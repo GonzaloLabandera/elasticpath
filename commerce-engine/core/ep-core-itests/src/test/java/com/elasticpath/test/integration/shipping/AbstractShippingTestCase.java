@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2017
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration.shipping;
 
@@ -59,8 +59,7 @@ public abstract class AbstractShippingTestCase extends DbTestCase {
 		shoppingContextPersister.persist(shoppingContext);
 
 		checkoutTestCartBuilder.withScenario(scenario)
-				.withCustomerSession(shoppingContext.getCustomerSession())
-				.withTestDoubleGateway();
+				.withCustomerSession(shoppingContext.getCustomerSession());
 
 		final CustomerSession customerSession = shoppingContext.getCustomerSession();
 		locale = customerSession.getLocale();

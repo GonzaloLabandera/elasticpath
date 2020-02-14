@@ -1,8 +1,13 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.rest.ws.fixture.alias
 
-import com.elasticpath.rest.ws.client.FluentRelosClient
 import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_SCOPE
 import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_TEST_USER_GUID
+
+import com.elasticpath.rest.ws.client.FluentRelosClient
 
 class HeaderAuthentication extends Authentication {
 

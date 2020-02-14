@@ -9,6 +9,7 @@
 	<!-- Imported Services -->
 	<reference id="persistenceEngine" interface="com.elasticpath.persistence.api.PersistenceEngine"/>
 	<reference id="productDao" interface="com.elasticpath.persistence.dao.ProductDao"/>
+	<reference id="productTypeDao" interface="com.elasticpath.persistence.dao.ProductTypeDao"/>
 	<reference id="settingsReader" interface="com.elasticpath.settings.SettingsReader"/>
 
 	<reference id="nonCachingCategoryLookup" interface="com.elasticpath.service.catalog.CategoryLookup"
@@ -38,7 +39,7 @@
 			   interface="com.elasticpath.service.search.FacetService"
 			   filter="(caching=false)"/>
 
-	<reference id="skuOptionService"
+	<reference id="nonCachingSkuOptionService"
 			   interface="com.elasticpath.service.catalog.SkuOptionService"
 			   filter="(caching=false)"/>
 

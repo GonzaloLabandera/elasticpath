@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.service.catalog.GiftCertificateService;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
@@ -205,7 +206,7 @@ public class GiftCertificateServiceImplTest extends BasicSpringContextTest {
 	 * @return the gift certificate.
 	 */
 	private GiftCertificate createGiftCertificate() {
-		GiftCertificate giftCertificate = getBeanFactory().getBean("giftCertificate");
+		GiftCertificate giftCertificate = getBeanFactory().getPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class);
 		giftCertificate.setStore(scenario.getStore());
 		giftCertificate.setCreationDate(new Date());
 		return giftCertificate;

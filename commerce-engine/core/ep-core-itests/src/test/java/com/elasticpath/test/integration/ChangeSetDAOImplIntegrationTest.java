@@ -109,7 +109,7 @@ public class ChangeSetDAOImplIntegrationTest extends BasicSpringContextTest {
 	}
 
 	private void givenChangeSetIsCreated(final String changeSetName, final ChangeSetStateCode changeSetStateCode) {
-		final ChangeSet changeSet = beanFactory.getBean(ContextIdNames.CHANGE_SET);
+		final ChangeSet changeSet = beanFactory.getPrototypeBean(ContextIdNames.CHANGE_SET, ChangeSet.class);
 		changeSet.setName(changeSetName);
 		changeSet.setStateCode(changeSetStateCode);
 		changeSet.setCreatedByUserGuid("Admin");

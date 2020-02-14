@@ -16,11 +16,6 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.rest.cache.CacheResult;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.catalog.BundleIdentifier;
@@ -79,27 +74,15 @@ public class ProductSkuRepositoryImpl implements ProductSkuRepository {
 	}
 
 	@Override
-	@CacheResult(uniqueIdentifier = "getProductSkuWithAttributesByGuidAsSingle")
-	public Single<ProductSku> getProductSkuWithAttributesByGuidAsSingle(final String skuGuid) {
-		return reactiveAdapter.fromServiceAsSingle(() -> productSkuLookup.findByGuid(skuGuid), NOT_FOUND_MESSAGE);
-	}
-
-	@Override
 	@CacheResult(uniqueIdentifier = "getProductSkuWithAttributesByGuid")
-	public ExecutionResult<ProductSku> getProductSkuWithAttributesByGuid(final String skuGuid) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				ProductSku productSku = Assign.ifNotNull(productSkuLookup.findByGuid(skuGuid),
-						OnFailure.returnNotFound(NOT_FOUND_MESSAGE));
-				return ExecutionResultFactory.createReadOK(productSku);
-			}
-		}.execute();
+	public Single<ProductSku> getProductSkuWithAttributesByGuid(final String skuGuid) {
+		return reactiveAdapter.fromServiceAsSingle(() -> productSkuLookup.findByGuid(skuGuid), NOT_FOUND_MESSAGE);
 	}
 
 	@Override
 	@CacheResult(uniqueIdentifier = "isProductBundleByGuid")
 	public Single<Boolean> isProductBundleByGuid(final String skuGuid) {
-		return getProductSkuWithAttributesByGuidAsSingle(skuGuid)
+		return getProductSkuWithAttributesByGuid(skuGuid)
 				.flatMap(productSku -> reactiveAdapter.fromNullableAsSingle(productSku::getProduct, PRODUCT_NOT_FOUND_FOR_SKU))
 				.flatMap(this::isProductBundle);
 	}

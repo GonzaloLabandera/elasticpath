@@ -55,7 +55,7 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 		String orderId = entity.getParentId();
 		String storeCode = scope.getValue();
 		String couponCode = entity.getCode();
-		return cartOrderRepository.findByGuidAsSingle(storeCode, orderId)
+		return cartOrderRepository.findByGuid(storeCode, orderId)
 				.flatMap(cartOrder -> shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid())
 						.map(this::getCustomerEmailForCoupon)
 						.flatMap(shopperEmail -> couponRepository.validateCoupon(couponCode, storeCode, shopperEmail)
@@ -81,9 +81,9 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 		String storeCode = identifier.getOrder().getScope().getValue();
 		String cartOrderGuid = identifier.getOrder().getOrderId().getValue();
 
-		return cartOrderRepository.findByGuidAsSingle(storeCode, cartOrderGuid)
+		return cartOrderRepository.findByGuid(storeCode, cartOrderGuid)
 				.flatMap(cartOrder -> Single.just(cartOrder.removeCoupon(couponId)) //Save cart order after coupons have been removed
-						.flatMap(removed -> removed ? cartOrderRepository.saveCartOrderAsSingle(cartOrder) 
+						.flatMap(removed -> removed ? cartOrderRepository.saveCartOrder(cartOrder)
 								: Single.error(ResourceOperationFailure.notFound(COUPON_IS_NOT_FOUND))))
 				.ignoreElement();
 	}
@@ -121,7 +121,7 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 		Single<CouponEntity> couponEntity;
 		if (isNewlyAdded) {
 			//Save cart order if new coupon has been added (propagate error if needed)
-			couponEntity = cartOrderRepository.saveCartOrderAsSingle(cartOrder)
+			couponEntity = cartOrderRepository.saveCartOrder(cartOrder)
 					.flatMap(order -> builder.build(coupon, OrdersMediaTypes.ORDER.id(), orderId));
 		} else {
 			couponEntity = builder.build(coupon, OrdersMediaTypes.ORDER.id(), orderId);
@@ -169,7 +169,7 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 	 * @return coupon entity
 	 */
 	protected Single<CouponEntity> getCouponDetailsForOrder(final String storeCode, final String orderId, final String couponId) {
-		return cartOrderRepository.findByGuidAsSingle(storeCode, orderId)
+		return cartOrderRepository.findByGuid(storeCode, orderId)
 				.map(CartOrder::getCouponCodes)
 				.flatMap(couponCodes -> getCouponEntity(couponId, couponCodes, orderId));
 	}

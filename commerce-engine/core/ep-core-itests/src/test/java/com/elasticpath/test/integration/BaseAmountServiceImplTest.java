@@ -53,7 +53,7 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		final PriceListDescriptor descriptor = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		final PriceListDescriptor descriptor = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 		plGuid = descriptor.getGuid();
 		descriptor.setCurrencyCode(Currency.getInstance(Locale.CANADA).getCurrencyCode());
 		descriptor.setName(Utils.uniqueCode("TEST"));
@@ -186,7 +186,7 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 	public void testDeleteWithAssignedToCatalog() {
 		final String baseAmountGuid = "TO_DELETE_BA_GUID";
 
-		final PriceListHelperService priceListHelperService = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE);
+		final PriceListHelperService priceListHelperService = getBeanFactory().getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE, PriceListHelperService.class);
 		final Currency currency = priceListHelperService.getDefaultCurrencyFor(scenario.getCatalog());
 
 		final String priceListDescriptorGuid = scenario.getCatalog().getCode() + "_" + currency.getCurrencyCode();

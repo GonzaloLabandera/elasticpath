@@ -4,7 +4,8 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipping;
 
-import com.elasticpath.rest.command.ExecutionResult;
+import io.reactivex.Single;
+
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
@@ -18,8 +19,9 @@ public interface ShipmentShippingOptionRepository {
 	 * Find a {@link ShippingOption} by its shipping option code.
 	 *
 	 * @param shippingOptionCode the shipping option code.
+	 * @param storeCode          the store code
 	 * @return result of {@link ShippingOption} lookup
 	 */
-	ExecutionResult<ShippingOption> findByCode(String shippingOptionCode);
+	Single<ShippingOption> findByCode(String shippingOptionCode, String storeCode);
 
 }

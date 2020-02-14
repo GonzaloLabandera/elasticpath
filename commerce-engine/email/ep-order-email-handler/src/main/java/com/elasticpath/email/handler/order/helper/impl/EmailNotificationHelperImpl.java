@@ -30,7 +30,8 @@ public class EmailNotificationHelperImpl implements EmailNotificationHelper {
 	@Override
 	public EmailProperties getOrderEmailProperties(final String orderNumber) {
 		final Order order = orderService.findOrderByOrderNumber(orderNumber);
-		final OrderEmailPropertyHelper orderEmailPropertyHelper = beanFactory.getBean(ContextIdNames.EMAIL_PROPERTY_HELPER_ORDER);
+		final OrderEmailPropertyHelper orderEmailPropertyHelper = beanFactory.getSingletonBean(ContextIdNames.EMAIL_PROPERTY_HELPER_ORDER,
+				OrderEmailPropertyHelper.class);
 		return orderEmailPropertyHelper.getOrderConfirmationEmailProperties(order);
 	}
 
@@ -76,7 +77,7 @@ public class EmailNotificationHelperImpl implements EmailNotificationHelper {
 		OrderShipment orderShipment = order.getShipment(shipmentNumber);
 
 		OrderEmailPropertyHelper orderEmailPropertyHelper = beanFactory
-				.getBean(ContextIdNames.EMAIL_PROPERTY_HELPER_ORDER);
+				.getSingletonBean(ContextIdNames.EMAIL_PROPERTY_HELPER_ORDER, OrderEmailPropertyHelper.class);
 
 		return orderEmailPropertyHelper.getShipmentConfirmationEmailProperties(
 				order, orderShipment);

@@ -14,7 +14,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.search.SortAttribute;
 import com.elasticpath.domain.search.SortLocalizedName;
@@ -83,7 +83,7 @@ public class SortAttributeViewerComparator extends ViewerComparator {
 				}
 				break;
 			case SORT_ATTIBUTE_DISPLAY_NAME_COLUMN:
-				SortLocalizedName empty = ServiceLocator.getService(ContextIdNames.SORT_LOCALIZED_NAME);
+				SortLocalizedName empty = BeanLocator.getPrototypeBean(ContextIdNames.SORT_LOCALIZED_NAME, SortLocalizedName.class);
 				empty.setName(StringUtils.EMPTY);
 				value = sortAttribute.getLocalizedNames().getOrDefault(defaultLocaleCode, empty).getName()
 						.compareTo(otherSortAttribute.getLocalizedNames().getOrDefault(defaultLocaleCode, empty).getName());

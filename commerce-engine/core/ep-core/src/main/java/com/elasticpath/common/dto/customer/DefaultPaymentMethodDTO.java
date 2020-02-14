@@ -23,7 +23,6 @@ public class DefaultPaymentMethodDTO implements Dto {
 	private static final long serialVersionUID = 1L;
 
 	@XmlElementRefs({
-			@XmlElementRef(type = PaymentTokenDto.class),
 			@XmlElementRef(type = CreditCardDTO.class)
 	})
 	private PaymentMethodDto defaultPaymentMethod;

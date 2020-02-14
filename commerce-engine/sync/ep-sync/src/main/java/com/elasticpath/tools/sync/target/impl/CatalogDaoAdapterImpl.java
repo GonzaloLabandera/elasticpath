@@ -32,7 +32,7 @@ public class CatalogDaoAdapterImpl extends AbstractDaoAdapter<Catalog> {
 
 	@Override
 	public Catalog createBean(final Catalog catalog) {
-		return beanFactory.getBean(ContextIdNames.CATALOG);
+		return beanFactory.getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
 	}
 
 	@Override

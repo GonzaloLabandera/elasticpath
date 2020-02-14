@@ -26,7 +26,7 @@ public abstract class AbstractInsertUpdateImporter {
 	 * @return ImportFault object
 	 */
 	protected ImportFault createImportFault(final String code, final Object parameter) {
-		final ImportFault fault = getBeanFactory().getBean(ContextIdNames.IMPORT_FAULT);
+		final ImportFault fault = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 		fault.setLevel(ImportFault.ERROR);
 		fault.setCode(code);
 		fault.setArgs(new Object[] { parameter });
@@ -41,7 +41,7 @@ public abstract class AbstractInsertUpdateImporter {
 	 * @return the bad row record
 	 */
 	protected ImportBadRow createImportBadRow(final String row, final int rowNumber, final ImportFault fault) {
-		final ImportBadRow badRow = getBeanFactory().getBean(ContextIdNames.IMPORT_BAD_ROW);
+		final ImportBadRow badRow = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 		badRow.setRowNumber(rowNumber); //absolute position, not relative
 		badRow.setRow(row);
 		badRow.addImportFault(fault);

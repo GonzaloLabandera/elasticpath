@@ -239,7 +239,7 @@ public abstract class AbstractShippingCostCalculationMethodImpl extends Abstract
 	 */
 	@Transient
 	ShippingCostCalculationParameter getShippingCostCalculationParameterBean() {
-		return getBean(SHIPPING_COST_CALCULATION_PARAMETER);
+		return getPrototypeBean(SHIPPING_COST_CALCULATION_PARAMETER, ShippingCostCalculationParameter.class);
 	}
 
 	/**

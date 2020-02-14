@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -67,7 +67,7 @@ public class AddEditSynonymGroupDialog extends AbstractEpDialog implements Modif
 		super(parentShell, 2, false);
 		editing = false;
 
-		model = ServiceLocator.getService(ContextIdNames.SYNONYM_GROUP);
+		model = BeanLocator.getPrototypeBean(ContextIdNames.SYNONYM_GROUP, SynonymGroup.class);
 		Assert.isNotNull(catalog);
 		Assert.isNotNull(locale);
 		model.setCatalog(catalog);
@@ -218,8 +218,7 @@ public class AddEditSynonymGroupDialog extends AbstractEpDialog implements Modif
 
 		// check for concept term uniqueness
 		if (!editing || !originalConceptTerm.equals(getModel().getConceptTerm())) {
-			final SynonymGroupService sgService = ServiceLocator.getService(
-					ContextIdNames.SYNONYM_GROUP_SERVICE);
+			final SynonymGroupService sgService = BeanLocator.getSingletonBean(ContextIdNames.SYNONYM_GROUP_SERVICE, SynonymGroupService.class);
 			if (sgService.conceptTermExists(getModel().getConceptTerm(), getModel().getCatalog(), getModel().getLocale())) {
 				setErrorMessage(CatalogMessages.get().AddEditSynonymGroupDialog_Error_ConceptTermExists);
 				return;

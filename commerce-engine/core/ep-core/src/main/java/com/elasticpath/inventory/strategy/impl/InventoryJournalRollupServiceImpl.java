@@ -126,7 +126,7 @@ public class InventoryJournalRollupServiceImpl implements InventoryJournalRollup
 	 * @return InventoryJournalLock
 	 */
 	protected InventoryJournalLock createInventoryJournalLock(final InventoryKey inventoryKey) {
-		InventoryJournalLock inventoryJournalLock = beanFactory.getBean(ContextIdNames.INVENTORY_JOURNAL_LOCK);
+		InventoryJournalLock inventoryJournalLock = beanFactory.getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL_LOCK, InventoryJournalLock.class);
 		inventoryJournalLock.setSkuCode(inventoryKey.getSkuCode());
 		inventoryJournalLock.setWarehouseUid(inventoryKey.getWarehouseUid());
 		return inventoryJournalLock;
@@ -137,7 +137,7 @@ public class InventoryJournalRollupServiceImpl implements InventoryJournalRollup
 	 * @return InventoryJournal.
 	 */
 	protected InventoryJournal createInventoryJournal(final InventoryJournalRollup rollup) {
-		InventoryJournal summedInventoryJournal = beanFactory.getBean(ContextIdNames.INVENTORY_JOURNAL);
+		InventoryJournal summedInventoryJournal = beanFactory.getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
 		summedInventoryJournal.setSkuCode(rollup.getInventoryKey().getSkuCode());
 		summedInventoryJournal.setWarehouseUid(rollup.getInventoryKey().getWarehouseUid());
 		summedInventoryJournal.setAllocatedQuantityDelta(rollup.getAllocatedQuantityDelta());

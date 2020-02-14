@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006-2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.order.impl;
 
@@ -52,9 +52,9 @@ import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.cmuser.impl.CmUserImpl;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.impl.AbstractLegacyPersistenceImpl;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderReturnStatus;
@@ -100,7 +100,8 @@ import com.elasticpath.service.tax.TaxCalculationResult;
 				@FetchAttribute(name = "rmaCode") })
 })
 @DataCache(enabled = false)
-@SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.TooManyFields", "PMD.ExcessiveImports", "PMD.ExcessiveClassLength", "PMD.GodClass" })
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyFields", "PMD.ExcessiveImports", "PMD.ExcessiveClassLength", "PMD.GodClass",
+		"PMD.CouplingBetweenObjects"})
 public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements OrderReturn {
 	/**
 	 * Serial version id.
@@ -151,8 +152,6 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 	private Order order;
 
 	private Order exchangeOrder;
-
-	private OrderPayment orderPayment;
 
 	private BigDecimal beforeTaxReturnTotal;
 
@@ -459,28 +458,6 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 	}
 
 	/**
-	 * Get return payment. Used to determine the refund given for the return, or the payment taken for an exchange.
-	 *
-	 * @return <code>OrderPayment</code>
-	 */
-	@Override
-	@OneToOne(targetEntity = OrderPaymentImpl.class, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
-	@JoinColumn(name = "ORDER_PAYMENT_UID")
-	public OrderPayment getReturnPayment() {
-		return orderPayment;
-	}
-
-	/**
-	 * Set order payment.
-	 *
-	 * @param orderPayment the orderPayment
-	 */
-	@Override
-	public void setReturnPayment(final OrderPayment orderPayment) {
-		this.orderPayment = orderPayment;
-	}
-
-	/**
 	 * Get the set of return taxes. This method will return incorrect values
 	 * if you attempt to create a return for an order where the tax rate has
 	 * changed since the order was completed.
@@ -564,28 +541,6 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 	}
 
 	@Override
-	@Transient
-	public BigDecimal getRefundedTotal() {
-		BigDecimal refundedAmount = BigDecimal.ZERO;
-		OrderPayment refundedPayment = getReturnPayment();
-		if (refundedPayment != null && OrderPayment.CREDIT_TRANSACTION.equals(refundedPayment.getTransactionType())) {
-			refundedAmount = refundedPayment.getAmount();
-		}
-		return refundedAmount;
-	}
-
-	@Override
-	@Transient
-	public BigDecimal getRefundTotal() {
-		if (getReturnType() == OrderReturnType.EXCHANGE && getExchangeOrder() != null) {
-			return getReturnTotal().subtract(getExchangeOrder().getTotal());
-		} else if (getReturnType() == OrderReturnType.EXCHANGE && getExchangePricingSnapshot() != null) {
-			return getReturnTotal().subtract(getExchangePricingSnapshot().getTotal());
-		}
-		return getReturnTotal();
-	}
-
-	@Override
 	public void addOrderReturnSku(final OrderReturnSku orderReturnSku) {
 		getOrderReturnSkus().add(orderReturnSku);
 	}
@@ -648,7 +603,7 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 
 		if (OrderShipmentStatus.SHIPPED.equals(orderShipment.getShipmentStatus())) {
 			for (OrderSku orderSku : orderShipment.getShipmentOrderSkus()) {
-				OrderReturnSku orderReturnSku = getBean(ContextIdNames.ORDER_RETURN_SKU);
+				OrderReturnSku orderReturnSku = getPrototypeBean(ContextIdNames.ORDER_RETURN_SKU, OrderReturnSku.class);
 				orderReturnSku.setOrderSku(orderSku);
 				orderReturnSku.setQuantity(0);
 				orderReturnSku.setReturnAmount(BigDecimal.ZERO);
@@ -658,7 +613,7 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 
 		setOrder(order);
 
-		TimeService timeService = getBean(ContextIdNames.TIME_SERVICE);
+		TimeService timeService = getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		setCreatedDate(timeService.getCurrentTime());
 	}
 
@@ -716,7 +671,8 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 
 	@Override
 	public TaxCalculationResult calculateTaxes() {
-		ReturnTaxOperationService returnTaxOperationService = getBean(ContextIdNames.RETURN_TAX_OPERATION_SERVICE);
+		ReturnTaxOperationService returnTaxOperationService = getSingletonBean(ContextIdNames.RETURN_TAX_OPERATION_SERVICE,
+				ReturnTaxOperationService.class);
 
 		return returnTaxOperationService.calculateTaxes(this);
 	}
@@ -793,9 +749,10 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 	}
 
 	private BigDecimal getReturnSkuTotalItemTax(final OrderReturnSku returnSku) {
-		final PricingSnapshotService pricingSnapshotService = getBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
+		final PricingSnapshotService pricingSnapshotService = getSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE,
+				PricingSnapshotService.class);
 		final ShoppingItemPricingSnapshot pricingSnapshotForOrderSku = pricingSnapshotService.getPricingSnapshotForOrderSku(returnSku.getOrderSku());
-		final TaxSnapshotService taxSnapshotService = getBean(ContextIdNames.TAX_SNAPSHOT_SERVICE);
+		final TaxSnapshotService taxSnapshotService = getSingletonBean(ContextIdNames.TAX_SNAPSHOT_SERVICE, TaxSnapshotService.class);
 		final ShoppingItemTaxSnapshot taxSnapshotForOrderSku = taxSnapshotService.getTaxSnapshotForOrderSku(returnSku.getOrderSku(),
 			pricingSnapshotForOrderSku);
 
@@ -812,7 +769,7 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 
 		for (Iterator<TaxCategory> taxIter = taxCalculationResult.getTaxCategoriesIterator(); taxIter.hasNext();) {
 			TaxCategory taxCategory = taxIter.next();
-			OrderTaxValue orderTaxValue = getBean(ContextIdNames.ORDER_TAX_VALUE);
+			OrderTaxValue orderTaxValue = getPrototypeBean(ContextIdNames.ORDER_TAX_VALUE, OrderTaxValue.class);
 			orderTaxValue.setTaxCategoryName(taxCategory.getName());
 			orderTaxValue.setTaxCategoryDisplayName(taxCategory.getDisplayName(order.getLocale()));
 			orderTaxValue.setTaxValue(taxCalculationResult.getTaxValue(taxCategory).getAmount());
@@ -901,7 +858,7 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 			productSkusForOrderSkus.put(new Pair<>(productSku.getUidPk(), orderSku.getUidPk()), orderSku);
 			orderSku.setReturnableQuantity(orderSku.getQuantity());
 		}
-		ReturnAndExchangeService returnAndExchangeService = getBean(ContextIdNames.ORDER_RETURN_SERVICE);
+		ReturnAndExchangeService returnAndExchangeService = getSingletonBean(ContextIdNames.ORDER_RETURN_SERVICE, ReturnAndExchangeService.class);
 		for (OrderReturn orderReturn : returnAndExchangeService.list(order.getUidPk())) { // order.getReturns()) { //
 			if (orderReturn.getReturnStatus() == OrderReturnStatus.CANCELLED
 					|| orderReturn.getOrderShipmentForReturn().getUidPk() != shipment.getUidPk()) {
@@ -967,7 +924,7 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 
 	/**
 	 * Set the shipping tax in <code>BigDecimal</code>.
-	 *urnAndExchangeService returnAndExchangeService = getBean(ContextIdNames.ORDER_RETURN_SERVICE);
+	 *urnAndExchangeService returnAndExchangeService = getSingletonBean(ContextIdNames.ORDER_RETURN_SERVICE, ReturnAndExchangeService.class);
 	 * @param shippingTax the shipping tax
 	 */
 	@Transient
@@ -1017,37 +974,8 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 
 	@Override
 	@Transient
-	public BigDecimal getOwedToCustomer() {
-		return getReturnTotal().subtract(getRefundedTotal());
-	}
-
-	/**
-	 * Get the owed to customer amount. The value is return total minus refund total.
-	 *
-	 * @return a <code>Money</code> object representing the owed to customer total.
-	 */
-	@Override
-	@Transient
-	public Money getOwedToCustomerMoney() {
-		return getMoney(getOwedToCustomer());
-	}
-
-	@Override
-	@Transient
 	public Money getBeforeTaxReturnTotalMoney() {
 		return getMoney(getBeforeTaxReturnTotal());
-	}
-
-	@Override
-	@Transient
-	public Money getRefundTotalMoney() {
-		return getMoney(getRefundTotal());
-	}
-
-	@Override
-	@Transient
-	public Money getRefundedTotalMoney() {
-		return getMoney(getRefundedTotal());
 	}
 
 	@Override
@@ -1175,7 +1103,7 @@ public class OrderReturnImpl extends AbstractLegacyPersistenceImpl implements Or
 
 	private TaxDocumentId createTaxDocumentId() {
 		return StringTaxDocumentId.fromString(this.getOrderShipmentForReturn().getShipmentNumber()
-												+ "." + getBean(ContextIdNames.RANDOM_GUID));
+												+ "." + getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class));
 	}
 
 	/**

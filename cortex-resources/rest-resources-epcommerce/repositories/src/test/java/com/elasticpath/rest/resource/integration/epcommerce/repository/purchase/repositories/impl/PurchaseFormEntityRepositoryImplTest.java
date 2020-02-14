@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl;
 
@@ -20,7 +20,6 @@ import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -41,7 +40,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.
 import com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.service.impl.CartHasItemsServiceImpl;
 
 /**
- * Test for the  {@link PurchaseFormEntityRepositoryImpl}.
+ * Test for the {@link PurchaseFormEntityRepositoryImpl}.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PurchaseFormEntityRepositoryImplTest {
@@ -64,7 +63,7 @@ public class PurchaseFormEntityRepositoryImplTest {
 
 	@Mock
 	private CartOrderRepository cartOrderRepository;
-	
+
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
 
@@ -123,27 +122,24 @@ public class PurchaseFormEntityRepositoryImplTest {
 		CreatePurchaseFormIdentifier createPurchaseFormIdentifier = CreatePurchaseFormIdentifier.builder()
 				.withOrder(OrderIdentifier.builder().withOrderId(StringIdentifier.of(ORDER_ID)).withScope(SCOPE).build())
 				.build();
-		
+
 		CartOrder cartOrder = mock(CartOrder.class);
 		ShoppingCartTaxSnapshot taxSnapshot = mock(ShoppingCartTaxSnapshot.class);
 		CustomerSession customerSession = mock(CustomerSession.class);
-		OrderPayment orderPayment = mock(OrderPayment.class);
 		CheckoutResults checkoutResults = mock(CheckoutResults.class);
 		ShoppingCart shoppingCart = createShoppingCart(shoppingCartIsEmpty);
-		
+
 		when(resourceOperationContext.getResourceIdentifier()).thenReturn(Optional.of(createPurchaseFormIdentifier));
 
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE.getValue(), ORDER_ID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE.getValue(), ORDER_ID)).thenReturn(Single.just(cartOrder));
 
-		when(purchaseRepository.createNewOrderPaymentEntity()).thenReturn(Single.just(orderPayment));
+		when(cartOrderRepository.getEnrichedShoppingCart(SCOPE.getValue(), cartOrder)).thenReturn(Single.just(shoppingCart));
 
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(SCOPE.getValue(), cartOrder)).thenReturn(Single.just(shoppingCart));
-
-		when(sessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(customerSession));
+		when(sessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(customerSession));
 
 		when(pricingSnapshotRepository.getShoppingCartTaxSnapshot(shoppingCart)).thenReturn(Single.just(taxSnapshot));
 
-		when(purchaseRepository.checkout(shoppingCart, taxSnapshot, customerSession, orderPayment)).thenReturn(Single.just(checkoutResults));
+		when(purchaseRepository.checkout(shoppingCart, taxSnapshot, customerSession)).thenReturn(Single.just(checkoutResults));
 
 		Order order = mock(Order.class);
 		when(checkoutResults.isOrderFailed()).thenReturn(false);

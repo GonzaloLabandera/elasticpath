@@ -38,7 +38,7 @@ import com.elasticpath.cmclient.catalog.wizards.sku.AddSkuWizardPage1;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.dto.catalog.ProductModel;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -97,8 +97,8 @@ public class ProductEditorMultiSkuSection extends AbstractPolicyAwareEditorPageS
 
 	private static final Logger LOG = Logger.getLogger(ProductEditorMultiSkuSection.class);
 
-	private final ProductSkuService productSkuService = getBean(ContextIdNames.PRODUCT_SKU_SERVICE);
-	
+	private final ProductSkuService productSkuService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_SERVICE, ProductSkuService.class);
+
 	private IPolicyTargetLayoutComposite mainEpComposite;
 	
 	private StatePolicy statePolicy;
@@ -109,7 +109,7 @@ public class ProductEditorMultiSkuSection extends AbstractPolicyAwareEditorPageS
 	
 	private PolicyActionContainer deleteSkuControls;
 	
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private AbstractPolicyAwarePaginationControl<ProductSku> paginationControl;
 
@@ -160,8 +160,8 @@ public class ProductEditorMultiSkuSection extends AbstractPolicyAwareEditorPageS
 
 		IEpLayoutData paginationData = mainEpComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
 
-		PaginatorFactory factory = getBean(ContextIdNames.PAGINATOR_FACTORY);
-		PaginationConfig config = getBean(ContextIdNames.PAGINATION_CONFIG);
+		PaginatorFactory factory = BeanLocator.getSingletonBean(ContextIdNames.PAGINATOR_FACTORY, PaginatorFactory.class);
+		PaginationConfig config = BeanLocator.getPrototypeBean(ContextIdNames.PAGINATION_CONFIG, PaginationConfig.class);
 		config.setObjectId(getProduct().getGuid());
 		config.setPageSize(getPageSize());
 		config.setSortingFields(new DirectedSortingField(ProductSkuOrderingField.SKU_CODE, SortingDirection.ASCENDING));
@@ -240,16 +240,6 @@ public class ProductEditorMultiSkuSection extends AbstractPolicyAwareEditorPageS
 		return PaginationInfo.getInstance().getPagination();
 	}
 
-	/**
-	 *
-	 * @param beanName the bean name
-	 * @param <T> the bean type
-	 * @return the bean instance
-	 */
-	<T> T getBean(final String beanName) {
-		return ServiceLocator.getService(beanName);
-	}
-	
 
 	@Override
 	protected void populateControls() {

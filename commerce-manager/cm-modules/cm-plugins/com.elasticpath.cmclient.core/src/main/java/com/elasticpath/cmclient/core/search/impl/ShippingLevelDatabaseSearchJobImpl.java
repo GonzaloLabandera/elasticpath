@@ -11,8 +11,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.helpers.SearchItemsLocator;
 import com.elasticpath.cmclient.core.search.SearchJob;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
@@ -43,7 +43,7 @@ public class ShippingLevelDatabaseSearchJobImpl extends AbstractSearchJobImpl im
 	public ShippingLevelDatabaseSearchJobImpl(final SearchItemsLocator<ShippingServiceLevel> locator, final Display display) {
 		super(locator);
 		this.display = display;
-		shippingServiceLevelService = ServiceLocator.getService(SHIPPING_SERVICE_LEVEL_SERVICE);
+		shippingServiceLevelService = BeanLocator.getSingletonBean(SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
 		jobName = CoreMessages.get().SearchProgress_StatusBarMessage_StartSearch;
 	}
 

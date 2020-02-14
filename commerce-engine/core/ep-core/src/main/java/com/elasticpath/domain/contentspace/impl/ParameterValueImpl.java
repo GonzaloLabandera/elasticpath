@@ -144,7 +144,7 @@ public class ParameterValueImpl extends AbstractLegacyEntityImpl implements Para
 	@Transient
 	public Parameter getParameter() {
 		if (parameter == null) {
-			parameter = getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER); 
+			parameter = getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER, Parameter.class);
 			parameter.setParameterId(getParameterName());	
 			parameter.setDescription(getDescription());
 			parameter.setLocalizable(isLocalizable());
@@ -234,7 +234,7 @@ public class ParameterValueImpl extends AbstractLegacyEntityImpl implements Para
 	 */
 	@Transient
 	protected ParameterLocaleDependantValue getNewParameterLocaleDependantValue() {
-		return getBean(ContextIdNames.DYNAMIC_PARAMETER_LDF_VALUE);
+		return getPrototypeBean(ContextIdNames.DYNAMIC_PARAMETER_LDF_VALUE, ParameterLocaleDependantValue.class);
 	}
 	
 	@Override

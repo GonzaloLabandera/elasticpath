@@ -80,6 +80,9 @@ class EpTableColoringLabelProvider extends LabelProvider implements ITableLabelP
 	 * @return null
 	 */
 	public Color getForeground(final Object element) {
+		if (element instanceof EpDisabledColorTextDecorator && ((EpDisabledColorTextDecorator) element).isDisabled()) {
+			return CmClientResources.getInactiveForegroundColor();
+		}
 		return null;
 	}
 

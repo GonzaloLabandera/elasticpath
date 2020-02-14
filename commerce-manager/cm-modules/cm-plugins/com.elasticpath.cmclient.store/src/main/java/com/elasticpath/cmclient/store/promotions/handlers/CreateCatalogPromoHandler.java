@@ -9,7 +9,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.wizard.EpWizardDialog;
@@ -28,7 +28,7 @@ public class CreateCatalogPromoHandler extends AbstractPolicyAwareHandler {
 	
 	private final PolicyActionContainer handlerContainer = addPolicyActionContainer("createCatalogPromoHandler"); //$NON-NLS-1$		
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	@Override
 	public Object execute(final ExecutionEvent arg0) throws ExecutionException {
@@ -36,7 +36,7 @@ public class CreateCatalogPromoHandler extends AbstractPolicyAwareHandler {
 		final WizardDialog dialog = new EpWizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);
 
 		if (dialog.open() == Window.OK) {
-			final RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+			final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 			ruleService.add(wizard.getModel());
 			changeSetHelper.addObjectToChangeSet(wizard.getModel(), ChangeSetMemberAction.ADD);
 		}

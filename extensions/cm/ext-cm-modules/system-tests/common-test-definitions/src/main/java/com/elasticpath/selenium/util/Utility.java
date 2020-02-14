@@ -47,6 +47,25 @@ public final class Utility {
 	}
 
 	/**
+	 * Converts string to Date with the ep dateTime format with hh:mm:ss included.
+	 *
+	 * @param dateTimeString String
+	 * @return Date
+	 */
+	public static Date convertToDateTime(final String dateTimeString) {
+		String dateFormat = PropertyManager.getInstance().getProperty("ep.dateTimeFormat");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.ENGLISH);
+
+		Date actualDate = null;
+		try {
+			actualDate = simpleDateFormat.parse(dateTimeString);
+		} catch (ParseException e) {
+			LOGGER.debug(e.getMessage());
+		}
+		return actualDate;
+	}
+
+	/**
 	 * Converts string to Date.
 	 *
 	 * @param dateString String

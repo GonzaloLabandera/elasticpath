@@ -1,11 +1,10 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions;
 
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 
@@ -33,12 +32,6 @@ public interface FinalizeCheckoutActionContext {
 	 * @return the {@link ShoppingCart}
 	 * */
 	ShoppingCart getShoppingCart();
-
-	/**
-	 * Gets the order payment template.
-	 * @return the order payment template
-	 * */
-	OrderPayment getOrderPaymentTemplate();
 
 	/**
 	 * Gets the is order exchange.

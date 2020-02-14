@@ -30,18 +30,15 @@ import com.elasticpath.cmclient.core.service.AuthorizationService;
 /**
  * Implements a multi-page editor for displaying and editing Stores.
  */
-@SuppressWarnings({ "PMD.PrematureDeclaration" })
+@SuppressWarnings({"PMD.PrematureDeclaration"})
 public class StoreEditor extends AbstractCmClientFormEditor {
 
 	/**
 	 * ID of the editor. It is the same as the class name.
 	 */
 	public static final String ID_EDITOR = StoreEditor.class.getName();
-
-	private StoreEditorModel storeEditorModel;
-
 	private final StoreEditorModelHelper editorModelHelper;
-
+	private StoreEditorModel storeEditorModel;
 	private boolean currentUserAuthorizedForStore;
 
 	/**
@@ -65,6 +62,7 @@ public class StoreEditor extends AbstractCmClientFormEditor {
 	/**
 	 * Determines whether the current CM User is authorized to modify the store with the given code.
 	 * Calls the {@link AuthorizationService}.
+	 *
 	 * @param storeCode the store code
 	 * @return true if authorized, false if not
 	 */
@@ -89,7 +87,6 @@ public class StoreEditor extends AbstractCmClientFormEditor {
 			addPage(new StoreCatalogPage(this, authorized));
 			addPage(new StoreWarehousePage(this, authorized));
 			addPage(new StoreTaxesPage(this, authorized));
-			addPage(new PaymentPage(this, authorized));
 			addPage(new SharedCustomerAccountsPage(this, authorized));
 			addPage(new StoreMarketingPage(this, authorized));
 			addPage(new StoreSystemPage(this, authorized));
@@ -97,6 +94,7 @@ public class StoreEditor extends AbstractCmClientFormEditor {
 			if (getModel() != null) {
 				addPage(new StoreFacetsPage(this, authorized, getModel()));
 				addPage(new StoreSortPage(this, authorized, getModel()));
+				addPage(new StorePaymentConfigurationPage(this, authorized, getModel()));
 			}
 
 			getCustomData().put("authorized", authorized);
@@ -128,6 +126,7 @@ public class StoreEditor extends AbstractCmClientFormEditor {
 		monitor.beginTask("Save the Store", 2); //$NON-NLS-1$
 		try {
 			editorModelHelper.flush(storeEditorModel);
+			editorModelHelper.saveStorePaymentConfiguration(storeEditorModel);
 		} catch (final EpServiceException exception) {
 			MessageDialog.openWarning(getSite().getShell(), AdminStoresMessages.get().CanNotCreateStoreMsgBoxTitle, exception.getLocalizedMessage());
 			monitor.setCanceled(true);
@@ -165,8 +164,8 @@ public class StoreEditor extends AbstractCmClientFormEditor {
 	@Override
 	protected String getSaveOnCloseMessage() {
 		return
-			NLS.bind(AdminStoresMessages.get().StoreEditor_OnSavePrompt,
-			getEditorName());
+				NLS.bind(AdminStoresMessages.get().StoreEditor_OnSavePrompt,
+						getEditorName());
 	}
 
 	@Override
@@ -182,7 +181,7 @@ public class StoreEditor extends AbstractCmClientFormEditor {
 	/**
 	 * @return - true if url is unique.
 	 * @see com.elasticpath.cmclient.core.helpers.store.StoreEditorModelHelper
-	 * 		#isUrlNotUniqueForOpenStore(com.elasticpath.cmclient.core.helpers.store.StoreEditorModel)
+	 * #isUrlNotUniqueForOpenStore(com.elasticpath.cmclient.core.helpers.store.StoreEditorModel)
 	 */
 	public boolean isUrlNotUniqueStore() {
 		return editorModelHelper.isUrlNotUniqueStore(storeEditorModel);

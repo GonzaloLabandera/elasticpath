@@ -10,7 +10,7 @@
 		<comment>Initial import of shared demo data. This is temporary data until valid project data is created.</comment>
 
 		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
-			<param name="dataSet" value="shared-demo-data" />
+			<param name="dataSet" value="shared-demo-data/shared-demo-data" />
 		</customChange>
 	</changeSet>
 </databaseChangeLog>

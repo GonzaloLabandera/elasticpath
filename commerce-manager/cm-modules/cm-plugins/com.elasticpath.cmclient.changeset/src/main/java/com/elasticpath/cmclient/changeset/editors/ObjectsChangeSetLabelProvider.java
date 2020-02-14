@@ -14,7 +14,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.helpers.UserViewFormatter;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.formatting.MetadataDateFormat;
@@ -121,7 +121,7 @@ public class ObjectsChangeSetLabelProvider extends LabelProvider implements ITab
 		if (userGuid == null) {
 			return ChangeSetMessages.EMPTY_STRING;
 		}
-		CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 		CmUser user = cmUserService.findByGuid(userGuid);
 		if (user != null) {
 			return UserViewFormatter.formatWithName(user);

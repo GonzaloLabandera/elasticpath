@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -99,7 +99,7 @@ public abstract class AbstractConfigureImportJobPage extends AbstractEPWizardPag
 		super(PAGE_LAYOUT_NUM_COLUMNS, false, pageName,
 				title, description, new DataBindingContext());
 		this.importJob = importJob;
-		this.importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+		this.importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 		this.display = Display.getDefault();
 	}
 

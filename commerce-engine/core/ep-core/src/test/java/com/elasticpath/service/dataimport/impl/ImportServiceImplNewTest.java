@@ -70,13 +70,13 @@ public class ImportServiceImplNewTest {
 		}
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T> T getBean(final String beanName) {
+		public <T> T getPrototypeBean(final String beanName, final Class<T> clazz) {
 			if ("importBadRow".equals(beanName)) {
 				return (T) new ImportBadRowImpl();
 			}
 			return null;
 		}
-	};
+	}
 
 	/**
 	 * Tests that validateTitle fails when there is a hyphen the header for a non

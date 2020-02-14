@@ -425,10 +425,10 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 */
 	protected void addCategoryFilter(final List<Filter<?>> filterQueries, final KeywordSearchCriteria searchCriteria) {
 		if (searchCriteria.getCategoryUid() != null && searchCriteria.getCategoryUid() > 0) {
-			CategoryFilter catFilter = getBeanFactory().getBean(ContextIdNames.CATEGORY_FILTER);
+			CategoryFilter catFilter = getBeanFactory().getPrototypeBean(ContextIdNames.CATEGORY_FILTER, CategoryFilter.class);
 			// Create a dummy category here so that we don't need a DB call to get the actual
 			// category (we don't use it)
-			Category dummyCategory = getBeanFactory().getBean(ContextIdNames.CATEGORY);
+			Category dummyCategory = getBeanFactory().getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 			dummyCategory.setUidPk(searchCriteria.getCategoryUid());
 			catFilter.setCategory(dummyCategory);
 			filterQueries.add(catFilter);
@@ -447,10 +447,10 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	protected void addDisplayableOnlyFilter(final SolrQuery query, final List<Filter<?>> filterQueries,
 											final KeywordSearchCriteria searchCriteria) {
 		if (searchCriteria.isDisplayableOnly()) {
-			DisplayableFilter displayableFilter = getBeanFactory().getBean(ContextIdNames.DISPLAYABLE_FILTER);
+			DisplayableFilter displayableFilter = getBeanFactory().getPrototypeBean(ContextIdNames.DISPLAYABLE_FILTER, DisplayableFilter.class);
 			displayableFilter.setStoreCode(searchCriteria.getStoreCode());
 			filterQueries.add(displayableFilter);
-			
+
 			Date roundedDate = roundDateUpToMinute(new Date());
 			final String now = getAnalyzer().analyze(roundedDate);
 
@@ -465,7 +465,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 * @return the catalog service
 	 */
 	protected CatalogService getCatalogService() {
-		return getBeanFactory().getBean(ContextIdNames.CATALOG_SERVICE);
+		return getBeanFactory().getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 	}
 
 	/**

@@ -211,7 +211,8 @@ public class TaxSnapshotServiceImpl implements TaxSnapshotService {
 	}
 
 	private TaxCalculationResult getNewTaxCalculationResult(final Currency currency) {
-		final TaxCalculationResult taxCalculationResult = getBeanFactory().getBean(ContextIdNames.TAX_CALCULATION_RESULT);
+		final TaxCalculationResult taxCalculationResult = getBeanFactory().getPrototypeBean(ContextIdNames.TAX_CALCULATION_RESULT,
+				TaxCalculationResult.class);
 		taxCalculationResult.initialize(currency);
 		return taxCalculationResult;
 	}

@@ -17,8 +17,8 @@ import org.springframework.core.convert.ConversionService;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.structured.EpValidationException;
-import com.elasticpath.commons.exception.InvalidBusinessStateException;
-import com.elasticpath.commons.exception.UnavailableException;
+import com.elasticpath.base.exception.structured.InvalidBusinessStateException;
+import com.elasticpath.base.exception.structured.UnavailableException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.advise.Message;

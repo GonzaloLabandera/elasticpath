@@ -63,7 +63,6 @@ public class ChangeStoreStateAction extends Action implements IMenuCreator {
 		final StoreEditorModel model = storeEditor.getModel();
 		restrictAction.setEnabled(!StoreState.RESTRICTED.equals(model.getStoreState()));
 		openAction.setEnabled(!StoreState.OPEN.equals(model.getStoreState()));
-		this.setActionDefinitionId(this.getClass().getName());
 	}
 
 	private Action createSetStoreStateAction(final String title, final ImageDescriptor image, final StoreState state) {
@@ -84,6 +83,11 @@ public class ChangeStoreStateAction extends Action implements IMenuCreator {
 				if (storeEditor.isUrlNotUniqueStore()) {
 					MessageDialog.openError(Display.getCurrent().getActiveShell(), 
 							AdminStoresMessages.get().CreateStoreErrorMsgBoxTitle, AdminStoresMessages.get().CreateStoreError_UrlNotUnique);
+					return;
+				}
+				if (!state.equals(StoreState.UNDER_CONSTRUCTION) && !storeEditor.getModel().isPaymentConfigurationSelected()) {
+					MessageDialog.openError(storeEditor.getSite().getShell(), AdminStoresMessages.get().StoreStateChangeError_Title,
+							AdminStoresMessages.get().Store_Payment_Configuration_Save_Error_Message);
 					return;
 				}
 				if (confirmStateChange()) {

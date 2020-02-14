@@ -5,13 +5,11 @@ package com.elasticpath.persistence.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.persistence.openjpa.routing.HDSSupportBean;
 import com.elasticpath.persistence.openjpa.routing.HDSSupportBeanImpl;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
 
 /**
  * Unit test for the {@code EntityModifiedListener} class.
@@ -19,11 +17,6 @@ import com.elasticpath.persistence.openjpa.util.QueryUtil;
 public class EntityModifiedListenerTest {
 
 	private final EntityModifiedListener entityModifiedListener = new EntityModifiedListener();
-
-	@Before
-	public void init() {
-		entityModifiedListener.setQueryUtil(new QueryUtil());
-	}
 
 	/**
 	 * Test if HDSSuportBean stores modified entity's class name if HDS feature is ON.

@@ -153,7 +153,7 @@ public class CategoryLookupImpl implements CategoryLookup {
 	 */
 	protected FetchGroupLoadTuner getLoadTuner() {
 		if (loadTuner == null) {
-			loadTuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+			loadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 			loadTuner.addFetchGroup(
 					FetchGroupConstants.CATALOG,
 					FetchGroupConstants.CATALOG_DEFAULTS,

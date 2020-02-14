@@ -1,12 +1,7 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.persistence.support.impl;
-
-import static java.util.Calendar.AUGUST;
-import static java.util.Calendar.DAY_OF_MONTH;
-import static java.util.Calendar.YEAR;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import static com.elasticpath.persistence.support.OrderCriterion.ResultType.ENTITY;
 import static com.elasticpath.service.search.query.SortOrder.ASCENDING;
@@ -15,6 +10,10 @@ import static com.elasticpath.service.search.query.StandardSortBy.CUSTOMER_NAME;
 import static com.elasticpath.service.search.query.StandardSortBy.DATE;
 import static com.elasticpath.service.search.query.StandardSortBy.ORDER_NUMBER;
 import static com.elasticpath.service.search.query.StandardSortBy.STATUS;
+import static java.util.Calendar.AUGUST;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.YEAR;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -25,7 +24,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.persistence.support.OrderCriterion.ResultType;
@@ -39,16 +37,9 @@ import com.elasticpath.service.search.query.OrderSearchCriteria;
  */
 public class OrderCriterionImplTest {
 
-	private static final int NO_3 = 3;
 	private static final String SKUCODE = "SKUCODE";
 
 	private OrderCriterionImpl orderCriterionImpl;
-
-	private static final OrderStatus ORDER_STATUS = OrderStatus.CANCELLED;
-
-	private static final OrderPaymentStatus PAYMENT_STATUS = OrderPaymentStatus.APPROVED;
-
-	private static final OrderShipmentStatus SHIPMENT_STATUS = OrderShipmentStatus.CANCELLED;
 
 	private static final String ZIPCODE = "zipcode";
 
@@ -60,119 +51,6 @@ public class OrderCriterionImplTest {
 	@Before
 	public void setUp() {
 		this.orderCriterionImpl = new OrderCriterionImpl();
-	}
-
-	private String getOrder() {
-		return "SELECT o FROM OrderImpl AS o";
-	}
-
-	private String getInnerJoinPayments() {
-		return " JOIN o.orderPayments AS op";
-	}
-
-	private String getInnerJoinShipments() {
-		return " JOIN o.shipments AS os";
-	}
-
-	private String getWhere() {
-		return " WHERE";
-	}
-
-	private String getAnd() {
-		return " AND";
-	}
-
-	private String getOrderStatusCondition(final int positionOfParam) {
-		return " o.status = ?" + positionOfParam;
-	}
-
-	private String getPaymentStatusCondition(final int positionOfParam) {
-		return " op.status = ?" + positionOfParam;
-	}
-
-	private String getShipmentStatusCondition(final int positionOfParam) {
-		return " os.status = ?" + positionOfParam;
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.persistence.support.impl.OrderCriterionImpl.getStatusCriteria'.
-	 */
-	@Test
-	public void testGetStatusCriteria() {
-		final StringBuilder fullQuery = new StringBuilder();
-		fullQuery.append(getOrder()).append(getInnerJoinPayments()).append(getInnerJoinShipments()).append(getWhere());
-		fullQuery.append(getOrderStatusCondition(1))
-			.append(getAnd()).append(getPaymentStatusCondition(2))
-			.append(getAnd()).append(getShipmentStatusCondition(NO_3));
-
-		final StringBuilder orderStatusQuery = new StringBuilder();
-		orderStatusQuery.append(getOrder()).append(getWhere()).append(getOrderStatusCondition(1));
-
-		final StringBuilder orderPaymentStatusQuery = new StringBuilder();
-		orderPaymentStatusQuery.append(getOrder()).append(getInnerJoinPayments()).append(getWhere());
-		orderPaymentStatusQuery.append(getOrderStatusCondition(1))
-			.append(getAnd()).append(getPaymentStatusCondition(2));
-
-		final StringBuilder orderShipmentStatusQuery = new StringBuilder();
-		orderShipmentStatusQuery.append(getOrder()).append(getInnerJoinShipments()).append(getWhere());
-		orderShipmentStatusQuery.append(getOrderStatusCondition(1))
-			.append(getAnd()).append(getShipmentStatusCondition(2));
-
-		final StringBuilder paymentStatusQuery = new StringBuilder();
-		paymentStatusQuery.append(getOrder()).append(getInnerJoinPayments()).append(getWhere());
-		paymentStatusQuery.append(getPaymentStatusCondition(1));
-
-		final StringBuilder paymentShipmentStatusQuery = new StringBuilder();
-		paymentShipmentStatusQuery.append(getOrder()).append(getInnerJoinPayments()).append(getInnerJoinShipments()).append(getWhere());
-		paymentShipmentStatusQuery.append(getPaymentStatusCondition(1))
-			.append(getAnd()).append(getShipmentStatusCondition(2));
-
-		final StringBuilder shipmentStatusQuery = new StringBuilder();
-		shipmentStatusQuery.append(getOrder()).append(getInnerJoinShipments()).append(getWhere());
-		shipmentStatusQuery.append(getShipmentStatusCondition(1));
-
-		final StringBuilder noStatusQuery = new StringBuilder();
-		noStatusQuery.append(getOrder());
-
-		CriteriaQuery result = orderCriterionImpl.getStatusCriteria(ORDER_STATUS, PAYMENT_STATUS, SHIPMENT_STATUS);
-		assertThat(result.getQuery()).isEqualTo(fullQuery.toString());
-		assertThat(result.getParameters())
-			.containsExactly(ORDER_STATUS, PAYMENT_STATUS, SHIPMENT_STATUS);
-
-		result = orderCriterionImpl.getStatusCriteria(ORDER_STATUS, null, null);
-		assertThat(result.getQuery()).isEqualTo(orderStatusQuery.toString());
-		assertThat(result.getParameters())
-			.containsExactly(ORDER_STATUS);
-
-		result = orderCriterionImpl.getStatusCriteria(ORDER_STATUS, PAYMENT_STATUS, null);
-		assertThat(result.getQuery()).isEqualTo(orderPaymentStatusQuery.toString());
-		assertThat(result.getParameters())
-			.containsExactly(ORDER_STATUS, PAYMENT_STATUS);
-
-		result = orderCriterionImpl.getStatusCriteria(ORDER_STATUS, null, SHIPMENT_STATUS);
-		assertThat(result.getQuery()).isEqualTo(orderShipmentStatusQuery.toString());
-		assertThat(result.getParameters())
-			.containsExactly(ORDER_STATUS, SHIPMENT_STATUS);
-
-		result = orderCriterionImpl.getStatusCriteria(null, PAYMENT_STATUS, null);
-		assertThat(result.getQuery()).isEqualTo(paymentStatusQuery.toString());
-		assertThat(result.getParameters())
-			.containsExactly(PAYMENT_STATUS);
-
-		result = orderCriterionImpl.getStatusCriteria(null, PAYMENT_STATUS, SHIPMENT_STATUS);
-		assertThat(result.getQuery()).isEqualTo(paymentShipmentStatusQuery.toString());
-		assertThat(result.getParameters())
-			.containsExactly(PAYMENT_STATUS, SHIPMENT_STATUS);
-
-		result = orderCriterionImpl.getStatusCriteria(null, null, SHIPMENT_STATUS);
-		assertThat(result.getQuery()).isEqualTo(shipmentStatusQuery.toString());
-		assertThat(result.getParameters())
-			.containsExactly(SHIPMENT_STATUS);
-
-		result = orderCriterionImpl.getStatusCriteria(null, null, null);
-		assertThat(result.getQuery()).isEqualTo(noStatusQuery.toString());
-		assertThat(result.getParameters())
-			.isEmpty();
 	}
 
 	/**

@@ -3,11 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.PromotionTestFactory
-		.buildAppliedPromotionsForPurchaseCouponIdentifier;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.PromotionTestFactory.buildAppliedPromotionsForPurchaseCouponIdentifier;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +60,7 @@ public class AppliedPromotionsForPurchaseCouponRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnNotFoundWhenOrderNotFound() {
-		when(orderRepository.findByGuidAsSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID))
+		when(orderRepository.findByGuid(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ResourceTestConstants.NOT_FOUND)));
 
 		repository.getElements(identifier)
@@ -72,7 +70,7 @@ public class AppliedPromotionsForPurchaseCouponRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnNotFoundWhenCouponRepositoryReturnsNotFound() {
-		when(orderRepository.findByGuidAsSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
 		when(couponRepository.findByCouponCode(ResourceTestConstants.COUPON_CODE))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ResourceTestConstants.NOT_FOUND)));
 
@@ -83,7 +81,7 @@ public class AppliedPromotionsForPurchaseCouponRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnEmptyWhenNoPromotionsFound() {
-		when(orderRepository.findByGuidAsSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
 		when(couponRepository.findByCouponCode(ResourceTestConstants.COUPON_CODE)).thenReturn(Single.just(coupon));
 		when(promotionRepository.getAppliedPromotionsForCoupon(order, coupon)).thenReturn(Collections.emptyList());
 
@@ -100,7 +98,7 @@ public class AppliedPromotionsForPurchaseCouponRepositoryImplTest {
 			appliedPromotions.add(String.valueOf(i));
 		}
 
-		when(orderRepository.findByGuidAsSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
 		when(couponRepository.findByCouponCode(ResourceTestConstants.COUPON_CODE)).thenReturn(Single.just(coupon));
 		when(promotionRepository.getAppliedPromotionsForCoupon(order, coupon)).thenReturn(appliedPromotions);
 

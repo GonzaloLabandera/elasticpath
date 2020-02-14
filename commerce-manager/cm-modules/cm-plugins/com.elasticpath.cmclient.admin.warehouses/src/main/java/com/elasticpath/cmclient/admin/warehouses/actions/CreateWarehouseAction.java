@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.admin.warehouses.actions;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -46,15 +46,14 @@ public class CreateWarehouseAction extends Action {
 	public void run() {
 		LOG.debug("CreateWarehouse Action called."); //$NON-NLS-1$
 
-		Warehouse warehouse = (Warehouse) ServiceLocator.getService(ContextIdNames.WAREHOUSE);
-		WarehouseAddress warehouseAddress = (WarehouseAddress) ServiceLocator.getService(ContextIdNames.WAREHOUSE_ADDRESS);
+		Warehouse warehouse = (Warehouse) BeanLocator.getPrototypeBean(ContextIdNames.WAREHOUSE, Object.class);
+		WarehouseAddress warehouseAddress = (WarehouseAddress) BeanLocator.getPrototypeBean(ContextIdNames.WAREHOUSE_ADDRESS, Object.class);
 		warehouseAddress.setCountry(CorePlugin.getDefault().getDefaultLocale().getCountry());
 		warehouse.setAddress(warehouseAddress);
 
 		boolean dialogOk = WarehouseDialog.openCreateDialog(listView.getSite().getShell(), warehouse);
 		if (dialogOk) {
-			WarehouseService warehouseService = (WarehouseService) ServiceLocator.getService(
-					ContextIdNames.WAREHOUSE_SERVICE);
+			WarehouseService warehouseService = (WarehouseService) BeanLocator.getSingletonBean(ContextIdNames.WAREHOUSE_SERVICE, Object.class);
 			final Warehouse updatedWarehouse = warehouseService.saveOrUpdate(warehouse);
 			listView.refreshViewerInput();
 			

@@ -95,7 +95,7 @@ Feature: View purchase line item
       | ITEMCODE   | MESSAGE     | RECIPIENT_EMAIL              | RECIPIENT_NAME | SENDER_NAME  | MESSAGE_2     | RECIPIENT_EMAIL_2    |
       | berries_20 | Hello World | harry.potter@elasticpath.com | Harry Potter   | MOBEE tester | Hello World 2 | test@elasticpath.com |
 
-  Scenario Outline: View components and available options of bundle item (2 components: no options, 2 options
+  Scenario Outline: View components and available options of bundle item (2 components: no options, 2 options)
     Given I login as a public shopper
     When I add item with code <ITEMCODE> to my cart
     When I fill in email needinfo

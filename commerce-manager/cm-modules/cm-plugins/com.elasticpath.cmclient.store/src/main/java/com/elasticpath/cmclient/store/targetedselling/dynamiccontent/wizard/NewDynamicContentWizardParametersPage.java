@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.dialog.value.support.IValueChangedListener;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -121,7 +121,8 @@ public class NewDynamicContentWizardParametersPage extends AbstractPolicyAwareWi
 		List<ParameterValue> parameterValues = new LinkedList<>();
 		for (Parameter parameter : parameters) {
 			if (parameter.getScriptExpression() == null) {
-				ParameterValue parameterValue = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_PARAMETER_VALUE);
+				ParameterValue parameterValue = BeanLocator
+						.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_PARAMETER_VALUE, ParameterValue.class);
 				parameterValue.setLocalizable(parameter.isLocalizable());
 				parameterValue.setParameter(parameter);
 				parameterValue.setParameterName(parameter.getParameterId());

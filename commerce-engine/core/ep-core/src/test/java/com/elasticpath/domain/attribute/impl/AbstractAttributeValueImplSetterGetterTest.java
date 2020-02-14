@@ -31,7 +31,9 @@ import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.domain.attribute.AttributeType;
+import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.AttributeValue;
+import com.elasticpath.persistence.api.AbstractPersistableImpl;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
@@ -61,8 +63,8 @@ public class AbstractAttributeValueImplSetterGetterTest {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, utility);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, AttributeUsageImpl.class);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
 	}
 
 	@After
@@ -229,8 +231,13 @@ public class AbstractAttributeValueImplSetterGetterTest {
 		final String value = "3.1415";
 		final BigDecimal decimalValue = new BigDecimal(value);
 		attributeValue.setValue(decimalValue);
-		assertSame(decimalValue, attributeValue.getValue());
-		assertEquals(value, attributeValue.getStringValue());
+
+		final BigDecimal adjustedDecimalValue =
+				new BigDecimal(value).setScale(AbstractPersistableImpl.DECIMAL_SCALE, AbstractPersistableImpl.ROUNDING_MODE);
+		final String adjustedStringValue  = adjustedDecimalValue.toString();
+
+		assertEquals(adjustedDecimalValue, attributeValue.getValue());
+		assertEquals(adjustedStringValue, attributeValue.getStringValue());
 	}
 
 	/**
@@ -242,10 +249,13 @@ public class AbstractAttributeValueImplSetterGetterTest {
 		attributeValue.setAttributeType(AttributeType.DECIMAL);
 
 		final String value = "3.1415";
-		final BigDecimal decimalValue = new BigDecimal(value);
 		attributeValue.setStringValue(value);
+
+		final BigDecimal decimalValue = new BigDecimal(value).setScale(AbstractPersistableImpl.DECIMAL_SCALE, AbstractPersistableImpl.ROUNDING_MODE);
+		final String adjustedStringValue  = decimalValue.toString();
+
 		assertEquals(decimalValue, attributeValue.getValue());
-		assertEquals(value, attributeValue.getStringValue());
+		assertEquals(adjustedStringValue, attributeValue.getStringValue());
 	}
 
 	/**

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
@@ -23,7 +23,6 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.impl.OrderImpl;
-import com.elasticpath.domain.order.impl.OrderPaymentImpl;
 import com.elasticpath.domain.order.impl.OrderReturnImpl;
 import com.elasticpath.domain.shopper.impl.ShopperImpl;
 import com.elasticpath.domain.shopper.impl.ShopperMementoImpl;
@@ -47,7 +46,6 @@ public class PopulateOrderDataCheckoutActionTest {
 	private final OrderReturnImpl exchange = new OrderReturnImpl();
 	private final CartItem item = new ShoppingItemImpl();
 	private final Order order = new OrderImpl();
-	private final OrderPaymentImpl orderPayment = new OrderPaymentImpl();
 	private final PromotionRecordContainer promotionRecordContainer = context.mock(PromotionRecordContainer.class);
 
 	private PopulateOrderDataCheckoutAction checkoutAction;
@@ -63,26 +61,37 @@ public class PopulateOrderDataCheckoutActionTest {
 		shopper.setGuid(UUID.randomUUID().toString());
 		shopper.getCache().putItem("FOO", "BAR");
 
-		context.checking(new Expectations() { {
-			allowing(customer).getGender(); will(returnValue('F'));
-			allowing(shoppingCart).getShopper(); will(returnValue(shopper));
-			allowing(shoppingCart).getRootShoppingItems(); will(returnValue(Collections.singletonList(item)));
-			allowing(pricingSnapshot).getPromotionRecordContainer(); will(returnValue(promotionRecordContainer));
-			allowing(taxSnapshot).getShoppingCartPricingSnapshot(); will(returnValue(pricingSnapshot));
-		} });
+		context.checking(new Expectations() {
+			{
+				allowing(customer).getGender();
+				will(returnValue('F'));
+
+				allowing(shoppingCart).getShopper();
+				will(returnValue(shopper));
+
+				allowing(shoppingCart).getRootShoppingItems();
+				will(returnValue(Collections.singletonList(item)));
+
+				allowing(pricingSnapshot).getPromotionRecordContainer();
+				will(returnValue(promotionRecordContainer));
+
+				allowing(taxSnapshot).getShoppingCartPricingSnapshot();
+				will(returnValue(pricingSnapshot));
+			}
+		});
 
 		final boolean isOrderExchange = false;
 		final boolean awaitExchangeCompletion = false;
 		checkoutContext = new CheckoutActionContextImpl(shoppingCart,
-														taxSnapshot,
-														null, orderPayment, isOrderExchange, awaitExchangeCompletion, exchange);
+				taxSnapshot,
+				null, isOrderExchange, awaitExchangeCompletion, exchange, null);
 		checkoutContext.setOrder(order);
 
 		checkoutAction = new PopulateOrderDataCheckoutAction();
 	}
 
 	@Test
-	public void verifyExecuteHappyPathWithSimpleIndexedAndMappedProperties() throws Exception {
+	public void verifyExecuteHappyPathWithSimpleIndexedAndMappedProperties() {
 		// Given
 		checkoutAction.setOrderDataProperties(createSampleOrderDataProperties());
 
@@ -97,7 +106,7 @@ public class PopulateOrderDataCheckoutActionTest {
 	}
 
 	@Test
-	public void verifyExecuteWithNullValuedProperty() throws Exception {
+	public void verifyExecuteWithNullValuedProperty() {
 		// Given
 		checkoutAction.setOrderDataProperties(Collections.singletonMap("missing", "shoppingCart.shopper.cache.item(MISSING)"));
 
@@ -110,7 +119,7 @@ public class PopulateOrderDataCheckoutActionTest {
 	}
 
 	@Test(expected = EpServiceException.class)
-	public void verifyExecutePukesIfUnknownPropertyIsSpecified() throws Exception {
+	public void verifyExecutePukesIfUnknownPropertyIsSpecified() {
 		// Given
 		checkoutAction.setOrderDataProperties(Collections.singletonMap("unknown", "shoppingCart.idonthavethisproperty"));
 
@@ -129,7 +138,7 @@ public class PopulateOrderDataCheckoutActionTest {
 
 		checkoutAction.setOrderDataProperties(
 				Collections.singletonMap("ruleCodes",
-					"shoppingCartTaxSnapshot.shoppingCartPricingSnapshot.promotionRecordContainer.limitedUsagePromotionRuleCodes"));
+						"shoppingCartTaxSnapshot.shoppingCartPricingSnapshot.promotionRecordContainer.limitedUsagePromotionRuleCodes"));
 
 		// Expectations
 		context.checking(new Expectations() {
@@ -151,7 +160,7 @@ public class PopulateOrderDataCheckoutActionTest {
 	}
 
 	@Test
-	public void testRollback() throws Exception {
+	public void testRollback() {
 		// Given
 		checkoutAction.setOrderDataProperties(createSampleOrderDataProperties());
 
@@ -166,9 +175,9 @@ public class PopulateOrderDataCheckoutActionTest {
 
 	private Map<String, String> createSampleOrderDataProperties() {
 		Map<String, String> orderDataProperties = new HashMap<>();
-		orderDataProperties.put("gender",  "shoppingCart.shopper.customer.gender");           // Simple Property
+		orderDataProperties.put("gender", "shoppingCart.shopper.customer.gender");           // Simple Property
 		orderDataProperties.put("skuGuid", "shoppingCart.rootShoppingItems[0].skuGuid");      // Indexed Property
-		orderDataProperties.put("foo",     "shoppingCart.shopper.cache.item(FOO)");           // Mapped Property
+		orderDataProperties.put("foo", "shoppingCart.shopper.cache.item(FOO)");           // Mapped Property
 
 		return orderDataProperties;
 	}

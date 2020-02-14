@@ -26,7 +26,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.dialog.value.support.IValueChangedListener;
 import com.elasticpath.cmclient.core.helpers.IValueRetriever;
@@ -431,7 +431,7 @@ public class ParametersTableSection extends AbstractStatePolicyTargetImpl implem
 	}
 
 	private void populateAvailableLocalesList() {
-		final StoreService dcService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		final StoreService dcService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		List<Store> stores = dcService.findAllStores();
 		for (Store store : stores) {
 			if (store.getStoreState().equals(StoreState.OPEN) || store.getStoreState().equals(StoreState.RESTRICTED)) {

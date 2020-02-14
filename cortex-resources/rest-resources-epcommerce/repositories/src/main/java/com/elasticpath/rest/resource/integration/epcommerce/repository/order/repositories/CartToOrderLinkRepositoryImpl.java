@@ -52,7 +52,7 @@ public class CartToOrderLinkRepositoryImpl<I extends CartIdentifier, LI extends 
 	 */
 	protected Single<CartOrder> getOrderByCartId(final String scope, final String cartId) {
 		return shoppingCartRepository.verifyShoppingCartExistsForStore(cartId, scope)
-				.flatMap(cartExists -> cartExists ? cartOrderRepository.findByCartGuidSingle(cartId)
+				.flatMap(cartExists -> cartExists ? cartOrderRepository.findByCartGuid(cartId)
 						: Single.error(ResourceOperationFailure.notFound(CART_WAS_NOT_FOUND + cartId)));
 	}
 

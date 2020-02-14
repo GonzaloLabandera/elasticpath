@@ -13,7 +13,7 @@ import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextCond
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionTimeWizardPage;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.IChangeSetEditorAware;
@@ -63,7 +63,7 @@ public class PriceListAssignmentWizard extends
 
 	private static final String SHOPPER_CONDITION_PAGE = "SHOPPER_CONDITION_PAGE"; //$NON-NLS-1$
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private PriceListAssignmentModelAdapter model;
 
@@ -220,7 +220,8 @@ public class PriceListAssignmentWizard extends
 	 */
 	private void savePriceListAssignment() {
 		PriceListAssignmentModelAdapter editedDcaWrapper = getModel();
-		PriceListAssignmentService service = ServiceLocator.getService(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+		PriceListAssignmentService service = BeanLocator
+				.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE, PriceListAssignmentService.class);
 
 		PriceListAssignment priceListAssignment = service.saveOrUpdate(editedDcaWrapper.getPriceListAssignment());
 
@@ -262,9 +263,10 @@ public class PriceListAssignmentWizard extends
 
 		PriceListAssignment priceListAssignment;
 		if (objectGuid == null) {
-			priceListAssignment = ServiceLocator.getService(ContextIdNames.PRICE_LIST_ASSIGNMENT);
+			priceListAssignment = BeanLocator.getPrototypeBean(ContextIdNames.PRICE_LIST_ASSIGNMENT, PriceListAssignment.class);
 		} else {
-			PriceListAssignmentService service = ServiceLocator.getService(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+			PriceListAssignmentService service = BeanLocator
+					.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE, PriceListAssignmentService.class);
 			priceListAssignment = service.findByGuid(objectGuid);
 			if (priceListAssignment == null) {
 				throw new IllegalArgumentException(

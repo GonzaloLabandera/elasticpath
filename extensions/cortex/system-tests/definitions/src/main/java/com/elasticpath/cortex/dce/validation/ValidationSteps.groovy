@@ -11,6 +11,7 @@ import cucumber.api.java.en.When
 
 import java.util.stream.Collectors
 
+import com.elasticpath.CucumberDTO.StructuredError
 import com.elasticpath.CucumberDTO.ValidationStructuredError
 import com.elasticpath.cortexTestObjects.Cart
 
@@ -65,22 +66,18 @@ class ValidationSteps {
 	@Then('^I should see validation error message with message type, message id, and debug message$')
 	static void verifyDebugMessage(DataTable error) {
 
-		def structuredErrorList = error.asList(ValidationStructuredError)
+		def structuredErrorList = error.asList(StructuredError)
 
 		assertValidationErrorStatus(client.response.status)
-
 		/**
 		 * First loop is looping the data table coming from feature.
 		 * Second loop is looping each message.
 		 */
-		for (ValidationStructuredError structureError : structuredErrorList) {
+		for (StructuredError structureError : structuredErrorList) {
 			boolean messageExists = false;
 			client.body.messages.each { message ->
-				if (structureError.getMessageId() == message.'id' && structureError.getMessageType() == message.'type') {
-					assertThat(structureError.getDebugMessage())
-							.as("Debug Message is not as expected")
-							.isEqualTo(message.'debug-message')
-
+				if (structureError.getMessageId() == message.'id' && structureError.getMessageType() == message.'type'
+						&& structureError.getDebugMessage() == message.'debug-message') {
 					messageExists = true
 					return true
 				}

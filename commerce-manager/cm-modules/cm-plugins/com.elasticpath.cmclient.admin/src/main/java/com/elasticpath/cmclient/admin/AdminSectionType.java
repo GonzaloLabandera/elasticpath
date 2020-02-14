@@ -14,6 +14,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
 
+import com.elasticpath.cmclient.core.util.InitializationGuard;
+
 /**
  * A section that can be added to the Admin navigation view. An AdminSectionType is represented by a configElement as an extension to the Admin
  * plugin, so this class knows how to parse such an element.
@@ -44,6 +46,8 @@ public class AdminSectionType {
 	private IAdminSection adminSection;
 
 	private static List<AdminSectionType> cachedTypes;
+
+	private static final InitializationGuard CACHED_TYPES_GUARD = new InitializationGuard();
 
 	/**
 	 * Compare Section types by the name first.
@@ -125,8 +129,20 @@ public class AdminSectionType {
 		if (cachedTypes != null) {
 			return cachedTypes;
 		}
-		cachedTypes = new ArrayList<>();
 
+		CACHED_TYPES_GUARD.initialize(() -> { cachedTypes = loadAdminSections(); });
+		CACHED_TYPES_GUARD.await();
+		return cachedTypes;
+	}
+
+	/**
+	 * Helper method for getSections(). Return all the <code>AdminSectionType</code>s that are plugged into the platform.
+	 *
+	 * @return all the <code>AdminSectionType</code>s that are plugged into the platform
+	 */
+	public static List<AdminSectionType> loadAdminSections() {
+
+		ArrayList<AdminSectionType> adminList = new ArrayList<>();
 		LOG.debug("Retrieving all plugin extension points for " + EXTENSION_NAME); //$NON-NLS-1$
 		IExtension[] extensions = Platform.getExtensionRegistry().getExtensionPoint(AdminPlugin.PLUGIN_ID, EXTENSION_NAME).getExtensions();
 		LOG.debug("Retrieved " + extensions.length + " extensions"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -134,14 +150,13 @@ public class AdminSectionType {
 			for (IConfigurationElement configElement : extension.getConfigurationElements()) {
 				AdminSectionType adminSectionType = parseItem(configElement);
 				if (adminSectionType != null) {
-					cachedTypes.add(adminSectionType);
+					adminList.add(adminSectionType);
 				}
 			}
 		}
-		Collections.sort(cachedTypes, SECTION_NAME_COMPARATOR);
-		Collections.sort(cachedTypes, NULL_SAFE_INT_COMPARATOR);
-
-		return Collections.unmodifiableList(cachedTypes);
+		Collections.sort(adminList, SECTION_NAME_COMPARATOR);
+		Collections.sort(adminList, NULL_SAFE_INT_COMPARATOR);
+		return Collections.unmodifiableList(adminList);
 	}
 
 	/**

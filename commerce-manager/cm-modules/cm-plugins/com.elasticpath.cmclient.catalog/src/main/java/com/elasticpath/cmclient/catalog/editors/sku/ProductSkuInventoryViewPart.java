@@ -20,7 +20,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.Section;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.ControlModificationListener;
@@ -73,7 +73,7 @@ public class ProductSkuInventoryViewPart extends DefaultStatePolicyDelegateImpl 
 		this.productSku = productSku;
 		this.controlModificationListener = controlModificationListener;
 		this.productInventoryManagementService =
-			ServiceLocator.getService(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE, ProductInventoryManagementService.class);
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class ProductSkuInventoryViewPart extends DefaultStatePolicyDelegateImpl 
 		inventoryTable.addTableColumn(CatalogMessages.get().ProductEditorSingleSkuShipping_Warehouse, COLUMN_WIDTH_ATTRIBUTES);
 		
 		final Map<Long, InventoryDto> inventoryDtos = productInventoryManagementService.getInventoriesForSku(getModel().getSkuCode());
-		final WarehouseService warehouseService = ServiceLocator.getService(ContextIdNames.WAREHOUSE_SERVICE);
+		final WarehouseService warehouseService = BeanLocator.getSingletonBean(ContextIdNames.WAREHOUSE_SERVICE, WarehouseService.class);
 		
 		inventoriesList = new ArrayList<>(inventoryDtos.size());
 		Set<Warehouse> warehouses = new HashSet<>();

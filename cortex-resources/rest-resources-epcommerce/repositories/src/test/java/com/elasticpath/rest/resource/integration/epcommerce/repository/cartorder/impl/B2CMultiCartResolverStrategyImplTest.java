@@ -226,7 +226,7 @@ public class B2CMultiCartResolverStrategyImplTest {
 		ShoppingCart mockCart = mockExistingCart();
 		CustomerSession customerSession = mock(CustomerSession.class);
 
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle())
+		when(customerSessionRepository.findOrCreateCustomerSession())
 				.thenReturn(Single.just(customerSession));
 		when(shoppingCartService.findByGuid(CART_GUID))
 				.thenReturn(mockCart);
@@ -294,7 +294,7 @@ public class B2CMultiCartResolverStrategyImplTest {
 	private CustomerSession createMockCustomerSession() {
 		CustomerSession mockCustomerSession = mock(CustomerSession.class);
 
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(mockCustomerSession));
+		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(mockCustomerSession));
 		return mockCustomerSession;
 	}
 

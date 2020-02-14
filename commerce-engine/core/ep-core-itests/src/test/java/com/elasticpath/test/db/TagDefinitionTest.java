@@ -62,7 +62,7 @@ public class TagDefinitionTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testAdd() {
-		final TagDefinition tagDefinition = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
+		final TagDefinition tagDefinition = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 		TagValueType tagValueType =  tagValueTypeService.findByGuid("text");
 		
 		tagDefinition.setValueType(tagValueType);		

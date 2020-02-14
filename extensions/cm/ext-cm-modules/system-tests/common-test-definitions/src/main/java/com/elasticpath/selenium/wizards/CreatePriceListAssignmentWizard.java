@@ -22,24 +22,30 @@ import com.elasticpath.selenium.util.DBConnector;
 public class CreatePriceListAssignmentWizard extends AbstractWizard {
 
 	private static final String CREATE_PLA_PARENT_CSS = "div[widget-id='Create Price List Assignment'] ";
-	private static final String WIZARD_PAGE_TITLE = "div[automation-id='com.elasticpath.cmclient.pricelistmanager.PriceListManagerMessages.Name_Priorty_Page_Description']";
+	private static final String WIZARD_PAGE_TITLE = "div[automation-id='com.elasticpath.cmclient.pricelistmanager.PriceListManagerMessages"
+			+ ".Name_Priorty_Page_Description']";
 	private static final String NAME_INPUT = CREATE_PLA_PARENT_CSS + "div[widget-id='Name'] > input";
-	private static final String DESCRIPTION_INPUT = "div[automation-id='com.elasticpath.cmclient.pricelistmanager.PriceListManagerMessages.Description_Label'] > textarea";
+	private static final String DESCRIPTION_INPUT = "div[automation-id='com.elasticpath.cmclient.pricelistmanager.PriceListManagerMessages"
+			+ ".Description_Label'] > textarea";
 	private static final String PRICE_LIST_PARENT = "div[widget-id='Price List Assignment'][widget-type='Table'] ";
 	private static final String PRICE_LIST_LIST = PRICE_LIST_PARENT + "div[parent-widget-id='Price List Assignment'] div[column-id='%s']";
 	private static final String CATALOG_PARENT = "div[widget-id='Price List Catalog'][widget-type='Table'] ";
 	private static final String CATALOG_LIST = CATALOG_PARENT + "div[parent-widget-id='Price List Catalog'] div[column-id='%s']";
-	private static final String STORES_TABLE_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages.SelectedStores_Label'] ";
+	private static final String COMMON_STRING = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages";
+	private static final String STORES_TABLE_PARENT_CSS = COMMON_STRING + ".SelectedStores_Label'] ";
 	private static final String STORES_TABLE_ROW_CSS = STORES_TABLE_PARENT_CSS + "div[widget-type='table_row']";
 	private static final String PLA_RADIO_BUTTON_CSS = "div[widget-id='%s'][appearance-id='radio-button']";
 	private static final String PRIORITY_SLIDER_CSS = CREATE_PLA_PARENT_CSS + "div[widget-type='Scale']";
-	private static final String ADD_PLA_STATEMENT_BLOCK_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages.ConditionBuilder_AddConditionButton']";
-	private static final String REMOVE_PLA_STATEMENT_BLOCK_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages.ConditionBuilder_Remove_Rule_label']";
-	private static final String ADD_STATEMENT_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages.ConditionBuilder_Add_Rule_label']";
-	private static final String REMOVE_STATEMENT_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages.ConditionBuilder_Remove_Statement_label']";
+	private static final String ADD_PLA_STATEMENT_BLOCK_CSS = COMMON_STRING + ".ConditionBuilder_AddConditionButton']";
+	private static final String REMOVE_PLA_STATEMENT_BLOCK_CSS = COMMON_STRING + ".ConditionBuilder_Remove_Rule_label']";
+	private static final String ADD_STATEMENT_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages"
+			+ ".ConditionBuilder_Add_Rule_label']";
+	private static final String REMOVE_STATEMENT_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages"
+			+ ".ConditionBuilder_Remove_Statement_label']";
 	private static final String STATEMENT_MENU_CSS = "div[appearance-id='menu'] div[widget-id='%s']";
-	private static final String CONDITION_COMBO_BOX_CSS = "div[widget-id='Create Price List Assignment'] div[appearance-id='ccombo'][seeable='true']";
-	private static final String AVAILABLE_STORES_TABLE_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages.AvailableStores_Label'][appearance-id='table']";
+	private static final String CONDITION_COMBO_BOX_CSS = "div[widget-id='Create Price List Assignment'] "
+			+ "div[appearance-id='ccombo'][seeable='true']";
+	private static final String AVAILABLE_STORES_TABLE_CSS = COMMON_STRING + ".AvailableStores_Label'][appearance-id='table']";
 	private static final String ADD_STORE_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.button_Add']";
 	private static final List<String> steps = Arrays.asList("priority", "price List", "catalog", "shoppers", "time", "stores");
 
@@ -188,16 +194,14 @@ public class CreatePriceListAssignmentWizard extends AbstractWizard {
 		selectRadioButton("Assign Specific Stores");
 
 		List<WebElement> actualStores = getDriver().findElements(By.cssSelector(STORES_TABLE_ROW_CSS));
-
-		assertThat(actualStores.size())
-				.isEqualTo(storeList.size())
-				.as("number of expected stores does not match actual");
-
-		for (int i = 0; i < actualStores.size(); i++) {
-			assertThat(actualStores.get(i).getText())
-					.isEqualTo(storeList.get(i))
-					.as("unexpected store found");
+		String[] actualStoreArray = new String[actualStores.size()];
+		for (int i = 0; i < actualStoreArray.length; i++) {
+			actualStoreArray[i] = actualStores.get(i).getText();
 		}
+
+		assertThat(storeList)
+				.as("Store list is not as expected")
+				.containsExactlyInAnyOrder(actualStoreArray);
 	}
 
 	/**
@@ -214,32 +218,41 @@ public class CreatePriceListAssignmentWizard extends AbstractWizard {
 	/**
 	 * Clicks button to create new Statement Block
 	 */
-	public void createNewStatementBlock() { clickButton(ADD_PLA_STATEMENT_BLOCK_CSS, "add statement block"); }
+	public void createNewStatementBlock() {
+		clickButton(ADD_PLA_STATEMENT_BLOCK_CSS, "add statement block");
+	}
 
 	/**
 	 * Clicks button to remove a Statement Block
 	 */
-	public void removeStatementBlock() { clickButton(REMOVE_PLA_STATEMENT_BLOCK_CSS, "remove statement block"); }
+	public void removeStatementBlock() {
+		clickButton(REMOVE_PLA_STATEMENT_BLOCK_CSS, "remove statement block");
+	}
 
 	/**
 	 * Clicks button to create new statement within statement block
 	 */
-	public void addNewStatement() { click(ADD_STATEMENT_CSS); }
+	public void addNewStatement() {
+		click(ADD_STATEMENT_CSS);
+	}
 
 	/**
 	 * Clicks button to remove statement in statement block
 	 */
-	public void removeStatemnt() { clickButton(REMOVE_STATEMENT_CSS, " remove statement"); }
+	public void removeStatemnt() {
+		clickButton(REMOVE_STATEMENT_CSS, " remove statement");
+	}
 
 	/**
 	 * Creates new statement with conditions
 	 *
-	 * @param mainMenuValue first combo (main menu) value to select
-	 * @param subMenuValue second combo (sub menu) value to select
-	 * @param conditionRule condition
+	 * @param mainMenuValue  first combo (main menu) value to select
+	 * @param subMenuValue   second combo (sub menu) value to select
+	 * @param conditionRule  condition
 	 * @param conditionValue condition value
 	 */
-	public void selectStatementConditions(final String mainMenuValue, final String subMenuValue, final String conditionRule, final String conditionValue) {
+	public void selectStatementConditions(final String mainMenuValue, final String subMenuValue, final String conditionRule,
+										  final String conditionValue) {
 		WebElement mainMenu = getDriver().findElement(By.cssSelector(String.format(STATEMENT_MENU_CSS, mainMenuValue)));
 		Actions action = new Actions(getDriver());
 		action.moveToElement(mainMenu).build().perform();
@@ -255,6 +268,7 @@ public class CreatePriceListAssignmentWizard extends AbstractWizard {
 
 	/**
 	 * Assigns price list assignment to store(s)
+	 *
 	 * @param assignedStores list of stores to assign to
 	 */
 	public void assignPLAToStores(final List<String> assignedStores) {

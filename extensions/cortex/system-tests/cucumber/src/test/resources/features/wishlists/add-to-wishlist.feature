@@ -61,19 +61,10 @@ Feature: Add to wishlist
       | physicalProduct |
       | multiskuProduct |
 
-  Scenario Outline: Adding configurable item to wishlist should be possible
-    Given I add item with code <ITEMCODE> to my default wishlist
+  Scenario: Adding configurable item to wishlist should be possible
+    Given I add item with code berries_20 to my default wishlist
     When I view my default wishlist
-    Then item with code <ITEMCODE> is in my default wishlist
-    Then I should see wishlist line item configurable fields for itemcode <ITEMCODE> as:
-      | giftCertificate.message        | <MESSAGE>         |
-      | giftCertificate.recipientEmail | <RECIPIENT_EMAIL> |
-      | giftCertificate.recipientName  | <RECIPIENT_NAME>  |
-      | giftCertificate.senderName     | <SENDER_NAME>     |
-
-    Examples:
-      | ITEMCODE   | MESSAGE | RECIPIENT_EMAIL | RECIPIENT_NAME | SENDER_NAME |
-      | berries_20 |         |                 |                |             |
+    Then item with code berries_20 is in my default wishlist
 
   Scenario Outline: Same sku items should be in same wishlist lineitem
 #   Item 1
@@ -134,13 +125,8 @@ Feature: Add to wishlist
     And item with code <ITEMCODE> is not found in my cart
 
     When I add item with code <ITEMCODE> to my default wishlist
-    Then I should see in the response the line item just added with configurable fields as:
-      | giftCertificate.message        | <MESSAGE_2>         |
-      | giftCertificate.recipientEmail | <RECIPIENT_EMAIL_2> |
-      | giftCertificate.recipientName  | <RECIPIENT_NAME_2>  |
-      | giftCertificate.senderName     | <SENDER_NAME_2>     |
+    Then my default wishlist has 2 lineitems
 
     Examples:
-      | ITEMCODE   | MESSAGE_1   | RECIPIENT_EMAIL_1            | RECIPIENT_NAME_1 | SENDER_NAME_1 | MESSAGE_2 | RECIPIENT_EMAIL_2 | RECIPIENT_NAME_2 | SENDER_NAME_2 |
-      | berries_20 | Hello World | harry.potter@elasticpath.com | Harry Potter     | MOBEE tester  |           |                   |                  |               |
-
+      | ITEMCODE   | MESSAGE_1   | RECIPIENT_EMAIL_1            | RECIPIENT_NAME_1 | SENDER_NAME_1 |
+      | berries_20 | Hello World | harry.potter@elasticpath.com | Harry Potter     | MOBEE tester  |

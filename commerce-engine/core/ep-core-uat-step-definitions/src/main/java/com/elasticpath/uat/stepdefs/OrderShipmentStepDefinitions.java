@@ -3,8 +3,6 @@
  */
 package com.elasticpath.uat.stepdefs;
 
-import static org.junit.Assert.fail;
-
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +15,6 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.order.ReleaseShipmentFailedException;
 import com.elasticpath.uat.ScenarioContextValueHolder;
 
 /**
@@ -71,12 +68,7 @@ public class OrderShipmentStepDefinitions {
 			// setting the status to something other than INVENTORY_ASSIGNED will cause the shipment release to fail.
 			orderShipment.setStatus(OrderShipmentStatus.AWAITING_INVENTORY);
 
-			try {
-				orderService.processReleaseShipment(orderShipment);
-				fail("Expected to throw a ReleaseShipmentFailedException when releasing a shipment fails");
-			} catch (final ReleaseShipmentFailedException e) {
-				// expected
-			}
+			orderService.processReleaseShipment(orderShipment);
 		});
 	}
 

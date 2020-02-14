@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.core.helpers;
 
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.service.CatalogEventService;
@@ -28,7 +28,7 @@ public class SkuSearchRequestJob extends AbstractSearchRequestJob<ProductSku> im
 	 */
 	public SkuSearchRequestJob() {
 		super();
-		skuReader = ServiceLocator.getService(ContextIdNames.PRODUCT_SKU_LOOKUP);
+		skuReader = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 	}
 
 	@Override

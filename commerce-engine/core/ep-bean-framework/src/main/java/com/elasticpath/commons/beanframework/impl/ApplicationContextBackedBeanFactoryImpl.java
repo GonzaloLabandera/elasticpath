@@ -3,9 +3,11 @@
  */
 package com.elasticpath.commons.beanframework.impl;
 
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.SimpleAliasRegistry;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -20,19 +22,28 @@ public class ApplicationContextBackedBeanFactoryImpl implements BeanFactory, App
 
 	@Override
 	public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
-		if (applicationContext.getBeanFactory().getBeanDefinition(name).isPrototype()) {
+		
+		// The getBeanDefinition method does not handle aliases, it simply looks up bean definitions by name. We must resolve the alias down 
+		// to the aliased bean definition name. Note that this does not impact the 'getBean' lookup, just our validation of the bean definition as a 
+		// singleton or prototype.
+		final String beanName = transformedBeanName(name);
+		
+		if (applicationContext.getBeanFactory().getBeanDefinition(beanName).isPrototype()) {
 			return applicationContext.getBean(name, clazz);
 		} else {
-			throw new AssertionError("Bean '" + name + "' is not a prototype.");
+			throw new IllegalArgumentException("Bean '" + name + "' is not a prototype.");
 		}
 	}
 
 	@Override
 	public <T> T getSingletonBean(final String name, final Class<T> clazz) {
-		if (applicationContext.getBeanFactory().getBeanDefinition(name).isSingleton()) {
+		
+		final String beanName = transformedBeanName(name);
+		
+		if (applicationContext.getBeanFactory().getBeanDefinition(beanName).isSingleton()) {
 			return applicationContext.getBean(name, clazz);
 		} else {
-			throw new AssertionError("Bean '" + name + "' is not a singleton.");
+			throw new IllegalArgumentException("Bean '" + name + "' is not a singleton.");
 		}
 	}
 
@@ -82,4 +93,19 @@ public class ApplicationContextBackedBeanFactoryImpl implements BeanFactory, App
 		}
 		applicationContext = (ConfigurableApplicationContext) context;
 	}
+	
+	/**
+	 * Return the bean name, stripping out the factory dereference prefix if necessary, and resolving aliases to canonical names. 
+	 * Note that this functionality is based upon {@link AbstractBeanFactory.transformedBeanName}.
+	 * 
+	 * @param name the user-specified name
+	 * @return the transformed bean name
+	 */
+	private String transformedBeanName(final String name) {
+		
+		final SimpleAliasRegistry simpleAliasRegistry = (SimpleAliasRegistry) applicationContext.getBeanFactory();
+		
+		return simpleAliasRegistry.canonicalName(BeanFactoryUtils.transformedBeanName(name));
+	}
+	
 }

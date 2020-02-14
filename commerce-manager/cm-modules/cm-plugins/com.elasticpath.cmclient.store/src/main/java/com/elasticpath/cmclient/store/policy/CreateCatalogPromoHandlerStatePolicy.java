@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.StateDeterminer;
@@ -88,7 +88,7 @@ public class CreateCatalogPromoHandlerStatePolicy extends AbstractStatePolicyImp
 			if (authorized == null) {
 				if (AuthorizationService.getInstance().isAuthorizedWithPermission(PromotionsPermissions.PROMOTION_MANAGE)) {
 					final CatalogService catalogService =
-							ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+							BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 					final List<Catalog> catalogs = catalogService.findAllCatalogs();
 					AuthorizationService.getInstance().filterAuthorizedCatalogs(catalogs);
 					authorized = catalogs.isEmpty();

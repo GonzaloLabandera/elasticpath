@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
@@ -15,7 +15,7 @@ public class PreCheckoutCheckoutAction implements CheckoutAction {
 
 	@Override
 	public void execute(final CheckoutActionContext context) {
-		checkoutEventHandler.preCheckout(context.getShoppingCart(), context.getOrderPaymentTemplate());
+		checkoutEventHandler.preCheckout(context.getShoppingCart());
 	}
 
 	protected CheckoutEventHandler getCheckoutEventHandler() {

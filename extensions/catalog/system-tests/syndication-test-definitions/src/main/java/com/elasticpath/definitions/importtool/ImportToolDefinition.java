@@ -9,6 +9,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import cucumber.api.java.en.When;
 
+import com.elasticpath.definitions.api.helpers.Constants;
+import com.elasticpath.definitions.api.helpers.StepsHelper;
 import com.elasticpath.definitions.importtool.database.QueryBuilder;
 
 /**
@@ -52,6 +54,7 @@ public class ImportToolDefinition {
 	@When("^corresponding projections were created in the system$")
 	public void validateResponseCode() throws SQLException {
 		QueryBuilder builder = new QueryBuilder();
+		StepsHelper.sleep(Constants.API_SLEEP_TIME);
 		for (String code : objectCodes) {
 			assertThat(builder.ifProjectionExists(code, this.objectType))
 					.as("There are no projections for required domain object: " + this.objectType + " - " + code)

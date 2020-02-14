@@ -31,7 +31,7 @@ public class ImportJobRunnerProductSkuImpl extends AbstractImportJobRunnerImpl {
 	 */
 	@Override
 	protected Entity createNewEntity(final Object baseObject) {
-		return getBean(ContextIdNames.PRODUCT_SKU);
+		return getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 	}
 
 	/**

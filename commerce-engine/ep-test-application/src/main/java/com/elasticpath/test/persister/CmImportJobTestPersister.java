@@ -31,7 +31,7 @@ public class CmImportJobTestPersister {
 	 */
 	public CmImportJobTestPersister(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		cmImportJobService = beanFactory.getBean(ContextIdNames.IMPORT_SERVICE);		
+		cmImportJobService = beanFactory.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 	}
 	
 	/**
@@ -68,7 +68,7 @@ public class CmImportJobTestPersister {
 			final char columnDelimiter, final char textDelimiter, 
 			final int maxErrors, final Map <String, Integer> dataFieldMappings) {
 	//CHECKSTYLE:ON	
-		ImportJob cmImportJob = beanFactory.getBean(ContextIdNames.IMPORT_JOB);
+		ImportJob cmImportJob = beanFactory.getPrototypeBean(ContextIdNames.IMPORT_JOB, ImportJob.class);
 		
 		cmImportJob.setCatalog(catalog);
 		cmImportJob.setStore(store);

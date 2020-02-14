@@ -92,7 +92,7 @@ public class StorePersistenceTest extends DbTestCase {
 		retrievedStore.getAssociatedStoreUids().addAll(storeAssociations);
 		storeService.saveOrUpdate(retrievedStore);
 
-		FetchGroupLoadTuner loadTuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		FetchGroupLoadTuner loadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		loadTuner.addFetchGroup(FetchGroupConstants.STORE_SHARING);
 		
 		Store updatedStore = storeService.getTunedStore(store.getUidPk(), loadTuner);
@@ -138,7 +138,7 @@ public class StorePersistenceTest extends DbTestCase {
 			}
 		});
 
-		FetchGroupLoadTuner loadTuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		FetchGroupLoadTuner loadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		loadTuner.addFetchGroup(FetchGroupConstants.STORE_SHARING);
 		
 		final Store reRetrievedStore = storeService.getTunedStore(savedStore.getUidPk(), loadTuner);

@@ -4,7 +4,7 @@
 package com.elasticpath.domain.catalogview.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -24,10 +24,13 @@ import org.junit.Test;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.SeoConstants;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.domain.attribute.AttributeType;
+import com.elasticpath.domain.attribute.AttributeUsage;
+import com.elasticpath.domain.attribute.AttributeValueWithType;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.attribute.impl.TransientAttributeValueImpl;
@@ -69,26 +72,20 @@ public class AttributeValueFilterImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		attributeService = context.mock(AttributeService.class);
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_SERVICE, attributeService);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class, attributeService);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, AttributeUsageImpl.class);
 
 		context.checking(new Expectations() {
 			{
 				allowing(attributeService).findByKey("A00001"); will(returnValue(getAttribute("A00001")));
 			}
 		});
-		this.attributeFilter = getAttributeFilter();
+		this.attributeFilter = new AttributeValueFilterImpl();
 	}
 
 	@After
 	public void tearDown() {
 		expectationsFactory.close();
-	}
-
-	private AttributeValueFilterImpl getAttributeFilter() {
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_FILTER, AttributeValueFilterImpl.class);
-
-		return beanFactory.getBean(ContextIdNames.ATTRIBUTE_FILTER);
 	}
 
 	/**
@@ -105,7 +102,8 @@ public class AttributeValueFilterImplTest {
 	@Test
 	public void testGetDisplayName() {
 		final String filterId = SeoConstants.ATTRIBUTE_FILTER_PREFIX + A00001_JPEG;
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		attributeFilter.initialize(filterId);
 		assertEquals(filterId, attributeFilter.getId());
 		assertEquals("JPEG", attributeFilter.getDisplayName(Locale.US));
@@ -127,7 +125,8 @@ public class AttributeValueFilterImplTest {
 	public void testGetDisplayNameWithExplicitDispayNameOverride() {
 		final String filterId = SeoConstants.ATTRIBUTE_FILTER_PREFIX + A00001_JPEG;
 		attributeFilter.setDisplayName("test display name");
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		attributeFilter.initialize(filterId);
 		assertEquals("test display name", attributeFilter.getDisplayName(Locale.US));
 	}
@@ -141,7 +140,8 @@ public class AttributeValueFilterImplTest {
 	public void testGetDisplayNameWithExplicitDispayNameOverrideOfNull() {
 		final String filterId = SeoConstants.ATTRIBUTE_FILTER_PREFIX + A00001_JPEG;
 		attributeFilter.setDisplayName(null);
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		attributeFilter.initialize(filterId);
 		assertEquals("Null display name was set, fallback should have been attribute value", "JPEG", attributeFilter.getDisplayName(Locale.US));
 	}
@@ -155,7 +155,8 @@ public class AttributeValueFilterImplTest {
 	public void testGetDisplayNameWithExplicitDispayNameOverrideOfBlank() {
 		final String filterId = SeoConstants.ATTRIBUTE_FILTER_PREFIX + A00001_JPEG;
 		attributeFilter.setDisplayName("   ");
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		attributeFilter.initialize(filterId);
 		assertEquals("Blank display name was set, null should have been returned", "JPEG", attributeFilter.getDisplayName(Locale.US));
 	}
@@ -205,15 +206,16 @@ public class AttributeValueFilterImplTest {
 	@Test
 	public void testEquals() {
 		final String filterId = SeoConstants.ATTRIBUTE_FILTER_PREFIX + A00001_JPEG;
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		attributeFilter.initialize(filterId);
 
-		final AttributeValueFilterImpl anotherattributeFilter = getAttributeFilter();
+		final AttributeValueFilterImpl anotherattributeFilter = new AttributeValueFilterImpl();
 		anotherattributeFilter.initialize(filterId);
 
-		assertEquals(attributeFilter, anotherattributeFilter);
+		assertEquals(anotherattributeFilter, attributeFilter);
 		assertEquals(attributeFilter.hashCode(), anotherattributeFilter.hashCode());
-		assertFalse(attributeFilter.equals(new Object()));
+		assertNotEquals(new Object(), attributeFilter);
 	}
 
 	/**
@@ -223,16 +225,15 @@ public class AttributeValueFilterImplTest {
 	public void testCompare() {
 		final String filterId1 = SeoConstants.ATTRIBUTE_FILTER_PREFIX + A00001_JPEG;
 		final String filterId2 = SeoConstants.ATTRIBUTE_FILTER_PREFIX + A00001_RAW;
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		attributeFilter.initialize(filterId1);
 
-		AttributeValueFilterImpl anotherattributeFilter = getAttributeFilter();
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		AttributeValueFilterImpl anotherattributeFilter = new AttributeValueFilterImpl();
 		anotherattributeFilter.initialize(filterId1);
 
 		assertEquals(0, attributeFilter.compareTo(anotherattributeFilter));
 
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
 		anotherattributeFilter.initialize(filterId2);
 		assertTrue(attributeFilter.compareTo(anotherattributeFilter) < 0);
 		assertTrue(anotherattributeFilter.compareTo(attributeFilter) > 0);
@@ -244,8 +245,9 @@ public class AttributeValueFilterImplTest {
 	@Test
 	public void testGetSeoId() {
 		final String filterId = SeoConstants.ATTRIBUTE_FILTER_PREFIX + A00001_JPEG;
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.UTILITY, UtilityImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
 		attributeFilter.initialize(filterId);
 		assertEquals(filterId, attributeFilter.getSeoId());
 		assertEquals("jpeg", attributeFilter.getSeoName(Locale.US));
@@ -257,8 +259,9 @@ public class AttributeValueFilterImplTest {
 	 */
 	@Test
 	public void testGetAliasedSeoId() {
-		AttributeValueFilter newFilter = getAttributeFilter();
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		AttributeValueFilter newFilter = new AttributeValueFilterImpl();
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		Map<String, Object> filterProperties = new HashMap<>();
 		filterProperties.put(AttributeFilter.ATTRIBUTE_PROPERTY, getAttribute("A00002"));
 		filterProperties.put(AttributeFilter.ATTRIBUTE_VALUES_ALIAS_PROPERTY, "01");
@@ -283,8 +286,9 @@ public class AttributeValueFilterImplTest {
 	 */
 	@Test
 	public void testGetAttributePrefixAndKey() {
-		AttributeValueFilter newFilter = getAttributeFilter();
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		AttributeValueFilter newFilter = new AttributeValueFilterImpl();
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		Map<String, Object> filterProperties = new HashMap<>();
 		filterProperties.put(AttributeFilter.ATTRIBUTE_PROPERTY, getAttribute("A00002"));
 		filterProperties.put(AttributeFilter.ATTRIBUTE_VALUES_ALIAS_PROPERTY, "01");

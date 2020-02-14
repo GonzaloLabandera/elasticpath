@@ -11,24 +11,30 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.domain.datapolicy.DataPolicy;
+import com.elasticpath.domain.datapolicy.DataPolicyDescription;
 import com.elasticpath.domain.datapolicy.DataPolicyState;
 import com.elasticpath.test.integration.DirtiesDatabase;
+import com.elasticpath.test.persister.SettingsTestPersister;
 
 public class DataPolicyServiceImplTest extends AbstractDataPolicyTest {
 
 	private static final String UPDATED_DATA_POLICY_NAME = "UPDATED_DATA_POLICY_NAME";
 	private static final String FALSE_SEGMENT = "FALSE_SEGMENT";
 	private static final String STORE_CODE = "STORE_CODE";
+	private static final String CUSTOMER_GUID = "CUSTOMER_GUID";
 	private static final long DAY_IN_MILLISEC = 1000 * 60 * 60 * 24;
 	private static final Date TOMORROW_DATE = new Date(System.currentTimeMillis() + DAY_IN_MILLISEC);
 	private static final Date YESTERDAY_DATE = new Date(System.currentTimeMillis() - DAY_IN_MILLISEC);
 	private static final Date TODAY_DATE = new Date();
+	private static final String POLICY_SEGMENTS_PATH = "COMMERCE/STORE/dataPolicySegments";
 
 	@Test
 	@DirtiesDatabase
@@ -316,6 +322,64 @@ public class DataPolicyServiceImplTest extends AbstractDataPolicyTest {
 		List<DataPolicy> foundDataPolicies = dataPolicyService.findActiveDataPoliciesForSegmentsAndStore(Collections.singletonList(EU), STORE_CODE);
 		assertThat(foundDataPolicies).isEmpty();
 	}
+
+	@Test
+	@DirtiesDatabase
+	public void findAllActiveDataPoliciesByStorePass() {
+		DataPolicy dataPolicy1 = createAndSaveDataPolicyWithStateAndSegments(DATA_POLICY_UNIQUE_CODE, DataPolicyState.ACTIVE, EU);
+		DataPolicy dataPolicy2 = createAndSaveDataPolicyWithStateAndSegments(DATA_POLICY_UNIQUE_CODE2, DataPolicyState.ACTIVE, EU, CA);
+		createAndSaveDataPolicyWithStateAndSegments(DATA_POLICY_UNIQUE_CODE3, DataPolicyState.ACTIVE, CA);
+
+		setupEnableDataPoliciesSettingValue(STORE_CODE, true);
+		setupDataPoliciesSegmentsSetting(STORE_CODE, EU);
+
+		List<DataPolicyDescription> policiesEU = Stream.of(dataPolicy1, dataPolicy2)
+				.map(DataPolicyDescription::new)
+				.collect(Collectors.toList());
+
+		List<DataPolicyDescription> foundDataPolicies = dataPolicyService.findAllActiveDataPoliciesForCustomer(STORE_CODE, CUSTOMER_GUID);
+		assertThat(foundDataPolicies).containsExactlyInAnyOrderElementsOf(policiesEU);
+	}
+
+	@Test
+	@DirtiesDatabase
+	public void findAllActiveDataPoliciesByStoreWithDisabledOptionOnPass() {
+		DataPolicy dataPolicy1 = createAndSaveDataPolicyWithStateAndSegments(DATA_POLICY_UNIQUE_CODE, DataPolicyState.ACTIVE, EU);
+		DataPolicy dataPolicy2 = createAndSaveDataPolicyWithStateAndSegments(DATA_POLICY_UNIQUE_CODE2, DataPolicyState.ACTIVE, EU, CA);
+		DataPolicy dataPolicy3 = createAndSaveDataPolicyWithStateAndSegments(DATA_POLICY_UNIQUE_CODE3, DataPolicyState.DISABLED, EU);
+		createAndSaveDataPolicyWithStateAndSegments(DATA_POLICY_UNIQUE_CODE4, DataPolicyState.DISABLED, CA);
+		createAndSaveDataPolicyWithStateAndSegments(DATA_POLICY_UNIQUE_CODE5, DataPolicyState.ACTIVE, CA);
+
+		setupEnableDataPoliciesSettingValue(STORE_CODE, true);
+		setupDataPoliciesSegmentsSetting(STORE_CODE, EU);
+
+		List<DataPolicyDescription> policiesEU = Stream.of(dataPolicy1, dataPolicy2, dataPolicy3)
+				.map(DataPolicyDescription::new)
+				.collect(Collectors.toList());
+
+		List<DataPolicyDescription> foundDataPolicies = dataPolicyService.findAllActiveDataPoliciesByStoreWithDisabledOption(STORE_CODE,
+				CUSTOMER_GUID, true);
+		assertThat(foundDataPolicies).containsExactlyInAnyOrderElementsOf(policiesEU);
+	}
+
+	private void setupDataPoliciesSegmentsSetting(final String storeCode, String... segments) {
+		SettingsTestPersister settingsTestPersister = getTac().getPersistersFactory().getSettingsTestPersister();
+		settingsTestPersister.updateSettingValue(POLICY_SEGMENTS_PATH, storeCode, toSegmentSettingString(segments));
+	}
+
+	private String toSegmentSettingString(final String[] segments) {
+		StringBuilder builder = new StringBuilder();
+		int lastIndex = segments.length - 1;
+
+		for (int index = 0; index < segments.length; index++) {
+			builder.append(segments[index]);
+			if (index != lastIndex) {
+				builder.append(",");
+			}
+		}
+		return builder.toString();
+	}
+
 
 	@Test
 	@DirtiesDatabase

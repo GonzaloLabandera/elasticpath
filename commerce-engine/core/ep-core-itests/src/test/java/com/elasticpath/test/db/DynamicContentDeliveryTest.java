@@ -61,7 +61,7 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	 * @return instance of DynamicContent.
 	 */
 	private DynamicContent createSingleDynamicContent() {
-		final DynamicContent dynamicContent  = getBeanFactory().getBean(ContextIdNames.DYNAMIC_CONTENT);
+		final DynamicContent dynamicContent = getBeanFactory().getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 		dynamicContent.setContentWrapperId(CONTENT_WRAPPER_ID);
 		dynamicContent.setName(DYNAMIC_CONTENT_NAME);
 		return dynamicContentService.add(dynamicContent);
@@ -75,7 +75,7 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	 */
 	private ConditionalExpression  createConditionalExpression(final String tagDictionaryGuid) throws InvalidConditionTreeException {
 		LogicalOperator logicalOperator = new LogicalOperator(LogicalOperatorType.AND);
-		ConditionalExpression conditionalExpression = getBeanFactory().getBean(ContextIdNames.TAG_CONDITION);
+		ConditionalExpression conditionalExpression = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 		conditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
 		conditionalExpression.setName("name_" + getIdx());
 		conditionalExpression.setDescription(String.valueOf(getIdx()));
@@ -84,7 +84,7 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	}
 
 	private SellingContext createSellingContext() throws InvalidConditionTreeException {
-		SellingContext sellingContext = getBeanFactory().getBean(ContextIdNames.SELLING_CONTEXT);
+		SellingContext sellingContext = getBeanFactory().getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 		sellingContext.setPriority(1);
 		sellingContext.setCondition("SHOPPER", createConditionalExpression("SHOPPER"));
 		sellingContext.setCondition("STORES", createConditionalExpression("STORES"));
@@ -95,7 +95,8 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	}
 
 	private DynamicContentDelivery createDynamicContentDelivery() throws InvalidConditionTreeException {
-		DynamicContentDelivery dynamicContentDelivery = getBeanFactory().getBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY);
+		DynamicContentDelivery dynamicContentDelivery = getBeanFactory().getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY,
+				DynamicContentDelivery.class);
 		SellingContext sellingContext = createSellingContext();
 		DynamicContent dynamicContentInstance = createSingleDynamicContent();
 		dynamicContentDelivery.setName("Name" + getIdx());
@@ -185,7 +186,7 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	}
 
 	private ContentSpace createContentSpace(final String name) {
-		ContentSpace contentSpace = getBeanFactory().getBean(ContextIdNames.CONTENTSPACE);
+		ContentSpace contentSpace = getBeanFactory().getPrototypeBean(ContextIdNames.CONTENTSPACE, ContentSpace.class);
 		contentSpace.setTargetId(name);
 		contentSpace.setDescription("description");
 		return contentSpace;

@@ -78,7 +78,7 @@ public class AddToCartAdvisorServiceImplTest {
 	@Before
 	public void setup() {
 
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(customerSession));
+		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(customerSession));
 		when(customerSession.getShopper()).thenReturn(shopper);
 		when(storeRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
 		when(productSkuRepository.getProductSkuWithAttributesByCode(SKU_CODE)).thenReturn(Single.just(productSku));

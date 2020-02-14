@@ -26,7 +26,7 @@ public class SkuOptionDaoAdapterImpl extends AbstractDaoAdapter<SkuOption> {
 
 	@Override
 	public SkuOption createBean(final SkuOption category) {
-		return beanFactory.getBean(ContextIdNames.SKU_OPTION);
+		return beanFactory.getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 	}
 
 	@Override

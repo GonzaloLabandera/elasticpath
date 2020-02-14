@@ -44,8 +44,6 @@ public class ShippingServiceLevelTestPersister {
 
 	private static final String COMMA_DELIM = ",";
 
-	private static final String STORE_BEAN = "store";
-
 	private final BeanFactory beanFactory;
 
 	private final ShippingServiceLevelService shippingServiceLevelService;
@@ -58,17 +56,19 @@ public class ShippingServiceLevelTestPersister {
 	/**
 	 * Construct ShippingServiceLevelService, ShippingRegionService and StoreService all used
 	 * later by this class.
+	 *
 	 * @param beanFactory - elastic path bean factory. gets beans.
 	 */
 	public ShippingServiceLevelTestPersister(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		shippingServiceLevelService = this.beanFactory.getBean(SHIPPING_SERVICE_LEVEL_SERVICE);
-		shippingRegionService = this.beanFactory.getBean(SHIPPING_REGION_SERVICE);
-		storeService = this.beanFactory.getBean(ContextIdNames.STORE_SERVICE);
+		shippingServiceLevelService = this.beanFactory.getSingletonBean(SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
+		shippingRegionService = this.beanFactory.getSingletonBean(SHIPPING_REGION_SERVICE, ShippingRegionService.class);
+		storeService = this.beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 	}
 
 	/**
 	 * persist the passed in object.
+	 *
 	 * @param shippingServiceLevel shippingServiceLevel to persist
 	 * @return the persisted shippingServiceLevel
 	 */
@@ -79,27 +79,30 @@ public class ShippingServiceLevelTestPersister {
 	/**
 	 * Create and persist a ShippingServiceLevel instance using the passed in vars and some
 	 * static ones hard coded into this class.
-	 * @param storeCode storeCode
-	 * @param shippingRegionName shippingRegionName
-	 * @param levelCode levelCode
-	 * @param localizedNames localizedNames
-	 * @param carrier carrier
-	 * @param calculationMethod calculationMethod
+	 *
+	 * @param storeCode                 storeCode
+	 * @param shippingRegionName        shippingRegionName
+	 * @param levelCode                 levelCode
+	 * @param localizedNames            localizedNames
+	 * @param carrier                   carrier
+	 * @param calculationMethod         calculationMethod
 	 * @param calculationMethodProperty calculationMethodProperty
-	 * @param calculationMethodValue calculationMethodValue
-	 * @param currency currency
-	 * @param active active
+	 * @param calculationMethodValue    calculationMethodValue
+	 * @param currency                  currency
+	 * @param active                    active
 	 * @return a ShippingServiceLevel instance
 	 */
 
 	public ShippingServiceLevel createAndPersistShippingServiceLevel(final String storeCode, final String storeLocales,
-																	 final String shippingRegionName,
-																	 final String levelCode, final String localizedNames, final String carrier,
-																	 final String calculationMethod, final String calculationMethodProperty,
-																	 final String calculationMethodValue, final String currency, final String active, boolean persistStore) {
+			final String shippingRegionName,
+			final String levelCode, final String localizedNames, final String carrier,
+			final String calculationMethod, final String calculationMethodProperty,
+			final String calculationMethodValue, final String currency,
+			final String active, boolean persistStore) {
 
 		ShippingServiceLevel shippingServiceLevel = createShippingServiceLevel(storeCode, storeLocales, shippingRegionName,
-																				 levelCode, localizedNames, carrier, calculationMethod, calculationMethodProperty, calculationMethodValue, currency, active, persistStore);
+				levelCode, localizedNames, carrier, calculationMethod, calculationMethodProperty, calculationMethodValue, currency, active,
+				persistStore);
 
 		shippingServiceLevel = persistShippingServiceLevel(shippingServiceLevel);
 		shippingServiceLevelService.getPersistenceEngine().clearCache();
@@ -109,27 +112,29 @@ public class ShippingServiceLevelTestPersister {
 	/**
 	 * Create a ShippingServiceLevel instance using the passed in vars and some
 	 * static ones hard coded into this class.
-	 * @param storeCode storeCode
-	 * @param shippingRegionName shippingRegionName
-	 * @param levelCode levelCode
-	 * @param localizedNames localizedNames
-	 * @param carrier carrier
-	 * @param calculationMethod calculationMethod
+	 *
+	 * @param storeCode                 storeCode
+	 * @param shippingRegionName        shippingRegionName
+	 * @param levelCode                 levelCode
+	 * @param localizedNames            localizedNames
+	 * @param carrier                   carrier
+	 * @param calculationMethod         calculationMethod
 	 * @param calculationMethodProperty calculationMethodProperty
-	 * @param calculationMethodValue calculationMethodValue
-	 * @param currency currency
-	 * @param active active
+	 * @param calculationMethodValue    calculationMethodValue
+	 * @param currency                  currency
+	 * @param active                    active
 	 * @return a ShippingServiceLevel instance
 	 */
 	public ShippingServiceLevel createShippingServiceLevel(final String storeCode, final String storeLocales, final String shippingRegionName,
 														   final String levelCode, final String localizedNames, final String carrier,
 														   final String calculationMethod, final String calculationMethodProperty,
-														   final String calculationMethodValue, final String currency, final String active, boolean persistStore) {
+														   final String calculationMethodValue, final String currency, final String active,
+														   boolean persistStore) {
 
 		ShippingServiceLevel shippingServiceLevel
-			= this.beanFactory.getBean(SHIPPING_SERVICE_LEVEL);
+				= this.beanFactory.getPrototypeBean(SHIPPING_SERVICE_LEVEL, ShippingServiceLevel.class);
 		List<Locale> supportedLocales = new ArrayList<>();
-		String [] locales = StringUtils.split(storeLocales, COMMA_DELIM);
+		String[] locales = StringUtils.split(storeLocales, COMMA_DELIM);
 		for (String locale : locales) {
 			supportedLocales.add(new Locale(locale));
 		}
@@ -145,7 +150,7 @@ public class ShippingServiceLevelTestPersister {
 		//	look: a service call here...
 		shippingServiceLevel.setShippingRegion(shippingRegionService.findByName(shippingRegionName));
 		shippingServiceLevel.setShippingCostCalculationMethod(
-			setUpShippingCostCalculationMethod(calculationMethod, calculationMethodProperty, calculationMethodValue, currency));
+				setUpShippingCostCalculationMethod(calculationMethod, calculationMethodProperty, calculationMethodValue, currency));
 
 		shippingServiceLevel.setLocalizedPropertiesMap(createLocalizedPropertiesMap(localizedNames, supportedLocales));
 		return shippingServiceLevel;
@@ -153,12 +158,14 @@ public class ShippingServiceLevelTestPersister {
 
 	/**
 	 * Set up and persist a Store object needed to persist a ShippingServiceLevelImpl correctly.
+	 *
 	 * @param storeCode unique store code
 	 * @return the persisted Store
 	 * @throws com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException
 	 */
-	public Store setUpTestStore(final String storeCode, final List<Locale> supportedLocales, final String country, final String subCountry, boolean persistStore) {
-	 	Store mockStore = beanFactory.getBean(STORE_BEAN);
+	public Store setUpTestStore(final String storeCode, final List<Locale> supportedLocales, final String country, final String subCountry,
+								boolean persistStore) {
+		Store mockStore = beanFactory.getPrototypeBean(ContextIdNames.STORE, Store.class);
 		mockStore.setCountry(country);
 		mockStore.setSubCountry(subCountry);
 		mockStore.setCode(storeCode);
@@ -169,7 +176,7 @@ public class ShippingServiceLevelTestPersister {
 		mockStore.setStoreFullCreditCardsEnabled(false);
 		mockStore.setStoreType(StoreType.B2C);
 		mockStore.setTimeZone(TimeZone.getDefault());
-		try  {
+		try {
 			mockStore.setSupportedLocales(supportedLocales);
 		} catch (Exception e) {
 			throw new EpServiceException(e.getMessage());
@@ -193,16 +200,17 @@ public class ShippingServiceLevelTestPersister {
 
 	/**
 	 * Set up the ShippingCostCalculationMethod object needed to persist a ShippingServiceLevelImpl correctly.
-	 * @param calculationMethod  calculationMethod
+	 *
+	 * @param calculationMethod         calculationMethod
 	 * @param calculationMethodProperty calculationMethodProperty
-	 * @param calculationMethodValue calculationMethodValue
-	 * @param currency currency
+	 * @param calculationMethodValue    calculationMethodValue
+	 * @param currency                  currency
 	 * @return a ShippingCostCalculationMethod instance
 	 */
 	private ShippingCostCalculationMethod setUpShippingCostCalculationMethod(final String calculationMethod, final String calculationMethodProperty,
 																			 final String calculationMethodValue, final String currency) {
 		ShippingCostCalculationMethod shippingCostCalculationMethod
-				= beanFactory.getBean(calculationMethod);
+				= beanFactory.getPrototypeBean(calculationMethod, ShippingCostCalculationMethod.class);
 		ShippingCostCalculationParameter param = new ShippingCostCalculationParameterImpl();
 
 		param.setCurrency(Currency.getInstance(currency));
@@ -219,7 +227,7 @@ public class ShippingServiceLevelTestPersister {
 
 	private Map<String, LocalizedPropertyValue> createLocalizedPropertiesMap(final String localizedNames, final List<Locale> locales) {
 		final Map<String, LocalizedPropertyValue> localizedProperties = new HashMap<>();
-		String [] names = StringUtils.split(localizedNames, COMMA_DELIM);
+		String[] names = StringUtils.split(localizedNames, COMMA_DELIM);
 		int count = 0;
 		for (Locale locale : locales) {
 			String localeKey = ShippingServiceLevel.LOCALIZED_PROPERTY_NAME + "_" + locale.getLanguage();

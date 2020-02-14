@@ -96,7 +96,7 @@ public abstract class ImportJobTestCase extends BasicSpringContextTest {
 	 */
 	protected ImportJob createSimpleImportJob(final Persistable associatedDomainObject, final String name, final String csvFileName,
 			final ImportType importType, final String importDataTypeName, final Map<String, Integer> mappings) {
-		ImportJob importJob = getBeanFactory().getBean(ContextIdNames.IMPORT_JOB);
+		ImportJob importJob = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_JOB, ImportJob.class);
 		if (associatedDomainObject instanceof Store) {
 			importJob.setStore((Store) associatedDomainObject);
 		} else if (associatedDomainObject instanceof Catalog) {

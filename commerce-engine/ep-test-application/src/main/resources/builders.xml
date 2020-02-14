@@ -13,8 +13,6 @@
 
 	<bean id="storeCustomerAttributeBuilder" class="com.elasticpath.domain.builder.customer.StoreCustomerAttributeBuilder"/>
 
-	<bean id="paymentGatewayBuilder" class="com.elasticpath.domain.builder.payment.gateway.PaymentGatewayBuilder" scope="prototype"/>
-	
 	<bean id="customerAddressBuilder" class="com.elasticpath.domain.builder.customer.CustomerAddressBuilder" scope="prototype"/>
 
 	<bean id="wishListBuilder" class="com.elasticpath.domain.builder.WishListBuilder" scope="prototype"/>

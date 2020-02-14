@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration.tax;
 
@@ -36,7 +36,7 @@ import com.elasticpath.plugin.tax.domain.TaxDocumentId;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.payment.PaymentService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
@@ -54,9 +54,6 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 	@Autowired
 	protected CheckoutService checkoutService;
 	
-	@Autowired
-	PaymentService paymentService;
-
 	protected Store store;
 
 	protected Customer customer;
@@ -94,6 +91,9 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 	@Autowired
 	protected TaxSnapshotService taxSnapshotService;
 
+	@Autowired
+	protected OrderPaymentService orderPaymentService;
+
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
 	 */
@@ -124,7 +124,7 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 		
 		// Tax code
 		final StoreTestPersister storePersister = getTac().getPersistersFactory().getStoreTestPersister();
-		final TaxCodeService taxCodeService = getBeanFactory().getBean(ContextIdNames.TAX_CODE_SERVICE);
+		final TaxCodeService taxCodeService = getBeanFactory().getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		final TaxCode goodTaxCode = taxCodeService.findByCode("GOODS");
 		storePersister.updateStoreTaxCodes(store, new HashSet<>(Collections.singletonList(goodTaxCode)));
 		
@@ -159,10 +159,10 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 																						scenario.getCategory(), 
 																						scenario.getWarehouse());
 
-		final OrderSku orderSku = getBeanFactory().getBean(ContextIdNames.ORDER_SKU);
+		final OrderSku orderSku = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 
 		final ProductSku productSku = newProduct.getDefaultSku();
-		final Price price = getBeanFactory().getBean(ContextIdNames.PRICE);
+		final Price price = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		final Money amount = Money.valueOf(BigDecimal.ONE, Currency.getInstance("USD"));
 		price.setListPrice(amount);
 		orderSku.setPrice(1, price);
@@ -191,6 +191,6 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 	 * @return EventOriginatorHelper
 	 */
 	public EventOriginatorHelper getEventOriginatorHelper() {
-		return getBeanFactory().getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		return getBeanFactory().getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 	}
 }

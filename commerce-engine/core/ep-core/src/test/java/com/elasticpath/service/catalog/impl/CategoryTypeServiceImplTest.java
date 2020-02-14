@@ -133,7 +133,7 @@ public class CategoryTypeServiceImplTest extends AbstractEPServiceTestCase {
 		categoryType.setAttributeGroup(group);
 
 		// expectations
-		stubGetBean(ContextIdNames.CATEGORY_TYPE, CategoryTypeImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class, CategoryTypeImpl.class);
 		List<Integer> noDuplicates = new ArrayList<>();
 		noDuplicates.add(Integer.valueOf(0));
 
@@ -171,7 +171,7 @@ public class CategoryTypeServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testInitializeNoCategory() {
-		stubGetBean(ContextIdNames.CATEGORY_TYPE, CategoryTypeImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class, CategoryTypeImpl.class);
 
 		final CategoryType categoryType = new CategoryTypeImpl();
 		AttributeGroup group = new AttributeGroupImpl();
@@ -194,7 +194,7 @@ public class CategoryTypeServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testInitializeWithCategory() {
-		stubGetBean(ContextIdNames.CATEGORY_TYPE, CategoryTypeImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class, CategoryTypeImpl.class);
 
 		// one category type with one attribute
 		final CategoryType categoryType = new CategoryTypeImpl();

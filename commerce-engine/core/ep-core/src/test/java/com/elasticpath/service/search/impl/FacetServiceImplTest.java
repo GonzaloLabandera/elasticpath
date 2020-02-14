@@ -70,7 +70,7 @@ public class FacetServiceImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testGetFacet() {
 
-		stubGetBean(ContextIdNames.FACET_SERVICE, FacetImpl.class);
+		stubGetPrototypeBean(ContextIdNames.FACET, Facet.class, FacetImpl.class);
 
 		final long uid = 1234L;
 		final Facet facet = context.mock(Facet.class);

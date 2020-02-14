@@ -76,8 +76,6 @@
 		</property>
 	</bean>
 
-	<bean id="cyberSourceSubscriberFactory" class="com.elasticpath.paymentgateways.cybersource.impl.CyberSourceTestSubscriberFactoryImpl"/>
-
 	<!-- Extension point for plugging in additional test components. -->
 	<!-- This must occur as the last import in the context to facilitate overriding existing beans. -->
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/ep-itest-plugin.xml" />

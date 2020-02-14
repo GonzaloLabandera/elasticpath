@@ -1,8 +1,10 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortexTestObjects
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
-import static com.elasticpath.cortex.dce.SharedConstants.TEST_TOKEN
-import static com.elasticpath.cortex.dce.SharedConstants.TEST_TOKEN_DISPLAY_NAME
 import static org.assertj.core.api.Assertions.assertThat
 
 import com.elasticpath.cortex.dce.CommonMethods
@@ -117,16 +119,16 @@ class Profile extends CommonMethods {
 
 		client.createaddressaction(
 				[
-						address: ["country-name"    : countryCode,
-								  "extended-address": extendedAddress,
-								  "locality"        : locale,
-								  "organization"    : organization,
-								  "phone-number"    : phoneNumber,
-								  "postal-code"     : postalCode,
-								  "region"          : regionCode,
-								  "street-address"  : streetAddress],
-						name   : ["family-name": familyName,
-								  "given-name" : givenName]
+						"organization": organization,
+						"phone-number": phoneNumber,
+						address       : ["country-name"    : countryCode,
+										 "extended-address": extendedAddress,
+										 "locality"        : locale,
+										 "postal-code"     : postalCode,
+										 "region"          : regionCode,
+										 "street-address"  : streetAddress],
+						name          : ["family-name": familyName,
+										 "given-name" : givenName]
 				]
 		)
 				.stopIfFailure()
@@ -146,16 +148,16 @@ class Profile extends CommonMethods {
 
 		client.PUT(client.body.self.uri,
 				[
-						address: ["country-name"    : countryCode,
-								  "extended-address": extendedAddress,
-								  "locality"        : locale,
-								  "organization"    : organization,
-								  "phone-number"    : phoneNumber,
-								  "postal-code"     : postalCode,
-								  "region"          : regionCode,
-								  "street-address"  : streetAddress],
-						name   : ["family-name": familyName,
-								  "given-name" : givenName]])
+						"organization": organization,
+						"phone-number": phoneNumber,
+						address       : ["country-name"    : countryCode,
+										 "extended-address": extendedAddress,
+										 "locality"        : locale,
+										 "postal-code"     : postalCode,
+										 "region"          : regionCode,
+										 "street-address"  : streetAddress],
+						name          : ["family-name": familyName,
+										 "given-name" : givenName]])
 	}
 
 	static void createAddressWithInvalidAddressKey(String countryCode, String locale, String postalCode, String regionCode,
@@ -200,7 +202,14 @@ class Profile extends CommonMethods {
 		assert client.response.status == 201
 	}
 
-	static void addUSBillingAddress(){
+	static void addGBBillingAddress() {
+		createAddress("GB", "", "London", "", "", "12345", "",
+				"111 Main Street", "GB User", "GB test")
+		assert client.response.status == 201
+	}
+
+
+	static void addUSBillingAddress() {
 		createAddress("US", "", "Seattle", "", "", "98119", "WA",
 				"555 Elliott Avenue W", "User", "Test")
 		assert client.response.status == 201
@@ -249,22 +258,6 @@ class Profile extends CommonMethods {
 				.isTrue()
 	}
 
-	static void addDefaultToken() {
-		addToken(TEST_TOKEN_DISPLAY_NAME, TEST_TOKEN)
-	}
-
-	static void addToken(String displayName, String token) {
-		getProfile()
-		client.paymentmethods()
-				.paymenttokenform()
-				.createpaymenttokenaction(
-				['display-name': displayName,
-				 'token'       : token]
-		)
-				.follow()
-				.stopIfFailure()
-	}
-
 	static void defaultBillingAddress() {
 		addresses()
 		client.billingaddresses()
@@ -278,39 +271,52 @@ class Profile extends CommonMethods {
 				.stopIfFailure()
 	}
 
-	static void defaultPaymentMethod() {
-		paymentmethods()
+	static void defaultPaymentInstrument() {
+		paymentinstruments()
 		client.default()
 				.stopIfFailure()
 	}
 
-	static def getDefaultPaymentMethodDisplayName() {
-		defaultPaymentMethod()
-		return getDisplayName()
+	static def getDefaultPaymentInstrumentName() {
+		defaultPaymentInstrument()
+		return client["name"]
 	}
 
-	static void verifyToken(final String tokenDisplayName) {
-		assertThat(findToken(tokenDisplayName))
-				.as("Unable to find token: $tokenDisplayName")
+	static void verifyInstrument(final String instrumentName) {
+		assertThat(findInstrument(instrumentName))
+				.as("Unable to find instrument: $instrumentName")
 				.isTrue()
 	}
 
-	static def findToken(final String tokenDisplayName) {
-		def tokenExists = false
-		paymentmethods()
+	static def findInstrument(final String instrumentName) {
+		def instrumentExists = false
+		paymentinstruments()
 		client.body.links.find {
 			if (it.rel == "element") {
 				client.GET(it.uri)
-				if (tokenDisplayName == getDisplayName()) {
-					return tokenExists = true
+				if (instrumentName == client["name"]) {
+					return instrumentExists = true
 				}
 			}
 		}
-		return tokenExists
+		return instrumentExists
 	}
 
-	static void deleteToken(final String tokenDisplayName) {
-		verifyToken(tokenDisplayName)
+	static def isDefaultPaymentInstrument(final String instrumentName) {
+		paymentinstruments()
+		client.body.links.find {
+			if (it.rel == "default") {
+				client.GET(it.uri)
+				if (instrumentName == client["name"]) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	static void deleteInstrument(final String instrumentName) {
+		verifyInstrument(instrumentName)
 		delete(client.body.self.uri)
 	}
 
@@ -333,6 +339,59 @@ class Profile extends CommonMethods {
 	static void wishlists() {
 		getProfile()
 		client.wishlists()
+				.stopIfFailure()
+	}
+
+	static void paymentinstruments() {
+		getProfile()
+		client.paymentinstruments()
+				.stopIfFailure()
+	}
+
+	static void paymentInstrumentsFromDefaultPaymentInstrumentSelector() {
+		client.paymentinstruments()
+				.stopIfFailure()
+	}
+
+	static void paymentInstrumentsChoicesFromChoice() {
+		client.selector()
+				.stopIfFailure()
+	}
+
+	static void getPaymentConfigurationWithName(String configurationName) {
+		paymentmethods()
+		openLinkRelWithFieldWithValue("element", "name", configurationName)
+	}
+
+	static void paymentInstrumentChoiceDescription() {
+		defaultinstrumentselector()
+		client.choice()
+				.description()
+				.stopIfFailure()
+	}
+
+	static void paymentInstrumentChoice() {
+		defaultinstrumentselector()
+		client.choice()
+				.stopIfFailure()
+	}
+
+	static void chosenPaymentInstrument() {
+		defaultinstrumentselector()
+		client.chosen()
+				.stopIfFailure()
+	}
+
+	static void chosenPaymentInstrumentDescription() {
+		chosenPaymentInstrument()
+		client.description()
+				.stopIfFailure()
+	}
+
+	static void defaultinstrumentselector() {
+		getProfile()
+		paymentinstruments()
+		client.defaultinstrumentselector()
 				.stopIfFailure()
 	}
 

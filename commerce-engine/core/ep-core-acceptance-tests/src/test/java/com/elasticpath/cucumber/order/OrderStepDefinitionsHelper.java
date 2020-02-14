@@ -292,7 +292,7 @@ public class OrderStepDefinitionsHelper {
 		Order order = orderHolder.get();
 		PhysicalOrderShipment phShipment = order.getPhysicalShipments().get(0);
 
-		final OrderAddress newShipmentAddress = coreBeanFactory.getBean(ContextIdNames.ORDER_ADDRESS);
+		final OrderAddress newShipmentAddress = coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 		newShipmentAddress.init(customerAddress);
 		phShipment.setShipmentAddress(newShipmentAddress);
 
@@ -365,7 +365,7 @@ public class OrderStepDefinitionsHelper {
 
 			for (OrderSku orderSku : phShipment.getShipmentOrderSkus()) {
 				if (StringUtils.equals(orderSku.getSkuCode(), skuCode)) {
-					OrderSku movedOrderSku = coreBeanFactory.getBean(ContextIdNames.ORDER_SKU);
+					OrderSku movedOrderSku = coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 					final ShoppingItemPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForOrderSku(orderSku);
 					final ShoppingItemTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForOrderSku(orderSku, pricingSnapshot);
 					movedOrderSku.copyFrom(orderSku, productSkuLookup, taxSnapshot, true);
@@ -441,14 +441,14 @@ public class OrderStepDefinitionsHelper {
 	 * @return EventOriginatorHelper
 	 */
 	private EventOriginatorHelper getEventOriginatorHelper() {
-		return coreBeanFactory.getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		return coreBeanFactory.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 	}
 
 	@SuppressWarnings("deprecation")
 	private void updatePrice(final OrderSku orderSku, final BigDecimal invoicePrice) {
 
-		PriceTier tier = coreBeanFactory.getBean(ContextIdNames.PRICE_TIER);
-		Price price = coreBeanFactory.getBean(ContextIdNames.PRICE);
+		PriceTier tier = coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class);
+		Price price = coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 
 		price.setCurrency(orderSku.getCurrency());
 

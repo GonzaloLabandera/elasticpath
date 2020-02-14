@@ -64,7 +64,7 @@
 
 		<plan>
 			<name>lookup-purchase-by-number</name>
-			<description><![CDATA[Look up a purchase by the purchase number.]]></description>
+			<description><![CDATA[Lookup a purchase by the purchase number.]]></description>
 			<step>
 				<description><![CDATA[Submit the form]]></description>
 				<start>purchase-lookup-form</start>
@@ -78,7 +78,9 @@
 <!--		Purchase Line Items-->
 		<plan>
 			<name>read-purchase-line-item</name>
-			<description><![CDATA[Retrieve a purchase's line item, which includes details on the item that was purchased such as item name, quantity purchased, and cost.]]></description>
+			<description>
+				<![CDATA[Retrieve a purchase's line-item including details on the purchased item, such as item name, quantity purchased and cost.]]>
+			</description>
 			<step>
 				<description><![CDATA[Purchase to purchase line-items]]></description>
 				<start>purchase</start>
@@ -164,24 +166,6 @@
 				<start>purchase-line-item</start>
 				<follow-link>parent</follow-link>
 				<result>purchase-line-item</result>
-			</step>
-		</plan>
-		
-<!--		Payment Means-->
-		<plan>
-			<name>read-paymentmean</name>
-			<description><![CDATA[Read a payment mean from a list of payment means.]]></description>
-			<step>
-				<description><![CDATA[Purchase to a list of payment means.]]></description>
-				<start>purchase</start>
-				<follow-link>paymentmeans</follow-link>
-				<result>purchase-paymentmeans</result>
-			</step>
-			<step>
-				<description><![CDATA[List of payment means to a paymentmean.]]></description>
-				<start>purchase-paymentmeans</start>
-				<follow-link>element</follow-link>
-				<result>purchase-paymentmean</result>
 			</step>
 		</plan>
 		

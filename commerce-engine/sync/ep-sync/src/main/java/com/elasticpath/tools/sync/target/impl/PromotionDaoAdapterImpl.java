@@ -29,7 +29,7 @@ public class PromotionDaoAdapterImpl extends AbstractDaoAdapter<Rule> {
 
 	@Override
 	public Rule createBean(final Rule rule) {
-		return beanFactory.getBean(ContextIdNames.PROMOTION_RULE);
+		return beanFactory.getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 	}
 
 	@Override

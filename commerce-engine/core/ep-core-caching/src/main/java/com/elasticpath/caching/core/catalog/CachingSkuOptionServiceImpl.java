@@ -3,12 +3,20 @@
  */
 package com.elasticpath.caching.core.catalog;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
+import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
+import com.elasticpath.persistence.dao.ProductTypeDao;
 import com.elasticpath.service.catalog.SkuOptionKeyExistException;
 import com.elasticpath.service.catalog.SkuOptionService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
@@ -18,8 +26,25 @@ import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
  */
 public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl implements SkuOptionService {
 
-	private  SkuOptionService fallbackSkuOptionService;
-	private Cache<String, SkuOption> findByKeyCache;
+	private SkuOptionService fallbackSkuOptionService;
+	private ProductTypeDao productTypeDao;
+
+	private Cache<SkuOptionCacheKey, SkuOption> skuOptionsCache;
+
+	/**
+	 * Initialize skuOption cache.
+	 */
+	public void init() {
+		List<ProductType> productTypes = productTypeDao.list();
+
+		Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap = new HashMap<>();
+
+		for (ProductType productType : productTypes) {
+			cacheSkuOptionsInMap(skuOptionToCacheKeyMap, productType.getSkuOptions(), productType.getUidPk());
+		}
+
+		flushSkuOptionsToCache(skuOptionToCacheKeyMap);
+	}
 
 	@Override
 	public SkuOption add(final SkuOption skuOption) throws SkuOptionKeyExistException {
@@ -47,11 +72,6 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 	}
 
 	@Override
-	public List<SkuOption> list() throws EpServiceException {
-		return fallbackSkuOptionService.list();
-	}
-
-	@Override
 	public List<SkuOption> findAllSkuOptionFromCatalog(final long catalogUid) throws EpServiceException {
 		return fallbackSkuOptionService.findAllSkuOptionFromCatalog(catalogUid);
 	}
@@ -68,18 +88,16 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public SkuOption findByKey(final String key) throws EpServiceException {
-		if (findByKeyCache.get(key) != null) {
-			return findByKeyCache.get(key);
+		SkuOptionCacheKey cacheKey = SkuOptionCacheKey.of(key);
+
+		SkuOption skuOption = skuOptionsCache.get(cacheKey);
+
+		if (Objects.isNull(skuOption)) {
+			skuOption = fallbackSkuOptionService.findByKey(key);
+			skuOptionsCache.put(cacheKey, skuOption);
 		}
 
-		SkuOption skuOption = fallbackSkuOptionService.findByKey(key);
-		findByKeyCache.put(key, skuOption);
 		return skuOption;
-	}
-
-	@Override
-	public List<Long> getSkuOptionInUseUidList() {
-		return fallbackSkuOptionService.getSkuOptionInUseUidList();
 	}
 
 	@Override
@@ -95,11 +113,6 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 	@Override
 	public SkuOption saveOrUpdate(final SkuOption skuOption) throws EpServiceException {
 		return fallbackSkuOptionService.saveOrUpdate(skuOption);
-	}
-
-	@Override
-	public List<Long> getSkuOptionValueInUseUidList() {
-		return fallbackSkuOptionService.getSkuOptionValueInUseUidList();
 	}
 
 	@Override
@@ -142,16 +155,90 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 		fallbackSkuOptionService.remove(skuOptionValue);
 	}
 
-	public void setFindByKeyCache(final Cache<String, SkuOption> findByKeyCache) {
-		this.findByKeyCache = findByKeyCache;
-	}
-
 	@Override
 	public Object getObject(final long uid) throws EpServiceException {
 		return get(uid);
 	}
 
+	@Override
+	public Set<SkuOption> findByProductTypeUid(final Long productTypeUid) {
+		SkuOptionCacheKey cacheKey = SkuOptionCacheKey.of(productTypeUid);
+
+		Collection<SkuOption> skuOptions = skuOptionsCache.getAllByPartialKey(cacheKey);
+
+		if (null == skuOptions) {
+			skuOptions = fallbackSkuOptionService.findByProductTypeUid(productTypeUid);
+
+			Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap = new HashMap<>();
+
+			cacheSkuOptionsInMap(skuOptionToCacheKeyMap, skuOptions, productTypeUid);
+
+			flushSkuOptionsToCache(skuOptionToCacheKeyMap);
+		}
+
+		return new HashSet<>(skuOptions);
+	}
+
+	@Override
+	public SkuOptionValue findOptionValueByOptionAndValueKeys(final String optionKey, final String optionValueKey) throws EpServiceException {
+		SkuOption skuOption = findByKey(optionKey);
+
+		return skuOption.getOptionValues().stream()
+			.filter(skuOptionValue ->  skuOptionValue.getOptionValueKey().equals(optionValueKey))
+			.findFirst()
+			.get();
+	}
+
+	@Override
+	public SkuOptionValue findOptionValueByOptionKeyAndValueUid(final String optionKey, final Long skuOptionValueUid) {
+		SkuOption skuOption = findByKey(optionKey);
+
+		return skuOption.getOptionValues().stream()
+			.filter(skuOptionValue ->  skuOptionValue.getUidPk() == skuOptionValueUid)
+			.findFirst()
+			.get();
+	}
+
+
+	public void setSkuOptionsCache(final Cache<SkuOptionCacheKey, SkuOption> skuOptionsCache) {
+		this.skuOptionsCache = skuOptionsCache;
+	}
+
 	public void setFallbackSkuOptionService(final SkuOptionService fallbackSkuOptionService) {
 		this.fallbackSkuOptionService = fallbackSkuOptionService;
+	}
+
+	public void setProductTypeDao(final ProductTypeDao productTypeDao) {
+		this.productTypeDao = productTypeDao;
+	}
+
+	protected SkuOptionService getFallbackSkuOptionService() {
+		return fallbackSkuOptionService;
+	}
+
+	protected ProductTypeDao getProductTypeDao() {
+		return productTypeDao;
+	}
+
+	protected Cache<SkuOptionCacheKey, SkuOption> getSkuOptionsCache() {
+		return skuOptionsCache;
+	}
+
+	private void cacheSkuOptionsInMap(final Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap, final Collection<SkuOption> skuOptions,
+		final Long productTypeUid) {
+
+		skuOptions
+			.forEach(skuOption ->
+					skuOptionToCacheKeyMap.computeIfAbsent(skuOption, val -> SkuOptionCacheKey.of(skuOption.getOptionKey()))
+						.withProductTypeUid(productTypeUid)
+
+			);
+	}
+
+	private void flushSkuOptionsToCache(final Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap) {
+		skuOptionToCacheKeyMap.forEach((key, value) -> skuOptionsCache.put(value, key));
+
+		//don't wait for GC - SKU options may contain thousands of SKU values or there could be thousands of options (or any combination)
+		skuOptionToCacheKeyMap.clear();
 	}
 }

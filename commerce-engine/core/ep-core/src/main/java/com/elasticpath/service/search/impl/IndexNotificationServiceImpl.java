@@ -110,7 +110,7 @@ public class IndexNotificationServiceImpl extends AbstractEpPersistenceServiceIm
 	@Override
 	public void addViaQuery(final UpdateType updateType, final SearchCriteria searchCriteria, final boolean isFuzzy) {
 		sanityCheck();
-		final IndexNotification notification = getBean(ContextIdNames.INDEX_NOTIFICATION);
+		final IndexNotification notification = getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
 		notification.setIndexType(searchCriteria.getIndexType());
 		notification.setUpdateType(updateType);
 
@@ -183,7 +183,7 @@ public class IndexNotificationServiceImpl extends AbstractEpPersistenceServiceIm
 	 * @return populated {@link IndexNotification}
 	 */
 	IndexNotification createNotification(final IndexType indexType, final Long affectedUid) {
-		final IndexNotification notification = getBean(ContextIdNames.INDEX_NOTIFICATION);
+		final IndexNotification notification = getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
 		notification.setIndexType(indexType);
 		notification.setAffectedUid(affectedUid);
 		notification.setAffectedEntityType("singleUnit");

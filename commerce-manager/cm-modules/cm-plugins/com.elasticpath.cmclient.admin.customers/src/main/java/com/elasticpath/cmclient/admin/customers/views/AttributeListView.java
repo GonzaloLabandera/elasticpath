@@ -22,8 +22,8 @@ import com.elasticpath.cmclient.admin.customers.AdminCustomersPlugin;
 import com.elasticpath.cmclient.admin.customers.actions.CreateAttributeAction;
 import com.elasticpath.cmclient.admin.customers.actions.DeleteAttributeAction;
 import com.elasticpath.cmclient.admin.customers.actions.EditAttributeAction;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
@@ -66,7 +66,7 @@ public class AttributeListView extends AbstractListView {
 	 */
 	public AttributeListView() {
 		super(false, ATTRIBUTE_LIST_TABLE);
-		attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 	}
 
 	@Override

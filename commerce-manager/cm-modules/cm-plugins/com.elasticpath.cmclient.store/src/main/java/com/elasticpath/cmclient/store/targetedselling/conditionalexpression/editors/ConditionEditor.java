@@ -19,7 +19,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
 import com.elasticpath.cmclient.core.event.EventType;
@@ -59,8 +59,8 @@ public class ConditionEditor extends AbstractPolicyAwareFormEditor implements Ch
 	
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) throws PartInitException {
-		conditionService = ServiceLocator.getService(ContextIdNames.TAG_CONDITION_SERVICE);
-		changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+		conditionService = BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
+		changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	}
 
 	/* (non-Javadoc)
@@ -86,7 +86,7 @@ public class ConditionEditor extends AbstractPolicyAwareFormEditor implements Ch
 	}
 
 	private TagConditionService getConditionalExpressionService() {
-		return ServiceLocator.getService(ContextIdNames.TAG_CONDITION_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
 	}
 
 	@Override

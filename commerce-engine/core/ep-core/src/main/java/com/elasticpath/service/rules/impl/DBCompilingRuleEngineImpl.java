@@ -302,7 +302,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 		// first try and find the existing rule base
 		EpRuleBase epRuleBase = getRuleService().findRuleBaseByScenario(store, catalog, ruleSet.getScenario());
 		if (epRuleBase == null) {
-			epRuleBase = getBeanFactory().getBean(ContextIdNames.EP_RULE_BASE);
+			epRuleBase = getBeanFactory().getPrototypeBean(ContextIdNames.EP_RULE_BASE, EpRuleBase.class);
 		}
 
 		epRuleBase.setRuleBase(ruleBase);

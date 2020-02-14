@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.changeset.helpers.impl;
 import com.elasticpath.cmclient.changeset.ChangeSetPermissions;
 import com.elasticpath.cmclient.changeset.helpers.ChangeSetPermissionsHelper;
 import com.elasticpath.cmclient.core.CmSingletonUtil;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 
@@ -18,7 +18,7 @@ public class ChangeSetPermissionsHelperImpl implements ChangeSetPermissionsHelpe
 	/**
 	 * Delegator that leaves in core. We ask it for ChangeSet being Enabled.
 	 */
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	/**
 	 * Getter for change set permission helper.

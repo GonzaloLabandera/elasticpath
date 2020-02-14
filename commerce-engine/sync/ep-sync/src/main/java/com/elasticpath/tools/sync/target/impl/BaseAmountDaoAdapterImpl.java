@@ -29,7 +29,7 @@ public class BaseAmountDaoAdapterImpl extends AbstractDaoAdapter<BaseAmount> {
 
 	@Override
 	public BaseAmount createBean(final BaseAmount bean) {
-		BaseAmountFactory baseAmountFactory = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_FACTORY);
+		BaseAmountFactory baseAmountFactory = beanFactory.getSingletonBean(ContextIdNames.BASE_AMOUNT_FACTORY, BaseAmountFactory.class);
 		return baseAmountFactory.createBaseAmount();
 	}
 

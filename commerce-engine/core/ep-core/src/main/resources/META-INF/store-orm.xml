@@ -79,13 +79,6 @@
 				JOIN s.taxJurisdictions j
 			</query>
 		</named-query>
-		<named-query name="PAYMENT_GATEWAYS_WITH_STORE">
-			<query>
-				SELECT DISTINCT p.uidPk
-				FROM StoreImpl s
-				JOIN s.paymentGateways p
-			</query>
-		</named-query>
 		<named-query name="STORE_WITH_ORDER_IN_USE">
 			<query>
 				SELECT s.uidPk
@@ -248,8 +241,13 @@
 			WHERE UPPER(s.code) = UPPER(?1)
 		</query>
 	</named-query>
-
-
+		<named-query name="STORE_CODE_BY_CATALOG_UIDS">
+			<query>
+				SELECT s.code
+				FROM StoreImpl s
+				WHERE s.catalog.uidPk IN (:list)
+			</query>
+		</named-query>
 
 </entity-mappings>
 

@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.pricelistassignments.controller;
 import java.util.List;
 
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.controller.impl.AbstractBaseControllerImpl;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
@@ -76,7 +76,8 @@ public class PriceListAssignmentsSearchController extends AbstractBaseController
 	
 	private PriceListAssignmentHelperService getPriceListAssignmentHelperService() {
 		if (priceListAssignmentHelperService == null) {
-			priceListAssignmentHelperService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE);
+			priceListAssignmentHelperService = BeanLocator
+					.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE, PriceListAssignmentHelperService.class);
 		}
 		return priceListAssignmentHelperService;
 	}

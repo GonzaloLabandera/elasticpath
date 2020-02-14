@@ -261,7 +261,7 @@ public class ImportGuidHelperImpl extends AbstractEpPersistenceServiceImpl imple
 	 */
 	@Override
 	public SkuOptionValue findSkuOptionValueByKey(final String key) {
-		final List<SkuOptionValue> optionValues = getPersistenceEngine().retrieveByNamedQuery("SKU_OPTION_VALUE_FIND_BY_KEY", key);
+		final List<SkuOptionValue> optionValues = getPersistenceEngine().retrieveByNamedQuery("SKU_OPTIONVALUE_FIND_BY_KEY", key);
 		if (optionValues.isEmpty()) {
 			return null;
 		}

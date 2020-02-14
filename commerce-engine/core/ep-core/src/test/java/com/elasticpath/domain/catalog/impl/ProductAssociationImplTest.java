@@ -30,6 +30,7 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationType;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
@@ -314,7 +315,7 @@ public class ProductAssociationImplTest {
 	 */
 	@Test
 	public void testInitialize() {
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		assertNull(productAssociation.getStartDate());
 		productAssociation.initialize();

@@ -23,6 +23,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.csvimport.ImportValidRow;
 import com.elasticpath.domain.dataimport.ImportBadRow;
+import com.elasticpath.domain.dataimport.ImportFault;
 import com.elasticpath.domain.dataimport.impl.ImportBadRowImpl;
 import com.elasticpath.domain.dataimport.impl.ImportFaultImpl;
 import com.elasticpath.domain.rules.Coupon;
@@ -108,8 +109,8 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 			
 			oneOf(couponService).findExistingCouponCodes(codes);
 			will(returnValue(Collections.emptySet()));
-			
-			oneOf(beanFactory).getBean("coupon");
+
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 			will(returnValue(coupon1));
 			
 			oneOf(couponService).add(coupon1);
@@ -130,20 +131,20 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 		validRows.add(row);
 		
 		context.checking(new Expectations() { {
-			oneOf(couponService).findCouponsForRuleCodeFromCouponCodes(null, Collections.<String>emptySet());
+			oneOf(couponService).findCouponsForRuleCodeFromCouponCodes(null, Collections.emptySet());
 			will(returnValue(Collections.emptySet()));
 			
-			oneOf(couponService).findExistingCouponCodes(Collections.<String>emptySet());
+			oneOf(couponService).findExistingCouponCodes(Collections.emptySet());
 			will(returnValue(Collections.emptySet()));
 			
 			allowing(row).getDto(); will(returnValue(dto2));
 			oneOf(row).getRow(); will(returnValue(ROW_STRING));
 			oneOf(row).getRowNumber(); will(returnValue(1));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_FAULT);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			will(returnValue(new ImportFaultImpl()));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_BAD_ROW);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			will(returnValue(new ImportBadRowImpl()));
 		} });
 		
@@ -175,10 +176,10 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 			oneOf(row).getRow(); will(returnValue(ROW_STRING));
 			oneOf(row).getRowNumber(); will(returnValue(1));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_FAULT);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			will(returnValue(new ImportFaultImpl()));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_BAD_ROW);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			will(returnValue(new ImportBadRowImpl()));
 		} });
 		
@@ -213,13 +214,13 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 			oneOf(row2).getRow(); will(returnValue(ROW2_STRING));
 			oneOf(row2).getRowNumber(); will(returnValue(2));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_FAULT);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			will(returnValue(new ImportFaultImpl()));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_BAD_ROW);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			will(returnValue(new ImportBadRowImpl()));
-			
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON);
+
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 			will(returnValue(coupon1));
 			
 			oneOf(couponService).add(coupon1);
@@ -241,10 +242,10 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 		validRows.add(row);
 		
 		context.checking(new Expectations() { {
-			oneOf(couponService).findCouponsForRuleCodeFromCouponCodes(null, Collections.<String>emptySet());
+			oneOf(couponService).findCouponsForRuleCodeFromCouponCodes(null, Collections.emptySet());
 			will(returnValue(Collections.emptySet()));
 			
-			oneOf(couponService).findExistingCouponCodes(Collections.<String>emptySet());
+			oneOf(couponService).findExistingCouponCodes(Collections.emptySet());
 			will(returnValue(Collections.emptySet()));
 			
 			allowing(row).getDto(); will(returnValue(dto3));
@@ -252,10 +253,10 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 			oneOf(row).getRow(); will(returnValue(ROW_STRING));
 			oneOf(row).getRowNumber(); will(returnValue(1));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_BAD_ROW);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			will(returnValue(new ImportBadRowImpl()));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_FAULT);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			will(returnValue(new ImportFaultImpl()));
 			
 
@@ -294,14 +295,14 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 			will(returnValue(null));
 			
 			allowing(row).getDto(); will(returnValue(dto4));
-			
-			allowing(beanFactory).getBean(ContextIdNames.COUPON);
+
+			allowing(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 			will(returnValue(coupon1));
 			
 			oneOf(couponService).add(coupon1);
 			will(returnValue(coupon1));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON_USAGE);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 			will(returnValue(couponUsage));
 			
 			oneOf(couponUsageService).add(couponUsage);
@@ -347,10 +348,10 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 			
 			allowing(row).getDto(); will(returnValue(dto4));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_FAULT);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			will(returnValue(new ImportFaultImpl()));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_BAD_ROW);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			will(returnValue(new ImportBadRowImpl()));
 						
 			oneOf(row).getRow(); will(returnValue(ROW_STRING));
@@ -393,23 +394,23 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 			
 			oneOf(couponUsageService).findByCouponCodeAndEmail(COUPON_ONE, EMAIL_ONE);
 			will(returnValue(null));
-			
-			allowing(beanFactory).getBean(ContextIdNames.COUPON);
+
+			allowing(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 			will(returnValue(coupon1));
 			
 			oneOf(couponService).add(coupon1);
 			will(returnValue(coupon1));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON_USAGE);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 			will(returnValue(couponUsage));
 			
 			oneOf(couponUsageService).add(couponUsage);
 			will(returnValue(couponUsage));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_FAULT);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			will(returnValue(new ImportFaultImpl()));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_BAD_ROW);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			will(returnValue(new ImportBadRowImpl()));
 						
 			oneOf(row2).getRow(); will(returnValue(ROW2_STRING));
@@ -452,10 +453,10 @@ public class CouponUsageModelDtoInsertUpdateImporterImplTest {
 			oneOf(couponUsageService).findByCouponCodeAndEmail(COUPON_ONE, EMAIL_ONE);
 			will(returnValue(couponUsage));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_FAULT);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			will(returnValue(new ImportFaultImpl()));
 			
-			oneOf(beanFactory).getBean(ContextIdNames.IMPORT_BAD_ROW);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			will(returnValue(new ImportBadRowImpl()));
 						
 			oneOf(row).getRow(); will(returnValue(ROW_STRING));

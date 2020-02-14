@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2017
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cmclient.core.helpers.store;
 
@@ -12,19 +12,15 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
-import org.eclipse.osgi.util.NLS;
 
-import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
-import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.TaxJurisdiction;
-import com.elasticpath.plugin.payment.PaymentGatewayType;
 
 /**
  * Represents the model of store to be populated in <code>StoreEditor</code>.
@@ -45,6 +41,8 @@ public class StoreEditorModel {
 	private List<SettingModel> systemSettings;
 
 	private List<StoreCustomerAttributeModel> storeCustomerAttributes;
+
+	private List<StorePaymentConfigurationModel> storePaymentConfigurations;
 
 	private String theme;
 
@@ -186,6 +184,24 @@ public class StoreEditorModel {
 	 */
 	void setStoreCustomerAttributes(final List<StoreCustomerAttributeModel> storeCustomerAttributes) {
 		this.storeCustomerAttributes = storeCustomerAttributes;
+	}
+
+	/**
+	 * Gets the store payment configurations.
+	 *
+	 * @return the list of store payment configurations.
+	 */
+	public List<StorePaymentConfigurationModel> getStorePaymentConfigurations() {
+		return storePaymentConfigurations;
+	}
+
+	/**
+	 * Sets the store payment configurations.
+	 *
+	 * @param storePaymentConfigurations the list of store payment configurations.
+	 */
+	public void setStorePaymentConfigurations(final List<StorePaymentConfigurationModel> storePaymentConfigurations) {
+		this.storePaymentConfigurations = storePaymentConfigurations;
 	}
 
 	/**
@@ -406,59 +422,24 @@ public class StoreEditorModel {
 	}
 
 	/**
-	 * Retrieves the store's payment gateway for the given payment gateway type.
-	 *
-	 * @param paymentGatewayType the payment gateway type
-	 * @return Map between PaymentGatewayType and PaymentGateway
+	 * Check if the selected payment configuration can be saved to the store.
+	 * @return true if the store payment configuration can be saved, false otherwise.
 	 */
-	public PaymentGateway getPaymentGateway(final PaymentGatewayType paymentGatewayType) {
-		return store.getPaymentGatewayMap().get(paymentGatewayType);
+	public boolean isStorePaymentConfigurationSavable() {
+		return getStore().getStoreState().equals(StoreState.UNDER_CONSTRUCTION) || isPaymentConfigurationSelected();
 	}
 
 	/**
-	 * Removes the corresponding payment gateway from the store's set of PaymentGateways.
-	 *
-	 * @param paymentGatewayType the type of PaymentGateway to remove
+	 * Check if the store has any payment configuration selected.
+	 * @return true if any payment configuration is selected, false otherwise.
 	 */
-	public void removePaymentGateway(final PaymentGatewayType paymentGatewayType) {
-		PaymentGateway gateway = getPaymentGateway(paymentGatewayType);
-		if (gateway != null) {
-			Set<PaymentGateway> paymentGateways = new HashSet<PaymentGateway>(store.getPaymentGateways());
-			paymentGateways.remove(gateway);
-
-			store.setPaymentGateways(paymentGateways);
-		}
-	}
-
-	/**
-	 * Puts a {@link PaymentGateway} onto a store.
-	 * If payment gateway is null, all {@link PaymentGateway}s of the applicable payment types will be removed.
-	 *
-	 * @param applicablePaymentGatewayTypes the applicable payment gateway types
-	 * @param paymentGateway the payment gateway
-	 */
-	public void putPaymentGateway(final Collection<PaymentGatewayType> applicablePaymentGatewayTypes, final PaymentGateway paymentGateway) {
-		if (paymentGateway != null && !applicablePaymentGatewayTypes.contains(paymentGateway.getPaymentGatewayType())) {
-			throw new IllegalArgumentException(
-				NLS.bind(CoreMessages.get().SelectedGatewayPaymentTypeNotInApplicableTypes,
-				paymentGateway.getPaymentGatewayType(), applicablePaymentGatewayTypes));
-		}
-
-		for (PaymentGatewayType paymentGatewayType : applicablePaymentGatewayTypes) {
-			removePaymentGateway(paymentGatewayType);
-		}
-
-		if (paymentGateway != null) {
-			Set<PaymentGateway> paymentGateways = new HashSet<PaymentGateway>(store.getPaymentGateways());
-			paymentGateways.add(paymentGateway);
-			
-			store.setPaymentGateways(paymentGateways);
-		}
+	public boolean isPaymentConfigurationSelected() {
+		return 	getStorePaymentConfigurations().stream().anyMatch(StorePaymentConfigurationModel::isSelected);
 	}
 
 	/**
 	 * Verifies whether credit card is Cvv2 enabled or not.
-	 * 
+	 *
 	 * @return true if credit card is Cvv2 enabled, false otherwise
 	 */
 	public boolean isCreditCardCvv2Enabled() {
@@ -467,7 +448,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets whether store has CVV2 verification enabled.
-	 * 
+	 *
 	 * @param creditCardCvv2Enabled verification flag
 	 */
 	public void setCreditCardCvv2Enabled(final boolean creditCardCvv2Enabled) {
@@ -476,7 +457,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Checks whether store full credit card enabled.
-	 * 
+	 *
 	 * @return true if store full credit card enabled, false otherwise
 	 */
 	public boolean isStoreFullCreditCardsEnabled() {
@@ -485,7 +466,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets whether the store saves full/unmasked credit card numbers on orders placed.
-	 * 
+	 *
 	 * @param savingCreditCardWithOrdersEnabled saving credit card policy flag
 	 */
 	public void setStoreFullCreditCardsEnabled(final boolean savingCreditCardWithOrdersEnabled) {
@@ -494,7 +475,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets warehouse.
-	 * 
+	 *
 	 * @return warehouse
 	 */
 	public Warehouse getWarehouse() {
@@ -503,7 +484,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets warehouses.
-	 * 
+	 *
 	 * @param warehouses warehouses to set
 	 */
 	public void setWarehouses(final List<Warehouse> warehouses) {
@@ -512,7 +493,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets store country.
-	 * 
+	 *
 	 * @param country country
 	 */
 	public void setCountry(final String country) {
@@ -521,7 +502,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets store country.
-	 * 
+	 *
 	 * @return country
 	 */
 	public String getCountry() {
@@ -530,7 +511,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets store sub country.
-	 * 
+	 *
 	 * @param subCountry sub country
 	 */
 	public void setSubCountry(final String subCountry) {
@@ -539,7 +520,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets store sub country.
-	 * 
+	 *
 	 * @return sub country
 	 */
 	public String getSubCountry() {
@@ -548,7 +529,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets store time zone.
-	 * 
+	 *
 	 * @param timeZone time zone
 	 */
 	public void setTimeZone(final TimeZone timeZone) {
@@ -557,7 +538,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets store time zone.
-	 * 
+	 *
 	 * @return time zone
 	 */
 	public TimeZone getTimeZone() {
@@ -566,7 +547,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets store description.
-	 * 
+	 *
 	 * @param description store description
 	 */
 
@@ -576,7 +557,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets store description.
-	 * 
+	 *
 	 * @return store description
 	 */
 	public String getDescription() {
@@ -585,7 +566,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets store tax codes.
-	 * 
+	 *
 	 * @param taxCodes tax codes
 	 */
 	public void setTaxCodes(final Set<TaxCode> taxCodes) {
@@ -594,7 +575,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets tax jurisdictions.
-	 * 
+	 *
 	 * @param taxJurisdictions tax jurisdictions
 	 */
 	public void setTaxJurisdictions(final Set<TaxJurisdiction> taxJurisdictions) {
@@ -603,7 +584,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets tax jurisdictions.
-	 * 
+	 *
 	 * @return tax jurisdictions
 	 */
 	public Set<TaxJurisdiction> getTaxJurisdictions() {
@@ -612,7 +593,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets store tax codes.
-	 * 
+	 *
 	 * @return tax codes
 	 */
 	public Set<TaxCode> getTaxCodes() {
@@ -621,7 +602,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets default currency.
-	 * 
+	 *
 	 * @param defaultCurrency default currency
 	 */
 	public void setDefaultCurrency(final Currency defaultCurrency) {
@@ -630,7 +611,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets default currency.
-	 * 
+	 *
 	 * @return default currency
 	 */
 	public Currency getDefaultCurrency() {
@@ -639,7 +620,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets supported currencies.
-	 * 
+	 *
 	 * @param supportedCurrencies supported currencies
 	 * @throws DefaultValueRemovalForbiddenException if supported currencies do not contain the default
 	 */
@@ -649,7 +630,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets the list of supported currencies.
-	 * 
+	 *
 	 * @return supported currencies
 	 */
 	public List<Currency> getSupportedCurrencies() {
@@ -658,7 +639,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Sets supported locales.
-	 * 
+	 *
 	 * @param supportedLocales suppored locales
 	 * @throws DefaultValueRemovalForbiddenException if the new locales do not contain the default
 	 */
@@ -668,7 +649,7 @@ public class StoreEditorModel {
 
 	/**
 	 * Gets supported locales.
-	 * 
+	 *
 	 * @return supported locales
 	 */
 	public Collection<Locale> getSupportedLocales() {
@@ -811,26 +792,6 @@ public class StoreEditorModel {
 	 */
 	public boolean loadSettingsAvailableToMarketingOnly() {
 		return availableToMarketingOnly;
-	}
-	
-	/**
-	 * Checks the payment methods configured for the store being edited.
-	 * {@link PaymentGatewayType#GIFT_CERTIFICATE} is not included in the check, only {@link PaymentGatewayType#PAYPAL_EXPRESS},
-	 * {@link PaymentGatewayType#CREDITCARD}.
-	 *
-	 * @return True if at least payment method is configured for the store.
-	 */
-	boolean isPaymentMethodSelected() {
-		PaymentGateway paypalGateway = getPaymentGateway(PaymentGatewayType.PAYPAL_EXPRESS);
-		PaymentGateway hostedPageGateway = getPaymentGateway(PaymentGatewayType.HOSTED_PAGE);
-		PaymentGateway creditCardGateway = getPaymentGateway(PaymentGatewayType.CREDITCARD);
-		
-		Set<CreditCardType> creditCardTypes = getCreditCardTypes();
-		if ((creditCardGateway == null || creditCardTypes.isEmpty()) && paypalGateway == null && hostedPageGateway == null) {
-			return false;
-		}
-		
-		return true;
 	}
 
 	/** @return the helper */

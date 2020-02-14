@@ -3,11 +3,14 @@
  */
 package com.elasticpath.cmclient.catalog.wizards.product.create;
 
+import com.elasticpath.cmclient.core.BeanLocator;
+
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.catalog.ProductBundle;
 
 /**
  * The Wizard for creating a new ProductBundle.
@@ -20,7 +23,8 @@ public class CreateProductBundleWizard extends AbstractCreateProductWizard {
 	 * @param selectedCategoryUid the selected category UID
 	 */
 	protected CreateProductBundleWizard(final long selectedCategoryUid) {
-		super(CatalogMessages.get().CreateBundleWizard_WindowTitle, selectedCategoryUid, getBean(ContextIdNames.PRODUCT_BUNDLE));
+		super(CatalogMessages.get().CreateBundleWizard_WindowTitle, selectedCategoryUid,
+				BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_BUNDLE, ProductBundle.class));
 	}
 
 	/**

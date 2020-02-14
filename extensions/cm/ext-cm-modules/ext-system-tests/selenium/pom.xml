@@ -91,6 +91,11 @@
 			<artifactId>ep-cortex-common-test-definitions</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${epdb.maven.groupId}</groupId>
+			<artifactId>${epdb.maven.artifactId}</artifactId>
+			<version>${epdb.maven.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ext-cortex-common-test-definitions</artifactId>
 		</dependency>

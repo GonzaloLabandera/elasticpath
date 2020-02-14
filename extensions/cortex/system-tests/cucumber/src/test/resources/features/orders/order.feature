@@ -37,61 +37,6 @@ Feature: Tests order resource
       | FREE_ITEM     |
       | tt0034583_sku |
 
-  Scenario Outline: Need info links in order removed when required fields added
-    Given I am logged in as a public shopper
-    And I add item with code <SHIPPABLE_ITEM> to my cart
-    When I retrieve the order
-    Then there are advisor messages with the following fields:
-      | messageType | messageId             | debugMessage                              | linkedTo                             |
-      | needinfo    | need.billing.address  | Billing address must be specified.        | orders.billingaddress-info           |
-      | needinfo    | need.shipping.address | Shipping address must be specified.       | shipmentdetails.destination-info     |
-      | needinfo    | need.email            | Customer email address must be specified. | orders.email-info                    |
-      | needinfo    | need.payment.method   | Payment method must be specified.         | paymentmethods.paymentmethod-info    |
-      | needinfo    | need.shipping.option  | Shipping option must be specified.        | shipmentdetails.shipping-option-info |
-  #fill in needinfo's and verify links are removed
-    When I create a payment method for my order
-    And I add an address with country CA and region BC
-    And I create an email for my order
-    And I retrieve the order
-    Then there is no advisor linked to billingaddress-info
-    And there is no advisor linked to email-info
-    And there is no advisor linked to paymentmethod-info
-    And there is no advisor linked to destination-info
-    And there is no advisor linked to shipping-option-info
-    When I submit the order
-    Then the HTTP status is OK, created
-
-    Examples:
-      | SHIPPABLE_ITEM          |
-      | handsfree_shippable_sku |
-
-  Scenario Outline: Shipping option need info links
-    Given I have authenticated as a newly registered shopper
-    And I add item with code <SHIPPABLE_ITEM> to my cart
-    And I create address with Country GB, Extended-Address County with no shipping options, Locality London, Organization Company Inc, Phone-Number 555-555-5555, Postal-Code N0N 0N0, Region , Street-Address fake street, Family-Name Test and Given-Name Test
-    And I fill in payment methods needinfo
-    When I retrieve the order
-    Then there is an advisor message with the following fields:
-      | messageType | messageId            | debugMessage                       | linkedTo                             |
-      | needinfo    | need.shipping.option | Shipping option must be specified. | shipmentdetails.shipping-option-info |
-    And I retrieve the purchase form
-    And there is an advisor message with the following fields:
-      | messageType | messageId            | debugMessage                       | linkedTo                             |
-      | needinfo    | need.shipping.option | Shipping option must be specified. | shipmentdetails.shipping-option-info |
-    And there are no submitorderaction links
-#fill in needinfo's and verify links are removed
-    When I add an address with country CA and region BC
-    And resolve the shipping-option-info needinfo
-    And I retrieve the order
-    Then there is no advisor linked to shipping-option-info
-    And I retrieve the purchase form
-    And there are no needinfo links
-    And there is a submitorderaction link
-
-    Examples:
-      | SHIPPABLE_ITEM          |
-      | handsfree_shippable_sku |
-
   Scenario Outline: Verify that deliveries show up based on the type of products in your cart
     Given I have authenticated as a newly registered shopper
     When I add item with code <DIGITAL_ITEM> to my cart

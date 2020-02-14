@@ -18,8 +18,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.UIEvent;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
@@ -48,12 +48,14 @@ public class DeleteConditionalExpressionAction extends BaseConditionalExpression
 	
 	/** The logger. */
 	private static final Logger LOG = Logger.getLogger(DeleteConditionalExpressionAction.class);
-	
-	private final SellingContextService sellingContextService = ServiceLocator.getService(ContextIdNames.SELLING_CONTEXT_SERVICE);
-	private final DynamicContentDeliveryService dynamicContentDeliveryService = ServiceLocator.getService(
-		ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
-	private final TagConditionService tagConditionService = ServiceLocator.getService(ContextIdNames.TAG_CONDITION_SERVICE);
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+
+	private final SellingContextService sellingContextService = BeanLocator
+			.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class);
+	private final DynamicContentDeliveryService dynamicContentDeliveryService = BeanLocator
+			.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
+	private final TagConditionService tagConditionService = BeanLocator
+			.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 
 	/**

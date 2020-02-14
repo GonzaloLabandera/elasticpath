@@ -19,7 +19,7 @@ import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetPlugin;
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventListener;
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
@@ -40,7 +40,7 @@ import com.elasticpath.service.changeset.ChangeSetManagementService;
 public class ChangeSetEditor extends AbstractPolicyAwareFormEditor implements ChangeSetEventListener {
 	
 	private static final Logger LOG = Logger.getLogger(ChangeSetEditor.class);
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	/**
 	 * The editor ID.
 	 */
@@ -94,7 +94,7 @@ public class ChangeSetEditor extends AbstractPolicyAwareFormEditor implements Ch
 	 * @return the load tuner instance
 	 */
 	private ChangeSetLoadTuner getLoadTuner() {
-		ChangeSetLoadTuner noMembersLoadTuner = ServiceLocator.getService(ContextIdNames.CHANGESET_LOAD_TUNER);
+		ChangeSetLoadTuner noMembersLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.CHANGESET_LOAD_TUNER, ChangeSetLoadTuner.class);
 		noMembersLoadTuner.setLoadingMemberObjects(false);
 		noMembersLoadTuner.setLoadingMemberObjectsMetadata(false);
 		
@@ -144,7 +144,8 @@ public class ChangeSetEditor extends AbstractPolicyAwareFormEditor implements Ch
 
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) throws PartInitException {
-		this.changeSetManagementService = ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+		this.changeSetManagementService = BeanLocator
+				.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 		ChangeSetEventService.getInstance().registerChangeSetEventListener(this);
 		this.listener = new ChangeSetEventListenerImpl();
 		com.elasticpath.cmclient.core.service.ChangeSetEventService.getInstance().addChangeEventListener(listener);

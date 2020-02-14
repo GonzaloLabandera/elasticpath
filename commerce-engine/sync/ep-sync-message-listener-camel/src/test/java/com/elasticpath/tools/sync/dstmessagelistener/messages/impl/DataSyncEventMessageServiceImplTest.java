@@ -115,7 +115,7 @@ public class DataSyncEventMessageServiceImplTest {
 		given(changeSet.getCreatedByUserGuid()).willReturn(CREATOR_GUID);
 		given(changeSet.getName()).willReturn(CHANGE_SET_NAME);
 
-		given(beanFactory.getBean(CHANGESET_LOAD_TUNER)).willReturn(changeSetLoadTuner);
+		given(beanFactory.getPrototypeBean(CHANGESET_LOAD_TUNER, ChangeSetLoadTuner.class)).willReturn(changeSetLoadTuner);
 		given(changeSetManagementService.get(eq(CHANGE_SET_GUID), same(changeSetLoadTuner))).willReturn(changeSet);
 
 		doReturn(dataSyncEventMessageBuilder).when(datasyncEventMessageService).prepareMessage();
@@ -228,7 +228,6 @@ public class DataSyncEventMessageServiceImplTest {
 				.build();
 
 		// Then
-		verify(beanFactory).getBean(eq(CHANGESET_LOAD_TUNER));
 		verify(changeSetManagementService).get(eq(CHANGE_SET_GUID), same(changeSetLoadTuner));
 		verify(cmUserService).findByGuid(eq(CREATOR_GUID));
 
@@ -268,7 +267,6 @@ public class DataSyncEventMessageServiceImplTest {
 				.build();
 
 		// Then
-		verify(beanFactory).getBean(eq(CHANGESET_LOAD_TUNER));
 		verify(changeSetManagementService).get(eq(CHANGE_SET_GUID), same(changeSetLoadTuner));
 		verify(cmUserService).findByGuid(eq(CREATOR_GUID));
 

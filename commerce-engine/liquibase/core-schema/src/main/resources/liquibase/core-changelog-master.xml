@@ -32,4 +32,7 @@
 	<include file="liquibase/core-changelog-7.6.0.xml"/>
 	<include file="liquibase/core-changelog-7.6.0-generalmodifiers.xml"/>
 	<include file="liquibase/core-changelog-7.6.0-multicarts.xml"/>
+	<include file="liquibase/core-changelog-2019-12.xml"/>
+	<include file="liquibase/core-changelog-2019-12-datapolicy.xml"/>
+	<include file="liquibase/core-changelog-2020-01-payments.xml"/>
 </databaseChangeLog>

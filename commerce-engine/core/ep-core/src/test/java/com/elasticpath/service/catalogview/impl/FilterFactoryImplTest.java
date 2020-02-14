@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.SeoConstants;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
@@ -268,7 +269,8 @@ public class FilterFactoryImplTest {
 
 			context.checking(new Expectations() {
 				{
-					allowing(beanFactory).getBean(filterBeanName); will(returnValue(new BrandFilterImpl()));
+					allowing(beanFactory).getPrototypeBean(filterBeanName, Filter.class);
+					will(returnValue(new BrandFilterImpl()));
 					allowing(mockFncLoader).getSeparatorInToken();  will(returnValue(separatorInToken));
 				}
 			});
@@ -301,18 +303,21 @@ public class FilterFactoryImplTest {
 
 			context.checking(new Expectations() {
 				{
-					allowing(beanFactory).getBean("attributeKeywordFilter"); will(returnValue(new AttributeKeywordFilterImpl()));
+					allowing(beanFactory).getPrototypeBean(ContextIdNames.ATTRIBUTE_KEYWORD_FILTER, Filter.class);
+					will(returnValue(new AttributeKeywordFilterImpl()));
 					allowing(mockFncLoader).getSeparatorInToken();  will(returnValue(separatorInToken));
 					
 					AttributeService attributeService = context.mock(AttributeService.class, "attrService");
 					Attribute attribute = context.mock(Attribute.class, "attr");
-					allowing(beanFactory).getBean("attributeService"); will(returnValue(attributeService));
+					allowing(beanFactory).getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
+					will(returnValue(attributeService));
 					allowing(attributeService).findByKey(with(any(String.class))); will(returnValue(attribute));
 						
 					AttributeValue attributeValue = context.mock(AttributeValueWithType.class, "attrValue");
 					
 					AttributeType attributeType = AttributeType.valueOf(1);
-					allowing(beanFactory).getBean("attributeValue"); will(returnValue(attributeValue));
+					allowing(beanFactory).getPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class);
+					will(returnValue(attributeValue));
 					allowing(attributeValue).setAttribute(attribute); 
 					allowing(attribute).getAttributeType(); will(returnValue(attributeType));
 					allowing(attributeValue).setAttributeType(attributeType);

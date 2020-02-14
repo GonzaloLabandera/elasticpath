@@ -21,6 +21,7 @@ import com.elasticpath.common.dto.ChangeSetObjects;
 import com.elasticpath.common.dto.assembler.pricing.BaseAmountDtoAssembler;
 import com.elasticpath.common.dto.category.ChangeSetObjectsImpl;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
+import com.elasticpath.common.pricing.service.BaseAmountUpdateStrategy;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.pricing.BaseAmount;
@@ -124,7 +125,7 @@ public class BaseAmountAllOrNothingUpdateStrategyTest {
 				will(returnValue(ba3));
 				allowing(baService).findByGuid(with(ba2.getGuid()));
 				will(returnValue(ba2));
-				allowing(beanFactory).getBean(with(ContextIdNames.BASE_AMOUNT_UPDATE_STRATEGY));
+				allowing(beanFactory).getSingletonBean(with(ContextIdNames.BASE_AMOUNT_UPDATE_STRATEGY), with(BaseAmountUpdateStrategy.class));
 				will(returnValue(strategy));
 				oneOf(baService).delete(with(ba3));
 				oneOf(baService).updateWithoutLoad(with(any(BaseAmount.class)));
@@ -198,7 +199,7 @@ public class BaseAmountAllOrNothingUpdateStrategyTest {
 				will(returnValue(ba3));
 				allowing(baService).findByGuid(with(ba2.getGuid()));
 				will(returnValue(ba2));
-				allowing(beanFactory).getBean(with(ContextIdNames.BASE_AMOUNT_UPDATE_STRATEGY));
+				allowing(beanFactory).getSingletonBean(with(ContextIdNames.BASE_AMOUNT_UPDATE_STRATEGY), with(BaseAmountUpdateStrategy.class));
 				will(returnValue(strategy));
 				oneOf(baService).delete(with(ba3));
 				oneOf(baService).add(with(ba1));

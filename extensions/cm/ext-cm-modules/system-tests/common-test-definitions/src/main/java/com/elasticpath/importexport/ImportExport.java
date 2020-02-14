@@ -269,13 +269,14 @@ public class ImportExport {
 
 	private void updateImportTotal() {
 		int importTotal = importedObjectsMap.get(TOTAL_NUMBER_OF_OBJECTS) + exportedObjectsMap.get("data_policies")
-				+ exportedObjectsMap.get("customer_consents");
+				+ exportedObjectsMap.get("customer_consents") + exportedObjectsMap.get("payment_providers");
 		importedObjectsMap.put(TOTAL_NUMBER_OF_OBJECTS, importTotal);
 	}
 
-	private void removeDataPoliciesAndCustomerConsents() {
+	private void removeUnallowedImportObjects() {
 		exportedObjectsMap.remove("data_policies");
 		exportedObjectsMap.remove("customer_consents");
+		exportedObjectsMap.remove("payment_providers");
 	}
 
 	/**
@@ -284,7 +285,7 @@ public class ImportExport {
 	public void compareExportedWithImportedObjects() {
 		removeWarningsAndComments();
 		updateImportTotal();
-		removeDataPoliciesAndCustomerConsents();
+		removeUnallowedImportObjects();
 
 		assertThat(importedObjectsMap.size())
 				.as("Number of exported object types are not same as imported object types")

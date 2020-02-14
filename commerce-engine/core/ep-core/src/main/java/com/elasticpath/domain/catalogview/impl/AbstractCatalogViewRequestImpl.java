@@ -11,6 +11,7 @@ import java.util.Locale;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.SeoConstants;
 import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.commons.exception.EpBindException;
@@ -364,7 +365,7 @@ public abstract class AbstractCatalogViewRequestImpl extends AbstractEpDomainImp
 	 */
 	protected FilterFactory getFilterFactory() {
 		if (filterFactory == null) {
-			filterFactory = getBean("filterFactory");
+			filterFactory = getSingletonBean(ContextIdNames.FILTER_FACTORY, FilterFactory.class);
 		}
 
 		return filterFactory;

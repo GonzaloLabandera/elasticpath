@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2007-2014
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cmclient.fulfillment.editors.order;
 
@@ -21,8 +21,8 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.PartInitException;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.helpers.LocalProductSkuLookup;
@@ -31,7 +31,7 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPlugin;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
-import com.elasticpath.cmclient.fulfillment.wizards.ReAuthWizard;
+import com.elasticpath.cmclient.fulfillment.wizards.reauth.ReAuthWizard;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.RecalculableObject;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -121,8 +121,9 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 	public void initEditor(final IEditorSite site, final IEditorInput input) throws PartInitException {
 		final Long orderUid = input.getAdapter(Long.class);
 		this.order = retrieveOrder(orderUid);
-		this.taxDocumentModificationContext = ServiceLocator.getService(
-																ContextIdNames.TAX_DOCUMENT_MODIFICATION_CONTEXT);
+
+		this.taxDocumentModificationContext =
+				BeanLocator.getPrototypeBean(ContextIdNames.TAX_DOCUMENT_MODIFICATION_CONTEXT, TaxDocumentModificationContext.class);
 		this.previousOrderShipmentAddresses = buildOrderShipmentAddress();
 		this.lockingListener = new LockingListener();
 		this.openEditorDate = getTimeService().getCurrentTime();
@@ -215,14 +216,14 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 
 	private OrderService getOrderService() {
 		if (orderService == null) {
-			orderService = ServiceLocator.getService(ContextIdNames.ORDER_SERVICE);
+			orderService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 		}
 		return orderService;
 	}
 
 	private OrderLockService getOrderLockService() {
 		if (orderLockService == null) {
-			orderLockService = ServiceLocator.getService(ContextIdNames.ORDER_LOCK_SERVICE);
+			orderLockService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_LOCK_SERVICE, OrderLockService.class);
 		}
 		return orderLockService;
 	}
@@ -459,7 +460,7 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 
 	private AllocationService getAllocationService() {
 		if (allocationService == null) {
-			allocationService = ServiceLocator.getService(ContextIdNames.ALLOCATION_SERVICE);
+			allocationService = BeanLocator.getSingletonBean(ContextIdNames.ALLOCATION_SERVICE, AllocationService.class);
 		}
 		return allocationService;
 	}
@@ -627,7 +628,7 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 			NLS.bind(FulfillmentMessages.get().OrderEditor_OnSavePrompt,
 			getEditorName());
 	}
-	
+
 	@Override
 	protected String getEditorName() {
 		return getEditorInput().getName();
@@ -638,7 +639,7 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 	 */
 	protected TimeService getTimeService() {
 		if (timeService == null) {
-			timeService = ServiceLocator.getService(ContextIdNames.TIME_SERVICE);
+			timeService = BeanLocator.getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		}
 		return timeService;
 	}
@@ -647,32 +648,32 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 	 * Remembers the original order shipment tax address, in case any ordershipment changes, the tax can be recorded correctly.
 	 */
 	private Map<String, OrderAddress> buildOrderShipmentAddress() {
-		
+
 		Map<String, OrderAddress> addresses = new HashMap<>();
-		
+
 		for (PhysicalOrderShipment orderShipment : order.getPhysicalShipments()) {
 			addresses.put(orderShipment.getShipmentNumber(), getClonedAddress(orderShipment.getShipmentAddress()));
 		}
-		
+
 		for (ElectronicOrderShipment orderShipment : order.getElectronicShipments()) {
 			addresses.put(orderShipment.getShipmentNumber(), getClonedAddress(order.getBillingAddress()));
 		}
-		
+
 		return addresses;
 	}
-	
+
 	/**
 	 * Clones the address to have a unmodified copy of the previous address.
 	 */
 	private OrderAddress getClonedAddress(final OrderAddress address) {
-		OrderAddress clonedAddress = ServiceLocator.getService(ContextIdNames.ORDER_ADDRESS);
+		OrderAddress clonedAddress = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 		clonedAddress.copyFrom(address);
 		return clonedAddress;
 	}
 
 	/**
 	 * Adds the order shipment for adding.
-	 * 
+	 *
 	 * @param orderShipment the new order shipment
 	 */
 	public void addOrderShipmentToNew(final OrderShipment orderShipment) {
@@ -680,26 +681,26 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 			null,
 			TaxDocumentModificationType.NEW);
 	}
-	
+
 	/**
 	 * Adds the order shipment for updating.
-	 * 
+	 *
 	 * @param orderShipment the order shipment to update
 	 */
 	public void addOrderShipmentToUpdate(final OrderShipment orderShipment) {
-		
-		this.taxDocumentModificationContext.add(orderShipment, 
+
+		this.taxDocumentModificationContext.add(orderShipment,
 												previousOrderShipmentAddresses.get(orderShipment.getShipmentNumber()),
 												TaxDocumentModificationType.UPDATE);
 	}
-	
+
 	/**
 	 * Adds the order shipment for cancelling.
-	 * 
+	 *
 	 * @param orderShipment the order shipment to cancel
 	 */
 	public void addOrderShipmentToCancel(final OrderShipment orderShipment) {
-		this.taxDocumentModificationContext.add(orderShipment, 
+		this.taxDocumentModificationContext.add(orderShipment,
 												previousOrderShipmentAddresses.get(orderShipment.getShipmentNumber()),
 												TaxDocumentModificationType.CANCEL);
 	}
@@ -713,7 +714,7 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 		if (productSkuLookup == null) {
 			productSkuLookup = new LocalProductSkuLookup();
 		}
-		
+
 		return productSkuLookup;
 	}
 
@@ -724,7 +725,7 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 	 */
 	protected PricingSnapshotService getPricingSnapshotService() {
 		if (pricingSnapshotService == null) {
-			pricingSnapshotService = ServiceLocator.getService(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
+			pricingSnapshotService = BeanLocator.getSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
 		}
 		return pricingSnapshotService;
 	}

@@ -59,7 +59,7 @@ public class LoginManager implements ILoginManager {
 	protected void updateCmUserLoginData() {
 		LOG.debug("Updating CmUser record with login time"); //$NON-NLS-1$
 		// Set the current CmUser and register their logindate
-		final CmUserService service = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		final CmUserService service = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 		final CmUser cmUser = getFreshCmUserInstance();
 		storeUserIdForAuditing(cmUser);
 
@@ -67,7 +67,8 @@ public class LoginManager implements ILoginManager {
 	}
 
 	private void storeUserIdForAuditing(final CmUser cmUser) {
-		Map<String, String> metadata = ServiceLocator.getService(ContextIdNames.PERSISTENCELISTENER_METADATA_MAP);
+		Map<String, String> metadata = (Map<String, String>) BeanLocator
+				.getSingletonBean(ContextIdNames.PERSISTENCELISTENER_METADATA_MAP, Map.class);
 
 		metadata.put(WebConstants.USER_GUID, cmUser.getGuid());
 	}
@@ -164,7 +165,7 @@ public class LoginManager implements ILoginManager {
 	}
 
 	private CmUser getFreshCmUserInstance() {
-		final CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		final CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 		return cmUserService.findByUserNameWithAccessInfo(SecurityContextHolder.getContext().getAuthentication().getName());
 	}
 

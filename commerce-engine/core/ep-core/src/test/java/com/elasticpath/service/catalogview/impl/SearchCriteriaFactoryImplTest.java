@@ -95,7 +95,8 @@ public class SearchCriteriaFactoryImplTest {
 
 		SearchRequest searchRequest = setUpSearchRequest();
 
-		when(beanFactory.getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA)).thenReturn(new CategorySearchCriteria());
+		when(beanFactory.getPrototypeBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA, CategorySearchCriteria.class))
+				.thenReturn(new CategorySearchCriteria());
 
 		CategorySearchCriteria categorySearchCriteria = searchCriteriaFactory.createCategorySearchCriteria(searchRequest);
 
@@ -116,13 +117,14 @@ public class SearchCriteriaFactoryImplTest {
 		searchRequest.setCategoryUid(CATEGORY_UID);
 
 		when(mockCategoryService.findCodeByUid(CATEGORY_UID)).thenReturn(ANCESTOR_CATEGORY_CODE);
-		when(beanFactory.getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA)).thenReturn(new CategorySearchCriteria());
+		when(beanFactory.getPrototypeBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA, CategorySearchCriteria.class))
+				.thenReturn(new CategorySearchCriteria());
 
 		CategorySearchCriteria categorySearchCriteria = searchCriteriaFactory.createCategorySearchCriteria(searchRequest);
 
 		examineSearchCriteria(categorySearchCriteria);
 		verify(mockCategoryService).findCodeByUid(CATEGORY_UID);
-		verify(beanFactory).getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA, CategorySearchCriteria.class);
 		assertThat(categorySearchCriteria.getAncestorCode())
 			.as("The ancestor category code in the search criteria should be equal to the category code ")
 			.isEqualTo(ANCESTOR_CATEGORY_CODE);
@@ -136,12 +138,13 @@ public class SearchCriteriaFactoryImplTest {
 
 		SearchRequest searchRequest = setUpSearchRequest();
 
-		when(beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA)).thenReturn(new ProductSearchCriteria());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class))
+				.thenReturn(new ProductSearchCriteria());
 
 		assertThat(searchCriteriaFactory.createProductSearchCriteria(searchRequest))
 			.as("The product search criteria object should not be null")
 			.isNotNull();
-		verify(beanFactory).getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class);
 	}
 	
 	/**
@@ -151,7 +154,8 @@ public class SearchCriteriaFactoryImplTest {
 	public void testCreateKeywordProductCategorySearchCriteria() {
 		SearchRequest searchRequest = setUpSearchRequest();
 
-		when(beanFactory.getBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA)).thenReturn(new KeywordSearchCriteria());
+		when(beanFactory.getPrototypeBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA, KeywordSearchCriteria.class))
+				.thenReturn(new KeywordSearchCriteria());
 
 
 		KeywordSearchCriteria keywordSearchCriteria = searchCriteriaFactory.createKeywordProductCategorySearchCriteria(searchRequest);
@@ -167,7 +171,7 @@ public class SearchCriteriaFactoryImplTest {
 		assertThat(keywordSearchCriteria.isFuzzySearchDisabled())
 			.as("The search criteria should have isFuzzySearchEnabled set to false.")
 			.isFalse();
-		verify(beanFactory).getBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA, KeywordSearchCriteria.class);
 
 	}
 

@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EpCategoryNotEmptyException;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -728,7 +729,7 @@ public class CategoryServiceImplTest extends BasicSpringContextTest {
 						getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS), cat);
 
 		prod = productService.saveOrUpdate(prod);
-		Category linkedCat = service.addLinkedCategory(cat.getUidPk(), -1, virtualCatalog.getUidPk());
+		service.addLinkedCategory(cat.getUidPk(), -1, virtualCatalog.getUidPk());
 
 		service.removeCategoryTree(cat.getUidPk());
 	}
@@ -748,7 +749,7 @@ public class CategoryServiceImplTest extends BasicSpringContextTest {
 						getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS), cat);
 
 		prod = productService.saveOrUpdate(prod);
-		Category linkedCat = service.addLinkedCategory(cat.getUidPk(), -1, virtualCatalog.getUidPk());
+		service.addLinkedCategory(cat.getUidPk(), -1, virtualCatalog.getUidPk());
 
 		List<Product> findByCategoryUid = productService.findByCategoryUid(cat.getUidPk());
 		List <Long> uidList = new ArrayList<>();
@@ -863,7 +864,7 @@ public class CategoryServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private Category createNormalCategory() {
-		Category masterCategory = getBeanFactory().getBean("category");
+		Category masterCategory = getBeanFactory().getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 		masterCategory.setCategoryType(categoryType);
 		masterCategory.setCatalog(masterCatalog);
 		masterCategory.setCode(Utils.uniqueCode("category"));

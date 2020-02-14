@@ -3,12 +3,6 @@
   <!--TODO: Change validation back to true when we figure out how to make customers schema pass -->
   <xmlvalidation>false</xmlvalidation>
   <importstrategy>
-    <importer type="PAYMENTGATEWAY">
-      <importstrategy>INSERT_OR_UPDATE</importstrategy>
-      <dependentelements>
-        <dependentelement type="PAYMENT_GATEWAY_PROPERTIES">CLEAR_COLLECTION</dependentelement>
-      </dependentelements>
-    </importer>
     <importer type="DYNAMICCONTENT">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>
     </importer>
@@ -120,6 +114,9 @@
     </importer>
     <importer type="GIFT_CERTIFICATE">
 		<importstrategy>INSERT_OR_UPDATE</importstrategy>
+    </importer>
+    <importer type="PAYMENTPROVIDER">
+      <importstrategy>INSERT</importstrategy>
     </importer>
    <importer type="SHIPPING_SERVICE_LEVEL">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>

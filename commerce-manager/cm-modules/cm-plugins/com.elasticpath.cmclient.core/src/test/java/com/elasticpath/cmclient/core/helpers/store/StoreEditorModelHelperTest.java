@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.cmclient.core.helpers.store;
 
@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -34,17 +33,22 @@ import org.mockito.junit.MockitoRule;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.customer.StoreCustomerAttribute;
-import com.elasticpath.domain.payment.PaymentGateway;
+import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.domain.store.StoreType;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
-import com.elasticpath.plugin.payment.PaymentGatewayType;
+import com.elasticpath.provider.payment.domain.PaymentProviderConfigurationStatus;
+import com.elasticpath.provider.payment.service.configuration.PaymentProviderConfigDTO;
+import com.elasticpath.provider.payment.service.provider.PaymentProviderPluginDTO;
 import com.elasticpath.service.command.CommandService;
 import com.elasticpath.service.command.UpdateStoreCommand;
 import com.elasticpath.service.command.UpdateStoreCommandResult;
 import com.elasticpath.service.datapolicy.DataPolicyService;
+import com.elasticpath.service.orderpaymentapi.StorePaymentProviderConfigService;
+import com.elasticpath.service.orderpaymentapi.management.PaymentProviderConfigManagementService;
+import com.elasticpath.service.orderpaymentapi.management.PaymentProviderManagementService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingValue;
@@ -64,6 +68,15 @@ public class StoreEditorModelHelperTest {
 
 	@Mock
 	private StoreService mockStoreService;
+
+	@Mock
+	PaymentProviderConfigManagementService paymentProviderConfigManagementService;
+
+	@Mock
+	PaymentProviderManagementService paymentProviderManagementService;
+
+	@Mock
+	StorePaymentProviderConfigService storePaymentProviderConfigService;
 
 	@Mock
 	private Store newStore;
@@ -147,6 +160,11 @@ public class StoreEditorModelHelperTest {
 
 			@Override
 			List<StoreCustomerAttributeModel> getStoreCustomerAttributes(final StoreEditorModel model) {
+				return Collections.emptyList();
+			}
+
+			@Override
+			List<StorePaymentConfigurationModel> getStorePaymentConfigurations(final StoreEditorModel model) {
 				return Collections.emptyList();
 			}
 		};
@@ -316,17 +334,15 @@ public class StoreEditorModelHelperTest {
 		final Store mockStore = mock(Store.class);
 
 		final String storeUrl = "http://test.com"; //$NON-NLS-1$
-		final Map<PaymentGatewayType, PaymentGateway> paymentGatewayMap = new HashMap<PaymentGatewayType, PaymentGateway>();
-		final PaymentGateway mockPaymentGateway = mock(PaymentGateway.class);
-		paymentGatewayMap.put(PaymentGatewayType.HOSTED_PAGE, mockPaymentGateway);
 
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
 		when(mockStore.getUrl()).thenReturn("").thenReturn(storeUrl).thenReturn(storeUrl);
 		when(mockStore.getStoreState()).thenReturn(StoreState.OPEN);
-		when(mockStore.getPaymentGatewayMap()).thenReturn(paymentGatewayMap);
 		when(mockStore.getCreditCardTypes()).thenReturn(Collections.<CreditCardType>emptySet());
 
 		StoreEditorModel model = new StoreEditorModel(mockStore);
+		model.setStorePaymentConfigurations(Collections.singletonList(new StorePaymentConfigurationModel(null, "Config1", "Guid1", "Provider1",
+				"method1", true)));
 		try {
 			editorModelHelper.sanityCheck(model);
 		} catch (EpServiceException e) {
@@ -417,4 +433,60 @@ public class StoreEditorModelHelperTest {
 		verify(mockStoreService).findAllStores();
 	}
 
+	@Test
+	public void testGetStorePaymentConfigurations() {
+		PaymentProviderConfigDTO paymentProviderConfigDTO1 = new PaymentProviderConfigDTO();
+		paymentProviderConfigDTO1.setStatus(PaymentProviderConfigurationStatus.ACTIVE);
+		paymentProviderConfigDTO1.setConfigurationName("Happy-Path");
+		paymentProviderConfigDTO1.setPaymentProviderPluginBeanName("Payment-Provider-Plugin-Bean-Name");
+		paymentProviderConfigDTO1.setGuid("Happy-Path-guid");
+
+		PaymentProviderConfigDTO paymentProviderConfigDTO2 = new PaymentProviderConfigDTO();
+		paymentProviderConfigDTO2.setStatus(PaymentProviderConfigurationStatus.ACTIVE);
+		paymentProviderConfigDTO2.setConfigurationName("Another-Happy-Path");
+		paymentProviderConfigDTO2.setPaymentProviderPluginBeanName("Payment-Provider-Plugin-Bean-Name");
+		paymentProviderConfigDTO2.setGuid("Another-Happy-Path-guid");
+
+		PaymentProviderPluginDTO paymentProviderPluginDTO = new PaymentProviderPluginDTO();
+		paymentProviderPluginDTO.setPluginBeanName("Payment-Provider-Plugin-Bean-Name");
+		paymentProviderPluginDTO.setPaymentMethodId("Payment-provider-method");
+		paymentProviderPluginDTO.setPaymentVendorId("Payment-provider-vendor-id");
+
+		StorePaymentProviderConfig storePaymentProviderConfig = mock(StorePaymentProviderConfig.class);
+		when(storePaymentProviderConfig.getPaymentProviderConfigGuid()).thenReturn("Happy-Path-guid");
+		when(storePaymentProviderConfig.getGuid()).thenReturn("Happy-Path-guid");
+		when(storePaymentProviderConfig.getUidPk()).thenReturn(100L);
+
+		when(paymentProviderConfigManagementService.findAllActive()).thenReturn(Arrays.asList(paymentProviderConfigDTO1, paymentProviderConfigDTO2));
+		when(paymentProviderManagementService.findAll()).thenReturn(Collections.singletonMap(paymentProviderPluginDTO.getPluginBeanName(),
+				paymentProviderPluginDTO));
+		when(storePaymentProviderConfigService.findByStore(any(Store.class))).thenReturn(Collections.singletonList(storePaymentProviderConfig));
+
+		StoreEditorModel storeEditorModel = new StoreEditorModel(newStore);
+		StoreEditorModelHelper storeEditorModelHelper = new StoreEditorModelHelper();
+		storeEditorModelHelper.setPaymentProviderConfigManagementService(paymentProviderConfigManagementService);
+		storeEditorModelHelper.setPaymentProviderManagementService(paymentProviderManagementService);
+		storeEditorModelHelper.setStorePaymentProviderConfigService(storePaymentProviderConfigService);
+
+		List<StorePaymentConfigurationModel> storePaymentConfigurationModels = storeEditorModelHelper.getStorePaymentConfigurations(storeEditorModel);
+		assertEquals(2, storePaymentConfigurationModels.size());
+
+		StorePaymentConfigurationModel result1 = storePaymentConfigurationModels.stream().filter(storePaymentConfigurationModel ->
+				storePaymentConfigurationModel.getConfigurationGuid().equals(paymentProviderConfigDTO1.getGuid())).findFirst().orElse(null);
+		assertNotNull(result1);
+		assertEquals(paymentProviderConfigDTO1.getConfigurationName(), result1.getConfigurationName());
+		assertEquals(paymentProviderPluginDTO.getPaymentVendorId(), result1.getProvider());
+		assertEquals(paymentProviderPluginDTO.getPaymentMethodId(), result1.getMethod());
+		assertTrue(result1.isSelected());
+		assertEquals(storePaymentProviderConfig, result1.getStorePaymentProviderConfig());
+
+		StorePaymentConfigurationModel result2 = storePaymentConfigurationModels.stream().filter(storePaymentConfigurationModel ->
+				storePaymentConfigurationModel.getConfigurationGuid().equals(paymentProviderConfigDTO2.getGuid())).findFirst().orElse(null);
+		assertNotNull(result2);
+		assertEquals(paymentProviderConfigDTO2.getConfigurationName(), result2.getConfigurationName());
+		assertEquals(paymentProviderPluginDTO.getPaymentVendorId(), result2.getProvider());
+		assertEquals(paymentProviderPluginDTO.getPaymentMethodId(), result2.getMethod());
+		assertFalse(result2.isSelected());
+		assertNull(result2.getStorePaymentProviderConfig());
+	}
 }

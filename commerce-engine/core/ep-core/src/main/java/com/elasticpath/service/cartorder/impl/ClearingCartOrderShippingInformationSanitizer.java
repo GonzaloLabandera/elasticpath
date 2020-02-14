@@ -188,7 +188,7 @@ public class ClearingCartOrderShippingInformationSanitizer implements CartOrderS
 	 */
 	protected CustomerSessionService getCustomerSessionService() {
 		if (this.customerSessionService == null) {
-			this.customerSessionService = getBeanFactory().getBean(ContextIdNames.CUSTOMER_SESSION_SERVICE);
+			this.customerSessionService = getBeanFactory().getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE, CustomerSessionService.class);
 		}
 		return this.customerSessionService;
 	}

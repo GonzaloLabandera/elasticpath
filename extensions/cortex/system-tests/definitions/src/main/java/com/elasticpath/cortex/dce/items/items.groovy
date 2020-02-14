@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortex.dce.items
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
@@ -100,7 +104,7 @@ class Items {
 	}
 
 	@Then('^the attribute with (.+) equal to (.+) has (.+) equal to (.+)$')
-	static void veriofyAttributeValue(def keyField, def keyValue, def valueField, def valueValue) {
+	static void verifyAttributeValue(def keyField, def keyValue, def valueField, def valueValue) {
 		boolean found = false
 		def details = client["details"]
 
@@ -300,13 +304,19 @@ class Items {
 
 	@When('^all Order need infos solved$')
 	static void setAllNeedinfos() {
-		CommonMethods.addEmailPaymentTokenAndAddress()
+		CommonMethods.addEmailPaymentInstrumentAndAddress()
 	}
 
 	@And('^I complete the purchase after providing all required order info$')
 	static void setNeedinfosAndSubmitPurchase() {
-		CommonMethods.addEmailPaymentTokenAndAddress()
+		CommonMethods.addEmailPaymentInstrumentAndAddress()
 		Order.submitPurchase()
+	}
+
+	@And('^I complete the purchase after providing all required order info for (.+) cart$')
+	static void setNeedinfosAndSubmitPurchaseForCart(final String cartName) {
+		CommonMethods.addEmailPaymentInstrumentAndAddress()
+		Order.submitPurchaseForCart(cartName)
 	}
 
 	@And('^the LineItems structure under the created Purchase$')

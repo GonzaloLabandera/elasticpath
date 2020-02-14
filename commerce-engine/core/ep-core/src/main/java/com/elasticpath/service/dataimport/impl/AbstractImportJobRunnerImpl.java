@@ -974,7 +974,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 	 * @return the csv file reader
 	 */
 	protected CsvFileReader getCsvFileReader() {
-		final CsvFileReader csvFileReader = getSingletonBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class);
+		final CsvFileReader csvFileReader = getPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class);
 		csvFileReader.open(request.getImportSource(),
 				request.getImportSourceColDelimiter(),
 				request.getImportSourceTextQualifier());

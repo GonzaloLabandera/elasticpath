@@ -699,7 +699,8 @@ public class ProductImpl extends AbstractLegacyEntityImpl implements Product, Pr
 	 * 	for the fallback locale if requested, or an empty LDF.
 	 */
 	public LocaleDependantFields getLocaleDependantFields(final Locale locale, final boolean fallback) {
-		CatalogLocaleFallbackPolicyFactory factory = getBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY);
+		CatalogLocaleFallbackPolicyFactory factory = getSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY,
+				CatalogLocaleFallbackPolicyFactory.class);
 		return getLocaleDependantFields(factory.createProductLocaleFallbackPolicy(locale, fallback, this));
 	}
 
@@ -1035,6 +1036,7 @@ public class ProductImpl extends AbstractLegacyEntityImpl implements Product, Pr
 	 * @return productCategory the <code>ProductCategory</code>.
 	 * @throws IllegalArgumentException if the product is not in the given category.
 	 */
+	@Override
 	public ProductCategory getProductCategory(final Category category) {
 		for (ProductCategory productCategory : this.getProductCategories()) {
 			if (productCategory.getCategory().equals(category)) {

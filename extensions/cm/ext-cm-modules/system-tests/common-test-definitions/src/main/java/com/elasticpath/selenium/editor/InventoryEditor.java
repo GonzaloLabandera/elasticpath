@@ -19,6 +19,8 @@ public class InventoryEditor extends AbstractPageObject {
 	private static final String QUANTITY_INPUT_CSS = "div[widget-id='Quantity'] input";
 	private static final String QUANTITY_ON_HAND_CSS =
 			"div[automation-id='com.elasticpath.cmclient.warehouse.WarehouseMessages.Inventory_QuantityOnHand'] + div > div";
+	private static final String AVAILABLE_QUANTITY_CSS =
+			"div[automation-id='com.elasticpath.cmclient.warehouse.WarehouseMessages.Inventory_AvailableQuantity'] + div > div";
 
 	/**
 	 * Constructor.
@@ -59,6 +61,16 @@ public class InventoryEditor extends AbstractPageObject {
 	public int getQuantityOnHand() {
 		getWaitDriver().waitForElementToBeNotStale(QUANTITY_ON_HAND_CSS);
 		return Integer.parseInt(getWaitDriver().waitForElementToBeVisible(By.cssSelector(QUANTITY_ON_HAND_CSS)).getText());
+	}
+
+	/**
+	 * Returns available quantity.
+	 *
+	 * @return the available quantity.
+	 */
+	public int getAvailableQuantity() {
+		getWaitDriver().waitForElementToBeNotStale(AVAILABLE_QUANTITY_CSS);
+		return Integer.parseInt(getWaitDriver().waitForElementToBeVisible(By.cssSelector(AVAILABLE_QUANTITY_CSS)).getText());
 	}
 
 	/**

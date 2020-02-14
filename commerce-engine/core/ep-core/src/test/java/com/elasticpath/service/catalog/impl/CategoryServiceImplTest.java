@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matchers;
 import org.jmock.Expectations;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
@@ -38,9 +40,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.hamcrest.Description;
-import org.hamcrest.Matchers;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -51,6 +50,7 @@ import com.elasticpath.commons.exception.IllegalOperationException;
 import com.elasticpath.commons.util.CategoryGuidUtil;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
+import com.elasticpath.domain.catalog.CategoryDeleted;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.AbstractCategoryImpl;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
@@ -59,6 +59,7 @@ import com.elasticpath.domain.catalog.impl.CategoryDeletedImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.catalog.impl.LinkedCategoryImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
@@ -141,9 +142,10 @@ public class CategoryServiceImplTest {
 		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ABSTRACT_CATEGORY, AbstractCategoryImpl.class);
 		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CATEGORY, CategoryImpl.class);
 		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTunerImpl.class);
-		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LINKED_CATEGORY, LinkedCategoryImpl.class);
-		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		beanFactoryExpectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class,
+				FetchGroupLoadTunerImpl.class);
+		beanFactoryExpectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LINKED_CATEGORY, Category.class, LinkedCategoryImpl.class);
+		beanFactoryExpectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		persistenceEngine = context.mock(PersistenceEngine.class);
 		categoryLookup = context.mock(CategoryLookup.class);
@@ -170,7 +172,8 @@ public class CategoryServiceImplTest {
 
 		indexNotificationService = context.mock(IndexNotificationService.class);
 
-		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE, indexNotificationService);
+		beanFactoryExpectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE, IndexNotificationService.class,
+				indexNotificationService);
 
 		setupCategory();
 	}
@@ -215,7 +218,8 @@ public class CategoryServiceImplTest {
 		serviceImpl.setPersistenceEngine(persistenceEngine);
 		serviceImpl.setProductService(productService);
 		serviceImpl.setBeanFactory(beanFactory);
-		when(beanFactory.getBean("indexNotificationService")).thenReturn(indexNotificationService);
+		when(beanFactory.getSingletonBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE, IndexNotificationService.class))
+			.thenReturn(indexNotificationService);
 
 		assertNotNull(serviceImpl.add(category));
 
@@ -358,7 +362,8 @@ public class CategoryServiceImplTest {
 		// expectations
 		when(persistenceEngine.withLoadTuners(any(LoadTuner.class))).thenReturn(persistenceEngine);
 		when(persistenceEngine.retrieveByNamedQuery("CATEGORY_LIST_ROOT", 2L)).thenReturn(Collections.emptyList());
-		when(beanFactory.getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER)).thenReturn(mock(FetchGroupLoadTuner.class));
+		when(beanFactory.getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class))
+				.thenReturn(mock(FetchGroupLoadTuner.class));
 
 		assertEquals(categories, categoryService.listRootCategories(catalog, false));
 		verify(persistenceEngine).retrieveByNamedQuery("CATEGORY_LIST_ROOT", 2L);
@@ -443,7 +448,8 @@ public class CategoryServiceImplTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testRemoveCategoryTree() {
-		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CATEGORY_DELETED, CategoryDeletedImpl.class);
+		beanFactoryExpectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CATEGORY_DELETED, CategoryDeleted.class,
+				CategoryDeletedImpl.class);
 
 		// Compose a category branch
 		final Category subCategory = getCategory();
@@ -528,7 +534,8 @@ public class CategoryServiceImplTest {
 		when(persistenceEngine.load(null, category2Uid)).thenReturn(category2);
 		when(persistenceEngine.saveOrMerge(category1)).thenReturn(category1);
 		when(persistenceEngine.saveOrMerge(category2)).thenReturn(category2);
-		when(beanFactory.getBean("indexNotificationService")).thenReturn(indexNotificationService);
+		when(beanFactory.getSingletonBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE, IndexNotificationService.class))
+			.thenReturn(indexNotificationService);
 		when(persistenceEngine.withLoadTuners((LoadTuner[]) null)).thenReturn(persistenceEngine);
 
 		// must use compareTo because we know ordering is the same before swapping
@@ -765,7 +772,7 @@ public class CategoryServiceImplTest {
 		final List<Long> childUids = new ArrayList<>();
 		childUids.add(childUid);
 
-		final Long ancestorUid = new Long(234L);
+		final Long ancestorUid = 234L;
 		final List<Long> ancestorUids = new ArrayList<>();
 		ancestorUids.add(ancestorUid);
 
@@ -1003,7 +1010,7 @@ public class CategoryServiceImplTest {
 	 */
 	@Test
 	public void testAddLinkedCategoryRecursiveRecurses() {
-		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LINKED_CATEGORY, LinkedCategoryImpl.class);
+		beanFactoryExpectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LINKED_CATEGORY, Category.class, LinkedCategoryImpl.class);
 
 		final String masterCategoryCode = "MASTER";
 		final String masterSubCategoryCode = "SUB";

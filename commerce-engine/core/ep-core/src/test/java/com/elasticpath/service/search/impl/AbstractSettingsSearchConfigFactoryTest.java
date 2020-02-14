@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.misc.SearchConfig;
+import com.elasticpath.domain.misc.SearchConfigInternal;
 import com.elasticpath.domain.misc.impl.SearchConfigImpl;
 import com.elasticpath.service.search.SearchHostLocator;
 import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
@@ -76,7 +77,7 @@ public class AbstractSettingsSearchConfigFactoryTest {
 		factory.setMinimumSimilarityProvider(new SimpleSettingValueProvider<>(settingsContext, MINIMUM_SIMILARITY));
 		factory.setPrefixLengthProvider(new SimpleSettingValueProvider<>(settingsContext, PREFIX_LENGTH));
 
-		when(beanFactory.getBean(ContextIdNames.SEARCH_CONFIG)).thenReturn(new SearchConfigImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.SEARCH_CONFIG, SearchConfigInternal.class)).thenReturn(new SearchConfigImpl());
 		when(searchHostLocator.getSearchHostLocation()).thenReturn(SEARCH_HOST_LOCATION);
 
 		final SearchConfig searchConfig = factory.getSearchConfig(indexName, settingsContext);

@@ -18,7 +18,7 @@ public interface CategoryRepository {
 	 * Find root categories for Store.
 	 *
 	 * @param storeCode the store code
-	 * @return ExecutionResult with the root categories
+	 * @return root categories
 	 */
 	Observable<Category> findRootCategories(String storeCode);
 
@@ -27,7 +27,7 @@ public interface CategoryRepository {
 	 *
 	 * @param storeCode the store code
 	 * @param categoryCode the category code
-	 * @return ExecutionResult with the category
+	 * @return category
 	 */
 	Single<Category> findByStoreAndCategoryCode(String storeCode, String categoryCode);
 
@@ -36,7 +36,7 @@ public interface CategoryRepository {
 	 *
 	 * @param storeCode the store code
 	 * @param parentCategoryCode the parent category code
-	 * @return ExecutionResult with the child categories
+	 * @return child categories
 	 */
 	Observable<Category> findChildren(String storeCode, String parentCategoryCode);
 
@@ -44,7 +44,7 @@ public interface CategoryRepository {
 	 * Find by category GUID.
 	 *
 	 * @param categoryGuid the category GUID
-	 * @return ExecutionResult with the category
+	 * @return category
 	 */
 	Single<Category> findByGuid(String categoryGuid);
 

@@ -173,7 +173,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	@Override
 	@CacheResult
 	public Maybe<WishList> findWishlistsContainingItem(final Map<String, String> itemIdMap) {
-		return customerSessionRepository.findOrCreateCustomerSessionAsSingle()
+		return customerSessionRepository.findOrCreateCustomerSession()
 				.flatMap(customerSession -> getWishlistInternal(customerSession.getShopper()))
 				.flatMapMaybe(filterWishlist(itemIdMap))
 				.filter(Objects::nonNull);
@@ -209,7 +209,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	@CacheResult(uniqueIdentifier = "cachingGetProductSku")
 	public Single<ProductSku> getProductSku(final WishList wishlist, final String lineItemGuid) {
 		return getShoppingItem(wishlist, lineItemGuid)
-				.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid()))
+				.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuid(shoppingItem.getSkuGuid()))
 				.filter(WishlistRepositoryImpl::isProductDiscoverable)
 				.toSingle()
 				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(ITEM_NOT_FOUND)));

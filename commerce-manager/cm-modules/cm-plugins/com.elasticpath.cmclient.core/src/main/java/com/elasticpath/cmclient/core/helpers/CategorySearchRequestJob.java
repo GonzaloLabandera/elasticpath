@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.service.CatalogEventService;
@@ -30,7 +30,7 @@ public class CategorySearchRequestJob extends AbstractSearchRequestJob<Category>
 	 */
 	public CategorySearchRequestJob() {
 		super();
-		categoryLookup = ServiceLocator.getService(ContextIdNames.CATEGORY_LOOKUP);
+		categoryLookup = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 	}
 
 	@Override

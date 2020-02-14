@@ -21,7 +21,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Control;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -241,7 +241,7 @@ public abstract class AbstractCatalogSearchViewTab {
 	 */
 	protected List<Brand> getAuthorizedBrandList(final boolean forceReload) {
 		if (forceReload || this.brandList == null) {
-			final BrandService brandService = ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+			final BrandService brandService = BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 		
 			this.catalogList = getInitializeAuthorizedCatalogsList(); //get the list of authorized Catalogs
 			this.brandList = brandService.findAllBrandsFromCatalogList(catalogList);
@@ -267,7 +267,7 @@ public abstract class AbstractCatalogSearchViewTab {
 	 */
 	protected List<Catalog> getInitializeAuthorizedCatalogsList(final boolean forceReload) {
 		if (forceReload || catalogList == null) {
-			final CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+			final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 			this.catalogList = catalogService.findAllCatalogs(); 
 			AuthorizationService.getInstance().filterAuthorizedCatalogs(catalogList);
 		}

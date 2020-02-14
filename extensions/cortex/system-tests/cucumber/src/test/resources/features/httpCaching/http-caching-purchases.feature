@@ -157,24 +157,24 @@ Feature: HTTP Caching - Purchases
       | ITEM_CODE        | COMPONENT_1 | COMPONENT_1_OPTION_1_ID | ITEM_NAME |
       | tbcp_0123456_sku | Avatar      | PurchaseType            | House     |
 
-  Scenario: Purchase payment means list should have HTTP caching
+  Scenario: Purchase payment instruments list should have HTTP caching
     When Adding an item with item code plantsVsZombies and quantity 1 to the cart
     And I fill in email needinfo
     And I fill in payment methods needinfo
     And I fill in billing address needinfo
     And the order is submitted
     Then the HTTP status is OK
-    And I view the purchase payment means
+    And I view the purchase payment instruments
     Then I should see the Cache-Control header in the response with a valid max age and private directive
     And I should see an ETag header in the response
 
-  Scenario: A purchase payment mean should have HTTP caching
+  Scenario: A purchase payment instrument should have HTTP caching
     When Adding an item with item code plantsVsZombies and quantity 1 to the cart
     And I fill in email needinfo
     And I fill in payment methods needinfo
     And I fill in billing address needinfo
     And the order is submitted
     Then the HTTP status is OK
-    And I view a single purchase payment mean
+    And I view a single purchase payment instrument
     Then I should see the Cache-Control header in the response with a valid max age and private directive
     And I should see an ETag header in the response

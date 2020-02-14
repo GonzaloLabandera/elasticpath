@@ -4,9 +4,8 @@
  */
 package com.elasticpath.test.jmock;
 
-import static java.util.Arrays.asList;
-
 import static com.elasticpath.domain.misc.impl.DisplayNameComparatorImplTest.LOCALE;
+import static java.util.Arrays.asList;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -56,6 +55,8 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.order.OrderSku;
@@ -74,6 +75,7 @@ import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shoppingcart.BundleApportioningCalculator;
+import com.elasticpath.service.shoppingcart.OrderSkuFactory;
 import com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.impl.ItemPricing;
 import com.elasticpath.service.shoppingcart.impl.OrderSkuFactoryImpl;
@@ -161,16 +163,18 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 	 *
 	 * @throws Exception if something goes wrong during set up.
 	 */
+	@Override
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
 
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
-		stubGetBean(ContextIdNames.ORDER_SKU, OrderSkuImpl.class);
-		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, getProductSkuLookup());
-		stubGetBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, getShoppingItemSubtotalCalculator());
-		stubGetBean(ContextIdNames.TIME_SERVICE, getTimeService());
+		stubGetPrototypeBean(ContextIdNames.CATALOG_LOCALE, SupportedLocale.class, CatalogLocaleImpl.class);
+		stubGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, LocalizedPropertiesImpl.class);
+		stubGetPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class, OrderSkuImpl.class);
+		stubGetSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class, getProductSkuLookup());
+		stubGetSingletonBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, ShoppingItemSubtotalCalculator.class,
+				getShoppingItemSubtotalCalculator());
+		stubGetSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class, getTimeService());
 
 		mockTimeService();
 		mockOrderSkuFactory();
@@ -728,7 +732,7 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 		orderSkuFactory.setProductSkuLookup(getProductSkuLookup());
 		orderSkuFactory.setTimeService(getTimeService());
 
-		stubGetBean(ContextIdNames.ORDER_SKU_FACTORY, orderSkuFactory);
+		stubGetSingletonBean(ContextIdNames.ORDER_SKU_FACTORY, OrderSkuFactory.class, orderSkuFactory);
 	}
 
 	/**
@@ -787,5 +791,5 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 		public void describeTo(final Description description) {
 			description.appendText("A stream of shippable shopping items");
 		}
-	};
+	}
 }

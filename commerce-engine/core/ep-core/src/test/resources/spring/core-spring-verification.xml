@@ -17,4 +17,5 @@
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml" />
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/beans.xml" />
 	<import resource="core-mocked-services.xml" />
+	<import resource="classpath:spring/service/payment-provider-api-service.xml"/>
 </beans>

@@ -439,7 +439,7 @@ public class CategoryServiceImpl implements CategoryService {
 	}
 
 	private void addCategoryDeleted(final long uid) {
-		final CategoryDeleted categoryDeleted = getBean(ContextIdNames.CATEGORY_DELETED);
+		final CategoryDeleted categoryDeleted = getBeanFactory().getPrototypeBean(ContextIdNames.CATEGORY_DELETED, CategoryDeleted.class);
 		categoryDeleted.setCategoryUid(uid);
 		categoryDeleted.setDeletedDate(new Date());
 		getPersistenceEngine().save(categoryDeleted);
@@ -880,7 +880,7 @@ public class CategoryServiceImpl implements CategoryService {
 	 */
 	private ProductService getProductService() {
 		if (productService == null) {
-			productService = getBean(ContextIdNames.PRODUCT_SERVICE);
+			productService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		}
 		return productService;
 	}
@@ -979,7 +979,7 @@ public class CategoryServiceImpl implements CategoryService {
 	 * @return the new linked category
 	 */
 	private Category createLinkedCategory(final Category masterCategory, final Category parentCategory, final Catalog catalog) {
-		final Category newLinkedCategory = getBean(ContextIdNames.LINKED_CATEGORY);
+		final Category newLinkedCategory = getBeanFactory().getPrototypeBean(ContextIdNames.LINKED_CATEGORY, Category.class);
 		newLinkedCategory.setCatalog(catalog);
 		newLinkedCategory.setMasterCategory(masterCategory);
 		newLinkedCategory.setParent(parentCategory);
@@ -1034,7 +1034,7 @@ public class CategoryServiceImpl implements CategoryService {
 	 */
 	@Override
 	public Category addLinkedCategory(final long masterCategoryUid, final long parentCategoryUid, final long catalogUid) {
-		final FetchGroupLoadTuner uidLoadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		final FetchGroupLoadTuner uidLoadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		uidLoadTuner.addFetchGroup(FetchGroupConstants.NONE);
 
 		final Category masterCategory = getCategoryLookup().findByUid(masterCategoryUid);
@@ -1260,7 +1260,8 @@ public class CategoryServiceImpl implements CategoryService {
 
 	private FetchGroupLoadTuner getDefaultFetchGroupLoadTuner() {
 		if (defaultFetchGroupLoadTuner == null) {
-			final FetchGroupLoadTuner defaultFetchGroupLoadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+			final FetchGroupLoadTuner defaultFetchGroupLoadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, 
+					FetchGroupLoadTuner.class);
 			defaultFetchGroupLoadTuner.addFetchGroup(FetchGroupConstants.CATEGORY_BASIC,
 					FetchGroupConstants.CATEGORY_ATTRIBUTES,
 					FetchGroupConstants.CATALOG_DEFAULTS, // need default locale
@@ -1273,7 +1274,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	private FetchGroupLoadTuner getLinkProductCategoryLoadTuner() {
 		if (linkProductCategoryLoadTuner == null) {
-			final FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+			final FetchGroupLoadTuner loadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 			loadTuner.addFetchGroup(FetchGroupConstants.LINK_PRODUCT_CATEGORY, FetchGroupConstants.PRODUCT_HASH_MINIMAL,
 					FetchGroupConstants.CATEGORY_HASH_MINIMAL, FetchGroupConstants.CATALOG_DEFAULTS);
 			linkProductCategoryLoadTuner = loadTuner;
@@ -1294,7 +1295,7 @@ public class CategoryServiceImpl implements CategoryService {
 	 * @return an instance of {@link IndexNotificationService}
 	 */
 	public IndexNotificationService getIndexNotificationService() {
-		return getBean("indexNotificationService");
+		return getBeanFactory().getSingletonBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE, IndexNotificationService.class);
 	}
 
 	@Override
@@ -1395,6 +1396,7 @@ public class CategoryServiceImpl implements CategoryService {
 	 * @param category category.
 	 * @return true if this category can be syndicated.
 	 */
+	@Override
 	public boolean canSyndicate(final Category category) {
 		if (category.isLinked() && !category.isIncluded()) {
 			return false;
@@ -1414,17 +1416,6 @@ public class CategoryServiceImpl implements CategoryService {
 		} else {
 			return canSyndicate(parent);
 		}
-	}
-
-	/**
-	 * Retrieves a bean from the bean factory.
-	 *
-	 * @param beanName the name of the bean to retrieve
-	 * @param <T> the bean's type
-	 * @return the bean
-	 */
-	protected <T> T getBean(final String beanName) {
-		return getBeanFactory().getBean(beanName);
 	}
 
 	protected PersistenceEngine getPersistenceEngine() {

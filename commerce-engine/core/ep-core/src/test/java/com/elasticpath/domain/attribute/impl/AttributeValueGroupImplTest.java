@@ -25,12 +25,15 @@ import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
 import com.elasticpath.domain.attribute.AttributeType;
+import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.AttributeValue;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
@@ -82,9 +85,9 @@ public class AttributeValueGroupImplTest {
 	public void setUp() throws Exception {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_USAGE, new AttributeUsageImpl());
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, new UtilityImpl());
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, new RandomGuidImpl());
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, new AttributeUsageImpl());
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		attributeValueMap = new HashMap<>();
 		this.setupAttribute1();

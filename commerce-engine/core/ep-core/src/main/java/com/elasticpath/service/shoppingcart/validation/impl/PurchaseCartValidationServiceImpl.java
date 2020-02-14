@@ -21,7 +21,8 @@ public class PurchaseCartValidationServiceImpl
 
 	@Override
 	public ShoppingCartValidationContext buildContext(final ShoppingCart shoppingCart, final CartOrder cartOrder) {
-		ShoppingCartValidationContext validationContext = beanFactory.getBean(ContextIdNames.SHOPPING_CART_VALIDATION_CONTEXT);
+		ShoppingCartValidationContext validationContext = beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_CART_VALIDATION_CONTEXT,
+				ShoppingCartValidationContext.class);
 		validationContext.setShoppingCart(shoppingCart);
 		validationContext.setCartOrder(cartOrder);
 		return validationContext;

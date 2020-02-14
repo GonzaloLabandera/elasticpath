@@ -9,7 +9,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
@@ -28,9 +28,11 @@ public class DeleteDynamicContentAction extends AbstractBaseDynamicContentAction
 	/** The logger. */
 	private static final Logger LOG = Logger.getLogger(DeleteDynamicContentAction.class);
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
-	private final DynamicContentService dynamicContentService = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_SERVICE);
-	private final DynamicContentDeliveryService dcaService = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
+	private final DynamicContentService dynamicContentService = BeanLocator
+			.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class);
+	private final DynamicContentDeliveryService dcaService = BeanLocator
+			.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 
 	/** DynamicContentSearchResultsView list view. */
 	private final DynamicContentSearchResultsView listView;

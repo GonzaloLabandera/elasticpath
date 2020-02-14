@@ -33,6 +33,7 @@ import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
 import com.elasticpath.domain.catalogview.BrandFilter;
 import com.elasticpath.domain.catalogview.CatalogViewRequest;
+import com.elasticpath.domain.catalogview.CatalogViewResult;
 import com.elasticpath.domain.catalogview.CatalogViewResultHistory;
 import com.elasticpath.domain.catalogview.CategoryFilter;
 import com.elasticpath.domain.catalogview.FeaturedProductFilter;
@@ -285,19 +286,19 @@ public class SearchServiceImplTest {
 				allowing(mockSfSearchLog).setSearchTime(with(any(Date.class)));
 				allowing(mockSfSearchLog).setSuggestionsGenerated(with(any(boolean.class)));
 
-				allowing(beanFactory).getBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA, KeywordSearchCriteria.class);
 				will(returnValue(new KeywordSearchCriteria()));
 
-				allowing(beanFactory).getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class);
 				will(returnValue(new ProductSearchCriteria()));
 
-				allowing(beanFactory).getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA, CategorySearchCriteria.class);
 				will(returnValue(new CategorySearchCriteria()));
 
-				allowing(beanFactory).getBean(ContextIdNames.FEATURED_PRODUCT_FILTER);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.FEATURED_PRODUCT_FILTER, FeaturedProductFilter.class);
 				will(returnValue(mockFeaturedProductFilter));
 
-				allowing(beanFactory).getBean(ContextIdNames.SF_SEARCH_LOG);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SF_SEARCH_LOG, SfSearchLog.class);
 				will(returnValue(mockSfSearchLog));
 			}
 		});
@@ -353,7 +354,7 @@ public class SearchServiceImplTest {
 					stubs[i] = returnValue(searchResult);
 				}
 
-				allowing(beanFactory).getBean(ContextIdNames.SEARCH_RESULT);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SEARCH_RESULT, CatalogViewResult.class);
 				will(onConsecutiveCalls(stubs));
 			}
 		});

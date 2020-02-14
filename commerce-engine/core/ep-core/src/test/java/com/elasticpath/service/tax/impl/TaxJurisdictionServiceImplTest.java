@@ -25,6 +25,8 @@ import org.junit.Test;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.tax.TaxCategory;
@@ -92,8 +94,9 @@ public class TaxJurisdictionServiceImplTest {
 	public void setUp() {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, 
+				LocalizedPropertiesImpl.class);
 		taxJurisdictionServiceImpl = new TaxJurisdictionServiceImpl();
 
 		mockPersistenceEngine = context.mock(PersistenceEngine.class);
@@ -299,9 +302,10 @@ public class TaxJurisdictionServiceImplTest {
 	 */
 	@Test
 	public void testRetrieveTaxJurisdiction() {
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdictionImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.TAX_CATEGORY, TaxCategoryImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, 
+				LocalizedPropertiesImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class, TaxJurisdictionImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class, TaxCategoryImpl.class);
 
 		final MutableTaxAddress shippingAddress = new MutableTaxAddress();
 		shippingAddress.setCountry(REGION_CODE_CA);
@@ -319,10 +323,6 @@ public class TaxJurisdictionServiceImplTest {
 
 		final List<TaxJurisdiction> tjList1 = new ArrayList<>();
 		tjList1.add(getFourCategoriesTaxJurisdiction());
-
-		final List<TaxJurisdiction> tjList2 = new ArrayList<>();
-		tjList2.add(taxJurisdiction1);
-		tjList2.add(taxJurisdiction3);
 
 		context.checking(new Expectations() { {
 			oneOf(mockPersistenceEngine).retrieveByNamedQuery(

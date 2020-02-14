@@ -26,7 +26,7 @@ public class CategoryTypeDaoAdapterImpl extends AbstractDaoAdapter<CategoryType>
 
 	@Override
 	public CategoryType createBean(final CategoryType category) {
-		return beanFactory.getBean(ContextIdNames.CATEGORY_TYPE);
+		return beanFactory.getPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class);
 	}
 
 	@Override

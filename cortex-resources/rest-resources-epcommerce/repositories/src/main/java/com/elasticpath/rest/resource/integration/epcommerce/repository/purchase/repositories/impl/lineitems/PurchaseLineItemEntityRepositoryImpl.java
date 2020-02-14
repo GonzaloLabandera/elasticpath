@@ -201,9 +201,9 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	 * @return the list of fields, can be empty
 	 */
 	private Single<List<ModifierField>> retrieveModifierFields(final String skuGuid) {
-		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(skuGuid)
+		return productSkuRepository.getProductSkuWithAttributesByGuid(skuGuid)
 				.map(ProductSku::getProduct)
-				.map(product -> modifiersRepository.findModifiersByProduct(product));
+				.flatMap(product -> modifiersRepository.findModifiersByProduct(product));
 	}
 
 	/**

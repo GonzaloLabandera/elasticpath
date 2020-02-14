@@ -3,8 +3,6 @@
  */
 package com.elasticpath.cmclient.core.service.impl;
 
-import com.elasticpath.cmclient.core.service.ProductModelService;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +17,7 @@ import com.elasticpath.cmclient.core.dto.catalog.ProductModel;
 import com.elasticpath.cmclient.core.dto.catalog.ProductSkuModel;
 import com.elasticpath.cmclient.core.dto.catalog.impl.PriceListEditorModelImpl;
 import com.elasticpath.cmclient.core.dto.catalog.impl.ProductSkuPriceListModelImpl;
-
+import com.elasticpath.cmclient.core.service.ProductModelService;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.common.pricing.service.PriceListHelperService;
@@ -91,7 +89,7 @@ public class ProductModelServiceImpl implements ProductModelService {
      * <code>Product</code> displayable in product editor
      */
     ProductLoadTuner createProductLoadTuner() {
-        final ProductLoadTuner productLoadTuner = beanFactory.getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
+        final ProductLoadTuner productLoadTuner = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 
         productLoadTuner.setLoadingProductType(true);
         productLoadTuner.setLoadingAttributeValue(true);

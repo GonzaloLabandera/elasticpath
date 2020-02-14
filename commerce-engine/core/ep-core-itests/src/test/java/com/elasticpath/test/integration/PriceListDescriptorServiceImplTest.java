@@ -51,7 +51,7 @@ public class PriceListDescriptorServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testCRUD() {
 		String name = "PRICY LIST";
-		PriceListDescriptor descriptor = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		PriceListDescriptor descriptor = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 		String guid = descriptor.getGuid();
 		assertNotNull(guid);
 		descriptor.setCurrencyCode(Currency.getInstance(Locale.CANADA).getCurrencyCode());
@@ -79,7 +79,7 @@ public class PriceListDescriptorServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testUpdate() throws Exception {
 		//Create a new PriceListDescriptor
-		PriceListDescriptor descriptor = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		PriceListDescriptor descriptor = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 		String pldGuid = descriptor.getGuid();
 		assertNotNull(pldGuid);
 		descriptor.setCurrencyCode(Currency.getInstance(Locale.CANADA).getCurrencyCode());
@@ -99,13 +99,13 @@ public class PriceListDescriptorServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testBaseAmountFilterQuery() {
-		PriceListDescriptor descriptor = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		PriceListDescriptor descriptor = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 		String guid1 = descriptor.getGuid();
 		descriptor.setCurrencyCode(Currency.getInstance(Locale.CANADA).getCurrencyCode());
 		descriptor.setName("test1");
 		priceListDescriptorService.add(descriptor);
 
-		descriptor = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		descriptor = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 		String guid2 = descriptor.getGuid();
 		descriptor.setCurrencyCode(Currency.getInstance(Locale.US).getCurrencyCode());
 		descriptor.setName("test2");
@@ -120,7 +120,7 @@ public class PriceListDescriptorServiceImplTest extends BasicSpringContextTest {
 		baseAmountService.add(amount2);
 		baseAmountService.add(amount3);
 
-		BaseAmountFilter filter = getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter filter = getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		filter.setObjectGuid("OBJ_GUID2");
 		filter.setObjectType("PRODUCT");
 		filter.setQuantity(new BigDecimal("2"));
@@ -137,7 +137,7 @@ public class PriceListDescriptorServiceImplTest extends BasicSpringContextTest {
 		}
 		assertNotNull(match);
 
-		BaseAmountFilter filter2 = getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter filter2 = getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		filter2.setQuantity(new BigDecimal("2"));
 
 		Collection<BaseAmount> results2 = baseAmountService.findBaseAmounts(filter2);
@@ -152,14 +152,14 @@ public class PriceListDescriptorServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testGetPriceListDescriptors() {
 		String nonHiddenSalt = String.valueOf(UUID.randomUUID());
-		PriceListDescriptor priceListNonHidden = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		PriceListDescriptor priceListNonHidden = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 		priceListNonHidden.setCurrencyCode(DEFAULT_CURRENCY);
 		priceListNonHidden.setName("TestPL" + nonHiddenSalt);
 		priceListNonHidden.setDescription(DEFAULT_DESCRIPTION + nonHiddenSalt);
 		priceListDescriptorService.add(priceListNonHidden);
 
 		String hiddenSalt = String.valueOf(UUID.randomUUID());
-		PriceListDescriptor priceListHidden = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		PriceListDescriptor priceListHidden = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 		priceListHidden.setCurrencyCode("USD");
 		priceListHidden.setName("TestPL" + hiddenSalt);
 		priceListHidden.setDescription(DEFAULT_DESCRIPTION + hiddenSalt);

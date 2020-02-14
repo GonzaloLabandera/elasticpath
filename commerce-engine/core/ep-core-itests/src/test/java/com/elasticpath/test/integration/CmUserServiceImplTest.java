@@ -78,7 +78,7 @@ public class CmUserServiceImplTest extends BasicSpringContextTest {
 		assertTrue(cmUser.getStores().contains(scenario.getStore()));
 
 		// load the catalog in another transaction
-		CatalogService catalogService = getBeanFactory().getBean(ContextIdNames.CATALOG_SERVICE);
+		CatalogService catalogService = getBeanFactory().getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		Catalog catalog = catalogService.getCatalog(scenario.getCatalog().getUidPk());
 		cmUser.addCatalog(catalog);
 		
@@ -216,7 +216,7 @@ public class CmUserServiceImplTest extends BasicSpringContextTest {
 	 * Creates a new {@link CmUser}.
 	 */
 	private CmUser getNewCmUser(final String userName, final String email, final String password) {
-		CmUser cmUser = getBeanFactory().getBean(ContextIdNames.CMUSER);
+		CmUser cmUser = getBeanFactory().getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
 		
 		cmUser.setClearTextPassword(password);
 		cmUser.setConfirmClearTextPassword(password);

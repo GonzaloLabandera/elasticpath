@@ -159,7 +159,7 @@ public class CustomerSessionServiceImplTest {
 			will(returnValue(shoppingStartTime));
 		} });
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.TAG_SET, new TagSet());
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.TAG_SET, TagSet.class, TagSet.class);
 
 		final CustomerSession customerSession = new CustomerSessionImpl();
 		final CustomerSessionMemento customerSessionMemento = new CustomerSessionMementoImpl();

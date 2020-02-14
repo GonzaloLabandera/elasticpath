@@ -8,7 +8,7 @@ import java.util.List;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.wizard.page.IBeforeFinishNotifier;
 import com.elasticpath.cmclient.jobs.JobsMessages;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
@@ -37,8 +37,8 @@ public class ConfigurePriceListImportJobPage extends AbstractConfigureImportJobP
 	public ConfigurePriceListImportJobPage(final ImportJob job) {
 		super("ConfigureImportJobPage", JobsMessages.get().ImportJobWizard_ConfigureImportJob, //$NON-NLS-1$
 				JobsMessages.get().ImportJobWizard_ConfigureImportJobDescription, job);
-		plService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
-		importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+		plService = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
+		importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 	}
 
 	@Override

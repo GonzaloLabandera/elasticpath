@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 import com.elasticpath.domain.customer.CustomerSession;
@@ -17,17 +18,8 @@ public interface CustomerSessionRepository {
 	 * Find or create a customer session. The customer session will have a shopper with a valid TagSet.
 	 *
 	 * @return the customer session
-	 * @deprecated Remove this method use this instead {@link #findOrCreateCustomerSessionAsSingle}
 	 */
-	@Deprecated
-	ExecutionResult<CustomerSession> findOrCreateCustomerSession();
-
-	/**
-	 * Find or create a customer session. The customer session will have a shopper with a valid TagSet.
-	 *
-	 * @return the customer session
-	 */
-	Single<CustomerSession> findOrCreateCustomerSessionAsSingle();
+	Single<CustomerSession> findOrCreateCustomerSession();
 
 	/**
 	 * Finds or creates the customer session for the given context.
@@ -66,6 +58,7 @@ public interface CustomerSessionRepository {
 	 * Triggers invalidation of CustomerSession instance associated with given customer guid.
 	 *
 	 * @param customerGuid the customer guid.
+	 * @return completed Completable
 	 */
-	void invalidateCustomerSessionByGuid(String customerGuid);
+	Completable invalidateCustomerSessionByGuid(String customerGuid);
 }

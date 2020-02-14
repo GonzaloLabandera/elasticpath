@@ -1,31 +1,28 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
- */
-/**
- *
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.impl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.junit.Rule;
+import org.junit.Test;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Rule;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests for the {@code CheckoutServiceImpl} class.
@@ -67,7 +64,7 @@ public class CheckoutServiceImplTest {
 		service.setReversibleActionList(actionList);
 
 		try {
-			service.checkoutInternal(shoppingCart, pricingSnapshot, customerSession, null, true, false, null, checkoutResults);
+			service.checkoutInternal(shoppingCart, pricingSnapshot, customerSession, true, false, null, checkoutResults);
 		} catch (EpSystemException ex) {
 			assertNotNull("The EpSystemException should be rethrown after the payments have been rolled back.", ex);
 		}
@@ -75,7 +72,7 @@ public class CheckoutServiceImplTest {
 	}
 
 	/**
-	 * TODO: Test that if a payment service throws an exception during the processing of OrderPayments,
+	 * TODO: Test that if a payment service throws an exception during the processing of OrderPayment,
 	 * all changes to the Order will be rolled back (including any payments already made), and then then EpSystemException
 	 * will be re-thrown. The ShoppingCart will still have all of its items.
 	 * This test should simply ensure that the PaymentService.initializePayments method throws an exception
@@ -83,10 +80,9 @@ public class CheckoutServiceImplTest {
 	 */
 
 	@Test
-	public void verifyCheckoutActionContextPopulatedWithAllExpectedParameters() throws Exception {
+	public void verifyCheckoutActionContextPopulatedWithAllExpectedParameters() {
 		final ShoppingCart cart = context.mock(ShoppingCart.class);
 		final CustomerSession customerSession = context.mock(CustomerSession.class);
-		final OrderPayment templateOrderPayment = context.mock(OrderPayment.class);
 		final boolean isOrderExchange = true;
 		final boolean awaitExchangeCompletion = true;
 		final OrderReturn exchange = context.mock(OrderReturn.class);
@@ -94,14 +90,12 @@ public class CheckoutServiceImplTest {
 		final CheckoutActionContext actionContext = new CheckoutServiceImpl().createActionContext(
 				cart,
 				null, customerSession,
-				templateOrderPayment,
 				isOrderExchange,
 				awaitExchangeCompletion,
 				exchange);
 	
 		assertEquals("Unexpected shopping cart", cart, actionContext.getShoppingCart());
 		assertEquals("Unexpected customer session", customerSession, actionContext.getCustomerSession());
-		assertEquals("Unexpected templateOrderPayment", templateOrderPayment, actionContext.getOrderPaymentTemplate());
 		assertEquals("Unexpected isOrderExchange", isOrderExchange, actionContext.isOrderExchange());
 		assertEquals("Unexpected awaitExchangeCompletion", awaitExchangeCompletion, actionContext.isAwaitExchangeCompletion());
 		assertEquals("Unexpected exchange", exchange, actionContext.getExchange());

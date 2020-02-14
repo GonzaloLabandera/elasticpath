@@ -358,7 +358,7 @@ public class PriceListServiceImpl implements PriceListService {
 
 	@Override
 	public Collection<BaseAmountDTO> getBaseAmounts(final String priceListGuid, final Locale locale) {
-		final BaseAmountFilter baseAmountFilter = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		final BaseAmountFilter baseAmountFilter = beanFactory.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		baseAmountFilter.setPriceListDescriptorGuid(priceListGuid);
 
 		final Collection<BaseAmountDTO> allDTOs = getBaseAmounts(baseAmountFilter);

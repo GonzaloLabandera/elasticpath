@@ -146,7 +146,7 @@ public class BrowsingRequestImplTest {
 		this.mockBrandService = context.mock(BrandService.class);
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.BRAND_SERVICE);
+				allowing(mockBeanFactory).getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 				will(returnValue(mockBrandService));
 			}
 		});
@@ -159,7 +159,7 @@ public class BrowsingRequestImplTest {
 		context.checking(new Expectations() {
 			{
 
-				allowing(mockBeanFactory).getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+				allowing(mockBeanFactory).getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY, StoreSeoUrlBuilderFactory.class);
 				will(returnValue(mockSeoUrlBuilderFactory));
 			}
 		});
@@ -180,7 +180,7 @@ public class BrowsingRequestImplTest {
 		this.filterFactory = this.mockFilterFactory;
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean("filterFactory");
+				allowing(mockBeanFactory).getSingletonBean(ContextIdNames.FILTER_FACTORY, FilterFactory.class);
 				will(returnValue(filterFactory));
 			}
 		});

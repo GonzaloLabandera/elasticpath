@@ -75,7 +75,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-test-cybersource-gateway</artifactId>
+			<artifactId>ep-settings-test-support</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>

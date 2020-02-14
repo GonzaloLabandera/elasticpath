@@ -146,7 +146,7 @@ public class ConditionDTO implements BooleanComponentDTO {
 
 	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
 	private RuleElement createRuleElement(final String elementKind) {
-		final RuleElement ruleElement = ElasticPathImpl.getInstance().getBean(elementKind);
+		final RuleElement ruleElement = ElasticPathImpl.getInstance().getPrototypeBean(elementKind, RuleElement.class);
 
 		if (ruleElement == null) {
 			throw new PopulationRuntimeException("IE-10708", elementKind);

@@ -21,6 +21,9 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.co
 import java.util.Collections;
 import java.util.Set;
 
+import com.google.common.util.concurrent.Runnables;
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,10 +31,6 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import com.google.common.util.concurrent.Runnables;
-import io.reactivex.Completable;
-import io.reactivex.Single;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.rules.Coupon;
@@ -88,7 +87,7 @@ public class OrderCouponToCouponinfoRepositoryTest {
 		when(coupon.getCouponCode()).thenReturn(COUPON_CODE);
 		when(cartOrder.addCoupon(COUPON_CODE)).thenReturn(true);
 		when(cartOrder.getShoppingCartGuid()).thenReturn(CART_GUID);
-		when(cartOrderRepository.saveCartOrderAsSingle(cartOrder)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.saveCartOrder(cartOrder)).thenReturn(Single.just(cartOrder));
 		when(couponRepository.validateCoupon(anyString(), anyString(), anyString())).thenReturn(Completable.fromRunnable(Runnables.doNothing()));
 		when(builder.build(coupon, OrdersMediaTypes.ORDER.id(), CART_ORDER_GUID))
 				.thenReturn(Single.just(COUPON_ENTITY));
@@ -96,9 +95,9 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void submitValidCouponEntityReturnsSubmitResultOfOrderCouponIdentifier() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 
-		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+		final OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.submit(COUPON_ENTITY, StringIdentifier.of(SCOPE))
 				.test()
@@ -107,10 +106,10 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void submitByCustomerWithNoEmailUsesEmptyEmail() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 		when(shoppingCart.getShopper().getCustomer().getEmail()).thenReturn(null);
 
-		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+		final OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.submit(COUPON_ENTITY, StringIdentifier.of(SCOPE))
 				.test()
@@ -121,7 +120,7 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void submitWithInvalidCouponReturnsStateFailureResourceOperationFailure() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 		when(couponRepository.validateCoupon(anyString(), anyString(), anyString())).thenReturn(Completable.fromRunnable(() -> {
 			throw new CouponNotValidException("coupon_code");
 		}));
@@ -133,7 +132,7 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void submitWithInvalidCartOrderReturnsNotFoundResourceOperationFailure() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID))
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(COUPON_IS_NOT_FOUND)));
 
 		repository.submit(COUPON_ENTITY, StringIdentifier.of(SCOPE))
@@ -143,11 +142,11 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void submitValidExistingCouponEntityReturnsSubmitResultOfOrderCouponIdentifier() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 		when(cartOrder.addCoupon(COUPON_CODE)).thenReturn(false);
 
 
-		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+		final OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.submit(COUPON_ENTITY, StringIdentifier.of(SCOPE))
 				.test()
@@ -156,9 +155,9 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void findOneWithCartOrderWithoutCouponsReturnsNotFoundResourceOperationFailure() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 
-		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+		final OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.findOne(orderCouponIdentifier)
 				.test()
@@ -167,10 +166,10 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void findOneValidCartOrderWithCouponsShouldReturnCouponEntity() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 		when(cartOrder.getCouponCodes()).thenReturn(Collections.singleton(COUPON_CODE));
 
-		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+		final OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.findOne(orderCouponIdentifier)
 				.test()
@@ -179,10 +178,10 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void deleteValidCouponReturnsCompletableComplete() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 		when(cartOrder.removeCoupon(COUPON_CODE)).thenReturn(true);
 
-		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+		final OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.delete(orderCouponIdentifier)
 				.test()
@@ -191,10 +190,10 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void deleteCouponFromInvalidCartOrderReturnsNotFoundResourceOperationFailure() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID))
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(COUPON_IS_NOT_FOUND)));
 
-		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+		final OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.delete(orderCouponIdentifier)
 				.test()
@@ -203,10 +202,10 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void deleteInvalidCouponReturnsNotFoundResourceOperationFailure() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 		when(cartOrder.removeCoupon(COUPON_CODE)).thenReturn(false);
 
-		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+		final OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.delete(orderCouponIdentifier)
 				.test()
@@ -216,7 +215,7 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void getExistingCouponEntitySuccess() {
-		Set<String> couponCodes = Collections.singleton(COUPON_CODE);
+		final Set<String> couponCodes = Collections.singleton(COUPON_CODE);
 
 		repository.getCouponEntity(COUPON_CODE, couponCodes, CART_ORDER_GUID)
 				.test()
@@ -227,7 +226,7 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Test
 	public void getCouponEntityWithFailure() {
-		Set<String> couponCodes = Collections.singleton(NOT_EXISTING_COUPON_ID);
+		final Set<String> couponCodes = Collections.singleton(NOT_EXISTING_COUPON_ID);
 
 		repository.getCouponEntity(COUPON_CODE, couponCodes, ORDER_ID)
 				.test()

@@ -12,7 +12,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.LocalProductSkuLookup;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
@@ -74,7 +74,8 @@ public class GiftCertificateContributedAction extends AbstractContributedAction 
 	 */
 	protected void resendEmail(final String recipientEmail) {
 		try {
-			final GiftCertificateService giftCertificateService = ServiceLocator.getService(ContextIdNames.GIFT_CERTIFICATE_SERVICE);
+			final GiftCertificateService giftCertificateService = BeanLocator
+					.getSingletonBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE, GiftCertificateService.class);
 			giftCertificateService.resendGiftCertificate(recipientEmail, getOrder().getGuid(), getOrderSku().getGuid());
 
 		} catch (final Exception e) {

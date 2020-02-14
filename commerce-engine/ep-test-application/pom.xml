@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -53,11 +57,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-test-cybersource-gateway</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
@@ -75,6 +74,11 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>shipping-calculation-plugin-epcommerce</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>payment-plugin-connectivity</artifactId>
 		</dependency>
 
 		<dependency>

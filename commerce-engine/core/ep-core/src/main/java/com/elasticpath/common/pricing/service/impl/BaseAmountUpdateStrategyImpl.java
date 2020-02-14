@@ -185,8 +185,6 @@ public class BaseAmountUpdateStrategyImpl implements BaseAmountUpdateStrategy {
 	 * Enabling declaritive txns.
 	 */
 	private BaseAmountUpdateStrategy getBaseAmountUpdateStrategy() {
-		return beanFactory.getBean(ContextIdNames.BASE_AMOUNT_UPDATE_STRATEGY);
+		return beanFactory.getSingletonBean(ContextIdNames.BASE_AMOUNT_UPDATE_STRATEGY, BaseAmountUpdateStrategy.class);
 	}
-
-
 }

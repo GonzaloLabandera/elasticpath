@@ -54,7 +54,7 @@ public class SynonymGroupServiceImpl extends AbstractEpPersistenceServiceImpl im
 	public SynonymGroup getSynonymGroup(final long synonymGroupUid) throws EpServiceException {
 		sanityCheck();
 		if (synonymGroupUid <= 0) {
-			return getBean(ContextIdNames.SYNONYM_GROUP);
+			return getPrototypeBean(ContextIdNames.SYNONYM_GROUP, SynonymGroup.class);
 		}
 		return getPersistentBeanFinder().get(ContextIdNames.SYNONYM_GROUP, synonymGroupUid);
 	}

@@ -24,10 +24,12 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
+import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.tools.sync.client.impl.CLISyncJobConfiguration;
 import com.elasticpath.tools.sync.configuration.ConnectionConfiguration;
 import com.elasticpath.tools.sync.configuration.dao.ConnectionConfigurationDao;
@@ -44,6 +46,7 @@ import com.elasticpath.tools.sync.target.result.SyncResultItem;
  */
 @SuppressWarnings({ "PMD.SystemPrintln", "PMD.GodClass" })
 public final class SynchronizationTool {
+	private static final Logger LOG = Logger.getLogger(SynchronizationTool.class);
 
 	/**
 	 * The location of the sync tool context Spring XML file.
@@ -288,6 +291,10 @@ public final class SynchronizationTool {
 			final Summary resultSummary = launcher.processJob(jobConfiguration);
 			processSummary(resultSummary);
 			return resultSummary;
+		} catch (Exception e) {
+			String errMsg = String.format("Exception occurred while processing command line with configuration:%n %s", toolConfiguration);
+			LOG.error(errMsg, e);
+			throw new EpSystemException(errMsg, e);
 		} finally {
 			processShutDown();
 		}

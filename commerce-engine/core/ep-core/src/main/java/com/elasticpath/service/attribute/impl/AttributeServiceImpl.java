@@ -104,7 +104,7 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		sanityCheck();
 		Attribute attribute = null;
 		if (attributeUid <= 0) {
-			attribute = getBean(ContextIdNames.ATTRIBUTE);
+			attribute = getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 		} else {
 			attribute = getPersistentBeanFinder().load(ContextIdNames.ATTRIBUTE, attributeUid);
 		}
@@ -123,7 +123,7 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		sanityCheck();
 		Attribute attribute = null;
 		if (attributeUid <= 0) {
-			attribute = getBean(ContextIdNames.ATTRIBUTE);
+			attribute = getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 		} else {
 			attribute = getPersistentBeanFinder().get(ContextIdNames.ATTRIBUTE, attributeUid);
 		}
@@ -341,7 +341,7 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	 */
 	@Override
 	public Map<String, String> getAttributeUsageMap() {
-		return ((AttributeUsage) getBean(ContextIdNames.ATTRIBUTE_USAGE)).getAttributeUsageMap();
+		return getPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class).getAttributeUsageMap();
 	}
 
 	/**

@@ -12,10 +12,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -68,17 +65,6 @@ public class CustomerDTO implements Dto {
 	@XmlElementWrapper(name = "addresses")
 	@XmlElement(name = "address")
 	private List<AddressDTO> addresses = new ArrayList<>();
-
-	@XmlMixed
-	@XmlElementWrapper(name = "payment_methods")
-	@XmlElementRefs({
-			@XmlElementRef(name = "payment_token", type = PaymentTokenDto.class),
-			@XmlElementRef(name = "credit_card", type = CreditCardDTO.class)
-	})
-	private List<PaymentMethodDto> paymentMethods = new ArrayList<>();
-
-	@XmlElement(name = "default_payment_method")
-	private DefaultPaymentMethodDTO defaultPaymentMethod;
 
 	/**
 	 * The customer sessions.
@@ -239,22 +225,6 @@ public class CustomerDTO implements Dto {
 
 	public void setProfileValues(final Set<AttributeValueDTO> profileValues) {
 		this.profileValues = profileValues;
-	}
-
-	public List<PaymentMethodDto> getPaymentMethods() {
-		return paymentMethods;
-	}
-
-	public void setPaymentMethods(final List<PaymentMethodDto> paymentMethods) {
-		this.paymentMethods = paymentMethods;
-	}
-
-	public DefaultPaymentMethodDTO getDefaultPaymentMethod() {
-		return this.defaultPaymentMethod;
-	}
-
-	public void setDefaultPaymentMethod(final DefaultPaymentMethodDTO defaultPaymentMethod) {
-		this.defaultPaymentMethod = defaultPaymentMethod;
 	}
 
 	public boolean isFirstTimeBuyer() {

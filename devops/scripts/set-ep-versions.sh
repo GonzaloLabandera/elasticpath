@@ -276,6 +276,8 @@ function set_extensions_version() {
   set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/system-tests/pom.xml"
   set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/system-tests/syndication-test-definitions/pom.xml"
   set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/system-tests/cucumber/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/commerce-engine/core/ep-core-tool-itests/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/commerce-engine/core/ep-core-tool-itests/selenium/pom.xml"
 
   # Set project version
   mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \

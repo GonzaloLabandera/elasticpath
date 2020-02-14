@@ -24,6 +24,7 @@
 
 	<import resource="classpath:spring/dataaccess/openjpa/openjpa.xml" />
 
+	<import resource="importexport-assemblers.xml" />
 	<import resource="importexport-adapters.xml" />
 
 	<import resource="importexport-domain.xml" />

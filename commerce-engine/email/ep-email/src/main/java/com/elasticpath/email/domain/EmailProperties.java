@@ -3,6 +3,7 @@
  */
 package com.elasticpath.email.domain;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -138,5 +139,12 @@ public interface EmailProperties extends EpDomain {
 	 * @param defaultSubject the text to use a subject to set
 	 */
 	void setDefaultSubject(String defaultSubject);
+
+	/**
+	 * Returns a list of email addresses for the recipients.
+	 *
+	 * @return a list of email addresses for the recipients.
+	 */
+	List<String> getRecipientAddresses();
 
 }

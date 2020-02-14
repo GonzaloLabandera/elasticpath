@@ -4,11 +4,18 @@
 
 package com.elasticpath.persistence.openjpa.executors;
 
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.getResults;
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.toFlushModeType;
+
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.openjpa.persistence.OpenJPAPersistence;
+import org.apache.openjpa.persistence.OpenJPAQuery;
 
 import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.persistence.api.Persistable;
@@ -27,6 +34,7 @@ public class NamedQueryExecutor<T extends Persistable> extends AbstractQueryExec
 	private FlushMode flushMode;
 	private Integer firstResult;
 	private Integer maxResults;
+	private Boolean ignoreChanges;
 
 	/**
 	 * Set query name.
@@ -101,6 +109,18 @@ public class NamedQueryExecutor<T extends Persistable> extends AbstractQueryExec
 		return this;
 	}
 
+	/**
+	 * Ignore changes, if required.
+	 *
+	 * @param ignoreChanges the flag.
+	 * @return the current instance of {@link NamedQueryExecutor}
+	 */
+	public NamedQueryExecutor withIgnoreChanges(final Boolean ignoreChanges) {
+		this.ignoreChanges = ignoreChanges;
+
+		return this;
+	}
+
 	@Override
 	public String getQuery() {
 		return queryName;
@@ -109,13 +129,19 @@ public class NamedQueryExecutor<T extends Persistable> extends AbstractQueryExec
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<T> executeMultiResultQuery(final EntityManager entityManager) {
-		Query namedQuery = getQueryUtil().createNamedQuery(entityManager, getQuery());
+		OpenJPAQuery namedQuery = OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName));
 
-		getQueryUtil().setQueryParameters(namedQuery, this.arrayParameters);
-		getQueryUtil().setQueryParameters(namedQuery, this.mapParameters);
+		if (ArrayUtils.isNotEmpty(arrayParameters)) {
+			namedQuery.setParameters(arrayParameters);
+
+		}
+
+		if (MapUtils.isNotEmpty(mapParameters)) {
+			namedQuery.setParameters(mapParameters);
+		}
 
 		if (this.flushMode != null) {
-			namedQuery.setFlushMode(getQueryUtil().toFlushModeType(flushMode));
+			namedQuery.setFlushMode(toFlushModeType(flushMode));
 		}
 
 		if (this.firstResult != null) {
@@ -126,6 +152,10 @@ public class NamedQueryExecutor<T extends Persistable> extends AbstractQueryExec
 			namedQuery.setMaxResults(maxResults);
 		}
 
-		return getQueryUtil().getResults(namedQuery);
+		if (this.ignoreChanges != null) {
+			OpenJPAPersistence.cast(namedQuery).setIgnoreChanges(ignoreChanges);
+		}
+
+		return getResults(namedQuery);
 	}
 }

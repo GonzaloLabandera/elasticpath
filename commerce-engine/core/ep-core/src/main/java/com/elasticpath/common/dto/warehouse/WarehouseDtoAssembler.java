@@ -18,7 +18,7 @@ public class WarehouseDtoAssembler extends AbstractDtoAssembler<WarehouseDTO, Wa
 
 	@Override
 	public Warehouse getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.WAREHOUSE);
+		return beanFactory.getPrototypeBean(ContextIdNames.WAREHOUSE, Warehouse.class);
 	}
 
 	@Override
@@ -28,11 +28,11 @@ public class WarehouseDtoAssembler extends AbstractDtoAssembler<WarehouseDTO, Wa
 
 	/**
 	 * Overridable factory method.
-	 * 
+	 *
 	 * @return a WarehouseAddress from the Spring context.
 	 */
 	protected WarehouseAddress warehouseAddressDomainFactory() {
-		return beanFactory.getBean(ContextIdNames.WAREHOUSE_ADDRESS);
+		return beanFactory.getPrototypeBean(ContextIdNames.WAREHOUSE_ADDRESS, WarehouseAddress.class);
 	}
 
 	@Override

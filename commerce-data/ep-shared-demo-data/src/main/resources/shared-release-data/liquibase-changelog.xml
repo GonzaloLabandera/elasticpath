@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+  logicalFilePath="shared-demo-data/liquibase-changelog.xml">
+
+	<changeSet id="import-release-shared-data${importexport.test-data.qualifier}" author="elasticpath" context="shared-data">
+
+		<validCheckSum>ANY</validCheckSum>
+
+		<comment>Test shared data for database update or reset test</comment>
+
+		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
+			<param name="dataSet" value="shared-demo-data/shared-release-data" />
+		</customChange>
+	</changeSet>
+</databaseChangeLog>

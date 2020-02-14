@@ -13,7 +13,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
 import com.elasticpath.cmclient.admin.stores.event.AdminStoresEventService;
 import com.elasticpath.cmclient.admin.stores.views.StoreSelector;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
 import com.elasticpath.cmclient.core.helpers.store.StoreEditorModel;
@@ -56,7 +56,7 @@ public class DeleteStoreAction extends Action {
 		LOG.debug("DeleteStore Action called."); //$NON-NLS-1$
 		StoreEditorModel selectedStoreEditorModel = storeSelector.getSelectedStoreEditorModel();
 
-		StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 
 		if (storeService.getStore(selectedStoreEditorModel.getUidPk()) == null) {
 			MessageDialog.openInformation(site.getShell(), AdminStoresMessages.get().NoLongerExistStoreMsgBoxTitle,

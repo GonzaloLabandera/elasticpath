@@ -373,7 +373,7 @@ public class ItemOptionSelectorRepositoryImpl
 																		final Collection<SkuOptionValue> optionValueSelection) {
 
 		return findSkuGuidMatchingOptionValueSelection(storeProduct, optionValueSelection)
-				.flatMap(selectedSkuGuid -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(selectedSkuGuid))
+				.flatMap(selectedSkuGuid -> productSkuRepository.getProductSkuWithAttributesByGuid(selectedSkuGuid))
 				.map(productSku -> itemRepository.getItemIdForProductSku(productSku));
 	}
 

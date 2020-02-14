@@ -25,10 +25,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressConstants;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.service.CatalogEventService;
@@ -54,7 +54,7 @@ import com.elasticpath.service.dataimport.ImportService;
  */
 public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 	private static final Logger LOG = Logger.getLogger(RunImportJobWizard.class);
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private final int type;
 
@@ -72,7 +72,7 @@ public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 		super(JobsMessages.get().RunJobAction, null, null);
 		Locale defaultLocale = CorePlugin.getDefault().getDefaultLocale();
 		CmUser cmUser = LoginManager.getCmUser();
-		request = ServiceLocator.getService(ContextIdNames.IMPORT_JOB_REQUEST);
+		request = BeanLocator.getPrototypeBean(ContextIdNames.IMPORT_JOB_REQUEST, ImportJobRequest.class);
 		request.setImportJob(importJob);
 		request.setInitiator(cmUser);
 		request.setReportingLocale(defaultLocale);
@@ -177,7 +177,7 @@ public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 		public void done(final IJobChangeEvent event) {
 			display.syncExec(() -> {
 
-					ImportService importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+				ImportService importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 					if (ContextIdNames.IMPORT_JOB_RUNNER_CATEGORY.equals(
 							importService.findImportDataType(
 									request.getImportJob().getImportDataTypeName())
@@ -224,8 +224,7 @@ public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 
 			monitor.beginTask("Remote Data Validation", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 
-			final ImportService importService = ServiceLocator.getService(
-				ContextIdNames.IMPORT_SERVICE);
+			final ImportService importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 
 			ImportJobStatus status = importService.scheduleImport(request);
 

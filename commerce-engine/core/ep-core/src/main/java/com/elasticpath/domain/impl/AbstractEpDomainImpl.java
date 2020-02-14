@@ -99,6 +99,6 @@ public abstract class AbstractEpDomainImpl implements EpDomain {
 	@Override
 	@Deprecated
 	public Utility getUtility() {
-		return getBean(ContextIdNames.UTILITY);
+		return getSingletonBean(ContextIdNames.UTILITY, Utility.class);
 	}
 }

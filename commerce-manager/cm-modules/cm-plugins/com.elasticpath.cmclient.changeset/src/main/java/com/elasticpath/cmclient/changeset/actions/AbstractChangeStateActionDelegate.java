@@ -20,7 +20,7 @@ import org.eclipse.ui.actions.ActionDelegate;
 
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventListener;
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -63,13 +63,14 @@ public abstract class AbstractChangeStateActionDelegate extends ActionDelegate
 	@Override
 	public void run(final IAction action) {
 		final IStructuredSelection selection = (IStructuredSelection) view.getViewSite().getSelectionProvider().getSelection();
-		final ChangeSetManagementService changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+		final ChangeSetManagementService changeSetService = BeanLocator
+				.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 		Iterator<ChangeSet> iterator = selection.iterator();
 		while (iterator.hasNext()) {
 			ChangeSet changeSet = iterator.next();
 
 			if (checkEditors(changeSet)) {
-				ChangeSetLoadTuner noMembersLoadTuner = ServiceLocator.getService(ContextIdNames.CHANGESET_LOAD_TUNER);
+				ChangeSetLoadTuner noMembersLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.CHANGESET_LOAD_TUNER, ChangeSetLoadTuner.class);
 				noMembersLoadTuner.setLoadingMemberObjects(false);
 				noMembersLoadTuner.setLoadingMemberObjectsMetadata(false);
 				

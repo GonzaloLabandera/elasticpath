@@ -1,6 +1,7 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
+
 package com.elasticpath.importexport.exporter.exporters.impl;
 
 import java.util.Collections;
@@ -12,7 +13,7 @@ import com.elasticpath.common.dto.giftcertificate.GiftCertificateTransactionDTO;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.payment.GiftCertificateTransaction;
 import com.elasticpath.service.catalog.GiftCertificateService;
-import com.elasticpath.service.payment.GiftCertificateTransactionService;
+import com.elasticpath.service.giftcertificate.GiftCertificateTransactionService;
 
 /**
  * This class is responsible for exporting {@link GiftCertificateTransaction}s.

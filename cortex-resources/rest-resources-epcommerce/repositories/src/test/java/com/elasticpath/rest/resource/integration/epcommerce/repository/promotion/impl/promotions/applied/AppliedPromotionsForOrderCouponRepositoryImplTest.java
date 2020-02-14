@@ -3,11 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.PromotionTestFactory
-		.buildAppliedPromotionsForOrderCouponIdentifier;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.PromotionTestFactory.buildAppliedPromotionsForOrderCouponIdentifier;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +67,7 @@ public class AppliedPromotionsForOrderCouponRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnNotFoundWhenShoppingCartNotFound() {
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
+		when(cartOrderRepository.getEnrichedShoppingCart(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
 				CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ResourceTestConstants.NOT_FOUND)));
 
@@ -80,9 +78,9 @@ public class AppliedPromotionsForOrderCouponRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnNotFoundWhenPricingSnapshotNotFound() {
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
+		when(cartOrderRepository.getEnrichedShoppingCart(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
 				CartOrderRepository.FindCartOrder.BY_ORDER_GUID)).thenReturn(Single.just(shoppingCart));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
+		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ResourceTestConstants.NOT_FOUND)));
 
 		repository.getElements(identifier)
@@ -92,9 +90,9 @@ public class AppliedPromotionsForOrderCouponRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnNotFoundWhenCouponNotFound() {
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
+		when(cartOrderRepository.getEnrichedShoppingCart(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
 				CartOrderRepository.FindCartOrder.BY_ORDER_GUID)).thenReturn(Single.just(shoppingCart));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
+		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
 				.thenReturn(Single.just(shoppingCartPricingSnapshot));
 		when(couponRepository.findByCouponCode(ResourceTestConstants.COUPON_CODE))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ResourceTestConstants.NOT_FOUND)));
@@ -106,9 +104,9 @@ public class AppliedPromotionsForOrderCouponRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnEmptyWhenNoPromotionsAreFound() {
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
+		when(cartOrderRepository.getEnrichedShoppingCart(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
 				CartOrderRepository.FindCartOrder.BY_ORDER_GUID)).thenReturn(Single.just(shoppingCart));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
+		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
 				.thenReturn(Single.just(shoppingCartPricingSnapshot));
 		when(couponRepository.findByCouponCode(ResourceTestConstants.COUPON_CODE)).thenReturn(Single.just(coupon));
 		when(promotionRepository.getAppliedPromotionsForCoupon(shoppingCartPricingSnapshot, coupon)).thenReturn(Collections.emptyList());
@@ -126,9 +124,9 @@ public class AppliedPromotionsForOrderCouponRepositoryImplTest {
 			appliedPromotions.add(String.valueOf(i));
 		}
 
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
+		when(cartOrderRepository.getEnrichedShoppingCart(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID,
 				CartOrderRepository.FindCartOrder.BY_ORDER_GUID)).thenReturn(Single.just(shoppingCart));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
+		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
 				.thenReturn(Single.just(shoppingCartPricingSnapshot));
 		when(couponRepository.findByCouponCode(ResourceTestConstants.COUPON_CODE)).thenReturn(Single.just(coupon));
 		when(promotionRepository.getAppliedPromotionsForCoupon(shoppingCartPricingSnapshot, coupon)).thenReturn(appliedPromotions);

@@ -46,7 +46,7 @@ public class ProductAssociationDaoAdapterImpl extends AbstractDaoAdapter<Product
 
 	@Override
 	public ProductAssociation createBean(final ProductAssociation bean) {
-		ProductAssociation association = beanFactory.getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+		ProductAssociation association = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 		association.initialize();
 		return association;
 	}

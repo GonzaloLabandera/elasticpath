@@ -59,4 +59,15 @@
 			</map>
 		</property>
 	</bean>
+
+    <bean id="defaultCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+          destroy-method="destroy">
+        <property name="cacheManagerName" value="#{applicationName}--CacheManager"/>
+        <property name="shared" value="false"/>
+        <property name="configLocation" value="#{ehCacheConfigurationLoader.resource}"/>
+    </bean>
+
+    <bean id="ehCacheConfigurationLoader" class="com.elasticpath.commons.util.EhcacheConfigurationLoader">
+        <property name="pathname" value="${ep.external.ehcache.xml.path:null}"/>
+    </bean>
 </beans>

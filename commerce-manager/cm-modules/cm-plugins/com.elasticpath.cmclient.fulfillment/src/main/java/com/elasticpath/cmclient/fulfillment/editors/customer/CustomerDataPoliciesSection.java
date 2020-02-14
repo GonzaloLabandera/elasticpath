@@ -4,6 +4,8 @@
 package com.elasticpath.cmclient.fulfillment.editors.customer;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,8 +35,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
@@ -49,10 +51,10 @@ import com.elasticpath.cmclient.fulfillment.editors.customer.dialogs.CustomerRem
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.datapolicy.ConsentAction;
-import com.elasticpath.domain.datapolicy.CustomerConsent;
-import com.elasticpath.domain.datapolicy.DataPolicy;
-import com.elasticpath.service.datapolicy.CustomerConsentService;
+import com.elasticpath.domain.datapolicy.DataPoint;
+import com.elasticpath.domain.datapolicy.DataPolicyDescription;
 import com.elasticpath.service.datapolicy.DataPointValueService;
+import com.elasticpath.service.datapolicy.DataPolicyService;
 import com.elasticpath.service.datapolicy.impl.DataPointValue;
 
 /**
@@ -61,13 +63,15 @@ import com.elasticpath.service.datapolicy.impl.DataPointValue;
  *
  * The CSRs will be able to delete data point values.
  */
+@SuppressWarnings({"PMD.GodClass"})
 public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSectionPart implements SelectionListener {
 
 	private static final String CUSTOMER_DATA_POLICIES_TABLE = "Customer Data Policies Table"; //$NON-NLS-1$
-	private static final CustomerConsentService CUSTOMER_CONSENT_SERVICE =
-		(CustomerConsentService) ServiceLocator.getService(ContextIdNames.CUSTOMER_CONSENT_SERVICE);
 
-	private static final DataPointValueService DATA_POINT_VALUE_SERVICE = ServiceLocator.getService(ContextIdNames.DATA_POINT_VALUE_SERVICE);
+	private static final DataPointValueService DATA_POINT_VALUE_SERVICE = BeanLocator
+			.getSingletonBean(ContextIdNames.DATA_POINT_VALUE_SERVICE, DataPointValueService.class);
+	private static final DataPolicyService DATA_POLICY_SERVICE = BeanLocator
+			.getSingletonBean(ContextIdNames.DATA_POLICY_SERVICE, DataPolicyService.class);
 
 	private static final int POLICY_NAME_COLUMN_WIDTH = 278;
 	private static final int CONSENT_GIVEN_COLUMN_WIDTH = 107;
@@ -87,7 +91,7 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 	private static final int COLUMN_THREE_INDEX = 3;
 	private static final int COLUMN_FOUR_INDEX = 4;
 
-	private List<CustomerConsent> customerConsents;
+	private List<DataPolicyDescription> allDataPolicies;
 	private final Customer customer;
 
 	private Button showDisabledPolicies;
@@ -106,7 +110,7 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 	CustomerDataPoliciesSection(final FormPage formPage, final AbstractCmClientFormEditor editor) {
 		super(formPage, editor, ExpandableComposite.TITLE_BAR);
 		this.customer = (Customer) editor.getModel();
-		this.customerConsents = CUSTOMER_CONSENT_SERVICE.findWithActiveDataPoliciesByCustomerGuid(this.customer.getGuid(), false);
+		this.allDataPolicies = DATA_POLICY_SERVICE.findAllActiveDataPoliciesForCustomer(this.customer.getStoreCode(), this.customer.getGuid());
 	}
 
 	@Override
@@ -142,11 +146,11 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 
 		dataPoliciesTableViewer.setLabelProvider(new DataPolicyLabelProvider());
 		dataPoliciesTableViewer.setContentProvider(new DataPolicyContentProvider());
-		dataPoliciesTableViewer.setInput(this.customerConsents);
+		dataPoliciesTableViewer.setInput(this.allDataPolicies);
 		dataPoliciesTableViewer.getSwtTableViewer().setSorter(new ViewerSorter() {
 			@Override
 			public int compare(final Viewer viewer, final Object obj1, final Object obj2) {
-				return ((CustomerConsent) obj1).getDataPolicy().getPolicyName().compareTo(((CustomerConsent) obj2).getDataPolicy().getPolicyName());
+				return ((DataPolicyDescription) obj1).getPolicyName().compareTo(((DataPolicyDescription) obj2).getPolicyName());
 			}
 		});
 
@@ -203,9 +207,11 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 	}
 
 	/**
-	 * This label provider returns the text that should appear in each column for a given <code>CustomerConsent</code> object.
+	 * This label provider returns the text that should appear in each column for a given <code>DataPolicyDescription</code> object.
 	 */
 	class DataPolicyLabelProvider extends LabelProvider implements ITableLabelProvider {
+
+		private static final String MISSING_VALUE_TEXT = "n/a";
 
 		@Override
 		public Image getColumnImage(final Object element, final int columnIndex) {
@@ -215,17 +221,25 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 
 		@Override
 		public String getColumnText(final Object element, final int columnIndex) {
-			final CustomerConsent consent = (CustomerConsent) element;
+			final DataPolicyDescription dataPolicyDescription = (DataPolicyDescription) element;
 
 			switch (columnIndex) {
 				case 0:
-					return consent.getDataPolicy().getPolicyName();
+					return dataPolicyDescription.getPolicyName();
 				case 1:
-					return consent.getDataPolicy().getState().getName();
+					return dataPolicyDescription.getStateName();
 				case 2:
-					return convertBooleanToYesNo(consent.getAction() == ConsentAction.GRANTED);
+					ConsentAction action = dataPolicyDescription.getAction();
+					if (action == null) {
+						return MISSING_VALUE_TEXT;
+					}
+					return convertBooleanToYesNo(action == ConsentAction.GRANTED);
 				case COLUMN_THREE_INDEX:
-					return DateTimeUtilFactory.getDateUtil().formatAsDateTime(consent.getConsentDate());
+					Date consentDate = dataPolicyDescription.getConsentDate();
+					if (consentDate == null) {
+						return MISSING_VALUE_TEXT;
+					}
+					return DateTimeUtilFactory.getDateUtil().formatAsDateTime(consentDate);
 				default:
 					return "unknown @ column" + columnIndex; //$NON-NLS-1$
 			}
@@ -248,7 +262,7 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 		@Override
 		@SuppressWarnings("synthetic-access")
 		public Object[] getElements(final Object inputElement) {
-			return ((List<CustomerConsent>) inputElement).toArray();
+			return ((List<DataPolicyDescription>) inputElement).toArray();
 		}
 
 		/**
@@ -371,31 +385,27 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 	public void widgetSelected(final SelectionEvent event) {
 
 		if (event.getSource() == this.viewDataPointsButton) {
-
-			CustomerConsent selectedCustomerConsent  = getSelectedCustomerConsent();
-			DataPolicy dataPolicy = selectedCustomerConsent.getDataPolicy();
+			DataPolicyDescription dataPolicyDescription = getSelectedDataPolicyDescription();
 
 			try {
 
-				initDataPointValuesTableWithData(dataPolicy.getGuid());
+				initDataPointValuesTableWithData(dataPolicyDescription.getGuid());
 
 			} catch (Exception e) {
 				Status status = new Status(IStatus.ERROR, FulfillmentPlugin.PLUGIN_ID, e.getMessage(), e);
 				ErrorDialog.openError(new Shell(Display.getCurrent()), FulfillmentMessages.get().Error_Title,
-					String.format(FulfillmentMessages.get().DataPointValueRemovalError_Message, dataPolicy.getPolicyName()), status);
+						String.format(FulfillmentMessages.get().DataPointValueRemovalError_Message, dataPolicyDescription.getPolicyName()), status);
 			}
 
 		} else if (event.getSource() == this.deletePolicyDataButton) {
-
-			CustomerConsent selectedCustomerConsent  = getSelectedCustomerConsent();
-			DataPolicy dataPolicy = selectedCustomerConsent.getDataPolicy();
+			DataPolicyDescription dataPolicyDescription = getSelectedDataPolicyDescription();
 
 			try {
 
 				/* must take the fresh set of data points because the data points and their values can be updated from another browser or DB client
 				as well as this window (once data point values are removed for the selected policy, there is no point deleting them again)
 				 */
-				Collection<DataPointValue> dataPointValues = getCustomerDataPointValuesByPolicyGuidFromDb(dataPolicy.getGuid()).stream()
+				Collection<DataPointValue> dataPointValues = getCustomerDataPointValuesByPolicyGuidFromDb(dataPolicyDescription.getGuid()).stream()
 					.filter(this::isDataPointValueRemovableAndNonEmpty)
 					.collect(Collectors.toList());
 
@@ -408,16 +418,16 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 				}
 
 				Dialog dialog = new CustomerRemoveDataPolicyDataDialog(this.getManagedForm().getForm().getShell(), customer.getGuid(),
-					dataPolicy.getPolicyName(), dataPolicy.getGuid(), dataPointValues);
+						dataPolicyDescription.getPolicyName(), dataPolicyDescription.getGuid(), dataPointValues);
 
 				if (dialog.open() == CustomerRemoveDataPolicyDataDialog.DELETE_BUTTON_INDEX) { //delete selected
-					initDataPointValuesTableWithData(dataPolicy.getGuid());
+					initDataPointValuesTableWithData(dataPolicyDescription.getGuid());
 				}
 
 			} catch (Exception e) {
 				Status status = new Status(IStatus.ERROR, FulfillmentPlugin.PLUGIN_ID, e.getMessage(), e);
 				ErrorDialog.openError(new Shell(Display.getCurrent()), FulfillmentMessages.get().Error_Title,
-					String.format(FulfillmentMessages.get().DataPointValueRemovalError_Message, dataPolicy.getPolicyName()),
+						String.format(FulfillmentMessages.get().DataPointValueRemovalError_Message, dataPolicyDescription.getPolicyName()),
 					status);
 			}
 
@@ -425,9 +435,11 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 
 			boolean isSelected = showDisabledPolicies.getSelection();
 
-			this.customerConsents = CUSTOMER_CONSENT_SERVICE.findWithActiveDataPoliciesByCustomerGuid(this.customer.getGuid(), isSelected);
+			String storeCode = this.customer.getStoreCode();
+			String customerGuid = this.customer.getGuid();
+			this.allDataPolicies = DATA_POLICY_SERVICE.findAllActiveDataPoliciesByStoreWithDisabledOption(storeCode, customerGuid, isSelected);
 
-			this.dataPoliciesTableViewer.setInput(customerConsents);
+			this.dataPoliciesTableViewer.setInput(allDataPolicies);
 			this.dataPoliciesTableViewer.getSwtTableViewer().refresh();
 
 			if (!isSelected) {
@@ -442,7 +454,13 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 	}
 
 	private Collection<DataPointValue> getCustomerDataPointValuesByPolicyGuidFromDb(final String dataPolicyGuid) {
-		return DATA_POINT_VALUE_SERVICE.getCustomerDataPointValuesForStoreByPolicyGuid(customer.getGuid(), customer.getStoreCode(), dataPolicyGuid);
+		HashMap<String, List<DataPoint>> objectObjectHashMap = new HashMap<>();
+		objectObjectHashMap.put(this.customer.getGuid(),
+				DATA_POLICY_SERVICE.findAllActiveDataPoliciesForCustomer(this.customer.getStoreCode(), this.customer.getGuid()).stream()
+						.filter(dataPolicy -> dataPolicy.getGuid().equals(dataPolicyGuid))
+						.flatMap(dataPolicy -> dataPolicy.getDataPoints().stream())
+						.collect(Collectors.toList()));
+		return DATA_POINT_VALUE_SERVICE.getValues(objectObjectHashMap);
 	}
 
 	private void initDataPointValuesTableWithData(final String dataPolicyGuid) {
@@ -453,8 +471,8 @@ public class CustomerDataPoliciesSection extends AbstractCmClientEditorPageSecti
 		this.dataPointsTableViewer.getSwtTable().setVisible(true);
 	}
 
-	private CustomerConsent getSelectedCustomerConsent() {
-		return (CustomerConsent) this.dataPoliciesTableViewer.getSwtTable().getSelection()[0].getData();
+	private DataPolicyDescription getSelectedDataPolicyDescription() {
+		return (DataPolicyDescription) this.dataPoliciesTableViewer.getSwtTable().getSelection()[0].getData();
 	}
 
 

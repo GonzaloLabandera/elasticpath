@@ -4,15 +4,14 @@
 
 package com.elasticpath.domain.shipping.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_COST_CALCULATION_PARAMETER;
 import static com.elasticpath.domain.shipping.impl.ShippingAsserts.assertShippingCost;
 import static com.elasticpath.domain.shipping.impl.ShippingCostTestDataFactory.aCostCalculationParam;
 import static com.elasticpath.domain.shipping.impl.ShippingCostTestDataFactory.someCalculationParams;
 import static com.elasticpath.test.factory.ShippableItemContainerStubBuilder.aContainer;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -145,7 +144,8 @@ public class OrderTotalPercentageMethodImplTest {
 	 */
 	@Test
 	public void testGetDefaultParametersSet() {
-		when(beanFactory.getBean(SHIPPING_COST_CALCULATION_PARAMETER)).thenReturn(mock(ShippingCostCalculationParameterImpl.class));
+		when(beanFactory.getPrototypeBean(SHIPPING_COST_CALCULATION_PARAMETER, ShippingCostCalculationParameter.class))
+				.thenReturn(mock(ShippingCostCalculationParameterImpl.class));
 
 		List<Currency> currencyList = new ArrayList<>();
 		Currency usd = Currency.getInstance("USD");

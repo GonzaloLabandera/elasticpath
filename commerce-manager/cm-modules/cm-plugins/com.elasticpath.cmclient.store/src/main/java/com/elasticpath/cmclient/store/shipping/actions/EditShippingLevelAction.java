@@ -10,8 +10,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.store.shipping.ShippingLevelsMessages;
 import com.elasticpath.cmclient.store.shipping.dialogs.ShippingLevelDialog;
 import com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView;
@@ -46,8 +46,8 @@ public class EditShippingLevelAction extends Action {
 	public void run() {
 		LOG.debug("EditShippingLevel Action called."); //$NON-NLS-1$
 
-		final ShippingServiceLevelService shippingService = ServiceLocator.getService(
-				EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+		final ShippingServiceLevelService shippingService = BeanLocator
+				.getSingletonBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
 
 		final ShippingServiceLevel selectedShippingLevel = listView.getSelectedShippingLevel();
 		final ShippingServiceLevel selectedShippingLevelToEdit = (ShippingServiceLevel) shippingService.getObject(selectedShippingLevel.getUidPk());

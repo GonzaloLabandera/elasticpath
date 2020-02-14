@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>paymentinstruments</name>
+
+		<resource>
+			<name>profile-default-payment-instrument-selector</name>
+			<description><![CDATA[
+				Selector to choose a default payment instrument for a profile.
+			]]></description>
+			<uri>{payment-instruments}/defaultinstrumentselector</uri>
+			<selector-for>payment-instruments</selector-for>
+		</resource>
+
+		<resource>
+			<name>profile-default-payment-instrument-selector-choice</name>
+			<description><![CDATA[
+				A choice for the default payment instrument selector on a profile.
+			]]></description>
+			<uri>{paymentinstruments.profile-default-payment-instrument-selector}/{paymentinstruments.payment-instrument}</uri>
+			<choices-for>profile-default-payment-instrument-selector</choices-for>
+		</resource>
+
+		<relationship>
+			<name>profile-default-payment-instrument-selector-for-profile</name>
+			<description><![CDATA[
+				Retrieve the selector for default instrument on a profile.
+			]]></description>
+			<rel>defaultinstrumentselector</rel>
+			<rev>paymentinstruments</rev>
+			<from>paymentinstruments.payment-instruments</from>
+			<to>profile-default-payment-instrument-selector</to>
+		</relationship>
+
+		<relationship>
+			<name>profile-default-payment-instrument-selector-choice-to-choices</name>
+			<description><![CDATA[Link from a profile payment instrument to the instrument choices.]]></description>
+			<rel>selector</rel>
+			<from>paymentinstruments.profile-default-payment-instrument-selector-choice</from>
+			<to>profile-default-payment-instrument-selector</to>
+		</relationship>
+	</family>
+</definitions>

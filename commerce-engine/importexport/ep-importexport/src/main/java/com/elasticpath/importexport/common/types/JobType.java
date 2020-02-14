@@ -72,8 +72,8 @@ public enum JobType {
 	/** Job type for PLAs. */
 	PRICELISTASSIGNMENT("price_list_assignments"),
 
-	/** Payment gateways. */
-	PAYMENTGATEWAY("payment_gateways"),
+	/** Payment providers. */
+	PAYMENTPROVIDER("payment_providers"),
 
 	/** Warehouses. */
 	WAREHOUSE("warehouses"),

@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -174,7 +174,7 @@ public class CatalogSkuOptionValueAddEditDialog extends AbstractPolicyAwareDialo
 	 */
 	public SkuOptionValue getSkuOptionValue() {
 		if (skuOptionValue == null) {
-			this.skuOptionValue = ServiceLocator.getService(ContextIdNames.SKU_OPTION_VALUE);
+			this.skuOptionValue = BeanLocator.getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE, SkuOptionValue.class);
 		}
 		return skuOptionValue;
 	}

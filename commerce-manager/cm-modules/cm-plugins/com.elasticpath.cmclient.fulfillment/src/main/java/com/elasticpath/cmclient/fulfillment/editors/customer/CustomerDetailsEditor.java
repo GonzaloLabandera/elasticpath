@@ -13,7 +13,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -90,8 +90,8 @@ public class CustomerDetailsEditor extends AbstractCmClientFormEditor {
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) throws PartInitException {
 		this.customer = input.getAdapter(Customer.class);
-		this.customerService = ServiceLocator.getService(ContextIdNames.CUSTOMER_SERVICE);
-		storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		this.customerService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
+		storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		store = storeService.findStoreWithCode(customer.getStoreCode());
 	}
 

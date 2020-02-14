@@ -69,15 +69,15 @@ public class ProfileEntityRepositoryImpl<E extends ProfileEntity, I extends Prof
 		return profileAttributeValidator.validate(entity, profileIdentifier)
 				.andThen(customerRepository.getCustomer(profileIdentifier.getProfileId().getValue())
 						.map(customer -> updateCustomerData(entity, profileIdentifier, customer))
-						.flatMapCompletable(customerRepository::updateCustomerAsCompletable));
+						.flatMapCompletable(customerRepository::updateCustomer));
 	}
 
 	/**
 	 * Updates the customer attributes with the profile entity.
 	 *
-	 * @param profileEntity profile entity
+	 * @param profileEntity     profile entity
 	 * @param profileIdentifier the profile identifier
-	 * @param customer      customer to update
+	 * @param customer          customer to update
 	 * @return the updated customer
 	 */
 	protected Customer updateCustomerData(final ProfileEntity profileEntity, final ProfileIdentifier profileIdentifier, final Customer customer) {
@@ -98,14 +98,14 @@ public class ProfileEntityRepositoryImpl<E extends ProfileEntity, I extends Prof
 				.collect(Collectors.toSet());
 
 		updateKeys.forEach(key ->
-						this.updateCustomerAttribute(key, StringUtils.trimToNull(dynamicProperties.get(key)), customer, attributeMap));
+				this.updateCustomerAttribute(key, StringUtils.trimToNull(dynamicProperties.get(key)), customer, attributeMap));
 
 		// get set of editable attribute keys that haven't been updated - semantically this implies they should be removed
 		List<String> attributeKeysForRemoval =
 				customerProfileAttributeService.getCustomerEditableAttributeKeys(profileIdentifier.getScope().getValue())
-				.stream()
-				.filter(key -> !updateKeys.contains(key))
-				.collect(Collectors.toList());
+						.stream()
+						.filter(key -> !updateKeys.contains(key))
+						.collect(Collectors.toList());
 
 		removeAttributes(attributeKeysForRemoval, customer);
 
@@ -118,9 +118,9 @@ public class ProfileEntityRepositoryImpl<E extends ProfileEntity, I extends Prof
 		customer.setProfileValueMap(profileValueMap);
 	}
 
-	@SuppressWarnings({ "PMD.MissingBreakInSwitch", "fallthrough" }) // PMD false positive bug - https://sourceforge.net/p/pmd/bugs/1262
+	@SuppressWarnings({"PMD.MissingBreakInSwitch", "fallthrough"}) // PMD false positive bug - https://sourceforge.net/p/pmd/bugs/1262
 	private void updateCustomerAttribute(final String attributeKey, final String value, final Customer customer,
-			final Map<String, Attribute> attributeMap) {
+										 final Map<String, Attribute> attributeMap) {
 		final AttributeType attributeType = attributeMap.get(attributeKey).getAttributeType();
 		switch (attributeType.getTypeId()) {
 			case AttributeType.DATE_TYPE_ID:

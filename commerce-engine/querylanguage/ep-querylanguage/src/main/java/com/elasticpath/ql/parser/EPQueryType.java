@@ -32,9 +32,6 @@ public enum EPQueryType {
 	/** A dynamic content query type. */
 	DYNAMICCONTENT("DynamicContent", TargetLanguage.JPQL), DYNAMICCONTENTDELIVERY("DynamicContentDelivery", TargetLanguage.JPQL),
 
-	/** Query type for payment gateways. */
-	PAYMENTGATEWAY("PaymentGateway", TargetLanguage.JPQL),
-
 	/** Query type warehouse. */
 	WAREHOUSE("Warehouse", TargetLanguage.JPQL),
 

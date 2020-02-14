@@ -3,6 +3,7 @@
  */
 package com.elasticpath.persistence.api;
 
+import java.math.RoundingMode;
 
 /**
  * The default implementation of <code>Persistable</code>.
@@ -24,6 +25,9 @@ public abstract class AbstractPersistableImpl implements Persistable {
 
 	/** Scale to be used for persisting decimal fields. */
 	public static final int DECIMAL_SCALE = 2;
+
+	/** Rounding mode to be used for persisting decimal fields. */
+	public static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
 
 	/**
 	 * True if the object has previously been persisted.

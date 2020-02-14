@@ -1,6 +1,7 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
+
 package com.elasticpath.service.catalog.impl;
 
 import java.math.BigDecimal;
@@ -24,17 +25,15 @@ import com.elasticpath.commons.util.Utility;
 import com.elasticpath.core.messaging.giftcertificate.GiftCertificateEventType;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.payment.GiftCertificateTransaction;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.money.Money;
-import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.service.catalog.GiftCertificateService;
+import com.elasticpath.service.giftcertificate.GiftCertificateTransactionService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.payment.GiftCertificateTransactionService;
 
 /**
  * Provides services related to Gift Certificates.
@@ -78,7 +77,7 @@ public class GiftCertificateServiceImpl extends AbstractEpPersistenceServiceImpl
 		sanityCheck();
 		GiftCertificate giftCertificate = null;
 		if (giftCertificateUid <= 0) {
-			giftCertificate = getBean(ContextIdNames.GIFT_CERTIFICATE);
+			giftCertificate = getPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class);
 		} else {
 			giftCertificate = getPersistentBeanFinder().load(ContextIdNames.GIFT_CERTIFICATE, giftCertificateUid);
 		}
@@ -504,28 +503,11 @@ public class GiftCertificateServiceImpl extends AbstractEpPersistenceServiceImpl
 
 	}
 
-	/**
-	 * Retrieves list of <code>OrderPayment</code>s associated with the specified gift certificate grouped by their shipments.
-	 *
-	 * @param uidPk GiftCertificate uid.
-	 * @return map of shipments to their payments.
-	 */
 	@Override
 	public Map<Order, Money> retrieveOrdersBalances(final long uidPk) {
 		sanityCheck();
 
-		final Map<Order, Money> ordersBalance = new TreeMap<>(Comparator.comparing(Order::getCreatedDate));
-
-		List<Order> orders = getPersistenceEngine().retrieveByNamedQuery("ORDERS_BY_GIFT_CERTIFICATE", uidPk);
-		for (Order order : orders) {
-			List<GiftCertificateTransaction> transactions = getPersistenceEngine().retrieveByNamedQuery(
-					"GIFT_CERTIFICATE_TRANSACTIONS_BY_ORDER_AND_GIFT_CERTIFICATE", uidPk, PaymentType.GIFT_CERTIFICATE, order.getUidPk());
-			BigDecimal amount = getGiftCertificateTransactionService().calcTransactionBalance(transactions);
-			Money money = Money.valueOf(amount, order.getCurrency());
-			ordersBalance.put(order, money);
-		}
-
-		return ordersBalance;
+		return new TreeMap<>(Comparator.comparing(Order::getCreatedDate));
 	}
 
 	@Override
@@ -540,7 +522,7 @@ public class GiftCertificateServiceImpl extends AbstractEpPersistenceServiceImpl
 
 	/**
 	 * Triggers a gift certificate event.
-	 * 
+	 *
 	 * @param eventType the type of Gift Certificate Event to trigger
 	 * @param giftCertificateGuid the guid of the Gift Certificate associated with the event
 	 */

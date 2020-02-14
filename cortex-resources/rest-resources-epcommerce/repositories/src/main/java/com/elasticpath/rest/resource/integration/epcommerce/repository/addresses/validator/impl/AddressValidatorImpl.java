@@ -9,7 +9,6 @@ import javax.inject.Singleton;
 import io.reactivex.Completable;
 
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.definition.addresses.AddressDetailEntity;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.base.NameEntity;
 import com.elasticpath.rest.definitions.validator.constants.ValidationMessages;
@@ -36,11 +35,12 @@ public class AddressValidatorImpl implements AddressValidator {
 	}
 
 	private boolean representationHasFields(final AddressEntity address) {
-		AddressDetailEntity addressDetailsEntity = address.getAddress();
+		com.elasticpath.rest.definition.base.AddressEntity addressEntity = address.getAddress();
 		NameEntity nameEntity = address.getName();
 
 		return nameEntityHasData(nameEntity)
-				|| addressEntityHasData(addressDetailsEntity);
+				|| addressEntityHasData(addressEntity)
+				|| (address.getOrganization() != null && address.getPhoneNumber() != null);
 	}
 
 	private boolean nameEntityHasData(final NameEntity nameEntity) {
@@ -51,17 +51,16 @@ public class AddressValidatorImpl implements AddressValidator {
 		);
 	}
 
-	private boolean addressEntityHasData(final AddressDetailEntity addressDetailsEntity) {
-		return addressDetailsEntity != null
+	@SuppressWarnings("squid:S1067")
+	private boolean addressEntityHasData(final com.elasticpath.rest.definition.base.AddressEntity addressEntity) {
+		return addressEntity != null
 				&& (
-				addressDetailsEntity.getStreetAddress() != null
-						|| addressDetailsEntity.getExtendedAddress() != null
-						|| addressDetailsEntity.getLocality() != null
-						|| addressDetailsEntity.getRegion() != null
-						|| addressDetailsEntity.getCountryName() != null
-						|| addressDetailsEntity.getPostalCode() != null
-						|| addressDetailsEntity.getPhoneNumber() != null
-						|| addressDetailsEntity.getOrganization() != null
+				addressEntity.getStreetAddress() != null
+						|| addressEntity.getExtendedAddress() != null
+						|| addressEntity.getLocality() != null
+						|| addressEntity.getRegion() != null
+						|| addressEntity.getCountryName() != null
+						|| addressEntity.getPostalCode() != null
 		);
 	}
 }

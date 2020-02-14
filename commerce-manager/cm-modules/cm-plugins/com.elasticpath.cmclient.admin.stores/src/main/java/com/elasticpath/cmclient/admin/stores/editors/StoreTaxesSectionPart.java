@@ -27,8 +27,8 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.helpers.store.StoreEditorModel;
@@ -150,7 +150,7 @@ public class StoreTaxesSectionPart extends AbstractCmClientEditorPageSectionPart
 		 * @param editable whether this section should be editable
 		 */
 		TaxCodeSubSection(final boolean editable) {
-			this.taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+			this.taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 			initiallyCheckedTaxCodes = new HashSet<>(getInitiallyCheckedTaxCodes());
 			this.editable = editable;
 		}
@@ -282,7 +282,7 @@ public class StoreTaxesSectionPart extends AbstractCmClientEditorPageSectionPart
 		 * @param editable whether this section should be editable
 		 */
 		TaxRegionSubSection(final boolean editable) {
-			this.taxService = ServiceLocator.getService(ContextIdNames.TAX_JURISDICTION_SERVICE);
+			this.taxService = BeanLocator.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
 			initiallyCheckedTaxJurisdictions = new HashSet<>(getInitiallyCheckedTaxJurisdictions());
 			this.editable = editable;
 		}
@@ -337,7 +337,7 @@ public class StoreTaxesSectionPart extends AbstractCmClientEditorPageSectionPart
 			 * Constructor.
 			 */
 			TaxJurisdictionListLabelProvider() {
-				geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
+				geography = BeanLocator.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 			}
 
 			@Override

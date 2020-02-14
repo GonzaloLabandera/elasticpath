@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cm.status;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.health.monitoring.ServerStatusChecker;
 import com.elasticpath.health.monitoring.StatusChecker;
 import org.eclipse.rap.rwt.service.ServiceHandler;
@@ -30,8 +30,8 @@ public class StatusServiceHandler implements ServiceHandler {
     public void service(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException, ServletException {
 
-        StatusChecker statusChecker = ServiceLocator.getService("statusChecker");
-        ServerStatusChecker serverStatusChecker = ServiceLocator.getService("serverStatusChecker");
+        StatusChecker statusChecker = BeanLocator.getSingletonBean("statusChecker", StatusChecker.class);
+        ServerStatusChecker serverStatusChecker = BeanLocator.getSingletonBean("serverStatusChecker", ServerStatusChecker.class);
 
         serverStatusChecker.getServerStatus(REFRESH_INTERVAL_SECONDS_DEFAULT, statusChecker, request, response);
     }

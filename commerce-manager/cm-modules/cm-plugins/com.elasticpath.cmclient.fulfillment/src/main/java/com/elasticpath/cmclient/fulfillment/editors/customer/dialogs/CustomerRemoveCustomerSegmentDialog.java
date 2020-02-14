@@ -8,7 +8,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.fulfillment.FulfillmentImageRegistry;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -71,7 +71,7 @@ public class CustomerRemoveCustomerSegmentDialog extends MessageDialog {
 		final int result = super.open();
 		if (result == BUTTON_INDEX_OK) {
 			if (customerService == null) {
-				customerService = ServiceLocator.getService(ContextIdNames.CUSTOMER_SERVICE);
+				customerService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 			}
 			customer.removeCustomerGroup(customerGroup);
 		}

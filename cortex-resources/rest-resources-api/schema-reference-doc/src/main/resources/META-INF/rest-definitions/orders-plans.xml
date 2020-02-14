@@ -40,6 +40,31 @@ satisfied the order can be submitted to a purchase.
 		</plan>
 
 		<plan>
+			<name>add-email-from-order</name>
+			<description>Create an email address from the order.</description>
+			<step>
+				<description>Order to emailinfo.</description>
+				<start>order</start>
+				<follow-link>emailinfo</follow-link>
+				<result>email-info</result>
+			</step>
+			<step>
+				<description>Emailinfo to emailform</description>
+				<start>email-info</start>
+				<follow-link>emailform</follow-link>
+				<result>emails.add-email-form</result>
+			</step>
+			<step>
+				<description>Submit the form to create an email</description>
+				<start>emails.add-email-form</start>
+				<submit></submit>
+				<to>emails.add-email-form</to>
+				<via-link>createemailaction</via-link>
+				<result>emails.email</result>
+			</step>
+		</plan>
+
+		<plan>
 			<name>read-email-needinfo-from-order</name>
 			<description><![CDATA[Read the order's email needinfo. When an email needinfo appears on
 			the order, it means the customer's email has not been selected for the purchase. Likely,
@@ -124,6 +149,31 @@ and then create a choice to select the billing address to use for the purchase.
 				<description><![CDATA[Read address from billing address info.]]></description>
 				<start>billingaddress-info</start>
 				<follow-link>billingaddress</follow-link>
+				<result>addresses.address</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>add-billing-address-from-order</name>
+			<description>Create a billing address from the order.</description>
+			<step>
+				<description>Order to billingaddressinfo.</description>
+				<start>order</start>
+				<follow-link>billingaddressinfo</follow-link>
+				<result>billingaddress-info</result>
+			</step>
+			<step>
+				<description>Billingaddress to address form.</description>
+				<start>billingaddress-info</start>
+				<follow-link>addressform</follow-link>
+				<result>addresses.address-form</result>
+			</step>
+			<step>
+				<description>Submit the form to create an address</description>
+				<start>addresses.address-form</start>
+				<submit></submit>
+				<to>addresses.address-form</to>
+				<via-link>createaddressaction</via-link>
 				<result>addresses.address</result>
 			</step>
 		</plan>

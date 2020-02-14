@@ -58,14 +58,20 @@ public class CmUserImplTest {
 			private static final long serialVersionUID = 740L;
 
 			@Override
-			public <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
+			}
+
+			@Override
+			public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+				return beanFactory.getSingletonBean(name, clazz);
 			}
 		};
 		this.cmUserImpl.setUserRoles(new HashSet<>());
 
-		when(beanFactory.getBean(ContextIdNames.CM_PASSWORDENCODER)).thenReturn(mockPasswordEncoder);
-		when(beanFactory.getBean("userPasswordHistoryItem")).thenAnswer(invocation -> new UserPasswordHistoryItemImpl());
+		when(beanFactory.getSingletonBean(ContextIdNames.CM_PASSWORDENCODER, PasswordEncoder.class)).thenReturn(mockPasswordEncoder);
+		when(beanFactory.getPrototypeBean(ContextIdNames.USER_PASSWORD_HISTORY_ITEM, UserPasswordHistoryItem.class))
+				.thenAnswer(invocation -> new UserPasswordHistoryItemImpl());
 	}
 
 	/**
@@ -233,7 +239,6 @@ public class CmUserImplTest {
 	
 	/** 
 	 * Test that isCmAccess returns false when a user does not have the CMUSER role. 
-	 * @throws Exception on error.
 	 */
 	@Test
 	public void testIsCmAccessFalse() {
@@ -246,7 +251,6 @@ public class CmUserImplTest {
 	
 	/** 
 	 * Test that isWsAccess returns true when a user has the WSUSER role. 
-	 * @throws Exception on error.
 	 */
 	@Test
 	public void testIsWsAccessTrue() {
@@ -259,7 +263,6 @@ public class CmUserImplTest {
 	
 	/** 
 	 * Test that isWsAccess returns false when a user does not have the WSUSER role. 
-	 * @throws Exception on error.
 	 */
 	@Test
 	public void testIsWsAccessFalse() {
@@ -274,7 +277,7 @@ public class CmUserImplTest {
 	public void testIsPasswordExpiredTrueWhenMaxAgePasswordPolicyInvalid() {
 		final PasswordPolicy maximumAgePasswordPolicy = mock(PasswordPolicy.class, "maxAgePasswordPolicy");
 
-		when(beanFactory.getBean("maximumAgePasswordPolicy")).thenReturn(maximumAgePasswordPolicy);
+		when(beanFactory.getSingletonBean(ContextIdNames.MAXIMUM_AGE_PASS_WORD_POLICY, PasswordPolicy.class)).thenReturn(maximumAgePasswordPolicy);
 
 		final ValidationResult validationResult = new ValidationResult();
 		validationResult.addError(new ValidationError("foo"));
@@ -291,7 +294,7 @@ public class CmUserImplTest {
 	public void testIsPasswordExpiredFalseWhenMaxAgePasswordPolicyValid() {
 		final PasswordPolicy maximumAgePasswordPolicy = mock(PasswordPolicy.class, "maxAgePasswordPolicy");
 
-		when(beanFactory.getBean("maximumAgePasswordPolicy")).thenReturn(maximumAgePasswordPolicy);
+		when(beanFactory.getSingletonBean(ContextIdNames.MAXIMUM_AGE_PASS_WORD_POLICY, PasswordPolicy.class)).thenReturn(maximumAgePasswordPolicy);
 
 		when(maximumAgePasswordPolicy.validate(cmUserImpl)).thenReturn(new ValidationResult());
 
@@ -307,7 +310,7 @@ public class CmUserImplTest {
 
 		final CmPasswordPolicy cmPasswordPolicy = mock(CmPasswordPolicy.class);
 
-		when(beanFactory.getBean("cmPasswordPolicy")).thenReturn(cmPasswordPolicy);
+		when(beanFactory.getSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class)).thenReturn(cmPasswordPolicy);
 
 		final ValidationResult validationResult = new ValidationResult();
 		validationResult.addError(new ValidationError("Invalid"));
@@ -330,7 +333,7 @@ public class CmUserImplTest {
 		final CmPasswordPolicy cmPasswordPolicy = mock(CmPasswordPolicy.class);
 
 		givenTimeServiceReturnsCurrentTime();
-		when(beanFactory.getBean("cmPasswordPolicy")).thenReturn(cmPasswordPolicy);
+		when(beanFactory.getSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class)).thenReturn(cmPasswordPolicy);
 
 		when(mockPasswordEncoder.encodePassword(newPassword, null)).thenReturn(newPasswordEncoded);
 
@@ -354,7 +357,7 @@ public class CmUserImplTest {
 		final CmPasswordPolicy cmPasswordPolicy = mock(CmPasswordPolicy.class);
 
 		givenTimeServiceReturnsCurrentTime();
-		when(beanFactory.getBean("cmPasswordPolicy")).thenReturn(cmPasswordPolicy);
+		when(beanFactory.getSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class)).thenReturn(cmPasswordPolicy);
 
 		when(mockPasswordEncoder.encodePassword(initialPassword, null)).thenReturn("encodedInitialPassword");
 		cmUserImpl.setClearTextPassword(initialPassword);
@@ -387,7 +390,7 @@ public class CmUserImplTest {
 
 		when(timeService.getCurrentTime()).thenReturn(new Date());
 
-		when(beanFactory.getBean("timeService")).thenReturn(timeService);
+		when(beanFactory.getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class)).thenReturn(timeService);
 	}
 
 }

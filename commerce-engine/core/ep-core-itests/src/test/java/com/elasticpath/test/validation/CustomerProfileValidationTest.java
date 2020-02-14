@@ -61,7 +61,7 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 			final AttributeType attributeType,
 			final AttributeMultiValueType multiValueType,
 			final boolean required) {
-		Attribute attribute = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE);
+		Attribute attribute = getBeanFactory().getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 
 		attribute.setDisplayName(Utils.uniqueCode(String.format("attribute-%d", count.incrementAndGet())), Locale.ENGLISH);
 		attribute.setGlobal(true);
@@ -76,7 +76,7 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 	}
 
 	private CustomerProfile createCustomerProfile() {
-		Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		return customer.getCustomerProfile();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2016
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.domain.event.impl;
@@ -9,12 +9,12 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import org.jmock.Expectations;
@@ -22,27 +22,30 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.catalog.GiftCertificate;
-import com.elasticpath.domain.catalog.impl.GiftCertificateImpl;
-import com.elasticpath.domain.customer.PaymentToken;
-import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.event.EventOriginator;
-import com.elasticpath.domain.event.OrderEventPaymentDetailFormatter;
+import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderEvent;
-import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.order.impl.OrderEventImpl;
 import com.elasticpath.domain.order.impl.OrderImpl;
-import com.elasticpath.domain.order.impl.OrderPaymentImpl;
 import com.elasticpath.domain.order.impl.PhysicalOrderShipmentImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.MoneyFormatter;
-import com.elasticpath.plugin.payment.PaymentType;
+import com.elasticpath.plugin.payment.provider.dto.MoneyDTO;
+import com.elasticpath.plugin.payment.provider.dto.MoneyDTOBuilder;
+import com.elasticpath.plugin.payment.provider.dto.PaymentStatus;
+import com.elasticpath.plugin.payment.provider.dto.TransactionType;
+import com.elasticpath.provider.payment.service.event.PaymentEvent;
+import com.elasticpath.provider.payment.service.instrument.OrderPaymentInstrumentDTO;
+import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentDTO;
+import com.elasticpath.provider.payment.workflow.PaymentInstrumentWorkflow;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
@@ -50,16 +53,23 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
 /**
  * Test for {@link OrderEventHelperImpl}.
  */
-@SuppressWarnings({ "PMD.TooManyMethods" })
+@SuppressWarnings({"PMD.TooManyMethods"})
+@RunWith(MockitoJUnitRunner.class)
 public class OrderEventHelperImplTest {
 	private static final String TEST_FORMATTED_AMOUNT = "formatted amount";
 
-	private static final String TEST_TOKEN_DISPLAY_VALUE = "testTokenDisplayValue";
-
-	private static final String TEST_GIFT_CERTIFICATE_CODE = "testGiftCertificateCode";
+	private static final BigDecimal ONE_HUNDRED = BigDecimal.valueOf(100);
+	private static final String PAYMENT_EVENT_GUID = "Payment_GUID";
+	private static final String CURRENCY_CODE_CAD = "CAD";
+	private static final String INSTRUMENT_NAME = "InstrumentName";
+	private static final String ORDER_PAYMENT_INSTRUMENT_GUID = "OPI_GUID";
+	private static final String PAYMENT_INSTRUMENT_GUID = "PI_GUID";
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
+
+	@Mock
+	private PaymentInstrumentWorkflow paymentInstrumentWorkflow;
 
 	private OrderEventHelperImpl orderEventHelper;
 	private final BeanFactory beanFactory = context.mock(BeanFactory.class);
@@ -78,11 +88,13 @@ public class OrderEventHelperImplTest {
 	@Before
 	public void setUp() throws Exception {
 		orderEvent = new OrderEventImpl();
-
+		final PaymentInstrumentDTO paymentInstrumentDTO = createPaymentInstrumentDTO();
+		when(paymentInstrumentWorkflow.findByGuid(PAYMENT_INSTRUMENT_GUID)).thenReturn(paymentInstrumentDTO);
 		BeanFactoryExpectationsFactory bfef = new BeanFactoryExpectationsFactory(context, beanFactory);
-		bfef.allowingBeanFactoryGetBean(ContextIdNames.ORDER_EVENT, orderEvent);
-		bfef.allowingBeanFactoryGetBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, new EventOriginatorHelperImpl());
-		bfef.allowingBeanFactoryGetBean(ContextIdNames.EVENT_ORIGINATOR, new EventOriginatorImpl());
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ORDER_EVENT, OrderEvent.class, orderEvent);
+		bfef.allowingBeanFactoryGetSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class,
+				new EventOriginatorHelperImpl());
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.EVENT_ORIGINATOR, EventOriginator.class, EventOriginatorImpl.class);
 
 		context.checking(new Expectations() {
 			{
@@ -105,10 +117,7 @@ public class OrderEventHelperImplTest {
 		orderEventHelper.setPricingSnapshotService(pricingSnapshotService);
 		orderEventHelper.setTimeService(timeService);
 
-		Map<PaymentType, OrderEventPaymentDetailFormatter> formatterMap = new HashMap<>();
-		formatterMap.put(PaymentType.GIFT_CERTIFICATE, new OrderEventGiftCertificateDetailsFormatter());
-		formatterMap.put(PaymentType.PAYMENT_TOKEN, new OrderEventPaymentTokenDetailsFormatter());
-		orderEventHelper.setFormatterMap(formatterMap);
+		orderEventHelper.setPaymentInstrumentWorkflow(paymentInstrumentWorkflow);
 	}
 
 	/**
@@ -166,63 +175,48 @@ public class OrderEventHelperImplTest {
 	}
 
 	/**
-	 * Ensure logging of order payment refund with gift certificate has correct format.
+	 * Ensure logging of capture payment event has correct format.
 	 */
 	@Test
-	public void ensureLoggingOfOrderPaymentRefundWithGiftCertificateHasCorrectFormat() {
+	public void ensureLoggingOfCapturePaymentEventHasCorrectFormat() {
 		Order order = createBlankOrderWithLocale();
-		orderEventHelper.logOrderPaymentRefund(order, createGiftCertificateRefundOrderPayment());
-		OrderEvent refundOrderEvent = getSingleOrderEventFromOrder(order);
-		String refundEventNote = refundOrderEvent.getNote();
-		assertNoteIsRefund(refundEventNote);
-		assertThatNoteIsForGiftCertificate(refundEventNote);
-		assertThatNoteHasFormattedAmount(refundEventNote);
-	}
-
-	/**
-	 * Ensure logging of order payment refund with payment token has correct format.
-	 */
-	@Test
-	public void ensureLoggingOfOrderPaymentRefundWithPaymentTokenHasCorrectFormat() {
-		Order order = createBlankOrderWithLocale();
-		orderEventHelper.logOrderPaymentRefund(order, createPaymentTokenRefundOrderPayment());
-		OrderEvent refundOrderEvent = getSingleOrderEventFromOrder(order);
-		String refundEventNote = refundOrderEvent.getNote();
-		assertNoteIsRefund(refundEventNote);
-		assertThatNoteIsForPaymentToken(refundEventNote);
-		assertThatNoteHasFormattedAmount(refundEventNote);
-	}
-
-	/**
-	 * Ensure logging of order payment capture with payment token has correct format.
-	 */
-	@Test
-	public void ensureLoggingOfOrderPaymentCaptureWithPaymentTokenHasCorrectFormat() {
-		Order order = createBlankOrderWithLocale();
-		orderEventHelper.logOrderPaymentCaptured(order, createPaymentTokenCaptureOrderPayment());
+		orderEventHelper.logOrderPaymentCaptured(order, createChargePaymentEvent());
 		OrderEvent captureOrderEvent = getSingleOrderEventFromOrder(order);
 		String captureEventNote = captureOrderEvent.getNote();
 		assertThatNoteIsCapture(captureEventNote);
-		assertThatNoteIsForPaymentToken(captureEventNote);
+		assertThatNoteIsOnCorrectPaymentInstrument(captureEventNote);
 		assertThatNoteHasFormattedAmount(captureEventNote);
 	}
 
 	/**
-	 * Ensure logging of order payment capture with gift certificate has correct format.
+	 * Ensure logging of refund payment event has correct format.
 	 */
 	@Test
-	public void ensureLoggingOfOrderPaymentCaptureWithGiftCertificateHasCorrectFormat() {
+	public void ensureLoggingOfRefundPaymentEventHasCorrectFormat() {
 		Order order = createBlankOrderWithLocale();
-		orderEventHelper.logOrderPaymentCaptured(order, createGiftCertificateCaptureOrderPayment());
+		orderEventHelper.logOrderPaymentRefund(order, createCreditPaymentEvent());
 		OrderEvent refundOrderEvent = getSingleOrderEventFromOrder(order);
-		String captureEventNote = refundOrderEvent.getNote();
-		assertThatNoteIsCapture(captureEventNote);
-		assertThatNoteIsForGiftCertificate(captureEventNote);
-		assertThatNoteHasFormattedAmount(captureEventNote);
+		String refundEventNote = refundOrderEvent.getNote();
+		assertNoteIsRefund(refundEventNote);
+		assertThatNoteIsOnCorrectPaymentInstrument(refundEventNote);
+		assertThatNoteHasFormattedAmount(refundEventNote);
+	}
+
+	/**
+	 * Ensure logging of manual refund payment event has correct format.
+	 */
+	@Test
+	public void ensureLoggingOfManualRefundPaymentEventHasCorrectFormat() {
+		Order order = createBlankOrderWithLocale();
+		orderEventHelper.logOrderPaymentManualRefund(order, createManualCreditPaymentEvent());
+		OrderEvent refundOrderEvent = getSingleOrderEventFromOrder(order);
+		String refundEventNote = refundOrderEvent.getNote();
+		assertNoteIsManualRefund(refundEventNote);
+		assertThatNoteHasFormattedAmount(refundEventNote);
 	}
 
 	@Test
-	public void verifyLoggingOfOrderReleasedForFulfilmentHasCorrectFormat() throws Exception {
+	public void verifyLoggingOfOrderReleasedForFulfilmentHasCorrectFormat() {
 		final Order order = createBlankOrderWithLocale();
 		order.setModifiedBy(scapegoat);
 
@@ -234,69 +228,66 @@ public class OrderEventHelperImplTest {
 		assertEquals("Unexpected event note", "Order is released for fulfilment.", orderReleasedEvent.getNote());
 	}
 
-	private OrderPayment createGiftCertificateRefundOrderPayment() {
-		OrderPayment orderPayment = createRefundOrderPayment();
-		addGiftCertificateToOrderPayment(orderPayment);
-		return orderPayment;
-	}
-
-	private OrderPayment createPaymentTokenRefundOrderPayment() {
-		OrderPayment orderPayment = createRefundOrderPayment();
-		addPaymentTokenToOrderPayment(orderPayment);
-		return orderPayment;
-	}
-
-	private OrderPayment createPaymentTokenCaptureOrderPayment() {
-		OrderPayment orderPayment = createCaptureOrderPayment();
-		addPaymentTokenToOrderPayment(orderPayment);
-		return orderPayment;
-	}
-
-	private OrderPayment createGiftCertificateCaptureOrderPayment() {
-		OrderPayment orderPayment = createCaptureOrderPayment();
-		addGiftCertificateToOrderPayment(orderPayment);
-		return orderPayment;
-	}
-
-	private void addGiftCertificateToOrderPayment(final OrderPayment orderPayment) {
-		orderPayment.setPaymentMethod(PaymentType.GIFT_CERTIFICATE);
-		GiftCertificate giftCertificate = new GiftCertificateImpl();
-		giftCertificate.setGiftCertificateCode(TEST_GIFT_CERTIFICATE_CODE);
-		orderPayment.setGiftCertificate(giftCertificate);
-	}
-
-	private void addPaymentTokenToOrderPayment(final OrderPayment orderPayment) {
-		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		PaymentToken paymentToken = new PaymentTokenImpl.TokenBuilder()
-				.withDisplayValue(TEST_TOKEN_DISPLAY_VALUE)
-				.build();
-		orderPayment.usePaymentToken(paymentToken);
-	}
-
-	private OrderPayment createRefundOrderPayment() {
-		OrderPayment orderPayment = createApprovedOrderPayment();
-		orderPayment.setTransactionType(OrderPayment.CREDIT_TRANSACTION);
-		return orderPayment;
-	}
-
-	private OrderPayment createCaptureOrderPayment() {
-		OrderPayment orderPayment = createApprovedOrderPayment();
-		orderPayment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
-		return orderPayment;
-	}
-
-	private OrderPayment createApprovedOrderPayment() {
-		OrderPayment orderPayment = new OrderPaymentImpl();
-		orderPayment.setCurrencyCode("USD");
-		orderPayment.setStatus(OrderPaymentStatus.APPROVED);
-		orderPayment.setAmount(BigDecimal.TEN);
-		return orderPayment;
-	}
-
 	private Order createBlankOrderWithLocale() {
 		Order order = new OrderImpl();
-		order.setLocale(Locale.US);
+		order.setLocale(Locale.CANADA);
+		order.setCurrency(Currency.getInstance("CAD"));
 		return order;
+	}
+
+	private PaymentEvent createManualCreditPaymentEvent() {
+		final PaymentEvent paymentEvent = new PaymentEvent();
+		paymentEvent.setParentGuid(OrderEventHelperImplTest.PAYMENT_EVENT_GUID);
+		paymentEvent.setPaymentType(TransactionType.MANUAL_CREDIT);
+		paymentEvent.setPaymentStatus(PaymentStatus.APPROVED);
+		paymentEvent.setAmount(create100CAD());
+		paymentEvent.setDate(new Date());
+		return paymentEvent;
+	}
+
+	private PaymentEvent createCreditPaymentEvent() {
+		final PaymentEvent paymentEvent = new PaymentEvent();
+		paymentEvent.setParentGuid(OrderEventHelperImplTest.PAYMENT_EVENT_GUID);
+		paymentEvent.setPaymentType(TransactionType.CREDIT);
+		paymentEvent.setPaymentStatus(PaymentStatus.APPROVED);
+		paymentEvent.setAmount(create100CAD());
+		paymentEvent.setDate(new Date());
+		paymentEvent.setOrderPaymentInstrumentDTO(createOrderPaymentInstrumentDTO());
+		return paymentEvent;
+	}
+
+	private PaymentEvent createChargePaymentEvent() {
+		final PaymentEvent paymentEvent = new PaymentEvent();
+		paymentEvent.setParentGuid(OrderEventHelperImplTest.PAYMENT_EVENT_GUID);
+		paymentEvent.setPaymentType(TransactionType.CHARGE);
+		paymentEvent.setPaymentStatus(PaymentStatus.APPROVED);
+		paymentEvent.setAmount(create100CAD());
+		paymentEvent.setDate(new Date());
+		paymentEvent.setOrderPaymentInstrumentDTO(createOrderPaymentInstrumentDTO());
+		return paymentEvent;
+	}
+
+	private MoneyDTO create100CAD() {
+		return MoneyDTOBuilder.builder()
+				.withAmount(ONE_HUNDRED)
+				.withCurrencyCode(CURRENCY_CODE_CAD)
+				.build(new MoneyDTO());
+	}
+
+	private OrderPaymentInstrumentDTO createOrderPaymentInstrumentDTO() {
+		final OrderPaymentInstrumentDTO orderInstrument = new OrderPaymentInstrumentDTO();
+		orderInstrument.setPaymentInstrument(createPaymentInstrumentDTO());
+		orderInstrument.setGUID(ORDER_PAYMENT_INSTRUMENT_GUID);
+		return orderInstrument;
+	}
+
+	private PaymentInstrumentDTO createPaymentInstrumentDTO() {
+		final PaymentInstrumentDTO paymentInstrument = new PaymentInstrumentDTO();
+		paymentInstrument.setName(INSTRUMENT_NAME);
+		paymentInstrument.setGUID(PAYMENT_INSTRUMENT_GUID);
+		paymentInstrument.setSupportingMultiCharges(false);
+		paymentInstrument.setSingleReservePerPI(false);
+		return paymentInstrument;
 	}
 
 	private OrderEvent getSingleOrderEventFromOrder(final Order order) {
@@ -309,20 +300,19 @@ public class OrderEventHelperImplTest {
 		assertThat("Note should be a refund.", refundEventNote, containsString("Refund"));
 	}
 
+	private void assertNoteIsManualRefund(final String refundEventNote) {
+		assertThat("Note should be a manual refund.", refundEventNote, containsString("Manual refund"));
+	}
+
 	private void assertThatNoteIsCapture(final String captureEventNote) {
 		assertThat("Note should be a capture.", captureEventNote, containsString("Capture"));
 	}
 
-	private void assertThatNoteIsForPaymentToken(final String refundEventNote) {
-		assertThat("Payment type should be included in note.", refundEventNote, containsString(PaymentType.PAYMENT_TOKEN.getName()));
-		assertThat("Token display value should be included in note.", refundEventNote, containsString(TEST_TOKEN_DISPLAY_VALUE));
+	private void assertThatNoteHasFormattedAmount(final String eventNote) {
+		assertThat("Payment amount should be included in note.", eventNote, containsString(TEST_FORMATTED_AMOUNT));
 	}
 
-	private void assertThatNoteIsForGiftCertificate(final String refundEventNote) {
-		assertThat("Payment type should be included in note.", refundEventNote, containsString(PaymentType.GIFT_CERTIFICATE.getName()));
-	}
-
-	private void assertThatNoteHasFormattedAmount(final String refundEventNote) {
-		assertThat("Payment amount should be included in note.", refundEventNote, containsString(TEST_FORMATTED_AMOUNT));
+	private void assertThatNoteIsOnCorrectPaymentInstrument(final String eventNote) {
+		assertThat("Note must have a correct payment instrument name.", eventNote, containsString(INSTRUMENT_NAME));
 	}
 }

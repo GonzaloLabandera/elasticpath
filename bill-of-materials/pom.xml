@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xmlns="http://maven.apache.org/POM/4.0.0"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,7 +11,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>112</version>
+		<version>114</version>
 		<relativePath/>
 	</parent>
 
@@ -18,17 +22,18 @@
 	<properties>
 		<aopalliance.version>1.0_5</aopalliance.version>
 		<apache.poi.version>4.0.1</apache.poi.version>
-		<api-platform.version>1.38.0.cdc4382051</api-platform.version>
+		<api-platform.version>1.42.0.e14f80e81a</api-platform.version>
 		<aspectj.rt.version>1.8.9</aspectj.rt.version>
 		<assertj-core.version>3.11.1</assertj-core.version>
 		<awaitility.version>2.0.0</awaitility.version>
+		<plexus-classworlds.version>2.6.0</plexus-classworlds.version>
 
 		<com.h2database.version>1.3.170</com.h2database.version>
 		<com.google.protobuf.version>2.6.0</com.google.protobuf.version>
 		<com.jayway.jsonpath.json-path.version>1.2.0</com.jayway.jsonpath.json-path.version>
 		<com.springsource.org.aopalliance.version>1.0.0</com.springsource.org.aopalliance.version>
 		<com.sun.mail.version>1.5.6</com.sun.mail.version>
-		<com.thoughtworks.xstream.version>1.4.10</com.thoughtworks.xstream.version>
+		<com.thoughtworks.xstream.version>1.4.11.1</com.thoughtworks.xstream.version>
 		<cmclient.platform.feature.version>0.0.0-SNAPSHOT</cmclient.platform.feature.version>
 		<cmclient.version>0.0.0-SNAPSHOT</cmclient.version>
 		<commons-beanutils.version>1.9.3</commons-beanutils.version>
@@ -64,7 +69,8 @@
 		<gherkin.version>5.0.0</gherkin.version>
 		<cucumber-groovy.version>2.0.1</cucumber-groovy.version>
 
-		<jackson.version>2.9.8</jackson.version>
+		<jackson.version>2.10.2</jackson.version>
+		<jackson.module.jaxb.annotations.version>2.9.10</jackson.module.jaxb.annotations.version>
 		<javax.cache.version>1.1.0</javax.cache.version>
 		<javax.el.version>2.2.4</javax.el.version>
 		<javax.json-api.version>1.1.4</javax.json-api.version>
@@ -101,6 +107,7 @@
 		<org.apache.servicemix.spring.ldap.version>2.3.2.RELEASE_1</org.apache.servicemix.spring.ldap.version>
 		<org.apache.servicemix.spring.version>4.3.19.RELEASE_1</org.apache.servicemix.spring.version>
 		<org.apache.servicemix.spring.security.version>4.2.4.RELEASE_1</org.apache.servicemix.spring.security.version>
+		<org.apache.servicemix.bundles.xstream.version>1.4.11.1_1</org.apache.servicemix.bundles.xstream.version>
 		<org.apache.derby.version>10.11.1.1</org.apache.derby.version>
 		<org.eclipse.emf.version>2.12.0.v20160420-0247</org.eclipse.emf.version>
 		<org.hibernate.version>5.4.3.Final</org.hibernate.version>
@@ -616,15 +623,15 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.seleniumhq.selenium</groupId>
-				<artifactId>selenium-java</artifactId>
-				<version>${selenium.version}</version>
+				<groupId>org.codehaus.plexus</groupId>
+				<artifactId>plexus-classworlds</artifactId>
+				<version>${plexus-classworlds.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>${mysql-connector-java.version}</version>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>selenium-java</artifactId>
+				<version>${selenium.version}</version>
 			</dependency>
 
 			<!-- Cucumber test dependencies -->
@@ -928,45 +935,6 @@
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-messaging-api</artifactId>
-				<version>${dce.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-messaging-camel</artifactId>
-				<version>${dce.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-core-uat-step-definitions</artifactId>
-				<version>${dce.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-email-uat-step-definitions</artifactId>
-				<version>${dce.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-customer-email-uat-step-definitions</artifactId>
-				<version>${dce.version}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-core-customer-messaging</artifactId>
-				<version>${dce.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-catalog-api</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
@@ -1140,25 +1108,32 @@
 				<version>${dce.version}</version>
 			</dependency>
 
-			<!-- Payment Gateway Connectivity -->
+			<!-- Payment API -->
 			<dependency>
 				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-payment-gateway-connectivity-api</artifactId>
+				<artifactId>payment-provider-api</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-test-payment-gateway</artifactId>
+				<artifactId>payment-plugin-connectivity</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-test-cybersource-gateway</artifactId>
+				<artifactId>payment-plugin-connectivity</artifactId>
+				<version>${dce.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>test-payment-provider-plugin</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-payment-gateway-connectivity-test-commons</artifactId>
+				<artifactId>purchase-order-plugin</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 
@@ -1259,7 +1234,13 @@
 				<version>${httpcomponents.version}</version>
 			</dependency>
 
-			<!-- Drools & KIE dependencies -->
+			<!-- Drools & KIE & xstream dependencies -->
+			<dependency>
+				<groupId>com.thoughtworks.xstream</groupId>
+				<artifactId>xstream</artifactId>
+				<version>${com.thoughtworks.xstream.version}</version>
+				<scope>runtime</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.drools</groupId>
 				<artifactId>drools-core</artifactId>
@@ -1271,6 +1252,10 @@
 				<version>${drools.version}</version>
 				<scope>runtime</scope>
 				<exclusions>
+					<exclusion>
+						<groupId>com.thoughtworks.xstream</groupId>
+						<artifactId>xstream</artifactId>
+					</exclusion>
 					<exclusion>
 						<groupId>commons-io</groupId>
 						<artifactId>commons-io</artifactId>
@@ -1412,13 +1397,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.thoughtworks.xstream</groupId>
-				<artifactId>xstream</artifactId>
-				<version>${com.thoughtworks.xstream.version}</version>
-				<scope>runtime</scope>
-			</dependency>
-
-			<dependency>
 				<groupId>aopalliance</groupId>
 				<artifactId>aopalliance</artifactId>
 				<version>1.0</version>
@@ -1451,7 +1429,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>stax</groupId>
 				<artifactId>stax-api</artifactId>
@@ -1536,7 +1513,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson.module.jaxb.annotations.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -1685,12 +1662,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.camel</groupId>
-				<artifactId>camel-test</artifactId>
-				<version>${org.apache.camel.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.camel</groupId>
 				<artifactId>camel-servlet</artifactId>
 				<version>${org.apache.camel.version}</version>
 			</dependency>
@@ -1771,6 +1742,12 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.annotation</artifactId>
+				<version>${osgi.core.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-base-api</artifactId>
 				<version>${api-platform.version}</version>
@@ -1823,11 +1800,6 @@
 				<artifactId>ep-resource-commons</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.resource.cortex</groupId>
-				<artifactId>ep-resource-payment-method-commons</artifactId>
-				<version>${cortex.ep.integration.version}</version>
-			</dependency>
 
 			<!-- Generated Resource APIs -->
 			<dependency>
@@ -1868,6 +1840,21 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-data-policies-api</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-payment-methods-api</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-payment-instructions-api</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-payment-instruments-api</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>
@@ -1918,11 +1905,6 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-orders-api</artifactId>
-				<version>${cortex.ep.integration.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-payment-tokens-api</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>
@@ -2415,6 +2397,11 @@
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
+				<artifactId>com.elasticpath.cmclient.admin.paymentconfigurations</artifactId>
+				<version>${cmclient.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.warehouses</artifactId>
 				<version>${cmclient.version}</version>
 			</dependency>
@@ -2540,8 +2527,18 @@
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-				<artifactId>ep-resource-paymentmethods-epcommerce</artifactId>
+				<groupId>com.elasticpath.rest.resource.cortex</groupId>
+				<artifactId>ep-resource-payment-methods</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.resource.cortex</groupId>
+				<artifactId>ep-resource-payment-instructions</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.resource.cortex</groupId>
+				<artifactId>ep-resource-payment-instruments</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>
@@ -2597,11 +2594,6 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.resource.cortex</groupId>
 				<artifactId>ep-resource-shipmentdetails</artifactId>
-				<version>${cortex.ep.integration.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-				<artifactId>ep-resource-payment-tokens-epcommerce</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>
@@ -3061,6 +3053,12 @@
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-security-web</artifactId>
 				<version>${org.apache.servicemix.spring.security.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.xstream</artifactId>
+				<version>${org.apache.servicemix.bundles.xstream.version}</version>
 				<scope>provided</scope>
 			</dependency>
 

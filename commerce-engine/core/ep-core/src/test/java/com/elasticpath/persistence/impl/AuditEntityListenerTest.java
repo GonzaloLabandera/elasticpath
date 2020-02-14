@@ -89,17 +89,17 @@ public class AuditEntityListenerTest {
 		 */
 		Object getField();
 	}
-	
+
 	/**
 	 * Set up mocks and stubs required by all tests.
-	 * 
+	 *
 	 * @throws java.lang.Exception in case of errors in test setup
 	 */
 	@Before
 	public void setUp() throws Exception {
 		// Instantiate the object under test, mocking out unrequired parts.
 		auditEntityListener = new AuditEntityListener() {
-						
+
 			@SuppressWarnings("unchecked")
 			@Override
 			protected <T> T getField(final Object object, final String fieldName) {
@@ -117,15 +117,15 @@ public class AuditEntityListenerTest {
 
 		realJpaPersistenceEngine.setQueryReader(queryReader);
 
-		when(beanFactory.getBean(ContextIdNames.AUDIT_DAO)).thenReturn(auditDao);
+		when(beanFactory.getSingletonBean(ContextIdNames.AUDIT_DAO, AuditDao.class)).thenReturn(auditDao);
 	}
 
 	private void givenRealJpaPersistenceEngine() {
-		when(beanFactory.getBean(ContextIdNames.PERSISTENCE_ENGINE)).thenReturn(realJpaPersistenceEngine);
+		when(beanFactory.getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, JpaPersistenceEngine.class)).thenReturn(realJpaPersistenceEngine);
 	}
 
 	private void givenMockJpaPersistenceEngine() {
-		when(beanFactory.getBean(ContextIdNames.PERSISTENCE_ENGINE)).thenReturn(mockJpaPersistenceEngine);
+		when(beanFactory.getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, JpaPersistenceEngine.class)).thenReturn(mockJpaPersistenceEngine);
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class AuditEntityListenerTest {
 			.isFalse();
 		verify(fieldMetaData).isPrimaryKey();
 	}
-	
+
 	/**
 	 * Test the rules for whether a Version field is auditable.
 	 */
@@ -169,7 +169,7 @@ public class AuditEntityListenerTest {
 			.isFalse();
 		verify(fieldMetaData).isTransient();
 	}
-	
+
 	/**
 	 * Test that non-collection objects are not identified as non-auditable collections.
 	 */
@@ -181,7 +181,7 @@ public class AuditEntityListenerTest {
 			.as("Non-collections should be auditable")
 			.isFalse();
 	}
-	
+
 	/**
 	 * Test that collections of non-embedded basic objects are not audited.
 	 */
@@ -258,7 +258,7 @@ public class AuditEntityListenerTest {
 		verify(fieldMetaData).getElement();
 		verify(valueMetaData).isDeclaredTypePC();
 	}
-	
+
 	/**
 	 * Test that a CREATE change type records the new field value.
 	 */
@@ -267,13 +267,13 @@ public class AuditEntityListenerTest {
 		final Entity entity = mock(Entity.class);
 		final String field = "Create Field";
 		final ChangeOperation operation = mock(ChangeOperation.class);
-		
+
 		auditEntityListener.setCurrentOperation(operation);
-		
+
 		auditEntityListener.recordFieldChanged(entity, "createField", field, ChangeType.CREATE);
 		verify(auditDao).persistDataChanged(entity, "createField", ChangeType.CREATE, null, field, operation);
 	}
-	
+
 	/**
 	 * Test that a DELETE change type records the old field value.
 	 */
@@ -282,9 +282,9 @@ public class AuditEntityListenerTest {
 		final Entity entity = mock(Entity.class);
 		final String field = "Delete Field";
 		final ChangeOperation operation = mock(ChangeOperation.class);
-		
+
 		auditEntityListener.setCurrentOperation(operation);
-		
+
 		auditEntityListener.recordFieldChanged(entity, "deleteField", field, ChangeType.DELETE);
 		verify(auditDao).persistDataChanged(entity, "deleteField", ChangeType.DELETE, field, null, operation);
 	}
@@ -333,7 +333,7 @@ public class AuditEntityListenerTest {
 		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.DELETE, "OLDGUID", null, operation);
 		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.CREATE, null, "NEWGUID", operation);
 	}
-	
+
 	/**
 	 * Test that a UPDATE change type records the old and new field values.
 	 */
@@ -366,7 +366,7 @@ public class AuditEntityListenerTest {
 		verify(oldEntity).getField();
 		verify(auditDao).persistDataChanged(entity, "updateField", ChangeType.UPDATE, oldField, field, operation);
 	}
-	
+
 	/**
 	 * Test that creating a new collection records new references.
 	 */
@@ -412,7 +412,7 @@ public class AuditEntityListenerTest {
 		verify(member).getUidPk();
 		verify(auditDao).persistDataChanged(entity, "deletedCollection", ChangeType.DELETE, String.valueOf(memberUid), null, operation);
 	}
-	
+
 	/**
 	 * Test that creating a new map records the new key=value pair values.
 	 */
@@ -436,7 +436,7 @@ public class AuditEntityListenerTest {
 	}
 
 	/**
-	 * Test that deleting a map records the old key=value pair values. 
+	 * Test that deleting a map records the old key=value pair values.
 	 */
 	@Test
 	public void testRecordMapChangedDelete() {
@@ -456,9 +456,9 @@ public class AuditEntityListenerTest {
 		verify(member).getUidPk();
 		verify(auditDao).persistDataChanged(entity, "deletedMap", ChangeType.DELETE, "key=" + memberUid, null, operation);
 	}
-	
+
 	/**
-	 * Test that updating a map records the removed and added key=value pair values. 
+	 * Test that updating a map records the removed and added key=value pair values.
 	 */
 	@Test
 	public void testRecordMapChangedUpdate() {
@@ -512,7 +512,7 @@ public class AuditEntityListenerTest {
 		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.DELETE, "oldKey=OLDGUID", null, operation);
 		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.UPDATE, "changedKey=ORPHAN", "changedKey=ADOPTEE", operation);
 	}
-	
+
 	/**
 	 * Test that beginning a change operation stores the operation details.
 	 */

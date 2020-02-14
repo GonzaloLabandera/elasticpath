@@ -27,7 +27,7 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.editors.category.CategoryEditor;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.registry.ObjectRegistryListener;
@@ -167,8 +167,7 @@ public class RemoveLinkedCategoryAction extends AbstractCatalogViewAction implem
 			LOG.error("RemoveLinkedCategoryAction should be disabled."); //$NON-NLS-1$
 			return;
 		}
-		final CategoryService categoryService = ServiceLocator.getService(
-				ContextIdNames.CATEGORY_SERVICE);
+		final CategoryService categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 
 		// Remove the Category Tree
 		monitor.beginTask(CatalogMessages.get().RemoveLinkedCategory_ProgressMessage, IProgressMonitor.UNKNOWN);
@@ -306,6 +305,6 @@ public class RemoveLinkedCategoryAction extends AbstractCatalogViewAction implem
 	}
 
 	protected CategoryLookup getCategoryLookup() {
-		return ServiceLocator.getService(ContextIdNames.CATEGORY_LOOKUP);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 	}
 }

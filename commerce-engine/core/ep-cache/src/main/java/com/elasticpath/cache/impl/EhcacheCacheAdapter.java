@@ -3,6 +3,9 @@
  */
 package com.elasticpath.cache.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.sf.ehcache.Element;
 
 /**
@@ -63,5 +66,39 @@ public class EhcacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K,
 	@Override
 	public boolean containsKey(final K key) {
 		return cache.getKeys().contains(key);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public V getByPartialKey(final K partialKey) {
+		for (Object key : cache.getKeys()) {
+			if (key.equals(partialKey)) {
+				Element element = cache.get(key);
+				if (element != null) {
+					return (V) element.getObjectValue();
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<V> getAllByPartialKey(final K partialKey) {
+		List<V> result = new ArrayList<>();
+
+		for (Object key : cache.getKeys()) {
+			if (key.equals(partialKey)) {
+				Element element = cache.get(key);
+				if (element != null) {
+					result.add((V) element.getObjectValue());
+				}
+			}
+		}
+
+		return result.isEmpty()
+			? null
+			: result;
 	}
 }

@@ -79,7 +79,7 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 
 	@Override
 	public void fireCatalogPromotionRules(final Collection<? extends Product> products, final Currency activeCurrency,
-											final Store store, final Map<String, List<Price>> prices) {
+										  final Store store, final Map<String, List<Price>> prices) {
 		if (store == null) {
 			throw new IllegalArgumentException("Store must not be null");
 		}
@@ -240,7 +240,7 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 	/**
 	 * Apply the discount. Default behaviour is to apply all.
 	 *
-	 * @param queryResults query result that consist of discount objects in working memory.
+	 * @param queryResults          query result that consist of discount objects in working memory.
 	 * @param discountItemContainer the discountItemContainer to apply discount.
 	 */
 	protected void applyDiscount(final QueryResults queryResults, final DiscountItemContainer discountItemContainer) {
@@ -256,12 +256,13 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 	/**
 	 * Get the promotion receiver.
 	 *
-	 * @param shoppingCart the shopping cart that receives the promotion
+	 * @param shoppingCart   the shopping cart that receives the promotion
 	 * @param activeCurrency the currency
 	 * @return promotion receiver.
 	 */
 	private DiscountItemContainer createShoppingCartDiscountItemContainer(final ShoppingCart shoppingCart, final Currency activeCurrency) {
-		final ShoppingCartDiscountItemContainer discountItemContainer = beanFactory.getBean(ContextIdNames.SHOPPING_CART_DISCOUNT_ITEM_CONTAINER);
+		final ShoppingCartDiscountItemContainer discountItemContainer =
+				beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_CART_DISCOUNT_ITEM_CONTAINER, ShoppingCartDiscountItemContainer.class);
 		discountItemContainer.setShoppingCart(shoppingCart);
 		discountItemContainer.setCurrency(activeCurrency);
 		return discountItemContainer;
@@ -279,7 +280,7 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 
 	/**
 	 * Creates a new Drools <code>RuleConfiguration</code> which will be based on the class loader of this class.
-	 *
+	 * <p>
 	 * In an OSGi environment this means that Drools will have access to all classes in core. In
 	 * a web application environment this will mean that Drools has access to all classes available
 	 * to the web application class loader.
@@ -312,7 +313,7 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 	 * Note: don't try to do refactoring by removing this method. This method is put here to make profiling easier.
 	 *
 	 * @param entryPoint the Drools runtime entry point
-	 * @param object the object
+	 * @param object     the object
 	 */
 	private void assertObject(final EntryPoint entryPoint, final Object object) {
 		entryPoint.insert(object);

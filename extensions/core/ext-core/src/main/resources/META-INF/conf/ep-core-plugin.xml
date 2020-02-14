@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-                        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:extensibleList="http://www.elasticpath.com/schema/extensibleList"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+			http://www.elasticpath.com/schema/extensibleList http://www.elasticpath.com/schema/extensibleList/extensibleList.xsd">
 
 	<util:list id="persistenceMappingExcludedFiles">
 		<!-- If you are overriding an *-orm.xml file, exclude the OOTB one here and -->
@@ -57,7 +62,6 @@
 	</bean>
 
 	<!-- Add Bean Definitions and Overrides Here -->
-
 
 	<!-- Log the extension version number on startup -->
 	<bean id="versionLoggerExt" class="com.elasticpath.extensions.commons.util.impl.VersionLoggerExt" init-method="init"/>

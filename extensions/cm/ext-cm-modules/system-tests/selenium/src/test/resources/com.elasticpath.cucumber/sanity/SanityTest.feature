@@ -35,7 +35,6 @@ Feature: Admin user can navigate all activities
       | handsfree_shippable_sku | 1        |
     When I go to Customer Service
     Then I can search and open order editor for the latest order
-    And I can select Details tab in the Order Editor
 
     When I select following report options
       | reportType    | store | currency | orderStatus          |

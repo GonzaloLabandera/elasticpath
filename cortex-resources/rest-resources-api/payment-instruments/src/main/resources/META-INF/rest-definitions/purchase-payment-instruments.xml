@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>paymentinstruments</name>
+		<resource>
+			<name>purchase-payment-instruments</name>
+			<description><![CDATA[The payment instrument used to pay for a purchase.]]></description>
+			<uri>{base.family}/{purchases.purchase}/purchasepaymentinstrument</uri>
+			<list-of>purchase-payment-instrument</list-of>
+		</resource>
+
+		<resource>
+			<name>purchase-payment-instrument</name>
+			<description><![CDATA[The payment instrument used to pay for a purchase.]]></description>
+			<uri>{paymentinstruments.purchase-payment-instruments}/{payment-instrument-id}</uri>
+			<entity>purchase-payment-instrument</entity>
+		</resource>
+
+		<relationship>
+			<name>purchase-payment-instruments-for-purchase</name>
+			<description><![CDATA[The link from purchase to the list of applied purchase payment instruments.]]></description>
+			<rel>paymentinstruments</rel>
+			<rev>purchase</rev>
+			<from>purchases.purchase</from>
+			<to>purchase-payment-instruments</to>
+		</relationship>
+
+		<resource>
+			<name>purchase-payment-method</name>
+			<description>
+				<![CDATA[A payment method supported by the store, such as a credit card, debit, or cash and accessed through the purchase.]]>
+			</description>
+			<uri>{purchase-payment-instrument}/purchasepaymentmethod/{paymentmethods.payment-method-id}</uri>
+			<entity>paymentmethods.payment-method</entity>
+		</resource>
+
+		<relationship>
+			<name>purchase-payment-instrument-to-purchase-payment-method</name>
+			<description><![CDATA[The link for an applied purchase payment instrument to the purchase payment method.]]></description>
+			<rel>paymentmethod</rel>
+			<from>purchase-payment-instrument</from>
+			<to>paymentinstruments.purchase-payment-method</to>
+		</relationship>
+
+		<relationship>
+			<name>purchase-payment-instrument-to-purchase-payment-instruments</name>
+			<description><![CDATA[The link from an applied purchase payment instrument to the list of purchase instruments.]]></description>
+			<rel>paymentinstruments</rel>
+			<from>purchase-payment-instrument</from>
+			<to>purchase-payment-instruments</to>
+		</relationship>
+
+		<relationship>
+			<name>purchase-payment-instruments-to-purchase</name>
+			<description><![CDATA[The link from list of applied purchase payment instruments to purchase]]></description>
+			<rel>purchase</rel>
+			<from>purchase-payment-instruments</from>
+			<to>purchases.purchase</to>
+		</relationship>
+
+		<entity>
+			<name>purchase-payment-instrument</name>
+			<description><![CDATA[Describes payment instrument.]]></description>
+			<property>
+				<name>payment-instrument-identification-attributes</name>
+				<description>
+					<![CDATA[Payment instrument-specific attributes, underscoring the individual payment instrument and differentiating it from other instruments.  These attributes might include a payment token or time to live.]]>
+				</description>
+				<is-a>payment-instrument-attributes</is-a>
+			</property>
+			<property>
+				<name>name</name>
+				<description><![CDATA[Payment instrument name.]]></description>
+				<string/>
+			</property>
+		</entity>
+	</family>
+
+</definitions>
+

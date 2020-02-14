@@ -12,7 +12,7 @@ import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 public class AddEditConfigurationValueDialog extends AbstractDialog {
 
 	private static final String ADD_CONFIGURATION_VALUE_PARENT_CSS = "div[widget-id*=' Configuration Value'][widget-type='Shell']";
-	private static final String CONTEXT_INPUT_FIELD_CSS = ADD_CONFIGURATION_VALUE_PARENT_CSS + "div[widget-id='Context'] > input";
+	private static final String CONTEXT_INPUT_FIELD_CSS = ADD_CONFIGURATION_VALUE_PARENT_CSS + " div[widget-id='Context'] > input";
 	private static final String CONFIGURATION_VALUE_TEXT_AREA_CSS = ADD_CONFIGURATION_VALUE_PARENT_CSS + " textarea:not([readonly=''])";
 	private static final String SAVE_BUTTON_CSS = "div[appearance-id='push-button'][widget-id='Save'][widget-type='Button']";
 	private static final String CANCEL_BUTTON_CSS = "div[appearance-id='push-button'][widget-id='Cancel'][widget-type='Button']";

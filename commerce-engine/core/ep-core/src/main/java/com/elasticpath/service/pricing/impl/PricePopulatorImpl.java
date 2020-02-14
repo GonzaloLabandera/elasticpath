@@ -55,7 +55,7 @@ public class PricePopulatorImpl implements PricePopulator {
 		final BigDecimal listValue = amount.getListValue();
 		final BigDecimal saleValue = amount.getSaleValue();
 		if (!(listValue == null && saleValue == null)) {
-			tier = beanFactory.getBean(ContextIdNames.PRICE_TIER);
+			tier = beanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class);
 			tier.setListPrice(listValue);
 			tier.setSalePrice(saleValue);
 			tier.setMinQty(amount.getQuantity().intValue());

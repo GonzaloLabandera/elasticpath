@@ -69,7 +69,7 @@ public class ProductFacetConfigurationStrategy implements FacetConfigurationStra
 	@Override
 	public void process(final FilteredNavigationConfiguration config, final Facet facet) {
 
-		StoreService storeService = beanFactory.getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 
 		Store store = storeService.findStoreWithCode(facet.getStoreCode());
 		Collection<Currency> currencies = store.getSupportedCurrencies();
@@ -92,9 +92,9 @@ public class ProductFacetConfigurationStrategy implements FacetConfigurationStra
 
 	private void addBrandsToConfig(final FilteredNavigationConfiguration config, final Catalog catalog) {
 		List<BrandFilter> brandFilters = config.getBrandFilters();
-		BrandService brandService = beanFactory.getBean(ContextIdNames.BRAND_SERVICE);
+		BrandService brandService = beanFactory.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 		brandService.findAllBrandsFromCatalogList(ImmutableList.of(catalog)).forEach(brand -> {
-			BrandFilter brandFilter = beanFactory.getBean(ContextIdNames.BRAND_FILTER);
+			BrandFilter brandFilter = beanFactory.getPrototypeBean(ContextIdNames.BRAND_FILTER, BrandFilter.class);
 			brandFilter.initialize(ImmutableMap.of(BRAND_PROPERTY_KEY, ImmutableSet.of(brand)));
 			brandFilters.add(brandFilter);
 		});
@@ -102,9 +102,9 @@ public class ProductFacetConfigurationStrategy implements FacetConfigurationStra
 
 	private void addCategoryToConfig(final FilteredNavigationConfiguration config, final Catalog catalog) {
 		List<CategoryFilter> categoryFilters = config.getCategoryFilters();
-		CategoryService categoryService = beanFactory.getBean(ContextIdNames.CACHING_CATEGORY_SERVICE);
+		CategoryService categoryService = beanFactory.getSingletonBean(ContextIdNames.CACHING_CATEGORY_SERVICE, CategoryService.class);
 		categoryService.findCategoriesByCatalogUid(catalog.getUidPk()).forEach(category -> {
-			CategoryFilter categoryFilter = beanFactory.getBean(ContextIdNames.CATEGORY_FILTER);
+			CategoryFilter categoryFilter = beanFactory.getPrototypeBean(ContextIdNames.CATEGORY_FILTER, CategoryFilter.class);
 			categoryFilter.initialize(ImmutableMap.of(CATEGORY_KEY, category));
 			categoryFilter.setCatalog(catalog);
 			categoryFilters.add(categoryFilter);
@@ -123,7 +123,7 @@ public class ProductFacetConfigurationStrategy implements FacetConfigurationStra
 				LOG.warn(String.format(LOWER_BOUND_GREATER_THAN_UPPER_BOUND_ERROR, lowerBound, upperBound, facet.getUidPk()));
 				continue;
 			}
-			SizeRangeFilter sizeRangeFilter = getBeanFactory().getBean(ContextIdNames.SIZE_FILTER);
+			SizeRangeFilter sizeRangeFilter = getBeanFactory().getPrototypeBean(ContextIdNames.SIZE_FILTER, SizeRangeFilter.class);
 			Map<String, Object> properties = new HashMap<>();
 			properties.put(SizeRangeFilterConstants.TYPE, SizeType.valueOfLabel(fieldKey));
 			properties.put(RangeFilter.LOWER_VALUE_PROPERTY, lowerBound);
@@ -159,7 +159,7 @@ public class ProductFacetConfigurationStrategy implements FacetConfigurationStra
 								  final Collection<Currency> currencies, final Facet facet) {
 		for (Currency currency : currencies) {
 			SortedSet<RangeFacet> rangeFacets = facet.getSortedRangeFacet();
-			PriceFilter rootFilter = getBeanFactory().getBean(ContextIdNames.PRICE_FILTER);
+			PriceFilter rootFilter = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_FILTER, PriceFilter.class);
 			rootFilter.setId(currency.getCurrencyCode());
 			rootFilter.setCurrency(currency);
 			rootFilter.setLocalized(false);
@@ -173,7 +173,7 @@ public class ProductFacetConfigurationStrategy implements FacetConfigurationStra
 					LOG.warn(String.format(LOWER_BOUND_GREATER_THAN_UPPER_BOUND_ERROR, lowerBound, upperBound, facet.getUidPk()));
 					continue;
 				}
-				PriceFilter priceFilter = getBeanFactory().getBean(ContextIdNames.PRICE_FILTER);
+				PriceFilter priceFilter = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_FILTER, PriceFilter.class);
 				Map<String, Object> properties = new HashMap<>();
 				priceFilter.setLocalized(false);
 				properties.put(PriceFilter.CURRENCY_PROPERTY, rootFilter.getCurrency());

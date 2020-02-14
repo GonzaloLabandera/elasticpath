@@ -9,7 +9,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.elasticpath.cmclient.admin.taxes.dialogs.TaxJurisdictionDialog;
 import com.elasticpath.cmclient.admin.taxes.views.TaxJurisdictionsListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.service.tax.TaxJurisdictionService;
@@ -41,7 +41,7 @@ public class CreateTaxJurisdictionAction extends Action {
 	public void run() {
 		LOG.debug("Create Tax Jurisdiction Action called."); //$NON-NLS-1$
 
-		TaxJurisdiction taxJurisdiction = ServiceLocator.getService(ContextIdNames.TAX_JURISDICTION);
+		TaxJurisdiction taxJurisdiction = BeanLocator.getPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class);
 
 		boolean dialogOk = TaxJurisdictionDialog.openCreateDialog(listView.getSite().getShell(), taxJurisdiction);
 
@@ -49,8 +49,8 @@ public class CreateTaxJurisdictionAction extends Action {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Persisting tax Jurisdiction: " + taxJurisdiction.getRegionCode()); //$NON-NLS-1$
 			}
-			TaxJurisdictionService taxJurisdictionService = ServiceLocator.getService(
-					ContextIdNames.TAX_JURISDICTION_SERVICE);
+			TaxJurisdictionService taxJurisdictionService = BeanLocator
+					.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
 			taxJurisdictionService.add(taxJurisdiction);
 			listView.refreshViewerInput();
 		}

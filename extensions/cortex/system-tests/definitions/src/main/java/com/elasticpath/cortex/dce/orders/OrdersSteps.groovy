@@ -5,24 +5,18 @@ import static com.elasticpath.cortex.dce.SharedConstants.TEST_EMAIL_VALUE
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static org.assertj.core.api.Assertions.assertThat
 
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-
 import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
-import org.apache.http.auth.AUTH
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
 
 import com.elasticpath.cortex.dce.CommonMethods
 import com.elasticpath.cortexTestObjects.Order
 import com.elasticpath.cortexTestObjects.Profile
 
 class OrdersSteps {
+
+	private static final String DEBUG_MESSAGE_KEY = "debug-message"
+	private static final String ID_KEY = "id"
 
 	@When('^I submit the order$')
 	static void submitOrder() {
@@ -152,6 +146,31 @@ class OrdersSteps {
 				.isFalse()
 	}
 
+	@Then('^there is needinfo with id (.+) and debug message (.+)$')
+	static void verifyNeedinfoIdAndMessageIdExists(def id, def message) {
+		assertThat(needInfoExistsAndContainsData(id, ID_KEY))
+				.as("Needinfo id $id was found")
+				.isTrue()
+
+		assertThat(needInfoExistsAndContainsData(message, DEBUG_MESSAGE_KEY))
+				.as("Needinfo debug message $message was found")
+				.isTrue()
+	}
+
+	@Then('^there is no needinfo with id (.+)$')
+	static void verifyNeedinfoIdNotExists(def id) {
+		assertThat(needInfoExistsAndContainsData(id, ID_KEY))
+				.as("Needinfo id $id was found")
+				.isFalse()
+	}
+
+	@Then('^there are no needinfo messages$')
+	static void verifyNeedinfoNotExists() {
+		assertThat(needInfoNotExist())
+				.as("Needinfo should not exist")
+				.isTrue()
+	}
+
 	@Then('^there is an advisor linked to (.+)$')
 	static void verifyAdvisorLinkExists(def resourceName) {
 		assertThat(advisorExistsWithLinkedToName(resourceName))
@@ -237,6 +256,14 @@ class OrdersSteps {
 		}
 		client.GET(startingPointUri)
 		return found
+	}
+
+	static needInfoExistsAndContainsData(def data, def key) {
+		client.body.messages.stream().anyMatch { message -> Objects.equals(data, message.get(key)) }
+	}
+
+	static needInfoNotExist() {
+		client.body.messages.isEmpty()
 	}
 
 	static advisorExistsWithLinkedToName(def name) {

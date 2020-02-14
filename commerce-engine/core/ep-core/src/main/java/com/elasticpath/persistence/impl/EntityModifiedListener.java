@@ -4,6 +4,8 @@
 
 package com.elasticpath.persistence.impl;
 
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.getEntityClassName;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +13,6 @@ import com.elasticpath.persistence.api.ChangeType;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngineOperationListener;
 import com.elasticpath.persistence.openjpa.routing.HDSSupportBean;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
 
 /**
  * This listener is required to support horizontal database scaling (HDS) feature.
@@ -23,12 +24,11 @@ public class EntityModifiedListener implements PersistenceEngineOperationListene
 	private static final Logger LOG = LoggerFactory.getLogger(EntityModifiedListener.class);
 
 	private HDSSupportBean hdsSupportBean;
-	private QueryUtil queryUtil;
 
 	@Override
 	public void endSingleOperation(final Persistable entity, final ChangeType type) {
 		if (hdsSupportBean.isHdsSupportEnabled()) {
-			String modifiedEntityName = queryUtil.getEntityClassName(entity.getClass());
+			String modifiedEntityName = getEntityClassName(entity.getClass());
 
 			LOG.debug("Entity {} is modified. Storing the name in HDSSupportBean TL list", modifiedEntityName);
 
@@ -38,9 +38,5 @@ public class EntityModifiedListener implements PersistenceEngineOperationListene
 
 	public void setHdsSupportBean(final HDSSupportBean hdsSupportBean) {
 		this.hdsSupportBean = hdsSupportBean;
-	}
-
-	public void setQueryUtil(final QueryUtil queryUtil) {
-		this.queryUtil = queryUtil;
 	}
 }

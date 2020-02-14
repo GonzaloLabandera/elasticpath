@@ -55,13 +55,13 @@ public abstract class AbstractCatalogViewServiceImpl {
 	private StoreProductService storeProductService;
 
 	private IndexSearchService indexSearchService;
-	
+
 	private IndexUtility indexUtility;
-	
+
 	private SeoUrlBuilder seoUrlBuilder;
-	
+
 	private StoreConfig storeConfig;
-	
+
 	private SettingsReader settingsReader;
 
 	private BeanFactory beanFactory;
@@ -76,7 +76,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	 * appropriate field within the result. Featured products are ordered by
 	 * {@link StandardSortBy#FEATURED_CATEGORY}, {@link SortOrder#DESCENDING}. Optionally specify
 	 * whether to include sub-category feature products in the search.
-	 * 
+	 *
 	 * @param request the current request
 	 * @param result the new result
 	 * @param shoppingCart the shopping cart
@@ -85,30 +85,30 @@ public abstract class AbstractCatalogViewServiceImpl {
 	 */
 	protected void searchAndSetFeaturedProducts(final CatalogViewRequest request, final CatalogViewResult result,
 			final ShoppingCart shoppingCart, final boolean loadProductAssociations, final boolean includeSubCategories) {
-		final List<Long> featuredProductsUids = searchFeaturedProducts(request, includeSubCategories, 
+		final List<Long> featuredProductsUids = searchFeaturedProducts(request, includeSubCategories,
 				shoppingCart.getShopper().getPriceListStack());
 		List<StoreProduct> featuredProducts = storeProductService.getProductsForStore(featuredProductsUids, shoppingCart.getStore(),
 				loadProductAssociations);
 		featuredProducts = indexUtility.sortDomainList(featuredProductsUids, featuredProducts);
 		result.setFeaturedProducts(featuredProducts);
 	}
-	
+
 	/**
 	 * Retrieves the list of UIDs for featured products in the current category and
 	 * sub-categories. The category is given via the {@link CatalogViewRequest}. Featured
 	 * products in other categories will also be retrieved as well (although sorted below those in
 	 * the current category). Order is given by {@link StandardSortBy#FEATURED_CATEGORY},
 	 * {@link SortOrder#DESCENDING}.
-	 * 
+	 *
 	 * @param request the current request
 	 * @param includeSubCategories whether to include sub-categories
 	 * @param priceListStack the price list stack
 	 * @return the list of UIDs for featured products in the current category and sub-categories
 	 */
-	protected List<Long> searchFeaturedProducts(final CatalogViewRequest request, final boolean includeSubCategories, 
+	protected List<Long> searchFeaturedProducts(final CatalogViewRequest request, final boolean includeSubCategories,
 			final PriceListStack priceListStack) {
 		ProductCategorySearchCriteria searchCriteria = constructSearchCriteria(request, includeSubCategories, priceListStack);
-		
+
 		// want to make a new copy of the list so that our featured product filter isn't added
 		// permanently to the mutable list
 		List<Filter<?>> previousFilters = Collections.emptyList();
@@ -117,11 +117,12 @@ public abstract class AbstractCatalogViewServiceImpl {
 		}
 		searchCriteria.setFilters(new ArrayList<>(previousFilters.size() + 1));
 		searchCriteria.getFilters().addAll(previousFilters);
-		
-		FeaturedProductFilter featuredProductFilter = beanFactory.getBean(ContextIdNames.FEATURED_PRODUCT_FILTER);
+
+		FeaturedProductFilter featuredProductFilter = beanFactory.getPrototypeBean(ContextIdNames.FEATURED_PRODUCT_FILTER,
+				FeaturedProductFilter.class);
 		featuredProductFilter.setCategoryUid(request.getCategoryUid());
 		searchCriteria.getFilters().add(featuredProductFilter);
-		
+
 		// filter out products with start and end date out of range
 		searchCriteria.setActiveOnly(true);
 		// filter out product not visible in the store being viewed
@@ -130,10 +131,10 @@ public abstract class AbstractCatalogViewServiceImpl {
 		searchCriteria.setSortingOrder(SortOrder.DESCENDING);
 		searchCriteria.setSortingType(StandardSortBy.FEATURED_CATEGORY);
 		searchCriteria.setFacetingEnabled(false);
-		
+
 		return indexSearchService.search(searchCriteria).getResults(0, getCatalogFeaturedProductCount());
 	}
-	
+
 	/**
 	 * Retrieve the {@link IndexSearchResult} for products.
 	 * <p>
@@ -141,7 +142,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	 * {@link ProductCategorySearchCriteria} to use for searching. Note: some values may be
 	 * overridden.
 	 * </p>
-	 * 
+	 *
 	 * @param request the current request
 	 * @param includeSubCategories whether to include sub-categories
 	 * @param requiresFaceting whether to add faceting information to the result
@@ -158,12 +159,12 @@ public abstract class AbstractCatalogViewServiceImpl {
 		searchCriteria.setDisplayableOnly(true);
 		return indexSearchService.search(searchCriteria);
 	}
-	
+
 	/**
 	 * Loads the previous history into an instance of {@link CatalogViewResult}. If there was no
 	 * history, return an new instance of {@link CatalogViewResult}. If <code>history</code> is
 	 * <code>null</code>, we assume there was no previous history.
-	 * 
+	 *
 	 * @param request the current request
 	 * @param history the previous history or <code>null</code>
 	 * @return a {@link CatalogViewResult} with previous history (if any)
@@ -178,18 +179,19 @@ public abstract class AbstractCatalogViewServiceImpl {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Sets the filter options of the given {@link CatalogViewResult} from the given
 	 * {@link CatalogViewRequest}.
-	 * 
+	 *
 	 * @param request the initial request
 	 * @param result the result
 	 * @param indexSearchResult the index search result to get the filter options from
 	 */
 	protected void setFilterOptions(final CatalogViewRequest request, final CatalogViewResult result, final IndexSearchResult indexSearchResult) {
-		final FilterBucketComparator hitsNumberComparator = beanFactory.getBean(ContextIdNames.FILTER_BUCKET_COMPARATOR);
-		
+		final FilterBucketComparator hitsNumberComparator =
+				beanFactory.getPrototypeBean(ContextIdNames.FILTER_BUCKET_COMPARATOR, FilterBucketComparator.class);
+
 		// remove categories that are not part of this store's catalog
 		List<FilterOption<CategoryFilter>> categoryFilterOptions = indexSearchResult.getCategoryFilterOptions();
 		for (Iterator<FilterOption<CategoryFilter>> catIter = categoryFilterOptions.iterator(); catIter.hasNext();) {
@@ -197,7 +199,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 				catIter.remove();
 			}
 		}
-		
+
 		// category filter options
 		prepareFilterOptions(indexSearchResult.getCategoryFilterOptions(), request);
 		result.setCategoryFilterOptions(indexSearchResult.getCategoryFilterOptions());
@@ -215,7 +217,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 		result.collapsePriceFilterOptions();
 		FilterOptionCompareToComparator<PriceFilter> priceFilterComparator = getCompareToComparator();
 		Collections.sort(result.getPriceFilterOptions(), priceFilterComparator);
-		
+
 		if (isAttributeFilterEnabled()) {
 			// attribute value filter options
 			for (List<FilterOption<AttributeValueFilter>> filterOptions : indexSearchResult.getAttributeValueFilterOptions().values()) {
@@ -224,7 +226,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 			}
 			result.setAttributeValueFilterOptions(indexSearchResult.getAttributeValueFilterOptions());
 		}
-		
+
 		// attribute range filter options
 		for (List<FilterOption<AttributeRangeFilter>> filterOptions : indexSearchResult.getAttributeRangeFilterOptions().values()) {
 			prepareFilterOptions(filterOptions, request);
@@ -238,7 +240,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 		}
 	}
 
-	
+
 	/**
 	 * Returns the number catalog featured products that are displayed in the store front with store
 	 * specific setting.
@@ -255,14 +257,15 @@ public abstract class AbstractCatalogViewServiceImpl {
 	boolean isAttributeFilterEnabled() {
 		return getStoreConfig().getSettingValue(getAttributeFilterEnabledSettingValueProvider());
 	}
-	
+
 	private <T extends Filter<T>> void prepareFilterOptions(final Collection<FilterOption<T>> filterOptions, final CatalogViewRequest request) {
 		addSeoAndQueryString(filterOptions, request);
 		removeDuplicateFilters(request.getFilters(), filterOptions);
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T extends Filter<T>> FilterOptionCompareToComparator<T> getCompareToComparator() {
-		return beanFactory.getBean(ContextIdNames.FILTER_OPTION_COMPARETO_COMPARATOR);
+		return beanFactory.getPrototypeBean(ContextIdNames.FILTER_OPTION_COMPARETO_COMPARATOR, FilterOptionCompareToComparator.class);
 	}
 
 	/**
@@ -280,12 +283,12 @@ public abstract class AbstractCatalogViewServiceImpl {
 			filterOption.setQueryString(newRequest.getQueryString());
 		}
 	}
-	
+
 	/**
 	 * Removes from the new filters options, filters that are already in use. For instance, if a
 	 * price filter was already in use, it removes that same price filter options from the
 	 * collection of new filters options.
-	 * 
+	 *
 	 * @param <T> the type of filter
 	 * @param filtersInUse filters that are currently in use
 	 * @param newFiltersOptions the current collection of new filter options
@@ -301,7 +304,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the actual start index given the page number and the page size.
 	 *
@@ -314,11 +317,11 @@ public abstract class AbstractCatalogViewServiceImpl {
 		if (pageNumber == 0) {
 			return searchResult.getAllResults();
 		}
-		
+
 		final int startIndex = (pageNumber - 1) * pagination;
 		return searchResult.getResults(startIndex, pagination);
 	}
-	
+
 	private ProductCategorySearchCriteria constructSearchCriteria(final CatalogViewRequest request,
 			final boolean includeSubCategories, final PriceListStack priceListStack) {
 		ProductCategorySearchCriteria searchCriteria = createCriteriaForProductSearch(request, includeSubCategories);
@@ -336,15 +339,15 @@ public abstract class AbstractCatalogViewServiceImpl {
 		}
 		return searchCriteria;
 	}
-	
+
 	/**
 	 * This method should return a specific {@link CatalogViewResult} for the given type of action
 	 * (browse or search).
-	 * 
+	 *
 	 * @return specific {@link CatalogViewResult} for the given type of action
 	 */
 	protected abstract CatalogViewResult createCatalogViewResult();
-	
+
 	/**
 	 * Creates a search criteria object with proprietary fields (for browsing/search) filled.
 	 *
@@ -353,7 +356,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	 * @return a search criteria object
 	 */
 	protected abstract ProductCategorySearchCriteria createCriteriaForProductSearch(CatalogViewRequest request, boolean includeSubCategories);
-	
+
 	/**
 	 * Gets the {@link TopSellerService} instance.
 	 *
@@ -362,7 +365,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	protected TopSellerService getTopSellerService() {
 		return topSellerService;
 	}
-	
+
 	/**
 	 * Gets the {@link com.elasticpath.service.catalog.CategoryLookup} instance.
 	 *
@@ -371,7 +374,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	protected CategoryLookup getCategoryLookup() {
 		return categoryLookup;
 	}
-	
+
 	/**
 	 * Gets the {@link StoreProductService} instance.
 	 *
@@ -380,7 +383,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	protected StoreProductService getStoreProductService() {
 		return storeProductService;
 	}
-	
+
 	/**
 	 * Gets the {@link IndexSearchService} instance.
 	 *
@@ -389,7 +392,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	protected IndexSearchService getIndexSearchService() {
 		return indexSearchService;
 	}
-	
+
 	/**
 	 * Gets the {@link IndexUtility} instance.
 	 *
@@ -434,7 +437,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	public void setIndexSearchService(final IndexSearchService indexSearchService) {
 		this.indexSearchService = indexSearchService;
 	}
-	
+
 	/**
 	 * Sets the {@link IndexUtility} instance to use.
 	 *
@@ -443,7 +446,7 @@ public abstract class AbstractCatalogViewServiceImpl {
 	public void setIndexUtility(final IndexUtility indexUtility) {
 		this.indexUtility = indexUtility;
 	}
-	
+
 	/**
 	 * Sets the {@link SeoUrlBuilder} instance to use.
 	 *
@@ -452,39 +455,39 @@ public abstract class AbstractCatalogViewServiceImpl {
 	public void setSeoUrlBuilder(final SeoUrlBuilder seoUrlBuilder) {
 		this.seoUrlBuilder = seoUrlBuilder;
 	}
-	
+
 	/**
 	 * Sets the store configuration to be used as a context for searching.
-	 * 
+	 *
 	 * @param storeConfig the store configuration.
 	 */
 	public void setStoreConfig(final StoreConfig storeConfig) {
 		this.storeConfig = storeConfig;
 	}
-	
+
 	/**
 	 * Returns the store configuration that provides the context for the
 	 * catalog to view.
-	 * 
+	 *
 	 * @return the store configuration.
 	 */
 	protected StoreConfig getStoreConfig() {
 		return storeConfig;
 	}
 
-	
+
 	/**
 	 * Returns the settingsService.
-	 * 
+	 *
 	 * @return the settings service.
 	 */
 	protected SettingsReader getSettingsService() {
 		return settingsReader;
 	}
-	
+
 	/**
 	 * Set the settingsService.
-	 * 
+	 *
 	 * @param settingsService the settingsServiceR
 	 */
 	public void setSettingsService(final SettingsReader settingsService) {

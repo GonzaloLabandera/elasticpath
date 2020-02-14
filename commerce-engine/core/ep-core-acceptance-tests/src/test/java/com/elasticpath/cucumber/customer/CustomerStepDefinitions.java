@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import cucumber.api.DataTable;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,6 +36,14 @@ public class CustomerStepDefinitions {
 	public void setUpCustomerWithAddress(final DataTable dataTable) {
 		List<Map<String, String>> addressMap = dataTable.asMaps(String.class, String.class);
 		customerStepDefinitionsHelper.setUpCustomerWithAddress(addressMap.get(0));
+	}
+
+	/**
+	 * Sets up an anonymous customer for the test environment.
+	 */
+	@And("^the anonymous customer has a modified date older than 0 day$")
+	public void setUpAnonymousCustomer() {
+		customerStepDefinitionsHelper.setUpAnonymousCustomer();
 	}
 
 }

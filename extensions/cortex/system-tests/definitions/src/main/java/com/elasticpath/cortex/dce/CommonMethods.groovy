@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortex.dce
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
@@ -490,20 +494,6 @@ class CommonMethods {
 		}
 	}
 
-	static void addTokenToOrder(String displayName, String token) {
-		client.GET("/")
-				.defaultcart()
-				.order()
-				.paymentmethodinfo()
-				.paymenttokenform()
-				.createpaymenttokenfororderaction(
-				['display-name': displayName,
-				 'token'       : token]
-		)
-				.follow()
-				.stopIfFailure()
-	}
-
 	static void openLinkRelWithFieldWithValue(def linkrel, def field, def value) {
 		def elementExists = false
 		def elementResponse
@@ -543,9 +533,9 @@ class CommonMethods {
 				.stopIfFailure()
 	}
 
-	static void addEmailPaymentTokenAndAddress() {
+	static void addEmailPaymentInstrumentAndAddress() {
 		Profile.addEmailWithoutFollow(TEST_EMAIL_VALUE)
-		Profile.addDefaultToken()
+		Order.addOrderPaymentInstrument()
 		Profile.createUniqueAddress()
 	}
 
@@ -596,8 +586,8 @@ class CommonMethods {
 		client.total()
 	}
 
-	static void addDefaultTokenAndBillingAddress(){
-		Profile.addDefaultToken()
+	static void addPaymentInstrumentAndBillingAddress(){
+		Order.addOrderPaymentInstrument()
 		Profile.addUSBillingAddress()
 	}
 

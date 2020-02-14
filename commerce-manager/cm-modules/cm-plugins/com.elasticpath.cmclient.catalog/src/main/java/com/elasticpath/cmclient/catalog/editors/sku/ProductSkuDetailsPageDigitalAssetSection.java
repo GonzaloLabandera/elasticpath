@@ -10,7 +10,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -50,7 +50,7 @@ public class ProductSkuDetailsPageDigitalAssetSection extends AbstractPolicyAwar
 		this.controlModificationListener = editor;
 		productSku = ((AbstractProductModel) getModel()).getProductSku();
 		if (productSku.getDigitalAsset() == null) {
-			this.digitalAsset = ServiceLocator.getService(ContextIdNames.DIGITAL_ASSET);
+			this.digitalAsset = BeanLocator.getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 		} else {
 			this.digitalAsset = productSku.getDigitalAsset();
 		}

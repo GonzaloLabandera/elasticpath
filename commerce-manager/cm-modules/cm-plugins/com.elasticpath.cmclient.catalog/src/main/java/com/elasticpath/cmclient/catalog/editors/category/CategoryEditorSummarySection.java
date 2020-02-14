@@ -26,7 +26,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -88,8 +88,7 @@ public class CategoryEditorSummarySection extends AbstractPolicyAwareEditorPageS
 	
 	private boolean onSaveValidation;
 
-	private final CategoryService categoryService = (CategoryService) ServiceLocator.getService(
-			ContextIdNames.CATEGORY_SERVICE);
+	private final CategoryService categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 	
 	private final List<CategoryType> availableCategoryTypes;
 	private CategoryLookup categoryLookup;
@@ -116,7 +115,7 @@ public class CategoryEditorSummarySection extends AbstractPolicyAwareEditorPageS
 		CatalogEventService.getInstance().addCategoryListener(this);
 		CatalogEventService.getInstance().addCategoryTypeListener(this);
 		
-		final CategoryTypeService categoryTypeService = ServiceLocator.getService(ContextIdNames.CATEGORY_TYPE_SERVICE);
+		final CategoryTypeService categoryTypeService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_TYPE_SERVICE, CategoryTypeService.class);
 		final List<CategoryType> readOnlyCategoryTypes;
 		
 		if (getModel().isVirtual()) {

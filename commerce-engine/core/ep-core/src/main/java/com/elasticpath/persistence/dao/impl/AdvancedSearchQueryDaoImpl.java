@@ -42,7 +42,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Save or update the given query.
-	 * 
+	 *
 	 * @param searchQuery the query to save or update
 	 * @return the merged object if it is merged, or the persisted object for save action
 	 * @throws EpServiceException - in case of any errors
@@ -55,7 +55,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Get the query with the given UIDPK. Return null if no matching records exist.
-	 * 
+	 *
 	 * @param queryUidPk the Query UIDPK.
 	 * @return the advanced search query if UIDPK exists, otherwise null
 	 * @throws EpServiceException - in case of any errors
@@ -65,7 +65,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 		sanityCheck();
 
 		if (queryUidPk <= 0) {
-			return getBean(ContextIdNames.ADVANCED_SEARCH_QUERY);
+			return beanFactory.getPrototypeBean(ContextIdNames.ADVANCED_SEARCH_QUERY, AdvancedSearchQuery.class);
 		}
 
 		return getPersistentBeanFinder()
@@ -75,7 +75,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Finds all visible queries (all public queries and all owner`s queries) with given query types.
-	 * 
+	 *
 	 * @param owner the query owner
 	 * @param queryTypes the query types
 	 * @param withDetails if true, additional search query fields will be loaded
@@ -98,7 +98,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Finds all queries with given query types.
-	 * 
+	 *
 	 * @param queryTypes the query types
 	 * @param withDetails if true, additional search query fields will be loaded
 	 * @return list of obtained queries
@@ -114,10 +114,10 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 			.withCollectionOfLazyFields(getLazyFields(withDetails))
 			.retrieveByNamedQuery("ADVANCED_QUERY_FIND_ALL_WITH_TYPES", parameters);
 	}
-	
+
 	/**
 	 * Finds queries with the given name.
-	 * 
+	 *
 	 * @param queryName the query name
 	 * @param withDetails if true, additional search query fields will be loaded
 	 * @return list of queries matching the given name
@@ -163,24 +163,13 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Removes the given query form database.
-	 * 
+	 *
 	 * @param query the query to remove
 	 */
 	@Override
 	public void remove(final AdvancedSearchQuery query) {
 		sanityCheck();
 		getPersistenceEngine().delete(query);
-	}
-
-	/**
-	 * Convenience method for getting a bean instance.
-	 * 
-	 * @param <T> the type of bean to return
-	 * @param beanName the name of the bean to get and instance of.
-	 * @return an instance of the requested bean.
-	 */
-	public <T> T getBean(final String beanName) {
-		return beanFactory.<T>getBean(beanName);
 	}
 
 	/**
@@ -205,7 +194,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Gets the persistence engine.
-	 * 
+	 *
 	 * @return The persistence engine.
 	 */
 	public PersistenceEngine getPersistenceEngine() {
@@ -214,7 +203,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Sets the persistence engine to use.
-	 * 
+	 *
 	 * @param persistenceEngine The persistence engine.
 	 */
 	public void setPersistenceEngine(final PersistenceEngine persistenceEngine) {
@@ -223,7 +212,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Sets the bean factory object.
-	 * 
+	 *
 	 * @param beanFactory the bean factory instance.
 	 */
 	public void setBeanFactory(final BeanFactory beanFactory) {

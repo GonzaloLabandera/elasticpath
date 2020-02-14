@@ -40,8 +40,8 @@ public class CartOrdersDefaultAddressPopulatorImpl implements CartOrdersDefaultA
 	@Override
 	public Completable updateAllCartOrdersAddresses(final Customer customer, final CustomerAddress address, final String storeCode,
 			final boolean updateBillingAddress, final boolean updateShippingAddress) {
-		return cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(storeCode, customer.getGuid())
-				.flatMapSingle(cartOrderGuid -> cartOrderRepository.findByGuidAsSingle(storeCode, cartOrderGuid))
+		return cartOrderRepository.findCartOrderGuidsByCustomer(storeCode, customer.getGuid())
+				.flatMapSingle(cartOrderGuid -> cartOrderRepository.findByGuid(storeCode, cartOrderGuid))
 				.flatMapSingle(cartOrder -> updateBillingAddress(address, updateBillingAddress, cartOrder))
 				.flatMapCompletable(cartOrder -> updateShippingAddress(address, updateShippingAddress, storeCode, cartOrder));
 	}
@@ -58,7 +58,7 @@ public class CartOrdersDefaultAddressPopulatorImpl implements CartOrdersDefaultA
 			final CartOrder cartOrder) {
 		if (updatedPreferredBillingAddress && cartOrder.getBillingAddressGuid() == null) {
 			cartOrder.setBillingAddressGuid(address.getGuid());
-			return cartOrderRepository.saveCartOrderAsSingle(cartOrder);
+			return cartOrderRepository.saveCartOrder(cartOrder);
 		}
 		return Single.just(cartOrder);
 	}
@@ -75,7 +75,7 @@ public class CartOrdersDefaultAddressPopulatorImpl implements CartOrdersDefaultA
 	protected Completable updateShippingAddress(final CustomerAddress address, final boolean updatedPreferredShippingAddress,
 			final String storeCode, final CartOrder cartOrder) {
 		if (updatedPreferredShippingAddress && cartOrder.getShippingAddressGuid() == null) {
-			return cartOrderRepository.updateShippingAddressOnCartOrderAsSingle(address.getGuid(), cartOrder.getGuid(), storeCode).toCompletable();
+			return cartOrderRepository.updateShippingAddressOnCartOrder(address.getGuid(), cartOrder.getGuid(), storeCode).toCompletable();
 		}
 		return Completable.complete();
 	}

@@ -20,7 +20,6 @@ import com.elasticpath.domain.catalog.TopSellerProduct;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.service.catalog.ProductLookup;
-import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.TopSellerService;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.test.db.DbTestCase;
@@ -38,7 +37,6 @@ public class TopSellerServiceImplTest extends DbTestCase {
 	private static final String BRAND_CODE = "MYBRAND";
 	@Autowired private OrderService orderService;
 	@Autowired private TopSellerService topSellerService;
-	@Autowired private ProductService productService;
 	@Autowired private ProductLookup productLookup;
 	private CatalogTestPersister catalogTestPersister;
 	private OrderTestPersister orderTestPersister;

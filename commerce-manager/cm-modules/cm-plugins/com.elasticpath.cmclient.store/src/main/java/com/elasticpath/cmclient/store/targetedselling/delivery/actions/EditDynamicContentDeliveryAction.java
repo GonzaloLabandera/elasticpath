@@ -9,7 +9,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.wizard.EpWizardDialog;
 import com.elasticpath.cmclient.store.targetedselling.delivery.views.DynamicContentDeliverySearchResultsView;
@@ -46,8 +46,8 @@ public class EditDynamicContentDeliveryAction extends BaseDynamicContentDelivery
 	public void run() {
 		LOG.debug("EditDynamicContent Action called."); //$NON-NLS-1$
 
-		DynamicContentDeliveryService service = ServiceLocator.getService(
-				ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+		DynamicContentDeliveryService service = BeanLocator
+				.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 
 		DynamicContentDeliveryModelAdapter dcaWrapper = listView.getSelectedItem();
 		DynamicContentDelivery dynamicContentDelivery = service.findByGuid(dcaWrapper.getDynamicContentDelivery().getGuid());

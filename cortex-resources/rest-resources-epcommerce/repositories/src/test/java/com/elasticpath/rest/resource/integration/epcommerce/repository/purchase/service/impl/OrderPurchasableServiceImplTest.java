@@ -82,9 +82,9 @@ public class OrderPurchasableServiceImplTest {
 
 	@Before
 	public void setup() {
-		given(cartOrderRepository.findByGuidAsSingle(SCOPE, ORDER_ID))
+		given(cartOrderRepository.findByGuid(SCOPE, ORDER_ID))
 				.willReturn(Single.just(cartOrder));
-		given(cartOrderRepository.getEnrichedShoppingCartSingle(SCOPE, cartOrder))
+		given(cartOrderRepository.getEnrichedShoppingCart(SCOPE, cartOrder))
 				.willReturn(Single.just(shoppingCart));
 
 		given((shoppingCart).getGuid()).willReturn(SHOPPING_CART_ID);

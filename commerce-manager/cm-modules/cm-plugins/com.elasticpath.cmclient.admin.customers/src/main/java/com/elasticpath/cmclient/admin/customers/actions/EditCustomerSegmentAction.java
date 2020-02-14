@@ -13,7 +13,7 @@ import com.elasticpath.cmclient.admin.customers.AdminCustomersMessages;
 import com.elasticpath.cmclient.admin.customers.views.CustomerSegmentEditor;
 import com.elasticpath.cmclient.admin.customers.views.CustomerSegmentEditorInput;
 import com.elasticpath.cmclient.admin.customers.views.CustomerSegmentListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.service.customer.CustomerGroupService;
@@ -43,7 +43,7 @@ public class EditCustomerSegmentAction extends Action {
 	@Override
 	public void run() {
 		final CustomerGroupService customerGroupService =
-				ServiceLocator.getService(ContextIdNames.CUSTOMER_GROUP_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_GROUP_SERVICE, CustomerGroupService.class);
 		final CustomerGroup customerGroup = listView.getSelectedCustomerGroup();
 		CustomerGroup customerGroupToEdit = customerGroupService.load(customerGroup.getUidPk());
 

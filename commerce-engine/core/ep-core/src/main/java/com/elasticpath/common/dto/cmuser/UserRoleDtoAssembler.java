@@ -12,7 +12,7 @@ import com.elasticpath.domain.cmuser.UserPermission;
 import com.elasticpath.domain.cmuser.UserRole;
 
 /**
- * Assembler for UserRole domain objects and their associated DTOs. 
+ * Assembler for UserRole domain objects and their associated DTOs.
  */
 public class UserRoleDtoAssembler extends AbstractDtoAssembler<UserRoleDTO, UserRole> {
 
@@ -20,7 +20,7 @@ public class UserRoleDtoAssembler extends AbstractDtoAssembler<UserRoleDTO, User
 
 	@Override
 	public UserRole getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.USER_ROLE);
+		return beanFactory.getPrototypeBean(ContextIdNames.USER_ROLE, UserRole.class);
 	}
 
 	@Override
@@ -33,15 +33,15 @@ public class UserRoleDtoAssembler extends AbstractDtoAssembler<UserRoleDTO, User
 	 * @return a new, uninitialized {@link UserPermission} object.
 	 */
 	protected UserPermission userPermissionDomainFactory() {
-		return beanFactory.getBean(ContextIdNames.USER_PERMISSION);
+		return beanFactory.getPrototypeBean(ContextIdNames.USER_PERMISSION, UserPermission.class);
 	}
-	
+
 	@Override
 	public void assembleDto(final UserRole source, final UserRoleDTO target) {
 		target.setGuid(source.getGuid());
 		target.setName(source.getName());
 		target.setDescription(source.getDescription());
-		
+
 		for (UserPermission sourcePermission : source.getUserPermissions()) {
 			target.getPermissions().add(sourcePermission.getAuthority());
 		}
@@ -53,16 +53,16 @@ public class UserRoleDtoAssembler extends AbstractDtoAssembler<UserRoleDTO, User
 		target.setGuid(source.getGuid());
 		target.setName(source.getName());
 		target.setDescription(source.getDescription());
-		
+
 		for (String sourcePermission : source.getPermissions()) {
 
 			UserPermission currentUserPermission = userPermissionDomainFactory();
 			currentUserPermission.setAuthority(sourcePermission);
-			
+
 			if (!target.getUserPermissions().contains(currentUserPermission)) {
 				target.getUserPermissions().add(currentUserPermission);
 			}
-			
+
 		}
 	}
 
@@ -79,5 +79,5 @@ public class UserRoleDtoAssembler extends AbstractDtoAssembler<UserRoleDTO, User
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
-	
+
 }

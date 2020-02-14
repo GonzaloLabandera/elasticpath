@@ -24,10 +24,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -93,11 +93,11 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		this.mainPane = mainPane;
 		addressList = new ArrayList<>();
 		// create copies of shipment address and customer addresses so we are not working with the actual instances
-		OrderAddress shipmentAddress = ServiceLocator.getService(ContextIdNames.ORDER_ADDRESS);
+		OrderAddress shipmentAddress = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 		shipmentAddress.init(shipment.getShipmentAddress());
 		addressList.add(shipmentAddress);
 		for (Address address : order.getCustomer().getAddresses()) {
-			OrderAddress orderAddress = ServiceLocator.getService(ContextIdNames.ORDER_ADDRESS);
+			OrderAddress orderAddress = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 			orderAddress.init(address);
 			addressList.add(orderAddress);
 		}
@@ -288,7 +288,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 	}
 
 	private EventOriginator getEventOriginator() {
-		EventOriginatorHelper helper = ServiceLocator.getService(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = BeanLocator.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 
 		return helper.getCmUserOriginator(LoginManager.getCmUser());
 	}
@@ -314,7 +314,8 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		editor.controlModified();
 
 		final PhysicalOrderShipmentShippingCostRefresher physicalOrderShipmentShippingCostRefresher =
-				ServiceLocator.getService(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER);
+				BeanLocator.getSingletonBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER,
+						PhysicalOrderShipmentShippingCostRefresher.class);
 		physicalOrderShipmentShippingCostRefresher.refresh(shipment);
 
 		// fire changes to editor to notify summary sub section about address/service option change event
@@ -361,7 +362,8 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 	 * @return String[] of shipping option names for that address
 	 */
 	private String[] getShippingOptionListAsArray(final OrderAddress address) {
-		final ShippingOptionService shippingOptionService = ServiceLocator.getService(ContextIdNames.SHIPPING_OPTION_SERVICE);
+		final ShippingOptionService shippingOptionService = BeanLocator
+				.getSingletonBean(ContextIdNames.SHIPPING_OPTION_SERVICE, ShippingOptionService.class);
 		shippingOptions = shippingOptionService.getShippingOptions(
 				address,
 				order.getStoreCode(),

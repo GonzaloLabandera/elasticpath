@@ -9,7 +9,7 @@ package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.mod
 import java.util.ArrayList;
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
 import com.elasticpath.cmclient.store.targetedselling.conditionalexpression.model.ComboViewerModelBuilder;
@@ -62,12 +62,13 @@ public class DynamicContentDeliveryModelBuilderImpl implements ComboViewerModelB
 	 * @return non-persistent DCD that is used as 'All' entry in the DCD combo on the search tab
 	 */
 	public DynamicContentDelivery getAllEntry() {
-		DynamicContentDelivery dynamicContentDeliveryAll = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY);
+		DynamicContentDelivery dynamicContentDeliveryAll = BeanLocator
+				.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY, DynamicContentDelivery.class);
 		dynamicContentDeliveryAll.setName(TargetedSellingMessages.get().ConditionalExpressionAll);
 		return dynamicContentDeliveryAll;
 	} 
 
 	private DynamicContentDeliveryService getDynamicContentDeliveryService() {
-		return ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 	}
 }

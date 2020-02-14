@@ -57,7 +57,7 @@ public class TaxJurisdictionFacade {
 	public TaxCategory putTaxCategory(final String name, final TaxCategoryTypeEnum taxCategoryType) {
 		TaxCategory taxCategory = taxJurisdiction.getTaxCategory(name);
 		if (taxCategory == null) {
-			taxCategory = elasticPath.getBean(ContextIdNames.TAX_CATEGORY);
+			taxCategory = elasticPath.getPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class);
 			taxCategory.setName(name);
 			taxJurisdiction.addTaxCategory(taxCategory);
 		}
@@ -111,13 +111,13 @@ public class TaxJurisdictionFacade {
 	}
 
 	private TaxRegion createTaxRegion(final String name) {
-		TaxRegion taxRegion = elasticPath.getBean(ContextIdNames.TAX_REGION);
+		TaxRegion taxRegion = elasticPath.getPrototypeBean(ContextIdNames.TAX_REGION, TaxRegion.class);
 		taxRegion.setRegionName(name);
 		return taxRegion;
 	}
 
 	private TaxValue createTaxValue(final BigDecimal taxValueNumber, final TaxCode taxCode) {
-		TaxValue taxValue = elasticPath.getBean(ContextIdNames.TAX_VALUE);
+		TaxValue taxValue = elasticPath.getPrototypeBean(ContextIdNames.TAX_VALUE, TaxValue.class);
 		taxValue.setTaxCode(taxCode);
 		taxValue.setTaxValue(taxValueNumber);
 		return taxValue;

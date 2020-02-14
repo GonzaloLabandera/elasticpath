@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2011.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.cartorder.impl;
 
@@ -95,11 +95,6 @@ public class CartOrderServiceImpl implements CartOrderService {
 	 */
 	protected ShoppingCartService getShoppingCartService() {
 		return shoppingCartService;
-	}
-
-	@Override
-	public void remove(final CartOrder cartOrder) {
-		cartOrderDao.remove(cartOrder);
 	}
 
 	@Override

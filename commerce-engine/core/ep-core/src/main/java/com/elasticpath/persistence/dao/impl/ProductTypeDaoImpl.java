@@ -279,7 +279,7 @@ public class ProductTypeDaoImpl extends AbstractDaoImpl implements ProductTypeDa
 	public ProductType get(final long uid) throws EpServiceException {
 		sanityCheck();
 		if (uid <= 0) {
-			return getBean(ContextIdNames.PRODUCT_TYPE);
+			return getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 		}
 
 		return getPersistentBeanFinder().get(ContextIdNames.PRODUCT_TYPE, uid);

@@ -15,7 +15,7 @@ import com.elasticpath.cmclient.catalog.dialogs.catalog.VirtualCatalogDialog;
 import com.elasticpath.cmclient.catalog.editors.catalog.CatalogEditor;
 import com.elasticpath.cmclient.catalog.editors.catalog.CatalogEditorInput;
 import com.elasticpath.cmclient.catalog.editors.category.CategoryEditor;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
@@ -35,8 +35,7 @@ public class EditCatalogCategoryAction extends AbstractCatalogViewAction {
 
 	private Object catalogCategory;
 
-	private final CatalogService catalogService = (CatalogService) ServiceLocator.getService(
-			ContextIdNames.CATALOG_SERVICE);	
+	private final CatalogService catalogService = (CatalogService) BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, Object.class);
 	
 	/**
 	 * Constructs a edit catalog or category action.
@@ -107,7 +106,7 @@ public class EditCatalogCategoryAction extends AbstractCatalogViewAction {
 			} else if (catalogCategory instanceof Category) {
 				final Category selectedCategory = (Category) catalogCategory;
 				
-				ChangeSetService changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+				ChangeSetService changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 				String categoryGuid = changeSetService.resolveObjectGuid(selectedCategory);
 				
 				final GuidEditorInput editorInput = new GuidEditorInput(categoryGuid, Category.class);

@@ -5,6 +5,7 @@ package com.elasticpath.cmclient.changeset.editors;
 
 import java.util.Date;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -21,7 +22,6 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.helpers.UserViewFormatter;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -62,7 +62,7 @@ public class ChangeSetEditorSummarySection extends AbstractPolicyAwareEditorPage
 
 	private Text stateText;
 
-	private final CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+	private final CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 
 	/**
 	 * Constructs a new section.

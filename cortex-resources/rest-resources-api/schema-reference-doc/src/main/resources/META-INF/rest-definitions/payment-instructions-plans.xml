@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>paymentinstructions</name>
+
+		<plan>
+			<name>read-request-instructions-form</name>
+			<description><![CDATA[Provides the request payment instructions form for a third party payment provider.]]></description>
+			<step>
+				<description><![CDATA[Get the form to request payment instructions for a third party payment provider.]]></description>
+				<start>paymentmethods.profile-payment-method</start>
+				<follow-link>requestinstructionsform</follow-link>
+				<result>request-instructions-form</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>request-payment-instructions</name>
+			<description><![CDATA[Provide the form to request payment instructions for a third party payment provider.]]></description>
+			<step>
+				<description><![CDATA[Provides the request payment instructions form for a third party payment provider.]]></description>
+				<start>paymentmethods.profile-payment-method</start>
+				<follow-link>requestinstructionsform</follow-link>
+				<result>request-instructions-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Request payment instructions for a third party payment provider with the provided fields.]]></description>
+				<start>request-instructions-form</start>
+				<submit/>
+				<to>request-instructions-form</to>
+				<via-link>requestpaymentinstructionsaction</via-link>
+				<result>payment-instructions</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-order-request-instructions-form</name>
+			<description><![CDATA[Provides the form to request payment instructions for a third party payment provider.]]></description>
+			<step>
+				<description><![CDATA[Get the form to request payment instructions for a third party payment provider.]]></description>
+				<start>paymentmethods.order-payment-method</start>
+				<follow-link>requestinstructionsform</follow-link>
+				<result>order-request-instructions-form</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>request-order-payment-instructions</name>
+			<description><![CDATA[Provide the form to a third party payment provider to request payment instructions.]]></description>
+			<step>
+				<description>
+					<![CDATA[Provides the form to request payment instructions for a third party payment provider from an order.]]>
+				</description>
+				<start>paymentmethods.order-payment-method</start>
+				<follow-link>requestinstructionsform</follow-link>
+				<result>order-request-instructions-form</result>
+			</step>
+			<step>
+				<description>
+					<![CDATA[Request payment instructions for a third party payment provider with the provided fields from an order.]]>
+				</description>
+				<start>order-request-instructions-form</start>
+				<submit/>
+				<to>order-request-instructions-form</to>
+				<via-link>requestpaymentinstructionsaction</via-link>
+				<result>order-payment-instructions</result>
+			</step>
+		</plan>
+
+	</family>
+</definitions>

@@ -4952,7 +4952,7 @@
         <minorderqty>1</minorderqty>
         <availabilityrule>AVAILABLE_FOR_PRE_ORDER</availabilityrule>
         <orderlimit>0</orderlimit>
-        <expectedreleasedate>2012-04-04T00:00:00-07:00</expectedreleasedate>
+        <expectedreleasedate>2030-04-04T00:00:00-07:00</expectedreleasedate>
     </availability>
     <attributes>
         <attribute key="A00009">
@@ -9745,271 +9745,268 @@ L'écran est également très bien. L'iPhone 5 conserve la technologie d'afficha
 		</description>
 	</seo>
 </product>
-    <product>
-        <code>singleSkuWithFutureEnableDate</code>
-        <name>
-            <value language="fr_CA"></value>
+<product>
+    <code>singleSkuWithFutureEnableDate</code>
+    <name>
+        <value language="fr_CA"></value>
+        <value language="fr"></value>
+        <value language="en">singleSkuWithFutureEnableDate</value>
+        <value language="en_US">singleSkuWithFutureEnableDate</value>
+    </name>
+    <type>Movies</type>
+    <taxcode>GOODS</taxcode>
+    <brand>None</brand>
+    <availability>
+        <storevisible>true</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2000-12-31T00:00:00-00:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="534afa09-5abf-4783-8735-2bfa5f314545">
+            <code>skuFutureEnableDate</code>
+            <availability>
+                <enabledate>2120-12-31T00:00:00-00:00</enabledate>
+            </availability>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </url>
+        <title>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </title>
+        <keywords>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </keywords>
+        <description>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </description>
+    </seo>
+</product>
+<product>
+    <code>prodTestProd2</code>
+    <name>
+        <value language="en">prodTestProd2En</value>
+        <value language="fr"></value>
+    </name>
+    <type>productTestSingleSkuProductType1</type>
+    <taxcode>GOODS</taxcode>
+    <brand>productTestBrand1</brand>
+    <image></image>
+    <availability>
+        <storevisible>true</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2019-08-26T14:47:00-07:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="0e92183d-6a52-4d9e-b1af-a8fea5fd9b0a">
+            <code>prodTestProd2_sku</code>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr"/>
+            <value language="en"/>
+        </url>
+        <title>
             <value language="fr"></value>
-            <value language="en">singleSkuWithFutureEnableDate</value>
-            <value language="en_US">singleSkuWithFutureEnableDate</value>
-        </name>
-        <type>Movies</type>
-        <taxcode>GOODS</taxcode>
-        <brand>None</brand>
-        <availability>
-            <storevisible>true</storevisible>
-            <notsoldseperately>false</notsoldseperately>
-            <enabledate>2000-12-31T00:00:00-00:00</enabledate>
-            <minorderqty>1</minorderqty>
-            <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-            <orderlimit>0</orderlimit>
-        </availability>
-        <attributes/>
-        <skus>
-            <sku guid="534afa09-5abf-4783-8735-2bfa5f314545">
-                <code>skuFutureEnableDate</code>
-                <availability>
-                    <enabledate>2120-12-31T00:00:00-00:00</enabledate>
-                </availability>
-                <shippable enabled="true">
-                    <weight units="KG">0</weight>
-                    <width units="CM">0</width>
-                    <length units="CM">0</length>
-                    <height units="CM">0</height>
-                </shippable>
-                <digitalasset enabled="false"/>
-            </sku>
-        </skus>
-        <seo>
-            <url>
-                <value language="fr_CA"/>
-                <value language="fr"/>
-                <value language="en"/>
-                <value language="en_US"/>
-            </url>
-            <title>
-                <value language="fr_CA"/>
-                <value language="fr"/>
-                <value language="en"/>
-                <value language="en_US"/>
-            </title>
-            <keywords>
-                <value language="fr_CA"/>
-                <value language="fr"/>
-                <value language="en"/>
-                <value language="en_US"/>
-            </keywords>
-            <description>
-                <value language="fr_CA"/>
-                <value language="fr"/>
-                <value language="en"/>
-                <value language="en_US"/>
-            </description>
-        </seo>
-    </product>
-    <product>
-        <code>prodTestProd2</code>
-        <name>
             <value language="en">prodTestProd2En</value>
+        </title>
+        <keywords>
+            <value language="fr"/>
+            <value language="en"/>
+        </keywords>
+        <description>
+            <value language="fr"/>
+            <value language="en"/>
+        </description>
+    </seo>
+</product>
+<product>
+    <code>prodTestProd3</code>
+    <name>
+        <value language="en">prodTestProd3En</value>
+        <value language="fr"></value>
+    </name>
+    <type>productTestSingleSkuProductType1</type>
+    <taxcode>GOODS</taxcode>
+    <brand>productTestBrand1</brand>
+    <image></image>
+    <availability>
+        <storevisible>true</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2019-08-26T14:49:00-07:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="e2fd7da3-5846-4a29-9484-f222e0799cfe">
+            <code>prodTestProd3_sku</code>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr"/>
+            <value language="en"/>
+        </url>
+        <title>
             <value language="fr"></value>
-        </name>
-        <type>productTestSingleSkuProductType1</type>
-        <taxcode>GOODS</taxcode>
-        <brand>productTestBrand1</brand>
-        <image></image>
-        <availability>
-            <storevisible>true</storevisible>
-            <notsoldseperately>false</notsoldseperately>
-            <enabledate>2019-08-26T14:47:00-07:00</enabledate>
-            <minorderqty>1</minorderqty>
-            <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-            <orderlimit>0</orderlimit>
-        </availability>
-        <attributes/>
-        <skus>
-            <sku guid="0e92183d-6a52-4d9e-b1af-a8fea5fd9b0a">
-                <code>prodTestProd2_sku</code>
-                <shippable enabled="true">
-                    <weight units="KG">0</weight>
-                    <width units="CM">0</width>
-                    <length units="CM">0</length>
-                    <height units="CM">0</height>
-                </shippable>
-                <digitalasset enabled="false"/>
-            </sku>
-        </skus>
-        <seo>
-            <url>
-                <value language="fr"/>
-                <value language="en"/>
-            </url>
-            <title>
-                <value language="fr"></value>
-                <value language="en">prodTestProd2En</value>
-            </title>
-            <keywords>
-                <value language="fr"/>
-                <value language="en"/>
-            </keywords>
-            <description>
-                <value language="fr"/>
-                <value language="en"/>
-            </description>
-        </seo>
-    </product>
-
-    <product>
-        <code>prodTestProd3</code>
-        <name>
             <value language="en">prodTestProd3En</value>
+        </title>
+        <keywords>
+            <value language="fr"/>
+            <value language="en"/>
+        </keywords>
+        <description>
+            <value language="fr"/>
+            <value language="en"/>
+        </description>
+    </seo>
+</product>
+<product>
+    <code>prodTestProd4</code>
+    <name>
+        <value language="en">prodTestProd4En</value>
+        <value language="fr"></value>
+    </name>
+    <type>productTestSingleSkuProductType1</type>
+    <taxcode>GOODS</taxcode>
+    <brand>productTestBrand1</brand>
+    <image></image>
+    <availability>
+        <storevisible>true</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2019-08-26T14:50:00-07:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="3732f5e9-9f2f-4782-921b-b8c48ba565d1">
+            <code>prodTestProd4_sku</code>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr"/>
+            <value language="en"/>
+        </url>
+        <title>
             <value language="fr"></value>
-        </name>
-        <type>productTestSingleSkuProductType1</type>
-        <taxcode>GOODS</taxcode>
-        <brand>productTestBrand1</brand>
-        <image></image>
-        <availability>
-            <storevisible>true</storevisible>
-            <notsoldseperately>false</notsoldseperately>
-            <enabledate>2019-08-26T14:49:00-07:00</enabledate>
-            <minorderqty>1</minorderqty>
-            <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-            <orderlimit>0</orderlimit>
-        </availability>
-        <attributes/>
-        <skus>
-            <sku guid="e2fd7da3-5846-4a29-9484-f222e0799cfe">
-                <code>prodTestProd3_sku</code>
-                <shippable enabled="true">
-                    <weight units="KG">0</weight>
-                    <width units="CM">0</width>
-                    <length units="CM">0</length>
-                    <height units="CM">0</height>
-                </shippable>
-                <digitalasset enabled="false"/>
-            </sku>
-        </skus>
-        <seo>
-            <url>
-                <value language="fr"/>
-                <value language="en"/>
-            </url>
-            <title>
-                <value language="fr"></value>
-                <value language="en">prodTestProd3En</value>
-            </title>
-            <keywords>
-                <value language="fr"/>
-                <value language="en"/>
-            </keywords>
-            <description>
-                <value language="fr"/>
-                <value language="en"/>
-            </description>
-        </seo>
-    </product>
-
-    <product>
-        <code>prodTestProd4</code>
-        <name>
             <value language="en">prodTestProd4En</value>
-            <value language="fr"></value>
-        </name>
-        <type>productTestSingleSkuProductType1</type>
-        <taxcode>GOODS</taxcode>
-        <brand>productTestBrand1</brand>
-        <image></image>
-        <availability>
-            <storevisible>true</storevisible>
-            <notsoldseperately>false</notsoldseperately>
-            <enabledate>2019-08-26T14:50:00-07:00</enabledate>
-            <minorderqty>1</minorderqty>
-            <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-            <orderlimit>0</orderlimit>
-        </availability>
-        <attributes/>
-        <skus>
-            <sku guid="3732f5e9-9f2f-4782-921b-b8c48ba565d1">
-                <code>prodTestProd4_sku</code>
-                <shippable enabled="true">
-                    <weight units="KG">0</weight>
-                    <width units="CM">0</width>
-                    <length units="CM">0</length>
-                    <height units="CM">0</height>
-                </shippable>
-                <digitalasset enabled="false"/>
-            </sku>
-        </skus>
-        <seo>
-            <url>
-                <value language="fr"/>
-                <value language="en"/>
-            </url>
-            <title>
-                <value language="fr"></value>
-                <value language="en">prodTestProd4En</value>
-            </title>
-            <keywords>
-                <value language="fr"/>
-                <value language="en"/>
-            </keywords>
-            <description>
-                <value language="fr"/>
-                <value language="en"/>
-            </description>
-        </seo>
-    </product>
-
-    <product>
-        <code>prodTestProd5</code>
-        <name>
-            <value language="en">prodTestProd5En</value>
-            <value language="fr"></value>
-        </name>
-        <type>productTestSingleSkuProductType1</type>
-        <taxcode>GOODS</taxcode>
-        <brand>productTestBrand1</brand>
-        <image></image>
-        <availability>
-            <storevisible>false</storevisible>
-            <notsoldseperately>false</notsoldseperately>
-            <enabledate>2019-08-26T14:51:00-07:00</enabledate>
-            <minorderqty>1</minorderqty>
-            <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-            <orderlimit>0</orderlimit>
-        </availability>
-        <attributes/>
-        <skus>
-            <sku guid="f69535d9-17a6-4a02-b048-65f5e7062310">
-                <code>prodTestProd5_sku</code>
-                <shippable enabled="true">
-                    <weight units="KG">0</weight>
-                    <width units="CM">0</width>
-                    <length units="CM">0</length>
-                    <height units="CM">0</height>
-                </shippable>
-                <digitalasset enabled="false"/>
-            </sku>
-        </skus>
-        <seo>
-            <url>
-                <value language="fr"/>
-                <value language="en"/>
-            </url>
-            <title>
-                <value language="fr"/>
-                <value language="en"/>
-            </title>
-            <keywords>
-                <value language="fr"/>
-                <value language="en"/>
-            </keywords>
-            <description>
-                <value language="fr"/>
-                <value language="en"/>
-            </description>
-        </seo>
-    </product>
+        </title>
+        <keywords>
+            <value language="fr"/>
+            <value language="en"/>
+        </keywords>
+        <description>
+            <value language="fr"/>
+            <value language="en"/>
+        </description>
+    </seo>
+</product>
+<product>
+    <code>prodTestProd5</code>
+    <name>
+        <value language="en">prodTestProd5En</value>
+        <value language="fr"></value>
+    </name>
+    <type>productTestSingleSkuProductType1</type>
+    <taxcode>GOODS</taxcode>
+    <brand>productTestBrand1</brand>
+    <image></image>
+    <availability>
+        <storevisible>false</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2019-08-26T14:51:00-07:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="f69535d9-17a6-4a02-b048-65f5e7062310">
+            <code>prodTestProd5_sku</code>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr"/>
+            <value language="en"/>
+        </url>
+        <title>
+            <value language="fr"/>
+            <value language="en"/>
+        </title>
+        <keywords>
+            <value language="fr"/>
+            <value language="en"/>
+        </keywords>
+        <description>
+            <value language="fr"/>
+            <value language="en"/>
+        </description>
+    </seo>
+</product>
 
     <product>
         <code>prodTestProd6</code>

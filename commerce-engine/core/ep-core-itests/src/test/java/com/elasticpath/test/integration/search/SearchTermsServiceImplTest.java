@@ -29,7 +29,7 @@ public class SearchTermsServiceImplTest extends BasicSpringContextTest {
 	private SearchTermsService searchTermsService;
 	
 	private SearchTerms createSearchTerms(final String keywords) {
-		SearchTerms searchTerms = getBeanFactory().getBean(ContextIdNames.SEARCH_TERMS);
+		SearchTerms searchTerms = getBeanFactory().getPrototypeBean(ContextIdNames.SEARCH_TERMS, SearchTerms.class);
 		searchTerms.setKeywords(keywords);
 		return searchTerms;
 	}

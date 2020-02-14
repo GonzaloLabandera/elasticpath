@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.helpers.SearchItemsLocator;
@@ -49,7 +49,7 @@ public class OrderDatabaseSearchJobImpl extends AbstractSearchJobImpl implements
 	public OrderDatabaseSearchJobImpl(final SearchItemsLocator<Order> locator, final Display display) {
 		super(locator);
 		this.display = display;
-		orderService = ServiceLocator.getService(ContextIdNames.ORDER_SERVICE);
+		orderService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 		jobName = CoreMessages.get().SearchProgress_StatusBarMessage_StartSearch;
 	}
 

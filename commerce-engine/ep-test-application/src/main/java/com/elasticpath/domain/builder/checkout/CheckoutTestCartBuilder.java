@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.domain.builder.checkout;
@@ -20,27 +20,19 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.payment.PaymentGateway;
-import com.elasticpath.domain.payment.impl.PaymentGatewayImpl;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.ProductSkuService;
-import com.elasticpath.service.payment.PaymentGatewayService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.test.persister.TestDataPersisterFactory;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
-import com.elasticpath.test.util.Utils;
 
 /**
  * Builder for shopping carts to facilitate testing of checkout.
  */
 public class CheckoutTestCartBuilder {
-	private static final String PAYMENT_GATEWAY_PLUGIN_TEST_DOUBLE = "paymentGatewayPluginTestDouble";
-	private static final String PAYMENT_GATEWAY_EXTERNAL_AUTH_NULL = "paymentGatewayExternalAuthNull";
-	private static final String PAYMENT_GATEWAY_NULL = "paymentGatewayNull";
-
 	private Store store;
 
 	private Customer customer;
@@ -53,16 +45,13 @@ public class CheckoutTestCartBuilder {
 
 	private final List<ShoppingItemDto> shoppingItemDtos = new ArrayList<>();
 
-	private final List<GiftCertificate> giftCertificates = new ArrayList<>();
+	private Map<String, String> cartData = new HashMap<>();
 
 	@Autowired
 	private TestDataPersisterFactory persisterFactory;
 
 	@Autowired
 	private CartDirector cartDirector;
-
-	@Autowired
-	private PaymentGatewayService paymentGatewayService;
 
 	@Autowired
 	private StoreService storeService;
@@ -257,88 +246,13 @@ public class CheckoutTestCartBuilder {
 	}
 
 	/**
-	 * Add a gift certificate with the specified amount.
-	 *
-	 * @param amount the amount
+	 * Populates meta data of shopping cart.
+	 * @param cartData the meta data of shopping cart.
 	 * @return the checkout test cart builder
 	 */
-	public CheckoutTestCartBuilder withGiftCertificateAmount(final BigDecimal amount) {
-		final GiftCertificate certificate = persisterFactory.getGiftCertificateTestPersister().persistGiftCertificate(scenario.getStore(),
-				"bigGiftCertificateGuid", "bigGiftCertificateCode",
-				store.getDefaultCurrency().getCurrencyCode(), amount, "recipientName", "senderName", "theme",
-				customer);
-		giftCertificates.add(certificate);
-		return this;
-	}
+	public CheckoutTestCartBuilder withCartData(final Map<String, String> cartData) {
 
-	/**
-	 * Use invalid token payment gateway for checkout.
-	 *
-	 * @return the checkout test cart builder
-	 */
-	public CheckoutTestCartBuilder withInvalidPaymentTokenGateway() {
-		addStorePaymentGateway(createAndPersistInvalidPaymentGateway());
-		return this;
-	}
-
-	/**
-	 * Use test double token payment gateway for checkout.
-	 *
-	 * @return the checkout test cart builder
-	 */
-	public CheckoutTestCartBuilder withTestDoubleGateway() {
-		addStorePaymentGateway(createAndPersistTestDoubleGateway());
-		return this;
-	}
-
-	/**
-	 * Use test double token payment gateway for checkout.
-	 *
-	 * @return the checkout test cart builder
-	 */
-	public CheckoutTestCartBuilder withTestExternalAuthGateway() {
-		addStorePaymentGateway(createAndPersistTestExternalAuthGateway());
-		return this;
-	}
-
-	/**
-	 * Use test double token payment gateway for checkout.
-	 *
-	 * @return the checkout test cart builder
-	 */
-	public CheckoutTestCartBuilder withTestGateway() {
-		addStorePaymentGateway(createAndPersistTestGateway());
-		return this;
-	}
-
-	/**
-	 * Use gift certificate gateway for checkout.
-	 *
-	 * @return the checkout test cart builder
-	 */
-	public CheckoutTestCartBuilder withGiftCertificateGateway() {
-		final PaymentGateway giftCertificateGateway = persisterFactory.getStoreTestPersister().persistGiftCertificatePaymentGateway();
-		addStorePaymentGateway(giftCertificateGateway);
-		return this;
-	}
-
-	/**
-	 * Use submitted gateway for checkout.
-	 *
-	 * @param paymentGateway the payment gateway
-	 * @return the checkout test cart builder
-	 */
-	public CheckoutTestCartBuilder withGateway(final PaymentGateway paymentGateway) {
-		addStorePaymentGateway(paymentGateway);
-		return this;
-	}
-
-	/**
-	 * Clear the payment gateways off the store.
-	 */
-	public CheckoutTestCartBuilder clearPaymentGateways() {
-		store.getPaymentGateways().clear();
-		store = storeService.saveOrUpdate(store);
+		this.cartData.putAll(cartData);
 		return this;
 	}
 
@@ -350,55 +264,13 @@ public class CheckoutTestCartBuilder {
 	public ShoppingCart build() {
 		final ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
 																											scenario.getShippingOption(), store);
+		cartData.forEach(shoppingCart::setCartDataFieldValue);
+
 		for (final ShoppingItemDto dto : shoppingItemDtos) {
 			cartDirector.addItemToCart(shoppingCart, dto);
-		}
-
-		for (final GiftCertificate giftCertificate: giftCertificates) {
-			shoppingCart.applyGiftCertificate(giftCertificate);
 		}
 
 		return shoppingCart;
 	}
 
-	private void addStorePaymentGateway(final PaymentGateway gateway) {
-		
-		// Multiple Payment Gateways with the same PaymentGatewayType are not supported, so we check for and remove the duplicate payment
-		// gateway before adding the new one.
-		final PaymentGateway existingGateway = store.getPaymentGatewayMap().get(gateway.getPaymentGatewayType());
-		if (existingGateway != null) {
-			store.getPaymentGateways().remove(existingGateway);
-		}
-		
-		store.getPaymentGateways().add(gateway);
-		store = storeService.saveOrUpdate(store);
-	}
-
-	private PaymentGateway createAndPersistTestDoubleGateway() {
-		final PaymentGateway paymentGateway = new PaymentGatewayImpl();
-		paymentGateway.setType(PAYMENT_GATEWAY_PLUGIN_TEST_DOUBLE);
-		paymentGateway.setName(Utils.uniqueCode(PAYMENT_GATEWAY_PLUGIN_TEST_DOUBLE));
-		return paymentGatewayService.saveOrUpdate(paymentGateway);
-	}
-
-	private PaymentGateway createAndPersistTestExternalAuthGateway() {
-		PaymentGateway paymentGateway = new PaymentGatewayImpl();
-		paymentGateway.setType(PAYMENT_GATEWAY_EXTERNAL_AUTH_NULL);
-		paymentGateway.setName(Utils.uniqueCode(PAYMENT_GATEWAY_EXTERNAL_AUTH_NULL));
-		return paymentGatewayService.saveOrUpdate(paymentGateway);
-	}
-
-	private PaymentGateway createAndPersistTestGateway() {
-		PaymentGateway paymentGateway = new PaymentGatewayImpl();
-		paymentGateway.setType(PAYMENT_GATEWAY_NULL);
-		paymentGateway.setName(Utils.uniqueCode(PAYMENT_GATEWAY_NULL));
-		return paymentGatewayService.saveOrUpdate(paymentGateway);
-	}
-
-	private PaymentGateway createAndPersistInvalidPaymentGateway() {
-		final PaymentGateway paymentGateway = new PaymentGatewayImpl();
-		paymentGateway.setType("paymentGatewayCyberSourceToken");
-		paymentGateway.setName(Utils.uniqueCode("CybersourceTokenPaymentGateway"));
-		return paymentGatewayService.saveOrUpdate(paymentGateway);
-	}
 }

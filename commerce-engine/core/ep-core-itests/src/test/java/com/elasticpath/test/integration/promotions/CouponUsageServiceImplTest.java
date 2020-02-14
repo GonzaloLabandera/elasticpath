@@ -173,7 +173,7 @@ public class CouponUsageServiceImplTest extends BasicSpringContextTest {
 		
 		Coupon addedCoupon = couponService.add(coupon);
 		
-		CouponUsage couponUsage = getBeanFactory().getBean(ContextIdNames.COUPON_USAGE);
+		CouponUsage couponUsage = getBeanFactory().getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 		couponUsage.setUseCount(1);
 		couponUsage.setCoupon(addedCoupon);
 		couponUsage.setActiveInCart(activeInCart);
@@ -226,7 +226,7 @@ public class CouponUsageServiceImplTest extends BasicSpringContextTest {
 		
 		Coupon addedCoupon = couponService.add(coupon);
 		
-		CouponUsage couponUsage = getBeanFactory().getBean(ContextIdNames.COUPON_USAGE);
+		CouponUsage couponUsage = getBeanFactory().getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 		couponUsage.setCoupon(addedCoupon);
 		couponUsage.setActiveInCart(activeInCart);
 		

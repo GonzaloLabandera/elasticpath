@@ -62,13 +62,13 @@ public class ProductDaoImplTest extends DbTestCase {
 			scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
 			null, Utils.uniqueCode(PRODUCT), MULTI_SKU_PRODUCT, GOODS, null, 0, skuCode1, skuCode2);
 
-		final ProductLoadTuner productLoadTuner = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
+		final ProductLoadTuner productLoadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 		productLoadTuner.setLoadingSkus(true);
 		final Product retrievedProduct = productDao.getTuned(product.getUidPk(), productLoadTuner);
 		assertThat(retrievedProduct.getProductSkus()).hasSize(2);
 
 		// Add a new SKU
-		final ProductSku productSku = getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU);
+		final ProductSku productSku = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 		productSku.setSkuCode("ADDANOTHER2");
 		productSku.setStartDate(new Date());
 		retrievedProduct.addOrUpdateSku(productSku);

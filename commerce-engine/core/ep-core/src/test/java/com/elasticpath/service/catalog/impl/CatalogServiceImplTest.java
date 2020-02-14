@@ -65,7 +65,7 @@ public class CatalogServiceImplTest extends AbstractEPServiceTestCase {
 		final long uid = 1234L;
 		final Catalog catalog = new CatalogImpl();
 		catalog.setUidPk(uid);
-		stubGetBean(ContextIdNames.CATALOG, CatalogImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CATALOG, Catalog.class, CatalogImpl.class);
 		context.checking(new Expectations() {
 			{
 				allowing(getMockPersistenceEngine()).get(CatalogImpl.class, uid);
@@ -83,7 +83,7 @@ public class CatalogServiceImplTest extends AbstractEPServiceTestCase {
 			}
 		});
 		assertNull(catalogServiceImpl.getCatalog(nonExistUid));
-		stubGetBean(ContextIdNames.CATALOG, CatalogImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CATALOG, Catalog.class, CatalogImpl.class);
 		assertEquals(0, catalogServiceImpl.getCatalog(0).getUidPk());
 	}
 

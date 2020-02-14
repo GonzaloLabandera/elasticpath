@@ -20,7 +20,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -136,7 +136,7 @@ public class StoreSelectionDialog extends AbstractEpDialog {
 	 * @return String[] contains all the stores' names
 	 */
 	private String[] getStoreAsArray() {
-		final StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 
 		storeList = storeService.findAllCompleteStores();
 		AuthorizationService.getInstance().filterAuthorizedStores(storeList);

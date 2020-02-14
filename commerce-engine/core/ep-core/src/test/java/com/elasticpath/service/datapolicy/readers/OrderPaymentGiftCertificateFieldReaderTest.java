@@ -62,19 +62,19 @@ public class OrderPaymentGiftCertificateFieldReaderTest extends AbstractDataPoin
 	protected String getExpectedReadQuery(final String... dataPointKeys) {
 
 		String query =  "SELECT gc.uidPk, gc.creationDate, gc.lastModifiedDate"
-			.concat(",'")
-			.concat(dataPointKeys[0])
-			.concat("',gc.")
-			.concat(DATAPOINT_1_DB_FIELD_NAME);
+				.concat(",'")
+				.concat(dataPointKeys[0])
+				.concat("',gc.")
+				.concat(DATAPOINT_1_DB_FIELD_NAME);
 
-			if (dataPointKeys.length == 2) {
-				query = query.concat(",'")
+		if (dataPointKeys.length == 2) {
+			query = query.concat(",'")
 					.concat(dataPointKeys[1])
 					.concat("',gc.")
 					.concat(DATAPOINT_2_DB_FIELD_NAME);
-			}
+		}
 
 		return query.concat(" FROM GiftCertificateImpl gc")
-					.concat(" WHERE gc.purchaser.guid = ?1");
+				.concat(" WHERE gc.purchaser.guid = ?1");
 	}
 }

@@ -8,7 +8,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.wizard.EpWizardDialog;
 import com.elasticpath.cmclient.store.targetedselling.dynamiccontent.views.DynamicContentSearchResultsView;
 import com.elasticpath.cmclient.store.targetedselling.dynamiccontent.wizard.NewDynamicContentWizard;
@@ -42,7 +42,8 @@ public class EditDynamicContentAction extends AbstractBaseDynamicContentAction {
 	public void run() {
 		LOG.debug("EditDynamicContent Action called."); //$NON-NLS-1$
 
-		DynamicContentService dynamicContentService = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_SERVICE);
+		DynamicContentService dynamicContentService = BeanLocator
+				.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class);
 
 		DynamicContent dynamicContent = dynamicContentService.findByGuid(listView.getSelectedItem().getGuid());
 

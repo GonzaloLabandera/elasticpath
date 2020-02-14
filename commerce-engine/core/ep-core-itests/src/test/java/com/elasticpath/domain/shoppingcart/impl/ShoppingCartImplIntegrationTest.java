@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
 
@@ -28,7 +29,7 @@ public class ShoppingCartImplIntegrationTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testSerialization() throws Exception {
-		shoppingCart = getBeanFactory().getBean(ContextIdNames.SHOPPING_CART);
+		shoppingCart = (ShoppingCartImpl) getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		shoppingCart.getGiftCertificateService();
 		shoppingCart.getRuleService();
 		shoppingCart.getCouponUsageService();

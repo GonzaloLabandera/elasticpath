@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <beans
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:extensibleList="http://www.elasticpath.com/schema/extensibleList"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
@@ -120,6 +124,8 @@
 
 	<bean id="paymentMethodShoppingCartValidator" class="com.elasticpath.service.shoppingcart.validation.impl.PaymentMethodShoppingCartValidatorImpl">
 		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
+		<property name="cartOrderPaymentInstrumentService" ref="cartOrderPaymentInstrumentService"/>
+		<property name="filteredPaymentInstrumentService" ref="filteredPaymentInstrumentService"/>
 	</bean>
 
 	<bean id="billingAddressShoppingCartValidator" class="com.elasticpath.service.shoppingcart.validation.impl.BillingAddressShoppingCartValidatorImpl">
@@ -127,11 +133,6 @@
 
 	<bean id="shippingAddressShoppingCartValidator"
 		  class="com.elasticpath.service.shoppingcart.validation.impl.ShippingAddressShoppingCartValidatorImpl"/>
-
-	<bean id="giftCertificateBalanceShoppingCartValidator" class="com.elasticpath.service.shoppingcart.validation.impl.GiftCertificateBalanceShoppingCartValidatorImpl">
-		<property name="giftCertificateService" ref="giftCertificateService"/>
-		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
-	</bean>
 
 	<!-- Validation Services -->
 
@@ -180,7 +181,7 @@
 	</extensibleList:create>
 
 	<!-- These validators are executed when determining if a productSku can be added to cart. -->
-	<extensibleList:modify id="productSkuValidatorListForShoppingItemDtos" parent="productSkuValidatorListParent">
+	<extensibleList:modify id="productSkuValidatorListForShoppingItemDtos" parent="productSkuValidatorList">
 		<extensibleList:removeFromList>
 				<!-- This strategy only checks to see if there's at least one available in inventory. Instead, we will rely on the
 				     InventoryShoppingItemDtoValidator to ensure that there is sufficient inventory for the items in the cart. -->
@@ -189,7 +190,7 @@
 	</extensibleList:modify>
 
 	<!-- These validators are executed on all productSkus in the cart when determining if the cart can be purchased. -->
-	<extensibleList:modify id="productSkuValidatorListForShoppingItems" parent="productSkuValidatorListParent">
+	<extensibleList:modify id="productSkuValidatorListForShoppingItems" parent="productSkuValidatorList">
 		<extensibleList:removeFromList>
 			<!-- This strategy only checks to see if there's at least one available in inventory. Instead, we will rely on the
 				     InventoryShoppingItemValidator to ensure that there is sufficient inventory for the items in the cart. -->
@@ -240,6 +241,5 @@
 		<ref bean="billingAddressShoppingCartValidator"/>
 		<ref bean="shippingAddressShoppingCartValidator"/>
 		<ref bean="paymentMethodShoppingCartValidator"/>
-		<ref bean="giftCertificateBalanceShoppingCartValidator"/>
 	</extensibleList:create>
 </beans>

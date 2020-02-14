@@ -47,7 +47,7 @@ public class PriceUpdatedNotificationServiceImpl implements PriceUpdatedNotifica
 	 * @return {@link IndexNotification}.
 	 */
 	protected IndexNotification createEmptyNotification() {
-		return beanFactory.getBean(ContextIdNames.INDEX_NOTIFICATION);
+		return beanFactory.getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class PriceUpdatedNotificationServiceImpl implements PriceUpdatedNotifica
 	 * @return {@link ProductSearchCriteria}.
 	 */
 	protected ProductSearchCriteria createEmptyProductSearchCriteria() {
-		return beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class);
 	}
 
 	/**

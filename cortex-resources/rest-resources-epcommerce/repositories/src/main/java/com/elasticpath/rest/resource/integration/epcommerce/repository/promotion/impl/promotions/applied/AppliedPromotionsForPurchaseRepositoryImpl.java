@@ -35,7 +35,7 @@ public class AppliedPromotionsForPurchaseRepositoryImpl<I extends AppliedPromoti
 		String scope = identifier.getPurchase().getPurchases().getScope().getValue();
 		String purchaseId = identifier.getPurchase().getPurchaseId().getValue();
 		PurchaseIdentifier purchaseIdentifier = identifier.getPurchase();
-		return orderRepository.findByGuidAsSingle(scope, purchaseId)
+		return orderRepository.findByGuid(scope, purchaseId)
 				.map(order -> promotionRepository.getAppliedPromotionsForPurchase(order))
 				.flatMapObservable(appliedPromotions -> buildPurchasePromotionIdentifiers(purchaseIdentifier, appliedPromotions));
 	}

@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.elasticpath.persistence.api.Entity;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 
 /**
  * A CartOrder contains information that is required by the workflow that a customer goes through on the way to creating an order.
@@ -55,32 +54,6 @@ public interface CartOrder extends Entity {
 	 * @param shippingOptionCode The shipping option code.
 	 */
 	void setShippingOptionCode(String shippingOptionCode);
-
-	/**
-	 * Gets the payment method.
-	 * @return the payment method
-	 */
-	PaymentMethod getPaymentMethod();
-
-	/**
-	 * Sets the payment method.
-	 * @param paymentMethod the payment method
-	 * @deprecated use {@link CartOrder#usePaymentMethod(PaymentMethod) to set the {@link PaymentMethod}
-	 * and {@link CartOrder#clearPaymentMethod() to clear it.
-	 */
-	@Deprecated
-	void setPaymentMethod(PaymentMethod paymentMethod);
-
-	/**
-	 * Clears the {@link PaymentMethod} on the {@link CartOrder). 
-	 */
-	void clearPaymentMethod();
-
-	/**
-	 * Selects the {@link PaymentMethod} to be used on the {@link CartOrder).
-	 * @param paymentMethod the {@link PaymentMethod}
-	 */
-	void usePaymentMethod(PaymentMethod paymentMethod);
 
 	/**
 	 * Remove the coupon with code from cart order.

@@ -11,8 +11,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.log4j.Logger;
 
@@ -21,6 +25,7 @@ import com.elasticpath.selenium.framework.util.PropertyManager;
 /**
  * DB Connector class for connecting to and querying the database.
  */
+@SuppressWarnings({"PMD.GodClass"})
 public class DBConnector {
 
 	private static final Logger LOGGER = Logger.getLogger(DBConnector.class);
@@ -47,7 +52,7 @@ public class DBConnector {
 	 */
 	public Connection getDBConnection() {
 		dbUrl = propertyManager.getProperty("db.connection.url");
-		dbClass = propertyManager.getProperty("db.connection.driver.class");
+		dbClass = getDbConnectionClass();
 		dbUser = propertyManager.getProperty("db.connection.username");
 		dbPwd = propertyManager.getProperty("db.connection.password");
 		try {
@@ -55,10 +60,11 @@ public class DBConnector {
 			connection = DriverManager.getConnection(dbUrl, dbUser, dbPwd);
 		} catch (ClassNotFoundException e) {
 			LOGGER.error(e);
-		} catch (SQLException e) {
-			LOGGER.error(e);
+		} catch (SQLException ex) {
+			LOGGER.error(ex);
 		}
 		return connection;
+
 	}
 
 	/**
@@ -68,7 +74,7 @@ public class DBConnector {
 	 */
 	public Connection getImportDBConnection() {
 		dbUrl = propertyManager.getProperty("import.db.connection.url");
-		dbClass = propertyManager.getProperty("db.connection.driver.class");
+		dbClass = getDbConnectionClass();
 		dbUser = propertyManager.getProperty("export.import.db.connection.username");
 		dbPwd = propertyManager.getProperty("export.import.db.connection.password");
 
@@ -77,8 +83,8 @@ public class DBConnector {
 			connection = DriverManager.getConnection(dbUrl, dbUser, dbPwd);
 		} catch (ClassNotFoundException e) {
 			LOGGER.error(e);
-		} catch (SQLException e) {
-			LOGGER.error(e);
+		} catch (SQLException ex) {
+			LOGGER.error(ex);
 		}
 		return connection;
 	}
@@ -90,7 +96,7 @@ public class DBConnector {
 	 */
 	public Connection getExportDBConnection() {
 		dbUrl = propertyManager.getProperty("export.db.connection.url");
-		dbClass = propertyManager.getProperty("db.connection.driver.class");
+		dbClass = getDbConnectionClass();
 		dbUser = propertyManager.getProperty("export.import.db.connection.username");
 		dbPwd = propertyManager.getProperty("export.import.db.connection.password");
 
@@ -99,8 +105,8 @@ public class DBConnector {
 			connection = DriverManager.getConnection(dbUrl, dbUser, dbPwd);
 		} catch (ClassNotFoundException e) {
 			LOGGER.error(e);
-		} catch (SQLException e) {
-			LOGGER.error(e);
+		} catch (SQLException ex) {
+			LOGGER.error(ex);
 		}
 		return connection;
 	}
@@ -112,7 +118,8 @@ public class DBConnector {
 	 * @param query the sql query
 	 */
 	public void executeUpdateQuery(final String query) {
-		assert (!query.isEmpty());
+		assertThat(query.isEmpty())
+				.isFalse();
 
 		try {
 			connection = this.getDBConnection();
@@ -324,7 +331,7 @@ public class DBConnector {
 	 */
 	public void updateProductEnableDate(final String productCode, final String enableDate, final String lastUpdate) {
 		executeUpdateQuery("UPDATE TPRODUCT SET START_DATE='" + enableDate + "', LAST_MODIFIED_DATE = '" + lastUpdate
-				+ "' WHERE CODE = '" + productCode + "';");
+				+ "' WHERE CODE = '" + productCode + "'");
 	}
 
 
@@ -346,8 +353,8 @@ public class DBConnector {
 	 * @param query the sql query
 	 */
 	public void executeImportExportUpdateQuery(final Connection connection, final String query) {
-		assert (!query.isEmpty());
-
+		assertThat(query.isEmpty())
+				.isFalse();
 		try {
 			connection.setAutoCommit(true);
 			connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
@@ -357,9 +364,7 @@ public class DBConnector {
 
 		} catch (SQLException e) {
 			try {
-				if(connection != null) {
-					connection.rollback();
-				}
+				connection.rollback();
 			} catch (SQLException e1) {
 				LOGGER.error(e1);
 			}
@@ -368,6 +373,28 @@ public class DBConnector {
 		} finally {
 			this.closeAll();
 		}
+	}
+
+	/**
+	 * Formats the date for Oracle db.
+	 * @param dateString the date string
+	 * @return formatted date string
+	 */
+	public String getDate(final String dateString) {
+		try {
+			if(propertyManager.getProperty("db.connection.driver.class").contains("oracle")){
+				Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH).parse(dateString);
+				return new SimpleDateFormat("dd-MMM-yyyy hh:mm:ss aa", Locale.ENGLISH).format(date);
+			}
+
+		} catch (ParseException e) {
+			LOGGER.error(e);
+		}
+		return dateString;
+	}
+
+	private String getDbConnectionClass() {
+		return propertyManager.getProperty("db.connection.driver.class");
 	}
 
 

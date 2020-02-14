@@ -11,7 +11,7 @@ import org.eclipse.osgi.util.NLS;
 import com.elasticpath.cmclient.admin.shipping.AdminShippingMessages;
 import com.elasticpath.cmclient.admin.shipping.dialogs.ShippingRegionDialog;
 import com.elasticpath.cmclient.admin.shipping.views.ShippingRegionListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.service.shipping.ShippingRegionService;
@@ -39,8 +39,8 @@ public class EditShippingRegionAction extends Action {
 	public void run() {
 
 		ShippingRegion shippingRegion = listView.getSelectedShippingRegion();
-		ShippingRegionService shippingRegionService = ServiceLocator.getService(
-				EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
+		ShippingRegionService shippingRegionService = BeanLocator.getSingletonBean(
+				EpShippingContextIdNames.SHIPPING_REGION_SERVICE, ShippingRegionService.class);
 
 		/** Get the most recent version of the selected ShippingRegion. */
 		ShippingRegion shippingRegionToEdit = shippingRegionService.get(shippingRegion.getUidPk());

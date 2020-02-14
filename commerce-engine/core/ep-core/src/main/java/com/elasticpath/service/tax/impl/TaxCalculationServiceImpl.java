@@ -244,7 +244,7 @@ public class TaxCalculationServiceImpl implements TaxCalculationService {
 		/** if storeCode is blank, or address is null, or there is no tax jurisdiction for the store and the address, 
 		 * or there is no tax category with the given tax name, then returns a new instance {@link TaxCategory} with the given tax name.
 		 */
-		TaxCategory taxCategory = beanFactory.getBean(ContextIdNames.TAX_CATEGORY);
+		TaxCategory taxCategory = beanFactory.getPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class);
 		taxCategory.setName(taxName);
 		return taxCategory;
 	}
@@ -290,7 +290,7 @@ public class TaxCalculationServiceImpl implements TaxCalculationService {
 	}
 	
 	private TaxCalculationResult getNewTaxCalculationResult(final Currency currency) {
-		TaxCalculationResult taxCalculationResult = beanFactory.getBean(ContextIdNames.TAX_CALCULATION_RESULT);
+		TaxCalculationResult taxCalculationResult = beanFactory.getPrototypeBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResult.class);
 		taxCalculationResult.initialize(currency);
 		
 		return taxCalculationResult;

@@ -13,7 +13,7 @@ import org.apache.commons.collections.PredicateUtils;
 
 import com.elasticpath.cmclient.admin.configuration.listener.SettingDefinitionUpdateListener;
 import com.elasticpath.cmclient.admin.configuration.listener.SettingValueUpdateListener;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
@@ -40,7 +40,7 @@ public class SettingsModel {
 	private final List<SettingValueUpdateListener> valueListeners = new LinkedList<>();
 
 	private final SettingsService settingsService = 
-		(SettingsService) ServiceLocator.getService(ContextIdNames.SETTINGS_SERVICE);
+		BeanLocator.getSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class);
 	
 	/**
 	 * Get all settings definitions. This doesn't need to go to the service every time.

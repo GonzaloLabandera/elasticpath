@@ -21,7 +21,7 @@ import com.elasticpath.cmclient.admin.taxes.TaxesPlugin;
 import com.elasticpath.cmclient.admin.taxes.actions.CreateTaxCodeAction;
 import com.elasticpath.cmclient.admin.taxes.actions.DeleteTaxCodeAction;
 import com.elasticpath.cmclient.admin.taxes.actions.EditTaxCodeAction;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -52,7 +52,7 @@ public class TaxCodeListView extends AbstractListView {
 	 */
 	public TaxCodeListView() {
 		super(false, TAX_CODE_TABLE);
-		taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+		taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 	}
 
 	@Override

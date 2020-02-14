@@ -27,7 +27,7 @@ public class ConditionalExpressionDaoAdapterImpl extends AbstractDaoAdapter<Cond
 
 	@Override
 	public ConditionalExpression createBean(final ConditionalExpression bean) {
-		return beanFactory.getBean(ContextIdNames.CONDITIONAL_EXPRESSION);
+		return beanFactory.getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 	}
 
 	@Override

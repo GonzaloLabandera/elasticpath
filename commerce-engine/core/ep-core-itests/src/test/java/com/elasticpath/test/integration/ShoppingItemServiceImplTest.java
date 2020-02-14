@@ -50,7 +50,7 @@ public class ShoppingItemServiceImplTest extends DbTestCase {
 	@Test
 	public void testFindByGuid() {
 		ShoppingItem item = service.saveOrUpdate(createItem());
-		LoadTuner loadTuner = getBeanFactory().getBean("SHOPPING_ITEM_LOAD_TUNER_DEFAULT");
+		LoadTuner loadTuner = getBeanFactory().getSingletonBean("SHOPPING_ITEM_LOAD_TUNER_DEFAULT", LoadTuner.class);
 		ShoppingItem foundItem = service.findByGuid(item.getGuid(), loadTuner);
 		
 		assertEquals(foundItem, item);

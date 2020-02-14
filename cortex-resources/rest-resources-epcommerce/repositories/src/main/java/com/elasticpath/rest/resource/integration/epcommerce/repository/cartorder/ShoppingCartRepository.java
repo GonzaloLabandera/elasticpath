@@ -54,7 +54,7 @@ public interface ShoppingCartRepository {
 	 * Gets the shopping cart with given GUID.
 	 *
 	 * @param cartGuid the cart guid
-	 * @return ExecutionResult with the shopping cart
+	 * @return the ShoppingCart
 	 */
 	Single<ShoppingCart> getShoppingCart(String cartGuid);
 

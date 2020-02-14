@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cucumber.definitions;
 
 import java.util.HashMap;
@@ -28,7 +32,6 @@ public class DataPolicyDefinition {
 	private final ConfigurationActionToolbar configurationActionToolbar;
 	private DataPolicyEditor dataPolicyEditor;
 	private final ActivityToolbar activityToolbar;
-	private String dataPolicyName;
 	private AddViewDataPointDialog addViewDataPointDialog;
 
 	/**
@@ -107,7 +110,7 @@ public class DataPolicyDefinition {
 	 *
 	 * @param validationFieldName Expected number of Validations
 	 */
-	@Then("^I can see validation error messages for the following fields$")
+	@Then("^I can see validation error messages for the following fields:$")
 	public void verifyNumberOfValidations(final List<String> validationFieldName) {
 		for (String nameField : validationFieldName) {
 			dataPolicyEditor.verifyValidationsReturned(nameField);
@@ -132,40 +135,72 @@ public class DataPolicyDefinition {
 	/**
 	 * Create Data Policy.
 	 *
-	 * @param datapolicyMap the Data Policy map.
+	 * NOTE: Data policy name is appended with UUID. If you need to refer to it use {@link DataPolicyDefinition#selectNewlyCreatedDataPolicy()}.
+	 *
+	 * @param dataPolicyMap the Data Policy map.
 	 */
 	@When("^(?:I create a|a) new Data Policy with following values$")
-	public void createDataPolicy(final Map<String, String> datapolicyMap) {
+	public void createDataPolicy(final Map<String, String> dataPolicyMap) {
 		clickDataPolicies();
 		dataPolicyEditor = dataPolicyResultPane.clickCreateDataPolicyButton();
 		String dataPolicyUnique = "dp" + Utility.getRandomUUID();
-		this.dataPolicyName = datapolicyMap.get("policy-name") + "-" + dataPolicyUnique;
-		dataPolicyEditor.enterDataPolicyName(this.dataPolicyName);
-		dataPolicyEditor.enterDataPolicyReferenceKey(datapolicyMap.get("policy-reference-key"));
-		dataPolicyEditor.enterDataPolicyRetentionPeriod(datapolicyMap.get("retention days"));
-		dataPolicyEditor.enterDataPolicyState(datapolicyMap.get("state"));
+		DataPolicyNameHolder.setName(dataPolicyMap.get("policy-name") + "-" + dataPolicyUnique);
+		dataPolicyEditor.enterDataPolicyName(DataPolicyNameHolder.getName());
+		dataPolicyEditor.enterDataPolicyReferenceKey(dataPolicyMap.get("policy-reference-key"));
+		dataPolicyEditor.enterDataPolicyRetentionPeriod(dataPolicyMap.get("retention days"));
+		dataPolicyEditor.enterDataPolicyState(dataPolicyMap.get("state"));
 		dataPolicyEditor.enterDateTime("StartDate", 0);
-		dataPolicyEditor.enterAvailableDataPoint(datapolicyMap.get("data points"));
-		dataPolicyEditor.enterDataPolicySegment(datapolicyMap.get("segment"));
+		String dataPoints = dataPolicyMap.get("data points");
+		for (String dataPointName : dataPoints.replace(", ", ",").split(",")) {
+			dataPolicyEditor.enterAvailableDataPoint(dataPointName);
+		}
+		dataPolicyEditor.enterDataPolicySegment(dataPolicyMap.get("segment"));
 		configurationActionToolbar.saveAll();
-		dataPolicyEditor.closeDataPolicyEditor(this.dataPolicyName);
+		dataPolicyEditor.closeNewDataPolicyEditor();
 	}
 
 	/**
 	 * Create Data Point.
 	 *
-	 * @param datapointMap the Data Point map.
+	 * @param dataPointMap the Data Point map.
 	 */
 	@When("^I Create Data points with following existing values$")
-	public void createDataPoint(final Map<String, String> datapointMap) {
+	public void createDataPoint(final Map<String, String> dataPointMap) {
 		dataPolicyEditor = dataPolicyResultPane.clickCreateDataPolicyButton();
 		dataPolicyEditor.clickTab("Data Points");
 		addViewDataPointDialog = dataPolicyEditor.clickCreateDataPointButton();
-		addViewDataPointDialog.enterDataPointName(datapointMap.get("data point name"));
-		addViewDataPointDialog.selectDataLocation(datapointMap.get("location key"));
-		addViewDataPointDialog.selectDataKey(datapointMap.get("data key"));
-		addViewDataPointDialog.enterDataPointDescription(datapointMap.get("description"));
+		addViewDataPointDialog.enterDataPointName(dataPointMap.get("data point name"));
+		addViewDataPointDialog.selectDataLocation(dataPointMap.get("location key"));
+		addViewDataPointDialog.selectDataKey(dataPointMap.get("data key"));
+		addViewDataPointDialog.enterDataPointDescription(dataPointMap.get("description"));
 		addViewDataPointDialog.clickSave();
+	}
+
+	/**
+	 * Create Data Point.
+	 *
+	 * @param dataPointMap the Data Point map.
+	 */
+	@When("^I ensure Data points with following values exists$")
+	public void ensureDataPointExists(final Map<String, String> dataPointMap) {
+		clickDataPolicies();
+		dataPolicyEditor = dataPolicyResultPane.clickCreateDataPolicyButton();
+		dataPolicyEditor.clickDataPointsTab();
+
+		String dataPointName = dataPointMap.get("data point name");
+
+		// Create data point if it doesn't exist
+		if (dataPolicyEditor.checkDataPointIsMissing(dataPointName)) {
+			createDataPoint(dataPointMap);
+			dataPolicyEditor.closeNewDataPolicyEditor();
+			ignoreValidationMessage();
+		} else {
+			dataPolicyEditor.closeNewDataPolicyEditor();
+		}
+	}
+
+	private void ignoreValidationMessage() {
+		new ConfirmDialog(SetUp.getDriver()).clickCancelButton();
 	}
 
 	/**
@@ -183,7 +218,7 @@ public class DataPolicyDefinition {
 	 */
 	@Then("^the newly created Data Policy exists in the list$")
 	public void verifyNewDataPolicyExists() {
-		dataPolicyResultPane.verifyDataPolicyExists(this.dataPolicyName);
+		dataPolicyResultPane.verifyDataPolicyExists(DataPolicyNameHolder.getName());
 	}
 
 	/**
@@ -191,15 +226,16 @@ public class DataPolicyDefinition {
 	 */
 	@And("^I select newly created data policy$")
 	public void selectNewlyCreatedDataPolicy() {
-		Profile.selectDataPolicy(this.dataPolicyName);
+		Profile.selectDataPolicy(DataPolicyNameHolder.getName());
 	}
+
 
 	/**
 	 * click On Edit Data Policy Button.
 	 */
-	@When("^I edit newly created Data Policy$")
+	@When("^I edit recent Data Policy$")
 	public void clickEditDataPolicy() {
-		dataPolicyEditor = dataPolicyResultPane.editDataPolicyEditor(this.dataPolicyName);
+		dataPolicyEditor = dataPolicyResultPane.editDataPolicyEditor(DataPolicyNameHolder.getName());
 	}
 
 	/**
@@ -234,9 +270,9 @@ public class DataPolicyDefinition {
 	/**
 	 * click On Disable Data Policy Button.
 	 */
-	@When("^I Disable newly created Data Policy$")
+	@When("^I click disable data policy button$")
 	public void clickDisableDataPolicyButton() {
-		dataPolicyResultPane.clickDisableDataPolicyButton(this.dataPolicyName);
+		dataPolicyResultPane.clickDisableDataPolicyButton(DataPolicyNameHolder.getName());
 	}
 
 	/**
@@ -248,7 +284,7 @@ public class DataPolicyDefinition {
 	public void editDataPolicy(final String dataPolicyActivity) {
 		dataPolicyEditor.enterDataPolicyActivity(dataPolicyActivity);
 		configurationActionToolbar.saveAll();
-		dataPolicyEditor.closeDataPolicyEditor(this.dataPolicyName);
+		dataPolicyEditor.closeNewDataPolicyEditor();
 	}
 
 	/**
@@ -260,7 +296,7 @@ public class DataPolicyDefinition {
 	public void editDataPolicyState(final String dataPolicyState) {
 		dataPolicyEditor.enterDataPolicyState(dataPolicyState);
 		configurationActionToolbar.saveAll();
-		dataPolicyEditor.closeDataPolicyEditor(this.dataPolicyName);
+		dataPolicyEditor.closeOldDataPolicyEditor();
 	}
 
 	/**
@@ -270,7 +306,7 @@ public class DataPolicyDefinition {
 	 */
 	@Then("^Data Policy State is (.+)")
 	public void verifyDataPolicyState(final String dataPolicyState) {
-		dataPolicyResultPane.verifyDataPolicyState(this.dataPolicyName, dataPolicyState);
+		dataPolicyResultPane.verifyDataPolicyState(DataPolicyNameHolder.getName(), dataPolicyState);
 	}
 
 	/**
@@ -280,7 +316,7 @@ public class DataPolicyDefinition {
 	 */
 	@Then("^the following data policy fields are disabled$")
 	public void verifyDataPolicyFieldsDisabled(final List<String> fields) {
-		openActiveDataPolicyEditor(this.dataPolicyName);
+		openActiveDataPolicyEditor(DataPolicyNameHolder.getName());
 		for (String nameField : fields) {
 			dataPolicyEditor.verifyDataPolicyFieldsDisabled(nameField);
 		}
@@ -291,7 +327,7 @@ public class DataPolicyDefinition {
 	 */
 	@Then("^Data Policy End Date is set to current time")
 	public void verifyDataPolicyEndDate() {
-		dataPolicyResultPane.verifyDataPolicyEndDateIsToday(this.dataPolicyName);
+		dataPolicyResultPane.verifyDataPolicyEndDateIsToday(DataPolicyNameHolder.getName());
 	}
 
 	/**
@@ -299,7 +335,7 @@ public class DataPolicyDefinition {
 	 */
 	@When("^I update Data Policy End Date to future date")
 	public void editDataPolicyEndDate() {
-		dataPolicyEditor = dataPolicyResultPane.viewDataPolicyEditor(this.dataPolicyName);
+		dataPolicyEditor = dataPolicyResultPane.viewDataPolicyEditor(DataPolicyNameHolder.getName());
 		dataPolicyEditor.enterDateTime("EndDate", 1);
 		configurationActionToolbar.saveAll();
 		configurationActionToolbar.clickReloadActiveEditor();
@@ -310,7 +346,7 @@ public class DataPolicyDefinition {
 	 */
 	@Then("^Data Policy End Date is in the future date")
 	public void verifyDataPolicyEndDateFutureDate() {
-		dataPolicyResultPane.verifyDataPolicyEndDateIsFuture(this.dataPolicyName);
+		dataPolicyResultPane.verifyDataPolicyEndDateIsFuture(DataPolicyNameHolder.getName());
 	}
 
 
@@ -354,7 +390,7 @@ public class DataPolicyDefinition {
 	@Then("^I can see the newly created data policy in my profile with following details$")
 	public void verifyDataPolicyDetails(final Map<String, String> dataPolicyDetailMap) {
 		HashMap<String, String> dataPolicyHashMap = new HashMap<>(dataPolicyDetailMap);
-		dataPolicyHashMap.put("policy-name", this.dataPolicyName);
+		dataPolicyHashMap.put("policy-name", DataPolicyNameHolder.getName());
 		DataPolicySteps.verifyDataPolicies(dataPolicyHashMap);
 	}
 
@@ -366,10 +402,33 @@ public class DataPolicyDefinition {
 	 * @param customerID      customerID.
 	 */
 	@When("^I (.+) existing data policy (.+) where consent is given by customer (.+)$")
-	public void disableDataPolicy(final String dataPolicyState, final String dataPolicyName, final String customerID) {
+	public void disableDataPolicyForCustomer(final String dataPolicyState, final String dataPolicyName, final String customerID) {
 		clickDataPolicies();
 		dataPolicyResultPane.clickDisableDataPolicyButton(dataPolicyName);
 		dataPolicyResultPane.verifyDataPolicyState(dataPolicyName, dataPolicyState);
 	}
 
+	/**
+	 * Disable newly created Active Data Policy.
+	 *
+	 * @param dataPolicyState for data policy.
+	 */
+	@When("^I (.+) newly created Data Policy$")
+	public void disableDataPolicyForCustomer(final String dataPolicyState) {
+		clickDataPolicies();
+		dataPolicyResultPane.clickDisableDataPolicyButton(DataPolicyNameHolder.getName());
+		dataPolicyResultPane.verifyDataPolicyState(DataPolicyNameHolder.getName(), dataPolicyState);
+	}
+
+	/**
+	 * Disable existing Active Data Policy where Consent is given by customer.
+	 *
+	 * @param dataPolicyState for data policy.
+	 */
+	@When("^I (.+) newly create data policy$")
+	public void changeDataPolicyState(final String dataPolicyState) {
+		clickDataPolicies();
+		dataPolicyResultPane.clickDisableDataPolicyButton(DataPolicyNameHolder.getName());
+		dataPolicyResultPane.verifyDataPolicyState(DataPolicyNameHolder.getName(), dataPolicyState);
+	}
 }

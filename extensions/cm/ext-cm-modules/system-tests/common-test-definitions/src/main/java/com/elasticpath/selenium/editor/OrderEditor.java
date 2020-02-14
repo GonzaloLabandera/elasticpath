@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.selenium.editor;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -6,9 +10,12 @@ import static org.assertj.core.api.Assertions.fail;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -21,10 +28,15 @@ import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.EditItemDetailsDialog;
 import com.elasticpath.selenium.dialogs.MoveItemDialog;
+import com.elasticpath.selenium.dialogs.OpenNoteDialog;
+import com.elasticpath.selenium.dialogs.PaymentProcessingErrorDialog;
 import com.elasticpath.selenium.dialogs.SelectASkuDialog;
+import com.elasticpath.selenium.dialogs.TransactionDetailsDialog;
+import com.elasticpath.selenium.domainobjects.PaymentConfiguration;
 import com.elasticpath.selenium.domainobjects.Shipment;
 import com.elasticpath.selenium.domainobjects.ShipmentTableRecord;
 import com.elasticpath.selenium.util.Constants;
+import com.elasticpath.selenium.wizards.CompleteExchangeWizard;
 import com.elasticpath.selenium.wizards.CompleteReturnWizard;
 import com.elasticpath.selenium.wizards.CreateExchangeWizard;
 import com.elasticpath.selenium.wizards.CreateRefundWizard;
@@ -36,25 +48,37 @@ import com.elasticpath.selenium.wizards.CreateReturnWizard;
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength"})
 public class OrderEditor extends AbstractPageObject {
 
-	//TODO: the pane-location disappears if re-login to an idled CM. Re-check again when PB-3174 fixed.
 	/**
 	 * Page Object Id.
 	 */
+    public static final String ORDER_EDITOR_TAB = "div[automation-id='com.elasticpath.cmclient.fulfillment"
+            + ".FulfillmentMessages.OrderEditor_ToolTipText'][active-tab='true']";
 	public static final String EDITOR_PANE_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
-	private static final String CANCEL_ORDER_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Cancel Order'][seeable='true']";
+	private static final String CANCEL_ORDER_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Cancel order'][seeable='true']";
 	private static final String EDITOR_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='%s'][seeable='true']";
-	private static final String CREATE_REFUND_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Create Refund'][seeable='true']";
-	private static final String ORDER_STATUS_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Order Status'] > input";
+	private static final String CREATE_REFUND_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Create refund'][seeable='true']";
+	private static final String ORDER_STATUS_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Order status'] > input";
+	private static final String ORDER_BALANCE_DUE = EDITOR_PANE_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages.OrderSummaryOverviewSection_BalanceDue'] > input";
 	private static final String SHIPMENT_STATUS_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Status'] > input";
 	private static final String TAB_CSS = "div[widget-id='%s'][seeable='true']";
-	private static final String PAYMENT_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Order Payments History Table'] ";
+	private static final String PAYMENT_TABLE_CSS = "div[widget-id='Order Payments History Table'][widget-type='Table'][seeable='true']";
+	private static final String PAYMENT_TABLE_ROW_CSS = PAYMENT_TABLE_CSS + " div[widget-type='table_row']";
+	private static final String PAYMENT_ROW_CSS = PAYMENT_TABLE_CSS + " div[widget-type='row']";
+	private static final String VIEW_PAYMENT_DETAILS_BUTTON = "div[automation-id='com.elasticpath.cmclient.fulfillment"
+			+ ".FulfillmentMessages.OrderPaymentHistorySection_ViewPaymentDetailsButton'][seeable='true']";
+	private static final String NOTES_TABLE_CSS = "div[widget-id='Order Notes Table'][widget-type='Table']";
+	private static final String NOTES_TABLE_ROW_CSS = NOTES_TABLE_CSS + " div[widget-type='table_row']";
+	private static final String OPEN_NOTE_BUTTON = "div[automation-id='com.elasticpath.cmclient.fulfillment"
+			+ ".FulfillmentMessages.OrderNoteNotes_Button']";
 	private static final String COLUMN_ID_CSS = "div[column-id='%s']";
-	private static final String PAYMENT_COLUMN_CSS = PAYMENT_TABLE_PARENT_CSS + COLUMN_ID_CSS;
+	private static final String COLUMN_NUM_CSS = "div[column-num='%d']";
 	private static final String SKU_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Sku Table'] ";
 	private static final String SKU_COLUMN_CSS = SKU_TABLE_PARENT_CSS + COLUMN_ID_CSS;
-	private static final String EXCHANGE_ORDER_NUMBER_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Exchange Order #'] > input";
+	private static final String EXCHANGE_ORDER_NUMBER_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Exchange order #'] > input";
+	private static final String EXCHANGE_ORDER_STATUS_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Status'] > input";
 	private static final String ORDER_NUMBER_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Order #'] > input";
-	private static final String EXTERNAL_ORDER_NUMBER_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='External Order #'] > input";
+	private static final String EXTERNAL_ORDER_NUMBER_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='External order #'] > input";
 	private static final String ORDER_DETAIL_SHIPMENT_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id*='Shipment Table']"
 			+ "[widget-type='Table'][seeable='true'] ";
 	private static final String E_SHIPMENT_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[automation-id*='ElectronicShipmentSection_Title'] + div ";
@@ -67,52 +91,53 @@ public class OrderEditor extends AbstractPageObject {
 	private static final String ATTRIBUTE_VALUE = "value";
 	private static final String EMAIL_ADDRESS_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-type='Hyperlink'][seeable='true']";
 	private static final String FULFILLMENT_MESSAGE = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages";
-	private static final String EDITOR_TITLE_LABEL = "[appearance-id='label-wrapper']";
-	public static final String SHIPMENT_SECTION = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages";
-	private static final String ORDER_SUMMARY_TITLE = FULFILLMENT_MESSAGE + ".OrderSummaryPage_Form_Title'][seeable='true']"
-			+ EDITOR_TITLE_LABEL;
-	private static final String ORDER_DETAILS_TITLE = FULFILLMENT_MESSAGE + ".OrderDetailPage_Form_Title'][seeable='true']"
-			+ EDITOR_TITLE_LABEL;
-	private static final String ORDER_PAYMENTS_TITLE = FULFILLMENT_MESSAGE + ".OrderPaymentsPage_Form_Title'][seeable='true']"
-			+ EDITOR_TITLE_LABEL;
-	private static final String RETURNS_AND_EXCHANGES_TITLE = FULFILLMENT_MESSAGE + ".OrderReturnsPage_Title'][seeable='true']"
-			+ EDITOR_TITLE_LABEL;
-	private static final String ITEM_DETAIL_BUTTON_CSS = SHIPMENT_SECTION
+	private static final String ORDER_SUMMARY_TITLE = FULFILLMENT_MESSAGE + ".OrderSummaryPage_Form_Title'][seeable='true']";
+	private static final String ORDER_DETAILS_TITLE = FULFILLMENT_MESSAGE + ".OrderDetailPage_Form_Title'][seeable='true']";
+	private static final String ORDER_PAYMENTS_TITLE = FULFILLMENT_MESSAGE + ".OrderPaymentsPage_Form_Title'][seeable='true']";
+	private static final String RETURNS_AND_EXCHANGES_TITLE = FULFILLMENT_MESSAGE + ".OrderReturnsPage_Title'][seeable='true']";
+	private static final String NOTES_TITLE = FULFILLMENT_MESSAGE + ".OrderNotePage_Title'][seeable='true']";
+	private static final String ITEM_DETAIL_BUTTON_CSS = FULFILLMENT_MESSAGE
 			+ ".ShipmentSection_EditItemAttributesButton'][seeable='true']";
 	private static final String RETURNED_SKU_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Sku Table'] ";
 	private static final String RETURNED_SKU_COLUMN_CSS = RETURNED_SKU_TABLE_PARENT_CSS + COLUMN_ID_CSS;
 	private static final int SLEEP_TIME = 500;
-	private static final String UNLOCK_ORDER_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages"
-			+ ".OrderActionUnlockOrder'][seeable='true']";
+	private static final String UNLOCK_ORDER_CSS = FULFILLMENT_MESSAGE + ".OrderActionUnlockOrder'][seeable='true']";
 	private static final String SHIPMENT_SECTION_BY_NUMBER_CSS = "div[widget-id*='%s'] + div ";
+	private static final String SHIPMENT_DETAIL_TABLE = EDITOR_PANE_PARENT_CSS + SHIPMENT_SECTION_BY_NUMBER_CSS + "div[widget-id*='Shipment Table']"
+			+ "[widget-type='Table'][seeable='true'] ";
 	private static final String SHIPMENT_SUMMARY_PRICE_VALUE_CSS = SHIPMENT_SECTION_BY_NUMBER_CSS + "div[automation-id$=%s][widget-type='Text'] "
 			+ "+ div[widget-type='Text'] > input";
-	private static final String SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_DIV_CSS = "div[widget-id*=' Shipment Discount'][ widget-type='Text'] + div";
+	private static final String SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_DIV_CSS = "div[widget-id*=' shipment discount'][ widget-type='Text'] + div";
 	private static final String SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_CSS = SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_DIV_CSS + " > input";
-	private static final String SHIPMENT_SUMMARY_SHIPMENT_COST_DIV_CSS = "div[widget-id='Shipping Cost:'][ widget-type='Text'] + div";
+	private static final String SHIPMENT_SUMMARY_SHIPMENT_COST_DIV_CSS = "div[widget-id='Shipping cost:'][ widget-type='Text'] + div";
 	private static final String SHIPMENT_SUMMARY_SHIPMENT_COST_CSS = SHIPMENT_SUMMARY_SHIPMENT_COST_DIV_CSS + " > input";
 	private static final String PROMOTION_TABLE_PARENT_CSS = "div[widget-id='Order Promotions Table'] ";
 	private static final String PROMOTION_COLUMN_CSS = PROMOTION_TABLE_PARENT_CSS + COLUMN_ID_CSS + "[column-num='1']";
-	private static final String BILLING_PHONE_NUMBER_CSS = SHIPMENT_SECTION
+	private static final String BILLING_PHONE_NUMBER_CSS = FULFILLMENT_MESSAGE
 			+ ".OrderSummaryBillingAddressSection_PhoneNumber'] > input";
-	private static final String ORDER_DATE_VALUE_CSS = SHIPMENT_SECTION
+	private static final String ORDER_DATE_VALUE_CSS = FULFILLMENT_MESSAGE
 			+ ".OrderSummaryOverviewSection_CreatedDate'] > input";
-	private static final String ORDER_DETAILS_SHIPPING_METHOD_CSS = SHIPMENT_SECTION
+	private static final String ORDER_DETAILS_SHIPPING_METHOD_CSS = FULFILLMENT_MESSAGE
 			+ ".ShipmentSection_ShippingMethod'][widget-type='CCombo'][seeable='true']";
-	private static final String ORDER_DETAILS_SHIPPING_ADDRESS_CSS = SHIPMENT_SECTION
+	private static final String ORDER_DETAILS_SHIPPING_ADDRESS_CSS = FULFILLMENT_MESSAGE
 			+ ".ShipmentSection_ShippingAddress'][widget-type='CCombo']";
-	private static final String SHIPMENT_TABLE_COLUMN_CSS = ORDER_DETAIL_SHIPMENT_TABLE_PARENT_CSS + "div[column-num='%s']";
-	private static final String BUNDLE_NAME_COLUMN_NAME = "Bundle Name";
+	private static final String SHIPMENT_TABLE_COLUMN_CSS = ORDER_DETAIL_SHIPMENT_TABLE_PARENT_CSS + COLUMN_NUM_CSS;
+	private static final String BUNDLE_NAME_COLUMN_NAME = "Bundle name";
 	private static final String INVENTORY_COLUMN_NAME = "Inventory";
-	private static final String SKU_CODE_COLUMN_NAME = "SKU Code";
-	private static final String PRODUCT_NAME_COLUMN_NAME = "Product Name";
-	private static final String SKU_OPTION_COLUMN_NAME = "SKU Option";
-	private static final String LIST_PRICE_COLUMN_NAME = "List Price";
-	private static final String SALE_PRICE_COLUMN_NAME = "Sale Price";
+	private static final String SKU_CODE_COLUMN_NAME = "SKU code";
+	private static final String PRODUCT_NAME_COLUMN_NAME = "Product name";
+	private static final String SKU_OPTION_COLUMN_NAME = "SKU option";
+	private static final String LIST_PRICE_COLUMN_NAME = "List price";
+	private static final String SALE_PRICE_COLUMN_NAME = "Sale price";
 	private static final String QUANTITY_COLUMN_NAME = "Qty";
 	private static final String DISCOUNT_COLUMN_NAME = "Discount";
-	private static final String TOTAL_PRICE_COLUMN_NAME = "Total Price";
-	private static final String PAYMENT_SCHEDULE_COLUMN_NAME = "Payment Schedule";
+	private static final String TOTAL_PRICE_COLUMN_NAME = "Total price";
+	private static final String PAYMENT_SCHEDULE_COLUMN_NAME = "Payment schedule";
+	private static final String METHOD_COLUMN_NAME = "Method";
+	private static final String TYPE_COLUMN_NAME = "Type";
+	private static final String DETAILS_COLUMN_NAME = "Details";
+	private static final String STATUS_COLUMN_NAME = "Status";
+	private static final String AMOUNT_COLUMN_NAME = "Amount";
 	private static final List<String> SHIPMENT_TABLE_COLUMN_HEADER_VALUES = Arrays.asList(BUNDLE_NAME_COLUMN_NAME, INVENTORY_COLUMN_NAME,
 			SKU_CODE_COLUMN_NAME, PRODUCT_NAME_COLUMN_NAME, SKU_OPTION_COLUMN_NAME, LIST_PRICE_COLUMN_NAME, SALE_PRICE_COLUMN_NAME,
 			QUANTITY_COLUMN_NAME, DISCOUNT_COLUMN_NAME, TOTAL_PRICE_COLUMN_NAME);
@@ -127,10 +152,23 @@ public class OrderEditor extends AbstractPageObject {
 			+ "div[parent-widget-id='Order Details Physical Shipment Table'][widget-type='table_row']";
 	private static final String E_SHIPMENT_ITEM_ROW_CSS = EDITOR_PANE_PARENT_CSS
 			+ "div[parent-widget-id='Order Details Electronic Shipment Table'][widget-type='table_row']";
+	private static final String CANCEL_SHIPMENT_BUTTON = SHIPMENT_SECTION_BY_NUMBER_CSS + FULFILLMENT_MESSAGE
+			+ ".ShipmentSection_CancelShipmentButton']";
+	private static final String RELEASE_SHIPMENT_BUTTON_CSS = "div[widget-id*='%s']+div div[automation-id="
+			+ "'com.elasticpath.cmclient.fulfillment.FulfillmentMessages.ShipmentSection_ReleaseShipmentButton']";
 	private static WebElement shipmentItemRow;
 	private static final String ORDER_DATA_TABLE_CSS = "div[widget-id='Field Value Table']";
 	private static final String ORDER_DATA_TABLE_ROW_CSS = "div[parent-widget-id='Field Value Table']"
 			+ "[widget-id='%s'] div[column-num='1']";
+	private static final String PAYMENT_SUMMARY_ORDERED_VALUE = FULFILLMENT_MESSAGE
+			+ ".OrderPaymentSummaySection_Ordered'] > input";
+	private static final String PAYMENT_SUMMARY_PAID_VALUE = FULFILLMENT_MESSAGE
+			+ ".OrderPaymentSummaySection_Paid'] > input";
+	private static final String PAYMENT_SUMMARY_DUE_VALUE = FULFILLMENT_MESSAGE
+			+ ".OrderPaymentSummaySection_Due'] > input";
+	private static final String MOVE_SHIPMENT_BUTTON = SHIPMENT_SECTION_BY_NUMBER_CSS + FULFILLMENT_MESSAGE + ".ShipmentSection_MoveItemButton']";
+	private static final String SHOW_SKIPPED_PAYMENT_EVENTS = FULFILLMENT_MESSAGE + ".ShowSkippedPaymentEvents_Label'][seeable='true']";
+	private static final String RELEASE_SHIPMENT_BUTTON = "Release shipment";
 
 	/**
 	 * Constructor.
@@ -140,6 +178,13 @@ public class OrderEditor extends AbstractPageObject {
 	public OrderEditor(final WebDriver driver) {
 		super(driver);
 	}
+
+    /**
+     * Clicks on the current Order Tab editor.
+     */
+    public void clickCurrentOrderTab() {
+        click(ORDER_EDITOR_TAB);
+    }
 
 	/**
 	 * Clicks Cancel Order button.
@@ -157,8 +202,18 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return the complete return wizard
 	 */
 	public CompleteReturnWizard clickCompleteReturnButton() {
-		clickEditorButton("Complete Return...");
+		clickEditorButton("Complete return...");
 		return new CompleteReturnWizard(getDriver());
+	}
+
+	/**
+	 * Clicks the complete return button.
+	 *
+	 * @return the complete return wizard
+	 */
+	public CompleteExchangeWizard clickCompleteExchangeButton() {
+		clickEditorButton("Complete exchange...");
+		return new CompleteExchangeWizard(getDriver());
 	}
 
 	/**
@@ -190,7 +245,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return the confirm dialog
 	 */
 	public ConfirmDialog clickCancelShipmentButton() {
-		clickEditorButton("Cancel Shipment");
+		clickEditorButton("Cancel shipment");
 		return new ConfirmDialog(getDriver());
 	}
 
@@ -200,7 +255,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return CreateReturnWizard
 	 */
 	public CreateReturnWizard clickCreateReturnButton() {
-		clickEditorButton("Create Return ");
+		clickEditorButton("Create return ");
 		return new CreateReturnWizard(getDriver());
 	}
 
@@ -210,7 +265,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return boolean
 	 */
 	public boolean isCreateReturnButtonInViewport() {
-		return isEditorButtonInViewport("Create Return ");
+		return isEditorButtonInViewport("Create return ");
 	}
 
 	/**
@@ -219,18 +274,60 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return CreateExchangeWizard
 	 */
 	public CreateExchangeWizard clickCreateExchangeButton() {
-		clickEditorButton("Create Exchange");
+		clickEditorButton("Create exchange");
 		return new CreateExchangeWizard(getDriver());
 	}
+
+	/**
+	 * Clicks Cancel Exchange button.
+	 */
+	public ConfirmDialog clickCancelExchangeButton() {
+		clickEditorButton("Cancel exchange...");
+		return new ConfirmDialog(getDriver());
+	}
+
+	/**
+	 * Create payment processing error dialog.
+	 *
+	 * @return PaymentProcessingErrorDialog
+	 */
+	public PaymentProcessingErrorDialog createPaymentProcessingErrorDialog() {
+		return new PaymentProcessingErrorDialog(getDriver());
+	}
+
 
 	/**
 	 * Clicks Release Shipment button.
 	 */
 	public void clickReleaseShipmentButton() {
-		String buttonText = "Release Shipment";
+		String buttonText = RELEASE_SHIPMENT_BUTTON;
 		scrollWidgetIntoView(String.format(EDITOR_BUTTON_CSS, buttonText));
 		clickButton(String.format(EDITOR_BUTTON_CSS, buttonText), buttonText);
 		new ConfirmDialog(getDriver()).clickOKButton("FulfillmentMessages.ShipmentSection_ReleaseShipmentConfirm");
+	}
+
+	/**
+	 * Release shipment by shipment number.
+	 *
+	 * @param shipmentNumber the shipment number
+	 */
+	public void releaseShipmentByShipmentID(final String shipmentNumber) {
+		String releaseShipmentButton = String.format(RELEASE_SHIPMENT_BUTTON_CSS, shipmentNumber);
+		scrollWidgetIntoView(releaseShipmentButton);
+		clickButton(releaseShipmentButton, RELEASE_SHIPMENT_BUTTON);
+		new ConfirmDialog(getDriver()).clickOKButton("FulfillmentMessages.ShipmentSection_ReleaseShipmentConfirm");
+	}
+
+	/**
+	 * Cancel shipment by shipment number.
+	 *
+	 * @param shipmentNumber the shipment number
+	 */
+	public void cancelShipmentByShipmentNumber(final String shipmentNumber) {
+		String cancelShipmentButton = String.format(CANCEL_SHIPMENT_BUTTON, shipmentNumber);
+		scrollWidgetIntoView(cancelShipmentButton);
+		clickButton(cancelShipmentButton, "Cancel shipment");
+		new ConfirmDialog(getDriver()).clickOKButton("FulfillmentMessages.ShipmentSection_CancelShipment");
 	}
 
 	/**
@@ -239,7 +336,15 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return boolean
 	 */
 	public boolean isReleaseShipmentButtonInViewport() {
-		return isEditorButtonInViewport("Release Shipment");
+		return isEditorButtonInViewport(RELEASE_SHIPMENT_BUTTON);
+	}
+
+	/**
+	 * Verifies is release shipment button disabled.
+	 */
+	public void verifyReleaseShipmentButtonDisabled() {
+		String releaseShipmentButtonCssSelector = String.format(EDITOR_BUTTON_CSS, RELEASE_SHIPMENT_BUTTON);
+		verifyButtonIsDisabled(releaseShipmentButtonCssSelector, RELEASE_SHIPMENT_BUTTON);
 	}
 
 	/**
@@ -248,7 +353,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return CreateRefundWizard
 	 */
 	public CreateRefundWizard clickCreateRefundButton() {
-		clickButton(CREATE_REFUND_BUTTON_CSS, "Create Refund");
+		clickButton(CREATE_REFUND_BUTTON_CSS, "Create refund");
 		return new CreateRefundWizard(getDriver());
 	}
 
@@ -256,7 +361,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * Clicks Open Exchange Order button.
 	 */
 	public void clickOpenExchangeOrderButton() {
-		clickEditorButton("Open Exchange Order...");
+		clickEditorButton("Open exchange order...");
 	}
 
 	/**
@@ -265,7 +370,19 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return MoveItemDialog
 	 */
 	public MoveItemDialog clickMoveItemButton() {
-		clickEditorButton("Move Item...");
+		clickEditorButton("Move item...");
+		return new MoveItemDialog(getDriver());
+	}
+
+	/**
+	 * Move item by shipment number.
+	 *
+	 * @param shipmentNumber the shipment number
+	 */
+	public MoveItemDialog moveItemByShipmentNumber(final String sku, final String shipmentNumber) {
+		String moveShipmentButton = String.format(MOVE_SHIPMENT_BUTTON, shipmentNumber);
+		selectSkuByShipment(shipmentNumber, sku);
+		clickButton(moveShipmentButton, "Move item");
 		return new MoveItemDialog(getDriver());
 	}
 
@@ -275,7 +392,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return SelectASkuDialog
 	 */
 	public SelectASkuDialog clickAddItemButton() {
-		clickEditorButton("Add Item...");
+		clickEditorButton("Add item...");
 		return new SelectASkuDialog(getDriver());
 	}
 
@@ -283,7 +400,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * Clicks Remove Item button.
 	 */
 	public void clickRemoveItemButton() {
-		clickEditorButton("Remove Item...");
+		clickEditorButton("Remove item...");
 		new ConfirmDialog(getDriver()).clickOKButton("FulfillmentMessages.ShipmentSection_RemoveItemConfirm");
 	}
 
@@ -294,8 +411,30 @@ public class OrderEditor extends AbstractPageObject {
 	 */
 	public void verifyOrderStatus(final String expectedOrderStatus) {
 		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(ORDER_STATUS_INPUT_CSS)).getAttribute(ATTRIBUTE_VALUE))
-				.as("Order Status validation failed")
+				.as("Order status validation failed")
 				.isEqualTo(expectedOrderStatus);
+	}
+
+	/**
+	 * Verifies status of exchange order.
+	 *
+	 * @param expectedStatus the expected status of exchange order.
+	 */
+	public void verifyExchangeOrderStatus(final String expectedStatus) {
+		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(EXCHANGE_ORDER_STATUS_INPUT_CSS)).getAttribute(ATTRIBUTE_VALUE))
+				.as("Order status validation failed")
+				.isEqualTo(expectedStatus);
+	}
+
+	/**
+	 * Verifies Order Balance Due.
+	 *
+	 * @param expectedBalanceDue the expected order status.
+	 */
+	public void verifyOrderBalance(final String expectedBalanceDue) {
+		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(ORDER_BALANCE_DUE)).getAttribute(ATTRIBUTE_VALUE))
+				.as("Order balance due does not match.")
+				.isEqualTo(expectedBalanceDue);
 	}
 
 	/**
@@ -316,6 +455,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @param tabName the tab name.
 	 */
 	public void clickTab(final String tabName) {
+        clickCurrentOrderTab();
 		String cssSelector = String.format(TAB_CSS, tabName);
 		resizeWindow(cssSelector);
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
@@ -335,8 +475,11 @@ public class OrderEditor extends AbstractPageObject {
 			case "Payments":
 				getWaitDriver().waitForElementToBeVisible(By.cssSelector(ORDER_PAYMENTS_TITLE));
 				break;
-			case "Returns and Exchanges":
+			case "Returns and exchanges":
 				getWaitDriver().waitForElementToBeVisible(By.cssSelector(RETURNS_AND_EXCHANGES_TITLE));
+				break;
+			case "Notes":
+				getWaitDriver().waitForElementToBeVisible(By.cssSelector(NOTES_TITLE));
 				break;
 			default:
 				fail("Editor is not visible for tab - " + tabName);
@@ -345,25 +488,199 @@ public class OrderEditor extends AbstractPageObject {
 	}
 
 	/**
-	 * Verifies Transaction Type.
-	 *
-	 * @param transactionType the transaction type.
+	 * Verifies that Payment Transaction table is empty.
 	 */
-	public void verifyTransactionType(final String transactionType) {
-		verifyPaymentHistoryColumnValue(transactionType, "Transaction Type");
+	public void verifyPaymentTransactionTableIsEmpty() {
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
+		final List<WebElement> paymentTransactions = getPaymentTransactionsByCssSelector(PAYMENT_TABLE_ROW_CSS);
+		if (!paymentTransactions.isEmpty()) {
+			fail("Found unexpected payment transaction in payment history");
+		}
+		setWebDriverImplicitWaitToDefault();
 	}
 
 	/**
-	 * Verifies Payment History column value.
+	 * Verifies Order Payment Transaction in Payment History with Skipped events.
 	 *
-	 * @param columnValue the column value.
-	 * @param columnName  the column number.
+	 * @param paymentMap the payment transaction map.
 	 */
-	public void verifyPaymentHistoryColumnValue(final String columnValue, final String columnName) {
-		sleep(SLEEP_TIME);
-		assertThat(selectItemInEditorPane(PAYMENT_TABLE_PARENT_CSS, PAYMENT_COLUMN_CSS, columnValue, columnName))
-				.as("Unable to find payment history column value - " + columnValue)
-				.isTrue();
+	public void verifyNoSuchPaymentTransactionInPaymentHistoryWithSkippedEvents(final Map<String, String> paymentMap) {
+		final List<WebElement> paymentTransactions = getPaymentTransactionsByCssSelector(PAYMENT_TABLE_ROW_CSS);
+		final List<WebElement> paymentTransactionsInRow = getPaymentTransactionsByCssSelector(PAYMENT_ROW_CSS);
+
+		verifyNoSuchPaymentTransaction(paymentMap, paymentTransactions);
+		verifyNoSuchPaymentTransaction(paymentMap, paymentTransactionsInRow);
+	}
+
+	/**
+	 * Verifies Type of Order Payment Transaction.
+	 *
+	 * @param transactionType the type of payment transaction.
+	 */
+	public void verifyNoSuchPaymentTransactionType(final String transactionType) {
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
+		final List<WebElement> paymentTransactions = getDriver().findElements(By.cssSelector(PAYMENT_TABLE_ROW_CSS));
+		for (WebElement paymentTransaction : paymentTransactions) {
+			String type = getPaymentTransactionColumnValue(paymentTransaction, 2);
+
+			if (transactionType.equals(type)) {
+				fail("Found unexpected payment transaction: %s", transactionType);
+			}
+		}
+		setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
+	 * Verifies Order Payment Transaction.
+	 *
+	 * @param paymentMap the payment transaction map.
+	 */
+	public void verifyNoSuchPaymentTransaction(final Map<String, String> paymentMap) {
+		final List<WebElement> paymentTransactions = getPaymentTransactionsByCssSelector(PAYMENT_TABLE_ROW_CSS);
+		verifyNoSuchPaymentTransaction(paymentMap, paymentTransactions);
+	}
+
+	private void verifyNoSuchPaymentTransaction(final Map<String, String> paymentMap, final List<WebElement> paymentTransactions) {
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
+		for (WebElement paymentTransaction : paymentTransactions) {
+			String type = getPaymentTransactionColumnValue(paymentTransaction, 2);
+			String details = getPaymentTransactionColumnValue(paymentTransaction, 3);
+			String status = getPaymentTransactionColumnValue(paymentTransaction, 4);
+			String amount = getPaymentTransactionColumnValue(paymentTransaction, 5);
+
+			final boolean typeMatch = paymentMap.containsKey(TYPE_COLUMN_NAME) && paymentMap.get(TYPE_COLUMN_NAME).equals(type);
+			final boolean detailsMatch = paymentMap.containsKey(DETAILS_COLUMN_NAME) && paymentMap.get(DETAILS_COLUMN_NAME).equals(details);
+			final boolean statusMatch = paymentMap.containsKey(STATUS_COLUMN_NAME) && paymentMap.get(STATUS_COLUMN_NAME).equals(status);
+			final boolean amountMatch = paymentMap.containsKey(AMOUNT_COLUMN_NAME) && paymentMap.get(AMOUNT_COLUMN_NAME).equals(amount);
+			if (typeMatch && detailsMatch && statusMatch && amountMatch) {
+				fail("Found unexpected payment transaction: %s", paymentMap.keySet().stream()
+						.map(key -> key + ": " + paymentMap.get(key))
+						.collect(Collectors.joining(",\n", "\n", "")));
+			}
+		}
+		setWebDriverImplicitWaitToDefault();
+	}
+
+	private boolean isPaymentTransactionsCheckSuccessful(final PaymentConfiguration paymentConfiguration, final Map<String, String> paymentMap,
+														 final List<WebElement> paymentTransactions, final String cssSelectorForTableRow) {
+		for (WebElement paymentTransaction : paymentTransactions) {
+			final String method = getPaymentTransactionColumnValue(paymentTransaction, 1);
+			final String type = getPaymentTransactionColumnValue(paymentTransaction, 2);
+			final String details = getPaymentTransactionColumnValue(paymentTransaction, 3);
+			final String status = getPaymentTransactionColumnValue(paymentTransaction, 4);
+			final String amount = getPaymentTransactionColumnValue(paymentTransaction, 5);
+			final boolean methodMatch;
+			if (paymentConfiguration.getConfigurationName().equals(StringUtils.EMPTY)) {
+				methodMatch = !paymentMap.containsKey(METHOD_COLUMN_NAME) || paymentMap.get(METHOD_COLUMN_NAME).equals(method);
+			} else {
+				LOGGER.debug("Verifying payment method name - " + paymentConfiguration.getConfigurationName());
+				methodMatch = !paymentMap.containsKey(METHOD_COLUMN_NAME) || paymentConfiguration.getConfigurationName().equals(method);
+			}
+			final boolean typeMatch = !paymentMap.containsKey(TYPE_COLUMN_NAME) || paymentMap.get(TYPE_COLUMN_NAME).equals(type);
+			final boolean detailsMatch = !paymentMap.containsKey(DETAILS_COLUMN_NAME) || paymentMap.get(DETAILS_COLUMN_NAME).equals(details);
+			final boolean statusMatch = !paymentMap.containsKey(STATUS_COLUMN_NAME) || paymentMap.get(STATUS_COLUMN_NAME).equals(status);
+			final boolean amountMatch = !paymentMap.containsKey(AMOUNT_COLUMN_NAME) || paymentMap.get(AMOUNT_COLUMN_NAME).equals(amount);
+			if (methodMatch && typeMatch && detailsMatch && statusMatch && amountMatch) {
+				final String concretePaymentTableRowCss = cssSelectorForTableRow + "[id='%s']";
+				final String rowIdCss = String.format(concretePaymentTableRowCss, paymentTransaction.getAttribute("id"));
+				assertThat(selectItemInEditorPaneWithScrollBar(PAYMENT_TABLE_CSS, rowIdCss + " " + COLUMN_ID_CSS, type))
+						.as("Unable to find payment transaction row - " + rowIdCss)
+						.isTrue();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Verifies Order Payment Transaction with skipped events.
+	 *
+	 * @param paymentMap the payment transaction map.
+	 */
+	public void verifyPaymentTransactionWithSkippedEvents(final PaymentConfiguration paymentConfiguration, final Map<String, String> paymentMap) {
+		if (isPaymentTransactionsCheckSuccessful(paymentConfiguration, paymentMap,
+				getPaymentTransactionsByCssSelector(PAYMENT_TABLE_ROW_CSS), PAYMENT_TABLE_ROW_CSS)) {
+			TransactionDetailsDialog transactionDetailsDialog = clickViewPaymentDetails();
+			transactionDetailsDialog.verifyOrderPaymentDetails(paymentConfiguration, paymentMap);
+			return;
+		}
+
+		if (isPaymentTransactionsCheckSuccessful(paymentConfiguration, paymentMap,
+				getPaymentTransactionsByCssSelector(PAYMENT_ROW_CSS), PAYMENT_ROW_CSS)) {
+			TransactionDetailsDialog transactionDetailsDialog = clickViewPaymentDetails();
+			transactionDetailsDialog.verifyOrderPaymentDetails(paymentConfiguration, paymentMap);
+			return;
+		}
+
+		fail("Could not find expected payment transaction: %s", paymentMap.keySet().stream()
+				.map(key -> key + ": " + paymentMap.get(key))
+				.collect(Collectors.joining(",\n", "\n", "")));
+	}
+
+	private List<WebElement> getPaymentTransactionsByCssSelector(final String paymentRowCss) {
+		return getDriver().findElements(By.cssSelector(paymentRowCss));
+	}
+
+	/**
+	 * Verifies Order Payment Transaction.
+	 *
+	 * @param paymentMap the payment transaction map.
+	 */
+	public void verifyPaymentTransaction(final PaymentConfiguration paymentConfiguration, final Map<String, String> paymentMap) {
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
+		if (isPaymentTransactionsCheckSuccessful(paymentConfiguration, paymentMap,
+				getPaymentTransactionsByCssSelector(PAYMENT_ROW_CSS), PAYMENT_TABLE_ROW_CSS)) {
+			TransactionDetailsDialog transactionDetailsDialog = clickViewPaymentDetails();
+			transactionDetailsDialog.verifyOrderPaymentDetails(paymentConfiguration, paymentMap);
+			return;
+		} else {
+			getDriver().findElement(By.cssSelector(PAYMENT_TABLE_CSS)).click();
+			scrollDownWithDownArrowKey(getDriver().findElement(By.cssSelector(PAYMENT_TABLE_CSS)), 5);
+			if (isPaymentTransactionsCheckSuccessful(paymentConfiguration, paymentMap,
+					getPaymentTransactionsByCssSelector(PAYMENT_TABLE_ROW_CSS), PAYMENT_TABLE_ROW_CSS)) {
+				TransactionDetailsDialog transactionDetailsDialog = clickViewPaymentDetails();
+				transactionDetailsDialog.verifyOrderPaymentDetails(paymentConfiguration, paymentMap);
+				return;
+			}
+		}
+		setWebDriverImplicitWaitToDefault();
+
+		fail("Could not find expected payment transaction: %s", paymentMap.keySet().stream()
+				.map(key -> key + ": " + paymentMap.get(key))
+				.collect(Collectors.joining(",\n", "\n", "")));
+	}
+
+	private String getPaymentTransactionColumnValue(final WebElement paymentTransaction, final int columnNumber) {
+		setWebDriverImplicitWait(0);
+		final List<WebElement> cellElement = paymentTransaction.findElements(By.cssSelector(String.format(COLUMN_NUM_CSS, columnNumber)));
+		setWebDriverImplicitWaitToDefault();
+		return cellElement.isEmpty() ? "" : cellElement.get(0).getText();
+	}
+
+	/**
+	 * Verifies Order Note.
+	 *
+	 * @param noteParts the note parts to match.
+	 */
+	public void verifyOrderNote(final Collection<String> noteParts) {
+		final List<WebElement> orderNotes = getPaymentTransactionsByCssSelector(NOTES_TABLE_ROW_CSS);
+		for (WebElement orderNote : orderNotes) {
+			String description = orderNote.findElement(By.cssSelector(String.format(COLUMN_NUM_CSS, 2))).getText();
+			boolean descriptionMatch = true;
+			for (String notePart : noteParts) {
+				descriptionMatch &= description.contains(notePart);
+			}
+			if (descriptionMatch) {
+				final String concretePaymentTableRowCss = NOTES_TABLE_ROW_CSS + "[id='%s']";
+				final String rowIdCss = String.format(concretePaymentTableRowCss, orderNote.getAttribute("id"));
+				assertThat(selectItemInEditorPaneWithScrollBar(NOTES_TABLE_CSS, rowIdCss + " " + COLUMN_ID_CSS, description))
+						.as("Unable to find order note row - " + rowIdCss)
+						.isTrue();
+				return;
+			}
+		}
+
+		fail("Could not find expected order note: %s", String.join(" (.*) ", noteParts));
 	}
 
 	/**
@@ -391,7 +708,6 @@ public class OrderEditor extends AbstractPageObject {
 		return exchangeOrderNumber;
 	}
 
-
 	/**
 	 * Verifies original and exchange order numbers.
 	 *
@@ -418,6 +734,21 @@ public class OrderEditor extends AbstractPageObject {
 		assertThat(selectItemInDialog(ORDER_DETAIL_SHIPMENT_TABLE_PARENT_CSS, ORDER_DETAIL_SHIPMENT_TABLE_COLUMN_CSS, skuCode, SKU_CODE_COLUMN_NAME))
 				.as("Unable to find order Shipment sku - " + skuCode)
 				.isTrue();
+	}
+
+	/**
+	 * Select shipment sku by shipment number.
+	 *
+	 * @param shipmentNumber String
+	 * @param sku            String
+	 */
+	public void selectSkuByShipment(final String shipmentNumber, final String sku) {
+		String shipmentSection = String.format(RELEASE_SHIPMENT_BUTTON_CSS, shipmentNumber);
+		scrollWidgetIntoView(shipmentSection);
+		sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
+		String shipmentSku = String.format(SHIPMENT_DETAIL_TABLE, shipmentNumber) + String.format(COLUMN_ID_CSS, sku);
+		scrollWidgetIntoView(shipmentSku);
+		getWaitDriver().waitForElementToBeClickable(By.cssSelector(shipmentSku)).click();
 	}
 
 	/**
@@ -477,7 +808,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return CustomerEditor
 	 */
 	public CustomerEditor clickOpenCustomerProfileButton() {
-		clickEditorButton("Open Customer Profile...");
+		clickEditorButton("Open customer profile...");
 		getWaitDriver().waitForElementToBeVisible(By.cssSelector("div[widget-id='Basic Profile'][seeable='true']"));
 		return new CustomerEditor(getDriver());
 	}
@@ -516,7 +847,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return EditAddressDialog
 	 */
 	public AddEditCustomerAddressDialog clickEditAddressButton() {
-		clickEditorButton("Edit Shipping Address...");
+		clickEditorButton("Edit shipping address...");
 		return new AddEditCustomerAddressDialog(getDriver());
 	}
 
@@ -565,7 +896,7 @@ public class OrderEditor extends AbstractPageObject {
 		String webElement;
 		switch (record.getShipmentType()) {
 			case "physical":
-				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Physical Shipment");
+				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Order Details Physical Shipment");
 				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME),
 						record.getBundleName());
 				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(INVENTORY_COLUMN_NAME),
@@ -585,7 +916,7 @@ public class OrderEditor extends AbstractPageObject {
 						record.getTotalPrice());
 				break;
 			case "e-shipment":
-				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Electronic Shipment");
+				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Order Details Electronic Shipment");
 				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME),
 						record.getBundleName());
 				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME),
@@ -606,7 +937,7 @@ public class OrderEditor extends AbstractPageObject {
 						record.getTotalPrice());
 				break;
 			case "recurring":
-				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Recurring Items");
+				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Order Details Recurring Items");
 				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME),
 						record.getBundleName());
 				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME),
@@ -646,7 +977,8 @@ public class OrderEditor extends AbstractPageObject {
 	private void verifyShipmentTableLineItemRow(final String webElementCSS, final Integer columnIndex, final String expectedValue) {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
 		try {
-			assertThat(getDriver().findElement(By.cssSelector(webElementCSS + "div[column-num='" + columnIndex + "']")).getText())
+			assertThat(getDriver().findElement(By.cssSelector(
+					webElementCSS + String.format(COLUMN_NUM_CSS, columnIndex))).getText())
 					.as("Shipment Line Item Value was not as expected")
 					.isEqualTo(expectedValue);
 		} catch (NoSuchElementException e) {
@@ -756,12 +1088,12 @@ public class OrderEditor extends AbstractPageObject {
 	}
 
 	/**
-	 * Clicks Edit Billing Address... button.
+	 * Clicks Edit Billing address... button.
 	 *
 	 * @return EditAddressDialog
 	 */
 	public AddEditCustomerAddressDialog clickEditBillingAddressButton() {
-		clickEditorButton("Edit Address...");
+		clickEditorButton("Edit address...");
 		return new AddEditCustomerAddressDialog(getDriver());
 	}
 
@@ -875,7 +1207,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @param sku the price expected.
 	 */
 	public void verifyShipmentLineItemSkuCode(final String sku) {
-		verifyShipmentLineItemRow("SKU Code", sku);
+		verifyShipmentLineItemRow("SKU code", sku);
 	}
 
 	/**
@@ -884,7 +1216,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @param salePrice the price expected.
 	 */
 	public void verifyShipmentLineItemSalePrice(final String salePrice) {
-		verifyShipmentLineItemRow("Sale Price", salePrice);
+		verifyShipmentLineItemRow("Sale price", salePrice);
 	}
 
 	/**
@@ -911,7 +1243,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @param totalPrice the price expected.
 	 */
 	public void verifyShipmentLineItemTotalPrice(final String totalPrice) {
-		verifyShipmentLineItemRow("Total Price", totalPrice);
+		verifyShipmentLineItemRow("Total price", totalPrice);
 	}
 
 	/**
@@ -970,7 +1302,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @return List of webElement
 	 */
 	private List<WebElement> getShipmentRow(final String shipmentItemRowCss) {
-		return getDriver().findElements(By.cssSelector(shipmentItemRowCss));
+		return getPaymentTransactionsByCssSelector(shipmentItemRowCss);
 	}
 
 	/**
@@ -985,7 +1317,8 @@ public class OrderEditor extends AbstractPageObject {
 		getWaitDriver().waitForElementToBeInteractable(shipmentItemRowCss);
 		for (WebElement itemRow : getShipmentRow(shipmentItemRowCss)) {
 			if (itemRow.findElement(By.cssSelector(
-					"div[column-num='" + SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME) + "']")).getText().equals(skuCode)) {
+					String.format(COLUMN_NUM_CSS, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME))))
+					.getText().equals(skuCode)) {
 				shipmentItemRow = itemRow;
 				getWaitDriver().waitForElementToBeClickable(itemRow);
 				itemRow.click();
@@ -1067,7 +1400,7 @@ public class OrderEditor extends AbstractPageObject {
 	 */
 	private void verifyShipmentItemColumnValue(final String columnName, final String expectedValue) {
 		String actualValue = shipmentItemRow.findElement(
-				By.cssSelector("div[column-num='" + SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(columnName) + "']")).getText();
+				By.cssSelector(String.format(COLUMN_NUM_CSS, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(columnName)))).getText();
 		assertThat(actualValue)
 				.as("Shipment item " + columnName + " is not as expected")
 				.isEqualTo(expectedValue);
@@ -1090,4 +1423,49 @@ public class OrderEditor extends AbstractPageObject {
 				.isEqualTo(orderDataValue);
 	}
 
+	/**
+	 * Clicks View Payment Details.
+	 *
+	 * @return TransactionDetailsDialog
+	 */
+	public TransactionDetailsDialog clickViewPaymentDetails() {
+		clickButton(VIEW_PAYMENT_DETAILS_BUTTON, "View Payment Details", TransactionDetailsDialog.TRANSACTION_DETAIL_PARENT);
+		return new TransactionDetailsDialog((getDriver()));
+	}
+
+	/**
+	 * Clicks Open Note...
+	 *
+	 * @return OpenNoteDialog
+	 */
+	public OpenNoteDialog clickOpenNote() {
+		clickButton(OPEN_NOTE_BUTTON, "Open Note...", OpenNoteDialog.NOTE_PARENT);
+		return new OpenNoteDialog((getDriver()));
+	}
+
+	/**
+	 * Verifies Payment ordered value.
+	 *
+	 * @param paymentSummaryMap payment summary map.
+	 */
+	public void verifyPaymentSummary(final Map<String, String> paymentSummaryMap) {
+		assertThat(getDriver().findElement(By.cssSelector(PAYMENT_SUMMARY_ORDERED_VALUE)).getAttribute(ATTRIBUTE_VALUE))
+				.as("Order Payment Ordered value not match.")
+				.isEqualTo(paymentSummaryMap.get("Ordered"));
+
+		assertThat(getDriver().findElement(By.cssSelector(PAYMENT_SUMMARY_PAID_VALUE)).getAttribute(ATTRIBUTE_VALUE))
+				.as("Order Payment Paid value not match.")
+				.isEqualTo(paymentSummaryMap.get("Paid"));
+
+		assertThat(getDriver().findElement(By.cssSelector(PAYMENT_SUMMARY_DUE_VALUE)).getAttribute(ATTRIBUTE_VALUE))
+				.as("Order Payment Balance Due value not match.")
+				.isEqualTo(paymentSummaryMap.get("Balance Due"));
+	}
+
+	/**
+	 * Select Skipped Payment Events.
+	 */
+	public void selectSkippedPaymentEvents() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SHOW_SKIPPED_PAYMENT_EVENTS)));
+	}
 }

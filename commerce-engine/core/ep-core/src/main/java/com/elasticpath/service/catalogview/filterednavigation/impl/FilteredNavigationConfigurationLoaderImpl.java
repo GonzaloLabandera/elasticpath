@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.Pair;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader;
@@ -24,13 +25,13 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 public class FilteredNavigationConfigurationLoaderImpl implements FilteredNavigationConfigurationLoader {
 
 	private BeanFactory beanFactory;
-	
+
 	/** Injected parser implementation that knows how to parse the configuration document. */
 	private FilteredNavigationConfigurationParser parser;
-	
+
 	private final Map<String, Pair<String, FilteredNavigationConfiguration>> fncCache =
 		new HashMap<>();
-	
+
 	private SettingValueProvider<String> separatorInTokenProvider;
 
 	private SettingValueProvider<String> configurationProvider;
@@ -55,7 +56,7 @@ public class FilteredNavigationConfigurationLoaderImpl implements FilteredNaviga
 		parser.parse(configStream, fnc);
 		return fnc;
 	}
-	
+
 	/**
 	 * Converts the given String into an InputStream.
 	 * @param fncString the string from which to get an InputStream
@@ -64,7 +65,7 @@ public class FilteredNavigationConfigurationLoaderImpl implements FilteredNaviga
 	InputStream getInputStreamFromString(final String fncString) {
 		return new ByteArrayInputStream(fncString.getBytes(StandardCharsets.UTF_8));
 	}
-	
+
 	/**
 	 * Retrieves the FilteredNavigation configuration as a String.
 	 * @param storeCode the code representing the store for which the FNC should be retrieved
@@ -79,7 +80,7 @@ public class FilteredNavigationConfigurationLoaderImpl implements FilteredNaviga
 	 * @return the new FNC object
 	 */
 	FilteredNavigationConfiguration createFnc() {
-		return beanFactory.getBean("filteredNavigationConfiguration");
+		return beanFactory.getPrototypeBean(ContextIdNames.FILTERED_NAVIGATION_CONFIGURATION, FilteredNavigationConfiguration.class);
 	}
 
 	/**

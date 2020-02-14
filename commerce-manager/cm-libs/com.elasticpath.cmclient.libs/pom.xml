@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -26,8 +30,10 @@
 						<Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
 						<Bundle-Name>%pluginName</Bundle-Name>
 						<Bundle-Vendor>%pluginProvider</Bundle-Vendor>
-						<Embed-Dependency>!(ep-core|ep-base|ep-cache|ep-money|ep-persistence-api|ep-persistence-openjpa|ep-settings|ep-converters|javax.servlet-api
-							|stax-api);scope=compile|runtime</Embed-Dependency>
+						<!-- Whitelisting globbed regular expression, that's why it's long, see: https://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html#embedding-dependencies -->
+						<Embed-Dependency>
+							!(ep-core|ep-base|ep-cache|ep-money|ep-persistence-api|ep-persistence-openjpa|ep-settings|ep-converters|javax.servlet-api|stax-api);scope=compile|runtime
+						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<_exportcontents>
 							com.elasticpath.ql.custom.category,
@@ -63,10 +69,17 @@
 							com.elasticpath.shipping.connectivity.dto,
 							com.elasticpath.shipping.connectivity.dto.builder,
 							com.elasticpath.shipping.connectivity.dto.builder.populators,
+							com.elasticpath.provider.payment.service.*,
+							com.elasticpath.provider.payment.workflow.*,
+							com.elasticpath.provider.payment.domain.*,
 							*.impl,
 							!com.elasticpath.*,
 							*
 						</_exportcontents>
+						<DynamicImport-Package>
+							com.elasticpath.plugin.payment.provider.*
+						</DynamicImport-Package>
+						<_noee>true</_noee>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -120,7 +133,7 @@
 					<artifactId>geronimo-jta_1.1_spec</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>javax.xml.stream</groupId>
+					<groupId>javax.xml</groupId>
 					<artifactId>stax-api</artifactId>
 				</exclusion>
 				<exclusion>
@@ -131,7 +144,17 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-payment-gateway-connectivity-api</artifactId>
+			<artifactId>payment-provider-api</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.geronimo.specs</groupId>
+					<artifactId>geronimo-jms_1.1_spec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.geronimo.specs</groupId>
+					<artifactId>geronimo-jta_1.1_spec</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
@@ -238,6 +261,5 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-jta</artifactId>
 		</dependency>
-
 	</dependencies>
 </project>

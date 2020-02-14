@@ -17,8 +17,8 @@ import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.editors.model.ProductModelController;
 import com.elasticpath.cmclient.catalog.exception.RequiredAttributesChangedForProductTypeException;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.dto.catalog.ProductModel;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
@@ -53,9 +53,10 @@ public abstract class AbstractCreateProductWizard extends AbstractEpWizard<Produ
 
 	private static final String NEW_LINE = "\n"; //$NON-NLS-1$
 
-	private final PriceListAssignmentHelperService plaHelperService = getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE);
-	private final CategoryService categoryService = getBean(ContextIdNames.CATEGORY_SERVICE);
-	private final ChangeSetHelper changeSetHelper = getBean(ChangeSetHelper.BEAN_ID);
+	private final PriceListAssignmentHelperService plaHelperService = BeanLocator
+			.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE, PriceListAssignmentHelperService.class);
+	private final CategoryService categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private final ProductModelController wizardController = new ProductModelController();
 	
@@ -233,16 +234,6 @@ public abstract class AbstractCreateProductWizard extends AbstractEpWizard<Produ
 	}
 	
 	/**
-	 * Convenience method for getting a bean instance from  bean factory.
-	 * @param <T> the type of bean to return
-	 * @param beanName the name of the bean to get and instance of.
-	 * @return an instance of the requested bean.
-	 */
-	protected static final <T> T getBean(final String beanName) {
-		return ServiceLocator.getService(beanName);
-	}
-
-	/**
 	 * Opens the Product creation wizard dialog.
 	 * 
 	 * @param shell the shell
@@ -293,6 +284,6 @@ public abstract class AbstractCreateProductWizard extends AbstractEpWizard<Produ
 
 
 	protected CategoryLookup getCategoryLookup() {
-		return getBean(ContextIdNames.CATEGORY_LOOKUP);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 	}
 }

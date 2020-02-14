@@ -161,7 +161,7 @@ public class PriceAdjustmentServiceImplTest extends BasicSpringContextTest {
 		createPA("P1", "PA2", "PLGUID", "C2GUID");
 		
 		
-		PriceAdjustmentDao dao = getBeanFactory().getBean("priceAdjustmentDao");
+		PriceAdjustmentDao dao = getBeanFactory().getSingletonBean("priceAdjustmentDao", PriceAdjustmentDao.class);
 		Collection<String> bcList = new ArrayList<>();
 		bcList.add("CGUID");
 		bcList.add("C2GUID");
@@ -237,7 +237,7 @@ public class PriceAdjustmentServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private PriceAdjustment createPA(final String bundleGuid, final String paGuid, final String plGuid, final String cGuid) {
-		PriceAdjustment pa = getBeanFactory().getBean(ContextIdNames.PRICE_ADJUSTMENT);
+		PriceAdjustment pa = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_ADJUSTMENT, PriceAdjustment.class);
 		pa.setPriceListGuid(plGuid);
 		pa.setAdjustmentAmount(BigDecimal.TEN);
 		pa.setGuid(paGuid);

@@ -12,7 +12,7 @@ import static com.elasticpath.service.datapolicy.job.impl.DataPointTestUtil.buil
 import static com.elasticpath.service.datapolicy.job.impl.DataPointTestUtil.buildDataPointValue;
 import static com.elasticpath.service.datapolicy.job.impl.DataPointTestUtil.buildDataPolicy;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -107,7 +107,7 @@ public class ExpiredDataPointValuesJobProcessorImplTest {
 		dataPointValueJob.process();
 
 		verify(dataPointValueService).getValues(dataPointValueServiceCaptor.capture());
-		verify(dataPointValueService).removeValues(any());
+		verify(dataPointValueService).removeValues(anyCollection());
 		verify(timeService).getCurrentTime();
 
 		Map<String, ? extends Collection<DataPoint>> value = dataPointValueServiceCaptor.getValue();
@@ -142,7 +142,7 @@ public class ExpiredDataPointValuesJobProcessorImplTest {
 		dataPointValueJob.process();
 
 		verify(dataPointValueService).getValues(dataPointValueServiceCaptor.capture());
-		verify(dataPointValueService).removeValues(any());
+		verify(dataPointValueService).removeValues(anyCollection());
 		verify(timeService).getCurrentTime();
 
 		Map<String, ? extends Collection<DataPoint>> value = dataPointValueServiceCaptor.getValue();
@@ -200,7 +200,7 @@ public class ExpiredDataPointValuesJobProcessorImplTest {
 		dataPointValueJob.process();
 
 		verify(dataPointValueService).getValues(dataPointValueServiceCaptor.capture());
-		verify(dataPointValueService).removeValues(any());
+		verify(dataPointValueService).removeValues(anyCollection());
 		final int wantedNumberOfInvocations = 4;
 		verify(timeService, times(wantedNumberOfInvocations)).getCurrentTime();
 

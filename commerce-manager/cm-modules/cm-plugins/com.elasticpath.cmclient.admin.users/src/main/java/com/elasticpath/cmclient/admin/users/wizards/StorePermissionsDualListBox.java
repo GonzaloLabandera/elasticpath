@@ -12,7 +12,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.AbstractEpDualListBoxControl;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -74,7 +74,7 @@ public class StorePermissionsDualListBox extends AbstractEpDualListBoxControl<Cm
 
 	@Override
 	public Collection<Store> getAvailable() {
-		StoreService service = (StoreService) ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		StoreService service = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		return service.findAllCompleteStores();
 	}
 

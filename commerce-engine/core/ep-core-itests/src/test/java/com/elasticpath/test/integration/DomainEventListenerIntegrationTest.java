@@ -429,7 +429,7 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 	}
 
 	public CategoryType persistCategoryType(final String categoryTypeName, final Catalog catalog) {
-		final CategoryType categoryType = beanFactory.getBean(ContextIdNames.CATEGORY_TYPE);
+		final CategoryType categoryType = beanFactory.getPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class);
 		categoryType.setCatalog(catalog);
 		categoryType.setName(categoryTypeName);
 		categoryType.setGuid(categoryTypeName);
@@ -439,7 +439,7 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 	public Category createMasterCategory(final String categoryCode, final Catalog catalog, final CategoryType categoryType,
 										 final Category parentCategory, final int ordering) {
 		final CategoryGuidUtil guidUtil = new CategoryGuidUtil();
-		final Category category = beanFactory.getBean(ContextIdNames.CATEGORY);
+		final Category category = beanFactory.getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 		category.setGuid(guidUtil.get(categoryCode, catalog.getCode()));
 		category.setCode(categoryCode);
 		category.setCatalog(catalog);

@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.repository.CatalogProjectionRepository;
@@ -38,6 +39,8 @@ import com.elasticpath.test.persister.testscenarios.MultiCategoryScenario;
  * Tests that Category bulk works correctly after link/unlink and include/exclude category.
  */
 @JmsBrokerConfigurator(url = JMS_BROKER_URL)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesDatabase
 public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 
 	public static final String JMS_BROKER_URL = "tcp://localhost:61629";
@@ -92,7 +95,6 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 		await().atMost(TEN_SECONDS).until(catalogNotifyBuilder::matches);
 	}
 
-	@DirtiesDatabase
 	@Test
 	public void testThatOfferProjectionsShouldBeTombstoneForStoreBasedOnLinkedCategoryWhenCategoryUnlinked() {
 		final int expectedNumberOfCatalogEvents = 2;
@@ -108,7 +110,6 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 		checkThatOfferProjectionForVirtualCatalogIsTombstone();
 	}
 
-	@DirtiesDatabase
 	@Test
 	public void testThatOfferProjectionsShouldBeTombstoneForStoreBasedOnLinkedCategoryWhenCategoryExcluded() throws InterruptedException {
 		final int expectedNumberOfCatalogEvents = 2;
@@ -124,7 +125,6 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 		checkThatOfferProjectionForVirtualCatalogIsTombstone();
 	}
 
-	@DirtiesDatabase
 	@Test
 	public void testThatOfferProjectionsShouldBeNotTombstoneForStoreBasedOnLinkedCategoryWhenCategoryIncluded() {
 		final int expectedNumberOfCatalogEvents = 2;
@@ -148,7 +148,6 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 		checkThatAllOfferProjectionsAreNotTombstone();
 	}
 
-	@DirtiesDatabase
 	@Test
 	public void testThatOfferProjectionsAreCreatedAfterLinkedCategory() {
 		addProduct();

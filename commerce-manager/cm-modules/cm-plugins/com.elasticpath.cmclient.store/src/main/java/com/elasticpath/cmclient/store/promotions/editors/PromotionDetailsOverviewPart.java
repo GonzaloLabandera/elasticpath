@@ -19,7 +19,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
@@ -216,7 +216,7 @@ public class PromotionDetailsOverviewPart extends AbstractPolicyAwareEditorPageS
 	 * Validates whether or not the promotion name is unique.
 	 */
 	private IStatus isUniquePromotionName(final String stringValue) {
-		final RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		
 		// check unique
 		if (!stringValue.equals(promotionNameText.getData(ORIG_PROMO_NAME_KEY))) {

@@ -34,7 +34,7 @@ import com.elasticpath.test.util.Utils;
  */
 public class ImportJobSingleOperationsTest extends ImportJobTestCase {
 
-	private final List<ImportDataType> simpleImportDataTypes = new ArrayList<>();
+	private List<ImportDataType> simpleImportDataTypes = new ArrayList<>();
 
 	@Autowired
 	private CategoryTypeService categoryService;
@@ -46,11 +46,12 @@ public class ImportJobSingleOperationsTest extends ImportJobTestCase {
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		simpleImportDataTypes.add((ImportDataType) getBeanFactory().getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION));
-		simpleImportDataTypes.add((ImportDataType) getBeanFactory().getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_ASSOCIATION));
-		simpleImportDataTypes.add((ImportDataType) getBeanFactory().getBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER));
-		simpleImportDataTypes.add((ImportDataType) getBeanFactory().getBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER_ADDRESS));
-		simpleImportDataTypes.add((ImportDataType) getBeanFactory().getBean(ContextIdNames.IMPORT_DATA_TYPE_INVENTORY));
+		simpleImportDataTypes
+				.add(getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION, ImportDataType.class));
+		simpleImportDataTypes.add(getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_ASSOCIATION, ImportDataType.class));
+		simpleImportDataTypes.add(getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER, ImportDataType.class));
+		simpleImportDataTypes.add(getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER_ADDRESS, ImportDataType.class));
+		simpleImportDataTypes.add(getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_INVENTORY, ImportDataType.class));
 	}
 
 	/**
@@ -166,8 +167,8 @@ public class ImportJobSingleOperationsTest extends ImportJobTestCase {
 	@Test
 	public void testFindImportDataTypeCategory() {
 		ImportJob importJob = createDefaultImportJob(AbstractImportTypeImpl.INSERT_TYPE);
-		final AbstractImportDataTypeImpl categoryImportDataType
-			= getBeanFactory().getBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY);
+		final AbstractImportDataTypeImpl categoryImportDataType = (AbstractImportDataTypeImpl) getBeanFactory()
+				.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY, ImportDataType.class);
 
 		final List<CategoryType> categoryTypes = categoryService.findAllCategoryTypeFromCatalog(scenario.getCatalog().getUidPk());
 		importJob.setImportDataTypeName(categoryImportDataType.getPrefixOfName() + ImportDataType.SEPARATOR + categoryTypes.get(0).getName());

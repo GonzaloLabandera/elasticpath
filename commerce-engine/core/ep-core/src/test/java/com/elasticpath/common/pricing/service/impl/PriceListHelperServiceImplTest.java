@@ -64,7 +64,7 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 	private static final String PRICE_LIST_GUID = "Catalog_USD";
 
 	private static final String PRICE_LIST_GUID2 = "Catalog_GBP";
-	
+
 	private static final String PRICE_LIST_GUID3 = "Catalog_UAH";
 
 	private static final String PRODUCT_SKU_CODE = "productSkuCode";
@@ -74,7 +74,7 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	private final PriceListLookupService priceListLookupService = context.mock(PriceListLookupService.class);
-	
+
 	private final PriceListService priceListService = context.mock(PriceListService.class);
 
 	private final BeanFactory beanFactory = context.mock(BeanFactory.class);
@@ -118,14 +118,14 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
 			public Map<PriceListDescriptorDTO, List<BaseAmountDTO>> getPriceListMap(final Product product, final boolean masterOnly) {
-				return mock.method(product, masterOnly);				
+				return mock.method(product, masterOnly);
 			}
 		};
-		
-		context.checking(new Expectations() { { 
+
+		context.checking(new Expectations() { {
 			oneOf(mock).method(product, false); will(returnValue(Collections.emptyMap()));
 		} });
-		
+
 		assertSame(Collections.emptyMap(), priceListHelperService.getPriceListMap(product));
 	}
 
@@ -136,10 +136,10 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 	public void testGetPriceListMapProductBooleanFalse() {
 		final PriceListDescriptorDTO priceListDescriptorDTO = new PriceListDescriptorDTO();
 		final MockInterface mock = context.mock(MockInterface.class);
-		
+
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
-			Map<PriceListDescriptorDTO, List<BaseAmountDTO>> getPriceInfoInternal(final String code, final String objectType, 
+			Map<PriceListDescriptorDTO, List<BaseAmountDTO>> getPriceInfoInternal(final String code, final String objectType,
 					final List<PriceListDescriptorDTO> priceListDescriptors) {
 				return mock.method(code, objectType, priceListDescriptors);
 			}
@@ -148,40 +148,40 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 				return mock.method(product, masterOnly);
 			}
 		};
-		
+
 		final List<PriceListDescriptorDTO> priceListDescriptorDTOList = Arrays.asList(priceListDescriptorDTO);
 		final Map<PriceListDescriptorDTO, List<BaseAmountDTO>> resultMap = new HashMap<>();
-		
+
 		context.checking(new Expectations() { {
 			oneOf(product).getCode(); will(returnValue(PRODUCT_CODE));
 			oneOf(mock).method(product, false); will(returnValue(priceListDescriptorDTOList));
 			oneOf(mock).method(PRODUCT_CODE, TYPE_PRODUCT, priceListDescriptorDTOList); will(returnValue(resultMap));
 		} });
-		
+
 		assertSame(resultMap, priceListHelperService.getPriceListMap(product, false));
 	}
-	
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#prepareDescriptorsList(Product, boolean)}.
 	 */
 	@Test
 	public void testPrepareDescriptorsListFalse() {
 		final MockInterface mock = context.mock(MockInterface.class);
-		
+
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
 			public List<PriceListDescriptorDTO> findAllDescriptors(final Product product) {
 				return mock.method(product);
 			}
 		};
-		
+
 		context.checking(new Expectations() { {
 			oneOf(mock).method(product); will(returnValue(Collections.emptyList()));
 		} });
-		
+
 		assertSame(Collections.emptyList(), priceListHelperService.prepareDescriptorsList(product, false));
 	}
-	
+
 
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#prepareDescriptorsList(Product, boolean)}.
@@ -190,33 +190,33 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 	public void testPrepareDescriptorsListTrue() {
 		final PriceListDescriptorDTO priceListDescriptorDTO = new PriceListDescriptorDTO();
 		final MockInterface mock = context.mock(MockInterface.class);
-		
+
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
 			public List <PriceListDescriptorDTO> findAllDescriptors(final Catalog catalog, final Currency currency) {
 				return mock.method(catalog, currency);
 			}
-			
+
 			@Override
 			public Set<Currency> getAllCurrenciesFor(final Catalog catalog) {
 				return Collections.singleton(CURRENCY_USD);
 			}
-			
+
 		};
-		
-		context.checking(new Expectations() { {			
+
+		context.checking(new Expectations() { {
 			oneOf(product).getMasterCatalog(); will(returnValue(catalog));
 			oneOf(mock).method(catalog, CURRENCY_USD); will(returnValue(Collections.singletonList(priceListDescriptorDTO)));
 		} });
-		
+
 		List<PriceListDescriptorDTO> list = priceListHelperService.prepareDescriptorsList(product, true);
-		
+
 		assertEquals(1, list.size());
 		assertSame(priceListDescriptorDTO, list.get(0));
 	}
-	
 
-	
+
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#getPriceListMap(BaseAmountFilter, String...)}.
 	 */
@@ -242,22 +242,22 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 			}
 		};
 		priceListHelperService.setPriceListService(priceListService);
-		
+
 		context.checking(new Expectations() { {
 			oneOf(priceListService).getPriceListDescriptors(baseAmountGuids); will(returnValue(Arrays.asList(priceListDescriptorDTO)));
-			
+
 			allowing(baseAmountFilter).getObjectType(); will(returnValue(TYPE_SKU));
 			allowing(baseAmountFilter).getObjectGuid(); will(returnValue(PRODUCT_SKU_CODE));
 		} });
-		
+
 		final Map<PriceListDescriptorDTO, List<BaseAmountDTO>> map = priceListHelperService.getPriceListMap(baseAmountFilter);
-		
+
 		assertSame(baseAmountDTO1, map.get(priceListDescriptorDTO).get(0));
 		assertSame(baseAmountDTO2, map.get(priceListDescriptorDTO).get(1));
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#(BaseAmountFilter, String...)}.
 	 */
@@ -265,7 +265,7 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 	public void testGetPriceListMapByFilterMultiplePriceLists() {
 		final PriceListDescriptorDTO priceListDescriptorDTO = new PriceListDescriptorDTO();
 		priceListDescriptorDTO.setGuid(PRICE_LIST_GUID);
-		
+
 		final PriceListDescriptorDTO priceListDescriptorDTO2 = new PriceListDescriptorDTO();
 		priceListDescriptorDTO2.setGuid(PRICE_LIST_GUID2);
 
@@ -286,26 +286,26 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 			}
 		};
 		priceListHelperService.setPriceListService(priceListService);
-		
+
 		context.checking(new Expectations() { {
 			allowing(priceListService).getPriceListDescriptors(baseAmountGuids);
 			will(returnValue(Arrays.asList(priceListDescriptorDTO, priceListDescriptorDTO2)));
-			
+
 			allowing(baseAmountFilter).getObjectType(); will(returnValue(TYPE_SKU));
 			allowing(baseAmountFilter).getObjectGuid(); will(returnValue(PRODUCT_SKU_CODE));
 		} });
-		
+
 		final Map<PriceListDescriptorDTO, List<BaseAmountDTO>> map = priceListHelperService.getPriceListMap(baseAmountFilter);
-		
+
 		assertSame(baseAmountDTO1, map.get(priceListDescriptorDTO).get(0));
 		assertSame(baseAmountDTO2, map.get(priceListDescriptorDTO2).get(0));
-		
-		final Map<PriceListDescriptorDTO, List<BaseAmountDTO>> map2 = 
+
+		final Map<PriceListDescriptorDTO, List<BaseAmountDTO>> map2 =
 			priceListHelperService.getPriceListMap(baseAmountFilter, new String[]{null});
 		assertSame(baseAmountDTO1, map2.get(priceListDescriptorDTO).get(0));
 		assertSame(baseAmountDTO2, map2.get(priceListDescriptorDTO2).get(0));
-	}		
-	
+	}
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#getPriceListMap(BaseAmountFilter, String...)}.
 	 */
@@ -314,11 +314,11 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 		final PriceListDescriptorDTO priceListDescriptorDTO = new PriceListDescriptorDTO();
 		priceListDescriptorDTO.setGuid(PRICE_LIST_GUID);
 		priceListDescriptorDTO.setCurrencyCode("USD");
-		
+
 		final PriceListDescriptorDTO priceListDescriptorDTO2 = new PriceListDescriptorDTO();
 		priceListDescriptorDTO2.setGuid(PRICE_LIST_GUID2);
 		priceListDescriptorDTO2.setCurrencyCode("GBP");
-		
+
 		final PriceListDescriptorDTO priceListDescriptorDTO3 = new PriceListDescriptorDTO();
 		priceListDescriptorDTO3.setGuid(PRICE_LIST_GUID3);
 		priceListDescriptorDTO3.setCurrencyCode("UAH");
@@ -337,7 +337,7 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 		baseAmountDTO3.setPriceListDescriptorGuid(PRICE_LIST_GUID3);
 		baseAmountGuids.add(PRICE_LIST_GUID3);
 
-		
+
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
 			List<BaseAmountDTO> findBaseAmounts(final BaseAmountFilter baseAmountFilter) {
@@ -345,21 +345,21 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 			}
 		};
 		priceListHelperService.setPriceListService(priceListService);
-		
+
 		context.checking(new Expectations() { {
 			oneOf(priceListService).getPriceListDescriptors(baseAmountGuids);
 			will(returnValue(Arrays.asList(priceListDescriptorDTO, priceListDescriptorDTO2, priceListDescriptorDTO3)));
-			
+
 			allowing(baseAmountFilter).getObjectType(); will(returnValue(TYPE_SKU));
 			allowing(baseAmountFilter).getObjectGuid(); will(returnValue(PRODUCT_SKU_CODE));
 		} });
-		
+
 		final Map<PriceListDescriptorDTO, List<BaseAmountDTO>> map = priceListHelperService.getPriceListMap(baseAmountFilter, "GBP", "UAH");
-		
+
 		assertNull(map.get(priceListDescriptorDTO));
 		assertSame(baseAmountDTO2, map.get(priceListDescriptorDTO2).get(0));
 		assertSame(baseAmountDTO3, map.get(priceListDescriptorDTO3).get(0));
-		
+
 	}
 
 	/**
@@ -382,10 +382,10 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 	public void testGetPriceListMapProductSku() {
 		final PriceListDescriptorDTO priceListDescriptorDTO = new PriceListDescriptorDTO();
 		priceListDescriptorDTO.setGuid(PRICE_LIST_GUID);
-		
+
 		final BaseAmountDTO baseAmountDTO1 = new BaseAmountDTO();
 		final BaseAmountDTO baseAmountDTO2 = new BaseAmountDTO();
-		
+
 		final MockInterface mock = context.mock(MockInterface.class);
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
@@ -397,7 +397,7 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 				return mock.method(product);
 			}
 		};
-		
+
 		context.checking(new Expectations() { {
 			oneOf(productSku).getSkuCode(); will(returnValue(PRODUCT_SKU_CODE));
 			oneOf(productSku).getProduct(); will(returnValue(product));
@@ -407,17 +407,17 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 			will(returnValue(new ArrayList<>(Arrays.asList(baseAmountDTO1))));
 			oneOf(mock).method(PRICE_LIST_GUID, PRODUCT_SKU_CODE, TYPE_SKU);
 			will(returnValue(Arrays.asList(baseAmountDTO2)));
-		} });		
-						
+		} });
+
 		final Map<PriceListDescriptorDTO, List<BaseAmountDTO>> map = priceListHelperService.getPriceListMap(productSku);
 		final List<BaseAmountDTO> baseAmountList = map.get(priceListDescriptorDTO);
-		
+
 		assertEquals(1, map.keySet().size());
 		assertEquals(2, baseAmountList.size());
 		assertSame(baseAmountDTO1, baseAmountList.get(0));
 		assertSame(baseAmountDTO2, baseAmountList.get(1));
 	}
-	
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#getPriceInfoInternal(String, String, List)}.
 	 */
@@ -427,35 +427,35 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 		final BaseAmountDTO baseAmountDTO = new BaseAmountDTO();
 		final PriceListDescriptorDTO priceListDescriptorDTO1 = new PriceListDescriptorDTO();
 		final PriceListDescriptorDTO priceListDescriptorDTO2 = new PriceListDescriptorDTO();
-		
+
 		priceListDescriptorDTO1.setGuid("pld-DTO1");
 		priceListDescriptorDTO2.setGuid("pld-DTO2");
-		
+
 		List<PriceListDescriptorDTO> pldList = Arrays.asList(priceListDescriptorDTO1, priceListDescriptorDTO2);
-		
+
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
 			List<BaseAmountDTO> findBaseAmounts(final String priceListGuid, final String productGuid, final String objectType) {
 				return mock.method(priceListGuid, productGuid, objectType);
 			}
 		};
-		
+
 		final Sequence seq = context.sequence("getPriceInfoInternal_Sequence");
-		
+
 		context.checking(new Expectations() { {
 			oneOf(mock).method("pld-DTO1", PRODUCT_CODE, TYPE_PRODUCT); will(returnValue(Collections.emptyList())); inSequence(seq);
 			oneOf(mock).method("pld-DTO2", PRODUCT_CODE, TYPE_PRODUCT); will(returnValue(Arrays.asList(baseAmountDTO))); inSequence(seq);
-		} });		
-		
+		} });
+
 		Map<PriceListDescriptorDTO, List<BaseAmountDTO>> map = priceListHelperService.getPriceInfoInternal(PRODUCT_CODE, TYPE_PRODUCT, pldList);
-		
+
 		assertEquals(2, map.keySet().size());
 		assertEquals(Collections.<BaseAmountDTO>emptyList(), map.get(priceListDescriptorDTO1));
-		
+
 		assertSame(1, map.get(priceListDescriptorDTO2).size());
-		assertSame(baseAmountDTO, map.get(priceListDescriptorDTO2).get(0));		
+		assertSame(baseAmountDTO, map.get(priceListDescriptorDTO2).get(0));
 	}
-	
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#findBaseAmounts(String, String, String)}.
 	 */
@@ -464,13 +464,13 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 		final BaseAmountDTO baseAmountDTO = new BaseAmountDTO();
 
 		context.checking(new Expectations() { {
-			oneOf(beanFactory).getBean(ContextIdNames.BASE_AMOUNT_FILTER); will(returnValue(baseAmountFilter));
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class); will(returnValue(baseAmountFilter));
 			oneOf(baseAmountFilter).setPriceListDescriptorGuid(PRICE_LIST_GUID);
 			oneOf(baseAmountFilter).setObjectType(TYPE_PRODUCT);
 			oneOf(baseAmountFilter).setObjectGuid(PRODUCT_CODE);
 			oneOf(priceListService).getBaseAmounts(baseAmountFilter); will(returnValue(Arrays.asList(baseAmountDTO)));
-		} });	
-		
+		} });
+
 		List<BaseAmountDTO> amounts = priceListHelperService.findBaseAmounts(PRICE_LIST_GUID, PRODUCT_CODE, TYPE_PRODUCT);
 		assertEquals(1, amounts.size());
 		assertSame(baseAmountDTO, amounts.get(0));
@@ -484,7 +484,7 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 		context.checking(new Expectations() { {
 			oneOf(priceListService).modifyBaseAmountChangeSet(changeSet);
 		} });
-		
+
 		priceListHelperService.processBaseAmountChangeSets(Collections.singletonList(changeSet));
 	}
 
@@ -498,20 +498,20 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 			public Set<Currency> getAllCurrenciesFor(final Catalog catalog) {
 				return Collections.singleton(CURRENCY_USD);
 			}
-			
+
 		};
 		priceListHelperService.setPriceListLookupService(priceListLookupService);
-		
-		
+
+
 		context.checking(new Expectations() { {
 			oneOf(product).getCatalogs(); will(returnValue(new HashSet<>(Arrays.asList(catalog))));
 			oneOf(catalog).getCode(); will(returnValue(CURRENCY_USD.getCurrencyCode()));
 			oneOf(priceListLookupService).getPriceListStack(with(any(String.class)),
 					with(any(Currency.class)), with((TagSet) null)); will(returnValue(getStack()));
 		} });
-		
+
 		List<PriceListDescriptorDTO> list = priceListHelperService.findAllDescriptors(product);
-		
+
 		assertEquals(1, list.size());
 		assertEquals(getStack().getPriceListStack().get(0), PRICE_LIST_GUID);
 	}
@@ -529,18 +529,18 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 			}
 		};
 		priceListHelperService.setPriceListService(priceListService);
-		
+
 		context.checking(new Expectations() { {
 			oneOf(mock).method(product); will(returnValue(changeSet));
 			oneOf(priceListService).modifyBaseAmountChangeSet(changeSet);
-		} });	
-		
+		} });
+
 		priceListHelperService.removePricesForProduct(product);
 	}
 
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#removePricesForProductSkus}.
-	 * 
+	 *
 	 * Test is complex. {@link PriceListHelperServiceImpl#removePricesForProductSkus} creates BaseAmountChangeSet and use it.
 	 * So we re implemented the {@link PriceListService#modifyBaseAmountChangeSet(ChangeSetObjects)} as it checks what in changeSet parameter,
 	 * also it calls dummy {@link MockInterface#method(Object...)} with "run:processBaseAmountChangeSet" to ensure that method was called by
@@ -550,7 +550,7 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 	public void testRemovePricesForProductSkus() {
 		final BaseAmountDTO baseAmountDTO = new BaseAmountDTO();
 		final MockInterface mock = context.mock(MockInterface.class);
-		
+
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
 			List<BaseAmountDTO> findBaseAmounts(final String priceListGuid, final String productGuid, final String objectType) {
@@ -564,20 +564,20 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 				assertSame(baseAmountDTO, changeSet.getRemovalList().get(0));
 				assertTrue(changeSet.getAdditionList().isEmpty());
 				assertTrue(changeSet.getUpdateList().isEmpty());
-				
+
 				mock.method("run:processBaseAmountChangeSet"); // ensure that processBaseAmountChangeSet is called
 			}
 		});
-		
+
 		context.checking(new Expectations() { {
 			oneOf(productSku).getSkuCode(); will(returnValue(PRODUCT_SKU_CODE));
 			oneOf(mock).method(null, PRODUCT_SKU_CODE, TYPE_SKU); will(returnValue(Arrays.asList(baseAmountDTO)));
 			oneOf(mock).method("run:processBaseAmountChangeSet"); // ensure that processBaseAmountChangeSet is called
-		} });	
-		
+		} });
+
 		priceListHelperService.removePricesForProductSkus(Arrays.asList(productSku));
 	}
-	
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#prepareChangeSetForProduct(Product)} (if it has multiple skus).
 	 */
@@ -592,12 +592,12 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 				return mock.method(priceListGuid, productGuid, objectType);
 			}
 		};
-		
+
 		final Map<String, ProductSku> skuMap = new HashMap<>();
 		skuMap.put(PRODUCT_SKU_CODE, productSku);
-		
+
 		final Sequence seq = context.sequence("getPriceInfoInternal_Sequence");
-				
+
 		context.checking(new Expectations() { {
 			oneOf(product).getCode(); will(returnValue(PRODUCT_CODE)); inSequence(seq);
 			oneOf(mock).method(null, PRODUCT_CODE, TYPE_PRODUCT); will(returnValue(Arrays.asList(baseAmountDTO1))); inSequence(seq);
@@ -606,16 +606,16 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 			oneOf(productSku).getSkuCode(); will(returnValue(PRODUCT_SKU_CODE)); inSequence(seq);
 			oneOf(mock).method(null, PRODUCT_SKU_CODE, TYPE_SKU); will(returnValue(Arrays.asList(baseAmountDTO2))); inSequence(seq);
 		} });
-		
+
 		ChangeSetObjects<BaseAmountDTO> baseAmountChangeSet = priceListHelperService.prepareChangeSetForProduct(product);
-		
+
 		assertEquals(2, baseAmountChangeSet.getRemovalList().size());
 		assertSame(baseAmountDTO1, baseAmountChangeSet.getRemovalList().get(0));
 		assertSame(baseAmountDTO2, baseAmountChangeSet.getRemovalList().get(1));
 		assertTrue(baseAmountChangeSet.getAdditionList().isEmpty());
-		assertTrue(baseAmountChangeSet.getUpdateList().isEmpty());		
+		assertTrue(baseAmountChangeSet.getUpdateList().isEmpty());
 	}
-	
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#prepareChangeSetForProduct(Product)}.
 	 */
@@ -629,38 +629,38 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 				return mock.method(priceListGuid, productGuid, objectType);
 			}
 		};
-		
+
 		context.checking(new Expectations() { {
 			oneOf(product).getCode(); will(returnValue(PRODUCT_CODE));
 			oneOf(product).hasMultipleSkus(); will(returnValue(false));
 			oneOf(mock).method(null, PRODUCT_CODE, TYPE_PRODUCT); will(returnValue(Arrays.asList(baseAmountDTO)));
 		} });
-		
+
 		ChangeSetObjects<BaseAmountDTO> baseAmountChangeSet = priceListHelperService.prepareChangeSetForProduct(product);
-		
+
 		assertEquals(1, baseAmountChangeSet.getRemovalList().size());
 		assertSame(baseAmountDTO, baseAmountChangeSet.getRemovalList().get(0));
 		assertTrue(baseAmountChangeSet.getAdditionList().isEmpty());
-		assertTrue(baseAmountChangeSet.getUpdateList().isEmpty());		
+		assertTrue(baseAmountChangeSet.getUpdateList().isEmpty());
 	}
-	
+
 	/**
 	 * Test method for {@link PriceListHelperServiceImpl#findAllDescriptors(Catalog, Currency)}.
 	 */
 	@Test
 	public void testFindDescriptor() {
 		final PriceListStack stack = getStack();
-		
+
 		final String catalogCode = "Catalog";
 		context.checking(new Expectations() { {
 			oneOf(catalog).getCode(); will(returnValue(catalogCode));
 			oneOf(priceListLookupService).getPriceListStack(catalogCode, CURRENCY_USD, null); will(returnValue(stack));
 		} });
-		
+
 		final List<PriceListDescriptorDTO> descriptors = priceListHelperService.findAllDescriptors(catalog, CURRENCY_USD);
-		
+
 		PriceListDescriptorDTO descriptor = descriptors.get(0);
-		
+
 		assertEquals(PRICE_LIST_GUID, descriptor.getGuid());
 		assertEquals(CURRENCY_USD.getCurrencyCode(), descriptor.getCurrencyCode());
 	}
@@ -690,7 +690,7 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 		final List<String> guids = new ArrayList<>();
 		guids.add(guid1);
 		guids.add(guid2);
-		
+
 		final MockInterface mock = context.mock(MockInterface.class);
 		priceListHelperService = new PriceListHelperServiceImpl() {
 			@Override
@@ -703,13 +703,13 @@ public class PriceListHelperServiceImplTest { // NOPMD (it is a big test)
 			}
 
 		};
-				
+
 		context.checking(new Expectations() { {
 			oneOf(priceListService).getPriceListDescriptors(guids); will(returnValue(priceListDescriptors));
-		} });		
-		
+		} });
+
 		List<PriceListDescriptorDTO> list = priceListService.getPriceListDescriptors(guids);
-		
+
 		assertEquals(2, list.size());
 		assertSame(priceListDescriptorDTO1, list.get(0));
 		assertSame(priceListDescriptorDTO2, list.get(1));

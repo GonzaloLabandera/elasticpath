@@ -202,7 +202,7 @@ public class PromotionRepositoryImplTest {
 	}
 
 	private void mockGetPromotionDependencies() {
-		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
 		when(appliedPromotionTransformer.transformToEntity(appliedRule)).thenReturn(promotionEntity);
 		when(appliedRule.getGuid()).thenReturn(PROMOTION_ID_THAT_EXISTS);
 

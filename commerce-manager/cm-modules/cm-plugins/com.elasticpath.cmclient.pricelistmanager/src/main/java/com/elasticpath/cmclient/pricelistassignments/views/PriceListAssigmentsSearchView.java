@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractCreateEditDeleteToolbar;
@@ -148,7 +148,8 @@ public class PriceListAssigmentsSearchView extends AbstractCreateEditDeleteToolb
 	@Override
 	public Object resolveObjectMember(final Object changeSetObjectSelection) {
 		PriceListAssignmentsDTO dto = (PriceListAssignmentsDTO) changeSetObjectSelection;
-		PriceListAssignmentService priceListAssignmentService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+		PriceListAssignmentService priceListAssignmentService = BeanLocator
+				.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE, PriceListAssignmentService.class);
 		return priceListAssignmentService.findByGuid(dto.getGuid());
 	}
 

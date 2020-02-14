@@ -56,7 +56,7 @@ public class OrderEmailPropertyHelperImplTest {
 		when(storeService.findStoreWithCode(store.getCode()))
 				.thenReturn(store);
 
-		when(beanFactory.getBean(EMAIL_PROPERTIES))
+		when(beanFactory.getPrototypeBean(EMAIL_PROPERTIES, EmailProperties.class))
 				.thenReturn(new EmailPropertiesImpl());
 	}
 

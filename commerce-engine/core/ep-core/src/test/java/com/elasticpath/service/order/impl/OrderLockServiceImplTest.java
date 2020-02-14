@@ -60,8 +60,8 @@ public class OrderLockServiceImplTest extends AbstractEPServiceTestCase {
 		orderLockService.setPersistenceEngine(getMockPersistenceEngine());
 		orderLockService.setTimeService(mockTimeService);
 
-		stubGetBean(ContextIdNames.ORDER_SERVICE, mockOrderService);
-		stubGetBean(ContextIdNames.ORDER_LOCK_SERVICE, orderLockService);
+		stubGetPrototypeBean(ContextIdNames.ORDER_SERVICE, OrderService.class, mockOrderService);
+		stubGetSingletonBean(ContextIdNames.ORDER_LOCK_SERVICE, OrderLockService.class, orderLockService);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class OrderLockServiceImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testObtainOrderLockFailsWhenExistingLockInDatabase() {
 		final OrderLock orderLock = new OrderLockImpl();
-		stubGetBean(ContextIdNames.ORDER_LOCK, orderLock);
+		stubGetPrototypeBean(ContextIdNames.ORDER_LOCK, OrderLock.class, orderLock);
 
 		final long uid = 1234L;
 		final Order order = new OrderImpl();
@@ -147,7 +147,7 @@ public class OrderLockServiceImplTest extends AbstractEPServiceTestCase {
 			}
 		});
 
-		stubGetBean(ContextIdNames.ORDER_LOCK, orderLock);
+		stubGetPrototypeBean(ContextIdNames.ORDER_LOCK, OrderLock.class, orderLock);
 
 		final Date lockCreatedDate = new Date();
 		context.checking(new Expectations() {
@@ -367,7 +367,7 @@ public class OrderLockServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testGet() {
-		stubGetBean(ContextIdNames.ORDER_LOCK, OrderLockImpl.class);
+		stubGetPrototypeBean(ContextIdNames.ORDER_LOCK, OrderLock.class, OrderLockImpl.class);
 
 		final OrderLock orderLock = new OrderLockImpl();
 		final long orderLockUid = 1234L;

@@ -36,6 +36,7 @@ The following table describes the permissions that can be assigned to user roles
 | Manage Data Policies | Grants permission to create, edit, and delete data policies. |
 | Manage Gift Certificate Themes | Grants permission to create, edit, and delete gift certificate themes. |
 | Manage Payment Gateways | Grants permission to create, edit, and delete payment gateways. |
+| Manage Payment Configurations | Grants permission to create, edit, and delete payment configurations. |
 | Manage Shipping Regions | Grants permission to create, edit, and delete shipping regions. |
 | Manage Stores | Grants permission to create stores and to edit and delete stores assigned to the user. |
 | Manage System Configuration | Grants permission to create, edit, and delete setting definitions and values. <br/><br/> **Note**: A user with this permission can override store-specific setting values, even if the user is not assigned to the store. |

@@ -269,6 +269,4 @@ class MultiCartSteps {
 		MultiCart.getOrder(cartName)
 		Payment.createInstrumentUsingSelectedCartOrder()
 	}
-
-
 }

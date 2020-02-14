@@ -2,7 +2,7 @@
  * Copyright (c) Elastic Path Software Inc., 2017
  */
 package com.elasticpath.cmclient.jobs.actions;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -41,7 +41,7 @@ public class EditJobAction extends AbstractAuthorizedJobAction {
 	@Override
 	public void run() {
 		ImportJob selectedImportJob = listView.getSelectedJob();
-		ImportService importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+		ImportService importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 		ImportJob importJobToEdit = importService.getImportJob(selectedImportJob.getUidPk());
 		ImportJobWizard wizard = new ImportJobWizard(importJobToEdit, type);
 		WizardDialog dialog = new EpWizardDialog(listView.getSite().getShell(), wizard);

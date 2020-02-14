@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl;
 
@@ -15,11 +15,8 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
-import com.elasticpath.plugin.payment.PaymentType;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
@@ -76,7 +73,8 @@ public class PurchaseFormEntityRepositoryImpl<E extends PurchaseFormEntity, I ex
 		CreatePurchaseFormIdentifier purchaseFormIdentifier = (CreatePurchaseFormIdentifier) identifier.get();
 		String orderId = purchaseFormIdentifier.getOrder().getOrderId().getValue();
 		String store = scope.getValue();
-		
+
+
 		return isOrderPurchasable(scope, orderId)
 				.flatMap(purchasable -> {
 					if (purchasable) {
@@ -107,14 +105,14 @@ public class PurchaseFormEntityRepositoryImpl<E extends PurchaseFormEntity, I ex
 	 * @return purchase identifier
 	 */
 	protected Single<PurchaseIdentifier> createPurchaseIdentifier(final String orderId, final String store) {
-		return cartOrderRepository.findByGuidAsSingle(store, orderId)
-				.flatMap(cartOrder -> createOrderPaymentFromCartOrder(cartOrder)
-						.flatMap(orderPayment -> getShoppingCart(StringIdentifier.of(store), cartOrder)
-								.flatMap(shoppingCart -> pricingSnapshotRepository.getShoppingCartTaxSnapshot(shoppingCart)
-										.flatMap(taxSnapshot -> customerSessionRepository.findOrCreateCustomerSessionAsSingle()
-												.flatMap(customerSession -> checkout(shoppingCart, taxSnapshot, customerSession, orderPayment))))))
+		return cartOrderRepository.findByGuid(store, orderId)
+				.flatMap(cartOrder -> getShoppingCart(StringIdentifier.of(store), cartOrder)
+						.flatMap(shoppingCart -> pricingSnapshotRepository.getShoppingCartTaxSnapshot(shoppingCart)
+								.flatMap(taxSnapshot -> customerSessionRepository.findOrCreateCustomerSession()
+										.flatMap(customerSession -> checkout(shoppingCart, taxSnapshot, customerSession)))))
 				.map(purchaseId -> buildPurchaseIdentifier(store, purchaseId));
 	}
+
 
 	/**
 	 * Build the PurchaseIdentifier.
@@ -140,43 +138,7 @@ public class PurchaseFormEntityRepositoryImpl<E extends PurchaseFormEntity, I ex
 	 * @return the shopping cart
 	 */
 	protected Single<ShoppingCart> getShoppingCart(final IdentifierPart<String> scope, final CartOrder cartOrder) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(scope.getValue(), cartOrder);
-	}
-
-	/**
-	 * Create the order payment from cart order.
-	 *
-	 * @param cartOrder cartOrder
-	 * @return the order payment
-	 */
-	protected Single<OrderPayment> createOrderPaymentFromCartOrder(final CartOrder cartOrder) {
-		PaymentMethod paymentMethod = cartOrder.getPaymentMethod();
-		if (paymentMethod == null) {
-			return createEmptyPaymentTokenOrderPaymentForZeroTotalPurchase();
-		} else {
-			return purchaseRepository.getOrderPaymentFromPaymentMethod(paymentMethod);
-		}
-	}
-
-	/**
-	 * Create an empty paymentToken order payment.
-	 *
-	 * @return empty paymentToken order payment
-	 */
-	protected Single<OrderPayment> createEmptyPaymentTokenOrderPaymentForZeroTotalPurchase() {
-		return purchaseRepository.createNewOrderPaymentEntity()
-				.map(this::setOrderPaymentAsPaymentToken);
-	}
-
-	/**
-	 * Set the Order payment method as a payment token.
-	 *
-	 * @param orderPayment orderPayment
-	 * @return orderPayment
-	 */
-	protected OrderPayment setOrderPaymentAsPaymentToken(final OrderPayment orderPayment) {
-		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		return orderPayment;
+		return cartOrderRepository.getEnrichedShoppingCart(scope.getValue(), cartOrder);
 	}
 
 	/**
@@ -185,16 +147,14 @@ public class PurchaseFormEntityRepositoryImpl<E extends PurchaseFormEntity, I ex
 	 * @param shoppingCart    shoppingCart
 	 * @param taxSnapshot     taxSnapshot
 	 * @param customerSession customerSession
-	 * @param orderPayment    order payment
 	 * @return purchase id
 	 */
 	protected Single<String> checkout(
 			final ShoppingCart shoppingCart,
 			final ShoppingCartTaxSnapshot taxSnapshot,
-			final CustomerSession customerSession,
-			final OrderPayment orderPayment) {
+			final CustomerSession customerSession) {
 
-		return purchaseRepository.checkout(shoppingCart, taxSnapshot, customerSession, orderPayment)
+		return purchaseRepository.checkout(shoppingCart, taxSnapshot, customerSession)
 				.flatMap(this::handleCheckoutResults);
 	}
 

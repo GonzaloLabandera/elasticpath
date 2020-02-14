@@ -91,7 +91,7 @@ public class WishListServiceImpl implements WishListService {
 
 	@Override
 	public WishList createWishList(final Shopper shopper) {
-		final WishList wishList = beanFactory.getBean(ContextIdNames.WISH_LIST);
+		final WishList wishList = beanFactory.getPrototypeBean(ContextIdNames.WISH_LIST, WishList.class);
 		wishList.initialize();
 		wishList.setShopper(shopper);
 		wishList.setStoreCode(shopper.getStoreCode());

@@ -115,7 +115,7 @@ public class CustomerGroupServiceImpl extends AbstractEpPersistenceServiceImpl
 		sanityCheck();
 		CustomerGroup customerGroup = null;
 		if (customerGroupUid <= 0) {
-			customerGroup = getBean(ContextIdNames.CUSTOMER_GROUP);
+			customerGroup = getPrototypeBean(ContextIdNames.CUSTOMER_GROUP, CustomerGroup.class);
 		} else {
 			customerGroup = getPersistentBeanFinder().load(ContextIdNames.CUSTOMER_GROUP, customerGroupUid);
 		}
@@ -137,7 +137,7 @@ public class CustomerGroupServiceImpl extends AbstractEpPersistenceServiceImpl
 		sanityCheck();
 		CustomerGroup customerGroup = null;
 		if (customerGroupUid <= 0) {
-			customerGroup = getBean(ContextIdNames.CUSTOMER_GROUP);
+			customerGroup = getPrototypeBean(ContextIdNames.CUSTOMER_GROUP, CustomerGroup.class);
 		} else {
 			customerGroup = getPersistentBeanFinder().get(ContextIdNames.CUSTOMER_GROUP, customerGroupUid);
 		}
@@ -270,13 +270,14 @@ public class CustomerGroupServiceImpl extends AbstractEpPersistenceServiceImpl
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean checkIfSystemGroup(final CustomerGroup customerGroup) {
 		sanityCheck();
 		if (customerGroup == null) {
 			return false;
 		}
 
-		final List<String> systemGroups = getBean(ContextIdNames.SYSTEM_CUSTOMER_GROUPS);
+		final List<String> systemGroups = getSingletonBean(ContextIdNames.SYSTEM_CUSTOMER_GROUPS, List.class);
 		if (systemGroups == null) {
 			throw new EpServiceException("Cannot retrieve system customer groups list.");
 		}

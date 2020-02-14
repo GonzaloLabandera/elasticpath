@@ -299,7 +299,7 @@ public class PriceListHelperServiceImpl implements PriceListHelperService {
 	 * @return list of base amounts
 	 */
 	List<BaseAmountDTO> findBaseAmounts(final String priceListGuid, final String productGuid, final String objectType) {
-		final BaseAmountFilter baseAmountFilter = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		final BaseAmountFilter baseAmountFilter = beanFactory.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		baseAmountFilter.setPriceListDescriptorGuid(priceListGuid);
 		baseAmountFilter.setObjectGuid(productGuid);
 		baseAmountFilter.setObjectType(objectType);

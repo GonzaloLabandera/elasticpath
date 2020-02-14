@@ -130,7 +130,7 @@ public class ElectronicOrderShipmentImpl extends AbstractOrderShipmentImpl imple
 	@Transient
 	public TaxCalculationResult calculateTaxes() {
 		
-		TaxOperationService taxOperationService = getBean(ContextIdNames.TAX_OPERATION_SERVICE);
+		TaxOperationService taxOperationService = getSingletonBean(ContextIdNames.TAX_OPERATION_SERVICE, TaxOperationService.class);
 
 		return taxOperationService.calculateTaxes(this);
 	}

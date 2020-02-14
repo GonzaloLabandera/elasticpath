@@ -9,14 +9,15 @@ Feature: Create Address
       | country-name     | <COUNTRY>          |
       | extended-address | <EXTENDED_ADDRESS> |
       | locality         | <LOCALITY>         |
-      | organization     | <ORGANIZATION>     |
-      | phone-number     | <PHONE_NUMBER>     |
       | postal-code      | <POSTAL_CODE>      |
       | region           | <REGION>           |
       | street-address   | <STREET_ADDRESS>   |
     And the address with postal code <POSTAL_CODE> should match the following name values
       | family-name | <FAMILY_NAME> |
       | given-name  | <GIVEN_NAME>  |
+    And the address with postal code <POSTAL_CODE> should contain the top level values
+      | organization | <ORGANIZATION> |
+      | phone-number | <PHONE_NUMBER> |
 
     Examples:
       | COUNTRY | EXTENDED_ADDRESS | LOCALITY  | ORGANIZATION | PHONE_NUMBER | POSTAL_CODE | REGION | STREET_ADDRESS | FAMILY_NAME | GIVEN_NAME    |

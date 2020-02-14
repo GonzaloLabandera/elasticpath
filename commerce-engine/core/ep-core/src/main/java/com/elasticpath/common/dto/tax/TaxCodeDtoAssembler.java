@@ -17,7 +17,7 @@ public class TaxCodeDtoAssembler extends AbstractDtoAssembler<TaxCodeDTO, TaxCod
 
 	@Override
 	public TaxCode getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.TAX_CODE);
+		return beanFactory.getPrototypeBean(ContextIdNames.TAX_CODE, TaxCode.class);
 	}
 
 	@Override

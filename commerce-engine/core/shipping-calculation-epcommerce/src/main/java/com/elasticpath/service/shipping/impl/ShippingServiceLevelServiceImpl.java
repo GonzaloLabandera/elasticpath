@@ -113,7 +113,7 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 	 * List all shippingServiceLevels stored in the database for the specified store with storeCode.
 	 *
 	 * @param storeCode the store code
-	 * @param active should only active service levels be retrieved or not
+	 * @param active    should only active service levels be retrieved or not
 	 * @return a list of shippingServiceLevels
 	 * @throws EpServiceException - in case of any errors
 	 */
@@ -141,7 +141,7 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 		sanityCheck();
 		ShippingServiceLevel shippingServiceLevel = null;
 		if (shippingServiceLevelUid <= 0) {
-			shippingServiceLevel = getBean(SHIPPING_SERVICE_LEVEL);
+			shippingServiceLevel = getPrototypeBean(SHIPPING_SERVICE_LEVEL, ShippingServiceLevel.class);
 		} else {
 			shippingServiceLevel = getPersistentBeanFinder().load(SHIPPING_SERVICE_LEVEL, shippingServiceLevelUid);
 		}
@@ -160,7 +160,7 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 		sanityCheck();
 		ShippingServiceLevel shippingServiceLevel = null;
 		if (shippingServiceLevelUid <= 0) {
-			shippingServiceLevel = getBean(SHIPPING_SERVICE_LEVEL);
+			shippingServiceLevel = getPrototypeBean(SHIPPING_SERVICE_LEVEL, ShippingServiceLevel.class);
 		} else {
 			shippingServiceLevel = getPersistentBeanFinder().get(SHIPPING_SERVICE_LEVEL, shippingServiceLevelUid);
 		}
@@ -214,7 +214,7 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 	@Override
 	public void setAllShippingCostCalculationMethods(final List<String> allShippingCostCalculationMethodsName) {
 		for (final String name : allShippingCostCalculationMethodsName) {
-			final ShippingCostCalculationMethod method = getBean(name);
+			final ShippingCostCalculationMethod method = getPrototypeBean(name, ShippingCostCalculationMethod.class);
 			this.allShippingCostCalculationMethods.add(method);
 		}
 	}
@@ -234,7 +234,7 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 	 * given locale.
 	 *
 	 * @param locale the locale with which to fetch country names
-	 * @param store the store to get shipping service levels for
+	 * @param store  the store to get shipping service levels for
 	 * @return sorted Map of country names to country codes.
 	 */
 	@Override
@@ -293,10 +293,10 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 	 * the given locale.
 	 *
 	 * @param countryCodeMap the map of country codes to subCountryCode Lists
-	 * @param locale the locale into which the names should be translated
+	 * @param locale         the locale into which the names should be translated
 	 */
 	private Map<String, Map<String, String>> translateSubCountryCodesToLocalizedSortedMap(final Multimap<String, String> countryCodeMap,
-			final Locale locale) {
+																						  final Locale locale) {
 		Map<String, Map<String, String>> codesMap = new TreeMap<>();
 		for (String code : countryCodeMap.keySet()) {
 			codesMap.put(code, getSortedLocalizedMapOfSubCountries(code, countryCodeMap.get(code), locale));
@@ -305,7 +305,7 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 	}
 
 	private Map<String, String> getSortedLocalizedMapOfSubCountries(final String countryCode, final Collection<String> subCountryCodes,
-			final Locale locale) {
+																	final Locale locale) {
 		SortedMap<String, String> sortedMap = new TreeMap<>();
 		for (String subCountryCode : subCountryCodes) {
 			sortedMap.put(geography.getSubCountryDisplayName(countryCode, subCountryCode, locale), subCountryCode);
@@ -317,7 +317,7 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 	 * Retrieve the list of valid <code>ShippingServiceLevel</code> based on the region info inside the given <code>Address</code>.
 	 *
 	 * @param storeCode the store that the shippingServiceLevels are valid in
-	 * @param address -- the address to be used to retrieve shippingServiceLevel info.
+	 * @param address   -- the address to be used to retrieve shippingServiceLevel info.
 	 * @return he list of valid <code>ShippingServiceLevel</code> for the given orderAddress.
 	 */
 	@Override
@@ -370,8 +370,8 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 	 * Generates JPA query and fills-in parameters list for searchCriteria.
 	 *
 	 * @param criteria search criteria.
-	 * @param params query parameters (in/out).
-	 * @param query initial query.
+	 * @param params   query parameters (in/out).
+	 * @param query    initial query.
 	 * @return JPA query.
 	 */
 	private String buildQueryAndParamsForCriteria(final ShippingServiceLevelSearchCriteria criteria, final List<Object> params, final String query) {
@@ -414,7 +414,8 @@ public class ShippingServiceLevelServiceImpl extends AbstractEpPersistenceServic
 
 
 	@Override
-	public List<ShippingServiceLevel> findByCriteria(final ShippingServiceLevelSearchCriteria searchCriteria, final int start, final int maxResults) {
+	public List<ShippingServiceLevel> findByCriteria(final ShippingServiceLevelSearchCriteria searchCriteria, final int start,
+													 final int maxResults) {
 		sanityCheck();
 		List<Object> params = new ArrayList<>();
 		String query = buildQueryAndParamsForCriteria(searchCriteria, params, "SELECT ssl FROM ShippingServiceLevelImpl ssl");

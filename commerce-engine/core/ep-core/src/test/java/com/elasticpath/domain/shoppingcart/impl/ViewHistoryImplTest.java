@@ -26,8 +26,7 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /** Test cases for <code>ViewHistoryImpl</code>. */
 public class ViewHistoryImplTest {
-	
-	private static final String VIEW_HISTORY_PRODUCT = "viewHistoryProduct";
+
 	private static final long UIDPK_1 = 1;	
 	private static final int TEST_MAX_HISTORY_LENGTH = 5;
 	
@@ -75,20 +74,20 @@ public class ViewHistoryImplTest {
 		// Set expectations
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+				oneOf(beanFactory).getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY, StoreSeoUrlBuilderFactory.class);
 				will(returnValue(seoUrlBuilderFactory));
 				
 				oneOf(seoUrlBuilderFactory).getStoreSeoUrlBuilder();
 				will(returnValue(seoUrlBuilder));
 
-				oneOf(beanFactory).getBean(VIEW_HISTORY_PRODUCT);
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.VIEW_HISTORY_PRODUCT, ViewHistoryProduct.class);
 				will(returnValue(viewHistoryProduct));
-				
-				oneOf(viewHistoryProduct).loadProductInfo(product, seoUrlBuilder);								
+
+				oneOf(viewHistoryProduct).loadProductInfo(product, seoUrlBuilder);
 			}
-		});			
-		
-		ViewHistoryProduct createdViewHistoryProduct = viewHistory.createHistoryProduct(product);		
+		});
+
+		ViewHistoryProduct createdViewHistoryProduct = viewHistory.createHistoryProduct(product);
 		assertNotNull(createdViewHistoryProduct);
 		
 		//viewHistory.getViewedProducts();		
@@ -112,13 +111,13 @@ public class ViewHistoryImplTest {
 		// Set expectations
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+				oneOf(beanFactory).getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY, StoreSeoUrlBuilderFactory.class);
 				will(returnValue(seoUrlBuilderFactory));
 
 				oneOf(seoUrlBuilderFactory).getStoreSeoUrlBuilder();
 				will(returnValue(seoUrlBuilder));
 
-				oneOf(beanFactory).getBean(VIEW_HISTORY_PRODUCT);
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.VIEW_HISTORY_PRODUCT, ViewHistoryProduct.class);
 				will(returnValue(viewHistoryProduct));
 				
 				oneOf(viewHistoryProduct).loadProductInfo(product, seoUrlBuilder);								
@@ -140,13 +139,13 @@ public class ViewHistoryImplTest {
 		// Set expectations
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+				oneOf(beanFactory).getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY, StoreSeoUrlBuilderFactory.class);
 				will(returnValue(seoUrlBuilderFactory));
 
 				oneOf(seoUrlBuilderFactory).getStoreSeoUrlBuilder();
 				will(returnValue(seoUrlBuilder));
 
-				allowing(beanFactory).getBean(VIEW_HISTORY_PRODUCT);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.VIEW_HISTORY_PRODUCT, ViewHistoryProduct.class);
 				will(returnValue(viewHistoryProduct));
 				
 				allowing(viewHistoryProduct).loadProductInfo(product, seoUrlBuilder);								
@@ -176,13 +175,13 @@ public class ViewHistoryImplTest {
 		// Set expectations
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+				allowing(beanFactory).getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY, StoreSeoUrlBuilderFactory.class);
 				will(returnValue(seoUrlBuilderFactory));
 
 				allowing(seoUrlBuilderFactory).getStoreSeoUrlBuilder();
 				will(returnValue(seoUrlBuilder));
 
-				allowing(beanFactory).getBean(VIEW_HISTORY_PRODUCT);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.VIEW_HISTORY_PRODUCT, ViewHistoryProduct.class);
 				will(returnValue(viewHistoryProduct));
 				
 				allowing(viewHistoryProduct).loadProductInfo(product, seoUrlBuilder);								
@@ -214,13 +213,13 @@ public class ViewHistoryImplTest {
 		// Set expectations
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+				allowing(beanFactory).getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY, StoreSeoUrlBuilderFactory.class);
 				will(returnValue(seoUrlBuilderFactory));
 
 				allowing(seoUrlBuilderFactory).getStoreSeoUrlBuilder();
 				will(returnValue(seoUrlBuilder));
 
-				allowing(beanFactory).getBean(VIEW_HISTORY_PRODUCT);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.VIEW_HISTORY_PRODUCT, ViewHistoryProduct.class);
 				will(returnValue(viewHistoryProduct));
 				
 				allowing(viewHistoryProduct).loadProductInfo(with(any(Product.class)), with(same(seoUrlBuilder)));								

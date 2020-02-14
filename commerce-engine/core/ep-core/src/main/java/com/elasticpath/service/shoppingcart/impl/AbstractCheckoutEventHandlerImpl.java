@@ -1,12 +1,9 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.impl;
 
-import java.util.Collection;
-
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.shoppingcart.CheckoutEventHandler;
 
@@ -18,17 +15,17 @@ import com.elasticpath.service.shoppingcart.CheckoutEventHandler;
 public abstract class AbstractCheckoutEventHandlerImpl implements CheckoutEventHandler {
 
 	@Override
-	public void preCheckout(final ShoppingCart shoppingCart, final OrderPayment orderPayment) {
+	public void preCheckout(final ShoppingCart shoppingCart) {
 		//Do nothing by default
 	}
 
 	@Override
-	public void preCheckoutOrderPersist(final ShoppingCart shoppingCart, final Collection<OrderPayment> orderPayment, final Order completedOrder) {
+	public void preCheckoutOrderPersist(final ShoppingCart shoppingCart, final Order completedOrder) {
 		//Do nothing by default
 	}
 
 	@Override
-	public void postCheckout(final ShoppingCart shoppingCart, final OrderPayment orderPayment, final Order completedOrder) {
+	public void postCheckout(final ShoppingCart shoppingCart, final Order completedOrder) {
 		//Do nothing by default
 	}
 	

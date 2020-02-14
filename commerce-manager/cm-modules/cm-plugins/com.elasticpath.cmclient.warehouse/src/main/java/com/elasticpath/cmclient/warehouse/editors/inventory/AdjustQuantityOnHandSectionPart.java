@@ -24,8 +24,8 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
@@ -82,13 +82,13 @@ public class AdjustQuantityOnHandSectionPart extends AbstractCmClientEditorPageS
 	 * Constructor.
 	 *
 	 * @param formPage the FormPage
-	 * @param editor the AbstractCmClientFormEditor
+	 * @param editor   the AbstractCmClientFormEditor
 	 * @param editMode if this part is read only
 	 */
 	public AdjustQuantityOnHandSectionPart(final FormPage formPage, final AbstractCmClientFormEditor editor, final EpState editMode) {
 		super(formPage, editor, ExpandableComposite.TITLE_BAR);
 		inventoryModel = (InventoryModel) editor.getModel();
-		inventoryAudit = ServiceLocator.getService(ContextIdNames.INVENTORY_AUDIT);
+		inventoryAudit = BeanLocator.getPrototypeBean(ContextIdNames.INVENTORY_AUDIT, InventoryAudit.class);
 		inventoryAudit.setEventType(InventoryEventType.STOCK_ADJUSTMENT);
 		inventoryAudit.setEventOriginator(InventoryAudit.EVENT_ORIGINATOR_CMUSER + LoginManager.getCmUserGuid());
 		inventoryAudit.setLogDate(new Date());
@@ -103,7 +103,7 @@ public class AdjustQuantityOnHandSectionPart extends AbstractCmClientEditorPageS
 		final EpControlBindingProvider binder = EpControlBindingProvider.getInstance();
 		final InventoryDto inventoryDto = inventoryModel.getInventory();
 
-		final IValidator validateReserveQuantity = new CompoundValidator(new IValidator[] {
+		final IValidator validateReserveQuantity = new CompoundValidator(new IValidator[]{
 				EpValidatorFactory.POSITIVE_INTEGER,
 				value -> {
 					final Integer reserveValue = (Integer) value;
@@ -218,8 +218,8 @@ public class AdjustQuantityOnHandSectionPart extends AbstractCmClientEditorPageS
 		adjustmentCombo.add(WarehouseMessages.get().Inventory_AdjustmentRemoveStock);
 		adjustmentCombo.select(0);
 
-		final AdjustmentQuantityOnHandReason adjustmentReason = ServiceLocator.getService(
-				ContextIdNames.ADJUSTMENT_QUANTITY_ON_HAND_REASON);
+		final AdjustmentQuantityOnHandReason adjustmentReason = BeanLocator.getSingletonBean(
+				ContextIdNames.ADJUSTMENT_QUANTITY_ON_HAND_REASON, AdjustmentQuantityOnHandReason.class);
 		final Map<String, String> reasonMap = adjustmentReason.getReasonMap();
 		for (final Entry<String, String> entry : reasonMap.entrySet()) {
 			reasonCombo.add(entry.getValue());

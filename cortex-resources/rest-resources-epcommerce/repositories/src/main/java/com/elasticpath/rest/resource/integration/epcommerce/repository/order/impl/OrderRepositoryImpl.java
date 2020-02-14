@@ -12,7 +12,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -27,11 +26,6 @@ import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheResult;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
@@ -85,21 +79,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 	@Override
 	@CacheResult
-	public ExecutionResult<Order> findByGuid(final String storeCode, final String orderGuid) {
-		return new ExecutionResultChain() {
-			@Override
-			public ExecutionResult<?> build() {
-				Order order = Assign.ifNotNull(orderService.findOrderByOrderNumber(orderGuid),
-						OnFailure.returnNotFound(PURCHASE_NOT_FOUND, orderGuid, storeCode));
-
-				return ExecutionResultFactory.createReadOK(order);
-			}
-		}.execute();
-	}
-
-	@Override
-	@CacheResult
-	public Single<Order> findByGuidAsSingle(final String storeCode, final String orderGuid) {
+	public Single<Order> findByGuid(final String storeCode, final String orderGuid) {
 		return reactiveAdapter.fromServiceAsSingle(() -> orderService.findOrderByOrderNumber(orderGuid),
 				String.format(PURCHASE_NOT_FOUND, orderGuid, storeCode));
 	}
@@ -129,13 +109,12 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 	@Override
 	public Single<CartOrder> getOrderByOrderId(final String scope, final String orderId) {
-		return reactiveAdapter.fromRepositoryAsSingle(
-				() -> cartOrderRepository.getCartOrder(scope, orderId, CartOrderRepository.FindCartOrder.BY_ORDER_GUID));
+		return cartOrderRepository.getCartOrder(scope, orderId, CartOrderRepository.FindCartOrder.BY_ORDER_GUID);
 	}
 
 	@Override
 	public Single<OrderSku> findOrderSku(final String scope, final String orderId, final List<String> guidPathFromRootItem) {
-		return findByGuidAsSingle(scope, orderId)
+		return findByGuid(scope, orderId)
 				.map(order -> (OrderSku) findShoppingItem(order, guidPathFromRootItem))
 				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(LINE_ITEM_NOT_FOUND)));
 	}
@@ -164,12 +143,12 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 	@Override
 	public Single<ProductSku> findProductSku(final String scope, final String orderId, final List<String> guidPathFromRootItem) {
-		return findByGuidAsSingle(scope, orderId)
+		return findByGuid(scope, orderId)
 				.flatMap(order -> findProductSku(order, guidPathFromRootItem));
 	}
 
 	private Single<ProductSku> findProductSku(final Order order, final List<String> guidPathFromRootItem) {
-		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(findShoppingItem(order, guidPathFromRootItem).getSkuGuid())
+		return productSkuRepository.getProductSkuWithAttributesByGuid(findShoppingItem(order, guidPathFromRootItem).getSkuGuid())
 				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(LINE_ITEM_NOT_FOUND)));
 	}
 
@@ -183,7 +162,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 	}
 
 	private OrderSearchCriteria createOrderSearchCriteria(final CustomerSearchCriteria customerSearchCriteria, final String validatedStoreCode) {
-		OrderSearchCriteria orderSearchCriteria = coreBeanFactory.getBean(ContextIdNames.ORDER_SEARCH_CRITERIA);
+		OrderSearchCriteria orderSearchCriteria = coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class);
 		orderSearchCriteria.setExcludedOrderStatus(OrderStatus.FAILED);
 		Set<String> storeCodes = Collections.singleton(validatedStoreCode);
 		orderSearchCriteria.setStoreCodes(storeCodes);
@@ -194,7 +173,8 @@ public class OrderRepositoryImpl implements OrderRepository {
 	}
 
 	private CustomerSearchCriteria createCustomerSearchCriteria(final String customerGuid) {
-		CustomerSearchCriteria customerSearchCriteria = coreBeanFactory.getBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA);
+		CustomerSearchCriteria customerSearchCriteria = coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA,
+				CustomerSearchCriteria.class);
 		customerSearchCriteria.setGuid(customerGuid);
 		return customerSearchCriteria;
 	}

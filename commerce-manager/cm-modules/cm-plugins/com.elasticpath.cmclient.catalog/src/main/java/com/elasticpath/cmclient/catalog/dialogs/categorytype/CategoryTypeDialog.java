@@ -18,7 +18,7 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModelImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -62,14 +62,15 @@ public class CategoryTypeDialog extends AbstractPolicyAwareDialog implements Obj
 
 	private String originalName;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	/**
 	 * Policy container for the dialog controls.
 	 */
 	private PolicyActionContainer addEditCategoryTypeDialogContainer;
 
-	private final CategoryTypeService categoryTypeService = ServiceLocator.getService(ContextIdNames.CATEGORY_TYPE_SERVICE);
+	private final CategoryTypeService categoryTypeService = BeanLocator
+			.getSingletonBean(ContextIdNames.CATEGORY_TYPE_SERVICE, CategoryTypeService.class);
 
 	/**
 	 * Constructs the CategoryType dialog.
@@ -91,7 +92,7 @@ public class CategoryTypeDialog extends AbstractPolicyAwareDialog implements Obj
 		if (editMode) {
 			initializeDialog(categoryType);
 		} else {
-			this.categoryType = ServiceLocator.getService(ContextIdNames.CATEGORY_TYPE);
+			this.categoryType = BeanLocator.getPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class);
 			this.categoryType.setCatalog(catalogModel.getCatalog());
 			selectedAttributes = new ArrayList<>();
 			originalName = null;
@@ -139,8 +140,8 @@ public class CategoryTypeDialog extends AbstractPolicyAwareDialog implements Obj
 		final Set<AttributeGroupAttribute> attributeGroupAttributes = new HashSet<>();
 
 		for (final Attribute attribute : attributes) {
-			final AttributeGroupAttribute groupAttribute = ServiceLocator.getService(
-					ContextIdNames.CATEGORY_TYPE_ATTRIBUTE);
+			final AttributeGroupAttribute groupAttribute = BeanLocator
+					.getPrototypeBean(ContextIdNames.CATEGORY_TYPE_ATTRIBUTE, AttributeGroupAttribute.class);
 			groupAttribute.setAttribute(attribute);
 			groupAttribute.setOrdering(order++);
 			attributeGroupAttributes.add(groupAttribute);
@@ -268,7 +269,7 @@ public class CategoryTypeDialog extends AbstractPolicyAwareDialog implements Obj
 	private void setCategoryTypeAttributes(final List<Attribute> assignedAttributes) {
 
 		final Set<AttributeGroupAttribute> groupAttributeSet = getGroupAttributeFromList(assignedAttributes);
-		final AttributeGroup attributeGroup = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_GROUP);
+		final AttributeGroup attributeGroup = BeanLocator.getPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class);
 
 		attributeGroup.setAttributeGroupAttributes(groupAttributeSet);
 
@@ -283,7 +284,7 @@ public class CategoryTypeDialog extends AbstractPolicyAwareDialog implements Obj
 	@Override
 	public void setObjectGuid(final String objectGuid) {
 		if (objectGuid == null) {
-			categoryType = ServiceLocator.getService(ContextIdNames.CATEGORY_TYPE);
+			categoryType = BeanLocator.getPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class);
 			editMode = false;
 		} else {
 			initializeDialog(getCategoryTypeService().findByGuid(objectGuid));

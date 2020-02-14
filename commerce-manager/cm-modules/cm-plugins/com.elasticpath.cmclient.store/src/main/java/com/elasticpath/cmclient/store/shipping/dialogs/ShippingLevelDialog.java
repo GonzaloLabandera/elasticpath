@@ -32,8 +32,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -152,12 +152,11 @@ public class ShippingLevelDialog extends AbstractEpDialog { //NOPMD
 
 		dataBindingContext = new DataBindingContext();
 
-		storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		shippingRegionService =
-				ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
+				BeanLocator.getSingletonBean(EpShippingContextIdNames.SHIPPING_REGION_SERVICE, ShippingRegionService.class);
 		shippingServiceLevelService =
-				ServiceLocator.getService(
-						EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+				BeanLocator.getSingletonBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
 
 		stores = storeService.findAllCompleteStores();
 		AuthorizationService.getInstance().removeUnathorizedStoresFrom(stores);
@@ -331,8 +330,8 @@ public class ShippingLevelDialog extends AbstractEpDialog { //NOPMD
 					ShippingCostCalculationParameter originalParameter = restoreMap.get(propertyName);
 
 					ShippingCostCalculationParameter parameter =
-							ServiceLocator.getService(
-									EpShippingContextIdNames.SHIPPING_COST_CALCULATION_PARAMETER);
+							BeanLocator.getPrototypeBean(EpShippingContextIdNames.SHIPPING_COST_CALCULATION_PARAMETER,
+									ShippingCostCalculationParameter.class);
 
 					parameter.setKey(originalParameter.getKey());
 					parameter.setCurrency(originalParameter.getCurrency());
@@ -342,8 +341,8 @@ public class ShippingLevelDialog extends AbstractEpDialog { //NOPMD
 				}
 
 				ShippingCostCalculationMethod originalCalcMethod = calcMethods.get((Integer) newValue);
-				ShippingCostCalculationMethod newCalcMethod =
-						ServiceLocator.getService(originalCalcMethod.getType());
+				ShippingCostCalculationMethod newCalcMethod = BeanLocator.getPrototypeBean(originalCalcMethod.getType(),
+						ShippingCostCalculationMethod.class);
 
 				newCalcMethod.setParameters(parameters);
 
@@ -536,7 +535,7 @@ public class ShippingLevelDialog extends AbstractEpDialog { //NOPMD
 	 * @return all supported shipment carrier.
 	 */
 	private List<String> getAllShipmentCarriers() {
-		SettingsService settingsService = ServiceLocator.getService(ContextIdNames.SETTINGS_SERVICE);
+		SettingsService settingsService = BeanLocator.getSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class);
 		final String valueStr =
 			settingsService.getSettingValue("COMMERCE/SYSTEM/SHIPPING/carriers").getValue(); //$NON-NLS-1$
 

@@ -25,8 +25,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.comparator.PriceListDescriptorComparator;
 import com.elasticpath.cmclient.core.helpers.EPTestUtilFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
@@ -131,7 +131,7 @@ public class PriceListDescriptiorsTableViewer {
 	}
 
 	private Set<Currency> getUniqueCurrencies() {
-		CurrencyCodeComparator comparator = ServiceLocator.getService(ContextIdNames.CURRENCYCODE_COMPARATOR);
+		CurrencyCodeComparator comparator = BeanLocator.getPrototypeBean(ContextIdNames.CURRENCYCODE_COMPARATOR, CurrencyCodeComparator.class);
 		Set<Currency> uniqueCurrencies = new TreeSet<>(comparator);
 		for (PriceListDescriptor priceListDescriptor : getPriceListsSorted()) {
 			uniqueCurrencies.add(Currency.getInstance(priceListDescriptor.getCurrencyCode()));
@@ -186,7 +186,8 @@ public class PriceListDescriptiorsTableViewer {
 
 
 	private List<PriceListDescriptor> getAllObjects() {
-		PriceListDescriptorService service = ServiceLocator.getService(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE);
+		PriceListDescriptorService service = BeanLocator
+				.getSingletonBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE, PriceListDescriptorService.class);
 		CmUser currentUser = LoginManager.getCmUser();
 		if (currentUser.isAllPriceListsAccess()) {
 			return service.getPriceListDescriptors(false);

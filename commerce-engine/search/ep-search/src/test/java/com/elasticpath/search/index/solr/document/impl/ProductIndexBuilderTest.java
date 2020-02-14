@@ -24,7 +24,9 @@ import java.util.Map;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -311,21 +313,33 @@ public class ProductIndexBuilderTest {
 	 */
 	@Test
 	public void testAddFeaturenessToDocumentTrue() {
-		final long categoryFeaturedUid = 5L;
 		final int categoryFeaturedRank = 2;
-		final long categoryNotFeaturedUid = 6L;
+
+		Category featuredCategory = context.mock(Category.class, "featuredCategory");
+		Category nonFeaturedCategory = context.mock(Category.class, "nonFeaturedCategory");
+
+		Catalog featuredCatalog = context.mock(Catalog.class, "featuredCatalog");
+		Catalog nonFeaturedCatalog = context.mock(Catalog.class, "nonFeaturedCatalog");
 
 		context.checking(new Expectations() {
 			{
-				Category featuredCategory = context.mock(Category.class, "featuredCategory");
-				allowing(featuredCategory).getUidPk();
-				will(returnValue(categoryFeaturedUid));
+				allowing(featuredCatalog).getCode();
+				will(returnValue("featuredCode"));
+
+				allowing(featuredCategory).getCode();
+				will(returnValue("featuredCategory"));
+				allowing(featuredCategory).getCatalog();
+				will(returnValue(featuredCatalog));
 				allowing(product).getFeaturedRank(featuredCategory);
 				will(returnValue(categoryFeaturedRank));
 
-				Category nonFeaturedCategory = context.mock(Category.class, "nonFeaturedCategory");
-				allowing(nonFeaturedCategory).getUidPk();
-				will(returnValue(categoryNotFeaturedUid));
+				allowing(nonFeaturedCatalog).getCode();
+				will(returnValue("nonFeaturedCode"));
+
+				allowing(nonFeaturedCategory).getCode();
+				will(returnValue("nonFeaturedCategory"));
+				allowing(nonFeaturedCategory).getCatalog();
+				will(returnValue(nonFeaturedCatalog));
 				allowing(product).getFeaturedRank(nonFeaturedCategory);
 				will(returnValue(0));
 
@@ -338,11 +352,11 @@ public class ProductIndexBuilderTest {
 
 		assertEquals("Since the product is featured in one of two categories, the index should show it as featured.", String.valueOf(true), document
 				.getFieldValue(SolrIndexConstants.FEATURED));
-		assertEquals("The featured category should be keyed on the category UID and contain the featured rank", analyzer
+		assertEquals("The featured category should be keyed on the category and contain the featured rank", analyzer
 				.analyze(this.productDocumentCreator.calculateFeatureBoost(categoryFeaturedRank)), document.getFieldValue(indexUtility
-				.createFeaturedField(categoryFeaturedUid)));
-		assertEquals("Non-featured categories should be keyed on the category UID and contain a featured rank of 0", analyzer.analyze(0), document
-				.getFieldValue(indexUtility.createFeaturedField(categoryNotFeaturedUid)));
+				.createFeaturedField(featuredCategory)));
+		assertEquals("Non-featured categories should be keyed on the category and contain a featured rank of 0", analyzer.analyze(0), document
+				.getFieldValue(indexUtility.createFeaturedField(nonFeaturedCategory)));
 	}
 
 	/**	 */
@@ -364,13 +378,20 @@ public class ProductIndexBuilderTest {
 	 */
 	@Test
 	public void testAddFeaturenessToDocumentFalse() {
-		final long categoryUid = 5L;
+		final String categoryCode = "categoryCode";
+		final String catalogCode = "categoryCode";
 
 		context.checking(new Expectations() {
 			{
+				Catalog catalog = context.mock(Catalog.class);
+				allowing(catalog).getCode();
+				will(returnValue(catalogCode));
+
 				Category category = context.mock(Category.class);
-				allowing(category).getUidPk();
-				will(returnValue(categoryUid));
+				allowing(category).getCode();
+				will(returnValue(categoryCode));
+				allowing(category).getCatalog();
+				will(returnValue(catalog));
 
 				allowing(product).getCategories();
 				will(returnValue(Collections.singleton(category)));
@@ -389,12 +410,20 @@ public class ProductIndexBuilderTest {
 	 */
 	@Test
 	public void testAddDisplayablFieldsToDocument() {
+
+		Mockery mockery = new JUnitRuleMockery() {
+			{
+				setThreadingPolicy(new Synchroniser());
+			}
+		};
+
 		final String storeDisplayableCode = "DISPLAYABLE_STORE";
 		final String storeNotDisplayableCode = "NOT_DISAPLAYABLE_STORE";
 
-		final Store displayableStore = context.mock(Store.class, storeDisplayableCode);
-		final Store invisibleStore = context.mock(Store.class, storeNotDisplayableCode);
-		context.checking(new Expectations() {
+		final IndexProduct indexProduct = mockery.mock(IndexProduct.class);
+		final Store displayableStore = mockery.mock(Store.class, storeDisplayableCode);
+		final Store invisibleStore = mockery.mock(Store.class, storeNotDisplayableCode);
+		mockery.checking(new Expectations() {
 			{
 				allowing(displayableStore).getCode();
 				will(returnValue(storeDisplayableCode));
@@ -419,7 +448,7 @@ public class ProductIndexBuilderTest {
 		Map<Long, Boolean> catalogUidAvailability = Collections.emptyMap();
 		testService.setIndexUtility(indexUtility);
 
-		testService.addDisplayableFieldsToDocument(document, product, catalogUidAvailability, stores);
+		testService.addDisplayableFieldsToDocument(document, indexProduct, catalogUidAvailability, stores);
 		assertEquals("The store in which the product is displayable should show up as such in the index", String.valueOf(true), document.getField(
 				indexUtility.createDisplayableFieldName(SolrIndexConstants.DISPLAYABLE, storeDisplayableCode)).getValue());
 		assertEquals("The store in which the product is NOT displayable should show up as such in the index", String.valueOf(false), document

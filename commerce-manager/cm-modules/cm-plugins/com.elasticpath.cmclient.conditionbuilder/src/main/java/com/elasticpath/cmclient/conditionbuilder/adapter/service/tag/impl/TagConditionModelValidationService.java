@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.conditionbuilder.adapter.service.tag.impl;
 
 import com.elasticpath.cmclient.conditionbuilder.adapter.BaseModelAdapter;
 import com.elasticpath.cmclient.conditionbuilder.adapter.service.ConditionModelValidationService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.service.ConditionValidationFacade;
@@ -26,7 +26,7 @@ public class TagConditionModelValidationService implements
 	 */
 	public TagConditionModelValidationService() {
 		
-		validationFacade = ServiceLocator.getService(ContextIdNames.TAG_CONDITION_VALIDATION_FACADE);
+		validationFacade = BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_VALIDATION_FACADE, ConditionValidationFacade.class);
 		
 	}
 

@@ -174,7 +174,8 @@ public class SearchServiceImpl extends AbstractSearchServiceImpl implements Sear
 	 * @return the list of suggested keywords similar to those in the given search request
 	 */
 	List<String> suggest(final SearchRequest searchRequest) {
-		final ProductSearchCriteria searchCriteria = beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+		final ProductSearchCriteria searchCriteria = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA,
+				ProductSearchCriteria.class);
 		searchCriteria.setProductName(searchRequest.getKeyWords());
 		searchCriteria.setLocale(searchRequest.getLocale());
 		// let's assume all of these suggestions are good

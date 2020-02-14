@@ -58,9 +58,9 @@ public class FacetServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public Facet getFacet(final long facetUid) throws EpServiceException {
 		sanityCheck();
 		if (facetUid <= 0) {
-			return getBean(ContextIdNames.FACET_SERVICE);
+			return getPrototypeBean(ContextIdNames.FACET, Facet.class);
 		}
-		return getPersistentBeanFinder().get(ContextIdNames.FACET_SERVICE, facetUid);
+		return getPersistentBeanFinder().get(ContextIdNames.FACET, facetUid);
 	}
 
 	@Override

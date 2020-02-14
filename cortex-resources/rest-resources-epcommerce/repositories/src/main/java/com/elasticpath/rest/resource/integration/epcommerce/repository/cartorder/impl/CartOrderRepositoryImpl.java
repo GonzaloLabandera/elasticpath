@@ -3,7 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -14,8 +13,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Address;
@@ -23,14 +20,9 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheRemove;
 import com.elasticpath.rest.cache.CacheResult;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.Ensure;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsConstants;
@@ -47,8 +39,6 @@ import com.elasticpath.service.rules.CartOrderCouponAutoApplier;
 @Named("cartOrderRepository")
 @SuppressWarnings("PMD.TooManyMethods")
 public class CartOrderRepositoryImpl implements CartOrderRepository {
-
-	private static final Logger LOG = LoggerFactory.getLogger(CartOrderRepositoryImpl.class);
 
 	/**
 	 * Error message when cart order not found.
@@ -97,19 +87,7 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 	}
 
 	@Override
-	public ExecutionResult<CartOrder> findByGuid(final String storeCode, final String cartOrderGuid) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				CartOrder cartOrder = Assign.ifNotNull(findByStoreCodeAndGuid(storeCode, cartOrderGuid),
-						OnFailure.returnNotFound(ORDER_WITH_GUID_NOT_FOUND, cartOrderGuid, storeCode));
-
-				return ExecutionResultFactory.createReadOK(cartOrder);
-			}
-		}.execute();
-	}
-
-	@Override
-	public Single<CartOrder> findByGuidAsSingle(final String storeCode, final String cartOrderGuid) {
+	public Single<CartOrder> findByGuid(final String storeCode, final String cartOrderGuid) {
 		return reactiveAdapter.fromServiceAsSingle(() -> findByStoreCodeAndGuid(storeCode, cartOrderGuid),
 				String.format(ORDER_WITH_GUID_NOT_FOUND, cartOrderGuid, storeCode));
 	}
@@ -120,24 +98,8 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 	}
 
 	@Override
-	public ExecutionResult<CartOrder> findByCartGuid(final String cartGuid) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				CartOrder cartOrder = Assign.ifNotNull(findByShoppingCartGuid(cartGuid),
-						OnFailure.returnNotFound(ORDER_WITH_CART_GUID_NOT_FOUND, cartGuid));
-				return ExecutionResultFactory.createReadOK(cartOrder);
-			}
-		}.execute();
-	}
-
 	@CacheResult
-	private CartOrder findByShoppingCartGuid(final String shoppingCartGuid) {
-		return coreCartOrderService.findByShoppingCartGuid(shoppingCartGuid);
-	}
-
-	@Override
-	@CacheResult
-	public Single<CartOrder> findByCartGuidSingle(final String cartGuid) {
+	public Single<CartOrder> findByCartGuid(final String cartGuid) {
 		return reactiveAdapter.fromServiceAsSingle(() -> coreCartOrderService.findByShoppingCartGuid(cartGuid),
 				String.format(ORDER_WITH_CART_GUID_NOT_FOUND, cartGuid));
 	}
@@ -151,18 +113,7 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 	}
 
 	@Override
-	public ExecutionResult<Collection<String>> findCartOrderGuidsByCustomer(final String storeCode, final String customerGuid) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				Collection<String> cartOrderGuids = Assign.ifNotNull(findCartOrderGuidsByCustomerGuid(storeCode, customerGuid),
-						OnFailure.returnNotFound(NO_CART_ORDERS_FOR_CUSTOMER, customerGuid, storeCode));
-				return ExecutionResultFactory.createReadOK(cartOrderGuids);
-			}
-		}.execute();
-	}
-
-	@Override
-	public Observable<String> findCartOrderGuidsByCustomerAsObservable(final String storeCode, final String customerGuid) {
+	public Observable<String> findCartOrderGuidsByCustomer(final String storeCode, final String customerGuid) {
 		return reactiveAdapter.fromService(() -> findCartOrderGuidsByCustomerGuid(storeCode, customerGuid),
 				String.format(NO_CART_ORDERS_FOR_CUSTOMER, customerGuid, storeCode))
 				.flatMap(Observable::fromIterable);
@@ -192,73 +143,46 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 	@Override
 	@CacheRemove(typesToInvalidate = {CartOrder.class, Address.class, ShoppingCart.class,
 			ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
-	public ExecutionResult<CartOrder> saveCartOrder(final CartOrder cartOrder) {
-		//cannot be final
-		ExecutionResult<CartOrder> result;
-		try {
-			result = ExecutionResultFactory.createCreateOKWithData(coreCartOrderService.saveOrUpdate(cartOrder), true);
-		} catch (Exception e) {
-			result = ExecutionResultFactory.createServerError("Unable to save cart order");
-			LOG.error("Unable to save cart order " + cartOrder, e);
-		}
-		return result;
+	public Single<CartOrder> saveCartOrder(final CartOrder cartOrder) {
+		return reactiveAdapter.fromServiceAsSingle(() -> coreCartOrderService.saveOrUpdate(cartOrder), "Unable to save cart order.")
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.serverError("Unable to save cart order.")));
 	}
 
 	@Override
-	@CacheRemove(typesToInvalidate = {CartOrder.class, Address.class, ShoppingCart.class,
-			ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
-	public Single<CartOrder> saveCartOrderAsSingle(final CartOrder cartOrder) {
-		return reactiveAdapter.fromServiceAsSingle(() -> coreCartOrderService.saveOrUpdate(cartOrder), "Unable to save cart order");
-	}
+	public Single<CartOrder> getCartOrder(final String storeCode, final String guid, final FindCartOrder findBy) {
 
-	@Override
-	public ExecutionResult<CartOrder> getCartOrder(final String storeCode, final String guid, final FindCartOrder findBy) {
-
-		CartOrder cartOrder;
+		Single<CartOrder> cartOrder;
 		switch (findBy) {
 			case BY_CART_GUID:
-				cartOrder = Assign.ifSuccessful(findByCartGuid(guid));
+				cartOrder = findByCartGuid(guid);
 				break;
 			case BY_ORDER_GUID:
-				cartOrder = Assign.ifSuccessful(findByGuid(storeCode, guid));
+				cartOrder = findByGuid(storeCode, guid);
 				break;
 			default:
-				return ExecutionResultFactory.createServerError("Invalid FindCartOrder criteria: " + findBy);
+				return Single.error(ResourceOperationFailure.serverError("Invalid FindCartOrder criteria: " + findBy));
 		}
 
-		return ExecutionResultFactory.createReadOK(cartOrder);
-	}
-
-	@Override
-	public ExecutionResult<ShoppingCart> getEnrichedShoppingCart(final String storeCode, final String guid, final FindCartOrder findBy) {
-			return getEnrichedShoppingCartSingle(storeCode, guid, findBy)
-						.map(this::createExecutionResult)
-						.onErrorReturnItem(ExecutionResultFactory.createNotFound())
-						.blockingGet();
-
-	}
-
-	private ExecutionResult<ShoppingCart> createExecutionResult(final ShoppingCart enrichedShoppingCartResult) {
-		return ExecutionResultFactory.createReadOK(enrichedShoppingCartResult);
+		return cartOrder;
 	}
 
 	@Override
 	@CacheResult(uniqueIdentifier = "enrichedCartByGuid")
-	public Single<ShoppingCart> getEnrichedShoppingCartSingle(final String storeCode, final String guid, final FindCartOrder findBy) {
-		return reactiveAdapter.fromRepositoryAsSingle(() -> getCartOrder(storeCode, guid, findBy))
-				.flatMap(cartOrder -> getEnrichedShoppingCartSingle(storeCode, cartOrder));
+	public Single<ShoppingCart> getEnrichedShoppingCart(final String storeCode, final String guid, final FindCartOrder findBy) {
+		return getCartOrder(storeCode, guid, findBy)
+				.flatMap(cartOrder -> getEnrichedShoppingCart(storeCode, cartOrder));
 	}
 
 	@Override
 	@CacheResult(uniqueIdentifier = "enrichedCartForShipments")
 	public Single<ShoppingCart> getEnrichedShoppingCartForShipments(final String storeCode, final Map<String, String> shipmentDetailsId) {
 		return findByShipmentDetailsId(storeCode, shipmentDetailsId)
-				.flatMap(cartOrder -> getEnrichedShoppingCartSingle(storeCode, cartOrder));
+				.flatMap(cartOrder -> getEnrichedShoppingCart(storeCode, cartOrder));
 	}
 
 	@Override
 	@CacheResult(uniqueIdentifier = "enrichedCart")
-	public Single<ShoppingCart> getEnrichedShoppingCartSingle(final String storeCode, final CartOrder cartOrder) {
+	public Single<ShoppingCart> getEnrichedShoppingCart(final String storeCode, final CartOrder cartOrder) {
 		return shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid())
 				// update the coupon codes on the shopping cart.
 				.map(shoppingCart -> coreCartOrderCouponService.populateCouponCodesOnShoppingCart(shoppingCart, cartOrder))
@@ -268,27 +192,9 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 
 	@Override
 	@CacheRemove(typesToInvalidate = {Address.class})
-	public ExecutionResult<Boolean> updateShippingAddressOnCartOrder(final String shippingAddressGuid, final String cartOrderGuid,
-																	 final String storeCode) {
-
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				CartOrder cartOrder = Assign.ifSuccessful(findByGuid(storeCode, cartOrderGuid));
-				final ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid()).blockingGet();
-				boolean updatedAddress = coreCartOrderShippingService.updateCartOrderShippingAddress(shippingAddressGuid, shoppingCart, cartOrder);
-				if (updatedAddress) {
-					Ensure.successful(saveCartOrder(cartOrder));
-				}
-				return ExecutionResultFactory.createReadOK(updatedAddress);
-			}
-		}.execute();
-	}
-
-	@Override
-	@CacheRemove(typesToInvalidate = {Address.class})
-	public Single<Boolean> updateShippingAddressOnCartOrderAsSingle(final String shippingAddressGuid, final String cartOrderGuid,
-																	final String storeCode) {
-		return findByGuidAsSingle(storeCode, cartOrderGuid)
+	public Single<Boolean> updateShippingAddressOnCartOrder(final String shippingAddressGuid, final String cartOrderGuid,
+															final String storeCode) {
+		return findByGuid(storeCode, cartOrderGuid)
 				.flatMap(cartOrder -> updateCartOrderShippingAddress(shippingAddressGuid, cartOrder));
 	}
 
@@ -301,7 +207,7 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 
 	private Single<Boolean> saveCartOrderIfAddressUpdated(final CartOrder cartOrder, final Boolean isAddressUpdated) {
 		if (isAddressUpdated) {
-			return saveCartOrderAsSingle(cartOrder)
+			return saveCartOrder(cartOrder)
 					.map(savedCartOrder -> true);
 		}
 		return Single.just(false);
@@ -309,15 +215,10 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 
 	@Override
 	@CacheRemove(typesToInvalidate = {CartOrder.class, ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
-	public ExecutionResult<Boolean> filterAndAutoApplyCoupons(final CartOrder cartOrder, final Store store, final String customerEmailAddress) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				boolean isCouponsApplied = Assign.ifNotNull(
-						cartOrderCouponAutoApplier.filterAndAutoApplyCoupons(cartOrder, store, customerEmailAddress),
-						OnFailure.returnServerError("Server error when auto applying coupons to cart order"));
-				return ExecutionResultFactory.createReadOK(isCouponsApplied);
-			}
-		}.execute();
+	public Single<Boolean> filterAndAutoApplyCoupons(final CartOrder cartOrder, final Store store, final String customerEmailAddress) {
+		return reactiveAdapter.fromServiceAsSingle(() ->
+				cartOrderCouponAutoApplier.filterAndAutoApplyCoupons(cartOrder, store, customerEmailAddress))
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.serverError("Server error when auto applying coupons to cart order")));
 	}
 
 	@Override

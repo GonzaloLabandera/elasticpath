@@ -35,7 +35,7 @@ public class PriceListDescriptorDtoAssemblerTest {
 	public void setUp() {
 		final BeanFactory beanFactory = context.mock(BeanFactory.class);
 		context.checking(new Expectations() { {
-			allowing(beanFactory).getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+			allowing(beanFactory).getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 			will(returnValue(new PriceListDescriptorImpl()));
 		} });
 		assembler.setBeanFactory(beanFactory);

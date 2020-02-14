@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
@@ -268,9 +268,9 @@ public class CategoryFinderDialog extends AbstractCatalogObjectFinderDialog {
 	 */
 	private List<Catalog> getCatalogs(final boolean onlyMasterCatalogs) {
 		if (onlyMasterCatalogs) {
-			return ((CatalogService) (ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE))).findMasterCatalogs();
+			return BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class).findMasterCatalogs();
 		}
-		return ((CatalogService) (ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE))).findAllCatalogs();
+		return BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class).findAllCatalogs();
 	}
 
 	@Override
@@ -414,7 +414,7 @@ public class CategoryFinderDialog extends AbstractCatalogObjectFinderDialog {
 	@Override
 	public CategorySearchCriteria getModel() {
 		if (searchCriteria == null) {
-			searchCriteria = ServiceLocator.getService(ContextIdNames.CATEGORY_SEARCH_CRITERIA);
+			searchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA, CategorySearchCriteria.class);
 		}
 		return searchCriteria;
 	}

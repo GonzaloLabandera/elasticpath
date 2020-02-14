@@ -161,6 +161,8 @@ public final class AdminStoresMessages {
 
 	public String StoreProfileAttributePolicies;
 
+	public String StorePaymentProviderConfigurations;
+
 	public String StoreMarketingSettings;
 
 	public String StoreSystemSettings;
@@ -337,6 +339,22 @@ public final class AdminStoresMessages {
 	public String Store_AttributePolicies_Policy;
 
 	public String Store_AttributePolicies_Permissions;
+
+	public String Store_PaymentConfigurations_Select;
+
+	public String Store_PaymentConfigurations_ConfigurationName;
+
+	public String Store_PaymentConfigurations_Provider;
+
+	public String Store_PaymentConfigurations_Method;
+
+	public String Store_Payment_Configuration_Save_Error_Title;
+
+	public String Store_Payment_Configuration_Save_Error_Message;
+
+	public String Payment_Configuration_Is_Disabled_Error_Title;
+
+	public String Payment_Configuration_Is_Disabled_Error_Message;
 
 	public String PolicyPermission_EMIT;
 

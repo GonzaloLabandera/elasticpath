@@ -110,7 +110,7 @@ public class AllocationServiceImpl implements AllocationService {
 			final int quantity,
 			final String reason) {
 
-		final AllocationResult allocationResult = getBean(ContextIdNames.ALLOCATION_RESULT);
+		final AllocationResult allocationResult = getBeanFactory().getPrototypeBean(ContextIdNames.ALLOCATION_RESULT, AllocationResult.class);
 		if (orderSku == null) {
 			return allocationResult;
 		}
@@ -120,7 +120,7 @@ public class AllocationServiceImpl implements AllocationService {
 
 		// if always available there is nothing to be allocated/deallocated
 		if (productSku.getProduct().getAvailabilityCriteria() == AvailabilityCriteria.ALWAYS_AVAILABLE) {
-			inventoryResult = getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			inventoryResult = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
 			inventoryResult.setQuantity(quantity);
 			allocationResult.setInventoryResult(inventoryResult);
 			return allocationResult;
@@ -160,10 +160,6 @@ public class AllocationServiceImpl implements AllocationService {
 		final int allocatedQty = getAllocatedQty(productSku, warehouseService.getWarehouse(warehouseUid).getCode());
 
 		return qtyInStock - allocatedQty;
-	}
-
-	private <T> T getBean(final String beanName) {
-		return getBeanFactory().getBean(beanName);
 	}
 
 	/**

@@ -93,7 +93,7 @@ public class TagDefinitionDaoTest extends BasicSpringContextTest {
     }
 
 	private TagDefinition createTagDefinition() {
-		TagDefinition tagDefinition = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
+		TagDefinition tagDefinition = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 		TagValueType tagValueType = tagValueTypeService.findByGuid("text");
         tagDefinition.setName("Demo Tag Definition");
         tagDefinition.setDescription("Description of demo tag definition");        

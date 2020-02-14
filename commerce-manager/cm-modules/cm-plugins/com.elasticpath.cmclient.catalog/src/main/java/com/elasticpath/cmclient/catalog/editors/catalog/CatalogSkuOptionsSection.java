@@ -44,10 +44,10 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.CatalogSkuOptionChangeSetTableLabelProviderDecorator;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.CatalogSkuOptionTableLabelProviderDecorator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapter;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -118,14 +118,13 @@ public class CatalogSkuOptionsSection extends AbstractCmClientEditorPageSectionP
 
 	private final InternalObjectRegistryListener objectRegistryListener = new InternalObjectRegistryListener();
 
-	private final SkuOptionService skuOptionService = (SkuOptionService) ServiceLocator.getService(
-			ContextIdNames.SKU_OPTION_SERVICE);
+	private final SkuOptionService skuOptionService = BeanLocator.getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
 
 	private final List<SkuOption> skuOptionList;
 
 	private final CatalogSkuOptionsSectionObservable observable = new CatalogSkuOptionsSectionObservable();
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private static ListenerList listenerList;
 

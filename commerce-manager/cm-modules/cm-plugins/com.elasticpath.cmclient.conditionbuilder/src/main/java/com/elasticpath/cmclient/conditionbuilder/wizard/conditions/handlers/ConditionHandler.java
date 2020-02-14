@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.conditionbuilder.wizard.conditions.handlers;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.domain.ConditionalExpression;
@@ -34,8 +34,8 @@ public class ConditionHandler {
 	 * Default constructor. 
 	 */
 	public ConditionHandler() {
-		this.conditionDSLBuilder = (ConditionDSLBuilder) getBeanByName(ContextIdNames.TAG_CONDITION_DSL_BUILDER);
-		this.conditionBuilder = (ConditionBuilder) getBeanByName(ContextIdNames.TAG_CONDITION_BUILDER);
+		this.conditionDSLBuilder = BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_DSL_BUILDER, ConditionDSLBuilder.class);
+		this.conditionBuilder = BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_BUILDER, ConditionBuilder.class);
 	}
 
 	/**
@@ -79,16 +79,6 @@ public class ConditionHandler {
 			}
 		}
 		return result;
-	}
-
-	/**
-	* Returns bean by specified name.
-	*
-	* @param name - name of the bean
-	* @return requested bean
-	* */
-	protected static Object getBeanByName(final String name) {
-		return ServiceLocator.getService(name);
 	}
 
 	/**

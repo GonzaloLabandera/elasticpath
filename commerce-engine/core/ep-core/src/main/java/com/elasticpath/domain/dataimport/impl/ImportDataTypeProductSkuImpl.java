@@ -356,7 +356,7 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 				}
 				DigitalAsset digitalAsset = sku.getDigitalAsset();
 				if (digitalAsset == null) {
-					digitalAsset = getBean(ContextIdNames.DIGITAL_ASSET);
+					digitalAsset = getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 
 				}
 				digitalAsset.setFileName(value);
@@ -393,7 +393,7 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 				}
 				DigitalAsset digitalAsset = sku.getDigitalAsset();
 				if (digitalAsset == null) {
-					digitalAsset = getBean(ContextIdNames.DIGITAL_ASSET);
+					digitalAsset = getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 
 				}
 
@@ -431,7 +431,7 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 				}
 				DigitalAsset digitalAsset = sku.getDigitalAsset();
 				if (digitalAsset == null) {
-					digitalAsset = getBean(ContextIdNames.DIGITAL_ASSET);
+					digitalAsset = getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 
 				}
 
@@ -664,7 +664,7 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 		if (!productSku.getProduct().hasMultipleSkus()) {
 			throw new EpUnsupportedOperationException("ProductSku from a SingleSku Product cannot be deleted.");
 		}
-		ProductSkuService productSkuService = getBean(ContextIdNames.PRODUCT_SKU_SERVICE);
+		ProductSkuService productSkuService = getSingletonBean(ContextIdNames.PRODUCT_SKU_SERVICE, ProductSkuService.class);
 		if (!productSkuService.canDelete(productSku)) {
 			throw new EpServiceException("Unable to delete ProductSku code=" + productSku.getSkuCode()
 					+ " because it has an uncompleted shipment.");
@@ -704,7 +704,7 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected ValidatorUtils getValidatorUtils() {
 		if (validatorUtils == null) {
-			validatorUtils = getBean(ContextIdNames.VALIDATOR_UTILS);
+			validatorUtils = getSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class);
 		}
 		return validatorUtils;
 	}
@@ -720,7 +720,7 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected Utility getUtilityBean() {
 		if (utilityBean == null) {
-			utilityBean = getBean(ContextIdNames.UTILITY);
+			utilityBean = getSingletonBean(ContextIdNames.UTILITY, Utility.class);
 		}
 		return utilityBean;
 	}

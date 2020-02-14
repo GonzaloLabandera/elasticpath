@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2007
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cmclient.fulfillment.editors.order;
 
@@ -21,10 +21,9 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
-import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
+import com.elasticpath.cmclient.core.BeanLocator;
+import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -32,6 +31,7 @@ import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentImageRegistry;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
@@ -42,14 +42,16 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderStatus;
+import com.elasticpath.domain.orderpaymentapi.OrderPaymentAmounts;
 import com.elasticpath.money.MoneyFormatter;
 import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.order.OrderService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiService;
 
 /**
  * UI representation of the order summary overview section.
  */
-@SuppressWarnings({"PMD.GodClass"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyFields"})
 public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageSectionPart implements SelectionListener, IPropertyListener {
 
 	private Order order;
@@ -69,6 +71,8 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 	private Text cmUserNameText;
 
 	private final CmUserService cmUserService;
+
+	private final OrderPaymentApiService orderPaymentApiService;
 
 	private Button cancelOrderButton;
 
@@ -90,6 +94,8 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 
 	private IEpLayoutComposite mainPane;
 
+	private final OrderPaymentAmounts orderPaymentAmounts;
+
 	/**
 	 * Constructor.
 	 * 
@@ -99,9 +105,12 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 	public OrderSummaryOverviewSectionPart(final FormPage formPage, final AbstractCmClientFormEditor editor) {
 		super(formPage, editor, ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
 		this.order = (Order) editor.getModel();
-		cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 		this.editor = (OrderEditor) editor;
 		editor.addPropertyListener(this);
+
+		orderPaymentApiService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_PAYMENT_API_SERVICE, OrderPaymentApiService.class);
+		orderPaymentAmounts = orderPaymentApiService.getOrderPaymentAmounts(order);
 	}
 
 	@Override
@@ -200,8 +209,10 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 		this.storeNameText.setText(this.order.getStore().getName());
 		this.createdDateText.setText(formatDate(this.order.getCreatedDate()));
 		this.currencyText.setText(this.order.getCurrency().toString());
+
+
 		this.orderTotalText.setText(getMoneyFormatter().formatCurrency(this.order.getTotalMoney(), locale));
-		this.balanceDueText.setText(getMoneyFormatter().formatCurrency(this.order.getBalanceMoney(), locale));
+		this.balanceDueText.setText(getMoneyFormatter().formatCurrency(orderPaymentAmounts.getAmountDue(), locale));
 		if (this.order.getCmUserUID() != null) {
 			this.cmUserNameText.setText(cmUserService.get(this.order.getCmUserUID()).getFirstName()
 					+ " " + cmUserService.get(this.order.getCmUserUID()).getLastName()); //$NON-NLS-1$
@@ -287,7 +298,7 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 	}
 
 	protected MoneyFormatter getMoneyFormatter() {
-		return ServiceLocator.getService(ContextIdNames.MONEY_FORMATTER);
+		return BeanLocator.getSingletonBean(ContextIdNames.MONEY_FORMATTER, MoneyFormatter.class);
 	}
 
 	/**
@@ -345,14 +356,13 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 	}
 
 	private EventOriginator getEventOriginator() {
-		EventOriginatorHelper helper = ServiceLocator.getService(
-				ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = BeanLocator.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 
 		return helper.getCmUserOriginator(LoginManager.getCmUser());
 	}
 
 	private OrderService getOrderService() {
-		return (OrderService) ServiceLocator.getService(ContextIdNames.ORDER_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 
 	}
 
@@ -374,8 +384,8 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 			updateButtons();
 		}
 		if (propId == OrderEditor.PROP_REFRESH_PARTS) {
-			this.balanceDueText.setText(getMoneyFormatter().formatCurrency(this.order.getBalanceMoney(), order.getLocale()));
 			this.orderTotalText.setText(getMoneyFormatter().formatCurrency(this.order.getTotalMoney(), order.getLocale()));
+			this.balanceDueText.setText(getMoneyFormatter().formatCurrency(this.orderPaymentAmounts.getAmountDue(), order.getLocale()));
 			mainPane.getSwtComposite().layout();
 		}
 	}

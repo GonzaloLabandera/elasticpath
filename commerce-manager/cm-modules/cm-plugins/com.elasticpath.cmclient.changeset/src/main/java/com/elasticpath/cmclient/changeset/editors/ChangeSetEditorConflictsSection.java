@@ -33,8 +33,8 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetPlugin;
 import com.elasticpath.cmclient.changeset.helpers.ComponentHelper;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.pagination.PaginationInfo;
- import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.common.IPaginationControl;
 import com.elasticpath.cmclient.core.common.PaginationContributionControl;
@@ -175,22 +175,12 @@ public class ChangeSetEditorConflictsSection extends AbstractCmClientEditorPageS
 			paginationComposite.getSwtComposite().layout();
 		}
 	}
-
-	/**
-	 *
-	 * @param beanName the bean name
-	 * @param <T> the bean type
-	 * @return the bean instance
-	 */
-	<T> T getBean(final String beanName) {
-		return ServiceLocator.getService(beanName);
-	}
 	
 	@Override
 	protected void populateControls() {		
 		ChangeSet changeSet = (ChangeSet) getModel();
 		dependencyPaginator = new ChangeSetDependencyPaginator(getChangeSetDependencies(changeSet));
-		PaginationConfig paginationConfig = getBean(ContextIdNames.PAGINATION_CONFIG);
+		PaginationConfig paginationConfig = BeanLocator.getPrototypeBean(ContextIdNames.PAGINATION_CONFIG, PaginationConfig.class);
 		paginationConfig.setObjectId(((ChangeSet) getModel()).getGuid());
 		paginationConfig.setPageSize(PaginationInfo.getInstance().getPagination());
 		paginationConfig.setSortingFields(
@@ -279,7 +269,8 @@ public class ChangeSetEditorConflictsSection extends AbstractCmClientEditorPageS
 
 	private BusinessObjectDescriptor getBusinessObjectDescriptor(
 			final String objectType, final String objectIdentifier) {
-		BusinessObjectDescriptor objDescriptor = ServiceLocator.getService(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		BusinessObjectDescriptor objDescriptor = BeanLocator
+				.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 		objDescriptor.setObjectIdentifier(objectIdentifier);
 		objDescriptor.setObjectType(objectType);
 		return objDescriptor;
@@ -329,7 +320,7 @@ public class ChangeSetEditorConflictsSection extends AbstractCmClientEditorPageS
 	}
 
 	private ChangeSetService getChangeSetService() {
-		return ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 	}
 
 	private DirectedSortingField getSortedField() {

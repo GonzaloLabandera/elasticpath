@@ -36,7 +36,7 @@ public class BillingAddressResolutionStrategy implements StructuredErrorResoluti
 	public Maybe<ResourceIdentifier> getResourceIdentifier(final StructuredErrorMessage message, final String cortexResourceID) {
 		if (StringUtils.equals(message.getMessageId(), BillingAddressShoppingCartValidatorImpl.MESSAGE_ID)) {
 			return shoppingCartRepository.findStoreForCartGuid(cortexResourceID)
-					.flatMapMaybe(storeCode -> cartOrderRepository.findByCartGuidSingle(cortexResourceID)
+					.flatMapMaybe(storeCode -> cartOrderRepository.findByCartGuid(cortexResourceID)
 							.flatMapMaybe(cartOrder -> {
 								BillingaddressInfoIdentifier billingAddressesIdentifier = buildBillingAddressIdentifier(
 										StringIdentifier.of(storeCode), cartOrder.getGuid());

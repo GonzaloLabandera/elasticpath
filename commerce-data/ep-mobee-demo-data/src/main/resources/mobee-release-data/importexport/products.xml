@@ -1,258 +1,226 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <products>
-	<product>
-		<code>prodTestProd2</code>
-		<name>
-			<value language="en">prodTestProd2En</value>
-			<value language="fr"></value>
-		</name>
-		<type>productTestSingleSkuProductType1</type>
-		<taxcode>GOODS</taxcode>
-		<brand>productTestBrand1</brand>
-		<image></image>
-		<availability>
-			<storevisible>true</storevisible>
-			<notsoldseperately>false</notsoldseperately>
-			<enabledate>2019-08-26T14:47:00-07:00</enabledate>
-			<minorderqty>1</minorderqty>
-			<availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-			<orderlimit>0</orderlimit>
-		</availability>
-		<attributes/>
-		<skus>
-			<sku guid="0e92183d-6a52-4d9e-b1af-a8fea5fd9b0a">
-				<code>prodTestProd2_sku</code>
-				<shippable enabled="true">
-					<weight units="KG">0</weight>
-					<width units="CM">0</width>
-					<length units="CM">0</length>
-					<height units="CM">0</height>
-				</shippable>
-				<digitalasset enabled="false"/>
-			</sku>
-		</skus>
-		<seo>
-			<url>
-				<value language="fr"/>
-				<value language="en"/>
-			</url>
-			<title>
-				<value language="fr"></value>
-				<value language="en">prodTestProd2En</value>
-			</title>
-			<keywords>
-				<value language="fr"/>
-				<value language="en"/>
-			</keywords>
-			<description>
-				<value language="fr"/>
-				<value language="en"/>
-			</description>
-		</seo>
-	</product>
-
-	<product>
-		<code>prodTestProd3</code>
-		<name>
-			<value language="en">prodTestProd3En</value>
-			<value language="fr"></value>
-		</name>
-		<type>productTestSingleSkuProductType1</type>
-		<taxcode>GOODS</taxcode>
-		<brand>productTestBrand1</brand>
-		<image></image>
-		<availability>
-			<storevisible>true</storevisible>
-			<notsoldseperately>false</notsoldseperately>
-			<enabledate>2019-08-26T14:49:00-07:00</enabledate>
-			<minorderqty>1</minorderqty>
-			<availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-			<orderlimit>0</orderlimit>
-		</availability>
-		<attributes/>
-		<skus>
-			<sku guid="e2fd7da3-5846-4a29-9484-f222e0799cfe">
-				<code>prodTestProd3_sku</code>
-				<shippable enabled="true">
-					<weight units="KG">0</weight>
-					<width units="CM">0</width>
-					<length units="CM">0</length>
-					<height units="CM">0</height>
-				</shippable>
-				<digitalasset enabled="false"/>
-			</sku>
-		</skus>
-		<seo>
-			<url>
-				<value language="fr"/>
-				<value language="en"/>
-			</url>
-			<title>
-				<value language="fr"></value>
-				<value language="en">prodTestProd3En</value>
-			</title>
-			<keywords>
-				<value language="fr"/>
-				<value language="en"/>
-			</keywords>
-			<description>
-				<value language="fr"/>
-				<value language="en"/>
-			</description>
-		</seo>
-	</product>
-
-	<product>
-		<code>prodTestProd4</code>
-		<name>
-			<value language="en">prodTestProd4En</value>
-			<value language="fr"></value>
-		</name>
-		<type>productTestSingleSkuProductType1</type>
-		<taxcode>GOODS</taxcode>
-		<brand>productTestBrand1</brand>
-		<image></image>
-		<availability>
-			<storevisible>true</storevisible>
-			<notsoldseperately>false</notsoldseperately>
-			<enabledate>2019-08-26T14:50:00-07:00</enabledate>
-			<minorderqty>1</minorderqty>
-			<availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-			<orderlimit>0</orderlimit>
-		</availability>
-		<attributes/>
-		<skus>
-			<sku guid="3732f5e9-9f2f-4782-921b-b8c48ba565d1">
-				<code>prodTestProd4_sku</code>
-				<shippable enabled="true">
-					<weight units="KG">0</weight>
-					<width units="CM">0</width>
-					<length units="CM">0</length>
-					<height units="CM">0</height>
-				</shippable>
-				<digitalasset enabled="false"/>
-			</sku>
-		</skus>
-		<seo>
-			<url>
-				<value language="fr"/>
-				<value language="en"/>
-			</url>
-			<title>
-				<value language="fr"></value>
-				<value language="en">prodTestProd4En</value>
-			</title>
-			<keywords>
-				<value language="fr"/>
-				<value language="en"/>
-			</keywords>
-			<description>
-				<value language="fr"/>
-				<value language="en"/>
-			</description>
-		</seo>
-	</product>
-
-	<product>
-		<code>prodTestProd5</code>
-		<name>
-			<value language="en">prodTestProd5En</value>
-			<value language="fr"></value>
-		</name>
-		<type>productTestSingleSkuProductType1</type>
-		<taxcode>GOODS</taxcode>
-		<brand>productTestBrand1</brand>
-		<image></image>
-		<availability>
-			<storevisible>false</storevisible>
-			<notsoldseperately>false</notsoldseperately>
-			<enabledate>2019-08-26T14:51:00-07:00</enabledate>
-			<minorderqty>1</minorderqty>
-			<availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-			<orderlimit>0</orderlimit>
-		</availability>
-		<attributes/>
-		<skus>
-			<sku guid="f69535d9-17a6-4a02-b048-65f5e7062310">
-				<code>prodTestProd5_sku</code>
-				<shippable enabled="true">
-					<weight units="KG">0</weight>
-					<width units="CM">0</width>
-					<length units="CM">0</length>
-					<height units="CM">0</height>
-				</shippable>
-				<digitalasset enabled="false"/>
-			</sku>
-		</skus>
-		<seo>
-			<url>
-				<value language="fr"/>
-				<value language="en"/>
-			</url>
-			<title>
-				<value language="fr"/>
-				<value language="en"/>
-			</title>
-			<keywords>
-				<value language="fr"/>
-				<value language="en"/>
-			</keywords>
-			<description>
-				<value language="fr"/>
-				<value language="en"/>
-			</description>
-		</seo>
-	</product>
-
-	<product>
-		<code>prodTestProd6</code>
-		<name>
-			<value language="en">prodTestProd6En</value>
-			<value language="fr"></value>
-		</name>
-		<type>productTestSingleSkuProductType1</type>
-		<taxcode>GOODS</taxcode>
-		<brand>productTestBrand1</brand>
-		<image></image>
-		<availability>
-			<storevisible>true</storevisible>
-			<notsoldseperately>false</notsoldseperately>
-			<enabledate>2019-08-01T14:51:00-07:00</enabledate>
-			<disabledate>2019-08-11T14:52:00-07:00</disabledate>
-			<minorderqty>1</minorderqty>
-			<availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
-			<orderlimit>0</orderlimit>
-		</availability>
-		<attributes/>
-		<skus>
-			<sku guid="666726cb-aedc-4423-939b-1be847672a71">
-				<code>prodTestProd6_sku</code>
-				<shippable enabled="true">
-					<weight units="KG">0</weight>
-					<width units="CM">0</width>
-					<length units="CM">0</length>
-					<height units="CM">0</height>
-				</shippable>
-				<digitalasset enabled="false"/>
-			</sku>
-		</skus>
-		<seo>
-			<url>
-				<value language="fr"/>
-				<value language="en"/>
-			</url>
-			<title>
-				<value language="fr"/>
-				<value language="en"/>
-			</title>
-			<keywords>
-				<value language="fr"/>
-				<value language="en"/>
-			</keywords>
-			<description>
-				<value language="fr"/>
-				<value language="en"/>
-			</description>
-		</seo>
-	</product>
+    <product bundle="true" pricingMechanism="assigned">
+        <code>bundleWithMultiplePhysicalItems</code>
+        <name>
+            <value language="en">bundleWithMultiplePhysicalItems</value>
+            <value language="en_US">bundleWithMultiplePhysicalItems</value>
+            <value language="fr"></value>
+            <value language="fr_CA"></value>
+        </name>
+        <type>PhysicalBundle</type>
+        <brand>Samsung</brand>
+        <image></image>
+        <availability>
+            <storevisible>true</storevisible>
+            <notsoldseperately>false</notsoldseperately>
+            <enabledate>2019-10-10T14:48:00-07:00</enabledate>
+            <minorderqty>1</minorderqty>
+            <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+            <orderlimit>0</orderlimit>
+        </availability>
+        <attributes/>
+        <skus>
+            <sku guid="834c3e3e-aa9a-4d62-b304-56454fdeafb6">
+                <code>bundleWithMultiplePhysicalItems_sku</code>
+                <shippable enabled="true">
+                    <weight units="KG">0</weight>
+                    <width units="CM">0</width>
+                    <length units="CM">0</length>
+                    <height units="CM">0</height>
+                </shippable>
+                <digitalasset enabled="false"/>
+            </sku>
+        </skus>
+        <seo>
+            <url>
+                <value language="fr_CA"/>
+                <value language="fr"/>
+                <value language="en"/>
+                <value language="en_US"/>
+            </url>
+            <title>
+                <value language="fr_CA"/>
+                <value language="fr"/>
+                <value language="en"/>
+                <value language="en_US"/>
+            </title>
+            <keywords>
+                <value language="fr_CA"/>
+                <value language="fr"/>
+                <value language="en"/>
+                <value language="en_US"/>
+            </keywords>
+            <description>
+                <value language="fr_CA"/>
+                <value language="fr"/>
+                <value language="en"/>
+                <value language="en_US"/>
+            </description>
+        </seo>
+    </product>
+    <product>
+        <code>physicalFreeProduct</code>
+        <name>
+            <value language="fr_CA"/>
+            <value language="en">physicalFreeProduct</value>
+        </name>
+        <type>Phones</type>
+        <taxcode>NONE</taxcode>
+        <brand>Samsung</brand>
+        <availability>
+            <storevisible>true</storevisible>
+            <notsoldseperately>false</notsoldseperately>
+            <enabledate>2013-08-15T10:28:38.832-07:00</enabledate>
+            <minorderqty>1</minorderqty>
+            <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+            <orderlimit>0</orderlimit>
+        </availability>
+        <attributes>
+            <attribute key="description">
+                <value language="en">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</value>
+            </attribute>
+            <attribute key="M0001">
+                <value language="en">physicalProduct.txt</value>
+                <value>physicalProduct.txt</value>
+            </attribute>
+            <attribute key="M0002">
+                <value language="en">Black</value>
+                <value>noir</value>
+            </attribute>
+            <attribute key="fullsize_image">
+                <value>physicalProduct.jpg</value>
+                <value language="en">physicalProduct.jpg</value>
+            </attribute>
+        </attributes>
+        <skus>
+            <sku guid="555BC18F-C410-4E87-9CDE-BF726107BAB9">
+                <code>physicalFreeProduct_sku</code>
+                <shippable enabled="true">
+                    <weight units="KG">0</weight>
+                    <width units="CM">0</width>
+                    <length units="CM">0</length>
+                    <height units="CM">0</height>
+                </shippable>
+                <digitalasset enabled="false"/>
+            </sku>
+        </skus>
+        <seo>
+            <url>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </url>
+            <title>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </title>
+            <keywords>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </keywords>
+            <description>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </description>
+        </seo>
+    </product>
+    <product>
+        <code>physicalPreOrderProduct</code>
+        <name>
+            <value language="fr_CA"/>
+            <value language="en">physicalPreOrderProduct</value>
+        </name>
+        <type>Phones</type>
+        <taxcode>GOODS</taxcode>
+        <brand>Samsung</brand>
+        <availability>
+            <storevisible>true</storevisible>
+            <notsoldseperately>false</notsoldseperately>
+            <enabledate>2013-08-15T10:07:00-07:00</enabledate>
+            <minorderqty>1</minorderqty>
+            <availabilityrule>AVAILABLE_FOR_PRE_ORDER</availabilityrule>
+            <orderlimit>0</orderlimit>
+            <expectedreleasedate>2040-12-25T00:00:00-08:00</expectedreleasedate>
+        </availability>
+        <attributes/>
+        <skus>
+            <sku guid="399101d3-e37e-452b-8527-68f249ae979a">
+                <code>physicalPreOrderProduct_sku</code>
+                <shippable enabled="true">
+                    <weight units="KG">0</weight>
+                    <width units="CM">0</width>
+                    <length units="CM">0</length>
+                    <height units="CM">0</height>
+                </shippable>
+                <digitalasset enabled="false"/>
+            </sku>
+        </skus>
+        <seo>
+            <url>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </url>
+            <title>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </title>
+            <keywords>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </keywords>
+            <description>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </description>
+        </seo>
+    </product>
+    <product>
+        <code>physicalBackOrderProduct</code>
+        <name>
+            <value language="fr_CA"/>
+            <value language="en">physicalBackOrderProduct</value>
+        </name>
+        <type>Phones</type>
+        <taxcode>GOODS</taxcode>
+        <brand>Samsung</brand>
+        <availability>
+            <storevisible>true</storevisible>
+            <notsoldseperately>false</notsoldseperately>
+            <enabledate>2011-11-25T17:28:08-08:00</enabledate>
+            <minorderqty>1</minorderqty>
+            <availabilityrule>AVAILABLE_FOR_BACK_ORDER</availabilityrule>
+            <orderlimit>0</orderlimit>
+        </availability>
+        <attributes/>
+        <skus>
+            <sku guid="0b932bf9-e755-4285-9e39-8b99775c5b39">
+                <code>physicalBackOrderProduct_sku</code>
+                <shippable enabled="true">
+                    <weight units="KG">0</weight>
+                    <width units="CM">0</width>
+                    <length units="CM">0</length>
+                    <height units="CM">0</height>
+                </shippable>
+                <digitalasset enabled="false"/>
+            </sku>
+        </skus>
+        <seo>
+            <url>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </url>
+            <title>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </title>
+            <keywords>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </keywords>
+            <description>
+                <value language="fr_CA"/>
+                <value language="en"/>
+            </description>
+        </seo>
+    </product>
 </products>

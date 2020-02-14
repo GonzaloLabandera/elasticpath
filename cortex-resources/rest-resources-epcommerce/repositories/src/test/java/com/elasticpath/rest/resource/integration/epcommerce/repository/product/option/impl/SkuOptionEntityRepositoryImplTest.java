@@ -8,11 +8,11 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
@@ -27,7 +27,6 @@ public class SkuOptionEntityRepositoryImplTest {
 	private static final String CANNOT_FIND_OPTION_VALUE_MESSAGE = "Cannot find option value.";
 	private static final String SKU_OPTION_NAME_KEY = "SKU_OPTION_NAME_KEY";
 	private static final String SKU_OPTION_VALUE_KEY = "SKU_OPTION_VALUE_KEY";
-	private static final String ALTERNATE_SKU_OPTION_NAME_KEY = "ALTERNATE_SKU_OPTION_NAME_KEY";
 
 	@Mock
 	private SkuOptionService skuOptionService;
@@ -36,9 +35,6 @@ public class SkuOptionEntityRepositoryImplTest {
 	private ReactiveAdapterImpl reactiveAdapter;
 
 	private SkuOptionRepositoryImpl skuOptionRepository;
-
-	@Mock
-	private SkuOption skuOption;
 
 	@Mock
 	SkuOptionValue skuOptionValue;
@@ -53,9 +49,7 @@ public class SkuOptionEntityRepositoryImplTest {
 	 */
 	@Test
 	public void testFindSkuOptionByValueKey() {
-		when(skuOptionService.findOptionValueByKey(SKU_OPTION_VALUE_KEY)).thenReturn(skuOptionValue);
-		when(skuOptionValue.getSkuOption()).thenReturn(skuOption);
-		when(skuOption.getOptionKey()).thenReturn(SKU_OPTION_NAME_KEY);
+		when(skuOptionService.findOptionValueByOptionAndValueKeys(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY)).thenReturn(skuOptionValue);
 
 		skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY)
 				.test()
@@ -68,22 +62,7 @@ public class SkuOptionEntityRepositoryImplTest {
 	 */
 	@Test
 	public void testFindSkuOptionByValueKeyWhenNoSkuOptionValueFound() {
-		when(skuOptionService.findOptionValueByKey(SKU_OPTION_VALUE_KEY)).thenReturn(null);
-
-		skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY)
-				.test()
-				.assertError(ResourceOperationFailure.notFound(CANNOT_FIND_OPTION_VALUE_MESSAGE))
-				.assertNoValues();
-	}
-
-	/**
-	 * Test find sku option by value key when cannot match option value keys.
-	 */
-	@Test
-	public void testFindSkuOptionByValueKeyWhenCannotMatchOptionValueKeys() {
-		when(skuOptionService.findOptionValueByKey(SKU_OPTION_VALUE_KEY)).thenReturn(skuOptionValue);
-		when(skuOptionValue.getSkuOption()).thenReturn(skuOption);
-		when(skuOption.getOptionKey()).thenReturn(ALTERNATE_SKU_OPTION_NAME_KEY);
+		when(skuOptionService.findOptionValueByOptionAndValueKeys(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY)).thenReturn(null);
 
 		skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY)
 				.test()

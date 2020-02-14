@@ -163,51 +163,7 @@ address is for, but out of the box this API version does not support this functi
 				<name>address</name>
 				<description>
 					<![CDATA[The customer address. Address field names are based on the v.card specification. For more information on this specification, see [v.card](https://www.ietf.org/rfc/rfc2426.txt).]]></description>
-				<is-a>address-detail</is-a>
-			</property>
-			<entity-type>addresses.address</entity-type>
-		</entity>
-
-		<entity>
-			<name>address-detail</name>
-			<description><![CDATA[Describes a customers address]]></description>
-			<property>
-				<name>address-id</name>
-				<description><![CDATA[The internal address identifier.]]></description>
-				<internal/>
-				<string/>
-			</property>
-			<property>
-				<name>street-address</name>
-				<description><![CDATA[The street address.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>extended-address</name>
-				<description><![CDATA[Extra field for address information. This field is optional.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>locality</name>
-				<description><![CDATA[The city name.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>region</name>
-				<description><![CDATA[Valid region codes for this field can be retrieved using the [Geographies](geographies.md) Resource.
-]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>postal-code</name>
-				<description><![CDATA[Postal code or zip code.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>country-name</name>
-				<description><![CDATA[Valid country codes for this field can be retrieved using the [Geographies](geographies.md) Resource.
-]]></description>
-				<string/>
+				<is-a>base.address</is-a>
 			</property>
 			<property>
 				<name>phone-number</name>
@@ -219,6 +175,7 @@ address is for, but out of the box this API version does not support this functi
 				<description><![CDATA[The organization]]></description>
 				<string/>
 			</property>
+			<entity-type>addresses.address</entity-type>
 		</entity>
 
 	</family>

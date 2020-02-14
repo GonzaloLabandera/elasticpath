@@ -13,20 +13,21 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
-import javax.persistence.Query;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.apache.openjpa.persistence.OpenJPAQuery;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.persistence.api.FlushMode;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
+import com.elasticpath.persistence.api.Persistable;
 
 /**
  * Unit test for the {@code NamedQueryExecutor} class.
@@ -40,17 +41,18 @@ public class NamedQueryExecutorTest {
 	@InjectMocks private NamedQueryExecutor namedQueryExecutor;
 
 	@Mock private EntityManager entityManager;
-	@Mock private Query query;
-	@Mock private QueryUtil queryUtil;
-	@Mock private List persistables;
-
+	@Mock private OpenJPAQuery query;
+	@Mock private Persistable persistable;
+	private List<Persistable> persistables;
 
 	@Before
 	public void init() {
+		persistables = Lists.newArrayList(persistable);
+
 		namedQueryExecutor
 			.withQueryName(NAMED_QUERY);
 
-		when(queryUtil.createNamedQuery(entityManager, NAMED_QUERY)).thenReturn(query);
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
 	}
 
 	/**
@@ -59,20 +61,20 @@ public class NamedQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithArrayParameters() {
 
-		Object[] arrayParams = {"1", "2"};
+		when(query.getResultList()).thenReturn(persistables);
 
-		when(queryUtil.getResults(query)).thenReturn(persistables);
+		Object[] arrayParams = {"1", "2"};
 
 		List result = namedQueryExecutor
 			.withParameters(arrayParams)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
-		verify(queryUtil).setQueryParameters(query, arrayParams);
-		verify(queryUtil).setQueryParameters(query, (Map) null);
-		verify(queryUtil).getResults(query);
+		verify(query).getResultList();
+		verify(query).setParameters(arrayParams);
+
 		verifyNoMoreInteractions(query);
 	}
 
@@ -82,22 +84,22 @@ public class NamedQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithMapParameters() {
 
+		when(query.getResultList()).thenReturn(persistables);
+
 		Map<String, String> mapParams = Maps.newHashMap();
 		mapParams.put("param1", "val1");
 		mapParams.put("param2", "val2");
-
-		when(queryUtil.getResults(query)).thenReturn(persistables);
 
 		List result = namedQueryExecutor
 			.withParameters(mapParams)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
-		verify(queryUtil).setQueryParameters(query, (Object[]) null);
-		verify(queryUtil).setQueryParameters(query, mapParams);
-		verify(queryUtil).getResults(query);
+		verify(query).getResultList();
+		verify(query).setParameters(mapParams);
+
 		verifyNoMoreInteractions(query);
 	}
 
@@ -107,24 +109,20 @@ public class NamedQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithFlushMode() {
 
+		when(query.getResultList()).thenReturn(persistables);
+
 		FlushMode flushMode = FlushMode.AUTO;
 		FlushModeType flushModeType = FlushModeType.AUTO;
-
-		when(queryUtil.getResults(query)).thenReturn(persistables);
-		when(queryUtil.toFlushModeType(flushMode)).thenReturn(flushModeType);
 
 		List result = namedQueryExecutor
 			.withFlushMode(flushMode)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
-		verify(queryUtil).setQueryParameters(query, (Object[]) null);
-		verify(queryUtil).setQueryParameters(query, (Map) null);
-		verify(queryUtil).toFlushModeType(flushMode);
+		verify(query).getResultList();
 		verify(query).setFlushMode(flushModeType);
-		verify(queryUtil).getResults(query);
 
 		verifyNoMoreInteractions(query);
 	}
@@ -135,21 +133,19 @@ public class NamedQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithFirstResult() {
 
-		int fistResult = 1;
+		when(query.getResultList()).thenReturn(persistables);
 
-		when(queryUtil.getResults(query)).thenReturn(persistables);
+		int fistResult = 1;
 
 		List result = namedQueryExecutor
 			.withFirstResult(fistResult)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
+		verify(query).getResultList();
 		verify(query).setFirstResult(fistResult);
-		verify(queryUtil).setQueryParameters(query, (Object[]) null);
-		verify(queryUtil).setQueryParameters(query, (Map) null);
-		verify(queryUtil).getResults(query);
 
 		verifyNoMoreInteractions(query);
 	}
@@ -160,21 +156,44 @@ public class NamedQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithMaxResults() {
 
-		int maxResults = 1;
+		when(query.getResultList()).thenReturn(persistables);
 
-		when(queryUtil.getResults(query)).thenReturn(persistables);
+		int maxResults = 1;
 
 		List result = namedQueryExecutor
 			.withMaxResults(maxResults)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
+		verify(query).getResultList();
 		verify(query).setMaxResults(maxResults);
-		verify(queryUtil).setQueryParameters(query, (Object[]) null);
-		verify(queryUtil).setQueryParameters(query, (Map) null);
-		verify(queryUtil).getResults(query);
+
+		verifyNoMoreInteractions(query);
+	}
+
+	/**
+	 * Test whether a query is executed with a flush mode.
+	 */
+	@Test
+	public void shouldExecuteMultiResultQueryWithFlushModeAndIgnoreChanges() {
+
+		boolean ignoreChanges = true;
+
+		when(query.getResultList()).thenReturn(persistables);
+
+		List result = namedQueryExecutor
+			.withFlushMode(FlushMode.COMMIT)
+			.withIgnoreChanges(ignoreChanges)
+			.executeMultiResultQuery(entityManager);
+
+		assertThat(result)
+			.contains(persistable);
+
+		verify(query).getResultList();
+		verify(query).setIgnoreChanges(ignoreChanges);
+		verify(query).setFlushMode(FlushModeType.COMMIT);
 
 		verifyNoMoreInteractions(query);
 	}

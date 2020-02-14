@@ -16,7 +16,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.store.StoreService;
@@ -124,7 +124,7 @@ public class OpenEpStorePulldownDelegate extends Action implements IWorkbenchWin
 	@Override
 	public void init(final IWorkbenchWindow window) {
 		this.window = window;
-		storeList = ((StoreService) ServiceLocator.getService(ContextIdNames.STORE_SERVICE)).findAllCompleteStores();
+		storeList = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class).findAllCompleteStores();
 
 	}
 

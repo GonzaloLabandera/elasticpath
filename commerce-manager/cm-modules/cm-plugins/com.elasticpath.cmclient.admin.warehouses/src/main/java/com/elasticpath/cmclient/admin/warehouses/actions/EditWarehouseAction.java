@@ -12,7 +12,7 @@ import org.eclipse.osgi.util.NLS;
 import com.elasticpath.cmclient.admin.warehouses.AdminWarehousesMessages;
 import com.elasticpath.cmclient.admin.warehouses.dialogs.WarehouseDialog;
 import com.elasticpath.cmclient.admin.warehouses.views.WarehouseListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
 import com.elasticpath.cmclient.core.service.CatalogEventService;
@@ -47,7 +47,7 @@ public class EditWarehouseAction extends Action {
 	public void run() {
 		LOG.debug("EditWarehouse Action called."); //$NON-NLS-1$
 
-		WarehouseService warehouseService = (WarehouseService) ServiceLocator.getService(ContextIdNames.WAREHOUSE_SERVICE);
+		WarehouseService warehouseService = BeanLocator.getSingletonBean(ContextIdNames.WAREHOUSE_SERVICE, WarehouseService.class);
 
 		Warehouse selectedWarehouse = listView.getSelectedWarehouse();
 		Warehouse selectedWarehouseToEdit = (Warehouse) warehouseService.getObject(selectedWarehouse.getUidPk());

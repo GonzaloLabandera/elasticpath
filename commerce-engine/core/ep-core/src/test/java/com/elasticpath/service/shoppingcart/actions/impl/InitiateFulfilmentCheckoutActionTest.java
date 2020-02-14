@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
@@ -61,8 +61,6 @@ public class InitiateFulfilmentCheckoutActionTest {
 	}
 
 
-
-
 	@Test
 	public void verifyFulfilmentNotTriggeredWhenOnHold() {
 		final Order order = mock(Order.class);
@@ -82,9 +80,9 @@ public class InitiateFulfilmentCheckoutActionTest {
 				null,
 				null,
 				null,
+				false,
+				false,
 				null,
-				false,
-				false,
 				null
 		);
 		checkoutActionContext.setOrder(order);

@@ -179,7 +179,7 @@ public class SkuOptionImplTest {
 		LocalizedProperties localizedProperties = mock(LocalizedProperties.class);
 		final String skuOptionDisplayName = "skuOptionDisplayName";
 
-		when(elasticPath.getBean(ContextIdNames.LOCALIZED_PROPERTIES)).thenReturn(localizedProperties);
+		when(elasticPath.getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class)).thenReturn(localizedProperties);
 		when(localizedProperties.getValue(skuOptionDisplayName, CATALOG_DEFAULT_LOCALE)).thenReturn(DISPLAYNAME_DEFAULT_LOCALE);
 
 		if (includeOtherLocale) {

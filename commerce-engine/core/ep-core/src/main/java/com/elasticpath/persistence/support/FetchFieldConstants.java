@@ -39,8 +39,6 @@ public final class FetchFieldConstants {
 	/** field name. */
 	public static final String SKU_ATTRIBUTE_GROUP_ATTRIBUTES = "skuAttributeGroupAttributes";
 	/** field name. */
-	public static final String SKU_OPTIONS = "skuOptions";
-	/** field name. */
 	public static final String CART_ITEM_MODIFIER_GROUPS = "cartItemModifierGroups";
 	/** field name. */
 	public static final String GUID = "guid";

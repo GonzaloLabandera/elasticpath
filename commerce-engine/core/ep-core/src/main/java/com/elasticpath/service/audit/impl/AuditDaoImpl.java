@@ -6,6 +6,7 @@ package com.elasticpath.service.audit.impl;
 import java.util.Map;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.audit.BulkChangeOperation;
 import com.elasticpath.domain.audit.ChangeOperation;
 import com.elasticpath.domain.audit.ChangeTransaction;
@@ -34,45 +35,46 @@ public class AuditDaoImpl implements AuditDao {
 	private SettingValueProvider<Boolean> changeSetEnabledProvider;
 
 	@Override
-	public void persistDataChanged(final Persistable object, final String fieldName, final ChangeType changeType, 
+	public void persistDataChanged(final Persistable object, final String fieldName, final ChangeType changeType,
 			final String oldValue, final String newValue, final ChangeOperation operation) {
 
 		// Start a separate transaction for writing data changed records
 		Transaction transaction = getPersistenceEngine().getPersistenceSession().beginTransaction();
-		
-		DataChanged dataChanged = getBeanFactory().getBean("dataChanged");
+
+		DataChanged dataChanged = getBeanFactory().getPrototypeBean(ContextIdNames.DATA_CHANGED, DataChanged.class);
 		dataChanged.setObjectName(object.getClass().getName());
 		dataChanged.setObjectUid(object.getUidPk());
 		if (object instanceof Entity) {
 			dataChanged.setObjectGuid(((Entity) object).getGuid());
 		}
-		dataChanged.setFieldName(fieldName);		
+		dataChanged.setFieldName(fieldName);
 		dataChanged.setChangeType(changeType);
 		dataChanged.setChangeOperation(operation);
 		dataChanged.setFieldNewValue(newValue);
 		dataChanged.setFieldOldValue(oldValue);
-		
+
 		getPersistenceEngine().saveOrMerge(dataChanged);
 		transaction.commit();
 	}
 
 	@Override
 	public ChangeTransaction persistChangeSetTransaction(final String transactionId, final Object persistable, final Map<String, Object> metadata) {
-		ChangeTransaction csTransaction = getBeanFactory().getBean("changeTransaction");
+		ChangeTransaction csTransaction = getBeanFactory().getPrototypeBean(ContextIdNames.CHANGE_TRANSACTION,
+				ChangeTransaction.class);
 		csTransaction.setTransactionId(transactionId);
-		TimeService timeService = getBeanFactory().getBean("timeService");
+		TimeService timeService = getBeanFactory().getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		csTransaction.setChangeDate(timeService.getCurrentTime());
 
 		getPersistenceEngine().save(csTransaction);
-		
+
 		processMetadata(csTransaction, persistable, metadata);
-		
+
 		return csTransaction;
 	}
 
 	/**
 	 * Process any metadata that should be attached to the given transaction.
-	 * 
+	 *
 	 * @param csTransaction the transaction to process metadata for
 	 * @param persistable the object associated with the transaction
 	 * @param metadata metadata to process.
@@ -81,14 +83,14 @@ public class AuditDaoImpl implements AuditDao {
 		// change sets must be enabled for the audit service to associate change set GUIDs with change operations
 		if (isChangeSetsEnabled() && persistable != null) {
 			// if the persistable object is associated with a change set, record the change set GUID
-			ChangeSetService changeSetService = getBeanFactory().getBean("changeSetService");
+			ChangeSetService changeSetService = getBeanFactory().getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 			String changeSetGuid = changeSetService.findChangeSetGuid(persistable);
 			if (changeSetGuid != null) {
 				ChangeTransactionMetadata metadata1 = generateMetadata(csTransaction, "changeSetGuid", changeSetGuid);
 				getPersistenceEngine().save(metadata1);
 			}
 		}
-		
+
 		// the user GUID is available as meta-data in the audit service (set by the cm client)
 		// use it to record the userGuid associated with the change transaction
 		String userGuid = (String) metadata.get("userGuid");
@@ -100,15 +102,17 @@ public class AuditDaoImpl implements AuditDao {
 
 	/**
 	 * Generate a new <code>ChangeTransactionMetadata</code> object for the given transaction and key/value pair.
-	 * 
+	 *
 	 * @param csTransaction the transaction to associate with the metadata
 	 * @param metadataKey the metadata key
 	 * @param metadataValue the metadata value
 	 * @return a new <code>ChangeTransactionMetadata</code> object
 	 */
-	protected ChangeTransactionMetadata generateMetadata(final ChangeTransaction csTransaction, 
+	protected ChangeTransactionMetadata generateMetadata(final ChangeTransaction csTransaction,
 			final String metadataKey, final String metadataValue) {
-		ChangeTransactionMetadata csTransactionMetadata = getBeanFactory().getBean("changeTransactionMetadata");
+		ChangeTransactionMetadata csTransactionMetadata =
+				getBeanFactory().getPrototypeBean(ContextIdNames.CHANGE_TRANSACTION_METADATA,
+						ChangeTransactionMetadata.class);
 		csTransactionMetadata.setChangeTransaction(csTransaction);
 		csTransactionMetadata.setMetadataKey(metadataKey);
 		csTransactionMetadata.setMetadataValue(metadataValue);
@@ -125,9 +129,9 @@ public class AuditDaoImpl implements AuditDao {
 	}
 
 	@Override
-	public ChangeOperation persistSingleChangeOperation(final Persistable object, final ChangeType type, final ChangeTransaction csTransaction, 
+	public ChangeOperation persistSingleChangeOperation(final Persistable object, final ChangeType type, final ChangeTransaction csTransaction,
 			final int index) {
-		SingleChangeOperation operation = getBeanFactory().getBean("singleChangeOperation");
+		SingleChangeOperation operation = getBeanFactory().getPrototypeBean(ContextIdNames.SINGLE_CHANGE_OPERATION, SingleChangeOperation.class);
 		operation.setChangeTransaction(csTransaction);
 		operation.setRootObjectName(object.getClass().getName());
 		operation.setRootObjectUid(object.getUidPk());
@@ -136,7 +140,7 @@ public class AuditDaoImpl implements AuditDao {
 		}
 		operation.setChangeType(type);
 		operation.setOperationOrder(index);
-		
+
 		getPersistenceEngine().save(operation);
 		return operation;
 	}
@@ -144,13 +148,13 @@ public class AuditDaoImpl implements AuditDao {
 	@Override
 	public ChangeOperation persistBulkChangeOperation(final String queryString, final String parameters, final ChangeType changeType,
 			final ChangeTransaction csTransaction, final int index) {
-		BulkChangeOperation operation = getBeanFactory().getBean("bulkChangeOperation");
+		BulkChangeOperation operation = getBeanFactory().getPrototypeBean(ContextIdNames.BULK_CHANGE_OPERATION, BulkChangeOperation.class);
 		operation.setChangeTransaction(csTransaction);
 		operation.setChangeType(changeType);
 		operation.setOperationOrder(index);
 		operation.setQueryString(normalizeWhitespace(queryString));
 		operation.setParameters(parameters);
-		
+
 		getPersistenceEngine().save(operation);
 		return operation;
 	}
@@ -162,7 +166,7 @@ public class AuditDaoImpl implements AuditDao {
 
 	/**
 	 * Set the persistence engine.
-	 * 
+	 *
 	 * @param persistenceEngine the persistenceEngine to set
 	 */
 	public void setPersistenceEngine(final JpaPersistenceEngine persistenceEngine) {
@@ -171,7 +175,7 @@ public class AuditDaoImpl implements AuditDao {
 
 	/**
 	 * Get the persistence engine.
-	 * 
+	 *
 	 * @return the persistenceEngine
 	 */
 	public JpaPersistenceEngine getPersistenceEngine() {
@@ -180,7 +184,7 @@ public class AuditDaoImpl implements AuditDao {
 
 	/**
 	 * Set the bean factory.
-	 * 
+	 *
 	 * @param beanFactory the beanFactory to set
 	 */
 	public void setBeanFactory(final BeanFactory beanFactory) {
@@ -189,7 +193,7 @@ public class AuditDaoImpl implements AuditDao {
 
 	/**
 	 * Get the bean factory.
-	 * 
+	 *
 	 * @return the beanFactory
 	 */
 	public BeanFactory getBeanFactory() {

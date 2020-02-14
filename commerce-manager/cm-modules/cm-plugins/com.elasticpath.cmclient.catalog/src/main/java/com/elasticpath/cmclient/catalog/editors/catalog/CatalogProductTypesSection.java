@@ -30,7 +30,7 @@ import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapte
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.catalog.wizards.product.ProductTypeAddEditWizard;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
@@ -52,8 +52,8 @@ import com.elasticpath.service.changeset.ChangeSetMemberAction;
 public class CatalogProductTypesSection extends AbstractPolicyAwareEpTableSection<ProductType> {
 
 	private static final String CATALOG_PRODUCT_TYPES_TABLE = "Catlog Product Types"; //$NON-NLS-1$
-	private final ProductTypeService productTypeService = ServiceLocator.getService(ContextIdNames.PRODUCT_TYPE_SERVICE);
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ProductTypeService productTypeService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_TYPE_SERVICE, ProductTypeService.class);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private List<ProductType> catalogProductTypes;
 	private ProductTypeAddEditWizard addEditWizard;

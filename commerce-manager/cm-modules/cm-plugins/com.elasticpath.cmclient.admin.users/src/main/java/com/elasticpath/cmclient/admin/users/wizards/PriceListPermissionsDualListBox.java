@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.AbstractEpDualListBoxControl;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -144,7 +144,7 @@ public class PriceListPermissionsDualListBox extends AbstractEpDualListBoxContro
 	 */
 	private PriceListService getPriceListService() {
 		if (this.priceListService == null) {
-			this.priceListService = (PriceListService) ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+			this.priceListService = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 		}
 		
 		return this.priceListService;

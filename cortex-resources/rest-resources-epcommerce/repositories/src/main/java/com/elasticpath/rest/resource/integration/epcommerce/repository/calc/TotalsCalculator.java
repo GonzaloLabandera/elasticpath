@@ -6,7 +6,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.calc;
 import io.reactivex.Single;
 
 import com.elasticpath.money.Money;
-import com.elasticpath.rest.command.ExecutionResult;
 
 /**
  * Performs calculations on the shopping cart.
@@ -31,24 +30,11 @@ public interface TotalsCalculator {
 
 	/**
 	 * Calculates the total without tax for the given cart order.
-	 *
-	 * Use {@link #calculateSubTotalForCartOrderSingle} instead
-	 *
 	 * @param storeCode the store code.
 	 * @param cartOrderGuid the cart order to total
-	 * @return the execution result containing the total or an error
-	 * @deprecated Use {@link TotalsCalculator#calculateSubTotalForCartOrderSingle} instead
+	 * @return the total
 	 */
-	@Deprecated
-	ExecutionResult<Money> calculateSubTotalForCartOrder(String storeCode, String cartOrderGuid);
-
-	/**
-	 * Calculates the total without tax for the given cart order.
-	 * @param storeCode the store code.
-	 * @param cartOrderGuid the cart order to total
-	 * @return the execution result containing the total or an error
-	 */
-	Single<Money> calculateSubTotalForCartOrderSingle(String storeCode, String cartOrderGuid);
+	Single<Money> calculateSubTotalForCartOrder(String storeCode, String cartOrderGuid);
 
 	/**
 	 * Calculates the total for a line item.

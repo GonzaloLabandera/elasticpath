@@ -359,7 +359,7 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 	 * @return an {@link OrderSku}.
 	 */
 	protected OrderSku createSimpleOrderSku() {
-		return beanFactory.getBean(ContextIdNames.ORDER_SKU);
+		return beanFactory.getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 	}
 
 	private List<ShoppingItem> createSortedConstituentShoppingItems(final ShoppingItem root, final ShoppingCartTaxSnapshot cartTaxSnapshot) {

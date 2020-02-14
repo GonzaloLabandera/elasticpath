@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.store.promotions.wizard;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.wizard.AbstractEpWizard;
 import com.elasticpath.cmclient.store.promotions.PromotionsImageRegistry;
 import com.elasticpath.cmclient.store.promotions.PromotionsMessages;
@@ -31,9 +31,8 @@ public class NewCatalogPromotionWizard extends AbstractEpWizard<Rule> {
 	public NewCatalogPromotionWizard() {
 		super(PromotionsMessages.get().NewCatalogPromotionWizard_Title, null, PromotionsImageRegistry
 				.getImage(PromotionsImageRegistry.PROMOTION_CATALOG_CREATE));
-		model = ServiceLocator.getService(ContextIdNames.PROMOTION_RULE);
-		final RuleSetService ruleSetService = ServiceLocator.getService(
-				ContextIdNames.RULE_SET_SERVICE);
+		model = BeanLocator.getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
+		final RuleSetService ruleSetService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
 		model.setRuleSet(ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO));
 		model.setEnabled(true);
 	}
@@ -53,7 +52,7 @@ public class NewCatalogPromotionWizard extends AbstractEpWizard<Rule> {
 	
 	
 	private boolean ruleNameExists(final String ruleName) {
-		final RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		try {
 			final Rule rule = ruleService.findByName(ruleName);
 			if (rule != null) {

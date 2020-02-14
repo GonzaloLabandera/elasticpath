@@ -20,9 +20,11 @@ import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
@@ -32,7 +34,9 @@ import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
-/** Test cases for <code>PromotionRuleImpl</code>. */
+/**
+ * Test cases for <code>PromotionRuleImpl</code>.
+ */
 public class PromotionRuleImplTest {
 
 	private static final String CAD = "CAD";
@@ -47,7 +51,7 @@ public class PromotionRuleImplTest {
 
 	/**
 	 * Prepare for each test.
-	 * 
+	 *
 	 * @throws Exception on error
 	 */
 	@Before
@@ -75,22 +79,24 @@ public class PromotionRuleImplTest {
 
 	/**
 	 * Creates a test promotion rule.
+	 *
 	 * @return a promotion rule
 	 */
 	public Rule getTestPromotionRule() {
 		PromotionRuleImpl promotionRuleImpl = new PromotionRuleImpl() {
 			private static final long serialVersionUID = -8201010936030693769L;
 			private final Set<RuleAction> actions = new HashSet<>();
+
 			@Override
 			public void addAction(final RuleAction ruleAction) { //NOPMD
 				this.actions.add(ruleAction);
 			}
-			
+
 			@Override
 			public void removeAction(final RuleAction ruleAction) {
 				this.actions.remove(ruleAction);
 			}
-			
+
 			@Override
 			public Set<RuleAction> getActions() {
 				return this.actions;
@@ -109,18 +115,18 @@ public class PromotionRuleImplTest {
 		RuleCondition currencyCondition = new CartCurrencyConditionImpl();
 		currencyCondition.addParameter(new RuleParameterImpl(RuleParameter.CURRENCY_KEY, CAD));
 		promotionRuleImpl.addCondition(currencyCondition);
-				
+
 		// Create an action
 		RuleAction discountAction = new CatalogCurrencyAmountDiscountActionImpl();
 		discountAction.addParameter(new RuleParameterImpl(RuleParameter.DISCOUNT_AMOUNT_KEY, "100"));
 		discountAction.addParameter(new RuleParameterImpl(RuleParameter.CURRENCY_KEY, CAD));
 		discountAction.setRuleId(PROMOTION_RULE_UID);
 		promotionRuleImpl.addAction(discountAction);
-		
+
 		RuleSet ruleSetImpl = new RuleSetImpl();
 		ruleSetImpl.setScenario(RuleScenarios.CATALOG_BROWSE_SCENARIO);
-		promotionRuleImpl.setRuleSet(ruleSetImpl);		
-		
+		promotionRuleImpl.setRuleSet(ruleSetImpl);
+
 		return promotionRuleImpl;
 	}
 
@@ -130,35 +136,35 @@ public class PromotionRuleImplTest {
 	@Test
 	public void testGetRuleCode() {
 		String code = promotionRuleImpl.getRuleCode();
-		
+
 		assertTrue(code.indexOf("delegate") > 0);
 		assertTrue(code.indexOf("cart") > 0);
 		assertTrue(code.indexOf("product") > 0);
 		assertTrue(code.indexOf("end") > 0);
-		
+
 		promotionRuleImpl.getRuleSet().setScenario(RuleScenarios.CART_SCENARIO);
 		code = promotionRuleImpl.getRuleCode();
 		assertEquals(-1, code.indexOf("Product ( available == true )"));
 	}
-	
+
 	/**
 	 * Test that the rule uid is being set properly.
 	 */
 	@Test
 	public void testTraceability() {
 		assertTrue(promotionRuleImpl.getActions().size() > 0);
-		
+
 		for (RuleAction currAction : promotionRuleImpl.getActions()) {
 			final String currActionRuleCode = currAction.getRuleCode();
 			assertTrue(currActionRuleCode.indexOf(String.valueOf(PROMOTION_RULE_UID)) > 0);
 		}
-		
+
 //		for (Iterator ruleActionIter = promotionRuleImpl.getActions().iterator(); ruleActionIter.hasNext();) {
 //			RuleAction currAction = (RuleAction) ruleActionIter.next();
 //			assertTrue(currAction.getRuleCode().indexOf(PROMOTION_RULE_UID + "") > 0);
 //		}
 	}
-	
+
 	/**
 	 * Test method for 'com.elasticpath.domain.rules.impl.PromotionRuleImpl.getRuleCode()'.
 	 */
@@ -169,7 +175,7 @@ public class PromotionRuleImplTest {
 			promotionRuleImpl.removeAction(currRuleAction);
 		}
 		assertEquals(0, promotionRuleImpl.getActions().size());
-		
+
 		promotionRuleImpl.getRuleCode();
 	}
 
@@ -181,10 +187,10 @@ public class PromotionRuleImplTest {
 	public void testConditionOr() {
 		promotionRuleImpl.setConditionOperator(Rule.OR_OPERATOR);
 		String code = promotionRuleImpl.getRuleCode();
-		assertTrue(code.indexOf("||") > 0);		
+		assertTrue(code.indexOf("||") > 0);
 	}
-	
-	
+
+
 	/**
 	 * Test method for 'com.elasticpath.domain.rules.impl.AbstractRuleImpl'.
 	 */
@@ -192,7 +198,7 @@ public class PromotionRuleImplTest {
 	public void testValidDiscountAmount() {
 		promotionRuleImpl.validate();
 	}
-	
+
 	/**
 	 * Test method for 'com.elasticpath.domain.rules.impl.AbstractRuleImpl'.
 	 */
@@ -213,7 +219,7 @@ public class PromotionRuleImplTest {
 
 		promotionRuleImpl.validate();
 	}
-  
+
 	/**
 	 * Test method for 'com.elasticpath.domain.rules.impl.AbstractRuleImpl'.
 	 */
@@ -232,7 +238,7 @@ public class PromotionRuleImplTest {
 
 		promotionRuleImpl.validate();
 	}
-	
+
 	/**
 	 * Test method for 'com.elasticpath.domain.rules.impl.AbstractRuleImpl'.
 	 */
@@ -252,7 +258,7 @@ public class PromotionRuleImplTest {
 
 		promotionRuleImpl.validate();
 	}
-	
+
 	/**
 	 * Test that the display name gets the correct localized name and does not fall back to
 	 * the marketing name.
@@ -263,9 +269,12 @@ public class PromotionRuleImplTest {
 		final RuleLocalizedPropertyValueImpl ruleLocalizedPropertyValueImpl = new RuleLocalizedPropertyValueImpl();
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.UTILITY); will(returnValue(new UtilityImpl()));
-				oneOf(beanFactory).getBean(ContextIdNames.LOCALIZED_PROPERTIES); will(returnValue(localizedPropertiesImpl));
-				oneOf(beanFactory).getBean(ContextIdNames.RULE_LOCALIZED_PROPERTY_VALUE); will(returnValue(ruleLocalizedPropertyValueImpl));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.UTILITY, Utility.class);
+				will(returnValue(new UtilityImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
+				will(returnValue(localizedPropertiesImpl));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.RULE_LOCALIZED_PROPERTY_VALUE, LocalizedPropertyValue.class);
+				will(returnValue(ruleLocalizedPropertyValueImpl));
 			}
 		});
 

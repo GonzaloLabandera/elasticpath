@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableList;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.commons.exception.InvalidBusinessStateException;
+import com.elasticpath.base.exception.structured.InvalidBusinessStateException;
 
 /**
  * This exception is thrown when a an order cannot be fulfilled due to product availability.

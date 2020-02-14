@@ -12,7 +12,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.layout.GridData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -63,7 +63,7 @@ public class ConfigureCustomerImportJobPage extends AbstractConfigureImportJobPa
 		if (getImportJob().isPersisted()) {
 			storeCombo.setEnabled(false);
 		}
-		StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		List<Store> stores = storeService.findAllStores();
 		AuthorizationService.getInstance().filterAuthorizedStores(stores);
 

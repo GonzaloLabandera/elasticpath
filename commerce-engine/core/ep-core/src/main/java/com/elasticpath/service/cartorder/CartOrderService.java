@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2011.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.cartorder;
 
@@ -53,15 +53,6 @@ public interface CartOrderService {
 	 * @return The found Address or <code>null</code> if it is not set.
 	 */
 	Address getShippingAddress(CartOrder cartOrder);
-
-	/**
-	 * Deleting a CartOrder will not delete its Addresses or ShoppingCart.
-	 * Note: deleting an Address will not delete any CartOrders referring to it.
-	 * Note: deleting a ShoppingCart will delete the CartOrder referring to it.
-	 *
-	 * @param cartOrder The CartOrder to remove.
-	 */
-	void remove(CartOrder cartOrder);
 
 	/**
 	 * Saves or updates the given CartOrder.

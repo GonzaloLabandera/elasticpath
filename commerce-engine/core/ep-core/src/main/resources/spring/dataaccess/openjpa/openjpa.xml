@@ -221,6 +221,8 @@
 
 	<util:list id="postLoadStrategyBeanIds">
 		<value>customerPostLoadStrategy</value>
+		<value>productTypePostLoadStrategy</value>
+		<value>productSkuOptionValuePostLoadStrategy</value>
 	</util:list>
 
 	<util:list id="persistenceEngineOperationListeners">
@@ -254,7 +256,6 @@
 
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 		<property name="queryReader" ref="queryReader"/>
-		<property name="queryUtil" ref="queryUtil"/>
 	</bean>
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">

@@ -1,32 +1,39 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2007
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.test.persister;
 
+import static com.elasticpath.commons.constants.ContextIdNames.CART_ORDER_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.CHECKOUT_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SESSION_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_CONFIGURATION_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.PRICING_SNAPSHOT_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.SHOPPER_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART;
+import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.TAX_SNAPSHOT_SERVICE;
+
 import java.util.Currency;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.PaymentToken;
-import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.service.OrderConfigurationService;
+import com.elasticpath.service.cartorder.CartOrderService;
+import com.elasticpath.service.customer.CustomerSessionService;
+import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
@@ -42,18 +49,28 @@ public class OrderTestPersister {
 
 	private final ShoppingCartService shoppingCartService;
 
+	private final ShopperService shopperService;
+
+	private final CustomerSessionService customerSessionService;
+
 	private final PricingSnapshotService pricingSnapshotService;
 
 	private final TaxSnapshotService taxSnapshotService;
 
 	private final TestDataPersisterFactory persisterFactory;
 
+	private final CartOrderService cartOrderService;
+
 	public OrderTestPersister(final BeanFactory beanFactory, final TestDataPersisterFactory persisterFactory) {
 		this.beanFactory = beanFactory;
-		shoppingCartService = beanFactory.getBean(ContextIdNames.SHOPPING_CART_SERVICE);
 		this.persisterFactory = persisterFactory;
-		pricingSnapshotService = beanFactory.getBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
-		taxSnapshotService = beanFactory.getBean(ContextIdNames.TAX_SNAPSHOT_SERVICE);
+
+		shoppingCartService = beanFactory.getSingletonBean(SHOPPING_CART_SERVICE, ShoppingCartService.class);
+		shopperService = beanFactory.getSingletonBean(SHOPPER_SERVICE, ShopperService.class);
+		customerSessionService = beanFactory.getSingletonBean(CUSTOMER_SESSION_SERVICE, CustomerSessionService.class);
+		pricingSnapshotService = beanFactory.getSingletonBean(PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
+		taxSnapshotService = beanFactory.getSingletonBean(TAX_SNAPSHOT_SERVICE, TaxSnapshotService.class);
+		cartOrderService = beanFactory.getSingletonBean(CART_ORDER_SERVICE, CartOrderService.class);
 	}
 
 	/**
@@ -67,10 +84,10 @@ public class OrderTestPersister {
 	 * @return the persisted shopping cart
 	 */
 	public ShoppingCart persistEmptyShoppingCart(final Address billingAddress, final Address shippingAddress,
-			final CustomerSession customerSession, final ShippingOption shippingOption, final Store store) {
+												 final CustomerSession customerSession, final ShippingOption shippingOption, final Store store) {
 		customerSession.setCurrency(Currency.getInstance(Locale.US));
 
-		final ShoppingCart shoppingCart = beanFactory.getBean(ContextIdNames.SHOPPING_CART);
+		final ShoppingCart shoppingCart = beanFactory.getPrototypeBean(SHOPPING_CART, ShoppingCart.class);
 		shoppingCart.initialize();
 		shoppingCart.setBillingAddress(billingAddress);
 		shoppingCart.setShippingAddress(shippingAddress);
@@ -79,24 +96,9 @@ public class OrderTestPersister {
 		if (shippingAddress != null) {
 			shoppingCart.setSelectedShippingOption(shippingOption);
 		}
-		return shoppingCartService.saveOrUpdate(shoppingCart);
-	}
-
-	/**
-	 * Create an order payment object.
-	 *
-	 * @param customer     the customer whose payment this is
-	 * @param creditCard the credit card to use for payment
-	 * @return an order payment object
-	 */
-	public OrderPayment createOrderPayment(final Customer customer, final PaymentToken paymentToken) {
-		OrderPayment orderPayment = beanFactory.getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setCreatedDate(new Date());
-		orderPayment.setCurrencyCode("USD");
-		orderPayment.setEmail(customer.getEmail());
-		orderPayment.setDisplayValue(paymentToken.getDisplayValue());
-		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		return orderPayment;
+		final ShoppingCart persistedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
+		persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(persistedShoppingCart);
+		return persistedShoppingCart;
 	}
 
 	/**
@@ -150,19 +152,20 @@ public class OrderTestPersister {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
+		persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(shoppingCart);
+
 		final boolean throwExceptions = false;
-		getCheckoutService().checkout(shoppingCart, taxSnapshot, customerSession, createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
-				.build()), throwExceptions);
+		getCheckoutService().checkout(shoppingCart, taxSnapshot, customerSession, throwExceptions);
 
 		// only one order should have been created by the checkout service
 		return shoppingCart.getCompletedOrder();
 	}
 
 	OrderConfigurationService getOrderConfigurationService() {
-		return beanFactory.getBean("orderConfigurationService");
+		return beanFactory.getSingletonBean(ORDER_CONFIGURATION_SERVICE, OrderConfigurationService.class);
 	}
 
 	protected CheckoutService getCheckoutService() {
-		return beanFactory.getBean(ContextIdNames.CHECKOUT_SERVICE);
+		return beanFactory.getSingletonBean(CHECKOUT_SERVICE, CheckoutService.class);
 	}
 }

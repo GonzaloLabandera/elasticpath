@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006-2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.order;
 
@@ -176,35 +176,6 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	Set<OrderSku> getOrderSkus();
 
 	/**
-	 * Get the payment(s) for this order.
-	 *
-	 * @return a set of <code>OrderPayment</code> objects
-	 */
-	Set<OrderPayment> getOrderPayments();
-
-	/**
-	 * Convenience method to retrieve a default order payment for this order. This should only be used when only a single payment is supported for a
-	 * single order.
-	 *
-	 * @return the first order payment for this Order
-	 */
-	OrderPayment getOrderPayment();
-
-	/**
-	 * Set the payment(s) for this order.
-	 *
-	 * @param orderPayments a set of <code>OrderPayment</code> objects.
-	 */
-	void setOrderPayments(Set<OrderPayment> orderPayments);
-
-	/**
-	 * Add a payment to the order.
-	 *
-	 * @param orderPayment an <code>OrderPayment</code>
-	 */
-	void addOrderPayment(OrderPayment orderPayment);
-
-	/**
 	 * Set the google order number that is used by google checkout customers to reference their order.
 	 *
 	 * @param externalOrderNumber the order number, which may include characters.
@@ -277,18 +248,18 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	BigDecimal getTotal();
 
 	/**
-	 * retrieve total amount by redeem the GiftCertificates.
-	 *
-	 * @return the total amount by redeem the GiftCertificates
-	 */
-	BigDecimal getTotalGiftCertificateDiscount();
-
-	/**
 	 * Get the sub total of all items in the cart after shipping, promotions, etc.
 	 *
 	 * @return a <code>Money</code> object representing the total
 	 */
 	Money getTotalMoney();
+
+	/**
+	 * Get the total of the order minus the total amounts for cancelled shipments, etc.
+	 *
+	 * @return a <code>Money</code> object representing the adjusted total.
+	 */
+	Money getAdjustedOrderTotalMoney();
 
 	/**
 	 * Get the order subtotal of all items in the cart.
@@ -331,27 +302,6 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 * @return a <code>Money</code> object representing the total tax
 	 */
 	Money getTotalTaxMoney();
-
-	/**
-	 * Return the paid amount for this order.
-	 *
-	 * @return the paid amount for this order.
-	 */
-	BigDecimal getPaidAmount();
-
-	/**
-	 * Return the credit amount for this order.
-	 *
-	 * @return the credit amount for this order.
-	 */
-	BigDecimal getCreditAmount();
-
-	/**
-	 * Return the balance amount for this order.
-	 *
-	 * @return the balance amount for this order.
-	 */
-	BigDecimal getBalanceAmount();
 
 	/**
 	 * Get the returns associated with this order.
@@ -428,20 +378,6 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	OrderSku getOrderSkuByGuid(String guid);
 
 	/**
-	 * Get the balance money of all items in the cart.
-	 *
-	 * @return a <code>Money</code> object representing the balance money
-	 */
-	Money getBalanceMoney();
-
-	/**
-	 * Get the paid amount money of all items in the cart.
-	 *
-	 * @return a <code>Money</code> object representing the paid amount money
-	 */
-	Money getPaidAmountMoney();
-
-	/**
 	 * Get the before-tax total shipping cost for this order.
 	 *
 	 * @return a <code>Money</code> representing the before-tax total shipping cost
@@ -471,12 +407,14 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 
 	/**
 	 * Sets the tax exemption to apply to this order.
+	 *
 	 * @param taxExemption the tax exemption being applied to this order
 	 */
 	void setTaxExemption(TaxExemption taxExemption);
 
 	/**
 	 * Get this order's shipment with a given number.
+	 *
 	 * @param shipmentNumber the shipment number to get
 	 * @return the shipment with the given number, or null if no shipment with that number is found
 	 */
@@ -528,6 +466,7 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	/**
 	 * Determines whether or not this order is in a state that allows it
 	 * to be cancelled.
+	 *
 	 * @return true if this order can be cancelled, false if not.
 	 */
 	boolean isCancellable();
@@ -535,6 +474,7 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	/**
 	 * Determines whether or not this order is in a state that allows it
 	 * to be put on hold.
+	 *
 	 * @return true if this order can be put on hold, false if not.
 	 */
 	boolean isHoldable();
@@ -588,19 +528,21 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 * Sets the order status to AWAITING_EXCHANGE.
 	 * This method should be called by the OrderService only.
 	 */
-	void awaitExchnageCompletionOrder();
+	void awaitExchangeCompletionOrder();
 
 	/**
 	 * Determines whether or not this order is the exchange order.
+	 *
 	 * @return the exchangeOrder
 	 */
 	Boolean isExchangeOrder();
 
 	/**
 	 * Sets exchange order flag.
-	 * @param exchnageOrder the exchnageOrder to set
+	 *
+	 * @param exchangeOrder the exchangeOrder to set
 	 */
-	void setExchangeOrder(Boolean exchnageOrder);
+	void setExchangeOrder(Boolean exchangeOrder);
 
 	/**
 	 * If this order is exchange order, the method returns associated exchange.
@@ -612,13 +554,14 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	/**
 	 * Set exchange for this exchange order.
 	 *
-	 * @param exchnage exchange
+	 * @param exchange exchange
 	 */
-	void setExchange(OrderReturn exchnage);
+	void setExchange(OrderReturn exchange);
 
 	/**
-	 * Get the discount due to exchange. The amount is calculated as
-	 * exchange.total-exchange.refunded. Valid for exchange order only, otherwise return zero.
+	 * Get the discount due to exchange.
+	 * The amount is always 0 or exchange.total depending on RMA state (completed means it's fully refunded).
+	 * Valid for exchange order only, otherwise return zero.
 	 *
 	 * @return the due to exchange amount
 	 */
@@ -663,7 +606,6 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 * Gets the {@link com.elasticpath.domain.store.Store} this object belongs to.
 	 *
 	 * @return the {@link com.elasticpath.domain.store.Store}
-	 *
 	 * @deprecated Use {@link com.elasticpath.service.store.StoreService#findStoreWithCode(String)} instead.
 	 */
 	@Deprecated
@@ -673,7 +615,6 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 * Sets the {@link Store} this object belongs to.
 	 *
 	 * @param store the {@link Store} to set
-	 *
 	 * @deprecated Use {@link #setStoreCode(String)} instead.
 	 */
 	@Deprecated
@@ -705,7 +646,7 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	/**
 	 * Assigns {@code value} to {@code name}. Any previous value is replaced.
 	 *
-	 * @param name The name of the field to assign.
+	 * @param name  The name of the field to assign.
 	 * @param value The value to assign to the field.
 	 */
 	void setFieldValue(String name, String value);
@@ -721,5 +662,12 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 * @return An immutable map containing all key/value data field pairs
 	 */
 	Map<String, String> getFieldValues();
+
+	/**
+	 * Sums up future order shipment amounts.
+	 *
+	 * @return total amount for future shipments
+	 */
+	Money sumUpFutureShipmentAmounts();
 
 }

@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.definitions.api.helpers.Constants;
 import com.elasticpath.definitions.api.helpers.ContextDrivenStepsHelper;
+import com.elasticpath.definitions.api.helpers.StepsHelper;
 import com.elasticpath.definitions.stateobjects.Context;
 import com.elasticpath.definitions.stateobjects.Projection;
 import com.elasticpath.definitions.stateobjects.content.OptionProjectionContent;
@@ -345,6 +346,7 @@ public class OptionDefinition {
 	 * @param code  sku option code to pass it in URL
 	 */
 	private void getLatestOptionProjection(final String store, final String code) {
+		StepsHelper.sleep(Constants.API_SLEEP_TIME);
 		response = given()
 				.when()
 				.get(String.format(SingleOptionApiResponse.OPTION_URL, store, code));

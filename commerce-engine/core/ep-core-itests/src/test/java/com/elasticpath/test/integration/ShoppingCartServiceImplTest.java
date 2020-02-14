@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration;
 
@@ -10,10 +10,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
@@ -402,9 +401,9 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void ensureDeleteAllShoppingCartsByShopperUidsCorrectlyHandlesAssociatedCartOrders() {
 		final Customer savedCustomer = createSavedCustomer();
-		ShoppingCart cartWithCartOrderToDelete = createSavedShoppingCartWithCartOrder(savedCustomer);
+		ShoppingCart cartWithCartOrderToDelete = createSavedShoppingCart(savedCustomer);
 		ShoppingCart cartWithoutCartOrderToKeep = createSavedShoppingCart(savedCustomer);
-		ShoppingCart cartWithCartOrderToKeep = createSavedShoppingCartWithCartOrder(savedCustomer);
+		ShoppingCart cartWithCartOrderToKeep = createSavedShoppingCart(savedCustomer);
 
 		List<Long> shopperUidsForDeletion = ImmutableList.of(cartWithCartOrderToDelete.getShopper().getUidPk());
 		shoppingCartService.deleteAllShoppingCartsByShopperUids(shopperUidsForDeletion);
@@ -416,16 +415,8 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		assertThat(shoppingCartService.shoppingCartExists(cartWithoutCartOrderToKeep.getGuid())).isTrue();
 	}
 
-	private ShoppingCart createSavedShoppingCartWithCartOrder(final Customer savedCustomer) {
-		ShoppingCart cartWithCartOrder = createSavedShoppingCart(savedCustomer);
-		boolean cartOrderCreated = cartOrderService.createOrderIfPossible(cartWithCartOrder);
-		assertThat(cartOrderCreated).isTrue();
-		return cartWithCartOrder;
-	}
-
-
 	private Customer createSavedCustomer() {
-		final Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		final Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		String email = "a@b.com";
 		customer.setUserId(email);
 		customer.setEmail(email);
@@ -444,7 +435,11 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
 		shoppingCart.setStore(scenario.getStore());
 		((ShoppingCartMementoHolder) shoppingCart).getShoppingCartMemento().setGuid(Utils.uniqueCode("CART-"));
-		return shoppingCartService.saveOrUpdate(shoppingCart);
+		final ShoppingCart persistedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
+
+		persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(persistedShoppingCart);
+
+		return persistedShoppingCart;
 	}
 
 	/**

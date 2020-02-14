@@ -1,8 +1,16 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cucumber.definitions;
 
+import static com.elasticpath.selenium.dialogs.PaymentProcessingErrorDialog.OK_BUTTON_CSS;
+import static com.elasticpath.selenium.setup.SetUp.getDriver;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +25,12 @@ import com.elasticpath.selenium.dialogs.CompleteShipmentDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.EditItemDetailsDialog;
 import com.elasticpath.selenium.dialogs.MoveItemDialog;
+import com.elasticpath.selenium.dialogs.OpenNoteDialog;
+import com.elasticpath.selenium.dialogs.PaymentProcessingErrorDialog;
 import com.elasticpath.selenium.dialogs.SelectASkuDialog;
+import com.elasticpath.selenium.dialogs.ShipmentCompletionErrorDialog;
+import com.elasticpath.selenium.dialogs.TransactionDetailsDialog;
+import com.elasticpath.selenium.domainobjects.PaymentConfiguration;
 import com.elasticpath.selenium.domainobjects.Product;
 import com.elasticpath.selenium.domainobjects.Shipment;
 import com.elasticpath.selenium.domainobjects.ShipmentTableRecord;
@@ -28,12 +41,11 @@ import com.elasticpath.selenium.navigations.CustomerService;
 import com.elasticpath.selenium.navigations.ShippingReceiving;
 import com.elasticpath.selenium.resultspane.OrderSearchResultPane;
 import com.elasticpath.selenium.resultspane.RmaSearchResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
-import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.toolbars.CustomerServiceActionToolbar;
 import com.elasticpath.selenium.toolbars.ShippingReceivingActionToolbar;
 import com.elasticpath.selenium.util.Constants;
+import com.elasticpath.selenium.wizards.CompleteExchangeWizard;
 import com.elasticpath.selenium.wizards.CompleteReturnWizard;
 import com.elasticpath.selenium.wizards.CreateExchangeWizard;
 import com.elasticpath.selenium.wizards.CreateRefundWizard;
@@ -44,55 +56,59 @@ import com.elasticpath.selenium.wizards.PaymentAuthorizationWizard;
 /**
  * Order step definitions.
  */
-@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessivePublicCount"})
 public class OrderDefinition {
 
-	private static final String ORDER_DETAILS_TAB = "Details";
 	private static final String CUSTOMERNAME_COLUUMNNAME = "Customer Name";
 	private static final String ORDER_NUMBER_COLUMNNAME = "Order #";
 	private static final String ORDER_STORE_COLUUMNNAME = "Store";
 	private static final String ORDER_PHONE_FIELD = "phone";
+	private static final String ORIGINAL_PAYMENT_SOURCE = "Original payment source";
+	private static final String LESS_SHIPMENT_DISCOUNT = "Less shipment discount";
+	private static final String LESS_RE_STOCKING_FEE = "Less re-stocking fee";
+	private static final String SHIPPING_COST = "Shipping Cost";
+	private static final String EXPRESS_RETURN = "Express Return";
+	private static final String REFUND_OPTION = "Refund Option";
+	private static final String MANUAL_REFUND = "Manual Refund";
+
+
 	private static final Logger LOGGER = Logger.getLogger(OrderDefinition.class);
+
 	private final CustomerService customerService;
 	private final ActivityToolbar activityToolbar;
 	private final ShippingReceivingActionToolbar shippingReceivingActionToolbar;
 	private final CustomerServiceActionToolbar customerServiceActionToolbar;
-	private final CatalogManagementActionToolbar catalogManagementActionToolbar;
 	private final Product product;
-	private ShippingReceiving shippingReceiving;
 	private OrderSearchResultPane orderSearchResultPane;
-	private RmaSearchResultPane rmaSearchResultPane;
 	private OrderEditor orderEditor;
 	private RmaEditor rmaEditor;
-	private CompleteReturnWizard completeReturnWizard;
 	private CustomerEditor customerEditor;
 	private CreateRefundWizard createRefundWizard;
 	private CreateReturnWizard createReturnWizard;
-	private CreateExchangeWizard createExchangeWizard;
 	private AddEditCustomerAddressDialog addEditCustomerAddressDialog;
-	private CompleteShipmentDialog completeShipmentDialog;
-	private MoveItemDialog moveItemDialog;
-	private SelectASkuDialog selectASkuDialog;
 	private ConfirmDialog confirmDialog;
 	private EditItemDetailsDialog editItemDetailsDialog;
-	private PaymentAuthorizationWizard paymentAuthorizationWizard;
 	private String exchangeOrderNumber;
 	private String addressNameToCheck;
 	private String addressPhoneToCheck;
-	private static final String PAYMENT_SOURCE = "Payment Source";
+	private final PaymentConfiguration paymentConfiguration;
+	private TransactionDetailsDialog transactionDetailsDialog;
+	private CreateExchangeWizard createExchangeWizard;
+	private PaymentProcessingErrorDialog paymentProcessingErrorDialog;
+	private CompleteExchangeWizard completeExchangeWizard;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param product Product.
 	 */
-	public OrderDefinition(final Product product) {
-		activityToolbar = new ActivityToolbar((SetUp.getDriver()));
-		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SetUp.getDriver());
-		customerService = new CustomerService(SetUp.getDriver());
-		customerServiceActionToolbar = new CustomerServiceActionToolbar(SetUp.getDriver());
-		catalogManagementActionToolbar = new CatalogManagementActionToolbar(SetUp.getDriver());
+	public OrderDefinition(final Product product, final PaymentConfiguration paymentConfiguration) {
+		activityToolbar = new ActivityToolbar((getDriver()));
+		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(getDriver());
+		customerService = new CustomerService(getDriver());
+		customerServiceActionToolbar = new CustomerServiceActionToolbar(getDriver());
 		this.product = product;
+		this.paymentConfiguration = paymentConfiguration;
 	}
 
 	/**
@@ -170,18 +186,23 @@ public class OrderDefinition {
 	 */
 	@And("^I cancel the order$")
 	public void cancelOrder() {
+		clickSummaryTab();
 		confirmDialog = orderEditor.clickCancelOrderButton();
 		confirmDialog.clickOKButton("FulfillmentMessages.OrderSummaryOverviewSection_DialogCancel");
 		customerServiceActionToolbar.clickReloadActiveEditor();
 	}
 
 	/**
-	 * Cancel shipment.
+	 * Cancel shipment by shipment number.
+	 *
+	 * @param shipmentID the shipment number
 	 */
-	@And("^I cancel the shipment")
-	public void cancelShipment() {
-		confirmDialog = orderEditor.clickCancelShipmentButton();
-		confirmDialog.clickOKButton("FulfillmentMessages.ShipmentSection_CancelShipment");
+	@And("^I cancel shipment by shipment number (.+)$")
+	public void cancelShipmentByShipmentNumber(final String shipmentID) {
+		clickDetailsTab();
+		activityToolbar.clickReloadActiveEditor();
+		String shipmentNumber = getLatestOrderNumber() + "-" + shipmentID;
+		orderEditor.cancelShipmentByShipmentNumber(shipmentNumber);
 		customerServiceActionToolbar.clickReloadActiveEditor();
 	}
 
@@ -209,7 +230,7 @@ public class OrderDefinition {
 	 */
 	@And("^I (?:can complete|complete) the order shipment")
 	public void completeOrderShipment() {
-		selectOrderEditorTab(ORDER_DETAILS_TAB);
+		clickDetailsTab();
 
 		int counter = 0;
 		while (!orderEditor.isReleaseShipmentButtonInViewport() && counter < Constants.RETRY_COUNTER_3) {
@@ -218,9 +239,86 @@ public class OrderDefinition {
 
 		orderEditor.clickReleaseShipmentButton();
 		activityToolbar.clickShippingReceivingButton();
-		completeShipmentDialog = shippingReceivingActionToolbar.clickCompleteShipmentButton();
+		CompleteShipmentDialog completeShipmentDialog = shippingReceivingActionToolbar.clickCompleteShipmentButton();
 		completeShipmentDialog.completeShipment(Purchase.getPurchaseNumber() + "-1");
 		customerServiceActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Verifies is release shipment button disabled.
+	 */
+	@And("^Release shipment button is disabled$")
+	public void verifyReleaseShipmentButtonDisabled() {
+		clickDetailsTab();
+		orderEditor.verifyReleaseShipmentButtonDisabled();
+	}
+
+	/**
+	 * Completes the order.
+	 */
+	@And("^I (?:can release|release) the order shipment")
+	public void releaseOrderShipment() {
+		activityToolbar.clickShippingReceivingButton();
+		CompleteShipmentDialog completeShipmentDialog = shippingReceivingActionToolbar.clickCompleteShipmentButton();
+		completeShipmentDialog.completeShipment(Purchase.getPurchaseNumber() + "-1");
+		customerServiceActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Complete order shipment by ID
+	 *
+	 * @param shipmentID String
+	 */
+	@And("^I complete the shipment for shipment ID (.+)$")
+	public void completeShipmentByID(final String shipmentID) {
+		clickDetailsTab();
+		String shipmentNumber = getLatestOrderNumber() + "-" + shipmentID;
+		orderEditor.releaseShipmentByShipmentID(shipmentNumber);
+		activityToolbar.clickShippingReceivingButton();
+		CompleteShipmentDialog completeShipmentDialog = shippingReceivingActionToolbar.clickCompleteShipmentButton();
+		completeShipmentDialog.completeShipment(Purchase.getPurchaseNumber() + "-" + shipmentID);
+		customerServiceActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Force complete order shipment by ID.
+	 *
+	 * @param shipmentID String
+	 */
+	@When("^I force complete shipment for shipment ID (.+)$")
+	public void forceCompleteShipmentByID(final String shipmentID) {
+		clickDetailsTab();
+		String shipmentNumber = getLatestOrderNumber() + "-" + shipmentID;
+		orderEditor.releaseShipmentByShipmentID(shipmentNumber);
+		activityToolbar.clickShippingReceivingButton();
+		CompleteShipmentDialog completeShipmentDialog = shippingReceivingActionToolbar.clickCompleteShipmentButton();
+		ShipmentCompletionErrorDialog shipmentCompletionErrorDialog = completeShipmentDialog
+				.forceCompleteShipment(Purchase.getPurchaseNumber() + "-" + shipmentID);
+		shipmentCompletionErrorDialog.clickOK();
+		completeShipmentDialog.clickForceCompletionButton();
+	}
+
+	/**
+	 * Verifies the completion of OrderShipment is impossible.
+	 */
+	@And("^I cannot complete the order shipment with error message (.+)$")
+	public void verifyCompletionOrderShipmentImpossible(final String errorMessage) {
+		clickDetailsTab();
+
+		int counter = 0;
+		while (!orderEditor.isReleaseShipmentButtonInViewport() && counter < Constants.RETRY_COUNTER_3) {
+			counter++;
+		}
+
+		orderEditor.clickReleaseShipmentButton();
+		activityToolbar.clickShippingReceivingButton();
+		CompleteShipmentDialog completeShipmentDialog = shippingReceivingActionToolbar.clickCompleteShipmentButton();
+		completeShipmentDialog.enterShipmentId(Purchase.getPurchaseNumber() + "-1");
+		completeShipmentDialog.clickValidateButton();
+		completeShipmentDialog.clickCompleteButton();
+		completeShipmentDialog.verifyErrorMessageDisplayed(errorMessage);
+		completeShipmentDialog.clickOK();
+		completeShipmentDialog.clickCancel();
 	}
 
 	/**
@@ -230,7 +328,19 @@ public class OrderDefinition {
 	 */
 	@And("^the order status should be (.+)$")
 	public void verifyOrderStatus(final String orderStatus) {
+		clickSummaryTab();
 		orderEditor.verifyOrderStatus(orderStatus);
+	}
+
+	/**
+	 * Verifies the order balance.
+	 *
+	 * @param balanceDue the order balance
+	 */
+	@Then("^the order balance due is (.+)$")
+	public void verifyOrderBalanceDue(final String balanceDue) {
+		clickSummaryTab();
+		orderEditor.verifyOrderBalance(balanceDue);
 	}
 
 	/**
@@ -240,6 +350,7 @@ public class OrderDefinition {
 	 */
 	@And("^the shipment status should be (.+)$")
 	public void verifyShipmentStatus(final String shipmentStatus) {
+		clickDetailsTab();
 		orderEditor.verifyShipmentStatus(shipmentStatus);
 	}
 
@@ -254,13 +365,124 @@ public class OrderDefinition {
 	}
 
 	/**
-	 * Verify Transaction Type.
-	 *
-	 * @param transactionType the transaction type.
+	 * Select Show skipped payment events.
 	 */
-	@Then("^I should see transaction type (.+) in the Payment History$")
-	public void verifyTransactionType(final String transactionType) {
-		orderEditor.verifyTransactionType(transactionType);
+	@And("^I click on Show Skipped Payment Events$")
+	public void selectShowSkippedPaymentEvents() {
+		clickPaymentsTab();
+		orderEditor.selectSkippedPaymentEvents();
+	}
+
+	/**
+	 * Verify Order Payment Transaction with skipped events and Payment Details.
+	 *
+	 * @param paymentMap the payment transaction.
+	 */
+	@Then("^I should see following order payment transaction in the Payment History with skipped events$")
+	public void verifyOrderPaymentDetailsWithSkippedEvents(final Map<String, String> paymentMap) {
+		clickPaymentsTab();
+		if (null == paymentConfiguration.getConfigurationName()) {
+			paymentConfiguration.setConfigurationName("");
+		}
+		orderEditor.verifyPaymentTransactionWithSkippedEvents(paymentConfiguration, paymentMap);
+	}
+
+	/**
+	 * Verify Order Payment Transaction and Payment Details.
+	 *
+	 * @param paymentMap the payment transaction.
+	 */
+	@Then("^I should see following order payment transaction in the Payment History$")
+	public void verifyOrderPaymentDetails(final Map<String, String> paymentMap) {
+		clickDetailsTab();
+		clickPaymentsTab();
+		if (null == paymentConfiguration.getConfigurationName()) {
+			paymentConfiguration.setConfigurationName("");
+		}
+		orderEditor.verifyPaymentTransaction(paymentConfiguration, paymentMap);
+	}
+
+	/**
+	 * Verifies order payment data in transaction details.
+	 *
+	 * @param orderPaymentDataMap map
+	 */
+	@Then("^I should see following order payment data$")
+	public void orderPaymentData(final Map<String, String> orderPaymentDataMap) {
+		clickPaymentsTab();
+		transactionDetailsDialog = orderEditor.clickViewPaymentDetails();
+		transactionDetailsDialog.verifyOrderPaymentData(orderPaymentDataMap);
+		transactionDetailsDialog.clickClose();
+	}
+
+	/**
+	 * Verify error message is displayed in the refund dialog.
+	 *
+	 * @param expErrorMessage expected error message
+	 */
+	@Then("^Refund dialog should display an error message (.*)$")
+	public void verifyErrorMessageDisplayed(final String expErrorMessage) {
+		createRefundWizard.verifyErrorMessageDisplayed(expErrorMessage);
+	}
+
+	/**
+	 * Verify payment plugin error message.
+	 * @param paymentError expected error
+	 */
+	@Then("^Refund should respond with payment error (.*)$")
+	public void verifyPaymentPluginError(final String paymentError) {
+		createRefundWizard.verifyPaymentError(paymentError);
+	}
+
+	/**
+	 * Verify exact payment plugin error message.
+	 * @param paymentError expected error
+	 */
+	@Then("^Refund should respond with exact payment error (.*)$")
+	public void verifyExactPaymentPluginError(final String paymentError) {
+		createRefundWizard.verifyExactPaymentError(paymentError);
+	}
+
+	/**
+	 * Verify Order Payment Transactions is no present in Payment History.
+	 */
+	@And("^I should NOT see order payment transactions in the Payment History$")
+	public void verifyOrderPaymentTransactionNotPresentInPaymentHistory() {
+		clickPaymentsTab();
+		orderEditor.verifyPaymentTransactionTableIsEmpty();
+	}
+
+	/**
+	 * Verify Order Payment Transaction is absent in Payment History with skipped events.
+	 *
+	 * @param paymentMap the payment transaction.
+	 */
+	@Then("^I should NOT see following order payment transaction in the Payment History with skipped events$")
+	public void verifyNoSuchOrderPaymentDetailsInPaymentsHistoryWithSkippedEvents(final Map<String, String> paymentMap) {
+		clickPaymentsTab();
+		orderEditor.verifyNoSuchPaymentTransactionInPaymentHistoryWithSkippedEvents(paymentMap);
+	}
+
+	/**
+	 * Verify Order Payment Transaction is absent.
+	 *
+	 * @param paymentMap the payment transaction.
+	 */
+	@Then("^I should NOT see following order payment transaction in the Payment History$")
+	public void verifyNoSuchOrderPaymentDetails(final Map<String, String> paymentMap) {
+		clickPaymentsTab();
+		orderEditor.verifyNoSuchPaymentTransaction(paymentMap);
+	}
+
+	/**
+	 * Verify Order Payment Transaction type is absent.
+	 *
+	 * @param transactionType the type of order payment transaction.
+	 */
+	@Then("^I should NOT see (.+) order payment transaction type in the Payment History$")
+	public void verifyNoSuchOrderPaymentDetails(final String transactionType) {
+		clickPaymentsTab();
+		orderEditor.verifyNoSuchPaymentTransactionType(transactionType);
 	}
 
 	/**
@@ -292,9 +514,30 @@ public class OrderDefinition {
 	 */
 	@When("^I (?:search|can search) and open order editor for the latest order$")
 	public void searchAndOpenLatestOrderEditor() {
+		activityToolbar.clickCustomerServiceButton();
 		customerService.enterOrderNumber(getLatestOrderNumber());
 		orderSearchResultPane = customerService.clickOrderSearch();
 		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(getLatestOrderNumber(), ORDER_NUMBER_COLUMNNAME);
+	}
+
+	/**
+	 * Searches order and opens order editor.
+	 */
+	@When("^I (?:search|can search) and open order editor for the latest exchange order$")
+	public void searchAndOpenLatestExchangeOrderEditor() {
+		activityToolbar.clickCustomerServiceButton();
+		customerService.enterOrderNumber(createExchangeWizard.getExchangeOrderNumber());
+		orderSearchResultPane = customerService.clickOrderSearch();
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(createExchangeWizard.getExchangeOrderNumber(), ORDER_NUMBER_COLUMNNAME);
+	}
+
+	/**
+	 * Searches and open the latest order and create refund for it.
+	 */
+	@When("^I (?:search|can search) and open the latest order and create a refund with following values$")
+	public void searchAndOpenLatestOrderAndCreateRefund(final Map<String, String> refundMap) {
+		searchAndOpenLatestOrderEditor();
+		createRefund(refundMap);
 	}
 
 	/**
@@ -307,16 +550,50 @@ public class OrderDefinition {
 	}
 
 	/**
+	 * Fills order refund form.
+	 *
+	 * @param refundMap refund item values
+	 */
+	@When("^I fill order refund form with following values$")
+	public void fillOrderRefundForm(final Map<String, String> refundMap) {
+		clickDetailsTab();
+		orderEditor.closePane("#" + Purchase.getPurchaseNumber());
+		activityToolbar.clickCustomerServiceButton();
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
+		createRefundWizard = orderEditor.clickCreateRefundButton();
+		createRefundWizard.verifyAvailableRefundAmount(refundMap.get("Available Refund Amount"));
+		createRefundWizard.fillOrderRefundForm(refundMap);
+	}
+
+	/**
+	 * Verify is refund button disabled.
+	 */
+	@When("^Refund button should be disabled")
+	public void verifyRefundButtonDisabled() {
+		createRefundWizard.verifyRefundButtonDisabled();
+	}
+
+	/**
+	 * Verify is refund button enabled.
+	 */
+	@When("^Refund button should be enabled$")
+	public void verifyRefundButtonEnabled() {
+		createRefundWizard.verifyRefundButtonEnabled();
+	}
+
+	/**
 	 * Creates refund.
 	 *
 	 * @param refundMap refund item values
 	 */
 	@When("^I create a refund with following values$")
 	public void createRefund(final Map<String, String> refundMap) {
+		clickDetailsTab();
 		orderEditor.closePane("#" + Purchase.getPurchaseNumber());
 		activityToolbar.clickCustomerServiceButton();
 		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
 		createRefundWizard = orderEditor.clickCreateRefundButton();
+		createRefundWizard.verifyAvailableRefundAmount(refundMap.get("Available Refund Amount"));
 		createRefundWizard.createRefund(refundMap);
 	}
 
@@ -327,10 +604,108 @@ public class OrderDefinition {
 	 */
 	@When("^I create a exchange with following values$")
 	public void createExchange(final Map<String, String> exchangeMap) {
+		clickDetailsTab();
 		shippingReceivingActionToolbar.clickReloadActiveEditor();
 		createExchangeWizard = orderEditor.clickCreateExchangeButton();
 		createExchangeWizard.createExchange(exchangeMap);
 		shippingReceivingActionToolbar.clickReloadActiveEditor();
+		clickReturnsAndExchangeTab();
+		exchangeOrderNumber = orderEditor.verifyExchangeOrderNumberIsPresent();
+		LOGGER.info("exchange order number: " + exchangeOrderNumber);
+	}
+
+	/**
+	 * Prepares exchange.
+	 *
+	 * @param exchangeMap exchange item values
+	 */
+	@When("^I prepare an exchange with following values$")
+	public void prepareExchange(final Map<String, String> exchangeMap) {
+		clickDetailsTab();
+		shippingReceivingActionToolbar.clickReloadActiveEditor();
+		createExchangeWizard = orderEditor.clickCreateExchangeButton();
+		createExchangeWizard.prepareExchange(exchangeMap);
+	}
+
+	/**
+	 * Cancel exchange.
+	 */
+	@When("^I cancel the exchange under the original order$")
+	public void cancelExchange() {
+		shippingReceivingActionToolbar.clickReloadActiveEditor();
+		confirmDialog = orderEditor.clickCancelExchangeButton();
+		confirmDialog.clickOKButton("FulfillmentMessages.OrderReturnSection_CancelExchangeTitle");
+	}
+
+	/**
+	 * Verifies status of exchange order.
+	 *
+	 * @param expectedStatus the expected status of exchange order.
+	 */
+	@When("^The status of exchange order is (.+)$")
+	public void verifyExchangeOrderStatus(final String expectedStatus) {
+		orderEditor.verifyExchangeOrderStatus(expectedStatus);
+	}
+
+	/**
+	 * Creates exchange.
+	 *
+	 * @param exchangeMap exchange item values
+	 */
+	@When("^I create a exchange with error$")
+	public void createExchangeWithError(final Map<String, String> exchangeMap) {
+		clickDetailsTab();
+		shippingReceivingActionToolbar.clickReloadActiveEditor();
+		createExchangeWizard = orderEditor.clickCreateExchangeButton();
+		paymentProcessingErrorDialog = orderEditor.createPaymentProcessingErrorDialog();
+		createExchangeWizard.createExchange(exchangeMap);
+	}
+
+	/**
+	 * Click cancel button.
+	 */
+	@When("^I click cancel in exchange window$")
+	public void clickCancel(){
+		completeExchangeWizard.clickCancelInDialog();
+	}
+
+	/**
+	 * Verifies error message is displayed.
+	 *
+	 * @param errorMessage String
+	 */
+	@Then("Error message (.*) appears")
+	public void hasError(final String errorMessage){
+		paymentProcessingErrorDialog.verifyErrorMessageDisplayedInPaymentProcessingErrorDialog(errorMessage);
+		paymentProcessingErrorDialog.clickButton(OK_BUTTON_CSS, "OK");
+		shippingReceivingActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Creates free item exchange with no new payment Reservation event.
+	 *
+	 * @param exchangeMap exchange item values
+	 */
+	@When("^I create exchange with adjusted shipping costs$")
+	public void createExchangeWithAdjustShippingCost(final Map<String, String> exchangeMap) {
+		clickDetailsTab();
+		shippingReceivingActionToolbar.clickReloadActiveEditor();
+		createExchangeWizard = orderEditor.clickCreateExchangeButton();
+		createExchangeWizard.createFreeItemExchange(exchangeMap);
+		shippingReceivingActionToolbar.clickReloadActiveEditor();
+		clickReturnsAndExchangeTab();
+		exchangeOrderNumber = orderEditor.verifyExchangeOrderNumberIsPresent();
+		LOGGER.info("exchange order number: " + exchangeOrderNumber);
+	}
+
+	/**
+	 * Resets shipping cost value.
+	 *
+	 * @param shippingCost String
+	 */
+	@When("^I reset order exchange shipping cost to (.+)$")
+	public void resetExchangeShippingCost(final String shippingCost) {
+		createExchangeWizard.setShippingCostValue(shippingCost);
 	}
 
 	/**
@@ -340,16 +715,8 @@ public class OrderDefinition {
 	 */
 	@Then("^I should see the returned sku code (.+)$")
 	public void verifyReturnedSkuCode(final String skuCode) {
+		clickReturnsAndExchangeTab();
 		orderEditor.verifyReturnSkuCode(skuCode);
-	}
-
-	/**
-	 * Verifies exchange order number is present.
-	 */
-	@Then("^I should see exchange order number$")
-	public void verifyExchangeOrderNumberIsPresent() {
-		exchangeOrderNumber = orderEditor.verifyExchangeOrderNumberIsPresent();
-		LOGGER.info("exchange order number: " + exchangeOrderNumber);
 	}
 
 	/**
@@ -357,6 +724,7 @@ public class OrderDefinition {
 	 */
 	@When("^I open the exchange order editor$")
 	public void openExchangeOrderEditor() {
+		clickReturnsAndExchangeTab();
 		orderEditor.clickOpenExchangeOrderButton();
 	}
 
@@ -375,6 +743,7 @@ public class OrderDefinition {
 	 */
 	@When("^I should see the following skus? in item list$")
 	public void verifySkuCodePresentInList(final List<String> skuCodeList) {
+		clickDetailsTab();
 		for (String skuCode : skuCodeList) {
 			orderEditor.verifyAndSelectOrderSkuCode(skuCode);
 		}
@@ -387,6 +756,7 @@ public class OrderDefinition {
 	 */
 	@When("^I should see the following skus? and quantity in physical shipment list$")
 	public void verifySkuCodeAndQuantityPresentInList(final Map<String, String> shipmentItemMap) {
+		clickDetailsTab();
 		for (Map.Entry<String, String> entry : shipmentItemMap.entrySet()) {
 			orderEditor.verifyPhysicalShipmentSkuCodeAndQuantity(entry.getKey(), entry.getValue());
 		}
@@ -411,6 +781,7 @@ public class OrderDefinition {
 	 */
 	@When("^I should see the following skus? and quantity in e-shipment list$")
 	public void verifySkuCodeAndQuantityPresentInEshipmentList(final Map<String, String> shipmentItemMap) {
+		clickDetailsTab();
 		for (Map.Entry<String, String> entry : shipmentItemMap.entrySet()) {
 			orderEditor.verifyEShipmentSkuCodeAndQuantity(entry.getKey(), entry.getValue());
 		}
@@ -421,7 +792,7 @@ public class OrderDefinition {
 	 */
 	@Then("^the order contains the newly created product$")
 	public void verfiyNewlyCreatedSkuInOrder() {
-		selectOrderEditorTab(ORDER_DETAILS_TAB);
+		clickDetailsTab();
 		List<String> skuCodeList = new ArrayList<>();
 		skuCodeList.add(this.product.getSkuCode());
 		verifySkuCodePresentInList(skuCodeList);
@@ -447,11 +818,27 @@ public class OrderDefinition {
 	 */
 	@And("^I create a new shipment for sku (.+) with following values$")
 	public void createNewShipment(final String skuCode, final Map<String, String> newShipmentInfoMap) {
+		clickDetailsTab();
 		orderEditor.verifyAndSelectOrderSkuCode(skuCode);
-		moveItemDialog = orderEditor.clickMoveItemButton();
+		MoveItemDialog moveItemDialog = orderEditor.clickMoveItemButton();
 		moveItemDialog.moveItem(newShipmentInfoMap.get("Address"), newShipmentInfoMap.get("Shipment Method"));
-		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
-		paymentAuthorizationWizard.completePaymentAuthorization(newShipmentInfoMap.get(PAYMENT_SOURCE));
+	}
+
+	/**
+	 * Split shipment by shipment number and sku.
+	 *
+	 * @param skuCode            String
+	 * @param shipmentID         String
+	 * @param newShipmentInfoMap Map
+	 */
+	@When("^I split a shipment for sku (.+) for shipment number (.+) with following values$")
+	public void createNewShipmentByID(final String skuCode, final String shipmentID, final Map<String, String> newShipmentInfoMap) {
+		clickDetailsTab();
+		customerServiceActionToolbar.clickReloadActiveEditor();
+		String shipmentNumber = getLatestOrderNumber() + "-" + shipmentID;
+		MoveItemDialog moveItemDialog = orderEditor.moveItemByShipmentNumber(skuCode, shipmentNumber);
+		moveItemDialog.moveItem(newShipmentInfoMap.get("Address"), newShipmentInfoMap.get("Shipment Method"));
+
 	}
 
 	/**
@@ -462,11 +849,9 @@ public class OrderDefinition {
 	 */
 	@When("^I add sku (.+) to the shipment with following values$")
 	public void addItemToShipment(final String skuCode, final Map<String, String> addItemInfoMap) {
-		selectASkuDialog = orderEditor.clickAddItemButton();
+		clickDetailsTab();
+		SelectASkuDialog selectASkuDialog = orderEditor.clickAddItemButton();
 		selectASkuDialog.selectSkuAndPriceList(skuCode, addItemInfoMap.get("Price List Name"));
-		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
-		paymentAuthorizationWizard.completePaymentAuthorization(addItemInfoMap.get(PAYMENT_SOURCE));
-		customerServiceActionToolbar.clickReloadActiveEditor();
 	}
 
 	/**
@@ -476,10 +861,10 @@ public class OrderDefinition {
 	 */
 	@And("^I remove sku (.+) from the shipment$")
 	public void addItemToShipment(final String skuCode) {
+		clickDetailsTab();
 		orderEditor.verifyAndSelectOrderSkuCode(skuCode);
 		orderEditor.clickRemoveItemButton();
-		customerServiceActionToolbar.clickSaveAllButton();
-		customerServiceActionToolbar.clickReloadActiveEditor();
+		completePaymentAuthorization(ORIGINAL_PAYMENT_SOURCE);
 	}
 
 	/**
@@ -499,30 +884,48 @@ public class OrderDefinition {
 	/**
 	 * Creates return for digital item.
 	 *
-	 * @param quantity the quantity
-	 * @param skuCode  the sku code
+	 * @param quantity      the quantity
+	 * @param skuCode       the sku code
+	 * @param returnInfoMap return form values
 	 */
 	@And("^I create digital item return with quantity (\\d+) for sku (.+)$")
-	public void createReturnForDigital(final int quantity, final String skuCode) {
+	public void createReturnForDigital(final int quantity, final String skuCode, final Map<String, String> returnInfoMap) {
 		searchAndOpenLatestOrderEditor();
-		selectOrderEditorTab(ORDER_DETAILS_TAB);
+		clickDetailsTab();
 		clickCreateReturnButton();
-		createReturnWizard.createDigitalReturn(quantity, skuCode);
+		final BigDecimal shipmentDiscount = new BigDecimal(returnInfoMap.getOrDefault(LESS_SHIPMENT_DISCOUNT, "0"));
+		final String refundOption = returnInfoMap.getOrDefault(REFUND_OPTION, ORIGINAL_PAYMENT_SOURCE);
+		createReturnWizard.createDigitalReturn(quantity, skuCode, shipmentDiscount, refundOption.equals(MANUAL_REFUND));
 	}
 
 	/**
 	 * Creates return for physical item.
 	 *
-	 * @param quantity the quantity
-	 * @param skuCode  the sku code
+	 * @param quantity      the quantity
+	 * @param skuCode       the sku code
+	 * @param returnInfoMap return form values
 	 */
 	@And("^I create physical item return with quantity (\\d+) for sku (.+)$")
-	public void createReturnForPhysical(final int quantity, final String skuCode) {
+	public void createReturnForPhysical(final int quantity, final String skuCode, final Map<String, String> returnInfoMap) {
 		searchAndOpenLatestOrderEditor();
-		selectOrderEditorTab(ORDER_DETAILS_TAB);
+		clickDetailsTab();
 		completeOrderShipment();
 		clickCreateReturnButton();
-		createReturnWizard.createPhysicalReturn(quantity, skuCode);
+		final BigDecimal shippingCost = new BigDecimal(returnInfoMap.getOrDefault(SHIPPING_COST, "0"));
+		final BigDecimal shipmentDiscount = new BigDecimal(returnInfoMap.getOrDefault(LESS_SHIPMENT_DISCOUNT, "0"));
+		final BigDecimal restockingFee = new BigDecimal(returnInfoMap.getOrDefault(LESS_RE_STOCKING_FEE, "0"));
+		final String expressReturn = returnInfoMap.getOrDefault(EXPRESS_RETURN, "false");
+		final String refundOption = returnInfoMap.getOrDefault(REFUND_OPTION, ORIGINAL_PAYMENT_SOURCE);
+		createReturnWizard.createPhysicalReturn(quantity, skuCode, shippingCost, shipmentDiscount, restockingFee,
+				!"true".equalsIgnoreCase(expressReturn), refundOption.equals(MANUAL_REFUND));
+	}
+
+	@And("^return dialog must have an error (.+)$")
+	public void verifyReturnErrorMessage(final String message) {
+		assertThat(createReturnWizard.getErrorMessage().contains(message))
+				.as("Error message \"" + message + "\" was not found")
+				.isTrue();
+		createReturnWizard.clickCancel();
 	}
 
 	/**
@@ -623,6 +1026,7 @@ public class OrderDefinition {
 	 */
 	@When("^I view item detail of the order line item (.*)$")
 	public void openItemDetail(final String skuCode) {
+		clickDetailsTab();
 		editItemDetailsDialog = orderEditor.clickItemDetailButton(skuCode);
 	}
 
@@ -646,11 +1050,11 @@ public class OrderDefinition {
 	 */
 	@When("^shipping receive return is processed for quantity (.+) of sku (.+)$")
 	public void receiveReturnForSku(final String receivedQuantity, final String receivedSku) {
-		shippingReceiving = activityToolbar.clickShippingReceivingButton();
+		ShippingReceiving shippingReceiving = activityToolbar.clickShippingReceivingButton();
 		shippingReceiving.clickReturnsTab();
 		String orderNumber = Purchase.getPurchaseNumber();
 		shippingReceiving.enterOrderNumber(orderNumber);
-		rmaSearchResultPane = shippingReceiving.clickReturnsSearch();
+		RmaSearchResultPane rmaSearchResultPane = shippingReceiving.clickReturnsSearch();
 		rmaEditor = rmaSearchResultPane.selectOrderAndOpenRmaEditor(orderNumber, ORDER_NUMBER_COLUMNNAME);
 		rmaEditor.setReturnedQuantity(receivedSku, receivedQuantity);
 		customerServiceActionToolbar.clickSaveButton();
@@ -658,15 +1062,79 @@ public class OrderDefinition {
 	}
 
 	/**
-	 * Completes a return.
+	 * Verifies RMA status.
+	 *
+	 * @param expectedRMAStatus the expected RMA status.
 	 */
-	@When("^I complete the return$")
-	public void completeReturn() {
+	@When("^The RMA status is (.+)$")
+	public void verifyRMAStatus(final String expectedRMAStatus) {
+		ShippingReceiving shippingReceiving = activityToolbar.clickShippingReceivingButton();
+		shippingReceiving.clickReturnsTab();
+		String orderNumber = Purchase.getPurchaseNumber();
+		shippingReceiving.enterOrderNumber(orderNumber);
+		RmaSearchResultPane rmaSearchResultPane = shippingReceiving.clickReturnsSearch();
+		rmaEditor = rmaSearchResultPane.selectOrderAndOpenRmaEditor(orderNumber, ORDER_NUMBER_COLUMNNAME);
+		rmaEditor.verifyRMAStatus(expectedRMAStatus);
+	}
+
+	/**
+	 * Completes the return.
+	 */
+	@When("^I complete the return refunding ((?:manually|to original source))$")
+	public void completeReturn(final String refundOption) {
 		orderEditor = rmaEditor.clickOpenOriginalOrderButton();
 		customerServiceActionToolbar.clickReloadActiveEditor();
-		orderEditor.clickTab("Returns and Exchanges");
-		completeReturnWizard = orderEditor.clickCompleteReturnButton();
-		completeReturnWizard.completeReturn();
+		clickReturnsAndExchangeTab();
+		CompleteReturnWizard completeReturnWizard = orderEditor.clickCompleteReturnButton();
+		completeReturnWizard.completeReturn("manually".equals(refundOption));
+	}
+
+	/**
+	 * Completes the exchange.
+	 */
+	@When("^I complete the exchange refunding ((?:manually|to original source))$")
+	public void completeExchange(final String refundOption) {
+		orderEditor = rmaEditor.clickOpenOriginalOrderButton();
+		customerServiceActionToolbar.clickReloadActiveEditor();
+		clickReturnsAndExchangeTab();
+		completeExchangeWizard = orderEditor.clickCompleteExchangeButton();
+		completeExchangeWizard.completeExchange("manually".equals(refundOption));
+	}
+
+	/**
+	 * Completes the exchange.
+	 */
+	@When("^I complete the exchange refunding ((?:manually|to original source)) with error$")
+	public void completeExchangeWithError(final String refundOption) {
+		orderEditor = rmaEditor.clickOpenOriginalOrderButton();
+		customerServiceActionToolbar.clickReloadActiveEditor();
+		clickReturnsAndExchangeTab();
+		completeExchangeWizard = orderEditor.clickCompleteExchangeButton();
+		completeExchangeWizard.completeExchangeWithError("manually".equals(refundOption));
+	}
+
+	/**
+	 * Verifies Order Note.
+	 *
+	 * @param noteMap the properties of the note
+	 */
+	@Then("^I should see following note in the Order Notes$")
+	public void verifyOrderNoteDetails(final Map<String, String> noteMap) {
+		clickNotesTab();
+
+		final Map<String, String> newMap = new HashMap<>(noteMap);
+		final String originatorKey = "Originator";
+		String originator = noteMap.get(originatorKey);
+		newMap.remove(originatorKey, originator);
+
+		orderEditor.verifyOrderNote(newMap.values());
+
+		final OpenNoteDialog openNoteDialog = orderEditor.clickOpenNote();
+		if (originator != null) {
+			openNoteDialog.verifyOriginator(originator);
+		}
+		openNoteDialog.verifyNote(newMap.values());
+		openNoteDialog.clickCancel();
 	}
 
 	/**
@@ -686,7 +1154,7 @@ public class OrderDefinition {
 	 */
 	@When("^I update and save the following shipping address for the order$")
 	public void updateOrderShippingAddress(final Map<String, String> addressMap) {
-		selectOrderEditorTab(ORDER_DETAILS_TAB);
+		clickDetailsTab();
 		addEditCustomerAddressDialog = orderEditor.clickEditAddressButton();
 		addEditCustomerAddressDialog.enterAddressLine1(addressMap.get("address line 1"));
 		addEditCustomerAddressDialog.enterPhone(addressMap.get(ORDER_PHONE_FIELD));
@@ -703,7 +1171,7 @@ public class OrderDefinition {
 	 */
 	@When("^I update the shipping address and set \"(.+)\" shipping method for the order$")
 	public void updateOrderShippingAddressAndMethod(final String shippingMethod, final Map<String, String> addressMap) {
-		selectOrderEditorTab(ORDER_DETAILS_TAB);
+		clickDetailsTab();
 		addEditCustomerAddressDialog = orderEditor.clickEditAddressButton();
 		addEditCustomerAddressDialog.selectCountry(addressMap.get("Country"));
 		addEditCustomerAddressDialog.selectState(addressMap.get("State/Province"));
@@ -713,8 +1181,7 @@ public class OrderDefinition {
 		addEditCustomerAddressDialog.enterPhone(addressMap.get("Phone"));
 		addEditCustomerAddressDialog.clickSave();
 		orderEditor.selectShippingMethod(shippingMethod);
-		customerServiceActionToolbar.clickSaveButton();
-		customerServiceActionToolbar.clickReloadActiveEditor();
+		completePaymentAuthorization(ORIGINAL_PAYMENT_SOURCE);
 	}
 
 	/**
@@ -725,8 +1192,14 @@ public class OrderDefinition {
 		orderEditor.verifyUnlockOrderIsNotEnabled();
 	}
 
+	/**
+	 * Verify shipment summary.
+	 *
+	 * @param shipments the properties of each shipment belonging to an order
+	 */
 	@Then("^I should see the following Shipment Summary$")
 	public void verifyShipmentSummary(final List<Map<String, String>> shipments) {
+		clickDetailsTab();
 		List<Shipment> shipmentObjects = orderEditor.populateShipments(shipments);
 		activityToolbar.clickReloadActiveEditor();
 		for (Shipment shipment : shipmentObjects) {
@@ -735,7 +1208,7 @@ public class OrderDefinition {
 			orderEditor.verifyShipmentItemTaxes(shipment.getShipmentNumber(), shipment.getItemTaxes());
 			orderEditor.verifyShipmentTotal(shipment.getShipmentNumber(), shipment.getShipmentTotal());
 
-			if (!shipment.getShipmentNumber().equals("E-shipment")) {
+			if (!"E-shipment".equals(shipment.getShipmentNumber())) {
 				orderEditor.verifyShipmentShippingCost(shipment.getShipmentNumber(), shipment.getShippingCost());
 				orderEditor.verifyShipmentTotalBeforeTax(shipment.getShipmentNumber(), shipment.getTotalBeforeTax());
 				orderEditor.verifyShipmentShippingTaxes(shipment.getShipmentNumber(), shipment.getShippingTaxes());
@@ -750,6 +1223,9 @@ public class OrderDefinition {
 	 */
 	@Then("^I should see the applied promotion of (.+) in the order details$")
 	public void verifyPromotionTable(final String promotionName) {
+//		Clicking summary tab and back to details tab to prevent from double clicking tab causing editor unscrollable.
+		clickSummaryTab();
+		clickDetailsTab();
 		orderEditor.verifyPromotionColumnValue(promotionName, "Promotion Name");
 	}
 
@@ -962,7 +1438,7 @@ public class OrderDefinition {
 	@Then("^I should see Order with Shipment Status (.+) in search results pane$")
 	public void verifySearchResultOrderShipmentStatus(final String orderShipmentStatus) {
 		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
-		orderEditor.clickTab(ORDER_DETAILS_TAB);
+		clickDetailsTab();
 		orderEditor.verifyShipmentStatus(orderShipmentStatus);
 	}
 
@@ -974,7 +1450,7 @@ public class OrderDefinition {
 	@Then("^I should see Order with SKU Code (.+) in search results pane$")
 	public void verifySearchResultOrderSkuDetails(final String orderSkuCode) {
 		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
-		orderEditor.clickTab(ORDER_DETAILS_TAB);
+		clickDetailsTab();
 		orderEditor.verifyAndSelectOrderSkuCode(orderSkuCode);
 	}
 
@@ -985,40 +1461,19 @@ public class OrderDefinition {
 	 */
 	@When("^I change the Shipping Method to the following$")
 	public void updateShippingMethod(final Map<String, String> newShipmentInfoMap) {
+		clickDetailsTab();
 		updateShippingMethodWithShipmentNumberAndPaymentAuth(1, newShipmentInfoMap);
-	}
-
-	/**
-	 * Update Shipping Method without Payment Auth.
-	 *
-	 * @param shippingMethod the new shipment method
-	 */
-	@When("^I change the Shipping Method to (.+) without authorizing payment$")
-	public void updateShippingMethodWithoutAuth(final String shippingMethod) {
-		updateShippingMethodWithShipmentNumberAndWithoutAuth(1, shippingMethod);
 	}
 
 	/**
 	 * Update Shipping Method with Shipment Number and Payment Auth.
 	 *
+	 * @param shipmentNumber     shipment ordinal number
 	 * @param newShipmentInfoMap new shipment values
 	 */
 	@When("^I change the shipment number (\\d+) Shipping Method to the following$")
 	public void updateShippingMethodWithShipmentNumberAndPaymentAuth(final int shipmentNumber, final Map<String, String> newShipmentInfoMap) {
-		updateShippingMethodWithShipmentNumberAndWithoutAuth(shipmentNumber, newShipmentInfoMap.get("Shipping Method"));
-		paymentAuthorizationWizard.completePaymentAuthorization(newShipmentInfoMap.get(PAYMENT_SOURCE));
-	}
-
-	/**
-	 * Update Shipping Method with Shipment Number and without Payment Auth.
-	 *
-	 * @param shippingMethod the new shipment method
-	 * @param shipmentNumber the shipment number
-	 */
-	@When("^I change the shipment number (\\d+) Shipping Method to (.+) without authorizing payment$")
-	public void updateShippingMethodWithShipmentNumberAndWithoutAuth(final int shipmentNumber, final String shippingMethod) {
-		orderEditor.selectShippingMethodByShipmentNumber(shipmentNumber, shippingMethod);
-		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		orderEditor.selectShippingMethodByShipmentNumber(shipmentNumber, newShipmentInfoMap.get("Shipping Method"));
 	}
 
 	/**
@@ -1028,6 +1483,7 @@ public class OrderDefinition {
 	 */
 	@And("^the Shipping Method should be (.+)$")
 	public void verifyShippingMethod(final String shippingMethod) {
+		clickDetailsTab();
 		orderEditor.verifyShippingMethod(shippingMethod);
 	}
 
@@ -1038,10 +1494,9 @@ public class OrderDefinition {
 	 */
 	@When("^I change the Shipping Information to the following$")
 	public void updateShippingInformation(final Map<String, String> newShipmentInfoMap) {
+		clickDetailsTab();
 		orderEditor.selectShippingAddress(newShipmentInfoMap.get("Address"));
 		orderEditor.selectShippingMethod(newShipmentInfoMap.get("Shipping Method"));
-		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
-		paymentAuthorizationWizard.completePaymentAuthorization(newShipmentInfoMap.get(PAYMENT_SOURCE));
 	}
 
 	/**
@@ -1050,7 +1505,7 @@ public class OrderDefinition {
 	 * @param shipmentItems expected values for a row in the Items table.
 	 */
 	@Then("I should see the following line items in the Shipment table$")
-	public void verifyShimpentLineItem(final List<Map<String, String>> shipmentItems) {
+	public void verifyShipmentLineItem(final List<Map<String, String>> shipmentItems) {
 		for (Map<String, String> item : shipmentItems) {
 			orderEditor.verifyShipmentLineItemSkuCode(item.get("sku-code"));
 			orderEditor.verifyShipmentLineItemSalePrice(item.get("sale-price"));
@@ -1068,19 +1523,45 @@ public class OrderDefinition {
 	 */
 	@Then("^I should see the following shipment with lineitem details$")
 	public void verifyLineItemByShipment(final List<ShipmentTableRecord> shipmentItems) {
+		clickDetailsTab();
 		for (ShipmentTableRecord record : shipmentItems) {
 			orderEditor.verifyOrderItemsTableValues(record);
 		}
 	}
 
 	/**
-	 * Modify shipment line item quantity
+	 * Modify order shipment quantity
+	 *
+	 * @param quantity new quantity value
+	 */
+	@When("^I enter (.+) for order shipment quantity$")
+	public void setShipmentLineItemQuantity(final String quantity) {
+		clickDetailsTab();
+		orderEditor.setShipmentLineItemQuantity(quantity);
+	}
+
+	/**
+	 * Modify shipment line item quantity and complete payment.
 	 *
 	 * @param quantity new quantity value
 	 */
 	@When("^I modify order shipment line item quantity to (.+)$")
-	public void setShipmentLineItemQuantity(final String quantity) {
+	public void setAndSaveShipmentLineItemQuantity(final String quantity) {
+		clickDetailsTab();
 		orderEditor.setShipmentLineItemQuantity(quantity);
+		completePaymentAuthorization(ORIGINAL_PAYMENT_SOURCE);
+	}
+
+	/**
+	 * Set shipment line item quantity to trigger failure.
+	 *
+	 * @param quantity quantity
+	 */
+	@When("^I modify the order to increase order total by setting line item quantity to (.+)$")
+	public void setShipmentLineItemQuantityToFailReAuthorization(final String quantity) {
+		clickDetailsTab();
+		orderEditor.setShipmentLineItemQuantity(quantity);
+		acceptCancelReAuthorization(ORIGINAL_PAYMENT_SOURCE);
 	}
 
 	/**
@@ -1090,19 +1571,46 @@ public class OrderDefinition {
 	 */
 	@When("^I modify order shipment line item discount to (.+)$")
 	public void setShipmentLineItemDiscount(final String discount) {
+		clickDetailsTab();
 		orderEditor.setShipmentLineItemDiscount(discount);
-		saveAllChangesAndReload();
+		completePaymentAuthorization(ORIGINAL_PAYMENT_SOURCE);
 	}
 
 	/**
-	 * Enters payment source and complete Payment Authorization
+	 * Verify completion of Payment Authorization should be impossible
+	 */
+	@And("^Completion of Payment Authorization should be impossible with error message (.+)$")
+	public void verifyIsCompletionPaymentAuthorizationImpossible(final String errorMessage) {
+		PaymentAuthorizationWizard paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		paymentAuthorizationWizard.clickAuthorizeButton();
+		assertThat(paymentAuthorizationWizard.isDoneButtonEnable())
+				.as("Done button should be disabled")
+				.isFalse();
+		paymentAuthorizationWizard.verifyErrorMessageDisplayed(errorMessage);
+		paymentAuthorizationWizard.clickCancel();
+		paymentAuthorizationWizard.clickOk();
+	}
+
+	/**
+	 * Enters payment source and complete Payment Authorization.
 	 *
 	 * @param paymentMethod payment source name
 	 */
 	@And("^I complete Payment Authorization with (.+) payment source$")
 	public void completePaymentAuthorization(final String paymentMethod) {
-		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		PaymentAuthorizationWizard paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
 		paymentAuthorizationWizard.completePaymentAuthorization(paymentMethod);
+	}
+
+	/**
+	 * Accepts Cancel Reauthroization.
+	 *
+	 * @param paymentMethod payment source name
+	 */
+	@And("^I accept Cancel Reauthorization warning$")
+	public void acceptCancelReAuthorization(final String paymentMethod) {
+		PaymentAuthorizationWizard paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		paymentAuthorizationWizard.cancelFailedPaymentAuthorization(paymentMethod);
 	}
 
 	/**
@@ -1113,7 +1621,7 @@ public class OrderDefinition {
 	@When("^I set order shipment discount to (.+)$")
 	public void setOrderShipmentDiscountValue(final String discount) {
 		orderEditor.setLessShipmentDiscountValue(discount);
-		saveAllChangesAndReload();
+		completePaymentAuthorization(ORIGINAL_PAYMENT_SOURCE);
 	}
 
 	/**
@@ -1124,12 +1632,16 @@ public class OrderDefinition {
 	@When("^I set order Shipping Cost value to (.+)$")
 	public void setOrderShippingCost(final String cost) {
 		orderEditor.setShippingCostValue(cost);
-		saveAllChangesAndReload();
+		completePaymentAuthorization(ORIGINAL_PAYMENT_SOURCE);
 	}
 
-	private void saveAllChangesAndReload() {
-		catalogManagementActionToolbar.saveAll();
-		catalogManagementActionToolbar.clickReloadActiveEditor();
+	/**
+	 * Resets order Shipping Cost value to 0
+	 */
+	@When("^I reset order Shipping Cost value to 0$")
+	public void resetOrderShippingCost() {
+		orderEditor.setShippingCostValue("0");
+		customerServiceActionToolbar.clickSaveAllButton();
 	}
 
 	private void closeOrderSearchResultPaneIfOpen() {
@@ -1150,4 +1662,63 @@ public class OrderDefinition {
 		}
 	}
 
+	/**
+	 * Verifies Payment Summary values.
+	 *
+	 * @param paymentSummaryMap payment summary map.
+	 */
+	@Then("^Payment Summary should have the following totals$")
+	public void verifyPaymentSummary(final Map<String, String> paymentSummaryMap) {
+		clickPaymentsTab();
+		orderEditor.verifyPaymentSummary(paymentSummaryMap);
+	}
+
+	/**
+	 * Verifies the completion of refund is impossible.
+	 *
+	 * @param errorMessage expected error message
+	 */
+	@And("^I cannot complete refund with error message (.+)$")
+	public void verifyRefundCompletionImpossible(final String errorMessage) {
+		createRefundWizard.verifyRefundButtonEnabled();
+		createRefundWizard.clickNextInDialog();
+		createRefundWizard.verifyPaymentError(errorMessage);
+	}
+
+	/**
+	 * Verifies Authorize Exchange button is enabled.
+	 */
+	@Then("^Authorize Exchange button should be enabled$")
+	public void verifyAuthorizeExchangeButtonIsEnabled() {
+		createExchangeWizard.verifyAuthorizeButtonIsEnabled();
+	}
+
+	/**
+	 * Verifies Authorize Exchange button is disabled on previous page.
+	 */
+	@Then("^Authorize Exchange button should be disabled on previous page$")
+	public void verifyAuthorizeExchangeButtonIsDisabledOnPreviousPage() {
+		createExchangeWizard.clickBackInDialog();
+		createExchangeWizard.verifyAuthorizeButtonIsDisabled();
+	}
+
+	private void clickSummaryTab() {
+		orderEditor.clickTab("Summary");
+	}
+
+	private void clickDetailsTab() {
+		orderEditor.clickTab("Details");
+	}
+
+	private void clickPaymentsTab() {
+		orderEditor.clickTab("Payments");
+	}
+
+	private void clickReturnsAndExchangeTab() {
+		orderEditor.clickTab("Returns and exchanges");
+	}
+
+	private void clickNotesTab() {
+		orderEditor.clickTab("Notes");
+	}
 }

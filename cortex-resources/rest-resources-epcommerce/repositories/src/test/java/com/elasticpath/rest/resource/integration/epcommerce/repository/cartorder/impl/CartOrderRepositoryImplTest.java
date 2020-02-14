@@ -3,7 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
-import static junit.framework.TestCase.assertTrue;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.CartOrderRepositoryImpl.ORDER_WITH_GUID_NOT_FOUND;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil.createShipmentDetailsId;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -11,10 +13,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil.createShipmentDetailsId;
-
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.PersistenceException;
@@ -36,11 +34,9 @@ import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
-import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
-import com.elasticpath.rest.test.AssertExecutionResult;
 import com.elasticpath.service.cartorder.CartOrderCouponService;
 import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.cartorder.CartOrderShippingService;
@@ -103,25 +99,9 @@ public class CartOrderRepositoryImplTest {
 	 */
 	@Test
 	public void testFindByStoreCodeAndGuid() {
-		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
-
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
 
-		ExecutionResult<CartOrder> result = repository.findByGuid(STORE_CODE, CART_ORDER_GUID);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isSuccessful()
-				.data(cartOrder);
-	}
-
-	/**
-	 * Test the behaviour of find by guid.
-	 */
-	@Test
-	public void testFindByStoreCodeAndGuidAsSingle() {
-		allowingCartOrderStoreCodeToBe(STORE_CODE);
-
-		repository.findByGuidAsSingle(STORE_CODE, CART_ORDER_GUID)
+		repository.findByGuid(STORE_CODE, CART_ORDER_GUID)
 				.test()
 				.assertNoErrors()
 				.assertValue(cartOrder);
@@ -132,25 +112,10 @@ public class CartOrderRepositoryImplTest {
 	 */
 	@Test
 	public void testFindByStoreCodeAndGuidNotFound() {
-
-		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(null);
-
-		ExecutionResult<CartOrder> result = repository.findByGuid(STORE_CODE, CART_ORDER_GUID);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isFailure()
-				.resourceStatus(ResourceStatus.NOT_FOUND);
-	}
-
-	/**
-	 * Test the behaviour of find by guid not found.
-	 */
-	@Test
-	public void testFindByStoreCodeAndGuidNotFoundAsSingle() {
 		String errorMsg = String.format("No cart order with GUID %s was found in store %s.", CART_ORDER_GUID, STORE_CODE);
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(null);
 
-		repository.findByGuidAsSingle(STORE_CODE, CART_ORDER_GUID)
+		repository.findByGuid(STORE_CODE, CART_ORDER_GUID)
 				.test()
 				.assertError(ResourceOperationFailure.notFound(errorMsg));
 	}
@@ -163,7 +128,7 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderService.findByShoppingCartGuid(CART_GUID)).thenReturn(cartOrder);
 
-		repository.findByCartGuidSingle(CART_GUID)
+		repository.findByCartGuid(CART_GUID)
 				.test()
 				.assertValue(cartOrder);
 	}
@@ -176,7 +141,7 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderService.findByShoppingCartGuid(CART_GUID)).thenReturn(null);
 
-		repository.findByCartGuidSingle(CART_GUID)
+		repository.findByCartGuid(CART_GUID)
 				.test()
 				.assertError(ResourceOperationFailure.notFound(String.format(ORDER_WITH_CART_GUID_NOT_FOUND, CART_GUID)));
 	}
@@ -203,7 +168,7 @@ public class CartOrderRepositoryImplTest {
 	public void testFindByShipmentDetailsIdWithInvalidId() {
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, INVALID_CART_ORDER_ID)).thenReturn(null);
 
-		String errorMsg = String.format(CartOrderRepositoryImpl.ORDER_WITH_GUID_NOT_FOUND, INVALID_CART_ORDER_ID, STORE_CODE);
+		String errorMsg = String.format(ORDER_WITH_GUID_NOT_FOUND, INVALID_CART_ORDER_ID, STORE_CODE);
 		repository.findByShipmentDetailsId(STORE_CODE, createShipmentDetailsId(INVALID_CART_ORDER_ID, DELIVERY_ID))
 				.test()
 				.assertError(createErrorCheckPredicate(errorMsg, ResourceStatus.NOT_FOUND));
@@ -217,22 +182,7 @@ public class CartOrderRepositoryImplTest {
 		List<String> listOfCartOrderGuids = Collections.singletonList(CART_ORDER_GUID);
 		when(cartOrderService.findCartOrderGuidsByCustomerGuid(STORE_CODE, CUSTOMER_GUID)).thenReturn(listOfCartOrderGuids);
 
-		ExecutionResult<Collection<String>> result = repository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMER_GUID);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isSuccessful()
-				.data(listOfCartOrderGuids);
-	}
-
-	/**
-	 * Test the behaviour of find cart order guids by customer.
-	 */
-	@Test
-	public void testFindCartOrderGuidsByCustomerAsObservable() {
-		List<String> listOfCartOrderGuids = Collections.singletonList(CART_ORDER_GUID);
-		when(cartOrderService.findCartOrderGuidsByCustomerGuid(STORE_CODE, CUSTOMER_GUID)).thenReturn(listOfCartOrderGuids);
-
-		repository.findCartOrderGuidsByCustomerAsObservable(STORE_CODE, CUSTOMER_GUID)
+		repository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMER_GUID)
 				.test()
 				.assertNoErrors()
 				.assertValueSequence(listOfCartOrderGuids);
@@ -243,24 +193,10 @@ public class CartOrderRepositoryImplTest {
 	 */
 	@Test
 	public void testFindCartOrderGuidsByCustomerWhenNoneFound() {
-		when(cartOrderService.findCartOrderGuidsByCustomerGuid(STORE_CODE, CUSTOMER_GUID)).thenReturn(null);
-
-		ExecutionResult<Collection<String>> result = repository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMER_GUID);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isFailure()
-				.resourceStatus(ResourceStatus.NOT_FOUND);
-	}
-
-	/**
-	 * Test the behaviour of find cart order guids by customer when none found.
-	 */
-	@Test
-	public void testFindCartOrderGuidsByCustomerWhenNoneFoundAsObservable() {
 		String errorMsg = String.format("No cart orders for customer with GUID %s were found in store %s.", CUSTOMER_GUID, STORE_CODE);
 		when(cartOrderService.findCartOrderGuidsByCustomerGuid(STORE_CODE, CUSTOMER_GUID)).thenReturn(null);
 
-		repository.findCartOrderGuidsByCustomerAsObservable(STORE_CODE, CUSTOMER_GUID)
+		repository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMER_GUID)
 				.test()
 				.assertError(ResourceOperationFailure.notFound(errorMsg));
 	}
@@ -300,22 +236,7 @@ public class CartOrderRepositoryImplTest {
 		final CartOrder savedCartOrder = mock(CartOrder.class, "saved");
 		when(cartOrderService.saveOrUpdate(cartOrder)).thenReturn(savedCartOrder);
 
-		ExecutionResult<CartOrder> result = repository.saveCartOrder(cartOrder);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isSuccessful()
-				.data(savedCartOrder);
-	}
-
-	/**
-	 * Test the behaviour of save cart order.
-	 */
-	@Test
-	public void testSaveCartOrderAsSingle() {
-		final CartOrder savedCartOrder = mock(CartOrder.class, "saved");
-		when(cartOrderService.saveOrUpdate(cartOrder)).thenReturn(savedCartOrder);
-
-		repository.saveCartOrderAsSingle(cartOrder)
+		repository.saveCartOrder(cartOrder)
 				.test()
 				.assertNoErrors()
 				.assertValue(savedCartOrder);
@@ -329,24 +250,9 @@ public class CartOrderRepositoryImplTest {
 	public void testSaveCartOrderWithException() {
 		when(cartOrderService.saveOrUpdate(cartOrder)).thenThrow(PersistenceException.class);
 
-		ExecutionResult<CartOrder> result = repository.saveCartOrder(cartOrder);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isFailure()
-				.resourceStatus(ResourceStatus.SERVER_ERROR);
-	}
-
-	/**
-	 * Test the behaviour of save cart order with exception.
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testSaveCartOrderWithExceptionAsSingle() {
-		when(cartOrderService.saveOrUpdate(cartOrder)).thenThrow(PersistenceException.class);
-
-		repository.saveCartOrderAsSingle(cartOrder)
+		repository.saveCartOrder(cartOrder)
 				.test()
-				.assertError(PersistenceException.class);
+				.assertError(ResourceOperationFailure.serverError("Unable to save cart order."));
 	}
 
 	/**
@@ -362,12 +268,10 @@ public class CartOrderRepositoryImplTest {
 		when(cartOrderCouponService.populateCouponCodesOnShoppingCart(shoppingCart, cartOrder)).thenReturn(enrichedShoppingCart);
 		when(cartOrderShippingService.populateAddressAndShippingFields(enrichedShoppingCart, cartOrder)).thenReturn(enrichedShoppingCart);
 
-		ExecutionResult<ShoppingCart> result = repository.getEnrichedShoppingCart(STORE_CODE, CART_ORDER_GUID,
-				CartOrderRepository.FindCartOrder.BY_ORDER_GUID);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isSuccessful()
-				.data(enrichedShoppingCart);
+		repository.getEnrichedShoppingCart(STORE_CODE, CART_ORDER_GUID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID)
+				.test()
+				.assertNoErrors()
+				.assertValue(enrichedShoppingCart);
 	}
 
 	/**
@@ -377,12 +281,10 @@ public class CartOrderRepositoryImplTest {
 	public void testGetEnrichedShoppingCartWhenOrderNotFound() {
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(null);
 
-		ExecutionResult<ShoppingCart> result = repository.getEnrichedShoppingCart(STORE_CODE, CART_ORDER_GUID,
-				CartOrderRepository.FindCartOrder.BY_ORDER_GUID);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isFailure()
-				.resourceStatus(ResourceStatus.NOT_FOUND);
+		repository.getEnrichedShoppingCart(STORE_CODE, CART_ORDER_GUID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID)
+				.test()
+				.assertError(ResourceOperationFailure.notFound(String.format(ORDER_WITH_GUID_NOT_FOUND, CART_ORDER_GUID, STORE_CODE)))
+				.assertNoValues();
 	}
 
 	/**
@@ -393,88 +295,36 @@ public class CartOrderRepositoryImplTest {
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
 		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.error(ResourceOperationFailure.notFound("not found")));
-		ExecutionResult<ShoppingCart> result = repository.getEnrichedShoppingCart(STORE_CODE, CART_ORDER_GUID,
-					CartOrderRepository.FindCartOrder.BY_ORDER_GUID);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isFailure()
-				.resourceStatus(ResourceStatus.NOT_FOUND);
-
+		repository.getEnrichedShoppingCart(STORE_CODE, CART_ORDER_GUID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID)
+				.test()
+				.assertError(ResourceOperationFailure.notFound("not found"))
+				.assertNoValues();
 	}
 
 	@Test
-	public void testUpdateShippingAddressReturnsTrueWhenAddressIsUpdated() {
-
-		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
-		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(true);
-		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
-
-		ExecutionResult<Boolean> result = repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
-
-		verify(cartOrderService, times(1)).saveOrUpdate(cartOrder);
-		AssertExecutionResult.assertExecutionResult(result)
-				.isSuccessful()
-				.data(true);
-	}
-
-	@Test
-	public void testCartIsUpdatedWhenAddressIsUpdatedAsCompletable() {
+	public void testCartIsUpdatedWhenAddressIsUpdated() {
 
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
 		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(true);
 
-		repository.updateShippingAddressOnCartOrderAsSingle(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).toCompletable()
+		repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).ignoreElement()
 				.test();
 
 		verify(cartOrderService, times(1)).saveOrUpdate(cartOrder);
 	}
 
 	@Test
-	public void testUpdateShippingAddressReturnsFalseWhenAddressIsNotUpdated() {
-
-		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
-		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(false);
-		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
-
-		ExecutionResult<Boolean> result = repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
-
-		verify(cartOrderService, times(0)).saveOrUpdate(any(CartOrder.class));
-		AssertExecutionResult.assertExecutionResult(result)
-				.isSuccessful()
-				.data(false);
-	}
-
-	@Test
-	public void testCartIsNotUpdatedWhenAddressIsNotUpdatedAsCompletable() {
+	public void testCartIsNotUpdatedWhenAddressIsNotUpdated() {
 
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
 		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(false);
 
-		repository.updateShippingAddressOnCartOrderAsSingle(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).toCompletable()
+		repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).ignoreElement()
 				.test();
 
 		verify(cartOrderService, times(0)).saveOrUpdate(any(CartOrder.class));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testUpdateShippingAddressReturnsServerErrorWhenFailsToSave() {
-
-		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
-		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(true);
-		when(cartOrderService.saveOrUpdate(cartOrder)).thenThrow(EpPersistenceException.class);
-		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
-
-		ExecutionResult<Boolean> result = repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
-
-		AssertExecutionResult.assertExecutionResult(result)
-				.isFailure()
-				.resourceStatus(ResourceStatus.SERVER_ERROR);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -487,9 +337,9 @@ public class CartOrderRepositoryImplTest {
 		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(true);
 		when(cartOrderService.saveOrUpdate(cartOrder)).thenThrow(EpPersistenceException.class);
 
-		repository.updateShippingAddressOnCartOrderAsSingle(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).toCompletable()
+		repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).ignoreElement()
 				.test()
-				.assertError(EpPersistenceException.class);
+				.assertError(ResourceOperationFailure.serverError("Unable to save cart order."));
 	}
 
 	@Test
@@ -500,10 +350,12 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderCouponAutoApplier.filterAndAutoApplyCoupons(any(CartOrder.class), any(Store.class), anyString())).thenReturn(true);
 
-		ExecutionResult<Boolean> booleanExecutionResult = repository.filterAndAutoApplyCoupons(cartOrder, store, customerEmail);
+		repository.filterAndAutoApplyCoupons(cartOrder, store, customerEmail)
+				.test()
+				.assertNoErrors()
+				.assertValue(true);
 
 		verify(cartOrderCouponAutoApplier).filterAndAutoApplyCoupons(any(CartOrder.class), any(Store.class), anyString());
-		assertTrue(booleanExecutionResult.getData());
 	}
 
 	private void allowingValidCartOrder() {

@@ -48,11 +48,12 @@
 		<module>ep-test-application</module>
 
 		<!-- payment gateway specific projects -->
-		<module>payment-gateway-connectivity</module>
 		<module>jms</module>
 		<module>tax-calculation-connectivity</module>
 		<module>shipping-calculation-connectivity</module>
 		<module>data-population</module>
+		<module>payment-connectivity</module>
+		<module>payment-api</module>
 	</modules>
 
 	<distributionManagement>

@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.events.SelectionEvent;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.policy.PolicyPlugin;
 import com.elasticpath.cmclient.pricelistmanager.PriceListManagerMessages;
 import com.elasticpath.cmclient.pricelistmanager.controller.PriceListEditorController;
@@ -41,7 +41,7 @@ public class BaseAmountSearchSection  extends AbstractBaseAmountFilterSection {
 	public BaseAmountSearchSection(final PriceListEditorController controller) {
 		super(controller, controller.getBaseAmountsFilter());
 		PolicyPlugin.getDefault().registerStatePolicyTarget(this);
-		SettingsService settingsService = ServiceLocator.getService(ContextIdNames.SETTINGS_SERVICE);
+		SettingsService settingsService = BeanLocator.getSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class);
 		numOfResults = 
 			Integer.valueOf(settingsService.getSettingValue("COMMERCE/APPSPECIFIC/RCP/PRICING/maximumBaseAmounts").getValue()); //$NON-NLS-1$
 		searchPerformedListeners = new ArrayList<>();

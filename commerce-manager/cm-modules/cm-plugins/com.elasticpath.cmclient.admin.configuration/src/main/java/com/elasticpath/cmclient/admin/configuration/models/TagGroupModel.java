@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.elasticpath.cmclient.admin.configuration.listener.TagGroupUpdateListener;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.tags.domain.TagDefinition;
 import com.elasticpath.tags.domain.TagDictionary;
@@ -27,13 +27,16 @@ public class TagGroupModel {
 
 	private final List<TagGroupUpdateListener> tagGroupUpdateListeners = new LinkedList<>();
 
-	private final TagGroupService tagGroupService = ServiceLocator.getService(ContextIdNames.TAG_GROUP_SERVICE);
+	private final TagGroupService tagGroupService = BeanLocator.getSingletonBean(ContextIdNames.TAG_GROUP_SERVICE, TagGroupService.class);
 
-	private final TagDictionaryService tagDictionaryService = ServiceLocator.getService(ContextIdNames.TAG_DICTIONARY_SERVICE);
+	private final TagDictionaryService tagDictionaryService = BeanLocator.getSingletonBean(ContextIdNames.TAG_DICTIONARY_SERVICE,
+			TagDictionaryService.class);
 
-	private final TagValueTypeService tagValueTypeService = ServiceLocator.getService(ContextIdNames.TAG_VALUE_TYPE_SERVICE);
+	private final TagValueTypeService tagValueTypeService = BeanLocator.getSingletonBean(ContextIdNames.TAG_VALUE_TYPE_SERVICE,
+			TagValueTypeService.class);
 
-	private final TagDefinitionService tagDefinitionService = ServiceLocator.getService(ContextIdNames.TAG_DEFINITION_SERVICE);
+	private final TagDefinitionService tagDefinitionService = BeanLocator.getSingletonBean(ContextIdNames.TAG_DEFINITION_SERVICE,
+			TagDefinitionService.class);
 
 	private List<TagGroup> currentTagGroups;
 	private List<TagDictionary> allTagDictionaries;
@@ -118,13 +121,13 @@ public class TagGroupModel {
 		if (tagDefinition == null) {
 			return getAllTagDictionaries();
 		} else {
-		        List<TagDictionary> dictionariesForTag = new ArrayList<>();
-                        for (TagDictionary dict : getAllTagDictionaries()) {
-                                if (dict.getTagDefinitions().contains(tagDefinition)) {
-                                        dictionariesForTag.add(dict);
-                                }
-                        }
-                        return dictionariesForTag;
+			List<TagDictionary> dictionariesForTag = new ArrayList<>();
+			for (TagDictionary dict : getAllTagDictionaries()) {
+				if (dict.getTagDefinitions().contains(tagDefinition)) {
+					dictionariesForTag.add(dict);
+				}
+			}
+			return dictionariesForTag;
 		}
 	}
 

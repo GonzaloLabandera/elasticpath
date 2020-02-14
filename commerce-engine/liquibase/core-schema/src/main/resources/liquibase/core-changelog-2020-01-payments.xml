@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-01-payments.xml">
+
+	<changeSet id="2020-01-create-order-payment-instrument-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Order Payment Instrument Table</comment>
+		<createTable tableName="TORDERPAYMENTINSTRUMENT">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="PAYMENT_INSTRUMENT_GUID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="LIMIT_AMOUNT" type="DECIMAL(19,2)"/>
+			<column name="ORDER_NUMBER" type="VARCHAR(64)">
+				<constraints foreignKeyName="OPI_ORDER_NUMBER_FK" references="TORDER(ORDER_NUMBER)"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TORDERPAYMENTINSTRUMENT"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="2020-01-create-cart-order-payment-instrument-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Cart Order Payment Instrument Table</comment>
+		<createTable tableName="TCARTORDERPAYMENTINSTRUMENT">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="PAYMENT_INSTRUMENT_GUID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="LIMIT_AMOUNT" type="DECIMAL(19,2)"/>
+			<column name="CART_ORDER_UID" type="BIGINT">
+				<constraints foreignKeyName="COPI_CARTORDER_FK" references="TCARTORDER(UIDPK)"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TCARTORDERPAYMENTINSTRUMENT"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="2020-01-create-order-payments-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Order Payments Table</comment>
+		<createTable tableName="TORDERPAYMENTS">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="CREATED_DATE" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+			<column name="TYPE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="STATUS" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ORDER_NUMBER" type="VARCHAR(64)">
+				<constraints foreignKeyName="OP_ORDER_NUMBER_FK" references="TORDER(ORDER_NUMBER)"/>
+			</column>
+			<column name="AMOUNT" type="DECIMAL(19,2)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CURRENCY_CODE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="PAYMENT_INSTRUMENT_GUID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="PARENT_ORDER_PAYMENT_GUID" type="VARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="IS_ORIGINAL_PI" type="BOOLEAN">
+				<constraints nullable="true"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TORDERPAYMENTS"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="2020-01-create-order-payment-data-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Order Payment Data Table</comment>
+		<createTable tableName="TORDERPAYMENTDATA">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="DATA_KEY" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="DATA_VALUE" type="VARCHAR(1000)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ORDER_PAYMENT_UID" type="BIGINT">
+				<constraints foreignKeyName="OPD_OP_FK" references="TORDERPAYMENTS(UIDPK)"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TORDERPAYMENTDATA"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="2020-01-create-customer-payment-instrument-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Customer Payment Instrument Table</comment>
+		<createTable tableName="TCUSTOMERPAYMENTINSTRUMENT">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="PAYMENT_INSTRUMENT_GUID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CUSTOMER_UID" type="BIGINT">
+				<constraints foreignKeyName="CUST_PI_FK" references="TCUSTOMER(UIDPK)"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TCUSTOMERPAYMENTINSTRUMENT"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="2020-01-create-store-payment-provider-config-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Store Payment Provider Config Table</comment>
+		<createTable tableName="TSTOREPAYMENTPROVIDERCONFIG">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="PAYMENT_PROVIDER_CONFIG_GUID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="STORECODE" type="VARCHAR(64)">
+				<constraints foreignKeyName="STORE_PPC_FK" references="TSTORE(STORECODE)"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TSTOREPAYMENTPROVIDERCONFIG"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="2020-01-create-payment-provider-config-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Payment Provider Config Table</comment>
+		<createTable tableName="TPAYMENTPROVIDERCONFIG">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="PAYMENT_PROVIDER_PLUGIN_ID" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CONFIGURATION_NAME" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="STATUS" type="VARCHAR(64)" defaultValue="DRAFT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="DEFAULT_DISPLAY_NAME" type="VARCHAR(255)"/>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TPAYMENTPROVIDERCONFIG"/>
+			<column name="LAST_VALUE" valueNumeric="100000"/>
+		</insert>
+
+		<createIndex tableName="TPAYMENTPROVIDERCONFIG" indexName="I_PYMTPROVIDERPLUGIN_PPID">
+			<column name="PAYMENT_PROVIDER_PLUGIN_ID"/>
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="2020-01-create-payment-provider-config-data-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Payment Provider Config Data Table</comment>
+		<createTable tableName="TPAYMENTPROVIDERCONFIGDATA">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="PAYMENTPROVIDERCONFIG_UID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CONFIG_KEY" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CONFIG_DATA" type="VARCHAR(1000)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TPAYMENTPROVIDERCONFIGDATA"/>
+			<column name="LAST_VALUE" valueNumeric="100000"/>
+		</insert>
+
+		<addForeignKeyConstraint constraintName="FK_TPAYMENTCONFIG_DATA_UID"
+								 baseTableName="TPAYMENTPROVIDERCONFIGDATA"
+								 baseColumnNames="PAYMENTPROVIDERCONFIG_UID"
+								 referencedTableName="TPAYMENTPROVIDERCONFIG"
+								 referencedColumnNames="UIDPK"/>
+	</changeSet>
+
+	<changeSet id="2020-01-create-payment-instrument-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Payment Instrument Table</comment>
+		<createTable tableName="TPAYMENTINSTRUMENT">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="PAYMENTPROVIDERCONFIG_UID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="IS_SUPPORTING_MULTI_CHARGES" type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
+			<column name="IS_SINGLE_RESERVE_PER_PI" type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
+			<column name="BILLING_ADDRESS_GUID" type="VARCHAR(64)">
+				<constraints nullable="true"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TPAYMENTINSTRUMENT"/>
+			<column name="LAST_VALUE" valueNumeric="100000"/>
+		</insert>
+
+		<addForeignKeyConstraint constraintName="FK_TPMNTPROVIDER_INSTRMNT_UID"
+								 baseTableName="TPAYMENTINSTRUMENT"
+								 baseColumnNames="PAYMENTPROVIDERCONFIG_UID"
+								 referencedTableName="TPAYMENTPROVIDERCONFIG"
+								 referencedColumnNames="UIDPK"/>
+	</changeSet>
+
+	<changeSet id="2020-01-create-payment-instrument-data-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Payment Instrument Data Table</comment>
+		<createTable tableName="TPAYMENTINSTRUMENTDATA">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="PAYMENTINSTRUMENT_UID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CONFIG_KEY" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CONFIG_DATA" type="VARCHAR(1000)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TPAYMENTINSTRUMENTDATA"/>
+			<column name="LAST_VALUE" valueNumeric="100000"/>
+		</insert>
+
+		<addForeignKeyConstraint constraintName="FK_TPYMTINSTRAMENT_DATA_UID"
+								 baseTableName="TPAYMENTINSTRUMENTDATA"
+								 baseColumnNames="PAYMENTINSTRUMENT_UID"
+								 referencedTableName="TPAYMENTINSTRUMENT"
+								 referencedColumnNames="UIDPK"/>
+	</changeSet>
+
+	<changeSet id="2020-01-create-payment-localized-properties-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Payment Localized Properties Table</comment>
+		<createTable tableName="TPAYMENTLOCALIZEDPROPERTIES">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="OBJECT_UID" type="BIGINT">
+				<constraints nullable="true"/>
+			</column>
+			<column name="LOCALIZED_PROPERTY_KEY" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="VALUE" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="TYPE" type="VARCHAR(31)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TPAYMENTLOCALIZEDPROPERTIES"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="2020-01-create-customer-default-payment-instrument-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the Customer Default Payment Instrument Table</comment>
+		<createTable tableName="TCUSTDEFAULTPAYMENTINSTRUMENT">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="CUSTOMER_UID" type="BIGINT">
+				<constraints foreignKeyName="CUST_CDPI_FK" references="TCUSTOMER(UIDPK)" nullable="false" unique="true"/>
+			</column>
+			<column name="CUSTOMER_PYMT_INSTRUMENT_UID" type="BIGINT">
+				<constraints foreignKeyName="CPI_CDPI_FK" references="TCUSTOMERPAYMENTINSTRUMENT(UIDPK)" nullable="false" unique="true"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TCUSTDEFAULTPAYMENTINSTRUMENT"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="2020-01-add-currency-code-to-payment-instrument" author="elasticpath" context="pre-app-upgrade">
+		<comment>Add currency code to payment instrument</comment>
+		<addColumn tableName="TORDERPAYMENTINSTRUMENT">
+			<column name="CURRENCY_CODE" type="VARCHAR(64)"/>
+		</addColumn>
+		<addColumn tableName="TCARTORDERPAYMENTINSTRUMENT">
+			<column name="CURRENCY_CODE" type="VARCHAR(64)"/>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="2020-01-restore-nullability-to-payment-config-data-column" author="elasticpath" context="pre-app-upgrade">
+		<dropNotNullConstraint tableName="TPAYMENTPROVIDERCONFIGDATA" columnName="CONFIG_DATA" columnDataType="VARCHAR(1000)"/>
+	</changeSet>
+
+</databaseChangeLog>

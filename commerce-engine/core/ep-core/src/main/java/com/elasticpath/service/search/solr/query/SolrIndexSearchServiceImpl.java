@@ -22,7 +22,7 @@ import com.elasticpath.service.search.query.SearchCriteria;
  * indexes.
  */
 public class SolrIndexSearchServiceImpl implements IndexSearchService {
-	
+
 	private static final Logger LOG = Logger.getLogger(SolrIndexSearchServiceImpl.class);
 
 	private SpellIndexSearcher spellIndexSearcher;
@@ -31,7 +31,7 @@ public class SolrIndexSearchServiceImpl implements IndexSearchService {
 
 	/**
 	 * Returns an immutable search result object that is pageable.
-	 * 
+	 *
 	 * @param searchCriteria the search criteria
 	 * @return search result
 	 */
@@ -41,8 +41,8 @@ public class SolrIndexSearchServiceImpl implements IndexSearchService {
 		// Create and populate a Solr search result object that will
 		// actually search when the user request result pages.
 
-		SolrIndexSearchResult result = beanFactory.getBean(ContextIdNames.SOLR_SEARCH_RESULT);
-		
+		SolrIndexSearchResult result = beanFactory.getPrototypeBean(ContextIdNames.SOLR_SEARCH_RESULT, SolrIndexSearchResult.class);
+
 		// Copy the search criteria so they cannot be modified externally.
 		SearchCriteria clonedSearchCriteria = searchCriteria;
 		try {
@@ -51,13 +51,13 @@ public class SolrIndexSearchServiceImpl implements IndexSearchService {
 			LOG.warn("Unable to clone search criteria, using given instance, continuing with original object", e);
 		}
 		result.setSearchCriteria(clonedSearchCriteria);
-		
+
 		return result;
 	}
 
 	/**
 	 * Suggests alternate query strings based on the given search criteria.
-	 * 
+	 *
 	 * @param searchCriteria the search criteria to base the suggestions on
 	 * @return alternate query strings
 	 */
@@ -71,19 +71,19 @@ public class SolrIndexSearchServiceImpl implements IndexSearchService {
 		return suggestionsList;
 	}
 
-	
+
 	/**
 	 * Sets the spell index searcher.
-	 * 
+	 *
 	 * @param spellIndexSearcher the spell index searcher
 	 */
 	public void setSpellIndexSearcher(final SpellIndexSearcher spellIndexSearcher) {
 		this.spellIndexSearcher = spellIndexSearcher;
 	}
-	
+
 	/**
 	 * Searches the index with the given search criteria.
-	 * 
+	 *
 	 * @param searchCriteria the search criteria
 	 * @param startIndex start index
 	 * @param pageSize page size
@@ -93,7 +93,7 @@ public class SolrIndexSearchServiceImpl implements IndexSearchService {
 	public IndexSearchResult search(final SearchCriteria searchCriteria, final int startIndex, final int pageSize) {
 		// Create and populate a Solr search result object that will
 		// actually search when the user request result pages.
-		SolrIndexSearchResult result = beanFactory.getBean(ContextIdNames.SOLR_SEARCH_RESULT);
+		SolrIndexSearchResult result = beanFactory.getPrototypeBean(ContextIdNames.SOLR_SEARCH_RESULT, SolrIndexSearchResult.class);
 
 		// Copy the search criteria so they cannot be modified externally.
 		SearchCriteria clonedSearchCriteria = searchCriteria;

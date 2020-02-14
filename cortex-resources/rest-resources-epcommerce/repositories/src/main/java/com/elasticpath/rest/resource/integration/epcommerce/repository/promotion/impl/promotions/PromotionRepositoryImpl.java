@@ -33,8 +33,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied.AppliedPromotionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.awares.AppliedPromotionRuleAwareOrderAdapter;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.awares.AppliedPromotionRuleAwareShippingOptionAdapter;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.awares
-		.AppliedPromotionRuleAwareShoppingCartPricingSnapshotAdapter;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.awares.AppliedPromotionRuleAwareShoppingCartPricingSnapshotAdapter;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.predicates.AppliedShippingRulePredicate;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.predicates.CartLineItemRulePredicate;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.predicates.CartRulePredicate;
@@ -195,7 +194,7 @@ public class PromotionRepositoryImpl implements PromotionRepository {
 	@Override
 	@CacheResult
 	public Single<PromotionEntity> getPromotionEntity(final String scope, final String purchaseId, final String promotionId) {
-		return orderRepository.findByGuidAsSingle(scope, purchaseId)
+		return orderRepository.findByGuid(scope, purchaseId)
 				.flatMap(order -> getPromotionEntity(order, promotionId));
 	}
 

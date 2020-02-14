@@ -45,7 +45,7 @@ public class PriceListDescriptorDtoAssembler extends AbstractDtoAssembler<PriceL
 
 	@Override
 	public PriceListDescriptor getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 	}
 
 	@Override

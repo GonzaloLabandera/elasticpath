@@ -8,7 +8,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.elasticpath.cmclient.admin.users.AdminUsersImageRegistry;
 import com.elasticpath.cmclient.admin.users.AdminUsersMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.wizard.AbstractEpWizard;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cmuser.UserRole;
@@ -70,7 +70,7 @@ public class RoleWizard extends AbstractEpWizard<UserRole> {
 		}
 		this.userRole = userRole;
 		this.setPagesTitleBlank(title + " - " + AdminUsersMessages.get().TitleStep); //$NON-NLS-1$
-		this.service = (UserRoleService) ServiceLocator.getService(ContextIdNames.USER_ROLE_SERVICE);
+		this.service = BeanLocator.getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 	}
 
 	@Override

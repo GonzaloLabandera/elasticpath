@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+	<named-query name="FIND_ORDER_PAYMENT_INSTRUMENT_BY_GUID">
+		<query>
+			SELECT opi
+			FROM OrderPaymentInstrumentImpl opi
+			WHERE opi.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_ORDER_PAYMENT_INSTRUMENT_BY_ORDER_NUMBER_ALL">
+		<query>
+			SELECT opi
+			FROM OrderPaymentInstrumentImpl opi
+			WHERE opi.orderNumber = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_ORDER_PAYMENT_INSTRUMENT_BY_ORDER_NUMBER_AND_PAYMENT_INSTRUMENT_GUID">
+		<query>
+			SELECT opi
+			FROM OrderPaymentInstrumentImpl opi
+			WHERE opi.orderNumber = ?1 AND opi.paymentInstrumentGuid = ?2
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_ORDER_PAYMENT_INSTRUMENT_BY_ORDER_NUMBER">
+		<query>
+			DELETE FROM OrderPaymentInstrumentImpl opi
+			WHERE opi.orderNumber = ?1
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_ALL_ORDER_PAYMENT_INSTRUMENTS_BY_ORDER_UID_LIST">
+		<query>
+			DELETE FROM OrderPaymentInstrumentImpl opi
+			WHERE opi.orderNumber IN (
+			SELECT o.orderNumber
+			FROM OrderImpl o
+			WHERE o.uidPk IN (:list)
+			)
+		</query>
+	</named-query>
+
+	<named-query name="FIND_ORDER_PAYMENT_INSTRUMENT_BY_UID">
+		<query>
+			SELECT opi
+			FROM OrderPaymentInstrumentImpl opi
+			WHERE opi.uidPk = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_CART_ORDER_PAYMENT_INSTRUMENTS_BY_CART_ORDER_ALL">
+		<query>
+			SELECT copi
+			FROM CartOrderPaymentInstrumentImpl copi
+			WHERE copi.cartOrderUid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_ALL_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPER_UID_LIST">
+		<query>
+			DELETE FROM CartOrderPaymentInstrumentImpl copi
+			WHERE copi.cartOrderUid IN (
+			SELECT co.uidPk
+			FROM ShoppingCartMementoImpl sc, CartOrderImpl co
+			WHERE sc.shopperUid IN (:list) AND co.shoppingCartGuidInternal = sc.guid
+			)
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_ALL_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPING_CART_GUID">
+		<query>
+			DELETE FROM CartOrderPaymentInstrumentImpl copi
+			WHERE copi.cartOrderUid IN (
+			SELECT co.uidPk
+			FROM CartOrderImpl co
+			WHERE co.shoppingCartGuidInternal = ?1
+			)
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPING_CART_GUIDS">
+		<query>
+			DELETE FROM CartOrderPaymentInstrumentImpl copi
+			WHERE copi.cartOrderUid IN (
+			SELECT co.uidPk
+			FROM CartOrderImpl co
+			WHERE co.shoppingCartGuidInternal IN (:list)
+			)
+		</query>
+	</named-query>
+
+	<named-query name="FIND_CART_ORDER_PAYMENT_INSTRUMENT_BY_UID">
+		<query>
+			SELECT copi
+			FROM CartOrderPaymentInstrumentImpl copi
+			WHERE copi.uidPk = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_CART_ORDER_PAYMENT_INSTRUMENT_BY_GUID">
+		<query>
+			SELECT copi
+			FROM CartOrderPaymentInstrumentImpl copi
+			WHERE copi.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_ORDER_PAYMENT_BY_UID">
+		<query>
+			SELECT op
+			FROM OrderPaymentImpl op
+			WHERE op.uidPk = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_ORDER_PAYMENT_BY_GUID">
+		<query>
+			SELECT op
+			FROM OrderPaymentImpl op
+			WHERE op.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_ORDER_PAYMENTS_BY_PAYMENT_INSTRUMENT_ALL">
+		<query>
+			SELECT op
+			FROM OrderPaymentImpl op
+			WHERE op.paymentInstrumentGuid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_ORDER_PAYMENTS_BY_ORDER_NUMBER_ALL">
+		<query>
+			SELECT op
+			FROM OrderPaymentImpl op
+			WHERE op.orderNumber = ?1
+			ORDER BY op.createdDate
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_ALL_ORDER_PAYMENTS_BY_ORDER_UID_LIST">
+		<query>
+			DELETE FROM OrderPaymentImpl op
+			WHERE op.orderNumber IN (
+			SELECT o.orderNumber
+			FROM OrderImpl o
+			WHERE o.uidPk IN (:list)
+			)
+		</query>
+	</named-query>
+
+
+	<named-query name="FIND_STORE_PAYMENT_PROVIDER_CONFIG_BY_UID">
+		<query>
+			SELECT sppc
+			FROM StorePaymentProviderConfigImpl sppc
+			WHERE sppc.uidPk = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_STORE_PAYMENT_PROVIDER_CONFIG_BY_GUID">
+		<query>
+			SELECT sppc
+			FROM StorePaymentProviderConfigImpl sppc
+			WHERE sppc.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_STORE_PAYMENT_PROVIDER_CONFIGS_BY_STORE_CODE">
+		<query>
+			SELECT sppc
+			FROM StorePaymentProviderConfigImpl sppc
+			WHERE sppc.storeCode = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_STORE_NAME_BY_PAYMENT_PROVIDER_CONFIG">
+		<query>
+			SELECT store.name
+			FROM StoreImpl store
+			WHERE store.code IN (
+			SELECT sppc.storeCode
+			FROM StorePaymentProviderConfigImpl sppc
+			WHERE sppc.paymentProviderConfigGuid = ?1
+			)
+		</query>
+	</named-query>
+
+	<named-query name="FIND_STORE_PAYMENT_PROVIDER_CONFIG_BY_PAYMENT_PROVIDER_CONFIG_GUID">
+		<query>
+			SELECT sppc
+			FROM StorePaymentProviderConfigImpl sppc
+			WHERE sppc.paymentProviderConfigGuid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_CUSTOMER_PAYMENT_INSTRUMENT_BY_UID">
+		<query>
+			SELECT cpi
+			FROM CustomerPaymentInstrumentImpl cpi
+			WHERE cpi.uidPk = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_CUSTOMER_PAYMENT_INSTRUMENT_BY_GUID">
+		<query>
+			SELECT cpi
+			FROM CustomerPaymentInstrumentImpl cpi
+			WHERE cpi.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_CUSTOMER_PAYMENT_INSTRUMENTS_BY_CUSTOMER_ALL">
+		<query>
+			SELECT cpi
+			FROM CustomerPaymentInstrumentImpl cpi
+			WHERE cpi.customerUid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_ALL_CUSTOMER_PAYMENT_INSTRUMENTS_BY_CUSTOMER">
+		<query>
+			DELETE FROM CustomerPaymentInstrumentImpl cpi
+			WHERE cpi.customerUid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_ALL_CUSTOMER_PAYMENT_INSTRUMENTS_BY_CUSTOMER_UID_LIST">
+		<query>
+			DELETE FROM CustomerPaymentInstrumentImpl cpi
+			WHERE cpi.customerUid IN (:list)
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_STORE_PAYMENT_PROVIDER_CONFIGS_BY_STORE_CODE">
+		<query>
+			DELETE FROM StorePaymentProviderConfigImpl sppc
+			WHERE sppc.storeCode = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER">
+		<query>
+			SELECT cdpi
+			FROM CustomerDefaultPaymentInstrumentImpl cdpi
+			WHERE cdpi.customerUid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER_PAYMENT_INSTRUMENT">
+		<query>
+			DELETE FROM CustomerDefaultPaymentInstrumentImpl cdpi
+			WHERE cdpi.customerPaymentInstrument.uidPk = ?1
+		</query>
+	</named-query>
+</entity-mappings>

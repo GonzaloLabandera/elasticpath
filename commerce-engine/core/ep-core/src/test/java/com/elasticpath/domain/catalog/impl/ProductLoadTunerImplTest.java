@@ -196,8 +196,11 @@ public class ProductLoadTunerImplTest {
 		BeanFactory beanFactory = mock(BeanFactory.class);
 		((ElasticPathImpl) ElasticPathImpl.getInstance()).setBeanFactory(beanFactory);
 
-		when(beanFactory.getBean("productSkuLoadTuner")).thenAnswer(invocation -> new ProductSkuLoadTunerImpl());
-		when(beanFactory.getBean("categoryLoadTuner")).thenAnswer(invocation -> new CategoryLoadTunerImpl());
-		when(beanFactory.getBean("productTypeLoadTuner")).thenAnswer(invocation -> new ProductTypeLoadTunerImpl());
+		when(beanFactory.getPrototypeBean("productSkuLoadTuner", ProductSkuLoadTuner.class))
+				.thenAnswer(invocation -> new ProductSkuLoadTunerImpl());
+		when(beanFactory.getPrototypeBean("categoryLoadTuner", CategoryLoadTuner.class))
+				.thenAnswer(invocation -> new CategoryLoadTunerImpl());
+		when(beanFactory.getPrototypeBean("productTypeLoadTuner", ProductTypeLoadTuner.class))
+				.thenAnswer(invocation -> new ProductTypeLoadTunerImpl());
 	}
 }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import static org.mockito.Mockito.never;
@@ -34,10 +38,14 @@ public class LogShoppingContextDateOverriddenActionTest {
 
 	private FinalizeCheckoutActionContext checkoutContext;
 
-	/** Tag name. */
+	/**
+	 * Tag name.
+	 */
 	private static final String SHOPPING_DATE_OVERRIDE_KEY = "SHOPPING_CONTEXT_DATE_OVERRIDE";
 
-	/** Expected note value. */
+	/**
+	 * Expected note value.
+	 */
 	private static final String EXPECTED_NOTE = "This order was placed with the SHOPPING_CONTEXT_DATE_OVERRIDE trait specified with a value of "
 			+ "date_value";
 
@@ -73,7 +81,7 @@ public class LogShoppingContextDateOverriddenActionTest {
 		CustomerSessionImpl customerSession = new CustomerSessionImpl();
 		customerSession.setCustomerTagSet(createTagSet(withOverrideTag));
 		CheckoutActionContext checkoutActionContext = new CheckoutActionContextImpl(
-			null, null, customerSession, null, false, false, null
+				null, null, customerSession, false, false, null, null
 		);
 		checkoutActionContext.setOrder(order);
 		checkoutContext = new FinalizeCheckoutActionContextImpl(checkoutActionContext);

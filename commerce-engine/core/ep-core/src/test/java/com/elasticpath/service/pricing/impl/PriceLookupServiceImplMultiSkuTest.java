@@ -135,7 +135,7 @@ public class PriceLookupServiceImplMultiSkuTest {
 		final TimeService timeService = mockery.mock(TimeService.class);
 		mockery.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.TIME_SERVICE);
+				allowing(beanFactory).getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 				will(returnValue(timeService));
 
 				allowing(timeService).getCurrentTime();
@@ -152,10 +152,10 @@ public class PriceLookupServiceImplMultiSkuTest {
 		multiSkuProductType.setMultiSku(true);
 		product.setProductType(multiSkuProductType);
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE, PriceImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE_TIER, PriceTierImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE_SCHEDULE, PriceScheduleImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICING_SCHEME, PricingSchemeImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE, Price.class, PriceImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class, PriceTierImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class, PriceScheduleImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class, PricingSchemeImpl.class);
 	}
 
 	@After

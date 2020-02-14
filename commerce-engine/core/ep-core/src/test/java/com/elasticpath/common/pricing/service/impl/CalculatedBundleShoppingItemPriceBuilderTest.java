@@ -15,14 +15,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableMap;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpSystemException;
@@ -119,10 +118,10 @@ public class CalculatedBundleShoppingItemPriceBuilderTest {
 		priceLookupFacade = context.mock(PriceLookupFacade.class);
 		productSkuLookup = context.mock(ProductSkuLookup.class);
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICING_SCHEME, PricingSchemeImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE, PriceImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE_SCHEDULE, PriceScheduleImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE_TIER, PriceTierImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class, PricingSchemeImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE, Price.class, PriceImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class, PriceScheduleImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class, PriceTierImpl.class);
 
 		calculatedBundleShoppingItemPriceBuilder = new CalculatedBundleShoppingItemPriceBuilder(priceLookupFacade, productSkuLookup, beanFactory);
 		calculatedBundleShoppingItemPriceBuilder.setBundleIdentifier(bundleIdentifier);

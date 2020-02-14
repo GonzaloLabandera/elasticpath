@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.promotions.CouponCollectionModel;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
@@ -112,7 +112,7 @@ public class CouponConfigWizardPage extends AbstractPolicyAwareWizardPage<Coupon
 	protected CouponConfigWizardPage(final String pageName, final String title) {
 		super(1, false, pageName, title, PromotionsMessages.get().CreatePromotionWizardCouponsPage_Description, new DataBindingContext());
 
-		this.couponConfig = ServiceLocator.getService(ContextIdNames.COUPON_CONFIG);
+		this.couponConfig = BeanLocator.getPrototypeBean(ContextIdNames.COUPON_CONFIG, CouponConfig.class);
 		CouponConfigPageModel emptyModel = new CouponConfigPageModel(couponConfig, new CouponCollectionModel());
 
 		this.couponUsageTypeController = new MultiUsePerOrderCouponConfigPageControlsController(new CouponUsageTypeUpdateValueStrategy());

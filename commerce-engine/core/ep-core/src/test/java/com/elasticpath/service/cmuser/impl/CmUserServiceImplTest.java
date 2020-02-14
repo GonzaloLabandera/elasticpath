@@ -19,12 +19,14 @@ import java.util.Map;
 
 import org.jmock.Expectations;
 import org.junit.Test;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EmailExistException;
 import com.elasticpath.commons.exception.EmailNonExistException;
+import com.elasticpath.commons.security.CmPasswordPolicy;
 import com.elasticpath.commons.security.impl.CmPasswordPolicyImpl;
 import com.elasticpath.commons.util.impl.PasswordGeneratorImpl;
 import com.elasticpath.domain.cmuser.CmUser;
@@ -35,9 +37,10 @@ import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.cmuser.UserNameExistException;
 import com.elasticpath.service.cmuser.UserRoleService;
-import com.elasticpath.service.order.impl.ReturnAndExchangeServiceImplTest.DummyTimeService;
+import com.elasticpath.service.order.impl.ReturnAndExchangeServiceImplOldTest.DummyTimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
@@ -78,8 +81,8 @@ public class CmUserServiceImplTest extends AbstractEPServiceTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.CM_PASSWORDENCODER, new ShaPasswordEncoder());
-		stubGetBean(ContextIdNames.CMUSER, CmUserImpl.class);
+		stubGetSingletonBean(ContextIdNames.CM_PASSWORDENCODER, PasswordEncoder.class, new ShaPasswordEncoder());
+		stubGetPrototypeBean(ContextIdNames.CMUSER, CmUser.class, CmUserImpl.class);
 
 		cmUserServiceImpl = new CmUserServiceImpl();
 		mockPersistenceEngine = getMockPersistenceEngine();
@@ -107,7 +110,7 @@ public class CmUserServiceImplTest extends AbstractEPServiceTestCase {
 
 		cmPasswordPolicy.setMinimumPasswordLengthProvider(new SimpleSettingValueProvider<>(minimumPasswordLength));
 
-		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
+		stubGetSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class, cmPasswordPolicy);
 
 		cmUserServiceImpl.setTimeService(new DummyTimeService());
 		cmUserServiceImpl.setMinimumPasswordHistoryLengthDaysProvider(new SimpleSettingValueProvider<>(minimumPasswordHistoryDays));
@@ -571,7 +574,7 @@ public class CmUserServiceImplTest extends AbstractEPServiceTestCase {
 			}
 		});
 
-		stubGetBean("cmUserService", cmUserServiceImpl);
+		stubGetSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class, cmUserServiceImpl);
 
 		this.userRoleSetup();
 		this.cmUserServiceImpl.resetUserPassword(email);

@@ -41,7 +41,8 @@ public class ShoppingItemDelegateFromShoppingCartValidatorImpl implements Shoppi
 					ProductSku productSku = entry.getValue();
 					ProductSku parentProductSku = shoppingCart.getParentProductSku(shoppingItem);
 
-					ShoppingItemValidationContext context = beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT);
+					ShoppingItemValidationContext context = beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT,
+							ShoppingItemValidationContext.class);
 					context.setProductSku(productSku);
 					context.setParentProductSku(parentProductSku);
 					context.setShopper(shoppingCart.getShopper());

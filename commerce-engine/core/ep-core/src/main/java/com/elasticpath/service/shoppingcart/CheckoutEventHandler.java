@@ -1,12 +1,9 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart;
 
-import java.util.Collection;
-
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 
 /**
@@ -18,28 +15,23 @@ public interface CheckoutEventHandler {
 
 	/**
 	 * This event occurs before any action is taken as part of the checkout process.
+	 *  @param shoppingCart the {@link ShoppingCart} being checked out
 	 *
-	 * @param shoppingCart the {@link ShoppingCart} being checked out
-	 * @param orderPayment information about the method of payment
 	 */
-	void preCheckout(ShoppingCart shoppingCart, OrderPayment orderPayment);
+	void preCheckout(ShoppingCart shoppingCart);
 
 	/**
 	 * This event occurs after a checkout has been processed but before the order has been persisted.
 	 * This event occurs between preCheckout and postCheckout.
-	 *
-	 * @param shoppingCart the {@link ShoppingCart} being checked out
-	 * @param orderPayment information about the method of payment
+	 *  @param shoppingCart the {@link ShoppingCart} being checked out
 	 * @param completedOrder the order object resulting from the checkout
 	 */
-	void preCheckoutOrderPersist(ShoppingCart shoppingCart, Collection<OrderPayment> orderPayment, Order completedOrder);
+	void preCheckoutOrderPersist(ShoppingCart shoppingCart, Order completedOrder);
 
 	/**
 	 * This event occurs after a checkout process has completed.
-	 *
-	 * @param shoppingCart with the {@link ShoppingCart} being checked out
-	 * @param orderPayment information about the method of payment
+	 *  @param shoppingCart with the {@link ShoppingCart} being checked out
 	 * @param completedOrder the order object resulting from the checkout
 	 */
-	void postCheckout(ShoppingCart shoppingCart, OrderPayment orderPayment, Order completedOrder);
+	void postCheckout(ShoppingCart shoppingCart, Order completedOrder);
 }

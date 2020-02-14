@@ -12,7 +12,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.helpers.SearchItemsLocator;
@@ -57,8 +57,8 @@ public class SolrSearchJobImpl extends AbstractSearchJobImpl {
 	public SolrSearchJobImpl(final SearchItemsLocator<?> locator, final Display display) {
 		super(locator);
 		this.display = display;
-		indexSearchService = ServiceLocator.getService(ContextIdNames.INDEX_SEARCH_SERVICE);
-		indexUtility = ServiceLocator.getService("indexUtility"); //$NON-NLS-1$
+		indexSearchService = BeanLocator.getSingletonBean(ContextIdNames.INDEX_SEARCH_SERVICE, IndexSearchService.class);
+		indexUtility = BeanLocator.getSingletonBean("indexUtility", IndexUtility.class); //$NON-NLS-1$
 		startSearchTaskName = CoreMessages.get().SearchProgress_StatusBarMessage_StartSearch;
 		convertToObjectsTaskName = CoreMessages.get().SearchProgress_StatusBarMessage_ConvertToObjects;
 		progressError = CoreMessages.get().SearchProgress_Error;

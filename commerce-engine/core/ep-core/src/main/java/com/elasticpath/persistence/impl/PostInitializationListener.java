@@ -23,18 +23,17 @@ import com.elasticpath.persistence.api.support.PostInitializationStrategy;
  * Occasionally, domain objects need to be post processed after they are loaded by OpenJPA.
  * If this can be done without invoking services or persistence, then this is a straightforward processing
  * task involving a @PostLoad and related annotations or an @EntityListener.
- *
+ * <p>
  * However, if services, and especially spring services are required to do the post processing,
  * then this is more complicated, since @PostLoad listeners and @EntityListeners have no access
  * to the Spring context.
- *
+ * <p>
  * The PostInitializationListener provides a standardized way to do post load initialization
  * on OpenJPA entities with spring injected beans.
- *
+ * <p>
  * PersistablePostLoadStrategies attached to the PostInitializationListener are invoked during both the PostLoad
  * and PostAttach events, since both of these (may) result in new objects being created by OpenJPA.
  * They are not invoked during the PostRefresh event.
- *
  */
 public class PostInitializationListener implements LoadListener, AttachListener, PersistListener {
 	private static final Logger LOG = Logger.getLogger(PostInitializationListener.class);
@@ -113,12 +112,11 @@ public class PostInitializationListener implements LoadListener, AttachListener,
 		if (postInitStrategies == null) {
 			try {
 				List<PostInitializationStrategy<? extends Persistable>> strategies =
-					new ArrayList<>(postInitStrategyIds.size());
+						new ArrayList<>(postInitStrategyIds.size());
 				for (String beanName : postInitStrategyIds) {
-					// TODO we have no examples of the usages of this class.  Therefore, we don't know
-					//  whether the getBean below should be prototype or singleton.
+					@SuppressWarnings("unchecked")
 					final PostInitializationStrategy<? extends Persistable> strategy =
-							getBeanFactory().getBean(beanName);
+							getBeanFactory().getSingletonBean(beanName, PostInitializationStrategy.class);
 					strategies.add(strategy);
 				}
 

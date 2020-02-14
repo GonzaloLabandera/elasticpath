@@ -11,12 +11,12 @@ import org.apache.commons.lang.ArrayUtils;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.pagination.DirectedSortingField;
+import com.elasticpath.commons.pagination.SortingField;
 import com.elasticpath.domain.ElasticPath;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.persistence.openjpa.QueryParameterEscaper;
-import com.elasticpath.persistence.openjpa.impl.QueryParameterEscaperImpl;
 import com.elasticpath.service.DirectedSortingFieldException;
 import com.elasticpath.service.changeset.ChangeSetMemberSortingField;
 import com.elasticpath.service.objectgroup.dao.BusinessObjectGroupDao;
@@ -28,7 +28,6 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 
 	private PersistenceEngine persistenceEngine;
 	private ElasticPath elasticPath;
-	private final QueryParameterEscaper paramEscaper = new QueryParameterEscaperImpl();
 
 	@Override
 	public void addGroupMember(final BusinessObjectGroupMember objectGroupMember) {
@@ -61,29 +60,6 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 		return findFilteredGroupMembersByGroupId(groupId, startIndex, maxResults, sortingFields, null);
 	}
 
-	private String createSqlFilter(final List<String> objectTypeFilter) {
-		String filter = "";
-		if (objectTypeFilter != null && !objectTypeFilter.isEmpty()) {
-
-			StringBuilder objectTypesToFilter = new StringBuilder("AND gm.objectType NOT IN (");
-			boolean hasComma = false;
-			for (String objectType : objectTypeFilter) {
-				if (hasComma) {
-					objectTypesToFilter.append(", ");
-				} else {
-					hasComma = true;
-				}
-
-				objectTypesToFilter.append('\'').append(paramEscaper.escapeStringParameter(objectType)).append('\'');
-			}
-
-			objectTypesToFilter.append(") ");
-			filter =  objectTypesToFilter.toString();
-		}
-
-		return filter;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -92,39 +68,34 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 	@Override
 	public Collection<BusinessObjectGroupMember> findFilteredGroupMembersByGroupId(final String groupId,
 			final int startIndex, final int maxResults, final DirectedSortingField [] sortingFields, final List<String> objectTypeFilter) {
+
 		sanityCheck(groupId, startIndex, maxResults, sortingFields);
 
-		//only supports one sorting fields
-		if (!sortingFields[0].getSortingField().equals(ChangeSetMemberSortingField.OBJECT_ID)
-				&& !sortingFields[0].getSortingField().equals(ChangeSetMemberSortingField.OBJECT_TYPE)) {
+		//only supports one sorting field
+		SortingField sortingField = sortingFields[0].getSortingField();
+
+		if (!sortingField.equals(ChangeSetMemberSortingField.OBJECT_ID)
+			&& !sortingField.equals(ChangeSetMemberSortingField.OBJECT_TYPE)) {
+
 			return findFilteredGroupMembersByGroupIdAndMetaData(groupId, startIndex, maxResults, sortingFields, objectTypeFilter);
 		}
 
-		String filter = createSqlFilter(objectTypeFilter);
+		StringBuilder query = new StringBuilder("SELECT gm FROM BusinessObjectGroupMemberImpl gm ")
+			.append("WHERE gm.groupId = ?1 ");
 
-		return persistenceEngine.retrieve(
-				"SELECT gm FROM BusinessObjectGroupMemberImpl gm WHERE gm.groupId = ?1 "
-				+ filter
-				+ "ORDER BY gm."
-				+ sortingFields[0].getSortingField().getName()
-				+ " "
-				+ sortingFields[0].getSortingDirection(),
-				new Object[] { groupId }, startIndex, maxResults);
+			if (CollectionUtils.isNotEmpty(objectTypeFilter)) {
+				query.append("AND gm.objectType NOT IN (:list) ");
+			}
+
+			query.append("ORDER BY gm.")
+			.append(sortingField.getName())
+			.append(' ')
+			.append(sortingFields[0].getSortingDirection());
+
+		return persistenceEngine
+			.retrieveWithList(query.toString(), "list", objectTypeFilter, new Object[] { groupId }, startIndex, maxResults);
 	}
 
-	/**
-	 * Find group members by group id and meta data.
-	 *
-	 * @param groupId the group id
-	 * @param startIndex the start index
-	 * @param maxResults the max results
-	 * @param sortingFields the sorting fields
-	 * @return the collection
-	 */
-	protected Collection<BusinessObjectGroupMember> findGroupMembersByGroupIdAndMetaData(final String groupId,
-			final int startIndex, final int maxResults, final DirectedSortingField [] sortingFields) {
-		return findFilteredGroupMembersByGroupIdAndMetaData(groupId, startIndex, maxResults, sortingFields, null);
-	}
 
 	/**
 	 * Find filtered group members by group id and meta data.
@@ -141,28 +112,29 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 
 		sanityCheck(groupId, startIndex, maxResults, sortingFields);
 
-		if (sortingFields[0].getSortingField().equals(ChangeSetMemberSortingField.OBJECT_ID)
-				|| sortingFields[0].getSortingField().equals(ChangeSetMemberSortingField.OBJECT_TYPE)) {
+		SortingField sortingField = sortingFields[0].getSortingField();
+
+		if (sortingField.equals(ChangeSetMemberSortingField.OBJECT_ID)
+				|| sortingField.equals(ChangeSetMemberSortingField.OBJECT_TYPE)) {
+
 			return findGroupMembersByGroupId(groupId, startIndex, maxResults, sortingFields);
 		}
 
-		StringBuilder whereBuilder = new StringBuilder("WHERE gm.groupId = ?1 ");
+		StringBuilder query = new StringBuilder("SELECT DISTINCT gm FROM BusinessObjectMetadataImpl meta ")
+			.append("INNER JOIN meta.businessObjectGroupMember gm ")
+			.append("WHERE gm.groupId = ?1 ");
 
-		String filter = createSqlFilter(objectTypeFilter);
-		whereBuilder.append(filter).append(" AND meta.metadataKey='").append(sortingFields[0].getSortingField().getName()).append("' ");
-		String whereClause = whereBuilder.toString();
+			if (CollectionUtils.isNotEmpty(objectTypeFilter)) {
+				query.append("AND gm.objectType NOT IN (:list) ");
+			}
 
-		StringBuilder orderByBuilder = new StringBuilder("ORDER BY ");
-		orderByBuilder.append("meta.metadataValue ").append(sortingFields[0].getSortingDirection());
-		String orderByClause = orderByBuilder.toString();
+			query.append("AND meta.metadataKey='")
+			.append(sortingField.getName())
+			.append("' ORDER BY meta.metadataValue ")
+			.append(sortingFields[0].getSortingDirection());
 
-		String queryStr =
-				"SELECT DISTINCT gm FROM BusinessObjectMetadataImpl meta INNER JOIN meta.businessObjectGroupMember gm "
-				+ whereClause + orderByClause;
-
-		return persistenceEngine.retrieve(
-				queryStr,
-				new Object[] { groupId }, startIndex, maxResults);
+		return persistenceEngine.retrieveWithList(query.toString(), "list", objectTypeFilter, new Object[] { groupId },
+			startIndex, maxResults);
 	}
 
 	private void sanityCheck(final String groupId, final int startIndex,
@@ -220,7 +192,7 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 
 	@Override
 	public String generateGroupId() {
-		final Object randomGuid = elasticPath.getBean(ContextIdNames.RANDOM_GUID);
+		final Object randomGuid = elasticPath.getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class);
 		return randomGuid.toString();
 	}
 

@@ -761,7 +761,6 @@
 			<column name="UIDPK" valueNumeric="100000"/>
 			<column name="CREATED_DATE" valueDate="2018-02-19 13:21:23.0"/>
 			<column name="DISPLAY_VALUE" value="test-token"/>
-			<column name="PAYMENT_GATEWAY" value="PAYMENT_TOKEN"/>
 			<column name="AMOUNT" valueNumeric="704.43"/>
 			<column name="REFERENCE_ID" value="testReferenceId"/>
 			<column name="REQUEST_TOKEN" value="testRequestToken"/>

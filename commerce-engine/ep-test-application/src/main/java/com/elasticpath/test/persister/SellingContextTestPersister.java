@@ -31,8 +31,8 @@ public class SellingContextTestPersister {
 	public SellingContextTestPersister(final BeanFactory beanFactory) {
 		
 		this.beanFactory = beanFactory;
-		
-		sellingContextService = this.beanFactory.getBean(ContextIdNames.SELLING_CONTEXT_SERVICE);
+
+		sellingContextService = this.beanFactory.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class);
 		
 	}
 	
@@ -41,8 +41,8 @@ public class SellingContextTestPersister {
 	 *
 	 * @return selling context promotion tag framework condition
 	 */
-	public SellingContext createEmptyContext() {		
-		SellingContext sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);		
+	public SellingContext createEmptyContext() {
+		SellingContext sellingContext = beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 		sellingContext.setPriority(1);
 		sellingContext.setName("Selling Context");
 		sellingContext.setDescription(sellingContext.getName());
@@ -64,7 +64,7 @@ public class SellingContextTestPersister {
 			currentSellingContext = createEmptyContext();
 		}
 		
-		ConditionalExpression conditionalExpression = beanFactory.getBean(ContextIdNames.CONDITIONAL_EXPRESSION);
+		ConditionalExpression conditionalExpression = beanFactory.getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 		conditionalExpression.initialize();
 		conditionalExpression.setConditionString(condition);
 		conditionalExpression.setNamed(false);
@@ -86,11 +86,11 @@ public class SellingContextTestPersister {
 	 */
 	@Deprecated
 	public SellingContext createSellingContextWithSingleCondition(final String shopper) {
-		
-		SellingContext sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
+
+		SellingContext sellingContext = beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 		
 		sellingContext.setPriority(1);
-		ConditionalExpression conditionalExpression = beanFactory.getBean(ContextIdNames.CONDITIONAL_EXPRESSION);
+		ConditionalExpression conditionalExpression = beanFactory.getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 		conditionalExpression.setConditionString(shopper);
 		conditionalExpression.setNamed(false);
 		conditionalExpression.setName("Promo conditional expression " + new Date());

@@ -71,7 +71,7 @@ public class PurchaseLineItemToItemLinksRepositoryImplTest {
 
 		when(orderRepository.findOrderSku(SCOPE, PURCHASE_ID, GUID_PATH_FROM_LINE_ITEM)).thenReturn(Single.just(orderSku));
 		when(orderSku.getSkuGuid()).thenReturn(SKU_GUID);
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).thenReturn(Single.just(productSku));
+		when(productSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID)).thenReturn(Single.just(productSku));
 		when(itemRepository.getItemIdForProductSku(productSku)).thenReturn(itemId);
 
 	}

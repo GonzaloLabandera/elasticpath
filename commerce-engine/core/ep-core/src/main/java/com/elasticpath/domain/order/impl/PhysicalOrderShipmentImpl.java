@@ -235,22 +235,26 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 		this.carrierName = carrierName;
 	}
 
+	@Override
 	@Basic
 	@Column(name = "SHIPPING_OPTION_CODE")
 	public String getShippingOptionCode() {
 		return shippingOptionCode;
 	}
 
+	@Override
 	public void setShippingOptionCode(final String shippingOptionCode) {
 		this.shippingOptionCode = shippingOptionCode;
 	}
 
+	@Override
 	@Basic
 	@Column(name = "SHIPPING_OPTION_NAME")
 	public String getShippingOptionName() {
 		return shippingOptionName;
 	}
 
+	@Override
 	public void setShippingOptionName(final String shippingOptionName) {
 		this.shippingOptionName = shippingOptionName;
 	}
@@ -337,7 +341,7 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 	@Override
 	@Transient
 	public TaxCalculationResult calculateTaxes() {
-		TaxOperationService taxOperationService = getBean(ContextIdNames.TAX_OPERATION_SERVICE);
+		TaxOperationService taxOperationService = getSingletonBean(ContextIdNames.TAX_OPERATION_SERVICE, TaxOperationService.class);
 
 		return taxOperationService.calculateTaxes(this);
 	}
@@ -371,10 +375,11 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 	@Override
 	public void removeShipmentOrderSku(final OrderSku orderSku, final ProductSkuLookup productSkuLookup) {
 		super.removeShipmentOrderSku(orderSku, productSkuLookup);
-		OrderSku removedOrderSku = getBean(ContextIdNames.ORDER_SKU);
+		OrderSku removedOrderSku = getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 
-		final PricingSnapshotService pricingSnapshotService = getBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
-		final TaxSnapshotService taxSnapshotService = getBean(ContextIdNames.TAX_SNAPSHOT_SERVICE);
+		final PricingSnapshotService pricingSnapshotService = getSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE,
+				PricingSnapshotService.class);
+		final TaxSnapshotService taxSnapshotService = getSingletonBean(ContextIdNames.TAX_SNAPSHOT_SERVICE, TaxSnapshotService.class);
 		ShoppingItemPricingSnapshot pricingSnapshotForOrderSku = pricingSnapshotService.getPricingSnapshotForOrderSku(orderSku);
 		ShoppingItemTaxSnapshot taxSnapshotForOrderSku = taxSnapshotService.getTaxSnapshotForOrderSku(orderSku, pricingSnapshotForOrderSku);
 		removedOrderSku.copyFrom(orderSku, productSkuLookup, taxSnapshotForOrderSku, false);
@@ -468,6 +473,6 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 	 */
 	@Transient
 	protected ProductSkuLookup getProductSkuLookup() {
-		return getBean(ContextIdNames.PRODUCT_SKU_LOOKUP);
+		return getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 	}
 }

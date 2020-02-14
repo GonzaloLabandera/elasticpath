@@ -53,6 +53,8 @@ import com.elasticpath.domain.dataimport.impl.ImportDataTypeProductSkuImpl;
 import com.elasticpath.domain.dataimport.impl.ImportFaultImpl;
 import com.elasticpath.domain.dataimport.impl.ImportJobImpl;
 import com.elasticpath.domain.dataimport.impl.ImportJobRequestImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.pricing.csvimport.impl.ImportDataTypeBaseAmountImpl;
 import com.elasticpath.domain.rules.csvimport.impl.ImportDataTypeCouponCodeEmailImpl;
 import com.elasticpath.domain.rules.csvimport.impl.ImportDataTypeCouponCodeImpl;
@@ -143,18 +145,19 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 				will(returnValue(new TestCustomerProfileFactory().getProfile()));
 			}
 		});
-		stubGetBean(ContextIdNames.ATTRIBUTE_SERVICE, mockAttributeService);
+		stubGetSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class, mockAttributeService);
 
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT, ImportDataTypeBaseAmountImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY, ImportDataTypeCategoryImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_COUPONCODE, ImportDataTypeCouponCodeImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_COUPONCODE_EMAIL, ImportDataTypeCouponCodeEmailImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER, ImportDataTypeCustomerImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER_ADDRESS, ImportDataTypeCustomerAddressImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_INVENTORY, ImportDataTypeInventoryImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT, ImportDataTypeProductImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_ASSOCIATION, ImportDataTypeProductAssociationImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION, ImportDataTypeProductCategoryAssociationImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT, ImportDataType.class, ImportDataTypeBaseAmountImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY, ImportDataType.class, ImportDataTypeCategoryImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_COUPONCODE, ImportDataType.class, ImportDataTypeCouponCodeImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_COUPONCODE_EMAIL, ImportDataType.class, ImportDataTypeCouponCodeEmailImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER, ImportDataType.class, ImportDataTypeCustomerImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER_ADDRESS, ImportDataType.class, ImportDataTypeCustomerAddressImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_INVENTORY, ImportDataType.class, ImportDataTypeInventoryImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT, ImportDataType.class, ImportDataTypeProductImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_ASSOCIATION, ImportDataType.class, ImportDataTypeProductAssociationImpl.class);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION, ImportDataType.class,
+				ImportDataTypeProductCategoryAssociationImpl.class);
 
 
 		importService.setPersistenceEngine(getPersistenceEngine());
@@ -193,21 +196,37 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 		importJob.setCsvFileName(csvFileName);
 
 		final Map<String, Integer> mappings = new HashMap<>();
-		mappings.put("product!name", Integer.valueOf(0));
-		mappings.put("product!startDate", Integer.valueOf(1));
-		mappings.put("product!defaultCategory", Integer.valueOf(2));
+		mappings.put("product!name", 0);
+		mappings.put("product!startDate", 1);
+		mappings.put("product!defaultCategory", 2);
 		final int indexNumberColumn4 = 3;
-		mappings.put("product!guid", Integer.valueOf(indexNumberColumn4));
+		mappings.put("product!guid", indexNumberColumn4);
 		importJob.setMappings(mappings);
 	}
 
 	private void setupCsvFileReader() {
 		// Mock CsvFileReader
 		mockCsvFileReader = context.mock(CsvFileReader.class);
-		stubGetBean(ContextIdNames.CSV_FILE_READER, mockCsvFileReader);
 
+		stubGetPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class, mockCsvFileReader);
 		setupExpectationsForCsvFileReader();
 
+	}
+
+	private void setupCsvFileReaderWithUtf8() {
+		CsvFileReaderImpl csvFileReader = new CsvFileReaderImpl() {
+			@Override
+			protected String getDatafileEncoding() {
+				return "UTF-8";
+			}
+
+			@Override
+			public String getRemoteCSVFileName(final String csvFileName) {
+				return csvFileName;
+			}
+		};
+
+		stubGetPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class, csvFileReader);
 	}
 
 	private void setupImportDataTypeProduct() {
@@ -264,7 +283,7 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testCount() {
 		final List<Long> returnValue = new ArrayList<>();
-		returnValue.add(Long.valueOf(0));
+		returnValue.add(0L);
 
 		// expectations
 		context.checking(new Expectations() {
@@ -407,7 +426,8 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testGet() {
-		stubGetBean(ContextIdNames.IMPORT_JOB, ImportJob.class);
+		stubGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, new LocalizedPropertiesImpl());
+		stubGetPrototypeBean(ContextIdNames.IMPORT_JOB, ImportJob.class, ImportJobImpl.class);
 
 		final long uid = 1234L;
 		final ImportJob importJob = new ImportJobImpl();
@@ -415,7 +435,7 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 		// expectations
 		context.checking(new Expectations() {
 			{
-				allowing(getMockPersistenceEngine()).get(ImportJob.class, uid);
+				allowing(getMockPersistenceEngine()).get(ImportJobImpl.class, uid);
 				will(returnValue(importJob));
 			}
 		});
@@ -451,13 +471,11 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testSaveOrUpdateJobNotFound() {
 
-		final List<ImportJob> importJobs = new ArrayList<>();
 		final ImportJob importJob = new ImportJobImpl();
 		final ImportJob updatedImportJob = new ImportJobImpl();
 		final String jobName = "ImportJob";
 		importJob.setName(jobName);
 		updatedImportJob.setName(jobName);
-		importJobs.add(importJob);
 		context.checking(new Expectations() {
 			{
 				allowing(getMockPersistenceEngine()).retrieveByNamedQuery("IMPORT_JOB_FIND_BY_NAME", jobName);
@@ -595,20 +613,20 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 
 	private void setupImportBadRow() {
 		importBadRow = new ImportBadRowImpl();
-		stubGetBean(ContextIdNames.IMPORT_BAD_ROW, importBadRow);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class, importBadRow);
 	}
 
 	private void setupImportFault() {
 		final ImportFault importFaultWarning = new ImportFaultImpl();
 		importFaultWarning.setLevel(ImportFault.WARNING);
-		stubGetBean(ContextIdNames.IMPORT_FAULT, importFaultWarning);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class, importFaultWarning);
 	}
 
 	private void setupImportJobRunner() {
 		this.mockImportJobRunner = context.mock(ImportJobRunner.class);
 		this.importJobRunner = this.mockImportJobRunner;
 
-		stubGetBean(ContextIdNames.IMPORT_JOB_RUNNER_PRODUCT, importJobRunner);
+		stubGetPrototypeBean(ContextIdNames.IMPORT_JOB_RUNNER_PRODUCT, ImportJobRunner.class, importJobRunner);
 		context.checking(new Expectations() {
 			{
 				allowing(mockImportJobRunner).validate(with(any(Locale.class)));
@@ -662,18 +680,7 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 		importJobRequest.setImportJob(importJob);
 		importJobRequest.setInitiator(new CmUserImpl());
 
-		stubGetBean(ContextIdNames.CSV_FILE_READER, new CsvFileReaderImpl() {
-				@Override
-				protected String getDatafileEncoding() {
-					return "UTF-8";
-				}
-
-				@Override
-				public String getRemoteCSVFileName(final String csvFileName) {
-					return csvFileName;
-				}
-			}
-		);
+		setupCsvFileReaderWithUtf8();
 
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		String csvFileName = classLoader.getResource(PRODUCT_IMPORT_CSV).getFile();
@@ -690,18 +697,7 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 		importJobRequest.setImportJob(importJob);
 		importJobRequest.setInitiator(new CmUserImpl());
 
-		stubGetBean(ContextIdNames.CSV_FILE_READER, new CsvFileReaderImpl() {
-				@Override
-				protected String getDatafileEncoding() {
-					return "UTF-8";
-				}
-
-				@Override
-				public String getRemoteCSVFileName(final String csvFileName) {
-					return csvFileName;
-				}
-			}
-		);
+		setupCsvFileReaderWithUtf8();
 
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		String csvFileName = classLoader.getResource("badImport.csv").getFile();
@@ -718,19 +714,7 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 		importJobRequest.setImportJob(importJob);
 		importJobRequest.setInitiator(new CmUserImpl());
 
-		stubGetBean(ContextIdNames.CSV_FILE_READER, new CsvFileReaderImpl() {
-				@Override
-				protected String getDatafileEncoding() {
-					return "UTF-8";
-				}
-
-				@Override
-				public String getRemoteCSVFileName(final String csvFileName) {
-					return csvFileName;
-				}
-			}
-		);
-
+		setupCsvFileReaderWithUtf8();
 
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		String csvFileName = classLoader.getResource("importFileWithWrappedTitleLine.csv").getFile();
@@ -748,18 +732,7 @@ public class ImportServiceImplTest extends AbstractEPServiceTestCase {
 		importJobRequest.setImportJob(importJob);
 		importJobRequest.setInitiator(new CmUserImpl());
 
-		stubGetBean(ContextIdNames.CSV_FILE_READER, new CsvFileReaderImpl() {
-					@Override
-					protected String getDatafileEncoding() {
-						return "UTF-8";
-					}
-
-					@Override
-					public String getRemoteCSVFileName(final String csvFileName) {
-						return csvFileName;
-					}
-			}
-		);
+		setupCsvFileReaderWithUtf8();
 
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		String csvFileName = classLoader.getResource("importFileWithQuotesInTitleLine.csv").getFile();

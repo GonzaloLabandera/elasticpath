@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.uat.stepdefs;
 
@@ -24,12 +24,10 @@ import com.elasticpath.domain.event.EventOriginatorType;
 import com.elasticpath.domain.impl.AbstractShoppingItemImpl;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderReturnSkuReason;
 import com.elasticpath.domain.order.OrderReturnType;
-import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -38,7 +36,8 @@ import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.order.ReturnAndExchangeService;
-import com.elasticpath.service.order.ReturnExchangeType;
+import com.elasticpath.service.order.ReturnExchangeRefundTypeEnum;
+import com.elasticpath.service.orderpaymentapi.management.PaymentInstrumentManagementService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
@@ -74,6 +73,9 @@ public class OrderReturnAndExchangeStepDefinitions {
 	private ShoppingItemAssembler shoppingItemAssembler;
 
 	@Autowired
+	private PaymentInstrumentManagementService orderPaymentInstrumentService;
+
+	@Autowired
 	@Qualifier("productSkuLookup")
 	private ProductSkuLookup productSkuLookup;
 
@@ -82,7 +84,7 @@ public class OrderReturnAndExchangeStepDefinitions {
 
 	@Autowired
 	private ScenarioContextValueHolder<Runnable> emailSendingCommandHolder;
-	
+
 	@Before
 	@SuppressWarnings("deprecation")
 	public void setUp() {
@@ -101,26 +103,26 @@ public class OrderReturnAndExchangeStepDefinitions {
 		// Defer execution until we are ready to check for the email
 		emailSendingCommandHolder.set(() -> {
 			final Order order = orderHolder.get();
-			final OrderShipment orderShipment = order.getPhysicalShipments().get(0);
+			final PhysicalOrderShipment orderShipment = order.getPhysicalShipments().get(0);
 
-			final OrderReturn orderReturn = beanFactory.getBean(ContextIdNames.ORDER_RETURN);
+			final OrderReturn orderReturn = beanFactory.getPrototypeBean(ContextIdNames.ORDER_RETURN, OrderReturn.class);
 			orderReturn.populateOrderReturn(order, orderShipment, OrderReturnType.RETURN);
-			orderReturn.setOrderReturnAddress(((PhysicalOrderShipment) orderShipment).getShipmentAddress());
+			orderReturn.setOrderReturnAddress(orderShipment.getShipmentAddress());
 			orderReturn.recalculateOrderReturn();
 
 			populateOrderReturnSkuQuantityAndReason(orderReturn);
 
-			final ReturnExchangeType returnExchangeType;
+			final ReturnExchangeRefundTypeEnum returnExchangeType;
 			if (physicalReturnRequired) {
-				returnExchangeType = ReturnExchangeType.PHYSICAL_RETURN_REQUIRED;
+				returnExchangeType = ReturnExchangeRefundTypeEnum.PHYSICAL_RETURN_REQUIRED;
 			} else {
-				returnExchangeType = ReturnExchangeType.MANUAL_RETURN;
+				returnExchangeType = ReturnExchangeRefundTypeEnum.MANUAL_REFUND;
 			}
 
 			orderReturnHolder.set(returnAndExchangeService.createShipmentReturn(orderReturn,
-																				returnExchangeType,
-																				orderReturn.getOrderShipmentForReturn(),
-																				getSystemOriginator()));
+					returnExchangeType,
+					orderReturn.getOrderShipmentForReturn(),
+					getSystemOriginator()));
 		});
 	}
 
@@ -130,39 +132,29 @@ public class OrderReturnAndExchangeStepDefinitions {
 		emailSendingCommandHolder.set(() -> {
 			final Order order = orderHolder.get();
 
-			final ReturnExchangeType returnExchangeType;
+			final ReturnExchangeRefundTypeEnum returnExchangeType;
 			if (physicalReturnRequired) {
-				returnExchangeType = ReturnExchangeType.PHYSICAL_RETURN_REQUIRED;
+				returnExchangeType = ReturnExchangeRefundTypeEnum.PHYSICAL_RETURN_REQUIRED;
 			} else {
-				returnExchangeType = ReturnExchangeType.NEW_PAYMENT;
+				returnExchangeType = ReturnExchangeRefundTypeEnum.REFUND_TO_ORIGINAL;
 			}
 
 			OrderReturn orderReturn = createExchangeOrderReturn(order);
-			final OrderPayment authOrderPayment = findAuthOrderPayment(order);
 
-			orderReturn = returnAndExchangeService.createExchange(orderReturn, returnExchangeType, authOrderPayment);
+			orderReturn = returnAndExchangeService.createExchange(orderReturn, returnExchangeType,
+					orderPaymentInstrumentService.findOrderInstruments(order));
 
 			orderReturnHolder.set(orderReturn);
 		});
 	}
 
-	private OrderPayment findAuthOrderPayment(final Order order) {
-		for (final OrderPayment orderPayment : order.getOrderPayments()) {
-			if (orderPayment.getTransactionType().equals(OrderPayment.AUTHORIZATION_TRANSACTION)) {
-				return orderPayment;
-			}
-		}
-
-		return null;
-	}
-
 	private OrderReturn createExchangeOrderReturn(final Order originalOrder) {
-		final OrderShipment orderShipment = originalOrder.getPhysicalShipments().get(0);
+		final PhysicalOrderShipment orderShipment = originalOrder.getPhysicalShipments().get(0);
 
-		final OrderReturn orderReturn = beanFactory.getBean(ContextIdNames.ORDER_RETURN);
+		final OrderReturn orderReturn = beanFactory.getPrototypeBean(ContextIdNames.ORDER_RETURN, OrderReturn.class);
 		orderReturn.populateOrderReturn(originalOrder, orderShipment, OrderReturnType.EXCHANGE);
 
-		final OrderAddress address = ((PhysicalOrderShipment) orderShipment).getShipmentAddress();
+		final OrderAddress address = orderShipment.getShipmentAddress();
 		orderReturn.setOrderReturnAddress(address);
 		orderReturn.recalculateOrderReturn();
 
@@ -208,13 +200,14 @@ public class OrderReturnAndExchangeStepDefinitions {
 			orderReturnSku.setReturnReason("OrderReturnSkuReason_Faulty");
 		}
 	}
-	
+
 	/**
 	 * Create the event originator which is the system.
+	 *
 	 * @return the event originator.
 	 */
 	private EventOriginator getSystemOriginator() {
-		EventOriginator originator = beanFactory.getBean(ContextIdNames.EVENT_ORIGINATOR);
+		EventOriginator originator = beanFactory.getPrototypeBean(ContextIdNames.EVENT_ORIGINATOR, EventOriginator.class);
 		originator.setType(EventOriginatorType.SYSTEM);
 		return originator;
 	}

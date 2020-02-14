@@ -3,6 +3,7 @@
  */
 package com.elasticpath.commons.security.impl;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.security.PasswordHolder;
 import com.elasticpath.commons.security.PasswordPolicy;
 import com.elasticpath.commons.security.ValidationResult;
@@ -14,7 +15,8 @@ public class AccountPasswordPolicyImpl extends AbstractPasswordPolicyImpl {
 
 	@Override
 	public ValidationResult validate(final PasswordHolder passwordHolder) {
-		PasswordPolicy retryAttemptPasswordPolicy = getBeanFactory().getBean("retryAttemptPasswordPolicy");
+		PasswordPolicy retryAttemptPasswordPolicy = getBeanFactory().getSingletonBean(
+			ContextIdNames.RETRY_ATTEMPT_PASS_WORD_POLICY, PasswordPolicy.class);
 		return retryAttemptPasswordPolicy.validate(passwordHolder);
 	}
 

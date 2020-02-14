@@ -3,21 +3,14 @@
  */
 package com.elasticpath.common.dto.customer;
 
-import static java.util.Optional.ofNullable;
-
-import java.util.Objects;
-
 import com.elasticpath.common.dto.AddressDTO;
 import com.elasticpath.common.dto.assembler.AbstractDtoAssembler;
-import com.elasticpath.common.dto.customer.transformer.PaymentTokenDTOTransformer;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerGroup;
-import com.elasticpath.domain.customer.PaymentToken;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.service.customer.CustomerGroupService;
 
 /**
@@ -31,11 +24,9 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 	private CustomerGroupService customerGroupService;
 
-	private PaymentTokenDTOTransformer paymentTokenDTOTransformer;
-
 	@Override
 	public Customer getDomainInstance() {
-		return getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 	}
 
 	@Override
@@ -66,8 +57,6 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		target.setFirstTimeBuyer(source.isFirstTimeBuyer());
 
 		populateDtoAddresses(source, target);
-		populateDtoPaymentMethods(source, target);
-		populateDtoDefaultPaymentMethod(source, target);
 
 		for (CustomerGroup group : source.getCustomerGroups()) {
 			target.getGroups().add(group.getGuid());
@@ -109,28 +98,6 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		}
 	}
 
-	private void populateDtoPaymentMethods(final Customer source, final CustomerDTO target) {
-		for (PaymentMethod sourcePaymentMethod : source.getPaymentMethods().all()) {
-			PaymentMethodDto paymentMethodDto = transformPaymentMethodToDto(sourcePaymentMethod);
-
-			if (paymentMethodDto != null) {
-				target.getPaymentMethods().add(paymentMethodDto);
-			}
-		}
-	}
-
-	private void populateDtoDefaultPaymentMethod(final Customer source, final CustomerDTO target) {
-		PaymentMethod defaultPaymentMethod = source.getPaymentMethods().getDefault();
-		if (defaultPaymentMethod != null) {
-			PaymentMethodDto transformedDefaultPaymentMethodDto = transformPaymentMethodToDto(defaultPaymentMethod);
-			if (transformedDefaultPaymentMethodDto != null) {
-				DefaultPaymentMethodDTO defaultPaymentMethodDTO = new DefaultPaymentMethodDTO();
-				defaultPaymentMethodDTO.setPaymentMethod(transformedDefaultPaymentMethodDto);
-				target.setDefaultPaymentMethod(defaultPaymentMethodDTO);
-			}
-		}
-	}
-
 	@Override
 	public void assembleDomain(final CustomerDTO source, final Customer target) {
 
@@ -151,8 +118,6 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 		target.setUserId(source.getUserId());
 		target.setFirstTimeBuyer(source.isFirstTimeBuyer());
-		populateDomainPaymentMethods(source, target);
-		populateDefaultPaymentMethod(source, target);
 
 		populateDomainCustomerGroup(source, target);
 
@@ -194,42 +159,6 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		}
 	}
 
-	private void populateDomainPaymentMethods(final CustomerDTO source, final Customer target) {
-		source.getPaymentMethods().stream()
-				.map(this::transformPaymentMethodDtoToDomain)
-				.filter(Objects::nonNull)
-				.forEach(targetPaymentMethod -> target.getPaymentMethods().add(targetPaymentMethod));
-	}
-
-	private void populateDefaultPaymentMethod(final CustomerDTO source, final Customer target) {
-		DefaultPaymentMethodDTO defaultPaymentMethod = source.getDefaultPaymentMethod();
-
-		if (defaultPaymentMethod != null) {
-			PaymentMethodDto defaultPaymentMethodSource = defaultPaymentMethod.getPaymentMethod();
-			PaymentMethod targetDefaultPaymentMethod = transformPaymentMethodDtoToDomain(defaultPaymentMethodSource);
-			ofNullable(targetDefaultPaymentMethod)
-					.ifPresent(paymentMethod -> target.getPaymentMethods().setDefault(targetDefaultPaymentMethod));
-		}
-	}
-
-	private PaymentMethod transformPaymentMethodDtoToDomain(final PaymentMethodDto paymentMethodDto) {
-		PaymentMethod transformedPaymentMethod = null;
-		if (paymentMethodDto instanceof PaymentTokenDto) {
-			transformedPaymentMethod = getPaymentTokenDTOTransformer().transformToDomain((PaymentTokenDto) paymentMethodDto);
-		}
-
-		return transformedPaymentMethod;
-	}
-
-	private PaymentMethodDto transformPaymentMethodToDto(final PaymentMethod paymentMethod) {
-		PaymentMethodDto transformedPaymentMethodDto = null;
-		if (paymentMethod instanceof PaymentToken) {
-			transformedPaymentMethodDto = getPaymentTokenDTOTransformer().transformToDto((PaymentToken) paymentMethod);
-		}
-
-		return transformedPaymentMethodDto;
-	}
-
 	private void populateDomainCustomerGroup(final CustomerDTO source, final Customer target) {
 		final CustomerGroup defaultCustomerGroup = getCustomerGroupService().findByGroupName(CustomerGroup.DEFAULT_GROUP_NAME);
 		target.addCustomerGroup(defaultCustomerGroup);
@@ -249,7 +178,7 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 	}
 
 	protected CustomerAddress getCustomerAddress() {
-		return getBeanFactory().getBean(ContextIdNames.CUSTOMER_ADDRESS);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 	}
 
 	public void setBeanFactory(final BeanFactory beanFactory) {
@@ -268,11 +197,4 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		return customerGroupService;
 	}
 
-	public void setPaymentTokenDTOTransformer(final PaymentTokenDTOTransformer paymentTokenDTOTransformer) {
-		this.paymentTokenDTOTransformer = paymentTokenDTOTransformer;
-	}
-
-	protected PaymentTokenDTOTransformer getPaymentTokenDTOTransformer() {
-		return this.paymentTokenDTOTransformer;
-	}
 }

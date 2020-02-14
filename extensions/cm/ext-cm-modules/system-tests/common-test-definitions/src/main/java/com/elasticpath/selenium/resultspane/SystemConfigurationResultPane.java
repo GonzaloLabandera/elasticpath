@@ -24,6 +24,7 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	private static final String DEFINED_CONTEXT_NAME_COLUMN_VALUE_CSS = "div[column-id='%s']+ div[column-num='1']";
 	private static final String MAXIMIZE_WINDOW_CSS = "div[pane-location='center-pane-outer'] div[appearance-id='ctabfolder-button']"
 			+ "[widget-id='Maximize'][seeable='true']";
+	private static final String MINIMIZE_EDITOR_PANE_CSS = "div[pane-location='editor-pane'] div[widget-id='Minimize'] > div[style*='minimize.gif']";
 	private static final String RESTORE_WINDOW_CSS = "div[pane-location='left-pane-outer'] div[appearance-id='ctabfolder-button']"
 			+ "[widget-id='Restore'][seeable='true']";
 	private static final String DEFINED_VALUES_PARENT_CSS = "div[appearance-id='label-wrapper'][widget-id='Defined Values'][seeable='true'] + div";
@@ -33,7 +34,7 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 			+ " div[appearance-id='push-button'][widget-id='Edit...'][seeable='true']";
 	private static final String REMOVE_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS
 			+ " div[appearance-id='push-button'][widget-id='Remove'][seeable='true']";
-	private static final String DEFINED_VALUES_TABLE_CSS = DEFINED_VALUES_PARENT_CSS + " div[appearance-id='table'][seeable='true']";
+	private static final String DEFINED_VALUES_TABLE_CSS = DEFINED_VALUES_PARENT_CSS + " div[appearance-id='table'][seeable='true'] ";
 	private static final String DEFAULT_VALUE_TEXTAREA_CSS =
 			"div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages.settingDefDefaultValue'] + div > textarea";
 
@@ -62,6 +63,17 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
 		if (getDriver().findElements(By.cssSelector(MAXIMIZE_WINDOW_CSS)).size() != 0) {
 			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(MAXIMIZE_WINDOW_CSS)));
+		}
+		setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
+	 * Minimize System Configuration editor pane.
+	 */
+	public void minimizeSystemConfigurationEditorPane() {
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		if (getDriver().findElements(By.cssSelector(MINIMIZE_EDITOR_PANE_CSS)).size() != 0) {
+			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(MINIMIZE_EDITOR_PANE_CSS)));
 		}
 		setWebDriverImplicitWaitToDefault();
 	}
@@ -106,6 +118,7 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	 * @param settingName String
 	 */
 	public void selectSettingName(final String settingName) {
+		enterSettingNameFilterInput(settingName);
 		assertThat(getWaitDriver().waitForElementToBeInteractable(String.format(EXPECTED_SETTING_RESULT_CSS, settingName)))
 				.as("Expected setting name not exist - " + settingName)
 				.isTrue();
@@ -194,6 +207,20 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 			}
 		} catch (Exception e) {
 			fail("No Defined Value records found!");
+		}
+	}
+
+
+	/**
+	 * Selects specific record and then clicks Remove button
+	 */
+	public void clearDefinedValueTable() {
+		List<WebElement> allRecords = getWaitDriver().waitForElementToBeVisible(
+				By.cssSelector(DEFINED_VALUES_TABLE_CSS)).findElements(By.cssSelector("div[widget-id][widget-type='row']"));
+
+		for (WebElement record : allRecords) {
+			click(record);
+			clickRemoveDefinedValueButton();
 		}
 	}
 }

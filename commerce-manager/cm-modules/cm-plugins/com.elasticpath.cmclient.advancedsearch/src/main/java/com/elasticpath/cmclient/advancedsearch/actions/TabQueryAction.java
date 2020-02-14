@@ -11,8 +11,8 @@ import com.elasticpath.cmclient.advancedsearch.AdvancedSearchImageRegistry;
 import com.elasticpath.cmclient.advancedsearch.AdvancedSearchMessages;
 import com.elasticpath.cmclient.advancedsearch.helpers.AdvancedSearchQuerySelector;
 import com.elasticpath.cmclient.advancedsearch.views.TabsInteractionController;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.advancedsearch.AdvancedSearchQuery;
 import com.elasticpath.persistence.dao.AdvancedSearchQueryDao;
@@ -222,7 +222,7 @@ public class TabQueryAction extends AbstractQueryAction {
 		public DeleteQueryAction(final TabsInteractionController tabsInteractionController, final AdvancedSearchQuerySelector selector) {
 			super(AdvancedSearchMessages.get().DeleteQuery, AdvancedSearchImageRegistry.QUERY_DELETE, tabsInteractionController, selector, null);
 
-			searchQueryDao = ServiceLocator.getService(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO);
+			searchQueryDao = BeanLocator.getSingletonBean(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO, AdvancedSearchQueryDao.class);
 		}
 
 		@Override

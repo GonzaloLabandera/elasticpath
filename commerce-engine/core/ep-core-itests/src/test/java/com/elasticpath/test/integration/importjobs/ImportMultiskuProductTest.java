@@ -25,7 +25,7 @@ import com.elasticpath.test.integration.DirtiesDatabase;
 public class ImportMultiskuProductTest extends ImportJobTestCase {
 
 	private void assertProductOne() {
-		ProductLookup productLookup = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOOKUP);
+		ProductLookup productLookup = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 		Product product = productLookup.findByGuid("101");
 		assertThat(product).isNotNull();
 		final AttributeValueGroup attributes = product.getAttributeValueGroup();
@@ -64,7 +64,7 @@ public class ImportMultiskuProductTest extends ImportJobTestCase {
 	}
 
 	private void assertProductTwo() {
-		ProductLookup productLookup = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOOKUP);
+		ProductLookup productLookup = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 		Product product = productLookup.findByGuid("102");
 		final AttributeValueGroup attributes = product.getAttributeValueGroup();
 
@@ -102,7 +102,7 @@ public class ImportMultiskuProductTest extends ImportJobTestCase {
 	}
 
 	private void assertProductTwoUpdated() {
-		ProductLookup productLookup = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOOKUP);
+		ProductLookup productLookup = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 		Product product = productLookup.findByGuid("102");
 		final AttributeValueGroup attributes = product.getAttributeValueGroup();
 

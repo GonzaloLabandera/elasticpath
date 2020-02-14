@@ -41,7 +41,7 @@ public class EmailComposerImpl implements EmailComposer {
 
 		EmailDto.Builder<?> builder = EmailDto.builder()
 				.withFrom(compositionConfiguration.getSendFromAddress())
-				.withTo(compositionConfiguration.getRecipientAddress())
+				.withTo(compositionConfiguration.getRecipientAddresses())
 				.withSubject(compositionConfiguration.getEmailSubject());
 
 		final Optional<String> htmlTemplateOptional = compositionConfiguration.getHtmlTemplate();

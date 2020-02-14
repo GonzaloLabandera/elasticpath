@@ -49,9 +49,7 @@ public abstract class AbstractSolrInputDocumentCreator<OUT> extends AbstractInde
 	 * @return whether the value was added
 	 */
 	protected boolean addFieldToDocument(final SolrInputDocument document, final String fieldName, final String value) {
-		if (value == null) {
-			return false;
-		} else if (value.length() == 0) {
+		if (value == null || value.length() == 0) {
 			return false;
 		}
 		document.addField(fieldName, value);

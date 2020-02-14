@@ -41,6 +41,7 @@ import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeValue;
@@ -57,6 +58,7 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.dataimport.ImportDataType;
 import com.elasticpath.domain.dataimport.ImportField;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
@@ -150,8 +152,8 @@ public class ImportDataTypeProductSkuImplTest {
 		validatorUtils = context.mock(ValidatorUtils.class);
 
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.VALIDATOR_UTILS, validatorUtils);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, utility);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class, validatorUtils);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
 
 		productSkuImportType = new ImportDataTypeProductSkuImpl();
 
@@ -605,8 +607,9 @@ public class ImportDataTypeProductSkuImplTest {
 	private ProductSku createProductSku() {
 		ProductSku productSku = new ProductSkuImpl();
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("jpaAdaptorSkuOptionValue", JpaAdaptorOfSkuOptionValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR, JpaAdaptorOfSkuOptionValueImpl.class,
+				JpaAdaptorOfSkuOptionValueImpl.class);
 
 		productSku.initialize();
 		return productSku;
@@ -621,7 +624,7 @@ public class ImportDataTypeProductSkuImplTest {
 	private SkuOption createSkuOption() {
 		final SkuOption skuOption = new SkuOptionImpl();
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		skuOption.initialize();
 		return skuOption;
@@ -631,8 +634,8 @@ public class ImportDataTypeProductSkuImplTest {
 	private ProductTypeImpl createProductType() {
 		ProductTypeImpl productType = new ProductTypeImpl();
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroupImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class, AttributeGroupImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		productType.initialize();
 		productType.setName(PRODUCT_TYPE_NAME);
@@ -671,14 +674,13 @@ public class ImportDataTypeProductSkuImplTest {
 	private void setupAttributeSize() {
 		attributeSize = createAttribute(AttributeType.INTEGER, ATTRIBUTE_KEY_PRODUCT_SIZE, false);
 		addAttributeToAttributeGroupAttributes(attributeSize, productTypeSkuAttributes);
-		AttributeValue attributeValue = createProductAttributeValue(attributeSize, AttributeType.INTEGER, Integer.valueOf(1));
+		AttributeValue attributeValue = createProductAttributeValue(attributeSize, AttributeType.INTEGER, 1);
 		productSkuAttributeValueMap.put(ATTRIBUTE_KEY_PRODUCT_SIZE, attributeValue);
 	}
 
-	private Attribute createAttribute(final AttributeType attributueType, final String key, final boolean localeDependant) {
+	private Attribute createAttribute(final AttributeType attributeType, final String key, final boolean localeDependant) {
 		Attribute result = new AttributeImpl();
-		result = new AttributeImpl();
-		result.setAttributeType(attributueType);
+		result.setAttributeType(attributeType);
 		result.setKey(key);
 		result.setLocaleDependant(localeDependant);
 		return result;

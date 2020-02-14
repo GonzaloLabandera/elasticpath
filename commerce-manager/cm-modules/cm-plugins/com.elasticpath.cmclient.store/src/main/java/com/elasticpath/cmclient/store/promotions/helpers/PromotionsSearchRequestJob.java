@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.helpers.AbstractSearchRequestJob;
@@ -31,7 +31,7 @@ public class PromotionsSearchRequestJob extends AbstractSearchRequestJob<Rule> {
 	 */
 	public PromotionsSearchRequestJob() {
 		super();
-		ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 	}
 
 	@Override

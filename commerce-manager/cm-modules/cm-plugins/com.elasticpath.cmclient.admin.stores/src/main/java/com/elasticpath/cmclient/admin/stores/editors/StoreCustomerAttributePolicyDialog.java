@@ -20,8 +20,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -227,9 +227,9 @@ public class StoreCustomerAttributePolicyDialog extends AbstractEpDialog {
 
 	private void populateAttributes() {
 		final CustomerProfileAttributeService customerProfileAttributeService =
-				ServiceLocator.getService(ContextIdNames.CUSTOMER_PROFILE_ATTRIBUTE_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_PROFILE_ATTRIBUTE_SERVICE, CustomerProfileAttributeService.class);
 
-		final AttributeService attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		attributes = attributeService.getCustomerProfileAttributes().stream()
 				// don't show attributes that have predefined policies
 				.filter(attribute -> !customerProfileAttributeService.getPredefinedProfileAttributePolicies().containsKey(attribute.getKey()))
@@ -247,8 +247,8 @@ public class StoreCustomerAttributePolicyDialog extends AbstractEpDialog {
 	}
 
 	private void populatePolicies() {
-		final AttributePolicyService attributePolicyService = ServiceLocator.getService(ContextIdNames
-				.ATTRIBUTE_POLICY_SERVICE);
+		final AttributePolicyService attributePolicyService = BeanLocator.getSingletonBean(ContextIdNames
+				.ATTRIBUTE_POLICY_SERVICE, AttributePolicyService.class);
 		policies = attributePolicyService.findAll().stream()
 				.map(AttributePolicy::getPolicyKey)
 				.distinct()

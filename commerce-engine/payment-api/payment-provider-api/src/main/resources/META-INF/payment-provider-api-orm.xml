@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+	<named-query name="PAYMENT_PROVIDER_CONFIG_BY_GUID">
+		<query>
+			SELECT pp
+			FROM PaymentProviderConfigurationImpl pp
+			WHERE pp.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="PAYMENT_INSTRUMENT_BY_GUID">
+		<query>
+			SELECT pi
+			FROM PaymentInstrumentImpl pi
+			WHERE pi.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="PAYMENT_PROVIDER_CONFIG_FIND_ALL">
+		<query>
+			SELECT pp
+			FROM PaymentProviderConfigurationImpl pp
+		</query>
+	</named-query>
+
+	<named-query name="PAYMENT_PROVIDER_CONFIG_BY_STATUS">
+		<query>
+			SELECT pp
+			FROM PaymentProviderConfigurationImpl pp
+			WHERE pp.status = ?1
+		</query>
+	</named-query>
+
+	<named-query name="PAYMENT_PROVIDER_CONFIG_BY_GUIDS">
+		<query>
+			SELECT pp
+			FROM PaymentProviderConfigurationImpl pp
+			WHERE pp.guid in (:list)
+		</query>
+	</named-query>
+</entity-mappings>

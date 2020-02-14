@@ -43,7 +43,7 @@ public class DataPointServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	public DataPoint load(final long dataPointUid) throws EpServiceException {
 		DataPoint dataPoint;
 		if (dataPointUid <= 0) {
-			dataPoint = getBean(ContextIdNames.DATA_POINT);
+			dataPoint = getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class);
 		} else {
 			dataPoint = getPersistentBeanFinder().load(ContextIdNames.DATA_POINT, dataPointUid);
 		}
@@ -54,7 +54,7 @@ public class DataPointServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	public DataPoint get(final long dataPointUid) throws EpServiceException {
 		DataPoint dataPoint;
 		if (dataPointUid <= 0) {
-			dataPoint = getBean(ContextIdNames.DATA_POINT);
+			dataPoint = getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class);
 		} else {
 			dataPoint = getPersistentBeanFinder().get(ContextIdNames.DATA_POINT, dataPointUid);
 		}

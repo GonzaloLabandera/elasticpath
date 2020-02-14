@@ -1,9 +1,12 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.rest.ws.fixture.alias
 
+import static com.elasticpath.cortex.dce.SharedConstants.*
+
 import com.elasticpath.rest.ws.client.FluentRelosClient
-import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_SCOPE
-import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_SCOPE_TEST_USER
-import static com.elasticpath.cortex.dce.SharedConstants.PASSWORD
 
 class OAuth2Authentication extends Authentication {
 

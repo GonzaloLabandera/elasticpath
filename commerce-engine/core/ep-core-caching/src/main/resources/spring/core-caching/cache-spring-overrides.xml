@@ -59,7 +59,7 @@
 		<constructor-arg ref="cachingFacetService"/>
 	</bean>
 
-	<bean factory-bean="cachingSkuOptionServiceProxy" factory-method="bindImplementation">
+	<bean factory-bean="skuOptionServiceProxy" factory-method="bindImplementation">
 		<constructor-arg ref="cachingSkuOptionService"/>
 	</bean>
 

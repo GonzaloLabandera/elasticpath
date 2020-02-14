@@ -18,7 +18,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.util.EditorUtil;
@@ -52,10 +52,10 @@ public class DeletePriceList extends AbstractPolicyAwareAction {
 
 	private final PriceListSearchResultsView view;
 
-	private final PriceListAssignmentHelperService priceListAssignmentHelperService = ServiceLocator.getService(ContextIdNames
-		.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE);
-	private final PriceListService priceListService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
-	private final BaseAmountFilter baseAmountFilter = ServiceLocator.getService(ContextIdNames.BASE_AMOUNT_FILTER);
+	private final PriceListAssignmentHelperService priceListAssignmentHelperService = BeanLocator.getSingletonBean(ContextIdNames
+		.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE, PriceListAssignmentHelperService.class);
+	private final PriceListService priceListService = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
+	private final BaseAmountFilter baseAmountFilter = BeanLocator.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 
 	private final ChangeSetHelper changeSetHelper;
 
@@ -80,7 +80,7 @@ public class DeletePriceList extends AbstractPolicyAwareAction {
 
 		if (confirmed) {
 
-			CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+			CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 			cmUserService.removePriceListFromUsers(dto.getGuid());
 			CmUser currentUser = LoginManager.getCmUser();
 			currentUser.removePriceList(dto.getGuid());

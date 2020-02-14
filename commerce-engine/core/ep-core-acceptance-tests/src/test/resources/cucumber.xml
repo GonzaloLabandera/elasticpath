@@ -52,4 +52,6 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 	<bean id="b2bTaxStepDefinitionHelper" class="com.elasticpath.cucumber.tax.B2BTaxStepDefinitionsHelper" />
 
+	<bean id="CleanupStepDefinitionsHelper" class="com.elasticpath.cucumber.cleanup.CleanupStepDefinitionsHelper"/>
+
 </beans>

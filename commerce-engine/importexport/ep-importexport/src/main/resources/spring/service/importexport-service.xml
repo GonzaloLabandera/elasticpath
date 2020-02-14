@@ -411,13 +411,6 @@
 		<property name="schemaPath" value="schema/schemaTaxCode.xsd" />
 	</bean>
 
-	<bean id="paymentGatewayImporter" class="com.elasticpath.importexport.importer.importers.impl.PaymentGatewayImporter"
-		parent="abstractImporter">
-		<property name="paymentGatewayService" ref="paymentGatewayService" />
-		<property name="paymentGatewayAdapter" ref="paymentGatewayAdapter" />
-		<property name="schemaPath" value="schema/schemaPaymentGateway.xsd" />
-	</bean>
-
 	<bean id="warehouseImporter" class="com.elasticpath.importexport.importer.importers.impl.WarehouseImporter"
 		parent="abstractImporter">
 		<property name="warehouseService" ref="warehouseService" />
@@ -450,6 +443,9 @@
 		<property name="storeService" ref="nonCachingStoreService" />
 		<property name="storeAdapter" ref="storeAdapter" />
 		<property name="schemaPath" value="schema/schemaStore.xsd" />
+		<property name="storePaymentProviderConfigService" ref="storePaymentProviderConfigService" />
+		<property name="paymentProviderConfigManagementService" ref="paymentProviderConfigManagementService" />
+		<property name="beanFactory" ref="coreBeanFactory" />
 	</bean>
 
     <bean id="cmImportJobImporter" class="com.elasticpath.importexport.importer.importers.impl.CmImportJobImporter" parent="abstractImporter">
@@ -532,6 +528,12 @@
 		<property name="schemaPath" value="schema/schemaCustomerConsent.xsd" />
 	</bean>
 
+	<bean id="paymentProviderImporter" class="com.elasticpath.importexport.importer.importers.impl.PaymentProviderImporterImpl" parent="abstractImporter">
+		<property name="paymentProviderAdapter" ref="paymentProviderAdapter" />
+		<property name="paymentProviderConfigManagementService" ref="paymentProviderConfigManagementService" />
+		<property name="schemaPath" value="schema/schemaPaymentProvider.xsd" />
+	</bean>
+
 	<bean id="cachingService" class="com.elasticpath.importexport.common.caching.impl.CachingServiceImpl">
 		<property name="catalogService">
 			<ref bean="catalogService" />
@@ -571,9 +573,6 @@
 	<bean id="importerFactory" class="com.elasticpath.importexport.importer.importers.impl.ImporterFactoryImpl">
 		<property name="importerMap">
 			<map>
-				<entry key="PAYMENTGATEWAY">
-					<ref bean="paymentGatewayImporter" />
-				</entry>
 				<entry key="TAXJURISDICTION">
 					<ref bean="taxJurisdictionImporter" />
 				</entry>
@@ -682,6 +681,9 @@
 				<entry key="DATA_POLICY">
 					<ref bean="dataPolicyImporter" />
 				</entry>
+				<entry key="PAYMENTPROVIDER">
+					<ref bean="paymentProviderImporter" />
+				</entry>
 				<entry key="CUSTOMER_CONSENT">
 					<ref bean="customerConsentImporter" />
 				</entry>
@@ -744,9 +746,9 @@
 						<ref bean="warehouseExporter" />
 					</list>
 				</entry>
-				<entry key="PAYMENTGATEWAY">
+				<entry key="PAYMENTPROVIDER">
 					<list>
-						<ref bean="paymentGatewayExporter" />
+						<ref bean="paymentProviderExporter" />
 					</list>
 				</entry>
                 <entry key="TAXCODE">
@@ -1021,10 +1023,10 @@
 		<property name="taxJurisdictionService" ref="taxJurisdictionService" />
 	</bean>
 
-	<bean id="paymentGatewayExporter" class="com.elasticpath.importexport.exporter.exporters.impl.PaymentGatewayExporter">
+	<bean id="paymentProviderExporter" class="com.elasticpath.importexport.exporter.exporters.impl.PaymentProviderExporterImpl">
 		<property name="importExportSearcher" ref="importExportSearcher" />
-		<property name="paymentGatewayAdapter" ref="paymentGatewayAdapter" />
-		<property name="paymentGatewayService" ref="paymentGatewayService" />
+		<property name="paymentProviderAdapter" ref="paymentProviderAdapter" />
+		<property name="paymentProviderConfigManagementService" ref="paymentProviderConfigManagementService" />
 	</bean>
 
 	<bean id="warehouseExporter" class="com.elasticpath.importexport.exporter.exporters.impl.WarehouseExporter">
@@ -1057,6 +1059,7 @@
 		<property name="storeAssociationAdapter" ref="storeAssociationAdapter" />
 		<property name="storeService" ref="nonCachingStoreService" />
 		<property name="storeAssociationService" ref="storeAssociationService" />
+		<property name="storePaymentProviderConfigService" ref="storePaymentProviderConfigService" />
 	</bean>
 
 	<bean id="storeAssociationExporter" class="com.elasticpath.importexport.exporter.exporters.impl.StoreAssociationExporter">
@@ -1581,9 +1584,9 @@
 				<value>TAXCODE</value>
 				<value>TAXJURISDICTION</value>
 				<value>WAREHOUSE</value>
-				<value>PAYMENTGATEWAY</value>
 				<value>MODIFIERGROUP</value>
 				<value>MODIFIERGROUPFILTER</value>
+				<value>PAYMENTPROVIDER</value>
 				<value>CATALOG</value>
 				<value>CATEGORY</value>
 				<value>STORE</value>

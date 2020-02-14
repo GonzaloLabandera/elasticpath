@@ -4,7 +4,11 @@
 package com.elasticpath.persistence.openjpa.executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -13,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
+import com.elasticpath.persistence.api.Persistable;
 
 /**
  * Unit test for the {@code DynamicQueryExecutor} class.
@@ -42,12 +45,13 @@ public class DynamicQueryExecutorTest {
 
 	@Mock private EntityManager entityManager;
 	@Mock private OpenJPAQuery query;
-	@Mock private QueryUtil queryUtil;
-	@Mock private List persistables;
-
+	@Mock private Persistable persistable;
+	private List<Persistable> persistables;
 
 	@Before
 	public void init() {
+		persistables = Lists.newArrayList(persistable);
+
 		dynamicQueryExecutor
 			.withQueryString(QUERY);
 
@@ -60,15 +64,10 @@ public class DynamicQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithListParameter() {
 
+		when(query.getResultList()).thenReturn(persistables);
+
 		List<String> listValues = Lists.newArrayList("1", "2");
-		String csvLstOfValues = "'1','2'";
 		String listParameterName = "list";
-
-		Query queryWithParams = mock(Query.class);
-
-		when(queryUtil.getInParameterValues(listValues)).thenReturn(csvLstOfValues);
-		when(queryUtil.insertListIntoQuery(query, listParameterName, csvLstOfValues)).thenReturn(queryWithParams);
-		when(queryUtil.getResults(queryWithParams)).thenReturn(persistables);
 
 		List result = dynamicQueryExecutor
 			.withListParameterName(listParameterName)
@@ -76,15 +75,18 @@ public class DynamicQueryExecutorTest {
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
-		verify(queryUtil).getInParameterValues(listValues);
-		verify(queryUtil).insertListIntoQuery(query, listParameterName, csvLstOfValues);
-		verify(queryUtil).getResults(queryWithParams);
-		verify(queryUtil).setQueryParameters(queryWithParams, (Object[]) null);
-		verify(queryUtil).setQueryParameters(queryWithParams, (Map) null);
+		verify(query).getResultList();
+		verify(query).setParameter(listParameterName, listValues);
+
+		verify(query, never()).setFirstResult(anyInt());
+		verify(query, never()).setMaxResults(anyInt());
+		verify(query, never()).setHint(anyString(), any());
+		verify(query, never()).setParameters((Map) null);
+		verify(query, never()).setParameters((Object[]) null);
+
 		verifyNoMoreInteractions(query);
-		verifyNoMoreInteractions(queryWithParams);
 	}
 
 	/**
@@ -93,20 +95,26 @@ public class DynamicQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithArrayParameters() {
 
-		Object[] arrayParams = {"1", "2"};
+		when(query.getResultList()).thenReturn(persistables);
 
-		when(queryUtil.getResults(query)).thenReturn(persistables);
+		Object[] arrayParams = {"1", "2"};
 
 		List result = dynamicQueryExecutor
 			.withParameters(arrayParams)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
-		verify(queryUtil).setQueryParameters(query, arrayParams);
-		verify(queryUtil).setQueryParameters(query, (Map) null);
-		verify(queryUtil).getResults(query);
+		verify(query).getResultList();
+		verify(query).setParameters(arrayParams);
+
+		verify(query, never()).setParameter(anyString(), anyCollection());
+		verify(query, never()).setFirstResult(anyInt());
+		verify(query, never()).setMaxResults(anyInt());
+		verify(query, never()).setHint(anyString(), any());
+		verify(query, never()).setParameters((Map) null);
+
 		verifyNoMoreInteractions(query);
 	}
 
@@ -116,22 +124,28 @@ public class DynamicQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithMapParameters() {
 
+		when(query.getResultList()).thenReturn(persistables);
+
 		Map<String, String> mapParams = Maps.newHashMap();
 		mapParams.put("param1", "val1");
 		mapParams.put("param2", "val2");
-
-		when(queryUtil.getResults(query)).thenReturn(persistables);
 
 		List result = dynamicQueryExecutor
 			.withParameters(mapParams)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
-		verify(queryUtil).setQueryParameters(query, (Object[]) null);
-		verify(queryUtil).setQueryParameters(query, mapParams);
-		verify(queryUtil).getResults(query);
+		verify(query).getResultList();
+		verify(query).setParameters(mapParams);
+
+		verify(query, never()).setParameter(anyString(), anyCollection());
+		verify(query, never()).setFirstResult(anyInt());
+		verify(query, never()).setMaxResults(anyInt());
+		verify(query, never()).setHint(anyString(), any());
+		verify(query, never()).setParameters((Object[]) null);
+
 		verifyNoMoreInteractions(query);
 	}
 
@@ -141,20 +155,26 @@ public class DynamicQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithFirstResult() {
 
+		when(query.getResultList()).thenReturn(persistables);
+
 		int fistResult = 1;
-		when(queryUtil.getResults(query)).thenReturn(persistables);
 
 		List result = dynamicQueryExecutor
 			.withFirstResult(fistResult)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
+		verify(query).getResultList();
 		verify(query).setFirstResult(fistResult);
-		verify(queryUtil).getResults(query);
-		verify(queryUtil).setQueryParameters(query, (Object[]) null);
-		verify(queryUtil).setQueryParameters(query, (Map) null);
+
+		verify(query, never()).setParameter(anyString(), anyCollection());
+		verify(query, never()).setMaxResults(anyInt());
+		verify(query, never()).setHint(anyString(), any());
+		verify(query, never()).setParameters((Map) null);
+		verify(query, never()).setParameters((Object[]) null);
+
 		verifyNoMoreInteractions(query);
 	}
 
@@ -164,21 +184,26 @@ public class DynamicQueryExecutorTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithMaxResults() {
 
+		when(query.getResultList()).thenReturn(persistables);
+
 		int maxResults = 1;
-		when(queryUtil.getResults(query)).thenReturn(persistables);
 
 		List result = dynamicQueryExecutor
 			.withMaxResults(maxResults)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
+		verify(query).getResultList();
 		verify(query).setMaxResults(maxResults);
-		verify(queryUtil).getResults(query);
-		verify(queryUtil).setQueryParameters(query, (Object[]) null);
-		verify(queryUtil).setQueryParameters(query, (Map) null);
 		verify(query).setHint("openjpa.hint.OracleSelectHint", "/*+ first_rows(" + maxResults + ") */");
+
+		verify(query, never()).setParameter(anyString(), anyCollection());
+		verify(query, never()).setFirstResult(anyInt());
+		verify(query, never()).setParameters((Map) null);
+		verify(query, never()).setParameters((Object[]) null);
+
 		verifyNoMoreInteractions(query);
 	}
 }

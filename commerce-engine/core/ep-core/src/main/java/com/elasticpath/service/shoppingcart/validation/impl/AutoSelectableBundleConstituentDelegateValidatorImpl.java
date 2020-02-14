@@ -55,7 +55,8 @@ public class AutoSelectableBundleConstituentDelegateValidatorImpl
 	 * @return the new validation context.
 	 */
 	protected ProductSkuValidationContext buildConstituentContext(final ProductSkuValidationContext context, final ConstituentItem item) {
-		ProductSkuValidationContext constituentContext = beanFactory.getBean(ContextIdNames.PRODUCT_SKU_VALIDATION_CONTEXT);
+		ProductSkuValidationContext constituentContext = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU_VALIDATION_CONTEXT,
+				ProductSkuValidationContext.class);
 		constituentContext.setProductSku(item.getProductSku());
 		constituentContext.setParentProductSku(context.getProductSku());
 		constituentContext.setShopper(context.getShopper());

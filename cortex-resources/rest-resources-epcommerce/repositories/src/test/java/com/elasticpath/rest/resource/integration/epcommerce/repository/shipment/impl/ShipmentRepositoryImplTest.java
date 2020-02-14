@@ -3,10 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipment.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 
 import java.util.HashSet;
 import java.util.List;
@@ -107,7 +106,7 @@ public class ShipmentRepositoryImplTest {
 
 	@Test
 	public void testFindAllWhendOrderNotFound() {
-		when(orderRepository.findByGuidAsSingle(STORE_CODE, ORDER_GUID))
+		when(orderRepository.findByGuid(STORE_CODE, ORDER_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(OrderRepositoryImpl.PURCHASE_NOT_FOUND)));
 
 		callFindAll()
@@ -118,7 +117,7 @@ public class ShipmentRepositoryImplTest {
 
 	@Test
 	public void testFindAllWhenNoShipmentFound() {
-		when(orderRepository.findByGuidAsSingle(STORE_CODE, ORDER_GUID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(STORE_CODE, ORDER_GUID)).thenReturn(Single.just(order));
 		when(order.getPhysicalShipments()).thenReturn(null);
 
 		callFindAll()
@@ -130,7 +129,7 @@ public class ShipmentRepositoryImplTest {
 
 	@Test
 	public void testFindAllWhenOneOrMoreShipmentsFound() {
-		when(orderRepository.findByGuidAsSingle(STORE_CODE, ORDER_GUID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(STORE_CODE, ORDER_GUID)).thenReturn(Single.just(order));
 		PhysicalOrderShipment physicalOrderShipment = mock(PhysicalOrderShipment.class);
 		List<PhysicalOrderShipment> shipments = ImmutableList.of(physicalOrderShipment);
 		when(order.getPhysicalShipments()).thenReturn(shipments);

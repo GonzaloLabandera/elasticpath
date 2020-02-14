@@ -5,7 +5,6 @@ package com.elasticpath.cmclient.catalog.editors.product;
 
 import java.util.Date;
 
-import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -32,6 +31,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpDateTimePicker;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.ui.framework.IEpViewPart;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.validation.CompoundValidator;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.policy.common.DefaultStatePolicyDelegateImpl;
@@ -78,8 +78,6 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 
 	private DataBindingContext bindingContext;
 
-	private Text availabilityText;
-
 	private final boolean wizardMode;
 
 	private static final String[] AVAILABILITY_STRINGS = new String[] { CatalogMessages.get().ProductEditorStoreRuleSection_AvailableWhenInStock,
@@ -90,7 +88,8 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 	private static final String[] AVAILABILITY_STRINGS_EDITOR_MODE = new String[] {
 			CatalogMessages.get().ProductEditorStoreRuleSection_AvailableWhenInStock,
 			CatalogMessages.get().ProductEditorStoreRuleSection_AvailableForPreOrder,
-			CatalogMessages.get().ProductEditorStoreRuleSection_AvailableForBackOrder };
+			CatalogMessages.get().ProductEditorStoreRuleSection_AvailableForBackOrder,
+			CatalogMessages.get().ProductEditorStoreRuleSection_AlwaysAvailable};
 
 	private static final int GRID_COLUMNS = 3;
 
@@ -148,12 +147,12 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 		} else {
 			createNotSoldSeparateControls(controlPane, productControls);
 			createStoreRulesControls(controlPane, productControls);
-			createProductSpecificControls(controlPane, productControls, relatedControls);
+			createProductSpecificControls(controlPane, productControls);
 		}
 	}
 
 	private void createNotSoldSeparateControls(final IPolicyTargetLayoutComposite parent, final PolicyActionContainer productControls) {
-		final IEpLayoutData labelLayoutData = parent.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
+		final IEpLayoutData labelLayoutData = parent.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData layoutDataSpan2 = parent.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 2, 1);
 		
 		parent.addLabelBold(CatalogMessages.get().Item_NotSoldSeparately, labelLayoutData, productControls);
@@ -161,7 +160,7 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 	}
 
 	private void createEffectiveRulesControls(final IPolicyTargetLayoutComposite parent, final PolicyActionContainer relatedControls) {
-		final IEpLayoutData labelLayoutData = parent.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
+		final IEpLayoutData labelLayoutData = parent.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData layoutDataSpan2 = parent.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 2, 1);
 
 		parent.addLabelBold(CatalogMessages.get().Item_StoreVisible, labelLayoutData, relatedControls);
@@ -175,7 +174,7 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 	}
 
 	private void createStoreRulesControls(final IPolicyTargetLayoutComposite parent, final PolicyActionContainer productControls) {
-		final IEpLayoutData labelLayoutData = parent.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
+		final IEpLayoutData labelLayoutData = parent.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData layoutDataSpan2 = parent.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 2, 1);
 
 		parent.addLabelBold(CatalogMessages.get().Item_StoreVisible, labelLayoutData, productControls);
@@ -188,9 +187,8 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 		this.disableDatePicker = parent.addDateTimeComponent(IEpDateTimePicker.STYLE_DATE_AND_TIME, layoutDataSpan2, productControls);
 	}
 
-	private void createProductSpecificControls(final IPolicyTargetLayoutComposite parent, final PolicyActionContainer productControls,
-			final PolicyActionContainer relatedControls) {
-		final IEpLayoutData labelLayoutData = parent.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
+	private void createProductSpecificControls(final IPolicyTargetLayoutComposite parent, final PolicyActionContainer productControls) {
+		final IEpLayoutData labelLayoutData = parent.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData layoutDataSpan2 = parent.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 2, 1);
 
 		parent.addLabelBoldRequired(CatalogMessages.get().ProductEditorStoreRuleSection_MinOrderQty, labelLayoutData, productControls);
@@ -199,12 +197,8 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 		this.minOrderQtySpinner.setMaximum(MAX_MINORDER);
 
 		parent.addLabelBold(CatalogMessages.get().ProductEditorStoreRuleSection_AvailabilityRule, labelLayoutData, productControls);
-		if (getModel().getAvailabilityCriteria() == AvailabilityCriteria.ALWAYS_AVAILABLE && !wizardMode) {
-			availabilityText = parent.addTextField(layoutDataSpan2, relatedControls);
-		} else {
-			availabilityRuleCombo = parent.addComboBox(layoutDataSpan2, productControls);
-			availabilityRuleCombo.addSelectionListener(this);
-		}
+		availabilityRuleCombo = parent.addComboBox(layoutDataSpan2, productControls);
+		availabilityRuleCombo.addSelectionListener(this);
 		
 		this.expectedReleaseDateLabel = parent.addLabelBoldRequired(CatalogMessages.get().ProductEditorStoreRuleSection_ExpReleaseDate,
 				labelLayoutData, productControls);
@@ -239,18 +233,9 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 			this.enableDatePicker.setDate(product.getStartDate());
 			this.disableDatePicker.setDate(product.getEndDate());
 			this.minOrderQtySpinner.setSelection(product.getMinOrderQty());
-			if (product.getAvailabilityCriteria() == AvailabilityCriteria.ALWAYS_AVAILABLE) {
-				final int alwaysAvailableIndex = 3;
-				availabilityText.setText(AVAILABILITY_STRINGS[alwaysAvailableIndex]);
-				setExpReleaseDateControlsEnabled(alwaysAvailableIndex);
-			} else {
-				this.availabilityRuleCombo.setItems(AVAILABILITY_STRINGS_EDITOR_MODE);
-				this.availabilityRuleCombo.setText(getAvailabilityRuleText(product));
-				// TODO - move the below to policy
-				// this.availabilityRuleCombo.setEnabled(product.getAvailabilityCriteria() != AvailabilityCriteria.ALWAYS_AVAILABLE
-				// && epState == EpState.EDITABLE);
-				setExpReleaseDateControlsEnabled(availabilityRuleCombo.getSelectionIndex());
-			}
+			this.availabilityRuleCombo.setItems(AVAILABILITY_STRINGS_EDITOR_MODE);
+			this.availabilityRuleCombo.setText(getAvailabilityRuleText(product));
+			setExpReleaseDateControlsEnabled(availabilityRuleCombo.getSelectionIndex());
 			this.expectedReleaseDateComp.setDate(product.getExpectedReleaseDate());
 		}
 
@@ -300,12 +285,9 @@ public class StoreRulesViewPart extends DefaultStatePolicyDelegateImpl implement
 			bindingProvider.bind(bindingContext, this.minOrderQtySpinner, product, "minOrderQty",  //$NON-NLS-1$
 					EpValidatorFactory.POSITIVE_INTEGER, null, true);
 
-			if (product.getAvailabilityCriteria() != AvailabilityCriteria.ALWAYS_AVAILABLE || wizardMode) {
+			bindAvailabilityRule(bindingContext, product, bindingProvider);
 
-				bindAvailabilityRule(bindingContext, product, bindingProvider);
-
-				bindExpectedReleaseDate(bindingContext, product);
-			}
+			bindExpectedReleaseDate(bindingContext, product);
 		}
 	}
 

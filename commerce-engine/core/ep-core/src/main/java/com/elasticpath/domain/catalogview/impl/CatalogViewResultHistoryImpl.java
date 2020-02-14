@@ -73,10 +73,10 @@ public class CatalogViewResultHistoryImpl extends AbstractEpDomainImpl implement
 	private CatalogViewResult generateNewSearchResult(final CatalogViewRequest newSearchRequest) {
 		final CatalogViewResult newSearchResult;
 		if (newSearchRequest instanceof SearchRequest) {
-			newSearchResult = getBean(ContextIdNames.SEARCH_RESULT);
+			newSearchResult = getPrototypeBean(ContextIdNames.SEARCH_RESULT, CatalogViewResult.class);
 			newSearchResult.setCatalogViewRequest(newSearchRequest);
 		} else {
-			newSearchResult = getBean(ContextIdNames.BROWSING_RESULT);
+			newSearchResult = getPrototypeBean(ContextIdNames.BROWSING_RESULT, CatalogViewResult.class);
 			newSearchResult.setCatalogViewRequest(newSearchRequest);
 		}
 		return newSearchResult;

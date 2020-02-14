@@ -40,7 +40,7 @@ public class CouponUsageModelDtoAssembler {
 			throw new IllegalArgumentException();
 		}
 			
-		CouponUsage couponUsage = beanFactory.getBean(ContextIdNames.COUPON_USAGE);
+		CouponUsage couponUsage = beanFactory.getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 		couponUsage.setCoupon(coupon);
 		couponUsage.setCustomerEmailAddress(source.getEmailAddress());
 		couponUsage.setSuspended(source.isSuspended());

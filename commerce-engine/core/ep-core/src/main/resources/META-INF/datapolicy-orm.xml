@@ -69,13 +69,22 @@
 		</query>
 	</named-query>
 
-	<named-query name="DATAPOLICY_FIND_ACTIVE">
+	<!-- Side note: Looking for disabled policy latest doesn't make any sense, because disabled implies expired -->
+	<named-query name="DATAPOLICY_FIND_BY_STATE_LATEST">
 		<query>
 			SELECT DISTINCT d
 			FROM DataPolicyImpl d
 			WHERE d.state = ?1
 			AND CURRENT_TIMESTAMP > d.startDate
 			AND (d.endDate IS NULL OR d.endDate > CURRENT_TIMESTAMP)
+		</query>
+	</named-query>
+
+	<named-query name="DATAPOLICY_FIND_BY_STATE">
+		<query>
+			SELECT DISTINCT d
+			FROM DataPolicyImpl d
+			WHERE d.state = ?1
 		</query>
 	</named-query>
 
@@ -86,7 +95,7 @@
 		</query>
 	</named-query>
 
-	<named-query name="DATAPOLICY_FIND_BY_STATE">
+	<named-query name="DATAPOLICY_FIND_BY_TWO_STATES">
 		<query>
 			SELECT d
 			FROM DataPolicyImpl d
@@ -175,8 +184,8 @@
 		<query>
 			SELECT c
 			FROM CustomerImpl c
-			WHERE c.storeCode = ?1
-			AND c.uidPk = ?2
+			WHERE c.userId = ?1
+			AND c.storeCode = ?2
 		</query>
 	</named-query>
 

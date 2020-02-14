@@ -323,7 +323,7 @@ public class JournalingInventoryStrategy extends AbstractEPInventoryStrategy {
 	 */
 	private void addInventoryJournalEntry(final InventoryKey inventoryKey, final int allocatedQuantityDelta, final int quantityOnHandDelta) {
 		if (allocatedQuantityDelta != 0 || quantityOnHandDelta != 0) {
-			InventoryJournal inventoryJournal = getBeanFactory().getBean(ContextIdNames.INVENTORY_JOURNAL);
+			InventoryJournal inventoryJournal = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
 			inventoryJournal.setSkuCode(inventoryKey.getSkuCode());
 			inventoryJournal.setWarehouseUid(inventoryKey.getWarehouseUid());
 			inventoryJournal.setAllocatedQuantityDelta(allocatedQuantityDelta);
@@ -356,7 +356,8 @@ public class JournalingInventoryStrategy extends AbstractEPInventoryStrategy {
 		@Override
 		public void execute(final InventoryLogSupport logSupport) {
 			addInventoryJournalEntry(inventoryKey, 0, onHandQtyToAdjust);
-			InventoryExecutionResult executionResult = getBeanFactory().getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			InventoryExecutionResult executionResult = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT,
+					InventoryExecutionResult.class);
 			executionResult.setQuantity(onHandQtyToAdjust);
 			setExecutionResult(executionResult);
 		}
@@ -389,7 +390,8 @@ public class JournalingInventoryStrategy extends AbstractEPInventoryStrategy {
 		@Override
 		public void execute(final InventoryLogSupport logSupport) {
 			addInventoryJournalEntry(inventoryKey, quantityToAllocate, 0);
-			InventoryExecutionResult executionResult = getBeanFactory().getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			InventoryExecutionResult executionResult = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT,
+					InventoryExecutionResult.class);
 			executionResult.setQuantity(quantityToAllocate);
 			setExecutionResult(executionResult);
 		}
@@ -422,7 +424,8 @@ public class JournalingInventoryStrategy extends AbstractEPInventoryStrategy {
 		@Override
 		public void execute(final InventoryLogSupport logSupport) {
 			addInventoryJournalEntry(inventoryKey, -quantityToDeallocate, 0);
-			InventoryExecutionResult executionResult = getBeanFactory().getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			InventoryExecutionResult executionResult = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT,
+					InventoryExecutionResult.class);
 			executionResult.setQuantity(quantityToDeallocate);
 			setExecutionResult(executionResult);
 		}
@@ -456,7 +459,8 @@ public class JournalingInventoryStrategy extends AbstractEPInventoryStrategy {
 		@Override
 		public void execute(final InventoryLogSupport logSupport) {
 			addInventoryJournalEntry(inventoryKey, -quantityToRelease, -quantityToRelease);
-			InventoryExecutionResult executionResult = getBeanFactory().getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			InventoryExecutionResult executionResult = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT,
+					InventoryExecutionResult.class);
 			setExecutionResult(executionResult);
 		}
 	}

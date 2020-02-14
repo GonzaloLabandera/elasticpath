@@ -162,7 +162,7 @@ public class ShopperServiceImpl implements ShopperService {
 	}
 
 	private Shopper createNewShopperFromMementoAndStore(final ShopperMemento shopperMemento, final String storeCode) {
-		final Shopper shopper = beanFactory.getBean(ContextIdNames.SHOPPER);
+		final Shopper shopper = beanFactory.getPrototypeBean(ContextIdNames.SHOPPER, Shopper.class);
 		shopper.setShopperMemento(shopperMemento);
 		shopper.setStoreCode(storeCode);
 
@@ -170,7 +170,7 @@ public class ShopperServiceImpl implements ShopperService {
 	}
 
 	private ShopperMemento createShopperMemento() {
-		final ShopperMemento newShopperMemento = beanFactory.getBean(ContextIdNames.SHOPPER_MEMENTO);
+		final ShopperMemento newShopperMemento = beanFactory.getPrototypeBean(ContextIdNames.SHOPPER_MEMENTO, ShopperMemento.class);
 		final String mementoGuid = getNewGuid();
 		newShopperMemento.setGuid(mementoGuid);
 		return newShopperMemento;

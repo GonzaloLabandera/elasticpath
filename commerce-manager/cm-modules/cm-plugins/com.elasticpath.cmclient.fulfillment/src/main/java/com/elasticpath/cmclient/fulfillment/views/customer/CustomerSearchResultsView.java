@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -331,7 +331,7 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 	 */
 	protected StoreService getStoreService() {
 		if (storeService == null) {
-			storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+			storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		}
 		return storeService;
 	}

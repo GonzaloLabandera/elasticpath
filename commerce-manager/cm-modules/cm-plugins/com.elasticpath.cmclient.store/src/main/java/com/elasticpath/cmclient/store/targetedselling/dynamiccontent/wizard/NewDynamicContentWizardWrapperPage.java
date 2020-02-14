@@ -23,7 +23,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -146,8 +146,8 @@ public class NewDynamicContentWizardWrapperPage extends AbstractPolicyAwareWizar
 			}			
 		}
 
-		DynamicContentService dynamicContentService = ServiceLocator.getService(
-				ContextIdNames.DYNAMIC_CONTENT_SERVICE);
+		DynamicContentService dynamicContentService = BeanLocator
+				.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class);
 
 		final Map<String, ContentWrapper> contentWrapperMap = dynamicContentService.getContentWrappersMap(true);
 
@@ -303,8 +303,7 @@ public class NewDynamicContentWizardWrapperPage extends AbstractPolicyAwareWizar
 	 * @return true - if another object with given name exists, false otherwise
 	 */
 	private boolean dcNameExists(final String dcName) {
-		final DynamicContentService dcService = ServiceLocator.getService(
-				ContextIdNames.DYNAMIC_CONTENT_SERVICE);
+		final DynamicContentService dcService = BeanLocator.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class);
 		try {
 			final DynamicContent dynamicContent = dcService.findByName(dcName);
 			if (dynamicContent != null && !dynamicContent.getGuid().equals(getModel().getGuid())) {

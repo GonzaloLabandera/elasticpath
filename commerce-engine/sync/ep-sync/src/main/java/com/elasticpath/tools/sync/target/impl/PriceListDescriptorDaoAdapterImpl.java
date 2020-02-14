@@ -41,7 +41,7 @@ public class PriceListDescriptorDaoAdapterImpl extends AbstractDaoAdapter<PriceL
 
 	@Override
 	public PriceListDescriptor createBean(final PriceListDescriptor product) {
-		return beanFactory.getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 	}
 
 	@Override

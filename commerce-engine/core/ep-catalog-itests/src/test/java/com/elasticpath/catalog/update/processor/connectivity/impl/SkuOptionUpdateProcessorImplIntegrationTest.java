@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Elastic Path Software Inc., 2018
  */
+
 package com.elasticpath.catalog.update.processor.connectivity.impl;
 
 import static com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.OPTION_IDENTITY_TYPE;
@@ -16,14 +17,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.log4j.Logger;
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionHistoryEntity;
@@ -47,6 +50,8 @@ import com.elasticpath.test.util.Utils;
  * Integration tests for {@link SkuOptionUpdateProcessorImpl}.
  */
 @JmsBrokerConfigurator(url = JMS_BROKER_URL)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesDatabase
 public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTestSupport {
 
 	public static final String JMS_BROKER_URL = "tcp://localhost:61619";
@@ -92,7 +97,6 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldAppendedProjectionWhenEventIsCreatedAndNoCorrespondingProjectionExists() {
 		final int expectedNumberOfCatalogEventsBeforeProductUpdate = 1;
 
@@ -110,7 +114,6 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldAppendedProjectionWhenEventIsUpdatedAndNoCorrespondingProjectionExists() {
 		final SkuOption skuOption = createAndPersistSkuOption();
 
@@ -127,7 +130,6 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldUnchangedProjectionWhenEventIsUpdatedAndSameProjectionIsExist() {
 		final SkuOption skuOption = createAndPersistSkuOption();
 
@@ -137,14 +139,12 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 				= catalogProjectionRepository.extractProjectionsByTypeAndCode(OPTION_IDENTITY_TYPE,
 				skuOption.getOptionKey());
 
-
 		final String savedHash = savedProjections.get(0).getContentHash();
 
 		skuOptionUpdateProcessor.processSkuOptionUpdated(skuOption);
 		final List<ProjectionEntity> updatedProjections
 				= catalogProjectionRepository.extractProjectionsByTypeAndCode(OPTION_IDENTITY_TYPE,
 				skuOption.getOptionKey());
-
 
 		final String updatedHash = updatedProjections.get(0).getContentHash();
 
@@ -153,7 +153,6 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldAddedNewProjectionWhenEventIsUpdatedAndSameProjectionNotExist() {
 		final SkuOption skuOption = createAndPersistSkuOption();
 
@@ -182,7 +181,6 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldAppendedProjectionWhenEventIsDeleted() {
 		final SkuOption skuOption = createAndPersistSkuOption();
 
@@ -226,7 +224,7 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	}
 
 	private SkuOption createAndPersistSkuOption() {
-		final SkuOption skuOption = getBeanFactory().getBean(ContextIdNames.SKU_OPTION);
+		final SkuOption skuOption = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 		skuOption.initialize();
 		skuOption.setOptionKey(Utils.uniqueCode(SKU_OPTION_KEY));
 		skuOption.setCatalog(catalog);

@@ -3,23 +3,22 @@
  */
 package com.elasticpath.service.pricing.dao.impl;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.common.pricing.service.BaseAmountFilter;
 import com.elasticpath.domain.pricing.BaseAmount;
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.persistence.openjpa.QueryParameterEscaper;
-import com.elasticpath.persistence.openjpa.impl.QueryParameterEscaperImpl;
 import com.elasticpath.service.pricing.dao.BaseAmountDao;
 
 /**
@@ -100,11 +99,8 @@ public class BaseAmountDaoImpl implements BaseAmountDao {
 	public Collection<BaseAmount> findBaseAmounts(final BaseAmountFilter filter) {
 		final BaseAmountJPQLBuilder queryBuilder = new BaseAmountJPQLBuilder(filter);
 
-		final Collection<BaseAmount> amounts = getPersistenceEngine().retrieve(queryBuilder.toString());
-		if (amounts == null) {
-			return new ArrayList<>();
-		}
-		return amounts;
+		return getPersistenceEngine().retrieve(queryBuilder.getQueryString(), queryBuilder.getQueryParameters());
+
 	}
 
 	@Override
@@ -199,12 +195,12 @@ public class BaseAmountDaoImpl implements BaseAmountDao {
 	/**
 	 * JPA Query builder for base amounts.
 	 */
+	@SuppressWarnings("PMD.AvoidStringBufferField")
 	static class BaseAmountJPQLBuilder {
-		private final String query;
+		private final StringBuilder queryBuilder = new StringBuilder("SELECT baseAmount FROM BaseAmountImpl AS baseAmount");
 		private boolean multipleStatements;
-		private static final String SELECT = "SELECT baseAmount FROM BaseAmountImpl AS baseAmount";
-		private final QueryParameterEscaper paramEscaper = new QueryParameterEscaperImpl();
-
+		private final List<Object> queryParameters = new LinkedList<>();
+		private int fieldIndex = 1;
 
 		/**
 		 * Builder for BaseAmount queries.
@@ -212,15 +208,12 @@ public class BaseAmountDaoImpl implements BaseAmountDao {
 		 * @param filter the query filter to transform into a query string.
 		 */
 		BaseAmountJPQLBuilder(final BaseAmountFilter filter) {
-			StringBuilder queryBuilder = new StringBuilder(SELECT);
-
-			queryBuilder.append(appendParameters("objectGuid", filter.getObjectGuid()));
-			queryBuilder.append(appendParameters("objectType", filter.getObjectType()));
-			queryBuilder.append(appendParameters("priceListDescriptorGuid", filter.getPriceListDescriptorGuid()));
-			queryBuilder.append(appendParameters("listValueInternal", filter.getListValue()));
-			queryBuilder.append(appendParameters("saleValueInternal", filter.getSaleValue()));
-			queryBuilder.append(appendParameters("quantityInternal", filter.getQuantity()));
-			this.query = queryBuilder.toString();
+			appendParameters("objectGuid", filter.getObjectGuid());
+			appendParameters("objectType", filter.getObjectType());
+			appendParameters("priceListDescriptorGuid", filter.getPriceListDescriptorGuid());
+			appendParameters("listValueInternal", filter.getListValue());
+			appendParameters("saleValueInternal", filter.getSaleValue());
+			appendParameters("quantityInternal", filter.getQuantity());
 		}
 
 		/**
@@ -229,17 +222,14 @@ public class BaseAmountDaoImpl implements BaseAmountDao {
 		 * @param criteria to match against
 		 * @return partial query criteria
 		 */
-		private String appendParameters(final String field, final Object criteria) {
+		private void appendParameters(final String field, final Object criteria) {
 			if (criteria != null && !"null".equals(criteria) && !StringUtils.EMPTY.equals(criteria)) {
-				final StringBuilder queryBuilder = new StringBuilder();
-				queryBuilder.append(getPrefix()).append("baseAmount.").append(field).append(" = ");
-				if (criteria instanceof BigDecimal) {
-					return queryBuilder.append(String.valueOf(((BigDecimal) criteria).doubleValue())).toString();
-				} else if (criteria instanceof String) {
-					return queryBuilder.append('\'').append(paramEscaper.escapeStringParameter((String) criteria)).append('\'').toString();
-				}
+				queryBuilder.append(getPrefix())
+					.append("baseAmount.").append(field)
+					.append(" = ?").append(fieldIndex++);
+
+				queryParameters.add(criteria);
 			}
-			return StringUtils.EMPTY;
 		}
 
 		private String getPrefix() {
@@ -250,9 +240,12 @@ public class BaseAmountDaoImpl implements BaseAmountDao {
 			return " WHERE ";
 		}
 
-		@Override
-		public String toString() {
-			return query;
+		public String getQueryString() {
+			return queryBuilder.toString();
+		}
+
+		public Object[] getQueryParameters() {
+			return this.queryParameters.toArray();
 		}
 	}
 }

@@ -1,20 +1,21 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2007
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.event;
 
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
+import com.elasticpath.provider.payment.service.event.PaymentEvent;
 
 /**
  * The helper on the <code>OrderEvent</code>.
  * Help to generate the event details to track the order changes.
  *
  */
+@SuppressWarnings({"PMD.TooManyMethods"})
 public interface OrderEventHelper {
 
 	/**
@@ -59,17 +60,25 @@ public interface OrderEventHelper {
 	 * Log the event when payment captured.
 	 *
 	 * @param order the order
-	 * @param orderPayment the order payment
+	 * @param paymentEvent payment event.
 	 */
-	void logOrderPaymentCaptured(Order order, OrderPayment orderPayment);
+	void logOrderPaymentCaptured(Order order,  PaymentEvent paymentEvent);
 
 	/**
-	 * Log the event when payment refund.
+	 * Log the event of refund payment.
 	 *
-	 * @param order the order
-	 * @param orderPayment the order payment
+	 * @param order        the order
+	 * @param paymentEvent payment event
 	 */
-	void logOrderPaymentRefund(Order order, OrderPayment orderPayment);
+	void logOrderPaymentRefund(Order order, PaymentEvent paymentEvent);
+
+	/**
+	 * Log the event of manual refund payment.
+	 *
+	 * @param order        the order
+	 * @param paymentEvent payment event
+	 */
+	void logOrderPaymentManualRefund(Order order, PaymentEvent paymentEvent);
 
 	/**
 	 * Log the event when new sku added.

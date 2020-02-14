@@ -41,7 +41,7 @@ public class PriceListAssignmentDaoAdapterImpl extends AbstractDaoAdapter<PriceL
 
 	@Override
 	public PriceListAssignment createBean(final PriceListAssignment priceListAssignment) {
-		return beanFactory.getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRICE_LIST_ASSIGNMENT, PriceListAssignment.class);
 	}
 
 	@Override

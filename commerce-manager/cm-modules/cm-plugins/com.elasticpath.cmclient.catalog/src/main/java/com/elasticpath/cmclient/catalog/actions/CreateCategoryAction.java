@@ -13,7 +13,7 @@ import org.eclipse.ui.PlatformUI;
 import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.wizards.category.CreateCategoryWizard;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.registry.ObjectRegistry;
@@ -112,7 +112,7 @@ public class CreateCategoryAction  extends AbstractCatalogViewAction implements 
 		final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		
 		LOG.debug("CreateCategoryAction called."); //$NON-NLS-1$
-		final Category category = ServiceLocator.getService(ContextIdNames.CATEGORY);
+		final Category category = BeanLocator.getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 		// Set the category's catalog object with the selected catalog
 		category.setCatalog(this.catalog);
 		// Set the category's virtual status

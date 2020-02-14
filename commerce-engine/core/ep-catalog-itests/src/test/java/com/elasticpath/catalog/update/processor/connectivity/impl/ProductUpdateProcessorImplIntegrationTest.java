@@ -40,9 +40,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.elasticpath.catalog.plugin.converter.impl.OfferContent;
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
+import com.elasticpath.catalog.plugin.repository.CatalogProjectionHistoryRepository;
 import com.elasticpath.catalog.plugin.repository.CatalogProjectionRepository;
 import com.elasticpath.domain.attribute.AttributeValue;
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
@@ -88,6 +90,8 @@ import com.elasticpath.test.util.Utils;
  * Integration tests for {@link ProductUpdateProcessorImpl}.
  */
 @JmsBrokerConfigurator(url = JMS_BROKER_URL)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesDatabase
 public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTestSupport {
 
 	public static final String JMS_BROKER_URL = "tcp://localhost:61625";
@@ -148,6 +152,9 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 	@Autowired
 	private CatalogProjectionRepository catalogProjectionRepository;
 
+	@Autowired
+	private CatalogProjectionHistoryRepository historyRepository;
+
 	@BeforeClass
 	public static void setUpClass() {
 		System.setProperty("bulkChangeMaxEventSize", BULK_CHANGE_MAX_EVENT_SIZE);
@@ -155,6 +162,8 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 
 	@Before
 	public void setUp() throws Exception {
+		historyRepository.deleteAll();
+		catalogProjectionRepository.deleteAll();
 		objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule());
 		objectMapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
@@ -169,7 +178,6 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldPublish2BulkEventsAndSetEnableAndDisableDateTimeAsInProductWhen3ProductBundleContainProductAndBulkChangeMaxEventSizeIs2()
 			throws Exception {
 		final int expectedNumberOfCatalogEventsBeforeProductUpdate = 9;
@@ -238,7 +246,6 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldPublish2BulkEventsAndSetEnableAndDisableDateTimeAsInProductBundlesWhen3ProductBundleContainProductAndBulkChangeMaxEventSizeIs2()
 			throws Exception {
 		final int expectedNumberOfCatalogEventsBeforeProductUpdate = 9;
@@ -307,7 +314,6 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldPublish1BulkEventsAndSetIsDeletedTrueWhen2ProductBundleContainProductAndBulkChangeMaxEventSizeIs2AndProductUpdatedHiddenTrue()
 			throws Exception {
 		final int expectedNumberOfCatalogEventsBeforeProductUpdate = 7;
@@ -358,7 +364,6 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldPublish1BulkEventsAndSetIsDeletedAsInProductBundleTrueWhen2ProductBundleContainProductAndProductUpdatedHiddenFalse()
 			throws Exception {
 		final int expectedNumberOfCatalogEventsBeforeProductUpdate = 7;
@@ -416,7 +421,6 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldPublish1BulkEventAndSetAvailabilityRulesAsInProductWhenProductAvailabilityRulesSetAvailableForPreOrder()
 			throws Exception {
 		final int expectedNumberOfCatalogEventsBeforeProductUpdate = 7;
@@ -480,7 +484,6 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldPublish1BulkEventAndSetAvailabilityRulesAsInProductBundlesWhenProductAvailabilityRulesSetAvailableWhenInStock()
 			throws Exception {
 		final int expectedNumberOfCatalogEventsBeforeProductUpdate = 7;

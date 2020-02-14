@@ -22,7 +22,7 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModelImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -68,14 +68,14 @@ public class BrandDialog extends AbstractPolicyAwareDialog implements ObjectGuid
 
 	private String originalCode;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	/**
 	 * Policy container for the dialog controls.
 	 */
 	private PolicyActionContainer addEditBrandDialogContainer;
 
-	private final BrandService brandService = ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+	private final BrandService brandService = BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 
 	/**
 	 * Constructs the Brand dialog.
@@ -126,7 +126,7 @@ public class BrandDialog extends AbstractPolicyAwareDialog implements ObjectGuid
 	}
 
 	private Brand createBrand() {
-		final Brand newBrand = ServiceLocator.getService(ContextIdNames.BRAND);
+		final Brand newBrand = BeanLocator.getPrototypeBean(ContextIdNames.BRAND, Brand.class);
 		newBrand.setLocalizedPropertiesMap(new HashMap<>());
 		return newBrand;
 	}

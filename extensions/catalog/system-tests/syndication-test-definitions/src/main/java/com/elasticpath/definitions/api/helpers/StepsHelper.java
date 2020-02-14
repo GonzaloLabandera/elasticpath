@@ -5,10 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * Helper class which has methods which are used by API step definition classes.
  */
 public final class StepsHelper {
+
+	private static final Logger LOGGER = Logger.getLogger(StepsHelper.class);
 
 	private StepsHelper() {
 	}
@@ -49,5 +53,19 @@ public final class StepsHelper {
 				.as("There are less pages in the response than provided value. Thus response page start index is out of range")
 				.isNotEqualTo(-1);
 		return startIndex;
+	}
+
+	/**
+	 * Sleep for a number of milliseconds.
+	 *
+	 * @param mills number of milliseconds.
+	 */
+	public static void sleep(final long mills) {
+		try {
+			Thread.sleep(mills);
+		} catch (InterruptedException e) {
+			LOGGER.error(e);
+			Thread.currentThread().interrupt();
+		}
 	}
 }

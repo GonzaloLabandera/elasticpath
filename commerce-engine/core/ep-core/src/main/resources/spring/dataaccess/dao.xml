@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -187,7 +191,7 @@
 		<property name="assetRepository" ref="assetRepository"/>
 	</bean>
 
-	<bean id="csvFileReader" parent="csvFileReaderTemplate"/>
+	<bean id="csvFileReader" parent="csvFileReaderTemplate" scope="prototype" />
 
 	<bean id="baseAmountDtoCsvLineReader" class="com.elasticpath.csvimport.impl.DtoCsvLineReaderImpl"
 			scope="prototype">
@@ -485,6 +489,7 @@
 	<bean id="cartOrderDao" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.cartorder.dao.impl.CartOrderDaoImpl">
+				<property name="beanFactory" ref="coreBeanFactory"/>
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 			</bean>
 		</property>
@@ -514,14 +519,6 @@
 			</bean>
 		</property>
 	</bean>
-
-	<bean id="paymentTokenDao" parent="txProxyTemplate">
-    	<property name="target">
-      		<bean class="com.elasticpath.persistence.dao.impl.PaymentTokenDaoImpl">
-        		<property name="persistenceEngine" ref="persistenceEngine"/>
-      		</bean>
-    	</property>
-  	</bean>
 
 	<bean id="taxJournalDao" parent="txProxyTemplate">
 		<property name="target">

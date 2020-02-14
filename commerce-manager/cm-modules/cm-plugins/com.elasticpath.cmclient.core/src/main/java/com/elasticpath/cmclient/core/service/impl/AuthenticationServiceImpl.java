@@ -13,8 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmSingletonUtil;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.security.CmAuthenticationManager;
 import com.elasticpath.cmclient.core.security.UISessionSecurityContextHolderStrategy;
 import com.elasticpath.cmclient.core.service.AuthenticationService;
@@ -59,7 +59,7 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
 	public void login(final String username, final String password) {
 		authToken = new UsernamePasswordAuthenticationToken(username, password);
 
-		CmAuthenticationManager cmAuthenticationManager = ServiceLocator.getService("cmAuthenticationManager");
+		CmAuthenticationManager cmAuthenticationManager = BeanLocator.getSingletonBean("cmAuthenticationManager", CmAuthenticationManager.class);
 
 		try {
 			Collection<? extends GrantedAuthority> roles = cmAuthenticationManager.attemptAuthentication(username, password);

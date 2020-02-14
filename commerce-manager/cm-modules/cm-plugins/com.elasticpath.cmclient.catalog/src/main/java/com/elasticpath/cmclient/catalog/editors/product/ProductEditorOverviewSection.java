@@ -21,7 +21,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -73,7 +73,7 @@ public class ProductEditorOverviewSection extends AbstractPolicyAwareEditorPageS
 
 	private static final String ORI_PRODUCT_CODE = "oriProductCode"; //$NON-NLS-1$
 
-	private final ProductService productService = (ProductService) ServiceLocator.getService(ContextIdNames.PRODUCT_SERVICE);
+	private final ProductService productService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 
 	private List<TaxCode> taxCodeList;
 
@@ -168,8 +168,8 @@ public class ProductEditorOverviewSection extends AbstractPolicyAwareEditorPageS
 			return;
 		}
 
-		final TaxCodeService taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
-		final TaxCodeRetriever taxCodeRetriever = ServiceLocator.getService(ContextIdNames.TAX_CODE_RETRIEVER);
+		final TaxCodeService taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
+		final TaxCodeRetriever taxCodeRetriever = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_RETRIEVER, TaxCodeRetriever.class);
 		final List<TaxCode> codeList = taxCodeService.list();
 		this.taxCodeList = new ArrayList<>();
 		for (final TaxCode currTaxCode : codeList) {
@@ -185,7 +185,7 @@ public class ProductEditorOverviewSection extends AbstractPolicyAwareEditorPageS
 
 	private void populateBrandNames(final Locale selectedLocale) {
 		final BrandService brandService =
-				ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 		this.brandList = brandService.findAllBrandsFromCatalog(getProduct().getMasterCatalog().getUidPk());
 		Collections.sort(brandList, new BrandComparator(selectedLocale));
 		brandCombo.setItems(new String[0]);

@@ -62,7 +62,7 @@ public class SkuOptionValueFilterImpl extends AbstractFilterImpl<SkuOptionValueF
 	 * @return the sku option service
 	 */
 	protected SkuOptionService getSkuOptionService() {
-		return getBean(ContextIdNames.SKU_OPTION_SERVICE);
+		return getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
 	}
 
 	@Override

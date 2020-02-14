@@ -78,7 +78,8 @@ public class SynonymGroupServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testGetSynonymGroup() {
-		stubGetBean(ContextIdNames.SYNONYM_GROUP, SynonymGroupImpl.class);
+		getBeanFactoryExpectationsFactory().allowingBeanFactoryGetPrototypeBean(ContextIdNames.SYNONYM_GROUP, SynonymGroup.class,
+				SynonymGroupImpl.class);
 
 		final long uid = 1234L;
 		final SynonymGroup synonymGroup = context.mock(SynonymGroup.class);

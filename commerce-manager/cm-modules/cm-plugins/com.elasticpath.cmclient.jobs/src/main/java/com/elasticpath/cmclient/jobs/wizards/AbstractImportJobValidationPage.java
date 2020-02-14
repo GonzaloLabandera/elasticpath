@@ -13,7 +13,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -87,7 +87,7 @@ public abstract class AbstractImportJobValidationPage extends WizardPage {
 		super(pageName, title, titleImage);
 		this.request = request;
 		setDescription(description);
-		importService =  ServiceLocator.getService("importService"); //$NON-NLS-1$
+		importService = BeanLocator.getSingletonBean("importService", ImportService.class); //$NON-NLS-1$
 
 	}
 

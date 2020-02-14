@@ -33,8 +33,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.pagination.PaginationInfo;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.promotions.CouponCollectionModel;
@@ -277,8 +277,8 @@ public class CouponEditorPart extends AbstractPolicyAwareEditorPageSectionPart {
 		PolicyActionContainer alwaysEnabledContainer = new PolicyActionContainer("alwaysEnabledContainer"); //$NON-NLS-1$
 
 		IEpLayoutData paginationData = mainComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
-		PaginatorFactory factory = getBean(ContextIdNames.PAGINATOR_FACTORY);
-		PaginationConfig config = getBean(ContextIdNames.PAGINATION_CONFIG);
+		PaginatorFactory factory = BeanLocator.getSingletonBean(ContextIdNames.PAGINATOR_FACTORY, PaginatorFactory.class);
+		PaginationConfig config = BeanLocator.getPrototypeBean(ContextIdNames.PAGINATION_CONFIG, PaginationConfig.class);
 
 		final String objectId = Long.toString(this.couponConfigPageModel.getCouponConfig().getUidPk());
 		config.setObjectId(objectId);
@@ -476,15 +476,6 @@ public class CouponEditorPart extends AbstractPolicyAwareEditorPageSectionPart {
 		IEpTableColumn column = couponUsageTableViewer.addTableColumn(columnName, columnWidth);
 		column.getSwtTableColumn().addListener(SWT.Selection, columnClickListener);
 		return column;
-	}
-
-	/**
-	 * @param beanName the bean name
-	 * @param <T>      the bean type
-	 * @return the bean instance
-	 */
-	<T> T getBean(final String beanName) {
-		return ServiceLocator.getService(beanName);
 	}
 
 	/**

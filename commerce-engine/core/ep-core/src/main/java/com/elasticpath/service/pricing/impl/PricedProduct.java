@@ -65,7 +65,7 @@ class PricedProduct extends AbstractPricedEntity<Product> {
 		final Map<String, Price> skuPricesByGuid = findSkuPrices(product);
 		final Set<Integer> tierQuantities = findTiers(skuPricesByGuid.values());
 
-		TimeService timeService = getBeanFactory().getBean(ContextIdNames.TIME_SERVICE);
+		TimeService timeService = getBeanFactory().getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		Date currentTime = timeService.getCurrentTime();
 		for (final int tierQuantity : tierQuantities) {
 			for (final ProductSku sku : product.getProductSkus().values()) {
@@ -124,9 +124,9 @@ class PricedProduct extends AbstractPricedEntity<Product> {
 	public Price getPrice() {
 		Price purchaseTimePrice = getLowestPriceForProduct(getEntity());
 		if (purchaseTimePrice != null) {
-			PriceSchedule priceSchedule = getBeanFactory().getBean(ContextIdNames.PRICE_SCHEDULE);
+			PriceSchedule priceSchedule = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class);
 			priceSchedule.setType(PriceScheduleType.PURCHASE_TIME);
-			PricingScheme pricingScheme = getBeanFactory().getBean(ContextIdNames.PRICING_SCHEME);
+			PricingScheme pricingScheme = getBeanFactory().getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class);
 			pricingScheme.setPriceForSchedule(priceSchedule, purchaseTimePrice);
 			purchaseTimePrice.setPricingScheme(pricingScheme);
 		}

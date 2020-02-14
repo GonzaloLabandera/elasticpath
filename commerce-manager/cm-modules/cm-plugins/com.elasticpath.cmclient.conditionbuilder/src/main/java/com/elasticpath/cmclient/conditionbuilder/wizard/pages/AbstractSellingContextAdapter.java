@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.conditionbuilder.wizard.pages;
 import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditions.SellingContextResolver;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.service.sellingcontext.SellingContextService;
@@ -43,7 +43,8 @@ public abstract class AbstractSellingContextAdapter {
 		if (StringUtils.isEmpty(guid)) {
 			setSellingContext(new SellingContextResolver().create(name));
 		} else {
-			final SellingContextService sellingContextService = ServiceLocator.getService(ContextIdNames.SELLING_CONTEXT_SERVICE);
+			final SellingContextService sellingContextService =
+					BeanLocator.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class);
 			setSellingContext(sellingContextService.getByGuid(guid));			
 		}
 	}

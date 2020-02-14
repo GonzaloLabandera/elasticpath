@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>paymentinstruments</name>
+
+		<uri-part>
+			<name>selectable-payment-instrument-id</name>
+			<description><![CDATA[The payment instrument ID used to identify the selectable payment instruments on an order.]]></description>
+			<composite/>
+		</uri-part>
+
+		<resource>
+			<name>order-payment-instrument-selector</name>
+			<description><![CDATA[Selector to choose a payment instrument for an order.]]></description>
+			<uri>{base.family}/{orders.order}/paymentinstrumentselector</uri>
+			<selector-for>order-payment-instrument</selector-for>
+		</resource>
+
+		<resource>
+			<name>order-payment-instrument-selector-choice</name>
+			<description><![CDATA[A choice for the payment instrument selector on an order.]]></description>
+			<uri>{order-payment-instrument-selector}/{selectable-payment-instrument-id}</uri>
+			<choices-for>order-payment-instrument-selector</choices-for>
+		</resource>
+
+		<relationship>
+			<name>order-payment-instrument-selector-for-order</name>
+			<description><![CDATA[Selector for an order payment instrument value.]]></description>
+			<rel>paymentinstrumentselector</rel>
+			<rev>order</rev>
+			<from>orders.order</from>
+			<to>order-payment-instrument-selector</to>
+		</relationship>
+	</family>
+
+</definitions>
+

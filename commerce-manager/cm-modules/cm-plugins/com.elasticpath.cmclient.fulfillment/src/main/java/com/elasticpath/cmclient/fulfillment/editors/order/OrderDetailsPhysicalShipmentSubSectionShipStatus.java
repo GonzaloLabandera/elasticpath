@@ -18,7 +18,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -34,10 +34,10 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
+import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.order.ReleaseShipmentFailedException;
 
 /**
  * Represents the physical shipment shipping status sub section.
@@ -230,10 +230,9 @@ public class OrderDetailsPhysicalShipmentSubSectionShipStatus implements IProper
 
 			releaseShipmentButton.setEnabled(false);
 
-			try {
-				shipment.getOrder().setModifiedBy(getEventOriginator());
-				getOrderService().processReleaseShipment(shipment);
-			} catch (ReleaseShipmentFailedException e) {
+			shipment.getOrder().setModifiedBy(getEventOriginator());
+			OrderShipment returnedShipment = getOrderService().processReleaseShipment(shipment);
+			if (!OrderShipmentStatus.RELEASED.equals(returnedShipment.getShipmentStatus())) {
 				MessageDialog.openError(editor.getSite().getShell(), FulfillmentMessages.get().ErrorReleasingShipment_Title,
 						FulfillmentMessages.get().ErrorReleasingShipment_Message);
 				return;
@@ -288,12 +287,11 @@ public class OrderDetailsPhysicalShipmentSubSectionShipStatus implements IProper
 	}
 
 	private OrderService getOrderService() {
-		return (OrderService) ServiceLocator.getService(ContextIdNames.ORDER_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 	}
 
 	private EventOriginator getEventOriginator() {
-		EventOriginatorHelper helper = ServiceLocator.getService(
-				ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = BeanLocator.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 
 		return helper.getCmUserOriginator(LoginManager.getCmUser());
 	}

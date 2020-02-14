@@ -27,7 +27,7 @@
    <!-- TaxCodes are exported with Tax Jurisdictions. You don't need to export them separately. 
      <exporter type="TAXCODE"/>
     -->
-   <exporter type="PAYMENTGATEWAY"/>
+   <exporter type="PAYMENTPROVIDER"/>
    <exporter type="WAREHOUSE"/>
    
    <exporter type="CUSTOMER"/>

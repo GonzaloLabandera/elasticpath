@@ -4,6 +4,7 @@
 package com.elasticpath.service.catalog;
 
 import java.util.List;
+import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
@@ -67,15 +68,6 @@ public interface SkuOptionService extends EpPersistenceService {
 	SkuOption get(long skuOptionUid) throws EpServiceException;
 
 	/**
-	 * Lists all sku option stored in the database.
-	 *
-	 * @return a list of sku option
-	 * @throws EpServiceException -
-	 *             in case of any errors
-	 */
-	List<SkuOption> list() throws EpServiceException;
-
-	/**
 	 * Finds all the {@link SkuOption}s for the specified catalog UID.
 	 *
 	 * @param catalogUid the catalog UID
@@ -113,13 +105,6 @@ public interface SkuOptionService extends EpPersistenceService {
 	SkuOption findByKey(String key) throws EpServiceException;
 
 	/**
-	 * Return a list of uids for all sku options in use.
-	 *
-	 * @return a list of uids for all sku options in use
-	 */
-	List<Long> getSkuOptionInUseUidList();
-
-	/**
 	 * Returns whether the given {@link SkuOption} is in use.
 	 *
 	 * @param skuOptionUid the {@link SkuOption} UID
@@ -145,13 +130,6 @@ public interface SkuOptionService extends EpPersistenceService {
 	 * @throws EpServiceException - in case of any errors
 	 */
 	SkuOption saveOrUpdate(SkuOption skuOption) throws EpServiceException;
-
-	/**
-	 * Return a list of uids for all sku options value in use.
-	 *
-	 * @return a list of uids for all sku options value in use
-	 */
-	List<Long> getSkuOptionValueInUseUidList();
 
 	/**
 	 * Find the sku option with the given key.
@@ -225,4 +203,29 @@ public interface SkuOptionService extends EpPersistenceService {
 	 */
 	void remove(SkuOptionValue skuOptionValue) throws EpServiceException;
 
+	/**
+	 * Find SKU options for given product type id.
+	 *
+	 * @param productTypeUid the product type id.
+	 * @return the set of SKU options
+	 */
+	Set<SkuOption> findByProductTypeUid(Long productTypeUid);
+
+	/**
+	 * Find SKU option value for given sku option key and option value ID.
+	 *
+	 * @param optionKey the option key
+	 * @param optionValueUid the option value id
+	 * @return the SKU option value
+	 */
+	SkuOptionValue findOptionValueByOptionKeyAndValueUid(String optionKey, Long optionValueUid);
+
+	/**
+	 * Find {@link SkuOptionValue} by option and option-value keys.
+	 *
+	 * @param optionKey the option key
+	 * @param optionValueKey the option-value key.
+	 * @return {@link SkuOptionValue}, if found, otherwise null
+	 */
+	SkuOptionValue findOptionValueByOptionAndValueKeys(String optionKey, String optionValueKey);
 }

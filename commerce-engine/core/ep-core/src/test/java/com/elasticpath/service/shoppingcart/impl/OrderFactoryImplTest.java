@@ -37,10 +37,12 @@ import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.impl.OrderAddressImpl;
 import com.elasticpath.domain.order.impl.OrderImpl;
 import com.elasticpath.domain.rules.AppliedRule;
 import com.elasticpath.domain.rules.Rule;
+import com.elasticpath.domain.rules.impl.AppliedRuleImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -133,12 +135,14 @@ public class OrderFactoryImplTest {
 		final ShoppingItemHasRecurringPricePredicate recurringPricePredicate = new ShoppingItemHasRecurringPricePredicate();
 		final ShipmentTypeShoppingCartVisitor shoppingCartVisitor = new ShipmentTypeShoppingCartVisitor(recurringPricePredicate, productSkuLookup);
 
-		mockBeanFactoryExpectation(beanFactory, ContextIdNames.EVENT_ORIGINATOR_HELPER, eventOriginatorHelper);
-		mockBeanFactoryExpectation(beanFactory, ContextIdNames.CUSTOMER_SERVICE, customerService);
-		mockBeanFactoryExpectation(beanFactory, ContextIdNames.SHOPPING_CART_MEMENTO, mock(ShoppingCartMementoImpl.class));
-		mockBeanFactoryExpectation(beanFactory, ContextIdNames.ORDER_ADDRESS, mock(OrderAddressImpl.class));
-		mockBeanFactoryExpectation(beanFactory, ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR, shoppingCartVisitor);
-
+		mockBeanFactorySingletonExpectation(beanFactory, ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class, eventOriginatorHelper);
+		mockBeanFactorySingletonExpectation(beanFactory, ContextIdNames.CUSTOMER_SERVICE, CustomerService.class, customerService);
+		mockBeanFactoryPrototypeExpectation(beanFactory, ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCart.class,
+				mock(ShoppingCartMementoImpl.class));
+		mockBeanFactoryPrototypeExpectation(beanFactory, ContextIdNames.ORDER_ADDRESS, OrderAddress.class, mock(OrderAddressImpl.class));
+		mockBeanFactoryPrototypeExpectation(beanFactory, ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR, ShipmentTypeShoppingCartVisitor.class,
+				shoppingCartVisitor);
+		mockBeanFactoryPrototypeExpectation(beanFactory, ContextIdNames.APPLIED_RULE, AppliedRule.class, AppliedRuleImpl.class);
 	}
 
 	/**
@@ -247,7 +251,9 @@ public class OrderFactoryImplTest {
 
 		when(ruleService.findByUids(ruleIds)).thenReturn(ImmutableList.of(rule1, rule2));
 
-		when(beanFactory.getBean(ContextIdNames.APPLIED_RULE)).thenReturn(expectedAppliedRule1).thenReturn(expectedAppliedRule2)
+		when(beanFactory.getPrototypeBean(ContextIdNames.APPLIED_RULE, AppliedRule.class))
+				.thenReturn(expectedAppliedRule1)
+				.thenReturn(expectedAppliedRule2)
 				.thenReturn(expectedAppliedRule3);
 
 		final Order newOrder = orderFactory.createAndPersistNewEmptyOrder(customer, customerSession, shoppingCart, false, false);
@@ -307,13 +313,26 @@ public class OrderFactoryImplTest {
 
 	private Order setupOrder() {
 		final Order order = new OrderImpl();
-		when(beanFactory.getBean(ContextIdNames.ORDER)).thenReturn(order);
+		when(beanFactory.getPrototypeBean(ContextIdNames.ORDER, Order.class)).thenReturn(order);
 		when(orderService.add(order)).thenReturn(order);
 		return order;
 	}
 
-	private void mockBeanFactoryExpectation(final BeanFactory beanFactory, final String beanName, final Object bean) {
-		when(beanFactory.getBean(beanName)).thenReturn(bean);
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void mockBeanFactoryPrototypeExpectation(final BeanFactory beanFactory, final String beanName, final Class interfaceClass,
+													 final Object bean) {
+		when(beanFactory.getPrototypeBean(beanName, interfaceClass)).thenReturn(bean);
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void mockBeanFactoryPrototypeExpectation(final BeanFactory beanFactory, final String beanName, final Class interfaceClass,
+													 final Class implClass) {
+		when(beanFactory.getPrototypeBean(beanName, interfaceClass)).thenAnswer(invocationOnMock -> implClass.newInstance());
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void mockBeanFactorySingletonExpectation(final BeanFactory beanFactory, final String beanName, final Class interfaceClass,
+													 final Object bean) {
+		when(beanFactory.getSingletonBean(beanName, interfaceClass)).thenReturn(bean);
+	}
 }

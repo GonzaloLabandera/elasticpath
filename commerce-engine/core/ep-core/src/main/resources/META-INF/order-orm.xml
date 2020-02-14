@@ -113,13 +113,6 @@
 				AND warehouse.uidPk = ?2
 			</query>
 		</named-query>
-		<named-query name="ORDERS_BY_GIFT_CERTIFICATE">
-			<query>
-				SELECT DISTINCT o
-				FROM OrderImpl o JOIN o.orderPayments op
-				WHERE op.giftCertificate.uidPk = ?1
-			</query>
-		</named-query>
 		<named-query name="ORDER_UID_FOR_FAILED_ORDERS_BEFORE_DATE">
 			<query>
 				SELECT o.uidPk

@@ -176,9 +176,6 @@
                 <entry key="CMUSER">
                     <ref bean="cmUserConfiguration"/>
                 </entry>
-                <entry key="PAYMENTGATEWAY">
-                    <ref bean="paymentGatewayConfiguration"/>
-                </entry>
                 <entry key="CM_IMPORT_JOB">
                     <ref bean="cmImportJobConfiguration"/>
                 </entry>
@@ -417,11 +414,6 @@
     </bean>
     
     <bean id="userRoleConfiguration" parent="abstractEpQLObjectConfiguration" class="com.elasticpath.ql.custom.cmuser.UserRoleConfiguration">
-        <property name="epQLValueResolver" ref="jpqlValueResolver"/>
-        <property name="completeQueryBuilder" ref="jpqlQueryBuilder"/>
-    </bean>
-
-    <bean id="paymentGatewayConfiguration" parent="abstractEpQLObjectConfiguration" class="com.elasticpath.ql.custom.store.PaymentGatewayConfiguration">
         <property name="epQLValueResolver" ref="jpqlValueResolver"/>
         <property name="completeQueryBuilder" ref="jpqlQueryBuilder"/>
     </bean>

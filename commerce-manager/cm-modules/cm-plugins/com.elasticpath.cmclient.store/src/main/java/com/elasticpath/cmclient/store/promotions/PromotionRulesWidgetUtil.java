@@ -46,9 +46,9 @@ import org.eclipse.ui.forms.AbstractFormPart;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -139,9 +139,10 @@ public final class PromotionRulesWidgetUtil {
 
 	private final int scenario;
 
-	private final PriceListService priceListService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+	private final PriceListService priceListService = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 
-	private final CouponConfigService couponConfigService = ServiceLocator.getService(ContextIdNames.COUPON_CONFIG_SERVICE);
+	private final CouponConfigService couponConfigService = BeanLocator
+			.getSingletonBean(ContextIdNames.COUPON_CONFIG_SERVICE, CouponConfigService.class);
 
 	private final Rule rule;
 
@@ -421,7 +422,7 @@ public final class PromotionRulesWidgetUtil {
 			}
 			currencies.addAll(uniqueCurrencies);
 		}
-		CurrencyCodeComparator comparator = ServiceLocator.getService(ContextIdNames.CURRENCYCODE_COMPARATOR);
+		CurrencyCodeComparator comparator = BeanLocator.getPrototypeBean(ContextIdNames.CURRENCYCODE_COMPARATOR, CurrencyCodeComparator.class);
 		Collections.sort(currencies, comparator);
 		return currencies;
 	}
@@ -566,7 +567,7 @@ public final class PromotionRulesWidgetUtil {
 		final CCombo brandCombo = ruleComposite.addComboBox(null, policyActionContainer);
 		brandCombo.pack();
 
-		final BrandService brandService = ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+		final BrandService brandService = BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 		final List<Brand> brands;
 		if (scenario == RuleScenarios.CATALOG_BROWSE_SCENARIO) {
 			if (catalog.isMaster()) {
@@ -647,7 +648,8 @@ public final class PromotionRulesWidgetUtil {
 		// create the combo box
 		final CCombo shippingOptionCombo = ruleComposite.addComboBox(null, policyActionContainer);
 		shippingOptionCombo.pack();
-		final ShippingOptionService shippingOptionService = ServiceLocator.getService(ContextIdNames.SHIPPING_OPTION_SERVICE);
+		final ShippingOptionService shippingOptionService = BeanLocator
+				.getSingletonBean(ContextIdNames.SHIPPING_OPTION_SERVICE, ShippingOptionService.class);
 		final List<ShippingOption> shippingOptions = shippingOptionService.getAllShippingOptions(
 				store.getCode(),
 				CorePlugin.getDefault().getDefaultLocale()).getAvailableShippingOptions();
@@ -861,7 +863,7 @@ public final class PromotionRulesWidgetUtil {
 
 	private Map<String, Rule> getRulesByScenarioAndStore(final int scenario, final Store store) {
 		Map<String, Rule> result = new HashMap<>();
-		final RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 
 		Collection<Rule> rules = ruleService.findByScenarioAndStore(scenario, store.getCode());
 		for (Rule rule : rules) {
@@ -896,8 +898,7 @@ public final class PromotionRulesWidgetUtil {
 		if (ruleParameter.getValue() == null) {
 			productFinderLink.setText(PromotionsMessages.get().PromoRulesDefinition_Label_Select);
 		} else {
-			final ProductLookup productLookup = ServiceLocator.getService(
-					ContextIdNames.PRODUCT_LOOKUP);
+			final ProductLookup productLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 			final Product product = productLookup.findByGuid(ruleParameter.getValue());
 			if (product != null) {
 				productFinderLink.setText(product.getDisplayName(CorePlugin.getDefault().getDefaultLocale()));
@@ -1057,8 +1058,7 @@ public final class PromotionRulesWidgetUtil {
 		} else {
 			categoryFinderLink.setText(ruleParameter.getValue());
 
-			final CategoryLookup categoryLookup = ServiceLocator.getService(
-					ContextIdNames.CATEGORY_LOOKUP);
+			final CategoryLookup categoryLookup = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 			final Category category = categoryLookup.findByCompoundCategoryAndCatalogCodes(ruleParameter.getValue());
 			if (category != null) {
 				categoryFinderLink.setText(category.getDisplayName(CorePlugin.getDefault().getDefaultLocale()));

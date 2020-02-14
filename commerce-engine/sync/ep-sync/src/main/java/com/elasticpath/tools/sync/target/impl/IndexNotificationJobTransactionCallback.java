@@ -67,22 +67,12 @@ public class IndexNotificationJobTransactionCallback implements JobTransactionCa
 	}
 
 	private IndexNotification createNotification(final UpdateType updateType, final long uidPk, final IndexType indexType) {
-		final IndexNotification notification = (IndexNotification) getBean(ContextIdNames.INDEX_NOTIFICATION);
+		final IndexNotification notification = beanFactory.getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
 		notification.setAffectedEntityType(AffectedEntityType.SINGLE_UNIT);
 		notification.setAffectedUid(uidPk);
 		notification.setIndexType(indexType);
 		notification.setUpdateType(updateType);
 		return notification;
-	}
-
-	/**
-	 * Get bean with specified id from bean factory.
-	 *
-	 * @param beanID id string of the bean to get
-	 * @return the bean
-	 */
-	protected Object getBean(final String beanID) {
-		return beanFactory.getBean(beanID);
 	}
 
 	/**

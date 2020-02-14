@@ -82,7 +82,7 @@ public class CmUserBuilder implements DomainObjectBuilder<CmUser> {
 	@Override
 	public CmUser build() {
 
-		final CmUser cmUser = beanFactory.getBean(ContextIdNames.CMUSER);
+		final CmUser cmUser = beanFactory.getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
 		cmUser.initialize();
 
 		cmUser.setEmail((String) ObjectUtils.defaultIfNull(email, "john.smith@elasticpath.com"));
@@ -98,7 +98,7 @@ public class CmUserBuilder implements DomainObjectBuilder<CmUser> {
 				// then add it to the current CmUser
 				final UserRole existingRole = userRoleService.findByName(currentUserRoleName);
 				if (existingRole == null) {
-					final UserRole userRole = beanFactory.getBean(ContextIdNames.USER_ROLE);
+					final UserRole userRole = beanFactory.getPrototypeBean(ContextIdNames.USER_ROLE, UserRole.class);
 					userRole.initialize();
 					userRole.setName(currentUserRoleName);
 					userRoleService.add(userRole);

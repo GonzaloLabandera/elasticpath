@@ -5,6 +5,7 @@ package com.elasticpath.search.index.solr.document.impl;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
@@ -142,10 +144,19 @@ public class SkuSolrInputDocumentCreator extends AbstractDocumentCreatingTask<Pr
 		addFieldNotMultiValuedToDocument(solrInputDocument, SolrIndexConstants.PRODUCT_NAME_NON_LC, getAnalyzer().analyze(
 				product.getDisplayName(defaultLocale)));
 
-		final Collection<Store> containingStores = findStoresWithCatalogUids(catalogFields.keySet());
-		for (final Store store : containingStores) {
-			addFieldToDocument(solrInputDocument, SolrIndexConstants.STORE_CODE, store.getCode());
+		final Collection<String> containingStores = getStoreService().findStoreCodeForStoresWithCatalogUids(catalogFields.keySet());
+
+		SolrInputField field = new SolrInputField(SolrIndexConstants.STORE_CODE);
+
+		try {
+			containingStores.parallelStream().forEach(store -> field.addValue(store));
+		} catch (IndexOutOfBoundsException iob) {
+			for (String store : containingStores) {
+				field.addValue(store);
+			}
 		}
+
+		solrInputDocument.putAll(Collections.singletonMap(SolrIndexConstants.STORE_CODE, field));
 
 		addDisplayableFieldsToDocument(solrInputDocument, product, catalogFields, getAllCompleteStores());
 		addLocaleSpecificFieldsToDocument(solrInputDocument, getEntity(), product, brand, catalogFields);

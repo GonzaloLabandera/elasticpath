@@ -159,9 +159,9 @@ public class PurchaseLineItemEntityRepositoryImplTest {
 		when(mockParentOrderSku.getQuantity()).thenReturn(PARENT_QUANTITY);
 		when(mockOrderSku.getSkuGuid()).thenReturn(SKU_GUID);
 
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).thenReturn(Single.just(mockProductSku));
+		when(productSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID)).thenReturn(Single.just(mockProductSku));
 		when(mockProductSku.getProduct()).thenReturn(mockProduct);
-		when(modifiersRepository.findModifiersByProduct(mockProduct)).thenReturn(Collections.emptyList());
+		when(modifiersRepository.findModifiersByProduct(mockProduct)).thenReturn(Single.just(Collections.emptyList()));
 
 		PurchaseLineItemEntity purchaseLineItemEntity = repository.buildLineItemEntity(mockOrderSku, LOCALE_EN).blockingGet();
 
@@ -287,9 +287,9 @@ public class PurchaseLineItemEntityRepositoryImplTest {
 		final ProductSku productSku = mock(ProductSku.class);
 		final Product product = mock(Product.class);
 
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).thenReturn(Single.just(productSku));
+		when(productSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID)).thenReturn(Single.just(productSku));
 		when(productSku.getProduct()).thenReturn(product);
-		when(modifiersRepository.findModifiersByProduct(product)).thenReturn(Collections.emptyList());
+		when(modifiersRepository.findModifiersByProduct(product)).thenReturn(Single.just(Collections.emptyList()));
 	}
 
 	private PurchaseLineItemEntity createPurchaseLineItemDto(final List<CostEntity> amountCostEntities,

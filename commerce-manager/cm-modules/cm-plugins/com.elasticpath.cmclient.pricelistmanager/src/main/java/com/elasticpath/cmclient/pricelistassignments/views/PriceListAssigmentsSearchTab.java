@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.cmclient.core.CmSingletonUtil;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -81,7 +81,7 @@ public class PriceListAssigmentsSearchTab {
 				1, 
 				false);
 		
-		catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		
 		createPriceListAssignmentSearchItem(tabComposite);		
 		

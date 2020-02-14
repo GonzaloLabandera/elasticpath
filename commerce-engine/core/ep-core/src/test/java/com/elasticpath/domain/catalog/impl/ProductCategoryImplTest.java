@@ -54,7 +54,7 @@ public class ProductCategoryImplTest {
 		this.catalog = context.mock(Catalog.class);
 		this.elasticPath = context.mock(ElasticPath.class);
 		context.checking(new Expectations() { {
-			allowing(elasticPath).getBean(ContextIdNames.RANDOM_GUID); will(returnValue(new RandomGuid() {
+			allowing(elasticPath).getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class); will(returnValue(new RandomGuid() {
 				private static final long serialVersionUID = -5717947651551792329L;
 
 				@Override

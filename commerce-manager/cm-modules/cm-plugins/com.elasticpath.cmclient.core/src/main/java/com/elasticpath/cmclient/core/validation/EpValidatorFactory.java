@@ -157,6 +157,9 @@ public final class EpValidatorFactory {
 	/** Checks that a String doesn't exceed 100 characters. */
 	public static final IValidator MAX_LENGTH_100 = new MaxStringLengthValidator(100);
 
+	/** Checks that a String doesn't exceed 100 characters. */
+	public static final IValidator MAX_LENGTH_1000 = new MaxStringLengthValidator(1000);
+
 	/** Checks that a String doesn't exceed 20 characters. */
 	public static final IValidator MAX_LENGTH_20 = new MaxStringLengthValidator(20);
 

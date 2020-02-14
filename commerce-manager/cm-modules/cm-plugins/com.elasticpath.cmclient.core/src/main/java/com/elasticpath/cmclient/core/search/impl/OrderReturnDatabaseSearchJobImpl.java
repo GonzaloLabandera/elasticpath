@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.helpers.SearchItemsLocator;
@@ -29,13 +29,13 @@ public class OrderReturnDatabaseSearchJobImpl extends AbstractSearchJobImpl impl
 	private static final Logger LOG = Logger.getLogger(OrderReturnDatabaseSearchJobImpl.class);
 
 	private static final int COUNT_UNITS_WORK = 2;
-	
+
 	private static final int SEARCH_UNITS_WORK = 5;
-	
+
 	private static final int FIRE_ITEMS_WORK = 1;
 
 	private static final int WORK_UNITS = COUNT_UNITS_WORK + SEARCH_UNITS_WORK + FIRE_ITEMS_WORK;
-	
+
 	private final ReturnAndExchangeService returnAndExchangeService;
 
 	private final Display display;
@@ -43,14 +43,14 @@ public class OrderReturnDatabaseSearchJobImpl extends AbstractSearchJobImpl impl
 
 	/**
 	 * Constructor that takes a search items locator.
-	 * 
+	 *
 	 * @param locator locator for items
 	 * @param display the display
 	 */
 	public OrderReturnDatabaseSearchJobImpl(final SearchItemsLocator<OrderReturn> locator, final Display display) {
 		super(locator);
 		this.display = display;
-		returnAndExchangeService = ServiceLocator.getService(ContextIdNames.ORDER_RETURN_SERVICE);
+		returnAndExchangeService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_RETURN_SERVICE, ReturnAndExchangeService.class);
 		taskName = CoreMessages.get().SearchProgress_StatusBarMessage_StartSearch;
 	}
 
@@ -61,7 +61,7 @@ public class OrderReturnDatabaseSearchJobImpl extends AbstractSearchJobImpl impl
 
 			monitor.beginTask(taskName, WORK_UNITS);
 			checkMonitorCancelled(monitor);
-			
+
 			final int startIndex = getStartIndexQueue().poll();
 			OrderReturnSearchCriteria searchCriteria;
 			synchronized (getSearchCriteriaQueue()) {
@@ -73,7 +73,7 @@ public class OrderReturnDatabaseSearchJobImpl extends AbstractSearchJobImpl impl
 
 			long totalItemsCount = returnAndExchangeService.getOrderReturnCountBySearchCriteria(searchCriteria);
 			monitor.worked(COUNT_UNITS_WORK);
-			
+
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Searching for items"); //$NON-NLS-1$
 			}

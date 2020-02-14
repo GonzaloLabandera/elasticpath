@@ -31,7 +31,7 @@ public class CustomerAddressDaoImpl extends AbstractDaoImpl implements CustomerA
 	@Override
 	public Address get(final long addressUid) throws EpServiceException {
 		if (addressUid <= 0) {
-			return getBean(ContextIdNames.CUSTOMER_ADDRESS);
+			return getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 		}
 		return getPersistentBeanFinder().get(ContextIdNames.CUSTOMER_ADDRESS, addressUid);
 	}

@@ -7,8 +7,7 @@
 **Entry Point:** `/purchases/{scope}`
 
 A purchase is a receipt of an executed order. A Purchase lists the order's total cost, purchase date, purchase status
-(COMPLETE or FAILED), tax paid, paymentmeans, which lists the billing and shipping details as well as
-customer's [paymentmethods](paymentmethods.md), and line items, which are lists of the [items](items.md) the customer
+(COMPLETE or FAILED), tax paid, paymentinstruments, and line items, which are lists of the [items](items.md) the customer
 purchased.
 
 Each time customers make successful purchases, Cortex API records them in its database. Using the purchases resource,
@@ -19,10 +18,7 @@ completes, the failed purchase is removed from the record and a successful purch
 
 Purchase line items are collections of items the customer purchased. Each line item can contain one or more of the same item,
 but will not have two different items. For example, one line item can have 7 Rock-Star t-shirts or one Rock-Star t-shirt,
-but it won't have one Rock-Star t-shirt and a Song track. The Song track and t-shirt would be in separate line items.
-
-The Paymentmeans resource is responsible for recording a purchase's billing details,
-such as a customer's billing address and [paymentmethod](paymentmethods.md)]]>
+but it won't have one Rock-Star t-shirt and a Song track. The Song track and t-shirt would be in separate line items.]]>
 		</description>
 
 		<uri-part>

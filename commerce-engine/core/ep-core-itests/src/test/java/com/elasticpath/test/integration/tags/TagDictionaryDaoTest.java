@@ -135,7 +135,7 @@ public class TagDictionaryDaoTest extends BasicSpringContextTest {
 	}
 
 	private TagDictionary createTagDictionary() {
-		TagDictionary tagDictionary = getBeanFactory().getBean(ContextIdNames.TAG_DICTIONARY);
+		TagDictionary tagDictionary = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DICTIONARY, TagDictionary.class);
 
 		tagDictionary.setName("Demo Dictionary");
 		tagDictionary.setPurpose("Purpose of demo dictionary");
@@ -144,8 +144,8 @@ public class TagDictionaryDaoTest extends BasicSpringContextTest {
 	}
 
 	private TagDefinition createTagDefinition() {
-		TagDefinition tagDefinition = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
-		TagValueType tagValueType = tagValueTypeService.findByGuid("text");
+		TagDefinition tagDefinition = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
+		TagValueType tagValueType =  tagValueTypeService.findByGuid("text");
 
 		tagDefinition.setName("Demo Tag Definition");
 		tagDefinition.setDescription("Description of demo tag definition");

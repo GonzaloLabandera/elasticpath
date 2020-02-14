@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.LocaleDependantFields;
 import com.elasticpath.domain.catalog.Product;
@@ -15,6 +16,7 @@ import com.elasticpath.domain.catalogview.SeoUrlBuilder;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
 import com.elasticpath.domain.shoppingcart.ViewHistoryProduct;
 import com.elasticpath.service.catalogview.StoreConfig;
+import com.elasticpath.service.catalogview.impl.ThreadLocalStorageImpl;
 
 /**
  * This represents a product recently viewed by the user.
@@ -67,7 +69,7 @@ public class ViewHistoryProductImpl extends AbstractEpDomainImpl implements View
 	 */
 	protected Collection<Locale> getLocales() {
 
-		StoreConfig storeConfig = getBean("threadLocalStorage");
+		StoreConfig storeConfig = getSingletonBean(ContextIdNames.THREAD_LOCAL_STORAGE, ThreadLocalStorageImpl.class);
 
 		return storeConfig.getStore().getSupportedLocales();
 	}

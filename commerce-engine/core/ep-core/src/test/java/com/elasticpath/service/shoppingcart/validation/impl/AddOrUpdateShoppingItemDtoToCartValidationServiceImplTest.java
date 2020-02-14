@@ -11,19 +11,17 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableMap;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.pricing.service.PriceLookupFacade;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -77,7 +75,7 @@ public class AddOrUpdateShoppingItemDtoToCartValidationServiceImplTest {
 		final ProductSku productSku = mock(ProductSku.class);
 		when(productSkuLookup.findBySkuCode(SKU_CODE)).thenReturn(productSku);
 		when(productSkuLookup.findBySkuCode(SKU_CODE_2)).thenReturn(productSku);
-		when(beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_DTO_VALIDATION_CONTEXT))
+		when(beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_DTO_VALIDATION_CONTEXT, ShoppingItemDtoValidationContext.class))
 				.then((Answer<ShoppingItemDtoValidationContext>) invocationOnMock -> new ShoppingItemDtoValidationContextImpl());
 
 		when(parentShoppingItem.getSkuGuid()).thenReturn(PARENT_SKU_CODE);

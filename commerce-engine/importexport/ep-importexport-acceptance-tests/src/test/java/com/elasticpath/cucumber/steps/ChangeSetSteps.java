@@ -45,7 +45,7 @@ public class ChangeSetSteps {
 	 */
 	@Given("^I create a change set (\\w+)$")
 	public void createChangeSet(final String changeSetGuid) {
-		ChangeSet changeSet = beanFactory.getBean(ContextIdNames.CHANGE_SET);
+		ChangeSet changeSet = beanFactory.getPrototypeBean(ContextIdNames.CHANGE_SET, ChangeSet.class);
 		changeSet.setName(changeSetGuid);
 		changeSet.setDescription(changeSetGuid + " description");
 		changeSet.setCreatedByUserGuid(tac.getPersistersFactory().getStoreTestPersister().getCmUser().getGuid());
@@ -89,7 +89,7 @@ public class ChangeSetSteps {
 	}
 
 	private ChangeSetLoadTuner getChangeSetLoadTuner() {
-		final ChangeSetLoadTuner loadTuner = beanFactory.getBean(ContextIdNames.CHANGESET_LOAD_TUNER);
+		final ChangeSetLoadTuner loadTuner = beanFactory.getPrototypeBean(ContextIdNames.CHANGESET_LOAD_TUNER, ChangeSetLoadTuner.class);
 		loadTuner.setLoadingMemberObjects(true);
 		loadTuner.setLoadingMemberObjectsMetadata(true);
 		return loadTuner;

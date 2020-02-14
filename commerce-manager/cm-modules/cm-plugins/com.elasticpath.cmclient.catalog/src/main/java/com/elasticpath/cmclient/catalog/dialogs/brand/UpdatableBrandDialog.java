@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.catalog.dialogs.brand;
 
 import org.eclipse.swt.widgets.Composite;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.service.changeset.ChangeSetMemberAction;
@@ -27,7 +27,7 @@ public class UpdatableBrandDialog extends BrandDialog {
 		Brand brand = getBrand();
 
 		getBrandService().update(brand);
-		final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+		final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 		changeSetHelper.addObjectToChangeSet(brand, ChangeSetMemberAction.EDIT);
 	}
 

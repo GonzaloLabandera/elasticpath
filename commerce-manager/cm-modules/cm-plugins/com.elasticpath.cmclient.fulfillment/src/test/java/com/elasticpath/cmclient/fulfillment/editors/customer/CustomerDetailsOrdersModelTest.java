@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
@@ -64,8 +64,8 @@ public class CustomerDetailsOrdersModelTest {
 		when(regStore.getName()).thenReturn("Registered Store").thenReturn("new store"); //$NON-NLS-1$ //$NON-NLS-2$
 		when(regStore.getAssociatedStoreUids()).thenReturn(Collections.singleton(SAMPLE_UIDPK));
 		when(regStore.compareTo(regStore)).thenReturn(1);
-		ServiceLocator.setBeanFactory(beanFactory);
-		when(beanFactory.getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER)).thenReturn(fetchGroupLoadTuner);
+		BeanLocator.setBeanFactory(beanFactory);
+		when(beanFactory.getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class)).thenReturn(fetchGroupLoadTuner);
 		when(storeService.getTunedStore(SAMPLE_CODE, fetchGroupLoadTuner)).thenReturn(regStore);
 		when(storeService.getTunedStores(Collections.singleton(SAMPLE_UIDPK), fetchGroupLoadTuner)).thenReturn(Collections.singleton(regStore));
 	}

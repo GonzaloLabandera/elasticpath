@@ -89,7 +89,7 @@ public class BillingAddressSelectorRepositoryImplTest {
 
 	@Before
 	public void setUp() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
 	}
 
 	@Test
@@ -170,7 +170,7 @@ public class BillingAddressSelectorRepositoryImplTest {
 
 	@Test
 	public void verifySelectChoiceIsComplete() {
-		when(cartOrderRepository.saveCartOrderAsSingle(cartOrder)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.saveCartOrder(cartOrder)).thenReturn(Single.just(cartOrder));
 
 		repository.selectChoice(selectorChoiceIdentifier)
 				.test()

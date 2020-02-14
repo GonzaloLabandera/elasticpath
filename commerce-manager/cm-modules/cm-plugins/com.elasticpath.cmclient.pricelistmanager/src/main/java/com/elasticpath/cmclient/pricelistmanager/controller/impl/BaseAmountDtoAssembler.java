@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.pricelistmanager.controller.impl;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.BaseAmountDTOCreator;
 import com.elasticpath.cmclient.pricelistmanager.model.impl.BaseAmountType;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
@@ -37,7 +37,7 @@ public final class BaseAmountDtoAssembler {
 	public static BaseAmountDTO assembleFromSku(final ProductSku source, final BigDecimal quantity, 
 				final PriceListDescriptorDTO priceListDescriptorDTO, final Locale locale) {
 		final BaseAmountDTO target = BaseAmountDTOCreator.createModel();
-		RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
+		RandomGuid randomGuid = BeanLocator.getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class);
 		target.setGuid(randomGuid.toString());
 		target.setObjectGuid(source.getSkuCode());
 		target.setObjectType(BaseAmountType.SKU.getType());
@@ -63,7 +63,7 @@ public final class BaseAmountDtoAssembler {
 	public static BaseAmountDTO assembleFromProduct(final Product source, final BigDecimal quantity, 
 						final PriceListDescriptorDTO priceListDescriptorDTO) {
 		final BaseAmountDTO target = BaseAmountDTOCreator.createModel();
-		RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
+		RandomGuid randomGuid = BeanLocator.getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class);
 		target.setGuid(randomGuid.toString());
 		target.setObjectGuid(source.getGuid());
 		target.setObjectType(BaseAmountType.PRODUCT.getType());

@@ -52,7 +52,7 @@ public class SimpleStoreScenario extends AbstractScenario {
 	 */
 	@Override
 	public void initialize() {
-		shippingOptionTransformer = getBeanFactory().getBean(SHIPPING_OPTION_TRANSFORMER);
+		shippingOptionTransformer = getBeanFactory().getSingletonBean(SHIPPING_OPTION_TRANSFORMER, ShippingOptionTransformer.class);
 		catalog = getDataPersisterFactory().getCatalogTestPersister().persistDefaultMasterCatalog();
 		warehouse = getDataPersisterFactory().getStoreTestPersister().persistDefaultWarehouse();
 		store = getDataPersisterFactory().getStoreTestPersister().persistDefaultStore(catalog, warehouse);

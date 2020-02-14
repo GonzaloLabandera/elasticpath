@@ -44,7 +44,7 @@ public abstract class AbstractSettingsSearchConfigFactory implements SearchConfi
 	 * @return a search configuration
 	 */
 	public SearchConfig getSearchConfig(final String indexName, final String settingsContext) {
-		final SearchConfigInternal searchConfig = getBeanFactory().getBean(ContextIdNames.SEARCH_CONFIG);
+		final SearchConfigInternal searchConfig = getBeanFactory().getPrototypeBean(ContextIdNames.SEARCH_CONFIG, SearchConfigInternal.class);
 		
 		searchConfig.setSearchHost(hostLocator.getSearchHostLocation());
 

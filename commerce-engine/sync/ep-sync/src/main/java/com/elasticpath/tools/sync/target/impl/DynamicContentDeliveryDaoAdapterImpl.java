@@ -50,7 +50,7 @@ public class DynamicContentDeliveryDaoAdapterImpl extends AbstractDaoAdapter<Dyn
 
 	@Override
 	public DynamicContentDelivery createBean(final DynamicContentDelivery priceListAssignment) {
-		return beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY);
+		return beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY, DynamicContentDelivery.class);
 	}
 
 	@Override

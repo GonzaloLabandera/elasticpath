@@ -22,7 +22,7 @@ import com.elasticpath.tags.TagSet;
 
 /**
  * Service for retrieving and saving CustomerSessions.
- *
+ * <p>
  * Note: CustomerSessions being returned do not have a ShoppingCart attached to them.
  */
 public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl implements CustomerSessionService {
@@ -154,7 +154,7 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	/**
 	 * Fires customer session updated event.
 	 *
-	 * @param customerSession the customer session that was updated.
+	 * @param customerSession    the customer session that was updated.
 	 * @param invalidatedShopper the recently invalidated shopping context.
 	 */
 	void handleShopperUpdate(final CustomerSession customerSession, final Shopper invalidatedShopper) {
@@ -172,11 +172,11 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 
 		return customerSession;
 	}
-	
+
 	@Override
-	public CustomerSession initializeCustomerSessionForPricing(final CustomerSession customerSession, final String storeCode, 
-			final Currency currency) {
-		TagSet tagSet = getBean(ContextIdNames.TAG_SET);
+	public CustomerSession initializeCustomerSessionForPricing(final CustomerSession customerSession, final String storeCode,
+															   final Currency currency) {
+		TagSet tagSet = getPrototypeBean(ContextIdNames.TAG_SET, TagSet.class);
 		tagSet.addTag(SELLING_CHANNEL_TAG, new Tag(storeCode));
 		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(getTimeService().getCurrentTime().getTime()));
 		customerSession.setCustomerTagSet(tagSet);
@@ -186,14 +186,15 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 
 	/**
 	 * Creates a new {@link CustomerSession}.  Does not persist it.
-	 *
+	 * <p>
 	 * WARNING: Does not attach a Shopper to it!
 	 *
 	 * @return a new {@link CustomerSession} with no {@link Shopper}.
 	 */
 	private CustomerSession create() {
 		final CustomerSession customerSession = createEmpty();
-		final CustomerSessionMemento customerSessionMemento = getBean(ContextIdNames.CUSTOMER_SESSION_MEMENTO);
+		final CustomerSessionMemento customerSessionMemento = getPrototypeBean(ContextIdNames.CUSTOMER_SESSION_MEMENTO,
+				CustomerSessionMemento.class);
 		customerSession.setCustomerSessionMemento(customerSessionMemento);
 
 		return customerSession;
@@ -210,7 +211,7 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	}
 
 	private CustomerSession createEmpty() {
-		return getBean(ContextIdNames.CUSTOMER_SESSION);
+		return getPrototypeBean(ContextIdNames.CUSTOMER_SESSION, CustomerSession.class);
 	}
 
 	private void attachShopper(final CustomerSession customerSession, final Shopper shopper) {
@@ -231,11 +232,12 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	}
 
 	protected CustomerSessionService getCustomerSessionService() {
-		return getBean(ContextIdNames.CUSTOMER_SESSION_SERVICE);
+		return getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE, CustomerSessionService.class);
 	}
 
 	/**
 	 * Sets the list of CustomerSessionUpdateHandlers.
+	 *
 	 * @param customerSessionShopperUpdateHandlers listeners to set
 	 */
 	public void setCustomerSessionUpdateHandlers(

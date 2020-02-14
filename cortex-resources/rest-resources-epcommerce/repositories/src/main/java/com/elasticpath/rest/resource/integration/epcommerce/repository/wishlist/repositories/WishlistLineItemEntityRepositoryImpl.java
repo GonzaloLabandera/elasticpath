@@ -27,7 +27,6 @@ import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
 
 /**
@@ -45,7 +44,6 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 	private WishlistRepository wishlistRepository;
 	private ItemRepository itemRepository;
 	private ModifiersRepository modifiersRepository;
-	private ReactiveAdapter reactiveAdapter;
 
 	@Override
 	public Single<SubmitResult<WishlistLineItemIdentifier>> submit(final WishlistLineItemEntity entity, final IdentifierPart<String>
@@ -101,8 +99,7 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 		if (fields == null) {
 			lineItemConfigurationEntity = Single.just(LineItemConfigurationEntity.builder().build());
 		} else {
-			lineItemConfigurationEntity = reactiveAdapter
-					.fromServiceAsSingle(() -> modifiersRepository.findModifiersByProduct(productSku.getProduct()))
+			lineItemConfigurationEntity = modifiersRepository.findModifiersByProduct(productSku.getProduct())
 					.map(modifierFields -> buildLineItemConfigurationEntity(fields, modifierFields));
 		}
 		return lineItemConfigurationEntity.map(configuration -> WishlistLineItemEntity.builder()
@@ -147,10 +144,5 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 	@Reference
 	public void setModifiersRepository(final ModifiersRepository modifiersRepository) {
 		this.modifiersRepository = modifiersRepository;
-	}
-
-	@Reference
-	public void setReactiveAdapter(final ReactiveAdapter reactiveAdapter) {
-		this.reactiveAdapter = reactiveAdapter;
 	}
 }

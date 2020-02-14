@@ -30,7 +30,7 @@ public class TaxJurisdictionDtoAssembler extends AbstractDtoAssembler<TaxJurisdi
 
 	@Override
 	public TaxJurisdiction getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.TAX_JURISDICTION);
+		return beanFactory.getPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class);
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class TaxJurisdictionDtoAssembler extends AbstractDtoAssembler<TaxJurisdi
 	 * @return a TaxValue from the Spring context.
 	 */
 	protected TaxValue taxValueDomainFactory() {
-		return beanFactory.getBean(ContextIdNames.TAX_VALUE);
+		return beanFactory.getPrototypeBean(ContextIdNames.TAX_VALUE, TaxValue.class);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class TaxJurisdictionDtoAssembler extends AbstractDtoAssembler<TaxJurisdi
 	 * @return a TaxCategory from the Spring context.
 	 */
 	protected TaxCategory taxCategoryDomainFactory() {
-		return beanFactory.getBean(ContextIdNames.TAX_CATEGORY);
+		return beanFactory.getPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class TaxJurisdictionDtoAssembler extends AbstractDtoAssembler<TaxJurisdi
 	 * @return a TaxRegion from the Spring context.
 	 */
 	protected TaxRegion taxRegionDomainFactory() {
-		return beanFactory.getBean(ContextIdNames.TAX_REGION);
+		return beanFactory.getPrototypeBean(ContextIdNames.TAX_REGION, TaxRegion.class);
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class TaxJurisdictionDtoAssembler extends AbstractDtoAssembler<TaxJurisdi
 	 * @return a (Tax Category) LocalizedPropertyValue from the Spring Context.
 	 */
 	protected LocalizedPropertyValue localizedPropertyValueDomainFactory() {
-		return beanFactory.getBean(ContextIdNames.TAX_CATEGORY_LOCALIZED_PROPERTY_VALUE);
+		return beanFactory.getPrototypeBean(ContextIdNames.TAX_CATEGORY_LOCALIZED_PROPERTY_VALUE, LocalizedPropertyValue.class);
 	}
 
 	@Override

@@ -26,7 +26,6 @@ import org.springframework.core.convert.ConversionService;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.definition.addresses.AddressDetailEntity;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
 import com.elasticpath.rest.definition.addresses.AddressesIdentifier;
@@ -112,7 +111,7 @@ public class AddressEntityRepositoryImplTest {
 
 		when(customerAddress.getGuid()).thenReturn(ADDRESS_ID);
 		when(customer.getAddressByGuid(ADDRESS_ID)).thenReturn(customerAddress);
-		
+
 		repository.submit(addressEntity, StringIdentifier.of(STORE_CODE))
 				.test()
 				.assertNoErrors();
@@ -256,7 +255,7 @@ public class AddressEntityRepositoryImplTest {
 		AddressEntity addressEntity = AddressEntity.builder()
 				.withAddressId(ADDRESS_ID)
 				.withName(getNameEntity())
-				.withAddress(getAddressDetailEntity())
+				.withAddress(getBaseAddressEntity())
 				.build();
 
 		repository.updateCustomerAddress(addressEntity, newCustomerAddress);
@@ -272,7 +271,7 @@ public class AddressEntityRepositoryImplTest {
 	}
 
 	@Test
-	public void shouldNotUpdateAddressDetailsGivenNullAddressDetailEntity() {
+	public void shouldNotUpdateAddressDetailsGivenNullBaseAddressEntity() {
 		AddressEntity addressEntity = AddressEntity.builder()
 				.withAddressId(ADDRESS_ID)
 				.withName(getNameEntity())
@@ -294,7 +293,7 @@ public class AddressEntityRepositoryImplTest {
 	public void shouldNotUpdateNamesGivenNullNameEntity() {
 		AddressEntity addressEntity = AddressEntity.builder()
 				.withAddressId(ADDRESS_ID)
-				.withAddress(getAddressDetailEntity())
+				.withAddress(getBaseAddressEntity())
 				.build();
 
 		repository.updateCustomerAddress(addressEntity, newCustomerAddress);
@@ -320,14 +319,14 @@ public class AddressEntityRepositoryImplTest {
 
 	private AddressEntity getAddressEntity() {
 		return AddressEntity.builder()
-				.withAddress(getAddressDetailEntity())
+				.withAddress(getBaseAddressEntity())
 				.withName(getNameEntity())
 				.withAddressId(ADDRESS_ID)
 				.build();
 	}
 
-	private AddressDetailEntity getAddressDetailEntity() {
-		return AddressDetailEntity.builder()
+	private com.elasticpath.rest.definition.base.AddressEntity getBaseAddressEntity() {
+		return com.elasticpath.rest.definition.base.AddressEntity.builder()
 				.withStreetAddress(STREET_ADDRESS)
 				.withExtendedAddress(EXTENDED_ADDRESS)
 				.withRegion(REGIONS)

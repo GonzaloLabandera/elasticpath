@@ -209,7 +209,7 @@ public class CategoryTypeServiceImpl extends AbstractEpPersistenceServiceImpl im
 	public CategoryType get(final long uid) throws EpServiceException {
 		sanityCheck();
 		if (uid <= 0) {
-			return getBean(ContextIdNames.CATEGORY_TYPE);
+			return getPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class);
 		}
 
 		return getPersistentBeanFinder().get(ContextIdNames.CATEGORY_TYPE, uid);

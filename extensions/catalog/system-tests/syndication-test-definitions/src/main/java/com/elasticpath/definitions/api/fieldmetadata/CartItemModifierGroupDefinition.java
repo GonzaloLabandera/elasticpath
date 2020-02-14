@@ -22,6 +22,8 @@ import io.restassured.response.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
+import com.elasticpath.definitions.api.helpers.Constants;
+import com.elasticpath.definitions.api.helpers.StepsHelper;
 import com.elasticpath.definitions.stateobjects.Context;
 import com.elasticpath.definitions.testobjects.SingleGroupApiResponse;
 import com.elasticpath.selenium.domainobjects.CartItemModifierGroup;
@@ -770,6 +772,7 @@ public class CartItemModifierGroupDefinition {
 	 * @param code  cart item modifier group code to pass it in URL
 	 */
 	private void getLatestGroupProjection(final String store, final String code) {
+		StepsHelper.sleep(Constants.API_SLEEP_TIME);
 		response = given()
 				.when()
 				.get(String.format(SingleGroupApiResponse.GROUP_URL, store, code));

@@ -127,6 +127,8 @@
 		<property name="serviceInterface" value="com.elasticpath.shipping.connectivity.service.ShippingCalculationService" />
 	</bean>
 
+	<bean id="dummyPaymentProviderPlugin" class="com.elasticpath.service.payment.provider.DummyPaymentProviderPluginImpl"/>
+
 	<!--
 		It is required to override persistenceEngineTarget bean, defined in openjpa.xml,
 		because a db connection is required for verification of the TX isolation level but

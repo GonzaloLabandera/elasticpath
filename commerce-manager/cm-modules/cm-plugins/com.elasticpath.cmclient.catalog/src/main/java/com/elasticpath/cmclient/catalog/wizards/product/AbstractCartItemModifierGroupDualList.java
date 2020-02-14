@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareDualListBox;
@@ -119,8 +119,7 @@ public abstract class AbstractCartItemModifierGroupDualList extends AbstractPoli
 	@Override
 	public Collection<ModifierGroup> getAvailable() {
 		if (availableCartItemModifierGroupList == null) {
-			final ModifierService modifierService =
-					(ServiceLocator.getService(ContextIdNames.MODIFIER_SERVICE));
+			final ModifierService modifierService = BeanLocator.getSingletonBean(ContextIdNames.MODIFIER_SERVICE, ModifierService.class);
 			availableCartItemModifierGroupList = getAvailableCartItemModifierGroupsList(modifierService);
 		}
 		return availableCartItemModifierGroupList;

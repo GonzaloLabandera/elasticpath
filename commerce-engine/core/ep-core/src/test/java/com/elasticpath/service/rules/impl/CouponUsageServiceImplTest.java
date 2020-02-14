@@ -20,13 +20,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -118,22 +117,6 @@ public class CouponUsageServiceImplTest {
 
 	@Mock
 	private RuleService ruleService;
-
-	/**
-	 * Test double for applied rule which allows addAppliedCoupon to run.
-	 */
-	private final class AppliedRuleImplTestDouble extends AppliedRuleImpl {
-		private static final long serialVersionUID = 1L;
-
-		@SuppressWarnings("unchecked")
-		@Override
-		protected <T> T getBean(final String beanName) {
-			if (beanName.equals(ContextIdNames.APPLIED_COUPON)) {
-				return (T) new AppliedCouponImpl();
-			}
-			return null;
-		}
-	}
 
 	/**
 	 * Test double CouponCodeGenerator.
@@ -255,7 +238,9 @@ public class CouponUsageServiceImplTest {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.COUPON_USAGE, CouponUsageImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class, CouponUsageImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.APPLIED_COUPON, AppliedCoupon.class, AppliedCouponImpl.class);
+
 		service.setBeanFactory(beanFactory);
 
 		context.checking(new Expectations() { {
@@ -363,7 +348,7 @@ public class CouponUsageServiceImplTest {
 	}
 
 	private Order populateInputOrder() {
-		AppliedRuleImpl appliedRule = new AppliedRuleImplTestDouble();
+		AppliedRuleImpl appliedRule = new AppliedRuleImpl();
 		appliedRule.setRuleUid(RULE_UID);
 		appliedRule.setAppliedCoupons(new HashSet<>());
 
@@ -1872,7 +1857,8 @@ public class CouponUsageServiceImplTest {
 		context.checking(new Expectations() { {
 			allowing(ruleService).get(RULE_UID); will(returnValue(rule));
 			oneOf(couponConfigService).findByRuleCode(XYZ); will(returnValue(couponConfig));
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON); will(returnValue(unpopulatedCoupon));
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
+			will(returnValue(unpopulatedCoupon));
 		} });
 
 		Set<Long> appliedRuleUids = new HashSet<>();
@@ -1936,9 +1922,11 @@ public class CouponUsageServiceImplTest {
 		context.checking(new Expectations() { {
 			allowing(ruleService).get(RULE_UID); will(returnValue(rule));
 			oneOf(couponConfigService).findByRuleCode(XYZ); will(returnValue(couponConfig1));
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON); will(returnValue(unpopulatedCoupon1));
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
+			will(returnValue(unpopulatedCoupon1));
 			oneOf(couponConfigService).findByRuleCode("uvw"); will(returnValue(couponConfig2));
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON); will(returnValue(unpopulatedCoupon2));
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
+			will(returnValue(unpopulatedCoupon2));
 		} });
 
 		Set<Long> appliedRuleUids = new HashSet<>();

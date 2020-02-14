@@ -1,8 +1,14 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.uat.stepdefs;
 
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_INSTRUMENT;
+import static com.elasticpath.provider.payment.constants.PaymentProviderApiContextIdNames.PAYMENT_INSTRUMENT;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Currency;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -14,6 +20,7 @@ import org.jvnet.mock_javamail.Mailbox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.builder.OrderBuilder;
 import com.elasticpath.domain.builder.checkout.CheckoutTestCartBuilder;
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
@@ -24,11 +31,17 @@ import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
+import com.elasticpath.domain.orderpaymentapi.OrderPaymentInstrument;
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.email.test.support.EmailSendingMockInterceptor;
 import com.elasticpath.persister.ShoppingContextPersister;
+import com.elasticpath.provider.payment.domain.PaymentInstrument;
+import com.elasticpath.provider.payment.service.configuration.PaymentProviderConfigurationService;
+import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.order.OrderService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentInstrumentService;
+import com.elasticpath.service.orderpaymentapi.impl.OrderPaymentApiServiceImpl;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.uat.ScenarioContextValueHolder;
 
@@ -38,6 +51,9 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 public class OrderStepDefinitions {
 
 	private static final long MAX_SECONDS_TO_WAIT_FOR_EMAIL = 20;
+	private static final String INSTRUMENT_NAME = "Instrument name";
+	private static final BigDecimal ZERO = BigDecimal.ZERO;
+	private static final Currency CURRENCY_USD = Currency.getInstance("USD");
 
 	@Autowired
 	private CustomerService customerService;
@@ -83,23 +99,39 @@ public class OrderStepDefinitions {
 	@Autowired
 	private ShoppingContextPersister shoppingContextPersister;
 
+	@Autowired
+	private OrderPaymentInstrumentService orderPaymentInstrumentService;
+
+	@Autowired
+	private PaymentInstrumentService paymentInstrumentService;
+
+	@Autowired
+	private PaymentProviderConfigurationService paymentProviderConfigurationService;
+
+	@Autowired
+	private OrderPaymentApiServiceImpl orderPaymentApiService;
+
+	@Autowired
+	@Qualifier("coreBeanFactory")
+	private BeanFactory beanFactory;
+
 	@When("^I successfully purchase my shopping cart contents$")
 	public void createOrder() throws Exception {
 		// Defer execution until we are ready to check for the email
 		emailSendingCommandHolder.set(() -> {
 			final Customer customer = buildAndAddCustomer();
 
-			final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(customer)
+			final ShoppingContext shoppingContext = shoppingContextBuilder
+					.withCustomer(customer)
+					.withStoreCode(customer.getStoreCode())
 					.build();
 			shoppingContextPersister.persist(shoppingContext);
 
 			final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
 					.withScenario(scenarioHolder.get())
-					.withCustomerSession(shoppingContext.getCustomerSession())
-					.withTestDoubleGateway();
+					.withCustomerSession(shoppingContext.getCustomerSession());
 
 				orderHolder.set(orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
-										.withTokenizedTemplateOrderPayment()
 										.withShoppingContext(shoppingContext)
 										.checkout());
 		});
@@ -120,22 +152,27 @@ public class OrderStepDefinitions {
 	public void createInProgressOrder() {
 		final Customer customer = buildAndAddCustomer();
 
-		final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(customer)
+		final ShoppingContext shoppingContext = shoppingContextBuilder
+				.withCustomer(customer)
+				.withStoreCode(customer.getStoreCode())
 				.build();
 		shoppingContextPersister.persist(shoppingContext);
 
 		final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
 				.withScenario(scenarioHolder.get())
-				.withCustomerSession(shoppingContext.getCustomerSession())
-				.withTestDoubleGateway();
+				.withCustomerSession(shoppingContext.getCustomerSession());
 
 		final Order order = orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
-				.withTokenizedTemplateOrderPayment()
 				.withNonZeroPhysicalShipment()
 				.withShoppingContext(shoppingContext)
 				.build();
 
-		orderHolder.set(orderService.update(order));
+		orderHolder.set(order);
+
+		final PaymentInstrument paymentInstrument = createPaymentInstrument();
+		createOrderPaymentInstrument(order, paymentInstrument.getGuid());
+
+		orderPaymentApiService.orderCreated(order);
 	}
 
 	@And("^the purchase has been completed and delivered$")
@@ -152,7 +189,7 @@ public class OrderStepDefinitions {
 			if (!shipment.getShipmentStatus().equals(OrderShipmentStatus.SHIPPED)) {
 				order = orderService.completeShipment(shipment.getShipmentNumber(),
 													  null,
-													  false,
+													  true,
 													  null,
 													  false,
 													  eventOriginatorHelper.getSystemOriginator());
@@ -187,4 +224,24 @@ public class OrderStepDefinitions {
 		return addedCustomer;
 	}
 
+	private PaymentInstrument createPaymentInstrument() {
+		final PaymentInstrument paymentInstrument = beanFactory.getPrototypeBean(PAYMENT_INSTRUMENT, PaymentInstrument.class);
+		paymentInstrument.setName(INSTRUMENT_NAME);
+		paymentInstrument.setPaymentProviderConfiguration(paymentProviderConfigurationService.findAll().get(0));
+		paymentInstrument.setSingleReservePerPI(false);
+		paymentInstrument.setPaymentInstrumentData(Collections.emptySet());
+
+		paymentInstrumentService.saveOrUpdate(paymentInstrument);
+
+		return paymentInstrument;
+	}
+
+	private void createOrderPaymentInstrument(final Order order, final String giud) {
+        final OrderPaymentInstrument orderPaymentInstrument = beanFactory.getPrototypeBean(ORDER_PAYMENT_INSTRUMENT, OrderPaymentInstrument.class);
+        orderPaymentInstrument.setPaymentInstrumentGuid(giud);
+        orderPaymentInstrument.setLimitAmount(ZERO);
+        orderPaymentInstrument.setOrderNumber(order.getOrderNumber());
+        orderPaymentInstrument.setCurrency(CURRENCY_USD);
+        orderPaymentInstrumentService.saveOrUpdate(orderPaymentInstrument);
+    }
 }

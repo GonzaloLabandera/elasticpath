@@ -24,7 +24,7 @@ import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -219,19 +219,19 @@ public class ProductBundleConstituentsDialog extends AbstractEpDialog {
 			bundleConstituent.setConstituent(getProductSkuConstituent());
 		}
 		bundleConstituent.setQuantity(getQuantity());
-		
+
 		// check if the item can be added to the bundle
 		if (getBundleValidator().isRecurringChargeItemOnAssignedBundle(rootProductBundle, bundleConstituent.getConstituent())) {
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), 
+			MessageDialog.openError(Display.getCurrent().getActiveShell(),
 				CatalogMessages.get().ProductSaveRecurringChargeOnAssignedBundleErrorTitle,
 				CatalogMessages.get().ProductSaveRecurringChargeOnAssignedBundleErrorMsg);
 			return;
 		}
-			
+
 		// should be invoked for proper result;
 		super.okPressed();
 	}
-	
+
 	@Override
 	protected String getInitialMessage() {
 		return null;
@@ -252,17 +252,17 @@ public class ProductBundleConstituentsDialog extends AbstractEpDialog {
 		if (editMode) {
 			return CatalogMessages.get().ProductBundleEditConstituentsDialog_Title;
 		}
-		
+
 		return CatalogMessages.get().ProductBundleAddConstituentsDialog_Title;
 	}
-	
+
 	private Product getProductConstituent() {
-		ProductLookup productLookup = ServiceLocator.getService(ContextIdNames.PRODUCT_LOOKUP);
+		ProductLookup productLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 		return productLookup.findByGuid(guidField.getText());
 	}
 
 	private ProductSku getProductSkuConstituent() {
-		ProductSkuLookup productSkuLookup = ServiceLocator.getService(ContextIdNames.PRODUCT_SKU_LOOKUP);
+		ProductSkuLookup productSkuLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 		return productSkuLookup.findBySkuCode(guidField.getText());
 	}
 
@@ -272,10 +272,10 @@ public class ProductBundleConstituentsDialog extends AbstractEpDialog {
 
 	/**
 	 * Get BundleValidator.
-	 *  
+	 *
 	 * @return the instance of the price list service
 	 */
 	protected BundleValidator getBundleValidator() {
-		return ServiceLocator.getService("bundleValidator"); //$NON-NLS-1$
+		return BeanLocator.getSingletonBean("bundleValidator", BundleValidator.class); //$NON-NLS-1$
 	}
 }

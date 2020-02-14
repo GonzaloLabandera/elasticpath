@@ -63,7 +63,7 @@ public class PurchaseLineItemToItemLinksRepositoryImpl<E extends PurchaseLineIte
 	 */
 	protected Single<IdentifierPart<Map<String, String>>> buildItemId(final OrderSku orderSku) {
 
-		final ProductSku sku = productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(orderSku.getSkuGuid()).blockingGet();
+		final ProductSku sku = productSkuRepository.getProductSkuWithAttributesByGuid(orderSku.getSkuGuid()).blockingGet();
 
 		return Single.just(itemRepository.getItemIdForProductSku(sku));
 

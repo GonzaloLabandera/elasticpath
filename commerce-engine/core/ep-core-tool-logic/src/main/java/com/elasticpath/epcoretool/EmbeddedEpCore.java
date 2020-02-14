@@ -61,7 +61,7 @@ public class EmbeddedEpCore {
 	 * @return the index search service
 	 */
 	public IndexSearchService getIndexSearchService() {
-		return (IndexSearchService) appCtx.getBean(ContextIdNames.INDEX_SEARCH_SERVICE);
+		return appCtx.getBean(ContextIdNames.INDEX_SEARCH_SERVICE, IndexSearchService.class);
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class EmbeddedEpCore {
 	 * @return the cm user service
 	 */
 	public CmUserService getCmUserService() {
-		return (CmUserService) appCtx.getBean(ContextIdNames.CMUSER_SERVICE);
+		return appCtx.getBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class EmbeddedEpCore {
 	 * @return the index build status service
 	 */
 	public IndexBuildStatusService getIndexBuildStatusService() {
-		return (IndexBuildStatusService) appCtx.getBean("indexBuildStatusService");
+		return appCtx.getBean("indexBuildStatusService", IndexBuildStatusService.class);
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class EmbeddedEpCore {
 	 * @return the settings service
 	 */
 	public SettingsService getSettingsService() {
-		return (SettingsService) appCtx.getBean(ContextIdNames.SETTINGS_SERVICE);
+		return appCtx.getBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class EmbeddedEpCore {
 	 * @return the store service
 	 */
 	public StoreService getStoreService() {
-		return (StoreService) appCtx.getBean(ContextIdNames.STORE_SERVICE);
+		return appCtx.getBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class EmbeddedEpCore {
 	 * @return the setting value factory
 	 */
 	public SettingValueFactory getSettingValueFactory() {
-		return (SettingValueFactory) appCtx.getBean("settingValueFactory");
+		return appCtx.getBean("settingValueFactory", SettingValueFactory.class);
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class EmbeddedEpCore {
 	 * @return the index notification service
 	 */
 	public IndexNotificationService getIndexNotificationService() {
-		return (IndexNotificationService) appCtx.getBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE);
+		return appCtx.getBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE, IndexNotificationService.class);
 
 	}
 
@@ -141,7 +141,7 @@ public class EmbeddedEpCore {
 	 * @return the recompiling rule engine
 	 */
 	public RecompilingRuleEngine getRuleEngine() {
-		return (RecompilingRuleEngine) appCtx.getBean(ContextIdNames.EP_RULE_ENGINE);
+		return appCtx.getBean(ContextIdNames.EP_RULE_ENGINE, RecompilingRuleEngine.class);
 	}
 
 	/**
@@ -167,7 +167,7 @@ public class EmbeddedEpCore {
 	}
 
 	private PersistenceEngine getPersistenceEngine() {
-		return (PersistenceEngine) appCtx.getBean("persistenceEngine");
+		return appCtx.getBean("persistenceEngine", PersistenceEngine.class);
 	}
 
 	/**

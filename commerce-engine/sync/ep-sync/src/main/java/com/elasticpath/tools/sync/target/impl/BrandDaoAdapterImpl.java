@@ -26,7 +26,7 @@ public class BrandDaoAdapterImpl extends AbstractDaoAdapter<Brand> {
 
 	@Override
 	public Brand createBean(final Brand brand) {
-		return beanFactory.getBean(ContextIdNames.BRAND);
+		return beanFactory.getPrototypeBean(ContextIdNames.BRAND, Brand.class);
 	}
 
 	@Override

@@ -85,7 +85,7 @@ public class PriceForCartLineItemEntityRepositoryImplTest {
 
 	@Test
 	public void verifyFindOneReturnsNotFoundWhenShoppingCartIsNotFound() {
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(
+		when(cartOrderRepository.getEnrichedShoppingCart(
 				SCOPE, CART_ID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(NOT_FOUND)));
 
@@ -96,10 +96,10 @@ public class PriceForCartLineItemEntityRepositoryImplTest {
 
 	@Test
 	public void verifyFindOneReturnsNotFoundWhenPricingSnapshotNotFound() {
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(
+		when(cartOrderRepository.getEnrichedShoppingCart(
 				SCOPE, CART_ID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.just(shoppingCart));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
+		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(NOT_FOUND)));
 
 		repository.findOne(priceForCartLineItemIdentifier)
@@ -109,10 +109,10 @@ public class PriceForCartLineItemEntityRepositoryImplTest {
 
 	@Test
 	public void verifyFindOneReturnsNotFoundWhenLineItemIdNotFound() {
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(
+		when(cartOrderRepository.getEnrichedShoppingCart(
 				SCOPE, CART_ID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.just(shoppingCart));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
+		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
 				.thenReturn(Single.just(shoppingCartPricingSnapshot));
 		when(shoppingCartPricingSnapshot.getShoppingItemPricingSnapshot(shoppingCart.getShoppingItemByGuid(LINE_ITEM_ID)))
 				.thenReturn(null);
@@ -131,10 +131,10 @@ public class PriceForCartLineItemEntityRepositoryImplTest {
 				.addingListPrice(listCostEntity)
 				.build();
 
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(
+		when(cartOrderRepository.getEnrichedShoppingCart(
 				SCOPE, CART_ID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.just(shoppingCart));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
+		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
 				.thenReturn(Single.just(shoppingCartPricingSnapshot));
 		when(shoppingCartPricingSnapshot.getShoppingItemPricingSnapshot(shoppingCart.getShoppingItemByGuid(LINE_ITEM_ID)))
 				.thenReturn(shoppingItemPricingSnapshot);

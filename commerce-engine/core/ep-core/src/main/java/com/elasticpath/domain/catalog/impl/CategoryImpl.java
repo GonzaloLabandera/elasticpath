@@ -268,7 +268,8 @@ public class CategoryImpl extends AbstractCategoryImpl {
 	 * 	for the fallback locale if requested, an empty LDF in the given locale if neither can be found.
 	 */
 	public LocaleDependantFields getLocaleDependantFields(final Locale locale, final boolean fallback) {
-		CatalogLocaleFallbackPolicyFactory factory = getBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY);
+		CatalogLocaleFallbackPolicyFactory factory = getSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY,
+				CatalogLocaleFallbackPolicyFactory.class);
 		return getLocaleDependantFields(factory.createCategoryLocaleFallbackPolicy(locale, fallback, this));
 	}
 

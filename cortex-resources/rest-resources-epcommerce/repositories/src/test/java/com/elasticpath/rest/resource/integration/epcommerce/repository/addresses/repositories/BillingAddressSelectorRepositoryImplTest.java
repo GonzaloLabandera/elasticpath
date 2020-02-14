@@ -181,9 +181,9 @@ public class BillingAddressSelectorRepositoryImplTest {
 		when(customer.getGuid()).thenReturn(CUSTOMERGUID);
 		when(customer.getPreferredBillingAddress()).thenReturn(customerAddress);
 		when(customerAddress.getGuid()).thenReturn(ADDRESS_GUID);
-		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(STORE_CODE, CUSTOMERGUID)).thenReturn(cartOrderGuidObservable);
-		when(cartOrderRepository.findByGuidAsSingle(STORE_CODE, cartOrderGuidObservable.blockingSingle())).thenReturn(Single.just(cartOrder));
-		when(cartOrderRepository.saveCartOrderAsSingle(cartOrder)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMERGUID)).thenReturn(cartOrderGuidObservable);
+		when(cartOrderRepository.findByGuid(STORE_CODE, cartOrderGuidObservable.blockingSingle())).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.saveCartOrder(cartOrder)).thenReturn(Single.just(cartOrder));
 
 		prototype.selectChoice(billingAddressSelectorChoiceIdentifier)
 				.test()

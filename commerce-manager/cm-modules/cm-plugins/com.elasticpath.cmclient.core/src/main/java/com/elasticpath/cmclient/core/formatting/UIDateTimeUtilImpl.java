@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.service.ClientInfo;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.CookieUtil;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.service.misc.TimeService;
@@ -157,7 +157,7 @@ public class UIDateTimeUtilImpl implements UIDateTimeUtil {
 			CookieUtil.setCookie(TimeZoneInfo.CM_TIMEZONE_ID, TimeZoneInfo.BROWSER);
 		}
 
-		TimeService timeservice = ServiceLocator.getService("timeService");
+		TimeService timeservice = BeanLocator.getSingletonBean("timeService", TimeService.class);
 		timeservice.getCurrentTime();
 	}
 

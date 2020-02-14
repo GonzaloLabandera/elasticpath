@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPlugin;
@@ -36,11 +36,11 @@ import com.elasticpath.service.datapolicy.impl.DataPointValue;
  */
 public class CustomerRemoveDataPolicyDataDialog extends MessageDialog {
 
-	private static final DataPointService DATA_POINT_SERVICE =
-		(DataPointService) ServiceLocator.getService(ContextIdNames.DATA_POINT_SERVICE);
+	private static final DataPointService DATA_POINT_SERVICE = BeanLocator
+			.getSingletonBean(ContextIdNames.DATA_POINT_SERVICE, DataPointService.class);
 
-	private static final DataPointValueService DATA_POINT_VALUE_SERVICE =
-		(DataPointValueService) ServiceLocator.getService(ContextIdNames.DATA_POINT_VALUE_SERVICE);
+	private static final DataPointValueService DATA_POINT_VALUE_SERVICE = BeanLocator
+			.getSingletonBean(ContextIdNames.DATA_POINT_VALUE_SERVICE, DataPointValueService.class);
 
 	private static final String[] BUTTONS = {
 		FulfillmentMessages.get().Delete_Label,

@@ -1,10 +1,10 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortex.dce
 
 class SharedConstants {
-
-	public static final TEST_TOKEN_DISPLAY_NAME = "testTokenDisplayName"
-
-	public static final TEST_TOKEN = "testToken"
 
 	public static final TEST_EMAIL_VALUE = "testEmailValue@elasticpath.com"
 
@@ -35,4 +35,6 @@ class SharedConstants {
 	public static final PASSWORD = "password"
 
 	public static final DEFAULT_TEST_USER_GUID = "95be8397-5262-49e7-bb7b-485a756abfe5"
+
+	public static final DEFAULT_PAYMENT_CONFIGURATION_NAME = "Smart Path Config"
 }

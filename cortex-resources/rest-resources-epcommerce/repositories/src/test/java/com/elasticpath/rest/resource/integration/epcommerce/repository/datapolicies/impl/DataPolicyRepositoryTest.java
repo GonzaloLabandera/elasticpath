@@ -190,6 +190,22 @@ public class DataPolicyRepositoryTest {
 	}
 
 	@Test
+	public void verifySaveNewCustomerConsentRecordWhenNoPriorConsentExists() {
+		dataPolicyRepository = Mockito.spy(dataPolicyRepository);
+		DataPolicyEntity dataPolicyEntity = createDataPolicyEntity(POLICY_GUID_1, KEY_1, Boolean.TRUE.toString());
+
+		when(customerConsentService.findByDataPolicyGuidForCustomerLatest(POLICY_GUID_1, USER_ID)).thenReturn(null);
+		when(timeService.getCurrentTime()).thenReturn(NOW_DATE);
+		when(customerConsentService.save(any())).thenReturn(customerConsent);
+
+		dataPolicyRepository.createCustomerConsentForDataPolicy(USER_ID, dataPolicy1, dataPolicyEntity)
+				.test()
+				.assertValue(customerConsent);
+
+		verify(customerConsentService).save(any(CustomerConsent.class));
+	}
+
+	@Test
 	public void verifyNeverSaveNewCustomerConsentRecordWithSameConsentActionWhenSubmittedWithinTimeThreshold() {
 		dataPolicyRepository = Mockito.spy(dataPolicyRepository);
 		DataPolicyEntity dataPolicyEntity = createDataPolicyEntity(POLICY_GUID_1, KEY_1, Boolean.TRUE.toString());
@@ -204,6 +220,23 @@ public class DataPolicyRepositoryTest {
 				.assertValue(customerConsent);
 
 		verify(dataPolicyRepository, never()).saveCustomerConsent(any(CustomerConsent.class));
+	}
+
+	@Test
+	public void verifyRevokeCustomerConsentRecord() {
+		dataPolicyRepository = Mockito.spy(dataPolicyRepository);
+		DataPolicyEntity dataPolicyEntity = createDataPolicyEntity(POLICY_GUID_1, KEY_1, Boolean.FALSE.toString());
+
+		when(customerConsentService.findByDataPolicyGuidForCustomerLatest(POLICY_GUID_1, USER_ID)).thenReturn(customerConsent);
+		when(customerConsent.getAction()).thenReturn(ConsentAction.GRANTED);
+		when(timeService.getCurrentTime()).thenReturn(NOW_DATE);
+		when(customerConsentService.save(any(CustomerConsent.class))).thenReturn(customerConsent);
+
+		dataPolicyRepository.createCustomerConsentForDataPolicy(USER_ID, dataPolicy1, dataPolicyEntity)
+				.test()
+				.assertValue(customerConsent);
+
+		verify(dataPolicyRepository).saveCustomerConsent(any(CustomerConsent.class));
 	}
 
 	@Test

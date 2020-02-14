@@ -63,6 +63,7 @@
 				WHERE co.shoppingCartGuidInternal = cart.guid
             		AND shopper.uidPk = cart.shopperUid 
             		AND UPPER(cart.storeCode) = UPPER(?1)
+            		AND cart.status = 'ACTIVE'
             		AND shopper.customer.guid = ?2
             </query>
         </named-query>

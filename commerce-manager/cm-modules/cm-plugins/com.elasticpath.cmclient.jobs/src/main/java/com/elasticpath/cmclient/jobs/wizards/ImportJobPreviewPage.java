@@ -18,7 +18,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -74,7 +74,7 @@ public class ImportJobPreviewPage extends WizardPage {
 		super(PAGE_NAME, title, titleImage);
 		this.setDescription(description);
 		this.request = request;
-		this.importService =  ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+		this.importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 		this.nextPage = nextPage;
 	}
 	
@@ -109,7 +109,7 @@ public class ImportJobPreviewPage extends WizardPage {
 	}
 
 	private ImportJob createRestrictedCloneOfImportJobForPreview(final ImportJobRequest importJobRequest) {
-		ImportJob clone = ServiceLocator.getService(ContextIdNames.IMPORT_JOB);
+		ImportJob clone = BeanLocator.getPrototypeBean(ContextIdNames.IMPORT_JOB, ImportJob.class);
 		clone.setCsvFileName(importJobRequest.getImportSource());
 		clone.setCsvFileColDelimeter(importJobRequest.getImportJob().getCsvFileColDelimeter());
 		clone.setCsvFileTextQualifier(importJobRequest.getImportJob().getCsvFileTextQualifier());

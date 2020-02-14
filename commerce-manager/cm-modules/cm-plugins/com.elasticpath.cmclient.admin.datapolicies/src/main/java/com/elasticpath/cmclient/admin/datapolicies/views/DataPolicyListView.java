@@ -25,7 +25,7 @@ import com.elasticpath.cmclient.admin.datapolicies.actions.DisableDataPolicyActi
 import com.elasticpath.cmclient.admin.datapolicies.actions.EditDataPolicyAction;
 import com.elasticpath.cmclient.admin.datapolicies.event.DataPolicyEventListener;
 import com.elasticpath.cmclient.admin.datapolicies.event.DataPolicyEventService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
@@ -76,7 +76,7 @@ public class DataPolicyListView extends AbstractListView implements DataPolicyEv
 	 */
 	public DataPolicyListView() {
 		super(false, DATA_POLICY_LIST_TABLE);
-		this.dataPolicyService = ServiceLocator.getService(ContextIdNames.DATA_POLICY_SERVICE);
+		this.dataPolicyService = BeanLocator.getSingletonBean(ContextIdNames.DATA_POLICY_SERVICE, DataPolicyService.class);
 		DataPolicyEventService.getInstance().registerDataPolicyEventListener(this);
 	}
 

@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.CatalogViewConstants;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.SeoConstants;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.impl.BrandImpl;
@@ -69,7 +70,8 @@ public class BrandFilterImplTest {
 		brandService = context.mock(BrandService.class);
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean("brandService"); will(returnValue(brandService));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
+				will(returnValue(brandService));
 			}
 		});
 		brandFilter = new BrandFilterImpl() {
@@ -267,7 +269,8 @@ public class BrandFilterImplTest {
 		context.checking(new Expectations() {
 			{
 //				oneOf(brandService).get(brand1Uid); will(returnValue(getBrand()));
-				oneOf(brandService).findByCode(String.valueOf(brand1Uid)); will(returnValue(brand));				
+				oneOf(brandService).findByCode(String.valueOf(brand1Uid));
+				will(returnValue(brand));
 			}
 		});
 		

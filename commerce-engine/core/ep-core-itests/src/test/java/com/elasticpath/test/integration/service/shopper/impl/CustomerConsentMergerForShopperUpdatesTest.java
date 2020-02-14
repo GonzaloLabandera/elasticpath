@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -32,6 +33,8 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 	private static final String CUSTOMER_CONSENT_CODE4 = "CUSTOMER_CONSENT_CODE4";
 	private static final String CUSTOMER_CONSENT_CODE5 = "CUSTOMER_CONSENT_CODE5";
 
+	@Autowired
+	@Qualifier("customerConsentMergerForShopperUpdates")
 	private CustomerConsentMergerForShopperUpdates customerConsentMergerForShopperUpdates;
 
 	private SimpleStoreScenario scenario;
@@ -53,7 +56,6 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 	@Before
 	public void setUp() {
 		scenario = getTac().useScenario(SimpleStoreScenario.class);
-		customerConsentMergerForShopperUpdates = getBeanFactory().getBean("customerConsentMergerForShopperUpdates");
 		dataPolicy1 = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE);
 		dataPolicy2 = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE2);
 

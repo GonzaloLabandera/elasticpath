@@ -85,7 +85,7 @@ public class GiftCertificateSummaryServiceImpl {
 
 
 	private GiftCertificateService getGiftCertificateService() {
-		return LoginManager.getInstance().getBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE);
+		return LoginManager.getInstance().getSingletonBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE, GiftCertificateService.class);
 	}
 	
 	/**

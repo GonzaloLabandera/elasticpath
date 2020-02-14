@@ -112,7 +112,8 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	 * @return the populated <code>PromotionRuleExceptions</code> object
 	 */
 	PromotionRuleExceptions getPromotionRuleExceptions(final String exceptionStr) {
-		PromotionRuleExceptions promotionRuleExceptions = beanFactory.getBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS);
+		PromotionRuleExceptions promotionRuleExceptions = beanFactory.getPrototypeBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS,
+				PromotionRuleExceptions.class);
 		promotionRuleExceptions.populateFromExceptionStr(exceptionStr);
 		return promotionRuleExceptions;
 	}

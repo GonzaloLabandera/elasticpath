@@ -19,6 +19,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.commons.util.impl.StoreThemeMessageSource;
+import com.elasticpath.domain.catalogview.SeoUrlBuilder;
 import com.elasticpath.domain.catalogview.impl.SeoUrlBuilderImpl;
 import com.elasticpath.domain.misc.Geography;
 import com.elasticpath.domain.store.impl.StoreImpl;
@@ -50,7 +51,7 @@ public class EmailContextFactoryImplTest {
 	@Before
 	public void setUp() {
 
-		when(beanFactory.getBean(ContextIdNames.SEO_URL_BUILDER)).thenReturn(new SeoUrlBuilderImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.SEO_URL_BUILDER, SeoUrlBuilder.class)).thenReturn(new SeoUrlBuilderImpl());
 
 		contextFactory = new EmailContextFactoryImpl();
 		contextFactory.setBeanFactory(beanFactory);

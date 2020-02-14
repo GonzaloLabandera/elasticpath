@@ -22,7 +22,7 @@ public class LoggingSearchTermsActivityStrategy implements SearchTermsActivitySt
 
 	@Override
 	public void logSearchTerm(final SearchTermsMemento memento) {
-		SearchTermsActivity activity = beanFactory.getBean(ContextIdNames.SEARCH_TERMS_ACTIVITY);
+		SearchTermsActivity activity = beanFactory.getPrototypeBean(ContextIdNames.SEARCH_TERMS_ACTIVITY, SearchTermsActivity.class);
 		activity.setSearchTerms(memento);
 		activity.setLastAccessDate(timeService.getCurrentTime());
 		searchTermsActivityDao.save(activity);

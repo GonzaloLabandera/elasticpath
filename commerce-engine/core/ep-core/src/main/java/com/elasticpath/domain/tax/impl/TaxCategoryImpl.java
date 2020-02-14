@@ -143,7 +143,7 @@ public class TaxCategoryImpl extends AbstractLegacyEntityImpl implements TaxCate
 	@Transient
 	public LocalizedProperties getLocalizedProperties() {
 		if (localizedProperties == null) {
-			localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			localizedProperties = getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 			localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(), ContextIdNames.TAX_CATEGORY_LOCALIZED_PROPERTY_VALUE);
 		}
 		return localizedProperties;

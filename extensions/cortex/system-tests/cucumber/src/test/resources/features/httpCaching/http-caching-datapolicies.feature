@@ -1,4 +1,4 @@
-@httpCaching
+@httpCaching @dataPolicies
 Feature: HTTP Caching - Data Policies
 
   Background:

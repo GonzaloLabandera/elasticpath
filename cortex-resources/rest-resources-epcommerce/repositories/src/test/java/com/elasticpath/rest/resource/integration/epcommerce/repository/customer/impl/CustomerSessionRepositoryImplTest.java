@@ -24,6 +24,7 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
@@ -31,6 +32,7 @@ import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.TestSubjectFactory;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.pricing.SessionPriceListLifecycle;
@@ -77,6 +79,9 @@ public class CustomerSessionRepositoryImplTest {
 	private CustomerSessionTagSetFactory tagSetFactory;
 
 	@InjectMocks
+	private ReactiveAdapterImpl reactiveAdapter;
+
+	@InjectMocks
 	private CustomerSessionRepositoryImpl customerSessionRepository;
 	public static final String ASSERT_DESCRIPTION = "Expected tag not found in customer session tag set.";
 
@@ -85,6 +90,8 @@ public class CustomerSessionRepositoryImplTest {
 	 */
 	@Before
 	public void setUp() {
+		customerSessionRepository = new CustomerSessionRepositoryImpl(resourceOperationContext, shopperService, customerService,
+				customerSessionService, sessionPriceListLifecycle, storeRepository, tagSetFactory, reactiveAdapter);
 		mockCreateCustomerSessionWithShopper();
 	}
 
@@ -105,8 +112,12 @@ public class CustomerSessionRepositoryImplTest {
 		when(customerSessionService.initializeCustomerSessionForPricing(mockCustomerSession, STORE_CODE, CURRENCY))
 				.thenReturn(mockCustomerSession);
 		when(tagSetFactory.createTagSet(any())).thenReturn(tagSet);
-		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
-		assertEquals("The customer session returned should be same as expected", mockCustomerSession, result.getData());
+
+		customerSessionRepository.findOrCreateCustomerSession()
+				.test()
+				.assertNoErrors()
+				.assertValue(mockCustomerSession);
+
 		assertEquals(ASSERT_DESCRIPTION, tag, sessionTagSet.getTagValue(TAG_KEY));
 		verify(sessionPriceListLifecycle).refreshPriceListStack(mockCustomerSession, mockStore);
 	}
@@ -131,8 +142,11 @@ public class CustomerSessionRepositoryImplTest {
 				.thenReturn(mockCustomerSession);
 		when(tagSetFactory.createTagSet(mockCustomer)).thenReturn(tagSet);
 
-		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
-		assertEquals("The customer session returned should be same as expected", mockCustomerSession, result.getData());
+		customerSessionRepository.findOrCreateCustomerSession()
+				.test()
+				.assertNoErrors()
+				.assertValue(mockCustomerSession);
+
 		assertEquals(ASSERT_DESCRIPTION, tag, sessionTagSet.getTagValue(TAG_KEY));
 		verify(sessionPriceListLifecycle).refreshPriceListStack(mockCustomerSession, mockStore);
 	}
@@ -144,10 +158,10 @@ public class CustomerSessionRepositoryImplTest {
 
 		when(customerService.findByGuid(USER_GUID)).thenReturn(mockCustomer);
 
-		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
-
-		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
-		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
+		customerSessionRepository.findOrCreateCustomerSession()
+				.test()
+				.assertError(ResourceOperationFailure.notFound("Customer was not found."))
+				.assertNoValues();
 	}
 
 	@Test
@@ -157,10 +171,10 @@ public class CustomerSessionRepositoryImplTest {
 
 		when(customerService.findByGuid(USER_GUID)).thenThrow(new EpServiceException("Error in customer service"));
 
-		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
-
-		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
-		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.SERVER_ERROR, result.getResourceStatus());
+		customerSessionRepository.findOrCreateCustomerSession()
+				.test()
+				.assertError(ResourceOperationFailure.serverError("Server error when finding shopper by guid"))
+				.assertNoValues();
 	}
 
 	@Test

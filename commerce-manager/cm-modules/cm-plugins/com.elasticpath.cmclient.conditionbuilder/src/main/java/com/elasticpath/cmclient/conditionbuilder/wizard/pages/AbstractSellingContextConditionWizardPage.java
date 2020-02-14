@@ -23,8 +23,8 @@ import com.elasticpath.cmclient.conditionbuilder.adapter.impl.tag.BaseModelAdapt
 import com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages;
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditioncomposite.SavedConditionComposite;
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditions.handlers.ConditionHandler;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
@@ -352,7 +352,7 @@ public abstract class AbstractSellingContextConditionWizardPage<T extends  Selli
 	private void createModelAdapter(final ConditionalExpression conditionalExpression) {
 		ConditionalExpression newConditionalExpression = conditionalExpression;
 		if (newConditionalExpression == null || newConditionalExpression.isNamed()) {
-			newConditionalExpression = ServiceLocator.getService(ContextIdNames.CONDITIONAL_EXPRESSION);
+			newConditionalExpression = BeanLocator.getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 			newConditionalExpression.setName(String.valueOf(System.nanoTime()));
 			newConditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
 		}
@@ -406,7 +406,7 @@ public abstract class AbstractSellingContextConditionWizardPage<T extends  Selli
 			for (Condition condition : new HashSet<>(logicalOperator.getConditions())) {
 				logicalOperator.removeCondition(condition);
 			}
-			StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+			StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 			List<Store> stores = storeService.findAllStores(LoginManager.getCmUser());
 			for (Store store : stores) {
 				Condition condition = conditionHandler.buildCondition(SELLING_CHANNEL, EQUAL_TO, store.getCode());

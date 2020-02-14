@@ -246,7 +246,7 @@ public class PriceRepositoryImplTest {
 
 	@Test
 	public void testEmptyPriceForPriceRange() {
-		when(coreBeanFactory.getBean(ContextIdNames.PRICE)).thenReturn(new PriceImpl());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());
 		StoreProductRepository storeProductRepository = mock(StoreProductRepository.class);
 		PriceRepository repository = priceRepositoryWithMultiSkuProductAndPrices(storeProductRepository);
 		repository.getPriceRange(STORE_CODE, PRODUCT_GUID_CODE)
@@ -257,7 +257,7 @@ public class PriceRepositoryImplTest {
 
 	@Test
 	public void testNonEmptyPriceForPriceRange() {
-		when(coreBeanFactory.getBean(ContextIdNames.PRICE)).thenReturn(new PriceImpl());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());
 		PriceRepository repository = priceRepositoryWithMultiSkuProductAndPrices(mock(StoreProductRepository.class));
 		when(moneyTransformer.transformToEntity(any()))
 				.thenReturn(CostEntity.builder().withAmount(BigDecimal.ZERO).withCurrency(USD).withDisplay(ZERO_USD).build());
@@ -273,7 +273,7 @@ public class PriceRepositoryImplTest {
 
 	@Test
 	public void testNoPurchasePriceFallsBackToListPriceForPriceRange() {
-		when(coreBeanFactory.getBean(ContextIdNames.PRICE)).thenReturn(new PriceImpl());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());
 		PriceRepository repository = priceRepositoryWithNoSalePrice(mock(StoreProductRepository.class));
 		when(moneyTransformer.transformToEntity(any()))
 				.thenReturn(CostEntity.builder().withAmount(BigDecimal.ZERO).withCurrency(USD).withDisplay(ZERO_USD).build());
@@ -304,7 +304,7 @@ public class PriceRepositoryImplTest {
 	}
 	
 	private void setupMockStore() {
-		when(mockCustomerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(mockCustomerSession));
+		when(mockCustomerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(mockCustomerSession));
 		when(mockCustomerSession.getShopper()).thenReturn(mockShopper);
 		when(mockShopper.getStoreCode()).thenReturn(STORE_CODE);
 		when(mockStoreRepository.findStoreAsSingle(STORE_CODE)).thenReturn(Single.just(mockStore));

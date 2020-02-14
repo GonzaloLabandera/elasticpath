@@ -78,14 +78,7 @@ public class ImportJobRunnerCategoryImplTest {
 				return (T) new ImportFaultImpl();
 			} else if (ContextIdNames.IMPORT_BAD_ROW.equals(name)) {
 				return (T) new ImportBadRowImpl();
-			}
-			throw new EpServiceException("unknown bean name: " + name);
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public <T> T getSingletonBean(final String name, final Class<T> clazz) {
-			if (ContextIdNames.CSV_FILE_READER.equals(name)) {
+			} else if (ContextIdNames.CSV_FILE_READER.equals(name)) {
 				final CsvFileReader mockCsvFileReader = context.mock(CsvFileReader.class);
 				context.checking(new Expectations() {
 					{
@@ -103,6 +96,11 @@ public class ImportJobRunnerCategoryImplTest {
 				});
 				return (T) mockCsvFileReader;
 			}
+			throw new EpServiceException("unknown bean name: " + name);
+		}
+
+		@Override
+		public <T> T getSingletonBean(final String name, final Class<T> clazz) {
 			throw new EpServiceException("unknown bean name: " + name);
 		}
 	};

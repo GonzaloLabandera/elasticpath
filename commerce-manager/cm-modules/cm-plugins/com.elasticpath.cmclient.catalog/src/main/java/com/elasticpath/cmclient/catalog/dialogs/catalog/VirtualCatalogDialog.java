@@ -27,9 +27,9 @@ import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -67,8 +67,8 @@ public class VirtualCatalogDialog extends AbstractPolicyAwareDialog implements O
 
 	private Catalog virtualCatalog;
 	
-	private final CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	
 	private Text catalogCode;
 
@@ -142,7 +142,7 @@ public class VirtualCatalogDialog extends AbstractPolicyAwareDialog implements O
 	}
 	
 	private List<Locale> getAllSupportedLocales() {
-		CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		List<Catalog> catalogs = catalogService.findAllCatalogs();
 		
 		Set<Locale> set = new HashSet<>();
@@ -378,7 +378,7 @@ public class VirtualCatalogDialog extends AbstractPolicyAwareDialog implements O
 	@Override
 	public void setObjectGuid(final String objectGuid) {
 		if (objectGuid == null) {
-			virtualCatalog = ServiceLocator.getService(ContextIdNames.CATALOG);
+			virtualCatalog = BeanLocator.getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
 			virtualCatalog.setMaster(false);
 		} else {
 			virtualCatalog = catalogService.findByCode(objectGuid);

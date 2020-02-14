@@ -12,9 +12,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +30,7 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -38,6 +42,11 @@ public class EhcacheCacheAdapterTest {
 	private static final String KEY_2 = "key2";
 	private static final String VAL_1 = "value1";
 	private static final String VAL_2 = "value2";
+	private static final String FOO = "foo";
+	private static final String BAR = "bar";
+	
+	private static final int THREE = 3;
+	private static final int FOUR = 4;
 
 	private static final String CACHE_NAME = "test-cache";
 	private final CacheManager cacheManager = CacheManager.create();
@@ -62,14 +71,14 @@ public class EhcacheCacheAdapterTest {
 
 	@Test
 	public void verifyThatGetOnCacheHitReturnsACachedObject() {
-		cache.put(new Element("foo", "bar"));
+		cache.put(new Element(FOO, BAR));
 
-		assertEquals("bar", adapter.get("foo"));
+		assertEquals(BAR, adapter.get(FOO));
 	}
 
 	@Test
 	public void verifyThatGetOnCacheMissReturnsNull() {
-		assertNull(adapter.get("foo"));
+		assertNull(adapter.get(FOO));
 	}
 
 	@Test
@@ -220,6 +229,81 @@ public class EhcacheCacheAdapterTest {
 
 		verify(fallbackCacheLoader).loadAll(keys);
 		verifyZeroInteractions(fallbackCacheLoader);
+	}
+
+	@Test
+	public void shouldGetByPartialKey() {
+		EhcacheCacheAdapter<CompositeCacheKey, String> adapter = new EhcacheCacheAdapter<>(cache);
+
+		CompositeCacheKey cacheKeyForPut = new CompositeCacheKey();
+		cacheKeyForPut.setUid(1L);
+		cacheKeyForPut.setName(FOO);
+
+		cache.put(new Element(cacheKeyForPut, BAR));
+
+		CompositeCacheKey cacheKeyForGet = new CompositeCacheKey();
+		cacheKeyForGet.setName(FOO);
+
+		//name is not part of hash, hence simple get will return null
+		assertNull(adapter.get(cacheKeyForGet));
+		assertEquals(BAR, adapter.getByPartialKey(cacheKeyForGet));
+	}
+
+	@Test
+	public void shouldGetAllByPartialKey() {
+		EhcacheCacheAdapter<CompositeCacheKey, String> adapter = new EhcacheCacheAdapter<>(cache);
+
+		IntStream.range(1, FOUR).forEach(idx -> {
+			CompositeCacheKey cacheKeyForPut = new CompositeCacheKey();
+			cacheKeyForPut.setUid(idx);
+			cacheKeyForPut.addSomeUid(idx == THREE ? 1 : idx);
+
+			cache.put(new Element(cacheKeyForPut, "bar#" + idx));
+		});
+
+		CompositeCacheKey cacheKeyForGet = new CompositeCacheKey();
+		cacheKeyForGet.addSomeUid(1);
+
+		//name is not part of hash, hence simple get will return null
+		assertNull(adapter.get(cacheKeyForGet));
+		assertTrue(adapter.getAllByPartialKey(cacheKeyForGet).containsAll(Lists.newArrayList("bar#1", "bar#3")));
+	}
+
+	private class CompositeCacheKey {
+		private long uid;
+		private String name;
+		private final List<Long> someUids = new ArrayList<>();
+
+		public void setUid(final long uid) {
+			this.uid = uid;
+		}
+
+		public void setName(final String name) {
+			this.name = name;
+		}
+
+		public void addSomeUid(final long uidToAdd) {
+			this.someUids.add(uidToAdd);
+		}
+
+		@Override
+		public boolean equals(final Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (other == null || getClass() != other.getClass()) {
+				return false;
+			}
+			CompositeCacheKey that = (CompositeCacheKey) other;
+			return uid == that.uid
+				|| Objects.equals(name, that.name)
+				|| CollectionUtils.containsAny(someUids, that.someUids);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(uid);
+		}
 	}
 
 }

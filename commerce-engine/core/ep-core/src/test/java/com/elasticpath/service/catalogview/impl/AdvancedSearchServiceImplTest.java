@@ -27,6 +27,7 @@ import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalogview.CatalogViewRequest;
 import com.elasticpath.domain.catalogview.CatalogViewResult;
 import com.elasticpath.domain.catalogview.EpCatalogViewRequestBindException;
+import com.elasticpath.domain.catalogview.FeaturedProductFilter;
 import com.elasticpath.domain.catalogview.Filter;
 import com.elasticpath.domain.catalogview.impl.FeaturedProductFilterImpl;
 import com.elasticpath.domain.catalogview.search.AdvancedSearchRequest;
@@ -175,8 +176,9 @@ public class AdvancedSearchServiceImplTest {
 			}
 		});
 
-		expectationsFactory.oneBeanFactoryGetBean(ContextIdNames.SEARCH_RESULT, SearchResultImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.FEATURED_PRODUCT_FILTER, FeaturedProductFilterImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.SEARCH_RESULT, CatalogViewResult.class, SearchResultImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.FEATURED_PRODUCT_FILTER, FeaturedProductFilter.class,
+				FeaturedProductFilterImpl.class);
 	}
 
 	@After

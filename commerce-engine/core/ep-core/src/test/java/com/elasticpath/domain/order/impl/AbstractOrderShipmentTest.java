@@ -27,6 +27,8 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ListenableObject;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.order.Order;
@@ -57,6 +59,8 @@ public class AbstractOrderShipmentTest {
 
 	private static final BigDecimal TAX_VALUE1 = new BigDecimal("10.44");
 
+	private static final BigDecimal PI_TO_4_DECIMALS = new BigDecimal("3.1415");
+
 	private ExtOrderShipment shipment;
 
 	private boolean fired;
@@ -86,7 +90,7 @@ public class AbstractOrderShipmentTest {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 		productSkuLookup = context.mock(ProductSkuLookup.class);
 
 		shipment = new TempOrderShipment();
@@ -104,6 +108,45 @@ public class AbstractOrderShipmentTest {
 		OrderSku orderSku = new OrderSkuImpl();
 		shipment.addShipmentOrderSku(orderSku);
 		assertSame(orderSku, shipment.getShipmentOrderSkus().toArray()[0]);
+	}
+
+	/** Test setting order total and subtotal keep more than two decimal scale when set with 3.1415.
+	 * @throws Exception on error */
+	@Test
+	public void testSetSubtotalAndTotalKeepsIncreasedScale() throws Exception {
+		AbstractOrderShipmentImpl orderShipmentImpl = new AbstractOrderShipmentImpl() {
+			private static final long serialVersionUID = 2701120160460208926L;
+
+			@Override
+			public boolean isCancellable() {
+				return false;
+			}
+
+			@Override
+			public Money getTotalTaxMoney() {
+				return null;
+			}
+
+			@Override
+			protected void recalculateTransientDerivedValues() {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			protected void recalculate() {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public ShipmentType getOrderShipmentType() {
+				return null;
+			}
+		};
+
+		orderShipmentImpl.setTotal(PI_TO_4_DECIMALS);
+		assertEquals(PI_TO_4_DECIMALS, orderShipmentImpl.getTotal());
+		orderShipmentImpl.setSubtotal(PI_TO_4_DECIMALS);
+		assertEquals(PI_TO_4_DECIMALS, orderShipmentImpl.getSubtotal());
 	}
 
 	/** Test removing an order sku that was previously added.
@@ -310,9 +353,10 @@ public class AbstractOrderShipmentTest {
 	@Test
 	public void testUpdateTaxValue() {
 
-		expectationsFactory.allowingBeanFactoryGetBean("randomGuid", RandomGuidImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("localizedProperties", LocalizedPropertiesImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("orderTaxValue", OrderTaxValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class,
+				LocalizedPropertiesImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ORDER_TAX_VALUE, OrderTaxValue.class, OrderTaxValueImpl.class);
 
 		OrderImpl orderImpl = new OrderImpl();
 		Store storeImpl = new StoreImpl();

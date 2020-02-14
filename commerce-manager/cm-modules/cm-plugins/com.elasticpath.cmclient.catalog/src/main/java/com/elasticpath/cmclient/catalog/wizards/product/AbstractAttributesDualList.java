@@ -17,8 +17,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareDualListBox;
@@ -117,8 +117,7 @@ public abstract class AbstractAttributesDualList extends AbstractPolicyAwareDual
 	@Override
 	public Collection<Attribute> getAvailable() {
 		if (availableAttributesList == null) {
-			final AttributeService attributeService = ServiceLocator.getService(
-					ContextIdNames.ATTRIBUTE_SERVICE);
+			final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 			availableAttributesList = getAvailableAttributesList(attributeService);
 		}
 		return availableAttributesList;

@@ -7,10 +7,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
+import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -19,7 +18,6 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.api.PersistenceSessionFilterSupport;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
@@ -35,9 +33,6 @@ public class JpaPersistenceSessionFilterSupportImplTest extends BasicSpringConte
 	private CustomerService customerService;
 
 	private SimpleStoreScenario scenario;
-
-	@Autowired
-	private PersistenceEngine persistenceEngine;
 
 	@Autowired
 	private BeanFactory beanFactory;
@@ -91,7 +86,7 @@ public class JpaPersistenceSessionFilterSupportImplTest extends BasicSpringConte
 			Customer first = customerService.findByGuid(persisted.getGuid());
 			first.setFirstName("Jane");
 
-			Customer updated = customerService.update(first);
+			customerService.update(first);
 		} finally {
 			filterSupport.closeSharedSession();
 		}
@@ -101,7 +96,7 @@ public class JpaPersistenceSessionFilterSupportImplTest extends BasicSpringConte
 	}
 
 	private Customer createPersistedCustomer(final String emailAddress, final Store store) {
-		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		final Customer customer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setUserId(emailAddress);
 		customer.setEmail(emailAddress);
 		customer.setStoreCode(store.getCode());
@@ -109,7 +104,7 @@ public class JpaPersistenceSessionFilterSupportImplTest extends BasicSpringConte
 		customer.setLastName("Doe");
 		customer.setFirstName("John");
 
-		CustomerAddress address = beanFactory.getBean(ContextIdNames.CUSTOMER_ADDRESS);
+		CustomerAddress address = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 		address.setCity("Vancouver");
 		address.setZipOrPostalCode("V6J5G4");
 		address.setFirstName("John");
@@ -118,7 +113,7 @@ public class JpaPersistenceSessionFilterSupportImplTest extends BasicSpringConte
 		address.setSubCountry("BC");
 		address.setCountry("CA");
 
-		CustomerAddress address2 = beanFactory.getBean(ContextIdNames.CUSTOMER_ADDRESS);
+		CustomerAddress address2 = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 		address2.setCity("St. John's");
 		address2.setZipOrPostalCode("V6J5G4");
 		address2.setFirstName("John");

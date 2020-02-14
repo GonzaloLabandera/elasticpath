@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
+import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.domain.tax.impl.TaxCategoryImpl;
@@ -58,7 +59,7 @@ public class TaxCalculationResultImplHashCodeEqualsTest {
 		obj3 = new TaxCalculationResultImpl();
 		context.checking(new Expectations() {
 			{
-				allowing(elasticpath).getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+				allowing(elasticpath).getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 				will(returnValue(new LocalizedPropertiesImpl()));
 			}
 		});

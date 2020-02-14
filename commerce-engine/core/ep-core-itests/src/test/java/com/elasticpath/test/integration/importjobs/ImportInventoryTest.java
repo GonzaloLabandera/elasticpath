@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -39,15 +38,12 @@ import com.elasticpath.test.integration.DirtiesDatabase;
 public class ImportInventoryTest extends ImportJobTestCase {
 
 	@Autowired
-	private Utility utility;
-
-	@Autowired
 	private ProductInventoryManagementService productInventoryManagementService;
 
 	@Autowired
 	private InventoryJournalDao ijDao;
 
-	private Locale locale = Locale.ENGLISH;
+	private final Locale locale = Locale.ENGLISH;
 
 	/**
 	 * Test import Inventory insert with an old InventoryJournal entry present.
@@ -59,7 +55,7 @@ public class ImportInventoryTest extends ImportJobTestCase {
 		
 		// Manually create an InventoryJournal entry and assert it exists.
 		InventoryKey inventoryKey = new InventoryKey("SKU101", scenario.getWarehouse().getUidPk());
-		InventoryJournal inventoryJournal = getBeanFactory().getBean(ContextIdNames.INVENTORY_JOURNAL);
+		InventoryJournal inventoryJournal = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
 		inventoryJournal.setAllocatedQuantityDelta(2);
 		inventoryJournal.setQuantityOnHandDelta(3);
 		inventoryJournal.setSkuCode(inventoryKey.getSkuCode());

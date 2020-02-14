@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesImageRegistry;
 import com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesMessages;
 import com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
@@ -81,8 +81,8 @@ public final class DataPointDialog extends AbstractEpDialog {
 		this.tableView = tableView;
 		this.dataPoint = dataPoint;
 
-		this.dataPointService = ServiceLocator.getService(ContextIdNames.DATA_POINT_SERVICE);
-		this.dataPointValueService = ServiceLocator.getService(ContextIdNames.DATA_POINT_VALUE_SERVICE);
+		this.dataPointService = BeanLocator.getSingletonBean(ContextIdNames.DATA_POINT_SERVICE, DataPointService.class);
+		this.dataPointValueService = BeanLocator.getSingletonBean(ContextIdNames.DATA_POINT_VALUE_SERVICE, DataPointValueService.class);
 
 		this.context = new DataBindingContext();
 		this.title = title;
@@ -98,7 +98,7 @@ public final class DataPointDialog extends AbstractEpDialog {
 	 * @return true if dialog opened successfully, otherwise false.
 	 */
 	public static boolean openCreateDialog(final Shell parentShell, final TableViewer tableView) {
-		DataPoint dataPoint = ServiceLocator.getService(ContextIdNames.DATA_POINT);
+		DataPoint dataPoint = BeanLocator.getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class);
 		dataPoint.initialize();
 		final DataPointDialog dialog = new DataPointDialog(parentShell, tableView,
 				AdminDataPoliciesMessages.get().DataPolicyEditor_DataPoints_Dialog_CreateTitle,

@@ -73,7 +73,7 @@ public class RuleParameterServiceImpl extends AbstractEpPersistenceServiceImpl i
 		if (ruleParameterUid > 0) {
 			ruleParameter = getPersistentBeanFinder().load(ContextIdNames.RULE_PARAMETER, ruleParameterUid);
 		} else {
-			ruleParameter = getBean(ContextIdNames.RULE_PARAMETER);
+			ruleParameter = getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 		}
 		return ruleParameter;
 	}
@@ -95,7 +95,7 @@ public class RuleParameterServiceImpl extends AbstractEpPersistenceServiceImpl i
 		if (ruleParameterUid > 0) {
 			ruleParameter = getPersistentBeanFinder().get(ContextIdNames.RULE_PARAMETER, ruleParameterUid);
 		} else {
-			ruleParameter = getBean(ContextIdNames.RULE_PARAMETER);
+			ruleParameter = getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 		}
 		return ruleParameter;
 	}

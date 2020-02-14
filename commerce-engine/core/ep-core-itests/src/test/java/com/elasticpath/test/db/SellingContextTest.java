@@ -49,7 +49,7 @@ public class SellingContextTest extends DbTestCase {
 	 */
 	private ConditionalExpression  createConditionalExpression(final String tagDictionaryGuid) throws InvalidConditionTreeException {
 		LogicalOperator logicalOperator = new LogicalOperator(LogicalOperatorType.AND);
-		ConditionalExpression conditionalExpression = getBeanFactory().getBean(ContextIdNames.TAG_CONDITION);
+		ConditionalExpression conditionalExpression = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 		conditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
 		conditionalExpression.setName("name_" + getIdx());
 		conditionalExpression.setDescription("" + getIdx());
@@ -59,7 +59,7 @@ public class SellingContextTest extends DbTestCase {
 
 	private SellingContext createSellingContext() throws InvalidConditionTreeException {
 
-		SellingContext sellingContext = getBeanFactory().getBean(ContextIdNames.SELLING_CONTEXT);
+		SellingContext sellingContext = getBeanFactory().getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 
 		sellingContext.setPriority(1);
 		sellingContext.setCondition("SHOPPER", createConditionalExpression("SHOPPER"));

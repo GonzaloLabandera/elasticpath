@@ -3,12 +3,18 @@
  */
 package com.elasticpath.service.catalog.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
+import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.persistence.dao.ProductDao;
 import com.elasticpath.service.catalog.SkuOptionKeyExistException;
 import com.elasticpath.service.catalog.SkuOptionService;
@@ -103,7 +109,7 @@ public class SkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		sanityCheck();
 		SkuOption skuOption = null;
 		if (skuOptionUid <= 0) {
-			skuOption = getBean(ContextIdNames.SKU_OPTION);
+			skuOption = getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 		} else {
 			skuOption = getPersistentBeanFinder().load(ContextIdNames.SKU_OPTION, skuOptionUid);
 		}
@@ -125,7 +131,7 @@ public class SkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		sanityCheck();
 		SkuOption skuOption = null;
 		if (skuOptionUid <= 0) {
-			skuOption = getBean(ContextIdNames.SKU_OPTION);
+			skuOption = getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 		} else {
 			skuOption = getPersistentBeanFinder().get(ContextIdNames.SKU_OPTION, skuOptionUid);
 		}
@@ -251,19 +257,6 @@ public class SkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	}
 
 	/**
-	 * Lists all sku option stored in the database.
-	 *
-	 * @return a list of sku option
-	 * @throws EpServiceException -
-	 *             in case of any errors
-	 */
-	@Override
-	public List<SkuOption> list() throws EpServiceException {
-		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("SKU_OPTION_SELECT_ALL_EAGER");
-	}
-
-	/**
 	 * Finds all the {@link SkuOption}s for the specified catalog UID.
 	 *
 	 * @param catalogUid the catalog UID
@@ -274,16 +267,6 @@ public class SkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	public List<SkuOption> findAllSkuOptionFromCatalog(final long catalogUid) throws EpServiceException {
 		sanityCheck();
 		return getPersistenceEngine().retrieveByNamedQuery("SKU_OPTION_SELECT_CATALOG_ALL_EAGER", catalogUid);
-	}
-
-	/**
-	 * Return a list of uids for all sku options in use.
-	 *
-	 * @return a list of uids for all sku options in use
-	 */
-	@Override
-	public List<Long> getSkuOptionInUseUidList() {
-		return getPersistenceEngine().retrieveByNamedQuery("SKU_OPTION_IN_USE_PRODUCT_TYPE");
 	}
 
 	/**
@@ -309,16 +292,6 @@ public class SkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	@Override
 	public boolean isSkuOptionValueInUse(final long skuOptionValueUid) throws EpServiceException {
 		return !getPersistenceEngine().retrieveByNamedQuery("SKU_OPTIONVALUE_IN_USE_PRODUCT_TYPE_SINGLE", skuOptionValueUid).isEmpty();
-	}
-
-	/**
-	 * Return a list of uids for all sku options value in use.
-	 *
-	 * @return a list of uids for all sku options value in use
-	 */
-	@Override
-	public List<Long> getSkuOptionValueInUseUidList() {
-		return getPersistenceEngine().retrieveByNamedQuery("SKU_OPTIONVALUE_IN_USE_PRODUCT_TYPE");
 	}
 
 	/**
@@ -444,5 +417,32 @@ public class SkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	@Override
 	public void remove(final SkuOptionValue skuOptionValue) throws EpServiceException {
 		getPersistenceEngine().delete(skuOptionValue);
+	}
+
+	@Override
+	public Set<SkuOption> findByProductTypeUid(final Long productTypeUid) {
+		List<SkuOption> dbSkuOptions = getPersistenceEngine().retrieveByNamedQuery("SKU_OPTIONS_BY_PRODUCT_TYPE_UID", FlushMode.COMMIT,
+			true, new Object[]{productTypeUid});
+
+		if (!dbSkuOptions.isEmpty() && dbSkuOptions.get(0) == null) {
+			return new HashSet<>();
+		}
+		return new HashSet<>(dbSkuOptions);
+	}
+
+	@Override
+	public SkuOptionValue findOptionValueByOptionAndValueKeys(final String optionKey, final String optionValueKey) throws EpServiceException {
+		List<SkuOptionValue> result = getPersistenceEngine().retrieveByNamedQuery("SKU_OPTIONVALUE_FIND_BY_OPTION_AND_VALUE_KEYS",
+			optionKey, optionValueKey);
+
+		return (SkuOptionValue) CollectionUtils.find(result, Objects::nonNull);
+	}
+
+	@Override
+	public SkuOptionValue findOptionValueByOptionKeyAndValueUid(final String optionKey, final Long skuOptionValueUid) {
+		List<SkuOptionValue> result = getPersistenceEngine().retrieveByNamedQuery("SKU_OPTIONVALUE_FIND_BY_UID", FlushMode.COMMIT,
+			true, new Object[]{skuOptionValueUid});
+
+		return (SkuOptionValue) CollectionUtils.find(result, Objects::nonNull);
 	}
 }

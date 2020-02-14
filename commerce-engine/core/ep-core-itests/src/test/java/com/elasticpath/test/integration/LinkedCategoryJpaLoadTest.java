@@ -48,7 +48,7 @@ public class LinkedCategoryJpaLoadTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testRetrieveProductWithCategories() {
-		ProductLookup productLookup = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOOKUP);
+		ProductLookup productLookup = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 		Category masterCategory = setupTestAndRetrieveCategory(productLookup,
 				"productIndex",
 				"categoryIndex",
@@ -76,7 +76,7 @@ public class LinkedCategoryJpaLoadTest extends DbTestCase {
 		Category secondLevelCategory = persisterFactory.getCatalogTestPersister().persistCategory(
 				"secondLevel", masterCatalog, categoryType, "secondLevelName", "US");
 		secondLevelCategory.setParent(masterCategory);
-		CategoryService categoryService = getBeanFactory().getBean("categoryService");
+		CategoryService categoryService = getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 		categoryService.saveOrUpdate(secondLevelCategory);
 		//Create a product in the master category's subcategory
 		List<Product> products = persisterFactory.getCatalogTestPersister().persistDefaultShippableProducts(
@@ -113,7 +113,7 @@ public class LinkedCategoryJpaLoadTest extends DbTestCase {
 		Category secondLevelCategory = persisterFactory.getCatalogTestPersister().persistCategory(
 				"secondLevel", masterCatalog, categoryType, "secondLevelName", "US");
 		secondLevelCategory.setParent(masterCategory);
-		CategoryService categoryService = getBeanFactory().getBean("categoryService");
+		CategoryService categoryService = getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 		categoryService.saveOrUpdate(secondLevelCategory);
 		//Create a product in the master category's subcategory
 		List<Product> products = persisterFactory.getCatalogTestPersister().persistDefaultShippableProducts(
@@ -124,12 +124,13 @@ public class LinkedCategoryJpaLoadTest extends DbTestCase {
 		categoryService.addLinkedCategory(masterCategory.getUidPk(), -1, virtualCatalog.getUidPk());
 		
 		final String nonMatchingExceptionString = null;
-		PromotionRuleDelegate promotionRuleDelegate = getBeanFactory().getBean(ContextIdNames.PROMOTION_RULE_DELEGATE);
+		PromotionRuleDelegate promotionRuleDelegate = getBeanFactory().getSingletonBean(ContextIdNames.PROMOTION_RULE_DELEGATE,
+				PromotionRuleDelegate.class);
 		assertTrue(promotionRuleDelegate.catalogProductInCategory(products.get(1), true, masterCategory.getCompoundGuid(),
 				nonMatchingExceptionString));
 	}
 
 	public CategoryLookup getCategoryLookup() {
-		return getBeanFactory().getBean(ContextIdNames.CATEGORY_LOOKUP);
+		return getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 	}
 }

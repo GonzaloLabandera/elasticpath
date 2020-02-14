@@ -3,8 +3,8 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.order;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.event.EventOriginator;
@@ -29,8 +29,7 @@ public final class OrderEventCmHelper {
 	 * @return the order event helper to log the order events.
 	 */
 	public static OrderEventHelper getOrderEventHelper() {
-		return (OrderEventHelper) ServiceLocator.getService(ContextIdNames.ORDER_EVENT_HELPER);
-
+		return (OrderEventHelper) BeanLocator.getSingletonBean(ContextIdNames.ORDER_EVENT_HELPER, Object.class);
 	}
 	
 	/**
@@ -38,10 +37,9 @@ public final class OrderEventCmHelper {
 	 * @param order the given order
 	 */
 	public static void initForOrderAuditing(final Order order) {
-		EventOriginatorHelper eventOriginatorHelper = ServiceLocator.getService(
-				ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper eventOriginatorHelper = BeanLocator
+				.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 		order.setModifiedBy(eventOriginatorHelper.getCmUserOriginator(LoginManager.getCmUser()));
-
 	}
 	
 	/**

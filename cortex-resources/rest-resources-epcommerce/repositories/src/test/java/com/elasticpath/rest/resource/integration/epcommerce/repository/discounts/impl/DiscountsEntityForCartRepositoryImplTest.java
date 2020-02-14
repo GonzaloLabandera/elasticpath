@@ -64,7 +64,7 @@ public class DiscountsEntityForCartRepositoryImplTest {
 
 	@Before
 	public void initialize() {
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle())
+		when(customerSessionRepository.findOrCreateCustomerSession())
 				.thenReturn(Single.just(customerSession));
 	}
 
@@ -73,10 +73,10 @@ public class DiscountsEntityForCartRepositoryImplTest {
 
 		ShoppingCart shoppingCart = createShoppingCart();
 
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(SCOPE, CART_ID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
+		when(cartOrderRepository.getEnrichedShoppingCart(SCOPE, CART_ID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.just(shoppingCart));
 
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
+		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
 				.thenReturn(Single.just(shoppingCartPricingSnapshot));
 
 		when(shoppingCartPricingSnapshot.getSubtotalDiscountMoney()).thenReturn(MONEY_TEN);
@@ -95,7 +95,7 @@ public class DiscountsEntityForCartRepositoryImplTest {
 	@Test
 	public void findOneProducesErrorWhenNoValidCartExists() {
 
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(INVALID, INVALID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
+		when(cartOrderRepository.getEnrichedShoppingCart(INVALID, INVALID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
 
 		discountRepository.findOne(createDiscountForCartIdentifier(INVALID, INVALID))

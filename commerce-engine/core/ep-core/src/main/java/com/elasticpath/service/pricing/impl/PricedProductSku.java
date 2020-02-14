@@ -94,7 +94,7 @@ public class PricedProductSku extends AbstractPricedEntity<ProductSku> {
 		if (schedulePrice == null) {
 			return null;
 		}
-		PricingScheme pricingScheme = getBeanFactory().getBean(ContextIdNames.PRICING_SCHEME);
+		PricingScheme pricingScheme = getBeanFactory().getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class);
 		pricingScheme.setPriceForSchedule(getPriceSchedule(), schedulePrice);
 		Price price;
 		if (getPaymentSchedule() == null) {

@@ -52,7 +52,8 @@ public class CustomerRegistrationServiceImpl implements CustomerRegistrationServ
 
 	@Override
 	public CustomerRegistrationResult registerAnonymousCustomer(final Customer customer) {
-		final CustomerRegistrationResult result = getBeanFactory().getBean(ContextIdNames.CUSTOMER_REGISTRATION_RESULT);
+		final CustomerRegistrationResult result = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER_REGISTRATION_RESULT,
+				CustomerRegistrationResult.class);
 		customer.setAnonymous(false);
 
 		final Set<ConstraintViolation<Customer>> violations = getValidator().validate(customer, PasswordChange.class);
@@ -82,7 +83,8 @@ public class CustomerRegistrationServiceImpl implements CustomerRegistrationServ
 			throw new EpValidationException("Customer validation failure.", structuredErrorMessageList);
 		}
 
-		final CustomerRegistrationResult result = getBeanFactory().getBean(ContextIdNames.CUSTOMER_REGISTRATION_RESULT);
+		final CustomerRegistrationResult result = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER_REGISTRATION_RESULT,
+				CustomerRegistrationResult.class);
 		final Customer updatedCustomer = getCustomerService().update(customer);
 		result.setRegisteredCustomer(updatedCustomer);
 

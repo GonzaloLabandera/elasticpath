@@ -37,6 +37,7 @@ import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.shoppingcart.PriceCalculator;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.StandardMoneyFormatter;
+import com.elasticpath.sellingchannel.ShoppingItemRecurringPriceAssembler;
 import com.elasticpath.sellingchannel.impl.ShoppingItemRecurringPriceAssemblerImpl;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.catalog.SkuOptionService;
@@ -97,7 +98,8 @@ public class OrderSkuImplTest {
 		paymentScheduleHelper.setSkuOptionService(skuOptionService);
 
 		recurringPriceAssembler.setPaymentScheduleHelper(paymentScheduleHelper);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER, recurringPriceAssembler);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER,
+				ShoppingItemRecurringPriceAssembler.class, recurringPriceAssembler);
 	}
 
 	@After

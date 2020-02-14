@@ -26,6 +26,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.misc.RandomGuid;
+import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.pricing.BaseAmount;
 import com.elasticpath.domain.pricing.BaseAmountObjectType;
 import com.elasticpath.domain.pricing.impl.BaseAmountImpl;
@@ -68,17 +69,7 @@ public class BaseAmountDtoAssemblerTest {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 
-		final String randomGuid = "RANDOMGUID";
-
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID,
-				new RandomGuid() {
-					private static final long serialVersionUID = -7638043786071701838L;
-
-					@Override
-					public String toString() {
-						return randomGuid;
-					}
-				});
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		product = context.mock(Product.class);
 		bundle = context.mock(ProductBundle.class);

@@ -6,10 +6,10 @@ package com.elasticpath.domain.order.impl;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -61,6 +61,7 @@ import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.PostLoadRecalculate;
 import com.elasticpath.domain.RecalculableObject;
 import com.elasticpath.domain.impl.AbstractListenableValueObjectImpl;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
@@ -468,7 +469,10 @@ public abstract class AbstractOrderShipmentImpl extends AbstractListenableValueO
 	 * @param total the total
 	 */
 	public void setTotal(final BigDecimal total) {
-		BigDecimal oldTotal = this.total;
+		BigDecimal oldTotal = BigDecimal.ZERO.setScale(DECIMAL_SCALE, RoundingMode.UNNECESSARY);
+
+		oldTotal = (this.total == null) ? null : oldTotal.add(this.total);
+
 		this.total = total;
 		firePropertyChange("total", oldTotal, total); //$NON-NLS-1$
 	}
@@ -485,7 +489,10 @@ public abstract class AbstractOrderShipmentImpl extends AbstractListenableValueO
 	 * @param subtotal the subtotal
 	 */
 	public void setSubtotal(final BigDecimal subtotal) {
-		BigDecimal oldSubtotal = this.subtotal;
+		BigDecimal oldSubtotal = BigDecimal.ZERO.setScale(DECIMAL_SCALE, RoundingMode.UNNECESSARY);
+
+		oldSubtotal = (this.subtotal == null) ? null : oldSubtotal.add(this.subtotal);
+
 		this.subtotal = subtotal;
 		firePropertyChange("subtotal", oldSubtotal, subtotal); //$NON-NLS-1$
 	}
@@ -676,7 +683,7 @@ public abstract class AbstractOrderShipmentImpl extends AbstractListenableValueO
 			if (correspondingTaxValue.isPresent()) {
 				correspondingTaxValue.get().setTaxValue(taxResult.getTaxValue(taxCategory).getAmount());
 			} else {
-				OrderTaxValue orderTaxValue = getBean(ContextIdNames.ORDER_TAX_VALUE);
+				OrderTaxValue orderTaxValue = getPrototypeBean(ContextIdNames.ORDER_TAX_VALUE, OrderTaxValue.class);
 				orderTaxValue.setTaxCategoryName(taxCategory.getName());
 				orderTaxValue.setTaxCategoryDisplayName(taxCategory.getDisplayName(getStore(getOrder()).getDefaultLocale()));
 				orderTaxValue.setTaxValue(taxResult.getTaxValue(taxCategory).getAmount());
@@ -686,11 +693,7 @@ public abstract class AbstractOrderShipmentImpl extends AbstractListenableValueO
 		}
 
 		// Remove any old tax values that don't apply anymore
-		for (Iterator<OrderTaxValue> taxValueIter = shipmentTaxes.iterator(); taxValueIter.hasNext();) {
-			if (!taxCategoryNames.contains(taxValueIter.next().getTaxCategoryName())) {
-				taxValueIter.remove();
-			}
-		}
+		shipmentTaxes.removeIf(orderTaxValue -> !taxCategoryNames.contains(orderTaxValue.getTaxCategoryName()));
 	}
 
 	/**
@@ -706,7 +709,7 @@ public abstract class AbstractOrderShipmentImpl extends AbstractListenableValueO
 			return order.getStore();
 		}
 
-		StoreService storeService = getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		return storeService.findStoreWithCode(order.getStoreCode());
 	}
 
@@ -807,7 +810,7 @@ public abstract class AbstractOrderShipmentImpl extends AbstractListenableValueO
 	}
 	
 	private TaxDocumentId createTaxDocumentId() {
-		return StringTaxDocumentId.fromString(getShipmentNumber() + "." + getBean(ContextIdNames.RANDOM_GUID));
+		return StringTaxDocumentId.fromString(getShipmentNumber() + "." + getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class));
 	}
 	
 	@Override

@@ -58,6 +58,10 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-catalog-connectivity</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-caching</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

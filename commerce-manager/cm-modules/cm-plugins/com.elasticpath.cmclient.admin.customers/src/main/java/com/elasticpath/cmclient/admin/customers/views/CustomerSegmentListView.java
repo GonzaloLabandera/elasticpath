@@ -30,7 +30,7 @@ import com.elasticpath.cmclient.admin.customers.actions.DeleteCustomerSegmentAct
 import com.elasticpath.cmclient.admin.customers.actions.EditCustomerSegmentAction;
 import com.elasticpath.cmclient.admin.customers.event.CustomerSegmentEventListener;
 import com.elasticpath.cmclient.admin.customers.event.CustomerSegmentEventService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
@@ -71,7 +71,7 @@ public class CustomerSegmentListView extends AbstractListView implements Custome
 	 */
 	public CustomerSegmentListView() {
 		super(false, CUSTOMER_SEGMENT_LIST_TABLE);
-		customerGroupService = ServiceLocator.getService(ContextIdNames.CUSTOMER_GROUP_SERVICE);
+		customerGroupService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_GROUP_SERVICE, CustomerGroupService.class);
 		CustomerSegmentEventService.getInstance().registerCustomerSegmentEventListener(this);
 	}
 

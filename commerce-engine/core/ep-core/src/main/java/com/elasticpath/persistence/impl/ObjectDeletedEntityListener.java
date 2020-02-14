@@ -13,6 +13,7 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.search.ObjectDeleted;
 import com.elasticpath.domain.search.impl.ObjectDeletedImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.service.misc.TimeService;
 
 /**
@@ -37,7 +38,7 @@ public class ObjectDeletedEntityListener extends AbstractLifecycleListener {
 	}
 	
 	private PersistenceEngine getPersistenceEngine() {
-		return beanFactory.getBean(ContextIdNames.PERSISTENCE_ENGINE);
+		return beanFactory.getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, JpaPersistenceEngine.class);
 	}
 
 	/**
@@ -47,7 +48,7 @@ public class ObjectDeletedEntityListener extends AbstractLifecycleListener {
 	 */
 	protected TimeService getTimeService() {
 		if (timeService == null) {
-			timeService = beanFactory.getBean(ContextIdNames.TIME_SERVICE);
+			timeService = beanFactory.getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		}
 		return timeService;
 	}

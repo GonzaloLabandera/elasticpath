@@ -14,7 +14,7 @@ import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.domain.changeset.ChangeSetObjectStatus;
 import com.elasticpath.service.changeset.ChangeSetManagementService;
 import com.elasticpath.service.changeset.ChangeSetService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 
 /**
  * An abstract UI control state policy which checks whether an object is a member of a changeset.
@@ -78,7 +78,7 @@ public class ChangesetMemberStatePolicyImpl extends AbstractChangeSetExcludeDete
 	 */
 	protected ChangeSetService getChangeSetService() {
 		if (changesetService == null) {
-			changesetService =  ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+			changesetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 		}
 		return changesetService;
 	}
@@ -90,7 +90,7 @@ public class ChangesetMemberStatePolicyImpl extends AbstractChangeSetExcludeDete
 	 */
 	protected ChangeSetManagementService getChangeSetManagementService() {
 		if (changesetManagementService == null) {
-			changesetManagementService =  ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+			changesetManagementService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 		}
 		return changesetManagementService;
 	}

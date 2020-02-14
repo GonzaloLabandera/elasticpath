@@ -4,16 +4,20 @@
 
 package com.elasticpath.persistence.openjpa.executors;
 
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.createDynamicJPQLQuery;
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.getResults;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.openjpa.persistence.OpenJPAPersistence;
+import org.apache.openjpa.persistence.OpenJPAQuery;
 
 import com.elasticpath.persistence.api.Persistable;
 
@@ -127,21 +131,25 @@ public class DynamicQueryExecutor<T extends Persistable> extends AbstractQueryEx
 	@Override
 	public List<T> executeMultiResultQuery(final EntityManager entityManager) {
 
-		Query query = entityManager.createQuery(queryString);
+		OpenJPAQuery query = createDynamicJPQLQuery(entityManager, queryString);
 
-		if (StringUtils.isNotBlank(listParameterName)
-			&& CollectionUtils.isNotEmpty(values)) {
-
-			String listValues = getQueryUtil().getInParameterValues(values);
-			if (StringUtils.isEmpty(listValues)) {
-				listValues = "''";
-			}
-
-			query = getQueryUtil().insertListIntoQuery(OpenJPAPersistence.cast(query), listParameterName, listValues);
+		if (ArrayUtils.isNotEmpty(arrayParameters)) {
+			query.setParameters(arrayParameters);
 		}
 
-		getQueryUtil().setQueryParameters(query, arrayParameters);
-		getQueryUtil().setQueryParameters(query, mapParameters);
+		if (MapUtils.isNotEmpty(mapParameters)) {
+			query.setParameters(mapParameters);
+		}
+
+		if (StringUtils.isNotBlank(listParameterName)
+			&& queryString.contains(":" + listParameterName)) {
+
+			if (CollectionUtils.isEmpty(values)) {
+				query.setParameter(listParameterName, null);
+			} else {
+				query.setParameter(listParameterName, values);
+			}
+		}
 
 		if (firstResult != null) {
 			query.setFirstResult(firstResult);
@@ -152,6 +160,6 @@ public class DynamicQueryExecutor<T extends Persistable> extends AbstractQueryEx
 			query.setHint("openjpa.hint.OracleSelectHint", "/*+ first_rows(" + maxResults + ") */");
 		}
 
-		return getQueryUtil().getResults(query);
+		return getResults(query);
 	}
 }

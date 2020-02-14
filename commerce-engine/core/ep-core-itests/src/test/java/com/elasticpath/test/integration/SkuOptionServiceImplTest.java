@@ -218,13 +218,13 @@ public class SkuOptionServiceImplTest extends DbTestCase {
 		final int numberOfNewValues = 5;
 		
 		// Create new catalog
-		Catalog catalog = getBeanFactory().getBean(ContextIdNames.CATALOG);
+		Catalog catalog = getBeanFactory().getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
 		populateCatalog(catalog);
 		
 		catalogService.saveOrUpdate(catalog);
 		
 		// Create a new SKU Option
-		SkuOption skuOption = getBeanFactory().getBean(ContextIdNames.SKU_OPTION);
+		SkuOption skuOption = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 		populateSkuOption(catalog, skuOption);
 		
 		for (int i = 0; i < number; i++) {
@@ -240,7 +240,7 @@ public class SkuOptionServiceImplTest extends DbTestCase {
 		
 		// Create a product type
 		skuOption = optionService.findByKey(COLOR);
-		ProductType productType = getBeanFactory().getBean(ContextIdNames.PRODUCT_TYPE);
+		ProductType productType = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 		populateProductType(catalog, skuOption, productType);
 		productTypeService.add(productType);
 
@@ -291,7 +291,7 @@ public class SkuOptionServiceImplTest extends DbTestCase {
 	}
 
 	private SkuOptionValue createSkuOptionValue() {
-		return getBeanFactory().getBean(ContextIdNames.SKU_OPTION_VALUE);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE, SkuOptionValue.class);
 	}
 
 	private void assertNoDuplicateRows(final int number) {
@@ -351,7 +351,7 @@ public class SkuOptionServiceImplTest extends DbTestCase {
 		Catalog catalog = scenario.getCatalog();
 		
 		// Create a new SKU Option
-		SkuOption skuOption = getBeanFactory().getBean(ContextIdNames.SKU_OPTION);
+		SkuOption skuOption = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 		// create a Color sku option
 		populateSkuOption(catalog, skuOption);
 

@@ -94,8 +94,9 @@
 			<artifactId>groovy-all</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
+			<groupId>${epdb.maven.groupId}</groupId>
+			<artifactId>${epdb.maven.artifactId}</artifactId>
+			<version>${epdb.maven.version}</version>
 		</dependency>
 	</dependencies>
 

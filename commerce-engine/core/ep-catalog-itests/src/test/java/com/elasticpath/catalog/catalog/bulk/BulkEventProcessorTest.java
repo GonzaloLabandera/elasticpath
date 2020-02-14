@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.elasticpath.catalog.bulk.BulkEventProcessor;
 import com.elasticpath.catalog.entity.AvailabilityRules;
@@ -76,6 +77,8 @@ import com.elasticpath.test.jta.XaTransactionTestSupport;
  * Test of {@link BulkEventProcessor}.
  */
 @JmsBrokerConfigurator(url = JMS_BROKER_URL)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesDatabase
 public class BulkEventProcessorTest extends XaTransactionTestSupport {
 
 	public static final String JMS_BROKER_URL = "tcp://localhost:61623";
@@ -144,7 +147,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldNotContainUpdatedBrandDisplayNameWhenOfferCodeIsNotInBrandBulkUpdateEvent() {
 		final int expectedNumberOfCatalogEvents = 2;
 
@@ -180,7 +182,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldContainOnlyUpdatedBrandDisplayNameWhenOfferCodeIsInBrandBulkUpdateEvent() {
 		final int expectedNumberOfCatalogEvents = 3;
 
@@ -216,7 +217,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldNotContainUpdatedSkuOptionDisplayNameWhenOfferCodeIsNotInSkuOptionBulkUpdateEvent() {
 		final Option option = createOptionWithTranslations(OPTION, STORE);
 		catalogService.saveOrUpdate(option);
@@ -242,7 +242,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldContainOnlyUpdatedSkuOptionDisplayNameWhenOfferCodeIsInSkuOptionBulkUpdateEvent() {
 		final Option option = createOptionWithTranslations(OPTION, STORE);
 		catalogService.saveOrUpdate(option);
@@ -268,7 +267,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldNotContainUpdatedItemTranslationOptionDisplayNameWhenOfferCodeIsNotInSkuOptionBulkUpdateEvent() {
 		final Option option = createOptionWithTranslations(OPTION, STORE);
 		catalogService.saveOrUpdate(option);
@@ -304,7 +302,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldContainOnlyUpdatedItemTranslationOptionDisplayNameWhenOfferCodeIsInOptionBulkUpdateEvent() {
 		final Option option = createOptionWithTranslations(OPTION, STORE);
 		catalogService.saveOrUpdate(option);
@@ -340,7 +337,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldNotContainUpdatedItemTranslationOptionDisplayValueWhenOfferCodeIsNotInSkuOptionBulkUpdateEvent() {
 		final Option option = createOptionWithTranslations(OPTION, STORE);
 		catalogService.saveOrUpdate(option);
@@ -376,7 +372,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldContainOnlyUpdatedItemTranslationOptionDisplayValueWhenOfferCodeIsInOptionBulkUpdateEvent() {
 		final Option option = createOptionWithTranslations(OPTION, STORE);
 		catalogService.saveOrUpdate(option);
@@ -413,7 +408,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldNotContainUpdatedAttributeDisplayNameWhenOfferCodeIsNotInAttributeBulkUpdateEvent() {
 		final Attribute attribute = createAttributeWithTranslations(ATTRIBUTE_CODE, STORE);
 		catalogService.saveOrUpdate(attribute);
@@ -439,7 +433,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldContainOnlyUpdatedAttributeDisplayNameWhenOfferCodeIsInAttributeBulkUpdateEvent() {
 		final Attribute attribute = createAttributeWithTranslations(ATTRIBUTE_CODE, STORE);
 		catalogService.saveOrUpdate(attribute);
@@ -465,7 +458,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldNotContainUpdatedItemTranslationAttributeDisplayNameWhenOfferCodeIsNotInSkuAttributeBulkUpdateEvent() {
 		final Attribute attribute = createAttributeWithTranslations(ATTRIBUTE_CODE, STORE);
 		catalogService.saveOrUpdate(attribute);
@@ -503,7 +495,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void offerTranslationsShouldContainOnlyUpdatedItemTranslationAttributeDisplayNameWhenOfferCodeIsInSkuAttributeBulkUpdateEvent() {
 		final Attribute attribute = createAttributeWithTranslations(ATTRIBUTE_CODE, STORE);
 		catalogService.saveOrUpdate(attribute);
@@ -541,7 +532,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void categoryTranslationsShouldNotContainUpdatedAttributeDisplayNameWhenCategoryCodeIsNotInAttributeBulkUpdateEvent() {
 		final Attribute attribute = createAttributeWithTranslations(ATTRIBUTE_CODE, STORE);
 		catalogService.saveOrUpdate(attribute);
@@ -569,7 +559,6 @@ public class BulkEventProcessorTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void categoryTranslationsShouldContainOnlyUpdatedAttributeDisplayNameWhenCategoryCodeIsInAttributeBulkUpdateEvent() {
 		final Attribute attribute = createAttributeWithTranslations(ATTRIBUTE_CODE, STORE);
 		catalogService.saveOrUpdate(attribute);

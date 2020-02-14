@@ -49,14 +49,9 @@ public class StoreRepositoryImpl implements StoreRepository {
 	}
 
 	@Override
-	public ExecutionResult<Boolean> isStoreCodeEnabled(final String storeCode) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				Store store = Assign.ifSuccessful(findStore(storeCode));
-				Boolean enabled = store.isEnabled() && StoreState.OPEN.equals(store.getStoreState());
-				return ExecutionResultFactory.createReadOK(enabled);
-			}
-		}.execute();
+	public Single<Boolean> isStoreCodeEnabled(final String storeCode) {
+		return findStoreAsSingle(storeCode)
+				.map(store -> store.isEnabled() && StoreState.OPEN.equals(store.getStoreState()));
 	}
 
 	@Override

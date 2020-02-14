@@ -11,8 +11,8 @@ import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.admin.taxes.TaxesMessages;
 import com.elasticpath.cmclient.admin.taxes.views.TaxJurisdictionsListView;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.misc.Geography;
 import com.elasticpath.domain.tax.TaxJurisdiction;
@@ -47,10 +47,10 @@ public class DeleteTaxJurisdictionAction extends Action {
 
 		TaxJurisdiction selectedJurisdiction = listView.getSelectedTaxJurisdiction();
 
-		TaxJurisdictionService jurisdictionService = ServiceLocator.getService(
-				ContextIdNames.TAX_JURISDICTION_SERVICE);
+		TaxJurisdictionService jurisdictionService = BeanLocator
+				.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
 
-		Geography geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
+		Geography geography = BeanLocator.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 		String countryName = geography.getCountryDisplayName(selectedJurisdiction.getRegionCode(), CorePlugin.getDefault().getDefaultLocale());
 
 		if (jurisdictionService.getTaxJurisdictionsInUse().contains(selectedJurisdiction.getUidPk())) {

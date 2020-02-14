@@ -21,7 +21,7 @@ public class CustomerConsentDtoAssembler extends AbstractDtoAssembler<CustomerCo
 
 	@Override
 	public CustomerConsent getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.CUSTOMER_CONSENT);
+		return beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT, CustomerConsent.class);
 	}
 
 	@Override

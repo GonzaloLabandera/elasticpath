@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2007
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.cmclient.fulfillment;
 
@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Locale;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.nls.BaseMessages;
 import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -16,9 +16,9 @@ import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.MoneyFormatter;
-import com.elasticpath.plugin.payment.PaymentType;
-import com.elasticpath.plugin.payment.exceptions.InsufficientFundException;
-import com.elasticpath.plugin.payment.exceptions.PaymentProcessingException;
+import com.elasticpath.plugin.payment.provider.dto.TransactionType;
+import com.elasticpath.provider.payment.service.PaymentsException;
+import com.elasticpath.provider.payment.service.PaymentsExceptionMessageId;
 
 /**
  * Messages class for the Fulfillment plugin.
@@ -130,10 +130,14 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String PaymentStatus_Failed;
 
+	public String PaymentStatus_Skipped;
+
+	public String PaymentStatus_Not_Processed;
+
 	public String PaymentType_CreditCard;
 
 	public String PaymentType_Token;
-	
+
 	public String PaymentType_PayPalExpress;
 
 	public String PaymentType_GiftCertificate;
@@ -141,6 +145,20 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String PaymentType_Exchange;
 
 	public String PaymentType_HostedPage;
+
+	public String TransactionType_Reserve;
+
+	public String TransactionType_Cancel_Reserve;
+
+	public String TransactionType_Modify_Reserve;
+
+	public String TransactionType_Charge;
+
+	public String TransactionType_Credit;
+
+	public String TransactionType_Manual_Credit;
+
+	public String TransactionType_Reverse_Charge;
 
 	// ----------------------------------------------------
 	// Customer Editors package
@@ -412,6 +430,8 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String OrderEditor_CreateRefund_EditorDirtyMessage;
 
+	public String OrderEditor_CreateRefund_AvailableRefundAmount;
+
 	public String OrderEditor_EditOrderErrorTitle;
 
 	public String OrderEditor_EditOrderIsLockedMessage;
@@ -667,23 +687,32 @@ public final class FulfillmentMessages extends BaseMessages {
 	// -- payment history section
 	public String OrderPaymentHistorySection_TableTitle_DateTime;
 
-	public String OrderPaymentHistorySection_TableTitle_ShipmentId;
+	public String OrderPaymentHistorySection_TableTitle_Method;
 
-	public String OrderPaymentHistorySection_TableTitle_PaymentType;
+	public String OrderPaymentHistorySection_TableTitle_Type;
 
-	public String OrderPaymentHistorySection_TableTitle_TransactionType;
-
-	public String OrderPaymentHistorySection_TableTitle_PaymentDetails;
-
-	public String OrderPaymentHistorySection_TableTitle_Amount;
+	public String OrderPaymentHistorySection_TableTitle_Details;
 
 	public String OrderPaymentHistorySection_TableTitle_Status;
 
-	public String OrderPaymentHistorySection_TableTitle_TransactionID;
+	public String OrderPaymentHistorySection_TableTitle_Amount;
+
+	public String OrderPaymentHistorySection_TableTitle_IsOriginalPI;
+
+	public String OrderPaymentHistorySection_ValueLabel_IsOriginal_PI_Yes;
+
+	public String OrderPaymentHistorySection_ValueLabel_IsOriginal_PI_No;
 
 	public String OrderPaymentHistorySection_ElectronicShipmentId;
 
 	public String OrderPaymentHistorySection_PaymentTokenDetailsPlaceholder;
+
+	public String OrderPaymentHistorySection_ViewPaymentDetailsButton;
+
+	public String OrderPaymentsHistorySection_ViewPaymentDetails_WindowTitle;
+
+	public String OrderPaymentsHistorySection_ViewPaymentDetails_AdditionalDataLabel;
+
 	// ----------------------------------------------------
 	// Order returns and exchanges
 	// ----------------------------------------------------
@@ -953,6 +982,10 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ReturnWizard_ProceedError_Msg;
 
+	public String ReturnWizard_Refund_Button;
+
+	public String ReturnWizard_Next_Button;
+
 	// ----------------------------------------------------
 	// Exchange Wizard
 	// ----------------------------------------------------
@@ -979,9 +1012,11 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ExchangeWizard_ExchangeSummary_Section;
 
+	public String ExchangeWizard_OriginalOrder_Section;
+
 	public String ExchangeWizard_RefundOptions_Section;
 
-	public String ExchangeWizard_AdditionalAuthorizationOptions_Section;
+	public String ExchangeWizard_ReserveOptions_Section;
 
 	public String ExchangeWizard_Confirmation_Section;
 
@@ -1027,7 +1062,7 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ExchangeWizard_TotalPriceOfItemsToBeOrdered_Label;
 
-	public String ExchangeWizard_RefundAmount_Label;
+	public String ExchangeWizard_ReservePaymentForExchangedOrder_Label;
 
 	public String ExchangeWizard_AdditionalAuthorizationAmmount_Label;
 
@@ -1035,9 +1070,17 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ExchangeWizard_NewExchangeCreated_Label;
 
+	public String ExchangeWizard_CancelExchangeCreated_Label;
+
 	public String ExchangeWizard_Exchange_Completed_Label;
 
 	public String ExchangeWizard_NewOrderCreated_Label;
+
+	public String ExchangeWizard_NewOrderCreatedCancelled_Label;
+
+	public String ExchangeWizard_RefundResultOriginalOrder_Label;
+
+	public String ExchangeWizard_RefundResultExchangeOrder_Label;
 
 	public String ExchangeWizard_RemoveLineItemConfirmTitle;
 
@@ -1047,11 +1090,13 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ExchangeWizard_ItemsUnavailableText;
 
-	public String ExchangeWizard_NoSkusToExchnage_Message;
+	public String ExchangeWizard_NoSkusToExchange_Message;
 
 	public String ExchangeWizard_MethodShouldBeSelected_Message;
 
 	public String ExchangeWizard_AddressShouldBeSelected_Message;
+
+	public String ExchangeWizard_PaymentSourceShouldBeSelected_Message;
 
 	public String ExchangeWizard_CardError_Title;
 
@@ -1060,6 +1105,16 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String ExchangeWizard_InsufficientInventory_Message;
 
 	public String ExchangeWizard_TooBigDiscount_Message;
+
+	public String ExchangeWizard_Refund_Button;
+
+	public String ExchangeWizard_Next_Button;
+
+	public String ExchangeWizard_Back_Button;
+
+	public String ExchangeWizard_Authorize_Button;
+
+	public String ExchangeWizard_Done_Button;
 
 	public String Exchange_Pending_Payment_Details;
 
@@ -1078,11 +1133,19 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String RefundWizard_Title;
 
-	public String RefundWizard_Page_Title;
-
 	public String RefundWizard_CardInfoPage_Message;
 
+	public String RefundWizard_PaymentSource;
+
 	public String RefundWizard_OriginalPaymentSource;
+
+	public String RefundOptionsComposite_OriginalPaymentSourceBlocked_Label;
+
+	public String RefundWizard_AlternatePaymentSource;
+
+	public String RefundWizard_SelectAlternatePaymentSource;
+
+	public String RefundWizard_ManualRefund;
 
 	public String RefundWizard_RefundAmount;
 
@@ -1104,13 +1167,23 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String RefundWizard_Confirmation_Section;
 
+	public String RefundWizard_PaymentSource_ColumnTitle;
+
+	public String RefundWizard_Authorization_ColumnTitle;
+
+	public String RefundWizard_Refund_ColumnTitle;
+
+	public String RefundWizard_Status_ColumnTitle;
+
+	public String RefundWizard_Refund_Button;
+
+	public String RefundWizard_Done_Button;
+
 	// ----------------------------------------------------
 	// Capture Wizard
 	// ----------------------------------------------------
 
 	public String CaptureWizard_Title;
-
-	public String CaptureWizard_Page_Title;
 
 	public String CaptureWizard_CardInfoPage_Message;
 
@@ -1120,23 +1193,27 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String CaptureWizard_Cancel_Message;
 
-	public String ReAuthWizard_AuthAmount;
+	public String ReAuthWizard_Authorize_Button;
 
-	public String ReAuthWizard_ShipmentNumber;
+	public String ReAuthWizard_Done_Button;
+
+	public String ReAuthWizard_PrevAuthAmount;
+
+	public String ReAuthWizard_NewAuthAmount;
 
 	public String ReAuthWizard_PaymentSource;
 
-	public String ReAuthWizard_SelectPaymentSource;
-
-	public String ReAuthWizard_Shipment_ColumnTitle;
-
-	public String ReAuthWizard_Amount_ColumnTitle;
+	public String ReAuthWizard_NewAuthorizations_TableTitle;
 
 	public String ReAuthWizard_PaymentSource_ColumnTitle;
 
-	public String ReAuthWizard_TransactionID_ColumnTitle;
+	public String ReAuthWizard_Amount_ColumnTitle;
 
-	public String ReAuthWizard_Error_ColumnTitle;
+	public String ReAuthWizard_Status_ColumnTitle;
+
+	public String ReAuthWizard_OriginalPaymentSource;
+
+	public String ReAuthWizard_Error_Reason;
 
 	public String ReAuthWizard_AdviceOnError_Note;
 
@@ -1144,29 +1221,20 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ReAuthWizard_GatewayError_Text;
 
-	public String ReAuthWizard_Failed_SectionTitle;
-
-	public String ReAuthWizard_Failed_Message;
-
 	public String ReAuthWizard_Successful_SectionTitle;
+
+	public String ReAuthWizard_Failed_SectionTitle;
 
 	public String ReAuthWizard_Successful_Message;
 
 	// ----------------------------------------------------
-	// PaymentSummary control
+	// PaymentSummaryControl
 	// ----------------------------------------------------
 
-	public String Additional_Payment_Begin;
-
-	public String Refund_Payment_Begin;
-
-	public String Manual_Refund_Payment_Begin;
-
-	public String Payment_End;
-
-	public String Manual_Payment_End;
-
-	public String Payment_Confirmation_Number;
+	public String PaymentSummaryControl_Additional_Payment;
+	public String PaymentSummaryControl_Refund_Payment;
+	public String PaymentSummaryControl_Manual_Refund_Payment;
+	public String PaymentSummaryControl_New_Authorizations;
 
 	// ----------------------------------------------------
 	// Refund Options Composite
@@ -1175,7 +1243,11 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String RefundOptionsComposite_ManualRefund_RadioButton;
 
-	public String RefundOptionsComposite_Caution_Label;
+	public String RefundOptionsComposite_CautionAuthorizeRefundAndReserve_Label;
+
+	public String RefundOptionsComposite_CautionAuthorizeRefund_Label;
+
+	public String RefundOptionsComposite_CautionRefund_Label;
 
 	public String RefundOptionsComposite_CautionHeader_Label;
 
@@ -1243,6 +1315,12 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String PaymentProcessingCommonError;
 
+	public String ErrorProcessingPayment;
+
+	public String InstrumentNotFoundError;
+
+	public String CapabilityNotSupportedError;
+
 	// ----------------------------------------------------
 	// Resend order confirmation email messages
 	// ----------------------------------------------------
@@ -1276,21 +1354,21 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String EditItemDetails_PropertyKey;
 
 	public String CustomerSegmentsPage_Title;
-	
+
 	public String CustomerSegmentsPage_FormTitle;
-	
+
 	public String CustomerSegmentsPage_GroupName;
-	
+
 	public String CustomerSegmentsPage_Add;
-	
+
 	public String CustomerSegmentsPage_Remove;
-	
+
 	public String CustomerSegmentsPageDialog_AddTitle;
-	
+
 	public String CustomerSegmentsPageDialog_AddWindowTitle;
-	
+
 	public String CustomerSegmentsPageDialog_RemoveMessage;
-	
+
 	public String CustomerSegmentsPageDialog_RemoveConfirm;
 
 	public String ShipmentSection_SubSectionStatus;
@@ -1320,6 +1398,8 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String CustomerDataPolicies_Title;
 
 	public String ShowDisabledPolicies_Label;
+
+	public String ShowSkippedPaymentEvents_Label;
 
 	public String DataPolicyName_Label;
 
@@ -1369,7 +1449,7 @@ public final class FulfillmentMessages extends BaseMessages {
 	 * @return String representation of specified money
 	 */
 	public String formatMoneyAsString(final Money money, final Locale locale) {
-		final MoneyFormatter formatter = ServiceLocator.getService(ContextIdNames.MONEY_FORMATTER);
+		final MoneyFormatter formatter = BeanLocator.getSingletonBean(ContextIdNames.MONEY_FORMATTER, MoneyFormatter.class);
 
 		return formatter.formatCurrency(money, locale);
 	}
@@ -1380,11 +1460,20 @@ public final class FulfillmentMessages extends BaseMessages {
 	 * @param error credit card exception.
 	 * @return localized displayable message for the specified credit card exception.
 	 */
-	public String getCreditCardErrorMessage(final PaymentProcessingException error) {
-		if (error instanceof InsufficientFundException) {
-			return InsufficientFundError;
+	public String getErrorMessage(final PaymentsException error) {
+		if (error != null) {
+			if (error.getMessageId() == PaymentsExceptionMessageId.PAYMENT_INSUFFICIENT_FUNDS) {
+				return InsufficientFundError;
+			}
+			if (error.getMessageId() == PaymentsExceptionMessageId.PAYMENT_METHOD_MISSING) {
+				return InstrumentNotFoundError;
+			}
+			if (error.getMessageId() == PaymentsExceptionMessageId.PAYMENT_CAPABILITY_UNSUPPORTED) {
+				return CapabilityNotSupportedError;
+			}
+			return error.getMessageId().getDefaultDebugMessage();
 		}
-			return PaymentProcessingCommonError;
+		return PaymentProcessingCommonError;
 	}
 
 	private FulfillmentMessages() {
@@ -1393,10 +1482,19 @@ public final class FulfillmentMessages extends BaseMessages {
 	/**
 	 * Initialize localized enumeration values.
 	 */
+	@Override
 	protected void instantiateEnums() {
 		putLocalizedName(OrderPaymentStatus.APPROVED, PaymentStatus_Approved);
 		putLocalizedName(OrderPaymentStatus.FAILED, PaymentStatus_Failed);
 		putLocalizedName(OrderPaymentStatus.PENDING, PaymentStatus_Pending);
+		putLocalizedName(OrderPaymentStatus.SKIPPED, PaymentStatus_Skipped);
+		putLocalizedName(TransactionType.RESERVE, TransactionType_Reserve);
+		putLocalizedName(TransactionType.CANCEL_RESERVE, TransactionType_Cancel_Reserve);
+		putLocalizedName(TransactionType.MODIFY_RESERVE, TransactionType_Modify_Reserve);
+		putLocalizedName(TransactionType.CHARGE, TransactionType_Charge);
+		putLocalizedName(TransactionType.CREDIT, TransactionType_Credit);
+		putLocalizedName(TransactionType.MANUAL_CREDIT, TransactionType_Manual_Credit);
+		putLocalizedName(TransactionType.REVERSE_CHARGE, TransactionType_Reverse_Charge);
 
 		putLocalizedName(OrderStatus.CANCELLED, OrderStatus_Canceled);
 		putLocalizedName(OrderStatus.CREATED, OrderStatus_Created);
@@ -1414,13 +1512,6 @@ public final class FulfillmentMessages extends BaseMessages {
 		putLocalizedName(OrderShipmentStatus.AWAITING_INVENTORY, ShipmentStatus_Awaiting);
 		putLocalizedName(OrderShipmentStatus.INVENTORY_ASSIGNED, ShipmentStatus_Assigned);
 		putLocalizedName(OrderShipmentStatus.FAILED_ORDER, ShipmentStatus_FailedOrder);
-
-		putLocalizedName(PaymentType.CREDITCARD_DIRECT_POST, PaymentType_CreditCard);
-		putLocalizedName(PaymentType.PAYPAL_EXPRESS, PaymentType_PayPalExpress);
-		putLocalizedName(PaymentType.GIFT_CERTIFICATE, PaymentType_GiftCertificate);
-		putLocalizedName(PaymentType.RETURN_AND_EXCHANGE, PaymentType_Exchange);
-		putLocalizedName(PaymentType.PAYMENT_TOKEN, PaymentType_Token);
-		putLocalizedName(PaymentType.HOSTED_PAGE, PaymentType_HostedPage);
 	}
 
 	/**

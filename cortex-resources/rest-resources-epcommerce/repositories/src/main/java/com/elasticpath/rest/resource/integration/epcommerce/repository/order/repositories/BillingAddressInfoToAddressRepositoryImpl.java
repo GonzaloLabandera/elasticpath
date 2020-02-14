@@ -34,7 +34,7 @@ public class BillingAddressInfoToAddressRepositoryImpl<I extends BillingaddressI
 		IdentifierPart<String> scope = orderIdentifier.getScope();
 		String orderId = orderIdentifier.getOrderId().getValue();
 
-		return cartOrderRepository.findByGuidAsSingle(scope.getValue(), orderId)
+		return cartOrderRepository.findByGuid(scope.getValue(), orderId)
 				.flatMapMaybe(cartOrder -> cartOrderRepository.getBillingAddress(cartOrder))
 				.map(address -> buildAddressIdentifier(scope, address.getGuid()))
 				.toObservable();

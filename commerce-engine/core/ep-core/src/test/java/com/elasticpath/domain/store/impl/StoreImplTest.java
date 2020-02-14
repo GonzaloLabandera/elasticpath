@@ -13,16 +13,12 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.domain.misc.SupportedCurrency;
 import com.elasticpath.domain.misc.SupportedLocale;
-import com.elasticpath.domain.payment.PaymentGateway;
-import com.elasticpath.domain.store.Store;
-import com.elasticpath.plugin.payment.PaymentGatewayType;
 
 /**
  * Tests for various methods of the StoreImpl class.
@@ -127,28 +123,5 @@ public class StoreImplTest {
 		store.setDefaultCurrency(usCurrency);
 		assertEquals(usCurrency, store.getDefaultCurrency());
 	}
-
-	/**
-	 * Ensure false result when payment type is not supported.
-	 */
-	@Test
-	public void ensureCorrectResultWhenPaymentTypeIsNotSupported() {
-		final PaymentGateway tokenPaymentGateway = context.mock(PaymentGateway.class);
-		final Set<PaymentGateway> gatewaySet = new HashSet<>();
-		gatewaySet.add(tokenPaymentGateway);
-		final Store store = new StoreImpl();
-		store.setPaymentGateways(gatewaySet);
-
-		context.checking(new Expectations() { {
-			allowing(tokenPaymentGateway).getType();
-			will(returnValue("TokenGateway"));
-			oneOf(tokenPaymentGateway).getPaymentGatewayType();
-			will(returnValue(PaymentGatewayType.CREDITCARD));
-
-		} });
-
-		assertTrue("Store should support credit cards", store.supportsPaymentGatewayType(PaymentGatewayType.CREDITCARD));
-	}
-
 
 }

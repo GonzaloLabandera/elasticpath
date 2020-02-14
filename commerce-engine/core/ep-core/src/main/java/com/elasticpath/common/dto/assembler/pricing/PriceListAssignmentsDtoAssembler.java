@@ -128,7 +128,7 @@ public class PriceListAssignmentsDtoAssembler extends AbstractDtoAssembler<Price
 
 	@Override
 	public PriceListAssignment getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRICE_LIST_ASSIGNMENT, PriceListAssignment.class);
 	}
 
 	@Override

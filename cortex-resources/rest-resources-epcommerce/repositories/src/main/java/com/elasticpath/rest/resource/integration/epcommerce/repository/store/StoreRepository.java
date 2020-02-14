@@ -35,5 +35,5 @@ public interface StoreRepository {
 	 * @param storeCode a storeCode.
 	 * @return true if store is enabled.
 	 */
-	ExecutionResult<Boolean> isStoreCodeEnabled(String storeCode);
+	Single<Boolean> isStoreCodeEnabled(String storeCode);
 }

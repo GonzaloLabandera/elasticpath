@@ -1,16 +1,16 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration.tax;
 
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.misc.PropertyBased;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderReturnStatus;
@@ -30,6 +28,7 @@ import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.order.impl.OrderReturnImpl;
+import com.elasticpath.domain.orderpaymentapi.OrderPayment;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
@@ -37,7 +36,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.service.order.ReturnAndExchangeService;
-import com.elasticpath.service.order.ReturnExchangeType;
+import com.elasticpath.service.order.ReturnExchangeRefundTypeEnum;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.test.integration.DirtiesDatabase;
@@ -63,15 +62,15 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 	@Before
 	public void setUp() {
 		super.setUp();
-		
+
 		setupPropertyForReason();
 	}
-	
+
 	/**
 	 * setupPropertyForReason.
 	 */
 	private void setupPropertyForReason() {
-		final PropertyBased propertyBased = getBeanFactory().getBean(ContextIdNames.ORDER_RETURN_SKU_REASON);
+		final PropertyBased propertyBased = getBeanFactory().getSingletonBean(ContextIdNames.ORDER_RETURN_SKU_REASON, PropertyBased.class);
 
 		Map<String, Properties> propertiesMap = new HashMap<>();
 
@@ -94,19 +93,15 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
 				scenario.getShippingOption(), scenario.getStore());
-		
+
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
-
-		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
-				.build());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		// checkout
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, templateOrderPayment, true);
+		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -117,25 +112,25 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		assertEquals(1, shipments.size());
 
 		// check payments
-		Set<OrderPayment> payments = order.getOrderPayments();
-		assertEquals(1, payments.size());
-		OrderPayment authPayment = payments.iterator().next();
+		final Collection<OrderPayment> orderPayments = orderPaymentService.findByOrder(order);
+		assertEquals(1, orderPayments.size());
+		OrderPayment authPayment = orderPayments.iterator().next();
 		assertEquals(order.getTotal().doubleValue(), authPayment.getAmount().doubleValue(), 0);
-		
+
 		PhysicalOrderShipment phShipment = order.getPhysicalShipments().iterator().next();
 		phShipment.setStatus(OrderShipmentStatus.SHIPPED);
 		orderService.update(order);
 		order.setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
-		
+
 		phShipment = order.getPhysicalShipments().iterator().next();
 		OrderReturn orderReturn = createOrderShipmentReturn(order, phShipment);
-		
+
 		returnAndExchangeService.createShipmentReturn(
-				orderReturn, 
-				ReturnExchangeType.PHYSICAL_RETURN_REQUIRED, 
-				orderReturn.getOrderShipmentForReturn(), 
+				orderReturn,
+				ReturnExchangeRefundTypeEnum.PHYSICAL_RETURN_REQUIRED,
+				orderReturn.getOrderShipmentForReturn(),
 				orderReturn.getOrder().getModifiedBy());
-		
+
 		verifyTaxDocumentForOrderReturn(orderReturn, store);
 	}
 
@@ -149,19 +144,15 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
 				scenario.getShippingOption(), scenario.getStore());
-		
+
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
-
-		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
-				.build());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		// checkout
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, templateOrderPayment, true);
+		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -172,42 +163,42 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		assertEquals(1, shipments.size());
 
 		// check payments
-		Set<OrderPayment> payments = order.getOrderPayments();
-		assertEquals(1, payments.size());
-		OrderPayment authPayment = payments.iterator().next();
+		final Collection<OrderPayment> orderPayments = orderPaymentService.findByOrder(order);
+		assertEquals(1, orderPayments.size());
+		OrderPayment authPayment = orderPayments.iterator().next();
 		assertEquals(order.getTotal().doubleValue(), authPayment.getAmount().doubleValue(), 0);
-		
+
 		PhysicalOrderShipment phShipment = order.getPhysicalShipments().iterator().next();
 		phShipment.setStatus(OrderShipmentStatus.SHIPPED);
 		order.setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
 		orderService.update(order);
-		
+
 		phShipment = order.getPhysicalShipments().iterator().next();
-		
+
 		OrderReturn orderReturn = createOrderShipmentReturn(order, phShipment);
 		orderReturn.getOrder().setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
-		
+
 		OrderReturn persistedOrderReturn = returnAndExchangeService.createShipmentReturn(
-				orderReturn, 
-				ReturnExchangeType.PHYSICAL_RETURN_REQUIRED, 
-				orderReturn.getOrderShipmentForReturn(), 
+				orderReturn,
+				ReturnExchangeRefundTypeEnum.PHYSICAL_RETURN_REQUIRED,
+				orderReturn.getOrderShipmentForReturn(),
 				orderReturn.getOrder().getModifiedBy());
-		
+
 		verifyTaxDocumentForOrderReturn(persistedOrderReturn, store);
-		
+
 		// cancle the order return
-		FetchGroupLoadTuner tuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
-		tuner.addFetchGroup(FetchGroupConstants.ORDER_INDEX, 
-			FetchGroupConstants.ORDER_NOTES, 
-			FetchGroupConstants.ALL);
-		
+		FetchGroupLoadTuner tuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
+		tuner.addFetchGroup(FetchGroupConstants.ORDER_INDEX,
+				FetchGroupConstants.ORDER_NOTES,
+				FetchGroupConstants.ALL);
+
 		OrderReturn retrievedOrderReturn = returnAndExchangeService.get(persistedOrderReturn.getUidPk(), tuner);
 		retrievedOrderReturn.getOrder().setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
 		OrderReturn cancelledOrderReturn = returnAndExchangeService.cancelReturnExchange(retrievedOrderReturn);
-		
+
 		verifyTaxDocumentReversal(cancelledOrderReturn.getTaxDocumentId());
 	}
-	
+
 	/**
 	 * Test cancelling an order return for an order shipment.
 	 */
@@ -218,19 +209,15 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
 				scenario.getShippingOption(), scenario.getStore());
-		
+
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
-
-		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
-				.build());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		// checkout
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, templateOrderPayment, true);
+		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -241,54 +228,54 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		assertEquals(1, shipments.size());
 
 		// check payments
-		Set<OrderPayment> payments = order.getOrderPayments();
-		assertEquals(1, payments.size());
-		OrderPayment authPayment = payments.iterator().next();
+		final Collection<OrderPayment> orderPayments = orderPaymentService.findByOrder(order);
+		assertEquals(1, orderPayments.size());
+		OrderPayment authPayment = orderPayments.iterator().next();
 		assertEquals(order.getTotal().doubleValue(), authPayment.getAmount().doubleValue(), 0);
-		
+
 		PhysicalOrderShipment phShipment = order.getPhysicalShipments().iterator().next();
 		phShipment.setStatus(OrderShipmentStatus.SHIPPED);
 		order.setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
 		orderService.update(order);
-		
+
 		phShipment = order.getPhysicalShipments().iterator().next();
-		
+
 		OrderReturn orderReturn = createOrderShipmentReturn(order, phShipment);
 		orderReturn.getOrder().setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
-		
+
 		OrderReturn persistedOrderReturn = returnAndExchangeService.createShipmentReturn(
-						orderReturn, 
-						ReturnExchangeType.PHYSICAL_RETURN_REQUIRED, 
-						orderReturn.getOrderShipmentForReturn(), 
-						orderReturn.getOrder().getModifiedBy());
-		
+				orderReturn,
+				ReturnExchangeRefundTypeEnum.PHYSICAL_RETURN_REQUIRED,
+				orderReturn.getOrderShipmentForReturn(),
+				orderReturn.getOrder().getModifiedBy());
+
 		verifyTaxDocumentForOrderReturn(persistedOrderReturn, store);
-		
+
 		// cancle the order return
-		FetchGroupLoadTuner tuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
-		tuner.addFetchGroup(FetchGroupConstants.ORDER_INDEX, 
-			FetchGroupConstants.ORDER_NOTES, 
-			FetchGroupConstants.ALL);
-		
+		FetchGroupLoadTuner tuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
+		tuner.addFetchGroup(FetchGroupConstants.ORDER_INDEX,
+				FetchGroupConstants.ORDER_NOTES,
+				FetchGroupConstants.ALL);
+
 		OrderReturn retrievedOrderReturn = returnAndExchangeService.get(persistedOrderReturn.getUidPk(), tuner);
 		retrievedOrderReturn.setShipmentDiscount(BigDecimal.TEN);
 		retrievedOrderReturn.getOrder().setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
 		retrievedOrderReturn.recalculateOrderReturn();
-		
+
 		OrderReturn modifiedOrderReturn = returnAndExchangeService.editReturn(retrievedOrderReturn);
-		
+
 		verifyTaxDocumentReversal(retrievedOrderReturn.getTaxDocumentId());
-		
+
 		modifiedOrderReturn.recalculateOrderReturn();
 		verifyTaxDocumentForOrderReturn(modifiedOrderReturn, store);
 	}
 
 	private OrderReturn createOrderShipmentReturn(final Order order,
-			final PhysicalOrderShipment phShipment) {
+												  final PhysicalOrderShipment phShipment) {
 		OrderReturn orderReturn = new OrderReturnImpl();
 		orderReturn.populateOrderReturn(order, phShipment, OrderReturnType.RETURN);
 		orderReturn.setOrderReturnAddress(phShipment.getShipmentAddress());
-		
+
 		for (OrderReturnSku orderReturnSku : orderReturn.getOrderReturnSkus()) {
 			orderReturnSku.setQuantity(orderReturnSku.getOrderSku().getQuantity());
 			orderReturnSku.setReturnReason("Faulty");

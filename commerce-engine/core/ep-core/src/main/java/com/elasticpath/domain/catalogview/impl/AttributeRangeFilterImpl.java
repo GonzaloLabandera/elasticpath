@@ -99,7 +99,7 @@ public class AttributeRangeFilterImpl extends AbstractRangeFilterImpl<AttributeR
 	@Override
 	public void setAttributeKey(final String attributeKey) {
 		this.attributeKey = attributeKey;
-		final AttributeService attributeService = getBean(ContextIdNames.ATTRIBUTE_SERVICE);
+		final AttributeService attributeService = getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		attribute = attributeService.findByKey(attributeKey);
 	}
 
@@ -174,7 +174,7 @@ public class AttributeRangeFilterImpl extends AbstractRangeFilterImpl<AttributeR
 		if (string == null || string.length() == 0) {
 			return null;
 		}
-		final AttributeValueWithType attr = getBean(ContextIdNames.ATTRIBUTE_VALUE);
+		final AttributeValueWithType attr = getPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class);
 		attr.setAttribute(getAttribute());
 		attr.setAttributeType(getAttribute().getAttributeType());
 		attr.setStringValue(string);

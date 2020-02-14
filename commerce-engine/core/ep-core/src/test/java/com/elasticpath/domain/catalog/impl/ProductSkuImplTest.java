@@ -127,8 +127,8 @@ public class ProductSkuImplTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
 			}
 		};
 		productSkuImpl.initialize();
@@ -317,7 +317,7 @@ public class ProductSkuImplTest {
 		skuOption.addOptionValue(skuOptionValue2);
 
 		final JpaAdaptorOfSkuOptionValueImpl adaptor = new JpaAdaptorOfSkuOptionValueImpl();
-		when(beanFactory.getBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR)).thenReturn(adaptor);
+		when(beanFactory.getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR, JpaAdaptorOfSkuOptionValueImpl.class)).thenReturn(adaptor);
 
 		productSkuImpl.setSkuOptionValue(skuOption, valueCode1);
 		assertThat(productSkuImpl.getSkuOptionValue(skuOption).getOptionValueKey()).isEqualTo(skuOptionValue1.getOptionValueKey());

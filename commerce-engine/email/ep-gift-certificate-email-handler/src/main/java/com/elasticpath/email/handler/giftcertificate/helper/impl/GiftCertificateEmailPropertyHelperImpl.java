@@ -69,7 +69,7 @@ public class GiftCertificateEmailPropertyHelperImpl implements GiftCertificateEm
 	}
 
 	private EmailProperties getEmailPropertiesBeanInstance() {
-		return beanFactory.getBean(ContextIdNames.EMAIL_PROPERTIES);
+		return beanFactory.getPrototypeBean(ContextIdNames.EMAIL_PROPERTIES, EmailProperties.class);
 	}
 
 	public void setMoneyFormatter(final MoneyFormatter formatter) {

@@ -23,7 +23,7 @@ import org.eclipse.ui.forms.editor.FormPage;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.dialogs.catalog.AddEditSynonymGroupDialog;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.editors.AbstractEpTableSection;
@@ -60,8 +60,7 @@ public class CatalogSynonymGroupsSection extends AbstractEpTableSection<SynonymG
 	 */
 	public CatalogSynonymGroupsSection(final FormPage formPage, final AbstractCmClientFormEditor editor) {
 		super(formPage, editor, CATALOG_SYNONYM_GROUP_TABLE);
-		synonymGroupService = ServiceLocator.getService(
-				ContextIdNames.SYNONYM_GROUP_SERVICE);
+		synonymGroupService = BeanLocator.getSingletonBean(ContextIdNames.SYNONYM_GROUP_SERVICE, SynonymGroupService.class);
 	}
 
 	@Override

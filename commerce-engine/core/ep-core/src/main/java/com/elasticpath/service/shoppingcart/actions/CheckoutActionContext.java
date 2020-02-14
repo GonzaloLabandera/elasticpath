@@ -1,15 +1,14 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions;
 
-import java.util.Collection;
 import java.util.Map;
 
+import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -26,14 +25,14 @@ public interface CheckoutActionContext {
 	 * Gets the {@link Shopper}.
 	 *
 	 * @return the {@link Shopper}
-	 * */
+	 */
 	Shopper getShopper();
 
 	/**
 	 * Gets the {@link ShoppingCart}.
 	 *
 	 * @return the {@link ShoppingCart}
-	 * */
+	 */
 	ShoppingCart getShoppingCart();
 
 	/**
@@ -45,60 +44,47 @@ public interface CheckoutActionContext {
 
 	/**
 	 * Gets the {@link Customer}.  If you need to save the Customer, you need to know where it comes from.
-	 *
+	 * <p>
 	 * Look inside the implementation.
 	 *
 	 * @return the {@link Customer}
-	 * */
+	 */
 	Customer getCustomer();
 
 	/**
 	 * Sets the order.
+	 *
 	 * @param order the order
-	 * */
+	 */
 	void setOrder(Order order);
 
 	/**
 	 * Gets the order.
+	 *
 	 * @return the order
-	 * */
+	 */
 	Order getOrder();
 
 	/**
-	 * Gets the order payment template.
-	 * @return the order payment template
-	 * */
-	OrderPayment getOrderPaymentTemplate();
-
-	/**
 	 * Gets the is order exchange.
+	 *
 	 * @return the is order exchange
-	 * */
+	 */
 	boolean isOrderExchange();
 
 	/**
 	 * Gets is Await Exchange Completion.
+	 *
 	 * @return is Await Exchange Completion
-	 * */
+	 */
 	boolean isAwaitExchangeCompletion();
 
 	/**
 	 * Gets the order return exchange.
+	 *
 	 * @return order return exchange
-	 * */
+	 */
 	OrderReturn getExchange();
-
-	/**
-	 * Sets the order payment list.
-	 * @param orderPaymentList the order payment list
-	 * */
-	void setOrderPaymentList(Collection<OrderPayment> orderPaymentList);
-
-	/**
-	 * Gets order payment list.
-	 * @return the order payment list
-	 * */
-	Collection<OrderPayment> getOrderPaymentList();
 
 	/**
 	 * Returns the Ip Address of the Customer that is doing this checkout.
@@ -125,14 +111,15 @@ public interface CheckoutActionContext {
 	 * Adds one tax document to the taxDocuments map.
 	 *
 	 * @param taxDocumentId the key of the taxDocuments map
-	 * @param taxDocument the value of the taxDocuments map
+	 * @param taxDocument   the value of the taxDocuments map
 	 */
 	void addTaxDocument(TaxDocumentId taxDocumentId, TaxDocument taxDocument);
 
 	/**
-	 * Takes the transient orderPayments in the arguments and merges it
-	 * with the internal list or orderPayments.
-	 * @param transientOrderPayments the list of transient orderPayments.
+	 * Gets cart order for this checkout action context.
+	 *
+	 * @return cart order for this checkout action context.
 	 */
-	void preserveTransientOrderPayment(Collection<OrderPayment> transientOrderPayments);
+	CartOrder getCartOrder();
+
 }

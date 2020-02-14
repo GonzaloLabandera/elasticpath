@@ -47,8 +47,8 @@ public class CartHasItemsServiceImplTest {
 
 	@Before
 	public void setUp() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(SCOPE, cartOrder)).thenReturn(Single.just(shoppingCart));
+		when(cartOrderRepository.findByGuid(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.getEnrichedShoppingCart(SCOPE, cartOrder)).thenReturn(Single.just(shoppingCart));
 
 		orderIdentifier = OrderIdentifier.builder()
 				.withOrderId(StringIdentifier.of(ORDER_ID))

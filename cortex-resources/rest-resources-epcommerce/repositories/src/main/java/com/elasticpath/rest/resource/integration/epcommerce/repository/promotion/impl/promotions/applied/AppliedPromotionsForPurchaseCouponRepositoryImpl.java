@@ -43,7 +43,7 @@ public class AppliedPromotionsForPurchaseCouponRepositoryImpl<I extends AppliedP
 		PurchaseCouponListIdentifier purchaseCouponListIdentifier = purchaseCouponIdentifier.getPurchaseCouponList();
 		String scope = purchaseCouponListIdentifier.getPurchase().getPurchases().getScope().getValue();
 		String purchaseId = purchaseCouponListIdentifier.getPurchase().getPurchaseId().getValue();
-		return orderRepository.findByGuidAsSingle(scope, purchaseId)
+		return orderRepository.findByGuid(scope, purchaseId)
 				.flatMap(order -> getAppliedPromotions(couponId, order))
 				.flatMapObservable(appliedPromotions -> buildPurchaseCouponPromotionIdentifiers(purchaseCouponIdentifier, appliedPromotions));
 	}

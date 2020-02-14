@@ -160,7 +160,7 @@ public class UtilityImpl implements Utility {
 
 	@Override
 	public Map<String, String> getStoreCreditCardTypesMap(final String storeCode) {
-		StoreService storeService = getBeanFactory().getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = getBeanFactory().getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		Store store = storeService.findStoreWithCode(storeCode);
 		Set<CreditCardType> cardTypes = store.getCreditCardTypes();
 		Map<String, String> supportedCardMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -176,7 +176,7 @@ public class UtilityImpl implements Utility {
 
 		Map<String, String> allCreditCardsMap = new LinkedHashMap<>();
 
-		StoreService storeService = getBeanFactory().getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = getBeanFactory().getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		List<Store> stores = storeService.findAllCompleteStores();
 
 		for (Store store : stores) {
@@ -187,7 +187,8 @@ public class UtilityImpl implements Utility {
 
 	@Override
 	public String getRandomStringWithLength(final int length) {
-		final PasswordGenerator passwordGenerator = getBeanFactory().getBean("passwordGenerator");
+		final PasswordGenerator passwordGenerator = getBeanFactory().getSingletonBean(
+				ContextIdNames.PASSWORD_GENERATOR, PasswordGenerator.class);
 		return passwordGenerator.getPassword().substring(0, length);
 	}
 

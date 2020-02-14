@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -43,17 +47,9 @@
 		<property name="beanFactory" ref="coreBeanFactory" />
 		<property name="moneyFormatter" ref="moneyFormatter" />
 		<property name="timeService" ref="timeService" />
+		<property name="paymentInstrumentWorkflow" ref="paymentInstrumentWorkflow" />
 		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
-		<property name="formatterMap">
-			<map key-type="com.elasticpath.plugin.payment.PaymentType">
-				<entry key="GIFT_CERTIFICATE" value-ref="orderEventGiftCertificateDetailsFormatter" />
-				<entry key="PAYMENT_TOKEN" value-ref="orderEventPaymentTokenDetailsFormatter" />
-			</map>
-		</property>
 	</bean>
-
-	<bean id="orderEventGiftCertificateDetailsFormatter" class="com.elasticpath.domain.event.impl.OrderEventGiftCertificateDetailsFormatter"/>
-	<bean id="orderEventPaymentTokenDetailsFormatter" class="com.elasticpath.domain.event.impl.OrderEventPaymentTokenDetailsFormatter"/>
 
 	<bean id="orderEventHelper" parent="orderEventHelperTemplate"/>
 

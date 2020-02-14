@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.widgets.Display;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.helpers.AbstractSearchRequestJob;
@@ -34,8 +34,8 @@ public class ShippingLevelSearchRequestJob extends AbstractSearchRequestJob<Ship
 	 */
 	public ShippingLevelSearchRequestJob() {
 		super();
-		this.shippingServiceLevelService = ServiceLocator.getService(
-				EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+		this.shippingServiceLevelService = BeanLocator
+				.getSingletonBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
 	}
 
 	@Override

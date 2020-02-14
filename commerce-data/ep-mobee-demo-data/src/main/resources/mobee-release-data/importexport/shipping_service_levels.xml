@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<shipping_service_levels>
+<shipping_service_level guid="f064b8e7-3be3-4bde-b02e-027218127356">
+    <shipping_region>Great Britain (UK)</shipping_region>
+    <shipping_cost_calculation_method type="fixedPriceMethod">
+        <displayText>FixedPriceMethod_method_text</displayText>
+        <shipping_cost_calculation_params>
+            <shipping_cost_calculation_param>
+                <param_key>CalculationParameter_FixedPrice</param_key>
+                <value>5.0</value>
+                <display_text>5.0</display_text>
+                <currency>CAD</currency>
+            </shipping_cost_calculation_param>
+            <shipping_cost_calculation_param>
+                <param_key>CalculationParameter_FixedPrice</param_key>
+                <value>3.0</value>
+                <display_text>3.0</display_text>
+                <currency>EUR</currency>
+            </shipping_cost_calculation_param>
+        </shipping_cost_calculation_params>
+    </shipping_cost_calculation_method>
+    <storecode>MOBEE</storecode>
+    <carrier>Royal Mail</carrier>
+    <localized_names>
+        <value language="en">RoyalMailExpress</value>
+        <value language="fr">RoyalMailExpress-fr</value>
+        <value language="fr_CA">RoyalMailExpress-fr_CA</value>
+    </localized_names>
+    <code>RoyalMailExpress</code>
+    <active>true</active>
+</shipping_service_level>
+</shipping_service_levels>

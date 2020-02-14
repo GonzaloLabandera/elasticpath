@@ -2,7 +2,8 @@
  * Copyright (c) Elastic Path Software Inc., 2017
  */
 package com.elasticpath.cmclient.jobs.actions;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
@@ -40,7 +41,7 @@ public class DeleteJobAction extends AbstractAuthorizedJobAction {
 			NLS.bind(JobsMessages.get().DeleteJobText,
 			importJob.getName()));
 		if (confirmed) {
-			ImportService importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+			ImportService importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 			importService.remove(importJob);
 			listView.refreshViewerInput();
 			listView.updateNavigationComponents();

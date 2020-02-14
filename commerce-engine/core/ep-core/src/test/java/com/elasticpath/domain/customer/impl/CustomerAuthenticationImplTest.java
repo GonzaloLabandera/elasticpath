@@ -65,8 +65,8 @@ public class CustomerAuthenticationImplTest {
 	 */
 	@Test
 	public void testSetClearPassword() {
-		beanExpectations.oneBeanFactoryGetBean(ContextIdNames.PASSWORDENCODER, passwordEncoder);
-		beanExpectations.oneBeanFactoryGetBean(ContextIdNames.SALT_FACTORY, saltFactory);
+		beanExpectations.oneBeanFactoryGetSingletonBean(ContextIdNames.PASSWORDENCODER, PasswordEncoder.class, passwordEncoder);
+		beanExpectations.oneBeanFactoryGetSingletonBean(ContextIdNames.SALT_FACTORY, SaltFactory.class, saltFactory);
 		context.checking(new Expectations() {
 			{
 				oneOf(saltFactory).createSalt(); will(returnValue(SALT));
@@ -102,14 +102,17 @@ public class CustomerAuthenticationImplTest {
 		final PasswordGenerator passwordGenerator = context.mock(PasswordGenerator.class);
 		final String randomPassword = "MyNtgYZf3U";
 
-		beanExpectations.oneBeanFactoryGetBean(ContextIdNames.PASSWORD_GENERATOR, passwordGenerator);
-		beanExpectations.oneBeanFactoryGetBean(ContextIdNames.PASSWORDENCODER, passwordEncoder);
-		beanExpectations.oneBeanFactoryGetBean(ContextIdNames.SALT_FACTORY, saltFactory);
+		beanExpectations.allowingBeanFactoryGetSingletonBean(ContextIdNames.PASSWORD_GENERATOR,
+			PasswordGenerator.class, passwordGenerator);
+		beanExpectations.oneBeanFactoryGetSingletonBean(ContextIdNames.PASSWORDENCODER, PasswordEncoder.class, passwordEncoder);
+		beanExpectations.oneBeanFactoryGetSingletonBean(ContextIdNames.SALT_FACTORY, SaltFactory.class, saltFactory);
 		context.checking(new Expectations() {
 			{
 				oneOf(passwordGenerator).getPassword(); will(returnValue(randomPassword));
 				oneOf(saltFactory).createSalt(); will(returnValue(SALT));
-				oneOf(passwordEncoder).encodePassword(randomPassword, SALT); will(returnValue(ENCODED_PASSWORD));			}
+				oneOf(passwordEncoder).encodePassword(randomPassword, SALT);
+				will(returnValue(ENCODED_PASSWORD));
+			}
 		});
 		customerAuthentication.resetPassword();
 		assertEquals("The clear text password should be the one generated", randomPassword, customerAuthentication.getClearTextPassword());

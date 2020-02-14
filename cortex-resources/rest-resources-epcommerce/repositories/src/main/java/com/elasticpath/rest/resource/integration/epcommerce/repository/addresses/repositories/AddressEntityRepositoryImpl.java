@@ -16,7 +16,6 @@ import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.repository.Repository;
-import com.elasticpath.rest.definition.addresses.AddressDetailEntity;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
 import com.elasticpath.rest.definition.addresses.AddressesIdentifier;
@@ -125,7 +124,7 @@ public class AddressEntityRepositoryImpl<E extends AddressEntity, I extends Addr
 	 * @return Completable
 	 */
 	protected Completable updateCartOrdersAddresses(final String scope, final Customer newAddressCustomer, final CustomerAddress address,
-			final boolean updatePreferredBillingAddress, final boolean updatePreferredShippingAddress) {
+													final boolean updatePreferredBillingAddress, final boolean updatePreferredShippingAddress) {
 		if (updatePreferredBillingAddress || updatePreferredShippingAddress) {
 			return cartOrdersDefaultAddressPopulator.updateAllCartOrdersAddresses(newAddressCustomer, address, scope, updatePreferredBillingAddress,
 					updatePreferredShippingAddress);
@@ -222,38 +221,40 @@ public class AddressEntityRepositoryImpl<E extends AddressEntity, I extends Addr
 		String addressGuid = identifier.getAddressId().getValue();
 		return addressValidator.validate(addressEntity)
 				.andThen(customerRepository.getCustomer(resourceOperationContext.getUserIdentifier())
-				.flatMapCompletable(customer -> getExistingAddressByGuid(addressGuid, customer)
-						.map(address -> updateCustomerAddress(addressEntity, address))
-						.flatMapCompletable(address -> customerRepository.updateAddress(customer, address))));
+						.flatMapCompletable(customer -> getExistingAddressByGuid(addressGuid, customer)
+								.map(address -> updateCustomerAddress(addressEntity, address))
+								.flatMapCompletable(address -> customerRepository.updateAddress(customer, address))));
 	}
 
 	/**
 	 * Updates the customer address from the given address entity.
 	 *
-	 * @param addressEntity addressEntity
-	 * @param address       address
+	 * @param addressEntity   addressEntity
+	 * @param customerAddress address
 	 * @return the updated customer address
 	 */
-	protected CustomerAddress updateCustomerAddress(final AddressEntity addressEntity, final CustomerAddress address) {
-		AddressDetailEntity addressDetailEntity = addressEntity.getAddress();
-		if (addressDetailEntity != null) {
-			updateCountry(address, addressDetailEntity.getCountryName());
-			updateState(address, addressDetailEntity.getRegion());
-			updateCity(address, addressDetailEntity.getLocality());
-			updatePostal(address, addressDetailEntity.getPostalCode());
-			updateStreet1(address, addressDetailEntity.getStreetAddress());
-			updateStreet2(address, addressDetailEntity.getExtendedAddress());
-			updatePhoneNumber(address, addressDetailEntity.getPhoneNumber());
-			updateOrganization(address, addressDetailEntity.getOrganization());
+	protected CustomerAddress updateCustomerAddress(final AddressEntity addressEntity, final CustomerAddress customerAddress) {
+		com.elasticpath.rest.definition.base.AddressEntity address = addressEntity.getAddress();
+
+		updatePhoneNumber(customerAddress, addressEntity.getPhoneNumber());
+		updateOrganization(customerAddress, addressEntity.getOrganization());
+
+		if (address != null) {
+			updateCountry(customerAddress, address.getCountryName());
+			updateState(customerAddress, address.getRegion());
+			updateCity(customerAddress, address.getLocality());
+			updatePostal(customerAddress, address.getPostalCode());
+			updateStreet1(customerAddress, address.getStreetAddress());
+			updateStreet2(customerAddress, address.getExtendedAddress());
 		}
 
 		NameEntity nameEntity = addressEntity.getName();
 		if (nameEntity != null) {
-			updateFirstName(address, nameEntity.getGivenName());
-			updateLastName(address, nameEntity.getFamilyName());
+			updateFirstName(customerAddress, nameEntity.getGivenName());
+			updateLastName(customerAddress, nameEntity.getFamilyName());
 		}
 
-		return address;
+		return customerAddress;
 	}
 
 	/**

@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.comparator.CatalogComparator;
 import com.elasticpath.cmclient.core.helpers.extenders.EPTableColumnCreator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -123,7 +123,7 @@ public class CatalogTableViewer {
 	private List<Catalog> getAllObjects() {
 
 		CmUser currentUser = LoginManager.getCmUser();
-		CatalogService service = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		CatalogService service = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		List<Catalog> catalogs = service.findAllCatalogs();
 		if (!currentUser.isAllCatalogsAccess()) {
 			List<Catalog> retainCatalogs = new ArrayList<>();

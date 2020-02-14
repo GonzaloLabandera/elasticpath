@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -27,7 +31,7 @@
 	</bean>
 	
 	<import resource="classpath:spring/service/changeset-services.xml" />
-	
+
 	<import resource="classpath*:spring/dataaccess/openjpa/openjpa.xml" />
 	<import resource="classpath*:spring/commons/util-config.xml" />
 	<import resource="classpath:spring/commons/validators.xml" />
@@ -705,5 +709,7 @@
 	</bean>
 
 	<bean id="customerAgePresentation" class="com.elasticpath.presentation.customer.impl.CustomerAgePresentationImpl" />
+
+	<bean id="paymentProviderPluginForIntegrationTesting" class="com.elasticpath.service.payment.provider.PaymentProviderPluginForIntegrationTesting"/>
 
 </beans>

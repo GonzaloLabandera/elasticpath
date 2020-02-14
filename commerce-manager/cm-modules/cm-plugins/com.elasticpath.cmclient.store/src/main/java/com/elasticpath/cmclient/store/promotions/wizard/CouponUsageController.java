@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.store.promotions.wizard;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.promotions.CouponCollectionModel;
 import com.elasticpath.common.dto.CouponModelDto;
 import com.elasticpath.common.dto.CouponUsageModelDto;
@@ -64,7 +64,7 @@ public class CouponUsageController {
 	 * @return A new coupon - extracted for unit testing.
 	 */
 	Coupon getNewCoupon() {
-		return ServiceLocator.getService(ContextIdNames.COUPON);
+		return BeanLocator.getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class CouponUsageController {
 	 * @return A new coupon usage - extracted for unit testing.
 	 */
 	CouponUsage getNewCouponUsage() {
-		return ServiceLocator.getService(ContextIdNames.COUPON_USAGE);
+		return BeanLocator.getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class CouponUsageController {
 	 * @return the coupon service
 	 */
 	public CouponService getCouponService() {
-		return ServiceLocator.getService(ContextIdNames.COUPON_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class CouponUsageController {
 	 * @return the coupon usage service 
 	 */
 	public CouponUsageService getCouponUsageService() {
-		return ServiceLocator.getService(ContextIdNames.COUPON_USAGE_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.COUPON_USAGE_SERVICE, CouponUsageService.class);
 	}
 
 }

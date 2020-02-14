@@ -194,7 +194,7 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	public CmUser load(final long cmUserUid) throws EpServiceException {
 		sanityCheck();
 		if (cmUserUid <= 0) {
-			return getBean(ContextIdNames.CMUSER);
+			return getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
 		}
 		return getPersistentBeanFinder().load(ContextIdNames.CMUSER, cmUserUid);
 	}
@@ -203,7 +203,7 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	public CmUser get(final long cmUserUid) throws EpServiceException {
 		sanityCheck();
 		if (cmUserUid <= 0) {
-			return getBean(ContextIdNames.CMUSER);
+			return getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
 		}
 		return getPersistentBeanFinder().get(ContextIdNames.CMUSER, cmUserUid);
 	}
@@ -301,7 +301,7 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	}
 
 	private CmUserService getCmUserService() {
-		return getBean(ContextIdNames.CMUSER_SERVICE);
+		return getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 	}
 
 	private void sendCmUserEvent(final EventType eventType, final String guid, final String password) {

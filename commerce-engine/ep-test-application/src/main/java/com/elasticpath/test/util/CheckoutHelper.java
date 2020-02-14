@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2015
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.test.util;
@@ -23,14 +23,12 @@ import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shipping.Region;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
-import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.service.shipping.ShippingOptionResult;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
@@ -38,6 +36,7 @@ import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.test.persister.PaymentInstrumentPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
 import com.elasticpath.test.persister.TestApplicationContext;
 
@@ -58,9 +57,9 @@ public class CheckoutHelper {
 
 	private final StoreTestPersister storeTestPersister;
 
-	private final TestApplicationContext tac;
-
 	private final ShippingServiceLevelService shippingServiceLevelService;
+
+	private final PaymentInstrumentPersister paymentInstrumentPersister;
 
 	/**
 	 * Constructor.
@@ -68,13 +67,14 @@ public class CheckoutHelper {
 	 * @param tac {@link TestApplicationContext}.
 	 */
 	public CheckoutHelper(final TestApplicationContext tac) {
-		this.tac = tac;
-		checkoutService = tac.getBeanFactory().getBean(ContextIdNames.CHECKOUT_SERVICE);
-		shippingOptionService = tac.getBeanFactory().getBean(SHIPPING_OPTION_SERVICE);
-		pricingSnapshotService = tac.getBeanFactory().getBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
-		taxSnapshotService = tac.getBeanFactory().getBean(ContextIdNames.TAX_SNAPSHOT_SERVICE);
+		checkoutService = tac.getBeanFactory().getSingletonBean(ContextIdNames.CHECKOUT_SERVICE, CheckoutService.class);
+		shippingOptionService = tac.getBeanFactory().getSingletonBean(SHIPPING_OPTION_SERVICE, ShippingOptionService.class);
+		pricingSnapshotService = tac.getBeanFactory().getSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
+		taxSnapshotService = tac.getBeanFactory().getSingletonBean(ContextIdNames.TAX_SNAPSHOT_SERVICE, TaxSnapshotService.class);
 		storeTestPersister = tac.getPersistersFactory().getStoreTestPersister();
-		shippingServiceLevelService = tac.getBeanFactory().getBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+		shippingServiceLevelService = tac.getBeanFactory().getSingletonBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE,
+				ShippingServiceLevelService.class);
+		paymentInstrumentPersister = tac.getPersistersFactory().getPaymentInstrumentPersister();
 	}
 
 	/**
@@ -83,6 +83,7 @@ public class CheckoutHelper {
 	 * @param shoppingCart {@link ShoppingCart}.
 	 */
 	public void enrichShoppingCartForCheckout(final ShoppingCart shoppingCart) {
+		paymentInstrumentPersister.persistPaymentInstrument(shoppingCart);
 		final ShippingOption defaultShippingOption = getDefaultShippingOptionFromCart(shoppingCart);
 		CustomerAddress address = createCustomerAddressMatchingShippingServiceLevel(defaultShippingOption);
 		shoppingCart.setShippingAddress(address);
@@ -103,7 +104,7 @@ public class CheckoutHelper {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		return checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, defaultOrderPayment(), false);
+		return checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, false);
 	}
 
 	/**
@@ -125,6 +126,8 @@ public class CheckoutHelper {
 	 */
 	public CheckoutResults checkoutWithDefaultInfoOverrideShipping(final CustomerSession customerSession, final String shippingOptionName) {
 		final ShoppingCart shoppingCart = customerSession.getShopper().getCurrentShoppingCart();
+		paymentInstrumentPersister.persistPaymentInstrument(shoppingCart);
+
 		List<ShippingOption> defaultShippingOptions = getShippingOptionsFromCart(shoppingCart);
 		boolean found = false;
 		for (ShippingOption defaultShippingOption : defaultShippingOptions) {
@@ -144,13 +147,7 @@ public class CheckoutHelper {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		return checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, defaultOrderPayment(), false);
-	}
-
-	private OrderPayment defaultOrderPayment() {
-		OrderPayment defaultOrderPayment = tac.getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		defaultOrderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		return defaultOrderPayment;
+		return checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, false);
 	}
 
 	private List<ShippingOption> getShippingOptionsFromCart(final ShoppingCart storeShoppingCart) {

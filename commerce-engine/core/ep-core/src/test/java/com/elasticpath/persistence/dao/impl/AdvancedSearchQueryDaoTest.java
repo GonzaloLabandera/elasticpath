@@ -51,7 +51,7 @@ public class AdvancedSearchQueryDaoTest {
 				allowing(mockBeanFactory).getBeanImplClass(with(any(String.class)));
 				will(returnValue(AdvancedSearchQueryImpl.class));
 
-				allowing(mockBeanFactory).getBean(with(any(String.class)));
+				allowing(mockBeanFactory).getPrototypeBean(with(any(String.class)), with(AdvancedSearchQuery.class));
 				will(returnValue(new AdvancedSearchQueryImpl()));
 			}
 		});

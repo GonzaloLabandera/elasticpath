@@ -14,7 +14,6 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -108,10 +107,10 @@ public class ImportDataTypeCustomerImplTest {
 	@Before
 	public void setUp() {
 
-		when(beanFactory.getBean(ContextIdNames.ATTRIBUTE_SERVICE)).thenReturn(attributeService);
-		when(beanFactory.getBean(ContextIdNames.VALIDATOR_UTILS)).thenReturn(validatorUtils);
-		when(beanFactory.getBean(ContextIdNames.UTILITY)).thenReturn(utility);
-		when(beanFactory.getBean(ContextIdNames.CUSTOMER_AUTHENTICATION)).thenReturn(customerAuthentication);
+		when(beanFactory.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class)).thenReturn(attributeService);
+		when(beanFactory.getSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class)).thenReturn(validatorUtils);
+		when(beanFactory.getSingletonBean(ContextIdNames.UTILITY, Utility.class)).thenReturn(utility);
+		when(beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthentication.class)).thenReturn(customerAuthentication);
 
 		when(attributeService.getCustomerProfileAttributesMap()).thenReturn(new TestCustomerProfileFactory().getProfile());
 
@@ -119,8 +118,8 @@ public class ImportDataTypeCustomerImplTest {
 			private static final long serialVersionUID = 740L;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			protected <T> T getSingletonBean(final String beanName, final Class<T> clazz) {
+				return beanFactory.getSingletonBean(beanName, clazz);
 			}
 		};
 

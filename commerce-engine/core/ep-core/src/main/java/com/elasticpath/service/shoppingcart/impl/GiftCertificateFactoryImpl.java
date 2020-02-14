@@ -2,7 +2,7 @@
  * Copyright (c) Elastic Path Software Inc., 2016
  */
 /**
- * 
+ *
  */
 package com.elasticpath.service.shoppingcart.impl;
 
@@ -23,7 +23,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.GiftCertificateFactory;
 
 /**
- * Creates GiftCertificates. 
+ * Creates GiftCertificates.
  * This implementation uses the GiftCertificateCodeGenerator to generate unique codes.
  */
 public class GiftCertificateFactoryImpl implements GiftCertificateFactory {
@@ -41,7 +41,7 @@ public class GiftCertificateFactoryImpl implements GiftCertificateFactory {
 													final Currency currency) {
 		final ProductSku giftCertificateSku = getProductSkuLookup().findByGuid(shoppingItem.getSkuGuid());
 
-		final GiftCertificate giftCertificate = getBeanFactory().getBean(ContextIdNames.GIFT_CERTIFICATE);
+		final GiftCertificate giftCertificate = getBeanFactory().getPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class);
 		giftCertificate.setGiftCertificateCode(generateUniqueGiftCertificateCode(store.getUidPk()));
 		giftCertificate.setPurchaser(customer);
 		giftCertificate.setCreationDate(new Date());
@@ -70,7 +70,7 @@ public class GiftCertificateFactoryImpl implements GiftCertificateFactory {
 		}
 		return giftCertificateCode;
 	}
-	
+
 	private String generateCode() {
 		return getGiftCertificateCodeGenerator().generateCode();
 	}
@@ -88,7 +88,7 @@ public class GiftCertificateFactoryImpl implements GiftCertificateFactory {
 	public BeanFactory getBeanFactory() {
 		return beanFactory;
 	}
-	
+
 	/**
 	 * @param giftCertificateCodeGenerator the giftCertificateCodeGenerator to set
 	 */

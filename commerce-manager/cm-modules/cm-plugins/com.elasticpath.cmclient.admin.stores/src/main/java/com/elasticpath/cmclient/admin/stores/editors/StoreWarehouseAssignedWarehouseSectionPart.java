@@ -12,7 +12,7 @@ import org.eclipse.ui.forms.editor.FormPage;
 
 import com.elasticpath.cmclient.admin.stores.AdminStoresImageRegistry;
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.store.Warehouse;
@@ -36,7 +36,7 @@ public class StoreWarehouseAssignedWarehouseSectionPart extends AbstractStoreAss
 			final boolean editable) {
 		super(formPage, editor);
 		this.getSection().setEnabled(editable);
-		this.warehouseService = ServiceLocator.getService(ContextIdNames.WAREHOUSE_SERVICE);
+		this.warehouseService = BeanLocator.getSingletonBean(ContextIdNames.WAREHOUSE_SERVICE, WarehouseService.class);
 	}
 
 	@Override

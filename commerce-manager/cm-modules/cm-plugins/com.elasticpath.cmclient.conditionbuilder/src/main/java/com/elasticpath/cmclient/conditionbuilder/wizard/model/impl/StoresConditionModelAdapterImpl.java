@@ -13,7 +13,7 @@ import com.elasticpath.cmclient.conditionbuilder.adapter.impl.tag.BaseModelAdapt
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditions.handlers.ConditionHandler;
 import com.elasticpath.cmclient.conditionbuilder.wizard.model.StoresConditionModelAdapter;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
@@ -43,7 +43,7 @@ public class StoresConditionModelAdapterImpl extends BaseModelAdapterImpl<Logica
 	public StoresConditionModelAdapterImpl() {
 		super(new LogicalOperator(LogicalOperatorType.OR));
 		
-		final StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		
 		final List<Store> allCurrentStores = storeService.findAllStores();
 		this.stores = new LinkedList<>();
@@ -135,7 +135,7 @@ public class StoresConditionModelAdapterImpl extends BaseModelAdapterImpl<Logica
 	 * @return List of stores
 	 */
 	public final List<Store> getAllStores() {
-		StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		return storeService.findAllStores(LoginManager.getCmUser());
 	}
 }

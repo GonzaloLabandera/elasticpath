@@ -51,7 +51,7 @@ public class DiscountsEntityForPurchaseRepositoryImplTest {
 	@Test
 	public void findOneProducesCorrectDiscountEntityWhenValidPurchaseExists() {
 
-		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID))
+		when(orderRepository.findByGuid(SCOPE, PURCHASE_ID))
 				.thenReturn(Single.just(getOrder()));
 
 		when(moneyTransformer.transformToEntity(Money.valueOf(0, Currency.getInstance("CAD")), Locale.CANADA))
@@ -66,7 +66,7 @@ public class DiscountsEntityForPurchaseRepositoryImplTest {
 	@Test
 	public void findOneProducesErrorWhenNoValidPurchaseExists() {
 
-		when(orderRepository.findByGuidAsSingle(INVALID, INVALID))
+		when(orderRepository.findByGuid(INVALID, INVALID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
 
 		discountRepository.findOne(createDiscountForPurchaseIdentifier(INVALID, INVALID))

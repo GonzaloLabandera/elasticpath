@@ -22,7 +22,7 @@ public class ShopperBrowsingActivityImpl implements ShopperBrowsingActivity {
 	@Override
 	public CatalogViewResultHistory getSearchResultHistory() {
 		if (searchResultHistory == null) {
-			searchResultHistory = getBeanFactory().getBean(ContextIdNames.CATALOG_VIEW_RESULT_HISTORY);
+			searchResultHistory = getBeanFactory().getPrototypeBean(ContextIdNames.CATALOG_VIEW_RESULT_HISTORY, CatalogViewResultHistory.class);
 		}
 
 		// To help figuring out how a customer reaches to a product, we only maintain one kind of catalog view result history,
@@ -34,7 +34,7 @@ public class ShopperBrowsingActivityImpl implements ShopperBrowsingActivity {
 	@Override
 	public CatalogViewResultHistory getBrowsingResultHistory() {
 		if (browsingResultHistory == null) {
-			browsingResultHistory = getBeanFactory().getBean(ContextIdNames.CATALOG_VIEW_RESULT_HISTORY);
+			browsingResultHistory = getBeanFactory().getPrototypeBean(ContextIdNames.CATALOG_VIEW_RESULT_HISTORY, CatalogViewResultHistory.class);
 		}
 
 		// To help figuring out how a customer reaches to a product, we only maintain one kind of catalog view result history,
@@ -59,7 +59,7 @@ public class ShopperBrowsingActivityImpl implements ShopperBrowsingActivity {
 	@Override
 	public ViewHistory getViewHistory() {
 		if (viewHistory == null) {
-			viewHistory = getBeanFactory().getBean("viewHistory");
+			viewHistory = getBeanFactory().getPrototypeBean(ContextIdNames.VIEW_HISTORY, ViewHistory.class);
 		}
 		return viewHistory;
 	}

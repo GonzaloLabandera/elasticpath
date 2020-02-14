@@ -82,6 +82,11 @@
 			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>${epdb.maven.groupId}</groupId>
+			<artifactId>${epdb.maven.artifactId}</artifactId>
+			<version>${epdb.maven.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>

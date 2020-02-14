@@ -52,7 +52,6 @@ import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
 
 /**
  * Provides a default implementation of {@link ReturnTaxOperationService}.
- *
  */
 public class ReturnTaxOperationServiceImpl implements ReturnTaxOperationService {
 
@@ -91,7 +90,7 @@ public class ReturnTaxOperationServiceImpl implements ReturnTaxOperationService 
 				.withCustomerBusinessNumber(orderReturn.getOrder().getCustomer().getBusinessNumber())
 				.build();
 
-		StoreService storeService = getBeanFactory().getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = getBeanFactory().getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		Warehouse defaultWarehouse = storeService.findStoreWithCode(orderReturn.getOrder().getStoreCode()).getWarehouse();
 		TaxAddress originAddress = null;
 		if (defaultWarehouse != null) {
@@ -169,8 +168,8 @@ public class ReturnTaxOperationServiceImpl implements ReturnTaxOperationService 
 	}
 
 	private void reverseTaxDocumentTaxes(final OrderReturn orderReturn, final TaxDocumentId reverseTaxDocumentId,
-			final TaxAddress destinationAddress, final TaxTransactionType transactionType) {
-		StoreService storeService = getBeanFactory().getBean(ContextIdNames.STORE_SERVICE);
+										 final TaxAddress destinationAddress, final TaxTransactionType transactionType) {
+		StoreService storeService = getBeanFactory().getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		Warehouse defaultWarehouse = storeService.findStoreWithCode(orderReturn.getOrder().getStoreCode()).getWarehouse();
 		TaxAddress originAddress = null;
 		if (defaultWarehouse != null) {
@@ -237,7 +236,7 @@ public class ReturnTaxOperationServiceImpl implements ReturnTaxOperationService 
 	}
 
 	private OrderSku convertToShoppingItem(final OrderReturnSku orderReturnSku, final Currency currency) {
-		final OrderSkuFactory orderSkuFactory = getBeanFactory().getBean(ContextIdNames.ORDER_SKU_FACTORY);
+		final OrderSkuFactory orderSkuFactory = getBeanFactory().getSingletonBean(ContextIdNames.ORDER_SKU_FACTORY, OrderSkuFactory.class);
 		final ProductSku productSku = getProductSkuLookup().findByGuid(orderReturnSku.getOrderSku().getSkuGuid());
 		final OrderSku orderSku = orderSkuFactory.createOrderSku(
 				productSku,
@@ -253,11 +252,12 @@ public class ReturnTaxOperationServiceImpl implements ReturnTaxOperationService 
 
 	/**
 	 * Takes the returnAmount from the OrderReturnSku object and populates a price based on it.
+	 *
 	 * @param orderReturnSku The OrderReturnSku instance to get the pricing information for
 	 * @return A Price instance representing the returnAmount of the OrderReturnSku
 	 */
 	private Price convertToPrice(final OrderReturnSku orderReturnSku, final Currency currency) {
-		Price price = getBeanFactory().getBean(ContextIdNames.PRICE);
+		Price price = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE, Price.class);
 
 		BigDecimal returnUnitPrice = orderReturnSku.getReturnAmount();
 

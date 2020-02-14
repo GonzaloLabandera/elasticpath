@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.store.promotions.editors;
 import java.util.Collection;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.common.dto.CouponUsageDtoMediator;
 import com.elasticpath.common.dto.CouponUsageModelDto;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -44,7 +44,7 @@ public class CouponUsageController {
 	 * @return the coupon usage mediator 
 	 */
 	public CouponUsageDtoMediator getCouponUsageDtoMediator() {
-		return ServiceLocator.getService(ContextIdNames.COUPON_USAGE_DTO_MEDIATOR);
+		return BeanLocator.getSingletonBean(ContextIdNames.COUPON_USAGE_DTO_MEDIATOR, CouponUsageDtoMediator.class);
 	}
 
 	

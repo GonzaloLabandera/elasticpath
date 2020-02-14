@@ -83,8 +83,8 @@ public class SolrIndexSearcherImpl {
 	 * The results are only those on the first page.
 	 *
 	 * @param searchCriteria the search criteria
-	 * @param maxResults the maximum results to return (maximum per page).
-	 * @param searchResult the search result object to populate.
+	 * @param maxResults     the maximum results to return (maximum per page).
+	 * @param searchResult   the search result object to populate.
 	 */
 	public void search(final SearchCriteria searchCriteria, final int maxResults, final SolrIndexSearchResult searchResult) {
 		search(searchCriteria, 0, maxResults, searchResult);
@@ -99,9 +99,9 @@ public class SolrIndexSearcherImpl {
 	 * upon the filters that are set in the search criteria).
 	 *
 	 * @param searchCriteria the search criteria
-	 * @param startIndex the initial index to display results for
-	 * @param maxResults the maximum results to return from given start index (maximum per page).
-	 * @param searchResult the search result object to populate.
+	 * @param startIndex     the initial index to display results for
+	 * @param maxResults     the maximum results to return from given start index (maximum per page).
+	 * @param searchResult   the search result object to populate.
 	 */
 	public void search(final SearchCriteria searchCriteria, final int startIndex, final int maxResults,
 					   final SolrIndexSearchResult searchResult) {
@@ -154,8 +154,8 @@ public class SolrIndexSearcherImpl {
 	 * document may have a store-specific facet to parse, otherwise any store-specific facets will be assumed not
 	 * to exist and will not be parsed.
 	 *
-	 * @param client the SOLR server to search
-	 * @param query the query to search with
+	 * @param client       the SOLR server to search
+	 * @param query        the query to search with
 	 * @param searchResult the search result to modify
 	 * @param filterLookup map keyed on solr query filter with a value containing the filter
 	 */
@@ -204,6 +204,7 @@ public class SolrIndexSearcherImpl {
 
 	/**
 	 * Parses facet queries for attribute values, attribute ranges or price values.
+	 *
 	 * @param searchResult search result
 	 * @param facetQueries facet queries
 	 * @param filterLookup map keyed on solr query filter with a value containing the filter
@@ -388,6 +389,7 @@ public class SolrIndexSearcherImpl {
 
 	/**
 	 * Get the <code>Catalog</code> associated with the <code>Store</code> that is represented by the given StoreCode.
+	 *
 	 * @param storeCode the store code
 	 * @return the requested Catalog
 	 */
@@ -423,6 +425,7 @@ public class SolrIndexSearcherImpl {
 
 	/**
 	 * Get the store to catalog map.
+	 *
 	 * @return the store to catalog map.
 	 */
 	protected Map<String, Catalog> getStoreCodeToCatalogCodeMap() {
@@ -433,14 +436,14 @@ public class SolrIndexSearcherImpl {
 	 * @return Store Service
 	 */
 	protected StoreService getStoreService() {
-		return elasticPath.getBean(ContextIdNames.STORE_SERVICE);
+		return elasticPath.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 	}
 
 	/**
 	 * @return Catalog service
 	 */
 	protected CatalogService getCatalogService() {
-		return elasticPath.getBean(ContextIdNames.CATALOG_SERVICE);
+		return elasticPath.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 	}
 
 
@@ -466,7 +469,8 @@ public class SolrIndexSearcherImpl {
 	}
 
 	private <T extends Filter<T>> FilterOption<T> constructFilterOption(final int hitsNumber, final T filter) {
-		final FilterOption<T> filterOption = elasticPath.getBean(ContextIdNames.FILTER_OPTION);
+		@SuppressWarnings("unchecked")
+		final FilterOption<T> filterOption = elasticPath.getPrototypeBean(ContextIdNames.FILTER_OPTION, FilterOption.class);
 		filterOption.setHitsNumber(hitsNumber);
 		filterOption.setFilter(filter);
 		return filterOption;

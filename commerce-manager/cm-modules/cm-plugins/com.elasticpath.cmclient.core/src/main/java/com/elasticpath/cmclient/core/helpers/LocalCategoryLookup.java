@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -80,6 +80,6 @@ public class LocalCategoryLookup implements CategoryLookup {
 	}
 
 	protected CategoryLookup getRemoteCategoryLookup() {
-		return ServiceLocator.getService(ContextIdNames.CATEGORY_LOOKUP);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 	}
 }

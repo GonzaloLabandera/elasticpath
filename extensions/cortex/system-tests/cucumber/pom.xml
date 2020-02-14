@@ -577,6 +577,11 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>${epdb.maven.groupId}</groupId>
+			<artifactId>${epdb.maven.artifactId}</artifactId>
+			<version>${epdb.maven.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>1.4.0</version>

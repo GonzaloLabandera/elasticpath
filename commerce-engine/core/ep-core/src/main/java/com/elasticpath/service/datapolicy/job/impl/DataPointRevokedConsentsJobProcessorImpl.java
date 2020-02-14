@@ -3,7 +3,6 @@
  */
 package com.elasticpath.service.datapolicy.job.impl;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,7 +12,6 @@ import org.apache.log4j.Logger;
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.service.datapolicy.DataPointService;
 import com.elasticpath.service.datapolicy.DataPointValueService;
-import com.elasticpath.service.datapolicy.impl.DataPointValue;
 import com.elasticpath.service.datapolicy.job.DataPointValueJob;
 
 /**
@@ -40,13 +38,7 @@ public class DataPointRevokedConsentsJobProcessorImpl implements DataPointValueJ
 			return;
 		}
 
-		Collection<DataPointValue> dataPointValues = dataPointValueService
-				.getValues(customerDataPoints)
-				.stream()
-				.filter(DataPointValue::isPopulated)
-				.collect(Collectors.toSet());
-
-		int removedValues = dataPointValueService.removeValues(dataPointValues);
+		int removedValues = dataPointValueService.removeValues(customerDataPoints);
 		LOG.debug(String.format("%s data point values have been removed.", removedValues));
 	}
 

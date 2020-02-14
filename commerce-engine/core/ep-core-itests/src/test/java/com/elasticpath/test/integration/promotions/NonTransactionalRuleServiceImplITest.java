@@ -25,9 +25,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleCondition;
 import com.elasticpath.domain.rules.RuleParameter;
-import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.rules.RuleService;
-import com.elasticpath.service.rules.RuleSetService;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.integration.junit.DatabaseHandlingTestExecutionListener;
 import com.elasticpath.test.persister.PromotionTestPersister;
@@ -50,12 +48,6 @@ public class NonTransactionalRuleServiceImplITest {
 	private RuleService ruleService;
 
 	@Autowired
-	private RuleSetService ruleSetService;
-
-	@Autowired
-	private PersistenceEngine persistenceEngine;
-
-	@Autowired
 	private BeanFactory beanFactory;
 
 	@Autowired
@@ -68,7 +60,7 @@ public class NonTransactionalRuleServiceImplITest {
 		Rule promo = givenABasicPromotionRule();
 
 		// When
-		RuleCondition condition = getBeanFactory().getBean(ContextIdNames.CART_SUBTOTAL_COND);
+		RuleCondition condition = getBeanFactory().getPrototypeBean(ContextIdNames.CART_SUBTOTAL_COND, RuleCondition.class);
 		condition.getParameters().iterator().next().setValue("50.00");
 		promo.addCondition(condition);
 
@@ -93,7 +85,7 @@ public class NonTransactionalRuleServiceImplITest {
 		Rule serializedPromo = serializeRule(promo);
 
 		// When
-		RuleCondition condition = getBeanFactory().getBean(ContextIdNames.CART_SUBTOTAL_COND);
+		RuleCondition condition = getBeanFactory().getPrototypeBean(ContextIdNames.CART_SUBTOTAL_COND, RuleCondition.class);
 		condition.getParameters().iterator().next().setValue("50.00");
 		serializedPromo.addCondition(condition);
 

@@ -8,10 +8,8 @@ import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsServiceImpl;
@@ -39,14 +37,13 @@ public class DestinationInfoServiceImpl implements DestinationInfoService {
 
 	@Override
 	public Single<Boolean> validateOrderIsShippable(final String scope, final String orderId) {
-		ExecutionResult<CartOrder> cartOrder = cartOrderRepository.getCartOrder(scope, orderId, CartOrderRepository.FindCartOrder.BY_ORDER_GUID);
-		return
-				shoppingCartRepository.getShoppingCart(cartOrder.getData().getShoppingCartGuid())
+		return cartOrderRepository.getCartOrder(scope, orderId, CartOrderRepository.FindCartOrder.BY_ORDER_GUID)
+				.flatMap(cartOrder -> shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid()))
 				.map(ShipmentDetailsUtil::containsPhysicalShipment);
 	}
 
 	private Maybe<String> findSelectedAddressIdForShipment(final String scope, final String cartId) {
-		return cartOrderRepository.findByGuidAsSingle(scope, cartId)
+		return cartOrderRepository.findByGuid(scope, cartId)
 				.flatMapMaybe(cartOrder -> cartOrderRepository.getShippingAddress(cartOrder))
 				.map(Address::getGuid);
 	}

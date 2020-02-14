@@ -129,4 +129,10 @@ public class CustomerStepDefinitionsHelper {
 		return null;
 	}
 
+	/**
+	 * Sets up an anonymous customer for the test environment.
+	 */
+	public void setUpAnonymousCustomer() {
+		customerHolder.set(tac.getPersistersFactory().getStoreTestPersister().createAnonymousCustomer(storeHolder.get()));
+	}
 }

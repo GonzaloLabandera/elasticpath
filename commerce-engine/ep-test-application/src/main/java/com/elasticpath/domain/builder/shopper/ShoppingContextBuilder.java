@@ -72,14 +72,14 @@ public class ShoppingContextBuilder implements DomainObjectBuilder<ShoppingConte
 	}
 
 	protected Shopper buildShopper() {
-		final Shopper shopper = beanFactory.getBean(ContextIdNames.SHOPPER);
+		final Shopper shopper = beanFactory.getPrototypeBean(ContextIdNames.SHOPPER, Shopper.class);
 		shopper.setCustomer(customer);
 		shopper.setStoreCode(storeCode);
 		return shopper;
 	}
 
 	protected CustomerSession buildCustomerSession() {
-		final CustomerSession customerSession = beanFactory.getBean(ContextIdNames.CUSTOMER_SESSION);
+		final CustomerSession customerSession = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_SESSION, CustomerSession.class);
 
 		customerSession.setCreationDate(new Date());
 		customerSession.setCurrency(Currency.getInstance(Locale.US));

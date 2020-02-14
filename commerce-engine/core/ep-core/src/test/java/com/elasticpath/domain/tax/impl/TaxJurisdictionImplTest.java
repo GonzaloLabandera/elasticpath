@@ -18,6 +18,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.domain.tax.TaxCategoryTypeEnum;
@@ -61,7 +63,8 @@ public class TaxJurisdictionImplTest {
 	public void setUp() {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean("localizedProperties", LocalizedPropertiesImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, 
+				LocalizedPropertiesImpl.class);
 
 		this.taxJurisdictionImpl = getFourCategoriesTaxJurisdiction();
 	}

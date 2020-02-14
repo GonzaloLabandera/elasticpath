@@ -11,7 +11,7 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
@@ -105,11 +105,11 @@ public class DynamicContentDeliverySearchTab implements IStoreMarketingInnerTab 
 		StorePlugin.getDefault().getContentSpacesController().addListener(assignmentTargetEventListener);
 
 		UIEvent<DynamicContent> dynamicContentSearchEvent = new UIEvent<>(
-				ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT), EventType.SEARCH, true);
+				BeanLocator.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class), EventType.SEARCH, true);
 		StorePlugin.getDefault().getDynamicContentsController().onEvent(dynamicContentSearchEvent);
 
 		UIEvent<ContentSpace> assignmentTargetEvent = new UIEvent<>(
-				ServiceLocator.getService(ContextIdNames.CONTENTSPACE), EventType.SEARCH, true);
+				BeanLocator.getPrototypeBean(ContextIdNames.CONTENTSPACE, ContentSpace.class), EventType.SEARCH, true);
 		StorePlugin.getDefault().getContentSpacesController().onEvent(assignmentTargetEvent);
 	}
 

@@ -1,10 +1,20 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.order.impl;
 
-import static com.elasticpath.domain.catalog.InventoryAudit.EVENT_ORIGINATOR_WS;
-import static com.elasticpath.domain.order.OrderPaymentStatus.PENDING;
+import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SEARCH_CRITERIA;
+import static com.elasticpath.commons.constants.ContextIdNames.EVENT_ORIGINATOR;
+import static com.elasticpath.commons.constants.ContextIdNames.EVENT_ORIGINATOR_HELPER;
+import static com.elasticpath.commons.constants.ContextIdNames.FETCH_GROUP_LOAD_TUNER;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_CRITERION;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_EVENT_HELPER;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_API_CLEANUP_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_API_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SEARCH_CRITERIA;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SERVICE;
+import static com.elasticpath.domain.order.OrderShipmentStatus.AWAITING_INVENTORY;
 import static com.elasticpath.domain.order.OrderShipmentStatus.INVENTORY_ASSIGNED;
 import static com.elasticpath.domain.order.OrderShipmentStatus.RELEASED;
 import static com.elasticpath.domain.order.OrderShipmentStatus.SHIPPED;
@@ -17,16 +27,17 @@ import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SK
 import static com.elasticpath.persistence.support.FetchFieldConstants.SHIPMENT_ORDER_SKUS_INTERNAL;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyVararg;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -47,19 +58,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.openjpa.lib.jdbc.ReportingSQLException;
 import org.apache.openjpa.persistence.PersistenceException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.core.messaging.order.OrderEventType;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
@@ -71,7 +81,6 @@ import com.elasticpath.domain.event.impl.EventOriginatorImpl;
 import com.elasticpath.domain.impl.ElasticPathImpl;
 import com.elasticpath.domain.order.DuplicateOrderException;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderShipment;
@@ -79,13 +88,12 @@ import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.impl.AbstractOrderShipmentImpl;
 import com.elasticpath.domain.order.impl.ElectronicOrderShipmentImpl;
 import com.elasticpath.domain.order.impl.OrderImpl;
-import com.elasticpath.domain.order.impl.OrderPaymentImpl;
 import com.elasticpath.domain.order.impl.OrderReturnImpl;
 import com.elasticpath.domain.order.impl.OrderReturnSkuImpl;
 import com.elasticpath.domain.order.impl.OrderSkuImpl;
 import com.elasticpath.domain.order.impl.PhysicalOrderShipmentImpl;
 import com.elasticpath.domain.order.impl.ServiceOrderShipmentImpl;
-import com.elasticpath.domain.payment.PaymentGateway;
+import com.elasticpath.domain.orderpaymentapi.OrderPaymentAmounts;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.store.impl.StoreImpl;
@@ -102,26 +110,25 @@ import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.persistence.support.OrderCriterion;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
 import com.elasticpath.persistence.support.impl.OrderCriterionImpl;
-import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.CompleteShipmentFailedException;
+import com.elasticpath.service.order.IncorrectRefundAmountException;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.order.ReleaseShipmentFailedException;
-import com.elasticpath.service.payment.PaymentResult;
-import com.elasticpath.service.payment.PaymentService;
-import com.elasticpath.service.payment.PaymentServiceException;
-import com.elasticpath.service.payment.impl.PaymentResultImpl;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiService;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.tax.TaxCalculationResult;
+import com.elasticpath.service.tax.TaxOperationService;
 import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
 
 /**
  * Test <code>OrderServiceImpl</code>.
  */
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.ExcessiveClassLength", "PMD.CouplingBetweenObjects", "PMD.GodClass",
-		"PMD.AvoidDecimalLiteralsInBigDecimalConstructor"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.ExcessiveClassLength", "PMD.CouplingBetweenObjects", "PMD.GodClass",
+		"PMD.AvoidDecimalLiteralsInBigDecimalConstructor", "PMD.TooManyFields"})
 @RunWith(MockitoJUnitRunner.class)
 public class OrderServiceImplTest {
 
@@ -136,25 +143,41 @@ public class OrderServiceImplTest {
 
 	private static final long MINUTE_IN_MILLIS = 60000;
 
-	private OrderCriterion orderCriterion;
 	private Store store;
-	private StoreImpl store2;
-	private Order order, order2;
+	private Store store2;
+	private Order order;
+	private Order order2;
 
-	@Mock private Order duplicateOrder;
-	@Mock private PersistenceException persistenceException;
-	@Mock private PersistenceException nestedPersistenceException;
-	@Mock private ReportingSQLException duplicateSQLException;
-
-	@Mock private TimeService mockTimeService;
-	@Mock private PaymentService mockPaymentService;
-	@Mock private StoreService mockStoreService;
-	@Mock private EventMessageFactory eventMessageFactory;
-	@Mock private EventMessagePublisher eventMessagePublisher;
-	@Mock private OrderEventHelper orderEventHelper;
-	@Mock private PersistenceEngine persistenceEngine;
-	@Mock private FetchPlanHelper fetchPlanHelper;
-	@Mock private BeanFactory beanFactory;
+	@Mock
+	private Order duplicateOrder;
+	@Mock
+	private PersistenceException persistenceException;
+	@Mock
+	private PersistenceException nestedPersistenceException;
+	@Mock
+	private ReportingSQLException duplicateSQLException;
+	@Mock
+	private TimeService mockTimeService;
+	@Mock
+	private OrderPaymentApiService mockOrderPaymentApiService;
+	@Mock
+	private OrderPaymentApiCleanupService mockPaymentInstrumentCleanupService;
+	@Mock
+	private StoreService mockStoreService;
+	@Mock
+	private EventMessageFactory eventMessageFactory;
+	@Mock
+	private EventMessagePublisher eventMessagePublisher;
+	@Mock
+	private OrderEventHelper orderEventHelper;
+	@Mock
+	private PersistenceEngine persistenceEngine;
+	@Mock
+	private FetchPlanHelper fetchPlanHelper;
+	@Mock
+	private BeanFactory beanFactory;
+	@Mock
+	private TaxOperationService taxOperationService;
 
 	private EventOriginatorHelper eventOriginatorHelper;
 
@@ -171,29 +194,31 @@ public class OrderServiceImplTest {
 	 * @throws Exception -- in case of any errors.
 	 */
 	@Before
-	@SuppressWarnings("unchecked")
 	public void setUp() throws Exception {
 		orderServiceImpl = new OrderServiceImpl();
 		orderServiceImpl.setPersistenceEngine(persistenceEngine);
 		orderServiceImpl.setFetchPlanHelper(fetchPlanHelper);
 
-		elasticPath.setBeanFactory(beanFactory);
-		when(beanFactory.getBeanImplClass(ContextIdNames.ORDER)).thenAnswer(answer -> OrderImpl.class);
-		when(beanFactory.getBean(ContextIdNames.ORDER)).thenReturn(new OrderImpl());
+		when(beanFactory.getSingletonBean(ORDER_PAYMENT_API_SERVICE, OrderPaymentApiService.class))
+				.thenReturn(mockOrderPaymentApiService);
+		when(beanFactory.getSingletonBean(ORDER_PAYMENT_API_CLEANUP_SERVICE, OrderPaymentApiCleanupService.class))
+				.thenReturn(mockPaymentInstrumentCleanupService);
 
-		orderCriterion = new OrderCriterionImpl();
-		when(beanFactory.getBean(ContextIdNames.ORDER_CRITERION)).thenReturn(orderCriterion);
+		elasticPath.setBeanFactory(beanFactory);
+		when(beanFactory.getBeanImplClass(ORDER)).thenAnswer(answer -> OrderImpl.class);
+		when(beanFactory.getPrototypeBean(ORDER, Order.class)).thenReturn(new OrderImpl());
+
+		when(beanFactory.getPrototypeBean(ORDER_CRITERION, OrderCriterion.class)).thenReturn(new OrderCriterionImpl());
 
 		eventOriginatorHelper = new EventOriginatorHelperImpl();
-		when(beanFactory.getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER)).thenReturn(eventOriginatorHelper);
-		when(beanFactory.getBean(ContextIdNames.ORDER_EVENT_HELPER)).thenReturn(orderEventHelper);
-		when(beanFactory.getBean(ContextIdNames.EVENT_ORIGINATOR)).thenReturn(new EventOriginatorImpl());
+		when(beanFactory.getSingletonBean(EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class)).thenReturn(eventOriginatorHelper);
+		when(beanFactory.getSingletonBean(ORDER_EVENT_HELPER, OrderEventHelper.class)).thenReturn(orderEventHelper);
+		when(beanFactory.getPrototypeBean(EVENT_ORIGINATOR, EventOriginator.class)).thenReturn(new EventOriginatorImpl());
 
 		when(mockTimeService.getCurrentTime()).thenReturn(new Date());
 
 		orderServiceImpl.setEventMessageFactory(eventMessageFactory);
 		orderServiceImpl.setEventMessagePublisher(eventMessagePublisher);
-		orderServiceImpl.setPaymentService(mockPaymentService);
 		orderServiceImpl.setStoreService(mockStoreService);
 		orderServiceImpl.setTimeService(mockTimeService);
 
@@ -256,7 +281,7 @@ public class OrderServiceImplTest {
 	 */
 	@Test
 	public void testFindOrder() {
-		when(persistenceEngine.retrieve(anyString(), anyVararg())).thenReturn(singletonList(order));
+		when(persistenceEngine.retrieve(anyString(), anyString())).thenReturn(singletonList(order));
 
 		final List<Order> resultList1 = orderServiceImpl.findOrder("orderNumber", ORDER_NUMBER, true);
 		assertThat(resultList1).isEqualTo(singletonList(order));
@@ -268,17 +293,9 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void testFindOrderByStatus() {
-		when(persistenceEngine.retrieve(anyString(), anyVararg())).thenReturn(singletonList(order));
-		assertThat(orderServiceImpl.findOrderByStatus(
-			CANCELLED, PENDING, INVENTORY_ASSIGNED)).isEqualTo(singletonList(order));
-		assertStoreIsPopulated(store, order);
-	}
-
-	@Test
 	public void testFindOrderByGiftCertificateCode() {
 		final boolean isExactMatch = true;
-		when(persistenceEngine.retrieve(anyString(), anyVararg())).thenReturn(singletonList(order));
+		when(persistenceEngine.retrieve(anyString())).thenReturn(singletonList(order));
 
 		assertThat(orderServiceImpl.findOrderByGiftCertificateCode("GC1", isExactMatch)).isEqualTo(singletonList(order));
 		assertStoreIsPopulated(store, order);
@@ -292,7 +309,7 @@ public class OrderServiceImplTest {
 		Warehouse warehouse = new WarehouseImpl();
 
 		when(persistenceEngine.retrieveByNamedQuery("COUNT_PHYSICAL_SHIPMENTS_BY_STATUS_AND_WAREHOUSE", RELEASED, warehouse.getUidPk()))
-			.thenAnswer(answer -> orders);
+				.thenAnswer(answer -> orders);
 
 		final Long result = orderServiceImpl.getAwaitingShipmentsCount(warehouse);
 		assertThat(result).isEqualTo(2L);
@@ -303,45 +320,45 @@ public class OrderServiceImplTest {
 	public void testFindOrderByCustomerGuid() {
 		// expectations
 		OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
-		when(beanFactory.getBean(ContextIdNames.ORDER_SEARCH_CRITERIA)).thenReturn(orderSearchCriteria);
+		when(beanFactory.getPrototypeBean(ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class)).thenReturn(orderSearchCriteria);
 		CustomerSearchCriteria customerSearchCriteria = new CustomerSearchCriteria();
-		when(beanFactory.getBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA)).thenReturn(customerSearchCriteria);
+		when(beanFactory.getPrototypeBean(CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class)).thenReturn(customerSearchCriteria);
 		when(persistenceEngine.retrieve(anyString(), any(Object[].class), anyInt(), anyInt())).thenReturn(singletonList(order));
 
 		assertThat(orderServiceImpl.findOrderByCustomerGuid(GUID_VALUE, true))
-			.as("The orders should come from the retrieve call")
-			.isEqualTo(singletonList(order));
+				.as("The orders should come from the retrieve call")
+				.isEqualTo(singletonList(order));
 		assertStoreIsPopulated(store, order);
 		assertThat(customerSearchCriteria.getGuid())
-			.as("The customer search criteria should include the guid")
-			.isEqualTo(GUID_VALUE);
+				.as("The customer search criteria should include the guid")
+				.isEqualTo(GUID_VALUE);
 		assertThat(orderSearchCriteria.getCustomerSearchCriteria())
-			.as("The order criteria should include the customer criteria")
-			.isEqualTo(customerSearchCriteria);
+				.as("The order criteria should include the customer criteria")
+				.isEqualTo(customerSearchCriteria);
 		assertThat(orderSearchCriteria.getExcludedOrderStatus())
-			.as("The order criteria should exclude failed orders")
-			.isEqualTo(FAILED);
+				.as("The order criteria should exclude failed orders")
+				.isEqualTo(FAILED);
 		assertThat(customerSearchCriteria.isFuzzySearchDisabled())
-			.as("The customer search criteria should disable fuzzy match")
-			.isTrue();
+				.as("The customer search criteria should disable fuzzy match")
+				.isTrue();
 
 		assertThat(orderServiceImpl.findOrderByCustomerGuid(GUID_VALUE, false))
-			.as("The orders should come from the retrieve call")
-			.isEqualTo(singletonList(order));
+				.as("The orders should come from the retrieve call")
+				.isEqualTo(singletonList(order));
 		assertThat(customerSearchCriteria.isFuzzySearchDisabled())
-			.as("The customer search criteria should enable fuzzy match")
-			.isFalse();
+				.as("The customer search criteria should enable fuzzy match")
+				.isFalse();
 	}
 
 	@Test
 	public void testFindOrderByCustomerGuidAndStoreCode() {
 		when(persistenceEngine.retrieveByNamedQuery("ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE", GUID_VALUE, store.getCode()))
-			.thenReturn(singletonList(order));
+				.thenReturn(singletonList(order));
 
 		final boolean retrieveFullInfo = true;
 		assertThat(orderServiceImpl.findOrdersByCustomerGuidAndStoreCode(GUID_VALUE, store.getCode(), retrieveFullInfo))
-			.as("The orders should come from the retrieve call")
-			.isEqualTo(singletonList(order));
+				.as("The orders should come from the retrieve call")
+				.isEqualTo(singletonList(order));
 		assertStoreIsPopulated(store, order);
 		verify(persistenceEngine).retrieveByNamedQuery("ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE", GUID_VALUE, store.getCode());
 	}
@@ -360,20 +377,9 @@ public class OrderServiceImplTest {
 		verify(persistenceEngine).retrieveByNamedQuery("ORDER_SELECT_BY_CREATED_DATE", date);
 	}
 
-	/**
-	 * Test method for 'com.elasticpath.service.OrderServiceImpl.list'.
-	 */
-	@Test
-	public void testList() {
-		when(persistenceEngine.retrieveByNamedQuery("ORDER_SELECT_ALL")).thenReturn(asList(order, order2));
-		assertThat(orderServiceImpl.list()).isEqualTo(asList(order, order2));
-		assertStoreIsPopulated(store, order2);
-		verify(persistenceEngine).retrieveByNamedQuery("ORDER_SELECT_ALL");
-	}
-
 	@Test
 	public void testFindOrdersBySearchCriteria() {
-		when(beanFactory.getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER)).thenReturn(new FetchGroupLoadTunerImpl());
+		when(beanFactory.getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class)).thenReturn(new FetchGroupLoadTunerImpl());
 		when(persistenceEngine.retrieve(anyString(), anyInt(), anyInt())).thenReturn(asList(order, order2));
 
 		assertThat(orderServiceImpl.findOrdersBySearchCriteria(new OrderSearchCriteria(), 1, 1)).isEqualTo(asList(order, order2));
@@ -490,11 +496,11 @@ public class OrderServiceImplTest {
 
 		Map<Long, Integer> orderSkuReturnedMap = service.getOrderSkuReturnQtyMap(uid);
 		assertThat(orderSkuReturnedMap.get(skuUid1).intValue())
-			.as("Two items should be returned from the first OrderSku.")
-			.isEqualTo(returnSku1Qty1 + returnSku1Qty2);
+				.as("Two items should be returned from the first OrderSku.")
+				.isEqualTo(returnSku1Qty1 + returnSku1Qty2);
 		assertThat(orderSkuReturnedMap.get(skuUid2).intValue())
-			.as("One item should be returned from the second OrderSku.")
-			.isEqualTo(returnSku2Qty1);
+				.as("One item should be returned from the second OrderSku.")
+				.isEqualTo(returnSku2Qty1);
 	}
 
 	/**
@@ -642,26 +648,17 @@ public class OrderServiceImplTest {
 		order.setStoreCode(store.getCode());
 		order.addShipment(physicalOrderShipmentImpl);
 
-		when(beanFactory.getBean(ContextIdNames.ORDER_SERVICE)).thenReturn(orderServiceImpl);
-
+		when(beanFactory.getSingletonBean(ORDER_SERVICE, OrderService.class)).thenReturn(orderServiceImpl);
 		when(persistenceEngine.retrieveByNamedQuery(eq("PHYSICAL_SHIPMENT_BY_SHIPMENT_NUMBER"), anyString()))
-			.thenAnswer(answer -> shipmentList);
+				.thenAnswer(answer -> shipmentList);
 
-		final PaymentResult paymentResult = new PaymentResultImpl();
-		paymentResult.setResultCode(PaymentResult.CODE_FAILED);
-		final OrderPayment orderPayment = new OrderPaymentImpl();
-		paymentResult.addProcessedPayment(orderPayment);
-
-		when(mockPaymentService.processShipmentPayment(any(OrderShipment.class)))
-			.thenReturn(paymentResult)
-			.thenThrow(new PaymentServiceException("expected"));
+		doThrow(new RuntimeException("expected")).when(mockOrderPaymentApiService).shipmentCompleted(any(OrderShipment.class));
 
 		Throwable thrown = catchThrowable(() -> orderServiceImpl.completeShipment(SHIPMENT_NUMBER, trackingCode, captureFund, null,
-			sendConfEmail, eventOriginatorHelper.getSystemOriginator()));
+				sendConfEmail, eventOriginatorHelper.getSystemOriginator()));
 
 		assertThat(thrown).isInstanceOf(CompleteShipmentFailedException.class);
 		assertThat(thrown).isNotNull();
-		verify(mockPaymentService).rollBackPayments(singletonList(orderPayment));
 	}
 
 	/**
@@ -669,7 +666,7 @@ public class OrderServiceImplTest {
 	 */
 	@Test
 	public void testUpdateOrderShipmentStatus() {
-		when(beanFactory.getBean(ContextIdNames.ORDER_SERVICE)).thenReturn(orderServiceImpl);
+		when(beanFactory.getSingletonBean(ORDER_SERVICE, OrderService.class)).thenReturn(orderServiceImpl);
 
 		final int pickDelayOrder1 = 4;
 		final int pickDelayOrder2 = 8;
@@ -723,10 +720,9 @@ public class OrderServiceImplTest {
 
 		// expectations
 		when(persistenceEngine.retrieveByNamedQuery("ORDERS_BY_ORDER_STATUS_AND_SHIPMENT_STATUS", parameters))
-			.thenAnswer(answer -> orderList);
+				.thenAnswer(answer -> orderList);
 		when(persistenceEngine.get(OrderImpl.class, 1L)).thenAnswer(answer -> order);
 		when(persistenceEngine.merge(any(Persistable.class))).thenReturn(order);
-		when(mockPaymentService.adjustShipmentPayment(any(OrderShipment.class))).thenReturn(new PaymentResultImpl());
 
 		this.orderServiceImpl.updateOrderShipmentStatus();
 
@@ -736,43 +732,21 @@ public class OrderServiceImplTest {
 
 	}
 
-	/** Test that you cannot cancel an order that is not cancellable. */
-	@Test(expected = EpServiceException.class)
-	public void testProcessOrderCancellationNotCancellable() {
-		Order order = new OrderImpl() {
-			private static final long serialVersionUID = 4330059855392807314L;
-
-			@Override
-			public boolean isCancellable() {
-				return false;
-			}
-		};
-		orderServiceImpl.processOrderCancellation(order);
-	}
-
-	/** Test that you cannot cancel an order that is not cancellable. */
 	@Test
-	public void testProcessOrderCancellationIsCancellableNoOrderSkus() {
-
+	public void testCancelOrder() {
 		// Mock out getEventOriginator to make the test easier
 		orderServiceImpl = new OrderServiceImpl() {
-			@Override
-			String getEventOriginator(final Order order) {
-				return EVENT_ORIGINATOR_WS;
-			}
-
-			@Override
-			protected void sanityCheck() {
-				// Always be sane
-			}
-
 			@Override
 			public Order update(final Order order) throws EpServiceException {
 				return order;  // ignore persistence - not testing that
 			}
 		};
 		orderServiceImpl.setEventMessageFactory(eventMessageFactory);
+		EventMessage eventMessage = mock(EventMessage.class);
+		given(eventMessageFactory.createEventMessage(eq(OrderEventType.ORDER_CANCELLED), any(), any())).willReturn(eventMessage);
 		orderServiceImpl.setEventMessagePublisher(eventMessagePublisher);
+		orderServiceImpl.setTaxOperationService(taxOperationService);
+		PhysicalOrderShipmentImpl physicalOrderShipmentImpl = this.getMockPhysicalOrderShipment();
 
 		// This order is cancellable
 		Order order = new OrderImpl() {
@@ -782,39 +756,32 @@ public class OrderServiceImplTest {
 			public boolean isCancellable() {
 				return true;
 			}
+
+			@Override
+			public List<OrderShipment> getAllShipments() {
+				return singletonList(physicalOrderShipmentImpl);
+			}
 		};
 
-		Order processedOrder = orderServiceImpl.processOrderCancellation(order);
+		when(elasticPath.getSingletonBean(ORDER_SERVICE, OrderService.class)).thenReturn(orderServiceImpl);
+
+		Order processedOrder = orderServiceImpl.cancelOrder(order);
 		assertThat(processedOrder.getStatus()).isEqualTo(CANCELLED);
+		verify(eventMessagePublisher).publish(eventMessage);
 	}
 
 	@Test
-	public void verifyOrderCancelSendsEventMessage() {
-		// Given
-		OrderServiceImpl orderService = new OrderServiceImpl();
-		Order order = mock(Order.class);
-		given(order.isCancellable()).willReturn(true);
+	public void testCancelOrderWhenOrderIsNotCancellable() {
+		// This order is cancellable
+		Order order = new OrderImpl() {
+			private static final long serialVersionUID = -392157231837612308L;
 
-		EventMessageFactory eventMessageFactory = mock(EventMessageFactory.class);
-		EventMessage eventMessage = mock(EventMessage.class);
-		given(eventMessageFactory.createEventMessage(eq(OrderEventType.ORDER_CANCELLED), any(), any())).willReturn(eventMessage);
-		orderService.setEventMessageFactory(eventMessageFactory);
-
-		EventMessagePublisher eventMessagePublisher = mock(EventMessagePublisher.class);
-		orderService.setEventMessagePublisher(eventMessagePublisher);
-
-		PersistenceEngine persistenceEngine = mock(PersistenceEngine.class);
-		given(persistenceEngine.merge(order)).willReturn(order);
-		orderService.setPersistenceEngine(persistenceEngine);
-
-		orderService.setStoreService(mock(StoreService.class));
-		orderService.setTimeService(mock(TimeService.class));
-
-		// When
-		orderService.processOrderCancellation(order);
-
-		// Then
-		verify(eventMessagePublisher).publish(eventMessage);
+			@Override
+			public boolean isCancellable() {
+				return false;
+			}
+		};
+		assertThatThrownBy(() -> orderServiceImpl.cancelOrder(order)).isInstanceOf(EpServiceException.class);
 	}
 
 	@Test
@@ -832,7 +799,7 @@ public class OrderServiceImplTest {
 	 */
 	@Test
 	public void testProcessOrderShipment() {
-		when(beanFactory.getBean(ContextIdNames.ORDER_SERVICE)).thenReturn(orderServiceImpl);
+		when(beanFactory.getSingletonBean(ORDER_SERVICE, OrderService.class)).thenReturn(orderServiceImpl);
 
 		final String orderNumber = "1";
 		final String shipmentNumber = "2";
@@ -859,13 +826,12 @@ public class OrderServiceImplTest {
 		order.addShipment(physicalOrderShipmentImpl);
 
 		when(persistenceEngine.retrieveByNamedQuery(eq("PHYSICAL_SHIPMENT_BY_SHIPMENT_NUMBER"), anyString()))
-			.thenAnswer(answer -> shipmentList);
+				.thenAnswer(answer -> shipmentList);
 		when(persistenceEngine.merge(any(Persistable.class))).thenReturn(order);
 		final Order result = orderServiceImpl.processOrderShipment(shipmentNumber, null, null, eventOriginatorHelper.getSystemOriginator());
-		verify(mockPaymentService).finalizeShipment(physicalOrderShipmentImpl);
 		assertThat(result.getStatus()).as("Order should now be in the COMPLETED state.").isEqualTo(COMPLETED);
 		assertThat(result.getAllShipments().iterator().next()
-			.getShipmentStatus()).as("Shipment should not be in the SHIPPED state.").isEqualTo(SHIPPED);
+				.getShipmentStatus()).as("Shipment should not be in the SHIPPED state.").isEqualTo(SHIPPED);
 	}
 
 	/**
@@ -905,35 +871,97 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void testProcessRefundOrderPayment() {
-		final double amount = 10.0;
-
-		final PaymentGateway gateway = mock(PaymentGateway.class);
-		store.setPaymentGateways(singleton(gateway));
-
+	public void testRefundOrderPayment() {
+		final Money refundAmount = Money.valueOf(BigDecimal.TEN, order.getCurrency());
 		final PhysicalOrderShipmentImpl shipment = getMockPhysicalOrderShipment();
 		order.addShipment(shipment);
 		shipment.setStatus(SHIPPED);
+		final OrderPaymentAmounts amounts = new OrderPaymentAmounts();
+		amounts.setAmountRefundable(refundAmount);
+		when(mockOrderPaymentApiService.getOrderPaymentAmounts(order)).thenReturn(amounts);
 
-		final OrderPayment payment = new OrderPaymentImpl();
-		payment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
-		payment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		payment.setAmount(new BigDecimal(amount));
-		payment.setCurrencyCode("CAD");
-		order.addOrderPayment(payment);
+		orderServiceImpl.refundOrderPayment(order, ImmutableList.of(), refundAmount, new EventOriginatorImpl());
 
-		final BigDecimal refundAmount = new BigDecimal(amount);
-		EventOriginator originator = new EventOriginatorImpl();
-
-		when(persistenceEngine.get(OrderImpl.class, order.getUidPk())).thenAnswer(answer -> order);
-		when(persistenceEngine.merge(order)).thenReturn(order);
-		when(mockPaymentService.refundShipmentPayment(any(OrderShipment.class), any(OrderPayment.class), any(BigDecimal.class)))
-			.thenReturn(null);
-		orderServiceImpl.processRefundOrderPayment(order.getUidPk(), shipment.getShipmentNumber(), payment, refundAmount, originator);
-		verify(orderEventHelper).logOrderPaymentCaptured(order, payment);
+		verify(mockOrderPaymentApiService).refund(order, emptyList(), refundAmount);
 	}
 
-	@Test(expected = ReleaseShipmentFailedException.class)
+	@Test
+	public void testManualRefundOrderPayment() {
+		final Money refundAmount = Money.valueOf(BigDecimal.TEN, order.getCurrency());
+		final PhysicalOrderShipmentImpl shipment = getMockPhysicalOrderShipment();
+		order.addShipment(shipment);
+		shipment.setStatus(SHIPPED);
+		final OrderPaymentAmounts amounts = new OrderPaymentAmounts();
+		amounts.setAmountRefundable(refundAmount);
+		when(mockOrderPaymentApiService.getOrderPaymentAmounts(order)).thenReturn(amounts);
+
+		orderServiceImpl.manualRefundOrderPayment(order, refundAmount, new EventOriginatorImpl());
+
+		verify(mockOrderPaymentApiService).manualRefund(order, refundAmount);
+	}
+
+	@Test(expected = IncorrectRefundAmountException.class)
+	public void testRefundOrderPaymentFailsForIncorrectRefundAmount() {
+		final Money refundAmount = Money.valueOf(BigDecimal.TEN, order.getCurrency());
+		final PhysicalOrderShipmentImpl shipment = getMockPhysicalOrderShipment();
+		order.addShipment(shipment);
+		shipment.setStatus(SHIPPED);
+		final OrderPaymentAmounts amounts = new OrderPaymentAmounts();
+		amounts.setAmountRefundable(refundAmount.subtract(Money.valueOf(BigDecimal.ONE, order.getCurrency())));
+		when(mockOrderPaymentApiService.getOrderPaymentAmounts(order)).thenReturn(amounts);
+
+		orderServiceImpl.refundOrderPayment(order, ImmutableList.of(), refundAmount, new EventOriginatorImpl());
+	}
+
+	@Test(expected = IncorrectRefundAmountException.class)
+	public void testManualRefundOrderPaymentFailsForIncorrectRefundAmount() {
+		final Money refundAmount = Money.valueOf(BigDecimal.TEN, order.getCurrency());
+		final PhysicalOrderShipmentImpl shipment = getMockPhysicalOrderShipment();
+		order.addShipment(shipment);
+		shipment.setStatus(SHIPPED);
+		final OrderPaymentAmounts amounts = new OrderPaymentAmounts();
+		amounts.setAmountRefundable(refundAmount.subtract(Money.valueOf(BigDecimal.ONE, order.getCurrency())));
+		when(mockOrderPaymentApiService.getOrderPaymentAmounts(order)).thenReturn(amounts);
+
+		orderServiceImpl.manualRefundOrderPayment(order, refundAmount, new EventOriginatorImpl());
+	}
+
+	@Test(expected = EpServiceException.class)
+	public void testRefundOrderPaymentFailsForShipmentAwaitingInventory() {
+		final PhysicalOrderShipmentImpl shipment = getMockPhysicalOrderShipment();
+		order.addShipment(shipment);
+		shipment.setStatus(AWAITING_INVENTORY);
+
+		orderServiceImpl.refundOrderPayment(order,
+				ImmutableList.of(),
+				Money.valueOf(BigDecimal.TEN, order.getCurrency()),
+				new EventOriginatorImpl());
+	}
+
+	@Test(expected = EpServiceException.class)
+	public void testRefundOrderPaymentFailsForReleasedShipment() {
+		final PhysicalOrderShipmentImpl shipment = getMockPhysicalOrderShipment();
+		order.addShipment(shipment);
+		shipment.setStatus(RELEASED);
+
+		orderServiceImpl.refundOrderPayment(order,
+				ImmutableList.of(),
+				Money.valueOf(BigDecimal.TEN, order.getCurrency()),
+				new EventOriginatorImpl());
+	}
+
+	@Test(expected = EpServiceException.class)
+	public void testManualRefundOrderPaymentFailsForReleasedShipment() {
+		final PhysicalOrderShipmentImpl shipment = getMockPhysicalOrderShipment();
+		order.addShipment(shipment);
+		shipment.setStatus(RELEASED);
+
+		orderServiceImpl.manualRefundOrderPayment(order,
+				Money.valueOf(BigDecimal.TEN, order.getCurrency()),
+				new EventOriginatorImpl());
+	}
+
+	@Test
 	public void verifyFailureToReleaseOrderShipmentSendsEventMessage() {
 		final String exceptionMessage = "Boom!";
 
@@ -956,12 +984,12 @@ public class OrderServiceImplTest {
 
 		final EventMessage eventMessage = mock(EventMessage.class);
 		when(eventMessageFactory.createEventMessage(OrderEventType.ORDER_SHIPMENT_RELEASE_FAILED,
-			shipment.getShipmentNumber(), expectedEventMessageData)
+				shipment.getShipmentNumber(), expectedEventMessageData)
 		).thenReturn(eventMessage);
 
 		releaseShipmentFailingOrderServiceImpl.processReleaseShipment(shipment);
 		verify(eventMessageFactory).createEventMessage(OrderEventType.ORDER_SHIPMENT_RELEASE_FAILED,
-			shipment.getShipmentNumber(), expectedEventMessageData);
+				shipment.getShipmentNumber(), expectedEventMessageData);
 		verify(eventMessagePublisher).publish(eventMessage);
 	}
 
@@ -969,7 +997,7 @@ public class OrderServiceImplTest {
 	public void verifyCompleteShipmentSendsEventMessage() {
 		final OrderService mockOrderService = mock(OrderService.class);
 
-		when(beanFactory.getBean(ContextIdNames.ORDER_SERVICE)).thenReturn(mockOrderService);
+		when(beanFactory.getSingletonBean(ORDER_SERVICE, OrderService.class)).thenReturn(mockOrderService);
 
 		final String shipmentNumber = "shipment-1";
 		final String trackingCode = "TRACK-001";
@@ -982,19 +1010,19 @@ public class OrderServiceImplTest {
 		final Order order = mock(Order.class);
 
 		when(mockOrderService.processOrderShipment(shipmentNumber, trackingCode, shipmentDate, eventOriginator))
-			.thenReturn(order);
+				.thenReturn(order);
 		when(order.getGuid()).thenReturn(ORDER_NUMBER);
 
 		final EventMessage eventMessage = mock(EventMessage.class);
 		when(eventMessageFactory.createEventMessage(OrderEventType.ORDER_SHIPMENT_SHIPPED, shipmentNumber,
-			ImmutableMap.of("orderGuid", ORDER_NUMBER))
+				ImmutableMap.of("orderGuid", ORDER_NUMBER))
 		).thenReturn(eventMessage);
 
 
 		orderServiceImpl.completeShipment(shipmentNumber, trackingCode, false, shipmentDate, sendConfEmail, eventOriginator);
 		verify(eventMessagePublisher).publish(eventMessage);
 		verify(eventMessageFactory).createEventMessage(OrderEventType.ORDER_SHIPMENT_SHIPPED, shipmentNumber,
-			ImmutableMap.of("orderGuid", ORDER_NUMBER));
+				ImmutableMap.of("orderGuid", ORDER_NUMBER));
 	}
 
 	@Test
@@ -1066,7 +1094,7 @@ public class OrderServiceImplTest {
 	@Test
 	public void verifyShipmentsAreReleasedWhenOrderIsReleased() {
 		final OrderService mockOrderService = mock(OrderService.class);
-		when(beanFactory.getBean(ContextIdNames.ORDER_SERVICE)).thenReturn(mockOrderService);
+		when(beanFactory.getSingletonBean(ORDER_SERVICE, OrderService.class)).thenReturn(mockOrderService);
 
 		ignorePersistence();
 
@@ -1087,15 +1115,11 @@ public class OrderServiceImplTest {
 		OrderShipment electronicShipment = getMockElectronicOrderShipment();
 		order.addShipment(electronicShipment);
 
-		OrderPaymentImpl orderPayment = new OrderPaymentImpl();
-		orderPayment.setOrderShipment(electronicShipment);
-		order.addOrderPayment(orderPayment);
-
 		// Given we are trying to release an order previously held.
 		order.holdOrder();
 
 		orderServiceImpl.releaseOrder(this.order);
-		verify(mockPaymentService).processShipmentPayment(electronicShipment);
+		verify(mockOrderPaymentApiService).shipmentCompleted(electronicShipment);
 	}
 
 	@Test
@@ -1110,21 +1134,13 @@ public class OrderServiceImplTest {
 		order.addShipment(serviceShipment);
 		order.addShipment(physicalShipment);
 
-		OrderPaymentImpl electronicShipmentPayment = new OrderPaymentImpl();
-		electronicShipmentPayment.setOrderShipment(electronicShipment);
-		order.addOrderPayment(electronicShipmentPayment);
-
-		OrderPaymentImpl serviceShipmentPayment = new OrderPaymentImpl();
-		serviceShipmentPayment.setOrderShipment(serviceShipment);
-		order.addOrderPayment(serviceShipmentPayment);
-
 		// Given we are trying to release an order previously held.
 		order.holdOrder();
 
 		orderServiceImpl.captureImmediatelyShippableShipments(order);
-		verify(mockPaymentService).processShipmentPayment(electronicShipment);
-		verify(mockPaymentService).processShipmentPayment(serviceShipment);
-		verify(mockPaymentService, never()).processShipmentPayment(physicalShipment);
+		verify(mockOrderPaymentApiService).shipmentCompleted(electronicShipment);
+		verify(mockOrderPaymentApiService).shipmentCompleted(serviceShipment);
+		verify(mockOrderPaymentApiService, never()).shipmentCompleted(physicalShipment);
 	}
 
 
@@ -1135,17 +1151,23 @@ public class OrderServiceImplTest {
 		OrderShipment electronicShipment = getMockElectronicOrderShipment();
 		order.addShipment(electronicShipment);
 
-		OrderPaymentImpl orderPayment = new OrderPaymentImpl();
-		orderPayment.setOrderShipment(electronicShipment);
-		order.addOrderPayment(orderPayment);
-
 		// Given the order was not on hold.
 
 		// When
 		orderServiceImpl.releaseOrder(this.order);
 
-		// Then there should be no call to paymentService.processShipment
-		verify(mockPaymentService, never()).processShipmentPayment(electronicShipment);
+		// Then there should be no call to orderPaymentApiService.shipmentCompleted
+		verify(mockOrderPaymentApiService, never()).shipmentCompleted(electronicShipment);
+	}
+
+	@Test
+	public void deleteOrders() {
+		final List<Long> orderUidList = new ArrayList<>();
+		orderUidList.add(2L);
+
+		orderServiceImpl.deleteOrders(orderUidList);
+
+		verify(mockPaymentInstrumentCleanupService).removeByOrderUidList(orderUidList);
 	}
 
 	@Test(expected = DuplicateOrderException.class)
@@ -1168,7 +1190,6 @@ public class OrderServiceImplTest {
 		when(nestedPersistenceException.getCause()).thenReturn(duplicateSQLException);
 		doThrow(persistenceException).when(persistenceEngine).save(duplicateOrder);
 	}
-
 
 	private void assertStoreIsPopulated(final Store expectedStore, final Order order) {
 		//  Pointless PMD-enforced craziness

@@ -1,0 +1,11 @@
+# EditorConfig is a file format that allows specifying formatting and editing requirements in a tool agnostic way.
+# More information is available here (https://editorconfig.org/)
+
+# The main purpose of this file is to fix GitHubs displaying of code since HTML treats tabs as spaced as 8.
+# See: https://stackoverflow.com/questions/8833953/how-to-change-tab-size-on-github
+
+# Other code style rules are specified in other places (checkstyle, IDE code style formats) and those places should be considered authoritative.
+root = true
+
+[*]
+tab_width = 4

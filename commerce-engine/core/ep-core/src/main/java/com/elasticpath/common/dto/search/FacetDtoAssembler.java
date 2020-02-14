@@ -42,7 +42,7 @@ public class FacetDtoAssembler extends AbstractDtoAssembler<FacetDTO, Facet> {
 
 	@Override
 	public Facet getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.FACET);
+		return beanFactory.getPrototypeBean(ContextIdNames.FACET, Facet.class);
 	}
 
 	@Override

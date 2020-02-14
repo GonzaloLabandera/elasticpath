@@ -23,7 +23,6 @@ import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.domain.shipping.evaluator.impl.ShoppingCartShipmentTypeEvaluator;
@@ -171,7 +170,7 @@ public class ShoppingCartShipmentTypeEvaluatorTest extends BasicSpringContextTes
 		sku.initialize();
 		productBundle.addOrUpdateSku(sku);
 
-		ProductService productService = getBeanFactory().getBean(ContextIdNames.PRODUCT_SERVICE);
+		ProductService productService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 
 		return productService.saveOrUpdate(productBundle);
 	}
@@ -186,7 +185,7 @@ public class ShoppingCartShipmentTypeEvaluatorTest extends BasicSpringContextTes
 
 	private Price createPrice() {
 		Currency currency = TestDataPersisterFactory.DEFAULT_CURRENCY;
-		PriceImpl price = getBeanFactory().getBean(ContextIdNames.PRICE);
+		Price price = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		price.setCurrency(currency);
 		price.setListPrice(Money.valueOf(BigDecimal.ONE, currency));
 
@@ -201,7 +200,7 @@ public class ShoppingCartShipmentTypeEvaluatorTest extends BasicSpringContextTes
 		ShoppingItem bundleShoppingItem = shoppingItemFactory.createShoppingItem(productBundle.getDefaultSku(), null, 1, 1, null);
 
 		// Derive a ShoppingItemDTO, select all the constituents and convert back to a ShoppingItem.
-		final ShoppingItemAssembler shoppingItemAssembler = getBeanFactory().getBean("shoppingItemAssembler");
+		final ShoppingItemAssembler shoppingItemAssembler = getBeanFactory().getSingletonBean("shoppingItemAssembler", ShoppingItemAssembler.class);
 		final ShoppingItemDto dto = shoppingItemAssembler.assembleShoppingItemDtoFrom(bundleShoppingItem);
 		dto.setSelected(true);
 		for (final ShoppingItemDto child : dto.getConstituents()) {

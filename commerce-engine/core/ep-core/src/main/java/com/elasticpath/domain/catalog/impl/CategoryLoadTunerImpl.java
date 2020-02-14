@@ -208,7 +208,7 @@ public class CategoryLoadTunerImpl extends AbstractEpDomainImpl implements Categ
 		mergedLoadTuner.loadingLocaleDependantFields = loadingLocaleDependantFields || categoryLoadTuner.isLoadingLocaleDependantFields();
 
 		if (categoryTypeLoadTuner == null) {
-			categoryTypeLoadTuner = getBean(ContextIdNames.CATEGORY_TYPE_LOAD_TUNER);
+			categoryTypeLoadTuner = getPrototypeBean(ContextIdNames.CATEGORY_TYPE_LOAD_TUNER, CategoryTypeLoadTuner.class);
 		}
 		mergedLoadTuner.categoryTypeLoadTuner = categoryTypeLoadTuner.merge(categoryLoadTuner.getCategoryTypeLoadTuner());
 		return mergedLoadTuner;

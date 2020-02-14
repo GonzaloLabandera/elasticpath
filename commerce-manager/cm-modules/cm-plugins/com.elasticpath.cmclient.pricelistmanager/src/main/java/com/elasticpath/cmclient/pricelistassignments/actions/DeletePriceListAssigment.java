@@ -12,8 +12,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmSingletonUtil;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.UIEvent;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
@@ -41,8 +41,9 @@ public class DeletePriceListAssigment extends AbstractPolicyAwareAction {
 	
 	private final PriceListAssigmentsSearchView view;
 
-	private final PriceListAssignmentService priceListAssignmentService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
-	private final StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+	private final PriceListAssignmentService priceListAssignmentService = BeanLocator
+			.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE, PriceListAssignmentService.class);
+	private final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 	private final ChangeSetHelper changeSetHelper;
 	
 	/**

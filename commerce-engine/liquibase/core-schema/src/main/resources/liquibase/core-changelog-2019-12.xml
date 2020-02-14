@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.6.0-generalmodifiers.xml">
+
+	<changeSet id="2019-12-PERF-187-Create-Composite-Index-In-TSHOPPINGCART" author="elasticpath" context="perf-fix">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<not>
+					<indexExists tableName="TSHOPPINGCART" indexName="I_SHOPCART_SHOPPER_AND_STATUS"/>
+				</not>
+			</and>
+		</preConditions>
+
+		<comment>Replace TSHOPPINGCART indices on SHOPPER ID and STATUS with a composite index to improve performance</comment>
+
+		<createIndex tableName="TSHOPPINGCART" indexName="I_SHOPCART_SHOPPER_AND_STATUS">
+			<column name="SHOPPER_UID" />
+			<column name="STATUS" />
+		</createIndex>
+
+		<dropForeignKeyConstraint baseTableName="TSHOPPINGCART" constraintName="TSHOPPINGCART_FK_SHOPPER"/>
+
+		<dropIndex indexName="I_SHOPCART_SHOPPER_UID" tableName="TSHOPPINGCART" />
+		<dropIndex indexName="I_CART_STATUS" tableName="TSHOPPINGCART" />
+
+		<addForeignKeyConstraint baseTableName="TSHOPPINGCART" baseColumnNames="SHOPPER_UID" constraintName="TSHOPPINGCART_FK_SHOPPER"
+								 referencedTableName="TSHOPPER" referencedColumnNames="UIDPK"/>
+
+	</changeSet>
+
+</databaseChangeLog>
+
+
+

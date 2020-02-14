@@ -34,11 +34,11 @@ import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.comparator.AttributeViewerComparatorByNameIgnoreCase;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
@@ -103,7 +103,7 @@ public class AddEditGlobalAttributesDialog extends AbstractEpDialog implements I
 	 */
 	public AddEditGlobalAttributesDialog(final Shell parentShell) {
 		super(parentShell, 2, false);
-		attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 	}
 
 	@Override

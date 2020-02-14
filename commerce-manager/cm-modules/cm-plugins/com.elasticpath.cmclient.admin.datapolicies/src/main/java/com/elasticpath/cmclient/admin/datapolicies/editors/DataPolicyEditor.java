@@ -23,7 +23,7 @@ import com.elasticpath.cmclient.admin.datapolicies.editors.pages.DataPolicySegme
 import com.elasticpath.cmclient.admin.datapolicies.editors.pages.DataPolicySummaryPage;
 import com.elasticpath.cmclient.admin.datapolicies.event.DataPolicyEventListener;
 import com.elasticpath.cmclient.admin.datapolicies.event.DataPolicyEventService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -85,14 +85,14 @@ public class DataPolicyEditor extends AbstractCmClientFormEditor implements Data
 
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) {
-		dataPolicyService = ServiceLocator.getService(ContextIdNames.DATA_POLICY_SERVICE);
+		dataPolicyService = BeanLocator.getSingletonBean(ContextIdNames.DATA_POLICY_SERVICE, DataPolicyService.class);
 
 		final Long uid = input.getAdapter(Long.class);
 		if (uid > 0) {
 			dataPolicy = dataPolicyService.load(uid);
 			action = ItemChangeEvent.EventType.CHANGE;
 		} else {
-			dataPolicy = ServiceLocator.getService(ContextIdNames.DATA_POLICY);
+			dataPolicy = BeanLocator.getPrototypeBean(ContextIdNames.DATA_POLICY, DataPolicy.class);
 			dataPolicy.initialize();
 			action = ItemChangeEvent.EventType.ADD;
 		}

@@ -61,7 +61,7 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 
 	@Override
 	 public Single<ShoppingCart> getShoppingCartSingle(final String cartGuid) {
-		return customerSessionRepository.findOrCreateCustomerSessionAsSingle()
+		return customerSessionRepository.findOrCreateCustomerSession()
 				.flatMap(customerSession -> getShoppingCartSingle(cartGuid, customerSession));
 	}
 

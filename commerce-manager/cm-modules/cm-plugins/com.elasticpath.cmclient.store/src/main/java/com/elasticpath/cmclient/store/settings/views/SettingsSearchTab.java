@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.EntityEditorInput;
 import com.elasticpath.cmclient.core.helpers.store.SettingModel;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -48,7 +48,7 @@ public class SettingsSearchTab implements IStoreMarketingInnerTab {
 
 	private final int tabIndex;
 
-	private final StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+	private final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 
 	/**
 	 * The constructor.

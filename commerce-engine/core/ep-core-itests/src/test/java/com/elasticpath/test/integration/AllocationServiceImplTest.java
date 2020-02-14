@@ -56,7 +56,7 @@ public class AllocationServiceImplTest {
 //		customerScenario = new CustomerScenario(scenario.getStore(), persisterFactory);
 //		customerScenario.initialize();
 //
-//		ProductService productService = (ProductService) elasticPath.getBean(ContextIdNames.PRODUCT_SERVICE);
+//		ProductService productService = (ProductService) elasticPath.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 //
 //		product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(), scenario.getCategory(),
 //				scenario.getWarehouse());
@@ -76,7 +76,7 @@ public class AllocationServiceImplTest {
 //
 //		shoppingCart = createEmptyShoppingCart();
 //
-//		orderService = elasticPath.getBean(ContextIdNames.ORDER_SERVICE);
+//		orderService = elasticPath.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 //
 //	}
 //
@@ -141,7 +141,7 @@ public class AllocationServiceImplTest {
 //	}
 //
 //	protected ShoppingCart createEmptyShoppingCart() {
-//		ShoppingCart shoppingCart = (ShoppingCart) elasticPath.getBean(ContextIdNames.SHOPPING_CART);
+//		ShoppingCart shoppingCart = (ShoppingCart) elasticPath.getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 //		shoppingCart.setDefaultValues();
 //		shoppingCart.setBillingAddress(address);
 //		shoppingCart.setShippingAddress(address);
@@ -154,6 +154,6 @@ public class AllocationServiceImplTest {
 //	}
 //
 //	public EventOriginatorHelper getEventOriginatorHelper() {
-//		return (EventOriginatorHelper) elasticPath.getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+//		return (EventOriginatorHelper) elasticPath.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 //	}
 }

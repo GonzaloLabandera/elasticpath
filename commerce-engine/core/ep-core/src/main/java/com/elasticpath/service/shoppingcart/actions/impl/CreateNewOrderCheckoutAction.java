@@ -1,18 +1,13 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.service.shoppingcart.actions.impl;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.shoppingcart.OrderFactory;
 import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
@@ -44,7 +39,7 @@ public class CreateNewOrderCheckoutAction implements ReversibleCheckoutAction {
 	 * Given an empty order, populates the empty order with the appropriate values
 	 * from the CheckoutActionContext.
 	 *
-	 * @param context the {@link CheckoutActionContext}
+	 * @param context    the {@link CheckoutActionContext}
 	 * @param emptyOrder an empty {@link Order}
 	 * @return the populated Order.
 	 */
@@ -61,11 +56,11 @@ public class CreateNewOrderCheckoutAction implements ReversibleCheckoutAction {
 		}
 
 		return orderFactory.fillInNewOrderFromShoppingCart(
-					emptyOrder,
-					context.getCustomer(),
-					context.getCustomerSession(),
-					context.getShoppingCart(),
-					context.getShoppingCartTaxSnapshot());
+				emptyOrder,
+				context.getCustomer(),
+				context.getCustomerSession(),
+				context.getShoppingCart(),
+				context.getShoppingCartTaxSnapshot());
 	}
 
 	@Override
@@ -76,10 +71,6 @@ public class CreateNewOrderCheckoutAction implements ReversibleCheckoutAction {
 		} else {
 			try {
 				order.failOrder();
-				Collection<OrderPayment> orderPaymentList = context.getOrderPaymentList();
-				if (CollectionUtils.isNotEmpty(orderPaymentList)) {
-					order.setOrderPayments(new HashSet<>(orderPaymentList));
-				}
 				if (order.isPersisted()) {
 					order = orderService.update(order);
 				} else {

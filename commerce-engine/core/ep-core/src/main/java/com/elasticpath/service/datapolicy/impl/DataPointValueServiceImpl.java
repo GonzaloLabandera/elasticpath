@@ -10,20 +10,28 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
+import com.elasticpath.commons.util.Pair;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.datapolicy.DataPoint;
+import com.elasticpath.domain.datapolicy.DataPolicyDescription;
 import com.elasticpath.service.datapolicy.DataPointValueReader;
 import com.elasticpath.service.datapolicy.DataPointValueRemover;
 import com.elasticpath.service.datapolicy.DataPointValueService;
+import com.elasticpath.service.datapolicy.DataPolicyService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
@@ -37,6 +45,7 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 
 	private List<DataPointValueReader> dataPointValueReaders;
 	private List<DataPointValueRemover> dataPointValueRemovers;
+	private DataPolicyService dataPolicyService;
 
 	@Override
 	public int removeValues(final Collection<DataPointValue> dataPointValues) {
@@ -123,8 +132,18 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 	}
 
 	@Override
+	public int removeValues(final Map<String, ? extends Collection<DataPoint>> customerDataPoints) {
+		Collection<DataPointValue> dataPointValues = this.getValues(customerDataPoints)
+				.stream()
+				.filter(DataPointValue::isPopulated)
+				.collect(Collectors.toSet());
+
+		return this.removeValues(dataPointValues);
+	}
+
+	@Override
 	public <E> Collection<Object[]> readValuesByQuery(final String query, final String listParameterName, final Collection<E> listValues,
-		final Object[] parameters) {
+													  final Object[] parameters) {
 
 		//not all queries require list parameter
 		if (query.contains(":" + listParameterName)) {
@@ -148,7 +167,7 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 
 	@Override
 	public Collection<DataPointValue> getCustomerDataPointValuesForStoreByPolicyGuid(final String customerGuid, final String storeCode,
-		final String dataPolicyGuid) {
+																					 final String dataPolicyGuid) {
 
 		List<DataPoint> dataPoints = getPersistenceEngine().retrieveByNamedQuery(
 			"FIND_DATA_POINTS_FOR_STORE_BY_CUSTOMER_AND_DATA_POLICY_GUIDS", customerGuid, storeCode, dataPolicyGuid);
@@ -162,6 +181,56 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 		customerGuidToDataPoints.put(customerGuid, dataPoints);
 
 		return getValues(customerGuidToDataPoints);
+	}
+
+	@Override
+	public Pair<Customer, List<DataPoint>> findAllActiveDataPointsForCustomer(final String storeCode, final String userId) {
+
+		Customer customer = getCustomer(storeCode, userId);
+		if (customer == null) {
+			return null;
+		}
+		List<DataPoint> dataPointsAll = getAllCustomerDataPoints(storeCode, customer.getGuid());
+		List<DataPoint> dataPointsWithConsent = getCustomerDataPointsWithConsent(storeCode, userId);
+
+		// Combine all the data points from segments specified in the system configuration and data points
+		// that have ever been applicable for the customer at some time
+		List<DataPoint> dataPointsForCustomer = Lists.newArrayList(Stream.concat(dataPointsAll.stream(),
+				dataPointsWithConsent.stream())
+				.collect(Collectors.toSet()));
+
+		if (dataPointsForCustomer.isEmpty()) {
+			return null;
+		}
+		return Pair.of(customer, dataPointsAll);
+	}
+
+	private List<DataPoint> getAllCustomerDataPoints(final String storeCode, final String customerGuid) {
+		return dataPolicyService.findAllActiveDataPoliciesForCustomer(storeCode, customerGuid)
+				.stream()
+				.map(DataPolicyDescription::getDataPoints)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+	}
+
+	private List<DataPoint> getCustomerDataPointsWithConsent(final String storeCode, final String userId) {
+		List<Object[]> customerWithDataPoints = getPersistenceEngine()
+				.retrieveByNamedQuery("CUSTOMER_AND_DATA_POINT_BY_STORE_AND_USER_ID", userId, storeCode);
+
+		if (customerWithDataPoints.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		return customerWithDataPoints.stream()
+				.map(object -> (DataPoint) object[1])
+				.collect(Collectors.toList());
+	}
+
+	private Customer getCustomer(final String storeCode, final String userId) {
+		return (Customer) CollectionUtils.find(
+				getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_FIND_BY_USER_ID_AND_STORE_CODE", userId, storeCode),
+				Objects::nonNull
+		);
 	}
 
 	private DataPointValueReader findDataPointReader(final String dataPointLocation) {
@@ -195,4 +264,9 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 	public void setDataPointValueRemovers(final List<DataPointValueRemover> dataPointValueRemovers) {
 		this.dataPointValueRemovers = dataPointValueRemovers;
 	}
+
+	public void setDataPolicyService(final DataPolicyService dataPolicyService) {
+		this.dataPolicyService = dataPolicyService;
+	}
+
 }

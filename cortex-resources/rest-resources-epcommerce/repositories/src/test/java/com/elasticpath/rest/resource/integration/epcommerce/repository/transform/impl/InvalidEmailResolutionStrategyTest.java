@@ -56,7 +56,7 @@ public class InvalidEmailResolutionStrategyTest {
 		when(store.getCode()).thenReturn(STORE_CODE);
 		when(shoppingCart.getStore()).thenReturn(store);
 		when(shoppingCartRepository.getShoppingCart(SHOPPING_CART_GUID)).thenReturn(Single.just(shoppingCart));
-		when(cartOrderRepository.findByCartGuidSingle(SHOPPING_CART_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByCartGuid(SHOPPING_CART_GUID)).thenReturn(Single.just(cartOrder));
 		when(cartOrder.getGuid()).thenReturn(CART_ORDER_GUID);
 
 		// When

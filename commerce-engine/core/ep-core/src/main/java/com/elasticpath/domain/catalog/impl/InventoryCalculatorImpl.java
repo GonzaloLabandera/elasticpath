@@ -46,7 +46,7 @@ public class InventoryCalculatorImpl implements InventoryCalculator {
 	 * @return the object.
 	 */
 	protected InventoryDetails createInventoryDetails() {
-		return beanFactory.getBean(ContextIdNames.INVENTORY_DETAILS);
+		return beanFactory.getPrototypeBean(ContextIdNames.INVENTORY_DETAILS, InventoryDetails.class);
 	}
 
 	/**

@@ -98,7 +98,7 @@ public class SyncToolLauncherMultipleExecutionsITest extends BasicSpringContextT
 	private ChangeSet createReadyToPublishChangeSetWithMembers(final Object... members) {
 		final String name = "Test change set for " + SyncToolLauncherMultipleExecutionsITest.class + "." + System.currentTimeMillis();
 
-		ChangeSet changeSet = getBeanFactory().getBean(ContextIdNames.CHANGE_SET);
+		ChangeSet changeSet = getBeanFactory().getPrototypeBean(ContextIdNames.CHANGE_SET, ChangeSet.class);
 		changeSet.setName(name);
 		changeSet.setDescription(name);
 		changeSet.setCreatedDate(new Date());

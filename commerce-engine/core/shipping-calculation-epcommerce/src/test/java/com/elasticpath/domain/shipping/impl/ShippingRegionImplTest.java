@@ -67,7 +67,7 @@ public class ShippingRegionImplTest {
 	@Before
 	public void setUp() {
 		((ElasticPathImpl) ElasticPathImpl.getInstance()).setBeanFactory(beanFactory);
-		when(beanFactory.getBean(ContextIdNames.REGION)).thenAnswer(invocation -> new RegionImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.REGION, Region.class)).thenAnswer(invocation -> new RegionImpl());
 		this.shippingRegionImpl = new ShippingRegionImpl();
 		this.shippingRegionImpl.setRegionStr(REGION_STR);
 

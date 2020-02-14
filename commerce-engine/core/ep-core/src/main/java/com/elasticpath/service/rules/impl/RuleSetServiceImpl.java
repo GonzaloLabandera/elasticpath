@@ -16,9 +16,8 @@ import com.elasticpath.service.rules.RuleSetService;
 
 /**
  * Provides Rule Engine related services.
- *
  */
-public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implements RuleSetService {
+public class RuleSetServiceImpl extends AbstractEpPersistenceServiceImpl implements RuleSetService {
 
 	private TimeService timeService;
 
@@ -58,7 +57,6 @@ public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implem
 	 * Delete the ruleSet.
 	 *
 	 * @param ruleSet the ruleSet to remove
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
@@ -73,9 +71,7 @@ public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implem
 	 * Throw an unrecoverable exception if there is no matching database row.
 	 *
 	 * @param ruleSetUid the ruleSet UID
-	 *
 	 * @return the ruleSet if UID exists, otherwise null
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
@@ -83,7 +79,7 @@ public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implem
 		sanityCheck();
 		RuleSet ruleSet = null;
 		if (ruleSetUid <= 0) {
-			ruleSet = getBean(ContextIdNames.RULE_SET);
+			ruleSet = getPrototypeBean(ContextIdNames.RULE_SET, RuleSet.class);
 		} else {
 			ruleSet = getPersistentBeanFinder().load(ContextIdNames.RULE_SET, ruleSetUid);
 		}
@@ -111,7 +107,7 @@ public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implem
 
 		return ruleSet;
 	}
-	
+
 	/**
 	 * Find the rule set by its name.
 	 *
@@ -140,9 +136,7 @@ public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implem
 	 * Return null if no matching record exists.
 	 *
 	 * @param ruleSetUid the ruleSet UID
-	 *
 	 * @return the ruleSet if UID exists, otherwise null
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
@@ -150,7 +144,7 @@ public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implem
 		sanityCheck();
 		RuleSet ruleSet = null;
 		if (ruleSetUid <= 0) {
-			ruleSet = getBean(ContextIdNames.RULE_SET);
+			ruleSet = getPrototypeBean(ContextIdNames.RULE_SET, RuleSet.class);
 		} else {
 			ruleSet = getPersistentBeanFinder().get(ContextIdNames.RULE_SET, ruleSetUid);
 		}
@@ -173,7 +167,6 @@ public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implem
 	 * List all ruleSets stored in the database.
 	 *
 	 * @return a list of ruleSets
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
@@ -195,14 +188,14 @@ public class RuleSetServiceImpl  extends AbstractEpPersistenceServiceImpl implem
 
 	/**
 	 * Update the <code>ruleSet</code>'s last modified timestamp to the current time.
-	 * 
+	 *
 	 * @param ruleSet the ruleSet whose timestamp is to be updated.
 	 */
 	@Override
 	public void updateLastModifiedTime(final RuleSet ruleSet) {
 		Date currentDateTime = timeService.getCurrentTime();
 		getPersistenceEngine().executeNamedQuery("RULE_SET_UPDATE_LAST_MODIFIED_DATE",
-			Long.valueOf(ruleSet.getUidPk()), currentDateTime);
+				Long.valueOf(ruleSet.getUidPk()), currentDateTime);
 	}
 
 	/**

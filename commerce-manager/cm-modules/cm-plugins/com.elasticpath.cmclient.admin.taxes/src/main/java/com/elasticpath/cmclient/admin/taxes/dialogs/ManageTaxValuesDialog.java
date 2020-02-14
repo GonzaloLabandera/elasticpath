@@ -34,9 +34,9 @@ import com.elasticpath.cmclient.admin.taxes.TaxesPlugin;
 import com.elasticpath.cmclient.admin.taxes.actions.CreateTaxValueAction;
 import com.elasticpath.cmclient.admin.taxes.actions.DeleteTaxValueAction;
 import com.elasticpath.cmclient.admin.taxes.actions.EditTaxValueAction;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -195,7 +195,7 @@ public class ManageTaxValuesDialog extends AbstractEpDialog {
 
 		final List<Integer> taxValuesColumnWidths = new ArrayList<>();
 		final List<String> taxValuesColumnNames = new ArrayList<>();
-		TaxCodeService taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+		TaxCodeService taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		taxValuesColumnNames.add(""); //$NON-NLS-1$
 		taxValuesColumnWidths.add(REGION_NAME_WIDTH);
 
@@ -254,9 +254,9 @@ public class ManageTaxValuesDialog extends AbstractEpDialog {
 
 	@Override
 	protected void populateControls() {
-		TaxJurisdictionService taxJurisdictionService = ServiceLocator.getService(
-				ContextIdNames.TAX_JURISDICTION_SERVICE);
-		Geography geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
+		TaxJurisdictionService taxJurisdictionService = BeanLocator
+				.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
+		Geography geography = BeanLocator.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 		List<TaxJurisdiction> taxJurisdictionList = taxJurisdictionService.list();
 		for (TaxJurisdiction taxJurisdiction : taxJurisdictionList) {
 			String countryName = geography.getCountryDisplayName(taxJurisdiction.getRegionCode(), CorePlugin.getDefault().getDefaultLocale());

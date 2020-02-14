@@ -108,7 +108,7 @@ public class CustomerConsentBuilder implements DomainObjectBuilder<CustomerConse
 
 	@Override
 	public CustomerConsent build() {
-		CustomerConsent customerConsent = beanFactory.getBean(ContextIdNames.CUSTOMER_CONSENT);
+		CustomerConsent customerConsent = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT, CustomerConsent.class);
 		customerConsent.setUidPk(uidpk);
 		customerConsent.setGuid(guid);
 		customerConsent.setDataPolicy(dataPolicy);

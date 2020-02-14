@@ -12,7 +12,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.service.CatalogEventService;
 import com.elasticpath.cmclient.core.ui.dialog.ProductFinderDialog;
@@ -41,7 +41,7 @@ public class AddExistingProductAction extends AbstractCatalogViewAction {
 	public AddExistingProductAction() {
 		super(CatalogMessages.get().CatalogBrowseView_Action_AddExistingProduct, CatalogImageRegistry.PRODUCT_INCLUDE);
 		setEnabled(false);
-		this.productService = ServiceLocator.getService(ContextIdNames.PRODUCT_SERVICE);
+		this.productService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 	}
 
 	@Override

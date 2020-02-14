@@ -28,7 +28,7 @@ import com.elasticpath.plugin.tax.resolver.TaxRateDescriptorResolver;
 import com.elasticpath.service.tax.TaxJurisdictionService;
 
 /**
- * Default implementation of a {@link TaxRateDescriptorResolver} to retrieve tax rates and tax jurisdiction from EP persistence. 
+ * Default implementation of a {@link TaxRateDescriptorResolver} to retrieve tax rates and tax jurisdiction from EP persistence.
  */
 public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver {
 	private static final Logger LOG = Logger.getLogger(TaxRateDescriptorResolverImpl.class);
@@ -49,16 +49,17 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 			return new NoTaxRateDescriptorResult();
 		}
 
-		MutableTaxRateDescriptorResult result = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAX_RATE_DESCRIPTOR_RESULT);
-		
+		MutableTaxRateDescriptorResult result = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAX_RATE_DESCRIPTOR_RESULT,
+				MutableTaxRateDescriptorResult.class);
+
 		for (TaxCategory taxCategory : taxJurisdiction.getTaxCategorySet()) {
 			for (TaxRegion taxRegion : taxCategory.getTaxRegionSet()) {
-				
+
 				if (taxRegion.getRegionName() == null) {
 					LOG.debug("Tax region has not been found for the given container: " + container);
 					return new NoTaxRateDescriptorResult(isInclusiveTaxCalculationInUse(taxJurisdiction));
 				}
-				
+
 				final BigDecimal decimalTaxRate = getDecimalTaxRate(taxRegion, taxableItem.getTaxCode());
 
 				if (decimalTaxRate != null) {
@@ -68,56 +69,57 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 		}
 		if (CollectionUtils.isEmpty(result.getTaxRateDescriptors())) {
 			LOG.debug("No a tax value for the given container: " + container);
-			
+
 			return new NoTaxRateDescriptorResult(isInclusiveTaxCalculationInUse(taxJurisdiction));
 		}
 
 		result.setTaxInclusive(isInclusiveTaxCalculationInUse(taxJurisdiction));
-		
+
 		return result;
 	}
 
 	/**
 	 * Creates a new tax rate.
-	 * 
+	 *
 	 * @param taxJurisdiction the tax jurisdiction
-	 * @param taxRegion taxRegion
-	 * @param taxCategory the tax category
-	 * @param value the value of the tax rate
+	 * @param taxRegion       taxRegion
+	 * @param taxCategory     the tax category
+	 * @param value           the value of the tax rate
 	 * @return a {@link TaxRateDescriptor} instance
 	 */
-	protected TaxRateDescriptor createNewTaxRateDescriptor(final TaxJurisdiction taxJurisdiction, 
-															final TaxRegion taxRegion,
-															final TaxCategory taxCategory,
-															final BigDecimal value) {
-		MutableTaxRateDescriptor taxRateDescriptor = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAX_RATE_DESCRIPTOR);
+	protected TaxRateDescriptor createNewTaxRateDescriptor(final TaxJurisdiction taxJurisdiction,
+														   final TaxRegion taxRegion,
+														   final TaxCategory taxCategory,
+														   final BigDecimal value) {
+		MutableTaxRateDescriptor taxRateDescriptor = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAX_RATE_DESCRIPTOR,
+				MutableTaxRateDescriptor.class);
 		taxRateDescriptor.setId(taxCategory.getName());
 
 		if (value != null) {
 			taxRateDescriptor.setValue(value);
 		}
-		
+
 		boolean inclusiveTaxCalculationInUse = isInclusiveTaxCalculationInUse(taxJurisdiction);
 		setTaxRateApplier(taxRateDescriptor, inclusiveTaxCalculationInUse);
-		
+
 		taxRateDescriptor.setTaxJurisdiction(taxJurisdiction.getRegionCode());
 		taxRateDescriptor.setTaxRegion(taxRegion.getRegionName());
-		
+
 		return taxRateDescriptor;
 	}
 
 	private void setTaxRateApplier(final MutableTaxRateDescriptor taxRateDescriptor, final boolean inclusiveTaxCalculationInUse) {
-		TaxRateApplier taxRateApplier = getBeanFactory().getBean(TaxContextIdNames.TAX_EXCLUSIVE_RATE_APPLIER);
+		TaxRateApplier taxRateApplier = getBeanFactory().getPrototypeBean(TaxContextIdNames.TAX_EXCLUSIVE_RATE_APPLIER, TaxRateApplier.class);
 		if (inclusiveTaxCalculationInUse) {
-			taxRateApplier = getBeanFactory().getBean(TaxContextIdNames.TAX_INCLUSIVE_RATE_APPLIER);
+			taxRateApplier = getBeanFactory().getPrototypeBean(TaxContextIdNames.TAX_INCLUSIVE_RATE_APPLIER, TaxRateApplier.class);
 		}
 		taxRateDescriptor.setTaxRateApplier(taxRateApplier);
 	}
 
 	/**
 	 * Sums all taxes applicable to the given tax code in the given tax jurisdiction.
-	 * 
-	 * @param itemTaxCode the tax code to find the rate for
+	 *
+	 * @param itemTaxCode     the tax code to find the rate for
 	 * @param taxJurisdiction the jurisdiction to get the taxes from
 	 * @return sum of all tax rates which apply to itemTaxCode in taxJurisdiction
 	 */
@@ -135,7 +137,7 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 	 * Returns true if the "inclusive" tax calculation method is in use; otherwise false. This is based on the specified
 	 * <code>TaxJurisdiction</code>, which is based on the shipping address. If the taxJurisdiction is null, this method returns
 	 * false by default.
-	 * 
+	 *
 	 * @param taxJurisdiction the <code>TaxJurisdiction</code>
 	 * @return true if the "inclusive" tax calculation method is in use; otherwise false.
 	 */
@@ -148,9 +150,9 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 
 	/**
 	 * Retrieves a tax jurisdiction for the specified address and store.
-	 * 
+	 *
 	 * @param storeCode the store to use
-	 * @param address the address to use
+	 * @param address   the address to use
 	 * @return an instance of a {@link TaxJurisdiction} or null if none found
 	 */
 	protected TaxJurisdiction findTaxJurisdictionByStoreAndAddress(final String storeCode, final TaxAddress address) {
@@ -163,20 +165,20 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 	/**
 	 * Gets the tax rate for a given tax code in the given tax region, expressed as a decimal (e.g. a 7.5% tax represented as
 	 * 0.0750).
-	 * 
+	 *
 	 * @param taxRegion the region in which the tax applies
-	 * @param taxCode the code representing the tax category being applied
+	 * @param taxCode   the code representing the tax category being applied
 	 * @return the tax rate expressed as a decimal (e.g. 0.075 for a 7.5% tax), or zero if one does not exist for the given
-	 *         inputs.
+	 * inputs.
 	 */
 	protected BigDecimal getDecimalTaxRate(final TaxRegion taxRegion, final String taxCode) {
 		BigDecimal taxRatePercentage = taxRegion.getTaxRate(taxCode);
 		if (taxRatePercentage == null) {
 			return null;
 		}
-		return taxRatePercentage.divide(PERCENT_CONVERT, 
-										TaxCalculationConstants.DEFAULT_DIVIDE_SCALE, 
-										TaxCalculationConstants.DEFAULT_ROUNDING_MODE);
+		return taxRatePercentage.divide(PERCENT_CONVERT,
+				TaxCalculationConstants.DEFAULT_DIVIDE_SCALE,
+				TaxCalculationConstants.DEFAULT_ROUNDING_MODE);
 	}
 
 	@Override
@@ -189,14 +191,15 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 			return new NoTaxRateDescriptorResult();
 		}
 
-		MutableTaxRateDescriptorResult result = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAX_RATE_DESCRIPTOR_RESULT);
-		
+		MutableTaxRateDescriptorResult result = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAX_RATE_DESCRIPTOR_RESULT,
+				MutableTaxRateDescriptorResult.class);
+
 		result.setTaxInclusive(isInclusiveTaxCalculationInUse(taxJurisdiction));
 		result.addTaxRateDescriptor(new NoTaxRateDescriptor(taxJurisdiction.getRegionCode(), null));
-		
+
 		return result;
 	}
-	
+
 	public TaxJurisdictionService getTaxJurisdictionService() {
 		return taxJurisdictionService;
 	}

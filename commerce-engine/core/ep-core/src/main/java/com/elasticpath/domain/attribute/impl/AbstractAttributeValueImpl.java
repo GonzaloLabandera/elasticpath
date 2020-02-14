@@ -34,6 +34,7 @@ import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeValueWithType;
 import com.elasticpath.domain.impl.AbstractLegacyPersistenceImpl;
+import com.elasticpath.persistence.api.AbstractPersistableImpl;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 
 /**
@@ -109,8 +110,12 @@ public abstract class AbstractAttributeValueImpl extends AbstractLegacyPersisten
 
 	@Override
 	@Basic
-	@Column(name = "DECIMAL_VALUE")
+	@Column(name = "DECIMAL_VALUE", scale = DECIMAL_PRECISION, precision = DECIMAL_SCALE)
 	public BigDecimal getDecimalValue() {
+		if (decimalValue != null) {
+			// this is hard coded to the scale from the Persistence object we use to retrieve decimals from the database.
+			decimalValue = decimalValue.setScale(AbstractPersistableImpl.DECIMAL_SCALE, AbstractPersistableImpl.ROUNDING_MODE);
+		}
 		return decimalValue;
 	}
 
@@ -483,6 +488,6 @@ public abstract class AbstractAttributeValueImpl extends AbstractLegacyPersisten
 
 	@Transient
 	private Utility getUtilityBean() {
-		return getBean(ContextIdNames.UTILITY);
+		return getSingletonBean(ContextIdNames.UTILITY, Utility.class);
 	}
 }

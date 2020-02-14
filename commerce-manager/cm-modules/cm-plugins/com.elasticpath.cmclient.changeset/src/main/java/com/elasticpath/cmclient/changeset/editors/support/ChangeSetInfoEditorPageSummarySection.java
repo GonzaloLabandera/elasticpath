@@ -20,7 +20,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
@@ -62,7 +62,7 @@ public class ChangeSetInfoEditorPageSummarySection extends AbstractCmClientEdito
 	public ChangeSetInfoEditorPageSummarySection(final FormPage formPage, final AbstractCmClientFormEditor editor) {
 		super(formPage, editor, ExpandableComposite.NO_TITLE);
 		
-		changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 	}
 
 	@Override
@@ -166,7 +166,7 @@ public class ChangeSetInfoEditorPageSummarySection extends AbstractCmClientEdito
 	protected CmUser getAddedBy(final Map<String, String> metadata) {
 		String cmUserGuid = metadata.get("addedByUserGuid"); //$NON-NLS-1$
 		if (cmUserGuid != null) {
-			CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+			CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 			return cmUserService.findByGuid(cmUserGuid);
 		}
 		return null;

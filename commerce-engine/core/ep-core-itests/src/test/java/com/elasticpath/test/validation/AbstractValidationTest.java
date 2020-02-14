@@ -32,7 +32,7 @@ public abstract class AbstractValidationTest extends BasicSpringContextTest {
 
 	public Validator getValidator() {
 		if (validator == null) {
-			validator = getBeanFactory().getBean("validator");
+			validator = getBeanFactory().getSingletonBean("validator", Validator.class);
 		}
 		return validator;
 	}

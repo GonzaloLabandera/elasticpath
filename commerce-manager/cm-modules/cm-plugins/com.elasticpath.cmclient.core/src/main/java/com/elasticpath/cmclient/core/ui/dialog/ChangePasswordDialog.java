@@ -18,11 +18,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -80,10 +80,10 @@ public class ChangePasswordDialog extends AbstractEpDialog implements ModifyList
 	 */
 	public ChangePasswordDialog(final Shell parentShell, final CmUser userToChange, final boolean sendEmail) {
 		super(parentShell, 2, false);
-		cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
-		passwordEncoder = ServiceLocator.getService(ContextIdNames.CM_PASSWORDENCODER);
-		oldUserContainer = ServiceLocator.getService(ContextIdNames.CMUSER);
-		cmPasswordPolicy = ServiceLocator.getService("cmPasswordPolicy"); //$NON-NLS-1$
+		cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
+		passwordEncoder = BeanLocator.getSingletonBean(ContextIdNames.CM_PASSWORDENCODER, PasswordEncoder.class);
+		oldUserContainer = BeanLocator.getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
+		cmPasswordPolicy = BeanLocator.getSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class);
 		authenticationService = AuthenticationServiceImpl.getInstance();
 
 		setUserToChange(userToChange);

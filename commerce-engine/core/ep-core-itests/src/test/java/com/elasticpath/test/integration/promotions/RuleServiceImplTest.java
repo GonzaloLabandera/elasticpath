@@ -19,7 +19,6 @@ import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
 import com.elasticpath.domain.rules.RuleCondition;
-import com.elasticpath.domain.rules.RuleElement;
 import com.elasticpath.domain.rules.RuleParameter;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
@@ -186,7 +185,7 @@ public class RuleServiceImplTest extends BasicSpringContextTest {
 
 		final Rule rule = createRule(RULE_CODE_ONE, scenario.getStore(), true);
 
-		final RuleCondition condition = getBeanFactory().getBean("limitedUsagePromotionCondition");
+		final RuleCondition condition = getBeanFactory().getPrototypeBean("limitedUsagePromotionCondition", RuleCondition.class);
 
 		promotionConfigureService.retrieveRuleParameterByKey(condition, RuleParameter.ALLOWED_LIMIT)
 				.setValue(String.valueOf(expectedAllowedLimit));
@@ -207,7 +206,7 @@ public class RuleServiceImplTest extends BasicSpringContextTest {
 		rule.setEnabled(isEnabled);
 		rule.setStore(storeCode);
 
-		SellingContext sellingContext = getBeanFactory().getBean(ContextIdNames.SELLING_CONTEXT);
+		SellingContext sellingContext = getBeanFactory().getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 		sellingContext.setGuid(ruleCode);
 		sellingContext.setName(ruleCode);
 		sellingContext.setPriority(1);
@@ -218,20 +217,20 @@ public class RuleServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private Rule createRule(final String ruleCode) {
-		RuleSet ruleSet = getBeanFactory().getBean(ContextIdNames.RULE_SET);
+		RuleSet ruleSet = getBeanFactory().getPrototypeBean(ContextIdNames.RULE_SET, RuleSet.class);
 		ruleSet.setLastModifiedDate(new Date());
 		ruleSet.setName(ruleCode);
 		ruleSet.setScenario(RuleScenarios.CART_SCENARIO);
 		ruleSet = ruleSetService.add(ruleSet);
 
-		RuleParameter ruleParam = getBeanFactory().getBean(ContextIdNames.RULE_PARAMETER);
+		RuleParameter ruleParam = getBeanFactory().getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 		ruleParam.setKey(RuleParameter.DISCOUNT_PERCENT_KEY);
 		ruleParam.setValue("10");
-		RuleAction ruleAction = getBeanFactory().getBean(ContextIdNames.CART_SUBTOTAL_PERCENT_DISCOUNT_ACTION);
+		RuleAction ruleAction = getBeanFactory().getPrototypeBean(ContextIdNames.CART_SUBTOTAL_PERCENT_DISCOUNT_ACTION, RuleAction.class);
 		ruleAction.getParameters().clear();
 		ruleAction.addParameter(ruleParam);
 
-		Rule rule = getBeanFactory().getBean(ContextIdNames.PROMOTION_RULE);
+		Rule rule = getBeanFactory().getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 		rule.setName(ruleCode);
 		rule.setCode(ruleCode);
 		rule.setRuleSet(ruleSet);

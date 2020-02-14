@@ -25,6 +25,7 @@ import com.elasticpath.test.jta.XaTransactionTestSupport;
 import com.elasticpath.test.util.Utils;
 
 @JmsBrokerConfigurator(url = JMS_BROKER_URL)
+@DirtiesDatabase
 public class ExpiredProjectionJobImplTest extends XaTransactionTestSupport {
 	public static final String JMS_BROKER_URL = "tcp://localhost:61627";
 	private static final String HASH_CODE = "hash";
@@ -50,7 +51,6 @@ public class ExpiredProjectionJobImplTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatExpiredProjectionConvertsToTombstone() throws InterruptedException {
 		persistProjectionEntity(new Date(System.currentTimeMillis() - PAST_TIME));
 
@@ -65,7 +65,6 @@ public class ExpiredProjectionJobImplTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatExpiredProjectionConvertsToTombstoneAtExpireTime() throws InterruptedException {
 		persistProjectionEntity(new Date(System.currentTimeMillis() + FUTURE_TIME));
 
@@ -80,7 +79,6 @@ public class ExpiredProjectionJobImplTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatExpiredProjectionNotConvertsToTombstoneBeforeExpireTime() throws InterruptedException {
 		persistProjectionEntity(new Date(System.currentTimeMillis() + FUTURE_TIME));
 

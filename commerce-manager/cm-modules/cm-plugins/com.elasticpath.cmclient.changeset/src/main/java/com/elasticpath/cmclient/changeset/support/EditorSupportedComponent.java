@@ -15,7 +15,7 @@ import com.elasticpath.cmclient.changeset.ChangeSetPlugin;
 import com.elasticpath.cmclient.changeset.helpers.EditorResolver;
 import com.elasticpath.cmclient.changeset.helpers.impl.DefaultEditorResolver;
 import com.elasticpath.cmclient.changeset.helpers.impl.PromotionsEditorResolver;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
@@ -71,7 +71,7 @@ public class EditorSupportedComponent extends AbstractSupportedComponent impleme
 	}
 
 	private Class< ? > findClassByObjectDescriptor(final BusinessObjectDescriptor objectDescriptor) {
-		final ChangeSetService changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		final ChangeSetService changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 		return changeSetService.findObjectClass(objectDescriptor);
 	}
 	

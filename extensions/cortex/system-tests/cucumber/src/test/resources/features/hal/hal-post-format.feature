@@ -11,14 +11,15 @@ Feature: HAL POST format
       | country-name     | <COUNTRY>          |
       | extended-address | <EXTENDED_ADDRESS> |
       | locality         | <LOCALITY>         |
-      | organization     | <ORGANIZATION>     |
-      | phone-number     | <PHONE_NUMBER>     |
       | postal-code      | <POSTAL_CODE>      |
       | region           | <REGION>           |
       | street-address   | <STREET_ADDRESS>   |
     And I should see the name from the POST
       | family-name | <FAMILY_NAME> |
       | given-name  | <GIVEN_NAME>  |
+    And I should see top level values from the POST
+      | organization     | <ORGANIZATION>     |
+      | phone-number     | <PHONE_NUMBER>     |
 
     Examples:
       | COUNTRY | EXTENDED_ADDRESS | LOCALITY  | ORGANIZATION | PHONE_NUMBER | POSTAL_CODE | REGION | STREET_ADDRESS | FAMILY_NAME | GIVEN_NAME    |

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,9 +18,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 
 import com.elasticpath.common.pricing.service.PromotedPriceLookupService;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -90,7 +94,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 
 	private Collection<Store> stores;
 
-	private final Map<Store, Collection<PriceListAssignment>> priceListAssignmentsByStore = new HashMap<>();
+	private final Map<Store, Collection<PriceListAssignment>> priceListAssignmentsByStore = new ConcurrentHashMap<>();
 
 	/**
 	 * Creates a {@link SolrInputDocument} from the attached {@link IndexProduct}.
@@ -111,7 +115,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		addPriceFieldsToDocument(solrInputDocument, getEntity(), stores);
 		addStoreSpecificFieldsToDocument(solrInputDocument, catalogUidAvailability);
 		addLocaleSpecificFieldsToDocument(solrInputDocument, getEntity());
-		addDefaultLocalizedFieldsToDocument(solrInputDocument, getEntity(), getProductBrand(getEntity()));
+		addDefaultLocalizedFieldsToDocument(solrInputDocument, getEntity(), getEntity().getBrand());
 		addSortedFieldsToDocument(solrInputDocument, getEntity());
 		addSizesAndWeightsToDocument(solrInputDocument, getEntity());
 
@@ -166,7 +170,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	}
 
 	private void addSortedFieldsToDocument(final SolrInputDocument solrInputDocument, final Product product) {
-		Brand brand = getProductBrand(product);
+		Brand brand = product.getBrand();
 		for (Locale locale : getAllLocales(product)) {
 			addFieldNotMultiValuedToDocument(solrInputDocument,
 					getIndexUtility().createLocaleFieldName(SolrIndexConstants.SORT_PRODUCT_NAME, locale),
@@ -239,8 +243,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		final Map<String, Collection<String>> categoryCodesMap = new HashMap<>();
 		final Set<String> allCategoryCodes = new HashSet<>();
 		final Map<String, Collection<String>> masterCategoryCodesMap = new HashMap<>();
-		for (final Category cat : product.getCategories()) {
-			final Category category = getCategoryLookup().findByUid(cat.getUidPk());
+		for (final Category category : product.getCategories()) {
 			final long catalogUid = category.getCatalog().getUidPk();
 			final String catalogCode = category.getCatalog().getCode();
 			final String categoryCode = category.getCode();
@@ -355,8 +358,8 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 */
 	protected boolean addFeaturenessToDocument(final SolrInputDocument solrInputDocument, final Product product) {
 		boolean featured = false;
-		for (final Category cat : product.getCategories()) {
-			int featuredRank = product.getFeaturedRank(cat);
+		for (final Category category : product.getCategories()) {
+			int featuredRank = product.getFeaturedRank(category);
 			featured |= featuredRank > 0;
 
 			if (featuredRank > 0) {
@@ -364,7 +367,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 			}
 
 			// add specific ordering on a per-category basis
-			addFieldToDocument(solrInputDocument, getIndexUtility().createFeaturedField(cat.getUidPk()), getAnalyzer().analyze(featuredRank));
+			addFieldToDocument(solrInputDocument, getIndexUtility().createFeaturedField(category), getAnalyzer().analyze(featuredRank));
 		}
 		addFieldToDocument(solrInputDocument, SolrIndexConstants.FEATURED, String.valueOf(featured));
 		LOG.trace("Feature-ness added");
@@ -388,10 +391,15 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 */
 	protected void addDisplayableFieldsToDocument(final SolrInputDocument solrInputDocument, final IndexProduct product,
 			final Map<Long, Boolean> catalogUidAvailability, final Collection<Store> allStores) {
-		for (final Store store : allStores) {
-			addFieldToDocument(solrInputDocument, getIndexUtility().createDisplayableFieldName(SolrIndexConstants.DISPLAYABLE, store.getCode()),
-					String.valueOf(isProductAvailableAndDisplayable(product, store, catalogUidAvailability)));
-		}
+
+		Map<String, SolrInputField> runner = new ConcurrentHashMap<>();
+		allStores.parallelStream().forEach(store -> {
+			String index = getIndexUtility().createDisplayableFieldName(SolrIndexConstants.DISPLAYABLE, store.getCode());
+			SolrInputField field = new SolrInputField(index);
+			field.setValue(String.valueOf(isProductAvailableAndDisplayable(product, store, catalogUidAvailability)));
+			runner.put(index, field);
+		});
+		solrInputDocument.putAll(runner);
 	}
 
 	/**
@@ -405,16 +413,20 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 * @param stores collection of all known stores
 	 */
 	protected void addPriceFieldsToDocument(final SolrInputDocument doc, final IndexProduct product, final Collection<Store> stores) {
-		final Map<String, Price> cachedPricefieldPriceMap = new HashMap<>();
 		final BaseAmountDataSourceFactory dataSourceFactory = initDataSourceFactory(product, stores);
-		for (final Store store : stores) {
-			final Collection<PriceListAssignment> assignments = getPriceListAssignmentByStore(store);
-			cachedPricefieldPriceMap.putAll(createPricefieldPriceMap(assignments, product, store, dataSourceFactory));
-		}
 
+		final Map<String, Price> cachedPricefieldPriceMap = new ConcurrentHashMap<>();
+		stores.parallelStream().forEach(store -> cachedPricefieldPriceMap.putAll(
+				createPricefieldPriceMap(getPriceListAssignmentByStore(store), product, store, dataSourceFactory))
+		);
+
+		Map<String, SolrInputField> runner = new HashMap<>(cachedPricefieldPriceMap.size());
 		for (final Entry<String, Price> priceEntry : cachedPricefieldPriceMap.entrySet()) {
-			addFieldToDocument(doc, priceEntry.getKey(), getStringValueOf(priceEntry.getValue()));
+			SolrInputField field = new SolrInputField(priceEntry.getKey());
+			field.setValue(getStringValueOf(priceEntry.getValue()));
+			runner.put(priceEntry.getKey(), field);
 		}
+		doc.putAll(runner);
 
 		LOG.trace("Added store specific fields");
 	}
@@ -427,10 +439,19 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 */
 	protected void addStoreSpecificFieldsToDocument(final SolrInputDocument solrInputDocument,
 			final Map<Long, Boolean> catalogUidAvailability) {
-		final Collection<Store> containingStores = storeService.findStoresWithCatalogUids(catalogUidAvailability.keySet());
-		for (final Store store : containingStores) {
-			addFieldToDocument(solrInputDocument, SolrIndexConstants.STORE_CODE, store.getCode());
+		final Collection<String> containingStores = storeService.findStoreCodeForStoresWithCatalogUids(catalogUidAvailability.keySet());
+
+		SolrInputField field = new SolrInputField(SolrIndexConstants.STORE_CODE);
+
+		try {
+			containingStores.parallelStream().forEach(store -> field.addValue(store));
+		} catch (IndexOutOfBoundsException iob) {
+			for (String store : containingStores) {
+				field.addValue(store);
+			}
 		}
+
+		solrInputDocument.putAll(Collections.singletonMap(SolrIndexConstants.STORE_CODE, field));
 	}
 
 	/**
@@ -456,7 +477,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 * @param product the product being indexed
 	 */
 	protected void addLocaleSpecificFieldsToDocument(final SolrInputDocument solrInputDocument, final Product product) {
-		final Brand brand = getProductBrand(product);
+		final Brand brand = product.getBrand();
 
 		for (final Locale locale : getAllLocales(product)) {
 			addFieldToDocument(solrInputDocument, getIndexUtility().createLocaleFieldName(SolrIndexConstants.PRODUCT_NAME, locale), getAnalyzer()
@@ -499,7 +520,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	protected void addConsituentFieldsToDocumentHelper(final SolrInputDocument document, final Product product) {
 		// Constituent specific document fields, these fields must be multi-valued
 		addBrandCodeToDocument(document, product);
-		addDefaultLocalizedMultiValueFieldsToDocument(document, product, getProductBrand(product));
+		addDefaultLocalizedMultiValueFieldsToDocument(document, product, product.getBrand());
 		addSkuCodesToDocument(document, product);
 		addLocaleSpecificFieldsToDocument(document, product);
 	}
@@ -516,7 +537,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		} else if (constituent.isProductSku()) {
 			addFieldToDocument(document, SolrIndexConstants.PRODUCT_SKU_CODE, constituent.getCode());
 			addBrandCodeToDocument(document, product);
-			addDefaultLocalizedMultiValueFieldsToDocument(document, product, getProductBrand(product));
+			addDefaultLocalizedMultiValueFieldsToDocument(document, product, product.getBrand());
 			addLocaleSpecificFieldsToDocument(document, product);
 		}
 	}
@@ -656,7 +677,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 */
 	protected Map<String, Price> createPricefieldPriceMap(final Collection<PriceListAssignment> assignments, final Product product,
 			final Store store, final BaseAmountDataSourceFactory dataSourceFactory) {
-		final Map<String, Price> pricefieldPriceMap = new HashMap<>();
+		final Map<String, Price> pricefieldPriceMap = new HashMap<>(assignments.size());
 
 		for (final PriceListAssignment assignment : assignments) {
 			mapPricefieldWithPrice(pricefieldPriceMap, product, assignment.getPriceListDescriptor(), store, dataSourceFactory);
@@ -707,6 +728,23 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	}
 
 	/**
+	 * Adds a field and value to a <code>SolrInputDocument</code>. Aborts if the value is empty in order to optimize the document.
+	 *
+	 * @param solrInputDocument the document to add fields to
+	 * @param fieldName the field name
+	 * @param value the value to add to the field
+	 * @return whether the operation was successful (was not aborted)
+	 */
+	@Override
+	protected boolean addFieldToDocument(final SolrInputDocument solrInputDocument, final String fieldName, final String value) {
+		if (value == null || value.length() == 0) {
+			return false;
+		}
+		solrInputDocument.addField(fieldName, value);
+		return true;
+	}
+
+	/**
 	 * This method is returning a boost value for featured products. <br>
 	 * The value is calculated by looking at the rank. <br>
 	 * Higher the rank has smaller the boost value. <br>
@@ -722,38 +760,17 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	/**
 	 * Adds a field and value to a <code>SolrInputDocument</code>. Aborts if the value is empty in order to optimize the document.
 	 *
-	 * @param solrInputDocument the document to add fields to
-	 * @param fieldName the field name
-	 * @param value the value to add to the field
-	 * @return whether the operation was successful (was not aborted)
-	 */
-	@Override
-	protected boolean addFieldToDocument(final SolrInputDocument solrInputDocument, final String fieldName, final String value) {
-		if (value == null) {
-			return false;
-		} else if (value.length() == 0) {
-			return false;
-		}
-		solrInputDocument.addField(fieldName, value);
-		return true;
-	}
-
-	/**
-	 * Adds a field and value to a <code>SolrInputDocument</code>. Aborts if the value is empty in order to optimize the document.
-	 *
 	 * @param document the document to add fields to
 	 * @param fieldName the field name
-	 * @param value the value to add to the field
+	 * @param values the value to add to the field
 	 * @return whether the operation was successful (was not aborted)
 	 */
 	@Override
-	protected boolean addFieldToDocument(final SolrInputDocument document, final String fieldName, final Collection<?> value) {
-		if (value == null) {
-			return false;
-		} else if (value.isEmpty()) {
+	protected boolean addFieldToDocument(final SolrInputDocument document, final String fieldName, final Collection<?> values) {
+		if (CollectionUtils.isEmpty(values)) {
 			return false;
 		}
-		document.addField(fieldName, value);
+		document.addField(fieldName, values);
 		return true;
 	}
 
@@ -766,17 +783,10 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	private void populateStoreAndPriceListAssignmentCache() {
 		stores = getStoreService().findAllCompleteStores(getProductLoadTuner());
 		priceListAssignmentsByStore.clear();
-		for (final Store store : stores) {
-			priceListAssignmentsByStore.put(store, getPriceListAssignmentService().listByCatalog(store.getCatalog(), true));
-		}
-	}
 
-	private Brand getProductBrand(final Product product) {
-		Brand brand = null;
-		if (product.getBrand() != null) {
-			brand = getBrandService().findByCode(product.getBrand().getCode());
-		}
-		return brand;
+		stores.parallelStream().forEach(store -> priceListAssignmentsByStore.put(
+				store, getPriceListAssignmentService().listByCatalog(store.getCatalog(), true))
+		);
 	}
 
 	private boolean checkAvailableAndPopulateParents(final Category parent, final Set<String> parentCategoryCodes, final boolean currentVisiblity) {

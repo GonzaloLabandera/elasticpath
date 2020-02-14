@@ -48,6 +48,7 @@ Feature: Reporting
     And I sign in to CM as admin user
     And I go to Customer Service
     And I create physical item return with quantity 1 for sku <sku-code>
+      | Less shipment discount | 0.00 |
     And shipping receive return is processed for quantity 1 of sku <sku-code>
     And I select following report options
       | reportType    | store   | currency   |

@@ -1,8 +1,9 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cmclient.fulfillment.editors.order;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.editor.FormPage;
@@ -30,11 +30,10 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.CoreImageRegistry;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -50,9 +49,10 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.dialogs.ResendRMAEmailDialog;
 import com.elasticpath.cmclient.fulfillment.views.order.OpenOrderEditorAction;
-import com.elasticpath.cmclient.fulfillment.wizards.ExchangeWizard;
-import com.elasticpath.cmclient.fulfillment.wizards.ReturnWizard;
 import com.elasticpath.cmclient.fulfillment.wizards.SubscribingDialog;
+import com.elasticpath.cmclient.fulfillment.wizards.exchange.ExchangeSummaryDialog;
+import com.elasticpath.cmclient.fulfillment.wizards.exchange.ExchangeWizard;
+import com.elasticpath.cmclient.fulfillment.wizards.shipmentreturn.ReturnWizard;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.OrderReturnSkuComparatorFactory;
 import com.elasticpath.domain.cmuser.CmUser;
@@ -64,6 +64,7 @@ import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderReturnSkuReason;
 import com.elasticpath.domain.order.OrderReturnStatus;
 import com.elasticpath.domain.order.OrderReturnType;
+import com.elasticpath.money.Money;
 import com.elasticpath.money.MoneyFormatter;
 import com.elasticpath.service.order.OrderReturnOutOfDateException;
 import com.elasticpath.service.order.ReturnAndExchangeService;
@@ -76,19 +77,19 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 
 	private static final Logger LOG = Logger.getLogger(OrderReturnsReturnSectionPart.class);
 
-	private static final int COLUMN_WIDTH_SKU_CODE = 75;
+	private static final int COLUMN_WIDTH_SKU_CODE = 100;
 
-	private static final int COLUMN_WIDTH_PRODUCT_NAME = 120;
+	private static final int COLUMN_WIDTH_PRODUCT_NAME = 150;
 
-	private static final int COLUMN_WIDTH_QTY = 40;
+	private static final int COLUMN_WIDTH_QTY = 50;
 
-	private static final int COLUMN_WIDTH_UNIT_PRICE = 60;
+	private static final int COLUMN_WIDTH_UNIT_PRICE = 75;
 
-	private static final int COLUMN_WIDTH_REASON = 60;
+	private static final int COLUMN_WIDTH_REASON = 75;
 
-	private static final int COLUMN_WIDTH_RECEIVED_QTY = 60;
+	private static final int COLUMN_WIDTH_RECEIVED_QTY = 75;
 
-	private static final int COLUMN_WIDTH_RECEIVED_STATE = 65;
+	private static final int COLUMN_WIDTH_RECEIVED_STATE = 75;
 
 	private static final int SKU_CODE_COLUMN_ID = 0;
 
@@ -104,7 +105,11 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 
 	private static final int RECEIVED_STATE_COLUMN_ID = 6;
 
+	private static final int HORIZONTAL_SPAN = 3;
+
 	private static final String SKU_TABLE = "Sku Table"; //$NON-NLS-1$
+
+	private static final int NUM_COLUMNS = 4;
 
 	private final OrderReturn orderReturn;
 
@@ -125,8 +130,6 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 	private Text owedToCustomerText;
 
 	private Text notesText;
-
-	private Label receivedByLabel;
 
 	private IEpTableViewer skuTable;
 
@@ -154,7 +157,7 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 		super(formPage, editor, ExpandableComposite.TWISTIE | ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
 		this.orderReturn = orderReturn;
 		this.editor = (OrderEditor) editor;
-		returnAndExchangeService = ServiceLocator.getService(ContextIdNames.ORDER_RETURN_SERVICE);
+		returnAndExchangeService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_RETURN_SERVICE, ReturnAndExchangeService.class);
 		orderReturn.getOrder().setModifiedBy(getEventOriginator());
 	}
 
@@ -162,59 +165,34 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 	protected void createControls(final Composite client, final FormToolkit toolkit) {
 		IEpLayoutComposite mainPane = CompositeFactory.createTableWrapLayoutComposite(client, 2, false);
 		mainPane.setLayoutData(new TableWrapData(TableWrapData.FILL, TableWrapData.FILL));
-		/*
-		 * Color clr = new Color(this.getSection().getDisplay(), 0, 255, 0); mainPane.getSwtComposite().setBackground(clr);
-		 */
 
 		IEpLayoutData returnInfoCompositeLayoutData = mainPane.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.FILL, false, true);
-		IEpLayoutComposite returnInfoComposite = mainPane.addTableWrapLayoutComposite(2, false, returnInfoCompositeLayoutData);
-		/*
-		 * Color clr0 = new Color(this.getSection().getDisplay(), 0, 0, 255); returnInfoComposite.getSwtComposite().setBackground(clr0);
-		 */
+		IEpLayoutComposite returnInfoComposite = mainPane.addTableWrapLayoutComposite(NUM_COLUMNS, false, returnInfoCompositeLayoutData);
 
-		IEpLayoutData buttonsCompositeLayoutData = mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, false, true, 1, 2);
+		IEpLayoutData buttonsCompositeLayoutData = mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, false, true);
 		IEpLayoutComposite buttonsComposite = mainPane.addTableWrapLayoutComposite(1, true, buttonsCompositeLayoutData);
-		/*
-		 * Color clr1 = new Color(this.getSection().getDisplay(), 255, 0, 0); buttonsComposite.getSwtComposite().setBackground(clr1);
-		 */
+
 		createButtons(buttonsComposite);
 
-		IEpLayoutData skuTableLayoutData = mainPane.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.FILL, false, true);
+		IEpLayoutData skuTableLayoutData = mainPane.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.FILL, false, true, 2, 1);
 		skuTable = mainPane.addTableViewer(false, EpState.READ_ONLY, skuTableLayoutData, SKU_TABLE);
 		createSkuTableContent();
 
 		// returnInfoComposite content:
-		IEpLayoutData returnDetailsCompositeLayoutData = returnInfoComposite.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.FILL, false,
+		IEpLayoutData returnDetailsCompositeLayoutData = returnInfoComposite.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.CENTER, false,
 				true);
-		IEpLayoutComposite returnDetailsComposite = returnInfoComposite.addTableWrapLayoutComposite(2, false, returnDetailsCompositeLayoutData);
-
-		IEpLayoutData notesCompositeLayoutData = returnInfoComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true);
-		IEpLayoutComposite notesComposite = returnInfoComposite.addTableWrapLayoutComposite(1, false, notesCompositeLayoutData);
+		IEpLayoutComposite returnDetailsComposite = returnInfoComposite.addTableWrapLayoutComposite(NUM_COLUMNS, false,
+				returnDetailsCompositeLayoutData);
 
 		// returnDetailsComposite content:
-		IEpLayoutData labelsReturnDetailsCompositeLayoutData = returnDetailsComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.BEGINNING);
+		IEpLayoutData labelsReturnDetailsCompositeLayoutData = returnDetailsComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		IEpLayoutData editsReturnDetailsCompositeLayoutData = returnDetailsComposite.createLayoutData(IEpLayoutData.BEGINNING,
-				IEpLayoutData.BEGINNING, true, true);
+				IEpLayoutData.CENTER, true, true);
+		IEpLayoutData amountsEditsReturnDetailsCompositeLayoutData = returnDetailsComposite.createLayoutData(IEpLayoutData.END,
+				IEpLayoutData.CENTER, false, true);
 
 		returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_DateTimeInitiated, labelsReturnDetailsCompositeLayoutData);
 		initiatedTimeText = returnDetailsComposite.addTextField(EpState.READ_ONLY, editsReturnDetailsCompositeLayoutData);
-
-		returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_CreatedBy, returnDetailsComposite.createLayoutData(
-				IEpLayoutData.END, IEpLayoutData.CENTER));
-		IEpLayoutComposite userComposite = returnDetailsComposite.addTableWrapLayoutComposite(2, false, editsReturnDetailsCompositeLayoutData);
-		userComposite.addImage(CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_USER), userComposite.createLayoutData(IEpLayoutData.BEGINNING,
-				IEpLayoutData.FILL));
-		createdByText = userComposite.addTextField(EpState.READ_ONLY, userComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true,
-				true));
-		returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_ReceivedBy, returnDetailsComposite.createLayoutData(
-				IEpLayoutData.END, IEpLayoutData.CENTER));
-		userComposite = returnDetailsComposite.addTableWrapLayoutComposite(2, false, editsReturnDetailsCompositeLayoutData);
-		receivedByLabel = userComposite.addImage(CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_USER), userComposite.createLayoutData(
-				IEpLayoutData.BEGINNING, IEpLayoutData.FILL));
-		receivedByText = userComposite.addTextField(EpState.READ_ONLY, userComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true,
-				true));
-		returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_Status, labelsReturnDetailsCompositeLayoutData);
-		statusText = returnDetailsComposite.addTextField(EpState.READ_ONLY, editsReturnDetailsCompositeLayoutData);
 
 		if (isExchange()) {
 			returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_ExchangeOrderNumber,
@@ -223,21 +201,46 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 		} else {
 
 			returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_Total, labelsReturnDetailsCompositeLayoutData);
-			returnTotalText = returnDetailsComposite.addTextField(EpState.READ_ONLY, editsReturnDetailsCompositeLayoutData);
-
-			returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_Refunded, labelsReturnDetailsCompositeLayoutData);
-			refundedText = returnDetailsComposite.addTextField(EpState.READ_ONLY, editsReturnDetailsCompositeLayoutData);
-
-			returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_BalanceOwed, labelsReturnDetailsCompositeLayoutData);
-			owedToCustomerText = returnDetailsComposite.addTextField(EpState.READ_ONLY, editsReturnDetailsCompositeLayoutData);
+			returnTotalText = returnDetailsComposite.addTextField(EpState.READ_ONLY, amountsEditsReturnDetailsCompositeLayoutData);
 		}
+
+		returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_CreatedBy, returnDetailsComposite.createLayoutData(
+				IEpLayoutData.END, IEpLayoutData.CENTER));
+		createdByText = returnDetailsComposite.addTextField(EpState.READ_ONLY, editsReturnDetailsCompositeLayoutData);
+
+		if (isExchange()) {
+			returnDetailsComposite.addEmptyComponent(labelsReturnDetailsCompositeLayoutData);
+			returnDetailsComposite.addEmptyComponent(labelsReturnDetailsCompositeLayoutData);
+		} else {
+			returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_Refunded, labelsReturnDetailsCompositeLayoutData);
+			refundedText = returnDetailsComposite.addTextField(EpState.READ_ONLY, amountsEditsReturnDetailsCompositeLayoutData);
+		}
+
+		returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_ReceivedBy, returnDetailsComposite.createLayoutData(
+				IEpLayoutData.END, IEpLayoutData.CENTER));
+		receivedByText = returnDetailsComposite.addTextField(EpState.READ_ONLY, editsReturnDetailsCompositeLayoutData);
+
+		if (isExchange()) {
+			returnDetailsComposite.addEmptyComponent(labelsReturnDetailsCompositeLayoutData);
+			returnDetailsComposite.addEmptyComponent(labelsReturnDetailsCompositeLayoutData);
+		} else {
+			returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_BalanceOwed, labelsReturnDetailsCompositeLayoutData);
+			owedToCustomerText = returnDetailsComposite.addTextField(EpState.READ_ONLY, amountsEditsReturnDetailsCompositeLayoutData);
+		}
+
+		returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_Status, labelsReturnDetailsCompositeLayoutData);
+		statusText = returnDetailsComposite.addTextField(EpState.READ_ONLY, editsReturnDetailsCompositeLayoutData);
+
+		returnDetailsComposite.addEmptyComponent(labelsReturnDetailsCompositeLayoutData);
+		returnDetailsComposite.addEmptyComponent(amountsEditsReturnDetailsCompositeLayoutData);
+
 		// end of returnDetailsComposite content
 
-		// notesComposite content:
-		notesComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_Notes, notesComposite.createLayoutData(IEpLayoutData.FILL,
+		returnDetailsComposite.addLabelBold(FulfillmentMessages.get().OrderReturnSection_Notes,
+				returnDetailsComposite.createLayoutData(IEpLayoutData.END,
 				IEpLayoutData.BEGINNING));
-		notesText = notesComposite.addTextArea(EpState.READ_ONLY, notesComposite
-				.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true));
+		notesText = returnDetailsComposite.addTextArea(EpState.READ_ONLY, returnDetailsComposite
+				.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true, HORIZONTAL_SPAN, 1));
 		// end of notesComposite content
 		// end of returnInfoComposite content:
 	}
@@ -252,10 +255,10 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 					.getImage(FulfillmentImageRegistry.IMAGE_EXCHANGE_CANCEL), EpState.EDITABLE, buttonLayoutData);
 			completeButton = buttonsComposite.addPushButton(FulfillmentMessages.get().OrderReturnSection_ExchangeCompleteBtn, FulfillmentImageRegistry
 					.getImage(FulfillmentImageRegistry.IMAGE_EXCHANGE_COMPLETE), EpState.EDITABLE, buttonLayoutData);
-			final Button openExchnageOrderButton = buttonsComposite.addPushButton(FulfillmentMessages.get().OrderReturnSection_ExchangeOpenOrderBtn,
+			final Button openExchangeOrderButton = buttonsComposite.addPushButton(FulfillmentMessages.get().OrderReturnSection_ExchangeOpenOrderBtn,
 					FulfillmentImageRegistry.getImage(FulfillmentImageRegistry.IMAGE_EXCHANGE_OPEN_ORDER), EpState.EDITABLE, buttonLayoutData);
 
-			openExchnageOrderButton.addSelectionListener(new ExchangeOrderButtonListener());
+			openExchangeOrderButton.addSelectionListener(new ExchangeOrderButtonListener());
 
 		} else {
 			/** Return */
@@ -329,7 +332,6 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 		this.initiatedTimeText.setText(formatDate(orderReturn.getCreatedDate()));
 		this.createdByText.setText(getDisplayableUserName(orderReturn.getCreatedByCmUser()));
 		boolean isReceived = orderReturn.getReceivedByCmUser() != null;
-		receivedByLabel.setVisible(isReceived);
 		if (isReceived) {
 			this.receivedByText.setText(getDisplayableUserName(orderReturn.getReceivedByCmUser()));
 		}
@@ -354,8 +356,13 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 		} else {
 			final Locale locale = getLocale();
 			this.returnTotalText.setText(getMoneyFormatter().formatCurrency(orderReturn.getReturnTotalMoney(), locale));
-			refundedText.setText(getMoneyFormatter().formatCurrency(orderReturn.getRefundedTotalMoney(), locale));
-			owedToCustomerText.setText(getMoneyFormatter().formatCurrency(orderReturn.getOwedToCustomerMoney(), locale));
+			if (status == OrderReturnStatus.COMPLETED) {
+				refundedText.setText(getMoneyFormatter().formatCurrency(orderReturn.getReturnTotalMoney(), locale));
+				owedToCustomerText.setText(getMoneyFormatter().formatCurrency(Money.valueOf(BigDecimal.ZERO, orderReturn.getCurrency()), locale));
+			} else {
+				refundedText.setText(getMoneyFormatter().formatCurrency(Money.valueOf(BigDecimal.ZERO, orderReturn.getCurrency()), locale));
+				owedToCustomerText.setText(getMoneyFormatter().formatCurrency(orderReturn.getReturnTotalMoney(), locale));
+			}
 			boolean authorizedReturn = authorized && authorizationService.isAuthorizedWithPermission(FulfillmentPermissions.CREATE_EDIT_RETURNS);
 			List<OrderReturnSku> skuList = new LinkedList<>(orderReturn.getOrderReturnSkus());
 			skuList.sort(OrderReturnSkuComparatorFactory.getOrderReturnSkuComparator());
@@ -417,7 +424,7 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 	}
 
 	protected MoneyFormatter getMoneyFormatter() {
-		return ServiceLocator.getService(ContextIdNames.MONEY_FORMATTER);
+		return BeanLocator.getSingletonBean(ContextIdNames.MONEY_FORMATTER, MoneyFormatter.class);
 	}
 
 	/**
@@ -451,8 +458,8 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 				return String.valueOf(orderReturnSku.getOrderSku().getUnitPrice());
 
 			case REASON_COLUMN_ID:
-				OrderReturnSkuReason orderReturnSkuReason = ServiceLocator.getService(
-						ContextIdNames.ORDER_RETURN_SKU_REASON);
+				OrderReturnSkuReason orderReturnSkuReason = BeanLocator
+						.getSingletonBean(ContextIdNames.ORDER_RETURN_SKU_REASON, OrderReturnSkuReason.class);
 				return orderReturnSkuReason.getReasonMap().get(orderReturnSku.getReturnReason());
 
 			case RECEIVED_QTY_COLUMN_ID:
@@ -462,16 +469,9 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 				if (orderReturnSku.getReceivedState() == null) {
 					return ""; //$NON-NLS-1$
 				}
-				OrderReturnReceivedState orderReturnState = ServiceLocator.getService(
-						ContextIdNames.ORDER_RETURN_RECEIVED_STATE);
+				OrderReturnReceivedState orderReturnState = BeanLocator
+						.getSingletonBean(ContextIdNames.ORDER_RETURN_RECEIVED_STATE, OrderReturnReceivedState.class);
 				return orderReturnState.getStateMap().get(orderReturnSku.getReceivedState());
-
-				// case RECEIVED_BY_COLUMN_ID:
-				// if (orderReturnSku.getCmUser() == null) {
-				// return ""; //$NON-NLS-1$
-				// }
-				// return "retrieve it from order return";//getDisplayableUserName(orderReturnSku.getCmUser()); //$NON-NLS-1$
-
 			default:
 				throw new EpUiException("Unknown column index (" + columnIndex + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -532,14 +532,19 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 				if (isExchange()) {
 					ExchangeWizard completeExchangeWizard = ExchangeWizard.completeExchangeWizard(orderReturn);
 					dialog = new SubscribingDialog(getSection().getShell(), completeExchangeWizard);
+					if (dialog.open() == Window.OK) {
+						reloadModel();
+						completeExchangeWizard.getModel().getOrderReturn().recalculateOrderReturn();
+						new ExchangeSummaryDialog(FulfillmentMessages.get().ExchangeWizard_Complete_Title, completeExchangeWizard.getModel()).open();
+					}
 				} else {
 					ReturnWizard completeReturnWizard = ReturnWizard.completeReturnWizard(orderReturn);
 					dialog = new SubscribingDialog(getSection().getShell(), completeReturnWizard);
+					if (dialog.open() == Window.OK) {
+						reloadModel();
+					}
 				}
 
-				if (dialog.open() == Window.OK) {
-					reloadModel();
-				}
 			}
 		}
 	}
@@ -579,7 +584,7 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 					try {
 						returnAndExchangeService.cancelReturnExchange(orderReturn);
 					} catch (OrderReturnOutOfDateException e) {
-						MessageDialog.openError(getSection().getShell(), 
+						MessageDialog.openError(getSection().getShell(),
 								FulfillmentMessages.get().OrderReturn_ErrDlgCollisionTitle,
 								FulfillmentMessages.get().OrderReturn_ErrDlgCollisionMessage);
 						return;
@@ -602,10 +607,10 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 			}
 		}
 	}
-	
+
 	/**
 	 * Resends the Gift Certificate email to the specified address.
-	 * 
+	 *
 	 * @param recipientEmail the email address to resend the email to
 	 */
 	protected void resendEmail(final String recipientEmail) {
@@ -626,7 +631,7 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 	private boolean isExchange() {
 		return orderReturn.getReturnType() == OrderReturnType.EXCHANGE;
 	}
-	
+
 	private boolean isPhysicalReturnEnabled() {
 		return orderReturn.getPhysicalReturn();
 	}
@@ -637,8 +642,7 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 	}
 
 	private EventOriginator getEventOriginator() {
-		EventOriginatorHelper helper = ServiceLocator.getService(
-				ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = BeanLocator.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 
 		return helper.getCmUserOriginator(LoginManager.getCmUser());
 	}

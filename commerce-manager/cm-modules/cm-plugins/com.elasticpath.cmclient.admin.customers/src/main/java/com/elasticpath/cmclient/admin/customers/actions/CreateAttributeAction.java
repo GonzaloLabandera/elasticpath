@@ -8,7 +8,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.elasticpath.cmclient.admin.customers.dialogs.AttributeDialog;
 import com.elasticpath.cmclient.admin.customers.views.AttributeListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
@@ -36,13 +36,12 @@ public class CreateAttributeAction extends Action {
 
 	@Override
 	public void run() {
-		Attribute attributeToAdd = ServiceLocator.getService(ContextIdNames.ATTRIBUTE);
+		Attribute attributeToAdd = BeanLocator.getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 		attributeToAdd.setAttributeUsage(AttributeUsageImpl.CUSTOMERPROFILE_USAGE);
 		attributeToAdd.setAttributeType(AttributeType.SHORT_TEXT);
 		boolean dialogOk = AttributeDialog.openCreateDialog(listView.getSite().getShell(), attributeToAdd);
 		if (dialogOk) {
-			AttributeService attributeService = ServiceLocator.getService(
-					ContextIdNames.ATTRIBUTE_SERVICE);
+			AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 			attributeService.add(attributeToAdd);
 			listView.refreshViewerInput();
 		}

@@ -13,6 +13,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,20 +101,9 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 	}
 
 	@Override
-	public ExecutionResult<CustomerSession> findOrCreateCustomerSession() {
-		return new ExecutionResultChain() {
-			@Override
-			public ExecutionResult<?> build() {
-				String userGuid = resourceOperationContext.getUserIdentifier();
-				return findCustomerSessionByGuid(userGuid);
-			}
-		}.execute();
-	}
-
-	@Override
-	public Single<CustomerSession> findOrCreateCustomerSessionAsSingle() {
+	public Single<CustomerSession> findOrCreateCustomerSession() {
 		String userGuid = resourceOperationContext.getUserIdentifier();
-		return reactiveAdapter.fromRepositoryAsSingle(() -> findCustomerSessionByGuid(userGuid));
+		return findCustomerSessionByGuidAsSingle(userGuid);
 	}
 
 	@Override
@@ -190,8 +180,9 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 
 	@Override
 	@CacheRemove(typesToInvalidate = CustomerSession.class)
-	public void invalidateCustomerSessionByGuid(final String customerGuid) {
+	public Completable invalidateCustomerSessionByGuid(final String customerGuid) {
 		//this method causes invalidation of CustomerSession instance for given customer guid
+		return Completable.complete();
 	}
 
 	private String getStoreCodeFromSubjectIfPossible(final Shopper shopper) {

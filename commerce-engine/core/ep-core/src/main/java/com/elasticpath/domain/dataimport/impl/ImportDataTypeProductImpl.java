@@ -193,7 +193,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 				if (checkNullValue(value)) {
 					return;
 				}
-				TaxCodeService taxCodeService = getBean(ContextIdNames.TAX_CODE_SERVICE);
+				TaxCodeService taxCodeService = getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 				TaxCode taxCode = taxCodeService.findByCode(value);
 				((Product) product).setTaxCodeOverride(taxCode);
 			}
@@ -1031,7 +1031,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 	protected ProductSku getProductSku(final Product product) {
 		ProductSku sku = product.getDefaultSku();
 		if (sku == null) {
-			sku = getBean(ContextIdNames.PRODUCT_SKU);
+			sku = getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 			sku.initialize();
 			product.setDefaultSku(sku);
 		}
@@ -1176,7 +1176,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 
 				DigitalAsset digitalAsset = sku.getDigitalAsset();
 				if (digitalAsset == null) {
-					digitalAsset = getBean(ContextIdNames.DIGITAL_ASSET);
+					digitalAsset = getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 				}
 
 				digitalAsset.setFileName(value);
@@ -1215,7 +1215,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 				}
 				DigitalAsset digitalAsset = sku.getDigitalAsset();
 				if (digitalAsset == null) {
-					digitalAsset = getBean(ContextIdNames.DIGITAL_ASSET);
+					digitalAsset = getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 				}
 				digitalAsset.setExpiryDays(ConverterUtils.string2Int(value));
 
@@ -1253,7 +1253,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 				}
 				DigitalAsset digitalAsset = sku.getDigitalAsset();
 				if (digitalAsset == null) {
-					digitalAsset = getBean(ContextIdNames.DIGITAL_ASSET);
+					digitalAsset = getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 				}
 				digitalAsset.setMaxDownloadTimes(ConverterUtils.string2Int(value));
 
@@ -1330,7 +1330,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 
 	@Override
 	public void deleteEntity(final Entity entity) {
-		ProductService productService = getBean(ContextIdNames.PRODUCT_SERVICE);
+		ProductService productService = getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		Product productToBeDeleted = (Product) entity;
 		if (productService.canDelete(productToBeDeleted)) {
 			productService.removeProductTree(entity.getUidPk());
@@ -1395,7 +1395,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected ValidatorUtils getValidatorUtils() {
 		if (validatorUtils == null) {
-			validatorUtils = getBean(ContextIdNames.VALIDATOR_UTILS);
+			validatorUtils = getSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class);
 		}
 		return validatorUtils;
 	}
@@ -1411,7 +1411,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected Utility getUtilityBean() {
 		if (utilityBean == null) {
-			utilityBean = getBean(ContextIdNames.UTILITY);
+			utilityBean = getSingletonBean(ContextIdNames.UTILITY, Utility.class);
 		}
 		return utilityBean;
 	}

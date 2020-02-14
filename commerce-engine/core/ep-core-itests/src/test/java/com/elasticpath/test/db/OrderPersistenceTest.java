@@ -297,11 +297,11 @@ public class OrderPersistenceTest extends DbTestCase {
 		final ProductSku productSku = newProduct.getDefaultSku();
 		
 		
-		final OrderSku orderSku = getBeanFactory().getBean(ContextIdNames.ORDER_SKU);
+		final OrderSku orderSku = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 		orderSku.initialize();
 		orderSku.setOrdering(0);
 
-		final Price price = getBeanFactory().getBean(ContextIdNames.PRICE);
+		final Price price = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		final Money amount = Money.valueOf(BigDecimal.ONE, Currency.getInstance("USD"));
 		price.setListPrice(amount);
 		orderSku.setPrice(1, price);

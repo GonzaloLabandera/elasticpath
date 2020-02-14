@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.cmclient.advancedsearch.AdvancedSearchMessages;
 import com.elasticpath.cmclient.advancedsearch.AdvancedSearchPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
@@ -58,7 +58,7 @@ public class SaveQueryDialog extends AbstractEpDialog {
 	private final boolean isSaveAs;
 
 	private final AdvancedSearchQueryDao searchQueryDao =
-			ServiceLocator.getService(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO);
+			BeanLocator.getSingletonBean(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO, AdvancedSearchQueryDao.class);
 	
 	/**
 	 * Constructor.

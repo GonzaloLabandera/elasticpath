@@ -1,8 +1,8 @@
 @purchases
-Feature: Anonymous shopper can complete purchase with payment token
+Feature: Anonymous shopper can complete purchase with payment instrument
   As a client developer
-  I want to allow the shopper to purchase with a newly created payment token
-  so they can create a payment token and use it on their purchase
+  I want to allow the shopper to purchase with a newly created payment instrument
+  So they can use it on their purchase
 
   Scenario Outline: Anonymous shopper can complete purchase
 
@@ -14,7 +14,7 @@ Feature: Anonymous shopper can complete purchase with payment token
     And the HTTP status is OK, created
     When the order is submitted
     Then the HTTP status is OK
-    And the payment token created is used for the order
+    And the payment instrument created is used for the order
 
     Examples:
       | ITEMCODE        | QUANTITY |

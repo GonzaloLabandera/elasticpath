@@ -59,7 +59,7 @@ public class EmailEntityRepositoryImpl<E extends EmailEntity, I extends EmailIde
 
 		customer.setEmail(email);
 
-		return customerRepository.updateCustomerAsCompletable(customer);
+		return customerRepository.updateCustomer(customer);
 	}
 
 	private boolean isCustomerUserIdLinkedToEmail(final Customer customer) {

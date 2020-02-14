@@ -3,11 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.PromotionTestFactory
-		.buildAppliedPromotionsForPurchaseIdentifier;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.PromotionTestFactory.buildAppliedPromotionsForPurchaseIdentifier;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +51,7 @@ public class AppliedPromotionsForPurchaseRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnNotFoundWhenOrderIsNotFound() {
-		when(orderRepository.findByGuidAsSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID))
+		when(orderRepository.findByGuid(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ResourceTestConstants.NOT_FOUND)));
 
 		repository.getElements(identifier)
@@ -63,7 +61,7 @@ public class AppliedPromotionsForPurchaseRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnEmptyWhenPromotionsNotFound() {
-		when(orderRepository.findByGuidAsSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
 		when(promotionRepository.getAppliedPromotionsForPurchase(order)).thenReturn(Collections.emptyList());
 
 		repository.getElements(identifier)
@@ -79,7 +77,7 @@ public class AppliedPromotionsForPurchaseRepositoryImplTest {
 			appliedPromotions.add(String.valueOf(i));
 		}
 
-		when(orderRepository.findByGuidAsSingle(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(ResourceTestConstants.SCOPE, ResourceTestConstants.PURCHASE_ID)).thenReturn(Single.just(order));
 		when(promotionRepository.getAppliedPromotionsForPurchase(order)).thenReturn(appliedPromotions);
 
 		repository.getElements(identifier)

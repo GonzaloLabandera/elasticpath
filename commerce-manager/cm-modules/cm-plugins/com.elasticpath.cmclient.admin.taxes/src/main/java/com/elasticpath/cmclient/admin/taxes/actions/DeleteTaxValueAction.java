@@ -11,7 +11,7 @@ import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.admin.taxes.TaxesMessages;
 import com.elasticpath.cmclient.admin.taxes.dialogs.ManageTaxValuesDialog;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.domain.tax.TaxRegion;
@@ -55,8 +55,8 @@ public class DeleteTaxValueAction extends Action {
 		if (confirmed) {
 			taxCategory.removeTaxRegion(taxRegion);
 
-			TaxJurisdictionService taxJurisdictionService = ServiceLocator.getService(
-					ContextIdNames.TAX_JURISDICTION_SERVICE);
+			TaxJurisdictionService taxJurisdictionService = BeanLocator
+					.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
 			taxJurisdictionService.update(manageTaxValueDialog.getSelectedTaxJurisdiction());
 			manageTaxValueDialog.refreshTaxRegions();
 		}

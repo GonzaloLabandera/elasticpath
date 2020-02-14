@@ -40,7 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.dialogs.cartitemmodifier.tablelabelcontentprovider.CartItemModifierFieldLabelProvider;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
@@ -183,7 +183,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 		}
 
 		this.cartItemModifierGroup = cartItemModifierGroup;
-		this.modifierService = ServiceLocator.getService(ContextIdNames.MODIFIER_SERVICE);
+		this.modifierService = BeanLocator.getSingletonBean(ContextIdNames.MODIFIER_SERVICE, ModifierService.class);
 		this.allowRefresh = false;
 	}
 
@@ -210,7 +210,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	}
 
 	private void createModifierField() {
-		this.cartItemModifierField = ServiceLocator.getService(ContextIdNames.MODIFIER_FIELD);
+		this.cartItemModifierField = BeanLocator.getPrototypeBean(ContextIdNames.MODIFIER_FIELD, ModifierField.class);
 		this.originalCode = "";
 		this.isRequired = false;
 	}
@@ -537,7 +537,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 			if (!display.isEmpty()) {
 				ModifierFieldLdf currentFieldLDF = this.getModifierField().findModifierFieldLdfByLocale(lang);
 				if (currentFieldLDF == null) {
-					currentFieldLDF = ServiceLocator.getService(ContextIdNames.MODIFIER_FIELD_LDF);
+					currentFieldLDF = BeanLocator.getPrototypeBean(ContextIdNames.MODIFIER_FIELD_LDF, ModifierFieldLdf.class);
 					currentFieldLDF.setDisplayName(display);
 					currentFieldLDF.setLocale(lang);
 					this.getModifierField().addModifierFieldLdf(currentFieldLDF);

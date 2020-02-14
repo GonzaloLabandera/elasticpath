@@ -1,13 +1,12 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2018
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.persistence.support.impl;
 
-import static java.util.stream.Collectors.toList;
-
 import static com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup.JpqlMatchType.AS_IS;
 import static com.elasticpath.service.search.query.SortOrder.ASCENDING;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,9 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.LongValidator;
 
 import com.elasticpath.domain.customer.impl.CustomerImpl;
-import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderShipmentStatus;
-import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilder;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup.ConjunctionType;
@@ -39,24 +36,6 @@ public class OrderCriterionImpl implements OrderCriterion {
 	private static final String ORDER_STATUS = "o.status";
 	private static final String ORDER_NUMBER = "o.orderNumber";
 	private static final String CP_SHORT_TEXT_VALUE = "cp.shortTextValue";
-
-	@Override
-	public CriteriaQuery getStatusCriteria(final OrderStatus orderStatus, final OrderPaymentStatus paymentStatus,
-										   final OrderShipmentStatus shipmentStatus) {
-		JpqlQueryBuilder queryBuilder = new JpqlQueryBuilder(ORDER, "o");
-		final JpqlQueryBuilderWhereGroup whereGroup = queryBuilder.getDefaultWhereGroup();
-		appendEqualsClause(whereGroup, ORDER_STATUS, orderStatus);
-		if (paymentStatus != null) {
-			queryBuilder.appendInnerJoin("o.orderPayments", "op");
-			whereGroup.appendWhereEquals("op.status", paymentStatus);
-		}
-		if (shipmentStatus != null) {
-			queryBuilder.appendInnerJoin("o.shipments", "os");
-			whereGroup.appendWhereEquals("os.status", shipmentStatus);
-		}
-
-		return new CriteriaQuery(queryBuilder);
-	}
 
 	@Override
 	public CriteriaQuery getOrderCustomerCriteria(final String propertyName, final String criteriaValue, final boolean isExactMatch) {

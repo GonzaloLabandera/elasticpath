@@ -6,8 +6,6 @@ package com.elasticpath.cucumber.customer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,10 +18,7 @@ import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.customer.CustomerDTO;
-import com.elasticpath.common.dto.customer.PaymentMethodDto;
-import com.elasticpath.common.dto.customer.PaymentTokenDto;
 import com.elasticpath.common.dto.customer.builder.CustomerDTOBuilder;
-import com.elasticpath.common.dto.customer.transformer.PaymentTokenDTOTransformer;
 import com.elasticpath.commons.util.TestDomainMarshaller;
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.builder.customer.CustomerGroupBuilder;
@@ -31,8 +26,6 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.importexport.common.configuration.PackagerConfiguration;
 import com.elasticpath.importexport.common.exception.ConfigurationException;
-import com.elasticpath.importexport.common.factory.TestPaymentDTOBuilderFactory;
-import com.elasticpath.importexport.common.factory.TestPaymentMethodBuilderFactory;
 import com.elasticpath.importexport.common.summary.Summary;
 import com.elasticpath.importexport.common.types.JobType;
 import com.elasticpath.importexport.common.types.PackageType;
@@ -46,7 +39,6 @@ import com.elasticpath.importexport.importer.controller.ImportController;
 import com.elasticpath.importexport.importer.types.CollectionStrategyType;
 import com.elasticpath.importexport.importer.types.DependentElementType;
 import com.elasticpath.importexport.importer.types.ImportStrategyType;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.store.StoreService;
@@ -59,8 +51,6 @@ import com.elasticpath.service.store.StoreService;
 public class ImportCustomerWithPaymentMethodsSteps {
 	private static final String TEST_PASSWORD = "testPassword";
 	private static final String TEST_SALT = "testSalt";
-	private static final String TEST_DISPLAY_VALUE = "testDisplayValue";
-	private static final String TEST_DISPLAY_VALUE_2 = "testDisplayValue2";
 	private static final String TEST_USER_ID = "testUser@email.com";
 	private static final String TEST_EMAIL = TEST_USER_ID;
 	private static final String TEST_GUID = "testGuid";
@@ -83,25 +73,12 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	private TestDomainMarshaller testDomainMarshaller;
 
 	@Autowired
-	private PaymentTokenDTOTransformer paymentTokenDTOTransformer;
-
-	@Autowired
-	private TestPaymentMethodBuilderFactory testPaymentMethodBuilderFactory;
-
-	@Autowired
-	private TestPaymentDTOBuilderFactory paymentDTOBuilderFactory;
-
-	@Autowired
 	private StoreService storeService;
 
 	@Autowired
 	private CustomerService customerService;
 
 	private ImportConfiguration importConfiguration;
-
-	private PaymentMethodDto testPaymentMethodA;
-	private PaymentMethodDto testPaymentMethodB;
-	private PaymentMethodDto testPaymentMethodC;
 
 	private Summary summary;
 
@@ -112,10 +89,6 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@Before
 	public void setupImportTestingComponents() {
-		testPaymentMethodA = paymentDTOBuilderFactory.createPaymentTokenWithValue("A").build();
-		testPaymentMethodB = paymentDTOBuilderFactory.createPaymentTokenWithValue("B").build();
-		testPaymentMethodC = paymentDTOBuilderFactory.createPaymentTokenWithValue("C").build();
-
 		if (customerGroupService.findByGroupName(CustomerGroup.DEFAULT_GROUP_NAME) == null) {
 			final CustomerGroup defaultCustomerGroup = customerGroupBuilder.newInstance()
 					.withGuid(String.format("guid_%s", CustomerGroup.DEFAULT_GROUP_NAME))
@@ -136,18 +109,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@Given("^a customer exists$")
 	public void createACustomerWithNoPaymentMethods() {
-		createPersistedCustomerWithPaymentMethods();
-	}
-
-	/**
-	 * Create a existingCustomer.
-	 */
-	@Given("^a customer exists with payment methods$")
-	public void createACustomerWithPaymentMethods() {
-		PaymentMethod paymentMethod = testPaymentMethodBuilderFactory.createPaymentTokenBuilderWithIdentity(TEST_DISPLAY_VALUE).build();
-		PaymentMethod paymentMethod2 = testPaymentMethodBuilderFactory.createPaymentTokenBuilderWithIdentity(TEST_DISPLAY_VALUE_2).build();
-
-		createPersistedCustomerWithPaymentMethods(paymentMethod, paymentMethod2);
+		createPersistedCustomer();
 	}
 
 	/**
@@ -157,8 +119,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@And("^an import with payment methods A,B and C and C is the default$")
 	public void setupImportFileForCustomerWithPaymentMethodsAndDefault() throws Exception {
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.asList(testPaymentMethodA,
-				testPaymentMethodB, testPaymentMethodC), testPaymentMethodC);
+		CustomerDTO customerDTO = createCustomerDTO();
 		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
 	}
 
@@ -169,8 +130,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@And("^an import with payment methods A,B and C and no default payment method$")
 	public void setupImportFileForCustomerWithPaymentMethodsAndNoDefault() throws Exception {
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.asList(testPaymentMethodA,
-				testPaymentMethodB, testPaymentMethodC), null);
+		CustomerDTO customerDTO = createCustomerDTO();
 
 		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
 	}
@@ -182,8 +142,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@And("^an import configured with a RETAIN_COLLECTION collection strategy for payment methods$")
 	public void setupImportFileForCustomerWithRetainCollectionForPaymentMethods() throws Exception {
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.asList(testPaymentMethodA,
-				testPaymentMethodB, testPaymentMethodC), null);
+		CustomerDTO customerDTO = createCustomerDTO();
 
 		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
 		ImporterConfiguration importerConfiguration = importConfiguration.getImporterConfiguration(JobType.CUSTOMER);
@@ -205,7 +164,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@And("^an import with an empty collection of payment methods$")
 	public void setupImportFilerForCustomerWithNoPaymentMethods() throws Exception {
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Collections.emptyList(), null);
+		CustomerDTO customerDTO = createCustomerDTO();
 
 		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
 	}
@@ -219,53 +178,6 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	public void executeImport() throws ConfigurationException {
 		importController.loadConfiguration(importConfiguration);
 		summary = importController.executeImport();
-	}
-
-	/**
-	 * Ensure the customer has the expected payment methods and default.
-	 */
-	@Then("^the customer will be updated with payment methods A,B and C and C is chosen as the default$")
-	public void ensureImportedCustomerHasListOfPaymentMethodsWithDefaultSelected() {
-		PaymentMethod paymentMethod = transformToPaymentMethod(testPaymentMethodA);
-		PaymentMethod paymentMethod2 = transformToPaymentMethod(testPaymentMethodB);
-		PaymentMethod paymentMethod3 = transformToPaymentMethod(testPaymentMethodC);
-
-		Customer persistedCustomer = getCustomerUpdated();
-
-		new CustomerPaymentMethodsValidator(persistedCustomer)
-				.withPaymentMethods(paymentMethod, paymentMethod2, paymentMethod3)
-				.withDefaultPaymentMethod(paymentMethod3)
-				.validate();
-	}
-
-	/**
-	 * Ensure the customer has the expected payment methods and default.
-	 */
-	@Then("^the customer will be updated with payment methods A,B, and C and A will be chosen as the default$")
-	public void ensureImportedCustomerHasListOfPaymentMethodsWithFirstPaymentMethodSelectedAsDefault() {
-		PaymentMethod paymentMethod = transformToPaymentMethod(testPaymentMethodA);
-		PaymentMethod paymentMethod2 = transformToPaymentMethod(testPaymentMethodB);
-		PaymentMethod paymentMethod3 = transformToPaymentMethod(testPaymentMethodC);
-
-		Customer persistedCustomer = getCustomerUpdated();
-
-		new CustomerPaymentMethodsValidator(persistedCustomer)
-				.withPaymentMethods(paymentMethod, paymentMethod2, paymentMethod3)
-				.withDefaultPaymentMethod(paymentMethod)
-				.validate();
-	}
-
-	/**
-	 * Ensure the customer has no payment methods.
-	 */
-	@Then("^the customer is updated and has no payment methods$")
-	public void ensureImportedCustomerHasNoPaymentMethods() {
-		Customer persistedCustomer = getCustomerUpdated();
-
-		new CustomerPaymentMethodsValidator(persistedCustomer)
-				.withPaymentMethods()
-				.withDefaultPaymentMethod(null)
-				.validate();
 	}
 
 	/**
@@ -287,43 +199,27 @@ public class ImportCustomerWithPaymentMethodsSteps {
 				.contains("Only CLEAR_COLLECTION is currently supported");
 	}
 
-	private Customer getCustomerUpdated() {
-		return customerService.findByGuid(TEST_GUID);
-	}
-
-	private Customer createPersistedCustomerWithPaymentMethods(final PaymentMethod... paymentMethods) {
+	private Customer createPersistedCustomer() {
 		final Customer customer = customerBuilder.newInstance()
 				.withGuid(TEST_GUID)
 				.withFirstName(TEST_FIRST_NAME)
 				.withLastName(TEST_LAST_NAME)
 				.withEmail(TEST_EMAIL)
 				.withStoreCode(storeService.findAllStores().get(0).getCode())
-				.withPaymentMethods(paymentMethods)
 				.build();
 
 		return customerService.add(customer);
 	}
 
-	private CustomerDTO createCustomerDTOWithPaymentMethodsAndDefault(final List<PaymentMethodDto> paymentMethodDtos,
-																	  final PaymentMethodDto defaultPaymentMethod) {
+	private CustomerDTO createCustomerDTO() {
 		return new CustomerDTOBuilder().withGuid(TEST_GUID)
 				.withCreationDate(new Date())
 				.withLastEditDate(new Date())
 				.withStoreCode(storeService.findAllStores().get(0).getCode())
 				.withUserId(TEST_USER_ID)
-				.withPaymentMethods(paymentMethodDtos.toArray(new PaymentMethodDto[paymentMethodDtos.size()]))
-				.withDefaultPaymentMethod(defaultPaymentMethod)
 				.withPassword(TEST_PASSWORD)
 				.withSalt(TEST_SALT)
 				.build();
-	}
-
-	private PaymentMethod transformToPaymentMethod(final PaymentMethodDto paymentMethodDto) {
-		if (paymentMethodDto instanceof PaymentTokenDto) {
-			return paymentTokenDTOTransformer.transformToDomain((PaymentTokenDto) paymentMethodDto);
-		} else {
-			return null;
-		}
 	}
 
 	private void createXmlRepresentationOfCustomerAndConfigureImport(final CustomerDTO customerDTO) throws Exception {

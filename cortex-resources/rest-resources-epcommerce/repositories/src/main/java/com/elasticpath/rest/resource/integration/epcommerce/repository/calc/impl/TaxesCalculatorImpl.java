@@ -44,7 +44,7 @@ public class TaxesCalculatorImpl implements TaxesCalculator {
 
 	@Override
 	public Single<TaxCalculationResult> calculateTax(final String storeCode, final String cartOrderGuid) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(storeCode, cartOrderGuid, CartOrderRepository.FindCartOrder.BY_ORDER_GUID)
+		return cartOrderRepository.getEnrichedShoppingCart(storeCode, cartOrderGuid, CartOrderRepository.FindCartOrder.BY_ORDER_GUID)
 				.flatMap(pricingSnapshotRepository::getShoppingCartTaxSnapshot)
 				.map(ShoppingCartTaxSnapshot::getTaxCalculationResult);
 	}

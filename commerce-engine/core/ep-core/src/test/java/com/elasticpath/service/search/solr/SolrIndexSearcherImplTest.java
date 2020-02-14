@@ -57,7 +57,7 @@ public class SolrIndexSearcherImplTest {
 			setImposteriser(ClassImposteriser.INSTANCE);
 		}
 	};
-	
+
 	private final ElasticPath elasticPath = context.mock(ElasticPath.class);
 
 	private SolrProvider solrProvider;
@@ -76,7 +76,7 @@ public class SolrIndexSearcherImplTest {
 
 	/**
 	 * Prepare for test.
-	 * 
+	 *
 	 * @throws Exception in case of error
 	 */
 	@Before
@@ -87,16 +87,16 @@ public class SolrIndexSearcherImplTest {
 		queryFactory = context.mock(SolrQueryFactory.class);
 		queryComposer = context.mock(QueryComposer.class);
 		queryComposerFactory = context.mock(QueryComposerFactory.class);
-		
+
 		context.checking(new Expectations() {
 			{
 				allowing(solrProvider).getServer(with(any(IndexType.class))); will(returnValue(solrClient));
 				allowing(solrProvider).getSearchConfig(with(any(IndexType.class))); will(returnValue(new SearchConfigImpl()));
-				
+
 				allowing(queryFactory).composeSpecificQuery(with(queryComposer), with(any(SearchCriteria.class)), with(any(Integer.class)),
 						with(any(Integer.class)), with(any(SearchConfig.class)), with(any(Boolean.class)), with(any(Map.class)));
 				will(returnValue(new SolrQuery()));
-				
+
 				allowing(queryFactory).composeKeywordQuery(with(any(KeywordSearchCriteria.class)), with(any(Integer.class)),
 						with(any(Integer.class)), with(any(SearchConfig.class)), with(any(Boolean.class)), with(any(Map.class)));
 				will(returnValue(new SolrQuery()));
@@ -110,51 +110,51 @@ public class SolrIndexSearcherImplTest {
 	}
 
 	/**
-	 * Non fuzzy search test method for 
+	 * Non fuzzy search test method for
 	 * {@link SolrIndexSearcherImpl#search(SearchCriteria, int, SolrIndexSearchResult)}.
 	 * @throws IOException in case of error during solr request
 	 * @throws SolrServerException in case of error during solr request
 	 */
 	@Test
 	public void testNonFuzzySearch() throws SolrServerException, IOException {
-		
+
 		// test fuzzy search
 		final ProductSearchCriteria searchCriteria = new ProductSearchCriteria();
 		searchCriteria.setFuzzySearchDisabled(true);
 
 		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();
-		
+
 		context.checking(new Expectations() {
 			{
 				allowing(queryComposerFactory).getComposerForCriteria(with(aNonNull(ProductSearchCriteria.class)));
 				will(returnValue(queryComposer));
-				
+
 				oneOf(solrClient).request(with(aNonNull(QueryRequest.class)), with(aNull(String.class)));
 				will(returnValue(new NamedList<>()));
 			}
 		});
 		solrIndexSearcherImpl.search(searchCriteria, DUMMY_MAX_RETURN_NUM, searchResult);
 	}
-	
+
 	/**
-	 * Fuzzy search test method for 
+	 * Fuzzy search test method for
 	 * {@link SolrIndexSearcherImpl#search(SearchCriteria, int, SolrIndexSearchResult)}.
 	 * @throws IOException in case of error during solr request
 	 * @throws SolrServerException in case of error during solr request
 	 */
 	@Test
 	public void testFuzzySearch() throws SolrServerException, IOException {
-		
+
 		// test non fuzzy search
 		final ProductSearchCriteria searchCriteria = new ProductSearchCriteria();
 
 		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();
-		
+
 		context.checking(new Expectations() {
 			{
 				allowing(queryComposerFactory).getComposerForCriteria(with(aNonNull(ProductSearchCriteria.class)));
 				will(returnValue(queryComposer));
-				
+
 				exactly(2).of(solrClient).request(with(aNonNull(SolrRequest.class)), with(aNull(String.class)));
 				will(returnValue(new NamedList<>()));
 			}
@@ -173,14 +173,14 @@ public class SolrIndexSearcherImplTest {
 	 */
 	@Test
 	public void testFuzzySearchWithKeyword() throws SolrServerException, IOException {
-		final SearchCriteria searchCriteria = new KeywordSearchCriteria();		
+		final SearchCriteria searchCriteria = new KeywordSearchCriteria();
 		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();
 
 		context.checking(new Expectations() {
 			{
 				allowing(queryComposerFactory).getComposerForCriteria(with(aNonNull(ProductSearchCriteria.class)));
 				will(returnValue(queryComposer));
-				
+
 				exactly(2).of(solrClient).request(with(aNonNull(QueryRequest.class)), with(aNull(String.class)));
 				will(returnValue(new NamedList<>()));
 			}
@@ -191,7 +191,7 @@ public class SolrIndexSearcherImplTest {
 		searchCriteria.setFuzzySearchDisabled(false);
 		solrIndexSearcherImpl.search(searchCriteria, DUMMY_MAX_RETURN_NUM, searchResult);
 	}
-	
+
 	/**
 	 * Non fuzzy search with keyword test method for
 	 * {@link SolrIndexSearcherImpl#search(SearchCriteria, int, SolrIndexSearchResult)}. This
@@ -209,7 +209,7 @@ public class SolrIndexSearcherImplTest {
 			{
 				allowing(queryComposerFactory).getComposerForCriteria(with(aNonNull(ProductSearchCriteria.class)));
 				will(returnValue(queryComposer));
-				
+
 				oneOf(solrClient).request(with(aNonNull(QueryRequest.class)), with(aNull(String.class)));
 				will(returnValue(new NamedList<>()));
 			}
@@ -218,9 +218,9 @@ public class SolrIndexSearcherImplTest {
 		solrIndexSearcherImpl.search(searchCriteria, DUMMY_MAX_RETURN_NUM, searchResult);
 
 	}
-	
+
 	/**
-	 * Tests that if a query starts with a bracket '(' (generated by a boolean query) 
+	 * Tests that if a query starts with a bracket '(' (generated by a boolean query)
 	 * it still is verified properly that it starts with the given prefix.
 	 */
 	@Test
@@ -244,27 +244,27 @@ public class SolrIndexSearcherImplTest {
 		final String attributeRangeKey = "attribute.A02638_sf:[6.0 TO *]";
 
 		final FilterOption<AttributeRangeFilter> filterOption = new FilterOptionImpl<>();
-		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();		
+		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();
 		final SolrFacetAdapter facetAdapter = new SolrFacetAdapter();
 		facetAdapter.setConfig(new FilteredNavigationConfigurationImpl());
 		final AttributeRangeFilter attributeRangeFilter = new AttributeRangeFilterImpl();
 		attributeRangeFilter.setAttribute(new AttributeImpl());
 		final Map<String, Integer> facetQueries = new HashMap<>();
 		facetQueries.put(attributeRangeKey, 2);
-		
+
 		context.checking(new Expectations() { {
-			allowing(elasticPath).getBean(ContextIdNames.FILTER_OPTION); will(returnValue(filterOption));
-		} });				
-		
+			allowing(elasticPath).getPrototypeBean(ContextIdNames.FILTER_OPTION, FilterOption.class); will(returnValue(filterOption));
+		} });
+
 		solrIndexSearcherImpl.setSolrFacetAdapter(facetAdapter);
 		solrIndexSearcherImpl.setElasticPath(elasticPath);
 		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries, ImmutableMap.of(attributeRangeKey, attributeRangeFilter));
-		
+
 		assertFalse(searchResult.getAttributeRangeFilterOptions().isEmpty());
 		assertTrue(searchResult.getAttributeValueFilterOptions().isEmpty());
 		assertTrue(searchResult.getPriceFilterOptions().isEmpty());
 	}
-	
+
 	/**
 	 * Tests that facet queries with attribute value are parsed correctly.
 	 */
@@ -273,55 +273,55 @@ public class SolrIndexSearcherImplTest {
 		final String attributeValueKey = "attribute.A02638_sf:value";
 
 		final FilterOption<AttributeValueFilter> filterOption = new FilterOptionImpl<>();
-		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();		
+		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();
 		final SolrFacetAdapter facetAdapter = new SolrFacetAdapter();
 		facetAdapter.setConfig(new FilteredNavigationConfigurationImpl());
 		final AttributeValueFilter attributeValueFilter = new AttributeValueFilterImpl();
 		attributeValueFilter.setAttribute(new AttributeImpl());
 		final Map<String, Integer> facetQueries = new HashMap<>();
 		facetQueries.put(attributeValueKey, 2);
-		
+
 		context.checking(new Expectations() { {
-			allowing(elasticPath).getBean(ContextIdNames.FILTER_OPTION); will(returnValue(filterOption));
-		} });				
-		
+			allowing(elasticPath).getPrototypeBean(ContextIdNames.FILTER_OPTION, FilterOption.class); will(returnValue(filterOption));
+		} });
+
 		solrIndexSearcherImpl.setSolrFacetAdapter(facetAdapter);
 		solrIndexSearcherImpl.setElasticPath(elasticPath);
 		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries, ImmutableMap.of(attributeValueKey, attributeValueFilter));
-		
+
 		assertTrue(searchResult.getAttributeRangeFilterOptions().isEmpty());
 		assertFalse(searchResult.getAttributeValueFilterOptions().isEmpty());
 		assertTrue(searchResult.getPriceFilterOptions().isEmpty());
 	}
-	
+
 	/**
-	 * Tests that facet queries with price are parsed correctly. 
+	 * Tests that facet queries with price are parsed correctly.
 	 */
 	@Test
 	public void testParseFacetQueriesWithPriceValue() {
 		final String priceValueKey = "priceA02638_sf:value";
 
 		final FilterOption<PriceFilter> filterOption = new FilterOptionImpl<>();
-		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();		
+		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();
 		final SolrFacetAdapter facetAdapter = new SolrFacetAdapter();
 		final PriceFilter priceFilter = new PriceFilterImpl();
 		facetAdapter.setConfig(new FilteredNavigationConfigurationImpl());
 		final Map<String, Integer> facetQueries = new HashMap<>();
 		facetQueries.put(priceValueKey, 2);
-		
+
 		context.checking(new Expectations() { {
-			allowing(elasticPath).getBean(ContextIdNames.FILTER_OPTION); will(returnValue(filterOption));
-		} });				
-		
+			allowing(elasticPath).getPrototypeBean(ContextIdNames.FILTER_OPTION, FilterOption.class); will(returnValue(filterOption));
+		} });
+
 		solrIndexSearcherImpl.setSolrFacetAdapter(facetAdapter);
 		solrIndexSearcherImpl.setElasticPath(elasticPath);
 		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries, ImmutableMap.of(priceValueKey, priceFilter));
-		
+
 		assertTrue(searchResult.getAttributeRangeFilterOptions().isEmpty());
 		assertTrue(searchResult.getAttributeValueFilterOptions().isEmpty());
 		assertFalse(searchResult.getPriceFilterOptions().isEmpty());
 	}
-	
+
 	/**
 	 * Tests that facet queries with random values are handled correctly.
 	 */
@@ -329,14 +329,14 @@ public class SolrIndexSearcherImplTest {
 	public void testParseFacetQueriesWithRandomValueOrZeroValue() {
 		final String randomValueKey = "random:value";
 		final String priceValueKey = "priceA02638_sf:value";
-		
-		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();		
+
+		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();
 		final Map<String, Integer> facetQueries = new HashMap<>();
 		facetQueries.put(priceValueKey, 0);
 		facetQueries.put(randomValueKey, 2);
-		
+
 		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries, ImmutableMap.of());
-		
+
 		assertTrue(searchResult.getAttributeRangeFilterOptions().isEmpty());
 		assertTrue(searchResult.getAttributeValueFilterOptions().isEmpty());
 		assertTrue(searchResult.getPriceFilterOptions().isEmpty());

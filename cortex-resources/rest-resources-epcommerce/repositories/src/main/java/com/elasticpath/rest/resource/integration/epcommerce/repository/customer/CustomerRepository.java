@@ -18,6 +18,7 @@ public interface CustomerRepository {
 
 	/**
 	 * Create a new Customer Domain Object. This method does not perform any persistence.
+	 *
 	 * @return Customer.
 	 */
 	Customer createNewCustomerEntity();
@@ -60,19 +61,9 @@ public interface CustomerRepository {
 	 * Updates the customer.
 	 *
 	 * @param customer the customer.
-	 * @return A result based on whether the update was successful.
-	 * @deprecated use {@link CustomerRepository#updateCustomerAsCompletable(Customer)}
-	 */
-	@Deprecated
-	ExecutionResult<Void> updateCustomer(Customer customer);
-
-	/**
-	 * Updates the customer.
-	 *
-	 * @param customer the customer.
 	 * @return Completable with the deferred execution of the update operation.
 	 */
-	Completable updateCustomerAsCompletable(Customer customer);
+	Completable updateCustomer(Customer customer);
 
 	/**
 	 * Merge anonymous to registered customer.
@@ -83,7 +74,7 @@ public interface CustomerRepository {
 	 * @return an execution result based on whether the merge was successful
 	 */
 	ExecutionResult<Object> mergeCustomer(CustomerSession customerSession, Customer recipientCustomer,
-			String validatedStoreCode);
+										  String validatedStoreCode);
 
 	/**
 	 * Adds the customer address.
@@ -126,4 +117,13 @@ public interface CustomerRepository {
 	 * @return customer is first time buyer
 	 */
 	boolean isFirstTimeBuyer(Customer customer);
+
+	/**
+	 * Attaches an address to a customer if the customer does not already have a link to an equivalent address.
+	 *
+	 * @param customer        the customer
+	 * @param customerAddress the address to check and/or attach to the customer.
+	 * @return customer address
+	 */
+	Single<CustomerAddress> createAddressForCustomer(Customer customer, CustomerAddress customerAddress);
 }

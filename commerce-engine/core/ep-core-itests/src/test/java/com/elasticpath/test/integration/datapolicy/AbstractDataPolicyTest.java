@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.pricing.service.PriceListHelperService;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -36,36 +35,62 @@ import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
 import com.elasticpath.service.datapolicy.DataPointService;
 import com.elasticpath.service.datapolicy.DataPolicyService;
-import com.elasticpath.service.misc.impl.MockTimeServiceImpl;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
-import com.elasticpath.test.integration.customer.AnonymousCustomerCleanupServiceImplTest;
 import com.elasticpath.test.persister.SettingsTestPersister;
 import com.elasticpath.test.util.Utils;
 
 public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 
-	/** Date for customer last changed */
+	/**
+	 * Date for customer last changed
+	 */
 	protected static final int EXPECTED_MAX_HISTORY = 60;
-	/** Data point Unique Code 1. */
+	/**
+	 * Data point Unique Code 1.
+	 */
 	protected static final String DATA_POINT_UNIQUE_CODE = "DATA_POINT";
-	/** Data Policy Unique Code 1. */
+	/**
+	 * Data Policy Unique Code 1.
+	 */
 	protected static final String DATA_POLICY_UNIQUE_CODE = "DATA_POLICY";
-	/** Data Policy Unique Code 2. */
+	/**
+	 * Data Policy Unique Code 2.
+	 */
 	protected static final String DATA_POLICY_UNIQUE_CODE2 = "DATA_POLICY2";
-	/** Data Policy Unique Code 3. */
+	/**
+	 * Data Policy Unique Code 3.
+	 */
 	protected static final String DATA_POLICY_UNIQUE_CODE3 = "DATA_POLICY3";
-	/** Customer Consent Unique Code 1. */
+	/**
+	 * Data Policy Unique Code 4.
+	 */
+	protected static final String DATA_POLICY_UNIQUE_CODE4 = "DATA_POLICY4";
+	/**
+	 * Data Policy Unique Code 5.
+	 */
+	protected static final String DATA_POLICY_UNIQUE_CODE5 = "DATA_POLICY5";
+	/**
+	 * Customer Consent Unique Code 1.
+	 */
 	public static final String CUSTOMER_CONSENT_UNIQUE_CODE = "CUSTOMER_CONSENT";
-	/** Customer Consent Unique Code 2. */
+	/**
+	 * Customer Consent Unique Code 2.
+	 */
 	protected static final String CUSTOMER_CONSENT_UNIQUE_CODE2 = "CUSTOMER_CONSENT2";
-	/** Customer Consent Unique Code 3. */
+	/**
+	 * Customer Consent Unique Code 3.
+	 */
 	protected static final String CUSTOMER_CONSENT_UNIQUE_CODE3 = "CUSTOMER_CONSENT3";
 
 	private static final long DAY_IN_MILLISEC = 1000 * 60 * 60 * 24;
-	/** Date object representing yesterday. */
+	/**
+	 * Date object representing yesterday.
+	 */
 	protected static final Date YESTERDAY_DATE = new Date(System.currentTimeMillis() - DAY_IN_MILLISEC);
-	/** Date object representing today. */
+	/**
+	 * Date object representing today.
+	 */
 	protected static final Date TODAY_DATE = new Date();
 
 	private static final String DESCRIPTION_KEY = "DESCRIPTION_KEY";
@@ -260,7 +285,7 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 	}
 
 	protected Customer createPersistedCustomer(final String storeCode, final String email, final boolean anonymous) {
-		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		final Customer customer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setAnonymous(anonymous);
 		if (!anonymous) {
 			customer.setUserId(email);
@@ -285,7 +310,7 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 		final CustomerSession customerSession = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(
 				shopper);
 
-		final PriceListHelperService priceListHelperService = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE);
+		final PriceListHelperService priceListHelperService = getBeanFactory().getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE, PriceListHelperService.class);
 		final Currency currency = priceListHelperService.getDefaultCurrencyFor(catalog);
 		customerSession.setCurrency(currency);
 		return customerSession;

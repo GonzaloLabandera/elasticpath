@@ -14,10 +14,10 @@ import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
 public interface ItemValidationService {
 
 	/**
-	 * Check if the item is purchasable.
+	 * Validates if the item is purchasable.
 	 *
 	 * @param wishlistLineItemIdentifier wishlistLineItemIdentifier
-	 * @return the execution result with the boolean result
+	 * @return error messages if item is not purchasable
 	 */
 	Observable<Message> isItemPurchasable(WishlistLineItemIdentifier wishlistLineItemIdentifier);
 

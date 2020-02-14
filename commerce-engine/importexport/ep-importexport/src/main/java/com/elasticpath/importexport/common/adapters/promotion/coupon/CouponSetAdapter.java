@@ -81,7 +81,7 @@ public class CouponSetAdapter extends AbstractDomainAdapterImpl<CouponSet, Coupo
 
 	/**
 	 * Populates coupon based on coupon code.
-	 * 
+	 *
 	 * @param couponCode coupon code.
 	 * @return {@link Coupon}.
 	 */
@@ -93,7 +93,7 @@ public class CouponSetAdapter extends AbstractDomainAdapterImpl<CouponSet, Coupo
 
 	/**
 	 * Populates coupon config based on {@link CouponConfigDTO}.
-	 * 
+	 *
 	 * @param couponConfigDTO {@link CouponConfigDTO}.
 	 * @return {@link CouponConfigDTO}.
 	 */
@@ -115,7 +115,7 @@ public class CouponSetAdapter extends AbstractDomainAdapterImpl<CouponSet, Coupo
 
 	/**
 	 * Setter for {@link CouponConfigAdapter}.
-	 * 
+	 *
 	 * @param couponConfigAdapter {@link CouponConfigAdapter}.
 	 */
 	public void setCouponConfigAdapter(final CouponConfigAdapter couponConfigAdapter) {
@@ -124,7 +124,7 @@ public class CouponSetAdapter extends AbstractDomainAdapterImpl<CouponSet, Coupo
 
 	/**
 	 * Gets {@link Coupon} by coupon code. Creates a new one if there is none.
-	 * 
+	 *
 	 * @return {@link Coupon}.
 	 */
 	private Coupon createCouponDomain() {

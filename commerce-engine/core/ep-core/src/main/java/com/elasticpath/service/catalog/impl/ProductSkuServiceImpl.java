@@ -219,7 +219,7 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 
 	private ProductService getProductService() {
 		if (this.productService == null) {
-			this.productService = getBean(ContextIdNames.PRODUCT_SERVICE);
+			this.productService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		}
 		return this.productService;
 	}
@@ -365,10 +365,6 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 		}
 
 		return result.get(0);
-	}
-
-	private <T> T getBean(final String beanName) {
-		return getBeanFactory().getBean(beanName);
 	}
 
 	/**

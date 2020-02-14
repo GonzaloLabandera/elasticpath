@@ -40,9 +40,9 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.ValidationErrorLocation;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -114,7 +114,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 	private static final int ORDER_SKU_TABLE_HEIGHT = 200;
 
 	private static final int COLUMN_WIDTH_BUNDLE_NAME = 120;
-	
+
 	private static final int COLUMN_WIDTH_INVENTORY_STATUS = 100;
 
 	private static final int COLUMN_WIDTH_SKU_CODE = 120;
@@ -125,7 +125,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 
 	private static final int COLUMN_WIDTH_LIST_PRICE = 80;
 
-	private static final int COLUMN_WIDTH_TOTAL_PRICE = 80;
+	private static final int COLUMN_WIDTH_TOTAL_PRICE = 160;
 
 	private static final int COLUMN_WIDTH_SALE_PRICE = 80;
 
@@ -214,7 +214,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 
 	private AllocationService getAllocationService() {
 		if (allocationService == null) {
-			allocationService = ServiceLocator.getService(ContextIdNames.ALLOCATION_SERVICE);
+			allocationService = BeanLocator.getSingletonBean(ContextIdNames.ALLOCATION_SERVICE, AllocationService.class);
 		}
 		return allocationService;
 	}
@@ -497,9 +497,9 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 		 */
 		private class InlineQuantityEditorActivationlistenerHelper extends ColumnViewerEditorActivationListenerHelper {
 
-			private final OrderSku oldOrderSku = ServiceLocator.getService(ContextIdNames.ORDER_SKU);
+			private final OrderSku oldOrderSku = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 			private final ProductInventoryManagementService productInventoryManagementService =
-				ServiceLocator.getService(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE);
+					BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE, ProductInventoryManagementService.class);
 
 			@Override
 			public void afterEditorActivated(final ColumnViewerEditorActivationEvent event) {
@@ -646,7 +646,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 		 */
 		private class InlineDiscountEditorActivationlistenerHelper extends ColumnViewerEditorActivationListenerHelper {
 
-			private final OrderSku oldOrderSku = ServiceLocator.getService(ContextIdNames.ORDER_SKU);
+			private final OrderSku oldOrderSku = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 
 			@Override
 			public void afterEditorActivated(final ColumnViewerEditorActivationEvent event) {
@@ -961,7 +961,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 	}
 
 	private OrderSku getOrderSkuBean() {
-		return ServiceLocator.getService(ContextIdNames.ORDER_SKU);
+		return BeanLocator.getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 	}
 	
 	private boolean validRequest(final ProductSku sku, final Set<OrderSku> orderSkus) {
@@ -1164,14 +1164,14 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 	}
 
 	private EventOriginator getEventOriginator() {
-		EventOriginatorHelper helper = ServiceLocator.getService(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = BeanLocator.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 
 		return helper.getCmUserOriginator(LoginManager.getCmUser());
 	}
 
 	private TaxCodeRetriever getTaxCodeRetriever() {
 		if (taxCodeRetriever == null) {
-			taxCodeRetriever = ServiceLocator.getService(ContextIdNames.TAX_CODE_RETRIEVER);
+			taxCodeRetriever = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_RETRIEVER, TaxCodeRetriever.class);
 		}
 		return taxCodeRetriever;
 	}
@@ -1183,7 +1183,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 	 */
 	private TimeService getTimeService() {
 		if (timeService == null) {
-			timeService = ServiceLocator.getService(ContextIdNames.TIME_SERVICE);
+			timeService = BeanLocator.getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		}
 		return timeService;
 	}
@@ -1195,7 +1195,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 	 */
 	protected PricingSnapshotService getPricingSnapshotService() {
 		if (pricingSnapshotService == null) {
-			pricingSnapshotService = ServiceLocator.getService(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
+			pricingSnapshotService = BeanLocator.getSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
 		}
 		return pricingSnapshotService;
 	}
@@ -1207,7 +1207,8 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 	 */
 	private PhysicalOrderShipmentShippingCostRefresher getPhysicalOrderShipmentShippingCostRefresher() {
 		if (physicalOrderShipmentShippingCostRefresher == null) {
-			physicalOrderShipmentShippingCostRefresher = ServiceLocator.getService(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER);
+			physicalOrderShipmentShippingCostRefresher = BeanLocator.getSingletonBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER,
+					PhysicalOrderShipmentShippingCostRefresher.class);
 		}
 		return physicalOrderShipmentShippingCostRefresher;
 	}

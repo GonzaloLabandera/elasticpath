@@ -10,9 +10,8 @@ import com.elasticpath.service.rules.RuleActionService;
 
 /**
  * Provides rule action component related services.
- *
  */
-public class RuleActionServiceImpl extends AbstractEpPersistenceServiceImpl implements RuleActionService  {
+public class RuleActionServiceImpl extends AbstractEpPersistenceServiceImpl implements RuleActionService {
 	/**
 	 * Adds the given ruleAction.
 	 *
@@ -44,7 +43,6 @@ public class RuleActionServiceImpl extends AbstractEpPersistenceServiceImpl impl
 	 * Delete the ruleAction.
 	 *
 	 * @param ruleAction the ruleAction to remove
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
@@ -52,30 +50,28 @@ public class RuleActionServiceImpl extends AbstractEpPersistenceServiceImpl impl
 		sanityCheck();
 		getPersistenceEngine().delete(ruleAction);
 	}
-	
+
 	/**
 	 * Load the ruleAction with the given UID.
 	 * Throw an unrecoverable exception if there is no matching database row.
 	 *
 	 * @param ruleActionUid the ruleAction UID
-	 *
 	 * @return the rule if UID exists, otherwise null
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
 	public RuleAction load(final long ruleActionUid) throws EpServiceException {
 		return this.load(ruleActionUid, null);
 	}
-	
+
 	/**
-	 * Load the ruleAction with the given UID if it is greater than 0; 
+	 * Load the ruleAction with the given UID if it is greater than 0;
 	 * otherwise get new instance of the ruleAction of the given ruleActionType
 	 * from the spring beanFactory (assuming bean id is the same as the ruleActionType).
-	 * 
+	 * <p>
 	 * Throw an unrecoverable exception if there is no matching database row.
 	 *
-	 * @param ruleActionUid the ruleAction UID
+	 * @param ruleActionUid  the ruleAction UID
 	 * @param ruleActionType the ruleAction type
 	 * @return the rule if it exists, otherwise null.
 	 * @throws EpServiceException in case of errors.
@@ -86,35 +82,33 @@ public class RuleActionServiceImpl extends AbstractEpPersistenceServiceImpl impl
 		RuleAction ruleAction = null;
 		if (ruleActionUid > 0) {
 			ruleAction = getPersistenceEngine().load(RuleAction.class, ruleActionUid);
-		} else if (ruleActionType != null) { 
-			ruleAction = getBean(ruleActionType);
+		} else if (ruleActionType != null) {
+			ruleAction = getPrototypeBean(ruleActionType, RuleAction.class);
 		}
 		return ruleAction;
 	}
-	
+
 	/**
-	 * Get the ruleAction with the given UID. 
+	 * Get the ruleAction with the given UID.
 	 * Return null if no matching record exists.
 	 *
 	 * @param ruleActionUid the ruleAction UID
-	 *
 	 * @return the ruleAction if UID exists, otherwise null
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
 	public RuleAction get(final long ruleActionUid) throws EpServiceException {
 		return this.get(ruleActionUid, null);
 	}
-	
+
 	/**
-	 * Get the ruleAction with the given UID if it is greater than 0; 
+	 * Get the ruleAction with the given UID if it is greater than 0;
 	 * otherwise get new instance of the ruleAction of the given ruleActionType
 	 * from the spring beanFactory (assuming bean id is the same as the ruleActionType).
-	 * 
+	 * <p>
 	 * Return null if no matching record exists.
 	 *
-	 * @param ruleActionUid the ruleAction UID
+	 * @param ruleActionUid  the ruleAction UID
 	 * @param ruleActionType the ruleAction type
 	 * @return the rule if it exists, otherwise null.
 	 * @throws EpServiceException in case of errors.
@@ -125,15 +119,15 @@ public class RuleActionServiceImpl extends AbstractEpPersistenceServiceImpl impl
 		RuleAction ruleAction = null;
 		if (ruleActionUid > 0) {
 			ruleAction = getPersistenceEngine().get(RuleAction.class, ruleActionUid);
-		} else if (ruleActionType != null) { 
-			ruleAction = getBean(ruleActionType);
+		} else if (ruleActionType != null) {
+			ruleAction = getPrototypeBean(ruleActionType, RuleAction.class);
 		}
 		return ruleAction;
 	}
-	
+
 	/**
 	 * Generic get method for all persistable domain models.
-	 * 
+	 *
 	 * @param uid the persisted instance uid
 	 * @return the persisted instance if exists, otherwise null
 	 * @throws EpServiceException - in case of any errors
@@ -142,5 +136,5 @@ public class RuleActionServiceImpl extends AbstractEpPersistenceServiceImpl impl
 	public Object getObject(final long uid) throws EpServiceException {
 		return get(uid);
 	}
-	
+
 }

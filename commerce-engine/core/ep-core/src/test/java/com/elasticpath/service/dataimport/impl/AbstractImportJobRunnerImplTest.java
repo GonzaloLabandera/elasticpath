@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.persistence.FlushModeType;
 
 import org.jmock.Expectations;
@@ -43,6 +42,7 @@ import com.elasticpath.domain.dataimport.impl.AbstractImportTypeImpl;
 import com.elasticpath.domain.dataimport.impl.ImportBadRowImpl;
 import com.elasticpath.domain.dataimport.impl.ImportFaultImpl;
 import com.elasticpath.domain.dataimport.impl.ImportJobRequestImpl;
+import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.CsvFileReader;
 import com.elasticpath.persistence.PrintWriter;
@@ -142,7 +142,7 @@ public class AbstractImportJobRunnerImplTest extends AbstractEPServiceTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CATALOG_LOCALE, SupportedLocale.class, CatalogLocaleImpl.class);
 
 		this.mockPrintWriter = context.mock(PrintWriter.class);
 		context.checking(new Expectations() {
@@ -152,7 +152,6 @@ public class AbstractImportJobRunnerImplTest extends AbstractEPServiceTestCase {
 				allowing(mockPrintWriter).close();
 			}
 		});
-		stubGetBean(ContextIdNames.PRINT_WRITER, mockPrintWriter);
 		final MessageSource messageSource = context.mock(MessageSource.class);
 		context.checking(new Expectations() {
 			{
@@ -161,7 +160,7 @@ public class AbstractImportJobRunnerImplTest extends AbstractEPServiceTestCase {
 				will(returnValue(DUMMY_STRING));
 			}
 		});
-		stubGetBean(ContextIdNames.MESSAGE_SOURCE, messageSource);
+		stubGetSingletonBean(ContextIdNames.MESSAGE_SOURCE, MessageSource.class, messageSource);
 
 		mockCsvFileReader = context.mock(CsvFileReader.class);
 		mockJobStatusHandler = context.mock(ImportJobStatusHandler.class);
@@ -518,7 +517,7 @@ public class AbstractImportJobRunnerImplTest extends AbstractEPServiceTestCase {
 				will(new PrototypeBeanCustomStub(ImportBadRowImpl.class));
 				
 				allowing(getBeanFactory()).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
-				will(new PrototypeBeanCustomStub(ImportFaultImpl.class));
+				will(new PrototypeBeanCustomStub(ImportFaultImpl.class));		
 			}
 		});
 		

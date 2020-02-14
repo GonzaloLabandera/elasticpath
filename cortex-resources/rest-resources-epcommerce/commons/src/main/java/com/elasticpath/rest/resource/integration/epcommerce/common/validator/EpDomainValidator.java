@@ -43,7 +43,7 @@ public class EpDomainValidator {
 
 		final ExecutionResult<Void> result;
 
-		Validator validator = coreBeanFactory.getBean("validator");
+		Validator validator = coreBeanFactory.getSingletonBean("validator", Validator.class);
 		Set<ConstraintViolation<T>> constraintViolations = validator.validate(domainObject, groups);
 		result = epConstraintViolationsInterpreter.interpret(constraintViolations);
 
@@ -64,7 +64,7 @@ public class EpDomainValidator {
 
 		final ExecutionResult<Void> result;
 
-		Validator validator = coreBeanFactory.getBean("validator");
+		Validator validator = coreBeanFactory.getSingletonBean("validator", Validator.class);
 		Set<ConstraintViolation<T>> constraintViolations = validator.validateProperty(domainObject, propertyName, groups);
 		result = epConstraintViolationsInterpreter.interpret(constraintViolations);
 

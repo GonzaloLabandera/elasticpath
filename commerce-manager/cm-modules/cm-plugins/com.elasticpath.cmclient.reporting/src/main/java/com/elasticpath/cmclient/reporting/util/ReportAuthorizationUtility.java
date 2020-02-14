@@ -9,7 +9,7 @@ package com.elasticpath.cmclient.reporting.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.store.Store;
@@ -54,7 +54,7 @@ public class ReportAuthorizationUtility {
 	 * @return a list of all stores known to the system that are not under construction
 	 */
 	protected List<Store> getAllStores() {
-		StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		return storeService.findAllCompleteStores();
 	}
 	

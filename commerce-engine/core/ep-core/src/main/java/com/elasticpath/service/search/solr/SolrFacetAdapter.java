@@ -294,7 +294,8 @@ public class SolrFacetAdapter {
 		List<String> priceListGuids;
 
 		if (priceListStackHint == null) {
-			PriceListAssignmentService priceListAssignmentService = beanFactory.getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+			PriceListAssignmentService priceListAssignmentService = beanFactory.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE,
+					PriceListAssignmentService.class);
 			priceListGuids = priceListAssignmentService.listByCatalogAndCurrencyCode(catalogCode, currency.getCurrencyCode())
 					.stream().map(priceListAssignment -> priceListAssignment.getPriceListDescriptor().getGuid())
 					.collect(Collectors.toList());

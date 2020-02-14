@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.event.impl;
 
@@ -26,7 +26,7 @@ public class EventOriginatorHelperImpl implements EventOriginatorHelper {
 	 */
 	@Override
 	public EventOriginator getCmUserOriginator(final CmUser cmUser) {
-		EventOriginator originator = ElasticPathImpl.getInstance().getBean(ContextIdNames.EVENT_ORIGINATOR);
+		EventOriginator originator = ElasticPathImpl.getInstance().getPrototypeBean(ContextIdNames.EVENT_ORIGINATOR, EventOriginator.class);
 		originator.setType(EventOriginatorType.CMUSER);
 		originator.setCmUser(cmUser);
 		return originator;
@@ -39,7 +39,7 @@ public class EventOriginatorHelperImpl implements EventOriginatorHelper {
 	 */
 	@Override
 	public EventOriginator getWsUserOriginator(final CmUser wsUser) {
-		EventOriginator originator = ElasticPathImpl.getInstance().getBean(ContextIdNames.EVENT_ORIGINATOR);
+		EventOriginator originator = ElasticPathImpl.getInstance().getPrototypeBean(ContextIdNames.EVENT_ORIGINATOR, EventOriginator.class);
 		originator.setType(EventOriginatorType.WSUSER);
 		originator.setCmUser(wsUser);
 		return originator;
@@ -52,7 +52,7 @@ public class EventOriginatorHelperImpl implements EventOriginatorHelper {
 	 */
 	@Override
 	public EventOriginator getCustomerOriginator(final Customer customer) {
-		EventOriginator originator = ElasticPathImpl.getInstance().getBean(ContextIdNames.EVENT_ORIGINATOR);
+		EventOriginator originator = ElasticPathImpl.getInstance().getPrototypeBean(ContextIdNames.EVENT_ORIGINATOR, EventOriginator.class);
 		originator.setType(EventOriginatorType.CUSTOMER);
 		originator.setCustomer(customer);
 		return originator;
@@ -64,7 +64,7 @@ public class EventOriginatorHelperImpl implements EventOriginatorHelper {
 	 */
 	@Override
 	public EventOriginator getSystemOriginator() {
-		EventOriginator originator = ElasticPathImpl.getInstance().getBean(ContextIdNames.EVENT_ORIGINATOR);
+		EventOriginator originator = ElasticPathImpl.getInstance().getPrototypeBean(ContextIdNames.EVENT_ORIGINATOR, EventOriginator.class);
 		originator.setType(EventOriginatorType.SYSTEM);
 		return originator;
 	}

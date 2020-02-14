@@ -1,5 +1,10 @@
 # Prerequisite
-  * build project /ep-commerce/extensions/cortex/system-tests to install required dependency with following command:
+  * Build the following projects to install required dependency:
+  ```
+    /ep-commerce/extensions/cortex/system-tests
+    /ep-commerce/extensions/cm/ext-cm-modules/system-tests/selenium
+```
+ Use the following command:
   ```java
   mvn clean install -DskipAllTests
   ```
@@ -54,7 +59,7 @@ mvn clean install -Dcucumber.options="--tags @regressionTest"
 *Updating Browser Driver Versions*
 * You can download the latest browser driver from web. e.g. chromedriver.
 * Update the RepositoryMap.xml for the driver version.
-* Has value can be found locally if you run following in bash command locally.
+* Hash value can be found locally if you run following in bash command locally.
 ```
 openssl sha1 <filename>
 ```

@@ -8,7 +8,6 @@ Feature: Shipping Cost Recalculated
     And I sign in to CM as admin user
     And I go to Customer Service
     And I search and open order editor for the latest order
-    And I select Details tab in the Order Editor
     When I update the shipping address and set "Canada Post 2 days" shipping method for the order
       | Country         | Canada           |
       | State/Province  | British Columbia |
@@ -22,18 +21,16 @@ Feature: Shipping Cost Recalculated
 
   Scenario: Percentage based shipping cost recalculation when updating shipment lineitems
     When I modify order shipment line item quantity to 2
-    And I complete Payment Authorization with testTokenDisplayName payment source
     Then I should see the following Shipment Summary
       | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
       | 1               | 200.00         | 10.00         | 0.00              | 210.00           | 24.00      | 1.20           | 235.20         |
     When I modify order shipment line item quantity to 1
-    And I save my changes
     Then I should see the following Shipment Summary
       | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
       | 1               | 100.00         | 5.00          | 0.00              | 105.00           | 12.00      | 0.60           | 117.60         |
     When I add sku portable_tv_hdbuy_sku to the shipment with following values
-      | Price List Name | Mobile Price List    |
-      | Payment Source  | testTokenDisplayName |
+      | Price List Name | Mobile Price List       |
+    And I complete Payment Authorization with Original payment source payment source
     Then I should see the following Shipment Summary
       | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
       | 1               | 250.99         | 12.55         | 0.00              | 263.54           | 30.12      | 1.51           | 295.17         |

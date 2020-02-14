@@ -14,8 +14,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
 import com.elasticpath.cmclient.store.targetedselling.conditionalexpression.model.ComboViewerModelBuilder;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -78,7 +78,7 @@ public class TagDefinitionModelBuilderImpl implements ComboViewerModelBuilder<Ta
 	
 	private void addAllMarkerAsFirstElement(final List<TagDefinition> tagDefinitionList) {
 		
-		TagDefinition tagDefinitionAll = ServiceLocator.getService(ContextIdNames.TAG_DEFINITION);
+		TagDefinition tagDefinitionAll = BeanLocator.getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 		tagDefinitionAll.setName(TargetedSellingMessages.get().ConditionalExpressionAll);
 		
 		tagDefinitionList.add(0, tagDefinitionAll);
@@ -92,7 +92,7 @@ public class TagDefinitionModelBuilderImpl implements ComboViewerModelBuilder<Ta
 	} 
 
 	private TagDefinitionReader getTagDefinitionReader() {
-		return ServiceLocator.getService(ContextIdNames.TAG_DEFINITION_READER);
+		return BeanLocator.getSingletonBean(ContextIdNames.TAG_DEFINITION_READER, TagDefinitionReader.class);
 	}
 
 }

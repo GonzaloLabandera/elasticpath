@@ -71,7 +71,7 @@ public class ChangeSetHelperImpl implements ChangeSetHelper {
 			LOG.debug("Convert a group member to descriptor: " + member);
 		}
 
-		final BusinessObjectDescriptor desc = elasticpath.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		final BusinessObjectDescriptor desc = elasticpath.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 
 		desc.setObjectIdentifier(member.getObjectIdentifier());
 		desc.setObjectType(member.getObjectType());
@@ -86,7 +86,7 @@ public class ChangeSetHelperImpl implements ChangeSetHelper {
 	 * @return the instance of change set member
 	 */
 	protected ChangeSetMember createChangeSetMember(final Map<String, String> metadataMap, final BusinessObjectDescriptor businessObjectDescriptor) {
-		ChangeSetMember changeSetMember = elasticpath.getBean(ContextIdNames.CHANGESET_MEMBER);
+		ChangeSetMember changeSetMember = elasticpath.getPrototypeBean(ContextIdNames.CHANGESET_MEMBER, ChangeSetMember.class);
 		if (changeSetMember instanceof ChangeSetMemberMutator) {
 			ChangeSetMemberMutator mutator = (ChangeSetMemberMutator) changeSetMember;
 			mutator.setBusinessObjectDescriptor(businessObjectDescriptor);

@@ -111,10 +111,10 @@ public class ProductSkuLookupImplITest extends DbTestCase {
 		ProductBundle bundle = persisterFactory.getCatalogTestPersister().createSimpleProductBundle(
 				"productBundleType", "productBundle", scenario.getCatalog(), scenario.getCategory(),
 				persisterFactory.getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS));
-		ProductSku bundleSku = beanFactory.getBean(ContextIdNames.PRODUCT_SKU);
+		ProductSku bundleSku = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 		bundleSku.setProduct(bundle);
 		bundleSku.setSkuCode("productBundle");
-		BundleConstituent constituent = beanFactory.getBean(ContextIdNames.BUNDLE_CONSTITUENT);
+		BundleConstituent constituent = beanFactory.getPrototypeBean(ContextIdNames.BUNDLE_CONSTITUENT, BundleConstituent.class);
 		constituent.setConstituent(product);
 		constituent.setQuantity(1);
 		bundle.addConstituent(constituent);

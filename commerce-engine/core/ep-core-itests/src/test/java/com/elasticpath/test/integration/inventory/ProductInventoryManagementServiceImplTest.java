@@ -146,7 +146,7 @@ public class ProductInventoryManagementServiceImplTest extends DbTestCase {
 		productTypeService.add(productType);
 
 		Product product = createMultiSkuProduct(catalog, productType);
-		ProductSku productSku = getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU);
+		ProductSku productSku = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 		productSku.setSkuCode(new RandomGuidImpl().toString());
 		productSku.setStartDate(new Date());
 		productSku.setProduct(product);
@@ -158,7 +158,7 @@ public class ProductInventoryManagementServiceImplTest extends DbTestCase {
 	/**
 	 */
 	private ProductType populateProductType(final Catalog catalog) {
-		ProductType productType = getBeanFactory().getBean(ContextIdNames.PRODUCT_TYPE);
+		ProductType productType = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 		productType.setName("FR_PC_CARD");
 		TaxCode taxCode = taxCodeService.findByCode("GOODS");
 		productType.setTaxCode(taxCode);

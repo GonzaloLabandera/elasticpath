@@ -26,7 +26,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -107,7 +107,7 @@ public class CustomerDetailsProfileAttributesSection extends AbstractCmClientEdi
 		TableWrapLayout tableWrapLayout = (TableWrapLayout) mainPane.getSwtComposite().getLayout();
 		tableWrapLayout.rightMargin = MAIN_PANEL_RIGHT_MARGIN;
 
-		final AttributeService attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		final List<Attribute> attributes = attributeService.getCustomerProfileAttributes();
 		attributeWidgetMap = new HashMap<>();
 		for (final Attribute attribute : attributes) {

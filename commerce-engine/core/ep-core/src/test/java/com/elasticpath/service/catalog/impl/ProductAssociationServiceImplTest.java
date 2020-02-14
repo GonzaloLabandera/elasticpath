@@ -68,7 +68,7 @@ public class ProductAssociationServiceImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 				will(returnValue(new ProductAssociationImpl()));
 			}
 		});
@@ -283,7 +283,7 @@ public class ProductAssociationServiceImplTest {
 			protected List<ProductAssociation> computeTopProductAssociations(final Set<ProductAssociation> allProductAssociations,
 					final int maxAssociations) {
 				return new ArrayList<>(allProductAssociations);
-			};
+			}
 		};
 
 		Set<StoreProduct> storeProductSet = new HashSet<>();

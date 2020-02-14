@@ -7,15 +7,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -56,8 +53,6 @@ import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.misc.SupportedCurrency;
 import com.elasticpath.domain.misc.SupportedLocale;
-import com.elasticpath.domain.payment.PaymentGateway;
-import com.elasticpath.domain.payment.impl.PaymentGatewayImpl;
 import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
@@ -70,7 +65,6 @@ import com.elasticpath.domain.tax.impl.TaxCodeImpl;
 import com.elasticpath.domain.tax.impl.TaxJurisdictionImpl;
 import com.elasticpath.persistence.api.AbstractPersistableImpl;
 import com.elasticpath.persistence.support.FetchGroupConstants;
-import com.elasticpath.plugin.payment.PaymentGatewayType;
 
 /**
  * Implementation of Store.java that takes into account special persistence-layer restrictions.
@@ -137,7 +131,7 @@ import com.elasticpath.plugin.payment.PaymentGatewayType;
 				@FetchAttribute(name = "name"),
 				@FetchAttribute(name = "url") })
 })
-@SuppressWarnings({ "PMD.AvoidDuplicateLiterals", "PMD.TooManyFields", "PMD.ExcessiveImports", "PMD.GodClass" })
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyFields", "PMD.ExcessiveImports", "PMD.GodClass", "PMD.ExcessiveClassLength"})
 public class StoreImpl extends AbstractPersistableImpl implements Store, Initializable {
 	/**
 	 * Serial version id.
@@ -182,12 +176,7 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 
 	private String code;
 
-	private Set<PaymentGateway> paymentGateways = new HashSet<>();
-
 	private Catalog catalog;
-
-	private final AtomicReference<Map<PaymentGatewayType, PaymentGateway>> paymentGatewayMap
-			= new AtomicReference<>();
 
 	private long uidPk;
 
@@ -709,58 +698,6 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 	}
 
 	/**
-	 * Gets a set of available payment gateways for this <code>Store</code>.
-	 *
-	 * @return a set of available payment gateways for this <code>Store</code>.
-	 */
-	@Override
-	@ManyToMany(targetEntity = PaymentGatewayImpl.class, fetch = FetchType.EAGER, cascade = { CascadeType.REFRESH, CascadeType.MERGE })
-	@JoinTable(name = "TSTOREPAYMENTGATEWAY", joinColumns = @JoinColumn(name = "STORE_UID"), inverseJoinColumns = @JoinColumn(name = "GATEWAY_UID"))
-	public Set<PaymentGateway> getPaymentGateways() {
-		return paymentGateways;
-	}
-
-	/**
-	 * Sets a set of available payment gateways for this <code>Store</code>.
-	 *
-	 * @param paymentGateways a set of available payment gateways for this <code>Store</code>.
-	 */
-	@Override
-	public void setPaymentGateways(final Set<PaymentGateway> paymentGateways) {
-		this.paymentGateways = paymentGateways;
-		// set the corresponding Map to null so it will be regenerated next time the getter is
-		// called
-		paymentGatewayMap.set(null);
-	}
-
-	/**
-	 * Gets a map of available payment gateways for this <code>Store</code>.  This field is lazy-loaded, and can be
-	 * accessed from a cached instance, so it must be thread safe.
-	 *
-	 * Note, however, that there still is a race condition with the {@link #setPaymentGateways(java.util.Set)} method, however
-	 * we should not ever hit that condition if we have a shared instance of a Store, since shared instances should always
-	 * be read-only in practice.
-	 *
-	 * @return a map of available payment gateways for this <code>Store</code>.
-	 */
-	@Override
-	@Transient
-	public Map<PaymentGatewayType, PaymentGateway> getPaymentGatewayMap() {
-		Map<PaymentGatewayType, PaymentGateway>  gateways = paymentGatewayMap.get();
-		if (gateways == null) {
-			gateways = new HashMap<>();
-
-			for (PaymentGateway paymentGateway : getPaymentGateways()) {
-				gateways.put(paymentGateway.getPaymentGatewayType(), paymentGateway);
-			}
-
-			gateways = Collections.unmodifiableMap(gateways);
-			paymentGatewayMap.set(gateways);
-		}
-		return gateways;
-	}
-
-	/**
 	 * Gets the unique code associated with the <code>Store</code>.
 	 *
 	 * @return the unique code associated with the <code>Store</code>
@@ -1112,11 +1049,6 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 	@Override
 	public void setStoreState(final StoreState storeState) {
 		this.storeState = storeState;
-	}
-
-	@Override
-	public boolean supportsPaymentGatewayType(final PaymentGatewayType paymentGatewayType) {
-		return getPaymentGatewayMap().containsKey(paymentGatewayType);
 	}
 
 	@Override

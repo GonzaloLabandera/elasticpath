@@ -3,6 +3,8 @@
  */
 package com.elasticpath.persistence.openjpa.impl;
 
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.createDynamicJPQLQuery;
+
 import javax.persistence.EntityManager;
 
 import org.springframework.transaction.PlatformTransactionManager;
@@ -119,7 +121,7 @@ public class JpaSessionImpl implements JpaPersistenceSession {
 	 */
 	@Override
 	public <T> Query<T> createQuery(final String queryString) throws EpPersistenceException {
-		final javax.persistence.Query query = this.session.createQuery(queryString);
+		final javax.persistence.Query query = createDynamicJPQLQuery(session, queryString);
 		return new JpaQueryImpl<>(query);
 	}
 

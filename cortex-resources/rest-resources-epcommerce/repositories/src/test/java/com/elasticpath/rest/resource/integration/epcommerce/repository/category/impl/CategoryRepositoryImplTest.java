@@ -1,14 +1,16 @@
-/**
+/*
  * Copyright © 2016 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.category.impl;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -74,7 +76,7 @@ public class CategoryRepositoryImplTest {
 				productLookup,
 				reactiveAdapter);
 	}
-	
+
 	@Test
 	public void testFindRootNodesWhenSuccessful() {
 		Catalog catalog = createMockCatalog(CATALOG_CODE);
@@ -224,8 +226,8 @@ public class CategoryRepositoryImplTest {
 
 	private Category createMockLinkedCategory(final boolean isIncluded) {
 		Category category = mock(Category.class);
-		when(category.isLinked()).thenReturn(true);
-		when(category.isIncluded()).thenReturn(isIncluded);
+		lenient().when(category.isLinked()).thenReturn(true);
+		lenient().when(category.isIncluded()).thenReturn(isIncluded);
 		return category;
 	}
 
@@ -269,7 +271,7 @@ public class CategoryRepositoryImplTest {
 	}
 
 	private void shouldGetBean() {
-		when(coreBeanFactory.getBean(ContextIdNames.ORDERING_COMPARATOR)).thenReturn(new OrderingComparatorImpl());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.ORDERING_COMPARATOR, Comparator.class)).thenReturn(new OrderingComparatorImpl());
 	}
 
 	private Catalog createMockCatalog(final String catalogCode) {

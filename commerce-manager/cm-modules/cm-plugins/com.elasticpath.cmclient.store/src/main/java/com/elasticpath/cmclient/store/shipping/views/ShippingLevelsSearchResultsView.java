@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.helpers.AbstractSearchRequestJob;
@@ -84,7 +84,7 @@ public class ShippingLevelsSearchResultsView extends AbstractSortListView implem
 	 */
 	public ShippingLevelsSearchResultsView() {
 		super(true, SHIPPING_LEVELS_SEARCH_RESULTS_TABLE);
-		StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		List<Store> stores = storeService.findAllCompleteStores();
 		AuthorizationService.getInstance().filterAuthorizedStores(stores);
 		hasAssignedStores = !stores.isEmpty(); //NOPMD

@@ -57,10 +57,12 @@
 		<property name="orderPresentationHelper" ref="orderPresentationHelper" />
 		<property name="storeService" ref="storeService" />
 		<property name="beanFactory" ref="coreBeanFactory" />
+		<property name="emailAddressesExtractionStrategy" ref="customerAndUserEmailAddressesExtractionStrategy" />
 	</bean>
 
 	<bean id="returnExchangeEmailPropertyHelper" class="com.elasticpath.email.handler.order.helper.impl.ReturnExchangeEmailPropertyHelperImpl">
 		<property name="beanFactory" ref="coreBeanFactory" />
+		<property name="emailAddressesExtractionStrategy" ref="customerAndUserEmailAddressesExtractionStrategy" />
 	</bean>
 
 	<import resource="classpath:/spring/order-email/order-shipment-shipped.xml" />

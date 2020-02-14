@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.cmuser.impl.CmUserImpl;
@@ -84,7 +85,7 @@ public class AbstractRuleImplTest {
 	public void setUp() {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean("randomGuid", RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
 
 
 		ruleImpl = getRuleImpl();

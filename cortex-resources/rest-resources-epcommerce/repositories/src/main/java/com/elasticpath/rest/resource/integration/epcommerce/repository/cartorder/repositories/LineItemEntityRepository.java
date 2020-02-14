@@ -65,7 +65,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 
 		return getShoppingCartForItemIdentifier(identifier)
 				.flatMap(cart -> shoppingCartRepository.getShoppingItem(lineItemId, cart)
-						.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid())
+						.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuid(shoppingItem.getSkuGuid())
 								.flatMap(productSku ->
 										buildLineItemEntity(cartId, lineItemId, shoppingItem, itemRepository.getItemIdForSku(productSku)))));
 	}
@@ -214,7 +214,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	protected Completable performUpdate(final LineItemEntity lineItemEntity, final String lineItemId, final LineItemIdentifier lineItemIdentifier) {
 		return getShoppingCartForItemIdentifier(lineItemIdentifier)
 				.flatMapCompletable(cart -> shoppingCartRepository.getShoppingItem(lineItemId, cart)
-						.flatMapCompletable(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid())
+						.flatMapCompletable(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuid(shoppingItem.getSkuGuid())
 								.flatMapCompletable(productSku -> performUpdate(lineItemEntity, cart, shoppingItem, productSku.getSkuCode()))));
 	}
 

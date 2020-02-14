@@ -13,50 +13,45 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style type="text/css" id="internalStyle">
 
-        .body { width:600px; margin-left:auto; margin-right:auto;
-            background:#fff; color:#333; font-size:11pt; line-height:150%; padding-bottom:20px; border:0;
-            font-family:arial,helvetica,sans-serif;border:2px solid #ccc; }
+        .body {
+            width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            background: #fff;
+            color: #333;
+            font-size: 11pt;
+            line-height: 150%;
+            padding-bottom: 20px;
+            border: 0;
+            font-family: arial, helvetica, sans-serif;
+            border: 2px solid #ccc;
+        }
 
         .indent {
-            margin-left:30px;
+            margin-left: 30px;
         }
 
     </style>
 </head>
 <body class="body indent">
-	#set ($order = $shipment.getOrder())
+    #set ($order = $shipment.getOrder())
 
 <p>
-	#emailMessage("email.failedRelease.message")
-    <br />#emailMessage("email.failedRelease.message2")
+    #emailMessage("email.failedRelease.message")
+    <br/>#emailMessage("email.failedRelease.message2")
 </p>
 
 <p class="indent">
-	#emailMessage("email.failedRelease.store"): $order.getStore().getName()
-    <br />#emailMessage("email.failedRelease.orderNumber"): $!order.getOrderNumber()
-    <br />#emailMessage("email.failedRelease.shipmentNumber"): $!shipment.getShipmentNumber()
-    <br />#emailMessage("email.failedRelease.createdDate"): $!shipment.createdDate
+    #emailMessage("email.failedRelease.store"): $order.getStore().getName()
+    <br/>#emailMessage("email.failedRelease.orderNumber"): $!order.getOrderNumber()
+    <br/>#emailMessage("email.failedRelease.shipmentNumber"): $!shipment.getShipmentNumber()
+    <br/>#emailMessage("email.failedRelease.createdDate"): $!shipment.createdDate
 </p>
 
 <p>
-	#emailMessage("email.failedRelease.reason"):
-	$errorMessage
+    #emailMessage("email.failedRelease.reason"):
+    $errorMessage
 </p>
-
-<p>
-	#emailMessage("email.failedRelease.failedPayments")
-</p>
-
-	#foreach($orderPayment in $order.getOrderPayments())
-    <p class="indent">
-		#if ($orderPayment.getOrderShipment() && ($shipment.getUidPk() == $orderPayment.getOrderShipment().getUidPk()))
-			#emailMessage("email.failedRelease.paymentDate"): $!orderPayment.getCreatedDate()
-            <br />#emailMessage("email.failedRelease.paymentMethod"): $!orderPayment.getPaymentMethod()
-            <br />#emailMessage("email.failedRelease.paymentAmount"): ($!orderPayment.getCurrencyCode() $!orderPayment.getAmount())
-            <br />#emailMessage("email.failedRelease.paymentStatus"): $!orderPayment.getStatus()
-        </p>
-
-		#end#end
 
 </body>
 </html>

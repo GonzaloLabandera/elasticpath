@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.fulfillment.FulfillmentImageRegistry;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.editors.order.AbstractOrderPage;
@@ -41,7 +41,7 @@ public class ResendConfirmationEmailContributionAction extends Action {
 
 		final Order order = ((OrderEditor) orderPage.getEditor()).getModel();
 
-		final OrderService orderService = ServiceLocator.getService(ContextIdNames.ORDER_SERVICE);
+		final OrderService orderService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 
 		boolean confirmationEmailSentSuccessfully = false;
 

@@ -67,7 +67,7 @@ public class PostInitializationListenerITest {
 	public void setUp() {
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(POST_LOAD_STRATEGY_BEAN);
+				allowing(mockBeanFactory).getSingletonBean(POST_LOAD_STRATEGY_BEAN, PostInitializationStrategy.class);
 				will(returnValue(strategy));
 			}
 		});
@@ -118,7 +118,7 @@ public class PostInitializationListenerITest {
 	}
 
 	@Test
-	public void testPostLoadStrategiesAreAreFiredWhenMasterAndDetailsArePersistedTogether() {
+	public void testPostLoadStrategiesAreFiredWhenMasterAndDetailsArePersistedTogether() {
 		Master master = persistMaster(createDetail());
 		assertThatPostLoadStrategyWasExecutedOnMasterAndDetails(master);
 	}

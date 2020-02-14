@@ -3,7 +3,6 @@
  */
 
 package com.elasticpath.persistence.openjpa.executors;
-
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -17,7 +16,6 @@ import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.openjpa.routing.QueryRouter;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
 
 /**
  * A main class for query execution with a support for retrying queries on master in case of
@@ -34,7 +32,6 @@ public abstract class AbstractQueryExecutor<T extends Persistable> {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractQueryExecutor.class);
 
 	private QueryRouter queryRouter;
-	private QueryUtil queryUtil;
 	private FetchPlanHelper fetchPlanHelper;
 
 	/**
@@ -158,15 +155,7 @@ public abstract class AbstractQueryExecutor<T extends Persistable> {
 		this.queryRouter = queryRouter;
 	}
 
-	public void setQueryUtil(final QueryUtil queryUtil) {
-		this.queryUtil = queryUtil;
-	}
-
 	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
 		this.fetchPlanHelper = fetchPlanHelper;
-	}
-
-	public QueryUtil getQueryUtil() {
-		return queryUtil;
 	}
 }

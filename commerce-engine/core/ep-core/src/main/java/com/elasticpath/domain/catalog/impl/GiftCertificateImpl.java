@@ -119,7 +119,7 @@ public class GiftCertificateImpl extends AbstractLegacyEntityImpl implements Gif
 	@Transient
 	private GiftCertificateService getGiftCertificateService() {
 		if (giftCertificateService == null) {
-			giftCertificateService = getBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE);
+			giftCertificateService = getSingletonBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE, GiftCertificateService.class);
 		}
 		return giftCertificateService;
 	}

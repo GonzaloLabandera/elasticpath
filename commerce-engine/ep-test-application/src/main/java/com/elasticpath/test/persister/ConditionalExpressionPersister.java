@@ -16,7 +16,7 @@ public class ConditionalExpressionPersister {
 
 	private final BeanFactory beanFactory;
 
-	private TagConditionService tagConditionService;
+	private final TagConditionService tagConditionService;
 	
 	/**
 	 * Default constructor. 
@@ -25,7 +25,7 @@ public class ConditionalExpressionPersister {
 	public ConditionalExpressionPersister(final BeanFactory beanFactory) {
 		super();
 		this.beanFactory = beanFactory;
-		this.tagConditionService = beanFactory.getBean(ContextIdNames.TAG_CONDITION_SERVICE);
+		this.tagConditionService = beanFactory.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class ConditionalExpressionPersister {
 	private ConditionalExpression populateConditionalExpression(
 			final String guid, final String tagDictionaryGuid, final String name, 
 			final String desc, final String condition) {
-		ConditionalExpression conditionalExpression = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
+		ConditionalExpression conditionalExpression = beanFactory.getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 		conditionalExpression.setGuid(guid);
 		conditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
 		conditionalExpression.setName(name);

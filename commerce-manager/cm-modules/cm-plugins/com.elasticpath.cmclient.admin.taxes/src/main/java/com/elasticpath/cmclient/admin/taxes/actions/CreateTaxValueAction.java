@@ -9,7 +9,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.elasticpath.cmclient.admin.taxes.dialogs.ManageTaxValuesDialog;
 import com.elasticpath.cmclient.admin.taxes.dialogs.TaxValueDialog;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.domain.tax.TaxRegion;
@@ -42,7 +42,7 @@ public class CreateTaxValueAction extends Action {
 	public void run() {
 		LOG.debug("Create Tax Value action called."); //$NON-NLS-1$
 
-		TaxRegion taxRegion = ServiceLocator.getService(ContextIdNames.TAX_REGION);
+		TaxRegion taxRegion = BeanLocator.getPrototypeBean(ContextIdNames.TAX_REGION, TaxRegion.class);
 		TaxCategory taxCategory = manageTaxValueDialog.getSelectedTaxCategory();
 
 		boolean dialogOk = TaxValueDialog.openCreateDialog(manageTaxValueDialog.getShell(), taxCategory, taxRegion, taxCategory.getFieldMatchType()
@@ -50,8 +50,8 @@ public class CreateTaxValueAction extends Action {
 
 		if (dialogOk) {
 			taxCategory.addTaxRegion(taxRegion);
-			TaxJurisdictionService taxJurisdictionService = ServiceLocator.getService(
-					ContextIdNames.TAX_JURISDICTION_SERVICE);
+			TaxJurisdictionService taxJurisdictionService = BeanLocator
+					.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
 			taxJurisdictionService.update(manageTaxValueDialog.getSelectedTaxJurisdiction());
 			manageTaxValueDialog.refreshTaxRegions();
 

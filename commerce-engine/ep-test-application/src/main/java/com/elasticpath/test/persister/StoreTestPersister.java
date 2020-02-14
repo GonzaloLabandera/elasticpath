@@ -1,9 +1,21 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2016
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.test.persister;
 
+import static com.elasticpath.commons.constants.ContextIdNames.CART_ORDER_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.CMUSER_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER;
+import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_ADDRESS;
+import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SESSION_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.SHOPPER_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.STORE;
+import static com.elasticpath.commons.constants.ContextIdNames.STORE_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.WAREHOUSE;
+import static com.elasticpath.commons.constants.ContextIdNames.WAREHOUSE_SERVICE;
 import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_OPTION_TRANSFORMER;
 import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_REGION;
 import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_REGION_SERVICE;
@@ -12,8 +24,8 @@ import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPIN
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -23,11 +35,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
 import com.elasticpath.domain.catalog.GiftCertificate;
@@ -36,13 +48,9 @@ import com.elasticpath.domain.cmuser.impl.CmUserImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.PaymentToken;
-import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
-import com.elasticpath.domain.payment.PaymentGateway;
-import com.elasticpath.domain.payment.impl.PaymentGatewayImpl;
 import com.elasticpath.domain.shipping.ShippingCostCalculationMethod;
 import com.elasticpath.domain.shipping.ShippingCostCalculationParameter;
 import com.elasticpath.domain.shipping.ShippingCostCalculationParametersEnum;
@@ -61,10 +69,10 @@ import com.elasticpath.domain.store.WarehouseAddress;
 import com.elasticpath.domain.store.impl.WarehouseAddressImpl;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.money.Money;
+import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionService;
-import com.elasticpath.service.payment.PaymentGatewayService;
 import com.elasticpath.service.shipping.ShippingOptionTransformer;
 import com.elasticpath.service.shipping.ShippingRegionService;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
@@ -78,7 +86,7 @@ import com.elasticpath.test.util.Utils;
 /**
  * Persister allows to create and save into database store dependent domain objects.
  */
-@SuppressWarnings({ "PMD.ExcessiveParameterList", "PMD.GodClass" })
+@SuppressWarnings({"PMD.ExcessiveParameterList", "PMD.GodClass"})
 public class StoreTestPersister {
 
 	private static final String USA = "USA";
@@ -112,13 +120,13 @@ public class StoreTestPersister {
 
 	private final StoreService storeService;
 
-	private final PaymentGatewayService paymentGatewayService;
-
 	private final ShippingRegionService regionService;
 
 	private final GiftCertificateTestPersister giftCertificateTestPersister;
 
 	private final List<Currency> shippingServiceLevelCurrencies = new ArrayList<>();
+
+	private final CartOrderService cartOrderService;
 
 	/**
 	 * Constructor initializes necessary services and beanFactory.
@@ -127,16 +135,16 @@ public class StoreTestPersister {
 	 */
 	public StoreTestPersister(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		paymentGatewayService = beanFactory.getBean(ContextIdNames.PAYMENT_GATEWAY_SERVICE);
-		regionService = beanFactory.getBean(SHIPPING_REGION_SERVICE);
-		warehouseService = beanFactory.getBean(ContextIdNames.WAREHOUSE_SERVICE);
-		customerService = beanFactory.getBean(ContextIdNames.CUSTOMER_SERVICE);
-		customerSessionService = beanFactory.getBean("customerSessionService");
-		shopperService = beanFactory.getBean("shopperService");
-		shoppingCartService = beanFactory.getBean(ContextIdNames.SHOPPING_CART_SERVICE);
-		shippingServiceLevelService = beanFactory.getBean(SHIPPING_SERVICE_LEVEL_SERVICE);
-		shippingOptionTransformer = beanFactory.getBean(SHIPPING_OPTION_TRANSFORMER);
-		storeService = beanFactory.getBean(ContextIdNames.STORE_SERVICE);
+		regionService = beanFactory.getSingletonBean(SHIPPING_REGION_SERVICE, ShippingRegionService.class);
+		warehouseService = beanFactory.getSingletonBean(WAREHOUSE_SERVICE, WarehouseService.class);
+		customerService = beanFactory.getSingletonBean(CUSTOMER_SERVICE, CustomerService.class);
+		customerSessionService = beanFactory.getSingletonBean(CUSTOMER_SESSION_SERVICE, CustomerSessionService.class);
+		shopperService = beanFactory.getSingletonBean(SHOPPER_SERVICE, ShopperService.class);
+		shoppingCartService = beanFactory.getSingletonBean(SHOPPING_CART_SERVICE, ShoppingCartService.class);
+		shippingServiceLevelService = beanFactory.getSingletonBean(SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
+		shippingOptionTransformer = beanFactory.getSingletonBean(SHIPPING_OPTION_TRANSFORMER, ShippingOptionTransformer.class);
+		storeService = beanFactory.getSingletonBean(STORE_SERVICE, StoreService.class);
+		cartOrderService = beanFactory.getSingletonBean(CART_ORDER_SERVICE, CartOrderService.class);
 
 		giftCertificateTestPersister = new GiftCertificateTestPersister(beanFactory);
 		//use these to set up cost calculations for shipping service levels
@@ -179,8 +187,8 @@ public class StoreTestPersister {
 	 * @return the warehouse
 	 */
 	public Warehouse persistWarehouse(final String warehouseCode, final String warehouseName, final int warehousePickDelay, final String city,
-			final String country, final String street1, final String subcountry, final String zip) {
-		final Warehouse warehouse = beanFactory.getBean(ContextIdNames.WAREHOUSE);
+									  final String country, final String street1, final String subcountry, final String zip) {
+		final Warehouse warehouse = beanFactory.getPrototypeBean(WAREHOUSE, Warehouse.class);
 		final WarehouseAddress wAddress = new WarehouseAddressImpl();
 		wAddress.setCity(city);
 		wAddress.setCountry(country);
@@ -280,7 +288,7 @@ public class StoreTestPersister {
 	 * @return persisted customer
 	 */
 	public Customer persistCustomer(final Store store, final String email, final String password) {
-		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		final Customer customer = beanFactory.getPrototypeBean(CUSTOMER, Customer.class);
 		customer.setUserId(email);
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
@@ -305,7 +313,7 @@ public class StoreTestPersister {
 	 */
 	public Customer persistCustomer(final String guid, final Store store, final String email,
 									final CustomerAddress... customerAddresses) {
-		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		final Customer customer = beanFactory.getPrototypeBean(CUSTOMER, Customer.class);
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
 		customer.setUserId(email);
@@ -321,21 +329,7 @@ public class StoreTestPersister {
 			customer.addAddress(address);
 		}
 
-		customer.getPaymentMethods().setDefault(createCustomerPaymentToken("test"));
 		return customerService.add(customer);
-	}
-	/**
-	 * Create customer payment token payment token.
-	 *
-	 * @param tokenValue the token value
-	 * @return the payment token
-	 */
-	public PaymentToken createCustomerPaymentToken(final String tokenValue) {
-		PaymentTokenImpl.TokenBuilder tokenBuilder = new PaymentTokenImpl.TokenBuilder();
-		return tokenBuilder
-				.withDisplayValue(tokenValue)
-				.withValue(tokenValue)
-				.build();
 	}
 
 	/**
@@ -353,9 +347,9 @@ public class StoreTestPersister {
 	 * @return the customer address
 	 */
 	public CustomerAddress createCustomerAddress(final String lastName, final String firstName, final String street1, final String street2,
-			final String city, final String country, final String state, final String zip, final String phone) {
+												 final String city, final String country, final String state, final String zip, final String phone) {
 
-		final CustomerAddress customerAddress = beanFactory.getBean(ContextIdNames.CUSTOMER_ADDRESS);
+		final CustomerAddress customerAddress = beanFactory.getPrototypeBean(CUSTOMER_ADDRESS, CustomerAddress.class);
 		customerAddress.setFirstName(firstName);
 		customerAddress.setLastName(lastName);
 		customerAddress.setStreet1(street1);
@@ -399,6 +393,8 @@ public class StoreTestPersister {
 		shopper.setCurrentShoppingCart(persistedShoppingCart);
 		shopperService.save(shopper);
 
+		cartOrderService.createOrderIfPossible(persistedShoppingCart);
+
 		shopper.updateTransientDataWith(session);
 		return session;
 	}
@@ -415,7 +411,7 @@ public class StoreTestPersister {
 		cmUser.setPassword("password");
 		cmUser.setEnabled(true);
 		cmUser.initialize();
-		final CmUserService cmUserService = beanFactory.getBean(ContextIdNames.CMUSER_SERVICE);
+		final CmUserService cmUserService = beanFactory.getSingletonBean(CMUSER_SERVICE, CmUserService.class);
 		return cmUserService.update(cmUser);
 	}
 
@@ -426,7 +422,7 @@ public class StoreTestPersister {
 	 * @return the instance of CmUser
 	 */
 	public CmUser getCmUser() {
-		final CmUserService cmUserService = beanFactory.getBean(ContextIdNames.CMUSER_SERVICE);
+		final CmUserService cmUserService = beanFactory.getSingletonBean(CMUSER_SERVICE, CmUserService.class);
 		return cmUserService.findByUserName("cmuser");
 	}
 
@@ -511,9 +507,9 @@ public class StoreTestPersister {
 	public ShippingServiceLevel persistShippingServiceLevel(final Store store, final String shippingRegionName,
 															final Map<Locale, String> displayNames, final String carrier, final String methodType,
 															final Properties properties, final String code, final boolean enabled) {
-		final ShippingRegionService shippingRegionService = beanFactory.getBean(SHIPPING_REGION_SERVICE);
+		final ShippingRegionService shippingRegionService = beanFactory.getSingletonBean(SHIPPING_REGION_SERVICE, ShippingRegionService.class);
 		final ShippingRegion shippingRegion = shippingRegionService.findByName(shippingRegionName);
-		final ShippingServiceLevel level = beanFactory.getBean(SHIPPING_SERVICE_LEVEL);
+		final ShippingServiceLevel level = beanFactory.getPrototypeBean(SHIPPING_SERVICE_LEVEL, ShippingServiceLevel.class);
 		level.setGuid(Utils.uniqueCode("service_level"));
 		level.setCarrier(carrier);
 		if (code == null) {
@@ -545,7 +541,8 @@ public class StoreTestPersister {
 	 * @return persisted shipping service level
 	 */
 	public ShippingServiceLevel persistShippingServiceLevelFixedPriceCalcMethod(final Store store, final String shippingRegionName,
-																				final String displayName, final String carrier, final String shippingPriceValue) {
+																				final String displayName, final String carrier,
+																				final String shippingPriceValue) {
 		return persistShippingServiceLevelFixedPriceCalcMethod(store, shippingRegionName, displayName, carrier, shippingPriceValue, null);
 	}
 
@@ -561,11 +558,12 @@ public class StoreTestPersister {
 	 * @return persisted shipping service level
 	 */
 	public ShippingServiceLevel persistShippingServiceLevelFixedPriceCalcMethod(final Store store, final String shippingRegionName,
-																				final String displayName, final String carrier, final String shippingPriceValue, final String code) {
+																				final String displayName, final String carrier,
+																				final String shippingPriceValue, final String code) {
 
-		final ShippingRegionService shippingRegionService = beanFactory.getBean(SHIPPING_REGION_SERVICE);
+		final ShippingRegionService shippingRegionService = beanFactory.getSingletonBean(SHIPPING_REGION_SERVICE, ShippingRegionService.class);
 		final ShippingRegion shippingRegion = shippingRegionService.findByName(shippingRegionName);
-		final ShippingServiceLevel level = beanFactory.getBean(SHIPPING_SERVICE_LEVEL);
+		final ShippingServiceLevel level = beanFactory.getPrototypeBean(SHIPPING_SERVICE_LEVEL, ShippingServiceLevel.class);
 		level.setGuid(Utils.uniqueCode("service_level"));
 		level.setCarrier(carrier);
 		if (code == null) {
@@ -607,15 +605,10 @@ public class StoreTestPersister {
 	 * @return the persisted store
 	 */
 	public Store persistStore(final Catalog catalog, final Warehouse warehouse, final String storeCode, final String currencyCode) {
-		final Store store = persistStore(catalog, warehouse, storeCode, currencyCode, USA, USA,
-				Arrays.asList(TestDataPersisterFactory.DEFAULT_LOCALE), "Email Sender", "tests@beanFactory.com",
+		return persistStore(catalog, warehouse, storeCode, currencyCode, USA, USA,
+				Collections.singletonList(TestDataPersisterFactory.DEFAULT_LOCALE), "Email Sender", "tests@beanFactory.com",
 				Utils.uniqueCode("storename"),
 				TimeZone.getDefault(), "storeurl", "email@test.com", "", "UTF-8", true, true, true, true);
-		final Set<PaymentGateway> paymentGateways = new HashSet<>();
-		paymentGateways.add(persistDefaultPaymentGateway());
-		updateStorePaymentGateways(store, paymentGateways);
-		return store;
-
 	}
 
 	/**
@@ -630,15 +623,21 @@ public class StoreTestPersister {
 	 * @return the store if save was successful
 	 */
 	public Store persistStore(final Catalog catalog, final Warehouse warehouse, final String storeCode, final String storeName,
-			final String currencyCode) {
-		final Store store = persistStore(catalog, warehouse, storeCode, currencyCode, USA, USA,
-				Arrays.asList(TestDataPersisterFactory.DEFAULT_LOCALE), "Email Sender", "tests@beanFactory.com", storeName, TimeZone.getDefault(),
+							  final String currencyCode) {
+		return persistStore(catalog, warehouse, storeCode, currencyCode, USA, USA,
+				Collections.singletonList(TestDataPersisterFactory.DEFAULT_LOCALE),
+				"Email Sender", "tests@beanFactory.com", storeName, TimeZone.getDefault(),
 				"storeurl", "email@test.com", "", "UTF-8", true, true, true, true);
-		final Set<PaymentGateway> paymentGateways = new HashSet<>();
-		paymentGateways.add(persistDefaultPaymentGateway());
-		updateStorePaymentGateways(store, paymentGateways);
-		return store;
 
+	}
+
+	/**
+	 * Persist a store.
+	 *
+	 * @param store the store to set
+	 */
+	public void persistStore(final Store store) {
+		storeService.saveOrUpdate(store);
 	}
 
 	/**
@@ -668,13 +667,14 @@ public class StoreTestPersister {
 	 * @return the persisted store
 	 */
 	public Store persistStore(final Catalog catalog, final Warehouse warehouse, final String storeCode,
-			final String currencyCode, final String country, final String subCountry, final List<Locale> locales, final String emailSenderName,
-			final String emailSenderAddress, final String storeName, final TimeZone timeZone, final String storeUrl,
-			final String adminEmailAddress, final String description, final String contentEncoding,
-			final boolean creditCardCvv2Enabled, final boolean displayOutOfStock, final boolean savingCreditCardWithOrdersEnabled,
-			final boolean enabled) {
+							  final String currencyCode, final String country, final String subCountry, final List<Locale> locales,
+							  final String emailSenderName,
+							  final String emailSenderAddress, final String storeName, final TimeZone timeZone, final String storeUrl,
+							  final String adminEmailAddress, final String description, final String contentEncoding,
+							  final boolean creditCardCvv2Enabled, final boolean displayOutOfStock, final boolean savingCreditCardWithOrdersEnabled,
+							  final boolean enabled) {
 
-		final Store store = beanFactory.getBean("store");
+		final Store store = beanFactory.getPrototypeBean(STORE, Store.class);
 		store.setCatalog(catalog);
 		final List<Warehouse> warehouses = new ArrayList<>();
 		warehouses.add(warehouse);
@@ -697,20 +697,20 @@ public class StoreTestPersister {
 		store.setDisplayOutOfStock(displayOutOfStock);
 		store.setStoreFullCreditCardsEnabled(savingCreditCardWithOrdersEnabled);
 		store.setEnabled(enabled);
-		final Set<PaymentGateway> paymentGateways = new HashSet<>();
-		store.setPaymentGateways(paymentGateways);
 		store.setStoreState(StoreState.OPEN);
 
 		final Collection<Currency> supportedCurrencies = new ArrayList<>();
 		supportedCurrencies.add(Currency.getInstance(currencyCode));
 		try {
 			store.setSupportedCurrencies(supportedCurrencies);
-		} catch (final DefaultValueRemovalForbiddenException e) {
+		} catch (final DefaultValueRemovalForbiddenException ignored) {
+			// ignored
 		}
 
 		try {
 			store.setSupportedLocales(locales);
-		} catch (final DefaultValueRemovalForbiddenException e) {
+		} catch (final DefaultValueRemovalForbiddenException ignored) {
+			// ignored
 		}
 		return storeService.saveOrUpdate(store);
 	}
@@ -728,18 +728,6 @@ public class StoreTestPersister {
 	}
 
 	/**
-	 * Update the store Payment gateways.
-	 *
-	 * @param store           the store
-	 * @param paymentGateways the payment gateways
-	 * @return the updated store with the payment gateways
-	 */
-	public Store updateStorePaymentGateways(final Store store, final Set<PaymentGateway> paymentGateways) {
-		store.setPaymentGateways(paymentGateways);
-		return storeService.saveOrUpdate(store);
-	}
-
-	/**
 	 * Update store currency.
 	 *
 	 * @param store        the store
@@ -749,46 +737,6 @@ public class StoreTestPersister {
 	public Store updateStoreCurrency(final Store store, final String currencyCode) {
 		store.setDefaultCurrency(Currency.getInstance(currencyCode));
 		return storeService.saveOrUpdate(store);
-	}
-
-	/**
-	 * Persists null payment gateway of the arbitrary name.
-	 *
-	 * @return PaymentGateway
-	 */
-	public PaymentGateway persistDefaultPaymentGateway() {
-		final PaymentGateway paymentGateway = new PaymentGatewayImpl();
-		paymentGateway.setType("paymentGatewayNull");
-		paymentGateway.setName(Utils.uniqueCode("NullPaymentGateway"));
-
-		return paymentGatewayService.saveOrUpdate(paymentGateway);
-	}
-
-	/**
-	 * Persists null payment gateway of the arbitrary name.
-	 *
-	 * @return PaymentGateway
-	 */
-	public PaymentGateway persistGiftCertificatePaymentGateway() {
-		final PaymentGateway paymentGateway = new PaymentGatewayImpl();
-		paymentGateway.setType("paymentGatewayGiftCertificate");
-		paymentGateway.setName("paymentGatewayGiftCertificate");
-
-		return paymentGatewayService.saveOrUpdate(paymentGateway);
-	}
-
-	/**
-	 * Create persisted payment gateway for CyberSource.
-	 *
-	 * @param propertiesMap the properties map
-	 * @return persisted paymentGateway
-	 */
-	public PaymentGateway persistCyberSourcePaymentGateway(final Properties propertiesMap) {
-		final PaymentGateway paymentgateway = new PaymentGatewayImpl();
-		paymentgateway.setType("paymentGatewayCybersource");
-		paymentgateway.setName(Utils.uniqueCode("CyberSource PaymentGateway"));
-		paymentgateway.setProperties(propertiesMap);
-		return paymentGatewayService.saveOrUpdate(paymentgateway);
 	}
 
 	/**
@@ -861,7 +809,7 @@ public class StoreTestPersister {
 	 */
 	@Deprecated
 	public GiftCertificate persistGiftCertificate(final Store store, final String gcCode, final String currencyCode,
-			final BigDecimal purchaseAmount) {
+												  final BigDecimal purchaseAmount) {
 		return giftCertificateTestPersister.persistGiftCertificate(
 				store, null, gcCode, currencyCode, purchaseAmount, null,
 				null, "SomeTheme", null, null, new Date(), null, null, null);
@@ -883,7 +831,7 @@ public class StoreTestPersister {
 	 */
 	@Deprecated
 	public GiftCertificate persistGiftCertificate(final Store store, final String gcCode, final String currencyCode,
-			final BigDecimal purchaseAmount, final Date creationDate) {
+												  final BigDecimal purchaseAmount, final Date creationDate) {
 		return giftCertificateTestPersister.persistGiftCertificate(
 				store, null, gcCode, currencyCode, purchaseAmount, null,
 				null, "SomeTheme", null, null, creationDate, null, null, null);
@@ -897,11 +845,27 @@ public class StoreTestPersister {
 	 * @return persisted shipping region
 	 */
 	public ShippingRegion persistShippingRegion(final String regionName, final String regionStr) {
-		final ShippingRegionService shippingRegionService = beanFactory.getBean(SHIPPING_REGION_SERVICE);
-		final ShippingRegionImpl shippingRegion = beanFactory.getBean(SHIPPING_REGION);
+		final ShippingRegionService shippingRegionService = beanFactory.getSingletonBean(SHIPPING_REGION_SERVICE, ShippingRegionService.class);
+		final ShippingRegionImpl shippingRegion = beanFactory.getPrototypeBean(SHIPPING_REGION, ShippingRegionImpl.class);
 		shippingRegion.setName(regionName);
 		shippingRegion.setRegionStr(regionStr);
 
 		return shippingRegionService.add(shippingRegion);
+	}
+
+	/**
+	 * Persists a customer with the given creation date.
+	 *
+	 * @param store the store customer to be registered in
+	 * @return persisted customer
+	 */
+	public Customer createAnonymousCustomer(final Store store) {
+		final Customer customer = beanFactory.getPrototypeBean(CUSTOMER, Customer.class);
+		customer.setUserId(UUID.randomUUID().toString());
+		customer.setStatus(Customer.STATUS_ACTIVE);
+		customer.setAnonymous(true);
+		customer.setGuid(new RandomGuidImpl().toString());
+		customer.setStoreCode(store.getCode());
+		return customerService.add(customer);
 	}
 }

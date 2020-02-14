@@ -323,7 +323,7 @@ public class ProductBundleServiceTest extends BasicSpringContextTest {
 
 		productService.saveOrUpdate(bundle);
 
-		final ProductBundleDao dao = getBeanFactory().getBean("productBundleDao");
+		final ProductBundleDao dao = getBeanFactory().getSingletonBean("productBundleDao", ProductBundleDao.class);
 		final ProductBundle foundBundle = dao.findByBundleConstituentGuid(defaultConstituent.getGuid());
 		assertNotNull(foundBundle);
 		assertEquals("Should have one constituent", 1, foundBundle.getConstituents().size());

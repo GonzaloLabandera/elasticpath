@@ -28,7 +28,7 @@ public class CouponDaoAdapterImpl extends AbstractDaoAdapter<Coupon> implements 
 	private CouponConfigService couponConfigService;
 
 	private CouponService couponService;
-	
+
 	@Override
 	public void add(final Coupon newPersistence) throws SyncToolRuntimeException {
 		// sanity check.. it may be there already
@@ -41,12 +41,12 @@ public class CouponDaoAdapterImpl extends AbstractDaoAdapter<Coupon> implements 
 
 	@Override
 	public Coupon createBean(final Coupon bean) {
-		return beanFactory.getBean(ContextIdNames.COUPON);
+		return beanFactory.getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 	}
 
 	@Override
 	public Coupon get(final String guid) {
-		try {		
+		try {
 			return (Coupon) getEntityLocator().locatePersistence(guid, Coupon.class);
 		} catch (SyncToolConfigurationException e) {
 			throw new SyncToolRuntimeException("Unable to locate Coupon persistence", e);
@@ -69,28 +69,28 @@ public class CouponDaoAdapterImpl extends AbstractDaoAdapter<Coupon> implements 
 		resolveConfig(mergedPersistence);
 		return couponService.update(mergedPersistence);
 	}
-	
+
 	/**
 	 * @param beanFactory the beanFactory to set
 	 */
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
-	
+
 	/**
 	 * @param couponConfigService the couponConfigService to set
 	 */
 	public void setCouponConfigService(final CouponConfigService couponConfigService) {
 		this.couponConfigService = couponConfigService;
 	}
-	
+
 	/**
 	 * @param couponService the couponService to set
 	 */
 	public void setCouponService(final CouponService couponService) {
 		this.couponService = couponService;
 	}
-	
+
 	/**
 	 * Find the CouponConfig to attach to the coupon.
 	 *
@@ -100,7 +100,7 @@ public class CouponDaoAdapterImpl extends AbstractDaoAdapter<Coupon> implements 
 		String ruleCode = mergedPersistence.getCouponConfig().getRuleCode();
 		CouponConfig config = couponConfigService.findByRuleCode(ruleCode);
 		if (config == null) {
-			throw new SyncToolRuntimeException("Could not find CouponConfig for Coupon on Target system. " 
+			throw new SyncToolRuntimeException("Could not find CouponConfig for Coupon on Target system. "
 					+ "The CouponConfig must always be persisted first");
 		}
 		mergedPersistence.setCouponConfig(config);

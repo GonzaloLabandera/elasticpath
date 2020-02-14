@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.order.impl;
 
@@ -228,6 +228,8 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 
 	@Override
 	public void removeChildItem(final ShoppingItem childItem) {
+		OrderSkuImpl orderSku = (OrderSkuImpl) childItem;
+		orderSku.setParent(null);
 		getChildOrderSkus().remove(childItem);
 	}
 
@@ -419,7 +421,7 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 	 * Get the unit price as a <code>Money</code> object.
 	 *
 	 * @return a <code>Money</code> object representing the unit price
-	 * @deprecated Call getUnitPriceCalc().getMoney() instead.
+	 * @deprecated use {@link com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot#getPriceCalc()}
 	 */
 	@Override
 	@Transient

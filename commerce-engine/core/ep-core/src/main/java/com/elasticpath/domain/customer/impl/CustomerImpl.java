@@ -62,7 +62,6 @@ import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerProfile;
 import com.elasticpath.domain.impl.AbstractLegacyEntityImpl;
 import com.elasticpath.persistence.support.FetchGroupConstants;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 
 /**
  * The default implementation of <code>Customer</code>.
@@ -193,10 +192,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	private long uidPk;
 
 	private String guid;
-
-	private Collection<PaymentMethod> paymentMethods = new ArrayList<>();
-
-	private PaymentMethod defaultPaymentMethod;
 
 	private boolean firstTimeBuyer = true;
 
@@ -476,7 +471,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	public String resetPassword() {
-		final PasswordGenerator passwordGenerator = getBean("passwordGenerator");
+		final PasswordGenerator passwordGenerator = getSingletonBean(ContextIdNames.PASSWORD_GENERATOR, PasswordGenerator.class);
 		final String newPassword = passwordGenerator.getPassword();
 		setClearTextPassword(newPassword);
 		return newPassword;
@@ -746,12 +741,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	@Transient
-	public CustomerPaymentMethodsImpl getPaymentMethods() {
-		return new CustomerPaymentMethodsImpl(this);
-	}
-
-	@Override
-	@Transient
 	public CustomerProfile getCustomerProfile() {
 		if (customerProfile == null) {
 			initializeCustomerProfile();
@@ -798,8 +787,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	private void initCustomerAuthentication() {
 		if (getCustomerAuthentication() == null) {
-			CustomerAuthentication customerAuthentication = getBean(ContextIdNames.CUSTOMER_AUTHENTICATION);
-			setCustomerAuthentication(customerAuthentication);
+			setCustomerAuthentication(getPrototypeBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthentication.class));
 		}
 	}
 
@@ -919,47 +907,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	public CustomerRoleMapper getCustomerRoleMapper() {
 		return new CustomerRoleMapper(this);
 	}
-
-	/**
-	 * Gets a customer's default payment method.
-	 * @return the default payment method
-	 */
-	@OneToOne(targetEntity = AbstractPaymentMethodImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-	@JoinColumn(name = "DEFAULT_PAYMENT_METHOD_UID")
-	protected PaymentMethod getDefaultPaymentMethod() {
-		return defaultPaymentMethod;
-	}
-
-	/**
-	 * Sets the default payment method.
-	 * @param defaultPaymentMethod the method to set as default
-	 */
-	protected void setDefaultPaymentMethod(final PaymentMethod defaultPaymentMethod) {
-		this.defaultPaymentMethod = defaultPaymentMethod;
-	}
-
-	/**
-	 * Returns a list of payment methods.
-	 * @return the list of payment methods
-	 */
-	@OneToMany(targetEntity = AbstractPaymentMethodImpl.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable(name = "TCUSTOMERPAYMENTMETHOD",
-			joinColumns = @JoinColumn(name = "CUSTOMER_UID"),
-			inverseJoinColumns = @JoinColumn(name = "PAYMENT_METHOD_UID"))
-	@ElementDependent
-	protected Collection<PaymentMethod> getPaymentMethodsInternal() {
-		return paymentMethods;
-	}
-
-	/**
-	 * Sets the list of payment methods. Method visibility set to private because this is only required by OpenJPA.
-	 * @param paymentMethods the list of payment methods
-	 */
-	@SuppressWarnings({"PMD.UnusedPrivateMethod", "unused"})
-	protected void setPaymentMethodsInternal(final Collection<PaymentMethod> paymentMethods) {
-		this.paymentMethods = paymentMethods;
-	}
-
 
 	@Override
 	@Transient

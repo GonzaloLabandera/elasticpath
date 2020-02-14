@@ -16,6 +16,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
+import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
@@ -47,13 +48,13 @@ public class TaxableItemContainerAdapter {
 	 * Adapts contextual data values to a {@link com.elasticpath.plugin.tax.domain.TaxableItemContainer}.
 	 *
 	 * @param shoppingItemPricingSnapshotMap a map of shopping items to their corresponding pricing snapshots
-	 * @param shippingCost shipping cost
-	 * @param discounts discounts
-	 * @param activeTaxCodes active tax codes
-	 * @param storeCode the store code
-	 * @param destinationAddress the destination address
-	 * @param originAddress the origin address
-	 * @param taxOperationContext the tax operation context
+	 * @param shippingCost                   shipping cost
+	 * @param discounts                      discounts
+	 * @param activeTaxCodes                 active tax codes
+	 * @param storeCode                      the store code
+	 * @param destinationAddress             the destination address
+	 * @param originAddress                  the origin address
+	 * @param taxOperationContext            the tax operation context
 	 * @return an instance of {@link com.elasticpath.plugin.tax.domain.TaxableItemContainer}
 	 */
 	@SuppressWarnings("checkstyle:parameternumber")
@@ -65,12 +66,13 @@ public class TaxableItemContainerAdapter {
 									  final TaxAddress destinationAddress,
 									  final TaxAddress originAddress,
 									  final TaxOperationContext taxOperationContext) {
-		StoreService storeService = beanFactory.getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		Locale locale = storeService.findStoreWithCode(storeCode).getDefaultLocale();
 
 		Currency currency = taxOperationContext.getCurrency();
 
-		MutableTaxableItemContainer container = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAXABLE_ITEM_CONTAINER);
+		MutableTaxableItemContainer container = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAXABLE_ITEM_CONTAINER,
+				MutableTaxableItemContainer.class);
 		container.setDestinationAddress(destinationAddress);
 		container.setOriginAddress(originAddress);
 		container.setCurrency(currency);
@@ -85,19 +87,19 @@ public class TaxableItemContainerAdapter {
 	 * Adapts contextual data values to a list of {@link com.elasticpath.plugin.tax.domain.TaxableItem}.
 	 *
 	 * @param shoppingItemPricingSnapshotMap a map of shopping items to their corresponding pricing snapshots
-	 * @param shippingCost   the shipping cost
-	 * @param discounts      the given map of the apportioned discount amount of shopping item
-	 * @param activeTaxCodes the active tax codes
-	 * @param currency       the currency
-	 * @param locale         the locale
+	 * @param shippingCost                   the shipping cost
+	 * @param discounts                      the given map of the apportioned discount amount of shopping item
+	 * @param activeTaxCodes                 the active tax codes
+	 * @param currency                       the currency
+	 * @param locale                         the locale
 	 * @return a list of taxable items
 	 */
 	protected List<TaxableItem> buildTaxableItems(final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap,
-													final BigDecimal shippingCost,
-													final Map<String, BigDecimal> discounts,
-													final Set<String> activeTaxCodes,
-													final Currency currency,
-													final Locale locale) {
+												  final BigDecimal shippingCost,
+												  final Map<String, BigDecimal> discounts,
+												  final Set<String> activeTaxCodes,
+												  final Currency currency,
+												  final Locale locale) {
 		List<TaxableItem> result = new ArrayList<>();
 
 		for (Map.Entry<? extends ShoppingItem, ShoppingItemPricingSnapshot> entry : shoppingItemPricingSnapshotMap.entrySet()) {
@@ -114,20 +116,20 @@ public class TaxableItemContainerAdapter {
 			BigDecimal price = itemPricingSnapshot.getPriceCalc().withCartDiscounts().getAmount();
 
 			TaxableItem item = buildTaxableItem(itemGuid,
-												activeTaxCodes,
-												taxCode,
-												currency,
-												price,
-												discounts.get(itemGuid),
-												skuCode,
-												quantity,
-												itemSku.getProduct().getDisplayName(locale));
+					activeTaxCodes,
+					taxCode,
+					currency,
+					price,
+					discounts.get(itemGuid),
+					skuCode,
+					quantity,
+					itemSku.getProduct().getDisplayName(locale));
 			result.add(item);
 		}
 
 		if (shippingCost != null && isAnyItemPhysical(shoppingItemPricingSnapshotMap.keySet())) {
 			TaxableItem item = buildTaxableItem(TaxCode.TAX_CODE_SHIPPING, activeTaxCodes, TaxCode.TAX_CODE_SHIPPING,
-			currency, shippingCost, null, TaxCode.TAX_CODE_SHIPPING, 1, SHIPPING_COST);
+					currency, shippingCost, null, TaxCode.TAX_CODE_SHIPPING, 1, SHIPPING_COST);
 			result.add(item);
 		}
 		return result;
@@ -145,23 +147,22 @@ public class TaxableItemContainerAdapter {
 	/**
 	 * Builds a new taxable item.
 	 *
-	 * @param itemGuid the item Guid
-	 * @param activeTaxCodes all active tax codes in the system
-	 * @param taxCode the tax code of the item
-	 * @param currency the currency
-	 * @param price the price of the taxable item
-	 * @param referenceId the SKU code or general reference ID of the related item
-	 * @param discount the apportioned discount amount of shopping item
-	 * @param quantity the quantity
+	 * @param itemGuid        the item Guid
+	 * @param activeTaxCodes  all active tax codes in the system
+	 * @param taxCode         the tax code of the item
+	 * @param currency        the currency
+	 * @param price           the price of the taxable item
+	 * @param referenceId     the SKU code or general reference ID of the related item
+	 * @param discount        the apportioned discount amount of shopping item
+	 * @param quantity        the quantity
 	 * @param itemDescription item description
-	 *
 	 * @return an instance of {@link com.elasticpath.plugin.tax.domain.TaxableItem}
 	 */
 	@SuppressWarnings("checkstyle:parameternumber")
 	protected TaxableItem buildTaxableItem(final String itemGuid, final Set<String> activeTaxCodes, final String taxCode,
-				final Currency currency, final BigDecimal price, final BigDecimal discount,
-				final String referenceId, final int quantity, final String itemDescription) {
-		TaxableItemImpl item = getBeanFactory().getBean(TaxContextIdNames.TAXABLE_ITEM);
+										   final Currency currency, final BigDecimal price, final BigDecimal discount,
+										   final String referenceId, final int quantity, final String itemDescription) {
+		TaxableItemImpl item = getBeanFactory().getPrototypeBean(TaxContextIdNames.TAXABLE_ITEM, TaxableItemImpl.class);
 
 		item.setCurrency(currency);
 		item.setItemGuid(itemGuid);
@@ -212,13 +213,13 @@ public class TaxableItemContainerAdapter {
 		}
 
 		return TaxAddressBuilder.newBuilder()
-								.withStreet1(address.getStreet1())
-								.withStreet2(address.getStreet2())
-								.withCity(address.getCity())
-								.withSubCountry(address.getSubCountry())
-								.withCountry(address.getCountry())
-								.withZipOrPostalCode(address.getZipOrPostalCode())
-								.build();
+				.withStreet1(address.getStreet1())
+				.withStreet2(address.getStreet2())
+				.withCity(address.getCity())
+				.withSubCountry(address.getSubCountry())
+				.withCountry(address.getCountry())
+				.withZipOrPostalCode(address.getZipOrPostalCode())
+				.build();
 	}
 
 	/**
@@ -231,7 +232,7 @@ public class TaxableItemContainerAdapter {
 		if (address == null) {
 			return null;
 		}
-		Address domainAddress = getBeanFactory().getBean(ContextIdNames.ORDER_ADDRESS);
+		Address domainAddress = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 
 		domainAddress.setCity(address.getCity());
 		domainAddress.setCountry(address.getCountry());

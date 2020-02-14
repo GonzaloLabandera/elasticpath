@@ -166,7 +166,7 @@ public class TagAllowedValueImpl extends AbstractLegacyPersistenceImpl implement
 	@Transient
 	public LocalizedProperties getLocalizedProperties() {
 		if (localizedProperties == null) {
-			this.localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			this.localizedProperties = getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 			this.localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(),
 					ContextIdNames.TAG_ALLOWED_VALUE_LOCALIZED_PROPERTY_VALUE);
 		}

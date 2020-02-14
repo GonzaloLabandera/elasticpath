@@ -18,6 +18,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.domain.search.IndexNotification;
 import com.elasticpath.domain.search.UpdateType;
@@ -146,7 +147,7 @@ public class IndexNotificationServiceImplTest {
 			{
 				allowing(searchCriteria).getIndexType();
 				will(returnValue(indexType));
-				oneOf(beanFactory).getBean("indexNotification");
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
 				will(returnValue(mockIndexNotification));
 
 				oneOf(mockIndexNotification).setIndexType(indexType);
@@ -182,7 +183,7 @@ public class IndexNotificationServiceImplTest {
 				allowing(searchCriteria).getIndexType();
 				will(returnValue(indexType));
 
-				oneOf(beanFactory).getBean("indexNotification");
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
 				will(returnValue(mockIndexNotification));
 
 				oneOf(mockIndexNotification).setIndexType(indexType);
@@ -214,7 +215,7 @@ public class IndexNotificationServiceImplTest {
 		final IndexNotification mockIndexNotification = context.mock(IndexNotification.class);
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean("indexNotification");
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
 				will(returnValue(mockIndexNotification));
 
 				oneOf(mockIndexNotification).setIndexType(indexType);

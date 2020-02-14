@@ -33,7 +33,6 @@ import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.solr.SolrIndexConstants;
 
 /**
- * 
  * The default implementation for {@link SearchCriteriaFactory} which provides methods to create search criteria.
  */
 public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
@@ -53,12 +52,12 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 	@Override
 	public CategorySearchCriteria createCategorySearchCriteria(final CatalogViewRequest catalogViewRequest) {
 
-		final CategorySearchCriteria searchCriteria = beanFactory.getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA);
+		final CategorySearchCriteria searchCriteria = beanFactory.getPrototypeBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA,
+				CategorySearchCriteria.class);
 
-		
+
 		searchCriteria.setCategoryName(extractKeywords(catalogViewRequest));
-		
-		
+
 
 		if (catalogViewRequest.getCategoryUid() > 0) {
 			String code = getCategoryService().findCodeByUid(catalogViewRequest.getCategoryUid());
@@ -74,12 +73,13 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 
 	@Override
 	public ProductSearchCriteria createProductSearchCriteria(final CatalogViewRequest searchRequest) {
-		return beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class);
 	}
 
 	@Override
 	public KeywordSearchCriteria createKeywordProductCategorySearchCriteria(final CatalogViewRequest catalogViewRequest) {
-		final KeywordSearchCriteria searchCriteria = beanFactory.getBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA);
+		final KeywordSearchCriteria searchCriteria = beanFactory.getPrototypeBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA,
+				KeywordSearchCriteria.class);
 
 		String keywords = extractKeywords(catalogViewRequest);
 		final Catalog catalog = getStoreConfig().getStore().getCatalog();
@@ -100,11 +100,11 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 		searchCriteria.setFuzzySearchDisabled(false);
 		return searchCriteria;
 	}
-	
+
 	private String extractKeywords(final CatalogViewRequest catalogViewRequest) {
-		if (catalogViewRequest instanceof SearchRequest)  {
+		if (catalogViewRequest instanceof SearchRequest) {
 			return ClientUtils.escapeQueryChars(((SearchRequest) catalogViewRequest).getKeyWords());
-		} 
+		}
 		return null;
 	}
 
@@ -112,7 +112,7 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 	 * Adds synonyms to the given set of keywords.
 	 *
 	 * @param keywords the keywords used in the search
-	 * @param catalog the catalog
+	 * @param catalog  the catalog
 	 * @return the keywords with synonyms added
 	 */
 	String addSynonyms(final String keywords, final Catalog catalog) {
@@ -134,9 +134,9 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 	 * Runs through the given synonym groups to find if there are any synonyms configured for the given keywords and, if so, adds the synonyms to the
 	 * string of keywords. This implementation splits up the keyword string using the tokenizer specified in the the Lucene Analyzer that is
 	 * configured through Spring to be the Synonym Analyzer.
-	 * 
+	 *
 	 * @param synonymGroups groups of synonym configurations
-	 * @param keywords the keyword string to which synonyms should be appended
+	 * @param keywords      the keyword string to which synonyms should be appended
 	 * @return the modified keyword string
 	 * @throws IOException if there is a problem tokenizing the keyword string
 	 */
@@ -147,7 +147,7 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 		final StringBuilder synonymStr = new StringBuilder();
 		synonymStr.append(keywords);
 
-		final Analyzer analyzer = beanFactory.getBean(ContextIdNames.SYNONYM_ANALYZER);
+		final Analyzer analyzer = beanFactory.getSingletonBean(ContextIdNames.SYNONYM_ANALYZER, Analyzer.class);
 		final TokenStream tokenStream = analyzer.tokenStream(null, new StringReader(keywords));
 
 		CharTermAttribute termAtt = tokenStream.addAttribute(CharTermAttribute.class);
@@ -177,7 +177,7 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 
 	/**
 	 * Sets the {@link SynonymGroupService} instance to use.
-	 * 
+	 *
 	 * @param synonymGroupService the {@link SynonymGroupService} instance to use
 	 */
 	public void setSynonymGroupService(final SynonymGroupService synonymGroupService) {
@@ -186,7 +186,7 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 
 	/**
 	 * Sets the {@link CatalogService} instance to use.
-	 * 
+	 *
 	 * @param catalogService the {@link CatalogService} instance to use
 	 */
 	public void setCatalogService(final CatalogService catalogService) {
@@ -195,7 +195,7 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 
 	/**
 	 * Sets the store configuration to be used as a context for searching.
-	 * 
+	 *
 	 * @param storeConfig the store configuration.
 	 */
 	public void setStoreConfig(final StoreConfig storeConfig) {
@@ -204,7 +204,7 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 
 	/**
 	 * Returns the store configuration that provides the context for the catalog to view.
-	 * 
+	 *
 	 * @return the store configuration.
 	 */
 	protected StoreConfig getStoreConfig() {
@@ -213,7 +213,7 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 
 	/**
 	 * Gets the {@link CategoryService} instance.
-	 * 
+	 *
 	 * @return the {@link CategoryService} instance
 	 */
 	protected CategoryService getCategoryService() {
@@ -222,7 +222,7 @@ public class SearchCriteriaFactoryImpl implements SearchCriteriaFactory {
 
 	/**
 	 * Sets the {@link CategoryService} instance to use.
-	 * 
+	 *
 	 * @param categoryService the {@link CategoryService instance to use
 	 */
 	public void setCategoryService(final CategoryService categoryService) {

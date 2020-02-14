@@ -57,7 +57,7 @@ import com.elasticpath.tags.service.ConditionEvaluatorService;
 /**
  * Provides Rule Engine related services.
  */
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements RuleService {
 
 	private static final String PLACEHOLDER_FOR_LIST = "list";
@@ -89,7 +89,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 *
 	 * @param rule the rule to add
 	 * @return the persisted instance of rule.
-	 * @throws DuplicateNameException - if the specified promoCode is already in use.
+	 * @throws DuplicateNameException      - if the specified promoCode is already in use.
 	 * @throws DuplicatePromoCodeException - if the specified promoCode is already in use.
 	 */
 	@Override
@@ -122,7 +122,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 *
 	 * @param rule the rule to update]
 	 * @return the updated object instance
-	 * @throws DuplicateNameException - if the specified promoCode is already in use.
+	 * @throws DuplicateNameException      - if the specified promoCode is already in use.
 	 * @throws DuplicatePromoCodeException - if the specified promoCode is already in use.
 	 */
 	@Override
@@ -215,7 +215,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 		sanityCheck();
 
 		if (ruleUid <= 0) {
-			return getBean(ContextIdNames.PROMOTION_RULE);
+			return getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 		}
 
 		return getPersistentBeanFinder().load(ContextIdNames.PROMOTION_RULE, ruleUid);
@@ -238,7 +238,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 * Give a load tuner to fine tune the parameters that are loaded into the retrieved object. If
 	 * no tuner is given the default fields will be loaded.
 	 *
-	 * @param ruleUid the rule UID to fetch
+	 * @param ruleUid   the rule UID to fetch
 	 * @param loadTuner the load tuner
 	 * @return the rule if the UID exists, otherwise <code>null</code>
 	 * @throws EpServiceException in case of any errors
@@ -247,7 +247,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	public Rule get(final long ruleUid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
 		if (ruleUid <= 0) {
-			return getBean(ContextIdNames.PROMOTION_RULE);
+			return getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 		}
 
 		return getPersistentBeanFinder()
@@ -325,7 +325,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 		}
 
 		if (results.size() > 1) {
-				throw new EpServiceException("Inconsistent data -- duplicate rule code \"" + code + "\".");
+			throw new EpServiceException("Inconsistent data -- duplicate rule code \"" + code + "\".");
 		}
 
 		return results.get(0);
@@ -363,7 +363,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 * Returns a list of <code>Rule</code>s based on the given uids. The returned rules will be populated based on the
 	 * given {@link FetchGroupLoadTuner}.
 	 *
-	 * @param ruleUids a collection of rule uids
+	 * @param ruleUids            a collection of rule uids
 	 * @param fetchGroupLoadTuner a {@link FetchGroupLoadTuner}.
 	 * @return a list of <code>Rule</code>s
 	 */
@@ -386,7 +386,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 *
 	 * @param date date to compare with the last modified date
 	 * @return list of <code>Rule</code> whose last modified date is later than the
-	 *         specified date
+	 * specified date
 	 */
 	@Override
 	public List<Long> findUidsByModifiedDate(final Date date) {
@@ -435,8 +435,8 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 * Finds the given rule base by {@link Store}, {@link Catalog} and scenario ID. It is OK to
 	 * set either {@link Store} or {@link Catalog} to {@code null}.
 	 *
-	 * @param store the store
-	 * @param catalog the catalog
+	 * @param store      the store
+	 * @param catalog    the catalog
 	 * @param scenarioId the scenario ID
 	 * @return a rule base if it exists, otherwise {@code null}
 	 * @throws EpServiceException in case of any errors
@@ -477,9 +477,9 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 * since the given date, {@code null} will be returned. If the rule base does not exist
 	 * {@code null} will also be returned. Store rules do not have a catalog set.
 	 *
-	 * @param storeCode the store code to use
+	 * @param storeCode  the store code to use
 	 * @param scenarioId the scenario ID of the rule base
-	 * @param date the date from which changes should be recognized
+	 * @param date       the date from which changes should be recognized
 	 * @return a rule base if it exists and was modified
 	 * @throws EpServiceException in case of any errors
 	 */
@@ -507,8 +507,8 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 * {@code null} will also be returned. Catalog rules do not have a store set.
 	 *
 	 * @param catalogCode the catalog code to use
-	 * @param scenarioId the scenario ID of the rule base
-	 * @param date the date from which changes should be recognized
+	 * @param scenarioId  the scenario ID of the rule base
+	 * @param date        the date from which changes should be recognized
 	 * @return a rule base if it exists and was modified
 	 * @throws EpServiceException in case of any errors
 	 */
@@ -567,7 +567,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 * @return the scenarioId Integer -> rule element List Map.
 	 */
 	private <T extends RuleElement> Map<Integer, List<T>> createElementMap(final List<String> ruleElements) {
-		RuleScenarios ruleScenarios = getBean(ContextIdNames.RULE_SCENARIOS);
+		RuleScenarios ruleScenarios = getPrototypeBean(ContextIdNames.RULE_SCENARIOS, RuleScenarios.class);
 		Set<Integer> ruleScenarioSet = ruleScenarios.getAvailableScenarios();
 		Map<Integer, List<T>> ruleElementMap = new HashMap<>();
 
@@ -617,7 +617,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 */
 	@Override
 	public Map<Integer, List<RuleException>> getAllExceptionsMap() {
-		RuleScenarios ruleScenarios = getBean(ContextIdNames.RULE_SCENARIOS);
+		RuleScenarios ruleScenarios = getPrototypeBean(ContextIdNames.RULE_SCENARIOS, RuleScenarios.class);
 		Set<Integer> ruleScenarioSet = ruleScenarios.getAvailableScenarios();
 		Map<Integer, List<RuleException>> ruleElementMap = new HashMap<>();
 
@@ -627,7 +627,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 		}
 
 		for (String currExceptionName : allExceptions) {
-			RuleException currRuleException = getBean(currExceptionName);
+			RuleException currRuleException = getPrototypeBean(currExceptionName, RuleException.class);
 
 			for (Integer currScenarioId : ruleScenarioSet) {
 				if (currRuleException.appliesInScenario(currScenarioId.intValue())) {
@@ -838,7 +838,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 * passed by the current date. Passing <code>null</code> the exclude date will not exclude
 	 * any dates.
 	 *
-	 * @param excludeFrom any date before this will be excluded
+	 * @param excludeFrom  any date before this will be excluded
 	 * @param ruleScenario the scenario to find changes for
 	 * @return a collection of {@link Rule} UIDs that have been changed since the current date
 	 * @throws EpServiceException in case of any errors
@@ -921,7 +921,6 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	}
 
 	/**
-	 *
 	 * @return reporting rule service.
 	 */
 	public ReportingRuleService getReportingRuleService() {
@@ -930,6 +929,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 
 	/**
 	 * Set reporting rule service.
+	 *
 	 * @param reportingRuleService reporting rule service to use.
 	 */
 	public void setReportingRuleService(final ReportingRuleService reportingRuleService) {
@@ -948,7 +948,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	public List<Object[]> findActiveRuleIdSellingContextByScenarioAndStore(final int scenario, final String storeCode) {
 
 		return getPersistenceEngine().retrieveByNamedQuery("ACTIVE_RULEID_AND_SELLINGCONTEXT_FIND_BY_SCENARIO_AND_STORE",
-			scenario, storeCode);
+				scenario, storeCode);
 	}
 
 	@Override
@@ -975,7 +975,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 			return ERROR_UNSPECIFIED;
 		}
 
-		final String storeCodeBelongingToRule =  rule.getStoreCode();
+		final String storeCodeBelongingToRule = rule.getStoreCode();
 
 		if (storeCodeBelongingToRule != null && !storeCodeBelongingToRule.equalsIgnoreCase(storeCode)) {
 			return ERROR_UNSPECIFIED;
@@ -1008,7 +1008,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 */
 	protected ConditionEvaluatorService getConditionEvaluatorService() {
 		if (conditionEvaluatorService == null) {
-			conditionEvaluatorService = getBean(ContextIdNames.TAG_CONDITION_EVALUATOR_SERVICE);
+			conditionEvaluatorService = getSingletonBean(ContextIdNames.TAG_CONDITION_EVALUATOR_SERVICE, ConditionEvaluatorService.class);
 		}
 		return conditionEvaluatorService;
 	}

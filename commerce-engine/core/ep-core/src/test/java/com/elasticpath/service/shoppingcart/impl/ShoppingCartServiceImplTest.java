@@ -63,12 +63,12 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 		shoppingCartServiceImpl = new ShoppingCartServiceImpl();
 		shoppingCartServiceImpl.setPersistenceEngine(getPersistenceEngine());
 
-		stubGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
+		stubGetPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class, ShoppingCartMementoImpl.class);
 
 		ShoppingCartImpl shoppingCartImpl = new ShoppingCartImpl();
 		shoppingCartImpl.setShopper(TestShopperFactory.getInstance().createNewShopperWithMemento());
 
-		stubGetBean(ContextIdNames.SHOPPING_CART, shoppingCartImpl);
+		stubGetPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class, ShoppingCartImpl.class);
 
 		context.checking(new Expectations() { {
 			allowing(timeService).getCurrentTime(); will(returnValue(new Date()));
@@ -196,7 +196,7 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 		final ShoppingCartImpl cart = new ShoppingCartImpl();
 		cart.setShoppingCartMemento(cartMemento);
 
-		stubGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
+		stubGetPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class, ShoppingCartMementoImpl.class);
 		// expectations
 		context.checking(new Expectations() {
 			{

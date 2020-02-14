@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.cmclient.core.CmSingletonUtil;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.ValueTypeEnum;
 import com.elasticpath.tags.domain.SelectableValue;
@@ -53,7 +53,7 @@ public final class SelectableValuesProviderFactory {
 	 * Constructor.
 	 */
 	private SelectableValuesProviderFactory() {
-		selectableTagValuesFacade = ServiceLocator.getService(ContextIdNames.TAG_SELECTABLE_VALUES_SERVICE);
+		selectableTagValuesFacade = BeanLocator.getSingletonBean(ContextIdNames.TAG_SELECTABLE_VALUES_SERVICE, SelectableTagValueFacade.class);
 
 		tagValueTypeEnum.put(CATEGORY_PICKER, ValueTypeEnum.Category);
 		tagValueResolver.put(CATEGORY_PICKER, new CategoryValuesProvider());

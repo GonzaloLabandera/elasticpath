@@ -24,9 +24,7 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.pricing.BaseAmount;
 import com.elasticpath.domain.pricing.BaseAmountObjectType;
-import com.elasticpath.domain.pricing.PriceListAssignment;
 import com.elasticpath.domain.pricing.PriceListDescriptor;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.test.db.DbTestCase;
@@ -39,8 +37,6 @@ public class PriceListServiceImplITest extends DbTestCase {
 	private static final String PRICE_LIST_CODE = "pl1";
 
 	private static final String PRICE_LIST_NAME = PRICE_LIST_CODE;
-
-	private static final String NON_HIDDEN_PLA_NAME = "pla";
 
 	private static final String PLA_HIDDEN_NAME = "plaHidden";
 
@@ -59,12 +55,10 @@ public class PriceListServiceImplITest extends DbTestCase {
 	private BeanFactory beanFactory;
 
 	private Catalog defaultCatalog;
-	private PriceListAssignment priceListAssignment;
 	private Category category;
 	private CategoryType categoryType;
 	private TaxCode taxCode;
 	private Product product;
-	private BaseAmount baseAmount;
 
 	/**
 	 * Set up required for each test.
@@ -88,7 +82,7 @@ public class PriceListServiceImplITest extends DbTestCase {
 		PriceListDescriptor priceList = persistersFactory.getPriceListPersister().createAndPersistPriceList(
 				PRICE_LIST_CODE, PRICE_LIST_NAME, DEFAULT_CURRENCY, DEFAULT_DESCRIPTION, true);
 
-		priceListAssignment = persistersFactory.getPriceListAssignmentPersister().
+		persistersFactory.getPriceListAssignmentPersister().
 				createPriceListAssignment(defaultCatalog.getGuid(), priceList.getGuid(), PLA_HIDDEN_NAME, DEFAULT_DESCRIPTION, 0);
 		persistersFactory.getPriceListPersister().addOrUpdateBaseAmount(
 				PRICE_LIST_CODE, BaseAmountObjectType.PRODUCT.getName(), product.getGuid(),
@@ -99,7 +93,7 @@ public class PriceListServiceImplITest extends DbTestCase {
 	@Test
 	@DirtiesDatabase
 	public void testGetBaseAmountsExtWithNonExactMatchForLowestPrice() {
-		BaseAmountFilterExt filterExpr = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT);
+		BaseAmountFilterExt filterExpr = beanFactory.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT, BaseAmountFilterExt.class);
 		filterExpr.setObjectGuid(product.getGuid());
 		filterExpr.setObjectType(BaseAmountObjectType.PRODUCT.getName());
 		filterExpr.setLocale(Locale.CANADA);
@@ -113,7 +107,7 @@ public class PriceListServiceImplITest extends DbTestCase {
 	@Test
 	@DirtiesDatabase
 	public void testGetBaseAmountsExtWithNonExactMatchForLowestPriceDoesFilterOnPrice() {
-		BaseAmountFilterExt filterExpr = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT);
+		BaseAmountFilterExt filterExpr = beanFactory.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT, BaseAmountFilterExt.class);
 		filterExpr.setObjectGuid(product.getGuid());
 		filterExpr.setObjectType(BaseAmountObjectType.PRODUCT.getName());
 		filterExpr.setLocale(Locale.CANADA);
@@ -132,7 +126,7 @@ public class PriceListServiceImplITest extends DbTestCase {
 		for (int isCaseSensitive = 0; isCaseSensitive < boolValues.length; isCaseSensitive ++) {
 			for (int hasLowestPrice = 0; hasLowestPrice < boolValues.length; hasLowestPrice ++ ) {
 				for (int hasHighestPrice = 0; hasHighestPrice < boolValues.length; hasHighestPrice ++) {
-					BaseAmountFilterExt filterExpr = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT);
+					BaseAmountFilterExt filterExpr = beanFactory.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT, BaseAmountFilterExt.class);
 					filterExpr.setObjectGuid(product.getGuid());
 					filterExpr.setObjectType(BaseAmountObjectType.PRODUCT.getName());
 					filterExpr.setLocale(Locale.CANADA);

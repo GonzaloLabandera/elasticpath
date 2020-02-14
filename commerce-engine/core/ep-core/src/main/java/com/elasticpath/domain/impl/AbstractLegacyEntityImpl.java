@@ -4,13 +4,11 @@
 package com.elasticpath.domain.impl;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.persistence.api.AbstractEntityImpl;
 
 /**
- * This class provides methods to allow accessing {@link ElasticPath} and getting beans from within the 
+ * This class provides methods to allow accessing {@link ElasticPath} and getting beans from within the
  * persistent objects. //REFACTORING
  */
 public abstract class AbstractLegacyEntityImpl extends AbstractEntityImpl implements BeanFactory {
@@ -28,8 +26,8 @@ public abstract class AbstractLegacyEntityImpl extends AbstractEntityImpl implem
 
 	/**
 	 * Get the ElasticPath singleton.
-	 * Consider using {@link #getBean(String)} for obtaining new
-	 * instances of prototype beans.
+	 * Consider using {@link #getPrototypeBean(String, Class)} directly on the bean factory
+	 * for obtaining new instances of prototype beans.
 	 *
 	 * @return elasticpath the ElasticPath singleton.
 	 */
@@ -37,7 +35,7 @@ public abstract class AbstractLegacyEntityImpl extends AbstractEntityImpl implem
 	public ElasticPath getElasticPath() {
 		return ElasticPathImpl.getInstance();
 	}
-	
+
 	@Deprecated
 	@Override
 	public <T> T getBean(final String beanName) {
@@ -66,6 +64,7 @@ public abstract class AbstractLegacyEntityImpl extends AbstractEntityImpl implem
 	 * of a cpu expensive field will be a field like GUID, current date, etc. We prefer this way rather than using the domain object constructor. It
 	 * doesn't make sense to set default values everytime when creating a new domain object, because most of the time the default value you set will
 	 * be overwritten by hibernate immediately.
+	 *
 	 * @deprecated use initialize instead
 	 */
 	@Deprecated
@@ -83,15 +82,5 @@ public abstract class AbstractLegacyEntityImpl extends AbstractEntityImpl implem
 	@Override
 	public void initialize() {
 		setDefaultValues();
-	}
-
-	/**
-	 * Returns the <code>Utility</code> singleton.
-	 * @return the <code>Utility</code> singleton.
-	 * @deprecated If the implementation class needs the Utility object it should be retrieved inside that class.
-	 */
-	@Deprecated
-	public Utility getUtility() {
-		return getBean(ContextIdNames.UTILITY);
 	}
 }

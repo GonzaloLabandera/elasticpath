@@ -9,7 +9,7 @@ import java.util.List;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.events.SelectionListener;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.ControlModificationListener;
@@ -93,11 +93,11 @@ public interface ISearchTab {
 		protected static List <Store> getAvailableStores() {
 			List <Store> resultStores = new ArrayList<>();
 			List <Store> accessibleStores = new ArrayList<>();
-			StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+			StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 			accessibleStores.addAll(storeService.findAllCompleteStores());
 			AuthorizationService.getInstance().removeUnathorizedStoresFrom(accessibleStores);
 		
-			Store allStoreOption = ServiceLocator.getService(ContextIdNames.STORE);
+			Store allStoreOption = BeanLocator.getPrototypeBean(ContextIdNames.STORE, Store.class);
 			allStoreOption.setName(FulfillmentMessages.get().SearchView_AllStore);
 			resultStores.add(allStoreOption);
 			if (!accessibleStores.isEmpty()) { 

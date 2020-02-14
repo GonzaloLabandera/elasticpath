@@ -22,7 +22,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -102,7 +102,7 @@ public class CustomerDetailsCustomerSegmentsSection extends AbstractCmClientEdit
 	@Override
 	protected void createControls(final Composite client, final FormToolkit toolkit) {
 		if (customerGroupService == null) {
-			customerGroupService = ServiceLocator.getService(ContextIdNames.CUSTOMER_GROUP_SERVICE);
+			customerGroupService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_GROUP_SERVICE, CustomerGroupService.class);
 		}
 
 		final AuthorizationService authorizationService = AuthorizationService.getInstance();

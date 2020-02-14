@@ -120,7 +120,7 @@ public class ProductServiceImplTest extends DbTestCase {
 		final Product product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
 			scenario.getCategory(), scenario.getWarehouse());
 
-		final ProductLoadTuner loadTuner = getBeanFactory().getBean("PRODUCT_LOAD_TUNER_ALL");
+		final ProductLoadTuner loadTuner = getBeanFactory().getSingletonBean("PRODUCT_LOAD_TUNER_ALL", ProductLoadTuner.class);
 		final List<Product> returnedProducts = service.findByCategoryUid(scenario.getCategory().getUidPk(), loadTuner);
 
 		// assertPersistenceInList(product, returnedProducts);
@@ -207,7 +207,7 @@ public class ProductServiceImplTest extends DbTestCase {
 			.isEqualTo(lastModified);
 
 		// reload the category
-		final CategoryLookup categoryLookup = getBeanFactory().getBean(ContextIdNames.CATEGORY_LOOKUP);
+		final CategoryLookup categoryLookup = getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 		final Category loadedCategory = categoryLookup.findByUid(category.getUidPk());
 		assertThat(loadedCategory.getLastModifiedDate())
 			.as("Loaded category time should still be the same")
@@ -340,7 +340,7 @@ public class ProductServiceImplTest extends DbTestCase {
 			scenario.getCategory(), scenario.getWarehouse());
 		final long productUid = product.getUidPk();
 
-		final FetchGroupLoadTuner categoryOnlyTuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		final FetchGroupLoadTuner categoryOnlyTuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		categoryOnlyTuner.addFetchGroup(FetchGroupConstants.LINK_PRODUCT_CATEGORY);
 		final Product categoryOnlyProduct = service.getTuned(productUid, categoryOnlyTuner);
 		assertThat(categoryOnlyProduct.getCategories())
@@ -350,7 +350,7 @@ public class ProductServiceImplTest extends DbTestCase {
 		product.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
 		service.saveOrUpdate(product);
 
-		final FetchGroupLoadTuner indexTuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		final FetchGroupLoadTuner indexTuner = getBeanFactory().getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		indexTuner.addFetchGroup(FetchGroupConstants.PRODUCT_INDEX);
 		final Product indexProduct = service.getTuned(productUid, indexTuner);
 		assertThat(indexProduct.getCategories())
@@ -374,7 +374,7 @@ public class ProductServiceImplTest extends DbTestCase {
 			scenario.getCategory(), scenario.getWarehouse());
 		final long productUid = product.getUidPk();
 
-		final ProductLoadTuner tuner = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
+		final ProductLoadTuner tuner = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 		tuner.setLoadingAttributeValue(true);
 		tuner.setLoadingSkus(false);
 
@@ -430,7 +430,7 @@ public class ProductServiceImplTest extends DbTestCase {
 			scenario.getCategory(),
 			scenario.getWarehouse());
 
-		final ProductLoadTuner tuner = getTac().getBeanFactory().getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
+		final ProductLoadTuner tuner = getTac().getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 		tuner.setLoadingAttributeValue(false);
 		tuner.setLoadingSkus(false);
 
@@ -492,7 +492,7 @@ public class ProductServiceImplTest extends DbTestCase {
 		Category subCategory = persisterFactory.getCatalogTestPersister().persistCategory(Utils.uniqueCode("subcategory"),
 			scenario.getCatalog(), scenario.getCategory().getCategoryType(), null, null);
 		subCategory.setParent(category);
-		final CategoryService categoryService = getBeanFactory().getBean("categoryService");
+		final CategoryService categoryService = getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 		subCategory = categoryService.saveOrUpdate(subCategory);
 
 		Product product1 = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
@@ -1031,10 +1031,10 @@ public class ProductServiceImplTest extends DbTestCase {
 		skuOption.addOptionValue(optionValue);
 
 		// update the sku option
-		final SkuOptionService skuService = getBeanFactory().getBean(ContextIdNames.SKU_OPTION_SERVICE);
+		final SkuOptionService skuService = getBeanFactory().getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
 		final SkuOption updatedSkuOption = skuService.saveOrUpdate(skuOption);
 
-		final ProductSku productSku = getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU);
+		final ProductSku productSku = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 
 		final String skuCode = Utils.uniqueCode("skucode1");
 		productSku.setSkuCode(skuCode);
@@ -1083,7 +1083,7 @@ public class ProductServiceImplTest extends DbTestCase {
 		skuOption.addOptionValue(optionValue);
 
 		// update the sku option
-		final SkuOptionService skuService = getBeanFactory().getBean(ContextIdNames.SKU_OPTION_SERVICE);
+		final SkuOptionService skuService = getBeanFactory().getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
 		final SkuOption updatedSkuOption = skuService.saveOrUpdate(skuOption);
 
 		final ProductSku productSku = new ProductSkuImpl();

@@ -29,7 +29,7 @@ import com.elasticpath.cmclient.advancedsearch.service.impl.ValidationStatus;
 import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -110,7 +110,7 @@ public class QueryBuilderTab implements SelectionListener, ModifyListener {
 		final Image buildQueryImage = AdvancedSearchImageRegistry.getImage(AdvancedSearchImageRegistry.QUERY_BUILDER);
 		final IEpLayoutComposite queryBuilderTab = tabFolder.addTabItem(AdvancedSearchMessages.get().QueryBuilder, buildQueryImage,
 				tabIndex, 1, false, true);
-		searchQueryDao = ServiceLocator.getService(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO);
+		searchQueryDao = BeanLocator.getSingletonBean(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO, AdvancedSearchQueryDao.class);
 		bindingContext = new DataBindingContext();
 		createControls(queryBuilderTab);
 	}
@@ -353,7 +353,7 @@ public class QueryBuilderTab implements SelectionListener, ModifyListener {
 	}
 
 	private void saveAsQueryAction() {
-		AdvancedSearchQuery advancedSearchQuery = ServiceLocator.getService(ContextIdNames.ADVANCED_SEARCH_QUERY);
+		AdvancedSearchQuery advancedSearchQuery = BeanLocator.getPrototypeBean(ContextIdNames.ADVANCED_SEARCH_QUERY, AdvancedSearchQuery.class);
 		advancedSearchQuery.populateFrom(searchQuery);
 		advancedSearchQuery.setName(EMPTY_STRING);
 		advancedSearchQuery.setOwner(LoginManager.getCmUser());

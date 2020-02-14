@@ -93,7 +93,7 @@ public class BrandImpl extends AbstractLegacyEntityImpl implements Brand {
 	@Transient
 	public LocalizedProperties getLocalizedProperties() {
 		if (localizedProperties == null) {
-			localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			localizedProperties = getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 			localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(), ContextIdNames.BRAND_LOCALIZED_PROPERTY_VALUE);
 		}
 		return localizedProperties;

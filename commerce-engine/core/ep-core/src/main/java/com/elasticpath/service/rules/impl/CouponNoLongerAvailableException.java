@@ -10,7 +10,7 @@ import java.util.Map;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.commons.exception.InvalidBusinessStateException;
+import com.elasticpath.base.exception.structured.InvalidBusinessStateException;
 
 
 /**

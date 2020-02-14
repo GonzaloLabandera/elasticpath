@@ -21,13 +21,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import org.jmock.Expectations;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.jmock.Expectations;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
@@ -39,6 +38,7 @@ import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl;
@@ -68,6 +68,7 @@ public class ShoppingCartDiscountItemContainerImplTest extends AbstractCatalogDa
 
 	private ShoppingCartDiscountItemContainerImpl container;
 
+	@Override
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
@@ -80,7 +81,7 @@ public class ShoppingCartDiscountItemContainerImplTest extends AbstractCatalogDa
 		container.setShoppingItemsSubtotalCalculator(getShoppingItemSubtotalCalculator());
 		container.setShippableItemPredicate(new ShippableItemPredicate<>(productSkuLookup));
 
-		stubGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
+		stubGetPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class, ShoppingCartMementoImpl.class);
 	}
 
 	/**

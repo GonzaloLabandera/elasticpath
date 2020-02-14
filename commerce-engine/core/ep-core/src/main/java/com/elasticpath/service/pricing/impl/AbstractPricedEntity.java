@@ -49,7 +49,7 @@ public abstract class AbstractPricedEntity<T> implements Priced {
 	 * @return the price schedule
 	 */
 	protected PriceSchedule getPriceSchedule(final PaymentSchedule paymentSchedule) {
-		PriceSchedule priceSchedule = beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE);
+		PriceSchedule priceSchedule = beanFactory.getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class);
 		
 		if (paymentSchedule == null) {
 			priceSchedule.setType(PriceScheduleType.PURCHASE_TIME);
@@ -77,7 +77,7 @@ public abstract class AbstractPricedEntity<T> implements Priced {
 	 * @return an empty instance of {@link Price}
 	 */
 	protected Price getPriceBean() {
-		return beanFactory.getBean(ContextIdNames.PRICE);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 	}
 	
 

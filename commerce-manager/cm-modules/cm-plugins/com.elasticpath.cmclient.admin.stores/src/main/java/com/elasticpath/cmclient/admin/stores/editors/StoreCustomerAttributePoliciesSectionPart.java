@@ -31,9 +31,9 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.helpers.store.StoreCustomerAttributeModel;
@@ -101,11 +101,11 @@ public class StoreCustomerAttributePoliciesSectionPart extends AbstractCmClientE
 		setEditable(editable);
 		this.tableName = "Store Customer Attribute Policies";
 
-		final AttributeService attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		attributesMap = attributeService.getCustomerProfileAttributesMap();
 
 		final AttributePolicyService attributePolicyService =
-				ServiceLocator.getService(ContextIdNames.ATTRIBUTE_POLICY_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_POLICY_SERVICE, AttributePolicyService.class);
 		policiesMap = attributePolicyService.findAll().stream()
 				.collect(Collectors.groupingBy(AttributePolicy::getPolicyKey));
 	}

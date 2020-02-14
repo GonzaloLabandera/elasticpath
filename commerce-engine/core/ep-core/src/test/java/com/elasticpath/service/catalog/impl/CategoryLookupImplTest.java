@@ -26,6 +26,7 @@ import com.elasticpath.domain.catalog.impl.AbstractCategoryImpl;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.catalog.impl.LinkedCategoryImpl;
+import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
@@ -50,7 +51,8 @@ public class CategoryLookupImplTest {
 	@Before
 	public void setUp() {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTunerImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class,
+				FetchGroupLoadTunerImpl.class);
 
 		catalog = new CatalogImpl();
 		catalog.setCode("catalog");

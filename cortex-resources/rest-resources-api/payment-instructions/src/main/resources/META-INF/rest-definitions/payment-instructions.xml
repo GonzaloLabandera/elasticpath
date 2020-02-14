@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>paymentinstructions</name>
+		<description>
+			<![CDATA[
+			Payment instructions provide the necessary creation details for defining valid payment instruments for corresponding third-party payment providers.
+			]]>
+		</description>
+
+		<uri-part>
+			<name>communication-instructions-id</name>
+			<description><![CDATA[The request communication instruction's form data.]]></description>
+			<composite/>
+		</uri-part>
+
+		<uri-part>
+			<name>payload-id</name>
+			<description><![CDATA[The request payload form data.]]></description>
+			<composite/>
+		</uri-part>
+
+		<resource>
+			<name>request-instructions-form</name>
+			<description><![CDATA[Provides the form with which to request payment instructions for a third party payment provider.]]></description>
+			<uri>{base.family}/{paymentmethods.profile-payment-method}/instructions/form</uri>
+			<form>
+				<entity>payment-method-configuration</entity>
+				<action-rel>requestpaymentinstructionsaction</action-rel>
+				<result>payment-instructions</result>
+			</form>
+		</resource>
+
+		<resource>
+			<name>order-request-instructions-form</name>
+			<description>
+				<![CDATA[Provides the form with which to request payment instructions for a third party payment provider from an order.]]>
+			</description>
+			<uri>{base.family}/{paymentmethods.order-payment-method}/instructions/form</uri>
+			<form>
+				<entity>payment-method-configuration</entity>
+				<action-rel>requestpaymentinstructionsaction</action-rel>
+				<result>order-payment-instructions</result>
+			</form>
+		</resource>
+
+		<resource>
+			<name>payment-instructions</name>
+			<description>
+				<![CDATA[The payment instructions resource, providing payment provider-defined details for creating valid payment instruments.]]>
+			</description>
+			<uri>{base.family}/{paymentmethods.profile-payment-method}/instructions/{communication-instructions-id}/{payload-id}</uri>
+			<entity>instructions</entity>
+		</resource>
+
+		<resource>
+			<name>order-payment-instructions</name>
+			<description>
+				<![CDATA[The payment instructions resource for the order, providing payment provider-defined details for creating valid payment instruments.]]>
+			</description>
+			<uri>{base.family}/{paymentmethods.order-payment-method}/instructions/{communication-instructions-id}/{payload-id}</uri>
+			<entity>instructions</entity>
+		</resource>
+
+		<advisor>
+			<name>order-request-instructions-form</name>
+			<description><![CDATA[Provides a blocking advisor to enforce creation fields during profile payment instrument creation, as required by the third-party payment provider. Required fields might include a billing address or email address.]]></description>
+			<blocks>order-request-instructions-form</blocks>
+		</advisor>
+
+		<advisor>
+			<name>request-instructions-form</name>
+			<description><![CDATA[Provides a blocking advisor to enforce creation fields during profile payment instrument creation, as required by the third-party payment provider. Required fields might include a billing address or email address.]]></description>
+			<blocks>request-instructions-form</blocks>
+		</advisor>
+
+		<relationship>
+			<name>request-instructions-form-for-profile-payment-method</name>
+			<description><![CDATA[The link from a profile payment method to request instructions form.]]></description>
+			<rel>requestinstructionsform</rel>
+			<rev>profilepaymentmethod</rev>
+			<from>paymentmethods.profile-payment-method</from>
+			<to>request-instructions-form</to>
+		</relationship>
+
+		<relationship>
+			<name>request-instructions-form-for-order-payment-method</name>
+			<description><![CDATA[The link from an order payment method to request instructions form.]]></description>
+			<rel>requestinstructionsform</rel>
+			<rev>orderpaymentmethod</rev>
+			<from>paymentmethods.order-payment-method</from>
+			<to>order-request-instructions-form</to>
+		</relationship>
+
+		<relationship>
+			<name>payment-instructions-to-profile-payment-method</name>
+			<description><![CDATA[The link from payment instructions to a profile payment method.]]></description>
+			<rel>paymentmethod</rel>
+			<from>payment-instructions</from>
+			<to>paymentmethods.profile-payment-method</to>
+		</relationship>
+
+		<relationship>
+			<name>payment-instructions-to-order-payment-method</name>
+			<description><![CDATA[The link from payment instructions to an order payment method.]]></description>
+			<rel>paymentmethod</rel>
+			<from>order-payment-instructions</from>
+			<to>paymentmethods.order-payment-method</to>
+		</relationship>
+
+		<entity>
+			<name>fetch-request-instructions-form</name>
+			<description>
+				<![CDATA[Additional payment provider-specific details which may be required for generating payment instrument creation instructions.
+				For example, the details might include endpoints for server-side calls to generate tokens that are used during instrument creation
+				or to sign request details and generate signatures, verifying client secrets and authorizing charges.
+				Some payment providers may not require any additional details, and in that case, this form is empty.]]>
+			</description>
+			<dynamic/>
+		</entity>
+
+		<entity>
+			<name>dynamic-instructions</name>
+			<description><![CDATA[Key/value pairs used by the instructions entity to provide communications instructions and payload.]]></description>
+			<dynamic/>
+		</entity>
+
+		<entity>
+			<name>instructions</name>
+			<description>
+				<![CDATA[Describes the third-party payment gateway instructions, such as the information that is needed to interact with a payment provider.]]>
+			</description>
+			<property>
+				<name>communication-instructions</name>
+				<description>
+					<![CDATA[Key/value pairs of data with control information. This information describes how a Cortex client application communicates directly with a third-party payment provider.]]>
+				</description>
+				<is-a>dynamic-instructions</is-a>
+			</property>
+			<property>
+				<name>payload</name>
+				<description><![CDATA[Key/value pairs of data that should be submitted to the payment provider.]]></description>
+				<is-a>dynamic-instructions</is-a>
+			</property>
+		</entity>
+
+		<entity>
+			<name>payment-method-configuration</name>
+			<description>
+				<![CDATA[Configuration required to fetch payment request instructions, used to communicate to a third-party payment gateway during the payment instrument creation flow.]]>
+			</description>
+			<is-a>fetch-request-instructions-form</is-a>
+			<property>
+				<name>billing-address</name>
+				<description>
+					<![CDATA[The billing address information used during the payment instrument creation process.]]>
+				</description>
+				<is-a>addresses.address</is-a>
+			</property>
+		</entity>
+
+	</family>
+</definitions>

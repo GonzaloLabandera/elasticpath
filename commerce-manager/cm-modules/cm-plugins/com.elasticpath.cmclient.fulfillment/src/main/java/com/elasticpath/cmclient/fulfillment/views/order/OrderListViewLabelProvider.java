@@ -8,7 +8,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -84,6 +84,6 @@ public class OrderListViewLabelProvider extends LabelProvider implements ITableL
 
 
 	public MoneyFormatter getMoneyFormatter() {
-		return ServiceLocator.getService(ContextIdNames.MONEY_FORMATTER);
+		return BeanLocator.getSingletonBean(ContextIdNames.MONEY_FORMATTER, MoneyFormatter.class);
 	}
 }

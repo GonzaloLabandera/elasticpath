@@ -6,5 +6,7 @@
 
 	<import resource="camel-context.xml"/>
 	<import resource="batch-jobs.xml"/>
+	<import resource="classpath*:spring/core-caching/cache-rules.xml"/>
+	<import resource="classpath*:spring/core-caching/plugin.xml"/>
 
 </beans>

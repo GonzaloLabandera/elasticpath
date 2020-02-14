@@ -36,9 +36,9 @@ public class PriceListAssignmentPersister {
 	 */
 	public PriceListAssignmentPersister(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		priceListAssignmentService = beanFactory.getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
-		catalogService = beanFactory.getBean(ContextIdNames.CATALOG_SERVICE);
-		priceListDescriptorService = beanFactory.getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE);
+		priceListAssignmentService = beanFactory.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE, PriceListAssignmentService.class);
+		catalogService = beanFactory.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
+		priceListDescriptorService = beanFactory.getSingletonBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE, PriceListDescriptorService.class);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ public class PriceListAssignmentPersister {
 			final String name, final String description, final int priority, final boolean isHidden) {
 		Catalog catalog = catalogService.findByGuid(catalogGuid, null);
 		PriceListDescriptor priceListDescriptor = priceListDescriptorService.findByGuid(priceListDescriptorGuid);
-		PriceListAssignment priceListAssignment = beanFactory.getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT);
+		PriceListAssignment priceListAssignment = beanFactory.getPrototypeBean(ContextIdNames.PRICE_LIST_ASSIGNMENT, PriceListAssignment.class);
 		priceListAssignment.setName(name);
 		priceListAssignment.setDescription(description);
 		priceListAssignment.setPriority(priority);
@@ -130,10 +130,10 @@ public class PriceListAssignmentPersister {
 				catalogGuid, priceListDescriptorGuid, name, description,
 				priority, isHidden);
 
-		SellingContext sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
+		SellingContext sellingContext = beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 
 		if (StringUtils.isNotEmpty(timeCondition)) {
-			ConditionalExpression time = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
+			ConditionalExpression time = beanFactory.getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 			time.setConditionString(timeCondition);
 			time.setName(time.getGuid());
 			time.setDescription(time.getGuid());
@@ -142,7 +142,7 @@ public class PriceListAssignmentPersister {
 		}
 
 		if (StringUtils.isNotEmpty(shopperCondition)) {
-			ConditionalExpression shopper = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
+			ConditionalExpression shopper = beanFactory.getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 			shopper.setConditionString(shopperCondition);
 			shopper.setName(shopper.getGuid());
 			shopper.setDescription(shopper.getGuid());
@@ -196,7 +196,7 @@ public class PriceListAssignmentPersister {
 
 	private SellingContext createPriceListAssignmentConditions(final PriceListAssignment assignment, 
 			final ConditionalExpression who, final ConditionalExpression when) {
-		SellingContext sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
+		SellingContext sellingContext = beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 		sellingContext.setPriority(1);
 		sellingContext.setCondition(TagDictionary.DICTIONARY_PLA_SHOPPER_GUID, who);
 		sellingContext.setCondition(TagDictionary.DICTIONARY_STORES_GUID, null);
@@ -207,7 +207,7 @@ public class PriceListAssignmentPersister {
 	}
 
 	private ConditionalExpression createConditionalExpression(final String tagDictionaryGuid, final String condition) {
-		ConditionalExpression conditionalExpression = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
+		ConditionalExpression conditionalExpression = beanFactory.getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 		conditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
 		conditionalExpression.setName("name_" + tagDictionaryGuid);
 		conditionalExpression.setDescription("desc_" + tagDictionaryGuid);
@@ -229,7 +229,7 @@ public class PriceListAssignmentPersister {
 		// create selling context with condition
 		SellingContext sellingContext = priceListAssignment.getSellingContext();
 		if (sellingContext == null) {
-			sellingContext = this.beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
+			sellingContext = this.beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 			sellingContext.setGuid("pla guid "+ priceListAssignment.getGuid());
 			sellingContext.setName("selling context for " + priceListAssignment.getName());
 			sellingContext.setDescription("selling context for " + priceListAssignment.getName());

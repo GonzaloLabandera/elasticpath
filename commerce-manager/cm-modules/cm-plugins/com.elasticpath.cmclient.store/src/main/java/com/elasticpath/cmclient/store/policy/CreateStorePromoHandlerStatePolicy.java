@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.StateDeterminer;
@@ -86,7 +86,7 @@ public class CreateStorePromoHandlerStatePolicy extends AbstractStatePolicyImpl 
 		public EpState determineState(final PolicyActionContainer targetContainer) {
 			if (authorized == null) {
 				if (AuthorizationService.getInstance().isAuthorizedWithPermission(PromotionsPermissions.PROMOTION_MANAGE)) {
-					final StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+					final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 					final List<Store> stores = storeService.findAllCompleteStores();
 					AuthorizationService.getInstance().filterAuthorizedStores(stores);
 					authorized = stores.isEmpty();

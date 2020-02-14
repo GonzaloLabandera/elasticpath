@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.graphics.Image;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.comparator.ContentSpaceComparator;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
@@ -106,7 +106,7 @@ public class ContentSpaceSelectionDualListBox extends
 	}
 
 	private List<ContentSpace> getAvailableContentspaces() {
-		ContentSpaceService contentspaceService = ServiceLocator.getService(ContextIdNames.CONTENTSPACE_SERVICE);
+		ContentSpaceService contentspaceService = BeanLocator.getSingletonBean(ContextIdNames.CONTENTSPACE_SERVICE, ContentSpaceService.class);
 		List<ContentSpace> contentSpaces = contentspaceService.findAll();
 		Collections.sort(contentSpaces, new ContentSpaceComparator());
 		return contentSpaces;

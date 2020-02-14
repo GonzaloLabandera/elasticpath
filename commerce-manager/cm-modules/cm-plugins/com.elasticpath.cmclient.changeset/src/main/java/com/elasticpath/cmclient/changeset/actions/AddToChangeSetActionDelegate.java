@@ -36,8 +36,8 @@ import com.elasticpath.cmclient.changeset.helpers.SupportedEditorCondition;
 import com.elasticpath.cmclient.changeset.helpers.impl.ChangeSetPermissionsHelperImpl;
 import com.elasticpath.cmclient.changeset.support.SupportedComponent;
 import com.elasticpath.cmclient.changeset.support.SupportedComponentsExtPoint;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -81,14 +81,14 @@ public class AddToChangeSetActionDelegate extends ActionDelegate implements IWor
 	private AbstractCmClientFormEditor activeEditor;
 	private Object changeSetObjectSelection;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private boolean hasActiveEditor;
 
 	private final ChangeSetActionUtil changeSetActionUtil = new ChangeSetActionUtil();
-	private final PriceListDescriptorService priceListDescriptorService = ServiceLocator.getService(
-			ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE);
-	private final ChangeSetService changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+	private final PriceListDescriptorService priceListDescriptorService = BeanLocator
+			.getSingletonBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE, PriceListDescriptorService.class);
+	private final ChangeSetService changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 
 	/**
 	 * The listener registered with the selection service.

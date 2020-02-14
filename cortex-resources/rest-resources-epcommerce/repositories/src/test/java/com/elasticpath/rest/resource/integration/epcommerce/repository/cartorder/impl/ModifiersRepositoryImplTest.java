@@ -7,11 +7,6 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
-import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,26 +29,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.catalog.Product;
+import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierFieldOption;
 import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.modifier.impl.ModifierFieldImpl;
 import com.elasticpath.domain.modifier.impl.ModifierFieldOptionImpl;
 import com.elasticpath.domain.modifier.impl.ModifierGroupImpl;
-import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
-import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.impl.OrderRepositoryImpl;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.modifier.ModifierService;
 
 /**
@@ -106,6 +102,9 @@ public class ModifiersRepositoryImplTest {
 	private OrderRepository orderRepository;
 
 	@InjectMocks
+	private ReactiveAdapterImpl reactiveAdapter;
+
+	@InjectMocks
 	private ModifiersRepositoryImpl modifiersRepository;
 
 	@Mock
@@ -135,7 +134,8 @@ public class ModifiersRepositoryImplTest {
 
 	@Before
 	public void setUp() {
-
+		modifiersRepository = new ModifiersRepositoryImpl(modifierService, shoppingCartRepository, productSkuRepository,
+				orderRepository, reactiveAdapter);
 		//given
 		modifierGroup = buildModifierGroup();
 		when(modifierService.findModifierGroupByCode(GROUP_CODE)).thenReturn(modifierGroup);
@@ -143,7 +143,7 @@ public class ModifiersRepositoryImplTest {
 		when(product.getProductType()).thenReturn(productType);
 		when(modifierService.findModifierFieldsByProductType(productType)).thenReturn(modifierFields);
 
-		given(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).willReturn(Single.just(productSku));
+		given(productSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID)).willReturn(Single.just(productSku));
 		given(productSku.getProduct()).willReturn(product);
 		given(product.getProductType()).willReturn(productType);
 		given(productType.getModifierGroups()).willReturn(ImmutableSet.of(modifierGroup));
@@ -151,21 +151,16 @@ public class ModifiersRepositoryImplTest {
 
 	@Test(expected = NullPointerException.class)
 	public void testFindModifierGroupByCodeWhenCodeIsNull() {
-
 		// when
 		modifiersRepository.findModifierGroupByCode(null);
 	}
 
 	@Test
 	public void testFindModifierGroupByCodeWhenValidCode() {
-
-		// when
-		ExecutionResult<ModifierGroup> group = modifiersRepository.findModifierGroupByCode(GROUP_CODE);
-
-		// verify
-		assertNotNull(group);
-		assertEquals(modifierGroup, group.getData());
-		assertEquals(ResourceStatus.READ_OK, group.getResourceStatus());
+		modifiersRepository.findModifierGroupByCode(GROUP_CODE)
+				.test()
+				.assertNoErrors()
+				.assertValue(modifierGroup);
 	}
 
 	@Test
@@ -173,13 +168,9 @@ public class ModifiersRepositoryImplTest {
 
 		//given
 		String invalidCode = "invalidCode";
-		// when
-		ExecutionResult<ModifierGroup> group = modifiersRepository.findModifierGroupByCode(invalidCode);
-
-		// verify
-		assertNotNull(group);
-		assertNull(group.getData());
-		assertEquals(ResourceStatus.NOT_FOUND, group.getResourceStatus());
+		modifiersRepository.findModifierGroupByCode(invalidCode)
+				.test()
+				.assertError(ResourceOperationFailure.notFound("ModifierGroup not found"));
 	}
 
 	@Test(expected = NullPointerException.class)
@@ -193,26 +184,20 @@ public class ModifiersRepositoryImplTest {
 
 	@Test
 	public void testFindModifierFieldBy() {
-
-		// when
-		ExecutionResult<ModifierField> field = modifiersRepository.findModifierFieldBy(FIELD_CODE1, GROUP_CODE);
-		// verify
-		assertNotNull(field);
-		assertEquals(FIELD_CODE1, field.getData().getCode());
-		assertEquals(ResourceStatus.READ_OK, field.getResourceStatus());
+		modifiersRepository.findModifierFieldBy(FIELD_CODE1, GROUP_CODE)
+				.test()
+				.assertNoErrors()
+				.assertValue(field -> StringUtils.equals(FIELD_CODE1, field.getCode()));
 	}
 
 	@Test
 	public void testFindModifierFieldByWithInvalidFieldCode() {
 
 		String invalidCode = "invalidCode";
-
-		// when
-		ExecutionResult<ModifierField> field = modifiersRepository.findModifierFieldBy(invalidCode, GROUP_CODE);
-		// verify
-		assertNotNull(field);
-		assertNull(field.getData());
-		assertEquals(ResourceStatus.NOT_FOUND, field.getResourceStatus());
+		modifiersRepository.findModifierFieldBy(invalidCode, GROUP_CODE)
+				.test()
+				.assertError(ResourceOperationFailure.notFound("ModifierField not found"))
+				.assertNoValues();
 	}
 
 	@Test(expected = NullPointerException.class)
@@ -226,27 +211,19 @@ public class ModifiersRepositoryImplTest {
 
 	@Test
 	public void testFindModifierFieldOptionBy() {
-
-		// when
-		ExecutionResult<ModifierFieldOption> option = modifiersRepository.findModifierFieldOptionBy(OPTION_VALUE1,
-				FIELD_CODE1, GROUP_CODE);
-		// verify
-		assertNotNull(option);
-		assertEquals(OPTION_VALUE1, option.getData().getValue());
-		assertEquals(ResourceStatus.READ_OK, option.getResourceStatus());
+		modifiersRepository.findModifierFieldOptionBy(OPTION_VALUE1, FIELD_CODE1, GROUP_CODE)
+				.test()
+				.assertNoErrors()
+				.assertValue(option -> StringUtils.equals(OPTION_VALUE1, option.getValue()));
 	}
 
 	@Test
 	public void testFindModifierFieldOptionByWithInvalidOptionValue() {
-
 		String invalidOptionValue = "invalidValue";
-		// when
-		ExecutionResult<ModifierFieldOption> option = modifiersRepository.findModifierFieldOptionBy(invalidOptionValue,
-				FIELD_CODE1, GROUP_CODE);
-		// verify
-		assertNotNull(option);
-		assertNull(OPTION_VALUE1, option.getData());
-		assertEquals(ResourceStatus.NOT_FOUND, option.getResourceStatus());
+		modifiersRepository.findModifierFieldOptionBy(invalidOptionValue, FIELD_CODE1, GROUP_CODE)
+				.test()
+				.assertError(ResourceOperationFailure.notFound("ModifierFieldOption not found"))
+				.assertNoValues();
 	}
 
 	private ModifierGroup buildModifierGroup() {
@@ -288,7 +265,7 @@ public class ModifiersRepositoryImplTest {
 		given(shoppingItem.getFields())
 				.willReturn(shoppingItemData);
 
-		given(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID))
+		given(productSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID))
 				.willReturn(Single.just(productSku));
 		given(productSku.getProduct())
 				.willReturn(product);
@@ -317,7 +294,7 @@ public class ModifiersRepositoryImplTest {
 
 	@Test
 	public void testFindPurchaseItemModifierValuesContainsOnlyValidModifiers() {
-		given(orderRepository.findByGuidAsSingle(STORE_CODE, PURCHASE_GUID))
+		given(orderRepository.findByGuid(STORE_CODE, PURCHASE_GUID))
 				.willReturn(Single.just(order));
 		given(order.getOrderSkuByGuid(PURCHASE_LINE_ITEM_GUID))
 				.willReturn(orderSku);
@@ -326,7 +303,7 @@ public class ModifiersRepositoryImplTest {
 		given(orderSku.getFields())
 				.willReturn(shoppingItemData);
 
-		given(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID))
+		given(productSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID))
 				.willReturn(Single.just(productSku));
 		given(productSku.getProduct())
 				.willReturn(product);
@@ -344,7 +321,7 @@ public class ModifiersRepositoryImplTest {
 
 	@Test
 	public void testFindPurchaseItemModifierValuesWithNoOrderFoundFailure() {
-		given(orderRepository.findByGuidAsSingle(STORE_CODE, PURCHASE_GUID))
+		given(orderRepository.findByGuid(STORE_CODE, PURCHASE_GUID))
 				.willReturn(Single.error(ResourceOperationFailure.notFound(OrderRepositoryImpl.PURCHASE_NOT_FOUND)));
 
 		modifiersRepository.findPurchaseItemModifierValues(STORE_CODE, PURCHASE_GUID, PURCHASE_LINE_ITEM_GUID)
@@ -354,12 +331,10 @@ public class ModifiersRepositoryImplTest {
 
 	@Test
 	public void testFindModifiersByProduct() {
-
-		// when
-		List<ModifierField> list = modifiersRepository.findModifiersByProduct(product);
-
-		// verify
-		assertEquals(list, modifierFields);
+		modifiersRepository.findModifiersByProduct(product)
+				.test()
+				.assertNoErrors()
+				.assertValue(modifierFields);
 	}
 
 	@Test
@@ -375,12 +350,11 @@ public class ModifiersRepositoryImplTest {
 		when(mockShoppingItem.getFields()).thenReturn(itemMap);
 
 		// when
-		List<String> missedRequiredFieldCodes = modifiersRepository.findMissingRequiredFieldCodesByShoppingItem(mockShoppingItem);
-
-		// verify
-		assertEquals(REQUIRED_FIELDS_COUNT, missedRequiredFieldCodes.size());
-		assertThat(missedRequiredFieldCodes, hasItems(FIELD_CODE3, FIELD_CODE4, FIELD_CODE5));
-
+		modifiersRepository.findMissingRequiredFieldCodesByShoppingItem(mockShoppingItem)
+				.test()
+				.assertNoErrors()
+				.assertValueCount(REQUIRED_FIELDS_COUNT)
+				.assertValueSet(Arrays.asList(FIELD_CODE3, FIELD_CODE4, FIELD_CODE5));
 	}
 
 	private ModifierField buildField(final String fieldCode, final int ordering, final boolean required) {

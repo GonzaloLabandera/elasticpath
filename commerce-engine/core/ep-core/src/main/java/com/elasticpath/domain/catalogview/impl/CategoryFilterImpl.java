@@ -187,7 +187,7 @@ public class CategoryFilterImpl extends AbstractFilterImpl<CategoryFilter> imple
 	@Override
 	public void initializeWithCode(final String categoryCode, final Catalog catalog) throws EpCatalogViewRequestBindException {
 		LOG.debug("Initializing category filter from Category Code and Catalog Code");
-		final CategoryLookup categoryLookup = getBean(ContextIdNames.CATEGORY_LOOKUP);
+		final CategoryLookup categoryLookup = getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 		final Category category = categoryLookup.findByCategoryCodeAndCatalog(categoryCode, catalog);
 		if (category == null) {
 			throw new EpCatalogViewRequestBindException(
@@ -212,7 +212,7 @@ public class CategoryFilterImpl extends AbstractFilterImpl<CategoryFilter> imple
 		final String categoryIdStr = filterIdStr.substring(filterIdStr.indexOf(SeoConstants.CATEGORY_PREFIX)
 				+ SeoConstants.CATEGORY_PREFIX.length());
 
-		final CategoryLookup categoryLookup = getBean(ContextIdNames.CATEGORY_LOOKUP);
+		final CategoryLookup categoryLookup = getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 		Category category = categoryLookup.findByCategoryCodeAndCatalog(categoryIdStr, catalog);
 		if (category == null) {
 			throw new EpCatalogViewRequestBindException("Invalid category filter id:" + filterIdStr);

@@ -127,7 +127,7 @@ public class ProfileEntityRepositoryImplTest {
 		when(dateForEditTransformer.transformToDomain(AttributeType.DATE, DOB))
 				.thenReturn(Optional.of(DOB_DATE));
 		when(customerRepository.getCustomer(profileIdentifier.getProfileId().getValue())).thenReturn(Single.just(customer));
-		when(customerRepository.updateCustomerAsCompletable(customer))
+		when(customerRepository.updateCustomer(customer))
 				.thenReturn(Completable.complete());
 
 		when(attributeService.getCustomerProfileAttributesMap())

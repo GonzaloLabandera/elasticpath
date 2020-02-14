@@ -22,7 +22,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
@@ -69,8 +69,7 @@ public class CustomerDetailsOrderSection extends AbstractCmClientEditorPageSecti
 
 	private transient IEpTableViewer epTableViewer;
 	
-	private static final OrderService ORDER_SERVICE = 
-		(OrderService) ServiceLocator.getService(ContextIdNames.ORDER_SERVICE);
+	private static final OrderService ORDER_SERVICE = BeanLocator.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 
 	/**
 	 * constructor.

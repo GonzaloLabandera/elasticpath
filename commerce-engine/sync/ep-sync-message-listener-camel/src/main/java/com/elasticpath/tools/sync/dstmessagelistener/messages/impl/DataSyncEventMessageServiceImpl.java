@@ -19,16 +19,17 @@ public class DataSyncEventMessageServiceImpl implements DataSyncEventMessageServ
 	private BeanFactory beanFactory;
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T extends DataSyncEventMessageBuilder<T>> DataSyncEventMessageBuilder<T> prepareMessage() {
 
-		return beanFactory.getBean(DATA_SYNC_EVENT_MESSAGE_BUILDER_BEAN_NAME);
-	}
-
-	public BeanFactory getBeanFactory() {
-		return beanFactory;
+		return beanFactory.getPrototypeBean(DATA_SYNC_EVENT_MESSAGE_BUILDER_BEAN_NAME, DataSyncEventMessageBuilder.class);
 	}
 
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+	}
+
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
 	}
 }

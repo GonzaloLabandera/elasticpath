@@ -63,7 +63,7 @@ public class ShipmentTypeShoppingCartVisitorTest {
 	@Before
 	public void setUp() throws Exception {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, productSkuLookup);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class, productSkuLookup);
 
 		productSkuIsNotShippable = new ProductSkuImpl();
 		productSkuIsNotShippable.setGuid("nonShippableSku");

@@ -22,7 +22,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.conversion.EpIntToStringConverter;
@@ -256,8 +256,7 @@ public class PromotionRulesSection extends AbstractPolicyAwareEditorPageSectionP
 		RuleCondition lupCondition = getLUPCondition();
 
 		if (lupCondition == null) {
-			lupCondition = ServiceLocator.getService(
-					RuleElementType.LIMITED_USAGE_PROMOTION_CONDITION.getPropertyKey());
+			lupCondition = BeanLocator.getPrototypeBean(RuleElementType.LIMITED_USAGE_PROMOTION_CONDITION.getPropertyKey(), RuleCondition.class);
 		}
 
 		// add the new condition to the rule
@@ -271,7 +270,7 @@ public class PromotionRulesSection extends AbstractPolicyAwareEditorPageSectionP
 		RuleParameter lupParamater = getRuleParameterByKey(lupCondition, RuleParameter.LIMITED_USAGE_PROMOTION_ID);
 
 		if (lupParamater == null) {
-			lupParamater = ServiceLocator.getService(ContextIdNames.RULE_PARAMETER);
+			lupParamater = BeanLocator.getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 			lupParamater.setKey(RuleParameter.LIMITED_USAGE_PROMOTION_ID);
 			lupCondition.addParameter(lupParamater);
 		}

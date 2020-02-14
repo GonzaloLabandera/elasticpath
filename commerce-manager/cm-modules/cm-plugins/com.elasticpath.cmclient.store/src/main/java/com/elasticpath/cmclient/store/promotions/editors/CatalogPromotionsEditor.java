@@ -15,7 +15,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.policy.StatePolicy;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
@@ -51,7 +51,7 @@ public class CatalogPromotionsEditor extends AbstractPolicyAwareFormEditor {
 
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) {
-		this.ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		this.ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		String guid = input.getAdapter(String.class);
 		this.rule = ruleService.findByRuleCode(guid);
 		setPartName(rule.getName());

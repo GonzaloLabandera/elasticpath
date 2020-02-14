@@ -48,6 +48,7 @@ import com.elasticpath.domain.subscriptions.impl.PaymentScheduleImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.sellingchannel.ShoppingItemFactory;
+import com.elasticpath.sellingchannel.ShoppingItemRecurringPriceAssembler;
 import com.elasticpath.sellingchannel.impl.ShoppingItemRecurringPriceAssemblerImpl;
 import com.elasticpath.service.catalog.SkuOptionService;
 import com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl;
@@ -122,7 +123,8 @@ public class ShoppingItemRecurringPriceAssemblerImplTest {
 		});
 
 		recurringPriceAssembler.setPaymentScheduleHelper(paymentScheduleHelper);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER, recurringPriceAssembler);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER,
+				ShoppingItemRecurringPriceAssembler.class, recurringPriceAssembler);
 	}
 
 	@After
@@ -161,9 +163,9 @@ public class ShoppingItemRecurringPriceAssemblerImplTest {
 		context.checking(new Expectations() {
 			{
 				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICING_SCHEME, PricingSchemeImpl.class);
-				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE_SCHEDULE, PriceScheduleImpl.class);
-				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE, PriceImpl.class);
+				expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class, PricingSchemeImpl.class);
+				expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class, PriceScheduleImpl.class);
+				expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE, Price.class, PriceImpl.class);
 			}
 		});
 		final ShoppingItemSimplePrice simplePrice = new ShoppingItemSimplePrice(monthlySimplePrice, 1);
@@ -209,19 +211,19 @@ public class ShoppingItemRecurringPriceAssemblerImplTest {
 		context.checking(new Expectations() {
 			{
 				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICING_SCHEME, PricingSchemeImpl.class);
-				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE_SCHEDULE, PriceScheduleImpl.class);
-				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE, PriceImpl.class);
+				expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class, PricingSchemeImpl.class);
+				expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class, PriceScheduleImpl.class);
+				expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRICE, Price.class, PriceImpl.class);
 			}
 		});
 
 		recurringPriceAssembler.assemblePrice(newPriceObjectToBeAssembled, generatedRecurringPrices);
 
-		final PriceSchedule priceScheduleFromAssebledPriceObject =
+		final PriceSchedule priceScheduleFromAssembledPriceObject =
 			newPriceObjectToBeAssembled.getPricingScheme().getSchedules(PriceScheduleType.RECURRING).iterator().next();
 
 		final SimplePrice simplePriceFromAssembled =
-			newPriceObjectToBeAssembled.getPricingScheme().getSimplePriceForSchedule(priceScheduleFromAssebledPriceObject);
+				newPriceObjectToBeAssembled.getPricingScheme().getSimplePriceForSchedule(priceScheduleFromAssembledPriceObject);
 
 		final SimplePrice expectedSimplePrice = monthlyPricingScheme.getSimplePriceForSchedule(monthlyPriceSchedule);
 
@@ -255,9 +257,11 @@ public class ShoppingItemRecurringPriceAssemblerImplTest {
 		final ShoppingItem shoppingItem = new ShoppingItemImpl();
 		context.checking(new Expectations() {
 			{
-				oneOf(cartItemFactory).createShoppingItem(sku, null, 2, 0, Collections.<String, String>emptyMap()); will(returnValue(shoppingItem));
+				oneOf(cartItemFactory).createShoppingItem(sku, null, 2, 0, Collections.emptyMap());
+				will(returnValue(shoppingItem));
 				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE, ShoppingItemRecurringPriceImpl.class);
+				expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE,
+						ShoppingItemRecurringPrice.class, ShoppingItemRecurringPriceImpl.class);
 			}
 		});
 

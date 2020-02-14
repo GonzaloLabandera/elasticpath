@@ -60,7 +60,7 @@ public class EmailEntityRepositoryImplTest {
 		when(customerRepository.getCustomer(USER_GUID)).thenReturn(Single.just(customer));
 		when(customer.getEmail()).thenReturn(EXISTING_EMAIL);
 		when(customer.getUserId()).thenReturn(USER_ID);
-		when(customerRepository.updateCustomerAsCompletable(customer)).thenReturn(Completable.complete());
+		when(customerRepository.updateCustomer(customer)).thenReturn(Completable.complete());
 		emailEntityRepository.setResourceOperationContext(resourceOperationContext);
 		emailEntityRepository.setCustomerRepository(customerRepository);
 	}

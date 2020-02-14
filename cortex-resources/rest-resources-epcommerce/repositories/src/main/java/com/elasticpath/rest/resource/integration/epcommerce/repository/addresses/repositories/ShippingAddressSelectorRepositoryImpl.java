@@ -177,9 +177,9 @@ public class ShippingAddressSelectorRepositoryImpl<
 
 	private Completable updateAllCartOrdersShippingAddresses(final Customer customer) {
 		final String storeCode = customer.getStoreCode();
-		return cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(customer.getStoreCode(), customer.getGuid())
+		return cartOrderRepository.findCartOrderGuidsByCustomer(customer.getStoreCode(), customer.getGuid())
 				.flatMapCompletable(cartOrderGuid ->
-						cartOrderRepository.updateShippingAddressOnCartOrderAsSingle(
+						cartOrderRepository.updateShippingAddressOnCartOrder(
 								customer.getPreferredShippingAddress().getGuid(), cartOrderGuid, storeCode).ignoreElement());
 	}
 

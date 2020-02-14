@@ -59,7 +59,7 @@ public class PurchaseLineItemsLinksRepositoryImplTest {
 
 	@Test
 	public void testTwoLinksPresent() {
-		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
 		doReturn(ImmutableList.of(item1, item2)).when(order).getRootShoppingItems();
 
 		when(item1.getGuid()).thenReturn(SKU_1);
@@ -77,7 +77,7 @@ public class PurchaseLineItemsLinksRepositoryImplTest {
 
 	@Test
 	public void testOneLinkPresent() {
-		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
 		doReturn(ImmutableList.of(item1)).when(order).getRootShoppingItems();
 
 		when(item1.getGuid()).thenReturn(SKU_1);
@@ -93,7 +93,7 @@ public class PurchaseLineItemsLinksRepositoryImplTest {
 
 	@Test
 	public void testNoLinkPresent() {
-		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
 		doReturn(Collections.emptyList()).when(order).getRootShoppingItems();
 
 		repository.getElements(identifier)

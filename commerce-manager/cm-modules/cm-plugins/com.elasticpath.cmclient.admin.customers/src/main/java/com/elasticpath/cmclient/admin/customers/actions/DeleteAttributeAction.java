@@ -14,7 +14,7 @@ import org.eclipse.osgi.util.NLS;
 import com.elasticpath.cmclient.admin.customers.AdminCustomersMessages;
 import com.elasticpath.cmclient.admin.customers.views.AttributeListView;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.service.attribute.AttributeService;
@@ -40,7 +40,7 @@ public class DeleteAttributeAction extends Action {
 
 	@Override
 	public void run() {
-		AttributeService attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 
 		Attribute attribute = listView.getSelectedAttribute();
 		Locale defaultLocale = CorePlugin.getDefault().getDefaultLocale();

@@ -44,7 +44,7 @@ public class ImportJobRunnerCustomerImpl extends AbstractImportJobRunnerImpl {
 	 */
 	@Override
 	protected Entity createNewEntity(final Object baseObject) {
-		return getBean(ContextIdNames.CUSTOMER);
+		return getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 	}
 	
 	/**

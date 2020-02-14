@@ -10,11 +10,10 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
 
@@ -31,7 +30,7 @@ public class ApplicationContextBackedBeanFactoryImplTest {
 	@Mock
 	private ConfigurableApplicationContext mockApplicationContext;
 	@Mock
-	private ConfigurableListableBeanFactory mockFactory;
+	private DefaultListableBeanFactory mockFactory;
 	@Mock
 	private BeanDefinition mockBeanDefinition;
 
@@ -49,6 +48,7 @@ public class ApplicationContextBackedBeanFactoryImplTest {
 		factory.setApplicationContext(mockApplicationContext);
 		when(mockApplicationContext.getBeanFactory()).thenReturn(mockFactory);
 		when(mockFactory.getBeanDefinition(TEST_BEAN_NAME)).thenReturn(mockBeanDefinition);
+		when(mockFactory.canonicalName(TEST_BEAN_NAME)).thenReturn(TEST_BEAN_NAME);
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class ApplicationContextBackedBeanFactoryImplTest {
 	public void testGetSingletonAssertsForPrototypeBean() {
 		when(mockBeanDefinition.isSingleton()).thenReturn(false);
 		assertThatThrownBy(() -> factory.getSingletonBean(TEST_BEAN_NAME, Integer.class))
-				.isInstanceOf(AssertionError.class);
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class ApplicationContextBackedBeanFactoryImplTest {
 	public void testGetPrototypeAssertsForSingletonBean() {
 		when(mockBeanDefinition.isPrototype()).thenReturn(false);
 		assertThatThrownBy(() -> factory.getPrototypeBean(TEST_BEAN_NAME, Integer.class))
-				.isInstanceOf(AssertionError.class);
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	/**

@@ -5,7 +5,6 @@
 package com.elasticpath.service.cartorder.impl;
 
 import static java.util.Collections.singletonList;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -121,7 +120,7 @@ public class ClearingCartOrderShippingInformationSanitizerTest {
 	 */
 	@Before
 	public void setUp() {
-		when(beanFactory.getBean(ContextIdNames.CUSTOMER_SESSION_SERVICE)).thenReturn(customerSessionService);
+		when(beanFactory.getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE, CustomerSessionService.class)).thenReturn(customerSessionService);
 		((ElasticPathImpl) ElasticPathImpl.getInstance()).setBeanFactory(beanFactory);
 		clearingCartOrderShippingInformationSanitizer = new ClearingCartOrderShippingInformationSanitizer();
 		clearingCartOrderShippingInformationSanitizer.setCustomerAddressDao(customerAddressDao);

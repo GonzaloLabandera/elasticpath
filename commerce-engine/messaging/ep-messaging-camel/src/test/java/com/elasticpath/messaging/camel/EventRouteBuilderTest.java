@@ -115,8 +115,8 @@ public class EventRouteBuilderTest extends AbstractCamelRouteBuilderTest<EventMe
 		template().sendBody(getSourceEndpoint(), message);
 
 		Assertions.assertThat(notifyBuilder.matches(TIMEOUT_SECONDS, TimeUnit.SECONDS))
-				.isTrue()
-				.withFailMessage("Did not receive message(s) on endpoint within " + TIMEOUT_SECONDS + " seconds");
+				.withFailMessage("Did not receive message(s) on endpoint within " + TIMEOUT_SECONDS + " seconds")
+				.isTrue();
 	}
 
 }

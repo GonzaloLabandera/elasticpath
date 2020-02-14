@@ -17,6 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalogview.CatalogViewRequest.Breadcrumb;
 import com.elasticpath.domain.catalogview.CatalogViewRequestUnmatchException;
 import com.elasticpath.domain.catalogview.Filter;
@@ -92,7 +93,7 @@ public class AbstractSearchRequestImplTest {
 		this.filterFactory = this.mockFilterFactory;
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean("filterFactory");
+				allowing(beanFactory).getSingletonBean(ContextIdNames.FILTER_FACTORY, FilterFactory.class);
 				will(returnValue(filterFactory));
 			}
 		});

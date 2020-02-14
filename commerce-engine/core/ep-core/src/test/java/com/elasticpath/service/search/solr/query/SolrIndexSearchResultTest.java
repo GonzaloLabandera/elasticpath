@@ -258,7 +258,7 @@ public class SolrIndexSearchResultTest {
 				allowing(mockStoreService).getCatalogCodeForStore(with(any(String.class)));
 				will(returnValue(TEST_MASTER_CATALOG_CODE));
 
-				allowing(elasticPath).getBean(ContextIdNames.STORE_SERVICE);
+				allowing(elasticPath).getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 				will(returnValue(mockStoreService));
 			}
 		});
@@ -443,7 +443,7 @@ public class SolrIndexSearchResultTest {
 				allowing(mockCatalogService).findByCode(with(any(String.class)));
 				will(returnValue(getCatalog()));
 
-				allowing(elasticPath).getBean(ContextIdNames.CATALOG_SERVICE);
+				allowing(elasticPath).getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 				will(returnValue(mockCatalogService));
 			}
 		});

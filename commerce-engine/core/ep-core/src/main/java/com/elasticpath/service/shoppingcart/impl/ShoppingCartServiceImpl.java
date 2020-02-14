@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.impl;
 
@@ -30,6 +30,7 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
@@ -52,6 +53,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	private ShopperService shopperService;
 	private StoreService storeService;
 	private TimeService timeService;
+	private OrderPaymentApiCleanupService orderPaymentApiCleanupService;
 	private LoadTuner[] loadTuners;
 
 	/**
@@ -321,7 +323,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 
 		final Store store = storeService.findStoreWithCode(storeCode);
 
-		final ShoppingCart shoppingCart = getBean(ContextIdNames.SHOPPING_CART);
+		final ShoppingCart shoppingCart = getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		shoppingCart.setStore(store);
 		shoppingCart.setShopper(shopper);
 		if (shoppingCartMemento != null) {
@@ -420,11 +422,11 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	public Object getObject(final long uid) throws EpServiceException {
 		ShoppingCart shoppingCart;
 		if (uid <= 0) {
-			shoppingCart = getBean(ContextIdNames.SHOPPING_CART);
+			shoppingCart = getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		} else {
 			final ShoppingCartMemento memento = loadMemento(uid);
 			if (memento == null) {
-				shoppingCart = getBean(ContextIdNames.SHOPPING_CART);
+				shoppingCart = getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 			} else {
 				shoppingCart = createShoppingCart(memento);
 			}
@@ -464,6 +466,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 			return 0;
 		}
 
+		getOrderPaymentApiCleanupService().removeByShopperUidList(shopperUids);
 		getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_CART_ORDERS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
 		return getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
 	}
@@ -477,6 +480,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 			return 0;
 		}
 
+		getOrderPaymentApiCleanupService().removeByShopperUidList(shopperUids);
 		getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_INACTIVE_CART_ORDERS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
 		return getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_INACTIVE_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
 	}
@@ -585,6 +589,15 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 		this.timeService = timeService;
 	}
 
+	protected OrderPaymentApiCleanupService getOrderPaymentApiCleanupService() {
+		return orderPaymentApiCleanupService;
+	}
+
+	public void setOrderPaymentApiCleanupService(final OrderPaymentApiCleanupService orderPaymentApiCleanupService) {
+		this.orderPaymentApiCleanupService = orderPaymentApiCleanupService;
+	}
+
+	// END - SPRING SETTERS
 	// This warning had to suppressed because the code is correct as per
 	// https://pmd.github.io/latest/pmd_rules_java_performance.html#optimizabletoarraycall
 	//TODO remove @SuppressWarnings after upgrading the PMD to 6.x

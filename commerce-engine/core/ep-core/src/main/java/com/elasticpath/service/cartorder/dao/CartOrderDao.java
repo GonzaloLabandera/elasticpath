@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2011.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.cartorder.dao;
 
@@ -37,11 +37,6 @@ public interface CartOrderDao {
 	 * @return The saved/updated CartOrder.
 	 */
 	CartOrder saveOrUpdate(CartOrder cartOrder);
-
-	/**
-	 * @param cartOrder The cartOrder.
-	 */
-	void remove(CartOrder cartOrder);
 
 	/**
 	 * Removes the cart order related to the shopping cart with the given GUID.

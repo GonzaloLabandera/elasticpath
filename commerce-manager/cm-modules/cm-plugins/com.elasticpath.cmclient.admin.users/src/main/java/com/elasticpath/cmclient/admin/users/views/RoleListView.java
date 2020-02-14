@@ -25,7 +25,7 @@ import com.elasticpath.cmclient.admin.users.AdminUsersImageRegistry;
 import com.elasticpath.cmclient.admin.users.AdminUsersMessages;
 import com.elasticpath.cmclient.admin.users.AdminUsersPlugin;
 import com.elasticpath.cmclient.admin.users.wizards.RoleWizard;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
@@ -82,7 +82,7 @@ public class RoleListView extends AbstractListView {
 
 	@Override
 	protected Object[] getViewInput() {
-		final UserRoleService service = (UserRoleService) ServiceLocator.getService(ContextIdNames.USER_ROLE_SERVICE);
+		final UserRoleService service = BeanLocator.getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 		final List< UserRole > userRoles = service.list();
 		return userRoles.toArray(new UserRole[userRoles.size()]);
 	}
@@ -147,7 +147,7 @@ public class RoleListView extends AbstractListView {
 		if (role.isUnmodifiableRole()) {
 			return false;
 		}
-		final CmUserService service = (CmUserService) ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		final CmUserService service = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 		if (service.findByRoleId(role.getUidPk()).isEmpty()) {
 			return true;
 		}
@@ -251,15 +251,14 @@ public class RoleListView extends AbstractListView {
 		@Override
 		public void run() {
 			LOG.debug("CreateRole Action called."); //$NON-NLS-1$
-			final UserRole userRole = (UserRole) ServiceLocator.getService(ContextIdNames.USER_ROLE);
+			final UserRole userRole = BeanLocator.getPrototypeBean(ContextIdNames.USER_ROLE, UserRole.class);
 			// Create the wizard
 			final RoleWizard wizard = new RoleWizard(userRole);
 			// Create the wizard dialog
 			final WizardDialog dialog = new EpWizardDialog(RoleListView.this.getSite().getShell(), wizard);
 			// Open the wizard dialog
 			if (Window.OK == dialog.open()) {
-				final UserRoleService userRoleService = (UserRoleService) ServiceLocator.getService(
-						ContextIdNames.USER_ROLE_SERVICE);
+				final UserRoleService userRoleService = BeanLocator.getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 				userRoleService.update(userRole);
 				refreshViewerInput();
 			}
@@ -292,15 +291,14 @@ public class RoleListView extends AbstractListView {
 			final RoleWizard wizard = new RoleWizard(userRole);
 			final WizardDialog dialog = new EpWizardDialog(RoleListView.this.getSite().getShell(), wizard);
 			if (Window.OK == dialog.open()) {
-				final UserRoleService userRoleService = (UserRoleService) ServiceLocator.getService(
-						ContextIdNames.USER_ROLE_SERVICE);
+				final UserRoleService userRoleService = BeanLocator.getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 				userRoleService.update(userRole);
 				refreshViewerInput();
 			}
 		}
 
 		private UserRole getPersistedUserRole(final long roleId) {
-			final UserRoleService roleService = (UserRoleService) ServiceLocator.getService(ContextIdNames.USER_ROLE_SERVICE);
+			final UserRoleService roleService = BeanLocator.getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 			return roleService.get(roleId);
 		}
 	}
@@ -339,7 +337,7 @@ public class RoleListView extends AbstractListView {
 
 		private void deleteUserRole(final UserRole userRole) {
 			LOG.info("Deleting Role: " + userRole.getAuthority()); //$NON-NLS-1$
-			final UserRoleService roleService = (UserRoleService) ServiceLocator.getService(ContextIdNames.USER_ROLE_SERVICE);
+			final UserRoleService roleService = BeanLocator.getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 			try {
 				roleService.remove(userRole);
 			} catch (EpPersistenceException e) {

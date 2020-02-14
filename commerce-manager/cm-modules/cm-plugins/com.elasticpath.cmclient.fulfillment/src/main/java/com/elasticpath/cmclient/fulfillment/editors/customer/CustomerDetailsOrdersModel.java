@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
@@ -37,7 +37,7 @@ public class CustomerDetailsOrdersModel {
 	 * Initialize the store service.
 	 */
 	protected void init() {
-		storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 	}
 
 	/**
@@ -51,7 +51,8 @@ public class CustomerDetailsOrdersModel {
 	public String[] getAccessableStoreNames(final Customer customer, final Set<Store> storeList) {
 		final Set<String> accessibleStoreNames = new TreeSet<>();
 
-		final FetchGroupLoadTuner fetchGroupLoadTuner = ServiceLocator.getService(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		final FetchGroupLoadTuner fetchGroupLoadTuner =
+				BeanLocator.getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		fetchGroupLoadTuner.addFetchGroup(FetchGroupConstants.STORE_SHARING);
 		final Store registeredStore = getStoreService().getTunedStore(customer.getStoreCode(), fetchGroupLoadTuner);
 

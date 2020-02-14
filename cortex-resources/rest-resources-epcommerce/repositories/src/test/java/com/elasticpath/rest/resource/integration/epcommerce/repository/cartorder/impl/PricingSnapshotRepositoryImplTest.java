@@ -3,8 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -23,7 +21,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
-import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
@@ -34,8 +31,6 @@ import com.elasticpath.service.shoppingcart.TaxSnapshotService;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PricingSnapshotRepositoryImplTest {
-
-	private static final String SUCCESSFUL_OPERATION = "The operation should have been successful";
 
 	@Mock
 	private OrderSku orderSku;
@@ -74,16 +69,17 @@ public class PricingSnapshotRepositoryImplTest {
 	public void testGetShoppingCartPricingSnapshot() throws Exception {
 		when(pricingSnapshotService.getPricingSnapshotForCart(shoppingCart)).thenReturn(pricingSnapshot);
 
-		final ExecutionResult<ShoppingCartPricingSnapshot> result = repository.getShoppingCartPricingSnapshot(shoppingCart);
-		assertTrue(SUCCESSFUL_OPERATION, result.isSuccessful());
-		assertEquals("The cart snapshot should match the one from the service", pricingSnapshot, result.getData());
+		repository.getShoppingCartPricingSnapshot(shoppingCart)
+				.test()
+				.assertNoErrors()
+				.assertValue(pricingSnapshot);
 	}
 
 	@Test
 	public void testGetShoppingCartPricingSnapshotSingle() throws Exception {
 		when(pricingSnapshotService.getPricingSnapshotForCart(shoppingCart)).thenReturn(pricingSnapshot);
 
-		repository.getShoppingCartPricingSnapshotSingle(shoppingCart).test()
+		repository.getShoppingCartPricingSnapshot(shoppingCart).test()
 				.assertNoErrors()
 				.assertValue(pricingSnapshot);
 	}

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
@@ -76,7 +76,7 @@ public class CreateGiftCertificatesCheckoutActionTest {
 		checkoutAction.setProductSkuLookup(productSkuLookup);
 		checkoutAction.setPricingSnapshotService(pricingSnapshotService);
 
-		checkoutContext = new CheckoutActionContextImpl(shoppingCart, null, customerSession, null, false, false, null);
+		checkoutContext = new CheckoutActionContextImpl(shoppingCart, null, customerSession, false, false, null, null);
 		checkoutContext.setOrder(order);
 
 		context.checking(new Expectations() {
@@ -105,7 +105,7 @@ public class CreateGiftCertificatesCheckoutActionTest {
 	}
 
 	@Test
-	public void testExecuteAddsGiftCertificateCodeToShoppingItemData() throws Exception {
+	public void testExecuteAddsGiftCertificateCodeToShoppingItemData() {
 		final String giftCertificate1Guid = "giftCertificateSku1";
 		final String giftCertificate2Guid = "giftCertificateSku2";
 

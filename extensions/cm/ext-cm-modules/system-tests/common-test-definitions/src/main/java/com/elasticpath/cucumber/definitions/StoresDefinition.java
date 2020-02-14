@@ -13,6 +13,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.AddEditProfileAttributePolicyDialog;
@@ -21,6 +22,7 @@ import com.elasticpath.selenium.dialogs.ConfigureFacetDialog;
 import com.elasticpath.selenium.dialogs.ConfigureRangeFacetDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.domainobjects.Catalog;
+import com.elasticpath.selenium.domainobjects.PaymentConfiguration;
 import com.elasticpath.selenium.domainobjects.SortAttribute;
 import com.elasticpath.selenium.domainobjects.Store;
 import com.elasticpath.selenium.editor.store.StoreEditor;
@@ -38,6 +40,7 @@ import com.elasticpath.selenium.util.Utility;
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class StoresDefinition {
+	private static final Logger LOGGER = Logger.getLogger(StoresDefinition.class);
 	private static final String PROFILE_ATTRIBUTE_POLICIES = "Profile Attribute Policies";
 
 	public static final String FACET = "Facet";
@@ -59,11 +62,12 @@ public class StoresDefinition {
 	private String initialFacetOption;
 	private SortAttribute sortAttribute;
 	private final SortingTab sortingTab;
+	private final PaymentConfiguration paymentConfiguration;
 
 	/**
 	 * Constructor.
 	 */
-	public StoresDefinition(final Store store, final Catalog catalog) {
+	public StoresDefinition(final Store store, final Catalog catalog, final PaymentConfiguration paymentConfiguration) {
 		final WebDriver driver = SetUp.getDriver();
 
 		configurationActionToolbar = new ConfigurationActionToolbar(driver);
@@ -72,6 +76,7 @@ public class StoresDefinition {
 		this.catalog = catalog;
 		this.profileAttributePolicyTab = new ProfileAttributePolicyTab(driver);
 		this.sortingTab = new SortingTab(driver);
+		this.paymentConfiguration = paymentConfiguration;
 	}
 
 	/**
@@ -89,6 +94,7 @@ public class StoresDefinition {
 	 */
 	@When("^I edit store (.+) in editor$")
 	public void editStore(final String storeCode) {
+		clickStores();
 		storeEditor = storesResultPane.editStore(storeCode);
 	}
 
@@ -130,9 +136,6 @@ public class StoresDefinition {
 		storeEditor.selectStoreSubCountry(storeMap.get("store sub country"));
 		storeEditor.clickTab("System");
 		storeEditor.editStoreSystemSetting("Store HTML Encoding", "UTF-8");
-		storeEditor.clickTab("Payments");
-		storeEditor.selectStorePrimaryPaymentGateway(storeMap.get("payment gateway"));
-		configurationActionToolbar.clickSaveButton();
 		storeEditor.clickTab("Warehouse");
 		storeEditor.selectRadioButton(storeMap.get("warehouse"));
 		storeEditor.clickTab("Catalog");
@@ -149,6 +152,8 @@ public class StoresDefinition {
 		storeEditor.editStoreMarketingSetting("Store Admin Email Address", "testadmin@example.com");
 		storeEditor.editStoreMarketingSetting("Store From Email (Friendly Name)", "Test Admin");
 		storeEditor.editStoreMarketingSetting("Store From Email (Sender Address)", "testadmin@example.com");
+		clickPayments();
+		storeEditor.selectStorePaymentConfiguration(storeMap.get("payment configuration"));
 		configurationActionToolbar.clickSaveButton();
 		storeEditor.minimizeStoreEditor();
 	}
@@ -164,9 +169,63 @@ public class StoresDefinition {
 	/**
 	 * Open the store.
 	 */
-	@When("^I open the store$")
+	@When("^I edit the newly created store$")
 	public void openStore() {
 		storeEditor = storesResultPane.editStore(this.storeCode);
+	}
+
+	/**
+	 * Clicks Payments tab.
+	 */
+	public void clickPayments() {
+		storeEditor.clickTab("Payments");
+		LOGGER.debug("Clicked Store Payments tab");
+	}
+
+	/**
+	 * Edit the given store code.
+	 * @param storeCode store code
+	 */
+	@When("^I edit the existing store (.+)$")
+	public void editExistingStore(final String storeCode) {
+		clickStores();
+		storeEditor = storesResultPane.editStore(storeCode);
+	}
+
+	/**
+	 * Selects and save the newly created payment configuration for the store.
+	 */
+	@When("^I (?:select|deselect) and save the newly created payment configuration for store (.+)$")
+	public void selectAndSaveStorePaymentConfigurationForStore(final String store) {
+		selectStorePaymentConfigurationForStore(store);
+		configurationActionToolbar.clickSaveButton();
+	}
+
+	/**
+	 * Selects the newly created payment configuration for the store.
+	 */
+	@When("^I (?:select|deselect) the newly created payment configuration for store (.+)$")
+	public void selectStorePaymentConfigurationForStore(final String store) {
+		editExistingStore(store);
+		clickPayments();
+		storeEditor.selectStorePaymentConfiguration(paymentConfiguration.getConfigurationName());
+	}
+
+	/**
+	 * Save the newly created payment configuration.
+	 */
+	@When("^I save the newly created payment configuration$")
+	public void saveStorePaymentConfiguration() {
+		configurationActionToolbar.clickSaveButton();
+	}
+
+	/**
+	 * verifies inactive payment configuration not available for store.
+	 */
+	@Then("^the inactive payment configuration should not be available for store payment configuration$")
+	public void verifyInactivePaymentConfigurationNotExist() {
+		clickPayments();
+		storeEditor.verifyPaymentConfigurationNotExist(paymentConfiguration.getConfigurationName());
 	}
 
 	/**
@@ -223,7 +282,6 @@ public class StoresDefinition {
 	 */
 	@When("^I change the store state without confirmation to (.+)$")
 	public void changeStoreStateWithoutConfirmation(final String newStoreState) {
-		storeEditor.clickTab("Summary");
 		storeEditor.changeStoreState(newStoreState);
 	}
 
@@ -353,7 +411,7 @@ public class StoresDefinition {
 
 	@When("^I toggle Searchable property of facet (.+)")
 	public void changeFacetToSearchable(final String facetName) {
-		storeEditor.filterFacetTableByName(facetName);
+		filterFacetTableByName(facetName);
 		storeEditor.toggleFacetSearcable(facetName);
 		configurationActionToolbar.clickSaveButton();
 	}
@@ -365,7 +423,7 @@ public class StoresDefinition {
 
 	@Then("^I should see facet (.+) with the following details$")
 	public void verifyFacetInTable(final String facetName, final Map<String, String> facetInfoMap) {
-		storeEditor.filterFacetTableByName(facetName);
+		filterFacetTableByName(facetName);
 		storeEditor.verifyFacetExistsInTable(facetName, facetInfoMap);
 	}
 
@@ -377,7 +435,7 @@ public class StoresDefinition {
 	@When("^I configure facet (.+) with facetable option (.+)")
 	public void setFacetableValue(final String facetName, final String option) {
 		this.facetName = facetName;
-		storeEditor.filterFacetTableByName(facetName);
+		filterFacetTableByName(facetName);
 		storeEditor.selectFacetableOption(facetName, option);
 		configurationActionToolbar.clickSaveButton();
 	}
@@ -385,7 +443,7 @@ public class StoresDefinition {
 	@When("^I configure facet (.+) with the following ranges$")
 	public void configureRangeFacet(final String facetName, final List<Map<String, String>> facetRangeValues) {
 		this.facetName = facetName;
-		storeEditor.filterFacetTableByName(facetName);
+		filterFacetTableByName(facetName);
 		storeEditor.selectFacetableOption(facetName, RANGE_FACET);
 
 		ConfigureRangeFacetDialog configureRangeFacetDialog = (ConfigureRangeFacetDialog) storeEditor.clickEdiFacetButton(RANGE_FACET);
@@ -397,7 +455,7 @@ public class StoresDefinition {
 
 	@When("I configure facet (.+) with the following display names")
 	public void configureFacetDisplayName(final String facetName, final Map<String, String> displayNameInfoMap) {
-		storeEditor.filterFacetTableByName(facetName);
+		filterFacetTableByName(facetName);
 		storeEditor.clickFacetFromTable(facetName);
 
 		ConfigureFacetDialog configureRangeFacetDialog = (ConfigureFacetDialog) storeEditor.clickEdiFacetButton(FACET);
@@ -430,13 +488,16 @@ public class StoresDefinition {
 	public void cleanupPriceFacet() {
 		DBConnector dbConnector = new DBConnector();
 
-		String query = "UPDATE TFACET SET RANGE_FACET_VALUES = \"["
+		String facetStr = "["
 				+ "{'start':0,'end':5,'displayNameMap':{'en':'Below $5','fr_CA':'0 - 100','fr':'0 - 100'}},"
 				+ "{'start':5,'end':20,'displayNameMap':{'en':'$5 to $20','fr_CA':'100 - 200','fr':'100 - 200'}},"
 				+ "{'start':20,'end':50, 'displayNameMap':{'en':'$20 to $50','fr_CA':'200 - 300','fr':'200 - 300'}},"
 				+ "{'start':50,'end':200,'displayNameMap':{'en':'$50 to $200','fr_CA':'300 +','fr':'300 +'}},"
 				+ "{'start':200,'end':null,'displayNameMap':{'en':'$200 and Above','fr_CA':'','fr':''}}"
-				+ "]\" WHERE FACET_NAME = 'Price' AND STORECODE = 'MOBEE';";
+				+ "]";
+
+		facetStr = facetStr.replace("'", "\"");
+		String query = "UPDATE TFACET SET RANGE_FACET_VALUES = '" + facetStr +"' WHERE FACET_NAME = 'Price' AND STORECODE = 'MOBEE'";
 
 		dbConnector.executeUpdateQuery(query);
 		dbConnector.closeAll();
@@ -555,5 +616,19 @@ public class StoresDefinition {
 	@After("@cleanupDefaultSortAttribute")
 	public void cleanupDefaultSortAttribute() {
 		changeDefaultSortAttribute("Best Match");
+	}
+
+	/**
+	 * Verifies store warning message shows.
+	 * @param errorMessage string
+	 */
+	@Then("^the following store warning message is displayed: (.+)$")
+	public void verifyStoreWarning(final String errorMessage) {
+		storeEditor.verifyErrorMessageDisplayed(errorMessage);
+	}
+
+	private void filterFacetTableByName(final String facetName){
+		configurationActionToolbar.clickReloadActiveEditor();
+		storeEditor.filterFacetTableByName(facetName);
 	}
 }

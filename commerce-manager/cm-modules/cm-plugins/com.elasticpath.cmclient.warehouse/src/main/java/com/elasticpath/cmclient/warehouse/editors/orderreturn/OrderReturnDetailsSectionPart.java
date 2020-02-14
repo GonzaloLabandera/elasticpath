@@ -18,7 +18,6 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
-
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -30,7 +29,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -102,7 +101,7 @@ public class OrderReturnDetailsSectionPart extends AbstractCmClientEditorPageSec
 	 * The constructor.
 	 *
 	 * @param formPage the form page.
-	 * @param editor the editor.
+	 * @param editor   the editor.
 	 * @param editMode if this part is read only
 	 */
 	public OrderReturnDetailsSectionPart(final FormPage formPage, final AbstractCmClientFormEditor editor, final EpState editMode) {
@@ -155,8 +154,8 @@ public class OrderReturnDetailsSectionPart extends AbstractCmClientEditorPageSec
 
 		recQtyColumn.setEditingSupport(new RecQtyEditingSupport(skuTableViewer.getSwtTableViewer(), new TextCellEditor(table)));
 
-		OrderReturnReceivedState orderReturnReceivedState = ServiceLocator.getService(
-				ContextIdNames.ORDER_RETURN_RECEIVED_STATE);
+		OrderReturnReceivedState orderReturnReceivedState = BeanLocator.getSingletonBean(
+				ContextIdNames.ORDER_RETURN_RECEIVED_STATE, OrderReturnReceivedState.class);
 		Set<String> orderReturnReceivedStateKeys = orderReturnReceivedState.getStateMap().keySet();
 		String[] states = new String[orderReturnReceivedStateKeys.size()];
 		int index = 0;
@@ -181,32 +180,32 @@ public class OrderReturnDetailsSectionPart extends AbstractCmClientEditorPageSec
 	@Override
 	protected String getSectionTitle() {
 		return
-			NLS.bind(WarehouseMessages.get().OrderReturnDetailsSection_Title,
-			orderReturn.getUidPk(), WarehouseMessages.EMPTY_STRING);
+				NLS.bind(WarehouseMessages.get().OrderReturnDetailsSection_Title,
+						orderReturn.getUidPk(), WarehouseMessages.EMPTY_STRING);
 	}
 
 	private void createSkuTableContent() {
-		int[] columnWidths = new int[] { EMPTY_COLUMN_WIDTH, SKU_CODE_COLUMN_WIDTH, PRODUCT_NAME_COLUMN_WIDTH, EXP_QTY_COLUMN_WIDTH,
-				REC_QTY_COLUMN_WIDTH, REC_STATE_COLUMN_WIDTH };
+		int[] columnWidths = new int[]{EMPTY_COLUMN_WIDTH, SKU_CODE_COLUMN_WIDTH, PRODUCT_NAME_COLUMN_WIDTH, EXP_QTY_COLUMN_WIDTH,
+				REC_QTY_COLUMN_WIDTH, REC_STATE_COLUMN_WIDTH};
 
-		String[] columnNames = new String[] { WarehouseMessages.EMPTY_STRING, WarehouseMessages.get().OrderReturnDetailsSection_SKUCodeColumn,
+		String[] columnNames = new String[]{WarehouseMessages.EMPTY_STRING, WarehouseMessages.get().OrderReturnDetailsSection_SKUCodeColumn,
 				WarehouseMessages.get().OrderReturnDetailsSection_ProductNameColumn, WarehouseMessages.get().OrderReturnDetailsSection_ExpQtyColumn,
-				WarehouseMessages.get().OrderReturnDetailsSection_RecQtyColumn, WarehouseMessages.get().OrderReturnDetailsSection_RecStateColumn };
+				WarehouseMessages.get().OrderReturnDetailsSection_RecQtyColumn, WarehouseMessages.get().OrderReturnDetailsSection_RecStateColumn};
 
 		for (int i = 0; i < columnWidths.length; i++) {
 			IEpTableColumn column = skuTableViewer.addTableColumn(columnNames[i], columnWidths[i], IEpTableColumn.TYPE_NONE);
 			switch (i) {
-			case COLUMN_INDEX_EMPTY:
-				column.getSwtTableColumn().setToolTipText(WarehouseMessages.get().OrderReturnDetailsSection_RMATableTooltip);
-				break;
-			case COLUMN_INDEX_REC_QTY:
-				recQtyColumn = column;
-				break;
-			case COLUMN_INDEX_REC_STATE:
-				recStateColumn = column;
-				break;
-			default:
-				break;
+				case COLUMN_INDEX_EMPTY:
+					column.getSwtTableColumn().setToolTipText(WarehouseMessages.get().OrderReturnDetailsSection_RMATableTooltip);
+					break;
+				case COLUMN_INDEX_REC_QTY:
+					recQtyColumn = column;
+					break;
+				case COLUMN_INDEX_REC_STATE:
+					recStateColumn = column;
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -337,17 +336,17 @@ public class OrderReturnDetailsSectionPart extends AbstractCmClientEditorPageSec
 		public Image getColumnImage(final Object element, final int columnIndex) {
 			Image image = null;
 			switch (columnIndex) {
-			case COLUMN_INDEX_EMPTY:
-				image = WarehouseImageRegistry.getImage(WarehouseImageRegistry.ICON_SKUTABLE_ITEM);
-				break;
-			case COLUMN_INDEX_REC_QTY:
-				image = WarehouseImageRegistry.getImage(WarehouseImageRegistry.ICON_SKUTABLE_EDIT_CELL);
-				break;
-			case COLUMN_INDEX_REC_STATE:
-				image = WarehouseImageRegistry.getImage(WarehouseImageRegistry.ICON_SKUTABLE_EDIT_CELL);
-				break;
-			default:
-				break;
+				case COLUMN_INDEX_EMPTY:
+					image = WarehouseImageRegistry.getImage(WarehouseImageRegistry.ICON_SKUTABLE_ITEM);
+					break;
+				case COLUMN_INDEX_REC_QTY:
+					image = WarehouseImageRegistry.getImage(WarehouseImageRegistry.ICON_SKUTABLE_EDIT_CELL);
+					break;
+				case COLUMN_INDEX_REC_STATE:
+					image = WarehouseImageRegistry.getImage(WarehouseImageRegistry.ICON_SKUTABLE_EDIT_CELL);
+					break;
+				default:
+					break;
 			}
 
 			return image;
@@ -359,33 +358,33 @@ public class OrderReturnDetailsSectionPart extends AbstractCmClientEditorPageSec
 
 			String text = WarehouseMessages.EMPTY_STRING;
 			switch (columnIndex) {
-			case COLUMN_INDEX_SKU_CODE:
-				text = orderReturnSku.getOrderSku().getSkuCode();
-				break;
-			case COLUMN_INDEX_PRODUCT_NAME:
-				text = orderReturnSku.getOrderSku().getDisplayName();
-				break;
-			case COLUMN_INDEX_EXP_QTY:
-				text = String.valueOf(orderReturnSku.getQuantity());
-				break;
-			case COLUMN_INDEX_REC_QTY:
-				text = String.valueOf(orderReturnSku.getReceivedQuantity());
-				break;
-			case COLUMN_INDEX_REC_STATE:
-				if (orderReturnSku.getReceivedState() == null) {
-					if (editMode == EpState.EDITABLE) {
-						text = WarehouseMessages.get().OrderReturn_SelectRecState;
+				case COLUMN_INDEX_SKU_CODE:
+					text = orderReturnSku.getOrderSku().getSkuCode();
+					break;
+				case COLUMN_INDEX_PRODUCT_NAME:
+					text = orderReturnSku.getOrderSku().getDisplayName();
+					break;
+				case COLUMN_INDEX_EXP_QTY:
+					text = String.valueOf(orderReturnSku.getQuantity());
+					break;
+				case COLUMN_INDEX_REC_QTY:
+					text = String.valueOf(orderReturnSku.getReceivedQuantity());
+					break;
+				case COLUMN_INDEX_REC_STATE:
+					if (orderReturnSku.getReceivedState() == null) {
+						if (editMode == EpState.EDITABLE) {
+							text = WarehouseMessages.get().OrderReturn_SelectRecState;
+						}
+					} else {
+						OrderReturnReceivedState orderReturnReceivedState = BeanLocator.getSingletonBean(
+								ContextIdNames.ORDER_RETURN_RECEIVED_STATE, OrderReturnReceivedState.class);
+						text = orderReturnReceivedState.getStateMap().get(orderReturnSku.getReceivedState());
 					}
-				} else {
-					OrderReturnReceivedState orderReturnReceivedState = ServiceLocator.getService(
-							ContextIdNames.ORDER_RETURN_RECEIVED_STATE);
-					text = orderReturnReceivedState.getStateMap().get(orderReturnSku.getReceivedState());
-				}
 
-				break;
-			case COLUMN_INDEX_EMPTY:
-			default:
-				break;
+					break;
+				case COLUMN_INDEX_EMPTY:
+				default:
+					break;
 			}
 
 			return text;

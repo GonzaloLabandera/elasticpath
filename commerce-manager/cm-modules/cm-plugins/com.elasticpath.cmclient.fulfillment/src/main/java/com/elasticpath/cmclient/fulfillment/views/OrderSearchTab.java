@@ -20,8 +20,8 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.search.SafeSearchCodes;
@@ -46,6 +46,7 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
 import com.elasticpath.service.search.query.StandardSortBy;
 
@@ -81,7 +82,7 @@ public class OrderSearchTab implements ISearchTab {
 
 	private IEpDateTimePicker toDatePicker;
 
-	private final OrderSearchCriteria searchCriteria = ServiceLocator.getService(ContextIdNames.ORDER_SEARCH_CRITERIA);
+	private final OrderSearchCriteria searchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class);
 
 	private final OrderSearchRequestJob searchJob = new OrderSearchRequestJob();
 
@@ -136,7 +137,7 @@ public class OrderSearchTab implements ISearchTab {
 
 	private void initializeSearchCriteria() {
 		searchCriteria
-				.setCustomerSearchCriteria(ServiceLocator.getService(ContextIdNames.CUSTOMER_SEARCH_CRITERIA));
+				.setCustomerSearchCriteria(BeanLocator.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class));
 	}
 
 	/**

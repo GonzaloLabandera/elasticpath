@@ -73,7 +73,7 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 		if (result.getCategory() == null) {
 			String storeCode = shoppingCart.getStore().getCode();
 			//Get the category from category filter to save some DB calls
-			Category category = null; 
+			Category category = null;
 			for (Filter<?> filter : browsingRequest.getFilters()) {
 				if (filter instanceof CategoryFilter) {
 					category = ((CategoryFilter) filter).getCategory();
@@ -93,16 +93,16 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 			searchAndSetFeaturedProducts(browsingRequest, result, shoppingCart, loadProductAssociations, includeSubCategories);
 
 			// get normal products, don't include featured products
-			final IndexSearchResult productResults = retrieveProducts(browsingRequest, category, 
+			final IndexSearchResult productResults = retrieveProducts(browsingRequest, category,
 					shoppingCart.getShopper().getPriceListStack());
-			
-			List<Long> productUids = getProductsUsingPageNumber(pageNumber, storeCode, productResults);		
-						
+
+			List<Long> productUids = getProductsUsingPageNumber(pageNumber, storeCode, productResults);
+
 			List<StoreProduct> products = getStoreProductService().getProductsForStore(productUids, shoppingCart.getStore(), loadProductAssociations);
 			products = getIndexUtility().sortDomainList(productUids, products);
 			result.setProducts(products);
 			result.setResultsCount(productResults.getLastNumFound());
-			
+
 			setFilterOptions(browsingRequest, result, productResults);
 		}
 
@@ -123,22 +123,22 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 	 * @return list of product uids
 	 */
 	protected List<Long> getProductsUsingPageNumber(final int pageNumber,
-													final String storeCode, 
+													final String storeCode,
 													final IndexSearchResult productResults) {
-		
-		int paginationNumber = paginationService.getNumberOfItemsPerPage(storeCode); 
-		
+
+		int paginationNumber = paginationService.getNumberOfItemsPerPage(storeCode);
+
 		int numberOfResults = productResults.getNumFound();
-		
+
 		int lastPageNumber = paginationService.getLastPageNumber(numberOfResults, storeCode);
-		
+
 		List<Long> productUids = Collections.emptyList();
-		
+
 		productResults.setRememberOptions(true);
-		
+
 		// Return the max num pages if the page number entered is too large
 		if (pageNumber <= lastPageNumber) {
-			productUids = getPagedResults(productResults, pageNumber, paginationNumber);								
+			productUids = getPagedResults(productResults, pageNumber, paginationNumber);
 		} else {
 			LOG.info("Page number requested " + pageNumber + " ignored, returning page number " + lastPageNumber);
 			productUids = getPagedResults(productResults, lastPageNumber, paginationNumber);
@@ -156,9 +156,9 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 	}
 
 	private IndexSearchResult retrieveProducts(final BrowsingRequest browsingRequest, final Category category, final PriceListStack priceListStack) {
-		
+
 		final IndexSearchResult results = searchProducts(browsingRequest, false, false, priceListStack);
-			
+
 		// TA376 Logic changes when retrieve products under category.
 		// 1. Check the category contains products.
 		// If no products in this category, and its the root category,
@@ -185,34 +185,35 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 
 	/**
 	 * Returns a new instance of {@link BrowsingResult}.
-	 * 
+	 *
 	 * @return a new instance of {@link BrowsingResult}
 	 */
 	@Override
 	protected CatalogViewResult createCatalogViewResult() {
-		return beanFactory.getBean(ContextIdNames.BROWSING_RESULT);
+		return beanFactory.getPrototypeBean(ContextIdNames.BROWSING_RESULT, CatalogViewResult.class);
 	}
 
 	@Override
 	protected ProductCategorySearchCriteria createCriteriaForProductSearch(final CatalogViewRequest request,
 			final boolean includeSubCategories) {
 		final BrowsingRequest browsingRequest = (BrowsingRequest) request;
-		final ProductSearchCriteria searchCriteria = beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
-		
+		final ProductSearchCriteria searchCriteria = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA,
+				ProductSearchCriteria.class);
+
 		// only want exact matches when browsing
 		searchCriteria.setFuzzySearchDisabled(true);
 		searchCriteria.setLocale(request.getLocale());
 		searchCriteria.setOnlyWithinDirectCategory(!includeSubCategories);
 		searchCriteria.setDirectCategoryUid(browsingRequest.getCategoryUid());
 		searchCriteria.setStoreCode(getStoreConfig().getStoreCode());
-		
+
 		// this is done elsewhere, but need to do this here for additional logic
 		if (includeSubCategories) {
 			final Set<Long> categoryUids = new HashSet<>();
 			categoryUids.add(browsingRequest.getCategoryUid());
 			searchCriteria.setAncestorCategoryUids(categoryUids);
 		}
-		
+
 		searchCriteria.setCatalogCode(getStoreConfig().getStore().getCatalog().getCode());
 		return searchCriteria;
 	}

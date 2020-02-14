@@ -1,14 +1,14 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2012
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -29,8 +29,8 @@ public class ClearShoppingCartCheckoutActionTest {
 	private CartOrderService cartOrderService;
 	@Mock
 	private ShoppingCartService shoppingCartService;
-	@Mock
-	private ShoppingCart shoppingCart;
+
+	private final ShoppingCart oldShoppingCart = mock(ShoppingCart.class);
 
 	@InjectMocks
 	private ClearShoppingCartCheckoutAction fixture;
@@ -46,10 +46,9 @@ public class ClearShoppingCartCheckoutActionTest {
 
 		fixture.execute(checkoutContext);
 
-		verify(shoppingCart).deactivateCart();
-		verify(cartOrderService).removeIfExistsByShoppingCart(shoppingCart);
-		verify(shoppingCartService, never()).saveOrUpdate(shoppingCart);
-
+		verify(oldShoppingCart).deactivateCart();
+		verify(cartOrderService).removeIfExistsByShoppingCart(oldShoppingCart);
+		verify(shoppingCartService, never()).saveOrUpdate(oldShoppingCart);
 	}
 
 	/**
@@ -61,12 +60,11 @@ public class ClearShoppingCartCheckoutActionTest {
 
 		fixture.execute(checkoutContext);
 
-		verify(shoppingCart).deactivateCart();
-		verify(shoppingCartService).disconnectCartFromShopperAndCustomerSession(shoppingCart, checkoutContext);
-		verify(cartOrderService).removeIfExistsByShoppingCart(shoppingCart);
+		verify(oldShoppingCart).deactivateCart();
+		verify(shoppingCartService).disconnectCartFromShopperAndCustomerSession(oldShoppingCart, checkoutContext);
+		verify(cartOrderService).removeIfExistsByShoppingCart(oldShoppingCart);
 	}
-	
-	
+
 	private void shouldHaveCheckoutContextAsOrderExchange() {
 		createCheckoutContext(true);
 	}
@@ -76,9 +74,8 @@ public class ClearShoppingCartCheckoutActionTest {
 	}
 
 	private void createCheckoutContext(final boolean isOrderExchange) {
-		CheckoutActionContext checkoutActionContext = new CheckoutActionContextImpl(shoppingCart,
-																					null,
-																					null, null, isOrderExchange, false, null);
+		CheckoutActionContext checkoutActionContext = new CheckoutActionContextImpl(oldShoppingCart,
+				null, null, isOrderExchange, false, null, null);
 		checkoutContext = new FinalizeCheckoutActionContextImpl(checkoutActionContext);
 	}
 }

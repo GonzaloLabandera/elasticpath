@@ -256,7 +256,19 @@ public class IndexUtilityImpl implements IndexUtility {
 		Category category = getCategoryLookup().findByUid(categoryUid);
 		return SolrIndexConstants.FEATURED_FIELD + category.getCode() + SEPARATOR + category.getCatalog().getCode();
 	}
-	
+
+	/**
+	 * Creates a product's featured field for a particular category.
+	 * <p/>
+	 *
+	 * @param category the category
+	 * @return a product's featured index field name
+	 */
+	@Override
+	public String createFeaturedField(final Category category) {
+		return SolrIndexConstants.FEATURED_FIELD + category.getCode() + SEPARATOR + category.getCatalog().getCode();
+	}
+
 	/**
 	 * Retrieves the boost values for a locale field. If no locale field is available for the
 	 * given locale, the variant, country and then the language itself are removed sequentially to

@@ -27,20 +27,21 @@ public class PriceListPersister {
 	private final BeanFactory beanFactory;
 	private final BaseAmountService baseAmountService;
 	private final PriceListDescriptorService priceListDescriptorService;
-	
+
 	/**
-	 * 
+	 *
 	 * @param beanFactory
 	 */
 	public PriceListPersister(final BeanFactory beanFactory) {
 		super();
 		this.beanFactory = beanFactory;
-		this.baseAmountService = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_SERVICE);
-		this.priceListDescriptorService = beanFactory.getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE);
+		this.baseAmountService = beanFactory.getSingletonBean(ContextIdNames.BASE_AMOUNT_SERVICE, BaseAmountService.class);
+		this.priceListDescriptorService = beanFactory.getSingletonBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE,
+				PriceListDescriptorService.class);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param priceListDescriptorGuid
 	 * @param objectType
 	 * @param objectGuid
@@ -58,9 +59,9 @@ public class PriceListPersister {
 			updateBaseAmount(oldBaseAmount, listPrice, salePrice, null);
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param priceListDescriptorGuid
 	 * @param objectType
 	 * @param objectGuid
@@ -81,7 +82,7 @@ public class PriceListPersister {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param guid
 	 * @param priceListDescriptorGuid
 	 * @param objectType
@@ -99,11 +100,11 @@ public class PriceListPersister {
 		} else {
 			updateBaseAmount(oldBaseAmount, listPrice, salePrice, null);
 		}
-	}	
-	
+	}
 
-	
-	private BaseAmount addBaseAmount(final String guid, final String objectGuid, final String objectType, final BigDecimal minQty, 
+
+
+	private BaseAmount addBaseAmount(final String guid, final String objectGuid, final String objectType, final BigDecimal minQty,
 			final BigDecimal listPrice,	final BigDecimal salePrice, final String priceListDescriptorGuid, final String paymenScheduleName) {
 		BaseAmountImpl newBaseAmount = new BaseAmountImpl();
 		newBaseAmount.setObjectGuid(objectGuid);
@@ -116,16 +117,16 @@ public class PriceListPersister {
 
 		return baseAmountService.add(newBaseAmount);
 	}
-	
+
 	private BaseAmount addBaseAmount(final String objectGuid, final String objectType, final BigDecimal minQty, final BigDecimal listPrice,
 			final BigDecimal salePrice, final String priceListDescriptorGuid, final String paymenScheduleName) {
-		return addBaseAmount(new RandomGuidImpl().toString(), objectGuid, objectType, minQty, listPrice, salePrice, priceListDescriptorGuid, 
+		return addBaseAmount(new RandomGuidImpl().toString(), objectGuid, objectType, minQty, listPrice, salePrice, priceListDescriptorGuid,
 				paymenScheduleName);
 	}
 
 	private BaseAmount findBaseAmount(final String objectGuid, final String objectType, final BigDecimal quantity,
 			final String priceListDescriptorGuid) {
-		BaseAmountFilter filter = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter filter = beanFactory.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		filter.setObjectGuid(objectGuid);
 		filter.setObjectType(objectType);
 		filter.setQuantity(quantity);
@@ -139,7 +140,7 @@ public class PriceListPersister {
 		return persistentBaseAmounts.iterator().next();
 	}
 
-	private void updateBaseAmount(final BaseAmount baseAmount, final BigDecimal listPrice, final BigDecimal salePrice, 
+	private void updateBaseAmount(final BaseAmount baseAmount, final BigDecimal listPrice, final BigDecimal salePrice,
 			final String paymenScheduleCode) {
 		baseAmount.setListValue(listPrice);
 		baseAmount.setSaleValue(salePrice);
@@ -150,7 +151,7 @@ public class PriceListPersister {
 			throw new EpServiceException("Failed to update " + baseAmount, e);
 		}
 	}
-	
+
 	/**
 	 * Creates a price list and adds it to the system with using following parameters.
 	 * @param code The price list GUID
@@ -158,13 +159,13 @@ public class PriceListPersister {
 	 * @param currencyCode The currency code
 	 * @param description The description
 	 * @param isHidden Whether this price list is hidden or not
-	 * 
+	 *
 	 * @return PriceListDescriptor the descriptor that was created
 	 */
 	public PriceListDescriptor createAndPersistPriceList(final String code, final String name, final String currencyCode,
 			final String description, final boolean isHidden) {
 		PriceListDescriptor priceListDescriptor = new PriceListDescriptorImpl();
-		
+
 		priceListDescriptor.setGuid(code);
 		priceListDescriptor.setName(name);
 		priceListDescriptor.setCurrencyCode(currencyCode);
@@ -172,7 +173,7 @@ public class PriceListPersister {
 		priceListDescriptor.setHidden(isHidden);
 
 		return priceListDescriptorService.add(priceListDescriptor);
-		
+
 	}
 
 	/**
@@ -190,7 +191,7 @@ public class PriceListPersister {
 		priceListDescriptor.setName(name);
 		priceListDescriptor.setCurrencyCode(currencyCode);
 		priceListDescriptor.setDescription(description);
-		
+
 		priceListDescriptorService.update(priceListDescriptor);
 	}
 }

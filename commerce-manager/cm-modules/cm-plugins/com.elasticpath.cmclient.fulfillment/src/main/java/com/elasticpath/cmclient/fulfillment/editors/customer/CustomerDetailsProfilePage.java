@@ -10,7 +10,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.forms.IManagedForm;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -103,7 +103,7 @@ public class CustomerDetailsProfilePage extends AbstractCmClientEditorPage imple
 		if (resetPassword) {
 			final Customer customer = (Customer) ((AbstractCmClientFormEditor) getEditor()).getModel();
 			final CustomerService customerService =
-					ServiceLocator.getService(ContextIdNames.CUSTOMER_SERVICE);
+					BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 			customerService.resetPassword(customer.getUserId(), customer.getStoreCode());
 			MessageDialog.openInformation(getSite().getShell(),
 					FulfillmentMessages.get().CustomerDetailsPage_ResetPassInfoTitle,

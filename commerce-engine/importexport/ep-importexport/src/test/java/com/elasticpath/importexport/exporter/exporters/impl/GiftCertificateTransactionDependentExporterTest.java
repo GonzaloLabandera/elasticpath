@@ -1,6 +1,7 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
+
 package com.elasticpath.importexport.exporter.exporters.impl;
 
 import static org.hamcrest.Matchers.hasItem;
@@ -29,7 +30,7 @@ import com.elasticpath.importexport.exporter.configuration.search.SearchConfigur
 import com.elasticpath.importexport.exporter.context.ExportContext;
 import com.elasticpath.importexport.exporter.exporters.DependentExporterFilter;
 import com.elasticpath.service.catalog.GiftCertificateService;
-import com.elasticpath.service.payment.GiftCertificateTransactionService;
+import com.elasticpath.service.giftcertificate.GiftCertificateTransactionService;
 
 /**
  * Test for {@link GiftCertificateTransactionDependentExporter}.

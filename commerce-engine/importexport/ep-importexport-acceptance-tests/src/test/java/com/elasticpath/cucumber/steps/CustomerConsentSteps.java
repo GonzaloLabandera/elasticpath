@@ -121,7 +121,7 @@ public class CustomerConsentSteps {
 	}
 
 	private void createPersistedAnonymousCustomer(final String customerFirstName, final String customerLastName) {
-		final Customer anonymousCustomer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		final Customer anonymousCustomer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		anonymousCustomer.setGuid(CustomerSteps.generateCustomerGuidFromName(customerFirstName, customerLastName));
 		anonymousCustomer.setStoreCode(storeService.findAllStores().get(0).getCode());
 		anonymousCustomer.setAnonymous(true);

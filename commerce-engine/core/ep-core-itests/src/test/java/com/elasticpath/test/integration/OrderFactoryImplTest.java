@@ -1,8 +1,10 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2007
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration;
 
+import static com.elasticpath.commons.constants.ContextIdNames.EVENT_ORIGINATOR_HELPER;
+import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART_SERVICE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -10,10 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Currency;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,15 +33,14 @@ import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.factory.TestShoppingCartFactoryForTestApplication;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
-import com.elasticpath.plugin.payment.PaymentType;
+import com.elasticpath.plugin.payment.provider.capabilities.PaymentCapabilityRequestFailedException;
+import com.elasticpath.plugin.payment.provider.capabilities.reservation.ReserveCapability;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.cartorder.CartOrderService;
-import com.elasticpath.service.payment.gateway.impl.NullPaymentGatewayPluginImpl;
+import com.elasticpath.service.payment.provider.PaymentProviderPluginForIntegrationTesting;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
@@ -92,27 +90,17 @@ public class OrderFactoryImplTest extends DbTestCase {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		scenario.getStore().setPaymentGateways(setUpPaymentGatewayAndProperties());
 		customer = persisterFactory.getStoreTestPersister().createDefaultCustomer(scenario.getStore());
 		shoppingContext = shoppingContextBuilder
 				.withCustomer(customer)
 				.withStoreCode(scenario.getStore().getCode())
 				.build();
 		shopperService.save(shoppingContext.getShopper());
-
-		// Reset the payment gateway for each test.
-		NullPaymentGatewayPluginImpl.setFailOnCapture(false);
-		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(false);
-		NullPaymentGatewayPluginImpl.setFailOnReversePreAuthorization(false);
-		NullPaymentGatewayPluginImpl.setFailOnSale(false);
 	}
 
 	@After
-	public void tearDown() throws Exception {
-		NullPaymentGatewayPluginImpl.setFailOnCapture(false);
-		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(false);
-		NullPaymentGatewayPluginImpl.setFailOnReversePreAuthorization(false);
-		NullPaymentGatewayPluginImpl.setFailOnSale(false);
+	public void tearDown() {
+		PaymentProviderPluginForIntegrationTesting.resetCapabilities();
 	}
 
 	/**
@@ -124,20 +112,17 @@ public class OrderFactoryImplTest extends DbTestCase {
 		final ShoppingCart shoppingCart = createShoppingCartWithScenarioStore();
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createPhysicalProduct(), 1));
 
-		CartOrder cartOrder = getBeanFactory().getBean(ContextIdNames.CART_ORDER);
-		cartOrder.setShoppingCartGuid(shoppingCart.getGuid());
-		cartOrderService.saveOrUpdate(cartOrder);
+		PaymentProviderPluginForIntegrationTesting.addCapability(getClass(), ReserveCapability.class, request -> {
+			throw new PaymentCapabilityRequestFailedException("internal message", "external message", false);
+		});
 
-		// make new order payment
-		final OrderPayment templateOrderPayment = getOrderPayment();
-
-		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(true);
+		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(shoppingCart.getGuid());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		CheckoutResults checkoutResult = checkoutService.checkout(
-				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), templateOrderPayment, false);
+				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), false);
 		assertTrue("order should fail", checkoutResult.isOrderFailed());
 
 		Order order = checkoutResult.getOrder();
@@ -156,20 +141,13 @@ public class OrderFactoryImplTest extends DbTestCase {
 		final ShoppingCart shoppingCart = createShoppingCartWithScenarioStore();
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createPhysicalProduct(), 1));
 
-		CartOrder cartOrder = getBeanFactory().getBean(ContextIdNames.CART_ORDER);
-		cartOrder.setShoppingCartGuid(shoppingCart.getGuid());
-		cartOrderService.saveOrUpdate(cartOrder);
-
-		// make new order payment
-		final OrderPayment templateOrderPayment = getOrderPayment();
-
-		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(false);
+		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(shoppingCart.getGuid());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		CheckoutResults checkoutResult = checkoutService.checkout(
-				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), templateOrderPayment, false);
+				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), false);
 		assertFalse("The order should not have failed", checkoutResult.isOrderFailed());
 
 		Order order = checkoutResult.getOrder();
@@ -199,23 +177,15 @@ public class OrderFactoryImplTest extends DbTestCase {
 		shoppingCart.setShippingAddress(getBillingAddress());
 		shoppingCart.setSelectedShippingOption(scenario.getShippingOption());
 
-		final ShoppingCartService shoppingCartService = getBeanFactory().getBean(ContextIdNames.SHOPPING_CART_SERVICE);
+		final ShoppingCartService shoppingCartService =
+				getBeanFactory().getSingletonBean(ContextIdNames.SHOPPING_CART_SERVICE, ShoppingCartService.class);
 		shoppingCartService.saveOrUpdate(shoppingCart);
-		return shoppingCart;
-	}
 
-	/**
-	 * Gets the order payment.
-	 *
-	 * @return the order payment
-	 */
-	private OrderPayment getOrderPayment() {
-		final OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setCreatedDate(new Date());
-		orderPayment.setCurrencyCode("USD");
-		orderPayment.setEmail(customer.getEmail());
-		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		return orderPayment;
+		cartOrderService.createOrderIfPossible(shoppingCart);
+
+		persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(shoppingCart);
+
+		return shoppingCart;
 	}
 
 	/**
@@ -236,12 +206,6 @@ public class OrderFactoryImplTest extends DbTestCase {
 		return billingAddress;
 	}
 
-	private Set<PaymentGateway> setUpPaymentGatewayAndProperties() {
-		final Set<PaymentGateway> gateways = new HashSet<>();
-		gateways.add(persisterFactory.getStoreTestPersister().persistDefaultPaymentGateway());
-		return gateways;
-	}
-
 	private Product createPhysicalProduct() {
 		return persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
 				scenario.getCategory(),
@@ -249,6 +213,6 @@ public class OrderFactoryImplTest extends DbTestCase {
 	}
 
 	public EventOriginatorHelper getEventOriginatorHelper() {
-		return getBeanFactory().getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		return getBeanFactory().getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 	}
 }

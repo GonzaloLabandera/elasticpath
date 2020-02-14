@@ -84,7 +84,7 @@ public class WishListServiceImplTest {
 		final CustomerSession customerSession = TestCustomerSessionFactory.getInstance().createNewCustomerSession();
 		final Shopper shopper = customerSession.getShopper();
 
-		when(beanFactory.getBean(ContextIdNames.WISH_LIST)).thenReturn(new WishListImpl() {
+		when(beanFactory.getPrototypeBean(ContextIdNames.WISH_LIST, WishList.class)).thenReturn(new WishListImpl() {
 			private static final long serialVersionUID = -7785511152889149172L;
 
 			@Override
@@ -102,7 +102,7 @@ public class WishListServiceImplTest {
 				.as("the shopping context in wish list is not expected one")
 				.isEqualTo(shopper);
 
-		verify(beanFactory).getBean(ContextIdNames.WISH_LIST);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.WISH_LIST, WishList.class);
 	}
 
 	@Test

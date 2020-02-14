@@ -7,7 +7,7 @@
 package com.elasticpath.cmclient.catalog.policy;
 
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.StateDeterminer;
@@ -62,8 +62,7 @@ public class EditDeleteCatalogAndCategoryAutorizationStatePolicy extends Abstrac
 	/** Catalog state determiner. */
 	private class CatalogStateDeterminer implements StateDeterminer {
 
-		private final CategoryService categoryService = (CategoryService) ServiceLocator.getService(
-				ContextIdNames.CATEGORY_SERVICE);
+		private final CategoryService categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 
 		@Override
 		public EpState determineState(final PolicyActionContainer targetContainer) {
@@ -95,7 +94,7 @@ public class EditDeleteCatalogAndCategoryAutorizationStatePolicy extends Abstrac
 	/** Category state determiner. */
 	private class CategoryStateDeterminer implements StateDeterminer {
 
-		private final ProductService productService = (ProductService) ServiceLocator.getService(ContextIdNames.PRODUCT_SERVICE);
+		private final ProductService productService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 
 		@Override
 		public EpState determineState(final PolicyActionContainer targetContainer) {
@@ -126,6 +125,6 @@ public class EditDeleteCatalogAndCategoryAutorizationStatePolicy extends Abstrac
 	}
 
 	protected CategoryService getCategoryService() {
-		return ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 	}
 }

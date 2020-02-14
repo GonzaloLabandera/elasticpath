@@ -26,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.PriceSchedule;
 import com.elasticpath.domain.catalog.PriceScheduleType;
 import com.elasticpath.domain.catalog.PricingScheme;
@@ -93,8 +94,10 @@ public class AbstractShoppingItemImplTest {
 		recurringPriceAssembler = new ShoppingItemRecurringPriceAssemblerImpl();
 		recurringPriceAssembler.setBeanFactory(beanFactory);
 
-		when(beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER)).thenReturn(recurringPriceAssembler);
-		when(beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE)).thenAnswer(invocation -> new ShoppingItemRecurringPriceImpl());
+		when(beanFactory.getSingletonBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER, ShoppingItemRecurringPriceAssembler.class))
+				.thenReturn(recurringPriceAssembler);
+		when(beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE, ShoppingItemRecurringPrice.class))
+				.thenAnswer(invocation -> new ShoppingItemRecurringPriceImpl());
 
 		final PaymentScheduleHelperImpl paymentScheduleHelper = getPaymentScheduleHelper();
 
@@ -353,9 +356,9 @@ public class AbstractShoppingItemImplTest {
 
 	private AbstractShoppingItemImpl prepareShoppingItemWithRecurringPrice(final Set<ShoppingItemRecurringPrice> recurringPrices,
 			final Currency currency) {
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICING_SCHEME)).thenAnswer(invocation -> new PricingSchemeImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE)).thenAnswer(invocation -> new PriceScheduleImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class)).thenAnswer(invocation -> new PricingSchemeImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class)).thenAnswer(invocation -> new PriceScheduleImpl());
 
 		AbstractShoppingItemImpl item = new ShoppingItemImpl() {  //no overriding of get prices
 			private static final long serialVersionUID = -2100849016179282868L;
@@ -371,8 +374,13 @@ public class AbstractShoppingItemImplTest {
 			}
 
 			@Override
-			public <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
+			}
+
+			@Override
+			public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+				return beanFactory.getSingletonBean(name, clazz);
 			}
 		};
 		item.setRecurringPrices(recurringPrices);
@@ -773,8 +781,8 @@ public class AbstractShoppingItemImplTest {
 			}
 
 			@Override
-			public <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+				return beanFactory.getSingletonBean(name, clazz);
 			}
 		};
 		return shoppingItem;

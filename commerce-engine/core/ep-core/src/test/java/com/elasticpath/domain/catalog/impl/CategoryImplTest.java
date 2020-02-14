@@ -23,8 +23,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.Utility;
-import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.impl.AttributeGroupAttributeImpl;
@@ -396,7 +394,8 @@ public class CategoryImplTest  {
 	public void testExtensionClassesCanOverrideLocaleDependantFieldsFactory() {
 		final CatalogLocaleFallbackPolicyFactory factory = new CatalogLocaleFallbackPolicyFactory();
 
-		when(beanFactory.getBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY)).thenReturn(factory);
+		when(beanFactory.getSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, CatalogLocaleFallbackPolicyFactory.class))
+				.thenReturn(factory);
 		ExtCategoryImpl category = new ExtCategoryImpl();
 		LocaleDependantFields ldf = category.getLocaleDependantFieldsWithoutFallBack(Locale.ENGLISH);
 
@@ -436,13 +435,8 @@ public class CategoryImplTest  {
 		}
 
 		@Override
-		public Utility getUtility() {
-			return new UtilityImpl();
-		}
-
-		@Override
-		public <T> T getBean(final String beanName) {
-			return beanFactory.getBean(beanName);
+		public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+			return beanFactory.getSingletonBean(name, clazz);
 		}
 	}
 

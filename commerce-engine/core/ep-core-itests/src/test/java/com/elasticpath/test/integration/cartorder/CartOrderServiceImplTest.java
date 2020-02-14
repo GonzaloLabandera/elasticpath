@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2011.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.test.integration.cartorder;
@@ -25,10 +25,7 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.PaymentToken;
-import com.elasticpath.domain.customer.impl.AbstractPaymentMethodImpl;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.shipping.Region;
@@ -37,9 +34,6 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.persistence.dao.PaymentTokenDao;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.customer.CustomerService;
@@ -48,6 +42,7 @@ import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.persister.CatalogTestPersister;
+import com.elasticpath.test.persister.PaymentInstrumentPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.test.util.Utils;
@@ -97,16 +92,13 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	private CustomerService customerService;
 
 	@Autowired
-	private PersistenceEngine persistenceEngine;
-
-	@Autowired
 	private CustomerBuilder customerBuilder;
 
 	@Autowired
-	private PaymentTokenDao paymentTokenDao;
+	private CatalogTestPersister catalogTestPersister;
 
 	@Autowired
-	private CatalogTestPersister catalogTestPersister;
+	private PaymentInstrumentPersister paymentInstrumentPersister;
 
 	private Store store;
 
@@ -223,14 +215,11 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	 */
 	@Test
 	public void testPersistenceOfCartOrderFields() {
-		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
+		CartOrder cartOrder = beanFactory.getPrototypeBean(ContextIdNames.CART_ORDER, CartOrder.class);
 		cartOrder.setBillingAddressGuid(billingAddressGuid);
 		cartOrder.setShippingAddressGuid(shippingAddressGuid);
 		cartOrder.setShippingOptionCode(DEFAULT_SHIPPING_OPTION_CODE);
 		cartOrder.setShoppingCartGuid(cartGuid);
-
-		PaymentToken token = getPersistedToken();
-		cartOrder.usePaymentMethod(token);
 
 		cartOrderService.saveOrUpdate(cartOrder);
 
@@ -248,102 +237,10 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		assertThat(retrievedCartOrder.getShoppingCartGuid())
 			.as("Shopping cart guid was not persisted")
 			.isEqualTo(cartGuid);
-		PaymentToken persistedPaymentToken = (PaymentToken) retrievedCartOrder.getPaymentMethod();
-		assertThat(persistedPaymentToken.getValue())
-			.as("Payment method value was not persisted")
-			.isEqualTo(token.getValue());
-		assertThat(persistedPaymentToken.getDisplayValue())
-			.as("Payment method display value was not persisted")
-			.isEqualTo(token.getDisplayValue());
 
 		assertThat(retrievedCartOrder)
 			.as("The persisted cart order was not identical to expected cart order")
 			.isEqualTo(cartOrder);
-	}
-
-	/**
-	 * Ensure successful persistence of new payment method on new cart order.
-	 */
-	@Test
-	public void ensureSuccessfulPersistenceOfNewPaymentMethodOnNewCartOrder() {
-		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
-		cartOrder.setShoppingCartGuid(cartGuid);
-		cartOrder.setShippingAddressGuid(shippingAddressGuid);
-		PaymentToken token = new PaymentTokenImpl.TokenBuilder().withDisplayValue("displayValue").withValue("value").build();
-		cartOrder.usePaymentMethod(token);
-		cartOrderService.saveOrUpdate(cartOrder);
-
-		CartOrder retrievedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		PaymentToken persistedPaymentToken = (PaymentToken) retrievedCartOrder.getPaymentMethod();
-		assertThat(persistedPaymentToken.getValue())
-			.as("Payment method value was not persisted")
-			.isEqualTo(token.getValue());
-		assertThat(persistedPaymentToken.getDisplayValue())
-			.as("Payment method display value was not persisted")
-			.isEqualTo(token.getDisplayValue());
-	}
-
-	/**
-	 * Ensure successful persistence of new payment method on existing cart order.
-	 */
-	@Test
-	public void ensureSuccessfulPersistenceOfNewPaymentMethodOnExistingCartOrder() {
-		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
-		cartOrder.setShoppingCartGuid(cartGuid);
-		cartOrder.setShippingAddressGuid(shippingAddressGuid);
-		cartOrderService.saveOrUpdate(cartOrder);
-
-		CartOrder retrievedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		PaymentToken token = new PaymentTokenImpl.TokenBuilder().withDisplayValue("displayValue").withValue("value").build();
-		retrievedCartOrder.usePaymentMethod(token);
-		cartOrderService.saveOrUpdate(retrievedCartOrder);
-
-		CartOrder updatedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		PaymentToken retrievedPaymentToken = (PaymentToken) updatedCartOrder.getPaymentMethod();
-		assertThat(retrievedPaymentToken.getDisplayValue()).isEqualTo(token.getDisplayValue());
-		assertThat(retrievedPaymentToken.getValue()).isEqualTo(token.getValue());
-	}
-
-	/**
-	 * Ensure deletion of cart order does not delete customer payment method.
-	 */
-	@Test
-	public void ensureDeletionOfCartOrderDoesNotDeleteCustomerPaymentMethod() {
-		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
-		cartOrder.setShoppingCartGuid(cartGuid);
-		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
-
-		PaymentMethod paymentMethod = new PaymentTokenImpl.TokenBuilder().withDisplayValue("displayValue").withValue("value").build();
-		customer.getPaymentMethods().setDefault(paymentMethod);
-		customer = customerService.update(customer);
-		PaymentMethod persistedPaymentMethod = customer.getPaymentMethods().getDefault();
-
-		cartOrder.usePaymentMethod(persistedPaymentMethod);
-		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
-
-		cartOrderService.remove(cartOrder);
-		Customer updatedCustomer = customerService.findByGuid(customer.getGuid());
-		assertThat(updatedCustomer.getPaymentMethods().getDefault())
-			.as("Payment method was not retained on Customer after CartOrder deletion.")
-			.isEqualTo(persistedPaymentMethod);
-	}
-
-	@Test
-	@SuppressWarnings("rawtypes")
-	public void ensureNullingPaymentTokenOnCartOrderRemovesOrphanToken() {
-		PaymentToken paymentToken = new PaymentTokenImpl.TokenBuilder().withDisplayValue("displayValue").withValue("value").build();
-
-		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
-		cartOrder.setShoppingCartGuid(cartGuid);
-		cartOrder.usePaymentMethod(paymentToken);
-		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
-		AbstractPaymentMethodImpl<?> persistedPaymentMethod = (AbstractPaymentMethodImpl<?>) cartOrder.getPaymentMethod();
-		cartOrder.clearPaymentMethod();
-		cartOrderService.saveOrUpdate(cartOrder);
-		PaymentToken retrievedPaymentMethod = paymentTokenDao.get(persistedPaymentMethod.getUidPk());
-		assertThat(retrievedPaymentMethod)
-			.as("Orphaned payment token should be deleted")
-			.isNull();
 	}
 
 	@Test
@@ -385,18 +282,14 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	 */
 	@Test
 	public void testRemoveCartOrder() {
-		CartOrder cartOrder = createAndSaveCartOrder();
+		createAndSaveCartOrder();
+		ShoppingCart shoppingCart = loadShoppingCart();
+		assertThat(shoppingCart).isNotNull();
 
-		CartOrder retrievedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-
-		cartOrderService.remove(retrievedCartOrder);
+		cartOrderService.removeIfExistsByShoppingCart(shoppingCart);
 		assertThat(cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid)).isNull();
 
 		assertThat(loadShoppingCart()).isNotNull();
-		PaymentTokenImpl paymentMethod = (PaymentTokenImpl) cartOrder.getPaymentMethod();
-		assertThat(persistenceEngine.get(PaymentTokenImpl.class, paymentMethod.getUidPk()))
-			.as("Payment method should have been cascade deleted")
-			.isNull();
 		assertThat(addressDao.findByGuid(billingAddressGuid))
 			.as("Billing address should not have been deleted")
 			.isNotNull();
@@ -473,7 +366,6 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	 */
 	@Test
 	public void testCreateIfNotExistsWithDefaultBillingAddress() {
-		customer.getPaymentMethods().clear();
 		customer = customerService.update(customer);
 		cartOrderService.createOrderIfPossible(cart);
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
@@ -481,7 +373,6 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		assertThat(cartOrder.getBillingAddressGuid())
 			.as("Customer preferred billing address guid and cart order billing address guid should be equal.")
 			.isEqualTo(customer.getPreferredBillingAddress().getGuid());
-		assertThat(cartOrder.getPaymentMethod()).isNull();
 	}
 
 	/**
@@ -491,14 +382,12 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testCreateIfNotExistsWithNoDefaults() {
 		customer.setPreferredBillingAddress(null);
-		customer.getPaymentMethods().clear();
 		customer = customerService.update(customer);
 
 		cartOrderService.createOrderIfPossible(cart);
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
 
 		assertThat(cartOrder.getBillingAddressGuid()).isNull();
-		assertThat(cartOrder.getPaymentMethod()).isNull();
 	}
 
 	/**
@@ -573,7 +462,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private ShoppingCart configureAndPersistCart() {
-		ShopperService shopperService = getBean(ContextIdNames.SHOPPER_SERVICE);
+		ShopperService shopperService = getBeanFactory().getSingletonBean(ContextIdNames.SHOPPER_SERVICE, ShopperService.class);
 		Shopper shopper = TestShopperFactoryForTestApplication.getInstance().createNewShopperWithMemento();
 		StoreTestPersister storeTestPersister = getTac().getPersistersFactory().getStoreTestPersister();
 		customer = storeTestPersister.createDefaultCustomer(store);
@@ -585,7 +474,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		final CustomerSession customerSession = TestCustomerSessionFactoryForTestApplication.getInstance()
 				.createNewCustomerSessionWithContext(shopper);
 		customerSession.setCurrency(Currency.getInstance("USD"));
-		final ShoppingCartImpl shoppingCart = getBean(ContextIdNames.SHOPPING_CART);
+		final ShoppingCartImpl shoppingCart = (ShoppingCartImpl) getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		shoppingCart.setShopper(shopper);
 		shoppingCart.setStore(store);
 		shoppingCart.getShoppingCartMemento().setGuid(cartGuid);
@@ -603,31 +492,14 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrder.setShippingOptionCode(DEFAULT_SHIPPING_OPTION_CODE);
 		cartOrder.setShoppingCartGuid(cartGuid);
 
-		cartOrder.usePaymentMethod(getPersistedToken());
-
 		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
 
 		assertThat(cartOrder.isPersisted()).isTrue();
+
+		final ShoppingCart shoppingCart = loadShoppingCart();
+		paymentInstrumentPersister.persistPaymentInstrument(shoppingCart);
+
 		return cartOrder;
-	}
-
-	private PaymentToken getPersistedToken() {
-
-		PaymentToken token = new PaymentTokenImpl.TokenBuilder()
-				.withDisplayValue("**** **** **** 1234")
-				.withGatewayGuid("1234")
-				.withValue("token-value")
-				.build();
-
-		Customer customer = customerBuilder.withStoreCode(store.getCode())
-				.withGuid(customerGuid)
-				.withPaymentMethods(token)
-				.build();
-
-		customer = customerService.add(customer);
-
-		token = (PaymentToken) customer.getPaymentMethods().all().iterator().next();
-		return token;
 	}
 
 	private Address createAndPersistAddressWithGuid(final String guid) {
@@ -659,9 +531,6 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		return cartOrder;
 	}
 
-	private <T> T getBean(final String name) {
-		return getBeanFactory().getBean(name);
-	}
 
 }
 

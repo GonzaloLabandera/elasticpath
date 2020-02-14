@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.reporting.common.SavedReportParameters;
 import org.apache.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -269,7 +269,7 @@ public class ReportingNavigationView extends ViewPart implements SelectionListen
 	private void startEngineTask(final Map<String, Object> params) {
 		if (currentReportType.equals(ReportingMessages.get().HTMLFormat) || currentReportType.equals(ReportingMessages.get().PDFFormat)) {
 			if (birt == null) {
-				birt = ServiceLocator.getService("cmReportService"); //$NON-NLS-1$
+				birt = BeanLocator.getSingletonBean("cmReportService", CmReportService.class); //$NON-NLS-1$
 				birt.initializeTask(false, currentReportLocation, currentReport.getClass().getClassLoader(), params);
 			} else if (previousReport != null && !previousReport.getReportTitle().equals(currentReport.getReportTitle())) { //NOPMD
 				previousReport = currentReport;
@@ -349,7 +349,7 @@ public class ReportingNavigationView extends ViewPart implements SelectionListen
 		}
 		if (currentReportType.equals(ReportingMessages.get().ExcelFormat) || currentReportType.equals(ReportingMessages.get().CSVFormat)) {
 
-			CmReportService birtExcelOrCsv = ServiceLocator.getService("cmReportService"); //$NON-NLS-1$
+			CmReportService birtExcelOrCsv = BeanLocator.getSingletonBean("cmReportService", CmReportService.class); //$NON-NLS-1$
 			birtExcelOrCsv.initializeTask(true, currentReportLocation, currentReport.getClass().getClassLoader(), reportParams);
 			//if cancel pressed, at least initial the task so it will be faster next time user runs the report
 			cancelMonitor(monitor);

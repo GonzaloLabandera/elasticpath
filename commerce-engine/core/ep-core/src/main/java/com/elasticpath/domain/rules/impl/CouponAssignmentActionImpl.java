@@ -169,7 +169,7 @@ public class CouponAssignmentActionImpl extends AbstractRuleActionImpl {
 	@Transient
 	RuleService getRuleService() {
 		if (ruleService == null) {
-			ruleService = this.getBean(ContextIdNames.RULE_SERVICE);
+			ruleService = this.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		}
 		return ruleService;
 	}
@@ -182,7 +182,7 @@ public class CouponAssignmentActionImpl extends AbstractRuleActionImpl {
 	@Transient
 	CouponConfigService getCouponConfigService() {
 		if (couponConfigService == null) {
-			couponConfigService = this.getBean(ContextIdNames.COUPON_CONFIG_SERVICE);
+			couponConfigService = this.getSingletonBean(ContextIdNames.COUPON_CONFIG_SERVICE, CouponConfigService.class);
 		}
 		return couponConfigService;
 	}

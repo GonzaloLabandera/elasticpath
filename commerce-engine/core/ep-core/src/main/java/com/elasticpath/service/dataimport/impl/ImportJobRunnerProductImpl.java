@@ -52,7 +52,7 @@ public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
 	 */
 	@Override
 	protected Entity createNewEntity(final Object baseObject) {
-		final Product product = getBean(ContextIdNames.PRODUCT);
+		final Product product = getPrototypeBean(ContextIdNames.PRODUCT, Product.class);
 		product.setProductType((ProductType) baseObject);
 		return product;
 	}

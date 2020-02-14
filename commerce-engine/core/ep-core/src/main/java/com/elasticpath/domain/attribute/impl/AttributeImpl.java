@@ -215,7 +215,7 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	@Transient
 	public LocalizedProperties getLocalizedProperties() {
 		if (localizedProperties == null) {
-			localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			localizedProperties = getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 			localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(), ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE);
 		}
 		return localizedProperties;
@@ -240,6 +240,7 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 		getLocalizedProperties().setValue(LOCALIZED_PROPERTY_DISPLAY_NAME, locale, name);
 	}
 
+	@Override
 	@OneToMany(targetEntity = AttributeLocalizedPropertyValueImpl.class, fetch = FetchType.EAGER, cascade = {CascadeType.ALL
 	}, orphanRemoval = true)
 	@MapKey(name = "localizedPropertyKey")
@@ -250,6 +251,7 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 		return localizedPropertiesMap;
 	}
 
+	@Override
 	public void setLocalizedPropertiesMap(final Map<String, LocalizedPropertyValue> localizedPropertiesMap) {
 		this.localizedPropertiesMap = localizedPropertiesMap;
 	}
@@ -494,7 +496,7 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 		if (attributeUsageId == 0) {
 			return null;
 		}
-		return ((AttributeUsageImpl) getBean(ContextIdNames.ATTRIBUTE_USAGE))
+		return getPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class)
 				.getAttributeUsageById(attributeUsageId);
 	}
 

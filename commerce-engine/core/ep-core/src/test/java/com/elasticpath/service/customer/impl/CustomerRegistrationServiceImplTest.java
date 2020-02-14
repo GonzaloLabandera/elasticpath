@@ -89,7 +89,8 @@ public class CustomerRegistrationServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.CUSTOMER_REGISTRATION_RESULT); will(returnValue(new CustomerRegistrationResultImpl()));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.CUSTOMER_REGISTRATION_RESULT, CustomerRegistrationResult.class);
+					will(returnValue(new CustomerRegistrationResultImpl()));
 			}
 		});
 	}

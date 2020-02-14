@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
 import com.elasticpath.cmclient.reporting.ReportType;
 import com.elasticpath.cmclient.reporting.ReportTypeManager;
@@ -101,7 +101,7 @@ public class PromotionUsageServiceImpl {
 	}
 	
 	private RuleService getRuleService() {
-		return ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 	}
 	
 	

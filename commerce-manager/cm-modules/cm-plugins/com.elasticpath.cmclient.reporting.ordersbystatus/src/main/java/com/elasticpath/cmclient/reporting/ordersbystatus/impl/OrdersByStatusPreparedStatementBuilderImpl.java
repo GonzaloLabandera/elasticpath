@@ -49,7 +49,7 @@ public class OrdersByStatusPreparedStatementBuilderImpl extends PreparedStatemen
 		final JpqlQueryBuilder jpqlQueryBuilder = new JpqlQueryBuilder("PhysicalOrderShipmentImpl", "shipments", selectFields);
 		jpqlQueryBuilder.appendInnerJoin("shipments.orderInternal", "o");
 
-		jpqlQueryBuilder.appendGroupBy("o.orderNumber");
+		jpqlQueryBuilder.appendGroupBy("o.orderNumber, o.createdDate");
 		jpqlQueryBuilder.appendOrderBy(O_CREATED_DATE, true);
 
 		final JpqlQueryBuilderWhereGroup whereGroup = jpqlQueryBuilder.getDefaultWhereGroup();

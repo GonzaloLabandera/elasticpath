@@ -27,7 +27,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.openjpa.routing.QueryRouter;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
 
 /**
  * Unit test for the {@code AbstractQueryExecutor} class.
@@ -42,7 +41,6 @@ public class AbstractQueryExecutorTest {
 	private AbstractQueryExecutor abstractQueryExecutor;
 
 	@Mock private QueryRouter queryRouter;
-	@Mock private QueryUtil queryUtil;
 	@Mock private FetchPlanHelper fetchPlanHelper;
 	@Mock private EntityManager rwEntityManager;
 	@Mock private EntityManager roEntityManager;
@@ -177,7 +175,6 @@ public class AbstractQueryExecutorTest {
 
 		abstractQueryExecutor.setFetchPlanHelper(fetchPlanHelper);
 		abstractQueryExecutor.setQueryRouter(queryRouter);
-		abstractQueryExecutor.setQueryUtil(queryUtil);
 
 		return abstractQueryExecutor;
 	}

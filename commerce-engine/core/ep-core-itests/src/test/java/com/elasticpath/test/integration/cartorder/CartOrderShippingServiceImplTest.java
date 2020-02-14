@@ -22,9 +22,7 @@ import com.elasticpath.domain.cartorder.impl.CartOrderImpl;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.shipping.Region;
@@ -33,9 +31,6 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.persistence.dao.PaymentTokenDao;
-import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.cartorder.CartOrderShippingService;
 import com.elasticpath.service.customer.CustomerService;
@@ -44,7 +39,6 @@ import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.integration.BasicSpringContextTest;
-import com.elasticpath.test.persister.CatalogTestPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.test.util.Utils;
@@ -70,9 +64,6 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 	private Customer customer;
 
 	@Autowired
-	private BeanFactory beanFactory;
-
-	@Autowired
 	private CustomerAddressDao addressDao;
 
 	@Autowired
@@ -85,22 +76,10 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 	private ShoppingCartService shoppingCartService;
 
 	@Autowired
-	private CartDirector cartDirector;
-
-	@Autowired
 	private CustomerService customerService;
 
 	@Autowired
-	private PersistenceEngine persistenceEngine;
-
-	@Autowired
 	private CustomerBuilder customerBuilder;
-
-	@Autowired
-	private PaymentTokenDao paymentTokenDao;
-
-	@Autowired
-	private CatalogTestPersister catalogTestPersister;
 
 	private Store store;
 
@@ -187,26 +166,12 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		cartOrder.setShippingOptionCode(DEFAULT_SHIPPING_OPTION_CODE);
 		cartOrder.setShoppingCartGuid(cartGuid);
 
-		cartOrder.usePaymentMethod(getPersistedToken());
-
 		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
 
 		assertTrue(cartOrder.isPersisted());
 		return cartOrder;
 	}
 
-	private PaymentToken getPersistedToken() {
-
-		PaymentToken token = new PaymentTokenImpl.TokenBuilder().withDisplayValue("**** **** **** 1234").withGatewayGuid("1234")
-				.withValue("token-value").build();
-
-		Customer customer = customerBuilder.withStoreCode(store.getCode()).withGuid(customerGuid).withPaymentMethods(token).build();
-
-		customer = customerService.add(customer);
-
-		token = (PaymentToken) customer.getPaymentMethods().all().iterator().next();
-		return token;
-}
 	private Address createAndPersistAddressWithGuid(final String guid) {
 		Address address = new CustomerAddressImpl();
 		address.setGuid(guid);
@@ -216,7 +181,7 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 	}
 
 	private ShoppingCart configureAndPersistCart() {
-		ShopperService shopperService = getBean(ContextIdNames.SHOPPER_SERVICE);
+		ShopperService shopperService = getBeanFactory().getSingletonBean(ContextIdNames.SHOPPER_SERVICE, ShopperService.class);
 		Shopper shopper = TestShopperFactoryForTestApplication.getInstance().createNewShopperWithMemento();
 		StoreTestPersister storeTestPersister = getTac().getPersistersFactory().getStoreTestPersister();
 		customer = storeTestPersister.createDefaultCustomer(store);
@@ -227,7 +192,7 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		// TODO: Handrolling customer session is probably not a good idea
 		final CustomerSession customerSession = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
 		customerSession.setCurrency(Currency.getInstance("USD"));
-		final ShoppingCartImpl shoppingCart = getBean(ContextIdNames.SHOPPING_CART);
+		final ShoppingCartImpl shoppingCart = (ShoppingCartImpl) getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		shoppingCart.setShopper(shopper);
 		shoppingCart.setStore(store);
 		shoppingCart.getShoppingCartMemento().setGuid(cartGuid);
@@ -235,9 +200,4 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		shopper.setCurrentShoppingCart(shoppingCart);
 		return shoppingCartService.saveOrUpdate(shoppingCart);
 	}
-
-	private <T> T getBean(final String name) {
-		return getBeanFactory().getBean(name);
-	}
-
 }

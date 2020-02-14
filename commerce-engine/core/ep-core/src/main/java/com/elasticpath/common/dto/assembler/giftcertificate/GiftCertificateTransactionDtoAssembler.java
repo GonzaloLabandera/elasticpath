@@ -12,18 +12,18 @@ import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.payment.GiftCertificateTransaction;
 import com.elasticpath.service.catalog.GiftCertificateService;
 /**
- * Assembler for {@link com.elasticpath.common.dto.giftcertificate.GiftCertificateTransactionDTO} and 
- * {@link com.elasticpath.domain.payment.GiftCertificateTransaction}. 
+ * Assembler for {@link com.elasticpath.common.dto.giftcertificate.GiftCertificateTransactionDTO} and
+ * {@link com.elasticpath.domain.payment.GiftCertificateTransaction}.
  */
 public class GiftCertificateTransactionDtoAssembler extends AbstractDtoAssembler<GiftCertificateTransactionDTO, GiftCertificateTransaction> {
 
 	private BeanFactory beanFactory;
 
 	private GiftCertificateService giftCertificateService;
-	
+
 	@Override
 	public GiftCertificateTransaction getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.GIFT_CERTIFICATE_TRANSACTION);
+		return beanFactory.getPrototypeBean(ContextIdNames.GIFT_CERTIFICATE_TRANSACTION, GiftCertificateTransaction.class);
 	}
 
 	@Override
@@ -45,17 +45,17 @@ public class GiftCertificateTransactionDtoAssembler extends AbstractDtoAssembler
 	public void assembleDomain(final GiftCertificateTransactionDTO source, final GiftCertificateTransaction target) {
 		String giftCertificateGuid = source.getGiftCertificateGuid();
 		GiftCertificate giftCertificateFromSource = giftCertificateService.findByGuid(giftCertificateGuid);
-		
+
 		if (giftCertificateFromSource == null) {
 			throw new EpServiceException("GiftCertificate with guid " + giftCertificateGuid + " not found.");
 		}
-	
+
 		target.setGiftCertificate(giftCertificateFromSource);
 		target.setCreatedDate(source.getCreationDate());
 		target.setAuthorizationCode(source.getAuthorizationCode());
 		target.setAmount(source.getAmount());
 		target.setAuthorizationCode(source.getAuthorizationCode());
-		target.setTransactionType(source.getTransactionType());		
+		target.setTransactionType(source.getTransactionType());
 	}
 
 	/**

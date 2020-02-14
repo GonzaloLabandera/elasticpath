@@ -340,7 +340,7 @@ public class ProductRecommendationServiceImpl extends AbstractEpPersistenceServi
 	 */
 	protected ProductAssociation createProductAssociation(final Product sourceProduct, final long recommendedProductUid, final Catalog catalog) {
 
-		final ProductAssociation productAssociation = getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+		final ProductAssociation productAssociation = getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 		productAssociation.setAssociationType(ProductAssociationType.RECOMMENDATION);
 
 		final Product recommendedTargetProduct = productService.getTuned(recommendedProductUid, fetchGroupLoadTuner);

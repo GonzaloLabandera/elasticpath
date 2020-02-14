@@ -89,7 +89,7 @@ public class ShippingRegionServiceImpl extends AbstractEpPersistenceServiceImpl 
 		sanityCheck();
 		ShippingRegion shippingRegion = null;
 		if (shippingRegionUid <= 0) {
-			shippingRegion = getBean(SHIPPING_REGION);
+			shippingRegion = getPrototypeBean(SHIPPING_REGION, ShippingRegion.class);
 		} else {
 			shippingRegion = getPersistentBeanFinder().load(SHIPPING_REGION, shippingRegionUid);
 		}
@@ -108,7 +108,7 @@ public class ShippingRegionServiceImpl extends AbstractEpPersistenceServiceImpl 
 		sanityCheck();
 		ShippingRegion shippingRegion = null;
 		if (shippingRegionUid <= 0) {
-			shippingRegion = getBean(SHIPPING_REGION);
+			shippingRegion = getPrototypeBean(SHIPPING_REGION, ShippingRegion.class);
 		} else {
 			shippingRegion = getPersistentBeanFinder().get(SHIPPING_REGION, shippingRegionUid);
 		}

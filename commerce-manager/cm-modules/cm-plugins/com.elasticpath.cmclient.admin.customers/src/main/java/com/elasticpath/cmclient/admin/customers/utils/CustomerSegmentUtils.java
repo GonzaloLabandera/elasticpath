@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.admin.customers.utils;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.tags.service.TagConditionService;
@@ -36,7 +36,7 @@ public final class CustomerSegmentUtils {
 	 */
 	public static boolean segmentsInUseByConditionalExpression(final CustomerGroup customerGroup) {
 		final TagConditionService tagConditionService =
-				ServiceLocator.getService(ContextIdNames.TAG_CONDITION_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
 
 		final String regex = String.format(TAG_REGEX, CUSTOMER_SEGMENT_TAG_NAME, customerGroup.getName());
 		final int count = tagConditionService.countMatchingTagExpressionStrings(regex);

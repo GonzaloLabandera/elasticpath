@@ -141,7 +141,7 @@ public class AttributeValueFilterImpl extends AbstractFilterImpl<AttributeValueF
 	@Override
 	public void setAttributeKey(final String attributeKey) {
 		this.attributeKey = attributeKey;
-		final AttributeService attributeService = getBean(ContextIdNames.ATTRIBUTE_SERVICE);
+		final AttributeService attributeService = getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		attribute = attributeService.findByKey(attributeKey);
 	}
 
@@ -267,7 +267,7 @@ public class AttributeValueFilterImpl extends AbstractFilterImpl<AttributeValueF
 	}
 
 	private AttributeValueWithType constructAttributeWithType(final String string) {
-		final AttributeValueWithType attr = getBean(ContextIdNames.ATTRIBUTE_VALUE);
+		final AttributeValueWithType attr = getPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class);
 		attr.setAttribute(getAttribute());
 		attr.setAttributeType(getAttribute().getAttributeType());
 		attr.setStringValue(string);

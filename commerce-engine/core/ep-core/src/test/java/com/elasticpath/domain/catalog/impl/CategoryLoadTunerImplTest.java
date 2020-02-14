@@ -162,6 +162,7 @@ public class CategoryLoadTunerImplTest {
 		BeanFactory beanFactory = mock(BeanFactory.class);
 		((ElasticPathImpl) ElasticPathImpl.getInstance()).setBeanFactory(beanFactory);
 
-		when(beanFactory.getBean(ContextIdNames.CATEGORY_TYPE_LOAD_TUNER)).thenAnswer(invocation -> new CategoryTypeLoadTunerImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.CATEGORY_TYPE_LOAD_TUNER, CategoryTypeLoadTuner.class))
+				.thenAnswer(invocation -> new CategoryTypeLoadTunerImpl());
 	}
 }

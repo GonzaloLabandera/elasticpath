@@ -23,8 +23,11 @@ import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
+import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.jmock.AbstractEPTestCase;
 
 /**
@@ -68,9 +71,12 @@ public class AttributeImplTest extends AbstractEPTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		stubGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
-		stubGetBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, AttributeLocalizedPropertyValueImpl.class);
+		BeanFactoryExpectationsFactory bfef = getBeanFactoryExpectationsFactory();
+
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, AttributeUsageImpl.class);
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, LocalizedPropertiesImpl.class);
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, LocalizedPropertyValue.class,
+				AttributeLocalizedPropertyValueImpl.class);
 
 		attributeImpl1 = new AttributeImpl();
 		attributeImpl2 = new AttributeImpl();

@@ -21,6 +21,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.BrandImpl;
@@ -93,7 +94,7 @@ public class BrandPersistenceTest extends DbTestCase {
 				return getPersistenceEngine().get(BrandImpl.class, brand.getUidPk());
 			}
 		});
-		BrandService service = getBeanFactory().getBean("brandService");
+		BrandService service = getBeanFactory().getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 		Brand newBrand = new BrandImpl();
 		newBrand.setGuid("newGuid");
 		newBrand.setCode("newCode");

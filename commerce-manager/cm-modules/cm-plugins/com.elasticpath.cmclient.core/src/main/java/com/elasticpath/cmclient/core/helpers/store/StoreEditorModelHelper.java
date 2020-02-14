@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2017
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.cmclient.core.helpers.store;
 
@@ -16,25 +16,32 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.customer.StoreCustomerAttribute;
+import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.domain.store.StoreType;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.support.FetchGroupConstants;
+import com.elasticpath.provider.payment.domain.PaymentProviderConfigurationStatus;
+import com.elasticpath.provider.payment.service.configuration.PaymentProviderConfigDTO;
+import com.elasticpath.provider.payment.service.provider.PaymentProviderPluginDTO;
 import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.command.CommandService;
 import com.elasticpath.service.command.UpdateStoreCommand;
 import com.elasticpath.service.command.UpdateStoreCommandResult;
 import com.elasticpath.service.customer.StoreCustomerAttributeService;
 import com.elasticpath.service.datapolicy.DataPolicyService;
+import com.elasticpath.service.orderpaymentapi.StorePaymentProviderConfigService;
+import com.elasticpath.service.orderpaymentapi.management.PaymentProviderConfigManagementService;
+import com.elasticpath.service.orderpaymentapi.management.PaymentProviderManagementService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
@@ -43,7 +50,7 @@ import com.elasticpath.settings.domain.SettingValue;
 /**
  * This class is responsible for store editor model creation, reloading and removing.
  */
-@SuppressWarnings({ "PMD.GodClass" })
+@SuppressWarnings({"PMD.GodClass"})
 public class StoreEditorModelHelper {
 
 	private static final String COMMERCE_STORE_THEME = "COMMERCE/STORE/theme"; //$NON-NLS-1$
@@ -51,24 +58,23 @@ public class StoreEditorModelHelper {
 	private static final String COMMERCE_STORE_BROWSING = "COMMERCE/STORE/FILTEREDNAVIGATION/filteredNavigationConfiguration"; //$NON-NLS-1$
 
 	private static final String COMMERCE_STORE_ADVANCED_SEARCH = "COMMERCE/STORE/ADVANCEDSEARCH/advancedSearchConfiguration"; //$NON-NLS-1$
-
+	private static final String AVAILABLE_TO_MARKETING = "availableToMarketing"; //$NON-NLS-1$
+	private static final String[] SYSTEM_SETTING_VALUE_PATHS = {};
 	private CommandService commandService;
-
 	private UpdateStoreCommand updateStoreCommand;
-
 	private SettingsService settingsService;
-
 	private StoreService storeService;
-
 	private FetchGroupLoadTuner fetchGroupLoadTuner;
 
-	private static final String AVAILABLE_TO_MARKETING = "availableToMarketing"; //$NON-NLS-1$
-
-	private static final String[] SYSTEM_SETTING_VALUE_PATHS = { };
-	
 	private CmUserService cmUserService;
 
 	private StoreCustomerAttributeService storeCustomerAttributeService;
+
+	private PaymentProviderConfigManagementService paymentProviderConfigManagementService;
+
+	private StorePaymentProviderConfigService storePaymentProviderConfigService;
+
+	private PaymentProviderManagementService paymentProviderManagementService;
 
 	/**
 	 * Constructs store editor model helper.
@@ -76,21 +82,30 @@ public class StoreEditorModelHelper {
 	StoreEditorModelHelper() {
 		//do nothing
 	}
-	
+
 	/**
 	 * Creates the store editor model helper.
-	 * 
+	 *
 	 * @return the store editor model helper
 	 */
 	public static StoreEditorModelHelper createStoreEditorModelHelper() {
 		final StoreEditorModelHelper editorModelHelper = new StoreEditorModelHelper();
-		editorModelHelper.setSettingsService(ServiceLocator.getService(ContextIdNames.SETTINGS_SERVICE));
-		editorModelHelper.setStoreService(ServiceLocator.getService(ContextIdNames.STORE_SERVICE));
-		editorModelHelper.setCommandService(ServiceLocator.getService(ContextIdNames.COMMAND_SERVICE));
-		editorModelHelper.setUpdateStoreCommand(ServiceLocator.getService(ContextIdNames.UPDATE_STORE_COMMAND));
-		editorModelHelper.setCmUserService(ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE));
-		editorModelHelper.setStoreCustomerAttributeService(ServiceLocator.getService(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE_SERVICE));
-		final FetchGroupLoadTuner fetchGroupLoadTuner = ServiceLocator.getService(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		editorModelHelper.setSettingsService(BeanLocator.getSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class));
+		editorModelHelper.setStoreService(BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class));
+		editorModelHelper.setCommandService(BeanLocator.getSingletonBean(ContextIdNames.COMMAND_SERVICE, CommandService.class));
+		editorModelHelper.setUpdateStoreCommand(BeanLocator.getPrototypeBean(ContextIdNames.UPDATE_STORE_COMMAND, UpdateStoreCommand.class));
+		editorModelHelper.setCmUserService(BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class));
+		editorModelHelper.setStoreCustomerAttributeService(
+				BeanLocator.getSingletonBean(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE_SERVICE, StoreCustomerAttributeService.class));
+		editorModelHelper.setPaymentProviderConfigManagementService(BeanLocator
+				.getSingletonBean(ContextIdNames.PAYMENT_PROVIDER_CONFIG_MANAGEMENT_SERVICE, PaymentProviderConfigManagementService.class));
+		editorModelHelper.setStorePaymentProviderConfigService(
+				BeanLocator.getSingletonBean(ContextIdNames.STORE_PAYMENT_PROVIDER_CONFIG_SERVICE, StorePaymentProviderConfigService.class));
+		editorModelHelper.setPaymentProviderManagementService(
+				BeanLocator.getSingletonBean(ContextIdNames.PAYMENT_PROVIDER_MANAGEMENT_SERVICE, PaymentProviderManagementService.class));
+
+		final FetchGroupLoadTuner fetchGroupLoadTuner =
+				BeanLocator.getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		fetchGroupLoadTuner.addFetchGroup(FetchGroupConstants.STORE_FOR_EDIT);
 		editorModelHelper.setFetchGroupLoadTuner(fetchGroupLoadTuner);
 		return editorModelHelper;
@@ -98,7 +113,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Creates the store editor model based on store UID.
-	 * 
+	 *
 	 * @param storeUid the store UID
 	 * @return the new store editor model
 	 */
@@ -108,9 +123,9 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Creates the store editor model based on store UID and way of loading marketing relating settings.
-	 * 
-	 * @param storeUid the store UID
-	 * @param availableToMarketingOnly use only settings available to marketing if true, all otherwise 
+	 *
+	 * @param storeUid                 the store UID
+	 * @param availableToMarketingOnly use only settings available to marketing if true, all otherwise
 	 * @return store editor model
 	 */
 	public StoreEditorModel createStoreEditorModel(final long storeUid, final boolean availableToMarketingOnly) {
@@ -122,8 +137,8 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Loads the store with shared stores.
-	 * 
-	 * @param storeUid the store uid
+	 *
+	 * @param storeUid  the store uid
 	 * @param loadTuner the fetch group load tuner
 	 * @return the loaded store
 	 */
@@ -132,10 +147,10 @@ public class StoreEditorModelHelper {
 		loadSharedStores(store);
 		return store;
 	}
-	
+
 	/**
 	 * Loads all the shared stores for the given store.
-	 * 
+	 *
 	 * @param store the root store
 	 * @return the collection of shared stored
 	 */
@@ -149,8 +164,8 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Loads the store with given uid.
-	 * 
-	 * @param storeUid the store uid
+	 *
+	 * @param storeUid  the store uid
 	 * @param loadTuner the fetch group load tuner
 	 * @return the loaded store
 	 */
@@ -177,12 +192,12 @@ public class StoreEditorModelHelper {
 	 * @return a new store instance
 	 */
 	protected Store createStore() {
-		return ServiceLocator.getService(ContextIdNames.STORE);
+		return BeanLocator.getPrototypeBean(ContextIdNames.STORE, Store.class);
 	}
 
 	/**
 	 * Gets the default locale.
-	 * 
+	 *
 	 * @return default locale
 	 */
 	Locale getDefaultLocale() {
@@ -191,13 +206,14 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Loads the settings to model.
-	 * 
+	 *
 	 * @param model the model to update
 	 */
 	void loadSettings(final StoreEditorModel model) {
 		model.setMarketingSettings(getMarketingSettings(model));
 		model.setSystemSettings(getSystemSettings(model));
 		model.setStoreCustomerAttributes(getStoreCustomerAttributes(model));
+		model.setStorePaymentConfigurations(getStorePaymentConfigurations(model));
 		model.setStoreThemeSetting(getSettingValue(COMMERCE_STORE_THEME, model));
 		model.setStoreBrowsingSetting(getSettingValue(COMMERCE_STORE_BROWSING, model));
 		model.setStoreAdvancedSearchSetting(getSettingValue(COMMERCE_STORE_ADVANCED_SEARCH, model));
@@ -208,7 +224,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Gets the marketing settings for given model.
-	 * 
+	 *
 	 * @param model the model
 	 * @return the list of settings
 	 */
@@ -224,8 +240,8 @@ public class StoreEditorModelHelper {
 	 */
 	private List<SettingModel> loadMarketingSettingsContainedInStore(final StoreEditorModel model) {
 		final SettingsFactory storeSettingsFactory = new StoreSettingsFactory(model);
-		final String[] storeSettingPaths = { StoreSettingsFactory.FRIENDLY_NAME_SETTING, StoreSettingsFactory.SENDER_ADDRESS_SETTING,
-				StoreSettingsFactory.ADMIN_EMAIL_ADDRESS_SETTING, StoreSettingsFactory.DISPLAY_OUT_OF_STOCK_SETTING };
+		final String[] storeSettingPaths = {StoreSettingsFactory.FRIENDLY_NAME_SETTING, StoreSettingsFactory.SENDER_ADDRESS_SETTING,
+				StoreSettingsFactory.ADMIN_EMAIL_ADDRESS_SETTING, StoreSettingsFactory.DISPLAY_OUT_OF_STOCK_SETTING};
 		return createSettingModelList(storeSettingPaths, model.getCode(), storeSettingsFactory);
 	}
 
@@ -238,7 +254,7 @@ public class StoreEditorModelHelper {
 			settingDefinitions.addAll(settingsService.findSettingDefinitionsByMetadataValue(
 					AVAILABLE_TO_MARKETING, Boolean.TRUE.toString()));
 		} else {
-			settingDefinitions.addAll(settingsService.findSettingDefinitionsByMetadata(AVAILABLE_TO_MARKETING)); 
+			settingDefinitions.addAll(settingsService.findSettingDefinitionsByMetadata(AVAILABLE_TO_MARKETING));
 		}
 
 		final List<SettingModel> marketingSettingModels = new ArrayList<SettingModel>();
@@ -252,7 +268,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Gets the system settings for given model.
-	 * 
+	 *
 	 * @param model the model
 	 * @return the list of settings
 	 */
@@ -261,7 +277,7 @@ public class StoreEditorModelHelper {
 		final SettingsFactory settingValuesFactory = new SettingsValueFactory(model);
 
 		final List<SettingModel> systemSettings = new ArrayList<SettingModel>();
-		final String[] storeSettingPaths = { StoreSettingsFactory.HTML_ENCODING_SETTING };
+		final String[] storeSettingPaths = {StoreSettingsFactory.HTML_ENCODING_SETTING};
 		systemSettings.addAll(createSettingModelList(storeSettingPaths, model.getCode(), storeSettingsFactory));
 		systemSettings.addAll(createSettingModelList(SYSTEM_SETTING_VALUE_PATHS, model.getCode(), settingValuesFactory));
 		return systemSettings;
@@ -289,8 +305,35 @@ public class StoreEditorModelHelper {
 	}
 
 	/**
+	 * Gets the payment provider configurations for given model.
+	 *
+	 * @param model the model
+	 * @return the list of payment provider configurations
+	 */
+	List<StorePaymentConfigurationModel> getStorePaymentConfigurations(final StoreEditorModel model) {
+		final StorePaymentConfigurationFactory factory = new StorePaymentConfigurationFactory();
+
+		List<PaymentProviderConfigDTO> paymentProviderConfigs = paymentProviderConfigManagementService.findAllActive();
+		Map<String, PaymentProviderPluginDTO> paymentProviderPlugins = paymentProviderManagementService.findAll();
+		Collection<StorePaymentProviderConfig> storePaymentProviderConfigs = storePaymentProviderConfigService.findByStore(model.getStore());
+
+		return paymentProviderConfigs.stream()
+				.map(providerConfig -> storePaymentProviderConfigs.stream()
+						.filter(storeConfigs -> storeConfigs.getPaymentProviderConfigGuid().equalsIgnoreCase(providerConfig.getGuid()))
+						.findFirst()
+						.map(storeConfig -> factory.createPaymentConfiguration(
+								providerConfig,
+								paymentProviderPlugins.get(providerConfig.getPaymentProviderPluginBeanName()),
+								storeConfig))
+						.orElse(factory.createPaymentConfiguration(
+								providerConfig,
+								paymentProviderPlugins.get(providerConfig.getPaymentProviderPluginBeanName())))
+				).collect(Collectors.toList());
+	}
+
+	/**
 	 * Deletes the given store from database.
-	 * 
+	 *
 	 * @param model the store model that contains store to delete
 	 */
 	public void destroyModel(final StoreEditorModel model) {
@@ -299,7 +342,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Reloads the given model.
-	 * 
+	 *
 	 * @param model the model to reload
 	 * @return the updated model
 	 */
@@ -315,7 +358,7 @@ public class StoreEditorModelHelper {
 	 * If the store was not previously persistent then it adds the store
 	 * to the list of stores accessible by the current user and refreshes the local
 	 * cache of store permissions.
-	 * 
+	 *
 	 * @param model the model to update
 	 * @return updated model
 	 */
@@ -342,11 +385,49 @@ public class StoreEditorModelHelper {
 	}
 
 	/**
+	 * Saves payment configuration models for the given store.
+	 *
+	 * @param storeEditorModel the model to save payment configurations for.
+	 */
+	public void saveStorePaymentConfiguration(final StoreEditorModel storeEditorModel) {
+		List<StorePaymentConfigurationModel> input = storeEditorModel.getStorePaymentConfigurations();
+		for (StorePaymentConfigurationModel storePaymentConfigurationModel : input) {
+			if (storePaymentConfigurationModel.getStorePaymentProviderConfig() == null && storePaymentConfigurationModel.isSelected()
+					&& isPaymentConfigurationActive(storePaymentConfigurationModel)) {
+				StorePaymentProviderConfig storeConfig = BeanLocator
+						.getPrototypeBean(ContextIdNames.STORE_PAYMENT_PROVIDER_CONFIG, StorePaymentProviderConfig.class);
+				storeConfig.setPaymentProviderConfigGuid(storePaymentConfigurationModel.getConfigurationGuid());
+				storeConfig.setStoreCode(storeEditorModel.getStore().getCode());
+				storePaymentConfigurationModel.setStorePaymentProviderConfig(storePaymentProviderConfigService.saveOrUpdate(storeConfig));
+			}
+			if (storePaymentConfigurationModel.getStorePaymentProviderConfig() != null && !storePaymentConfigurationModel.isSelected()) {
+				storePaymentProviderConfigService.remove(storePaymentConfigurationModel.getStorePaymentProviderConfig());
+				storePaymentConfigurationModel.setStorePaymentProviderConfig(null);
+			}
+		}
+	}
+
+	/**
+	 * Checks if the payment configuration is active.
+	 *
+	 * @param storePaymentConfigurationModel payment configuration model.
+	 * @return true, if the payment configuration is active.
+	 */
+	private boolean isPaymentConfigurationActive(final StorePaymentConfigurationModel storePaymentConfigurationModel) {
+		final PaymentProviderConfigManagementService paymentProviderConfigManagementService =
+				BeanLocator.getSingletonBean(ContextIdNames.PAYMENT_PROVIDER_CONFIG_MANAGEMENT_SERVICE,
+						PaymentProviderConfigManagementService.class);
+
+		return paymentProviderConfigManagementService.findByGuid(storePaymentConfigurationModel.getConfigurationGuid())
+				.getStatus().equals(PaymentProviderConfigurationStatus.ACTIVE);
+	}
+
+	/**
 	 * Adds the given store code to the list of store codes designating the stores
 	 * to which the current user has edit permissions, and updates the local cache
 	 * of the user's permissions so that if the user closes the store editor and re-opens
 	 * it then they'll still have permissions to edit the store they just created.
-	 *  
+	 *
 	 * @param store the store to add to the current user
 	 */
 	protected void addStoreToCurrentUser(final Store store) {
@@ -356,13 +437,13 @@ public class StoreEditorModelHelper {
 		//retrieve the CmUser from the server with the stores, warehouses, and catalogs populated
 		CmUser serverCmUser = getCmUserService().findByUserNameWithAccessInfo(LoginManager.getCmUserUsername());
 		serverCmUser.addStore(store);
-		getCmUserService().update(serverCmUser);	
+		getCmUserService().update(serverCmUser);
 		AuthorizationService.getInstance().refreshRolesAndPermissions();
 	}
-	
+
 	/**
 	 * Checks that given model can be saved.
-	 * 
+	 *
 	 * @param model the model to save
 	 * @throws EpServiceException if store with given code or url already exists
 	 */
@@ -375,16 +456,16 @@ public class StoreEditorModelHelper {
 		if (isUrlNotUniqueForOpenStore(model)) {
 			throw new EpServiceException(CoreMessages.get().StoreUrlExists);
 		}
-		
-		if (!model.isPaymentMethodSelected()) {
-			throw new EpServiceException(CoreMessages.get().PaymentMethodRequired);
+
+		if (!model.isStorePaymentConfigurationSavable()) {
+			throw new EpServiceException(CoreMessages.get().PaymentProviderConfigurationRequired);
 		}
 	}
-	
+
 	/**
-	 * Check if the store's Url is unique for open stores. 
-	 *  Used when store is transfered to open state.  
-	 * 
+	 * Check if the store's Url is unique for open stores.
+	 * Used when store is transfered to open state.
+	 *
 	 * @param model the model to check
 	 * @return true if we are changing an open store and other open store has the same url
 	 */
@@ -395,19 +476,19 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Check if the store's Url is unique for stores.
-	 * 
+	 *
 	 * @param model the model to check
 	 * @return true if we are saving store and other open store has the same url
 	 */
 	public boolean isUrlNotUniqueStore(final StoreEditorModel model) {
-		return StringUtils.isNotEmpty(model.getUrl()) 	&& !storeService.isStoreUrlUniqueForState(model.getStore(), StoreState.OPEN);
+		return StringUtils.isNotEmpty(model.getUrl()) && !storeService.isStoreUrlUniqueForState(model.getStore(), StoreState.OPEN);
 	}
 
-	
+
 	/**
 	 * Checks if the stores are different.
-	 * 
-	 * @param model the store model
+	 *
+	 * @param model       the store model
 	 * @param storeByCode the store
 	 * @return true if stores are different and false otherwise
 	 */
@@ -417,7 +498,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Updates the store model.
-	 * 
+	 *
 	 * @param model the model to update
 	 */
 	void updateStoreModel(final StoreEditorModel model) {
@@ -426,7 +507,7 @@ public class StoreEditorModelHelper {
 		for (StoreEditorModel sharedModel : model.getSharedLoginStoreEntries()) {
 			store.getAssociatedStoreUids().add(sharedModel.getStore().getUidPk());
 		}
-		
+
 		updateStoreCommand.setStore(store);
 		updateStoreCommand.setSettingValues(getSettingsMap(model));
 		updateStoreCommand.setStoreCustomerAttributes(getStoreCustomerAttributeMap(model));
@@ -464,7 +545,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Gets the settings map from given model.
-	 * 
+	 *
 	 * @param model the model
 	 * @return the model settings
 	 */
@@ -491,7 +572,8 @@ public class StoreEditorModelHelper {
 	}
 
 	private StoreCustomerAttribute createStoreCustomerAttribute(final StoreCustomerAttributeModel attributeModel) {
-		final StoreCustomerAttribute storeCustomerAttribute = ServiceLocator.getService(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE);
+		final StoreCustomerAttribute storeCustomerAttribute = BeanLocator
+				.getPrototypeBean(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE, StoreCustomerAttribute.class);
 		storeCustomerAttribute.setGuid(attributeModel.getGuid());
 		storeCustomerAttribute.setAttributeKey(attributeModel.getAttributeKey());
 		storeCustomerAttribute.setPolicyKey(attributeModel.getPolicyKey());
@@ -515,7 +597,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * finds all available store editor models.
-	 * 
+	 *
 	 * @return the list of all store editor models
 	 */
 	public List<StoreEditorModel> findAllStoreEditorModels() {
@@ -529,7 +611,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Sets the settings service.
-	 * 
+	 *
 	 * @param settingsService the settings service to set
 	 */
 	void setSettingsService(final SettingsService settingsService) {
@@ -538,7 +620,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Sets the store service.
-	 * 
+	 *
 	 * @param storeService the store service to set
 	 */
 	void setStoreService(final StoreService storeService) {
@@ -547,21 +629,13 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Sets the command service.
-	 * 
+	 *
 	 * @param commandService the command service to set
 	 */
 	void setCommandService(final CommandService commandService) {
 		this.commandService = commandService;
 	}
-	
-	/**
-	 * Sets the CmUserService.
-	 * @param cmUserService the cmuserservice to set
-	 */
-	void setCmUserService(final CmUserService cmUserService) {
-		this.cmUserService = cmUserService;
-	}
-	
+
 	/**
 	 * @return the CmUserService
 	 */
@@ -570,8 +644,17 @@ public class StoreEditorModelHelper {
 	}
 
 	/**
+	 * Sets the CmUserService.
+	 *
+	 * @param cmUserService the cmuserservice to set
+	 */
+	void setCmUserService(final CmUserService cmUserService) {
+		this.cmUserService = cmUserService;
+	}
+
+	/**
 	 * Sets update store command service.
-	 * 
+	 *
 	 * @param updateStoreCommand the update store command service to set
 	 */
 	void setUpdateStoreCommand(final UpdateStoreCommand updateStoreCommand) {
@@ -580,7 +663,7 @@ public class StoreEditorModelHelper {
 
 	/**
 	 * Sets the fetch group load tuner.
-	 * 
+	 *
 	 * @param fetchGroupLoadTuner the load tuner to set
 	 */
 	void setFetchGroupLoadTuner(final FetchGroupLoadTuner fetchGroupLoadTuner) {
@@ -594,5 +677,17 @@ public class StoreEditorModelHelper {
 	 */
 	void setStoreCustomerAttributeService(final StoreCustomerAttributeService storeCustomerAttributeService) {
 		this.storeCustomerAttributeService = storeCustomerAttributeService;
+	}
+
+	void setPaymentProviderConfigManagementService(final PaymentProviderConfigManagementService paymentProviderConfigManagementService) {
+		this.paymentProviderConfigManagementService = paymentProviderConfigManagementService;
+	}
+
+	void setStorePaymentProviderConfigService(final StorePaymentProviderConfigService storePaymentProviderConfigService) {
+		this.storePaymentProviderConfigService = storePaymentProviderConfigService;
+	}
+
+	void setPaymentProviderManagementService(final PaymentProviderManagementService paymentProviderManagementService) {
+		this.paymentProviderManagementService = paymentProviderManagementService;
 	}
 }

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <manifest>
     <version>6.0</version>
-    <resource>modifiergroups.xml</resource>
-    <resource>catalogs.xml</resource>
-    <resource>modifiergroupfilters.xml</resource>
-    <resource>categories.xml</resource>
     <resource>stores.xml</resource>
+    <resource>customers.xml</resource>
     <resource>products.xml</resource>
+    <resource>bundles.xml</resource>
     <resource>productcategoryassociations.xml</resource>
-    <resource>inventory.xml</resource>
+    <resource>amounts.xml</resource>
+    <resource>shipping_service_levels.xml</resource>
 </manifest>

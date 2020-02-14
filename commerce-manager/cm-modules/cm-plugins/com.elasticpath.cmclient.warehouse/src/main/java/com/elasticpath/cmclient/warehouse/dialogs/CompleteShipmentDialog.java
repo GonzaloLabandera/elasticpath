@@ -3,7 +3,9 @@
  */
 package com.elasticpath.cmclient.warehouse.dialogs;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -22,6 +24,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.IManagedForm;
@@ -30,8 +33,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -73,22 +76,30 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 /**
  * Dialog for creating and editing orderShipment.
  */
-@SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.GodClass" })
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.GodClass"})
 public class CompleteShipmentDialog extends AbstractEpDialog {
-	
+
 	private static final int FORCE_COMPLETION_BUTTON_ID = 1000;
-	/** This dialog's title. Depends from whether this is create or edit dialog */
+	/**
+	 * This dialog's title. Depends from whether this is create or edit dialog
+	 */
 	private final String title;
 
-	/** This dialog's image. Depends from whether this is create or edit dialog */
+	/**
+	 * This dialog's image. Depends from whether this is create or edit dialog
+	 */
 	private final Image image;
 
-	/** This dialog's data binding context. */
+	/**
+	 * This dialog's data binding context.
+	 */
 	private final DataBindingContext dataBindingContext;
 
 	private final OrderService orderService;
 
-	/** The orderShipment. */
+	/**
+	 * The orderShipment.
+	 */
 	private PhysicalOrderShipment orderShipment;
 
 	private SelectionContainer selectionContainer;
@@ -104,29 +115,29 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 	private Text shippingMethodText;
 
 	private Text trackingNumberText;
-	
+
 	private Button validateButton;
-	
+
 	private Button forceCompletionButton;
 
 	private IEpLayoutComposite mainComposite;
-	
+
 	private IEpLayoutComposite notificationComposite;
-	
+
 	private Button completeButton;
-	
+
 	private final AllocationService allocationService;
 
-	private final ProductInventoryManagementService productInventoryManagementService; 
+	private final ProductInventoryManagementService productInventoryManagementService;
 	private ProductSkuLookup productSkuLookup;
-	
-	
+
+
 	/**
 	 * The constructor.
-	 * 
+	 *
 	 * @param parentShell the parent Shell
-	 * @param image the image for this dialog
-	 * @param title the title for this dialog
+	 * @param image       the image for this dialog
+	 * @param title       the title for this dialog
 	 */
 	public CompleteShipmentDialog(final Shell parentShell, final String title, final Image image) {
 		super(parentShell, 1, true);
@@ -135,15 +146,15 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 		this.image = image;
 		this.orderShipment = null;
 		this.dataBindingContext = new DataBindingContext();
-		this.orderService = ServiceLocator.getService(ContextIdNames.ORDER_SERVICE);
-		this.allocationService = ServiceLocator.getService(ContextIdNames.ALLOCATION_SERVICE);
-		this.productInventoryManagementService = ServiceLocator.getService(
-				ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE);
+		this.orderService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
+		this.allocationService = BeanLocator.getSingletonBean(ContextIdNames.ALLOCATION_SERVICE, AllocationService.class);
+		this.productInventoryManagementService = BeanLocator.getSingletonBean(
+				ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE, ProductInventoryManagementService.class);
 	}
 
 	/**
 	 * Convenience method to open a create dialog.
-	 * 
+	 *
 	 * @param parentShell the parent Shell
 	 * @return <code>true</code> if the user presses the OK button, <code>false</code> otherwise
 	 */
@@ -212,7 +223,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 	@Override
 	protected void bindControls() {
 		boolean hideDecorationOnFirstValidation = false;
-		
+
 		// create a simple ObservableUpdateValueStrategy target for the trackingNumberText binding
 		final ObservableUpdateValueStrategy trackingNumberUpdateStrategy = new ObservableUpdateValueStrategy() {
 			@Override
@@ -220,11 +231,11 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 				return Status.OK_STATUS;
 			}
 		};
-		
+
 		// add validation to the trackingNumberText binding
-		EpControlBindingProvider.getInstance().bind(dataBindingContext, trackingNumberText,	
+		EpControlBindingProvider.getInstance().bind(dataBindingContext, trackingNumberText,
 				EpValidatorFactory.MAX_LENGTH_255, null, trackingNumberUpdateStrategy, hideDecorationOnFirstValidation);
-		
+
 		// create the binding
 		EpDialogSupport.create(this, dataBindingContext);
 
@@ -242,16 +253,17 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 						WarehouseMessages.get().CompleteShipment_InsufficientInventory);
 				return;
 			}
-			
+
 			boolean sendConfEmail = true;
 			//complete the shipment assuming everything's ok.
-			orderService.completeShipment(orderShipment.getShipmentNumber(), trackingNumberText.getText(), 
+			orderService.completeShipment(orderShipment.getShipmentNumber(), trackingNumberText.getText(),
 					true, null, sendConfEmail, getEventOriginator());
 
 			super.okPressed();
 		} catch (CompleteShipmentFailedException ex) {
 			MessageDialog.openError(getShell(), WarehouseMessages.get().CompleteShipment_ShipmentCompletionFailedDialogTitle,
 					WarehouseMessages.get().CompleteShipment_ShipmentCompletionFailedDialogMessage);
+			showForceCompletionNotification();
 			enableForceCompletionButton();
 		}
 	}
@@ -278,19 +290,24 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 		return false;
 	}
 
-	private void enableForceCompletionButton() {
-		if (forceCompletionButton != null && !forceCompletionButton.isEnabled()) {
-			forceCompletionButton.setEnabled(true);
+	private void showForceCompletionNotification() {
+		if (Optional.ofNullable(forceCompletionButton).map(button -> !button.isEnabled()).orElse(false)) {
 			notificationComposite.addLabel(WarehouseMessages.get().CompleteShipment_ForceCompletionNotification,
 					notificationComposite.createLayoutData());
 			getShell().pack();
+			detailsSectionPart.getSection().pack();
 		}
+	}
+
+	private void enableForceCompletionButton() {
+		Optional.ofNullable(forceCompletionButton)
+				.filter(button -> !button.isEnabled())
+				.ifPresent(button -> button.setEnabled(true));
 	}
 
 	@Override
 	protected void createEpButtonsForButtonsBar(final ButtonsBarType buttonsBarType, final Composite parent) {
 		completeButton = createButton(parent, IDialogConstants.OK_ID, WarehouseMessages.get().CompleteShipment_OkButton, true);
-		completeButton.setImage(WarehouseImageRegistry.getImage(WarehouseImageRegistry.IMAGE_COMPLETE_SHIPMENT));
 		if (AuthorizationService.getInstance().isAuthorizedWithPermission(WarehousePermissions.WAREHOUSE_FORCE_ORDER_SHIPMENT_COMPLETE)
 				&& AuthorizationService.getInstance().isAuthorizedForWarehouse(WarehousePerspectiveFactory.getCurrentWarehouse())) {
 			forceCompletionButton = createButton(parent, FORCE_COMPLETION_BUTTON_ID,
@@ -303,7 +320,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 						boolean sendConfEmail = true;
 						orderService.completeShipment(orderShipment.getShipmentNumber(),
 								trackingNumberText.getText(), false, null, sendConfEmail, getEventOriginator());
-						MessageDialog.openInformation(getShell(), 
+						MessageDialog.openInformation(getShell(),
 								WarehouseMessages.get().CompleteShipment_ShipmentForceCompletionOkDialogTitle,
 								WarehouseMessages.get().CompleteShipment_ShipmentForceCompletionOkDialogMessage);
 						CompleteShipmentDialog.super.okPressed();
@@ -314,13 +331,13 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 				}
 			});
 		}
-		
+
 		createEpCancelButton(parent);
 	}
-	
+
 	private EventOriginator getEventOriginator() {
-		EventOriginatorHelper helper = ServiceLocator.getService(
-				ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = BeanLocator.getSingletonBean(
+				ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 
 		return helper.getCmUserOriginator(LoginManager.getCmUser());
 	}
@@ -336,7 +353,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 		private static final int SELECT_SECTION_PART_COLUMN_COUNT = 3;
 
 		private IEpLayoutComposite selectionComposite;
-		
+
 		public void createControls() {
 			selectionComposite = CompositeFactory.createTableWrapLayoutComposite(mainComposite.getSwtComposite(), SELECT_SECTION_PART_COLUMN_COUNT,
 					false);
@@ -348,7 +365,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 					IEpLayoutData.BEGINNING, true, false));
 
 			validateButton = selectionComposite.addPushButton(WarehouseMessages.get().CompleteShipment_ValidateButton, WarehouseImageRegistry
-					.getImage(WarehouseImageRegistry.IMAGE_VALIDATE_BUTTON), EpState.EDITABLE, selectionComposite.createLayoutData());			
+					.getImage(WarehouseImageRegistry.IMAGE_VALIDATE_BUTTON), EpState.EDITABLE, selectionComposite.createLayoutData());
 		}
 
 		public void populateControls() {
@@ -372,7 +389,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 				public void widgetSelected(final SelectionEvent event) {
 					// Nothing
 				}
-				
+
 			});
 			validateButton.addSelectionListener(new SelectionListener() {
 				@Override
@@ -386,8 +403,8 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 				}
 
 			});
-			
-			// pressing enter while entering a shipment ID will also validate and 
+
+			// pressing enter while entering a shipment ID will also validate and
 			// load the shipment, which simulates pressing of the validate button
 			shipmentIDText.addKeyListener(new KeyAdapter() {
 				@Override
@@ -397,7 +414,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 					}
 				}
 			});
-			
+
 			trackingNumberText.addKeyListener(new KeyAdapter() {
 				@Override
 				public void keyReleased(final KeyEvent event) {
@@ -406,36 +423,36 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 					}
 				}
 			});
-			
+
 			selectionComposite.setControlModificationListener(CompleteShipmentDialog.this::resetError);
 		}
 
 		private void validatePressed() {
 			setComplete(false);
 			detailsSectionPart.getSection().setVisible(false);
-			
-			PhysicalOrderShipment foundShipment = 
+
+			PhysicalOrderShipment foundShipment =
 					(PhysicalOrderShipment) orderService.findOrderShipment(shipmentIDText.getText(), ShipmentType.PHYSICAL);
-			
+
 			if (foundShipment == null) {
 				setErrorMessage(WarehouseMessages.get().CompleteShipment_InvalidShipmentIDErrorMessage);
 				return;
 			}
-			
+
 			List<Warehouse> warehouses = foundShipment.getOrder().getStore().getWarehouses();
 			AuthorizationService.getInstance().filterAuthorizedWarehouses(warehouses);
-			
+
 			if (CollectionUtils.isEmpty(warehouses)) {
 				setErrorMessage(WarehouseMessages.get().CompleteShipment_Warehouse_No_Permission);
 				return;
-			} 
+			}
 
 			OrderShipmentStatus shipmentStatus = foundShipment.getShipmentStatus();
-			
+
 			if (OrderShipmentStatus.RELEASED.equals(shipmentStatus)) {
 				orderShipment = foundShipment;
 				detailsSectionPart.repopulate();
-				
+
 				setComplete(true);
 				detailsSectionPart.getSection().setVisible(true);
 				completeButton.setEnabled(true);
@@ -475,8 +492,9 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 			customerIDText = dataComposite.addTextField(EpState.READ_ONLY, dataComposite.createLayoutData(IEpLayoutData.FILL,
 					IEpLayoutData.BEGINNING, true, false));
 
-			dataComposite.addLabelBold(WarehouseMessages.get().CompleteShipment_ShippingAddressText, dataComposite.createLayoutData(IEpLayoutData.END,
-					IEpLayoutData.BEGINNING, true, false));
+			dataComposite.addLabelBold(WarehouseMessages.get().CompleteShipment_ShippingAddressText,
+					dataComposite.createLayoutData(IEpLayoutData.END,
+							IEpLayoutData.BEGINNING, true, false));
 			shippingAddressText = dataComposite.addTextField(EpState.READ_ONLY, dataComposite.createLayoutData(IEpLayoutData.FILL,
 					IEpLayoutData.BEGINNING, true, false));
 
@@ -523,6 +541,13 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 
 			shippingMethodText.setText(foundShippingOption.getDisplayName(orderShipment.getOrder().getLocale()).orElse(null));
 
+			if (Optional.ofNullable(forceCompletionButton).map(button -> !button.isEnabled()).orElse(false)) {
+				Arrays.stream(notificationComposite.getSwtComposite().getChildren())
+						.filter(label -> ((Label) label).getText().equals(WarehouseMessages.get().CompleteShipment_ForceCompletionNotification))
+						.findAny()
+						.ifPresent(label -> label.dispose());
+			}
+
 			detailsSectionPart.getSection().pack();
 			detailsSectionPart.getManagedForm().getForm().getShell().pack();
 		}
@@ -535,7 +560,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 			final String separator = WarehouseMessages.COMMA + WarehouseMessages.SPACE;
 			addressStr.append(orderAddress.getStreet1());
 			addressStr.append(separator);
-			if (orderAddress.getStreet2() != null 
+			if (orderAddress.getStreet2() != null
 					&& !orderAddress.getStreet2().equals(WarehouseMessages.EMPTY_STRING)) {
 				addressStr.append(orderAddress.getStreet2());
 				addressStr.append(separator);
@@ -551,17 +576,18 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 			return addressStr.toString();
 		}
 	}
-	
+
 	/**
-	* Gets inventoryService.
-	* @return inventoryService - inventoryService.
-	*/
+	 * Gets inventoryService.
+	 *
+	 * @return inventoryService - inventoryService.
+	 */
 	public ProductInventoryManagementService getProductInventoryManagementService() {
 		return productInventoryManagementService;
 	}
 
 	protected ShippingOptionService getShippingOptionService() {
-		return ServiceLocator.getService(ContextIdNames.SHIPPING_OPTION_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.SHIPPING_OPTION_SERVICE, ShippingOptionService.class);
 	}
 
 	/**
@@ -573,7 +599,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 		if (productSkuLookup == null) {
 			productSkuLookup = new LocalProductSkuLookup();
 		}
-		
+
 		return productSkuLookup;
 	}
 }

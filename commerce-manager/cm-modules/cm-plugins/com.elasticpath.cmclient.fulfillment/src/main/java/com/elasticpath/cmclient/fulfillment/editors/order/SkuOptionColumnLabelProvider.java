@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.fulfillment.editors.order;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.order.OrderSku;
@@ -16,15 +16,15 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
  */
 public class SkuOptionColumnLabelProvider extends ColumnLabelProvider {
 	private final OrderSkuOptionRenderer skuOptionRenderer;
-	
+
 	/**
 	 * SkuOptionColumnLabelProvider constructor.
 	 */
 	public SkuOptionColumnLabelProvider() {
-		ProductSkuLookup skuReader = ServiceLocator.getService(ContextIdNames.PRODUCT_SKU_LOOKUP);
+		ProductSkuLookup skuReader = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 		skuOptionRenderer = new OrderSkuOptionRendererImpl(skuReader);
 	}
-	
+
 	@Override
 	public String getText(final Object element) {
 		final OrderSku orderSku = (OrderSku) element;

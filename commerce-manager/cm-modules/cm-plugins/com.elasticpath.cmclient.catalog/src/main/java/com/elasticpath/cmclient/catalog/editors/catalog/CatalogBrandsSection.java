@@ -30,10 +30,10 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.dialogs.brand.BrandDialog;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.CatalogBrandTableLabelProviderDecorator;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.ChangeSetTableLabelProviderDecorator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapter;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -61,7 +61,7 @@ public class CatalogBrandsSection extends AbstractPolicyAwareEpTableSection<Bran
 
 	private final List<Brand> catalogBrands;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private final ChangeSetColumnDecorator changeSetColumnDecorator = new ChangeSetColumnDecorator();
 
@@ -106,7 +106,7 @@ public class CatalogBrandsSection extends AbstractPolicyAwareEpTableSection<Bran
 	}
 
 	private void initializeServices() {
-		brandService = ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+		brandService = BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 	}
 
 	/**

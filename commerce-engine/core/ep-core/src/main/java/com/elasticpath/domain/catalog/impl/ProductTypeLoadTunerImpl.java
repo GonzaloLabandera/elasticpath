@@ -7,7 +7,6 @@ import static com.elasticpath.persistence.support.FetchFieldConstants.CART_ITEM_
 import static com.elasticpath.persistence.support.FetchFieldConstants.OPTION_VALUE_MAP;
 import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_ATTRIBUTE_GROUP_ATTRIBUTES;
 import static com.elasticpath.persistence.support.FetchFieldConstants.SKU_ATTRIBUTE_GROUP_ATTRIBUTES;
-import static com.elasticpath.persistence.support.FetchFieldConstants.SKU_OPTIONS;
 
 import java.util.Objects;
 
@@ -137,7 +136,6 @@ public class ProductTypeLoadTunerImpl extends AbstractEpDomainImpl implements Pr
 			fetchPlan.addField(ProductTypeImpl.class, SKU_ATTRIBUTE_GROUP_ATTRIBUTES);
 		}
 		if (isLoadingSkuOptions()) {
-			fetchPlan.addField(ProductTypeImpl.class, SKU_OPTIONS);
 			fetchPlan.addField(ProductSkuImpl.class, OPTION_VALUE_MAP);
 		}
 		if (isLoadingModifierGroups()) {

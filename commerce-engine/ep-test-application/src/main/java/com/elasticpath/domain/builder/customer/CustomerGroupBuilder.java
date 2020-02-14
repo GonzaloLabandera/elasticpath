@@ -73,7 +73,7 @@ public class CustomerGroupBuilder implements DomainObjectBuilder<CustomerGroup> 
 
 	@Override
 	public CustomerGroup build() {
-		CustomerGroup customerGroup = beanFactory.getBean(ContextIdNames.CUSTOMER_GROUP);
+		CustomerGroup customerGroup = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_GROUP, CustomerGroup.class);
 		customerGroup.setGuid(guid);
 		customerGroup.setUidPk(uidpk);
 		customerGroup.setName(name);

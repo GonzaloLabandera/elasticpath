@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -55,9 +59,9 @@
 		<module>navigations</module>
 		<module>orders</module>
 		<module>pagination-commons</module>
-		<module>payment-method-commons</module>
 		<module>paymentmethods</module>
-		<module>paymenttokens</module>
+		<module>paymentinstructions</module>
+		<module>paymentinstruments</module>
 		<module>prices</module>
 		<module>profiles</module>
 		<module>promotions</module>

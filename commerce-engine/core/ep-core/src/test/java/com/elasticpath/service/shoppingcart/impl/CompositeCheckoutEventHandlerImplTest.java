@@ -1,12 +1,11 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.impl;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,7 +17,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.shoppingcart.CheckoutEventHandler;
 
@@ -30,19 +28,18 @@ public class CompositeCheckoutEventHandlerImplTest {
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 	private ShoppingCart shoppingCart;
-	private OrderPayment orderPayment;
 	private Order order;
 
 	private CompositeCheckoutEventHandlerImpl compositeCheckoutEventHandler;
 
 	/**
 	 * Test setup.
+	 *
 	 * @throws Exception on failure
 	 */
 	@Before
 	public void setUp() throws Exception {
 		order = context.mock(Order.class);
-		orderPayment = context.mock(OrderPayment.class);
 		shoppingCart = context.mock(ShoppingCart.class);
 
 		compositeCheckoutEventHandler = new CompositeCheckoutEventHandlerImpl();
@@ -50,19 +47,17 @@ public class CompositeCheckoutEventHandlerImplTest {
 
 	/**
 	 * Test teardown.
-	 * @throws Exception on failure
 	 */
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		compositeCheckoutEventHandler = null;
 	}
 
 	/**
 	 * Test that CheckoutEventHandler getters and setters are immutable.
-	 * @throws Exception on failure
 	 */
 	@Test
-	public void testGetAndSetCheckoutEventHandlersIsImmutable() throws Exception {
+	public void testGetAndSetCheckoutEventHandlersIsImmutable() {
 		final List<CheckoutEventHandler> delegatedHandlers = new ArrayList<>();
 		delegatedHandlers.add(context.mock(CheckoutEventHandler.class));
 
@@ -79,97 +74,88 @@ public class CompositeCheckoutEventHandlerImplTest {
 
 	/**
 	 * Test empty list of CheckoutEventHandlers.
-	 * @throws Exception on failure
 	 */
 	@Test
-	public void testAllOperationsPerformNoOpForUnsetAndEmptyListOfCheckoutEventHandlers()
-	throws Exception {
-		compositeCheckoutEventHandler.preCheckout(shoppingCart, orderPayment);
-		compositeCheckoutEventHandler.preCheckoutOrderPersist(shoppingCart,
-				Collections.singletonList(orderPayment), order);
-		compositeCheckoutEventHandler.postCheckout(shoppingCart, orderPayment, order);
+	public void testAllOperationsPerformNoOpForUnsetAndEmptyListOfCheckoutEventHandlers() {
+		compositeCheckoutEventHandler.preCheckout(shoppingCart);
+		compositeCheckoutEventHandler.preCheckoutOrderPersist(shoppingCart, order);
+		compositeCheckoutEventHandler.postCheckout(shoppingCart, order);
 
-		compositeCheckoutEventHandler.setCheckoutEventHandlers(Collections
-				.<CheckoutEventHandler> emptyList());
+		compositeCheckoutEventHandler.setCheckoutEventHandlers(Collections.emptyList());
 
-		compositeCheckoutEventHandler.preCheckout(shoppingCart, orderPayment);
-		compositeCheckoutEventHandler.preCheckoutOrderPersist(shoppingCart,
-				Collections.singletonList(orderPayment), order);
-		compositeCheckoutEventHandler.postCheckout(shoppingCart, orderPayment, order);
+		compositeCheckoutEventHandler.preCheckout(shoppingCart);
+		compositeCheckoutEventHandler.preCheckoutOrderPersist(shoppingCart, order);
+		compositeCheckoutEventHandler.postCheckout(shoppingCart, order);
 	}
 
 	/**
 	 * Test preCheckout delegates.
-	 * @throws Exception on failure
 	 */
 	@Test
-	public void testPreCheckoutDelegates() throws Exception {
+	public void testPreCheckoutDelegates() {
 		final List<CheckoutEventHandler> delegatedHandlers = getMockedCheckoutEventHandlerList();
 
 		context.checking(new Expectations() {
 
 			{
 				for (final CheckoutEventHandler checkoutEventHandler : delegatedHandlers) {
-					oneOf(checkoutEventHandler).preCheckout(shoppingCart, orderPayment);
+					oneOf(checkoutEventHandler).preCheckout(shoppingCart);
 				}
 			}
 
 		});
 
 		compositeCheckoutEventHandler.setCheckoutEventHandlers(delegatedHandlers);
-		compositeCheckoutEventHandler.preCheckout(shoppingCart, orderPayment);
+		compositeCheckoutEventHandler.preCheckout(shoppingCart);
 	}
 
 	/**
 	 * Test preCheckoutOrderPersist delegates.
-	 * @throws Exception on failure
 	 */
 	@Test
-	public void testPreCheckoutOrderPersistDelegates() throws Exception {
+	public void testPreCheckoutOrderPersistDelegates() {
 		final List<CheckoutEventHandler> delegatedHandlers = getMockedCheckoutEventHandlerList();
-		final Collection<OrderPayment> orderPayments = Collections.singletonList(orderPayment);
 
 		context.checking(new Expectations() {
 
 			{
 				for (final CheckoutEventHandler checkoutEventHandler : delegatedHandlers) {
-					oneOf(checkoutEventHandler).preCheckoutOrderPersist(shoppingCart, orderPayments, order);
+					oneOf(checkoutEventHandler).preCheckoutOrderPersist(shoppingCart, order);
 				}
 			}
 
 		});
 
 		compositeCheckoutEventHandler.setCheckoutEventHandlers(delegatedHandlers);
-		compositeCheckoutEventHandler.preCheckoutOrderPersist(shoppingCart, orderPayments, order);
+		compositeCheckoutEventHandler.preCheckoutOrderPersist(shoppingCart, order);
 	}
 
 	/**
 	 * Test postCheckout delegates.
-	 * @throws Exception on failure
 	 */
 	@Test
-	public void testPostCheckoutDelegates() throws Exception {
+	public void testPostCheckoutDelegates() {
 		final List<CheckoutEventHandler> delegatedHandlers = getMockedCheckoutEventHandlerList();
 
 		context.checking(new Expectations() {
 
 			{
 				for (final CheckoutEventHandler checkoutEventHandler : delegatedHandlers) {
-					oneOf(checkoutEventHandler).postCheckout(shoppingCart, orderPayment, order);
+					oneOf(checkoutEventHandler).postCheckout(shoppingCart, order);
 				}
 			}
 
 		});
 
 		compositeCheckoutEventHandler.setCheckoutEventHandlers(delegatedHandlers);
-		compositeCheckoutEventHandler.postCheckout(shoppingCart, orderPayment, order);
+		compositeCheckoutEventHandler.postCheckout(shoppingCart, order);
 	}
 
 	private List<CheckoutEventHandler> getMockedCheckoutEventHandlerList() {
 		final CheckoutEventHandler checkoutEventHandler1 = context.mock(CheckoutEventHandler.class,
 				"checkoutEventHandler1");
 		final CheckoutEventHandler checkoutEventHandler2 = context.mock(CheckoutEventHandler.class,
-		"checkoutEventHandler2");
+				"checkoutEventHandler2");
 
 		final List<CheckoutEventHandler> mockedHandlers = new ArrayList<>();
 		mockedHandlers.add(checkoutEventHandler1);

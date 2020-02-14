@@ -87,8 +87,8 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.PROMOTION_RULE, PromotionRuleImpl.class);
-		stubGetBean(ContextIdNames.RULE_SCENARIOS, RuleScenariosImpl.class);
+		stubGetPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class, PromotionRuleImpl.class);
+		stubGetPrototypeBean(ContextIdNames.RULE_SCENARIOS, RuleScenarios.class, RuleScenariosImpl.class);
 		stubGetBean(ContextIdNames.CART_SUBTOTAL_COND, CartSubtotalConditionImpl.class);
 
 		ruleServiceImpl = new RuleServiceImpl();
@@ -507,7 +507,7 @@ Tested by FIT?
 	 */
 	@Test
 	public void testGetAllExceptionsMap() {
-		stubGetBean(ContextIdNames.SKU_EXCEPTION, SkuExceptionImpl.class);
+		stubGetPrototypeBean(ContextIdNames.SKU_EXCEPTION, RuleException.class, SkuExceptionImpl.class);
 
 		List<String> exceptionsSet = new ArrayList<>();
 		exceptionsSet.add("skuException");

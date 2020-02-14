@@ -99,13 +99,19 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
 	@Override
 	public Observable<Category> findChildren(final String storeCode, final String parentCategoryCode) {
-		Comparator<Category> comparator = coreBeanFactory.getBean(ContextIdNames.ORDERING_COMPARATOR);
+
+
 
 		return findByStoreAndCategoryCode(storeCode, parentCategoryCode)
 				.flatMap(this::getChildren)
 				.flatMapObservable(Observable::fromIterable)
 				.filter(category -> !category.isLinked() || category.isIncluded())
-				.sorted(comparator);
+				.sorted(getComparatorBean());
+	}
+
+	@SuppressWarnings("unchecked")
+	private Comparator<Category> getComparatorBean() {
+		return coreBeanFactory.getPrototypeBean(ContextIdNames.ORDERING_COMPARATOR, Comparator.class);
 	}
 
 	@Override

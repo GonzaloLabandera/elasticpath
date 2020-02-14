@@ -115,7 +115,7 @@ public class AttributeRangeFilterXmlElementParserImplTest extends BasicFilteredN
 
 					@SuppressWarnings("unchecked")
 					@Override
-					protected <T> T getBean(final String beanName) {
+					protected <T> T getPrototypeBean(final String beanName, final Class<T> clazz) {
 						Object object = null;
 						if (ContextIdNames.ATTRIBUTE_VALUE.equals(beanName)) {
 							object = productAttributeValueImpl;

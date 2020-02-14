@@ -1,8 +1,11 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortexTestObjects
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
-import static com.elasticpath.cortex.dce.SharedConstants.TEST_TOKEN
-import static com.elasticpath.cortex.dce.SharedConstants.TEST_TOKEN_DISPLAY_NAME
+import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_PAYMENT_CONFIGURATION_NAME
 import static org.assertj.core.api.Assertions.assertThat
 
 import com.elasticpath.cortex.dce.CommonMethods
@@ -95,7 +98,18 @@ class Order extends CommonMethods {
 		CortexResponse.purchaseResponse = client.save()
 		Purchase.setPurchaseNumber()
 		println("purchase number: " + Purchase.getPurchaseNumber())
+	}
 
+	static void submitPurchaseForCart(final String cartName) {
+		MultiCart.getCart(cartName)
+		client.order()
+				.purchaseform()
+				.submitorderaction()
+				.follow()
+				.stopIfFailure()
+		CortexResponse.purchaseResponse = client.save()
+		Purchase.setPurchaseNumber()
+		println("purchase number: " + Purchase.getPurchaseNumber())
 	}
 
 	static void submitPurchaseWithoutFollow() {
@@ -146,32 +160,14 @@ class Order extends CommonMethods {
 		}
 	}
 
-	static void paymentmethodinfo() {
+	static void paymentmethodsresource() {
 		getOrder()
 		client.paymentmethodinfo()
 				.stopIfFailure()
 	}
 
-	static void addToken(String displayName, String token) {
-		paymentmethodinfo()
-		client.paymenttokenform()
-				.createpaymenttokenfororderaction(
-				['display-name': displayName,
-				 'token'       : token]
-		)
-				.follow()
-				.stopIfFailure()
-	}
-
-	static void addDefaultToken() {
-		addToken(TEST_TOKEN_DISPLAY_NAME, TEST_TOKEN)
-	}
-
-	static def getPaymentMethodDisplayName() {
-		paymentmethodinfo()
-		client.paymentmethod()
-				.stopIfFailure()
-		return client["display-name"]
+	static void addOrderPaymentInstrument() {
+		Payment.createUnsavedPaymentInstrument(DEFAULT_PAYMENT_CONFIGURATION_NAME)
 	}
 
 	static void selectShippingAddressByPostalCode(def postalCode) {
@@ -298,46 +294,38 @@ class Order extends CommonMethods {
 		return getDisplayName()
 	}
 
-	static void paymentMethodSelector() {
-		paymentmethodinfo()
-		client.selector()
+	static void paymentinstrumentselector() {
+		getOrder()
+		client.paymentinstrumentselector()
 				.stopIfFailure()
 	}
 
-	static void chosenPaymentMethod() {
-		paymentMethodSelector()
+	static void chosenPaymentInstrument() {
+		paymentinstrumentselector()
 		client.chosen()
 				.stopIfFailure()
 	}
 
-	static void chosenPaymentMethodDescription() {
-		chosenPaymentMethod()
+	static void chosenPaymentInstrumentDescription() {
+		chosenPaymentInstrument()
 		client.description()
 				.stopIfFailure()
 	}
 
-	static def getChosenPaymentMethodDisplayName() {
-		chosenPaymentMethodDescription()
-		return getDisplayName()
+	static def getChosenPaymentInstrumentName() {
+		chosenPaymentInstrumentDescription()
+		return client["name"]
 	}
 
-	static void paymentMethodChoiceDescription() {
-		paymentMethodSelector()
+	static void paymentInstrumentChoiceDescription() {
+		paymentinstrumentselector()
 		client.choice()
 				.description()
 				.stopIfFailure()
 	}
 
-	static void chooseAnyPaymentMethod() {
-		paymentMethodSelector()
-		client.choice()
-				.selectaction()
-				.follow()
+	static void getPaymentConfigurationWithName(String configurationName) {
+		paymentmethodsresource()
+		openLinkRelWithFieldWithValue("element", "name", configurationName)
 	}
-
-	static def getChoicePaymentMethodDisplayName() {
-		paymentMethodChoiceDescription()
-		return getDisplayName()
-	}
-
 }

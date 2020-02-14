@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -45,8 +46,9 @@ public class CatalogLocaleFallbackPolicyFactoryTest {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		factory = new CatalogLocaleFallbackPolicyFactory();
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, factory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, UtilityImpl.class);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, 
+				CatalogLocaleFallbackPolicyFactory.class, factory);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
 
 	}
 

@@ -95,10 +95,10 @@ public class ProductLookupImplITest extends DbTestCase {
 		ProductBundle innerBundle = persisterFactory.getCatalogTestPersister().createSimpleProductBundle(
 				"productBundleType", "innerBundle", scenario.getCatalog(), scenario.getCategory(),
 				persisterFactory.getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS));
-		ProductSku innerBundleSku = beanFactory.getBean(ContextIdNames.PRODUCT_SKU);
+		ProductSku innerBundleSku = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 		innerBundleSku.setProduct(innerBundle);
 		innerBundleSku.setSkuCode("productBundle");
-		BundleConstituent constituent = beanFactory.getBean(ContextIdNames.BUNDLE_CONSTITUENT);
+		BundleConstituent constituent = beanFactory.getPrototypeBean(ContextIdNames.BUNDLE_CONSTITUENT, BundleConstituent.class);
 		constituent.setConstituent(product);
 		constituent.setQuantity(1);
 		innerBundle.addConstituent(constituent);
@@ -107,10 +107,10 @@ public class ProductLookupImplITest extends DbTestCase {
 		ProductBundle outerBundle = persisterFactory.getCatalogTestPersister().createSimpleProductBundle(
 				"productBundleType", "outerBundle", scenario.getCatalog(), scenario.getCategory(),
 				persisterFactory.getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS));
-		ProductSku bundleSku = beanFactory.getBean(ContextIdNames.PRODUCT_SKU);
+		ProductSku bundleSku = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 		bundleSku.setProduct(outerBundle);
 		bundleSku.setSkuCode("outerBundle");
-		BundleConstituent outerConstituent = beanFactory.getBean(ContextIdNames.BUNDLE_CONSTITUENT);
+		BundleConstituent outerConstituent = beanFactory.getPrototypeBean(ContextIdNames.BUNDLE_CONSTITUENT, BundleConstituent.class);
 		outerConstituent.setConstituent(innerBundle.getDefaultSku());
 		outerConstituent.setQuantity(1);
 		outerBundle.addConstituent(outerConstituent);

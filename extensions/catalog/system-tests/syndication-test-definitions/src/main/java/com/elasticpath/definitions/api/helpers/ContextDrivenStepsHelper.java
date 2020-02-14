@@ -121,6 +121,7 @@ public class ContextDrivenStepsHelper {
 		if (!"".equals(modifiedSinceOffset)) {
 			comleteUrl = comleteUrl + "&modifiedSinceOffset=" + modifiedSinceOffset;
 		}
+		StepsHelper.sleep(Constants.API_SLEEP_TIME);
 		response = given().when().get(comleteUrl);
 		context.setResponse(response);
 		return context;

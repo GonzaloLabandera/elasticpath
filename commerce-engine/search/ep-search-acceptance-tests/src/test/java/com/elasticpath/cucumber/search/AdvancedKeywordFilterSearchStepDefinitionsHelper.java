@@ -119,7 +119,7 @@ public class AdvancedKeywordFilterSearchStepDefinitionsHelper {
 	}
 
 	private void setUpProducts(final String productAttributeValue) {
-		ProductLoadTuner tuner = beanFactory.getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
+		ProductLoadTuner tuner = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 		tuner.setLoadingAttributeValue(true);
 		tuner.setLoadingSkus(false);
 		
@@ -159,7 +159,8 @@ public class AdvancedKeywordFilterSearchStepDefinitionsHelper {
 		final Set<AttributeGroupAttribute> attributeGroupAttributes = new HashSet<>();
 
 		for (final Attribute attribute : attributes) {
-			final AttributeGroupAttribute groupAttribute = beanFactory.getBean(ContextIdNames.PRODUCT_TYPE_PRODUCT_ATTRIBUTE);
+			final AttributeGroupAttribute groupAttribute = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_TYPE_PRODUCT_ATTRIBUTE,
+					AttributeGroupAttribute.class);
 			groupAttribute.setAttribute(attribute);
 			groupAttribute.setOrdering(order++);
 			attributeGroupAttributes.add(groupAttribute);
@@ -204,14 +205,14 @@ public class AdvancedKeywordFilterSearchStepDefinitionsHelper {
 	 * @param attrKey the attribute key
 	 */
 	public void runAdvancedSearch(final String searchTerm, final String attrKey) {
-		searchRequest = beanFactory.getBean(ContextIdNames.ADVANCED_SEARCH_REQUEST);
+		searchRequest = beanFactory.getPrototypeBean(ContextIdNames.ADVANCED_SEARCH_REQUEST, AdvancedSearchRequest.class);
 		searchRequest.initialize();
 		searchRequest.setLocale(Locale.ENGLISH);
 		searchRequest.parseSorterIdStr(SortUtility.constructSortTypeOrderString(
 				StandardSortBy.RELEVANCE, SortOrder.DESCENDING));
 		addKeywordFilter(attrKey, searchTerm);
 		
-		ShoppingCart shoppingCart = beanFactory.getBean(ContextIdNames.SHOPPING_CART);
+		ShoppingCart shoppingCart = beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		setupShoppingCart(shoppingCart);
 		
 		searchResult = advancedSearchService.search(searchRequest, shoppingCart, 1);
@@ -244,7 +245,7 @@ public class AdvancedKeywordFilterSearchStepDefinitionsHelper {
 	}
 	
 	private void setupShoppingCart(final ShoppingCart shoppingCart) {
-		Shopper shopper = beanFactory.getBean(ContextIdNames.SHOPPER);
+		Shopper shopper = beanFactory.getPrototypeBean(ContextIdNames.SHOPPER, Shopper.class);
 		shopper.setShopperMemento(new ShopperMementoImpl());
 		shopper.setGuid("shopper-1");
 		shopper.setStoreCode(scenario.getStore().getCode());

@@ -90,7 +90,8 @@ public class AuditDaoImplTest {
 				oneOf(entity).getUidPk(); will(returnValue(UIDPK));
 				oneOf(entity).getGuid(); will(returnValue(GUID));
 				
-				oneOf(beanFactory).getBean("dataChanged"); will(returnValue(dataChanged));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.DATA_CHANGED, DataChanged.class);
+				will(returnValue(dataChanged));
 				oneOf(dataChanged).setObjectName(entity.getClass().getName());
 				oneOf(dataChanged).setObjectUid(UIDPK);
 				oneOf(dataChanged).setObjectGuid(GUID);
@@ -120,10 +121,10 @@ public class AuditDaoImplTest {
 		metadata.put("userGuid", "USERGUID");
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean("changeTransaction");
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGE_TRANSACTION, ChangeTransaction.class);
 					will(returnValue(changeTransaction));
 
-				oneOf(beanFactory).getBean(ContextIdNames.TIME_SERVICE);
+				oneOf(beanFactory).getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 					will(returnValue(timeService));
 				oneOf(timeService).getCurrentTime();
 					will(returnValue(changeDate));
@@ -151,7 +152,7 @@ public class AuditDaoImplTest {
 		
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean("singleChangeOperation");
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.SINGLE_CHANGE_OPERATION, SingleChangeOperation.class);
 					will(returnValue(operation));
 					
 				oneOf(entity).getUidPk();
@@ -183,7 +184,7 @@ public class AuditDaoImplTest {
 		final int nextIndex = 2;
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean("bulkChangeOperation"); will(returnValue(operation));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.BULK_CHANGE_OPERATION, BulkChangeOperation.class); will(returnValue(operation));
 				oneOf(operation).setQueryString(queryString);
 				oneOf(operation).setParameters(parameters);
 				oneOf(operation).setChangeType(ChangeType.UPDATE);
@@ -206,7 +207,7 @@ public class AuditDaoImplTest {
 		final ChangeTransactionMetadata metadata = context.mock(ChangeTransactionMetadata.class, key);
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean("changeTransactionMetadata");
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGE_TRANSACTION_METADATA, ChangeTransactionMetadata.class);
 					will(returnValue(metadata));
 				oneOf(metadata).setChangeTransaction(changeTransaction);
 				oneOf(metadata).setMetadataKey(key);
@@ -230,7 +231,7 @@ public class AuditDaoImplTest {
 		final ChangeSetService changeSetService = context.mock(ChangeSetService.class);
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_SERVICE);
+				oneOf(beanFactory).getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 					will(returnValue(changeSetService));
 				oneOf(changeSetService).findChangeSetGuid(object);
 					will(returnValue(guid));

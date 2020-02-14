@@ -37,6 +37,7 @@ import org.apache.openjpa.persistence.jdbc.ElementForeignKey;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.cmuser.impl.CmUserImpl;
 import com.elasticpath.domain.dataimport.ImportAction;
@@ -400,7 +401,8 @@ public class ImportNotificationImpl extends AbstractLegacyPersistenceImpl implem
 	 * @param value the value
 	 */
 	private void setMetadataValue(final String key, final Object value) {
-		ImportNotificationMetadata metadataEntry = getBean("importNotificationMetadata");
+		ImportNotificationMetadata metadataEntry = getPrototypeBean(ContextIdNames.IMPORT_NOTIFICATION_METADATA,
+				ImportNotificationMetadata.class);
 		metadataEntry.setKey(key);
 		metadataEntry.setValue(String.valueOf(value));
 		getMetadata().put(key, metadataEntry);

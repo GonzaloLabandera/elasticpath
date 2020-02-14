@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.changeset.policy;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.StateDeterminer;
@@ -39,7 +39,7 @@ public class ChangeSetBaseAmountPolicyImpl extends AbstractChangeSetDeterminerSt
 	 */
 	public static class BaseAmountRemovingDeterminer implements StateDeterminer {
 
-		private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+		private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 		/**
 		 * Determine the removing state based on the base amount selection.

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2014
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cmclient.fulfillment.editors.actions;
 
@@ -9,8 +9,8 @@ import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.fulfillment.FulfillmentImageRegistry;
 import com.elasticpath.cmclient.fulfillment.editors.order.OrderEditor;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
-import com.elasticpath.cmclient.fulfillment.wizards.ReturnElectronicOrderWizard;
 import com.elasticpath.cmclient.fulfillment.wizards.SubscribingDialog;
+import com.elasticpath.cmclient.fulfillment.wizards.shipmentreturn.ReturnElectronicOrderWizard;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 
@@ -48,7 +48,7 @@ public class CreateReturnElectronicOrderContributionAction extends org.eclipse.j
 	 */
 	@Override
 	public void run() {
-		ReturnElectronicOrderWizard wizard = ReturnElectronicOrderWizard.createReturnWizard(order, orderShipment);
+		ReturnElectronicOrderWizard wizard = ReturnElectronicOrderWizard.createReturnWizard(orderShipment);
 		// Create the wizard dialog
 		SubscribingDialog dialog = new SubscribingDialog(parentShell, wizard);
 		// Open the wizard dialog

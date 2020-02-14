@@ -64,7 +64,7 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 
 	@Override
 	public Single<StoreProduct> findDisplayableStoreProductWithAttributesBySkuGuid(final String storeCode, final String skuGuid) {
-		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(skuGuid)
+		return productSkuRepository.getProductSkuWithAttributesByGuid(skuGuid)
 				.flatMap(productSku -> findDisplayableStoreProductWithAttributesForProduct(storeCode, productSku.getProduct()));
 	}
 

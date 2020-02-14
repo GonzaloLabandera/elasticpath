@@ -358,7 +358,7 @@ public class ImportDataTypeCustomerAddressImpl extends AbstractImportDataTypeImp
 					throw new EpInvalidValueBindException(super.getName());
 				}
 
-				Geography geography = getBean(ContextIdNames.GEOGRAPHY);
+				Geography geography = getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 				boolean valid = false;
 				for (String countryCode : geography.getCountryCodes()) {
 					valid |= geography.getSubCountryCodes(countryCode).contains(value);
@@ -398,7 +398,7 @@ public class ImportDataTypeCustomerAddressImpl extends AbstractImportDataTypeImp
 					throw new EpInvalidValueBindException(super.getName());
 				}
 
-				Geography geography = getBean(ContextIdNames.GEOGRAPHY);
+				Geography geography = getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 				if (!geography.getCountryCodes().contains(value)) {
 					throw new EpInvalidValueBindException(super.getName() + "Invalid Country Code");
 				}
@@ -585,7 +585,7 @@ public class ImportDataTypeCustomerAddressImpl extends AbstractImportDataTypeImp
 	 */
 	@Override
 	public Persistable createValueObject() {
-		return getBean(ContextIdNames.CUSTOMER_ADDRESS);
+		return getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 	}
 
 	/**

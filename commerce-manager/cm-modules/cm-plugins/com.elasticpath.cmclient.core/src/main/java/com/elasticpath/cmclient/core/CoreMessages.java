@@ -197,6 +197,8 @@ public final class CoreMessages {
 
 	public String EpValidatorFactory_BigDecimal;
 
+	public String EpValidatorFactory_RefundingAmount;
+
 	public String EpValidatorFactory_BigDecimal_Asterisk;
 
 	public String EpValidatorFactory_NonNegativeNonZeroBigDecimal;
@@ -624,7 +626,7 @@ public final class CoreMessages {
 	public String StoreCodeExists;
 	public String StoreUrlExists;
 	public String NotAllRequiredFieldsProvided;
-	public String PaymentMethodRequired;
+	public String PaymentProviderConfigurationRequired;
 	public String SelectedGatewayPaymentTypeNotInApplicableTypes;
 
 	public String ValidationError_WarningMessage;

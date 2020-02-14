@@ -12,10 +12,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.dto.catalog.PriceListEditorModel;
 import com.elasticpath.cmclient.core.dto.catalog.impl.PriceListEditorModelImpl;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -55,17 +55,17 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	private ProductLookup productLookup;
 
 	private ProductSkuLookup productSkuLookup;
-	
+
 	/** Controllers are tied to a model. We don't want to manage multiple opened models. **/
 	private String plGuid = StringUtils.EMPTY;
 
 	private Locale currentLocale;
-	
+
 	/**
 	 * Common used filter.
 	 */
 	private BaseAmountFilterExt filter;
-	
+
 	/**
 	 * Base amount second filter, that used for perform filtering on obtained from server side result.
 	 */
@@ -86,18 +86,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	 */
 	public PriceListEditorControllerImpl(final String guid) {
 		plGuid = guid;
-		this.changeSetHelper = getBean(ChangeSetHelper.BEAN_ID);
-	}
-
-	/**
-	 * Gets the bean instance.
-	 *
-	 * @param beanId bean identifier string
-	 * @param <T> the type
-	 * @return the instance of the bean
-	 */
-	protected <T> T getBean(final String beanId) {
-		return ServiceLocator.getService(beanId);
+		this.changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	}
 
 	/**
@@ -105,7 +94,8 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	 */
 	protected PriceListService getPriceListService() {
 		if (this.priceListService == null) {
-			this.priceListService = this.getBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+			//this.priceListService = BeanLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+			this.priceListService = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 		}
 		return this.priceListService;
 	}
@@ -115,24 +105,24 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	 */
 	protected ProductLookup getProductLookup() {
 		if (this.productLookup == null) {
-			this.productLookup = this.getBean(ContextIdNames.PRODUCT_LOOKUP);
+			this.productLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 		}
 		return productLookup;
 	}
-	
+
 	/**
 	 * @return the product sku reader
 	 */
 	protected ProductSkuLookup getProductSkuLookup() {
 		if (this.productSkuLookup == null) {
-			this.productSkuLookup = this.getBean(ContextIdNames.PRODUCT_SKU_LOOKUP);
+			this.productSkuLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 		}
 		return productSkuLookup;
 	}
 
 	@Override
 	public boolean isPriceTierExists(final BaseAmountDTO baseAmountDTO) {
-		
+
 		if (clientSideDuplicatesExist(baseAmountDTO, getModel().getBaseAmounts())) {
 			return true;
 		}
@@ -189,7 +179,8 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	 * @return persistent base amounts matching the input.
 	 */
 	protected Collection<BaseAmountDTO> getPersistentBaseAmounts(final BaseAmountDTO baseAmountDTO) {
-		BaseAmountFilter filter = this.getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		//BaseAmountFilter filter = BeanLocator.getService(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter filter = BeanLocator.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		filter.setObjectGuid(baseAmountDTO.getObjectGuid());
 		filter.setObjectType(baseAmountDTO.getObjectType());
 		filter.setQuantity(baseAmountDTO.getQuantity());
@@ -211,10 +202,10 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Creates a new model object from price list in storage.
-	 * 
+	 *
 	 * @return instance of the price list model
 	 */
 	protected PriceListEditorModel populateModel() {
@@ -232,7 +223,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 			}
 			if (getNewlyCreatedProduct() == null) { //if we create a new product no need to query base amounts
 				baDTOs = getBaseAmounts();
-			}	
+			}
 			isUnsavedNew = false;
 		}
 		return new PriceListEditorModelImpl(descriptor, baDTOs);
@@ -255,7 +246,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 		}
 		return this.model;
 	}
-	
+
 	/**
 	 * @param filter the filter to use for retrieving base amounts.
 	 * @return uses service to retrieve base amount for given filter.
@@ -283,7 +274,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 
 	/**
 	 * Is base amount persisted ?
-	 * 
+	 *
 	 * @param newBaseAmountDTO base amount dto to check
 	 * @return true if object persisted.
 	 */
@@ -291,7 +282,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 		if (newBaseAmountDTO.getGuid() == null || newBaseAmountDTO.getObjectGuid() == null || newBaseAmountDTO.getObjectType() == null) {
 			return false;
 		}
-		BaseAmountFilter filter = this.getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter filter = BeanLocator.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		filter.setObjectGuid(newBaseAmountDTO.getObjectGuid());
 		filter.setObjectType(newBaseAmountDTO.getObjectType());
 		filter.setQuantity(newBaseAmountDTO.getQuantity());
@@ -322,7 +313,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 				product = getNewlyCreatedProduct();
 			} else {
 				product = getProductLookup().findByGuid(baseAmountDTO.getObjectGuid());
-			}			
+			}
 			if (product == null) {
 				break;
 			}
@@ -330,7 +321,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 			baseAmountDTO.setProductCode(product.getCode());
 			if (product.getProductType().isMultiSku()) {
 				baseAmountDTO.setMultiSku(true);
-			} 
+			}
 			break;
 		case SKU:
 			ProductSku productSku = getProductSkuLookup().findBySkuCode(baseAmountDTO.getObjectGuid());
@@ -374,11 +365,11 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 		}
 		return catalogs;
 	}
-	
-	
-	
+
+
+
 	/**
-	 * @return the newly created product or null if there isn't one. 
+	 * @return the newly created product or null if there isn't one.
 	 */
 	protected Product getNewlyCreatedProduct() {
 		return null;
@@ -405,7 +396,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	@Override
 	public void saveModel() {
 		PriceListDescriptorDTO dto = this.getModel().getPriceListDescriptor();
-		
+
 		PriceListDescriptorDTO pldDTO = getPriceListService().saveOrUpdate(dto);
 
 		if (isUnsavedNew && !changeSetHelper.getChangeSetObjectStatus(pldDTO).isLocked()) {
@@ -427,12 +418,12 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 
 
 		fireBaseAmountChangedEvent(baseAmountChangeSet);
-		
+
 		// remove all edited base amounts as they are already in a change set
 		baseAmountChangeSet.getUpdateList().clear();
 
 		CmUser currentUser = LoginManager.getCmUser();
-		CmUserService cmUserService = this.getBean(ContextIdNames.CMUSER_SERVICE);
+		CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 		currentUser = cmUserService.findByGuid(currentUser.getGuid());
 		if (!currentUser.getPriceLists().contains(pldDTO.getGuid())) {
 			// Make sure that the price list is added to the accessible price list collection
@@ -467,7 +458,7 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	/**
 	 * Sets the price list descriptor GUID. Can be set after controller is constructed. If the managed price list is different, change is not picked
 	 * up until controller is reloaded.
-	 * 
+	 *
 	 * @param plGuid a price list GUID identifier
 	 */
 	@Override
@@ -514,14 +505,14 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	@Override
 	public BaseAmountFilterExt getBaseAmountsFilter() {
 		if (filter == null) {
-			filter = ServiceLocator.getService(ContextIdNames.BASE_AMOUNT_FILTER_EXT);
-			SettingsService settingsService = ServiceLocator.getService(ContextIdNames.SETTINGS_SERVICE);
+			filter = BeanLocator.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT, BaseAmountFilterExt.class);
+			SettingsService settingsService = BeanLocator.getSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class);
 			int numOfResults =
 				settingsService.getSettingValue("COMMERCE/APPSPECIFIC/RCP/PRICING/maximumBaseAmounts").getIntegerValue(); //$NON-NLS-1$
 			filter.setLimit(numOfResults);
 			filter.setLocale(new Locale(getCurrentLocale().getLanguage()));
 		}
-		filter.setPriceListDescriptorGuid(this.plGuid);				
+		filter.setPriceListDescriptorGuid(this.plGuid);
 		return filter;
 	}
 
@@ -532,22 +523,22 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 		}
 		return currentLocale;
 	}
-	
-	
+
+
 	@Override
 	public BaseAmountFilterExt getBaseAmountsUiFilter() {
 		if (uiFilter == null) {
-			uiFilter = ServiceLocator.getService(ContextIdNames.BASE_AMOUNT_FILTER_EXT);
+			uiFilter = BeanLocator.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT, BaseAmountFilterExt.class);
 			uiFilter.setPriceListDescriptorGuid(this.plGuid);
 		}
 		return uiFilter;
-	}	
+	}
 
 	@Override
 	public void setModel(final PriceListEditorModel model) {
 		this.model = model;
 	}
-	
+
 	@Override
 	public boolean isModelPersistent() {
 		return !isUnsavedNew;
@@ -557,5 +548,5 @@ public class PriceListEditorControllerImpl implements PriceListEditorController 
 	public void setCurrentLocale(final Locale currentLocale) {
 		this.currentLocale = currentLocale;
 	}
-	
+
 }

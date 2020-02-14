@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
@@ -29,7 +30,6 @@ import com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages;
 import com.elasticpath.cmclient.admin.configuration.AdminConfigurationPlugin;
 import com.elasticpath.cmclient.admin.configuration.actions.RebuildIndexAction;
 import com.elasticpath.cmclient.admin.configuration.models.IndexBuildStatusSelector;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -89,10 +89,10 @@ public class SearchIndexesView extends AbstractListView implements IndexBuildSta
 	 */
 	public SearchIndexesView() {
 		super(false, SEARCH_INDEX_TABLE);
-		this.indexBuildStatusService = ServiceLocator.getService("indexBuildStatusService"); //$NON-NLS-1$
-		this.indexNotificationService = ServiceLocator.getService(ContextIdNames.INDEX_NOTIFICATION_SERVICE);
+		this.indexBuildStatusService = BeanLocator.getSingletonBean(ContextIdNames.INDEX_BUILD_STATUS_SERVICE, IndexBuildStatusService.class);
+		this.indexNotificationService = BeanLocator.getSingletonBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE, IndexNotificationService.class);
 		this.timer = new Timer();
-		this.timeService = ServiceLocator.getService(ContextIdNames.TIME_SERVICE);
+		this.timeService = BeanLocator.getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 	}
 
 	@Override

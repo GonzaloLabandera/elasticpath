@@ -26,10 +26,6 @@
 			<artifactId>ep-resource-uribuilder-apis</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.rest.resource.cortex</groupId>
-			<artifactId>ep-resource-payment-method-commons</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-purchases-api</artifactId>
 		</dependency>

@@ -10,8 +10,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +57,7 @@ import com.elasticpath.domain.catalog.impl.CategoryTypeImpl;
 import com.elasticpath.domain.dataimport.CatalogImportField;
 import com.elasticpath.domain.dataimport.ImportDataType;
 import com.elasticpath.domain.dataimport.ImportField;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.dataimport.ImportGuidHelper;
@@ -140,8 +139,8 @@ public class ImportDataTypeCategoryImplTest {
 		validatorUtils = context.mock(ValidatorUtils.class);
 
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.VALIDATOR_UTILS, validatorUtils);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, utility);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class, validatorUtils);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
 
 		categoryImportType = new ImportDataTypeCategoryImpl();
 		categoryImportType.setCategoryLookup(categoryLookup);
@@ -149,10 +148,8 @@ public class ImportDataTypeCategoryImplTest {
 		importGuidHelper = context.mock(ImportGuidHelper.class);
 		
 		CatalogLocaleFallbackPolicyFactory localePolicyFactory = new CatalogLocaleFallbackPolicyFactory();
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, localePolicyFactory);
-
-		Collection<Locale> supportedLocales = new ArrayList<>();
-		supportedLocales.add(Locale.getDefault());
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, 
+				CatalogLocaleFallbackPolicyFactory.class, localePolicyFactory);
 
 		attributeValueMap = new HashMap<>();
 		categoryTypeAttributes = new HashSet<>();
@@ -223,7 +220,7 @@ public class ImportDataTypeCategoryImplTest {
 			categoryImportType.getImportField("NO_EXIST");
 			fail("Where's my exception.");
 		} catch (EpDomainException expected) {
-			assertTrue(expected.getMessage().indexOf("doesn't exist") > -1);
+			assertTrue(expected.getMessage().contains("doesn't exist"));
 		}
 	}
 
@@ -597,7 +594,7 @@ public class ImportDataTypeCategoryImplTest {
 	 */
 	@Test
 	public void testGetImportFieldOfSize() {
-		final Integer size = Integer.valueOf(3);
+		final Integer size = 3;
 
 		category.getAttributeValueGroup().setAttributeValue(attributeSize, null, size);
 
@@ -699,7 +696,7 @@ public class ImportDataTypeCategoryImplTest {
 
 	private Category createCategory() {
 		final Category category = new CategoryImpl();
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		category.initialize();
 		Catalog catalog = new CatalogImpl();
@@ -717,7 +714,7 @@ public class ImportDataTypeCategoryImplTest {
 	private void setupAttributeSize() {
 		attributeSize = createAttribute(AttributeType.INTEGER, ATTRIBUTE_KEY_CATEGORY_SIZE, false);
 		addAttributeToAttributeGroupAttributes(attributeSize, categoryTypeAttributes);
-		AttributeValue attributeValue = createProductAttributeValue(attributeSize, AttributeType.INTEGER, Integer.valueOf(1));
+		AttributeValue attributeValue = createProductAttributeValue(attributeSize, AttributeType.INTEGER, 1);
 		attributeValueMap.put(ATTRIBUTE_KEY_CATEGORY_SIZE, attributeValue);
 	}
 

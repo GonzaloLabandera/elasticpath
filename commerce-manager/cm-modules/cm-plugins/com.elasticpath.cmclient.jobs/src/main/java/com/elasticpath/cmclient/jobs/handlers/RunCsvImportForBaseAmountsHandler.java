@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.jobs.handlers;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -36,7 +37,7 @@ import com.elasticpath.service.dataimport.ImportService;
  */
 public class RunCsvImportForBaseAmountsHandler extends AbstractPolicyAwareHandler {
 
-	private final ImportService importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+	private final ImportService importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 	
 	private static final String DEFAULT_IMPORT_JOB_FOR_BASE_AMOUNT = "DEFAULT_IMPORT_JOB_FOR_BASE_AMOUNT"; //$NON-NLS-1$
 

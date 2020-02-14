@@ -30,9 +30,9 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.dialogs.product.ProductBundleConstituentsDialog;
 import com.elasticpath.cmclient.catalog.helpers.BundleConstituentTableContentProvider;
 import com.elasticpath.cmclient.catalog.helpers.BundleConstituentTableLabelProvider;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
@@ -124,7 +124,7 @@ public class BundleConstituentsWizardPage6 extends AbstractEPWizardPage<ProductM
 
 		this.setDescription(description);
 		this.setTitle(title);
-		bundleValidator = ServiceLocator.getService("bundleValidator"); //$NON-NLS-1$
+		bundleValidator = BeanLocator.getSingletonBean("bundleValidator", BundleValidator.class); //$NON-NLS-1$
 	}
 
 	@Override
@@ -242,7 +242,7 @@ public class BundleConstituentsWizardPage6 extends AbstractEPWizardPage<ProductM
 	private SelectionRule getSelectionRuleFromRuleInput(final ProductBundle bundle) {
 		SelectionRule selectionRule = bundle.getSelectionRule();
 		if (selectionRule == null) {
-			selectionRule = ServiceLocator.getService(ContextIdNames.BUNDLE_SELECTION_RULE);
+			selectionRule = BeanLocator.getPrototypeBean(ContextIdNames.BUNDLE_SELECTION_RULE, SelectionRule.class);
 		}
 
 		if (selectRuleCombo.getSelectionIndex() > 1) {
@@ -339,7 +339,7 @@ public class BundleConstituentsWizardPage6 extends AbstractEPWizardPage<ProductM
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(final SelectionEvent event) {
-				final BundleConstituent bundleConstituent = ServiceLocator.getService(ContextIdNames.BUNDLE_CONSTITUENT);
+				final BundleConstituent bundleConstituent = BeanLocator.getPrototypeBean(ContextIdNames.BUNDLE_CONSTITUENT, BundleConstituent.class);
 				ProductBundleConstituentsDialog dialog = new ProductBundleConstituentsDialog(getShell(), bundleConstituent, false,
 						getProductBundleModel());
 				if (dialog.open() == Window.OK) {

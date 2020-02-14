@@ -18,7 +18,11 @@ import com.elasticpath.service.store.StoreService;
 
 /**
  * Assembler for {@link com.elasticpath.domain.store.Store} domain object and {@link com.elasticpath.common.dto.store.StoreDTO}.
+ *
+ * @deprecated Now using:
+ * commerce-engine\importexport\ep-importexport\src\main\java\com\elasticpath\importexport\common\assembler\store\StoreAssociationDtoAssembler
  */
+@Deprecated
 public class StoreAssociationDtoAssembler extends AbstractDtoAssembler<StoreAssociationDTO, Store> {
 
 	private BeanFactory beanFactory;
@@ -29,7 +33,7 @@ public class StoreAssociationDtoAssembler extends AbstractDtoAssembler<StoreAsso
 	
 	@Override
 	public Store getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.STORE);
+		return beanFactory.getPrototypeBean(ContextIdNames.STORE, Store.class);
 	}
 
 	@Override

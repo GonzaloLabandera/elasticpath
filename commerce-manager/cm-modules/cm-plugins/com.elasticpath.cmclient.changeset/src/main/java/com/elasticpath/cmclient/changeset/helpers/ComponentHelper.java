@@ -8,7 +8,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetSupportedEditors;
 import com.elasticpath.cmclient.changeset.support.SupportedComponent;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.service.changeset.ChangeSetService;
@@ -42,7 +42,7 @@ public class ComponentHelper {
 	 * @return true if the object exists
 	 */
 	private boolean objectExists(final String groupId, final BusinessObjectDescriptor objectDescriptor) {
-		final ChangeSetService changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		final ChangeSetService changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 		
 		return changeSetService.objectExists(groupId, objectDescriptor);
 	}

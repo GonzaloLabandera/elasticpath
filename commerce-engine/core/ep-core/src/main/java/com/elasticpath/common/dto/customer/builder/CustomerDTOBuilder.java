@@ -11,9 +11,7 @@ import java.util.Set;
 import com.elasticpath.common.dto.AddressDTO;
 import com.elasticpath.common.dto.customer.AttributeValueDTO;
 import com.elasticpath.common.dto.customer.CustomerDTO;
-import com.elasticpath.common.dto.customer.DefaultPaymentMethodDTO;
 import com.elasticpath.common.dto.customer.LegacyCreditCardDTO;
-import com.elasticpath.common.dto.customer.PaymentMethodDto;
 
 /**
  * Customer dto builder used to construct {@link com.elasticpath.common.dto.customer.CustomerDTO}s.
@@ -27,10 +25,8 @@ public class CustomerDTOBuilder {
 	private Date lastEditDate;
 	private String password;
 	private String salt;
-	private PaymentMethodDto[] paymentMethods;
 	private Set<AttributeValueDTO> profileValues = new HashSet<>();
 	private LegacyCreditCardDTO[] legacyCreditCards;
-	private PaymentMethodDto defaultPaymentMethod;
 	private String billingAddressGuid;
 	private String shippingAddressGuid;
 	private AddressDTO[] addresses;
@@ -122,28 +118,6 @@ public class CustomerDTOBuilder {
 	 */
 	public CustomerDTOBuilder withSalt(final String salt) {
 		this.salt = salt;
-		return this;
-	}
-
-	/**
-	 * Sets the payment methods.
-	 *
-	 * @param paymentMethods the payment methods
-	 * @return this {@link CustomerDTOBuilder}
-	 */
-	public CustomerDTOBuilder withPaymentMethods(final PaymentMethodDto... paymentMethods) {
-		this.paymentMethods = paymentMethods;
-		return this;
-	}
-
-	/**
-	 * Sets the default payment method.
-	 *
-	 * @param defaultPaymentMethod the default payment method
-	 * @return this {@link CustomerDTOBuilder}
-	 */
-	public CustomerDTOBuilder withDefaultPaymentMethod(final PaymentMethodDto defaultPaymentMethod) {
-		this.defaultPaymentMethod = defaultPaymentMethod;
 		return this;
 	}
 
@@ -240,10 +214,6 @@ public class CustomerDTOBuilder {
 		customerDTO.setSalt(salt);
 		customerDTO.setFirstTimeBuyer(isFirstTimeBuyer);
 
-		if (paymentMethods != null) {
-			customerDTO.setPaymentMethods(Arrays.asList(paymentMethods));
-		}
-
 		customerDTO.setProfileValues(profileValues);
 		if (legacyCreditCards != null) {
 			customerDTO.setCreditCards(Arrays.asList(legacyCreditCards));
@@ -258,12 +228,6 @@ public class CustomerDTOBuilder {
 
 		if (groups != null) {
 			customerDTO.setGroups(Arrays.asList(groups));
-		}
-
-		if (defaultPaymentMethod != null) {
-			DefaultPaymentMethodDTO defaultPaymentMethodDTO = new DefaultPaymentMethodDTO();
-			defaultPaymentMethodDTO.setPaymentMethod(defaultPaymentMethod);
-			customerDTO.setDefaultPaymentMethod(defaultPaymentMethodDTO);
 		}
 
 		return customerDTO;

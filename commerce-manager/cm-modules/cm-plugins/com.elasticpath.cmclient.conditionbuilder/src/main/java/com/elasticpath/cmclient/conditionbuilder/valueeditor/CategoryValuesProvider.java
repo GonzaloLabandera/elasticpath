@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.conditionbuilder.valueeditor;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Category;
@@ -22,7 +22,7 @@ public class CategoryValuesProvider implements SelectableValueResolver {
 	 */
 	public CategoryValuesProvider() {
 		super();
-		this.categoryService = ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE);
+		this.categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 	}
 
 	/**

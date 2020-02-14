@@ -133,7 +133,7 @@ public class ItemOptionSelectorRepositoryImplTest {
 				.thenReturn(Single.just(selectedSkuOptionValue));
 		when(multiSkuProductConfigurationService.findSkuGuidsMatchingSelectedOptions(eq(storeProduct), any()))
 				.thenReturn(Collections.singletonList(PRODUCT_SKU_GUID));
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(PRODUCT_SKU_GUID)).thenReturn(Single.just(selectedProductSku));
+		when(productSkuRepository.getProductSkuWithAttributesByGuid(PRODUCT_SKU_GUID)).thenReturn(Single.just(selectedProductSku));
 		when(itemRepository.getItemIdForProductSku(selectedProductSku)).thenReturn(SELECTED_ITEM_ID);
 	}
 
@@ -268,7 +268,7 @@ public class ItemOptionSelectorRepositoryImplTest {
 
 	@Test
 	public void selectChoiceShouldReturnErrorWhenNoProductSkuFoundForGuid() {
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(PRODUCT_SKU_GUID))
+		when(productSkuRepository.getProductSkuWithAttributesByGuid(PRODUCT_SKU_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(PRODUCT_SKU_NOT_FOUND)));
 		repository.selectChoice(itemOptionSelectorChoiceIdentifier)
 				.test()

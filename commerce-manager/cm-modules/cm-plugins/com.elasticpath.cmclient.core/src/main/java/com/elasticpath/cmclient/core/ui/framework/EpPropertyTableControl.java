@@ -79,7 +79,7 @@ public class EpPropertyTableControl {
 		propertiesCellModifier = new PropertyCellModifier();
 		propertiesSwtTableViewer.setCellModifier(propertiesCellModifier);
 
-		propertiesTableViewer.setContentProvider(new PaymentGatewayContentProvider());
+		propertiesTableViewer.setContentProvider(new PropertiesContentProvider());
 		propertiesTableViewer.setLabelProvider(new PropertiesLabelProvider());
 		this.propertiesValidator = propertiesValidator;
 //		this.keyCell = keyLabel;
@@ -173,7 +173,7 @@ public class EpPropertyTableControl {
 	/**
 	 * Properties content provider.
 	 */
-	private static final class PaymentGatewayContentProvider implements IStructuredContentProvider {
+	private static final class PropertiesContentProvider implements IStructuredContentProvider {
 
 		@Override
 		public Object[] getElements(final Object inputElement) {
@@ -194,7 +194,7 @@ public class EpPropertyTableControl {
 	}
 
 	/**
-	 * Payment Gateway properties label provider.
+	 * Properties label provider.
 	 */
 	private static final class PropertiesLabelProvider extends LabelProvider implements ITableLabelProvider {
 		/**

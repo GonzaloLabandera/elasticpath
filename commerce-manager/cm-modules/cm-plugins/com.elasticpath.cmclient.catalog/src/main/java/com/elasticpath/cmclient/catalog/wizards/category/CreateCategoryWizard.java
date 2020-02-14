@@ -71,7 +71,7 @@ public class CreateCategoryWizard extends AbstractEpWizard<Category> {
 
 	@Override
 	public boolean performFinish() {
-//		final CategoryService categoryService = (CategoryService) ServiceLocator.getService(
+//		final CategoryService categoryService = (CategoryService) BeanLocator.getService(
 //				ContextIdNames.CATEGORY_SERVICE);
 //		
 //		// Ensure the category code is unique

@@ -13,7 +13,7 @@ import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
  * Defines methods useful for all persistable DAO classes.
  */
 @SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
-public abstract class AbstractDaoImpl {
+public abstract class AbstractDaoImpl implements BeanFactory {
 
 	private PersistenceEngine persistenceEngine;
 	private BeanFactory beanFactory;
@@ -74,25 +74,25 @@ public abstract class AbstractDaoImpl {
 		}
 	}
 
-	/**
-	 * Convenience method for getting a bean instance.
-	 * @param <T> the type of bean to return
-	 * @param beanName the name of the bean to get and instance of.
-	 * @return an instance of the requested bean.
-	 */
+	@Override
+	@Deprecated
 	public <T> T getBean(final String beanName) {
-		return beanFactory.<T>getBean(beanName);
+		return beanFactory.getBean(beanName);
 	}
-	
-	/**
-	 * Convenience method for getting a bean implementation class.
-	 * 
-	 * @param <T> the type of bean to return 
-	 * @param beanName the name of the bean
-	 * @return the implementation class of the bean
-	 */
+
+	@Override
+	public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+		return beanFactory.getPrototypeBean(name, clazz);
+	}
+
+	@Override
+	public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+		return beanFactory.getSingletonBean(name, clazz);
+	}
+
+	@Override
 	public <T> Class<T> getBeanImplClass(final String beanName) {
-		return beanFactory.<T>getBeanImplClass(beanName);
+		return beanFactory.getBeanImplClass(beanName);
 	}
 
 	/**

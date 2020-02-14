@@ -1,8 +1,11 @@
 @regressionTest @dataPolicy
-Feature: Data Policy Reporting
+Feature: Data Policy Reporting for customer consent data policies
 
   Background:
     Given I sign in to CM as admin user
+    And I go to Configuration
+    And I go to System Configuration
+    And I ensure table values for the following system setting COMMERCE/STORE/dataPolicySegments do not exist
 
   Scenario Outline: Report for Customer with Data Points
     When I select following report options

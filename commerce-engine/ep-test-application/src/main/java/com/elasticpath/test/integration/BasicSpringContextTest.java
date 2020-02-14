@@ -15,6 +15,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.test.integration.junit.DatabaseHandlingTestExecutionListener;
+import com.elasticpath.test.integration.junit.LoggingMDCInitializerTestExecutionListener;
 import com.elasticpath.test.persister.TestApplicationContext;
 import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 
@@ -25,6 +26,7 @@ import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 @ContextConfiguration("/integration-context.xml")
 @SuppressWarnings("PMD.AbstractNaming")
 @TestExecutionListeners({
+		LoggingMDCInitializerTestExecutionListener.class,
 		JmsRegistrationTestExecutionListener.class,
 		DatabaseHandlingTestExecutionListener.class,
 		DependencyInjectionTestExecutionListener.class,

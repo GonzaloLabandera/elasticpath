@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006-2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.order;
 
@@ -200,20 +200,6 @@ public interface OrderReturn extends Persistable {
 	void setOrder(Order order);
 
 	/**
-	 * Get order payment. Used to determine the refund given for the return, or the payment taken for an exchange.
-	 *
-	 * @return <code>OrderPayment</code>
-	 */
-	OrderPayment getReturnPayment();
-
-	/**
-	 * Set order payment.
-	 *
-	 * @param orderPayment the orderPayment
-	 */
-	void setReturnPayment(OrderPayment orderPayment);
-
-	/**
 	 * Get the order return's currency.
 	 *
 	 * @return the <code>Currency</code>
@@ -233,40 +219,6 @@ public interface OrderReturn extends Persistable {
 	 * @return a <code>Money</code> object representing the return total.
 	 */
 	Money getReturnTotalMoney();
-
-	/**
-	 * Return refund total. If this OrderReturn represents Return, this value will equal return total, else if this OrderReturn represents Exchange,
-	 * this value will be calculated considering exchange order total. Thus, refund can be a negative value which means that additional charge
-	 * required.
-	 *
-	 * @return refund total
-	 */
-	BigDecimal getRefundTotal();
-
-	/**
-	 * Return refund total. If this OrderReturn represents Return, this value will equal return total, else if this OrderReturn represents Exchange,
-	 * this value will be calculated considering exchange order total. Thus, refund can be a negative value which means that additional charge
-	 * required.
-	 *
-	 * @return a <code>Money</code> object representing the refund total
-	 */
-	Money getRefundTotalMoney();
-
-	/**
-	 * Return refunded total. Derives the amount from refund payment if the last was already
-	 * processed.
-	 *
-	 * @return refund total
-	 */
-	BigDecimal getRefundedTotal();
-
-	/**
-	 * Return refunded total. Derives the amount from refund payment if the last was already
-	 * processed.
-	 *
-	 * @return a <code>Money</code> object representing the refunded total
-	 */
-	Money getRefundedTotalMoney();
 
 	/**
 	 * Get the set of return taxes. This method will return incorrect values
@@ -376,21 +328,6 @@ public interface OrderReturn extends Persistable {
 	 * @return the return subtotal
 	 */
 	BigDecimal getSubtotal();
-
-	/**
-	 * Get the owed to customer amount. The value is return total minus refund total.
-	 *
-	 * @return the owed to customer total.
-	 */
-	BigDecimal getOwedToCustomer();
-
-	/**
-	 * Get the owed to customer amount. The value is return total minus refund total.
-	 *
-	 * @return a <code>Money</code> object representing the owed to customer total.
-	 */
-	Money getOwedToCustomerMoney();
-
 
 	/**
 	 * Gets the subtotal for this return.

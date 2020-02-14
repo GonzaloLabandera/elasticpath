@@ -61,7 +61,7 @@ public class AttributeFacetConfigurationStrategy implements FacetConfigurationSt
 		String attributeKey = facet.getBusinessObjectId();
 		Attribute rootAttribute;
 		if (facet.getFacetType() == FacetType.FACET.getOrdinal()) {
-			AttributeValueFilter rootFilter = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_FILTER);
+			AttributeValueFilter rootFilter = getBeanFactory().getPrototypeBean(ContextIdNames.ATTRIBUTE_FILTER, AttributeValueFilter.class);
 			rootFilter.setId(attributeKey);
 			rootFilter.setAttributeKey(attributeKey);
 			rootAttribute = rootFilter.getAttribute();
@@ -69,7 +69,7 @@ public class AttributeFacetConfigurationStrategy implements FacetConfigurationSt
 			config.getAllAttributeSimpleValues().put(rootFilter.getId(), rootFilter);
 			setAttributeFilter(config, rootFilter, rootAttribute, facet);
 		} else {
-			AttributeRangeFilter rootFilter = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER);
+			AttributeRangeFilter rootFilter = getBeanFactory().getPrototypeBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER, AttributeRangeFilter.class);
 			rootFilter.setId(attributeKey);
 			rootFilter.setAttributeKey(attributeKey);
 			rootAttribute = rootFilter.getAttribute();
@@ -98,7 +98,7 @@ public class AttributeFacetConfigurationStrategy implements FacetConfigurationSt
 				continue;
 			}
 			values.add(valueString);
-			AttributeValueFilter attributeFilter = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_FILTER);
+			AttributeValueFilter attributeFilter = getBeanFactory().getPrototypeBean(ContextIdNames.ATTRIBUTE_FILTER, AttributeValueFilter.class);
 			Map<String, Object> filterProperties = new HashMap<>();
 			attributeFilter.setLocalized(rootFilter.isLocalized());
 			filterProperties.put(AttributeFilter.ATTRIBUTE_PROPERTY, rootAttribute);
@@ -141,7 +141,8 @@ public class AttributeFacetConfigurationStrategy implements FacetConfigurationSt
 										 final AttributeRangeFilter rootFilter) {
 		SortedSet<RangeFacet> sortedRangeFacets = facet.getSortedRangeFacet();
 		for (RangeFacet rangeFacet : sortedRangeFacets) {
-			AttributeRangeFilter attributeRangeFilter = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER);
+			AttributeRangeFilter attributeRangeFilter = getBeanFactory().getPrototypeBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER, 
+					AttributeRangeFilter.class);
 			Map<String, Object> filterProperties = new HashMap<>();
 			final BigDecimal lowerBound = rangeFacet.getStart();
 			boolean noLowerBound = lowerBound == null;

@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.helpers.store.StoreEditorModel;
@@ -186,7 +186,7 @@ public abstract class AbstractSortDialog extends Dialog {
 			Map<String, SortLocalizedName> displayName = selectedSortAttribute.getLocalizedNames();
 			if (displayNameText.length() > 0) {
 				if (!displayName.containsKey(localeCode)) {
-					SortLocalizedName sortLocalizedName = ServiceLocator.getService(ContextIdNames.SORT_LOCALIZED_NAME);
+					SortLocalizedName sortLocalizedName = BeanLocator.getPrototypeBean(ContextIdNames.SORT_LOCALIZED_NAME, SortLocalizedName.class);
 					sortLocalizedName.setLocaleCode(localeCode);
 					displayName.put(localeCode, sortLocalizedName);
 				}

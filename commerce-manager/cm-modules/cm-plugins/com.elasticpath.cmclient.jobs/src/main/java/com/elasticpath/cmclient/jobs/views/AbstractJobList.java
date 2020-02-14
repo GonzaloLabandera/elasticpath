@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.graphics.Image;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
 import com.elasticpath.cmclient.jobs.JobsImageRegistry;
@@ -79,20 +79,9 @@ public abstract class AbstractJobList extends AbstractListView {
 	@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 	public AbstractJobList(final String tableName) {
 		super(true, tableName);
-		importService = getBean(ContextIdNames.IMPORT_SERVICE);
+		importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 	}
 
-	/**
-	 * Find a bean from the factory by name.
-	 * 
-	 * @param <T> the type of the bean
-	 * @param beanName the name of the bean
-	 * @return the bean.
-	 */
-	protected <T> T getBean(final String beanName) {
-		return ServiceLocator.getService(beanName);
-	}
-	
 	@Override
 	protected void initializeViewToolbar() {
 		final Separator jobsActionGroup = new Separator("JobActionGroup"); //$NON-NLS-1$

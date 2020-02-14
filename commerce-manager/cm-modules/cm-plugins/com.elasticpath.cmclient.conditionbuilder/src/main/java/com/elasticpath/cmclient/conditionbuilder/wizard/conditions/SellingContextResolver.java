@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.conditionbuilder.wizard.conditions;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 
@@ -28,7 +28,7 @@ public class SellingContextResolver {
 	 */
 	public SellingContext create(final String name) {
 		
-		SellingContext sellingContext = ServiceLocator.getService(ContextIdNames.SELLING_CONTEXT);
+		SellingContext sellingContext = BeanLocator.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 
         String sellingContextNameStr = SELLING_CONTEXT_NAME + name;
 		if (sellingContextNameStr.length() > SELLING_CONTEXT_NAME_MAX_SIZE) {

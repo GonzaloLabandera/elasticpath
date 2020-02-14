@@ -26,7 +26,7 @@ public class ProductSkuDaoAdapterImpl extends AbstractDaoAdapter<ProductSku> {
 
 	@Override
 	public ProductSku createBean(final ProductSku productSku) {
-		return beanFactory.getBean(ContextIdNames.PRODUCT_SKU);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 	}
 
 	@Override

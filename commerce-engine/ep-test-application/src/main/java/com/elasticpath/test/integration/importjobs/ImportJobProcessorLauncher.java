@@ -53,8 +53,8 @@ public class ImportJobProcessorLauncher {
 	 */
 	public ImportJobProcessorLauncher(final BeanFactory beanFactory, final int timeoutInSeconds) {
 		this.timeoutInSeconds = timeoutInSeconds;
-		importJobProcessor = beanFactory.getBean("importJobProcessor");
-		importService = beanFactory.getBean("importService");
+		importJobProcessor = beanFactory.getSingletonBean("importJobProcessor", ImportJobProcessor.class);
+		importService = beanFactory.getSingletonBean("importService", ImportService.class);
 		// max 2 threads expected
 		executor = Executors.newFixedThreadPool(MAX_THREADS_COUNT);
 	}

@@ -47,7 +47,7 @@ public class ShippingAddressResolutionStrategyTest {
 	public void testGetResourceIdentifier() {
 		// Given
 		when(shoppingCartRepository.findStoreForCartGuid(SHOPPING_CART_GUID)).thenReturn(Single.just(STORE_CODE));
-		when(cartOrderRepository.findByCartGuidSingle(SHOPPING_CART_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByCartGuid(SHOPPING_CART_GUID)).thenReturn(Single.just(cartOrder));
 		when(cartOrder.getGuid()).thenReturn(CART_ORDER_GUID);
 
 		// When

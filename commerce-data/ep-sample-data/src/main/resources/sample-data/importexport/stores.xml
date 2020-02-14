@@ -33,9 +33,6 @@
         <jurisdiction>USTaxJurisdiction</jurisdiction>
         <jurisdiction>GBTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -79,10 +76,6 @@
         <jurisdiction>CATaxJurisdiction</jurisdiction>
         <jurisdiction>USTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-        <gateway>GiftCertificate</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>

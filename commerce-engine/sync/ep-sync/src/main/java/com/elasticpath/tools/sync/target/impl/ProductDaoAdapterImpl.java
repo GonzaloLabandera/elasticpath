@@ -43,7 +43,7 @@ public class ProductDaoAdapterImpl extends AbstractDaoAdapter<Product> {
 
 	@Override
 	public Product createBean(final Product product) {
-		return beanFactory.getBean(ContextIdNames.PRODUCT);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRODUCT, Product.class);
 	}
 
 	@Override

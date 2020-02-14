@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.jobs.JobsMessages;
 import com.elasticpath.cmclient.jobs.JobsPermissions;
@@ -45,7 +45,7 @@ public class PriceListImportJobsListView extends AbstractJobList {
 	 */
 	public PriceListImportJobsListView() {
 		super(PRICE_LIST_IMPORT_JOBS_TABLE);
-		plService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+		plService = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 	}
 	@Override
 	protected String[] getTableColumnNames() {

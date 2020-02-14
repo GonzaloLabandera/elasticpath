@@ -4,6 +4,9 @@
 
 package com.elasticpath.persistence.openjpa.executors;
 
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.getResults;
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.splitCollection;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,10 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.apache.openjpa.persistence.OpenJPAQuery;
 
@@ -33,7 +35,7 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 	private String queryName;
 	private Map<String, Collection<V>> mapParameters;
 	private String listParameterName;
-	private Collection<?> values;
+	private Collection<V> values;
 	private Object[] arrayParameters;
 	private Integer firstResult;
 	private Integer maxResults;
@@ -130,7 +132,7 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 	@Override
 	protected List<T> executeMultiResultQuery(final EntityManager entityManager) {
 
-		OpenJPAQuery namedQuery =  OpenJPAPersistence.cast(getQueryUtil().createNamedQuery(entityManager, queryName));
+		OpenJPAQuery namedQuery = OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName));
 
 		if (this.mapParameters != null) {
 			return executeWithMapParameters(namedQuery);
@@ -146,39 +148,32 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 	@SuppressWarnings("unchecked")
 	private List<T> executeWithMapParameters(final OpenJPAQuery namedQuery) {
 
-		OpenJPAQuery configuredQuery = namedQuery;
-
 		for (final Map.Entry<String, Collection<V>> entry : mapParameters.entrySet()) {
 			final Collection<V> mapParamValues = entry.getValue();
 
-			if (mapParamValues == null || mapParamValues.isEmpty()) {
+			if (CollectionUtils.isEmpty(mapParamValues)) {
 				return Collections.emptyList();
 			}
 
-			final String parameterValue = getQueryUtil().getInParameterValues(mapParamValues);
-			configuredQuery = OpenJPAPersistence.cast(getQueryUtil().insertListIntoQuery(configuredQuery, entry.getKey(), parameterValue));
+			namedQuery.setParameter(entry.getKey(), mapParamValues);
 		}
 
-		return getQueryUtil().getResults(configuredQuery);
+		return getResults(namedQuery);
 	}
 
 	@SuppressWarnings("unchecked")
 	private List<T> executeWithParametersInBatches(final OpenJPAQuery namedQuery) {
 
-		int parameterCount = arrayParameters == null
-			? 0
-			: arrayParameters.length;
-
-		List<String> listParameters = getQueryUtil().splitCollection(values, parameterCount);
+		List<List<V>> listOfSubListsOfParameters = splitCollection(values);
 
 		final List<T> result = new ArrayList<>();
 
-		for (String listParameter : listParameters) {
-			Query newQuery = getQueryUtil().insertListIntoQuery(namedQuery, listParameterName, listParameter);
+		for (List<V> subListOfParameters : listOfSubListsOfParameters) {
 
-			getQueryUtil().setQueryParameters(newQuery, arrayParameters);
+			namedQuery.setParameters(arrayParameters);
+			namedQuery.setParameter(listParameterName, subListOfParameters);
 
-			result.addAll(getQueryUtil().getResults(newQuery));
+			result.addAll(getResults(namedQuery));
 		}
 
 		return result;
@@ -189,17 +184,17 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 
 		assert ArrayUtils.isNotEmpty(arrayParameters);
 
-		String valuesList = getQueryUtil().getInParameterValues(values);
-		if (StringUtils.isEmpty(valuesList)) {
-			valuesList = "''";
+		namedQuery.setParameters(arrayParameters);
+
+		if (CollectionUtils.isEmpty(values)) {
+			namedQuery.setParameter(listParameterName, null);
+		} else {
+			namedQuery.setParameter(listParameterName, values);
 		}
 
-		Query newQuery = getQueryUtil().insertListIntoQuery(namedQuery, listParameterName, valuesList);
-		newQuery.setFirstResult(firstResult);
-		newQuery.setMaxResults(maxResults);
+		namedQuery.setFirstResult(firstResult);
+		namedQuery.setMaxResults(maxResults);
 
-		getQueryUtil().setQueryParameters(newQuery, arrayParameters);
-
-		return getQueryUtil().getResults(newQuery);
+		return getResults(namedQuery);
 	}
 }

@@ -257,7 +257,7 @@ public class SynonymGroupImpl extends AbstractLegacyPersistenceImpl implements S
 			if (synonymStr.equals(getConceptTerm())) {
 				continue;
 			}
-			final Synonym synonym = getBean(ContextIdNames.SYNONYM);
+			final Synonym synonym = getPrototypeBean(ContextIdNames.SYNONYM, Synonym.class);
 			synonym.setSynonym(synonymStr);
 			addSynonym(synonym);
 		}

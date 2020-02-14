@@ -24,6 +24,7 @@ import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
+import com.elasticpath.persistence.api.AbstractPersistableImpl;
 import com.elasticpath.rest.definition.base.DetailsEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.AttributeValueTransformer;
 import com.elasticpath.rest.util.date.DateUtil;
@@ -174,7 +175,8 @@ public class AttributeValueTransformerImplTest {
 	 */
 	@Test
 	public void testDecimalAttributeType() {
-		BigDecimal expectedBigDecimal = BigDecimal.valueOf(EXPECTED_DOUBLE);
+		BigDecimal expectedBigDecimal = BigDecimal.valueOf(EXPECTED_DOUBLE)
+				.setScale(AbstractPersistableImpl.DECIMAL_SCALE, AbstractPersistableImpl.ROUNDING_MODE);
 		DetailsEntity expectedDetailsEntity = createDetailsEntity(KEY, expectedBigDecimal, NAME, EXPECTED_DOUBLE_STRING_VALUE);
 
 		AttributeValue attributeValue = createAttributeValue(NAME, KEY, false, AttributeType.DECIMAL, expectedBigDecimal);

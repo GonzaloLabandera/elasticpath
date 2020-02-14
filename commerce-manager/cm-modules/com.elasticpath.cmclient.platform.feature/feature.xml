@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <feature id="com.elasticpath.cmclient.platform.feature" label="%featureName" version="0.0.0.qualifier" provider-name="%featureProvider">
 
     <description url="http://www.example.com/description">
@@ -88,7 +92,6 @@
     <plugin id="org.eclipse.osgi.util" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
     <plugin id="org.eclipse.osgi.services" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
 
-
     <plugin id="org.eclipse.ui.editors" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
     <plugin id="org.eclipse.ui.ide" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
     <plugin id="org.eclipse.ui.views" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
@@ -122,7 +125,7 @@
     <plugin id="com.elasticpath.cmclient.admin.stores" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
     <plugin id="com.elasticpath.cmclient.admin.taxes" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
     <plugin id="com.elasticpath.cmclient.admin.shipping" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.payment" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.paymentconfigurations" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
     <plugin id="com.elasticpath.cmclient.admin.warehouses" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
     <plugin id="com.elasticpath.cmclient.admin.datapolicies" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
     <plugin id="com.elasticpath.cmclient.fulfillment" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
@@ -131,7 +134,6 @@
     <plugin id="com.elasticpath.cmclient.advancedsearch" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
     <plugin id="com.elasticpath.cmclient.admin.customers" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
     <plugin id="com.elasticpath.cmclient.ep-local-auth" download-size="0" install-size="0" version="0.0.0.qualifier" unpack="false"/>
-    <plugin id="test-util" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
 
     <plugin id="test-util" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
 

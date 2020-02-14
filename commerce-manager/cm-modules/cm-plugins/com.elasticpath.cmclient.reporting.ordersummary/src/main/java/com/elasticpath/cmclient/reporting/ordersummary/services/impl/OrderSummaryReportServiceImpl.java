@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.formatting.TimeZoneInfo;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.reporting.ordersummary.OrderSummaryPreparedStatementBuilder;
@@ -251,7 +251,7 @@ public class OrderSummaryReportServiceImpl {
 
 	private ReportService getReportService() {
 		if (reportService == null) {
-			reportService = ServiceLocator.getService(ContextIdNames.REPORT_SERVICE);
+			reportService = BeanLocator.getSingletonBean(ContextIdNames.REPORT_SERVICE, ReportService.class);
 		}
 		return reportService;
 	}

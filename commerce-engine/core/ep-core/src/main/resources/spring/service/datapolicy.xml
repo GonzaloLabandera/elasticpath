@@ -7,9 +7,11 @@
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
 		xsi:schemaLocation="
 				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 		">
 
 
@@ -35,6 +37,10 @@
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 		<property name="settingsReader" ref="settingsReader"/>
 		<property name="elasticPath" ref="elasticPath"/>
+		<property name="customerConsentService" ref="customerConsentService"/>
+		<property name="dataPolicySegmentsSettingsProvider">
+			<settings:setting path="COMMERCE/STORE/dataPolicySegments"/>
+		</property>
 	</bean>
 
 	<bean id="customerConsentService" parent="txProxyTemplate">
@@ -154,12 +160,13 @@
 		<property name="dataPointValueReaders" ref="dataPointValueReaders"/>
 		<property name="dataPointValueRemovers" ref="dataPointValueRemovers"/>
 		<property name="indexNotificationService" ref="indexNotificationService" />
+		<property name="dataPolicyService" ref="dataPolicyService"/>
 	</bean>
 
 	<bean id="customerPersonalDataReportingService" class="com.elasticpath.service.datapolicy.impl.CustomerPersonalDataReportingServiceImpl">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 		<property name="elasticPath" ref="elasticPath"/>
-		<property name="dataPointValueService" ref="dataPointValueService" />
+		<property name="dataPointValueService" ref="dataPointValueService"/>
 	</bean>
 
 	<!--Data point value jobs-->

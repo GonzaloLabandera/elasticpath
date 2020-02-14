@@ -57,7 +57,7 @@ public class DataPolicyServiceImplTest {
 	@Before
 	public void setUp() {
 		Mockito.<Class<DataPolicy>>when(elasticPath.getBeanImplClass(ContextIdNames.DATA_POLICY)).thenReturn(DataPolicy.class);
-		when(elasticPath.getBean(ContextIdNames.DATA_POLICY)).thenReturn(dataPolicy);
+		when(elasticPath.getPrototypeBean(ContextIdNames.DATA_POLICY, DataPolicy.class)).thenReturn(dataPolicy);
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class DataPolicyServiceImplTest {
 	public void loadWithUidPkOfZeroReturnsNewDataPolicyFromBean() {
 		assertThat(dataPolicyServiceImpl.load(0))
 				.isEqualTo(dataPolicy);
-		verify(elasticPath).getBean(ContextIdNames.DATA_POLICY);
+		verify(elasticPath).getPrototypeBean(ContextIdNames.DATA_POLICY, DataPolicy.class);
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public class DataPolicyServiceImplTest {
 		assertThat(dataPolicyServiceImpl.get(0))
 				.isEqualTo(dataPolicy);
 
-		verify(elasticPath).getBean(ContextIdNames.DATA_POLICY);
+		verify(elasticPath).getPrototypeBean(ContextIdNames.DATA_POLICY, DataPolicy.class);
 	}
 
 	@Test
@@ -177,7 +177,7 @@ public class DataPolicyServiceImplTest {
 	@Test
 	public void verifyFindActiveDataPoliciesForSegmentsAndStoreWhenEnableDataPoliciesEnabledAndNoDataPoliciesFound() {
 		setupEnableDataPolicySetting(true);
-		when(persistenceEngine.retrieveByNamedQuery("DATAPOLICY_FIND_ACTIVE", DataPolicyState.ACTIVE))
+		when(persistenceEngine.retrieveByNamedQuery("DATAPOLICY_FIND_BY_STATE_LATEST", DataPolicyState.ACTIVE))
 				.thenReturn(Collections.emptyList());
 
 		assertThat(dataPolicyServiceImpl.findActiveDataPoliciesForSegmentsAndStore(Collections.singletonList(SEGMENT_CODE), STORE_CODE))
@@ -193,7 +193,7 @@ public class DataPolicyServiceImplTest {
 		Set<String> headers = new HashSet<>();
 		headers.add(SEGMENT_CODE);
 
-		when(persistenceEngine.retrieveByNamedQuery("DATAPOLICY_FIND_ACTIVE", DataPolicyState.ACTIVE))
+		when(persistenceEngine.retrieveByNamedQuery("DATAPOLICY_FIND_BY_STATE_LATEST", DataPolicyState.ACTIVE))
 				.thenReturn(Collections.singletonList(dataPolicy));
 		when(dataPolicy.getSegments()).thenReturn(headers);
 

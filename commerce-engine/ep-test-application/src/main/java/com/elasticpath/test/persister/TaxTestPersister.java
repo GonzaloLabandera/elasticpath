@@ -103,7 +103,7 @@ public class TaxTestPersister {
 	 * @return persisted tax jurisdiction
 	 */
 	public TaxJurisdiction persistTaxJurisdiction(final String regionCode, final boolean inclusive) {
-		TaxJurisdiction taxJurisdiction = beanFactory.getBean(ContextIdNames.TAX_JURISDICTION);
+		TaxJurisdiction taxJurisdiction = beanFactory.getPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class);
 		taxJurisdiction.setRegionCode(regionCode);
 		taxJurisdiction.setPriceCalculationMethod(inclusive);
 		return persistTaxJurisdiction(taxJurisdiction);
@@ -129,7 +129,7 @@ public class TaxTestPersister {
 	 * @return persisted tax code
 	 */
 	public TaxCode persistTaxCode(final String taxCodeString) {
-		TaxCode taxCode = beanFactory.getBean(ContextIdNames.TAX_CODE);
+		TaxCode taxCode = beanFactory.getPrototypeBean(ContextIdNames.TAX_CODE, TaxCode.class);
 		taxCode.setCode(taxCodeString);
 		return taxCodeService.add(taxCode);
 	}

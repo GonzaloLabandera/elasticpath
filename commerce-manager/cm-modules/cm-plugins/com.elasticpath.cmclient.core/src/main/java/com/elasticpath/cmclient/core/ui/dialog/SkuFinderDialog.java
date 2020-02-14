@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
@@ -436,14 +436,14 @@ public class SkuFinderDialog extends AbstractEpPriceDialog {
 	 * @return the brand service
 	 */
 	protected BrandService getBrandService() {
-		return ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 	}
 
 	/**
 	 * @return the catalog service
 	 */
 	protected CatalogService getCatalogService() {
-		return ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 	}
 
 	private void setDefaultCurrency() {
@@ -699,7 +699,7 @@ public class SkuFinderDialog extends AbstractEpPriceDialog {
 	@Override
 	public SkuSearchCriteria getModel() {
 		if (searchCriteria == null) {
-			searchCriteria = ServiceLocator.getService(ContextIdNames.SKU_SEARCH_CRITERIA);
+			searchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.SKU_SEARCH_CRITERIA, SkuSearchCriteria.class);
 			// Set default sorting criteria
 			searchCriteria.setSortingOrder(SortOrder.ASCENDING);
 			searchCriteria.setSortingType(StandardSortBy.SKU_CODE);

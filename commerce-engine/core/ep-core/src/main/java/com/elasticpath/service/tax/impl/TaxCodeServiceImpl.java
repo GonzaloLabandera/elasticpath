@@ -89,7 +89,7 @@ public class TaxCodeServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 		sanityCheck();
 		TaxCode taxCode = null;
 		if (taxCodeUid <= 0) {
-			taxCode = getBean(ContextIdNames.TAX_CODE);
+			taxCode = getPrototypeBean(ContextIdNames.TAX_CODE, TaxCode.class);
 		} else {
 			taxCode = getPersistentBeanFinder().load(ContextIdNames.TAX_CODE, taxCodeUid);
 		}
@@ -108,7 +108,7 @@ public class TaxCodeServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 		sanityCheck();
 		TaxCode taxCode = null;
 		if (taxCodeUid <= 0) {
-			taxCode = getBean(ContextIdNames.TAX_CODE);
+			taxCode = getPrototypeBean(ContextIdNames.TAX_CODE, TaxCode.class);
 		} else {
 			taxCode = getPersistentBeanFinder().get(ContextIdNames.TAX_CODE, taxCodeUid);
 		}

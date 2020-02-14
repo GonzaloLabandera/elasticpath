@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2017
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.service.shoppingcart.impl;
@@ -86,7 +86,7 @@ public class OrderFactoryImpl implements OrderFactory {
 			final boolean isOrderExchange,
 			final boolean awaitExchangeCompletion) {
 
-		Order order = getBean(ContextIdNames.ORDER);
+		Order order = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER, Order.class);
 		order.setCreatedDate(getTimeService().getCurrentTime());
 		order.setIpAddress(customerSession.getIpAddress());
 		order.setCurrency(customerSession.getCurrency());
@@ -97,7 +97,7 @@ public class OrderFactoryImpl implements OrderFactory {
 		if (isOrderExchange) {
 			order.setExchangeOrder(Boolean.TRUE);
 			if (awaitExchangeCompletion) {
-				order = getOrderService().awaitExchnageCompletionForOrder(order);
+				order = getOrderService().awaitExchangeCompletionForOrder(order);
 			}
 		}
 
@@ -168,7 +168,7 @@ public class OrderFactoryImpl implements OrderFactory {
 		order.setTaxExemption(shoppingCart.getTaxExemption());
 
 		// Set the billing address
-		final OrderAddress billingAddress = getBean(ContextIdNames.ORDER_ADDRESS);
+		final OrderAddress billingAddress = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 		if (shoppingCart.getBillingAddress() != null) {
 			billingAddress.init(shoppingCart.getBillingAddress());
 			order.setBillingAddress(billingAddress);
@@ -284,7 +284,8 @@ public class OrderFactoryImpl implements OrderFactory {
 												final Set<OrderSku> physicalSkus,
 												final Set<OrderSku> electronicSkus,
 												final Set<OrderSku> serviceSkus) {
-		final ShipmentTypeShoppingCartVisitor visitor = getBeanFactory().getBean(ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR);
+		final ShipmentTypeShoppingCartVisitor visitor = getBeanFactory().getPrototypeBean(ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR, 
+				ShipmentTypeShoppingCartVisitor.class);
 		for (final OrderSku sku : rootItems) {
 			sku.accept(visitor, getProductSkuLookup());
 		}
@@ -316,8 +317,9 @@ public class OrderFactoryImpl implements OrderFactory {
 												 final Set<OrderSku> orderSkuSet,
 												 final boolean isExchangeOrder,
 												 final boolean awaitExchangeCompletion) {
-		final PhysicalOrderShipment orderShipment = getBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT);
-		final OrderAddress shippingAddress = getBean(ContextIdNames.ORDER_ADDRESS);
+		final PhysicalOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT, 
+				PhysicalOrderShipment.class);
+		final OrderAddress shippingAddress = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 
 		shippingAddress.init(shoppingCart.getShippingAddress());
 		orderShipment.setShipmentAddress(shippingAddress);
@@ -375,7 +377,8 @@ public class OrderFactoryImpl implements OrderFactory {
 													final ShoppingCartPricingSnapshot pricingSnapshot,
 													final Set<OrderSku> orderSkuSet) {
 
-		final ElectronicOrderShipment orderShipment = getBean(ContextIdNames.ELECTRONIC_ORDER_SHIPMENT);
+		final ElectronicOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.ELECTRONIC_ORDER_SHIPMENT, 
+				ElectronicOrderShipment.class);
 		orderShipment.setCreatedDate(getTimeService().getCurrentTime());
 		orderShipment.setStatus(OrderShipmentStatus.RELEASED);
 		// add skus
@@ -390,7 +393,8 @@ public class OrderFactoryImpl implements OrderFactory {
 
 
 	private OrderShipment createServiceShipment(final Set<OrderSku> orderSkus) {
-		final ServiceOrderShipment orderShipment = getBean(ContextIdNames.SERVICE_ORDER_SHIPMENT);
+		final ServiceOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.SERVICE_ORDER_SHIPMENT, 
+				ServiceOrderShipment.class);
 		addOrderSkusToShipment(orderSkus, orderShipment);
 		orderShipment.setCreatedDate(getTimeService().getCurrentTime());
 		orderShipment.setSubtotalDiscount(BigDecimal.ZERO.setScale(2));
@@ -399,7 +403,7 @@ public class OrderFactoryImpl implements OrderFactory {
 	}
 
 	private EventOriginatorHelper getEventOriginatorHelper() {
-		return getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		return getBeanFactory().getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 	}
 
 	/**
@@ -433,7 +437,7 @@ public class OrderFactoryImpl implements OrderFactory {
 	 * @return a new {@link AppliedRule} instance
 	 */
 	protected AppliedRule createAppliedRule(final Rule rule, final Locale locale) {
-		final AppliedRule appliedRule = getBean(ContextIdNames.APPLIED_RULE);
+		final AppliedRule appliedRule = getBeanFactory().getPrototypeBean(ContextIdNames.APPLIED_RULE, AppliedRule.class);
 
 		appliedRule.initialize(rule, locale);
 		appliedRule.accept(appliedRuleVisitor);
@@ -448,23 +452,13 @@ public class OrderFactoryImpl implements OrderFactory {
 	 * @return a new {@link AppliedRule} instance
 	 */
 	protected AppliedRule createAppliedRuleForRemovedRule(final Long uid) {
-		final AppliedRule appliedRule = getBean(ContextIdNames.APPLIED_RULE);
+		final AppliedRule appliedRule = getBeanFactory().getPrototypeBean(ContextIdNames.APPLIED_RULE, AppliedRule.class);
 
 		appliedRule.setRuleUid(uid);
 		appliedRule.setRuleName(RULE_DELETED_MESSAGE);
 		appliedRule.setRuleCode(RULE_DELETED_MESSAGE);
 
 		return appliedRule;
-	}
-
-	/**
-	 * Convenience method for getting a bean instance from elastic path.
-	 * @param <T> the type of bean to return
-	 * @param beanName the name of the bean to get an instance of.
-	 * @return an instance of the requested bean.
-	 */
-	protected <T> T getBean(final String beanName) {
-		return getBeanFactory().<T>getBean(beanName);
 	}
 
 	/**

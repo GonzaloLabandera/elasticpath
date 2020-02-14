@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.elasticpath.cmclient.admin.stores.editors.facets.FacetModel;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.store.StoreEditorModel;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
@@ -48,8 +48,8 @@ public class StoreFacets {
 	 *
 	 */
 	public StoreFacets(final StoreEditorModel storeEditorModel) {
-		facetService = ServiceLocator.getService(ContextIdNames.FACET_SERVICE);
-		catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		facetService = BeanLocator.getSingletonBean(ContextIdNames.FACET_SERVICE, FacetService.class);
+		catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 
 		this.defaultLocale = storeEditorModel.getDefaultLocale();
 		this.catalog = storeEditorModel.getCatalog();

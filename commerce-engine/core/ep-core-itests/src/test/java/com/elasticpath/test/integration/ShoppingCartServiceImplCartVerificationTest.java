@@ -6,27 +6,16 @@ package com.elasticpath.test.integration;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Date;
 import java.util.Locale;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.common.dto.ShoppingItemDto;
-import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.ProductBundle;
-import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.sellingchannel.director.CartDirector;
-import com.elasticpath.service.catalog.ProductService;
-import com.elasticpath.service.catalog.ProductSkuService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.test.integration.cart.AbstractCartIntegrationTestParent;
-import com.elasticpath.test.persister.CatalogTestPersister;
-import com.elasticpath.test.persister.TaxTestPersister;
-import com.elasticpath.test.persister.TestDataPersisterFactory;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 
 /**
@@ -38,14 +27,6 @@ public class ShoppingCartServiceImplCartVerificationTest extends AbstractCartInt
 	private static final String NONEXISTENT_STORECODE = "NONEXISTENT_STORECODE";
 	@Autowired
 	private ShoppingCartService shoppingCartService;
-	@Autowired
-	private ProductService productService;
-	@Autowired
-	private ProductSkuService productSkuService;
-	@Autowired
-	private CartDirector cartDirector;
-	@Autowired
-	private TestDataPersisterFactory persisterFactory;
 	private final Locale DEFAULT_LOCALE = Locale.US;
 	
 	@DirtiesDatabase
@@ -112,30 +93,4 @@ public class ShoppingCartServiceImplCartVerificationTest extends AbstractCartInt
 		return result;
 	}
 
-	private ProductBundle createTestProductBundle() {
-		CatalogTestPersister catalogTestPersister = persisterFactory.getCatalogTestPersister();
-		ProductBundle productBundle = catalogTestPersister.createSimpleProductBundle("testtype", "testbundle", 
-				getScenario().getCatalog(),	getScenario().getCategory(), 
-				persisterFactory.getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS));
-		final Product product = catalogTestPersister.createDefaultProductWithSkuAndInventory(getScenario().getCatalog(),
-				getScenario().getCategory(), getScenario().getWarehouse());
-
-		productBundle.addConstituent(catalogTestPersister.createSimpleBundleConstituent(product, 1));
-		
-		productBundle.setCalculated(true);
-		final ProductSkuImpl bundleSku = new ProductSkuImpl();
-		bundleSku.setStartDate(new Date());
-		bundleSku.setSkuCode("testbundleSku");
-		bundleSku.setDefaultValues();
-		productBundle.addOrUpdateSku(bundleSku);
-		productService.saveOrUpdate(productBundle);
-		
-		return productBundle;
-	}
-	
-	
-	private void addSkuToCart(final ShoppingCart shoppingCart, final String skuCode, final int quantity) {
-		final ShoppingItemDto dto = new ShoppingItemDto(skuCode, quantity);
-		cartDirector.addItemToCart(shoppingCart, dto);
-	}
 }

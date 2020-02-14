@@ -130,7 +130,7 @@ public class DataPolicyResultPane extends AbstractPageObject {
 		String actualDateString = getDriver().findElement(By.cssSelector(String.format(DATA_POLICY_LIST_ROW_COLUMN_CSS, dataPolicyName)
 				+ DATA_POLICY_END_DATE_COLUMN_CSS)).getText();
 
-		assertThat(Utility.convertToDate(actualDateString))
+		assertThat(Utility.convertToDateTime(actualDateString))
 				.as("Data Policy End Date is not future date.")
 				.isInTheFuture();
 	}

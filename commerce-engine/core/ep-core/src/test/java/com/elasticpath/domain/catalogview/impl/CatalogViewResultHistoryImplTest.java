@@ -39,7 +39,7 @@ public class CatalogViewResultHistoryImplTest extends AbstractEPTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.SEARCH_RESULT, SearchResultImpl.class);
+		stubGetPrototypeBean(ContextIdNames.SEARCH_RESULT, CatalogViewResult.class, SearchResultImpl.class);
 		
 		this.catalogViewResultHistory = new CatalogViewResultHistoryImpl();
 	}

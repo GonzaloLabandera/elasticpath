@@ -19,7 +19,7 @@ import com.elasticpath.service.rules.RuleService;
 public class PromotionDetailsReportParametersRetriever {
 	private final ReportAuthorizationUtility reportUtility = new ReportAuthorizationUtility();
 
-	private final RuleService ruleService = LoginManager.getInstance().getBean(ContextIdNames.RULE_SERVICE);
+	private final RuleService ruleService = LoginManager.getInstance().getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 
 	/**
 	 * Gets all available stores.

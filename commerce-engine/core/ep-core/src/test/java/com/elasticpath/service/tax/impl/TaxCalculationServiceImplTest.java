@@ -33,17 +33,19 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.CatalogLocaleImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.shoppingcart.PriceCalculator;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
+import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.impl.TaxCategoryImpl;
 import com.elasticpath.domain.tax.impl.TaxCodeImpl;
 import com.elasticpath.money.Money;
-import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.plugin.tax.builder.TaxAddressBuilder;
 import com.elasticpath.plugin.tax.builder.TaxOperationContextBuilder;
 import com.elasticpath.plugin.tax.common.TaxContextIdNames;
@@ -130,18 +132,19 @@ public class TaxCalculationServiceImplTest {
 		productSkuLookup = context.mock(ProductSkuLookup.class);
 
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, productSkuLookup);
-		expectationsFactory.allowingBeanFactoryGetBean(TaxContextIdNames.MUTABLE_TAXABLE_ITEM_CONTAINER, MutableTaxableItemContainer.class);
-		expectationsFactory.allowingBeanFactoryGetBean(TaxContextIdNames.TAXABLE_ITEM, TaxableItemImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.TAX_CATEGORY, TaxCategoryImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CATALOG_LOCALE, SupportedLocale.class, CatalogLocaleImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, 
+				LocalizedPropertiesImpl.class);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class, productSkuLookup);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(TaxContextIdNames.MUTABLE_TAXABLE_ITEM_CONTAINER, MutableTaxableItemContainer.class, 
+				MutableTaxableItemContainer.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(TaxContextIdNames.TAXABLE_ITEM, TaxableItemImpl.class, TaxableItemImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class, TaxCategoryImpl.class);
 
 		taxManager = context.mock(TaxManager.class);
 		taxDocument = context.mock(TaxDocument.class);
 		storeService = context.mock(StoreService.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.STORE_SERVICE, storeService);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class, storeService);
 
 		context.checking(new Expectations() {
 			{

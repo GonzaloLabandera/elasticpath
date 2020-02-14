@@ -34,8 +34,8 @@ import com.elasticpath.test.util.Utils;
 public class ImportBaseAmountTest extends ImportJobTestCase {
 
 	private void assertBaseAmountsInserted() {
-		BaseAmountService baseAmountService = getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_SERVICE);
-		BaseAmountFilter filter = getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountService baseAmountService = getBeanFactory().getSingletonBean(ContextIdNames.BASE_AMOUNT_SERVICE, BaseAmountService.class);
+		BaseAmountFilter filter = getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		Collection<BaseAmount> baseAmounts = baseAmountService.findBaseAmounts(filter);
 		assertFalse(baseAmounts.isEmpty());
 	}
@@ -54,14 +54,14 @@ public class ImportBaseAmountTest extends ImportJobTestCase {
 		assertEquals(0, badRows.size());
 		assertBaseAmountsInserted();
 	}
-	
+
 	/**
 	 * Creates a PriceList into which BaseAmounts can be imported.
 	 * @return the created PLD
 	 */
 	PriceListDescriptor createPriceListForImport() {
 		String name = "PRICE LIST";
-		PriceListDescriptor descriptor = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR);
+		PriceListDescriptor descriptor = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
 		String guid = descriptor.getGuid();
 		assertNotNull(guid);
 		descriptor.setCurrencyCode(Currency.getInstance(Locale.CANADA).getCurrencyCode());
@@ -70,14 +70,14 @@ public class ImportBaseAmountTest extends ImportJobTestCase {
 		assertNotNull("The created PriceList into which BaseAmounts will be inserted cannot be null.", createdDescriptor);
 		return createdDescriptor;
 	}
-	
+
 	/**
 	 * @return the PriceListDescriptor Service
 	 */
 	PriceListDescriptorService getPriceListDescriptorService() {
-		return getBeanFactory().getBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE);
+		return getBeanFactory().getSingletonBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE, PriceListDescriptorService.class);
 	}
-	
+
 	/**
 	 * @param priceListDescriptorGuid the GUID of the price list descriptor
 	 * @return the created import job
@@ -88,7 +88,7 @@ public class ImportBaseAmountTest extends ImportJobTestCase {
 		final int column4 = 4;
 		final int column5 = 5;
 		final int column6 = 6;
-		
+
 		mappings.put("type", 1);
 		mappings.put("productCode", 2);
 		mappings.put("skuCode", column3);

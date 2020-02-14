@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.delivery.handlers;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.UIEvent;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
@@ -47,7 +47,8 @@ public class CreateDynamicContentDeliveryHandler extends
 	@Override
 	protected CreateHandlerService<DynamicContentDelivery> getService() {
 		return new DynamicContentDeliveryCreateHandlerServiceAdapter(
-				ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE));
+				BeanLocator.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE,
+						com.elasticpath.service.targetedselling.DynamicContentDeliveryService.class));
 	}
 
 	@Override
@@ -55,8 +56,7 @@ public class CreateDynamicContentDeliveryHandler extends
 
 		DynamicContentDeliveryModelAdapter model = 
 			new DynamicContentDeliveryModelAdapter(
-					ServiceLocator.getService(
-							ContextIdNames.DYNAMIC_CONTENT_DELIVERY));
+					BeanLocator.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY, DynamicContentDelivery.class));
 		return new DynamicContentDeliveryWizard(model);
 	}
 	

@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.ui.dialog.SkuFinderDialog;
@@ -133,8 +133,7 @@ public class InventorySearchTab implements ITab {
 	}
 
 	private boolean validateSku(final String productSkuCode) {
-		ProductSkuLookup productSkuLookup = ServiceLocator.getService(
-				ContextIdNames.PRODUCT_SKU_LOOKUP);
+		ProductSkuLookup productSkuLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 		productSKU = productSkuLookup.findBySkuCode(productSkuCode);
 
 //		long warehouseUid = WarehousePerspectiveFactory.getCurrentWarehouse().getUidPk();

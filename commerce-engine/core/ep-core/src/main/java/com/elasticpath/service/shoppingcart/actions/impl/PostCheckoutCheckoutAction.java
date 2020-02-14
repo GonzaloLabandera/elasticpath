@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
@@ -16,7 +16,7 @@ public class PostCheckoutCheckoutAction implements FinalizeCheckoutAction {
 
 	@Override
 	public void execute(final FinalizeCheckoutActionContext context) throws EpSystemException {
-		checkoutEventHandler.postCheckout(context.getShoppingCart(), context.getOrderPaymentTemplate(),
+		checkoutEventHandler.postCheckout(context.getShoppingCart(),
 				context.getOrder());
 	}
 

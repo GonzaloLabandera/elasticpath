@@ -185,7 +185,7 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	public Single<ProductSku> getProductSku(final String cartId, final String lineItemId) {
 		return getShoppingCart(cartId)
 				.flatMap(cart -> getShoppingItem(lineItemId, cart))
-				.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid()));
+				.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuid(shoppingItem.getSkuGuid()));
 	}
 
 	@Override

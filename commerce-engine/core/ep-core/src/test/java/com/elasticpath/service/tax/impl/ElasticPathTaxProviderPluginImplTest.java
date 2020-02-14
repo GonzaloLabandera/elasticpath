@@ -103,16 +103,18 @@ public class ElasticPathTaxProviderPluginImplTest {
 		when(taxRateDescriptorResolver.findTaxRateDescriptors(isA(TaxableItem.class), isA(TaxableItemContainer.class))).
 				thenReturn(gstDescriptionResult);
 
-		when(beanFactory.getBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER)).thenReturn(new MutableTaxedItemContainer());
+		when(beanFactory.getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER, MutableTaxedItemContainer.class))
+			.thenReturn(new MutableTaxedItemContainer());
 		// thenAnswer returns a new Object (not the same instance) per call
-		when(beanFactory.getBean(TaxContextIdNames.MUTABLE_TAXED_ITEM)).thenAnswer(new Answer<MutableTaxedItem>() {
+		when(beanFactory.getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM, MutableTaxedItem.class)).thenAnswer(new Answer<MutableTaxedItem>() {
 			@Override
 			public MutableTaxedItem answer(final InvocationOnMock invocationOnMock) throws Throwable {
 				return new MutableTaxedItem();
 			}
 		});
 
-		when(beanFactory.getBean(TaxContextIdNames.TAX_RATE_DESCRIPTOR_RESOLVER)).thenReturn(taxRateDescriptorResolver);
+		when(beanFactory.getPrototypeBean(TaxContextIdNames.TAX_RATE_DESCRIPTOR_RESOLVER, TaxRateDescriptorResolver.class))
+				.thenReturn(taxRateDescriptorResolver);
 	}
 
 	@Test
@@ -170,10 +172,10 @@ public class ElasticPathTaxProviderPluginImplTest {
 	}
 
 	private void setupTaxContainerHelper(final String documentId,
-			final List<TaxableItem> itemList,
-			final TaxExemption taxExemption,
-			final MutableTaxAddress destination,
-			final MutableTaxAddress origin) {
+										 final List<TaxableItem> itemList,
+										 final TaxExemption taxExemption,
+										 final MutableTaxAddress destination,
+										 final MutableTaxAddress origin) {
 		resetContainerAddresses(destination, origin);
 		container.setTaxOperationContext(TaxOperationContextBuilder
 				.newBuilder()
@@ -187,8 +189,9 @@ public class ElasticPathTaxProviderPluginImplTest {
 
 	/**
 	 * Resets the container's addresses.
+	 *
 	 * @param destination destination address
-	 * @param origin origin address
+	 * @param origin      origin address
 	 */
 	private void resetContainerAddresses(final TaxAddress destination, final TaxAddress origin) {
 		container.setDestinationAddress(destination);
@@ -209,10 +212,10 @@ public class ElasticPathTaxProviderPluginImplTest {
 
 	@SuppressWarnings("PMD.AvoidDecimalLiteralsInBigDecimalConstructor")
 	private TaxableItemImpl generateTaxableItem(final double totalPrice,
-			final int quantity,
-			final String itemDescription,
-			final String itemCode,
-			final String taxCode) {
+												final int quantity,
+												final String itemDescription,
+												final String itemCode,
+												final String taxCode) {
 		TaxableItemImpl item = new TaxableItemImpl();
 		item.setPrice(new BigDecimal(totalPrice));
 		item.setQuantity(quantity);

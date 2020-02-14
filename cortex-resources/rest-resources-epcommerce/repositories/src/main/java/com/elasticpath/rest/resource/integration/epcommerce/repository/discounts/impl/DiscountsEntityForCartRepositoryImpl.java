@@ -43,7 +43,7 @@ public class DiscountsEntityForCartRepositoryImpl<E extends DiscountEntity, I ex
 
 		Single<Money> subtotalDiscountMoney = getSubtotalDiscountMoney(scope, cartId);
 
-		Single<CustomerSession> customerSession = customerSessionRepository.findOrCreateCustomerSessionAsSingle();
+		Single<CustomerSession> customerSession = customerSessionRepository.findOrCreateCustomerSession();
 
 		return getCostEntity(subtotalDiscountMoney, customerSession)
 				.map(costEntity -> DiscountEntity.builder()
@@ -58,8 +58,8 @@ public class DiscountsEntityForCartRepositoryImpl<E extends DiscountEntity, I ex
 	}
 
 	private Single<Money> getSubtotalDiscountMoney(final String scope, final String cartId) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(scope, cartId, CartOrderRepository.FindCartOrder.BY_CART_GUID)
-				.flatMap(pricingSnapshotRepository::getShoppingCartPricingSnapshotSingle)
+		return cartOrderRepository.getEnrichedShoppingCart(scope, cartId, CartOrderRepository.FindCartOrder.BY_CART_GUID)
+				.flatMap(pricingSnapshotRepository::getShoppingCartPricingSnapshot)
 				.map(ShoppingCartPricingSnapshot::getSubtotalDiscountMoney);
 	}
 

@@ -191,7 +191,7 @@ public class SkuOptionImpl extends AbstractLegacyEntityImpl implements SkuOption
 	@Transient
 	public LocalizedProperties getLocalizedProperties() {
 		if (localizedProperties == null) {
-			localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			localizedProperties = getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 			localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(), ContextIdNames.SKU_OPTION_LOCALIZED_PROPERTY_VALUE);
 		}
 		return localizedProperties;

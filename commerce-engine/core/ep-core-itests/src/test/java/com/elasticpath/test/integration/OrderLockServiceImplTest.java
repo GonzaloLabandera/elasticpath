@@ -1,9 +1,9 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2014
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration;
 
-import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -27,10 +27,8 @@ import com.elasticpath.domain.builder.shopper.ShoppingContext;
 import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.factory.OrderPaymentFactory;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderLock;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.persister.Persister;
 import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.customer.CustomerService;
@@ -44,9 +42,6 @@ public class OrderLockServiceImplTest extends BasicSpringContextTest {
 
 	@Autowired
 	private OrderLockService orderLockService;
-
-	@Autowired
-	private OrderPaymentFactory orderPaymentFactory;
 
 	@Autowired
 	private CheckoutTestCartBuilder checkoutTestCartBuilder;
@@ -91,14 +86,10 @@ public class OrderLockServiceImplTest extends BasicSpringContextTest {
 		
 		checkoutTestCartBuilder
 				.withScenario(scenario)
-				.withCustomerSession(shoppingContext.getCustomerSession())
-				.withTestDoubleGateway();
-
-		final OrderPayment templateOrderPayment = orderPaymentFactory.createTemplateTokenizedOrderPayment();
+				.withCustomerSession(shoppingContext.getCustomerSession());
 
 		orderBuilder
 				.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
-				.withTemplateOrderPayment(templateOrderPayment)
 				.withShoppingContext(shoppingContext);
 
 		cmUser = cmUserService.findByUserName("admin");

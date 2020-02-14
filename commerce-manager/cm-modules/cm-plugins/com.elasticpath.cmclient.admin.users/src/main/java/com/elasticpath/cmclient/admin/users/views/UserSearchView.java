@@ -24,7 +24,7 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
 import com.elasticpath.cmclient.admin.users.AdminUsersMessages;
 import com.elasticpath.cmclient.admin.users.helpers.UserSearchRequestJob;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
@@ -199,7 +199,7 @@ public class UserSearchView extends AbstractCmClientView {
 	}
 
 	private void populateUserRoleCombo() {
-		final UserRoleService userRoleService = (UserRoleService) getBean(ContextIdNames.USER_ROLE_SERVICE);
+		final UserRoleService userRoleService = BeanLocator.getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 		
 		this.userRolesCombo.add(AdminUsersMessages.get().SearchView_Filter_Item_Any, ANY_FILTER_INDEX);
 		this.userRolesCombo.select(ANY_FILTER_INDEX);
@@ -211,7 +211,7 @@ public class UserSearchView extends AbstractCmClientView {
 	}
 
 	private void populateCatalogCombo() {
-		final CatalogService catalogService = (CatalogService) getBean(ContextIdNames.CATALOG_SERVICE);
+		final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 
 		this.catalogCombo.add(AdminUsersMessages.get().SearchView_Filter_Item_Any, ANY_FILTER_INDEX);
 		this.catalogCombo.select(ANY_FILTER_INDEX);
@@ -222,7 +222,7 @@ public class UserSearchView extends AbstractCmClientView {
 	}
 
 	private void populateStoreCombo() {
-		final StoreService storeService = (StoreService) getBean(ContextIdNames.STORE_SERVICE);
+		final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 
 		this.storeCombo.add(AdminUsersMessages.get().SearchView_Filter_Item_Any, ANY_FILTER_INDEX);
 		this.storeCombo.select(ANY_FILTER_INDEX);
@@ -247,36 +247,44 @@ public class UserSearchView extends AbstractCmClientView {
 		bind(userEmailText, getModel(), "email", null, null); //$NON-NLS-1$
 	
 		bindCombo(catalogCombo, new BindComboHelper<Catalog>() {
+			@java.lang.Override
 			public void handleSelectionAny() {
 				getModel().setCatalogCode(null);				
 			}			
+			@java.lang.Override
 			public void handleSelection(final Catalog catalog) {
 				getModel().setCatalogCode(catalog.getCode());
 			}
 		});
 		
 		bindCombo(storeCombo, new BindComboHelper<Store>() {
+			@java.lang.Override
 			public void handleSelectionAny() {
 				getModel().setStoreCode(null);
 			}			
+			@java.lang.Override
 			public void handleSelection(final Store store) {
 				getModel().setStoreCode(store.getCode());
 			}
 		});
 		
 		bindCombo(statusCombo, new BindComboHelper<UserStatus>() {
+			@java.lang.Override
 			public void handleSelectionAny() {
 				getModel().setUserStatus(null);
 			}
+			@java.lang.Override
 			public void handleSelection(final UserStatus userStatus) {
 				getModel().setUserStatus(userStatus);
 			}
 		});
 		
 		bindCombo(userRolesCombo, new BindComboHelper<UserRole>() {
+			@java.lang.Override
 			public void handleSelectionAny() {
 				getModel().setUserRoleName(null);
 			}
+			@java.lang.Override
 			public void handleSelection(final UserRole userRole) {
 				getModel().setUserRoleName(userRole.getName());
 			}
@@ -362,7 +370,7 @@ public class UserSearchView extends AbstractCmClientView {
 	@Override
 	protected UserSearchCriteria getModel() {
 		if (this.userSearchCriteria == null) {
-			this.userSearchCriteria = (UserSearchCriteria) getBean(ContextIdNames.USER_SEARCH_CRITERIA);
+			this.userSearchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.USER_SEARCH_CRITERIA, UserSearchCriteria.class);
 		}
 		return this.userSearchCriteria;		
 	}
@@ -390,11 +398,7 @@ public class UserSearchView extends AbstractCmClientView {
 			}			
 		});
 	}
-	
-	private static Object getBean(final String beanName) {
-		return ServiceLocator.getService(beanName);
-	}
-	
+
 	private static String getUserRoleName(final UserRole role) {
 		String result = role.getName();
 		if (result.equals(UserRole.CMUSER)) {

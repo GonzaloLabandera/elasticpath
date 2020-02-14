@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration;
 
@@ -8,23 +8,20 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import com.elasticpath.base.GloballyIdentifiable;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
@@ -37,15 +34,14 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerMessageIds;
-import com.elasticpath.domain.customer.CustomerPaymentMethods;
-import com.elasticpath.domain.customer.PaymentToken;
-import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.domain.orderpaymentapi.CustomerPaymentInstrument;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
+import com.elasticpath.service.orderpaymentapi.CustomerPaymentInstrumentService;
+import com.elasticpath.test.persister.PaymentInstrumentPersister;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.test.util.Utils;
 
@@ -82,6 +78,9 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 	@Autowired
 	private BeanFactory beanFactory;
+
+	@Autowired
+	private CustomerPaymentInstrumentService customerPaymentInstrumentService;
 
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
@@ -518,107 +517,20 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 	@Test
 	@DirtiesDatabase
-	public void ensureCascadeDeletionOfTokensOnCustomerDelete() {
-		PaymentTokenImpl.TokenBuilder tokenBuilder = new PaymentTokenImpl.TokenBuilder()
-			.withDisplayValue(TOKEN_DISPLAY_VALUE)
-			.withGatewayGuid(TOKEN_GATEWAY_GUID);
-
-		PaymentToken firstToken = tokenBuilder
-			.withValue("first-token-value").build();
-		PaymentToken secondToken = tokenBuilder
-			.withValue("second-token-value").build();
-		PaymentToken thirdToken = tokenBuilder
-			.withValue("third-token-value").build();
-
+	public void ensureDeletionOfPaymentInstrumentsOnCustomerDelete() {
 		final Customer customer = createCustomer();
-		List<PaymentMethod> customerPaymentMethods = ImmutableList.of(firstToken, secondToken);
-		customer.getPaymentMethods().addAll(customerPaymentMethods);
-		customer.getPaymentMethods().setDefault(thirdToken);
 		service.add(customer);
+		final PaymentInstrumentPersister paymentInstrumentPersister = getTac().getPersistersFactory().getPaymentInstrumentPersister();
+		final CustomerPaymentInstrument persistedInstrument = paymentInstrumentPersister.persistPaymentInstrument(customer, null);
 
 		service.remove(customer);
-		for (PaymentMethod token : customer.getPaymentMethods().all()) {
-			long uidPk = ((PaymentToken) token).getUidPk();
-			assertThat(persistenceEngine.get(PaymentTokenImpl.class, uidPk))
-				.as("Token with uidpk {%s} should have been cascade deleted", uidPk)
+
+		assertThat(customerPaymentInstrumentService.findByGuid(persistedInstrument.getGuid()))
+				.as("Customer payment instrument with GUID {%s} should have been deleted", persistedInstrument.getGuid())
 				.isNull();
-		}
-		assertThat(persistenceEngine.get(PaymentTokenImpl.class, thirdToken.getUidPk()))
-			.as("Token with uidpk {%s} should have been cascade deleted", thirdToken.getUidPk())
-			.isNull();
-	}
-
-	@Test
-	@DirtiesDatabase
-	public void ensureCustomerSavesWithPopulatedTokenFields() {
-		PaymentTokenImpl.TokenBuilder tokenBuilder = new PaymentTokenImpl.TokenBuilder()
-			.withDisplayValue(TOKEN_DISPLAY_VALUE)
-			.withGatewayGuid(TOKEN_GATEWAY_GUID);
-
-		PaymentToken firstToken = tokenBuilder
-			.withValue("first-token-value").build();
-		PaymentToken secondToken = tokenBuilder
-			.withValue("second-token-value").build();
-
-
-		final Customer customer = createCustomer();
-		List<PaymentMethod> customerPaymentMethods = ImmutableList.of(firstToken, secondToken);
-		customer.getPaymentMethods().addAll(customerPaymentMethods);
-		customer.getPaymentMethods().setDefault(secondToken);
-		service.add(customer);
-
-		Customer retrievedCustomer = service.get(customer.getUidPk());
-		CustomerPaymentMethods retrievedPaymentTokens = retrievedCustomer.getPaymentMethods();
-
-		assertThat(retrievedPaymentTokens.all().size()).isEqualTo(2);
-		for (PaymentMethod token : retrievedPaymentTokens.all()) {
-			assertThat(persistenceEngine.get(PaymentTokenImpl.class, ((PaymentToken) token).getUidPk()))
-				.as("Tokens referenced by the customer should exist in the database")
-				.isNotNull();
-		}
-		assertThat(customer.getPaymentMethods().getDefault()).isNotNull();
-	}
-
-	@Test
-	@DirtiesDatabase
-	public void ensureCustomerSavesWithEmptyTokenFields() {
-		final Customer customer = createCustomer();
-		service.add(customer);
-
-		Customer retrievedCustomer = service.get(customer.getUidPk());
-		CustomerPaymentMethods retrievedCustomerCustomerPaymentMethods = retrievedCustomer.getPaymentMethods();
-		assertThat(retrievedCustomerCustomerPaymentMethods.all()).isEmpty();
-		assertThat(customer.getPaymentMethods().getDefault())
-			.as("No default payment token should have been saved on the customer")
-			.isNull();
-	}
-
-	@Test(expected = InvalidDataAccessApiUsageException.class)
-	@DirtiesDatabase
-	public void ensureCustomerSavedWithTokenWithNullDisplayValueThrowsAnException() {
-		PaymentToken tokenWithNoDisplayValue = new PaymentTokenImpl.TokenBuilder()
-				.withGatewayGuid(TOKEN_GATEWAY_GUID)
-				.withValue("token-value")
-				.build();
-
-		Customer customer = createCustomer();
-		customer.getPaymentMethods().addAll(Collections.singletonList(tokenWithNoDisplayValue));
-
-		service.add(customer);
-	}
-
-	@Test(expected = InvalidDataAccessApiUsageException.class)
-	@DirtiesDatabase
-	public void ensureCustomerSavedWithTokenWithNullTokenValueThrowsAnException() {
-		PaymentToken tokenWithNoValue = new PaymentTokenImpl.TokenBuilder()
-				.withGatewayGuid(TOKEN_GATEWAY_GUID)
-				.withDisplayValue(TOKEN_DISPLAY_VALUE)
-				.build();
-
-		Customer customer = createCustomer();
-		customer.getPaymentMethods().addAll(Collections.singletonList(tokenWithNoValue));
-
-		service.add(customer);
+		assertThat(customerPaymentInstrumentService.findByCustomer(customer))
+				.as("All payment instruments should have been deleted for customer with UID", customer.getUidPk())
+				.isEmpty();
 	}
 
 	@Test
@@ -635,39 +547,6 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 			.containsOnly(signedInCustomer.getUidPk());
 	}
 
-	@Test
-	@DirtiesDatabase
-	public void ensureCustomerDefaultPaymentMethodIsUpdatedAndPreviousDefaultIsRetained() {
-		Customer customer = createCustomer();
-
-		PaymentMethod tokenWithValue = new PaymentTokenImpl.TokenBuilder()
-			.withGatewayGuid(TOKEN_GATEWAY_GUID)
-			.withDisplayValue(TOKEN_DISPLAY_VALUE)
-			.withValue(TEST_TOKEN_VALUE + "1")
-			.build();
-		customer.getPaymentMethods().add(tokenWithValue);
-
-		PaymentMethod tokenWithValue2 = new PaymentTokenImpl.TokenBuilder()
-			.withGatewayGuid(TOKEN_GATEWAY_GUID)
-			.withDisplayValue(TOKEN_DISPLAY_VALUE)
-			.withValue(TEST_TOKEN_VALUE + "2")
-			.build();
-		customer.getPaymentMethods().setDefault(tokenWithValue2);
-		Customer updatedCustomer = service.update(customer);
-
-		//Set a new default and re-update customer
-		updatedCustomer.getPaymentMethods().setDefault(tokenWithValue);
-		updatedCustomer = service.update(updatedCustomer);
-
-		assertThat(updatedCustomer.getPaymentMethods().all())
-			.containsExactlyInAnyOrder(tokenWithValue, tokenWithValue2)
-			.allSatisfy(paymentMethod -> assertThat(retrieveToken(paymentMethod)).isNotNull());
-	}
-
-	private PaymentTokenImpl retrieveToken(final PaymentMethod paymentMethod) {
-		return persistenceEngine.get(PaymentTokenImpl.class, ((PaymentTokenImpl) paymentMethod).getUidPk());
-	}
-
 	@Test(expected= EpValidationException.class)
 	@DirtiesDatabase
 	public void verifyAddingInvalidEmailToAnonymousCustomerResultsInStructuredErrorMessage() {
@@ -681,7 +560,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	//====================================================================================================================
 
 	private Customer createPersistedAnonymousCustomer(final Store store) {
-		final Customer anonymousCustomer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		final Customer anonymousCustomer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		anonymousCustomer.setStoreCode(store.getCode());
 		anonymousCustomer.setAnonymous(true);
 
@@ -689,7 +568,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private Customer createPersistedCustomer(final String userId, final String email, final Store store) {
-		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		final Customer customer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setUserId(userId);
 		customer.setEmail(email);
 		customer.setFirstName("Test");
@@ -701,7 +580,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private CustomerAddress createAddress() {
-		final CustomerAddress customerAddress = beanFactory.getBean("customerAddress");
+		final CustomerAddress customerAddress = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 		customerAddress.setFirstName("Test");
 		customerAddress.setLastName("Test");
 		customerAddress.setSubCountry("BC");
@@ -713,7 +592,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private Customer createCustomer() {
-		final Customer customer = beanFactory.getBean("customer");
+		final Customer customer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setUserId(Utils.uniqueCode("id"));
 		customer.setFirstName("Test");
 		customer.setLastName("Test");

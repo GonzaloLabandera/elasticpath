@@ -36,7 +36,9 @@ public class DataPolicyEditor extends AbstractPageObject {
 	private static final String DATA_POLICY_ACTIVITY_INPUT_CSS = DATA_POLICY_EDITOR_SUMMARY_PAGE_CSS + "_Activities'][widget-type='Text'] input";
 	private static final String FIELD_DISABLE_CSS = "[disabled]";
 	private static final String DATA_POLICY_SUMMARY_EDITOR_CSS = "div[automation-id='DataPolicySummaryPage']";
-	private static final String AVAILABLE_DATA_POINTS_PARENT_CSS = "div[widget-id='Available Data Points'][widget-type='Table'] ";
+	private static final String AVAILABLE_DATA_POINTS_PARENT_CSS =
+			"div[automation-id='com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesMessages.DataPolicyEditor_DataPoints_Available_Title']"
+					+ "[widget-type='Table'] ";
 	private static final String AVAILABLE_DATA_POINTS_COLUMN_CSS = AVAILABLE_DATA_POINTS_PARENT_CSS + "div[column-id='%s']";
 	private static final String ASSIGNED_DATA_POINTS_PARENT_CSS = "div[widget-id='Assigned Data Points'][widget-type='Table'] ";
 	private static final String ASSIGNED_DATA_POINTS_COLUMN_CSS = ASSIGNED_DATA_POINTS_PARENT_CSS + "div[column-id='%s']";
@@ -46,8 +48,12 @@ public class DataPolicyEditor extends AbstractPageObject {
 	private static final String ADD_SEGMENT_BUTTON_CSS = DATA_POLICY_EDITOR_PARENT_CSS + "div[widget-id='Add Segment']";
 	private static final String CREATE_DATA_POINT_BUTTON_CSS = DATA_POLICY_EDITOR_PARENT_CSS + "div[automation-id='com.elasticpath.cmclient.admin"
 			+ ".datapolicies.AdminDataPoliciesMessages.DataPolicyEditor_DataPoints_Button_CreateDataPoint'][seeable='true']";
-	private static final String DATA_POLICY_EDITOR_CLOSE_ICON_CSS = "div[widget-id='%s'][appearance-id='ctab-item'][active-tab='true'] > "
-			+ "div[style*='.gif']";
+	private static final String DATA_POLICY_EDITOR_CLOSE_ICON_CSS_NEW_SEGMENT =
+			"div[automation-id='com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesMessages.DataPolicyEditor_NewSegmentName']"
+					+ "[appearance-id='ctab-item'][active-tab='true'] > div[style*='.gif']";
+	private static final String DATA_POLICY_EDITOR_CLOSE_ICON_CSS =
+			"div[automation-id='com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesMessages.DataPolicyEditor_Tooltip']"
+					+ "[appearance-id='ctab-item'][active-tab='true'] > div[style*='.gif']";
 	private static final String DATA_POLICY_RETENTION_PERIOD_VALIDATION_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages"
 			+ ".EpValidatorFactory_Integer'][widget-id='%s']";
 	private static final String DATA_POLICY_END_DATE_VALIDATION_CSS = "div[automation-id='com.elasticpath.cmclient.admin.datapolicies"
@@ -127,12 +133,19 @@ public class DataPolicyEditor extends AbstractPageObject {
 	 * @param dataPolicyPoint Data Policy point.
 	 */
 	public void enterAvailableDataPoint(final String dataPolicyPoint) {
-		clickTab("Data Points");
+		clickDataPointsTab();
 		assertThat(selectItemInDialog(AVAILABLE_DATA_POINTS_PARENT_CSS, AVAILABLE_DATA_POINTS_COLUMN_CSS, dataPolicyPoint, ""))
 				.as("Unable to find available data point - " + dataPolicyPoint)
 				.isTrue();
 		clickMoveRightButton();
 		verifyAssignedDataPoint(dataPolicyPoint);
+	}
+
+	/**
+	 * Selects Data Points tab.
+	 */
+	public void clickDataPointsTab() {
+		clickTab("Data Points");
 	}
 
 	/**
@@ -144,6 +157,18 @@ public class DataPolicyEditor extends AbstractPageObject {
 		assertThat(selectItemInDialog(ASSIGNED_DATA_POINTS_PARENT_CSS, ASSIGNED_DATA_POINTS_COLUMN_CSS, dataPolicyPoint, ""))
 				.as("Unable to find assigned data point - " + dataPolicyPoint)
 				.isTrue();
+	}
+
+	/**
+	 * Check if data point is NOT present.
+	 *
+	 * @param dataPolicyPoint Data Policy point.
+	 * @return whether data point exists
+	 */
+	public boolean checkDataPointIsMissing(final String dataPolicyPoint) {
+		// false if item is not present
+		// hence we need to negate (because we check if IS missing)
+		return !verifyItemIsNotInDialog(AVAILABLE_DATA_POINTS_PARENT_CSS, AVAILABLE_DATA_POINTS_COLUMN_CSS, dataPolicyPoint, "");
 	}
 
 	/**
@@ -195,13 +220,17 @@ public class DataPolicyEditor extends AbstractPageObject {
 	}
 
 	/**
-	 * Close Data Policy Editor.
-	 *
-	 * @param dataPolicyName String
+	 * Close new Data Policy Editor.
 	 */
-	public void closeDataPolicyEditor(final String dataPolicyName) {
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(DATA_POLICY_EDITOR_CLOSE_ICON_CSS, dataPolicyName)
-		)));
+	public void closeNewDataPolicyEditor() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(DATA_POLICY_EDITOR_CLOSE_ICON_CSS_NEW_SEGMENT)));
+	}
+
+	/**
+	 * Close old Data Policy Editor.
+	 */
+	public void closeOldDataPolicyEditor() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(DATA_POLICY_EDITOR_CLOSE_ICON_CSS)));
 	}
 
 	/**

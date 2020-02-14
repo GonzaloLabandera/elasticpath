@@ -47,7 +47,9 @@ public class StoresResultPane extends AbstractPageObject {
 	 * @return StoreEditor
 	 */
 	public StoreEditor editStore(final String storeCode) {
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(TARGET_STORE_CSS, storeCode))));
+        assertThat(selectItemInCenterPaneWithoutPagination(STORE_LIST_PARENT_CSS, STORE_LIST_CSS, storeCode, "Store Name"))
+                .as("Store does not exist in the list - " + storeCode)
+                .isTrue();
 		clickButton(EDIT_STORE_BUTTON_CSS, "Edit Store Button");
 		return new StoreEditor(getDriver());
 	}

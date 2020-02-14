@@ -23,4 +23,9 @@ public class NoImplGivenDefinition {
 	public void givenDefaultSortAttribute(final String sortAttribute) {
 		// empty
 	}
+
+	@Given("^the payment configuration (.+) is associated with store$")
+	public void givenExistingPaymentConfigurationAssociatedToStore(final String paymentConfigurationName) {
+		// empty
+	}
 }

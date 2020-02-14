@@ -10,7 +10,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.dialogs.catalog.CreateCatalogDialog;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.service.CatalogEventService;
@@ -25,13 +25,13 @@ public class CreateCatalogHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent arg0) throws ExecutionException {
-		Catalog catalog = ServiceLocator.getService(ContextIdNames.CATALOG);
+		Catalog catalog = BeanLocator.getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
 		catalog.setMaster(true);
 
 		final CreateCatalogDialog createCatalogDialog = new CreateCatalogDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), catalog);
 
 		if (createCatalogDialog.open() == 0) {
-			CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+			CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 			catalog = catalogService.saveOrUpdate(catalog);
 
 			// Fire an event to refresh the browse list view

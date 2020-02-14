@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.dynamiccontent.handlers;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.UIEvent;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
@@ -19,6 +19,7 @@ import com.elasticpath.cmclient.store.targetedselling.handlers.CreateHandlerServ
 import com.elasticpath.cmclient.store.targetedselling.handlers.serviceadapters.DynamicContentCreateHandlerServiceAdapter;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.contentspace.DynamicContent;
+import com.elasticpath.service.contentspace.DynamicContentService;
 
 /**
  * Creates a catalog promotion by opening up the new store promotion wizard. If
@@ -46,8 +47,7 @@ public class CreateDynamicContentHandler extends
 	@Override
 	protected CreateHandlerService<DynamicContent> getService() {
 		return new DynamicContentCreateHandlerServiceAdapter(
-				ServiceLocator.getService(
-				ContextIdNames.DYNAMIC_CONTENT_SERVICE));
+				BeanLocator.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class));
 	}
 
 	@Override

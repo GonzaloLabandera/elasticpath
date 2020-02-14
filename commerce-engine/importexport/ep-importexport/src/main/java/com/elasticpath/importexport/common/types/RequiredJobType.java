@@ -39,8 +39,8 @@ public enum RequiredJobType {
 	/** Required job for Price List Assignments. */
 	PRICELISTASSIGNMENT(JobType.PRICELISTASSIGNMENT),
 
-	/** Payment Gateways. */
-	PAYMENTGATEWAY(JobType.PAYMENTGATEWAY),
+	/** Payment Providers. */
+	PAYMENTPROVIDER(JobType.PAYMENTPROVIDER),
 
 	/** Taxes. */
 	TAXCODE(JobType.TAXCODE), TAXJURISDICTION(JobType.TAXJURISDICTION),

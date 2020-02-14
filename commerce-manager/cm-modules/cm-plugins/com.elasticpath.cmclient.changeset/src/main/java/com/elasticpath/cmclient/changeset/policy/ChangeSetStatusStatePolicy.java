@@ -8,7 +8,7 @@ import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.service.changeset.ChangeSetManagementService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 
 /**
  * A state policy to determine the editable state depending on the 
@@ -41,7 +41,7 @@ public class ChangeSetStatusStatePolicy extends AbstractChangeSetEditorStatePoli
 	 */
 	protected ChangeSetManagementService getChangeSetManagementService() {
 		if (changesetManagementService == null) {
-			changesetManagementService = ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+			changesetManagementService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 		}
 		return changesetManagementService;
 	}

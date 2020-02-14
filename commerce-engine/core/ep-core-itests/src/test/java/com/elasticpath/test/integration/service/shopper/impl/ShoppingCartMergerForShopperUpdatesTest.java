@@ -8,6 +8,8 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -23,6 +25,8 @@ import com.elasticpath.test.integration.cart.AbstractCartIntegrationTestParent;
  */
 public class ShoppingCartMergerForShopperUpdatesTest extends AbstractCartIntegrationTestParent {
 
+	@Autowired
+	@Qualifier("shoppingCartMergerForShopperUpdates")
 	private ShoppingCartMergerForShopperUpdates shoppingCartMergerForShopperUpdates;
 
 	private ShoppingCartService shoppingCartService;
@@ -34,8 +38,7 @@ public class ShoppingCartMergerForShopperUpdatesTest extends AbstractCartIntegra
 	 */
 	@Before
 	public void setUp() throws Exception {
-		shoppingCartMergerForShopperUpdates = getBeanFactory().getBean("shoppingCartMergerForShopperUpdates");
-		shoppingCartService = getBeanFactory().getBean(ContextIdNames.SHOPPING_CART_SERVICE);
+		shoppingCartService = getBeanFactory().getSingletonBean(ContextIdNames.SHOPPING_CART_SERVICE, ShoppingCartService.class);
 	}
 
 	/**
@@ -48,7 +51,6 @@ public class ShoppingCartMergerForShopperUpdatesTest extends AbstractCartIntegra
 	@Test
 	public void testMergingCartsKeepsTheCartAssociatedWithTheCustomerAccountNotTheAnonymouslyCreatedCart() {
 		CustomerSession registeredCustomerSession = createCustomerSession();
-		Shopper registeredShopper = registeredCustomerSession.getShopper();
 		ShoppingCart registeredShoppingCart = createShoppingCart(registeredCustomerSession);
 		shoppingCartService.saveOrUpdate(registeredShoppingCart);
 

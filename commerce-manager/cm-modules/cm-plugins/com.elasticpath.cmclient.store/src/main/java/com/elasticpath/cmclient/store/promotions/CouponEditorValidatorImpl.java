@@ -8,7 +8,7 @@ import java.util.Collections;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.promotions.CouponValidator;
 import com.elasticpath.cmclient.core.promotions.ValidationState;
 import com.elasticpath.common.dto.CouponModelDto;
@@ -101,7 +101,7 @@ public class CouponEditorValidatorImpl implements CouponValidator {
 	 *  Return true if cannot find the couponCode | email pair in the db FOR this ruleCode.
 	 */
 	private boolean validForDatabase(final String couponCode, final String email, final String ruleCode) {
-		CouponService couponService = ServiceLocator.getService(ContextIdNames.COUPON_SERVICE);
+		CouponService couponService = BeanLocator.getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
 		return !couponService.doesCouponCodeEmailPairExistForThisRuleCode(couponCode, email, ruleCode);
 	}
 
@@ -109,7 +109,7 @@ public class CouponEditorValidatorImpl implements CouponValidator {
 	 *  Return true if cannot find the couponCode for any ruleCode Other than this one.
 	 */
 	private boolean validForDatabase(final String couponCode, final String ruleCode) {
-		CouponService couponService = ServiceLocator.getService(ContextIdNames.COUPON_SERVICE);
+		CouponService couponService = BeanLocator.getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
 		return couponService.doesCouponCodeOnlyExistForThisRuleCode(couponCode, ruleCode);
 	}
 
@@ -117,7 +117,7 @@ public class CouponEditorValidatorImpl implements CouponValidator {
 	 *  Return true if not in db.
 	 */
 	private boolean validForDatabase(final String couponCode) {
-		CouponService couponService = ServiceLocator.getService(ContextIdNames.COUPON_SERVICE);
+		CouponService couponService = BeanLocator.getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
 		return (couponService.findByCouponCode(couponCode) == null);
 	}
 
@@ -125,7 +125,7 @@ public class CouponEditorValidatorImpl implements CouponValidator {
 	 * Return collection of codes that were found in the db for ruleCodes Other than this one. 
 	 */
 	private Collection<String> validForDatabase(final Collection<String> couponCodes, final String ruleCode) {
-		CouponService couponService = ServiceLocator.getService(ContextIdNames.COUPON_SERVICE);
+		CouponService couponService = BeanLocator.getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
 		return couponService.findExistingCouponCodes(couponCodes, ruleCode);
 	}
 

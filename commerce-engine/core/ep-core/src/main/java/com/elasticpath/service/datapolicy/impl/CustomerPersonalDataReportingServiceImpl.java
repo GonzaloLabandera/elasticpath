@@ -13,6 +13,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.service.datapolicy.CustomerPersonalDataReportingService;
@@ -28,25 +29,21 @@ public class CustomerPersonalDataReportingServiceImpl extends AbstractEpPersiste
 
 	@Override
 	public Collection<Object[]> getData(final String storeCode, final String userId) {
+		Pair<Customer, List<DataPoint>> customerDataPoints;
 
-		List<Object[]> customerWithDataPoints = getPersistenceEngine()
-			.retrieveByNamedQuery("CUSTOMER_AND_DATA_POINT_BY_STORE_AND_USER_ID", userId, storeCode);
+		customerDataPoints = dataPointValueService.findAllActiveDataPointsForCustomer(storeCode, userId);
 
-		if (customerWithDataPoints.isEmpty()) {
+		if (customerDataPoints == null) {
 			return Collections.emptyList();
 		}
-
-		Customer customer = (Customer) customerWithDataPoints.get(0)[0];
+		Customer customer = customerDataPoints.getFirst();
+		List<DataPoint> dataPoints = customerDataPoints.getSecond();
 
 		String customerFullName = customer.getFullName();
 		//prepare a map with customer GUID and a collection of data points for the DataPointValueService
 		Multimap<String, DataPoint> customerGuidToDataPoints = HashMultimap.create();
 
-		customerWithDataPoints.forEach(customerWithDataPoint -> {
-				DataPoint dataPoint = (DataPoint) customerWithDataPoint[1];
-				customerGuidToDataPoints.put(customer.getGuid(), dataPoint);
-			}
-		);
+		dataPoints.forEach(dataPoint -> customerGuidToDataPoints.put(customer.getGuid(), dataPoint));
 
 		Collection<DataPointValue> dataPointValues = dataPointValueService.getValues(customerGuidToDataPoints.asMap());
 

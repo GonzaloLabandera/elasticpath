@@ -4,7 +4,6 @@
 package com.elasticpath.importexport.exporter.exporters.impl;
 
 import com.elasticpath.common.dto.customer.CustomerDTO;
-import com.elasticpath.commons.exception.EpUnsupportedOperationException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.importexport.importer.configuration.ImporterConfiguration;
 import com.elasticpath.importexport.importer.importers.CollectionsStrategy;
@@ -17,7 +16,8 @@ import com.elasticpath.service.customer.CustomerService;
  */
 public class CustomerCollectionsStrategy implements CollectionsStrategy<Customer, CustomerDTO> {
 
-	private final boolean clearAddresses, clearGroups, clearPaymentMethods;
+	private final boolean clearAddresses;
+	private final boolean clearGroups;
 
 	private final CustomerService customerService;
 
@@ -35,9 +35,6 @@ public class CustomerCollectionsStrategy implements CollectionsStrategy<Customer
 				CollectionStrategyType.CLEAR_COLLECTION);
 		clearGroups = importerConfiguration.getCollectionStrategyType(DependentElementType.CUSTOMER_GROUPS).equals(
 				CollectionStrategyType.CLEAR_COLLECTION);
-
-		clearPaymentMethods = importerConfiguration.getCollectionStrategyType(DependentElementType.PAYMENT_METHODS).equals(
-				CollectionStrategyType.CLEAR_COLLECTION);
 	}
 
 	@Override
@@ -45,12 +42,6 @@ public class CustomerCollectionsStrategy implements CollectionsStrategy<Customer
 
 		if (clearAddresses) {
 			customer.getAddresses().clear();
-		}
-
-		if (clearPaymentMethods) {
-			customer.getPaymentMethods().clear();
-		} else {
-			throw new EpUnsupportedOperationException("Only CLEAR_COLLECTION is currently supported for the collection of payment methods.");
 		}
 
 		if (clearGroups) {

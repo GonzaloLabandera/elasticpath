@@ -867,31 +867,31 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	@PostLoad
 	@PostUpdate
 	protected void assemblePrice() {
-		Price price = getBean(ContextIdNames.PRICE);
-		price.setCurrency(getCurrency());
+		Price assembledPrice = getPrototypeBean(ContextIdNames.PRICE, Price.class);
+		assembledPrice.setCurrency(getCurrency());
 		boolean hasRecurringPrice = getRecurringPrices() != null && !getRecurringPrices().isEmpty();
 		if (getListUnitPriceInternal() == null) {
 			if (hasRecurringPrice) {
-				price.setListPrice(makeMoney(BigDecimal.ZERO));
+				assembledPrice.setListPrice(makeMoney(BigDecimal.ZERO));
 			}
-		} else { 
-			price.setListPrice(getListUnitPrice());
+		} else {
+			assembledPrice.setListPrice(getListUnitPrice());
 		}
 		if (getSaleUnitPriceInternal() != null) {
-			price.setSalePrice(getSaleUnitPrice());
+			assembledPrice.setSalePrice(getSaleUnitPrice());
 		}
 		if (getPromotedUnitPriceInternal() != null) {
-			price.setComputedPriceIfLower(getPromotedUnitPrice());
+			assembledPrice.setComputedPriceIfLower(getPromotedUnitPrice());
 		}
-		
-		getShoppingItemRecurringPriceAssembler().assemblePrice(price, getRecurringPrices());
+
+		getShoppingItemRecurringPriceAssembler().assemblePrice(assembledPrice, getRecurringPrices());
 		if (getListUnitPrice() != null && !(hasRecurringPrice && BigDecimal.ZERO.compareTo(getListUnitPrice().getAmount()) == 0)) {
-			getShoppingItemRecurringPriceAssembler().assemblePrice(price, getRecurringPrices());
-			PriceSchedule purchaseTime = getBean(ContextIdNames.PRICE_SCHEDULE);
+			getShoppingItemRecurringPriceAssembler().assemblePrice(assembledPrice, getRecurringPrices());
+			PriceSchedule purchaseTime = getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class);
 			purchaseTime.setType(PriceScheduleType.PURCHASE_TIME);
-			price.getPricingScheme().setPriceForSchedule(purchaseTime, price);
+			assembledPrice.getPricingScheme().setPriceForSchedule(purchaseTime, assembledPrice);
 		}
-		this.price = price;
+		this.price = assembledPrice;
 	}
 
 	/**
@@ -920,7 +920,8 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	@Transient
 	protected ShoppingItemRecurringPriceAssembler getShoppingItemRecurringPriceAssembler() {
 		if (shoppingItemRecurringPriceAssembler == null) {
-			shoppingItemRecurringPriceAssembler = getBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER);
+			shoppingItemRecurringPriceAssembler = getSingletonBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER,
+					ShoppingItemRecurringPriceAssembler.class);
 		}
 		return shoppingItemRecurringPriceAssembler;
 	}

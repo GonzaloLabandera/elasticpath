@@ -266,14 +266,26 @@ public class ReportingDefinition {
 	}
 
 	/**
-	 * Verify Customer data report content.
+	 * Verify Customer data report content is present.
 	 *
 	 * @param dataPointListValues in customer data report.
 	 */
 	@And("^the Report Content shows following Data Points$")
-	public void verifyReportContent(final List<String> dataPointListValues) {
+	public void verifyReportContentPresent(final List<String> dataPointListValues) {
 		for (String nameField : dataPointListValues) {
 			reportPane.verifyReportContent(nameField);
+		}
+	}
+
+	/**
+	 * Verify Customer data report content is missing.
+	 *
+	 * @param dataPointListValues in customer data report.
+	 */
+	@And("^the Report Content does not contain following Data Points$")
+	public void verifyMissingReportContent(final List<String> dataPointListValues) {
+		for (String nameField : dataPointListValues) {
+			reportPane.verifyMissingReportContent(nameField);
 		}
 	}
 }

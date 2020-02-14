@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2006
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.customer.impl;
 
@@ -23,16 +23,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableMap;
-
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -66,7 +63,9 @@ import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.auth.UserIdentityService;
 import com.elasticpath.service.customer.CustomerGroupService;
+import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.misc.TimeService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.shopper.ShopperCleanupService;
@@ -115,6 +114,8 @@ public class CustomerServiceImplTest {
 	@Mock
 	private ShopperCleanupService shopperCleanupService;
 	@Mock
+	private OrderPaymentApiCleanupService orderPaymentApiCleanupService;
+	@Mock
 	private PersistenceEngine persistenceEngine;
 	@Mock
 	private FetchPlanHelper fetchPlanHelper;
@@ -150,7 +151,7 @@ public class CustomerServiceImplTest {
 		when(customer.getUidPk()).thenReturn(USER_UIDPK);
 
 		Mockito.<Class<Customer>>when(elasticPath.getBeanImplClass(ContextIdNames.CUSTOMER)).thenReturn(Customer.class);
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER)).thenReturn(customer);
+		when(elasticPath.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class)).thenReturn(customer);
 	}
 
 	/**
@@ -293,12 +294,13 @@ public class CustomerServiceImplTest {
 	@Test
 	public void verifyRemove() {
 		CustomerDeleted customerDeleted = mock(CustomerDeleted.class);
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER_DELETED)).thenReturn(customerDeleted);
+		when(elasticPath.getPrototypeBean(ContextIdNames.CUSTOMER_DELETED, CustomerDeleted.class)).thenReturn(customerDeleted);
 
 		customerServiceImpl.remove(customer);
 
 		verify(userIdentityService).remove(USER_ID);
 		verify(shopperCleanupService).removeShoppersByCustomer(customer);
+		verify(orderPaymentApiCleanupService).removeByCustomer(customer);
 		verify(persistenceEngine).delete(customer);
 		verify(customerDeleted).setCustomerUid(USER_UIDPK);
 		verify(customerDeleted).setDeletedDate(any(Date.class));
@@ -321,7 +323,7 @@ public class CustomerServiceImplTest {
 	@Test
 	public void loadWithUidPkOfZeroReturnsNewCustomerFromBean() {
 		assertThat(customerServiceImpl.load(0)).isEqualTo(customer);
-		verify(elasticPath).getBean(ContextIdNames.CUSTOMER);
+		verify(elasticPath).getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 	}
 
 	/**
@@ -418,7 +420,7 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void changePasswordAndSendEmailSetsPasswordAndPublishsEvent() {
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER_SERVICE)).thenReturn(customerServiceImpl);
+		when(elasticPath.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class)).thenReturn(customerServiceImpl);
 		doReturn(customer).when(customerServiceImpl).update(customer);
 
 		customerServiceImpl.setElasticPath(elasticPath);
@@ -444,7 +446,7 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void resetPasswordFindsCustomerAndResetsPassword() {
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER_SERVICE)).thenReturn(customerServiceImpl);
+		when(elasticPath.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class)).thenReturn(customerServiceImpl);
 		doReturn(customer).when(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE);
 		doReturn(customer).when(customerServiceImpl).auditableResetPassword(customer);
 

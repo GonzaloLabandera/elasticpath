@@ -53,8 +53,8 @@ public class ParameterValueImplTest {
 			}
 
 			@Override
-			public <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
 			}
 		};
 	}
@@ -66,12 +66,13 @@ public class ParameterValueImplTest {
 	@Test
 	public void testSetParameterValueNoParameter() {
 
-		when(beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER)).thenReturn(userInputParameter);
+		when(beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER, Parameter.class))
+				.thenReturn(userInputParameter);
 		when(userInputParameter.isLocalizable()).thenReturn(false);
 
 		parameterValue.setValue("test123", "en");
 		assertThat(parameterValue.getValue("en")).isEqualTo("test123");
-		verify(beanFactory).getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER, Parameter.class);
 		verify(userInputParameter).setParameterId(null);
 		verify(userInputParameter).setDescription(null);
 		verify(userInputParameter).setLocalizable(false);
@@ -245,7 +246,8 @@ public class ParameterValueImplTest {
 	@Test
 	public void testToString() {
 
-		when(beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER)).thenReturn(userInputParameter);
+		when(beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER, Parameter.class))
+				.thenReturn(userInputParameter);
 
 		parameterValue.setParameter(null);
 
@@ -255,7 +257,7 @@ public class ParameterValueImplTest {
 
 		assertThat(parameterValue.toString()).isNotNull();
 
-		verify(beanFactory).getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER, Parameter.class);
 		verify(userInputParameter).setParameterId(null);
 		verify(userInputParameter).setDescription(null);
 		verify(userInputParameter).setLocalizable(false);

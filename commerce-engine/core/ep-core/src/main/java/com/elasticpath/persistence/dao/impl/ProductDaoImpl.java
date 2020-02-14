@@ -179,7 +179,7 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 		sanityCheck();
 		FetchGroupLoadTuner configuredLoadTuner = loadTuner;
 		if (configuredLoadTuner == null) {
-			configuredLoadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+			configuredLoadTuner = getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 			configuredLoadTuner.addFetchGroup(FetchGroupConstants.DEFAULT);
 		}
 		return getPersistenceEngine()
@@ -679,7 +679,7 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 			getPersistenceEngine().delete(productAssociation);
 		}
 
-		ProductLoadTuner productLoadTuner = getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
+		ProductLoadTuner productLoadTuner = getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 		productLoadTuner.setLoadingSkus(true);
 
 		// delete the product list
@@ -793,7 +793,7 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	}
 
 	private void addProductDeleted(final long uid) {
-		final ProductDeleted productDeleted = getBean(ContextIdNames.PRODUCT_DELETED);
+		final ProductDeleted productDeleted = getPrototypeBean(ContextIdNames.PRODUCT_DELETED, ProductDeleted.class);
 		productDeleted.setProductUid(uid);
 		productDeleted.setDeletedDate(timeService.getCurrentTime());
 		getPersistenceEngine().save(productDeleted);

@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.core.util;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.common.CMContextIdNames;
 import com.elasticpath.cmclient.core.formatting.UIDateTimeUtil;
 
@@ -25,7 +25,7 @@ public final class DateTimeUtilFactory {
 	 * @return a UI date util
 	 */
 	public static UIDateTimeUtil getDateUtil() {
-		return ServiceLocator.getService(CMContextIdNames.UI_DATE_FORMATTER);
+		return BeanLocator.getSingletonBean(CMContextIdNames.UI_DATE_FORMATTER, UIDateTimeUtil.class);
 	}
 
 }

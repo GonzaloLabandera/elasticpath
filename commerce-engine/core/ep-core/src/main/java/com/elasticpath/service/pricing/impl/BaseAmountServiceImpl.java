@@ -201,7 +201,7 @@ public class BaseAmountServiceImpl implements BaseAmountService {
 	 * @return a new empty BaseAmountFilter bean
 	 */
 	protected BaseAmountFilter createBaseAmountFilter() {
-		return getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 	}
 
 	/**

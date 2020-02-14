@@ -89,7 +89,7 @@ public class CouponDtoMediatorImplTest {
 			return null;
 		}
 		
-	};
+	}
 
 	/**
 	 * Set up required for each test.
@@ -129,7 +129,8 @@ public class CouponDtoMediatorImplTest {
 		
 		context.checking(new Expectations() { {
 			oneOf(couponConfigService).findByRuleCode(ruleCode); will(returnValue(persistentCouponConfig));
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON); will(returnValue(persistentCoupon));
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
+			will(returnValue(persistentCoupon));
 		} });
 
 		mediator.add(addedCoupon, ruleCode);

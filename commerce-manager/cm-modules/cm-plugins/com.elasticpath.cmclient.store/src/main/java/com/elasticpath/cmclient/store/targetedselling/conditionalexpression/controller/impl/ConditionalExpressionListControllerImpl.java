@@ -9,7 +9,7 @@ package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.con
 
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.controller.impl.AbstractBaseControllerImpl;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
@@ -68,6 +68,6 @@ public class ConditionalExpressionListControllerImpl extends
 	}
 
 	private TagConditionService getConditionalExpressionService() {
-		return ServiceLocator.getService(ContextIdNames.TAG_CONDITION_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
 	}
 }

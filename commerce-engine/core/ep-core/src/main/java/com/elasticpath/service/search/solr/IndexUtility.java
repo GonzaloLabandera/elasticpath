@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.persistence.api.Persistable;
 
@@ -82,6 +83,14 @@ public interface IndexUtility {
 	 * @return a product's featured field
 	 */
 	String createFeaturedField(long categoryUid);
+
+	/**
+	 * Creates a product's featured field for a particular category.
+	 *
+	 * @param category the category
+	 * @return a product's featured field
+	 */
+	String createFeaturedField(Category category);
 
 	/**
 	 * Retrieves the boost values for a locale field. If no locale field is available for the

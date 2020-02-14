@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
 import com.elasticpath.cmclient.reporting.ReportTypeManager;
 import com.elasticpath.cmclient.reporting.ReportingPlugin;
@@ -56,7 +56,7 @@ public class CustomerPersonalDataServiceImpl {
 	}
 
 	private CustomerPersonalDataReportingService getCustomerPersonalDataReportingService() {
-		return ServiceLocator.getService(ContextIdNames.CUSTOMER_PERSONAL_DATA_REPORTING_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_PERSONAL_DATA_REPORTING_SERVICE, CustomerPersonalDataReportingService.class);
 	}
 
 

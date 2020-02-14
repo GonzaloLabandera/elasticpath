@@ -6,7 +6,6 @@ package com.elasticpath.test.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -44,13 +42,13 @@ import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shopper.ShopperService;
+import com.elasticpath.service.shoppingcart.ShoppingCartMerger;
 import com.elasticpath.service.shoppingcart.impl.ShoppingCartMergerImpl;
 import com.elasticpath.service.tax.TaxCodeService;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.test.persister.CatalogTestPersister;
 import com.elasticpath.test.persister.CouponTestPersister;
-import com.elasticpath.test.persister.GiftCertificateTestPersister;
 import com.elasticpath.test.persister.PromotionTestPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
 import com.elasticpath.test.persister.TestDataPersisterFactory;
@@ -114,8 +112,8 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		// Create the merger we will actually be testing
 		// - we mock out the price lookup facade to keep the test as simple as possible, as
 		//   price isn't important in the merging case.
-		merger = getBeanFactory().getBean("shoppingCartMerger");
-		cartDirector = getBeanFactory().getBean("cartDirector");
+		merger = (ShoppingCartMergerImpl) getBeanFactory().getSingletonBean("shoppingCartMerger", ShoppingCartMerger.class);
+		cartDirector = getBeanFactory().getSingletonBean("cartDirector", CartDirector.class);
 		merger.setCartDirector(cartDirector);
 
 		scenario = getTac().useScenario(ShoppingCartSimpleStoreScenario.class);
@@ -127,7 +125,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		previousShopper = createShopper(previousCustomerSession);
 
 		final StoreTestPersister storePersister = getTac().getPersistersFactory().getStoreTestPersister();
-		final TaxCodeService taxCodeService = getBeanFactory().getBean(ContextIdNames.TAX_CODE_SERVICE);
+		final TaxCodeService taxCodeService = getBeanFactory().getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		final TaxCode goodTaxCode = taxCodeService.findByCode("GOODS");
 		storePersister.updateStoreTaxCodes(scenario.getStore(), new HashSet<>(Arrays.asList(goodTaxCode)));
 
@@ -157,7 +155,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		cameraWarrantySku = cameraWarranty.getDefaultSku();
 
 		// Create shopping items that we'll be putting into the cart.
-		shoppingItemFactory = getBeanFactory().getBean("shoppingItemFactory");
+		shoppingItemFactory = getBeanFactory().getSingletonBean("shoppingItemFactory", ShoppingItemFactory.class);
 
 		Currency currency = TestDataPersisterFactory.DEFAULT_CURRENCY;
 		PriceImpl price = new PriceImpl();
@@ -188,7 +186,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 	}
 
 	private Shopper createShopper(final CustomerSession customerSession) {
-		final ShopperService shopperService = getBeanFactory().getBean(ContextIdNames.SHOPPER_SERVICE);
+		final ShopperService shopperService = getBeanFactory().getSingletonBean(ContextIdNames.SHOPPER_SERVICE, ShopperService.class);
 
 		final Shopper shopper = shopperService.createAndSaveShopper(scenario.getStore().getCode());
 		customerSession.setShopper(shopper);
@@ -374,13 +372,13 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		sku.initialize();
 		cameraBagCard.setDefaultSku(sku);
 
-		final ProductService productService = getBeanFactory().getBean(ContextIdNames.PRODUCT_SERVICE);
+		final ProductService productService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		cameraBagCard = (ProductBundle) productService.saveOrUpdate(cameraBagCard);
 
 		bundleCameraBagCard = shoppingItemFactory.createShoppingItem(cameraBagCard.getDefaultSku(), null, 1, 1, null);
 
 		// Derive a ShoppingItemDTO, select all the constituents and convert back to a ShoppingItem.
-		final ShoppingItemAssembler shoppingItemAssembler = getBeanFactory().getBean("shoppingItemAssembler");
+		final ShoppingItemAssembler shoppingItemAssembler = getBeanFactory().getSingletonBean("shoppingItemAssembler", ShoppingItemAssembler.class);
 		final ShoppingItemDto dto = shoppingItemAssembler.assembleShoppingItemDtoFrom(bundleCameraBagCard);
 		dto.setSelected(true);
 		for (final ShoppingItemDto child : dto.getConstituents()) {
@@ -500,35 +498,6 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 				.first()
 				.as("The coupon code should be code applied to the previous cart")
 				.isEqualTo("COUPON");
-	}
-
-	/**
-	 * Test merge preserves gift certificates.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testMergePreservesGiftCertificates() {
-		final ShoppingCart currentCart = buildShoppingCart(CURRENT_CART_NAME, siCameraQty1);
-		final ShoppingCart previousCart = buildShoppingCart(PREVIOUS_CART_NAME, siBagQty1);
-
-		GiftCertificateTestPersister giftCertificateTestPersister = getTac().getPersistersFactory().getGiftCertificateTestPersister();
-		GiftCertificate giftCertificate = giftCertificateTestPersister.persistGiftCertificate(scenario.getStore(), "gcGuid", "gc100",
-				scenario.getStore().getDefaultCurrency().getCurrencyCode(), BigDecimal.TEN, "me", "you", "theme", previousCart.getShopper()
-						.getCustomer());
-
-		previousCart.applyGiftCertificate(giftCertificate);
-
-		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
-
-		assertThat(mergedCart.getAppliedGiftCertificates())
-				.size()
-				.as("There should be a gift certificate in the cart")
-				.isEqualTo(1);
-
-		assertThat(mergedCart.getAppliedGiftCertificates().iterator())
-				.first()
-				.as("The gift certificate should be the one from the previous cart")
-				.isEqualTo(giftCertificate);
 	}
 
 	private void assertItemAndQuantity(final List<ShoppingItem> mergedList, final int position, final ProductSku sku, final int expectedQuantity) {

@@ -3,8 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil
-		.buildPromotionIdentifiers;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil.buildPromotionIdentifiers;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,7 +56,7 @@ public class AppliedPromotionsForShippingOptionRepositoryImpl<I extends AppliedP
 
 	private Single<Collection<String>> getAppliedPromotions(final String shippingOptionId, final ShoppingCart shoppingCart) {
 		final List<ShippingOption> shippingOptions = shippingOptionService.getShippingOptions(shoppingCart).getAvailableShippingOptions();
-		return pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)
+		return pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart)
 				.flatMap(cartPricingSnapshot -> getShippingPromotions(shippingOptionId,
 						Observable.fromIterable(shippingOptions), cartPricingSnapshot));
 	}

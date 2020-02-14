@@ -65,9 +65,9 @@ public class CartAnySkuAmountDiscountImplTest {
 		context.checking(new Expectations() {
 			{
 				final PromotionRuleExceptions exceptions = context.mock(PromotionRuleExceptions.class);
-				oneOf(beanFactory).getBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS);
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS, PromotionRuleExceptions.class);
 				will(returnValue(exceptions));
-				oneOf(beanFactory).getBean(ContextIdNames.TOTALLING_APPLIER);
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.TOTALLING_APPLIER, TotallingApplier.class);
 				will(returnValue(totallingApplier));
 
 				oneOf(exceptions).populateFromExceptionStr(EXCEPTION_STR);

@@ -16,8 +16,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.warehouse.WarehouseMessages;
 import com.elasticpath.cmclient.warehouse.WarehousePlugin;
@@ -47,8 +47,7 @@ public class OrderReturnEditor extends AbstractCmClientFormEditor {
 
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) throws PartInitException {
-		this.returnAndExchangeService = ServiceLocator.getService(
-				ContextIdNames.ORDER_RETURN_SERVICE);
+		this.returnAndExchangeService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_RETURN_SERVICE, ReturnAndExchangeService.class);
 		this.orderReturn = retrieveOrderReturn(input.getAdapter(Long.class));
 	}
 
@@ -105,7 +104,7 @@ public class OrderReturnEditor extends AbstractCmClientFormEditor {
 	 * @return the <code>Order</code>
 	 */
 	private OrderReturn retrieveOrderReturn(final long orderReturnUid) {
-		FetchGroupLoadTuner tuner = ServiceLocator.getService(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		FetchGroupLoadTuner tuner = BeanLocator.getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		tuner.addFetchGroup(FetchGroupConstants.ORDER_INDEX,
 			FetchGroupConstants.ORDER_NOTES,
 			FetchGroupConstants.ALL);
@@ -124,8 +123,7 @@ public class OrderReturnEditor extends AbstractCmClientFormEditor {
 	}
 
 	private EventOriginator getEventOriginator() {
-		EventOriginatorHelper helper = ServiceLocator.getService(
-				ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = BeanLocator.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 
 		return helper.getCmUserOriginator(LoginManager.getCmUser());
 	}
@@ -141,11 +139,11 @@ public class OrderReturnEditor extends AbstractCmClientFormEditor {
 			NLS.bind(WarehouseMessages.get().OrderReturn_Editor_OnSavePrompt,
 			getEditorName());
 	}
-	
+
 	@Override
 	protected String getEditorName() {
 		return getEditorInput().getName();
 	}
-	
+
 
 }

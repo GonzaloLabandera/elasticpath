@@ -236,7 +236,7 @@ public class ConditionDaoTest extends BasicSpringContextTest {
     }
     
 	private ConditionalExpression createCondition() {
-		ConditionalExpression condition = getBeanFactory().getBean(ContextIdNames.TAG_CONDITION);
+		ConditionalExpression condition = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 
         condition.setName("Demo Condition");
         condition.setDescription("Description of demo condition");

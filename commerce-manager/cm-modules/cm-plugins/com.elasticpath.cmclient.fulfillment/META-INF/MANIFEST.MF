@@ -26,3 +26,4 @@ Export-Package: com.elasticpath.cmclient.fulfillment.editors.order.actions,
  com.elasticpath.cmclient.fulfillment.views.order,
   com.elasticpath.cmclient.fulfillment.editors.order
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+DynamicImport-Package: com.elasticpath.plugin.payment.provider.*

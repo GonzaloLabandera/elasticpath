@@ -91,7 +91,7 @@ public class TestApplicationContext {
 	private void resetRuleEngineCache() {
 		// Can't use the BeanFactory until the object is created, so use the app context.
 		if (appCtx != null) {
-			((DBCompilingRuleEngineImpl) getBeanFactory().getBean(ContextIdNames.EP_RULE_ENGINE)).resetRuleBaseCache();
+			getBeanFactory().getSingletonBean(ContextIdNames.EP_RULE_ENGINE, DBCompilingRuleEngineImpl.class).resetRuleBaseCache();
 		}
 	}
 
@@ -106,7 +106,7 @@ public class TestApplicationContext {
 	 * configure the settings needed by integration tests here. These settings should be global. Refrain from adding test specific settings here.
 	 */
 	public void configureSettingsServiceWithTestDefaults() {
-		final SettingsService settingsService = getBeanFactory().getBean("settingsService");
+		final SettingsService settingsService = getBeanFactory().getSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class);
 		try {
 			final SettingDefinition settingsDefAssetLocation = settingsService.getSettingDefinition("COMMERCE/SYSTEM/ASSETS/assetLocation");
 			settingsDefAssetLocation.setDefaultValue(config.getAssetsDir());
@@ -122,7 +122,8 @@ public class TestApplicationContext {
 			settingsService.updateSettingDefinition(emailEnabled);
 
 			// reinitialize the map with catalog theme's vm & properties files.
-			final MessageSourceCacheImpl messageSourceCache = getBeanFactory().getBean("messageSourceCache");
+			final MessageSourceCacheImpl messageSourceCache = getBeanFactory().getSingletonBean(ContextIdNames.MESSAGE_SOURCE_CACHE,
+					MessageSourceCacheImpl.class);
 			messageSourceCache.invalidate();
 		} catch (final EpServiceException e) {
 			throw new TestApplicationException("Could not configure Settings Service " + e);
@@ -148,7 +149,7 @@ public class TestApplicationContext {
 	 * @param object the object to remove from the data cache.
 	 */
 	public void evictObjectFromCache(final Persistable object) {
-		final PersistenceEngine persistenceEngine = getBeanFactory().getBean("persistenceEngine");
+		final PersistenceEngine persistenceEngine = getBeanFactory().getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, PersistenceEngine.class);
 		persistenceEngine.evictObjectFromCache(object);
 	}
 
@@ -161,7 +162,7 @@ public class TestApplicationContext {
 	 * @param scenarios list of scenario keys
 	 * @return current scenario map.
 	 */
-	public <T extends AbstractScenario> Map<Class<? extends AbstractScenario>, AbstractScenario> useScenarios(final List<Class<T>>  scenarios) {
+	public <T extends AbstractScenario> Map<Class<? extends AbstractScenario>, AbstractScenario> useScenarios(final List<Class<T>> scenarios) {
 
 		for (final Class<T> scenarioClass : scenarios) {
 			final T scenario = springBeanFactory.getBean(StringUtils.uncapitalize(scenarioClass.getSimpleName()), scenarioClass);
@@ -206,7 +207,7 @@ public class TestApplicationContext {
 	}
 
 	protected CmUser getAdminCmUser() {
-		final CmUserService cmUserService = getBeanFactory().getBean(ContextIdNames.CMUSER_SERVICE);
+		final CmUserService cmUserService = getBeanFactory().getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 		return cmUserService.findByUserName("admin");
 	}
 

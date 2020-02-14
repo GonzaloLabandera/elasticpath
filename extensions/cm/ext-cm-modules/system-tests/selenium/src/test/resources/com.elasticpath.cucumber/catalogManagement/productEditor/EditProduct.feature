@@ -11,7 +11,7 @@ Feature: Edit Product
       | catalog        | category    | productName | productType | taxCode | brand  | storeVisible | availability     | attrShortTextMulti | attrShortTextMultiValue | attrInteger | attrIntegerValue | attrDecimal     | attrDecimalValue | shippableType | priceList               | listPrice |
       | Mobile Catalog | Accessories | Product     | Movies      | DIGITAL | Disney | true         | Always available | Languages          | English                 | Runtime     | 120              | Viewer's Rating | 5.5              | Digital Asset | Mobile Price List (CAD) | 111.00    |
     And the newly created product is in the list
-    When I edit newly created product name to testProductNameChanged
+    When I edit newly created product name to UpdatedProdName
     Then the newly created product is in the list
 
   Scenario: Add Edit Remove Tier Pricing from an existing product
@@ -46,3 +46,9 @@ Feature: Edit Product
     When I delete category Games from category assignment list
     Then product 12 Angry Men is not linked with Games Category
 
+  Scenario: Edit the availability rule for an existing product
+    Given I search and open an existing product with product code tt0050083
+    When I edit the availability rule to Available only if in stock
+    Then the product has the availability rule Available only if in stock
+    When I edit the availability rule to Always available
+    Then the product has the availability rule Always available

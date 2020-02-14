@@ -33,7 +33,7 @@ public class PurchaseLineItemsLinksRepositoryImpl<I extends PurchaseLineItemsIde
 		String scope = purchaseIdentifier.getPurchases().getScope().getValue();
 		String purchaseId = purchaseIdentifier.getPurchaseId().getValue();
 
-		return orderRepository.findByGuidAsSingle(scope, purchaseId)
+		return orderRepository.findByGuid(scope, purchaseId)
 				.flatMapObservable(order -> Observable.fromIterable(order.getRootShoppingItems()))
 				.map(linesItem -> buildPurchaseLineItemIdentifier(purchaseIdentifier, linesItem));
 	}

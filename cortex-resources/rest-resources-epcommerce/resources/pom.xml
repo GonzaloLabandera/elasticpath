@@ -18,8 +18,6 @@
 	<modules>
 		<module>authentication-parent</module>
 		<module>event-handlers</module>
-		<module>paymentmethods</module>
-		<module>paymenttokens</module>
 		<module>personalization</module>
 		<module>subject-lookups</module>
 		<module>hds-support</module>
@@ -55,6 +53,10 @@
 				<exclusion>
 					<groupId>org.drools</groupId>
 					<artifactId>drools-compiler</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.thoughtworks.xstream</groupId>
+					<artifactId>xstream</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

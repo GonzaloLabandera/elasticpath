@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -28,6 +28,7 @@ import com.elasticpath.cmclient.warehouse.helpers.OrderReturnSearchRequestJob;
 import com.elasticpath.cmclient.warehouse.perspective.WarehousePerspectiveFactory;
 import com.elasticpath.cmclient.warehouse.views.orderreturn.OrderReturnSearchResultsView;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.OrderReturnSearchCriteria;
 
 /**
@@ -120,10 +121,9 @@ public class OrderReturnSearchTab implements ISearchTab {
 	 */
 	protected OrderReturnSearchCriteria getModel() {
 		if (searchCriteria == null) {
-			searchCriteria = ServiceLocator.getService(
-					ContextIdNames.ORDER_RETURN_SEARCH_CRITERIA);
-			searchCriteria.setCustomerSearchCriteria(ServiceLocator.getService(
-					ContextIdNames.CUSTOMER_SEARCH_CRITERIA));
+			searchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_RETURN_SEARCH_CRITERIA, OrderReturnSearchCriteria.class);
+			searchCriteria.setCustomerSearchCriteria(
+					BeanLocator.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class));
 		}
 
 		return searchCriteria;

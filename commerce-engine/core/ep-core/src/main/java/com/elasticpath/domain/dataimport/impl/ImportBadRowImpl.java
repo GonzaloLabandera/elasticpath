@@ -149,7 +149,7 @@ public class ImportBadRowImpl extends AbstractLegacyPersistenceImpl implements I
 	public List<String> getImportErrors(final Locale locale) {
 		if (importErrors.size() != getImportFaults().size()) {
 			final List<ImportFault> importFaults = getImportFaults();
-			final MessageSource messageSource = getBean(ContextIdNames.MESSAGE_SOURCE);
+			final MessageSource messageSource = getSingletonBean(ContextIdNames.MESSAGE_SOURCE, MessageSource.class);
 			for (final ImportFault importFault : importFaults) {
 				final String errorMessage = messageSource.getMessage(importFault.getCode(), importFault.getArgs(),
 						importFault.getCode(), locale);

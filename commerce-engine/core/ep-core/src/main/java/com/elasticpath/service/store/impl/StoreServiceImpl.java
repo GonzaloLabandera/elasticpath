@@ -94,7 +94,7 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	protected SearchCriteria buildProductUpdateCriteria(final Store storeBeforePersistence) {
 		ProductSearchCriteria searchCriteria = null;
 		if (updateProductsNotificationRequired(storeBeforePersistence)) {
-			searchCriteria = getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+			searchCriteria = getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class);
 			// we just need a locale here, it isn't going to be used
 			searchCriteria.setLocale(Locale.US);
 			searchCriteria.setCatalogCode(storeBeforePersistence.getCatalog().getCode());
@@ -208,7 +208,7 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public Store getTunedStore(final long storeUid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
 		if (storeUid <= 0) {
-			return getBean(ContextIdNames.STORE);
+			return getPrototypeBean(ContextIdNames.STORE, Store.class);
 		}
 
 		if (loadTuner != null) {
@@ -512,5 +512,11 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Collection<String> getCartTypeNamesForStore(final String storeCode) {
 		return getPersistenceEngine().retrieveByNamedQuery("FIND_CART_TYPES_FOR_STORE", storeCode);
+	}
+
+	@Override
+	public Collection<String> findStoreCodeForStoresWithCatalogUids(final Collection<Long> catalogUids) {
+		sanityCheck();
+		return getPersistenceEngine().retrieveByNamedQueryWithList("STORE_CODE_BY_CATALOG_UIDS", PLACEHOLDER_FOR_LIST, catalogUids);
 	}
 }

@@ -44,8 +44,9 @@ public class SkuOptionRepositoryImpl implements SkuOptionRepository {
 
 	@Override
 	public Single<SkuOptionValue> findSkuOptionValueByKey(final String skuOptionNameKey, final String skuOptionValueKey) {
-		return reactiveAdapter.fromServiceAsSingle(() -> skuOptionService.findOptionValueByKey(skuOptionValueKey), CANNOT_FIND_OPTION_VALUE_MESSAGE)
-				.filter(skuOptionValue -> skuOptionValue.getSkuOption().getOptionKey().equals(skuOptionNameKey))
+		return reactiveAdapter.fromServiceAsSingle(() -> skuOptionService.findOptionValueByOptionAndValueKeys(skuOptionNameKey, skuOptionValueKey),
+			CANNOT_FIND_OPTION_VALUE_MESSAGE)
+				.toMaybe()
 				.toSingle()
 				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(CANNOT_FIND_OPTION_VALUE_MESSAGE)));
 	}

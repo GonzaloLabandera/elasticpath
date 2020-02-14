@@ -1,11 +1,21 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006-2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.order.impl;
 
+import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SEARCH_CRITERIA;
+import static com.elasticpath.commons.constants.ContextIdNames.EVENT_ORIGINATOR_HELPER;
+import static com.elasticpath.commons.constants.ContextIdNames.FETCH_GROUP_LOAD_TUNER;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_CRITERION;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_EVENT_HELPER;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_LOCK_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_API_CLEANUP_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_API_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SEARCH_CRITERIA;
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SERVICE;
 import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SKU;
 import static com.elasticpath.persistence.support.FetchFieldConstants.SHIPMENT_ORDER_SKUS_INTERNAL;
-import static java.util.stream.Collectors.toList;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -17,12 +27,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -33,7 +43,6 @@ import org.apache.openjpa.persistence.jdbc.FetchMode;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.core.messaging.order.OrderEventType;
 import com.elasticpath.domain.catalog.InventoryAudit;
 import com.elasticpath.domain.cmuser.CmUser;
@@ -48,8 +57,6 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderLock;
 import com.elasticpath.domain.order.OrderMessageIds;
-import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderShipment;
@@ -60,15 +67,16 @@ import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.order.PurchaseHistorySearchCriteria;
 import com.elasticpath.domain.order.impl.AbstractOrderShipmentImpl;
 import com.elasticpath.domain.order.impl.OrderSkuImpl;
+import com.elasticpath.domain.orderpaymentapi.OrderPaymentAmounts;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.shipping.ShipmentType;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
+import com.elasticpath.money.Money;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -76,7 +84,10 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.persistence.support.OrderCriterion;
 import com.elasticpath.persistence.support.OrderCriterion.ResultType;
 import com.elasticpath.persistence.support.impl.CriteriaQuery;
-import com.elasticpath.plugin.payment.exceptions.PaymentGatewayException;
+import com.elasticpath.plugin.payment.provider.dto.PaymentStatus;
+import com.elasticpath.plugin.payment.provider.dto.TransactionType;
+import com.elasticpath.provider.payment.service.event.PaymentEvent;
+import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentDTO;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.AllocationService;
@@ -86,8 +97,8 @@ import com.elasticpath.service.order.OrderLockService;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.order.OrderShipmentNotFoundException;
 import com.elasticpath.service.order.ReleaseShipmentFailedException;
-import com.elasticpath.service.payment.PaymentResult;
-import com.elasticpath.service.payment.PaymentService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiService;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
@@ -100,16 +111,15 @@ import com.elasticpath.service.tax.TaxOperationService;
 /**
  * Provides storage and access to <code>Order</code> objects.
  */
-@SuppressWarnings({"PMD.ExcessiveClassLength", "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.GodClass" })
+@SuppressWarnings({"PMD.ExcessiveClassLength", "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.GodClass"})
 public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implements OrderService {
 
 	private static final long MINUTE_IN_MS = 60L * 1000L; // 60 sec * 1000 msec
+	private static final String LIST_PARAMETER_NAME = "list";
 
 	private static final Logger LOG = Logger.getLogger(OrderServiceImpl.class);
 
 	private TimeService timeService;
-
-	private PaymentService paymentService;
 
 	private AllocationService allocationService;
 
@@ -145,7 +155,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
-	public Order add(final Order order) throws EpServiceException {
+	public Order add(final Order order) {
 		sanityCheck();
 		order.setLastModifiedDate(timeService.getCurrentTime());
 
@@ -173,16 +183,10 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
-	public Order update(final Order order) throws EpServiceException {
+	public Order update(final Order order) {
 		sanityCheck();
 		order.setLastModifiedDate(timeService.getCurrentTime());
 
-		// Log payment captured event
-		for (final OrderPayment orderPayment : order.getOrderPayments()) {
-			if (!orderPayment.isPersisted()) {
-				logOrderPaymentEvents(order, orderPayment);
-			}
-		}
 		Order persistedOrder = getPersistenceEngine().merge(order);
 		// Avoid using storeService to avoid flushing the OpenJPA Context
 		if (order.getStore() == null) {
@@ -211,49 +215,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		return updatedOrder;
 	}
 
-	private void logOrderPaymentEvents(final Order order, final OrderPayment orderPayment) {
-		if (StringUtils.equals(orderPayment.getTransactionType(), OrderPayment.CAPTURE_TRANSACTION)) {
-			getOrderEventHelper().logOrderPaymentCaptured(order, orderPayment);
-		} else if (StringUtils.equals(orderPayment.getTransactionType(), OrderPayment.CREDIT_TRANSACTION)) {
-			getOrderEventHelper().logOrderPaymentRefund(order, orderPayment);
-		}
-	}
-
-	/**
-	 * Retrieve the list of orders with the specified statuses.
-	 *
-	 * @param orderStatus the status of the order
-	 * @param paymentStatus the status of the payment
-	 * @param shipmentStatus the status of the shipment
-	 * @return the list of orders with the specified statuses
-	 */
-	@Override
-	public List<Order> findOrderByStatus(final OrderStatus orderStatus, final OrderPaymentStatus paymentStatus,
-			final OrderShipmentStatus shipmentStatus) {
-		sanityCheck();
-		//determine parameters List
-		List<Object> params = new LinkedList<>();
-		if (orderStatus != null) {
-			params.add(orderStatus);
-		}
-		if (paymentStatus != null) {
-			params.add(paymentStatus);
-		}
-		if (shipmentStatus != null) {
-			params.add(shipmentStatus);
-		}
-		if (params.isEmpty()) {
-			throw new IllegalArgumentException("No status criteria provided. If you need all orders in the system use list() method instead");
-		}
-
-		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		final CriteriaQuery statusCriteria = orderCriterion.getStatusCriteria(orderStatus, paymentStatus, shipmentStatus);
-
-		List<Order> orders = getPersistenceEngineWithDefaultLoadTuner()
-			.retrieve(statusCriteria.getQuery(), statusCriteria.getParameters().toArray());
-
-		return populateRelationships(orders);
-	}
 
 	/**
 	 * Retrieves list of <code>Order</code> where the created date is later than the specified date.
@@ -272,9 +233,9 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	/**
 	 * Retrieve the list of orders, whose specified property matches the given criteria value.
 	 *
-	 * @param propertyName order property to search on.
+	 * @param propertyName  order property to search on.
 	 * @param criteriaValue criteria value to be used for searching.
-	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
+	 * @param isExactMatch  true for doing an exact match; false for doing a fuzzy match.
 	 * @return list of orders matching the given criteria.
 	 */
 	@Override
@@ -287,10 +248,10 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			sanityCheck();
 			if (isExactMatch) {
 				orders = getPersistenceEngineWithDefaultLoadTuner()
-					.retrieve("SELECT o FROM OrderImpl " + "as o WHERE o." + propertyName + " = ?1", criteriaValue);
+						.retrieve("SELECT o FROM OrderImpl " + "as o WHERE o." + propertyName + " = ?1", criteriaValue);
 			} else {
 				orders = getPersistenceEngineWithDefaultLoadTuner()
-					.retrieve("SELECT o FROM OrderImpl as o WHERE o." + propertyName + " LIKE ?1", "%" + criteriaValue + "%");
+						.retrieve("SELECT o FROM OrderImpl as o WHERE o." + propertyName + " LIKE ?1", "%" + criteriaValue + "%");
 			}
 
 		} else {
@@ -311,11 +272,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public List<Order> findOrderByCustomerGuid(final String customerGuid, final boolean isExactMatch) {
 		sanityCheck();
 
-		CustomerSearchCriteria customerSearchCriteria = getBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA);
+		CustomerSearchCriteria customerSearchCriteria = getPrototypeBean(CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class);
 		customerSearchCriteria.setGuid(customerGuid);
 		customerSearchCriteria.setFuzzySearchDisabled(isExactMatch);
 
-		OrderSearchCriteria orderSearchCriteria = getBean(ContextIdNames.ORDER_SEARCH_CRITERIA);
+		OrderSearchCriteria orderSearchCriteria = getPrototypeBean(ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class);
 		orderSearchCriteria.setCustomerSearchCriteria(customerSearchCriteria);
 		orderSearchCriteria.setExcludedOrderStatus(OrderStatus.FAILED);
 
@@ -330,14 +291,14 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		if (retrieveFullInfo) {
 			loadTuner = defaultLoadTuner;
 		} else {
-			loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+			loadTuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 			((FetchGroupLoadTuner) loadTuner).addFetchGroup(FetchGroupConstants.ORDER_LIST_BASIC);
 		}
 
 		final List<Order> orderList = getPersistenceEngineWithLoadTuner(loadTuner)
-			.retrieveByNamedQuery("ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE",
-				customerGuid,
-				storeCode);
+				.retrieveByNamedQuery("ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE",
+						customerGuid,
+						storeCode);
 
 		return populateRelationships(orderList);
 	}
@@ -346,16 +307,16 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * Retrieve the list of orders by the gift certificate code.
 	 *
 	 * @param giftCertificateCode the gift certificate code
-	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
+	 * @param isExactMatch        true for doing an exact match; false for doing a fuzzy match.
 	 * @return list of orders matching the gift certificate code.
 	 */
 	@Override
 	public List<Order> findOrderByGiftCertificateCode(final String giftCertificateCode, final boolean isExactMatch) {
 		sanityCheck();
 
-		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
+		final OrderCriterion orderCriterion = getPrototypeBean(ORDER_CRITERION, OrderCriterion.class);
 		final List<Order> orderList = getPersistenceEngineWithDefaultLoadTuner().retrieve(
-			orderCriterion.getOrderGiftCertificateCriteria("giftCertificateCode", giftCertificateCode, isExactMatch).getQuery());
+				orderCriterion.getOrderGiftCertificateCriteria("giftCertificateCode", giftCertificateCode, isExactMatch).getQuery());
 
 		return populateRelationships(orderList);
 	}
@@ -369,11 +330,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public long getOrderCountBySearchCriteria(final OrderSearchCriteria orderSearchCriteria) {
 		sanityCheck();
-		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
+		final OrderCriterion orderCriterion = getPrototypeBean(ORDER_CRITERION, OrderCriterion.class);
 		Collection<String> storeCodes = new LinkedList<>();
 		CriteriaQuery query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.COUNT);
 
-		FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		FetchGroupLoadTuner loadTuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_SEARCH);
 		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
 
@@ -383,11 +344,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			orderCount = getPersistenceEngineWithLoadTuner(loadTuner).retrieve(query.getQuery());
 		} else if (storeCodes.isEmpty()) {
 			orderCount = getPersistenceEngineWithLoadTuner(loadTuner)
-				.retrieve(query.getQuery(), query.getParameters().toArray());
+					.retrieve(query.getQuery(), query.getParameters().toArray());
 		} else {
 			orderCount = getPersistenceEngineWithLoadTuner(loadTuner)
-				.retrieveWithList(query.getQuery(), "storeList", storeCodes,
-					query.getParameters().toArray(), 0, Integer.MAX_VALUE);
+					.retrieveWithList(query.getQuery(), "storeList", storeCodes,
+							query.getParameters().toArray(), 0, Integer.MAX_VALUE);
 		}
 
 		return orderCount.get(0);
@@ -398,17 +359,17 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * load tuner and forces JOIN fetch mode.
 	 *
 	 * @param orderSearchCriteria the order search criteria.
-	 * @param start the starting record to search
-	 * @param maxResults the max results to be returned
+	 * @param start               the starting record to search
+	 * @param maxResults          the max results to be returned
 	 * @return the list of orders matching the given criteria.
 	 */
 	@Override
 	public List<Order> findOrdersBySearchCriteria(final OrderSearchCriteria orderSearchCriteria,
-													final int start,
-													final int maxResults) {
+												  final int start,
+												  final int maxResults) {
 		sanityCheck();
 
-		FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		FetchGroupLoadTuner loadTuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_SEARCH);
 
 		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
@@ -420,29 +381,29 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * Find orders by search criteria using the given load tuner.
 	 *
 	 * @param orderSearchCriteria the order search criteria.
-	 * @param start the starting record to search
-	 * @param maxResults the max results to be returned
-	 * @param loadTuner the load tuner
+	 * @param start               the starting record to search
+	 * @param maxResults          the max results to be returned
+	 * @param loadTuner           the load tuner
 	 * @return the list of orders matching the given criteria.
 	 */
 	@Override
 	public List<Order> findOrdersBySearchCriteria(final OrderSearchCriteria orderSearchCriteria, final int start, final int maxResults,
-		final LoadTuner loadTuner) {
+												  final LoadTuner loadTuner) {
 
-		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
+		final OrderCriterion orderCriterion = getPrototypeBean(ORDER_CRITERION, OrderCriterion.class);
 		Collection<String> storeCodes = new LinkedList<>();
 		CriteriaQuery query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ENTITY);
 
 		List<Order> orderList;
 		if (query.getParameters().isEmpty() && storeCodes.isEmpty()) {
 			orderList = getPersistenceEngineWithLoadTuner(loadTuner)
-				.retrieve(query.getQuery(), start, maxResults);
+					.retrieve(query.getQuery(), start, maxResults);
 		} else if (storeCodes.isEmpty()) {
 			orderList = getPersistenceEngineWithLoadTuner(loadTuner)
-				.retrieve(query.getQuery(), query.getParameters().toArray(), start, maxResults);
+					.retrieve(query.getQuery(), query.getParameters().toArray(), start, maxResults);
 		} else {
 			orderList = getPersistenceEngineWithLoadTuner(loadTuner)
-				.retrieveWithList(query.getQuery(), "storeList", storeCodes, query.getParameters().toArray(), start, maxResults);
+					.retrieveWithList(query.getQuery(), "storeList", storeCodes, query.getParameters().toArray(), start, maxResults);
 		}
 
 		return populateRelationships(orderList);
@@ -452,14 +413,14 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * Find orders by search criteria using the given load tuner.
 	 *
 	 * @param orderSearchCriteria the order search criteria.
-	 * @param start the starting record to search
-	 * @param maxResults the max results to be returned
+	 * @param start               the starting record to search
+	 * @param maxResults          the max results to be returned
 	 * @return the list of order numbers matching the given criteria.
 	 */
 	@Override
 	public List<String> findOrderNumbersBySearchCriteria(final OrderSearchCriteria orderSearchCriteria, final int start, final int maxResults) {
 
-		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
+		final OrderCriterion orderCriterion = getPrototypeBean(ORDER_CRITERION, OrderCriterion.class);
 		Collection<String> storeCodes = new LinkedList<>();
 		CriteriaQuery query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
 
@@ -470,7 +431,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			orderList = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray(), start, maxResults);
 		} else {
 			orderList = getPersistenceEngine().retrieveWithList(query.getQuery(), "storeList", storeCodes,
-				query.getParameters().toArray(), start, maxResults);
+					query.getParameters().toArray(), start, maxResults);
 		}
 
 		return orderList;
@@ -478,11 +439,10 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	/**
 	 * Get a map with lazy fields. By default,  <strong>AbstractOrderShipmentImpl.shipmentOrderSkusInternal</strong> field will be loaded.
-	 *
+	 * <p>
 	 * If <strong>withFullDetails</strong> is true, then <strong>OrderSkuImpl.productSku</strong> field will be loaded too.
 	 *
 	 * @param withFullDetails if true, additional field will be loaded.
-	 *
 	 * @return a map with lazy fields.
 	 */
 	protected Map<Class<?>, String> getLazyFields(final boolean withFullDetails) {
@@ -523,11 +483,10 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	/**
 	 * Returns a list of <code>Order</code> based on the given uids. The returned orders will be populated based on the given load tuner.
 	 *
-	 * @param orderUids a collection of order uids
+	 * @param orderUids           a collection of order uids
 	 * @param isDetailedFetchPlan if true, all lazy fields will be loaded. See #getLazyFields(boolean)
 	 * @return a list of <code>Order</code>s
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	private List<Order> findOrdersByUids(final Collection<Long> orderUids, final boolean isDetailedFetchPlan) {
 		sanityCheck();
 
@@ -536,30 +495,15 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 
 		Map<Class<?>, String> lazyFields = isDetailedFetchPlan
-			? getLazyFields(true)
-			: Collections.emptyMap();
+				? getLazyFields(true)
+				: Collections.emptyMap();
 
 		final List<Order> orders = getPersistenceEngineWithDefaultLoadTuner()
-			.withLazyFields(lazyFields)
-			.retrieveByNamedQueryWithList("ORDER_BY_UIDS", "list", orderUids);
+				.withLazyFields(lazyFields)
+				.retrieveByNamedQueryWithList("ORDER_BY_UIDS", LIST_PARAMETER_NAME, orderUids);
 
 		return populateRelationships(orders);
 	}
-
-	/**
-	 * List all orders stored in the database.
-	 *
-	 * @return a list of orders
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public List<Order> list() throws EpServiceException {
-		sanityCheck();
-		final List<Order> orders = getPersistenceEngineWithDefaultLoadTuner().retrieveByNamedQuery("ORDER_SELECT_ALL");
-
-		return populateRelationships(orders);
-	}
-
 
 	/**
 	 * Get the order with the given UID. Return null if no matching record exists.
@@ -569,16 +513,16 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
-	public Order get(final long orderUid) throws EpServiceException {
+	public Order get(final long orderUid) {
 		sanityCheck();
 		Order order;
 		if (orderUid <= 0) {
-			order = getBean(ContextIdNames.ORDER);
+			order = getPrototypeBean(ORDER, Order.class);
 		} else {
 			order = getPersistentBeanFinder()
-				.withLoadTuners(defaultLoadTuner)
-				.withLazyFields(getLazyFields(false))
-				.get(ContextIdNames.ORDER, orderUid);
+					.withLoadTuners(defaultLoadTuner)
+					.withLazyFields(getLazyFields(false))
+					.get(ORDER, orderUid);
 		}
 		return populateRelationships(order);
 	}
@@ -587,21 +531,21 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * Get the order with the given UID. Return <code>null</code> if no matching record exists. Fine tune the order with the given load tuner. If
 	 * <code>null</code> is given, the default load tuner will be used.
 	 *
-	 * @param orderUid the order UID
+	 * @param orderUid  the order UID
 	 * @param loadTuner the load tuner to use (or <code>null</code> for the default)
 	 * @return the order if UID exists, otherwise <code>null</code>
 	 * @throws EpServiceException in case of any errors
 	 */
 	@Override
-	public Order get(final long orderUid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
+	public Order get(final long orderUid, final FetchGroupLoadTuner loadTuner) {
 		sanityCheck();
 		Order order;
 		if (orderUid <= 0) {
-			order = getBean(ContextIdNames.ORDER);
+			order = getPrototypeBean(ORDER, Order.class);
 		} else {
 			order = getPersistentBeanFinder()
-				.withLoadTuners(loadTuner)
-				.get(ContextIdNames.ORDER, orderUid);
+					.withLoadTuners(loadTuner)
+					.get(ORDER, orderUid);
 		}
 
 		return populateRelationships(order);
@@ -615,7 +559,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
-	public Object getObject(final long uid) throws EpServiceException {
+	public Object getObject(final long uid) {
 		return get(uid);
 	}
 
@@ -627,16 +571,16 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
-	public Order getOrderDetail(final long orderUid) throws EpServiceException {
+	public Order getOrderDetail(final long orderUid) {
 		sanityCheck();
 		Order order;
 		if (orderUid <= 0) {
-			order = getBean(ContextIdNames.ORDER);
+			order = getPrototypeBean(ORDER, Order.class);
 		} else {
 			order = getPersistentBeanFinder()
-				.withLoadTuners(defaultLoadTuner)
-				.withLazyFields(getLazyFields(true))
-				.get(ContextIdNames.ORDER, orderUid);
+					.withLoadTuners(defaultLoadTuner)
+					.withLazyFields(getLazyFields(true))
+					.get(ORDER, orderUid);
 		}
 		return populateRelationships(order);
 	}
@@ -692,7 +636,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * Gets the system originator for automatic releasing of the ready shipments.
 	 */
 	private EventOriginator getSystemEventOriginator() {
-		EventOriginatorHelper helper = getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = getSingletonBean(EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 		return helper.getSystemOriginator();
 	}
 
@@ -712,7 +656,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * Searches for order shipment with the specified shipment number and shipment type.
 	 *
 	 * @param shipmentNumber the order shipment number
-	 * @param shipmentType the type of shipment (physical or electronic)
+	 * @param shipmentType   the type of shipment (physical or electronic)
 	 * @return the shipment requested, or null if not found
 	 */
 	@Override
@@ -739,42 +683,36 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	@Override
 	public Order completeShipment(final String shipmentNumber, final String trackingCode, final boolean captureFunds, final Date shipmentDate,
-			final boolean sendConfEmail, final EventOriginator eventOriginator) {
-		PaymentResult paymentResult = null;
+								  final boolean sendConfEmail, final EventOriginator eventOriginator) {
+		List<PaymentEvent> paymentEvents = Collections.emptyList();
 		try {
-			// Capture funds. This will update the OrderShipment's Order's list of OrderPayments.
+			// Capture funds. This will update the OrderShipment's Order's list of OrderPayment.
 			if (captureFunds) {
-				paymentResult = getOrderService().processOrderShipmentPayment(shipmentNumber);
-				if (paymentResult != null && paymentResult.getResultCode() != PaymentResult.CODE_OK) {
-					throw new CompleteShipmentFailedException("Cannot complete shipment. Payments have failed.", paymentResult.getCause());
-				}
+				paymentEvents = getOrderService().processOrderShipmentPayment(shipmentNumber);
 			}
+			paymentEvents = paymentEvents.stream()
+					.filter(paymentEvent -> paymentEvent.getPaymentType().equals(TransactionType.CHARGE))
+					.filter(paymentEvent -> paymentEvent.getPaymentStatus().equals(PaymentStatus.APPROVED))
+					.collect(Collectors.toList());
 
 			final Order updatedOrder = getOrderService().processOrderShipment(shipmentNumber, trackingCode, shipmentDate, eventOriginator);
 
 			sendOrderEvent(OrderEventType.ORDER_SHIPMENT_SHIPPED,
-							shipmentNumber,
-							ImmutableMap.<String, Object>of("orderGuid", updatedOrder.getGuid()));
+					shipmentNumber,
+					ImmutableMap.of("orderGuid", updatedOrder.getGuid()));
 
 			return updatedOrder;
 		} catch (final Exception e) {
-			LOG.error("Complete shipment failed during release shipment phase.", e);
-			if (paymentResult != null) {
-				paymentService.rollBackPayments(paymentResult.getProcessedPayments());
+			if (!paymentEvents.isEmpty()) {
+				getOrderPaymentApiService().rollbackShipmentCompleted(findOrderShipment(shipmentNumber), paymentEvents);
 			}
+			LOG.error("Complete shipment failed during release shipment phase.", e);
 			throw new CompleteShipmentFailedException("Complete shipment failed. Caused by: " + e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Process the payment for a shipment. This will attempt to capture funds for the shipment and return a <code>PaymentResult</code>. If the
-	 * payment processing fails, then any failed capture transactions will be saved to the order.
-	 *
-	 * @param shipmentNumber the shipment number to process a payment on (GUID)
-	 * @return the result of the payment processing
-	 */
 	@Override
-	public PaymentResult processOrderShipmentPayment(final String shipmentNumber) {
+	public List<PaymentEvent> processOrderShipmentPayment(final String shipmentNumber) {
 		final PhysicalOrderShipment orderShipmentToComplete = (PhysicalOrderShipment) getOrderService().findOrderShipment(shipmentNumber,
 				ShipmentType.PHYSICAL);
 
@@ -782,22 +720,20 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			throw new OrderShipmentNotFoundException("Unable to find Physical Shipment with number " + shipmentNumber);
 		}
 
-		PaymentResult paymentResult;
-		paymentResult = paymentService.processShipmentPayment(orderShipmentToComplete);
+		List<PaymentEvent> paymentEvents = getOrderPaymentApiService().shipmentCompleted(orderShipmentToComplete);
 
 		// Save the updated Order with its new orderPayment
 		try {
-			update(orderShipmentToComplete.getOrder());
+			getOrderService().update(orderShipmentToComplete.getOrder());
 		} catch (RuntimeException e) {
 			//  Eat Exception to preserve existing logic flow in checkout
-			LOG.error("Error occurred when attempting to save failed payments to order.", e);
+			LOG.error("Error occurred when attempting to update the order.", e);
 		}
-
-		return paymentResult;
+		return paymentEvents;
 	}
 
 	private OrderService getOrderService() {
-		return getBean(ContextIdNames.ORDER_SERVICE);
+		return getSingletonBean(ORDER_SERVICE, OrderService.class);
 	}
 
 	/**
@@ -806,17 +742,17 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * email and execute the extra tasks, eg. capture the payment for gift certificate. This method will run as an atomic DB transaction (This is
 	 * specified in the Spring configuration)
 	 *
-	 * @param shipmentNumber the number (GUID) of the PHYSICAL orderShipment to be released.
-	 * @param trackingCode the trackingCode for the orderShipment to be released.
-	 * @param shipmentDate the date of complete shipment process
+	 * @param shipmentNumber  the number (GUID) of the PHYSICAL orderShipment to be released.
+	 * @param trackingCode    the trackingCode for the orderShipment to be released.
+	 * @param shipmentDate    the date of complete shipment process
 	 * @param eventOriginator the event originator, could be cm user, ws user, customer or system originator. See {@link EventOriginatorHelper }
 	 * @return the updated order
 	 * @throws OrderShipmentNotFoundException if a physical shipment with the given number cannot be found
-	 * @throws EpServiceException if a single order can't be found with the given order number
+	 * @throws EpServiceException             if a single order can't be found with the given order number
 	 */
 	@Override
 	public Order processOrderShipment(final String shipmentNumber, final String trackingCode, final Date shipmentDate,
-			final EventOriginator eventOriginator) {
+									  final EventOriginator eventOriginator) {
 		final PhysicalOrderShipment shipment = (PhysicalOrderShipment) getOrderService().findOrderShipment(shipmentNumber, ShipmentType.PHYSICAL);
 
 		if (shipment == null) {
@@ -839,80 +775,52 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			shipment.setShipmentDate(shipmentDate);
 		}
 		shipment.setStatus(OrderShipmentStatus.SHIPPED);
-		// will call our external payment gateways to confirm shipment and send shipment notice to customer
-		paymentService.finalizeShipment(shipment);
 
-		return update(shipment.getOrder());
+		return getOrderService().update(shipment.getOrder());
 	}
 
 	@Override
-	public Order refundOrderPayment(final long orderUid, final String shipmentNumber, final OrderPayment orderPayment,
-			final BigDecimal refundAmount, final EventOriginator eventOriginator) {
-		return getOrderService().processRefundOrderPayment(orderUid, shipmentNumber, orderPayment, refundAmount, eventOriginator);
-	}
-
-	@Override
-	public Order processRefundOrderPayment(final long orderUid, final String shipmentNumber, final OrderPayment refundPayment,
-			final BigDecimal refundAmount, final EventOriginator eventOriginator) {
-
-		final Order order = get(orderUid);
+	public void refundOrderPayment(final Order order,
+								   final List<PaymentInstrumentDTO> paymentInstruments,
+								   final Money refundAmount,
+								   final EventOriginator eventOriginator) {
 		order.setModifiedBy(eventOriginator);
 
 		if (!order.isRefundable()) {
 			throw new EpServiceException("Order is not applicable for a refund.");
 		}
 
-		OrderShipment orderShipmentToRefund = findRefundableShipment(shipmentNumber, order);
-
-		final BigDecimal capturedTotal = calculateTotalCaptured(order).setScale(2);
-
-		BigDecimal totalCreditAmount = BigDecimal.ZERO.setScale(2);
-		// calculate total credit amount on the order
-		for (final OrderPayment orderPayment : order.getOrderPayments()) {
-			if (orderPayment.getTransactionType().equals(OrderPayment.CREDIT_TRANSACTION)) {
-				totalCreditAmount = totalCreditAmount.add(orderPayment.getAmount());
-			}
+		if (BigDecimal.ZERO.compareTo(refundAmount.getAmount()) >= 0) {
+			throw new IncorrectRefundAmountException("Amount to refund must be positive.");
 		}
 
-		final BigDecimal totalMinusCredit = capturedTotal.subtract(totalCreditAmount);
-
-		// refund only when the refund amount <= available credit
-		if (refundAmount.compareTo(totalMinusCredit) <= 0) {
-			Order updatedOrder = order;
-			PaymentResult paymentResult;
-
-			paymentResult = paymentService.refundShipmentPayment(orderShipmentToRefund, refundPayment, refundAmount);
-
-			// persist refund payment regardless of result
-			try {
-				updatedOrder = update(orderShipmentToRefund.getOrder());
-			} catch (RuntimeException e) {
-				LOG.error("Error occured when attempting to save failed refunds to order.", e);
-			}
-
-			if (paymentResult != null && paymentResult.getResultCode() != PaymentResult.CODE_OK) {
-				// In order to preserve existing client catch blocks we need to throw this exception.
-				throw new PaymentGatewayException("Refund was unsuccesful.", paymentResult.getCause());
-			}
-			return updatedOrder;
+		final OrderPaymentApiService orderPaymentApiService = getOrderPaymentApiService();
+		final OrderPaymentAmounts amounts = orderPaymentApiService.getOrderPaymentAmounts(order);
+		if (refundAmount.getAmount().compareTo(amounts.getAmountRefundable().getAmount()) > 0) {
+			throw new IncorrectRefundAmountException("The refund amount exceeds the total amount captured for this order.");
 		}
-		throw new IncorrectRefundAmountException("The refund amount exceeds total amount left to be captured.");
+
+		orderPaymentApiService.refund(order, paymentInstruments, refundAmount);
 	}
 
-	/**
-	 * Calculates the total of the amount captured.
-	 *
-	 * @param order The order to total for.
-	 * @return The total.
-	 */
-	BigDecimal calculateTotalCaptured(final Order order) {
-		BigDecimal returnValue = BigDecimal.ZERO;
-		for (OrderPayment payment : order.getOrderPayments()) {
-			if (OrderPayment.CAPTURE_TRANSACTION.equals(payment.getTransactionType())) {
-				returnValue = returnValue.add(payment.getAmount());
-			}
+	@Override
+	public void manualRefundOrderPayment(final Order order, final Money refundAmount, final EventOriginator eventOriginator) {
+		order.setModifiedBy(eventOriginator);
+
+		if (!order.isRefundable()) {
+			throw new EpServiceException("Order is not applicable for a refund.");
 		}
-		return returnValue;
+
+		if (BigDecimal.ZERO.compareTo(refundAmount.getAmount()) >= 0) {
+			throw new IncorrectRefundAmountException("Amount to refund must be positive.");
+		}
+		final OrderPaymentApiService orderPaymentApiService = getOrderPaymentApiService();
+		final OrderPaymentAmounts amounts = orderPaymentApiService.getOrderPaymentAmounts(order);
+		if (refundAmount.getAmount().compareTo(amounts.getAmountRefundable().getAmount()) > 0) {
+			throw new IncorrectRefundAmountException("The refund amount exceeds the total amount captured for this order.");
+		}
+
+		orderPaymentApiService.manualRefund(order, refundAmount);
 	}
 
 	/**
@@ -947,7 +855,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	/**
 	 * Add the given <code>OrderReturn</code> to the order with given uid.
 	 *
-	 * @param order the given order.
+	 * @param order       the given order.
 	 * @param orderReturn orderReturn to be added.
 	 * @return the updated order.
 	 */
@@ -1087,31 +995,12 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		this.allocationService = allocationService;
 	}
 
-	/**
-	 * @param paymentService the paymentService to set
-	 */
-	public void setPaymentService(final PaymentService paymentService) {
-		this.paymentService = paymentService;
-	}
-
-	/**
-	 * Remove an order. Should only be called on an unpopulated order object.
-	 *
-	 * @param order the order to remove
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public void remove(final Order order) throws EpServiceException {
-		sanityCheck();
-		getPersistenceEngine().delete(order);
-	}
-
 	@Override
 	public List<PhysicalOrderShipment> getAwaitingShipments(final Warehouse warehouse) {
 		sanityCheck();
 		List<PhysicalOrderShipment> releasedShipments =
-			getPersistenceEngine().retrieveByNamedQuery("PHYSICAL_SHIPMENTS_BY_STATUS_AND_WAREHOUSE",
-					OrderShipmentStatus.RELEASED, warehouse.getUidPk());
+				getPersistenceEngine().retrieveByNamedQuery("PHYSICAL_SHIPMENTS_BY_STATUS_AND_WAREHOUSE",
+						OrderShipmentStatus.RELEASED, warehouse.getUidPk());
 		List<PhysicalOrderShipment> pickableShipments = new ArrayList<>();
 
 		//Released state is dependent on Order status
@@ -1134,14 +1023,14 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	/**
 	 * Releases order lock if order was locked and updates the order.
 	 *
-	 * @param order the order to be unlocked and updated.
+	 * @param order  the order to be unlocked and updated.
 	 * @param cmUser the user which is releasing the order lock.
-	 * @throws EpServiceException - in case of any errors, InvalidUnlockerException if when the orderLock was obtained not by the cmUser, but by some
-	 *             other user.
+	 * @throws EpServiceException in case of any errors,
+	 *                            InvalidUnlockerException if when the orderLock was obtained not by the cmUser, but by some other user.
 	 */
 	@Override
 	public void unlockAndUpdate(final Order order, final CmUser cmUser) {
-		final OrderLockService orderLockService = getBean(ContextIdNames.ORDER_LOCK_SERVICE);
+		final OrderLockService orderLockService = getSingletonBean(ORDER_LOCK_SERVICE, OrderLockService.class);
 		final OrderLock orderLock = orderLockService.getOrderLock(order);
 		if (orderLock != null) {
 			/* the order was locked, try to release it now. */
@@ -1161,13 +1050,9 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		if (!order.isCancellable()) {
 			throw new EpServiceException("Order is not cancellable.");
 		}
-		try {
-			paymentService.cancelOrderPayments(order);
-		} catch (final Exception e) {
-			// If anything wrong on the payment, won't affect the order
-			// cancellation. Since we only try to reverse the auth.
-			LOG.error("Reverse payment failed when cancel the order.", e);
-		}
+
+		getOrderPaymentApiService().orderCanceled(order);
+
 		getOrderEventHelper().logOrderCanceled(order);
 
 		// Run it in a transaction.
@@ -1193,8 +1078,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 		String eventOriginator = getEventOriginator(order);
 
-		for (final ShoppingItem shoppingItem : order.getRootShoppingItems()) {
-			OrderSku orderSku = (OrderSku) shoppingItem;
+		for (final OrderSku orderSku : order.getRootShoppingItems()) {
 			if (orderSku.getSkuGuid() != null) {
 				allocationService.processAllocationEvent(orderSku, AllocationEventType.ORDER_CANCELLATION, eventOriginator, orderSku
 						.getAllocatedQuantity(), null);
@@ -1231,7 +1115,9 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public PhysicalOrderShipment cancelOrderShipment(final PhysicalOrderShipment orderShipment) {
 		try {
-			paymentService.cancelShipmentPayment(orderShipment);
+			Order freshOrder = get(orderShipment.getOrder().getUidPk());
+			orderShipment.setOrder(freshOrder);
+			getOrderPaymentApiService().shipmentCanceled(orderShipment);
 		} catch (final Exception e) {
 			// If anything wrong on the payment, won't affect the order
 			// cancellation. Since we only try to reverse the auth.
@@ -1253,7 +1139,8 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 */
 	@Override
 	public PhysicalOrderShipment processOrderShipmentCancellation(final PhysicalOrderShipment orderShipment) {
-		String eventOriginator = getEventOriginator(orderShipment.getOrder());
+		Order order = orderShipment.getOrder();
+		String eventOriginator = getEventOriginator(order);
 		for (final OrderSku orderSku : orderShipment.getShipmentOrderSkus()) {
 			if (orderSku.getSkuGuid() != null) {
 				allocationService.processAllocationEvent(orderSku, AllocationEventType.ORDER_CANCELLATION, eventOriginator, orderSku
@@ -1261,10 +1148,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			}
 		}
 
-		orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
-		final Order updatedOrder = update(orderShipment.getOrder());
+		String shipmentNumber = orderShipment.getShipmentNumber();
+		order.getShipment(shipmentNumber).setStatus(OrderShipmentStatus.CANCELLED);
+		final Order updatedOrder = update(order);
 
-		return (PhysicalOrderShipment) updatedOrder.getShipment(orderShipment.getShipmentNumber());
+		return (PhysicalOrderShipment) updatedOrder.getShipment(shipmentNumber);
 	}
 
 	/**
@@ -1276,16 +1164,9 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Order findOrderByOrderNumber(final String orderNumber) {
 		sanityCheck();
-		List<Order> results = getPersistenceEngineWithDefaultLoadTuner().retrieveByNamedQuery("ORDER_SELECT_BY_ORDERNUMBER", orderNumber);
-		//FIXME this will be removed when payments branch gets merged
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
 
-		// Workaround to explicitly initialize "parent" field for all OrderSku entities.
-		results.stream()
-			.filter(order -> order != null && order.getAllShipments() != null)
-			.flatMap(order -> order.getAllShipments().stream())
-			.filter(shipment -> shipment != null && shipment.getShipmentOrderSkus() != null)
-			.flatMap(shipment -> shipment.getShipmentOrderSkus().stream())
-			.forEach(OrderSku::getParent);
+		List<Order> results = getPersistenceEngineWithDefaultLoadTuner().retrieveByNamedQuery("ORDER_SELECT_BY_ORDERNUMBER", orderNumber);
 
 		Order order = null;
 		if (results.size() == 1) {
@@ -1356,18 +1237,18 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * @return the modified order
 	 */
 	@Override
-	public Order awaitExchnageCompletionForOrder(final Order order) {
-		order.awaitExchnageCompletionOrder();
+	public Order awaitExchangeCompletionForOrder(final Order order) {
+		order.awaitExchangeCompletionOrder();
 		return order;
 	}
 
 	@Override
-	public OrderShipment processReleaseShipment(final OrderShipment orderShipment) throws ReleaseShipmentFailedException {
+	public OrderShipment processReleaseShipment(final OrderShipment orderShipment) {
 		try {
 			return processReleaseShipmentInternal(orderShipment);
 		} catch (final ReleaseShipmentFailedException e) {
 			sendOrderEventForFailedReleaseShipment(orderShipment, e.getMessage());
-			throw e;
+			return orderShipment;
 		}
 	}
 
@@ -1379,7 +1260,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * @return the updated order shipment
 	 * @throws ReleaseShipmentFailedException on error setting up the authorization payments
 	 */
-	protected OrderShipment processReleaseShipmentInternal(final OrderShipment orderShipment) throws ReleaseShipmentFailedException {
+	protected OrderShipment processReleaseShipmentInternal(final OrderShipment orderShipment) {
 		// We need to grab fresh shipment and do changes directly in DB, because of order locking issues.
 		// If one RCP session releases the shipment, DB changes are taken place, but order won't be marked dirty
 		// That's why if another session tries to release shipment again, it couldnt't detect that shipment was already released.
@@ -1401,12 +1282,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		if (!OrderShipmentStatus.INVENTORY_ASSIGNED.equals(foundShipment.getShipmentStatus())) {
 			throw new ReleaseShipmentFailedException("Shipment to be released is not in INVENTORY_ASSIGNED " + "state. Current state is "
 					+ foundShipment.getShipmentStatus());
-		}
-		// adjust the auth payments if needed
-		PaymentResult paymentResult = paymentService.adjustShipmentPayment(foundShipment);
-		// check the result code
-		if (paymentResult != null && paymentResult.getResultCode() != PaymentResult.CODE_OK) {
-			throw new ReleaseShipmentFailedException("Cannot release shipment", paymentResult.getCause());
 		}
 
 		foundShipment.setStatus(OrderShipmentStatus.RELEASED);
@@ -1438,13 +1313,13 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	/**
 	 * Allocates inventory, logs order event and saves the order to the database.
 	 *
-	 * @param order the order
+	 * @param order           the order
 	 * @param isExchangeOrder true if the order is of exchange type
 	 * @return the completed order object
 	 * @throws EpServiceException on error
 	 */
 	@Override
-	public Order processOrderOnCheckout(final Order order, final boolean isExchangeOrder) throws EpServiceException {
+	public Order processOrderOnCheckout(final Order order, final boolean isExchangeOrder) {
 
 		if (order == null) {
 			throw new IllegalArgumentException("Cannot process a null order");
@@ -1484,18 +1359,19 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	@Override
 	public List<Long> getFailedOrderUids(final Date toDate, final int maxResults) {
-		return getPersistenceEngine().retrieveByNamedQuery("ORDER_UID_FOR_FAILED_ORDERS_BEFORE_DATE", new Object[] {toDate}, 0, maxResults);
+		return getPersistenceEngine().retrieveByNamedQuery("ORDER_UID_FOR_FAILED_ORDERS_BEFORE_DATE", new Object[]{toDate}, 0, maxResults);
 	}
 
 	@Override
 	public void deleteOrders(final List<Long> orderUids) {
-		getPersistenceEngine().executeNamedQueryWithList("DELETE_ORDER_BY_ORDER_UID_LIST", "list", orderUids);
+		getOrderPaymentApiCleanupService().removeByOrderUidList(orderUids);
+		getPersistenceEngine().executeNamedQueryWithList("DELETE_ORDER_BY_ORDER_UID_LIST", LIST_PARAMETER_NAME, orderUids);
 	}
 
 	@Override
 	public String findLatestOrderGuidByCartOrderGuid(final String cartOrderGuid) {
 		List<String> results = getPersistenceEngine().retrieveByNamedQuery("FIND_ORDER_GUIDS_BY_CART_ORDER_GUID",
-				new Object[] { cartOrderGuid }, 0, 1);
+				new Object[]{cartOrderGuid}, 0, 1);
 		if (!results.isEmpty()) {
 			return results.get(0);
 		}
@@ -1515,7 +1391,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 		OrderShipment shipment = null;
 		final List<OrderShipment> results = getPersistenceEngineWithDefaultLoadTuner()
-			.retrieveByNamedQuery("ABSTRACT_ORDER_SHIPMENT_BY_SHIPMENT_NUMBER", shipmentNumber);
+				.retrieveByNamedQuery("ABSTRACT_ORDER_SHIPMENT_BY_SHIPMENT_NUMBER", shipmentNumber);
 		if (!results.isEmpty()) {
 			shipment = results.get(0);
 		}
@@ -1528,9 +1404,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		List<OrderShipment> nonPhysicalShipments = getImmediatelyShippableShipments(order);
 
 		for (final OrderShipment orderShipment : nonPhysicalShipments) {
-			if (orderHasPaymentForShipment(order, orderShipment)) {
-				paymentService.processShipmentPayment(orderShipment);
-			}
+			getOrderPaymentApiService().shipmentCompleted(orderShipment);
 			// if we don't have to pay for electronically shipments, we should still put the status on SHIPPED
 			orderShipment.setStatus(OrderShipmentStatus.SHIPPED);
 		}
@@ -1538,57 +1412,15 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	/**
 	 * Extracts the shipments whose payments must be captured during checkout.
+	 *
 	 * @param order the order.
 	 * @return the list of shipments
 	 */
 	protected List<OrderShipment> getImmediatelyShippableShipments(final Order order) {
 		return order.getAllShipments().stream()
 				.filter(orderShipment -> !(orderShipment instanceof PhysicalOrderShipment))
-				.collect(toList());
+				.collect(Collectors.toList());
 	}
-
-	/**
-	 * Check the order has a payment for the shipment.
-	 *
-	 * @param order Order to check payment on
-	 * @param orderShipment Shipment to check for payment
-	 * @return true if order has payment for the shipment or if order payment has no shipment, false otherwise
-	 */
-	protected boolean orderHasPaymentForShipment(final Order order,
-												 final OrderShipment orderShipment) {
-		if (orderShipment == null) {
-			return false;
-		}
-
-		for (OrderPayment orderPayment : order.getOrderPayments()) {
-			if (orderPayment.getOrderShipment() == null || orderShipment.equals(orderPayment.getOrderShipment())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Finds and verifies that the indicated shipment is refundable.  Throws an
-	 * EpServiceException if the shipment cannot be found or is non-refundable.
-	 * @param shipmentNumber the shipment number
-	 * @param order the order
-	 * @return the order shipment
-	 */
-	private OrderShipment findRefundableShipment(final String shipmentNumber, final Order order) {
-		OrderShipment orderShipmentToRefund = null;
-		if (shipmentNumber != null) {
-			orderShipmentToRefund = order.getShipment(shipmentNumber);
-		}
-
-		if (orderShipmentToRefund == null) {
-			throw new EpServiceException("The shipment could not be found.");
-		} else if (!orderShipmentToRefund.isRefundable()) {
-			throw new EpServiceException("The shipment is not refundable.");
-		}
-		return orderShipmentToRefund;
-	}
-
 
 	@Override
 	public void resendOrderConfirmationEvent(final String orderNumber) {
@@ -1597,6 +1429,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	/**
 	 * Helper method which returns the store associated with a given order.
+	 *
 	 * @param order the order
 	 * @return the store
 	 */
@@ -1607,7 +1440,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	/**
 	 * Triggers an order event.
 	 *
-	 * @param eventType the type of Order Event to trigger
+	 * @param eventType   the type of Order Event to trigger
 	 * @param orderNumber the order id associated with the event
 	 */
 	protected void sendOrderEvent(final EventType eventType, final String orderNumber) {
@@ -1617,8 +1450,8 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	/**
 	 * Triggers an order event.
 	 *
-	 * @param eventType the type of Order Event to trigger
-	 * @param orderNumber the order id associated with the event
+	 * @param eventType      the type of Order Event to trigger
+	 * @param orderNumber    the order id associated with the event
 	 * @param additionalData additional data to include in the message
 	 */
 	protected void sendOrderEvent(final EventType eventType, final String orderNumber, final Map<String, Object> additionalData) {
@@ -1672,7 +1505,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	}
 
 	protected OrderEventHelper getOrderEventHelper() {
-		return getBean(ContextIdNames.ORDER_EVENT_HELPER);
+		return getSingletonBean(ORDER_EVENT_HELPER, OrderEventHelper.class);
 	}
 
 	public TaxOperationService getTaxOperationService() {
@@ -1701,13 +1534,19 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 
 	private PersistenceEngine getPersistenceEngineWithDefaultLoadTuner() {
-		return getPersistenceEngine()
-			.withLoadTuners(defaultLoadTuner);
+		return getPersistenceEngine().withLoadTuners(defaultLoadTuner);
 	}
 
 	private PersistenceEngine getPersistenceEngineWithLoadTuner(final LoadTuner loadTuner) {
-		return getPersistenceEngine()
-			.withLoadTuners(loadTuner);
+		return getPersistenceEngine().withLoadTuners(loadTuner);
+	}
+
+	protected OrderPaymentApiService getOrderPaymentApiService() {
+		return getSingletonBean(ORDER_PAYMENT_API_SERVICE, OrderPaymentApiService.class);
+	}
+
+	protected OrderPaymentApiCleanupService getOrderPaymentApiCleanupService() {
+		return getSingletonBean(ORDER_PAYMENT_API_CLEANUP_SERVICE, OrderPaymentApiCleanupService.class);
 	}
 
 }

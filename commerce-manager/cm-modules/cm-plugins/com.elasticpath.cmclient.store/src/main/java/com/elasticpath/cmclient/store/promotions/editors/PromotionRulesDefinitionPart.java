@@ -35,10 +35,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -291,7 +291,7 @@ public class PromotionRulesDefinitionPart extends AbstractPolicyAwareEditorPageS
 	 * @param menu the <code>Menu</code> to populate
 	 */
 	private void populateAddConditionMenu(final Menu menu, final Rule rule) {
-		final RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		final Map<Integer, List<RuleCondition>> allConditionsMap = ruleService.getAllConditionsMap();
 		final List<RuleCondition> allConditionsList = allConditionsMap.get(rule.getRuleSet().getScenario());
 
@@ -307,7 +307,7 @@ public class PromotionRulesDefinitionPart extends AbstractPolicyAwareEditorPageS
 				new SelectionAdapter() {
 					@Override
 					public void widgetSelected(final SelectionEvent event) {
-						final RuleCondition newCondition = ServiceLocator.getService(currCondition.getType());
+						final RuleCondition newCondition = BeanLocator.getPrototypeBean(currCondition.getType(), RuleCondition.class);
 						// add the new condition to the rule
 						rule.addCondition(newCondition);
 						markDirty();
@@ -333,7 +333,7 @@ public class PromotionRulesDefinitionPart extends AbstractPolicyAwareEditorPageS
 	 * @param parentMenu the <code>Menu</code> to populate
 	 */
 	private void populateAddActionMenu(final Menu parentMenu, final Rule rule) {
-		final RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		final Map<Integer, List<RuleAction>> allActionsMap = ruleService.getAllActionsMap();
 		final List<RuleAction> allActionsList = allActionsMap.get(rule.getRuleSet().getScenario());
 
@@ -349,7 +349,7 @@ public class PromotionRulesDefinitionPart extends AbstractPolicyAwareEditorPageS
 						new SelectionAdapter() {
 							@Override
 							public void widgetSelected(final SelectionEvent event) {
-								final RuleAction newAction = ServiceLocator.getService(currAction.getType());
+								final RuleAction newAction = BeanLocator.getPrototypeBean(currAction.getType(), RuleAction.class);
 								// add the new action to the rule
 								rule.addAction(newAction);
 								markDirty();
@@ -380,15 +380,14 @@ public class PromotionRulesDefinitionPart extends AbstractPolicyAwareEditorPageS
 
 		if ((exceptionKeys != null) && (exceptionKeys.length > 0)) {
 			for (final RuleExceptionType currExceptionKey : exceptionKeys) {
-				final RuleException ruleException = ServiceLocator.getService(currExceptionKey.getPropertyKey());
+				final RuleException ruleException = BeanLocator.getPrototypeBean(currExceptionKey.getPropertyKey(), RuleException.class);
 
 				final MenuItem menuItem = controlFactory.createMenuItem(menu, SWT.NONE,
 					RulePresentationHelper.toMenuDisplayString(PromotionsMessages.get().getLocalizedName(ruleException.getExceptionType())),
 					new SelectionAdapter() {
 						@Override
 						public void widgetSelected(final SelectionEvent event) {
-							final RuleException newException = ServiceLocator.getService(
-								ruleException.getType());
+							final RuleException newException = BeanLocator.getPrototypeBean(ruleException.getType(), RuleException.class);
 							// add the new exception to the rule element
 							ruleElement.addException(newException);
 							markDirty();

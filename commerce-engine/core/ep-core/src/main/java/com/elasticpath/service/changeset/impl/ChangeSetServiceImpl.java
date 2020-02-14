@@ -146,7 +146,7 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 	}
 
 	private BusinessObjectMetadata newBusinessObjectMetadataInstance() {
-		return beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_METADATA);
+		return beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class);
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 	 * @return an instance of business object group member
 	 */
 	protected BusinessObjectGroupMember newBusinessObjectGroupMemberInstance() {
-		return beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER);
+		return beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER, BusinessObjectGroupMember.class);
 	}
 
 	/**
@@ -247,7 +247,7 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 	 * @return a new instance
 	 */
 	protected ChangeSetObjectStatus getChangeSetObjectStatusInstance() {
-		return beanFactory.getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+		return beanFactory.getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 	}
 
 	@Override
@@ -472,7 +472,8 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 	 */
 	protected void updateResolvedMetadata(final BusinessObjectGroupMember businessObjectGroupMember) {
 
-		BusinessObjectDescriptor objectDescriptor = beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		BusinessObjectDescriptor objectDescriptor = beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR,
+				BusinessObjectDescriptor.class);
 		objectDescriptor.setObjectIdentifier(businessObjectGroupMember.getObjectIdentifier());
 		objectDescriptor.setObjectType(businessObjectGroupMember.getObjectType());
 

@@ -134,7 +134,7 @@ public class SettingValueBackedPredicateITest extends CamelTestSupport {
 	private SettingDefinition createSettingDefinition(final String settingPath) {
 		final String refreshStrategyKey = "coreRefreshStrategy";
 
-		final SettingMetadata settingMetaData = beanFactory.getBean(ContextIdNames.SETTING_METADATA);
+		final SettingMetadata settingMetaData = beanFactory.getPrototypeBean(ContextIdNames.SETTING_METADATA, SettingMetadata.class);
 		settingMetaData.setKey(refreshStrategyKey);
 		settingMetaData.setValue("immediate");
 
@@ -142,7 +142,7 @@ public class SettingValueBackedPredicateITest extends CamelTestSupport {
 				refreshStrategyKey, settingMetaData
 		);
 
-		final SettingDefinition settingDefinition = beanFactory.getBean(ContextIdNames.SETTING_DEFINITION);
+		final SettingDefinition settingDefinition = beanFactory.getPrototypeBean(ContextIdNames.SETTING_DEFINITION, SettingDefinition.class);
 		settingDefinition.setPath(settingPath);
 		settingDefinition.setMetadata(metadata);
 		settingDefinition.setValueType("Boolean");

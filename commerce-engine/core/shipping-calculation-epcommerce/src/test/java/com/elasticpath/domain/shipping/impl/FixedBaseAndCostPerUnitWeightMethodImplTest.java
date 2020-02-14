@@ -4,14 +4,13 @@
 
 package com.elasticpath.domain.shipping.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_COST_CALCULATION_PARAMETER;
 import static com.elasticpath.domain.shipping.ShippingCostCalculationParametersEnum.COST_PER_UNIT_WEIGHT;
 import static com.elasticpath.domain.shipping.ShippingCostCalculationParametersEnum.FIXED_BASE;
 import static com.elasticpath.domain.shipping.impl.ShippingCostTestDataFactory.aCostCalculationParam;
 import static com.elasticpath.domain.shipping.impl.ShippingCostTestDataFactory.someCalculationParams;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -63,7 +62,7 @@ public class FixedBaseAndCostPerUnitWeightMethodImplTest {
 	@Before
 	public void setUp() {
 		((ElasticPathImpl) ElasticPathImpl.getInstance()).setBeanFactory(beanFactory);
-		when(beanFactory.getBean(SHIPPING_COST_CALCULATION_PARAMETER))
+		when(beanFactory.getPrototypeBean(SHIPPING_COST_CALCULATION_PARAMETER, ShippingCostCalculationParameter.class))
 				.thenAnswer(invocation -> new ShippingCostCalculationParameterImpl());
 		shippingCostCalculationMethod = new FixedBaseAndCostPerUnitWeightMethodImpl();
 		this.setDefaultParameterSet(this.shippingCostCalculationMethod);

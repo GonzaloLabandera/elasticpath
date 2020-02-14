@@ -90,7 +90,8 @@ public class OAuth2AccessTokenRepositoryImpl implements OAuth2AccessTokenReposit
 	@CacheResult
 	public ExecutionResult<OAuth2AccessTokenMemento> createOAuth2AccessToken() {
 		try {
-			OAuth2AccessTokenMemento memento = coreBeanFactory.getBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO);
+			OAuth2AccessTokenMemento memento = coreBeanFactory.getPrototypeBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO,
+					OAuth2AccessTokenMemento.class);
 			return ExecutionResultFactory.createReadOK(memento);
 		} catch (RuntimeException runtimeException) {
 			String errorMessage = "Unable to create OAuth2AccessTokenMemento";

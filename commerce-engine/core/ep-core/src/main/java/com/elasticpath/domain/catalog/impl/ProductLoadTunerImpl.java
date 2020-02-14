@@ -342,17 +342,17 @@ public class ProductLoadTunerImpl extends AbstractEpDomainImpl implements Produc
 		mergedProductLoadTuner.loadingSkus = loadingSkus || productLoadTuner.isLoadingSkus();
 
 		if (productSkuLoadTuner == null) {
-			productSkuLoadTuner = getBean(ContextIdNames.PRODUCT_SKU_LOAD_TUNER);
+			productSkuLoadTuner = getPrototypeBean(ContextIdNames.PRODUCT_SKU_LOAD_TUNER, ProductSkuLoadTuner.class);
 		}
 		mergedProductLoadTuner.productSkuLoadTuner = productSkuLoadTuner.merge(productLoadTuner.getProductSkuLoadTuner());
 
 		if (categoryLoadTuner == null) {
-			categoryLoadTuner = getBean(ContextIdNames.CATEGORY_LOAD_TUNER);
+			categoryLoadTuner = getPrototypeBean(ContextIdNames.CATEGORY_LOAD_TUNER, CategoryLoadTuner.class);
 		}
 		mergedProductLoadTuner.categoryLoadTuner = categoryLoadTuner.merge(productLoadTuner.getCategoryLoadTuner());
 
 		if (productTypeLoadTuner == null) {
-			productTypeLoadTuner = getBean(ContextIdNames.PRODUCT_TYPE_LOAD_TUNER);
+			productTypeLoadTuner = getPrototypeBean(ContextIdNames.PRODUCT_TYPE_LOAD_TUNER, ProductTypeLoadTuner.class);
 		}
 		mergedProductLoadTuner.productTypeLoadTuner = productTypeLoadTuner.merge(productLoadTuner.getProductTypeLoadTuner());
 

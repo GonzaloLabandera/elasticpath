@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl;
 
@@ -12,20 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.PurchaseRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
-import com.elasticpath.service.payment.gateway.PaymentMethodTransformer;
-import com.elasticpath.service.payment.gateway.PaymentMethodTransformerFactory;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 
 /**
@@ -35,8 +29,6 @@ import com.elasticpath.service.shoppingcart.CheckoutService;
 public class PurchaseRepositoryImpl implements PurchaseRepository {
 	private static final Logger LOG = LoggerFactory.getLogger(PurchaseRepositoryImpl.class);
 
-	private BeanFactory coreBeanFactory;
-	private PaymentMethodTransformerFactory paymentMethodTransformerFactory;
 	private CheckoutService checkoutService;
 	private ReactiveAdapter reactiveAdapter;
 
@@ -44,33 +36,13 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
 	@CacheResult
 	public Single<CheckoutResults> checkout(final ShoppingCart shoppingCart,
 											final ShoppingCartTaxSnapshot taxSnapshot,
-											final CustomerSession customerSession,
-											final OrderPayment orderPayment) {
+											final CustomerSession customerSession) {
 		return reactiveAdapter.fromServiceAsSingle(() -> checkoutService.checkout(
 				shoppingCart,
 				taxSnapshot,
 				customerSession,
-				orderPayment,
 				true
 		)).onErrorResumeNext(handleCheckoutException());
-	}
-
-	@Override
-	@CacheResult
-	public Single<OrderPayment> getOrderPaymentFromPaymentMethod(final PaymentMethod paymentMethod) {
-		PaymentMethodTransformer transformer;
-		try {
-			transformer = paymentMethodTransformerFactory.getTransformerInstance(paymentMethod);
-		} catch (IllegalArgumentException exception) {
-			return Single.error(ResourceOperationFailure.notFound("No PaymentMethodTransformer for payment method: " + paymentMethod));
-		}
-
-		return Single.just(transformer.transformToOrderPayment(paymentMethod));
-	}
-
-	@Override
-	public Single<OrderPayment> createNewOrderPaymentEntity() {
-		return Single.just(coreBeanFactory.getBean(ContextIdNames.ORDER_PAYMENT));
 	}
 
 	/**
@@ -93,16 +65,6 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
 		};
 	}
 
-	@Reference
-	public void setCoreBeanFactory(final BeanFactory coreBeanFactory) {
-		this.coreBeanFactory = coreBeanFactory;
-	}
-
-	@Reference
-	public void setPaymentMethodTransformerFactory(final PaymentMethodTransformerFactory paymentMethodTransformerFactory) {
-		this.paymentMethodTransformerFactory = paymentMethodTransformerFactory;
-	}
-	
 	@Reference
 	public void setCheckoutService(final CheckoutService checkoutService) {
 		this.checkoutService = checkoutService;

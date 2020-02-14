@@ -118,7 +118,7 @@ public class EmailContextFactoryImpl implements EmailContextFactory {
 	 * @return an SeoUrlBuilder for the given store.
 	 */
 	protected SeoUrlBuilder getSeoUrlBuilder(final Store store) {
-		SeoUrlBuilder seoUrlBuilder = beanFactory.getBean(ContextIdNames.SEO_URL_BUILDER);
+		SeoUrlBuilder seoUrlBuilder = beanFactory.getPrototypeBean(ContextIdNames.SEO_URL_BUILDER, SeoUrlBuilder.class);
 		seoUrlBuilder.setStore(store);
 		return seoUrlBuilder;
 	}

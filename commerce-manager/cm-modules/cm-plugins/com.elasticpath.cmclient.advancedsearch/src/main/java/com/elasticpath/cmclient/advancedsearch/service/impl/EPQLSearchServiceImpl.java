@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.advancedsearch.service.impl;
 import java.util.Collections;
 
 import com.elasticpath.cmclient.advancedsearch.service.EPQLSearchService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.ql.parser.EpQLParseException;
 import com.elasticpath.search.searchengine.EpQLSearchEngine;
 import com.elasticpath.search.searchengine.EpQlSearchResult;
@@ -23,7 +23,7 @@ public class EPQLSearchServiceImpl implements EPQLSearchService {
 	 * Constructor initializes EpQL searcher.
 	 */
 	public EPQLSearchServiceImpl() {
-		searchEngine = ServiceLocator.getService("epQLSearchEngine"); //$NON-NLS-1$
+		searchEngine = BeanLocator.getSingletonBean("epQLSearchEngine", EpQLSearchEngine.class); //$NON-NLS-1$
 	}
 
 	@Override

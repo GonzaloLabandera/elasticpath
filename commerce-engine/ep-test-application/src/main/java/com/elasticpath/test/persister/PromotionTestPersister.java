@@ -47,6 +47,7 @@ public class PromotionTestPersister {
 	private final TagConditionService tagConditionService;
 
 	private final TestApplicationContext tac;
+
 	/**
 	 * Promotion test persister constructor.
 	 *
@@ -54,14 +55,14 @@ public class PromotionTestPersister {
 	 */
 	public PromotionTestPersister(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		tac = beanFactory.getBean("testApplicationContext");
-		ruleService = beanFactory.getBean(ContextIdNames.RULE_SERVICE);
-		ruleSetService = beanFactory.getBean(ContextIdNames.RULE_SET_SERVICE);
-		storeService = beanFactory.getBean(ContextIdNames.STORE_SERVICE);
-		catalogService = beanFactory.getBean(ContextIdNames.CATALOG_SERVICE);
-		sellingContextService = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT_SERVICE);
-		tagConditionService = beanFactory.getBean(ContextIdNames.TAG_CONDITION_SERVICE);
-		ruleEngine = beanFactory.getBean("epRuleEngine");
+		tac = beanFactory.getSingletonBean(ContextIdNames.TEST_APPLICATION_CONTEXT, TestApplicationContext.class);
+		ruleService = beanFactory.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
+		ruleSetService = beanFactory.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
+		storeService = beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
+		catalogService = beanFactory.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
+		sellingContextService = beanFactory.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class);
+		tagConditionService = beanFactory.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
+		ruleEngine = beanFactory.getSingletonBean(ContextIdNames.EP_RULE_ENGINE, DBCompilingRuleEngineImpl.class);
 		ruleEngine.resetRuleBaseCache();
 	}
 
@@ -69,7 +70,7 @@ public class PromotionTestPersister {
 	 * Create catalog promotion rule.
 	 *
 	 * @param promotionName the promotion name
-	 * @param catalogCode the catalog code
+	 * @param catalogCode   the catalog code
 	 * @return rule instance
 	 */
 	public Rule createCatalogPromotion(final String promotionName, final String catalogCode) {
@@ -86,9 +87,10 @@ public class PromotionTestPersister {
 
 	/**
 	 * Create catalog promotion rule, but with the specified code as promo code.
+	 *
 	 * @param promotionName the promotion name
-	 * @param promoCode the catalog code
-	 * @param catalogCode rule instance
+	 * @param promoCode     the catalog code
+	 * @param catalogCode   rule instance
 	 * @return created promotion rule.
 	 */
 	public Rule createCatalogPromotion(final String promotionName, final String promoCode, final String catalogCode) {
@@ -97,7 +99,7 @@ public class PromotionTestPersister {
 			throw new TestApplicationException("Catalog with name " + catalogCode + " doesn't exists in DB.");
 		}
 		final Rule promotionRule = createPromotion(promotionName, promoCode,
-			ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO), false);
+				ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO), false);
 		promotionRule.setCatalog(catalog);
 		return promotionRule;
 	}
@@ -106,7 +108,7 @@ public class PromotionTestPersister {
 	 * Create shopping cart promotion rule.
 	 *
 	 * @param promotionName the promotion name
-	 * @param storeCode the store code
+	 * @param storeCode     the store code
 	 * @return configured rule instance
 	 */
 	public Rule createLimitedUsagePromotion(final String promotionName, final String storeCode) {
@@ -119,8 +121,8 @@ public class PromotionTestPersister {
 	 * Create shopping cart promotion rule.
 	 *
 	 * @param promotionName the promotion name
-	 * @param storeCode the store code
-	 * @param code promo code (not a coupon code)
+	 * @param storeCode     the store code
+	 * @param code          promo code (not a coupon code)
 	 * @return configured rule instance
 	 */
 	public Rule createShoppingCartPromotion(final String promotionName, final String storeCode, final String code) {
@@ -142,8 +144,8 @@ public class PromotionTestPersister {
 	 * Create shopping cart promotion rule.
 	 *
 	 * @param promotionName the promotion name
-	 * @param storeCode the store code
-	 * @param code promo code (not a coupon code)
+	 * @param storeCode     the store code
+	 * @param code          promo code (not a coupon code)
 	 * @param couponEnabled enabled for coupons
 	 * @return configured rule instance
 	 */
@@ -167,21 +169,20 @@ public class PromotionTestPersister {
 	}
 
 	/**
-	 *
 	 * Create promotion.
 	 *
 	 * @param promotionName
 	 * @param code
-	 * @param ruleSet we have to know what kind of promotion need to be created
+	 * @param ruleSet       we have to know what kind of promotion need to be created
 	 * @return rule
 	 */
 	private Rule createPromotion(final String promotionName, final String code,
 								 final RuleSet ruleSet, final boolean couponEnabled) {
-		final Rule promotionRule = beanFactory.getBean(ContextIdNames.PROMOTION_RULE);
+		final Rule promotionRule = beanFactory.getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 		promotionRule.setRuleSet(ruleSet);
 		promotionRule.initialize();
 
-		if (ruleSet.getScenario() ==  RuleScenarios.CATALOG_BROWSE_SCENARIO) {
+		if (ruleSet.getScenario() == RuleScenarios.CATALOG_BROWSE_SCENARIO) {
 			//shopping cart scenario must use selling context for set the date ranges
 			promotionRule.setStartDate(new Date());
 		}
@@ -236,8 +237,8 @@ public class PromotionTestPersister {
 	 * Creates and persists a simple (10% off subtotal) shopping cart promotion.
 	 *
 	 * @param promotionName the name of the promotion
-	 * @param storeCode the store code
-	 * @param code the promoCode (not coupon code)
+	 * @param storeCode     the store code
+	 * @param code          the promoCode (not coupon code)
 	 * @return rule
 	 */
 	public Rule createAndPersistSimpleShoppingCartPromotion(final String promotionName, final String storeCode, final String code) {
@@ -248,18 +249,18 @@ public class PromotionTestPersister {
 	 * Creates and persists a simple (10% off subtotal) shopping cart promotion.
 	 *
 	 * @param promotionName the name of the promotion
-	 * @param storeCode the store code
-	 * @param code the promoCode (not coupon code)
+	 * @param storeCode     the store code
+	 * @param code          the promoCode (not coupon code)
 	 * @param couponEnabled whether the promo is coupon enabled
 	 * @return rule
 	 */
 	public Rule createAndPersistSimpleShoppingCartPromotion(final String promotionName, final String storeCode,
-			final String code, final boolean couponEnabled) {
-		RuleParameter param = beanFactory.getBean(ContextIdNames.RULE_PARAMETER);
+															final String code, final boolean couponEnabled) {
+		RuleParameter param = beanFactory.getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 		param.setKey(RuleParameter.DISCOUNT_PERCENT_KEY);
 		param.setValue("10");
 
-		RuleAction action = beanFactory.getBean(ContextIdNames.CART_SUBTOTAL_PERCENT_DISCOUNT_ACTION);
+		RuleAction action = beanFactory.getPrototypeBean(ContextIdNames.CART_SUBTOTAL_PERCENT_DISCOUNT_ACTION, RuleAction.class);
 		action.getParameters().clear();
 		action.addParameter(param);
 

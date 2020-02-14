@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<import resource="classpath:spring/service/payment-provider-api-service.xml"/>
+
+	<bean id="orderPaymentInstrumentService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.orderpaymentapi.impl.OrderPaymentInstrumentServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+				<property name="elasticPath" ref="elasticPath"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="cartOrderPaymentInstrumentService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.orderpaymentapi.impl.CartOrderPaymentInstrumentServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+				<property name="elasticPath" ref="elasticPath"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="orderPaymentService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.orderpaymentapi.impl.OrderPaymentServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+				<property name="elasticPath" ref="elasticPath"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="customerPaymentInstrumentService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.orderpaymentapi.impl.CustomerPaymentInstrumentServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+				<property name="elasticPath" ref="elasticPath"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="storePaymentProviderConfigService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.orderpaymentapi.impl.StorePaymentProviderConfigServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+				<property name="elasticPath" ref="elasticPath"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="orderPaymentApiService" class="com.elasticpath.service.orderpaymentapi.impl.OrderPaymentApiServiceImpl">
+		<constructor-arg name="paymentAPIWorkflow" ref="paymentAPIWorkflow"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+		<constructor-arg name="paymentInstrumentWorkflow" ref="paymentInstrumentWorkflow"/>
+		<constructor-arg name="orderEventHelper" ref="orderEventHelper"/>
+		<constructor-arg name="orderPaymentInstrumentService" ref="orderPaymentInstrumentService"/>
+		<constructor-arg name="orderPaymentService" ref="orderPaymentService"/>
+		<constructor-arg name="pricingSnapshotService" ref="pricingSnapshotService"/>
+		<constructor-arg name="taxSnapshotService" ref="taxSnapshotService"/>
+		<constructor-arg name="customerAddressDao" ref="customerAddressDao"/>
+	</bean>
+
+	<bean id="paymentProviderConfigManagementService"
+		  class="com.elasticpath.service.orderpaymentapi.management.impl.PaymentProviderConfigManagementServiceImpl">
+		<constructor-arg name="paymentProviderConfigWorkflow" ref="paymentProviderConfigWorkflow"/>
+	</bean>
+
+	<bean id="paymentProviderManagementService"
+		  class="com.elasticpath.service.orderpaymentapi.management.impl.PaymentProviderManagementServiceImpl">
+		<constructor-arg name="paymentProviderWorkflow" ref="paymentProviderWorkflow"/>
+	</bean>
+
+	<bean id="paymentInstrumentManagementService"
+		  class="com.elasticpath.service.orderpaymentapi.management.impl.PaymentInstrumentManagementServiceImpl">
+		<constructor-arg name="paymentInstrumentWorkflow" ref="paymentInstrumentWorkflow"/>
+		<constructor-arg name="orderPaymentInstrumentService" ref="orderPaymentInstrumentService"/>
+	</bean>
+
+	<bean id="orderPaymentApiCleanupService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.orderpaymentapi.impl.OrderPaymentApiCleanupServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="customerDefaultPaymentInstrumentService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.orderpaymentapi.impl.CustomerDefaultPaymentInstrumentServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="filteredPaymentInstrumentService" class="com.elasticpath.service.orderpaymentapi.impl.FilteredPaymentInstrumentServiceImpl">
+		<constructor-arg name="customerPaymentInstrumentService" ref="customerPaymentInstrumentService"/>
+		<constructor-arg name="paymentInstrumentManagementService" ref="paymentInstrumentManagementService"/>
+		<constructor-arg name="storePaymentProviderConfigService" ref="storePaymentProviderConfigService"/>
+		<constructor-arg name="customerDefaultPaymentInstrumentService" ref="customerDefaultPaymentInstrumentService"/>
+		<constructor-arg name="cartOrderPaymentInstrumentService" ref="cartOrderPaymentInstrumentService"/>
+	</bean>
+
+	<bean id="paymentStatisticService" class="com.elasticpath.service.orderpaymentapi.management.impl.PaymentStatisticServiceImpl">
+		<constructor-arg name="orderPaymentService" ref="orderPaymentService"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+</beans>

@@ -175,7 +175,7 @@ public class AppliedRuleImpl extends AbstractLegacyPersistenceImpl implements Ap
 
 	@Override
 	public void addAppliedCoupon(final String couponCode, final int usageCount) {
-		AppliedCoupon appliedCoupon = getBean(ContextIdNames.APPLIED_COUPON);
+		AppliedCoupon appliedCoupon = getPrototypeBean(ContextIdNames.APPLIED_COUPON, AppliedCoupon.class);
 		appliedCoupon.setCouponCode(couponCode);
 		appliedCoupon.setUsageCount(usageCount);
 		this.appliedCoupons.add(appliedCoupon);

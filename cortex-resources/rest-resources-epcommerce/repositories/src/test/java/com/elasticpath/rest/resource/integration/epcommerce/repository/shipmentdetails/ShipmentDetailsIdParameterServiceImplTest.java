@@ -50,7 +50,7 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 					.thenReturn(Maybe.just(createShipmentDetailsId(cartId, ShipmentDetailsConstants.SHIPMENT_TYPE)));
 		}
 
-		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(SCOPE, USER_ID)).thenReturn(Observable.fromIterable(cartIds));
+		when(cartOrderRepository.findCartOrderGuidsByCustomer(SCOPE, USER_ID)).thenReturn(Observable.fromIterable(cartIds));
 
 		shipmentDetailsIdParameterService.findShipmentDetailsIds(SCOPE, USER_ID)
 				.test()
@@ -62,7 +62,7 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 	@Test
 	public void verifyFindShipmentDetailsIdReturnsEmptyWhenCartOrderIdsNotFound() {
 		String errorMsg = String.format(CartOrderRepositoryImpl.NO_CART_ORDERS_FOR_CUSTOMER, USER_ID, SCOPE);
-		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(SCOPE, USER_ID))
+		when(cartOrderRepository.findCartOrderGuidsByCustomer(SCOPE, USER_ID))
 				.thenReturn(Observable.error(ResourceOperationFailure.notFound(errorMsg)));
 
 		shipmentDetailsIdParameterService.findShipmentDetailsIds(SCOPE, USER_ID)
@@ -81,7 +81,7 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 					.thenReturn(Maybe.empty());
 		}
 
-		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(SCOPE, USER_ID)).thenReturn(Observable.fromIterable(cartIds));
+		when(cartOrderRepository.findCartOrderGuidsByCustomer(SCOPE, USER_ID)).thenReturn(Observable.fromIterable(cartIds));
 
 		shipmentDetailsIdParameterService.findShipmentDetailsIds(SCOPE, USER_ID)
 				.test()

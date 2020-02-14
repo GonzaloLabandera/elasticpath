@@ -4,6 +4,8 @@
 
 package com.elasticpath.persistence.openjpa.executors;
 
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.getEntityClassName;
+
 import javax.persistence.EntityManager;
 
 import com.elasticpath.persistence.api.Persistable;
@@ -57,7 +59,7 @@ public class IdentityQueryExecutor<T extends Persistable> extends AbstractQueryE
 	 */
 	@Override
 	public String getQuery() {
-		return "SELECT c FROM " + getQueryUtil().getEntityClassName(clazz) + " c WHERE c.uidPk = ?1";
+		return "SELECT c FROM " + getEntityClassName(clazz) + " c WHERE c.uidPk = ?1";
 	}
 
 

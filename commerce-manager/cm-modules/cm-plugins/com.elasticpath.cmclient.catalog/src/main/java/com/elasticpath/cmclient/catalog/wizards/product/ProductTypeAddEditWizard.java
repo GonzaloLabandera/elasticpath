@@ -14,7 +14,7 @@ import org.eclipse.swt.graphics.Image;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModelImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.IChangeSetEditorAware;
@@ -58,7 +58,7 @@ public class ProductTypeAddEditWizard extends AbstractPolicyAwareWizard<ProductT
 
 	private PolicyActionContainer finishContainer;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	/**
 	 * @param productType the product type passed in.
@@ -74,7 +74,7 @@ public class ProductTypeAddEditWizard extends AbstractPolicyAwareWizard<ProductT
 		if (editMode) {
 			this.productType = productType;
 		} else {
-			this.productType = ServiceLocator.getService(ContextIdNames.PRODUCT_TYPE);
+			this.productType = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 			this.productType.setCatalog(this.catalogModel.getCatalog());
 		}
 	}
@@ -165,7 +165,7 @@ public class ProductTypeAddEditWizard extends AbstractPolicyAwareWizard<ProductT
 	}
 
 	private void setProductTypeSkuAttributes(final List<Attribute> attributes) {
-		final AttributeGroup skuAttributeGroup = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_GROUP);
+		final AttributeGroup skuAttributeGroup = BeanLocator.getPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class);
 		skuAttributeGroup.setAttributeGroupAttributes(getGroupAttributeFromList(attributes, ContextIdNames.PRODUCT_TYPE_SKU_ATTRIBUTE));
 		getProductType().setSkuAttributeGroup(skuAttributeGroup);
 	}
@@ -175,7 +175,7 @@ public class ProductTypeAddEditWizard extends AbstractPolicyAwareWizard<ProductT
 		final Set<AttributeGroupAttribute> attributeGroupAttributes = new HashSet<>();
 
 		for (final Attribute attribute : attributes) {
-			final AttributeGroupAttribute groupAttribute = ServiceLocator.getService(beanName);
+			final AttributeGroupAttribute groupAttribute = BeanLocator.getPrototypeBean(beanName, AttributeGroupAttribute.class);
 			groupAttribute.setAttribute(attribute);
 			groupAttribute.setOrdering(order++);
 			attributeGroupAttributes.add(groupAttribute);
@@ -212,11 +212,11 @@ private void setProductTypeCartItemModifierGroup(final List<ModifierGroup> assig
 	@Override
 	public void setObjectGuid(final String objectGuid) {
 		if (objectGuid == null) {
-			productType = ServiceLocator.getService(ContextIdNames.PRODUCT_TYPE);
+			productType = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 			productType.setCatalog(catalogModel.getCatalog());
 			editMode = false;
 		} else {
-			productTypeService = ServiceLocator.getService(ContextIdNames.PRODUCT_TYPE_SERVICE);
+			productTypeService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_TYPE_SERVICE, ProductTypeService.class);
 			productType = productTypeService.findByGuid(objectGuid);
 			productTypes = new ArrayList<>();
 			editMode = true;

@@ -10,8 +10,8 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmSingletonUtil;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.PerspectiveDefaults;
 import com.elasticpath.cmclient.jobs.views.WarehouseJobListView;
@@ -76,7 +76,7 @@ public class WarehousePerspectiveFactory implements IPerspectiveFactory {
 	@SuppressWarnings("PMD.NonThreadSafeSingleton")
 	public static void initWarehouses() {
 		WarehousePerspectiveFactory instance = getInstance();
-		instance.warehouses = ((WarehouseService) ServiceLocator.getService(ContextIdNames.WAREHOUSE_SERVICE)).findAllWarehouses();
+		instance.warehouses = BeanLocator.getSingletonBean(ContextIdNames.WAREHOUSE_SERVICE, WarehouseService.class).findAllWarehouses();
 		AuthorizationService.getInstance().filterAuthorizedWarehouses(instance.warehouses);
 		
 		if (instance.currentWarehouse != null) {

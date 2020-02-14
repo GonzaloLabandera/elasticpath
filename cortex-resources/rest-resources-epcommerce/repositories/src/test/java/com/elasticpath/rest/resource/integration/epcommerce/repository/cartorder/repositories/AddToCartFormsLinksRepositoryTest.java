@@ -37,7 +37,7 @@ public class AddToCartFormsLinksRepositoryTest {
 	private static final String TEST_VALUE = "test";
 
 	@InjectMocks
-	private AddToCartFormsLinksRepository <ItemIdentifier, AddToCartFormsIdentifier> repository;
+	private AddToCartFormsLinksRepository<ItemIdentifier, AddToCartFormsIdentifier> repository;
 	@Mock
 	private MultiCartResolutionStrategyHolder holder;
 	@Mock
@@ -65,17 +65,18 @@ public class AddToCartFormsLinksRepositoryTest {
 		CustomerSession customerSession = mock(CustomerSession.class);
 		Shopper shopper = mock(Shopper.class);
 
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(customerSession));
+		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(customerSession));
 
 		when(strategy.supportsCreate(subject, shopper, SCOPE)).thenReturn(true);
 		when(customerSession.getShopper()).thenReturn(shopper);
 
 		repository.getElements(itemIdentifier)
-		.test()
-		.assertNoErrors()
-		.assertValueCount(1);
+				.test()
+				.assertNoErrors()
+				.assertValueCount(1);
 
 	}
+
 	@Test
 	public void testFindElementsWhenNotSupported() {
 
@@ -93,7 +94,7 @@ public class AddToCartFormsLinksRepositoryTest {
 		CustomerSession customerSession = mock(CustomerSession.class);
 		Shopper shopper = mock(Shopper.class);
 
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(customerSession));
+		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(customerSession));
 
 		when(strategy.supportsCreate(subject, shopper, SCOPE)).thenReturn(false);
 		when(customerSession.getShopper()).thenReturn(shopper);

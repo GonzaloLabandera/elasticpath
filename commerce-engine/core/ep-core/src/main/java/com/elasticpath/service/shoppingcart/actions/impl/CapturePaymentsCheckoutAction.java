@@ -1,21 +1,21 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.commons.collections.CollectionUtils;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
+import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderStatus;
+import com.elasticpath.domain.order.PhysicalOrderShipment;
+import com.elasticpath.plugin.payment.provider.dto.TransactionType;
+import com.elasticpath.provider.payment.service.event.PaymentEvent;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.payment.PaymentService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentService;
 import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 
@@ -24,8 +24,9 @@ import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
  */
 public class CapturePaymentsCheckoutAction implements ReversibleCheckoutAction {
 
-	private PaymentService paymentService;
+	private OrderPaymentApiService orderPaymentApiService;
 	private OrderService orderService;
+	private OrderPaymentService orderPaymentService;
 
 	@Override
 	public void execute(final CheckoutActionContext context) throws EpSystemException {
@@ -35,39 +36,40 @@ public class CapturePaymentsCheckoutAction implements ReversibleCheckoutAction {
 			return;
 		}
 
-		final Collection<OrderPayment> originalOrderPayments = new ArrayList<>(context.getOrderPaymentList());
-
 		orderService.captureImmediatelyShippableShipments(order);
 
 		final Order updatedOrder = orderService.update(order);
 		updatedOrder.setModifiedBy(order.getModifiedBy());
 
 		context.setOrder(updatedOrder);
-		context.setOrderPaymentList(updatedOrder.getOrderPayments());
-
-		context.preserveTransientOrderPayment(originalOrderPayments);
 	}
 
 
 	@Override
 	public void rollback(final CheckoutActionContext context) throws EpSystemException {
-		if (context.getOrder() != null) {
-			
-			Set<OrderPayment> orderPayments = new HashSet<>(context.getOrder().getOrderPayments());
-			
-			CollectionUtils.filter(orderPayments, object -> ((OrderPayment) object)
-					.getTransactionType().equals(OrderPayment.CAPTURE_TRANSACTION));
-			
-			paymentService.rollBackPayments(orderPayments);
+		final Order order = context.getOrder();
+		final List<PaymentEvent> chargedEvents = orderPaymentService.findByOrder(order).stream()
+                .filter(orderPayment -> orderPayment.getTransactionType().equals(TransactionType.CHARGE))
+                .filter(orderPayment -> orderPayment.getOrderPaymentStatus().equals(OrderPaymentStatus.APPROVED))
+                .map(orderPayment -> orderPaymentApiService.buildPaymentEvent(orderPayment, order))
+				.collect(Collectors.toList());
+		if (order != null) {
+			order.getAllShipments()
+					.stream()
+					.filter(orderShipment -> !(orderShipment instanceof PhysicalOrderShipment))
+					.findAny().ifPresent(orderShipment -> orderPaymentApiService.rollbackShipmentCompleted(orderShipment, chargedEvents));
 		}
 	}
 
-	public void setPaymentService(final PaymentService paymentService) {
-		this.paymentService = paymentService;
+	public void setOrderPaymentApiService(final OrderPaymentApiService orderPaymentApiService) {
+		this.orderPaymentApiService = orderPaymentApiService;
 	}
 
 	public void setOrderService(final OrderService orderService) {
 		this.orderService = orderService;
 	}
 
+	public void setOrderPaymentService(final OrderPaymentService orderPaymentService) {
+		this.orderPaymentService = orderPaymentService;
+	}
 }

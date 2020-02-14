@@ -10,7 +10,6 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.service.cartorder.CartOrderPopulationStrategy;
 import com.elasticpath.service.cartorder.CartOrderShippingService;
 import com.elasticpath.service.rules.CartOrderCouponAutoApplier;
@@ -39,7 +38,7 @@ public class CartOrderPopulationOnCustomerProfileStrategyImpl implements CartOrd
 	 */
 	@Override
 	public CartOrder createCartOrder(final ShoppingCart shoppingCart) {
-		CartOrder cartOrder = prototypeBeanFactory.getBean(ContextIdNames.CART_ORDER);
+		CartOrder cartOrder = prototypeBeanFactory.getPrototypeBean(ContextIdNames.CART_ORDER, CartOrder.class);
 		cartOrder.setShoppingCartGuid(shoppingCart.getGuid());
 
 		Customer customer = shoppingCart.getShopper().getCustomer();
@@ -58,8 +57,6 @@ public class CartOrderPopulationOnCustomerProfileStrategyImpl implements CartOrd
 			cartOrderShippingService.updateCartOrderShippingAddress(shippingAddressGuid, shoppingCart, cartOrder);
 		}
 
-		cartOrder = populateDefaultPaymentMethodOnCartOrder(cartOrder, customer);
-
 		if (!customer.isAnonymous()) {
 			cartOrder = populateCouponsFromProfile(cartOrder, shoppingCart.getStore(), customer.getEmail());
 		}
@@ -69,15 +66,6 @@ public class CartOrderPopulationOnCustomerProfileStrategyImpl implements CartOrd
 
 	private CartOrder populateCouponsFromProfile(final CartOrder cartOrder, final Store store, final String customerEmail) {
 		cartOrderCouponAutoApplier.filterAndAutoApplyCoupons(cartOrder, store, customerEmail);
-		return cartOrder;
-	}
-
-	private CartOrder populateDefaultPaymentMethodOnCartOrder(final CartOrder cartOrder, final Customer customer) {
-		PaymentMethod defaultPaymentMethod = customer.getPaymentMethods().getDefault();
-
-		if (defaultPaymentMethod != null) {
-			cartOrder.usePaymentMethod(defaultPaymentMethod);
-		}
 		return cartOrder;
 	}
 

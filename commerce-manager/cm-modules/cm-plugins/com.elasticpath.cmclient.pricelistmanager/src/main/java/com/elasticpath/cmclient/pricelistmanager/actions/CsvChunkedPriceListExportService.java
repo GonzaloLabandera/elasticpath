@@ -17,7 +17,7 @@ import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.csv.PriceListCsvExportNotificationListener;
 import com.elasticpath.cmclient.core.csv.PriceListCsvExportNotificationListenerComposite;
 import com.elasticpath.cmclient.core.util.FileSystemUtil;
@@ -53,8 +53,8 @@ public class CsvChunkedPriceListExportService implements PriceListExportService 
 		listener.notifyLoadingData();
 		PriceListDescriptorDTO priceListDescriptor = getPriceListDescriptor();
 
-		JobLauncher jobLauncher = ServiceLocator.getService("jobLauncher"); //$NON-NLS-1$
-		Job priceListCsvExportJob = ServiceLocator.getService("priceListCsvExportJob"); //$NON-NLS-1$
+		JobLauncher jobLauncher = BeanLocator.getSingletonBean("jobLauncher", JobLauncher.class); //$NON-NLS-1$
+		Job priceListCsvExportJob = BeanLocator.getSingletonBean("priceListCsvExportJob", Job.class); //$NON-NLS-1$
 		Locale pricingLocale = getPricingLocale();
 		String priceListName = priceListDescriptor.getName();
 		String priceListCurrencyCode = priceListDescriptor.getCurrencyCode();

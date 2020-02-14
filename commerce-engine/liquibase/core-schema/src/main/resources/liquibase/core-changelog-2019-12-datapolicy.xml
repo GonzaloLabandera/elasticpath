@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2019-12.xml">
+
+	<!-- Add the setting definition for Data Policy Segments that are of interest for the admin. -->
+	<changeSet id="2019-12-policy-segments" author="elasticpath">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">SELECT count(*) FROM TSETTINGDEFINITION WHERE PATH='COMMERCE/STORE/dataPolicySegments'
+			</sqlCheck>
+		</preConditions>
+
+		<!-- Gives the store the definition of data policy segments, so that all of the customer in the store don't need to provide the consent
+		for the data policy. By default the VALUE is empty which means no data policy segments are applied, so the consent is required
+		for the customer. -->
+		<comment>Add a setting definition for the policy segments</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueComputed="202"/>
+			<column name="PATH" value="COMMERCE/STORE/dataPolicySegments"/>
+			<column name="DEFAULT_VALUE" value=""/>
+			<column name="VALUE_TYPE" value="String"/>
+			<column name="DESCRIPTION" value="Segments to include for reporting"/>
+			<column name="MAX_OVERRIDE_VALUES" value="-1"/>
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

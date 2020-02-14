@@ -19,6 +19,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.rules.RuleAction;
 import com.elasticpath.domain.rules.RuleParameter;
+import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.impl.CartSubtotalAmountDiscountActionImpl;
 import com.elasticpath.domain.rules.impl.RuleParameterImpl;
 import com.elasticpath.domain.rules.impl.RuleScenariosImpl;
@@ -58,7 +59,7 @@ public class RuleActionServiceImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.RULE_SCENARIOS);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.RULE_SCENARIOS, RuleScenarios.class);
 				will(returnValue(new RuleScenariosImpl()));
 			}
 		});

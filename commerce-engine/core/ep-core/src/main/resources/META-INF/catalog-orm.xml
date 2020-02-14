@@ -1478,14 +1478,7 @@
 			<query>
 				SELECT pt
 				FROM ProductTypeImpl pt
-			</query>
-		</named-query>
-		<named-query name="PRODUCT_TYPE_SELECT_ALL_EAGER">
-			<query>
-				SELECT pt
-				FROM ProductTypeImpl pt
-				LEFT OUTER JOIN FETCH pt.productAttributeGroupAttributes
-				LEFT OUTER JOIN FETCH pt.skuAttributeGroupAttributes
+				LEFT OUTER JOIN FETCH pt.skuOptions
 			</query>
 		</named-query>
 		<named-query name="PRODUCT_TYPE_BY_CATALOG_EAGER">

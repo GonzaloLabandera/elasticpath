@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <beans xmlns="http://www.springframework.org/schema/beans"
 			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			 xmlns:context="http://www.springframework.org/schema/context"
@@ -74,7 +78,17 @@
 									org.w3c.dom.ranges,
 									org.xmlpull.mxp1,
 									org.xmlpull.v1,
-									org.slf4j;org.slf4j.spi;org.slf4j.helpers;version=1.7.25
+									org.slf4j;org.slf4j.spi;org.slf4j.helpers;version=1.7.25,
+									com.elasticpath.plugin.payment.provider,
+									com.elasticpath.plugin.payment.provider.annotations,
+									com.elasticpath.plugin.payment.provider.capabilities,
+									com.elasticpath.plugin.payment.provider.capabilities.charge,
+									com.elasticpath.plugin.payment.provider.capabilities.creation,
+									com.elasticpath.plugin.payment.provider.capabilities.credit,
+									com.elasticpath.plugin.payment.provider.capabilities.instructions,
+									com.elasticpath.plugin.payment.provider.capabilities.reservation,
+									com.elasticpath.plugin.payment.provider.dto,
+									com.elasticpath.plugin.payment.provider.exception
 							"/>
 				<!-- Why are these packages declared here? Mostly to support libraries that don't support OSGi properly.
 					 These libraries are typically loading a class from a package not declared in their Import-Package

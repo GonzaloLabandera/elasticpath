@@ -36,9 +36,9 @@ import com.elasticpath.cmclient.changeset.actions.ChangeSetActionUtil;
 import com.elasticpath.cmclient.changeset.dialogs.ChangeSetDialog;
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventService;
 import com.elasticpath.cmclient.changeset.helpers.ComponentHelper;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.pagination.PaginationInfo;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -104,7 +104,7 @@ public class ChangeSetEditorObjectsSection extends AbstractPolicyAwareEditorPage
 
 	private AbstractPolicyAwarePaginationControl<ChangeSetMember> paginationControl;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	/**
 	 * Constructs a new section.
@@ -223,8 +223,8 @@ public class ChangeSetEditorObjectsSection extends AbstractPolicyAwareEditorPage
 	}
 
 	private Paginator<ChangeSetMember> createPaginator(final SortingField defaultSortingField, final SortingDirection defaultSortingDirection) {
-		final PaginatorFactory factory = getBean(ContextIdNames.PAGINATOR_FACTORY);
-		final PaginationConfig config = getBean(ContextIdNames.PAGINATION_CONFIG);
+		final PaginatorFactory factory = BeanLocator.getSingletonBean(ContextIdNames.PAGINATOR_FACTORY, PaginatorFactory.class);
+		final PaginationConfig config = BeanLocator.getPrototypeBean(ContextIdNames.PAGINATION_CONFIG, PaginationConfig.class);
 		config.setObjectId(((ChangeSet) getModel()).getGuid());
 		config.setPageSize(getPageSize());
 		config.setSortingFields(new DirectedSortingField(defaultSortingField, defaultSortingDirection));
@@ -238,15 +238,6 @@ public class ChangeSetEditorObjectsSection extends AbstractPolicyAwareEditorPage
 		if (statePolicy != null) {
 			applyStatePolicy(statePolicy);
 		}
-	}
-
-	/**
-	 * @param beanName the bean name
-	 * @param <T> the bean type
-	 * @return the bean instance
-	 */
-	<T> T getBean(final String beanName) {
-		return ServiceLocator.getService(beanName);
 	}
 
 	private int getPageSize() {
@@ -282,8 +273,8 @@ public class ChangeSetEditorObjectsSection extends AbstractPolicyAwareEditorPage
 		final ChangeSetLoadTuner noMembersLoadTuner = getChangeSetLoadTuner();
 		noMembersLoadTuner.setLoadingMemberObjects(false);
 
-		return ((ChangeSetManagementService) getBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE)).findByCriteria(
-				changeSetSearchCriteria, noMembersLoadTuner);
+		return BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class)
+				.findByCriteria(changeSetSearchCriteria, noMembersLoadTuner);
 	}
 
 	private void moveObjectsToChangeSet() {
@@ -332,8 +323,8 @@ public class ChangeSetEditorObjectsSection extends AbstractPolicyAwareEditorPage
 
 				// refresh the action delegate
 				ChangeSetEventService.getInstance().fireChangeSetModificationEvent(new ItemChangeEvent<ChangeSet>(this, targetChangeSet));
-				final ChangeSetManagementService changeSetManagementService = ServiceLocator.getService(
-						ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+				final ChangeSetManagementService changeSetManagementService = BeanLocator
+						.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 
 				final ChangeSetLoadTuner allMembersLoadTuner = getChangeSetLoadTuner();
 				allMembersLoadTuner.setLoadingMemberObjects(true);
@@ -379,8 +370,8 @@ public class ChangeSetEditorObjectsSection extends AbstractPolicyAwareEditorPage
 			allMembersLoadTuner.setLoadingMemberObjects(true);
 			allMembersLoadTuner.setLoadingMemberObjectsMetadata(true);
 
-			final ChangeSetManagementService changeSetManagementService = 
-				ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+			final ChangeSetManagementService changeSetManagementService =
+					BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 			ChangeSet changeSet = changeSetManagementService.get(originChangeSet.getGuid(), allMembersLoadTuner);
 			
 			for (ChangeSetMember changeSetMembers : changeSet.getChangeSetMembers()) {
@@ -395,7 +386,7 @@ public class ChangeSetEditorObjectsSection extends AbstractPolicyAwareEditorPage
 	}
 
 	private ChangeSetLoadTuner getChangeSetLoadTuner() {
-		return getBean(ContextIdNames.CHANGESET_LOAD_TUNER);
+		return BeanLocator.getPrototypeBean(ContextIdNames.CHANGESET_LOAD_TUNER, ChangeSetLoadTuner.class);
 	}
 
 	@Override

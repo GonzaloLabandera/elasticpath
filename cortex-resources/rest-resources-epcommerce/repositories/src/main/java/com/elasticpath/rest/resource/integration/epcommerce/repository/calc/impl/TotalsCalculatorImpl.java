@@ -16,10 +16,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.money.Money;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.TotalsCalculator;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
@@ -63,42 +59,28 @@ public class TotalsCalculatorImpl implements TotalsCalculator {
 
 	@Override
 	public Single<Money> calculateTotalForShoppingCart(final String storeCode, final String shoppingCartGuid) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(storeCode, shoppingCartGuid, BY_CART_GUID)
-				.flatMap(pricingSnapshotRepository::getShoppingCartPricingSnapshotSingle)
+		return cartOrderRepository.getEnrichedShoppingCart(storeCode, shoppingCartGuid, BY_CART_GUID)
+				.flatMap(pricingSnapshotRepository::getShoppingCartPricingSnapshot)
 				.map(ShoppingCartPricingSnapshot::getSubtotalMoney);
 	}
 
 	@Override
 	public Single<Money> calculateTotalForCartOrder(final String storeCode, final String cartOrderGuid) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(storeCode, cartOrderGuid, BY_ORDER_GUID)
+		return cartOrderRepository.getEnrichedShoppingCart(storeCode, cartOrderGuid, BY_ORDER_GUID)
 				.flatMap(pricingSnapshotRepository::getShoppingCartTaxSnapshot)
 				.map(ShoppingCartTaxSnapshot::getTotalMoney);
 	}
 
 	@Override
-	public ExecutionResult<Money> calculateSubTotalForCartOrder(final String storeCode, final String cartOrderGuid) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				final ShoppingCart shoppingCart = Assign.ifSuccessful(
-						cartOrderRepository.getEnrichedShoppingCart(storeCode, cartOrderGuid, BY_ORDER_GUID));
-				final ShoppingCartPricingSnapshot pricingSnapshot = Assign.ifSuccessful(
-						pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart));
-
-				return ExecutionResultFactory.createReadOK(pricingSnapshot.getSubtotalMoney());
-			}
-		}.execute();
-	}
-
-	@Override
-	public Single<Money> calculateSubTotalForCartOrderSingle(final String storeCode, final String cartOrderGuid) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(storeCode, cartOrderGuid, BY_ORDER_GUID)
-				.flatMap(pricingSnapshotRepository::getShoppingCartPricingSnapshotSingle)
+	public Single<Money> calculateSubTotalForCartOrder(final String storeCode, final String cartOrderGuid) {
+		return cartOrderRepository.getEnrichedShoppingCart(storeCode, cartOrderGuid, BY_ORDER_GUID)
+				.flatMap(pricingSnapshotRepository::getShoppingCartPricingSnapshot)
 				.map(ShoppingCartPricingSnapshot::getSubtotalMoney);
 	}
 
 	@Override
 	public Single<Money> calculateTotalForLineItem(final String storeCode, final String shoppingCartGuid, final String cartItemGuid) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(storeCode, shoppingCartGuid, BY_CART_GUID)
+		return cartOrderRepository.getEnrichedShoppingCart(storeCode, shoppingCartGuid, BY_CART_GUID)
 				.flatMap(shoppingCart -> getLineItemTotalFromShoppingCart(cartItemGuid, shoppingCart));
 	}
 
@@ -110,7 +92,7 @@ public class TotalsCalculatorImpl implements TotalsCalculator {
 	 * @return the line item total
 	 */
 	protected Single<Money> getLineItemTotalFromShoppingCart(final String cartItemGuid, final ShoppingCart shoppingCart) {
-		return pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)
+		return pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart)
 				.map(shoppingCartPricingSnapshot ->
 						getLineItemTotalFromCartPricingSnapshot(cartItemGuid, shoppingCart, shoppingCartPricingSnapshot));
 	}

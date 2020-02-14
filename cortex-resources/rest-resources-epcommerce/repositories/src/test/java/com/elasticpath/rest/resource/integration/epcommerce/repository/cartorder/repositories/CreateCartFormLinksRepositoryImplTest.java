@@ -58,7 +58,7 @@ public class CreateCartFormLinksRepositoryImplTest {
 		Shopper shopper = mock(Shopper.class);
 
 		when(customerSession.getShopper()).thenReturn(shopper);
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(
+		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(
 				Single.just(customerSession));
 		when(strategy.supportsCreate(subject, shopper, SCOPE)).thenReturn(true);
 		CartsIdentifier cartsIdentifier = CartsIdentifier.builder()
@@ -81,7 +81,7 @@ public class CreateCartFormLinksRepositoryImplTest {
 		Shopper shopper = mock(Shopper.class);
 
 		when(customerSession.getShopper()).thenReturn(shopper);
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(
+		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(
 				Single.just(customerSession));
 
 		when(strategy.supportsCreate(subject, shopper, SCOPE)).thenReturn(false);

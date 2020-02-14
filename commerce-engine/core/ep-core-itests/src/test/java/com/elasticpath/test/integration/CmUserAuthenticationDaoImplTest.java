@@ -86,7 +86,7 @@ public class CmUserAuthenticationDaoImplTest extends BasicSpringContextTest {
 	 * Create a new {@link CmUser} object with required attributes set.
 	 */
 	private CmUser getNewCmUser(final String userName, final String email, final String password) {
-		CmUser cmUser = getBeanFactory().getBean(ContextIdNames.CMUSER);
+		CmUser cmUser = getBeanFactory().getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
 
 		cmUser.setClearTextPassword(password);
 		cmUser.setConfirmClearTextPassword(password);

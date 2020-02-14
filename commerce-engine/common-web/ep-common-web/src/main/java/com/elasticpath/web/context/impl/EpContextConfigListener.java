@@ -58,7 +58,7 @@ public class EpContextConfigListener implements ServletContextListener {
 			doElasticPathConfig(webApplicationContext, servletContext);
 
 			servletContext.setAttribute(WebConstants.GEOGRAPHY_HELPER,
-					new VelocityGeographyHelperImpl(this.<Geography>getBean(ContextIdNames.GEOGRAPHY)));
+					new VelocityGeographyHelperImpl(beanFactory.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class)));
 
 		} catch (final Exception e) {
 			LOG.error("Caught an exception.", e);
@@ -74,23 +74,11 @@ public class EpContextConfigListener implements ServletContextListener {
 	 */
 	protected void doElasticPathConfig(final WebApplicationContext webApplicationContext, final ServletContext servletContext) {
 		beanFactory = (BeanFactory) webApplicationContext.getBean("coreBeanFactory");
-		ElasticPath elasticPath = getBean(ContextIdNames.ELASTICPATH);
+		ElasticPath elasticPath = beanFactory.getSingletonBean(ContextIdNames.ELASTICPATH, ElasticPath.class);
 		if (elasticPath != null) {
-
 			// set the database server name in elasticPath
 			getDatabaseMetaData();
 		}
-
-	}
-
-	/**
-	 * Gets the given bean.
-	 * @param <T> generic to ease assignment
-	 * @param name the name of the bean
-	 * @return the given bean
-	 */
-	protected <T> T getBean(final String name) {
-		return beanFactory.getBean(name);
 	}
 
 	@SuppressWarnings("PMD.DoNotThrowExceptionInFinally")
@@ -99,7 +87,7 @@ public class EpContextConfigListener implements ServletContextListener {
 
 		Connection connection = null;
 		try {
-			PersistenceEngine engine = getBean(ContextIdNames.PERSISTENCE_ENGINE);
+			PersistenceEngine engine = beanFactory.getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, PersistenceEngine.class);
 			connection = engine.getConnection();
 			databaseMetaData = connection.getMetaData();
 

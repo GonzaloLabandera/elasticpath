@@ -10,10 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 
 import org.apache.openjpa.persistence.OpenJPAPersistence;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl;
 import com.elasticpath.persistence.openjpa.impl.JpaSessionFactoryImpl;
-import com.elasticpath.test.support.DataSourceJndiBinderImpl;
 
 /**
  * Test the Persistence Engine JPA Caching methods act as expected.

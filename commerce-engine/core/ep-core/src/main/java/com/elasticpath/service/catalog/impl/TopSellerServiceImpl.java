@@ -285,7 +285,7 @@ public class TopSellerServiceImpl extends AbstractEpPersistenceServiceImpl imple
 			if (topSellerCategory.getProductUids().contains(productUid)) {
 				topSellerCategory.getTopSellerProducts().get(productUid).setSalesCount(salesCount);
 			} else {
-				TopSellerProduct topSellerProduct = beanFactory.getBean(ContextIdNames.TOP_SELLER_PRODUCT);
+				TopSellerProduct topSellerProduct = beanFactory.getPrototypeBean(ContextIdNames.TOP_SELLER_PRODUCT, TopSellerProduct.class);
 				topSellerProduct.setProductUid(productUid);
 				topSellerProduct.setSalesCount(salesCount);
 				topSellerCategory.getTopSellerProducts().put(topSellerProduct.getProductUid(), topSellerProduct);				
@@ -303,7 +303,7 @@ public class TopSellerServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	TopSeller loadTopSellerCategory(final Long categoryUid) {
 		final List<TopSeller> result = getPersistenceEngine().retrieveByNamedQuery("TOP_SELLER_SELECT_BY_CATEGORY_UID", categoryUid);
 		if (result.isEmpty()) {
-			TopSeller topSeller = beanFactory.getBean(ContextIdNames.TOP_SELLER);
+			TopSeller topSeller = beanFactory.getPrototypeBean(ContextIdNames.TOP_SELLER, TopSeller.class);
 			topSeller.setCategoryUid(categoryUid);
 			return topSeller;
 		}

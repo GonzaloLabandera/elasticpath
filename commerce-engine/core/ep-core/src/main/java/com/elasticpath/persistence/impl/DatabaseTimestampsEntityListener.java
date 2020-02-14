@@ -69,7 +69,7 @@ public class DatabaseTimestampsEntityListener extends AbstractLifecycleListener 
 	 */
 	protected TimeService getTimeService() {
 		if (timeService == null) {
-			timeService = beanFactory.getBean(ContextIdNames.TIME_SERVICE);
+			timeService = beanFactory.getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		}
 		return timeService;
 	}

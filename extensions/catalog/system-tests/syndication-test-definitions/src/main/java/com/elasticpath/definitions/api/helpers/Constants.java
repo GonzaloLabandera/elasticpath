@@ -35,4 +35,9 @@ public class Constants {
 	 * Etag header name.
 	 */
 	public static final String ETAG = "ETag";
+
+	/**
+	 * API sleep time.
+	 */
+	public static final long API_SLEEP_TIME = 2000;
 }

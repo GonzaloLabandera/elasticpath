@@ -1,4 +1,4 @@
-@regressionTest @dataPolicy
+@regressionTest @dataPolicy 
 Feature: Manage Data Policy
 
   Background:
@@ -12,7 +12,7 @@ Feature: Manage Data Policy
       | state                | Draft               |
       | data points          | Customer first name |
       | segment              | uk_dp               |
-    When I edit newly created Data Policy
+    When I edit recent Data Policy
     And I update Data Policy State to Active
     Then Data Policy State is Active
 
@@ -24,7 +24,7 @@ Feature: Manage Data Policy
       | state                | Draft               |
       | data points          | Customer first name |
       | segment              | uk_dp               |
-    When I Disable newly created Data Policy
+    When I click disable data policy button
     Then Data Policy State is Disabled
     And Data Policy End Date is set to current time
     And the following data policy fields are disabled

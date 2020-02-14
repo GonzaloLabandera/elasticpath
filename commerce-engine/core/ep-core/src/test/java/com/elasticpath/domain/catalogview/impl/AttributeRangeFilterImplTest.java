@@ -4,7 +4,7 @@
 package com.elasticpath.domain.catalogview.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -29,6 +29,8 @@ import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.domain.attribute.AttributeType;
+import com.elasticpath.domain.attribute.AttributeUsage;
+import com.elasticpath.domain.attribute.AttributeValueWithType;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.attribute.impl.TransientAttributeValueImpl;
@@ -93,10 +95,12 @@ public class AttributeRangeFilterImplTest {
 
 		attributeService = context.mock(AttributeService.class);
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_SERVICE, attributeService);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER, AttributeRangeFilterImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class, attributeService);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, AttributeUsageImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER, AttributeRangeFilter.class,
+				AttributeRangeFilterImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 
 		context.checking(new Expectations() {
 			{
@@ -216,7 +220,8 @@ public class AttributeRangeFilterImplTest {
 		assertEquals(0, rangeFilter.getChildren().size());
 
 		AttributeRangeFilter childRangeFilter = getRangeFilter();
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		childRangeFilter.initialize(SeoConstants.ATTRIBUTE_RANGE_FILTER_PREFIX + "A00001_2.0_2.3");
 		this.rangeFilter.addChild(childRangeFilter);
 		assertTrue(rangeFilter.getChildren().contains(childRangeFilter));
@@ -225,7 +230,7 @@ public class AttributeRangeFilterImplTest {
 	}
 
 	private AttributeRangeFilter getRangeFilter() {
-		return beanFactory.getBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER);
+		return beanFactory.getPrototypeBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER, AttributeRangeFilter.class);
 	}
 
 	/**
@@ -234,7 +239,8 @@ public class AttributeRangeFilterImplTest {
 	@Test
 	public void testEquals() {
 		final String testId = SeoConstants.ATTRIBUTE_RANGE_FILTER_PREFIX + BETWEEN_2_AND_3;
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_VALUE, TransientAttributeValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_VALUE, AttributeValueWithType.class,
+				TransientAttributeValueImpl.class);
 		this.rangeFilter.initialize(testId);
 
 		final AttributeRangeFilter anotherFilter = getRangeFilter();
@@ -242,7 +248,7 @@ public class AttributeRangeFilterImplTest {
 
 		assertEquals(rangeFilter, anotherFilter);
 		assertEquals(rangeFilter.hashCode(), anotherFilter.hashCode());
-		assertFalse(rangeFilter.equals(new Object()));
+		assertNotEquals(new Object(), rangeFilter);
 	}
 
 	/**

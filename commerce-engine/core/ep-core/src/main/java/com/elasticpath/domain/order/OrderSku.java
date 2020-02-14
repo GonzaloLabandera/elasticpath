@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.order;
 
@@ -75,7 +75,7 @@ public interface OrderSku extends ShoppingItem, ListenableObject {
 	 * Get the unit price for this sku.
 	 * 
 	 * @return the price
-	 * @deprecated Call getUnitPriceCalc().getAmount() instead.
+	 * @deprecated use {@link com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot#getPriceCalc()}
 	 */
 	@Deprecated
 	BigDecimal getUnitPrice();
@@ -84,7 +84,7 @@ public interface OrderSku extends ShoppingItem, ListenableObject {
 	 * Get the unit price as a <code>Money</code> object.
 	 * 
 	 * @return a <code>Money</code> object representing the unit price
-	 * @deprecated Call getUnitPriceCalc().getMoney() instead.
+	 * @deprecated use {@link com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot#getPriceCalc()}
 	 */
 	@Deprecated
 	Money getUnitPriceMoney();
@@ -311,7 +311,7 @@ public interface OrderSku extends ShoppingItem, ListenableObject {
 	OrderSku getRoot();
 	
 	/**
-	 * Removes {@link ShoppingItem} item from this {@link ShoppingItem}.
+	 * Removes {@link ShoppingItem} item from this {@link ShoppingItem} and the link to it's parent.
 	 * 
 	 * @param dependentItem {@link ShoppingItem}
 	 */

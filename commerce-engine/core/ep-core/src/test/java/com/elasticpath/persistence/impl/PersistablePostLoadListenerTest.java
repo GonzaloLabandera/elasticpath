@@ -41,7 +41,8 @@ public class PersistablePostLoadListenerTest {
 	}
 
 	protected void givenBeanFactoryGetFooIsSuccessful() {
-		bfef.allowingBeanFactoryGetBean(FOO_SERVICE, foo);
+		bfef.allowingBeanFactoryGetSingletonBean(FOO_SERVICE, PersistablePostLoadListener.class, foo);
+		bfef.allowingBeanFactoryGetSingletonBean(FOO_SERVICE, PersistablePostLoadStrategy.class, foo);
 	}
 
 	@After
@@ -83,15 +84,15 @@ public class PersistablePostLoadListenerTest {
 	public void verifyThatListenerCanDelayLazyLoadingUntilSpringIsReady() throws Exception {
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(FOO_SERVICE);
+				oneOf(beanFactory).getSingletonBean(FOO_SERVICE, PersistablePostLoadStrategy.class);
 				will(throwException(
 						new BeanCreationException("This bean cannot be instantiated because spring is still in the middle of building the context")));
 
-				oneOf(beanFactory).getBean(FOO_SERVICE);
+				oneOf(beanFactory).getSingletonBean(FOO_SERVICE, PersistablePostLoadStrategy.class);
 				will(throwException(
 						new BeanCreationException("This bean cannot be instantiated because spring is still in the middle of building the context")));
 
-				oneOf(beanFactory).getBean(FOO_SERVICE);
+				oneOf(beanFactory).getSingletonBean(FOO_SERVICE, PersistablePostLoadStrategy.class);
 				will(returnValue(foo));
 
 				allowing(foo).canProcess(persistable);

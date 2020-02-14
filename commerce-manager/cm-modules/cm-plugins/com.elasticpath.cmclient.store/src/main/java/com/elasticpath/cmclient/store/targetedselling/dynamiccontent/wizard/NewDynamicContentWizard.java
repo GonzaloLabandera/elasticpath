@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.store.targetedselling.dynamiccontent.wizard;
 
 import org.eclipse.osgi.util.NLS;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
 import com.elasticpath.cmclient.core.event.EventType;
@@ -29,9 +29,10 @@ public class NewDynamicContentWizard extends AbstractEPCampaignWizard<DynamicCon
 
 	private static final String PARAMETER_PAGE_NAME = "NewDynamicContentWizardParametersPage"; //$NON-NLS-1$
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	private DynamicContent model;
-	private final DynamicContentService dynamicContentService = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_SERVICE);
+	private final DynamicContentService dynamicContentService = BeanLocator
+			.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class);
 
 	private boolean editMode;
 
@@ -42,7 +43,7 @@ public class NewDynamicContentWizard extends AbstractEPCampaignWizard<DynamicCon
 		super(TargetedSellingMessages.get().NewDynamicContentCreateWizard_Title,
 				null,
 				TargetedSellingImageRegistry.getImage(TargetedSellingImageRegistry.IMAGE_DYNAMIC_CONTENT_CREATE_ACTION));
-		model = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT);
+		model = BeanLocator.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 		setNeedsProgressMonitor(true);
 	}
 

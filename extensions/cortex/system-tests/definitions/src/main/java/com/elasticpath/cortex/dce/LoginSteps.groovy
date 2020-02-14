@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortex.dce
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
@@ -8,6 +12,7 @@ import cucumber.api.java.en.Given
 import cucumber.api.java.en.Then
 
 import com.elasticpath.cortexTestObjects.Cart
+import com.elasticpath.cortexTestObjects.Payment
 
 class LoginSteps {
 
@@ -23,8 +28,9 @@ class LoginSteps {
 	}
 
 	@Given('^I login as (?:a|another) registered shopper$')
-	static void loginAsRegisteredUser() {
+	static void loginAsRegisteredPayableUser() {
 		client.authAsRegisteredUser()
+		Payment.createProfilePaymentInstrumentWithDefaultName()
 		Cart.clearCart()
 	}
 
@@ -133,6 +139,13 @@ class LoginSteps {
 	@Then('^I set (.+) header (.+)$')
 	static void setHeaderValue(String header, String value) {
 		Map<String, String> headers = new HashMap<String, String>()
+		headers.put(header, value)
+		client.setHeaders(headers)
+	}
+
+	@Then('^I add (.+) header (.+)$')
+	static void addHeaderValue(String header, String value) {
+		def headers = client.getHeaders()
 		headers.put(header, value)
 		client.setHeaders(headers)
 	}

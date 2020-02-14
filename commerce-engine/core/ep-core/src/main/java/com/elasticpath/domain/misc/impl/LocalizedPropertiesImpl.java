@@ -103,7 +103,7 @@ public class LocalizedPropertiesImpl extends AbstractEpDomainImpl implements Loc
 	 * @return an instance of the bean specified by {@link #setLocalizedPropertiesMap(Map, String)}
 	 */
 	protected LocalizedPropertyValue getNewLocalizedPropertyValue() {
-		return getBean(localizedPropertyValueBean);
+		return getPrototypeBean(localizedPropertyValueBean, LocalizedPropertyValue.class);
 	}
 
 	@Override

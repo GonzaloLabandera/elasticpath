@@ -3,9 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.order.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.order.impl.OrderRepositoryImpl.PURCHASE_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -16,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -27,8 +27,10 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
-import com.elasticpath.rest.ResourceStatus;
-import com.elasticpath.rest.command.ExecutionResult;
+import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
@@ -47,36 +49,47 @@ public class OrderRepositoryImplTest {
 	private OrderService orderService;
 	@Mock
 	private BeanFactory coreBeanFactory;
+	@Mock
+	private CartOrderRepository cartOrderRepository;
+	@Mock
+	private ProductSkuRepository productSkuRepository;
+	@InjectMocks
+	private ReactiveAdapterImpl reactiveAdapter;
 	@InjectMocks
 	private OrderRepositoryImpl orderRepository;
 
+	@Before
+	public void initialize() {
+		orderRepository = new OrderRepositoryImpl(orderService, coreBeanFactory, reactiveAdapter, cartOrderRepository, productSkuRepository);
+	}
 
 	@Test
 	public void testFindByGuid() {
 		Order order = mock(Order.class);
 		when(orderService.findOrderByOrderNumber(ORDER_GUID)).thenReturn(order);
 
-		ExecutionResult<Order> result = orderRepository.findByGuid(STORE_CODE, ORDER_GUID);
-
-		assertTrue("This should be a successful operation.", result.isSuccessful());
-		assertEquals("The resulting data should contain the expected order.", order, result.getData());
+		orderRepository.findByGuid(STORE_CODE, ORDER_GUID)
+				.test()
+				.assertNoErrors()
+				.assertValue(order);
 	}
 
 	@Test
 	public void testFindByGuidWithoutFindingAMatch() {
 		when(orderService.findOrderByOrderNumber(ORDER_GUID)).thenReturn(null);
 
-		ExecutionResult<Order> result = orderRepository.findByGuid(STORE_CODE, ORDER_GUID);
-
-		assertTrue("This should result in a failed operation.", result.isFailure());
-		assertEquals("The result status should be as expected.", ResourceStatus.NOT_FOUND, result.getResourceStatus());
+		orderRepository.findByGuid(STORE_CODE, ORDER_GUID)
+				.test()
+				.assertError(ResourceOperationFailure.notFound(String.format(PURCHASE_NOT_FOUND, ORDER_GUID, STORE_CODE)))
+				.assertNoValues();
 	}
 
 	@Test
 	public void testGetOrdersForProfileWhenOneFound() {
 		OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
-		shouldGetBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, new CustomerSearchCriteria());
-		shouldGetBean(ContextIdNames.ORDER_SEARCH_CRITERIA, orderSearchCriteria);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class))
+				.thenReturn(new CustomerSearchCriteria());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class)).thenReturn(orderSearchCriteria);
 		shouldFindOrderNumbersBySearchCriteria(orderSearchCriteria, Collections.singletonList(ORDER_GUID));
 
 		orderRepository.findOrderIdsByCustomerGuid(STORE_CODE, USER_GUID)
@@ -87,8 +100,9 @@ public class OrderRepositoryImplTest {
 	@Test
 	public void testGetOrderForProfileWhenOneFound() {
 		OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
-		shouldGetBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, new CustomerSearchCriteria());
-		shouldGetBean(ContextIdNames.ORDER_SEARCH_CRITERIA, orderSearchCriteria);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class))
+				.thenReturn(new CustomerSearchCriteria());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class)).thenReturn(orderSearchCriteria);
 		shouldFindOrderNumberBySearchCriteria(orderSearchCriteria, Collections.singletonList(ORDER_GUID));
 
 		orderRepository.findByGuidAndCustomerGuid(STORE_CODE, ORDER_GUID, USER_GUID)
@@ -101,8 +115,9 @@ public class OrderRepositoryImplTest {
 	public void testGetOrdersForProfileWhenMultipleFound() {
 		List<String> orderGuids = Arrays.asList(ORDER_GUID, "guid2");
 		OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
-		shouldGetBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, new CustomerSearchCriteria());
-		shouldGetBean(ContextIdNames.ORDER_SEARCH_CRITERIA, orderSearchCriteria);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class))
+				.thenReturn(new CustomerSearchCriteria());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class)).thenReturn(orderSearchCriteria);
 		shouldFindOrderNumbersBySearchCriteria(orderSearchCriteria, orderGuids);
 
 		orderRepository.findOrderIdsByCustomerGuid(STORE_CODE, USER_GUID)
@@ -113,8 +128,9 @@ public class OrderRepositoryImplTest {
 	@Test
 	public void testGetOrdersForProfileWhenNoOrdersFound() {
 		OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
-		shouldGetBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, new CustomerSearchCriteria());
-		shouldGetBean(ContextIdNames.ORDER_SEARCH_CRITERIA, orderSearchCriteria);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class))
+				.thenReturn(new CustomerSearchCriteria());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class)).thenReturn(orderSearchCriteria);
 		shouldFindOrderNumbersBySearchCriteria(orderSearchCriteria, Collections.emptyList());
 
 		orderRepository.findOrderIdsByCustomerGuid(STORE_CODE, USER_GUID)
@@ -126,8 +142,9 @@ public class OrderRepositoryImplTest {
 	@Test
 	public void testGetOrderForProfileWhenNoOrdersFound() {
 		OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
-		shouldGetBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, new CustomerSearchCriteria());
-		shouldGetBean(ContextIdNames.ORDER_SEARCH_CRITERIA, orderSearchCriteria);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA, CustomerSearchCriteria.class))
+				.thenReturn(new CustomerSearchCriteria());
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class)).thenReturn(orderSearchCriteria);
 		shouldFindOrderNumberBySearchCriteria(orderSearchCriteria, Collections.emptyList());
 
 		orderRepository.findByGuidAndCustomerGuid(STORE_CODE, ORDER_GUID, USER_GUID)
@@ -189,10 +206,6 @@ public class OrderRepositoryImplTest {
 
 	private void shouldFindOrderNumberBySearchCriteria(final OrderSearchCriteria orderSearchCriteria, final List<String> result) {
 		when(orderService.findOrderNumbersBySearchCriteria(orderSearchCriteria, 0, 1)).thenReturn(result);
-	}
-
-	private void shouldGetBean(final String beanName, final Object bean) {
-		when(coreBeanFactory.getBean(beanName)).thenReturn(bean);
 	}
 
 }

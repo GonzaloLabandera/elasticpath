@@ -13,7 +13,6 @@ import java.util.Set;
 
 import com.elasticpath.domain.EpDomain;
 import com.elasticpath.domain.ShoppingItemContainer;
-import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.StoreObject;
@@ -36,20 +35,6 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 * @return the guid.
 	 */
 	String getGuid();
-
-	/**
-	 * Get the set of applied gift certificates.
-	 *
-	 * @return the giftCertificateRedeems
-	 */
-	Set<GiftCertificate> getAppliedGiftCertificates();
-
-	/**
-	 * Adds the given gift certificate to the set which will be redeemed / applied to this shopping cart.
-	 *
-	 * @param giftCertificate the gift certificate.
-	 */
-	void applyGiftCertificate(GiftCertificate giftCertificate);
 
 	/**
 	 * Return the <code>CustomerSession</code>. instance. Customer sessions track information about sessions where the customer may not be logged

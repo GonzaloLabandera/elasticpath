@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
@@ -49,7 +50,7 @@ public class TaxCategoryImplTest {
 	private TaxCategoryImpl getNewTaxCategory() {
 		context.checking(new Expectations() {
 			{
-				allowing(elasticPath).getBean(with(any(String.class)));
+				allowing(elasticPath).getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 				will(returnValue(new LocalizedPropertiesImpl()));
 			}
 		});

@@ -1,10 +1,9 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2007
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cmclient.fulfillment.editors.order;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -15,7 +14,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
@@ -27,7 +26,7 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.editors.actions.CreateExchangeContributionAction;
 import com.elasticpath.cmclient.fulfillment.editors.actions.CreateReturnContributionAction;
-import com.elasticpath.cmclient.fulfillment.wizards.ExchangeWizard;
+import com.elasticpath.cmclient.fulfillment.wizards.exchange.ExchangeWizard;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
@@ -145,7 +144,7 @@ public class OrderDetailsPhysicalShipmentSubSectionReturnAndExchange implements 
 				CreateExchangeContributionAction createExchangeAction = new CreateExchangeContributionAction(FulfillmentMessages.EMPTY_STRING,
 						editor, orderShipment);
 				// new order(Exchange) can be created only for the customer with status ACTIVE. see MSC-5339
-				int customerStatus = ((CustomerService) ServiceLocator.getService(ContextIdNames.CUSTOMER_SERVICE))
+				int customerStatus = ((CustomerService) BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class))
 						.findCustomerStatusByUid(getOrder().getCustomer().getUidPk());
 				if (customerStatus == Customer.STATUS_ACTIVE) {
 					createExchangeAction.run();

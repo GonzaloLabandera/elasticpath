@@ -120,11 +120,12 @@ public class OAuth2AccessTokenRepositoryImplTest {
 	@Test
 	public void shouldCreateOAuth2AccessToken() {
 		OAuth2AccessTokenMemento oAuth2AccessTokenMemento = mock(OAuth2AccessTokenMemento.class);
-		when(coreBeanFactory.getBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO)).thenReturn(oAuth2AccessTokenMemento);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO, OAuth2AccessTokenMemento.class))
+				.thenReturn(oAuth2AccessTokenMemento);
 
 		ExecutionResult<OAuth2AccessTokenMemento> executionResult = oAuth2AccessTokenRepository.createOAuth2AccessToken();
 
-		verify(coreBeanFactory).getBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO);
+		verify(coreBeanFactory).getPrototypeBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO, OAuth2AccessTokenMemento.class);
 		assertExecutionResult(executionResult).
 				isSuccessful().
 				data(oAuth2AccessTokenMemento);
@@ -132,11 +133,12 @@ public class OAuth2AccessTokenRepositoryImplTest {
 
 	@Test
 	public void shouldNotCreateOAuth2AccessTokenOnRuntimeException() {
-		doThrow(RuntimeException.class).when(coreBeanFactory).getBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO);
+		doThrow(RuntimeException.class).when(coreBeanFactory).getPrototypeBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO,
+				OAuth2AccessTokenMemento.class);
 
 		ExecutionResult<OAuth2AccessTokenMemento> executionResult = oAuth2AccessTokenRepository.createOAuth2AccessToken();
 
-		verify(coreBeanFactory).getBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO);
+		verify(coreBeanFactory).getPrototypeBean(ContextIdNames.OAUTH2_ACCESS_TOKEN_MEMENTO, OAuth2AccessTokenMemento.class);
 		assertExecutionResult(executionResult).
 				isFailure().
 				resourceStatus(ResourceStatus.SERVER_ERROR);

@@ -102,9 +102,9 @@ public class StoreDTO implements Dto {
 	@XmlElement(name = "jurisdiction")
 	private List<String> taxJurisdictions = new ArrayList<>();
 
-	@XmlElementWrapper(name = "payment_gateways")
-	@XmlElement(name = "gateway")
-	private List<String> paymentGateways = new ArrayList<>();
+	@XmlElementWrapper(name = "payment_provider_configurations")
+	@XmlElement(name = "payment_provider_configuration_guid")
+	private List<String> paymentProviderConfigGuids = new ArrayList<>();
 
 	@XmlElementWrapper(name = "credit_card_types")
 	@XmlElement(name = "type")
@@ -274,12 +274,12 @@ public class StoreDTO implements Dto {
 		this.taxJurisdictions = taxJurisdictions;
 	}
 
-	public List<String> getPaymentGateways() {
-		return paymentGateways;
+	public List<String> getPaymentProviderPluginConfigGuids() {
+		return paymentProviderConfigGuids;
 	}
 
-	public void setPaymentGateways(final List<String> gateway) {
-		this.paymentGateways = gateway;
+	public void setPaymentProviderConfigGuids(final List<String> paymentProviderConfigGuids) {
+		this.paymentProviderConfigGuids = paymentProviderConfigGuids;
 	}
 
 	public List<String> getCreditCardTypes() {

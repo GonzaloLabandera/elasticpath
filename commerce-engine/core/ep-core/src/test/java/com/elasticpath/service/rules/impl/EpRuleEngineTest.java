@@ -18,14 +18,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.junit.Test;
-
 import org.drools.core.SessionConfiguration;
 import org.jmock.Expectations;
+import org.junit.Test;
 
 import com.elasticpath.cache.SimpleTimeoutCache;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
+import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Catalog;
@@ -35,6 +36,8 @@ import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.discounts.DiscountItemContainer;
+import com.elasticpath.domain.discounts.ShoppingCartDiscountItemContainer;
+import com.elasticpath.domain.discounts.TotallingApplier;
 import com.elasticpath.domain.discounts.impl.LimitedTotallingApplierImpl;
 import com.elasticpath.domain.discounts.impl.ShoppingCartDiscountItemContainerImpl;
 import com.elasticpath.domain.rules.EpRuleBase;
@@ -68,15 +71,19 @@ import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.money.Money;
-import com.elasticpath.money.StandardMoneyFormatter;
+import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.rules.EpRuleEngine;
 import com.elasticpath.service.rules.PromotionRuleDelegate;
+import com.elasticpath.service.rules.PromotionRuleExceptions;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.RuleSetService;
+import com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator;
 import com.elasticpath.service.store.StoreService;
+import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
 import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
+import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.impl.SettingsServiceImpl;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.service.ConditionEvaluatorService;
@@ -123,21 +130,20 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 		final LimitedTotallingApplierImpl limitedTotallingApplier = new LimitedTotallingApplierImpl();
 		limitedTotallingApplier.setProductSkuLookup(getProductSkuLookup());
 
-		stubGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
-		stubGetBean(ContextIdNames.EP_RULE_BASE, EpRuleBaseImpl.class);
-		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-		stubGetBean(ContextIdNames.PRODUCT_SERVICE, getProductService());
-		stubGetBean(ContextIdNames.SHOPPING_CART_DISCOUNT_ITEM_CONTAINER, discountItemContainer);
-		stubGetBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResultImpl.class);
-		stubGetBean(ContextIdNames.TOTALLING_APPLIER, limitedTotallingApplier);
+		stubGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, AttributeUsageImpl.class);
+		stubGetPrototypeBean(ContextIdNames.EP_RULE_BASE, EpRuleBase.class, EpRuleBaseImpl.class);
+		stubGetSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class, getProductService());
+		stubGetPrototypeBean(ContextIdNames.SHOPPING_CART_DISCOUNT_ITEM_CONTAINER, ShoppingCartDiscountItemContainer.class, discountItemContainer);
+		stubGetPrototypeBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResult.class, TaxCalculationResultImpl.class);
+		stubGetPrototypeBean(ContextIdNames.TOTALLING_APPLIER, TotallingApplier.class, limitedTotallingApplier);
 
 		TaxAddressAdapter adapter = new TaxAddressAdapter();
-		stubGetBean(ContextIdNames.TAX_ADDRESS_ADAPTER, adapter);
+		stubGetSingletonBean(ContextIdNames.TAX_ADDRESS_ADAPTER, TaxAddressAdapter.class, adapter);
 
 		final EpRuleEngine mockRuleEngine = context.mock(EpRuleEngine.class);
-		stubGetBean(ContextIdNames.EP_RULE_ENGINE, mockRuleEngine);
-		stubGetBean(ContextIdNames.UTILITY, new UtilityImpl());
-		stubGetBean("settingsService", new SettingsServiceImpl());
+		stubGetSingletonBean(ContextIdNames.EP_RULE_ENGINE, EpRuleEngine.class, mockRuleEngine);
+		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
+		stubGetSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class, new SettingsServiceImpl());
 		context.checking(new Expectations() {
 			{
 				allowing(mockRuleEngine).fireOrderPromotionRules(with(any(ShoppingCart.class)),
@@ -204,7 +210,7 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 
 		ruleEngine.setRuleService(mockRuleService);
 
-		stubGetBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS, new PromotionRuleExceptionsImpl());
+		stubGetPrototypeBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS, PromotionRuleExceptions.class, new PromotionRuleExceptionsImpl());
 
 		conditionEvaluationService = context.mock(ConditionEvaluatorService.class);
 		ruleEngine.setConditionEvaluatorService(conditionEvaluationService);
@@ -356,7 +362,8 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 
 	private ShoppingCart givenACartWithAShoppingItemSubtotalCalculator() {
 		final ShoppingCartImpl shoppingCart = getShoppingCart();
-		stubGetBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, getShoppingItemSubtotalCalculator());
+		stubGetSingletonBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, ShoppingItemSubtotalCalculator.class,
+				getShoppingItemSubtotalCalculator());
 		final Currency currency = shoppingCart.getCustomerSession().getCurrency();
 		context.checking(new Expectations() {
 			{

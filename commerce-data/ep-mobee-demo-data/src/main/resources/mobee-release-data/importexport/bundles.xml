@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bundles>
+<bundle code="bundleWithMultiplePhysicalItems">
+    <constituents>
+        <constituent>
+            <guid>a96fea9f-5b48-43c6-8c83-521512d7eeac</guid>
+            <code type="product">physicalProduct</code>
+            <quantity>1</quantity>
+            <ordering>0</ordering>
+            <price_adjustments/>
+        </constituent>
+        <constituent>
+            <guid>8817ac8d-b779-48ad-b7d4-87c36bc45cf9</guid>
+            <code type="product">handsfree_shippable</code>
+            <quantity>1</quantity>
+            <ordering>1</ordering>
+            <price_adjustments/>
+        </constituent>
+    </constituents>
+</bundle>
+</bundles>

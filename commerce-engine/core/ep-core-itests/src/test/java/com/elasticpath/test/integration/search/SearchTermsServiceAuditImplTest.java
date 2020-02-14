@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.search.query.SearchTerms;
@@ -29,6 +30,10 @@ public class SearchTermsServiceAuditImplTest extends BasicSpringContextTest {
 
 	@Autowired
 	private SearchTermsServiceImpl searchTermsService;
+	
+	@Autowired
+	@Qualifier("loggingSearchTermsActivityStrategy")
+	private SearchTermsActivityStrategy searchTermsActivityStrategy;
 
 	@Autowired
 	private PersistenceEngine persistenceEngine;
@@ -38,12 +43,11 @@ public class SearchTermsServiceAuditImplTest extends BasicSpringContextTest {
 	 */
 	@Before
 	public void setUp() {
-		SearchTermsActivityStrategy searchTermsActivityStrategy = getBeanFactory().getBean("loggingSearchTermsActivityStrategy");
 		searchTermsService.setSearchTermsActivityStrategy(searchTermsActivityStrategy);
 	}
 
 	private SearchTerms createSearchTerms(final String keywords) {
-		SearchTerms searchTerms = getBeanFactory().getBean(ContextIdNames.SEARCH_TERMS);
+		SearchTerms searchTerms = getBeanFactory().getPrototypeBean(ContextIdNames.SEARCH_TERMS, SearchTerms.class);
 		searchTerms.setKeywords(keywords);
 		return searchTerms;
 	}

@@ -63,7 +63,7 @@ public class SearchTermsServiceImpl implements SearchTermsService {
 	protected SearchTermsMemento createMemento(final SearchTerms searchTerms) {
 		String representation = serializeSearchTerms(searchTerms);
 		SearchTermsId searchTermsId = generateIdentifier(representation);
-		SearchTermsMemento memento = getPrototypeBeanFactory().getBean(ContextIdNames.SEARCH_TERMS_MEMENTO);
+		SearchTermsMemento memento = getPrototypeBeanFactory().getPrototypeBean(ContextIdNames.SEARCH_TERMS_MEMENTO, SearchTermsMemento.class);
 		memento.setSearchTermsRepresentation(representation);
 		memento.setId(searchTermsId);
 		return memento;

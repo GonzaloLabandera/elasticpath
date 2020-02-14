@@ -7,7 +7,7 @@ Feature: Data Policy Validations
   Scenario: Data Policy required field validation
     When I go to Data Policies
     And I Create Data Policy without entering required fields
-    Then I can see validation error messages for the following fields
+    Then I can see validation error messages for the following fields:
       | NameField         |
       | ReferenceKeyField |
       | RetentionPeriod   |

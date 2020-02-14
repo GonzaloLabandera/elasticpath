@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -243,8 +243,7 @@ public class ProductSearchViewTab extends AbstractCatalogSearchViewTab implement
 	 */
 	protected ProductSearchCriteria getModel() {
 		if (this.productSearchCriteria == null) {
-			this.productSearchCriteria = ServiceLocator.getService(
-					ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+			this.productSearchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class);
 		}
 		return this.productSearchCriteria;
 	}

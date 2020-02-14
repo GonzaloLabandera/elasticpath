@@ -413,7 +413,8 @@ public class ImportDataTypeInventoryImpl extends AbstractImportDataTypeImpl {
 	 */
 	@Override
 	public void deleteEntity(final Entity entity) {
-		ProductInventoryManagementService pims = getBean(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE);
+		ProductInventoryManagementService pims = getSingletonBean(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE,
+				ProductInventoryManagementService.class);
 		InventoryDto inventoryDto = pims.assembleDtoFromDomain((Inventory) entity);
 		pims.remove(inventoryDto);
 	}

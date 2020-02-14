@@ -120,7 +120,7 @@ public class WishListImpl extends AbstractShoppingListImpl implements WishList {
 
 	@Override
 	public ShoppingItem addItem(final ShoppingItem item) {
-		ShoppingItem newItem = getBean(ContextIdNames.SHOPPING_ITEM);
+		ShoppingItem newItem = getPrototypeBean(ContextIdNames.SHOPPING_ITEM, ShoppingItem.class);
 		newItem.setSkuGuid(item.getSkuGuid());
 
 		Map<String, String> fields = item.getFields();

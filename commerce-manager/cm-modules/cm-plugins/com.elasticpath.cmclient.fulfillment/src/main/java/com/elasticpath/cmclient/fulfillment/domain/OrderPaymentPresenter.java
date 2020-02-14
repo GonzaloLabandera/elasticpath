@@ -33,22 +33,18 @@ public interface OrderPaymentPresenter {
 	String getDisplayPaymentDetails();
 
 	/**
-	 * @return the Shipment ID string for display purposes. 
-	 */
-	String getDisplayShipmentId();
-	
-	/**
-	 * @return the payment method string for display purposes.
+	 * Get payment method for display. It retrieves payment instrument details based on the payment instrument associated with this Order Payment.
+	 * @return Payment method String for display.
 	 */
 	String getDisplayPaymentMethod();
-	
+
 	/**
 	 * @return the status string for display purposes.
 	 */
 	String getDisplayStatus();
 	
 	/**
-	 * @return the transaction ID for display purposes.
+	 * @return the result of IsOriginalPI in a string format
 	 */
-	String getDisplayTransactionId();
+	String getDisplayIsOriginalPI();
 }

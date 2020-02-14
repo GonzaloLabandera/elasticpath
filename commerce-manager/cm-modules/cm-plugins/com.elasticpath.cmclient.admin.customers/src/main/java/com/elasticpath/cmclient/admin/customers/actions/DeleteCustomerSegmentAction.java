@@ -12,7 +12,7 @@ import com.elasticpath.cmclient.admin.customers.AdminCustomersMessages;
 import com.elasticpath.cmclient.admin.customers.event.CustomerSegmentEventService;
 import com.elasticpath.cmclient.admin.customers.utils.CustomerSegmentUtils;
 import com.elasticpath.cmclient.admin.customers.views.CustomerSegmentListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -44,7 +44,7 @@ public class DeleteCustomerSegmentAction extends Action {
 	@Override
 	public void run() {
 		final CustomerGroupService customerGroupService =
-				ServiceLocator.getService(ContextIdNames.CUSTOMER_GROUP_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_GROUP_SERVICE, CustomerGroupService.class);
 
 		final CustomerGroup customerGroup = listView.getSelectedCustomerGroup();		
 		final CustomerGroup customerGroupToDelete = customerGroupService.findByGroupName(customerGroup.getName());

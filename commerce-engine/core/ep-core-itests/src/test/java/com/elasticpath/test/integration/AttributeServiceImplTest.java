@@ -76,7 +76,7 @@ public class AttributeServiceImplTest extends DbTestCase {
 		// product.getAttributeValueGroup().setAttributeValue(attribute2, Locale.US, "value2");
 		product.setAttributeValueMap(product.getAttributeValueGroup().getAttributeValueMap());
 
-		ProductService prodService = getBeanFactory().getBean(ContextIdNames.PRODUCT_SERVICE);
+		ProductService prodService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		prodService.saveOrUpdate(product);
 
 		assertTrue(attribute.isPersisted());
@@ -105,7 +105,7 @@ public class AttributeServiceImplTest extends DbTestCase {
 		customer.getCustomerProfile().setProfileValue(attribute.getKey(), "value");
 		customer.setProfileValueMap(customer.getCustomerProfile().getProfileValueMap());
 		
-		CustomerService customerService = getBeanFactory().getBean(ContextIdNames.CUSTOMER_SERVICE);
+		CustomerService customerService = getBeanFactory().getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 		customerService.update(customer);
 
 		assertTrue(attribute.isPersisted());

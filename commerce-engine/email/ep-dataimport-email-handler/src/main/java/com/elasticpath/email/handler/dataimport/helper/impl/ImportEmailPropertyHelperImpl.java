@@ -47,7 +47,7 @@ public class ImportEmailPropertyHelperImpl extends AbstractEpDomainImpl implemen
 	 * @return
 	 */
 	private EmailProperties getEmailPropertiesBeanInstance() {
-		return getBean(ContextIdNames.EMAIL_PROPERTIES);
+		return getPrototypeBean(ContextIdNames.EMAIL_PROPERTIES, EmailProperties.class);
 	}
 
 }

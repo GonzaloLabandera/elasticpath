@@ -44,6 +44,7 @@ import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeValue;
@@ -72,6 +73,7 @@ import com.elasticpath.domain.dataimport.CatalogImportField;
 import com.elasticpath.domain.dataimport.ImportDataType;
 import com.elasticpath.domain.dataimport.ImportField;
 import com.elasticpath.domain.dataimport.impl.ImportDataTypeProductImpl.ImportFieldProductDefaultCategory;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.impl.JpaAdaptorOfSkuOptionValueImpl;
@@ -194,15 +196,16 @@ public class ImportDataTypeProductImplTest {
 		validatorUtils = context.mock(ValidatorUtils.class);
 
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.VALIDATOR_UTILS, validatorUtils);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, utility);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class, validatorUtils);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
 
 		productImportType = createImportDataTypeProduct();
 
 		importGuidHelper = context.mock(ImportGuidHelper.class);
 
 		CatalogLocaleFallbackPolicyFactory localePolicyFactory = new CatalogLocaleFallbackPolicyFactory();
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, localePolicyFactory);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, 
+				CatalogLocaleFallbackPolicyFactory.class, localePolicyFactory);
 
 		setupSkuOption();
 
@@ -1166,7 +1169,8 @@ public class ImportDataTypeProductImplTest {
 	private ProductSku createProductSku() {
 		ProductSku productSku = new ProductSkuImpl();
 
-		expectationsFactory.allowingBeanFactoryGetBean("jpaAdaptorSkuOptionValue", JpaAdaptorOfSkuOptionValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR, JpaAdaptorOfSkuOptionValueImpl.class,
+				JpaAdaptorOfSkuOptionValueImpl.class);
 
 		return productSku;
 	}
@@ -1188,7 +1192,7 @@ public class ImportDataTypeProductImplTest {
 	private ProductTypeImpl createProductType() {
 		ProductTypeImpl productType = new ProductTypeImpl();
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroupImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class, AttributeGroupImpl.class);
 
 		productType.initialize();
 		productType.setName(PRODUCT_TYPE_NAME);
@@ -1221,7 +1225,7 @@ public class ImportDataTypeProductImplTest {
 	private ImportDataTypeProductImpl createImportDataTypeProduct() {
 		ImportDataTypeProductImpl productImportType = new ImportDataTypeProductImpl();
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRODUCT_SKU, createProductSku());
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class, ProductSkuImpl.class);
 
 		return productImportType;
 	}
@@ -1229,7 +1233,7 @@ public class ImportDataTypeProductImplTest {
 	private SkuOption createSkuOption() {
 		final SkuOption skuOption = new SkuOptionImpl();
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		skuOption.initialize();
 		return skuOption;
@@ -1238,7 +1242,7 @@ public class ImportDataTypeProductImplTest {
 	private Category createCategory() {
 		final Category category = new CategoryImpl();
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		category.initialize();
 		category.setCatalog(getCatalog());
@@ -1278,14 +1282,14 @@ public class ImportDataTypeProductImplTest {
 	private void setupAttributeSize() {
 		attributeSize = createAttribute(AttributeType.INTEGER, ATTRIBUTE_KEY_PRODUCT_SIZE, false);
 		addAttributeToAttributeGroupAttributes(attributeSize, productAttributes);
-		AttributeValue attributeValue = createProductAttributeValue(attributeSize, AttributeType.INTEGER, Integer.valueOf(1));
+		AttributeValue attributeValue = createProductAttributeValue(attributeSize, AttributeType.INTEGER, 1);
 		productAttributeValueMap.put(ATTRIBUTE_KEY_PRODUCT_SIZE, attributeValue);
 	}
 
 	private void setupAttributeColor() {
 		attributeColor = createAttribute(AttributeType.INTEGER, ATTRIBUTE_KEY_PRODUCT_COLOR, false);
 		addAttributeToAttributeGroupAttributes(attributeColor, productSkuAttributes);
-		AttributeValue attributeValue = createProductAttributeValue(attributeColor, AttributeType.INTEGER, Integer.valueOf(1));
+		AttributeValue attributeValue = createProductAttributeValue(attributeColor, AttributeType.INTEGER, 1);
 		productSkuAttributeValueMap.put(ATTRIBUTE_KEY_PRODUCT_COLOR, attributeValue);
 	}
 

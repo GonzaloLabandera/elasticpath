@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2011
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration.shoppingcart;
 
@@ -15,13 +15,13 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -32,6 +32,7 @@ import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartStatus;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.director.CartDirectorService;
+import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.misc.impl.MockTimeServiceImpl;
 import com.elasticpath.service.shopper.ShopperService;
@@ -41,6 +42,7 @@ import com.elasticpath.service.shoppingcart.ShoppingItemService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
+import com.elasticpath.test.persister.PaymentInstrumentPersister;
 import com.elasticpath.test.persister.testscenarios.AbstractScenario;
 import com.elasticpath.test.persister.testscenarios.ProductsScenario;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
@@ -49,7 +51,7 @@ import com.elasticpath.test.util.Utils;
 /**
  * Integration testing when dealing with shopping cart abandonment issues.
  */
-@ContextConfiguration(locations="/integration-mock-time-service.xml", inheritLocations = true)
+@ContextConfiguration(locations="/integration-mock-time-service.xml")
 public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 
 	private static final int PRODUCT_AGE = 120;
@@ -67,6 +69,8 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 
 	@Autowired private ShopperService shopperService;
 
+	@Autowired private CustomerService customerService;
+
 	@Autowired private CustomerSessionService customerSessionService;
 
 	private SimpleStoreScenario storeScenario;
@@ -80,8 +84,10 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 	@Autowired @Qualifier(ContextIdNames.TIME_SERVICE)
 	private MockTimeServiceImpl mockTimeService;
 
+	@Autowired private PaymentInstrumentPersister paymentInstrumentPersister;
+
 	private Date priorDate;
-	private Date productCreationDate;
+	private Customer customer;
 
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. <br>
@@ -91,7 +97,7 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 	@Before
 	@SuppressWarnings("unchecked")
 	public void setUp() throws Exception {
-		productCreationDate = getAdjustedDate(new Date(), PRODUCT_AGE);
+		Date productCreationDate = getAdjustedDate(new Date(), PRODUCT_AGE);
 		priorDate = getAdjustedDate(new Date(), EXPECTED_MAX_CART_HISTORY);
 
 		mockTimeService.setCurrentTime(productCreationDate);
@@ -99,6 +105,8 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 				getTac().useScenarios((List) Arrays.asList(SimpleStoreScenario.class, ProductsScenario.class));
 		storeScenario = (SimpleStoreScenario) scenarios.get(SimpleStoreScenario.class);
 		mockTimeService.setCurrentTime(new Date());
+
+		customer = createSavedCustomer();
 	}
 
 	/**
@@ -183,6 +191,9 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 
 		mockTimeService.setCurrentTime(cartCreationTime);
 		final Shopper shopper = shopperService.createAndSaveShopper(storeScenario.getStore().getCode());
+		shopper.setCustomer(customer);
+		shopperService.save(shopper);
+
 		ShoppingCart shoppingCart = createShoppingCart(shopper);
 		ShoppingItemDto dto = new ShoppingItemDto(SKU_CODE, 1);
 		ShoppingItem shoppingItem = cartDirectorService.addItemToCart(shoppingCart, dto);
@@ -326,6 +337,9 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 
 		try {
 			final Shopper shopper = shopperService.createAndSaveShopper(storeScenario.getStore().getCode());
+			shopper.setCustomer(customer);
+			shopperService.save(shopper);
+
 			ShoppingCart cart = createShoppingCart(shopper);
 			ShoppingCart updatedCart = shoppingCartService.saveOrUpdate(cart);
 			shopper.setCurrentShoppingCart(updatedCart);
@@ -338,11 +352,23 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 
 	private Shopper createShoppingCartWithStatus(final ShoppingCartStatus cartStatus) {
 		final Shopper shopper = shopperService.createAndSaveShopper(storeScenario.getStore().getCode());
-		ShoppingCart cart = createShoppingCart(shopper, cartStatus);
-		ShoppingCart updatedCart = shoppingCartService.saveOrUpdate(cart);
-		shopper.setCurrentShoppingCart(updatedCart);
+		shopper.setCustomer(customer);
+		shopperService.save(shopper);
+
+		ShoppingCart shoppingCart = createShoppingCart(shopper, cartStatus);
+		shopper.setCurrentShoppingCart(shoppingCart);
 
 		return shopper;
+	}
+
+	private Customer createSavedCustomer() {
+		final Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
+		String email = "a@b.com";
+		customer.setUserId(email);
+		customer.setEmail(email);
+		customer.setStoreCode(storeScenario.getStore().getCode());
+		customer.setAnonymous(false);
+		return customerService.add(customer);
 	}
 
 	/**
@@ -351,7 +377,6 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 	 * @return the shopping cart
 	 */
 	private ShoppingCart createShoppingCart(final Shopper shopper) {
-
 		return createShoppingCart(shopper, ShoppingCartStatus.ACTIVE);
 	}
 
@@ -372,7 +397,11 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 		memento.setStatus(cartStatus);
 
 		shopper.setCurrentShoppingCart(shoppingCart);
-		return shoppingCart;
+
+		final ShoppingCart persistedCart = shoppingCartService.saveOrUpdate(shoppingCart);
+		paymentInstrumentPersister.persistPaymentInstrument(persistedCart);
+
+		return persistedCart;
 	}
 
 }

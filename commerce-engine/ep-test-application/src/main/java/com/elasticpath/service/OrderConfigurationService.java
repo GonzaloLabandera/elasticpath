@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service;
 
@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
@@ -47,15 +46,6 @@ public interface OrderConfigurationService {
 	 * @return modified shopping cart
 	 */
 	ShoppingCart selectShippingOption(ShoppingCart shoppingCart, String shippingOptionName);
-
-	/**
-	 * Creates the order payment based on payment token value.
-	 *
-	 * @param customer   the customer
-	 * @param tokenValue the token value
-	 * @return the order payment
-	 */
-	OrderPayment createOrderPayment(Customer customer, String tokenValue);
 
 	/**
 	 * Gets the shopper service.

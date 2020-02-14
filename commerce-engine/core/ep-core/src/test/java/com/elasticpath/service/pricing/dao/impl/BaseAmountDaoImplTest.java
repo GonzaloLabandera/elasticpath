@@ -3,11 +3,11 @@
  */
 package com.elasticpath.service.pricing.dao.impl;
 
-import static org.junit.Assert.assertEquals;
-
 import static com.elasticpath.service.pricing.dao.impl.BaseAmountDaoImpl.BaseAmountJPQLBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -33,31 +33,54 @@ public class BaseAmountDaoImplTest {
 	 * @throws Exception on error
 	 */
 	@Test
-	public void testQueryBuilder() throws Exception {
+	public void testQueryBuilder() {
 		final BigDecimal quantityDbl = new BigDecimal("2.43");
 		final BigDecimal list = new BigDecimal("9.9");
 		final BigDecimal sale = new BigDecimal("3.14");
+		final String objectGuid = "GUID2";
+		final String objectType = "PROD";
+		final String priceListDescriptorGuid = "PRICELISTGUID";
+
 		BaseAmountFilter filter = new BaseAmountFilterImpl();
-		filter.setObjectGuid("GUID");
+		filter.setPriceListDescriptorGuid(priceListDescriptorGuid);
+
 		BaseAmountJPQLBuilder builder = new BaseAmountJPQLBuilder(filter);
-		assertEquals("SELECT baseAmount FROM BaseAmountImpl AS baseAmount WHERE baseAmount.objectGuid = 'GUID'", builder.toString());
-		
+
+		StringBuilder expectedQuery = new StringBuilder("SELECT baseAmount FROM BaseAmountImpl AS baseAmount WHERE ")
+			.append("baseAmount.priceListDescriptorGuid = ?1");
+
+		Object[] expectedParameters = Arrays.asList(priceListDescriptorGuid).toArray();
+
+		assertThat(builder.getQueryString())
+			.isEqualTo(expectedQuery.toString());
+		assertThat(builder.getQueryParameters())
+			.isEqualTo(expectedParameters);
+
 		BaseAmountFilter filter2 = new BaseAmountFilterImpl();
-		filter2.setObjectGuid("GUID2");
-		filter2.setObjectType("PROD");
-		filter2.setListValue(list);
-		filter2.setSaleValue(sale);
-		filter2.setPriceListDescriptorGuid("PRICELISTGUID");
+		filter2.setObjectGuid(objectGuid);
 		filter2.setQuantity(quantityDbl);
-		
+		filter2.setObjectType(objectType);
+		filter2.setListValue(list);
+		filter2.setPriceListDescriptorGuid(priceListDescriptorGuid);
+		filter2.setSaleValue(sale);
+
+		//test all fields
 		BaseAmountJPQLBuilder builder2 = new BaseAmountJPQLBuilder(filter2);
-		assertEquals("SELECT baseAmount FROM BaseAmountImpl AS baseAmount "
-				+ "WHERE baseAmount.objectGuid = 'GUID2' "
-				+ "AND baseAmount.objectType = 'PROD' "
-				+ "AND baseAmount.priceListDescriptorGuid = 'PRICELISTGUID' "
-				+ "AND baseAmount.listValueInternal = 9.9 "
-				+ "AND baseAmount.saleValueInternal = 3.14 "
-				+ "AND baseAmount.quantityInternal = 2.43", builder2.toString());
+
+		StringBuilder fullExpectedQuery = new StringBuilder("SELECT baseAmount FROM BaseAmountImpl AS baseAmount WHERE ")
+			.append("baseAmount.objectGuid = ?1 AND ")
+			.append("baseAmount.objectType = ?2 AND ")
+			.append("baseAmount.priceListDescriptorGuid = ?3 AND ")
+			.append("baseAmount.listValueInternal = ?4 AND ")
+			.append("baseAmount.saleValueInternal = ?5 AND ")
+			.append("baseAmount.quantityInternal = ?6");
+
+		Object[] fullExpectedParameters = Arrays.asList(objectGuid, objectType, priceListDescriptorGuid, list, sale, quantityDbl).toArray();
+
+		assertThat(builder2.getQueryString())
+			.isEqualTo(fullExpectedQuery.toString());
+		assertThat(builder2.getQueryParameters())
+			.isEqualTo(fullExpectedParameters);
 	}
 	
 	/**

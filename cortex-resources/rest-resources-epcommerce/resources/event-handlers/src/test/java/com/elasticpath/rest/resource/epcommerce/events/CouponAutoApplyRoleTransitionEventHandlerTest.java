@@ -12,31 +12,26 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
-
-import io.reactivex.Single;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.relos.rs.events.RoleTransitionEvent;
 import com.elasticpath.rest.resource.integration.epcommerce.common.authentication.AuthenticationConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CouponAutoApplyRoleTransitionEventHandlerTest {
@@ -56,12 +51,6 @@ public class CouponAutoApplyRoleTransitionEventHandlerTest {
 
 	@Mock
 	private StoreRepository storeRepository;
-
-	@Mock
-	private ExceptionTransformer exceptionTransformer;
-
-	@Spy
-	private final ReactiveAdapterImpl reactiveAdapter = new ReactiveAdapterImpl(exceptionTransformer);
 
 	@InjectMocks
 	private CouponAutoApplyRoleTransitionEventHandler couponAutoApplyRoleTransitionEventHandler;
@@ -91,36 +80,34 @@ public class CouponAutoApplyRoleTransitionEventHandlerTest {
 
 		when(storeRepository.findStoreAsSingle(STORE_CODE)).thenReturn(Single.just(mockStore));
 
-		when(cartOrderRepository.saveCartOrderAsSingle(mockCartOrder)).thenReturn(Single.just(mockCartOrder));
+		when(cartOrderRepository.saveCartOrder(mockCartOrder)).thenReturn(Single.just(mockCartOrder));
 	}
 
 	@Test
 	public void testCartOrderIsSavedWhenCouponAutoApplierUpdatesCartOrder() throws Exception {
 		allowingRepositoryToFindCartOrder(true);
-		when(cartOrderRepository.filterAndAutoApplyCoupons(mockCartOrder, mockStore, EMAIL)).thenReturn(ExecutionResultFactory.createReadOK(true));
+		when(cartOrderRepository.filterAndAutoApplyCoupons(mockCartOrder, mockStore, EMAIL)).thenReturn(Single.just(true));
 
 		couponAutoApplyRoleTransitionEventHandler.handleEvent(STORE_CODE, mockEvent);
 
 		verifyMocks(atLeastOnce());
-		verify(reactiveAdapter, atLeastOnce()).fromRepositoryAsSingle(any());
 		verify(storeRepository).findStoreAsSingle(STORE_CODE);
 		verify(cartOrderRepository).filterAndAutoApplyCoupons(any(CartOrder.class), any(Store.class), eq(EMAIL));
-		verify(cartOrderRepository).saveCartOrderAsSingle(mockCartOrder);
+		verify(cartOrderRepository).saveCartOrder(mockCartOrder);
 	}
 
 
 	@Test
 	public void testCartOrderIsNotSavedWhenNoCouponsAreAutoAppliedToCartOrder() throws Exception {
 		allowingRepositoryToFindCartOrder(true);
-		when(cartOrderRepository.filterAndAutoApplyCoupons(mockCartOrder, mockStore, EMAIL)).thenReturn(ExecutionResultFactory.createReadOK(false));
+		when(cartOrderRepository.filterAndAutoApplyCoupons(mockCartOrder, mockStore, EMAIL)).thenReturn(Single.just(false));
 
 		couponAutoApplyRoleTransitionEventHandler.handleEvent(STORE_CODE, mockEvent);
 
 		verifyMocks(atLeastOnce());
-		verify(reactiveAdapter, atLeastOnce()).fromRepositoryAsSingle(any());
 		verify(storeRepository).findStoreAsSingle(STORE_CODE);
 		verify(cartOrderRepository).filterAndAutoApplyCoupons(any(CartOrder.class), any(Store.class), eq(EMAIL));
-		verify(cartOrderRepository, never()).saveCartOrderAsSingle(mockCartOrder);
+		verify(cartOrderRepository, never()).saveCartOrder(mockCartOrder);
 	}
 
 	@Test
@@ -130,17 +117,16 @@ public class CouponAutoApplyRoleTransitionEventHandlerTest {
 		couponAutoApplyRoleTransitionEventHandler.handleEvent(STORE_CODE, mockEvent);
 
 		verifyMocks(atLeastOnce());
-		verify(reactiveAdapter, never()).fromRepositoryAsSingle(any());
 		verify(storeRepository, never()).findStoreAsSingle(STORE_CODE);
 		verify(cartOrderRepository, never()).filterAndAutoApplyCoupons(any(CartOrder.class), any(Store.class), eq(EMAIL));
-		verify(cartOrderRepository, never()).saveCartOrderAsSingle(mockCartOrder);
+		verify(cartOrderRepository, never()).saveCartOrder(mockCartOrder);
 	}
 
 	private void allowingRepositoryToFindCartOrder(final boolean findCartOrder) {
 		if (findCartOrder) {
-			when(cartOrderRepository.findByCartGuidSingle(SHOPPING_CART_GUID)).thenReturn(Single.just(mockCartOrder));
+			when(cartOrderRepository.findByCartGuid(SHOPPING_CART_GUID)).thenReturn(Single.just(mockCartOrder));
 		} else {
-			when(cartOrderRepository.findByCartGuidSingle(SHOPPING_CART_GUID)).thenReturn(Single.error(ResourceOperationFailure.notFound()));
+			when(cartOrderRepository.findByCartGuid(SHOPPING_CART_GUID)).thenReturn(Single.error(ResourceOperationFailure.notFound()));
 		}
 	}
 
@@ -178,6 +164,6 @@ public class CouponAutoApplyRoleTransitionEventHandlerTest {
 
 	private void verifyMocks(final VerificationMode mode) {
 		verify(shoppingCartRepository, mode).getShoppingCartForCustomer(NEW_USER_GUID);
-		verify(cartOrderRepository, mode).findByCartGuidSingle(SHOPPING_CART_GUID);
+		verify(cartOrderRepository, mode).findByCartGuid(SHOPPING_CART_GUID);
 	}
 }

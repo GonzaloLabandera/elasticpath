@@ -20,40 +20,40 @@ import com.elasticpath.service.cmuser.UserRoleService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.store.WarehouseService;
 /**
- * Assembler for CmUser domain objects and their associated DTOs. 
+ * Assembler for CmUser domain objects and their associated DTOs.
  */
 public class CmUserDtoAssembler extends AbstractDtoAssembler<CmUserDTO, CmUser> {
 
 	private BeanFactory beanFactory;
 
 	private UserRoleService userRoleService;
-	
+
 	private StoreService storeService;
-	
+
 	private WarehouseService warehouseService;
-	
+
 	private CatalogService catalogService;
 
 	private static final String CMUSER_MESSAGE_PREFIX = "CmUser ";
-	
+
 	@Override
 	public CmUser getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.CMUSER);
+		return beanFactory.getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
 	}
 
 	@Override
 	public CmUserDTO getDtoInstance() {
 		return new CmUserDTO();
 	}
-	
+
 	/**
-	 * Factory method for {@link UserPasswordHistoryItem}. 
+	 * Factory method for {@link UserPasswordHistoryItem}.
 	 * @return new, uninitialized {@link UserPasswordHistoryItem}.
 	 */
 	protected UserPasswordHistoryItem userPasswordHistoryItemDomainFactory() {
-		return beanFactory.getBean(ContextIdNames.USER_PASSWORD_HISTORY_ITEM);
+		return beanFactory.getPrototypeBean(ContextIdNames.USER_PASSWORD_HISTORY_ITEM, UserPasswordHistoryItem.class);
 	}
-	
+
 	@Override
 	public void assembleDto(final CmUser source, final CmUserDTO target) {
 		target.setGuid(source.getGuid());
@@ -62,87 +62,87 @@ public class CmUserDtoAssembler extends AbstractDtoAssembler<CmUserDTO, CmUser> 
 		target.setFirstName(source.getFirstName());
 		target.setLastName(source.getLastName());
 		target.setPassword(source.getPassword());
-		
+
 		target.setCreationDate(source.getCreationDate());
 		target.setLastLoginDate(source.getLastLoginDate());
 		target.setLastChangedPasswordDate(source.getLastChangedPasswordDate());
 		target.setLastModifiedDate(source.getLastModifiedDate());
-		
+
 		target.setFailedLoginAttempts(source.getFailedLoginAttempts());
 		target.setEnabled(source.isEnabled());
 		target.setHasTemporaryPassword(source.isTemporaryPassword());
-		
+
 		target.setAllWarehousesAccess(source.isAllWarehousesAccess());
 		target.setAllCatalogsAccess(source.isAllCatalogsAccess());
 		target.setAllStoresAccess(source.isAllStoresAccess());
 		target.setAllPriceListsAccess(source.isAllPriceListsAccess());
-		
+
 		for (Warehouse sourceWarehouse : source.getWarehouses()) {
 			target.getAccessibleWarehouseCodes().add(sourceWarehouse.getCode());
 		}
-		
+
 		for (Catalog sourceCatalog : source.getCatalogs()) {
 			target.getAccessibleCatalogCodes().add(sourceCatalog.getCode());
 		}
-		
+
 		for (Store sourceStore : source.getStores()) {
 			target.getAccessibleStoreCodes().add(sourceStore.getCode());
-		}		
-		
+		}
+
 		for (String sourcePriceListGuid : source.getPriceLists()) {
 			target.getAccessiblePriceListGuids().add(sourcePriceListGuid);
 		}
-		
+
 		for (UserRole sourceUserRole : source.getUserRoles()) {
 			target.getUserRoleGuids().add(sourceUserRole.getGuid());
 		}
-		
+
 		for (UserPasswordHistoryItem sourceUserPasswordHistoryItem : source.getPasswordHistoryItems()) {
 
 			UserPasswordHistoryItemDTO targetUserPasswordHistoryItemDTO = new UserPasswordHistoryItemDTO();
 			targetUserPasswordHistoryItemDTO.setExpirationDate(sourceUserPasswordHistoryItem.getExpirationDate());
 			targetUserPasswordHistoryItemDTO.setOldPassword(sourceUserPasswordHistoryItem.getOldPassword());
-			
+
 			target.getUserPasswordHistoryItems().add(targetUserPasswordHistoryItemDTO);
 		}
-		
+
 	}
-	
+
 	@Override
 	public void assembleDomain(final CmUserDTO source, final CmUser target) {
-		
+
 		target.setGuid(source.getGuid());
 		target.setUserName(source.getUserName());
 		target.setEmail(source.getEmail());
 		target.setFirstName(source.getFirstName());
 		target.setLastName(source.getLastName());
 		target.setPassword(source.getPassword());
-		
+
 		target.setCreationDate(source.getCreationDate());
 		target.setLastLoginDate(source.getLastLoginDate());
 		target.setLastChangedPasswordDate(source.getLastChangedPasswordDate());
 		target.setLastModifiedDate(source.getLastModifiedDate());
-		
+
 		target.setFailedLoginAttempts(source.getFailedLoginAttempts());
 		target.setEnabled(source.isEnabled());
 		target.setTemporaryPassword(source.hasTemporaryPassword());
-		
+
 		target.setAllWarehousesAccess(source.isAllWarehousesAccess());
 		target.setAllCatalogsAccess(source.isAllCatalogsAccess());
 		target.setAllStoresAccess(source.isAllStoresAccess());
 		target.setAllPriceListsAccess(source.isAllPriceListsAccess());
-		
-		populateAndAddPasswordHistoryItemsToDomain(source, target);	
+
+		populateAndAddPasswordHistoryItemsToDomain(source, target);
 		addPriceListGuidsToDomain(source, target);
 		populateAndAddUserRolesToDomain(source, target);
 		populateAndAddWarehousesToDomain(source, target);
 		populateAndAddCatalogsToDomain(source, target);
 		populateAndAddStoresToDomain(source, target);
-		
+
 	}
-	
+
 	private void populateAndAddPasswordHistoryItemsToDomain(final CmUserDTO source, final CmUser target) {
-		
+
 		for (UserPasswordHistoryItemDTO sourceUserPasswordHistoryItemDTO : source.getUserPasswordHistoryItems()) {
 
 			UserPasswordHistoryItem targetUserPasswordHistoryItem = userPasswordHistoryItemDomainFactory();
@@ -154,11 +154,11 @@ public class CmUserDtoAssembler extends AbstractDtoAssembler<CmUserDTO, CmUser> 
 			if (!userPasswordHistoryFromDomain.contains(targetUserPasswordHistoryItem)) {
 				target.getPasswordHistoryItems().add(targetUserPasswordHistoryItem);
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	private void populateAndAddWarehousesToDomain(final CmUserDTO source, final CmUser target) {
 
 		for (String warehouseCodeFromDto : source.getAccessibleWarehouseCodes()) {
@@ -172,11 +172,11 @@ public class CmUserDtoAssembler extends AbstractDtoAssembler<CmUserDTO, CmUser> 
 
 			target.getWarehouses().add(warehouseFromDTO);
 		}
-		
+
 	}
 
 	private void populateAndAddCatalogsToDomain(final CmUserDTO source, final CmUser target) {
-	
+
 		for (String catalogCodeFromDto : source.getAccessibleCatalogCodes()) {
 
 			Catalog catalogFromDTO = catalogService.findByCode(catalogCodeFromDto);
@@ -187,12 +187,12 @@ public class CmUserDtoAssembler extends AbstractDtoAssembler<CmUserDTO, CmUser> 
 			}
 
 			target.getCatalogs().add(catalogFromDTO);
-		}	
-		
+		}
+
 	}
-	
+
 	private void populateAndAddStoresToDomain(final CmUserDTO source, final CmUser target) {
-		
+
 		for (String storeCodeFromDto : source.getAccessibleStoreCodes()) {
 
 			Store storeFromDTO = storeService.findStoreWithCode(storeCodeFromDto);
@@ -203,12 +203,12 @@ public class CmUserDtoAssembler extends AbstractDtoAssembler<CmUserDTO, CmUser> 
 			}
 
 			target.getStores().add(storeFromDTO);
-		}		
-		
+		}
+
 	}
-	
+
 	private void populateAndAddUserRolesToDomain(final CmUserDTO source, final CmUser target) {
-		
+
 		for (String userRoleGuidFromDto : source.getUserRoleGuids()) {
 
 			UserRole userRoleFromDTO = userRoleService.findByGuid(userRoleGuidFromDto);
@@ -217,17 +217,17 @@ public class CmUserDtoAssembler extends AbstractDtoAssembler<CmUserDTO, CmUser> 
 				throw new EpSystemException(CMUSER_MESSAGE_PREFIX + source.getGuid() + " references user role guid " + userRoleGuidFromDto
 						+ " which is not in the target system. Maybe run an export/import on user roles first.");
 			}
-			
+
 			Collection<UserRole> userRolesFromDomain = target.getUserRoles();
-			
+
 			if (!userRolesFromDomain.contains(userRoleFromDTO)) {
 				target.getUserRoles().add(userRoleFromDTO);
 			}
-		}		
+		}
 	}
-	
+
 	private void addPriceListGuidsToDomain(final CmUserDTO source, final CmUser target) {
-		
+
 		for (String priceListGuidFromDto : source.getAccessiblePriceListGuids()) {
 
 			Collection<String> priceListGuidsFromDomain = target.getPriceLists();
@@ -274,5 +274,5 @@ public class CmUserDtoAssembler extends AbstractDtoAssembler<CmUserDTO, CmUser> 
 	public void setCatalogService(final CatalogService catalogService) {
 		this.catalogService = catalogService;
 	}
-	
+
 }

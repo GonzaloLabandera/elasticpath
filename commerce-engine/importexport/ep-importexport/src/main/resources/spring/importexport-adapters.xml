@@ -299,8 +299,8 @@
 		<property name="assembler" ref="taxCodeDtoAssembler" />
 	</bean>
 
-	<bean id="paymentGatewayAdapter" class="com.elasticpath.importexport.common.adapters.paymentgateway.PaymentGatewayAdapter" parent="abstractDomainAdapter">
-		<property name="assembler" ref="paymentGatewayDtoAssembler"/>
+	<bean id="paymentProviderAdapter" class="com.elasticpath.importexport.common.adapters.paymentprovider.PaymentProviderAdapter" parent="abstractDomainAdapter">
+		<property name="assembler" ref="paymentProviderDtoAssembler"/>
 	</bean>
 	
 	<bean id="warehouseAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"

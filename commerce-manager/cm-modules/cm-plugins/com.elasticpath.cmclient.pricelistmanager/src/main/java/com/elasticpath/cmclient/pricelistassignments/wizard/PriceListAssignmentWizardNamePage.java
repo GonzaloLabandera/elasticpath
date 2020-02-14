@@ -16,7 +16,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
@@ -242,8 +242,8 @@ public class PriceListAssignmentWizardNamePage extends AbstractPolicyAwareWizard
 	 * @return true - if another object with given name exists, false otherwise
 	 */
 	private boolean plaNameExists(final String plaName) {
-		final PriceListAssignmentService plaService = 
-			ServiceLocator.getService(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+		final PriceListAssignmentService plaService =
+				BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE, PriceListAssignmentService.class);
 		try {
 			final PriceListAssignment priceListAssignment = plaService.findByName(plaName.trim());
 

@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.eclipse.rap.rwt.testfixture.TestContext;
 
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.common.CMContextIdNames;
 import com.elasticpath.commons.beanframework.BeanFactory;
 
@@ -60,13 +60,11 @@ public class TimeZoneInfoTest {
 		timezoneFormatMap.put(LOW_OFFSET_TIMEZONE_ID, LOW_OFFSET_LOCALIZATION_KEY);
 
 		BeanFactory mockBeanFactory = mock(BeanFactory.class);
-		ServiceLocator.setBeanFactory(mockBeanFactory);
+		BeanLocator.setBeanFactory(mockBeanFactory);
 
-		when(mockBeanFactory.getBean((CMContextIdNames.UI_DATE_FORMATTER)))
+		when(mockBeanFactory.getSingletonBean(CMContextIdNames.UI_DATE_FORMATTER, UIDateTimeUtil.class))
 				.thenReturn(mockDateTimeUtil);
-
-		when(mockBeanFactory.getBean((CMContextIdNames.TIMEZONE_FORMAT_MAP)))
-				.thenReturn(timezoneFormatMap);
+		when(mockBeanFactory.getSingletonBean(CMContextIdNames.TIMEZONE_FORMAT_MAP, Map.class)).thenReturn(timezoneFormatMap);
 
 		timezoneDisplayStrings = instance.getTimezoneDisplayStrings();
 

@@ -1,11 +1,10 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
@@ -18,27 +17,27 @@ public class FinalizeCheckoutActionContextImpl implements FinalizeCheckoutAction
 
 	private final Order order;
 	private final ShoppingCart shoppingCart;
-	private final OrderPayment orderPaymentTemplate;
 	private final CustomerSession customerSession;
 	private final boolean orderExchange;
 	private boolean emailFailed;
 
 	/**
 	 * Constructor for creating a FinalizeCheckoutActionContext object from a CheckoutActionContext object.
+	 *
 	 * @param checkoutActionContext the checkoutActionContext
 	 */
 	public FinalizeCheckoutActionContextImpl(final CheckoutActionContext checkoutActionContext) {
 		this.order = checkoutActionContext.getOrder();
 		this.shoppingCart = checkoutActionContext.getShoppingCart();
-		this.orderPaymentTemplate = checkoutActionContext.getOrderPaymentTemplate();
 		this.orderExchange = checkoutActionContext.isOrderExchange();
 		this.customerSession = checkoutActionContext.getCustomerSession();
 	}
 
 	/**
 	 * Gets the order.
+	 *
 	 * @return the order
-	 * */
+	 */
 	@Override
 	public Order getOrder() {
 		return order;
@@ -55,18 +54,10 @@ public class FinalizeCheckoutActionContextImpl implements FinalizeCheckoutAction
 	}
 
 	/**
-	 * Gets the order payment template.
-	 * @return the order payment template
-	 * */
-	@Override
-	public OrderPayment getOrderPaymentTemplate() {
-		return orderPaymentTemplate;
-	}
-
-	/**
 	 * Gets the is order exchange.
+	 *
 	 * @return the is order exchange
-	 * */
+	 */
 	@Override
 	public boolean isOrderExchange() {
 		return orderExchange;
@@ -74,8 +65,8 @@ public class FinalizeCheckoutActionContextImpl implements FinalizeCheckoutAction
 
 	/**
 	 * Sets email failed.
+	 *
 	 * @param emailFailed the email failed flag
-	 * 
 	 **/
 	@Override
 	public void setEmailFailed(final boolean emailFailed) {
@@ -84,8 +75,9 @@ public class FinalizeCheckoutActionContextImpl implements FinalizeCheckoutAction
 
 	/**
 	 * Gets email failed.
+	 *
 	 * @return is email failed
-	 * */
+	 */
 	@Override
 	public boolean isEmailFailed() {
 		return emailFailed;

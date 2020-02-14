@@ -88,7 +88,7 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 
 		ProductAssociation productAssociation = null;
 		if (productAssociationUid <= 0) {
-			productAssociation = getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+			productAssociation = getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 		} else {
 			productAssociation = getPersistentBeanFinder().load(ContextIdNames.PRODUCT_ASSOCIATION, productAssociationUid);
 		}

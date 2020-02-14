@@ -16,7 +16,6 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.builder.DomainObjectBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerGroup;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 
 /**
  * A builder that builds {@link Customer}s for testing purposes.
@@ -39,8 +38,6 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
 	private String storeCode;
 	private int status;
 	private CustomerGroup[] customerGroups = new CustomerGroup[] {};
-	private PaymentMethod[] paymentMethods = new PaymentMethod[] {};
-	private PaymentMethod method;
 	private String phone;
 
 	public CustomerBuilder newInstance() {
@@ -110,16 +107,6 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
         return this;
     }
 
-	public CustomerBuilder withPaymentMethods(final PaymentMethod... tokens) {
-		this.paymentMethods = tokens;
-    	return this;
-    }
-
-	public CustomerBuilder withDefaultToken(final PaymentMethod method) {
-		this.method = method;
-    	return this;
-    }
-
     public CustomerBuilder withClearTextPassword(final String clearTextPassword) {
         this.clearTextPassword = clearTextPassword;
         return this;
@@ -132,7 +119,7 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
 
     @Override
     public Customer build() {
-        Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+        Customer customer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
         setIfNotNull(customer::setUidPk, uidPk);
         setIfNotNull(customer::setGuid, guid);
         setIfNotNull(customer::setUserId, userId);
@@ -150,14 +137,6 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
         if (customerGroups != null) {
             customer.getCustomerGroups().addAll(Arrays.asList(customerGroups));
         }
-
-		if (paymentMethods != null) {
-        	customer.getPaymentMethods().addAll(Arrays.asList(paymentMethods));
-        }
-
-		if (method != null) {
-			customer.getPaymentMethods().setDefault(method);
-		}
 
         return customer;
     }

@@ -6,7 +6,7 @@
 	<fileSets>
 		<fileSet>
 			<directory>src/main/resources</directory>
-			<outputDirectory></outputDirectory>
+			<outputDirectory>shared-demo-data</outputDirectory>
 		</fileSet>
 	</fileSets>
 </assembly>

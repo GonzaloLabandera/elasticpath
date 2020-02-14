@@ -35,10 +35,10 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -199,7 +199,7 @@ public class ProductFinderDialog extends AbstractEpPriceDialog {
 		super(parentShell, showPrices);
 
 		this.catalog = catalog;
-		final BrandService brandService = ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+		final BrandService brandService = BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 
 		final List<Brand> brands;
 		if (catalog == null) {
@@ -233,9 +233,9 @@ public class ProductFinderDialog extends AbstractEpPriceDialog {
 	 */
 	private List<Catalog> getCatalogs(final boolean onlyMasterCatalogs) {
 		if (onlyMasterCatalogs) {
-			return ((CatalogService) (ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE))).findMasterCatalogs();
+			return BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class).findMasterCatalogs();
 		}
-		return ((CatalogService) (ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE))).findAllCatalogs();
+		return BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class).findAllCatalogs();
 	}
 
 	@Override
@@ -432,7 +432,7 @@ public class ProductFinderDialog extends AbstractEpPriceDialog {
 	@Override
 	public ProductSearchCriteria getModel() {
 		if (searchCriteria == null) {
-			searchCriteria = (ProductSearchCriteria) ServiceLocator.getService(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+			searchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class);
 		}
 		return searchCriteria;
 	}

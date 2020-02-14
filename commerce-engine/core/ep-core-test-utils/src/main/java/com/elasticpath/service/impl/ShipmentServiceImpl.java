@@ -126,7 +126,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 	public void moveSkuToExistingShipment(final PhysicalOrderShipment fromOrderShipment, final PhysicalOrderShipment toOrderShipment,
 			final OrderSku orderSku, final int quantityToMove, final CmUser cmUser) {
 
-		OrderSku newOrderSku = getBeanFactory().getBean(ContextIdNames.ORDER_SKU);
+		OrderSku newOrderSku = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 		// get a copy of order sku to avoid JPA issue when deleting and adding order sku with same UIDPK
 		final ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
 		final ShoppingItemTaxSnapshot taxSnapshot = getTaxSnapshotService().getTaxSnapshotForOrderSku(orderSku, pricingSnapshot);
@@ -166,9 +166,10 @@ public class ShipmentServiceImpl implements ShipmentService {
 	@Override
 	public void moveSkuToNewShipment(final PhysicalOrderShipment fromOrderShipment, final OrderSku orderSku, final int quantityToMove,
 									 final OrderAddress orderAddress, final ShippingOption shippingOption, final CmUser cmUser) {
-		final PhysicalOrderShipment newShipment = getBeanFactory().getBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT);
+		final PhysicalOrderShipment newShipment = getBeanFactory().getPrototypeBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT,
+				PhysicalOrderShipment.class);
 
-		final OrderAddress newOrderAddress = getBeanFactory().getBean(ContextIdNames.ORDER_ADDRESS);
+		final OrderAddress newOrderAddress = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 		newOrderAddress.copyFrom(orderAddress);
 
 		newShipment.setShipmentAddress(newOrderAddress);
@@ -178,7 +179,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 		shippingOption.getCarrierCode().ifPresent(newShipment::setCarrierCode);
 		shippingOption.getCarrierDisplayName().ifPresent(newShipment::setCarrierName);
 
-		final OrderSku newOrderSku = getBeanFactory().getBean(ContextIdNames.ORDER_SKU);
+		final OrderSku newOrderSku = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 
 		// get a copy of order sku to avoid JPA issue when deleting and adding order sku with same UIDPK
 		final ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
@@ -252,7 +253,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 			throws EpServiceException {
 		OrderSku newOrderSku = getOrderSkuBySkuCode(shipment, skuCode);
 
-		OrderSku oldOrderSku = getBeanFactory().getBean(ContextIdNames.ORDER_SKU);
+		OrderSku oldOrderSku = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class);
 		oldOrderSku.setQuantity(newOrderSku.getQuantity());
 		oldOrderSku.setChangedQuantityAllocated(newOrderSku.getChangedQuantityAllocated());
 

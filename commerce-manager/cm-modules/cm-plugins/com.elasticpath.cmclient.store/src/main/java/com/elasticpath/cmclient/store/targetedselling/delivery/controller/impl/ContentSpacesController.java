@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.store.targetedselling.delivery.controller.impl;
 
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.controller.impl.AbstractBaseControllerImpl;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.event.UIEvent;
@@ -38,7 +38,7 @@ public class ContentSpacesController extends AbstractBaseControllerImpl<ContentS
 
 	private ContentSpaceService getContentSpaceService() {
 		if (contentSpaceService == null) {
-			contentSpaceService = ServiceLocator.getService(ContextIdNames.CONTENTSPACE_SERVICE);
+			contentSpaceService = BeanLocator.getSingletonBean(ContextIdNames.CONTENTSPACE_SERVICE, ContentSpaceService.class);
 		}
 		return contentSpaceService;
 	}

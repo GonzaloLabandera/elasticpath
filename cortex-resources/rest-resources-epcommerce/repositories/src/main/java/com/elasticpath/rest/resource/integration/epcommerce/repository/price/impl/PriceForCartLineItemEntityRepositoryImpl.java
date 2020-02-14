@@ -63,8 +63,8 @@ public class PriceForCartLineItemEntityRepositoryImpl<E extends CartLineItemPric
 
 	private Single<ShoppingItemPricingSnapshot> getShoppingItemPricingSnapshotSingle(final String cartGuid, final String cartScope,
 																					 final String lineItemId) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(cartScope, cartGuid, CartOrderRepository.FindCartOrder.BY_CART_GUID)
-				.flatMap(shoppingCart -> pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)
+		return cartOrderRepository.getEnrichedShoppingCart(cartScope, cartGuid, CartOrderRepository.FindCartOrder.BY_CART_GUID)
+				.flatMap(shoppingCart -> pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart)
 						.flatMap(cartPricingSnapshot -> getShoppingItemPricingSnapshotSingle(lineItemId, shoppingCart, cartPricingSnapshot)));
 	}
 

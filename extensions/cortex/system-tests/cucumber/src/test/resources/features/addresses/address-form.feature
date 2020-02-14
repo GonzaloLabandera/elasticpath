@@ -13,10 +13,11 @@ Feature: Addresses Form Fields
       | address | country-name     |
       | address | extended-address |
       | address | locality         |
-      | address | organization     |
-      | address | phone-number     |
       | address | postal-code      |
       | address | region           |
       | address | street-address   |
       | name    | family-name      |
       | name    | given-name       |
+    And I see the following fields on the top-level address form:
+      | organization |
+      | phone-number |

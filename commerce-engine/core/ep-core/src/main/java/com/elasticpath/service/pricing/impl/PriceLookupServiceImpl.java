@@ -46,9 +46,9 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 	private PricedEntityFactory pricedEntityFactory;
 
 	private BaseAmountFinder baseAmountFinder;
-	
+
 	private BaseAmountDataSource baseAmountDataSource;
-	
+
 	@Override
 	public Map<Product, Price> getProductsPrices(final Collection<Product> products, final PriceListStack plStack) {
 		Map<Product, Price> productPrices = new HashMap<>(products.size());
@@ -70,7 +70,7 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 	@Override
 	public Price getSkuPrice(final ProductSku productSku, final PriceListStack plStack) {
 		PriceProvider priceProvider = getPriceProvider(plStack);
-		return getPricedEntityFactory().createPricedProductSku(productSku, plStack, priceProvider, 
+		return getPricedEntityFactory().createPricedProductSku(productSku, plStack, priceProvider,
 				new NoPreprocessBaseAmountDataSourceFactory()).getPrice();
 	}
 
@@ -82,7 +82,7 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 		for (String plGuid : plStack.getPriceListStack()) {
 			baseAmountsForGuid = getBaseAmountFinder().filterBaseAmounts(baseAmounts, plGuid, BaseAmountObjectType.SKU, productSku.getGuid());
 			if (baseAmountsForGuid.isEmpty()) {
-				baseAmountsForGuid = getBaseAmountFinder().filterBaseAmounts(baseAmounts, plGuid, 
+				baseAmountsForGuid = getBaseAmountFinder().filterBaseAmounts(baseAmounts, plGuid,
 						BaseAmountObjectType.PRODUCT,
 						productSku.getProduct().getGuid());
 			}
@@ -98,7 +98,7 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 		final Map<String, Price> prices = new HashMap<>();
 
 		for (String plGuid : plStack.getPriceListStack()) {
-			PriceListStack singlePlStack = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_STACK);
+			PriceListStack singlePlStack = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_STACK, PriceListStack.class);
 			singlePlStack.setCurrency(plStack.getCurrency());
 			singlePlStack.addPriceList(plGuid);
 			Price price = getSkuPrice(productSku, singlePlStack);
@@ -152,13 +152,13 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 		}
 	}
 
-	
+
 	/**
 	 * An implementation of {@link Predicate} that evaluates unacceptable price adjustments on a bundle as true.
 	 */
 	static class UnacceptablePriceAdjustmentPredicate implements Predicate {
 		private final boolean isCalculated;
-		
+
 		/**
 		 * @param isCalculated whether the bundle is a calculated one
 		 */
@@ -166,15 +166,15 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 		public UnacceptablePriceAdjustmentPredicate(final boolean isCalculated) {
 			this.isCalculated = isCalculated;
 		}
-		
+
 		@Override
 		public boolean evaluate(final Object object) {
 			return evaluate((PriceAdjustment) object);
 		}
-		
+
 		/**
 		 * @param adjustment price adjustment to be evaluated
-		 * @return <code>true</code> iff the price adjustment is null, zero, or it is a negative adjustment on an assigned bundle, or a positive 
+		 * @return <code>true</code> iff the price adjustment is null, zero, or it is a negative adjustment on an assigned bundle, or a positive
 		 * adjustment on a calculated bundle
 		 */
 		protected boolean evaluate(final PriceAdjustment adjustment) {
@@ -186,12 +186,12 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 
 			return shouldRemove;
 		}
-		
-		
+
+
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @param beanFactory instance of {@link BeanFactory} to set.
 	 */
@@ -215,7 +215,7 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 
 	/**
 	 * Set the base amount finder instance.
-	 * 
+	 *
 	 * @param baseAmountFinder the base amount finder
 	 */
 	public void setBaseAmountFinder(final BaseAmountFinder baseAmountFinder) {
@@ -229,7 +229,7 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 		return priceAdjustmentService;
 	}
 
-	
+
 	/**
 	 * Set the {@link PricedEntityFactory} instance to be used.
 	 *
@@ -253,7 +253,7 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 		return baseAmountFinder;
 	}
 
-	
+
 	/**
 	 * Create a predicate for unacceptable price adjustments based on the bundle.
 	 * @param bundle the bundle from which the price adjustments are extracted
@@ -263,7 +263,7 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 		return new UnacceptablePriceAdjustmentPredicate(bundle.isCalculated());
 	}
 
-	
+
 	/**
 	 * Creates a {@link PriceProvider} as a callback to this instance of PriceLookupServiceImpl.
 	 *
@@ -272,17 +272,17 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 	 */
 	protected PriceProvider getPriceProvider(final PriceListStack plStack) {
 		return new PriceProvider() {
-			
+
 			@Override
 			public Price getProductSkuPrice(final ProductSku productSku) {
 				return PriceLookupServiceImpl.this.getSkuPrice(productSku, plStack);
 			}
-			
+
 			@Override
 			public Price getProductPrice(final Product product) {
 				return PriceLookupServiceImpl.this.getProductPrice(product, plStack);
 			}
-			
+
 			@Override
 			public Currency getCurrency() {
 				return plStack.getCurrency();
@@ -297,5 +297,5 @@ public class PriceLookupServiceImpl implements PriceLookupService {
 	protected BaseAmountDataSource getBaseAmountDataSource() {
 		return baseAmountDataSource;
 	}
-	
+
 }

@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.elasticpath.cmclient.changeset.ChangeSetPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.common.AbstractStatePolicyImpl;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
@@ -18,7 +19,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.service.changeset.ChangeSetManagementService;
 import com.elasticpath.service.changeset.ChangeSetService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+
 /**
  * A state policy which checks whether an object is a member of a Change Set. See determine state method for details. 
  */
@@ -158,7 +159,7 @@ public class ChangeSetPriceAdjustmentStatePolicyImpl extends AbstractStatePolicy
 	 */
 	protected ChangeSetService getChangeSetService() {
 		if (changesetService == null) {
-			changesetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+			changesetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 		}
 		return changesetService;
 	}
@@ -170,7 +171,7 @@ public class ChangeSetPriceAdjustmentStatePolicyImpl extends AbstractStatePolicy
 	 */
 	protected ChangeSetManagementService getChangeSetManagementService() {
 		if (changesetManagementService == null) {
-			changesetManagementService = ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+			changesetManagementService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 		}
 		return changesetManagementService;
 	}

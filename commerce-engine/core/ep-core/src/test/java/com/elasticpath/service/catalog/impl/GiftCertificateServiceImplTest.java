@@ -243,7 +243,7 @@ public class GiftCertificateServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testLoad() {
-		stubGetBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificateImpl.class);
+		stubGetPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class, GiftCertificateImpl.class);
 
 		final long uid = 1234L;
 		final GiftCertificate giftCertificate = new GiftCertificateImpl();
@@ -264,7 +264,7 @@ public class GiftCertificateServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testLoadAnNonExistGiftCertificate() {
-		stubGetBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificateImpl.class);
+		stubGetPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class, GiftCertificateImpl.class);
 
 		final long uid = 1234L;
 		final GiftCertificate giftCertificate = new GiftCertificateImpl();
@@ -283,7 +283,7 @@ public class GiftCertificateServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testLoadANewGiftCertificate() {
-		stubGetBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificateImpl.class);
+		stubGetPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class, GiftCertificateImpl.class);
 
 		assertNotNull(giftCertificateService.load(0L));
 	}
@@ -512,7 +512,7 @@ public class GiftCertificateServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testRemoveGiftCertificate() {
-		stubGetBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificateImpl.class);
+		stubGetPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class, GiftCertificateImpl.class);
 
 		final long giftCertificateUid = 23456L;
 		final GiftCertificate giftCertificate = getGiftCertificate();

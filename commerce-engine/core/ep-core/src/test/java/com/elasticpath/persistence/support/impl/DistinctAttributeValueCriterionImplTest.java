@@ -40,7 +40,7 @@ public class DistinctAttributeValueCriterionImplTest {
 		distinctAttributeValueCriterionImpl = new DistinctAttributeValueCriterionImpl();
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, AttributeUsageImpl.class);
 	}
 
 	@After
@@ -61,10 +61,10 @@ public class DistinctAttributeValueCriterionImplTest {
 		attribute.setAttributeUsage(attributeUsage);
 
 		String result = distinctAttributeValueCriterionImpl.getDistinctAttributeValueCriterion(attribute);
-		assertTrue(result.indexOf("select") >= 0);
-		assertTrue(result.indexOf(String.valueOf(ATTRIBUTE_UID)) >= 0);
-		assertTrue(result.indexOf("integerValue") >= 0);
-		assertTrue(result.indexOf("Product") >= 0);
+		assertTrue(result.contains("select"));
+		assertTrue(result.contains(String.valueOf(ATTRIBUTE_UID)));
+		assertTrue(result.contains("integerValue"));
+		assertTrue(result.contains("Product"));
 
 	}
 
@@ -81,10 +81,10 @@ public class DistinctAttributeValueCriterionImplTest {
 		attribute.setAttributeUsage(attributeUsage);
 
 		String result = distinctAttributeValueCriterionImpl.getDistinctAttributeValueCriterion(attribute);
-		assertTrue(result.indexOf("select") >= 0);
-		assertTrue(result.indexOf(String.valueOf(ATTRIBUTE_UID)) >= 0);
-		assertTrue(result.indexOf("longTextValue") >= 0);
-		assertTrue(result.indexOf("Category") >= 0);
+		assertTrue(result.contains("select"));
+		assertTrue(result.contains(String.valueOf(ATTRIBUTE_UID)));
+		assertTrue(result.contains("longTextValue"));
+		assertTrue(result.contains("Category"));
 
 	}
 
@@ -101,10 +101,10 @@ public class DistinctAttributeValueCriterionImplTest {
 		attribute.setAttributeUsage(attributeUsage);
 
 		String result = distinctAttributeValueCriterionImpl.getDistinctAttributeValueCriterion(attribute);
-		assertTrue(result.indexOf("select") >= 0);
-		assertTrue(result.indexOf(String.valueOf(ATTRIBUTE_UID)) >= 0);
-		assertTrue(result.indexOf("dateValue") >= 0);
-		assertTrue(result.indexOf("ProductSku") >= 0);
+		assertTrue(result.contains("select"));
+		assertTrue(result.contains(String.valueOf(ATTRIBUTE_UID)));
+		assertTrue(result.contains("dateValue"));
+		assertTrue(result.contains("ProductSku"));
 
 	}
 

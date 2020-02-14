@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -343,7 +343,7 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 	 */
 	public List<Attribute> getAvailableAttributesList() {
 		if (availableAttributes == null) {
-			final AttributeService attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+			final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 			availableAttributes = attributeService.getProductAttributes();
 		}
 
@@ -411,7 +411,7 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 	@SuppressWarnings({"PMD.CyclomaticComplexity"})
 	protected void populateControls() {
 		// Populate taxCode combo
-		final TaxCodeService taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+		final TaxCodeService taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 
 		final List<TaxCode> codeList = taxCodeService.list();
 		taxCodeList = new ArrayList<>();

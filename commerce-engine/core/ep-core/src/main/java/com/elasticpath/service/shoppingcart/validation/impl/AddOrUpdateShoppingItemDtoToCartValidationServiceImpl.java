@@ -35,7 +35,8 @@ public class AddOrUpdateShoppingItemDtoToCartValidationServiceImpl
 	@Override
 	public ShoppingItemDtoValidationContext buildContext(final ShoppingCart shoppingCart, final ShoppingItemDto shoppingItemDto,
 														 final Object parentShoppingItem, final boolean isUpdate) {
-		final ShoppingItemDtoValidationContext context = beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_DTO_VALIDATION_CONTEXT);
+		final ShoppingItemDtoValidationContext context = beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_DTO_VALIDATION_CONTEXT,
+				ShoppingItemDtoValidationContext.class);
 
 		context.setShoppingCart(shoppingCart);
 		context.setShoppingItemDto(shoppingItemDto);

@@ -281,6 +281,15 @@ public class CustomerDefinition {
 	}
 
 	/**
+	 * Select newly created Data Policy to Delete Data points.
+	 */
+	@When("^I Delete Data Points for recent Data Policy$")
+	public void deleteDataPointsInNewlyCreatedDataPolicy() {
+		customerEditor.verifyDataPolicyExists(DataPolicyNameHolder.getName());
+		customerEditor.clickDeletePolicyDataButton();
+	}
+
+	/**
 	 * Ensure Data Point Values in the Table are empty.
 	 *
 	 * @param dataPointNameList List of Data Point Names.
@@ -335,13 +344,22 @@ public class CustomerDefinition {
 	}
 
 	/**
+	 * Verify newly created Data Policy is present in the table.
+	 */
+	@Then("^I should see newly Disabled Data Policy$")
+	public void verifyNewlyCreatedDataPolicyExists() {
+		customerEditor.verifyDataPolicyExists(DataPolicyNameHolder.getName());
+		resetDataPolicyState(DataPolicyNameHolder.getName());
+	}
+
+	/**
 	 * Resets Data Policy State.
 	 *
 	 * @param dataPolicyName String.
 	 */
 	private void resetDataPolicyState(final String dataPolicyName) {
 		DBConnector dbConnector = new DBConnector();
-		dbConnector.executeUpdateQuery("UPDATE TDATAPOLICY SET STATE='1', END_DATE=NULL WHERE POLICY_NAME='" + dataPolicyName + "';");
+		dbConnector.executeUpdateQuery("UPDATE TDATAPOLICY SET STATE='1', END_DATE=NULL WHERE POLICY_NAME='" + dataPolicyName + "'");
 		dbConnector.closeAll();
 	}
 

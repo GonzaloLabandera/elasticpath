@@ -6,7 +6,6 @@ package com.elasticpath.rest.resource.addresses.prototypes;
 import io.reactivex.Single;
 import org.apache.commons.lang3.StringUtils;
 
-import com.elasticpath.rest.definition.addresses.AddressDetailEntity;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.addresses.AddressFormResource;
 import com.elasticpath.rest.definition.base.NameEntity;
@@ -18,15 +17,13 @@ public class ReadAddressFormPrototype implements AddressFormResource.Read {
 
 	@Override
 	public Single<AddressEntity> onRead() {
-		AddressDetailEntity addressDetailEntity = AddressDetailEntity.builder()
+		com.elasticpath.rest.definition.base.AddressEntity addressEntity = com.elasticpath.rest.definition.base.AddressEntity.builder()
 				.withCountryName(StringUtils.EMPTY)
 				.withExtendedAddress(StringUtils.EMPTY)
 				.withLocality(StringUtils.EMPTY)
 				.withPostalCode(StringUtils.EMPTY)
 				.withRegion(StringUtils.EMPTY)
 				.withStreetAddress(StringUtils.EMPTY)
-				.withPhoneNumber(StringUtils.EMPTY)
-				.withOrganization(StringUtils.EMPTY)
 				.build();
 
 		NameEntity nameEntity = NameEntity.builder()
@@ -35,8 +32,10 @@ public class ReadAddressFormPrototype implements AddressFormResource.Read {
 				.build();
 
 		return Single.just(AddressEntity.builder()
-				.withAddress(addressDetailEntity)
+				.withAddress(addressEntity)
 				.withName(nameEntity)
+				.withPhoneNumber(StringUtils.EMPTY)
+				.withOrganization(StringUtils.EMPTY)
 				.build());
 	}
 }

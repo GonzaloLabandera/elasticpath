@@ -17,7 +17,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
@@ -71,7 +71,7 @@ public class OrderDetailsPromotionSectionPart extends AbstractCmClientEditorPage
 	}
 
 	private Rule retrieveRule(final AppliedRule appliedRule) {
-		RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		return ruleService.get(appliedRule.getRuleUid());
 	}
 

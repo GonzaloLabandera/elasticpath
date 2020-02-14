@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="ext-data/data/liquibase-changelog.xml">
+
+	<!-- The following sample/demo data is included by default from the commerce-data project.
+		 You should remove these includes once you have created real data for your project. -->
+	<include file="shared-demo-data/liquibase-changelog.xml" relativeToChangelogFile="true" />
+	<include file="shared-release-data/liquibase-changelog.xml" relativeToChangelogFile="true" />
+
+</databaseChangeLog>

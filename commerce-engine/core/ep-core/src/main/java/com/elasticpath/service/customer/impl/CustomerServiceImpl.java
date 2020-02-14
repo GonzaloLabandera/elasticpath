@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.customer.impl;
 
@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -52,6 +51,7 @@ import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.dao.CustomerAddressDao;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.shopper.ShopperCleanupService;
@@ -90,6 +90,8 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	private EventMessageFactory eventMessageFactory;
 
 	private EventMessagePublisher eventMessagePublisher;
+
+	private OrderPaymentApiCleanupService orderPaymentApiCleanupService;
 
 	private static final String NEW_PASSWORD_KEY = "newPassword";
 
@@ -302,12 +304,13 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 		userIdentityService.remove(customer.getUserId());
 		shopperCleanupService.removeShoppersByCustomer(customer);
+		orderPaymentApiCleanupService.removeByCustomer(customer);
 		getPersistenceEngine().delete(customer);
 		addCustomerDeletedForAuditing(customer.getUidPk());
 	}
 
 	private void addCustomerDeletedForAuditing(final long uid) {
-		final CustomerDeleted customerDeleted = getBean(ContextIdNames.CUSTOMER_DELETED);
+		final CustomerDeleted customerDeleted = getPrototypeBean(ContextIdNames.CUSTOMER_DELETED, CustomerDeleted.class);
 		customerDeleted.setCustomerUid(uid);
 		customerDeleted.setDeletedDate(new Date());
 		getPersistenceEngine().save(customerDeleted);
@@ -337,7 +340,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		sanityCheck();
 		Customer customer = null;
 		if (customerUid <= 0) {
-			customer = getBean(ContextIdNames.CUSTOMER);
+			customer = getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		} else {
 			customer = getPersistentBeanFinder().load(ContextIdNames.CUSTOMER, customerUid);
 		}
@@ -369,7 +372,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		sanityCheck();
 		Customer customer;
 		if (customerUid <= 0) {
-			customer = getBean(ContextIdNames.CUSTOMER);
+			customer = getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		} else {
 			customer = getPersistentBeanFinder()
 				.withLoadTuners(loadTuner)
@@ -829,7 +832,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	private CustomerService getCustomerService() {
-		return getBean(ContextIdNames.CUSTOMER_SERVICE);
+		return getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 	}
 
 	/**
@@ -879,4 +882,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		return eventMessagePublisher;
 	}
 
+	public void setOrderPaymentApiCleanupService(final OrderPaymentApiCleanupService orderPaymentApiCleanupService) {
+		this.orderPaymentApiCleanupService = orderPaymentApiCleanupService;
+	}
 }

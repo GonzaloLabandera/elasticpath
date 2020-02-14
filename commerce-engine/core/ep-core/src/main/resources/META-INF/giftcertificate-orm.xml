@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+
+	<!-- Named queries for GiftCertificateTransactionImpl -->
+	<named-query name="GIFT_CERTIFICATE_TRANSACTIONS">
+		<query>
+			SELECT g
+			FROM GiftCertificateTransactionImpl g
+			WHERE g.giftCertificate.uidPk = ?1
+			ORDER BY g.uidPk
+		</query>
+	</named-query>
+
+</entity-mappings>
+

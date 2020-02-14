@@ -85,7 +85,9 @@
 							org.springframework.beans.factory,
 							org.springframework.beans.factory.config,
 							org.springframework.context,
-							org.springframework.core.io,org.springframework.util,
+							org.springframework.core.io,
+							org.springframework.util,
+							org.springframework.core,
 							!*
 						</Import-Package>
 						<Export-Package>

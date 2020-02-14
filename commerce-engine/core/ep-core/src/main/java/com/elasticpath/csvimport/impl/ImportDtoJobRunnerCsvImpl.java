@@ -137,9 +137,9 @@ public class ImportDtoJobRunnerCsvImpl<T, V> implements ImportJobRunner {
 		// verify the change set status of the object in case change sets are enabled
 		if (!checkChangeSetStatus(object, getImportJobRequest().getChangeSetGuid())) {
 			// verify the changeset status only if the verification of the line was successful
-			ImportBadRow badRow = getBeanFactory().getBean(ContextIdNames.IMPORT_BAD_ROW);
+			ImportBadRow badRow = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			// report error
-			final ImportFault importFault = getBeanFactory().getBean(ContextIdNames.IMPORT_FAULT);
+			final ImportFault importFault = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			importFault.setCode("import.csvFile.badRow.unavailableForChangeSet");
 			importFault.setArgs(new Object[] { rowNumber, getImportJobRequest().getChangeSetGuid() });
 			badRow.addImportFault(importFault);
@@ -173,7 +173,8 @@ public class ImportDtoJobRunnerCsvImpl<T, V> implements ImportJobRunner {
 	 * @return the reader criteria
 	 */
 	protected CsvReaderConfiguration getCsvReaderConfiguration() {
-		CsvReaderConfiguration configuration = getBeanFactory().getBean(ContextIdNames.CSV_READER_CONFIGURATION);
+		CsvReaderConfiguration configuration = getBeanFactory()
+				.getPrototypeBean(ContextIdNames.CSV_READER_CONFIGURATION, CsvReaderConfiguration.class);
 		configuration.setDelimiter(getCsvColDelimiter());
 		configuration.setTextQualifier(getCsvTextQualifier());
 		configuration.setFieldColumnIndexMapping(getFieldColumnIndexMappings());

@@ -21,7 +21,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.editor.IFormPage;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.editors.CancelSaveException;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
@@ -72,9 +72,9 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 	private Rule rule;
 
 	private final RuleService ruleService =
-		ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+			BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 	private final SellingContextService sellingContextService =
-		ServiceLocator.getService(ContextIdNames.SELLING_CONTEXT_SERVICE);
+			BeanLocator.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class);
 
 	private List<IFormPage> pagesList = new LinkedList<>();
 
@@ -82,7 +82,8 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 
 	private CouponConfigPageModel couponModel;
 
-	private final CouponConfigService couponConfigService = ServiceLocator.getService(ContextIdNames.COUPON_CONFIG_SERVICE);
+	private final CouponConfigService couponConfigService = BeanLocator
+			.getSingletonBean(ContextIdNames.COUPON_CONFIG_SERVICE, CouponConfigService.class);
 
 	private CouponEditorPage couponEditorPage;
 
@@ -99,7 +100,7 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 		Rule rule = ruleService.findByRuleCode(guid);
 		SellingContext sellingContext = rule.getSellingContext();
 		if (sellingContext == null) {
-			sellingContext = ServiceLocator.getService(ContextIdNames.SELLING_CONTEXT);
+			sellingContext = BeanLocator.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 			sellingContext.setName(rule.getName());
 			rule.setSellingContext(sellingContext);
 		}
@@ -109,7 +110,7 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 	private CouponConfig retriveCouponConfig(final String ruleCode) {
 		CouponConfig couponConfig = couponConfigService.findByRuleCode(ruleCode);
 		if (couponConfig == null) {
-			couponConfig = ServiceLocator.getService(ContextIdNames.COUPON_CONFIG);
+			couponConfig = BeanLocator.getPrototypeBean(ContextIdNames.COUPON_CONFIG, CouponConfig.class);
 		}
 
 		return couponConfig;

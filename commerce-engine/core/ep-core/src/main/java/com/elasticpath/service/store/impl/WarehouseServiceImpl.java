@@ -18,7 +18,7 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	/**
 	 * Saves or updates a given <code>Warehouse</code>.
-	 * 
+	 *
 	 * @param warehouse the <code>Warehouse</code> to save or update
 	 * @throws EpServiceException in case of any errors
 	 *
@@ -32,7 +32,7 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	/**
 	 * Deletes a warehouse and it's associated address.
-	 * 
+	 *
 	 * @param warehouse the warehouse to remove
 	 * @throws EpServiceException in case of any errors
 	 */
@@ -44,7 +44,7 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	/**
 	 * Gets a <code>Warehouse</code> with the given UID. Return null if no matching records exist.
-	 * 
+	 *
 	 * @param warehouseUid the <code>Warehouse</code> UID
 	 * @return the <code>Warehouse</code> with the attributes populated if the UID exists, otherwise null
 	 * @throws EpServiceException in case of any errors
@@ -54,7 +54,7 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		sanityCheck();
 		Warehouse warehouse = null;
 		if (warehouseUid <= 0) {
-			warehouse = getBean(ContextIdNames.WAREHOUSE);
+			warehouse = getPrototypeBean(ContextIdNames.WAREHOUSE, Warehouse.class);
 		} else {
 			warehouse = getPersistentBeanFinder().get(ContextIdNames.WAREHOUSE, warehouseUid);
 		}
@@ -63,7 +63,7 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	/**
 	 * Gets a list of all warehouse UIDs.
-	 * 
+	 *
 	 * @return a list of all warehouse UIDs
 	 * @throws EpServiceException in case of any errors
 	 */
@@ -75,7 +75,7 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	/**
 	 * Gets a list of all warehouses.
-	 * 
+	 *
 	 * @return a list of all warehouses
 	 * @throws EpServiceException in case of any errors
 	 */
@@ -87,7 +87,7 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	/**
 	 * Generic get method for a warehouse.
-	 * 
+	 *
 	 * @param uid the persisted warehouse uid
 	 * @return the persisted instance of a <code>Warehouse</code> if it exists, otherwise null
 	 * @throws EpServiceException in case of any errors
@@ -99,7 +99,7 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	/**
 	 * Check if warehouse in use.
-	 * 
+	 *
 	 * @param warehouseUidPk the warehouse uidPk
 	 * @return true if given warehouse in use false otherwise
 	 * @throws EpServiceException in case of any errors
@@ -113,11 +113,11 @@ public class WarehouseServiceImpl extends AbstractEpPersistenceServiceImpl imple
 				|| !getPersistenceEngine().retrieveByNamedQuery("FIND_WAREHOUSE_UIDS_IN_IMPORTJOB_USE", queryParams).isEmpty()
 				|| !getPersistenceEngine().retrieveByNamedQuery("FIND_WAREHOUSE_UIDS_IN_INVENTORY_USE", queryParams).isEmpty();
 	}
-	
+
 	/**
 	 * Retrieves a warehouse by it's code. If no warehouse is found with the given code, returns
 	 * <code>null</code>.
-	 * 
+	 *
 	 * @param code the code to look for
 	 * @return the warehouse with the given code or <code>null</code> if none could be found
 	 * @throws EpServiceException in case of any errors

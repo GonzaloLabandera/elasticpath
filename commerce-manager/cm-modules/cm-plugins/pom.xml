@@ -27,7 +27,7 @@
 		<module>com.elasticpath.cmclient.admin.stores</module>
 		<module>com.elasticpath.cmclient.admin.taxes</module>
 		<module>com.elasticpath.cmclient.admin.shipping</module>
-		<module>com.elasticpath.cmclient.admin.payment</module>
+		<module>com.elasticpath.cmclient.admin.paymentconfigurations</module>
 		<module>com.elasticpath.cmclient.admin.warehouses</module>
 		<module>com.elasticpath.cmclient.fulfillment</module>
 		<module>com.elasticpath.cmclient.changeset</module>

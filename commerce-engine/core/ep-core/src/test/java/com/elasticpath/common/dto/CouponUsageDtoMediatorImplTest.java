@@ -42,12 +42,12 @@ public class CouponUsageDtoMediatorImplTest {
 	private static final String EMAIL_ADDRESS1 = "email.address@blog.com";
 
 	private CouponServiceImplDouble couponService;
-	
+
 	private CouponUsageServiceImplDouble couponUsageService;
 
 	@Mock
 	private CouponConfigService couponConfigService;
-	
+
 	private CouponUsageDtoMediatorImpl mediator;
 
 	@Mock
@@ -65,50 +65,50 @@ public class CouponUsageDtoMediatorImplTest {
 	 */
 	private class CouponUsageServiceImplDouble extends CouponUsageServiceImpl {
 		private CouponUsage updatedCouponUsage;
-		
+
 		@Override
 		public CouponUsage add(final CouponUsage newCouponUsage) throws EpServiceException {
 			this.updatedCouponUsage = newCouponUsage;
 			return updatedCouponUsage;
 		}
-		
+
 		public CouponUsage getUpdatedCouponUsage() {
 			return updatedCouponUsage;
 		}
 	}
-	
+
 	/**
 	 * Test double for verifying calls.
 	 */
 	private class CouponServiceImplDouble extends CouponServiceImpl {
 		private Coupon updatedCoupon;
-		
+
 		@Override
 		public Coupon update(final Coupon newCoupon) throws EpServiceException {
 			this.updatedCoupon = newCoupon;
 			return updatedCoupon;
 		}
-		
+
 		@Override
 		public Coupon add(final Coupon newCoupon) {
 			this.updatedCoupon = newCoupon;
 			return updatedCoupon;
 		}
-				
+
 		@Override
 		public Map<String, Coupon> findCouponsForCodes(final Collection<String> codes) {
 			return new HashMap<>();
 		}
-		
+
 		public Coupon getUpdatedCoupon() {
 			return this.updatedCoupon;
 		}
-		
+
 		@Override
 		public Coupon findByCouponCode(final String couponCode) {
 			return null;
 		}
-		
+
 		@Override
 		public boolean doesCouponCodeOnlyExistForThisRuleCode(final String couponCode, final String ruleCode) {
 			return true;
@@ -118,7 +118,7 @@ public class CouponUsageDtoMediatorImplTest {
 
 	/**
 	 * Set up required for each test.
-	 * 
+	 *
 	 * @throws java.lang.Exception in case of error during setup
 	 */
 	@Before
@@ -133,7 +133,7 @@ public class CouponUsageDtoMediatorImplTest {
 		mediator.setCouponUsageService(couponUsageService);
 		mediator.setBeanFactory(beanFactory);
 	}
-	
+
 	/**
 	 * Test Adding Coupon given a list of Dtos and an associated CouponPk.
 	 */
@@ -158,16 +158,16 @@ public class CouponUsageDtoMediatorImplTest {
 		addedCouponUsages.add(dto1);
 
 		when(couponConfigService.findByRuleCode(ruleCode)).thenReturn(persistentCouponConfig);
-		when(beanFactory.getBean(ContextIdNames.COUPON)).thenReturn(persistentCoupon);
-		when(beanFactory.getBean(ContextIdNames.COUPON_USAGE)).thenReturn(persistentCouponUsage);
+		when(beanFactory.getPrototypeBean(ContextIdNames.COUPON, Coupon.class)).thenReturn(persistentCoupon);
+		when(beanFactory.getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class)).thenReturn(persistentCouponUsage);
 
 		mediator.add(addedCouponUsages, ruleCode);
 		Coupon coupon = couponService.getUpdatedCoupon();
 		CouponUsage couponUsage = couponUsageService.getUpdatedCouponUsage();
 
 		verify(couponConfigService).findByRuleCode(ruleCode);
-		verify(beanFactory).getBean(ContextIdNames.COUPON);
-		verify(beanFactory).getBean(ContextIdNames.COUPON_USAGE);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 
 		assertThat(couponUsage.isSuspended()).isTrue();
 		assertThat(coupon.isSuspended()).isFalse();

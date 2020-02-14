@@ -21,8 +21,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -58,8 +58,7 @@ public class CatalogSummarySection extends AbstractCmClientEditorPageSectionPart
 
 	private LanguageSelectionDualListBox languageDualList;
 
-	private final StoreService storeService =
-		(StoreService) ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+	private final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 
 	@SuppressWarnings("PMD.AvoidStringBufferField")
 	private StringBuilder bodyString;

@@ -24,7 +24,8 @@ public class CatalogSyndicationBatchJobsExtensionIntegrationTest extends XaTrans
 
 	@Test
 	public void testCatalogSyndicationBatchJobsExtension() {
-		final Map<String, ?> searchTerms = getBeanFactory().getBean(CATALOG_SYNDICATION_BATCH_JOBS);
+		@SuppressWarnings("unchecked")
+		final Map<String, ?> searchTerms = (Map<String, ?>) getBeanFactory().getSingletonBean(CATALOG_SYNDICATION_BATCH_JOBS, Map.class);
 		assertThat(searchTerms.keySet()).containsExactlyInAnyOrder(
 				"BUILD_TEST_EXTENSION_FEED",
 				"BUILD_ALL_OPTIONS",

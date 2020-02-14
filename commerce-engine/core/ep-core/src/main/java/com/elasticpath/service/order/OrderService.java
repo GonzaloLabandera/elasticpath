@@ -1,33 +1,29 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006-2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.order;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
-import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderShipment;
-import com.elasticpath.domain.order.OrderShipmentStatus;
-import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.order.PurchaseHistorySearchCriteria;
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.domain.store.Warehouse;
+import com.elasticpath.money.Money;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
+import com.elasticpath.provider.payment.service.event.PaymentEvent;
+import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentDTO;
 import com.elasticpath.service.EpPersistenceService;
-import com.elasticpath.service.payment.PaymentResult;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
 import com.elasticpath.service.tax.TaxDocumentModificationContext;
 
@@ -42,28 +38,18 @@ public interface OrderService extends EpPersistenceService {
 	 *
 	 * @param order the order to add
 	 * @return the persisted instance of order
-	 * @throws EpServiceException - in case of any errors
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
-	Order add(Order order) throws EpServiceException;
+	Order add(Order order);
 
 	/**
 	 * Updates the given order.
 	 *
 	 * @param order the order to update
 	 * @return the persisted instance of order
-	 * @throws EpServiceException - in case of any errors
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
-	Order update(Order order) throws EpServiceException;
-
-	/**
-	 * Retrieve the list of orders with the specified statuses.
-	 *
-	 * @param orderStatus the status of the order
-	 * @param paymentStatus the status of the paymentreturnSummaryNode
-	 * @param shipmentStatus the status of the shipment
-	 * @return the list of orders with the specified statuses
-	 */
-	List<Order> findOrderByStatus(OrderStatus orderStatus, OrderPaymentStatus paymentStatus, OrderShipmentStatus shipmentStatus);
+	Order update(Order order);
 
 	/**
 	 * Retrieves list of <code>Order</code> where the created date is later than the specified date.
@@ -76,9 +62,9 @@ public interface OrderService extends EpPersistenceService {
 	/**
 	 * Retrieve the list of orders, whose specified property matches the given criteria value.
 	 *
-	 * @param propertyName order property to search on.
+	 * @param propertyName  order property to search on.
 	 * @param criteriaValue criteria value to be used for searching.
-	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
+	 * @param isExactMatch  true for doing an exact match; false for doing a fuzzy match.
 	 * @return list of orders matching the given criteria.
 	 */
 	List<Order> findOrder(String propertyName, String criteriaValue, boolean isExactMatch);
@@ -95,8 +81,8 @@ public interface OrderService extends EpPersistenceService {
 	/**
 	 * Retrieve the list of orders by the customer's guid and store code.
 	 *
-	 * @param customerGuid the customer's guid
-	 * @param storeCode the store code
+	 * @param customerGuid     the customer's guid
+	 * @param storeCode        the store code
 	 * @param retrieveFullInfo if set to true, will retrieve entire object graph, otherwise only retrieves basic information
 	 * @return list of orders matching the criteria.
 	 */
@@ -114,8 +100,8 @@ public interface OrderService extends EpPersistenceService {
 	 * order search function based on the OrderSearchCriteria.
 	 *
 	 * @param orderSearchCriteria the order search criteria.
-	 * @param start the starting record to search
-	 * @param maxResults the max results to be returned
+	 * @param start               the starting record to search
+	 * @param maxResults          the max results to be returned
 	 * @return the list of orders matching the given criteria.
 	 */
 	List<Order> findOrdersBySearchCriteria(OrderSearchCriteria orderSearchCriteria, int start, int maxResults);
@@ -124,13 +110,13 @@ public interface OrderService extends EpPersistenceService {
 	 * Find orders by search criteria using the given load tuner.
 	 *
 	 * @param orderSearchCriteria the order search criteria.
-	 * @param start the starting record to search
-	 * @param maxResults the max results to be returned
-	 * @param loadTuner the load tuner
+	 * @param start               the starting record to search
+	 * @param maxResults          the max results to be returned
+	 * @param loadTuner           the load tuner
 	 * @return the list of orders matching the given criteria.
 	 */
 	List<Order> findOrdersBySearchCriteria(OrderSearchCriteria orderSearchCriteria, int start, int maxResults,
-			LoadTuner loadTuner);
+										   LoadTuner loadTuner);
 
 	/**
 	 * Returns a list of <code>Order</code> based on the given uids. The returned orders will be populated based on the given load tuner.
@@ -150,72 +136,64 @@ public interface OrderService extends EpPersistenceService {
 	List<Order> findDetailedOrdersByUids(Collection<Long> orderUids);
 
 	/**
-	 * List all orders stored in the database.
-	 *
-	 * @return a list of orders
-	 * @throws EpServiceException - in case of any errors
-	 */
-	List<Order> list() throws EpServiceException;
-
-	/**
 	 * Get the order with the given UID. Return null if no matching record exists.
 	 *
 	 * @param orderUid the order UID
 	 * @return the order if UID exists, otherwise null
-	 * @throws EpServiceException - in case of any errors
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
-	Order get(long orderUid) throws EpServiceException;
+	Order get(long orderUid);
 
 	/**
 	 * Get the order with the given UID. Return <code>null</code> if no matching record exists.
 	 * Fine tune the order with the given load tuner. If <code>null</code> is given, the default
 	 * load tuner will be used.
 	 *
-	 * @param orderUid the order UID
+	 * @param orderUid  the order UID
 	 * @param loadTuner the load tuner to use (or <code>null</code> for the default)
 	 * @return the order if UID exists, otherwise <code>null</code>
-	 * @throws EpServiceException in case of any errors
+	 * @throws com.elasticpath.base.exception.EpServiceException in case of any errors
 	 */
-	Order get(long orderUid, FetchGroupLoadTuner loadTuner) throws EpServiceException;
+	Order get(long orderUid, FetchGroupLoadTuner loadTuner);
 
 	/**
 	 * Generic get method for all persistable domain models.
 	 *
 	 * @param uid the persisted instance uid
 	 * @return the persisted instance if exists, otherwise null
-	 * @throws EpServiceException - in case of any errors
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
 	@Override
-	Object getObject(long uid) throws EpServiceException;
+	Object getObject(long uid);
 
 	/**
 	 * Return the fully initialized order object.
 	 *
 	 * @param uid the persisted instance uid
 	 * @return the persisted instance if exists, otherwise null
-	 * @throws EpServiceException - in case of any errors
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
-	Order getOrderDetail(long uid) throws EpServiceException;
+	Order getOrderDetail(long uid);
 
 	/**
 	 * Capture the order balance amount and update the <code>OrderShipment</code> status on success.
 	 *
-	 * @param shipmentNumber the shipment number to be released (GUID)
-	 * @param trackingCode the trackingCode for the orderShipment to be released (optional)
-	 * @param captureFunds true if funds should be captured, false if not
-	 * @param shipmentDate the date that the shipment was completed (optional, defaults to now)
-	 * @param sendConfEmail need to send customer a shipment confirmation email or not (optional, defaults to false)\
+	 * @param shipmentNumber  the shipment number to be released (GUID)
+	 * @param trackingCode    the trackingCode for the orderShipment to be released (optional)
+	 * @param captureFunds    true if funds should be captured, false if not
+	 * @param shipmentDate    the date that the shipment was completed (optional, defaults to now)
+	 * @param sendConfEmail   need to send customer a shipment confirmation email or not (optional, defaults to false)\
 	 * @param eventOriginator the event originator, could be cm user, ws user, customer or system originator.
-	 * See {@link com.elasticpath.domain.event.EventOriginatorHelper }
+	 *                        See {@link com.elasticpath.domain.event.EventOriginatorHelper }
 	 * @return the modified Order containing the modified Shipment
 	 * @throws CompleteShipmentFailedException on error setting up the payments
 	 */
 	Order completeShipment(String shipmentNumber,
-			String trackingCode,
-			boolean captureFunds,
-			Date shipmentDate,
-			boolean sendConfEmail,
-			EventOriginator eventOriginator);
+						   String trackingCode,
+						   boolean captureFunds,
+						   Date shipmentDate,
+						   boolean sendConfEmail,
+						   EventOriginator eventOriginator);
 
 	/**
 	 * Called by quartz job to release order shipments after a preconfigured period after order has been placed.
@@ -227,10 +205,11 @@ public interface OrderService extends EpPersistenceService {
 	 * <p>A Shipment is considered releasable if
 	 * <ul>
 	 *     <li>it is a Physical shipment,</li>
-	 *     <li>it has a status of {@link OrderShipmentStatus#INVENTORY_ASSIGNED INVENTORY_ASSIGNED}, and</li>
+	 *     <li>it has a status of {@link com.elasticpath.domain.order.OrderShipmentStatus#INVENTORY_ASSIGNED INVENTORY_ASSIGNED}, and</li>
 	 *     <li>the corresponding warehouse's pick/pack delay has expired</li>
 	 * </ul>
 	 * </p>
+	 *
 	 * @param order the order containing the shipments to release
 	 */
 	void releaseReleasableShipments(Order order);
@@ -238,30 +217,23 @@ public interface OrderService extends EpPersistenceService {
 	/**
 	 * Partially or fully Refund the order based on the amount.
 	 *
-	 * @param orderUid the uid of the order.
-	 * @param shipmentNumber the shipment number
-	 * @param orderPayment order payment to be used for refunding.
-	 * @param refundAmount the amount of the orderpayment to be refunded.
-	 * @param eventOriginator the event originator, could be cm user, ws user, customer or system originator.
-	 * See {@link com.elasticpath.domain.event.EventOriginatorHelper }
-	 * @return the Order on which the refund occurred
+	 * @param order              the order.
+	 * @param paymentInstruments order payment instruments to be used for refunding.
+	 * @param refundAmount       the amount of money to be refunded.
+	 * @param eventOriginator    the event originator, could be cm user, ws user, customer or system originator.
+	 *                           See {@link com.elasticpath.domain.event.EventOriginatorHelper }
 	 */
-	Order processRefundOrderPayment(long orderUid, String shipmentNumber, OrderPayment orderPayment,
-			BigDecimal refundAmount, EventOriginator eventOriginator);
+	void refundOrderPayment(Order order, List<PaymentInstrumentDTO> paymentInstruments, Money refundAmount, EventOriginator eventOriginator);
 
 	/**
-	 * Partially or fully Refund the order based on the amount.
+	 * Manually refund the order based on the amount.
 	 *
-	 * @param orderUid the uid of the order.
-	 * @param shipmentNumber the shipment number
-	 * @param orderPayment order payment to be used for refunding.
-	 * @param refundAmount the amount of the orderpayment to be refunded.
-	 * @param eventOriginator the event originator, could be cm user, ws user, customer or system originator.
-	 * See {@link com.elasticpath.domain.event.EventOriginatorHelper }
-	 * @return the Order on which the refund occurred
+	 * @param order           the order
+	 * @param refundAmount    the amount of money to be refunded
+	 * @param eventOriginator the event originator, could be cm user, ws user, customer or system originator
+	 *                        See {@link com.elasticpath.domain.event.EventOriginatorHelper}
 	 */
-	Order refundOrderPayment(long orderUid, String shipmentNumber, OrderPayment orderPayment, BigDecimal refundAmount,
-			EventOriginator eventOriginator);
+	void manualRefundOrderPayment(Order order, Money refundAmount, EventOriginator eventOriginator);
 
 	/**
 	 * Get the orderSku uid -> returned quantity map for the order with given uid.
@@ -290,7 +262,7 @@ public interface OrderService extends EpPersistenceService {
 	 * Retrieve the list of orders by the gift certificate code.
 	 *
 	 * @param giftCertificateCode the gift certificate code
-	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
+	 * @param isExactMatch        true for doing an exact match; false for doing a fuzzy match.
 	 * @return list of orders matching the gift certificate code.
 	 */
 	List<Order> findOrderByGiftCertificateCode(String giftCertificateCode, boolean isExactMatch);
@@ -298,6 +270,7 @@ public interface OrderService extends EpPersistenceService {
 	/**
 	 * Returns a list of ProductCodes for all Products of which the product's skus have been purchased by a
 	 * particular user, given additional search criteria.
+	 *
 	 * @param criteria the criteria to use in finding the product codes
 	 * @return distinct list of product codes corresponding to skus that were purchased by a user, filtered by
 	 * the given search criteria
@@ -313,8 +286,9 @@ public interface OrderService extends EpPersistenceService {
 
 	/**
 	 * Searches for an order shipment with the specified shipment number and shipment type.
+	 *
 	 * @param shipmentNumber the order shipment number
-	 * @param shipmentType the type of shipment (physical or electronic)
+	 * @param shipmentType   the type of shipment (physical or electronic)
 	 * @return the shipment requested, or null if not found
 	 */
 	OrderShipment findOrderShipment(String shipmentNumber, ShipmentType shipmentType);
@@ -327,42 +301,32 @@ public interface OrderService extends EpPersistenceService {
 	 * some extra tasks, eg. capture the payment for gift certificate.
 	 * This method will run as an atomic DB transaction (this is specified in the Spring configuration).
 	 *
-	 * @param shipmentNumber the number of the orderShipment to be released.
-	 * @param trackingCode the trakcingCode for the orderShipment to be released.
-	 * @param shipmentDate the date of shipment process
+	 * @param shipmentNumber  the number of the orderShipment to be released.
+	 * @param trackingCode    the trakcingCode for the orderShipment to be released.
+	 * @param shipmentDate    the date of shipment process
 	 * @param eventOriginator the event originator, could be cm user, ws user, customer or system originator.
-	 * See {@link com.elasticpath.domain.event.EventOriginatorHelper }
+	 *                        See {@link com.elasticpath.domain.event.EventOriginatorHelper }
 	 * @return the updated order
 	 */
 	Order processOrderShipment(String shipmentNumber, String trackingCode, Date shipmentDate,
-			EventOriginator eventOriginator);
+							   EventOriginator eventOriginator);
 
 	/**
 	 * Add the given <code>OrderReturn</code> to the order with given uid.
 	 *
-	 * @param order the order.
+	 * @param order       the order.
 	 * @param orderReturn orderReturn to be added.
 	 * @return the updated order.
 	 */
 	Order addOrderReturn(Order order, OrderReturn orderReturn);
 
 	/**
-	 * Remove an order. Should only be called on an unpopulated order object.
-	 *
-	 * @param order the order to remove
-	 * @throws EpServiceException - in case of any errors
-	 */
-	void remove(Order order) throws EpServiceException;
-
-
-	/**
 	 * Releases the shipment for pick/pack.
 	 *
 	 * @param orderShipment the order shipment to be released
 	 * @return the updated order shipment
-	 * @throws ReleaseShipmentFailedException on error setting up the authorization payments
 	 */
-	OrderShipment processReleaseShipment(OrderShipment orderShipment) throws ReleaseShipmentFailedException;
+	OrderShipment processReleaseShipment(OrderShipment orderShipment);
 
 	/**
 	 * Return list of shipments which are awaiting shipping.
@@ -383,10 +347,11 @@ public interface OrderService extends EpPersistenceService {
 	/**
 	 * Releases order lock if order was locked and updates the order.
 	 *
-	 * @param order the order to be unlocked and updated.
+	 * @param order  the order to be unlocked and updated.
 	 * @param cmUser the user which is releasing the order lock.
-	 * @throws EpServiceException - in case of any errors,
-	 * InvalidUnlockerException if when the orderLock was obtained not by the cmUser, but by some other user.
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors,
+	 *                                                           InvalidUnlockerException if when the orderLock was obtained not by the cmUser, but
+	 *                                                           by some other user.
 	 */
 	void unlockAndUpdate(Order order, CmUser cmUser);
 
@@ -460,36 +425,37 @@ public interface OrderService extends EpPersistenceService {
 
 	/**
 	 * Places order which exchange requires physical return to AWAITING_EXCHANGE state.
+	 *
 	 * @param order the order upon which to place a hold
 	 * @return the modified order
 	 */
-	Order awaitExchnageCompletionForOrder(Order order);
+	Order awaitExchangeCompletionForOrder(Order order);
 
 	/**
 	 * Processes an order resulting from a shopping cart checkout. The order processing involves all record-creation steps such as creating and
 	 * storing the order, shipment, decrementing Inventory, etc. This method will run as an atomic DB transaction (This is specified in the Spring
 	 * configuration)
 	 *
-	 * @param order the order to process
+	 * @param order           the order to process
 	 * @param isExchangeOrder true if order is created for an exchange
 	 * @return the completed order object
-	 * @throws EpServiceException on error
+	 * @throws com.elasticpath.base.exception.EpServiceException on error
 	 */
 	Order processOrderOnCheckout(Order order, boolean isExchangeOrder);
 
 	/**
-	 * Process the payment for a shipment. This will attempt to capture funds for the shipment and return a <code>PaymentResult</code>. If the
+	 * Process the payment for a shipment. This will attempt to capture funds for the shipment and return a list of payment events. If the
 	 * payment processing fails, then any failed capture transactions will be saved to the order.
 	 *
 	 * @param shipmentNumber the shipment number to process a payment on (GUID)
-	 * @return the result of the payment processing
+	 * @return payment events ledger after shipment processing
 	 */
-	PaymentResult processOrderShipmentPayment(String shipmentNumber);
+	List<PaymentEvent> processOrderShipmentPayment(String shipmentNumber);
 
 	/**
 	 * Increases the record of the number of uses of limited usage promotion codes if the promotions were applied to the shopping cart.
 	 *
-	 * @param appliedRuleUids the UIDs of the rules that have been applied to the shopping cart
+	 * @param appliedRuleUids            the UIDs of the rules that have been applied to the shopping cart
 	 * @param limitedUsagePromotionCodes - list of Limited Usage Promotion codes (stored in ShoppingCart)
 	 */
 	void updateLimitedUsagePromotionCurrentNumbers(Collection<Long> appliedRuleUids, List<String> limitedUsagePromotionCodes);
@@ -497,7 +463,7 @@ public interface OrderService extends EpPersistenceService {
 	/**
 	 * Gets a list of order UIDs for "failed" orders that are created before the given date.
 	 *
-	 * @param toDate the date. orders that are created before this date will be returned.
+	 * @param toDate     the date. orders that are created before this date will be returned.
 	 * @param maxResults the maximum number of results to be returned
 	 * @return a list of order UIDs
 	 */
@@ -521,9 +487,9 @@ public interface OrderService extends EpPersistenceService {
 
 	/**
 	 * Find the numbers of all the orders owned by a customer in a certain store, given customer's GUID and store code.
-	 * @param storeCode the store code
-	 * @param customerGuid the customer GUID
 	 *
+	 * @param storeCode    the store code
+	 * @param customerGuid the customer GUID
 	 * @return the list of order numbers
 	 */
 	List<String> findOrderNumbersByCustomerGuid(String storeCode, String customerGuid);
@@ -532,32 +498,32 @@ public interface OrderService extends EpPersistenceService {
 	 * Find order numbers by search criteria.
 	 *
 	 * @param orderSearchCriteria the order search criteria
-	 * @param start the start
-	 * @param maxResults the max results
+	 * @param start               the start
+	 * @param maxResults          the max results
 	 * @return the list
 	 */
 	List<String> findOrderNumbersBySearchCriteria(OrderSearchCriteria orderSearchCriteria, int start, int maxResults);
-	
+
 	/**
 	 * Handles updating order and its tax documents changes.
-	 * 
-	 * @param order the order to update 
+	 *
+	 * @param order                          the order to update
 	 * @param taxDocumentModificationContext the order tax document modification context
-	 *  
 	 * @return the persisted instance of the updated order
-	 * @throws EpServiceException - in case of any errors
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
-	Order update(Order order, TaxDocumentModificationContext taxDocumentModificationContext) throws EpServiceException;
+	Order update(Order order, TaxDocumentModificationContext taxDocumentModificationContext);
 
 	/**
 	 * Triggers the Re-send Order Confirmation Event.
-	 * 
+	 *
 	 * @param orderNumber the order number
 	 */
 	void resendOrderConfirmationEvent(String orderNumber);
 
 	/**
 	 * Searches for an order shipment with the specified shipment number.
+	 *
 	 * @param shipmentNumber the order shipment number
 	 * @return the shipment requested, or null if not found
 	 */
@@ -565,6 +531,7 @@ public interface OrderService extends EpPersistenceService {
 
 	/**
 	 * Captures payments for shipments in the order that need payment.
+	 *
 	 * @param order the order whose shipment payments we want to capture.
 	 */
 	void captureImmediatelyShippableShipments(Order order);

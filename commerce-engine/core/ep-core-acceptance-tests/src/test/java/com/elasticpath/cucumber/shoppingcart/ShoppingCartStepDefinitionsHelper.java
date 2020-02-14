@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cucumber.shoppingcart;
 
@@ -9,28 +9,23 @@ import static java.util.Collections.singletonList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.google.common.collect.ImmutableMap;
-
 import cucumber.api.DataTable;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
 import com.elasticpath.domain.builder.shopper.ShoppingContext;
 import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -57,32 +52,32 @@ public class ShoppingCartStepDefinitionsHelper {
 	@Inject
 	@Named("storeHolder")
 	private ScenarioContextValueHolder<Store> storeHolder;
-	
+
 	@Inject
 	@Named("shippingOptionHolder")
 	private ScenarioContextValueHolder<ShippingOption> shippingOptionHolder;
-	
+
 	@Inject
 	@Named("customerHolder")
 	private ScenarioContextValueHolder<Customer> customerHolder;
-	
+
 	@Inject
 	@Named("shoppingCartHolder")
 	private ScenarioContextValueHolder<ShoppingCart> shoppingCartHolder;
-	
+
 	@Inject
 	@Named("orderHolder")
 	private ScenarioContextValueHolder<Order> orderHolder;
-	
+
 	@Autowired
 	private TestApplicationContext tac;
-	
+
 	@Autowired
 	private CartDirector cartDirector;
-	
+
 	@Autowired
 	private ShippingOptionService shippingOptionService;
-	
+
 	@Autowired
 	private CheckoutService checkoutService;
 
@@ -107,10 +102,9 @@ public class ShoppingCartStepDefinitionsHelper {
 		if (shoppingCartHolder.get() == null) {
 			shoppingCartHolder.set(getEmptyShoppingCart());
 		}
-		
 		return shoppingCartHolder.get();
 	}
-	
+
 	/**
 	 * Retrieves a default shopping cart.
 	 *
@@ -124,7 +118,6 @@ public class ShoppingCartStepDefinitionsHelper {
 		final OrderTestPersister orderTestPersister = persisterFactory.getOrderTestPersister();
 
 		final CustomerSession customerSession = storeTestPersister.persistCustomerSessionWithAssociatedEntities(customer);
-
 		return orderTestPersister.persistEmptyShoppingCart(
 				customer.getPreferredBillingAddress(), customer.getPreferredShippingAddress(), customerSession,
 				shippingOptionHolder.get(),
@@ -146,7 +139,7 @@ public class ShoppingCartStepDefinitionsHelper {
 			shoppingCart.setBillingAddress(customerAddress);
 		}
 	}
-	
+
 	/**
 	 * Sets billing address of the shopping cart of the current test context.
 	 *
@@ -158,12 +151,12 @@ public class ShoppingCartStepDefinitionsHelper {
 	}
 
 	/**
-	 * Sets delivery option of the shopping cart of the current test context. 
+	 * Sets delivery option of the shopping cart of the current test context.
 	 *
 	 * @param deliveryOption the delivery option
 	 */
 	public void setDeliveryOption(final String deliveryOption) {
-		
+
 		final ShoppingCart shoppingCart = getShoppingCart();
 		final ShippingOptionResult shippingOptionResult = shippingOptionService.getShippingOptions(shoppingCart);
 		final String errorMessage = format("Unable to get available shipping options for the given cart with guid '%s'. "
@@ -184,7 +177,7 @@ public class ShoppingCartStepDefinitionsHelper {
 		if (availableOptions.isEmpty()) {
 			return;
 		}
-		
+
 		availableOptions.stream()
 				.filter(option -> option.getCode().equals(deliveryOption))
 				.findFirst()
@@ -192,15 +185,15 @@ public class ShoppingCartStepDefinitionsHelper {
 	}
 
 	/**
-	 *  Adds items to to the shopping cart of the current test context, and checks out an order from the shopping cart.
+	 * Adds items to to the shopping cart of the current test context, and checks out an order from the shopping cart.
 	 *
 	 * @param itemDtos the shopping item dtos
 	 */
-	public void purchaseItems(final List<ShoppingItemDto> itemDtos) {		
+	public void purchaseItems(final List<ShoppingItemDto> itemDtos) {
 		addItems(itemDtos);
-		submitOrder();		
+		submitOrder();
 	}
-	
+
 	/**
 	 * Adds items to the shopping cart of the current test context.
 	 *
@@ -210,34 +203,26 @@ public class ShoppingCartStepDefinitionsHelper {
 		final ShoppingCart shoppingCart = getShoppingCart();
 		addShoppingItems(shoppingCart, itemDtos);
 	}
-	
+
 	/**
 	 * Checks out an order from the shopping cart of the current test context.
 	 */
 	public void submitOrder() {
 		final Customer customer = customerHolder.get();
 		final ShoppingCart shoppingCart = getShoppingCart();
-		
-		final OrderPayment orderPayment = tac.getPersistersFactory().getOrderTestPersister().createOrderPayment(
-			customer, (PaymentToken) customer.getPaymentMethods().getDefault());
 
-		final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(customer)
-				.build();
+		final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(customer).build();
 		shoppingContextPersister.persist(shoppingContext);
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		final CheckoutResults checkoutResults = checkoutService.checkout(shoppingCart,
-																		taxSnapshot,
-																		shoppingContext.getCustomerSession(),
-																		orderPayment,
-																		true);
+		final CheckoutResults checkoutResults = checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
 		orderHolder.set(checkoutResults.getOrder());
-		
+
 		shoppingCart.clearItems();
 	}
-	
+
 	private List<ShoppingItem> addShoppingItems(final ShoppingCart shoppingCart, final List<ShoppingItemDto> itemDtos) {
 		final List<ShoppingItem> lineItems = new ArrayList<>();
 
@@ -251,6 +236,7 @@ public class ShoppingCartStepDefinitionsHelper {
 	/**
 	 * Convert a Gherkin data table into ShoppingItemDtos. We do this instead of taking a List<ShoppingItemDto> because
 	 * Cucumber does some weirdness in which the constructor/static initializers are not executed.
+	 *
 	 * @param dataTable a data table representing the Shopping Item Dtos
 	 * @return a list of ShoppingItemDto objects
 	 */

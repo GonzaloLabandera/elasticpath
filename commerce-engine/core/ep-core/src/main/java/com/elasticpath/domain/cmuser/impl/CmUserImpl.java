@@ -318,7 +318,8 @@ public class CmUserImpl extends AbstractLegacyEntityImpl implements CmUser {
 				passwordHistoryItems.remove(0);
 			}
 
-			final UserPasswordHistoryItem currentPasswordToHistory = getBean(ContextIdNames.USER_PASSWORD_HISTORY_ITEM);
+			final UserPasswordHistoryItem currentPasswordToHistory = getPrototypeBean(ContextIdNames.USER_PASSWORD_HISTORY_ITEM,
+					UserPasswordHistoryItem.class);
 			currentPasswordToHistory.setOldPassword(getPassword());
 			currentPasswordToHistory.setExpirationDate(getTimeService().getCurrentTime());
 			passwordHistoryItems.add(currentPasswordToHistory);
@@ -367,7 +368,7 @@ public class CmUserImpl extends AbstractLegacyEntityImpl implements CmUser {
 			setPassword(null);
 		} else {
 			try {
-				final PasswordEncoder passwordEncoder = getBean(ContextIdNames.CM_PASSWORDENCODER);
+				final PasswordEncoder passwordEncoder = getSingletonBean(ContextIdNames.CM_PASSWORDENCODER, PasswordEncoder.class);
 				setPassword(passwordEncoder.encodePassword(clearTextPassword, null));
 			} catch (Exception exception) {
 				LOG.error("Unable to set user's password.", exception);
@@ -776,17 +777,17 @@ public class CmUserImpl extends AbstractLegacyEntityImpl implements CmUser {
 
 	@Transient
 	private CmPasswordPolicy getCmPasswordPolicy() {
-		return getBean("cmPasswordPolicy");
+		return getSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class);
 	}
 
 	@Transient
 	private PasswordPolicy getMaximumAgePasswordPolicy() {
-		return getBean("maximumAgePasswordPolicy");
+		return getSingletonBean(ContextIdNames.MAXIMUM_AGE_PASS_WORD_POLICY, PasswordPolicy.class);
 	}
 
 	@Transient
 	private PasswordPolicy getAccountPasswordPolicy() {
-		return getBean("accountPasswordPolicy");
+		return getSingletonBean(ContextIdNames.ACCOUNT_PASS_WORD_POLICY, PasswordPolicy.class);
 	}
 
 	/**
@@ -1260,6 +1261,6 @@ public class CmUserImpl extends AbstractLegacyEntityImpl implements CmUser {
 
 	@Transient
 	public TimeService getTimeService() {
-		return getBean(ContextIdNames.TIME_SERVICE);
+		return getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 	}
 }

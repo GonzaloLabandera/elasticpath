@@ -125,7 +125,7 @@ public class BrandServiceImplTest {
 				allowing(brand).getUidPk();
 				will(returnValue(0L));
 
-				allowing(beanFactory).getBean(ContextIdNames.BRAND);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.BRAND, Brand.class);
 				will(returnValue(brand));
 			}
 		});

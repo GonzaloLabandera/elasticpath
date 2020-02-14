@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.selenium.toolbars;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +27,16 @@ public class CustomerServiceActionToolbar extends AbstractToolbar {
 	 */
 	public CustomerServiceActionToolbar(final WebDriver driver) {
 		super(driver);
+	}
+
+	/**
+	 * Clicks Save button.
+	 *
+	 * @return PaymentAuthorizationWizard
+	 */
+	public PaymentAuthorizationWizard clickSaveButtonAndGetAuthorizationWizard() {
+		clickSaveButton();
+		return new PaymentAuthorizationWizard(getDriver());
 	}
 
 	/**

@@ -21,7 +21,7 @@ import org.eclipse.ui.PartInitException;
 import com.elasticpath.cmclient.admin.customers.AdminCustomersMessages;
 import com.elasticpath.cmclient.admin.customers.AdminCustomersPlugin;
 import com.elasticpath.cmclient.admin.customers.event.CustomerSegmentEventService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
@@ -78,7 +78,7 @@ public class CustomerSegmentEditor extends AbstractCmClientFormEditor {
 
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) throws PartInitException {
-		customerGroupService = ServiceLocator.getService(ContextIdNames.CUSTOMER_GROUP_SERVICE);
+		customerGroupService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_GROUP_SERVICE, CustomerGroupService.class);
 
 		final Long uid = input.getAdapter(Long.class);
 		if (uid > 0) {
@@ -86,13 +86,13 @@ public class CustomerSegmentEditor extends AbstractCmClientFormEditor {
 			customerGroup = customerGroupService.load(uid);
 		} else {
 			// new group
-			customerGroup = ServiceLocator.getService(ContextIdNames.CUSTOMER_GROUP);
+			customerGroup = BeanLocator.getPrototypeBean(ContextIdNames.CUSTOMER_GROUP, CustomerGroup.class);
 			customerGroup.setCustomerRoles(defineCustomerRoles());
 		}
 	}
 
 	private Set<CustomerRole> defineCustomerRoles() {
-		final CustomerRole defaultCustomerRole = ServiceLocator.getService(ContextIdNames.CUSTOMER_ROLE);
+		final CustomerRole defaultCustomerRole = BeanLocator.getPrototypeBean(ContextIdNames.CUSTOMER_ROLE, CustomerRole.class);
 		defaultCustomerRole.setAuthority(WebConstants.ROLE_CUSTOMER);
 		return new HashSet<>(Arrays.asList(defaultCustomerRole));
 	}

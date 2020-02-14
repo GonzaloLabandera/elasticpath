@@ -18,7 +18,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.search.SafeSearchCodes;
 import com.elasticpath.cmclient.core.search.impl.SafeSearchCodesImpl;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -280,7 +280,7 @@ public class PromotionsSearchTab implements SelectionListener, IStoreMarketingIn
 	}
 
 	private void populateCatalogCombo() {
-		final CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 
 		catalogs = catalogService.findAllCatalogs();
 		AuthorizationService.getInstance().filterAuthorizedCatalogs(catalogs);
@@ -296,7 +296,7 @@ public class PromotionsSearchTab implements SelectionListener, IStoreMarketingIn
 	}
 
 	private void populateStoreCombo() {
-		final StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 
 		stores = storeService.findAllCompleteStores();
 		AuthorizationService.getInstance().removeUnathorizedStoresFrom(stores);
@@ -411,7 +411,7 @@ public class PromotionsSearchTab implements SelectionListener, IStoreMarketingIn
 	 */
 	public final PromotionSearchCriteria getModel() {
 		if (searchCriteria == null) {
-			searchCriteria = ServiceLocator.getService(ContextIdNames.PROMOTION_SEARCH_CRITERIA);
+			searchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.PROMOTION_SEARCH_CRITERIA, PromotionSearchCriteria.class);
 		}
 
 		return searchCriteria;
@@ -474,8 +474,7 @@ public class PromotionsSearchTab implements SelectionListener, IStoreMarketingIn
 		}
 		searchCriteria.setStoreCodes(storeCodes.asSet());
 
-		final RuleSetService ruleSetService = ServiceLocator.getService(
-				ContextIdNames.RULE_SET_SERVICE);
+		final RuleSetService ruleSetService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
 		final RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO);
 		searchCriteria.setRuleSetUid(String.valueOf(ruleSet.getUidPk()));
 	}
@@ -493,8 +492,7 @@ public class PromotionsSearchTab implements SelectionListener, IStoreMarketingIn
 			searchCriteria.setCatalogCode(selectedCatalog.getCode());
 		}
 
-		final RuleSetService ruleSetService = ServiceLocator.getService(
-				ContextIdNames.RULE_SET_SERVICE);
+		final RuleSetService ruleSetService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
 		final RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO);
 		searchCriteria.setRuleSetUid(String.valueOf(ruleSet.getUidPk()));
 	}

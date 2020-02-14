@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.catalog.SkuOptionNameVerifierImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
@@ -153,7 +153,7 @@ public class ProductSkuOptionValueDialog extends AbstractEpDialog {
 	 */
 	public SkuOptionValue getSkuOptionValue() {
 		if (skuOptionValue == null) {
-			skuOptionValue = ServiceLocator.getService(ContextIdNames.SKU_OPTION_VALUE);
+			skuOptionValue = BeanLocator.getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE, SkuOptionValue.class);
 		}
 		return skuOptionValue;
 	}

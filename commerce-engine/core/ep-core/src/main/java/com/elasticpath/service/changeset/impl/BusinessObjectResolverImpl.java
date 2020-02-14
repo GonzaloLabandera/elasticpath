@@ -104,7 +104,8 @@ public class BusinessObjectResolverImpl implements BusinessObjectResolver {
 			final Object value = localObjectTypes.get(interfaceClass);
 			final String resolveGuid = resolveGuid(interfaceClass, object);
 			if	(resolveGuid != null) {
-				final BusinessObjectDescriptor objectDescriptor = beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+				final BusinessObjectDescriptor objectDescriptor = beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR,
+						BusinessObjectDescriptor.class);
 				objectDescriptor.setObjectIdentifier(resolveGuid);
 				objectDescriptor.setObjectType(String.valueOf(value));
 				return objectDescriptor;

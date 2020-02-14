@@ -23,6 +23,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.common.collect.ImmutableMap;
+import org.assertj.core.api.SoftAssertions;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -30,10 +32,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableMap;
-
-import org.assertj.core.api.SoftAssertions;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -119,7 +117,7 @@ public class OrderSkuFactoryImplTest {
 	@Before
 	public void setUp() {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ORDER_SKU, OrderSkuImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class, OrderSkuImpl.class);
 
 		DiscountApportioningCalculatorImpl discountApportioningCalculator = new DiscountApportioningCalculatorImpl();
 		discountApportioningCalculator.setProductSkuLookup(productSkuLookup);

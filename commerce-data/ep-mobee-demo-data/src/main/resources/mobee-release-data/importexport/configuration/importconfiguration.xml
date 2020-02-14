@@ -2,11 +2,8 @@
 <importconfiguration>
   <xmlvalidation>true</xmlvalidation>
   <importstrategy>
-    <importer type="PAYMENTGATEWAY">
-      <importstrategy>INSERT_OR_UPDATE</importstrategy>
-      <dependentelements>
-        <dependentelement type="PAYMENT_GATEWAY_PROPERTIES">CLEAR_COLLECTION</dependentelement>
-      </dependentelements>
+    <importer type="PAYMENTPROVIDER">
+      <importstrategy>INSERT</importstrategy>
     </importer>
     <importer type="WAREHOUSE">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>

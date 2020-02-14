@@ -19,7 +19,7 @@ import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.ViewSynchronizer;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModelImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -55,7 +55,7 @@ public class CatalogEditor extends AbstractCmClientFormEditor implements ChangeS
 
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) {
-		catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 
 		final Catalog catalog = input.getAdapter(Catalog.class);
 		catalogModel = new CatalogModelImpl(catalog);

@@ -1,14 +1,13 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.info;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory.buildOrderIdentifier;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_ORDER_GUID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.COUPON_CODE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponTestFactory.buildCouponinfoIdentifier;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponTestFactory.buildOrderCouponIdentifier;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,12 +48,12 @@ public class CouponinfoToOrderCouponsRepositoryTest {
 
 	@Before
 	public void setUp() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 	}
 
 	@Test
 	public void getElementsReturnsNotFoundErrorWhenNoCartOrderFoundForTheGivenOrderGuid() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID))
+		when(cartOrderRepository.findByGuid(SCOPE, CART_ORDER_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ORDER_WITH_GUID_NOT_FOUND)));
 
 		couponinfoToOrderCouponsRepository.getElements(

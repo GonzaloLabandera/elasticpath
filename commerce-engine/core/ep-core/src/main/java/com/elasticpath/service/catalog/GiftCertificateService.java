@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
+
 package com.elasticpath.service.catalog;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
 import com.elasticpath.service.EpPersistenceService;
-import com.elasticpath.service.payment.GiftCertificateTransactionService;
+import com.elasticpath.service.giftcertificate.GiftCertificateTransactionService;
 
 /**
  * Provides gift certificate related business services.
@@ -224,7 +225,7 @@ public interface GiftCertificateService extends EpPersistenceService {
 	
 	
 	/**
-	 * Retrieves list of <code>OrderPayment</code>s associated with the specified gift certificate grouped by their shipments.
+	 * Retrieves Orders Balances.
 	 * 
 	 * @param uidPk GiftCertificate uid.
 	 * @return map of shipments to their payments.

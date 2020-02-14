@@ -11,18 +11,6 @@
     </groups>
     <preferred_shipping_address>d0b52f13-f41d-4877-8692-dfb0babf6650</preferred_shipping_address>
     <preferred_billing_address>d0b52f13-f41d-4877-8692-dfb0babf6650</preferred_billing_address>
-	<payment_methods>
-		<payment_token>
-			<payment_token_display_value>testPaymentTokenDisplayValue</payment_token_display_value>
-			<payment_token_value>testPaymentTokenValue</payment_token_value>
-		</payment_token>
-	</payment_methods>
-	<default_payment_method>
-		<credit_card guid="D67B080C-990A-AB3A-816A-E3084E291CB2" expiry_month="5" expiry_year="2018" type="American Express">
-			<holder_name>System test user</holder_name>
-			<card_number>340000000000009</card_number>
-		</credit_card>
-	</default_payment_method>
     <customer_profile>
         <profile_value key="CP_LAST_NAME" type="AttributeType_ShortText">user</profile_value>
         <profile_value key="CP_FIRST_NAME" type="AttributeType_ShortText">system</profile_value>

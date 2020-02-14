@@ -354,7 +354,7 @@ public class CustomerGroupServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.SYSTEM_CUSTOMER_GROUPS);
+				allowing(beanFactory).getSingletonBean(ContextIdNames.SYSTEM_CUSTOMER_GROUPS, List.class);
 				will(returnValue(Arrays.asList(CustomerGroup.DEFAULT_GROUP_NAME)));
 
 				allowing(persistenceEngine).retrieveByNamedQuery(CUSTOMERGROUP_CHECK_IF_IN_USE, 1L);
@@ -391,7 +391,7 @@ public class CustomerGroupServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.SYSTEM_CUSTOMER_GROUPS);
+				allowing(beanFactory).getSingletonBean(ContextIdNames.SYSTEM_CUSTOMER_GROUPS, List.class);
 				will(returnValue(Arrays.asList(CustomerGroup.DEFAULT_GROUP_NAME)));
 			}
 		});

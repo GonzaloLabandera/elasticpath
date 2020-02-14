@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
@@ -42,7 +42,7 @@ public class CreateNewOrderEventCheckoutActionTest {
 		checkoutAction.setEventMessageFactory(eventMessageFactory);
 		checkoutAction.setEventMessagePublisher(messagePublisher);
 
-		checkoutContext = new CheckoutActionContextImpl(null, null, null, null, false, false, null);
+		checkoutContext = new CheckoutActionContextImpl(null, null, null, false, false, null, null);
 		checkoutContext.setOrder(order);
 
 		context.checking(new Expectations() {
@@ -54,7 +54,7 @@ public class CreateNewOrderEventCheckoutActionTest {
 	}
 
 	@Test(expected = EpSystemException.class)
-	public void verifyExecuteThrowsEpSystemExceptionOnPublishingError() throws Exception {
+	public void verifyExecuteThrowsEpSystemExceptionOnPublishingError() {
 		context.checking(new Expectations() {
 			{
 				final EventMessage eventMessage = context.mock(EventMessage.class);
@@ -70,7 +70,7 @@ public class CreateNewOrderEventCheckoutActionTest {
 	}
 
 	@Test
-	public void verifyExecutePublishesEventMessage() throws Exception {
+	public void verifyExecutePublishesEventMessage() {
 		context.checking(new Expectations() {
 			{
 				final EventMessage eventMessage = context.mock(EventMessage.class);

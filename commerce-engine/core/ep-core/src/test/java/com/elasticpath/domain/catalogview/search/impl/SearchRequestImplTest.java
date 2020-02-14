@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.EpDomainException;
@@ -107,7 +108,7 @@ public class SearchRequestImplTest {
 		this.brandService = this.mockBrandService;
 		context.checking(new Expectations() {
 			{
-				allowing(mockElasticPath).getBean("brandService");
+				allowing(mockElasticPath).getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 				will(returnValue(brandService));
 			}
 		});
@@ -119,7 +120,7 @@ public class SearchRequestImplTest {
 		this.filterFactory = this.mockFilterFactory;
 		context.checking(new Expectations() {
 			{
-				allowing(mockElasticPath).getBean("filterFactory");
+				allowing(mockElasticPath).getSingletonBean(ContextIdNames.FILTER_FACTORY, FilterFactory.class);
 				will(returnValue(filterFactory));
 			}
 		});

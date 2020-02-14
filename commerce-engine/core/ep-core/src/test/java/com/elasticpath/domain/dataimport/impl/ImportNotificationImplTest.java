@@ -39,7 +39,7 @@ public class ImportNotificationImplTest {
 			 */
 			@SuppressWarnings("unchecked")
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getPrototypeBean(final String beanName, final Class<T> clazz) {
 				if ("importNotificationMetadata".equals(beanName)) {
 					return (T) importNotificationMetadata;
 				}
@@ -48,6 +48,7 @@ public class ImportNotificationImplTest {
 		};
 		importJob = context.mock(ImportJob.class); 
 		importNotificationMetadata = context.mock(ImportNotificationMetadata.class);
+
 	}
 
 	/**

@@ -63,6 +63,8 @@ public class StoreStepDefinitions {
 	@And("^my email address (.+) is registered as the Store's Administrator email$")
 	public void setStoreAdministratorEmailAddress(final String emailAddress) throws Throwable {
 		storeScenarioHolder.get().getStore().setStoreAdminEmailAddress(emailAddress);
+		Store store = storeScenarioHolder.get().getStore();
+		tac.getPersistersFactory().getStoreTestPersister().persistStore(store);
 	}
 
 }

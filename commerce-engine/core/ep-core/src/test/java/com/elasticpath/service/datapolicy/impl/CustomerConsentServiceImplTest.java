@@ -55,8 +55,9 @@ public class CustomerConsentServiceImplTest {
 	public void setUp() {
 		Mockito.<Class<CustomerConsent>>when(elasticPath.getBeanImplClass(ContextIdNames.CUSTOMER_CONSENT)).thenReturn(CustomerConsent.class);
 
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER_CONSENT)).thenReturn(customerConsent);
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER_CONSENT_HISTORY)).thenReturn(customerConsentHistory);
+		when(elasticPath.getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT, CustomerConsent.class)).thenReturn(customerConsent);
+		when(elasticPath.getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT_HISTORY, CustomerConsentHistoryImpl.class))
+				.thenReturn(customerConsentHistory);
 	}
 
 	@Test
@@ -99,7 +100,7 @@ public class CustomerConsentServiceImplTest {
 		assertThat(customerConsentServiceImpl.load(0))
 				.isEqualTo(customerConsent);
 
-		verify(elasticPath).getBean(ContextIdNames.CUSTOMER_CONSENT);
+		verify(elasticPath).getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT, CustomerConsent.class);
 	}
 
 	@Test
@@ -191,7 +192,7 @@ public class CustomerConsentServiceImplTest {
 		assertThat(customerConsentServiceImpl.get(0))
 				.isEqualTo(customerConsent);
 
-		verify(elasticPath).getBean(ContextIdNames.CUSTOMER_CONSENT);
+		verify(elasticPath).getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT, CustomerConsent.class);
 	}
 
 	@Test

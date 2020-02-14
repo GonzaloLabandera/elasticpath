@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.admin.taxes.TaxesImageRegistry;
 import com.elasticpath.cmclient.admin.taxes.TaxesMessages;
 import com.elasticpath.cmclient.admin.taxes.TaxesPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
@@ -61,7 +61,7 @@ public class TaxCodeDialog extends AbstractEpDialog {
 		this.taxCode = taxCode;
 		this.title = title;
 		this.image = image;
-		taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+		taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 
 	}
 

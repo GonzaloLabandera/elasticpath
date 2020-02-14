@@ -8,6 +8,7 @@ package com.elasticpath.cmclient.pricelistmanager.controller.impl;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,10 +25,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.dto.catalog.PriceListEditorModel;
+import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.pricing.service.BaseAmountFilter;
 import com.elasticpath.common.pricing.service.PriceListService;
+import com.elasticpath.common.pricing.service.impl.PriceListServiceImpl;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 
 
@@ -61,12 +66,19 @@ public class PriceListEditorControllerImplTest {
 	 */
 	@Before
 	public void setUp() {
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		when(beanFactory.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class)).thenReturn(new ChangeSetHelper());
+		BeanLocator.setBeanFactory(beanFactory);
+		when(beanFactory.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class)).thenReturn(baseAmountFilter);
+		when(BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class)).thenReturn(new PriceListServiceImpl());
 		controller = new PriceListEditorControllerImpl(PRICE_LIST_DESCRIPTOR_GUID) {
 			@Override
+			protected PriceListService getPriceListService() {
+				return priceListService;
+			}
+
 			protected Object getBean(final String beanId) {
-				if (beanId.equals(ContextIdNames.PRICE_LIST_CLIENT_SERVICE)) {
-					return priceListService;
-				} else if (beanId.equals(ContextIdNames.BASE_AMOUNT_FILTER)) {
+				if (beanId.equals(ContextIdNames.BASE_AMOUNT_FILTER)) {
 					return baseAmountFilter;
 				}
 				
@@ -77,7 +89,7 @@ public class PriceListEditorControllerImplTest {
 			public PriceListEditorModel getModel() {
 				return priceListModel;
 			}
-		}; 
+		};
 	}
 	
 	private BaseAmountDTO createNewBaseAmount(final String objectGuid, final String objectType, 

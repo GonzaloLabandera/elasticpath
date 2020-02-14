@@ -21,5 +21,9 @@
 			<groupId>com.elasticpath.cmclient</groupId>
 			<artifactId>com.elasticpath.cmclient.jobs</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.cmclient</groupId>
+			<artifactId>com.elasticpath.cmclient.fulfillment</artifactId>
+		</dependency>
 	</dependencies>
 </project>

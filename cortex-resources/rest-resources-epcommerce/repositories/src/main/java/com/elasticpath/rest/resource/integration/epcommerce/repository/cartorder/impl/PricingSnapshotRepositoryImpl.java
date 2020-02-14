@@ -16,9 +16,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
 import com.elasticpath.rest.cache.CacheResult;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
@@ -56,17 +53,7 @@ public class PricingSnapshotRepositoryImpl implements PricingSnapshotRepository 
 
 	@Override
 	@CacheResult
-	public ExecutionResult<ShoppingCartPricingSnapshot> getShoppingCartPricingSnapshot(final ShoppingCart shoppingCart) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				return ExecutionResultFactory.createReadOK(pricingSnapshotService.getPricingSnapshotForCart(shoppingCart));
-			}
-		}.execute();
-	}
-
-	@Override
-	@CacheResult
-	public Single<ShoppingCartPricingSnapshot> getShoppingCartPricingSnapshotSingle(final ShoppingCart shoppingCart) {
+	public Single<ShoppingCartPricingSnapshot> getShoppingCartPricingSnapshot(final ShoppingCart shoppingCart) {
 		return reactiveAdapter.fromServiceAsSingle(() -> pricingSnapshotService.getPricingSnapshotForCart(shoppingCart), SNAPSHOT_NOT_FOUND);
 	}
 
@@ -79,7 +66,7 @@ public class PricingSnapshotRepositoryImpl implements PricingSnapshotRepository 
 	@Override
 	@CacheResult(uniqueIdentifier = "getShoppingCartTaxSnapshot")
 	public Single<ShoppingCartTaxSnapshot> getShoppingCartTaxSnapshot(final ShoppingCart shoppingCart) {
-		return getShoppingCartPricingSnapshotSingle(shoppingCart)
+		return getShoppingCartPricingSnapshot(shoppingCart)
 				.flatMap(pricingSnapshot ->
 						reactiveAdapter.fromServiceAsSingle(() -> taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot)));
 	}

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleCondition;
@@ -28,7 +28,7 @@ public class PromotionBrandValidator {
 	 */
 	public PromotionBrandValidator() {
 
-		brandService = ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+		brandService = BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 	}
 	/**
 	 * Gets the invalid brands for the given rule.

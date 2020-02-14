@@ -57,7 +57,7 @@ public class WarehouseServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.WAREHOUSE);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.WAREHOUSE, Warehouse.class);
 				will(returnValue(new WarehouseImpl()));
 				allowing(beanFactory).getBeanImplClass(ContextIdNames.WAREHOUSE);
 				will(returnValue(WarehouseImpl.class));
@@ -250,7 +250,7 @@ public class WarehouseServiceImplTest {
 		});
 		assertTrue(warehouseServiceImpl.warehouseInUse(1L));
 	}
-	
+
 	/**
 	 * Test method for {@link WarehouseServiceImpl#getByCode(String)}.
 	 */

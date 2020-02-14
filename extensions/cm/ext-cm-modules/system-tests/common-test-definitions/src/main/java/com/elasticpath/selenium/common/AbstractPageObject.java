@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.selenium.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,9 +21,12 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -34,9 +41,8 @@ import com.elasticpath.selenium.util.FluentWaitDriver;
 /**
  * Page super class. All page objects in this test framework extends the page super class.
  */
-@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.ExcessiveClassLength"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.ExcessiveClassLength", "PMD.AvoidDuplicateLiterals"})
 public abstract class AbstractPageObject extends AbstractPage {
-
 	private static final Logger LOGGER = Logger.getLogger(AbstractPageObject.class);
 	private static final int POLLING_INTERVAL = 500;
 	private static final int COMBO_SCROLL_REPETITIONS = 10;
@@ -58,7 +64,11 @@ public abstract class AbstractPageObject extends AbstractPage {
 	private static final String CATALOG_TREE_ITEM_CSS = CATALOG_TREE_PARENT_CSS + "div[row-id='%1$s'] div[column-id='%1$s']";
 	private static final String CATALOG_TREE_ITEM_PARTIAL_CSS = CATALOG_TREE_PARENT_CSS + "div[widget-id*='%s'][widget-type='row']";
 	private static final String CLOSE_PANE_ICON_CSS = "div[widget-id*='%s'][active-tab='true'] > div[style*='close.gif']";
+	private static final String SCROLLBAR_CSS = "div[appearance-id='scrolledcomposite'][seeable='true']"
+			+ " > div[appearance-id='scrollbar'] div[appearance-id='scrollbar-thumb']";
+
 	private static final long WEBDRIVER_DEFAULT_TIMEOUT = Long.parseLong(PropertyManager.getInstance().getProperty("selenium.waitdriver.timeout"));
+
 	private static String authorTabHandle;
 	private static String publishTabHandle;
 
@@ -161,6 +171,23 @@ public abstract class AbstractPageObject extends AbstractPage {
 		getWaitDriver().waitForElementToBeNotStale(cssString);
 		getWaitDriver().waitForElementToBeInteractable(cssString);
 		clearAndTypeText(cssString, text);
+	}
+
+	/**
+	 * Verifies is element interactive.
+	 *
+	 * @param cssString the css string
+	 */
+	public boolean isElementInteractive(final String cssString) {
+		try {
+			getWaitDriver().waitForElementToBeNotStale(cssString);
+			getWaitDriver().waitForElementToBeInteractable(cssString);
+		} catch (TimeoutException | NoSuchElementException | ElementNotInteractableException e) {
+
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -327,6 +354,18 @@ public abstract class AbstractPageObject extends AbstractPage {
 	}
 
 	/**
+	 * Scrolls element identified by XPATH into view.
+	 * <i>Sets focus on scrollbar to activate it before actually scrolling.</i>
+	 *
+	 * @param parentCss parent element CSS, which contains scrollbar.
+	 * @param xpath     xpath
+	 */
+	protected void scrollIntoView(final String parentCss, final By xpath) {
+		click(By.cssSelector(parentCss + SCROLLBAR_CSS));
+		scrollElementIntoView(xpath);
+	}
+
+	/**
 	 * Scrolls widget into view.
 	 *
 	 * @param cssSelector The css selector.
@@ -335,6 +374,17 @@ public abstract class AbstractPageObject extends AbstractPage {
 		getWaitDriver().waitForElementToBeNotStale(cssSelector);
 		JavascriptExecutor jse = (JavascriptExecutor) getDriver();
 		jse.executeScript("arguments[0].scrollIntoView();", getDriver().findElement(By.cssSelector(cssSelector)));
+	}
+
+	/**
+	 * Scrolls widget into view.
+	 *
+	 * @param bySelector The css selector.
+	 */
+	protected void scrollElementIntoView(final By bySelector) {
+		getWaitDriver().waitForElementToBeNotStale(bySelector);
+		JavascriptExecutor jse = (JavascriptExecutor) getDriver();
+		jse.executeScript("arguments[0].scrollIntoView();", getDriver().findElement(bySelector));
 	}
 
 	/**
@@ -540,6 +590,20 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 */
 	public boolean selectItemInEditorPaneWithScrollBarNonJSCheck(final String tableParentCss, final String tableColumnCss, final String value) {
 		return selectItem(tableParentCss, tableColumnCss, value, "Name", true, true, false);
+	}
+
+	/**
+	 * Selects item in editor pane with scrollbar for a specific column without Javascript check for element.
+	 *
+	 * @param tableParentCss the table parent css.
+	 * @param tableColumnCss the table column css.
+	 * @param value          the value.
+	 * @param columnName     the columnt name.
+	 * @return true if selected item.
+	 */
+	public boolean selectItemInEditorPaneWithScrollBarNonJSCheck(final String tableParentCss, final String tableColumnCss,
+																 final String value, final String columnName) {
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, true, false);
 	}
 
 	/**
@@ -887,6 +951,27 @@ public abstract class AbstractPageObject extends AbstractPage {
 	/**
 	 * Clicks an element and if exceptions occur, it will retry click every POLLING_INTERVAL and
 	 * ignore the exceptions for a total of timeout seconds.
+	 * Before clicking, waits for element to load, scrolls the element into view if it's scrollable,
+	 * and moves the focus to the element. Then eventually it performs the click.
+	 * Takes xpath
+	 *
+	 * @param xpath the xpathSelector.
+	 */
+	public void clickCheckboxXpath(final String xpath) {
+		waitForElementToLoad(getDriver().findElement(By.xpath(xpath)));
+		scrollElementIntoView(By.xpath(xpath));
+		moveFocusToElement(getDriver().findElement(By.xpath(xpath)));
+		retryFunction((WebDriver driver) -> {
+			driver.findElement(By.xpath(xpath)).findElement(By.xpath("//div[2]")).click();
+			return true;
+		}, POLLING_INTERVAL, WEBDRIVER_DEFAULT_TIMEOUT);
+		sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+	}
+
+
+	/**
+	 * Clicks an element and if exceptions occur, it will retry click every POLLING_INTERVAL and
+	 * ignore the exceptions for a total of timeout seconds.
 	 * Takes by selector
 	 *
 	 * @param bySelector By selector
@@ -1035,6 +1120,18 @@ public abstract class AbstractPageObject extends AbstractPage {
 		assertThat(isButtonEnabled(cssSelector))
 				.as(buttonName + " button is not enabled as expected")
 				.isTrue();
+	}
+
+	/**
+	 * Verifies is button disabled.
+	 *
+	 * @param cssSelector the css selector
+	 * @param buttonName  the button name
+	 */
+	public void verifyButtonIsDisabled(final String cssSelector, final String buttonName) {
+		assertThat(isButtonEnabled(cssSelector))
+				.as(buttonName + " button should be disabled")
+				.isFalse();
 	}
 
 	/**

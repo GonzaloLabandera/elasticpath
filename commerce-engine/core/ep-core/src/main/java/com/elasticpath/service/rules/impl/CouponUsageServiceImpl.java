@@ -188,7 +188,7 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 		final Collection<AppliedRule> appliedRules = new ArrayList<>();
 
 		for (final long ruleId : ruleIds) {
-			final AppliedRule appliedRule = beanFactory.getBean(ContextIdNames.APPLIED_RULE);
+			final AppliedRule appliedRule = beanFactory.getPrototypeBean(ContextIdNames.APPLIED_RULE, AppliedRule.class);
 			appliedRule.initialize(ruleService.load(ruleId), locale);
 			appliedRules.add(appliedRule);
 		}
@@ -353,7 +353,7 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 		CouponUsage toReturn = candidateCouponUsage;
 
 		if (toReturn == null) {
-			toReturn = beanFactory.getBean(ContextIdNames.COUPON_USAGE);
+			toReturn = beanFactory.getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 			toReturn.setCoupon(candidateCoupon);
 			toReturn.setUseCount(useCountAllocated);
 			if (CouponUsageType.LIMIT_PER_ANY_USER.equals(candidateUsageType)
@@ -722,14 +722,14 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 					// We don't care if this email is already associated with
 					// such a coupon.. rather just generate a unique code
 					// and create a new one.
-					Coupon unpopulatedCoupon = beanFactory.getBean(ContextIdNames.COUPON);
+					Coupon unpopulatedCoupon = beanFactory.getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 					unpopulatedCoupon.setCouponConfig(couponConfig);
 					String couponCodePrefix = couponAssignmentAction.getParamValue(RuleParameter.COUPON_PREFIX);
 
 					Coupon coupon = couponService.addAndGenerateCode(unpopulatedCoupon, couponCodePrefix);
 
 					// add a coupon usage for this customer for this rule.
-					CouponUsage newCouponUsage = beanFactory.getBean(ContextIdNames.COUPON_USAGE);
+					CouponUsage newCouponUsage = beanFactory.getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 					newCouponUsage.setCustomerEmailAddress(customerEmailAddress);
 					newCouponUsage.setCoupon(coupon);
 					// Create the usage with a use count of zero so that the

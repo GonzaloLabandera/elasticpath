@@ -5,6 +5,7 @@ package com.elasticpath.sellingchannel.presentation.impl;
 
 import com.elasticpath.common.dto.OrderItemDto;
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.tree.Functor;
 import com.elasticpath.commons.tree.impl.PreOrderTreeTraverser;
 import com.elasticpath.commons.tree.impl.TreeNodeMemento;
@@ -57,7 +58,9 @@ public class OrderItemPresentationBeanMapperImpl implements OrderItemPresentatio
 		public OrderItemDocumentMapperStackMemento processNode(final OrderItemDto sourceNode, final OrderItemDto parentNode,
 				final OrderItemDocumentMapperStackMemento parentStackMemento, final int level) {
 
-			OrderItemPresentationBean destDocument = beanFactory.getBean("orderItemPresentationBean");
+			OrderItemPresentationBean destDocument =
+					beanFactory.getPrototypeBean(ContextIdNames.ORDER_ITEM_PRESENTATION_BEAN,
+							OrderItemPresentationBean.class);
 
 			destDocument.setLevel(level);
 			destDocument.setDisplayName(sourceNode.getDisplayName());

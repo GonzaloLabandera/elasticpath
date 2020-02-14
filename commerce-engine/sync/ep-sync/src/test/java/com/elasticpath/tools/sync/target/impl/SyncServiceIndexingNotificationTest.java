@@ -13,6 +13,8 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Test;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.search.IndexNotification;
@@ -120,12 +122,16 @@ public class SyncServiceIndexingNotificationTest {
 	 * Create a callback instance with the specific notification service and registered index types.
 	 */
 	private IndexNotificationJobTransactionCallback getNotificationCallbackUnderTest(final IndexNotificationService indexNotificationService) {
-		IndexNotificationJobTransactionCallback indexNotificationCallback = new IndexNotificationJobTransactionCallback() {
-			@Override
-			protected Object getBean(final String beanID) {
-				return new IndexNotificationImpl();
+		BeanFactory beanFactory = context.mock(BeanFactory.class);
+		context.checking(new Expectations() {
+			{
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
+				will(returnValue(new IndexNotificationImpl()));
 			}
-		};
+		});
+		
+		IndexNotificationJobTransactionCallback indexNotificationCallback = new IndexNotificationJobTransactionCallback();
+		indexNotificationCallback.setBeanFactory(beanFactory);
 		
 		Map<String, IndexType> indexNameMap = new HashMap<>();
 		indexNameMap.put("com.elasticpath.domain.catalog.Product", IndexType.PRODUCT);

@@ -22,8 +22,8 @@ import org.eclipse.swt.widgets.Shell;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetPlugin;
 import com.elasticpath.cmclient.changeset.helpers.UserViewFormatter;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
@@ -46,7 +46,7 @@ public class ChangeSetDialog extends AbstractEpDialog {
 	
 	private IEpTableViewer changeSetTableViewer;
 	
-	private final CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+	private final CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 
 	private ChangeSet selectedChangeSetForMove;	
 

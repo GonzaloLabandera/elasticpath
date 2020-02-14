@@ -1,8 +1,9 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2016
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.order.impl;
 
+import static com.elasticpath.service.shoppingcart.impl.OrderSkuAsShoppingItemPricingSnapshotAction.returnTheSameOrderSkuAsPricingSnapshot;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -11,8 +12,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import static com.elasticpath.service.shoppingcart.impl.OrderSkuAsShoppingItemPricingSnapshotAction.returnTheSameOrderSkuAsPricingSnapshot;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.junit.Test;
 
-import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.PriceTier;
@@ -48,7 +46,6 @@ import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderReturnSkuReason;
@@ -66,11 +63,12 @@ import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.money.Money;
-import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.plugin.tax.domain.TaxAddress;
 import com.elasticpath.plugin.tax.domain.TaxOperationContext;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
+import com.elasticpath.service.order.OrderService;
+import com.elasticpath.service.order.ReturnAndExchangeService;
 import com.elasticpath.service.order.impl.OrderServiceImpl;
 import com.elasticpath.service.order.impl.ReturnAndExchangeServiceImpl;
 import com.elasticpath.service.shoppingcart.OrderSkuFactory;
@@ -79,6 +77,7 @@ import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.service.shoppingcart.impl.OrderSkuFactoryImpl;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.store.WarehouseService;
+import com.elasticpath.service.tax.ReturnTaxOperationService;
 import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.TaxCalculationService;
 import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
@@ -90,7 +89,7 @@ import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
 /**
  * Test cases for <code>OrderReturnImpl</code>.
  */
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.ExcessiveClassLength", "PMD.GodClass" })
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.ExcessiveClassLength", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
 public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 
 	private static final Currency CURRENCY = Currency.getInstance("CAD");
@@ -128,12 +127,11 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, productSkuLookup);
-		stubGetBean(ContextIdNames.PRICE, PriceImpl.class);
+		stubGetSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class, productSkuLookup);
+		stubGetPrototypeBean(ContextIdNames.PRICE, Price.class, PriceImpl.class);
 
 		storeService = context.mock(StoreService.class);
-		stubGetBean(ContextIdNames.STORE_SERVICE, storeService);
+		stubGetSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class, storeService);
 
 		context.checking(new Expectations() {
 			{
@@ -153,11 +151,10 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 
 		final OrderReturnSkuReason orderReturnSkuReason = new OrderReturnSkuReasonImpl();
 		orderReturnSkuReason.setPropertiesMap(new HashMap<>());
-		stubGetBean(ContextIdNames.ORDER_RETURN_SKU_REASON, orderReturnSkuReason);
 
 		final OrderServiceImpl orderService = new OrderServiceImpl();
 		orderService.setPersistenceEngine(getPersistenceEngine());
-		stubGetBean(ContextIdNames.ORDER_SERVICE, orderService);
+		stubGetPrototypeBean(ContextIdNames.ORDER_SERVICE, OrderService.class, orderService);
 
 		ReturnTaxOperationServiceImpl returnTaxOperationService = new ReturnTaxOperationServiceImpl();
 		returnTaxOperationService.setProductSkuLookup(productSkuLookup);
@@ -206,7 +203,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 		};
 		returnTaxOperationService.setBeanFactory(getBeanFactory());
 		returnTaxOperationService.setTaxCalculationService(taxCalculationService);
-		stubGetBean(ContextIdNames.RETURN_TAX_OPERATION_SERVICE, returnTaxOperationService);
+		stubGetSingletonBean(ContextIdNames.RETURN_TAX_OPERATION_SERVICE, ReturnTaxOperationService.class, returnTaxOperationService);
 
 		context.checking(new Expectations() {
 			{
@@ -214,7 +211,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 				will(returnTheSameOrderSkuAsPricingSnapshot());
 			}
 		});
-		stubGetBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, pricingSnapshotService);
+		stubGetSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class, pricingSnapshotService);
 	}
 
 	/**
@@ -344,16 +341,6 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderReturnImpl.getReturnPayment()'.
-	 */
-	@Test
-	public void testGetSetReturnPayment() {
-		OrderPayment orderPayment = new OrderPaymentImpl();
-		orderReturn.setReturnPayment(orderPayment);
-		assertEquals(orderPayment, orderReturn.getReturnPayment());
-	}
-
-	/**
 	 * Test method for 'com.elasticpath.domain.impl.OrderReturnImpl.getCurrency()'.
 	 */
 	@Test
@@ -430,63 +417,6 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderReturnImpl.getRefundedTotalMoney()'.
-	 */
-	@Test
-	public void testGetSetRefundedTotalMoney() {
-		orderReturn.setReturnPayment(null);
-		assertEquals(BigDecimal.ZERO.setScale(2), orderReturn.getRefundedTotalMoney().getAmount());
-
-		OrderPaymentImpl orderPayment = new OrderPaymentImpl();
-		orderPayment.setTransactionType(OrderPayment.CREDIT_TRANSACTION);
-		orderPayment.setAmount(BigDecimal.ONE);
-		orderReturn.setReturnPayment(orderPayment);
-		assertEquals(BigDecimal.ONE.setScale(2), orderReturn.getRefundedTotalMoney().getAmount());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderReturnImpl.getRefundTotalMoney()'.
-	 */
-	@Test
-	public void testGetSetRefundTotalMoney() {
-
-		final int expectedCartTotal = -8; // 2 - 10
-		ShoppingCart shoppingCart = new ShoppingCartImpl();
-		ShoppingCartTaxSnapshot pricingSnapshotForCart = new ShoppingCartImpl() {
-			private static final long serialVersionUID = 2285944468697006262L;
-
-			@Override
-			public BigDecimal getTotal() { // return 10
-				return BigDecimal.TEN.setScale(2);
-			}
-		};
-
-		final int orderCartTotal = -9; // 2 - 11
-		Order order = new OrderImpl() {
-			private static final long serialVersionUID = -1299867884559350200L;
-
-			@Override
-			public BigDecimal getTotal() { // return 11
-				return BigDecimal.TEN.add(BigDecimal.ONE);
-			}
-		};
-		orderReturn.setReturnTotal(BigDecimal.valueOf(2));
-		orderReturn.setReturnType(OrderReturnType.RETURN);
-		assertEquals(2, orderReturn.getRefundTotalMoney().getAmount().intValue());
-
-		orderReturn.setReturnType(OrderReturnType.EXCHANGE);
-		orderReturn.setExchangeOrder(null);
-		orderReturn.setExchangeShoppingCart(null, null);
-		assertEquals(2, orderReturn.getRefundTotalMoney().getAmount().intValue());
-
-		orderReturn.setExchangeShoppingCart(shoppingCart, pricingSnapshotForCart);
-		assertEquals(expectedCartTotal, orderReturn.getRefundTotalMoney().getAmount().intValue());
-
-		orderReturn.setExchangeOrder(order);
-		assertEquals(orderCartTotal, orderReturn.getRefundTotalMoney().getAmount().intValue());
-	}
-
-	/**
 	 * Test method for 'com.elasticpath.domain.impl.OrderReturnImpl.getExchangeShoppingCart()'.
 	 */
 	@Test
@@ -527,7 +457,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testPopulateOrderReturn() {
 		mockTimeService();
-		stubGetBean(ContextIdNames.ORDER_RETURN_SKU, OrderReturnSkuImpl.class);
+		stubGetPrototypeBean(ContextIdNames.ORDER_RETURN_SKU, OrderReturnSku.class, OrderReturnSkuImpl.class);
 
 		OrderReturn orderReturn = new OrderReturnImpl();
 		orderReturn.populateOrderReturn(orderImpl, orderImpl.getAllShipments().get(0), OrderReturnType.RETURN);
@@ -536,24 +466,6 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 		assertEquals(OrderReturnType.RETURN, orderReturn.getReturnType());
 		assertEquals(orderImpl, orderReturn.getOrder());
 		assertNotNull(orderReturn.getCreatedDate());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderReturnImpl.getOwedToCustomerMoney()'.
-	 */
-	@Test
-	public void testGetOwedToCustomerMoney() {
-		final BigDecimal returnTotal = BigDecimal.valueOf(10, 2);
-		final BigDecimal orderPaymentAmount = BigDecimal.ONE;
-		final BigDecimal totalAmount = returnTotal.subtract(orderPaymentAmount);
-
-		OrderPaymentImpl orderPayment = new OrderPaymentImpl();
-		orderPayment.setTransactionType(OrderPayment.CREDIT_TRANSACTION);
-		orderPayment.setAmount(orderPaymentAmount);
-		orderReturn.setReturnPayment(orderPayment);
-		orderReturn.setReturnTotal(returnTotal);
-
-		assertEquals(totalAmount, orderReturn.getOwedToCustomerMoney().getAmount());
 	}
 
 	/**
@@ -646,7 +558,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testUpdateOrderReturnableQuantity() {
 		mockTimeService();
-		stubGetBean(ContextIdNames.ORDER_RETURN_SKU, OrderReturnSkuImpl.class);
+		stubGetPrototypeBean(ContextIdNames.ORDER_RETURN_SKU, OrderReturnSku.class, OrderReturnSkuImpl.class);
 
 		OrderReturn orderReturn = new OrderReturnImpl();
 
@@ -666,12 +578,12 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 
 		ReturnAndExchangeServiceImpl returnAndExchangeService = new ReturnAndExchangeServiceImpl() {
 			@Override
-			public List<OrderReturn> list(final long uidPk) throws EpServiceException {
+			public List<OrderReturn> list(final long uidPk) {
 				return returnsList;
 			}
 		};
 
-		stubGetBean(ContextIdNames.ORDER_RETURN_SERVICE, returnAndExchangeService);
+		stubGetSingletonBean(ContextIdNames.ORDER_RETURN_SERVICE, ReturnAndExchangeService.class, returnAndExchangeService);
 		orderReturn.updateOrderReturnableQuantity(orderImpl, productSkuLookup);
 		for (OrderSku orderSku : orderImpl.getOrderSkus()) {
 			assertEquals(1, orderSku.getQuantity());
@@ -685,7 +597,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testNormalizeOrderReturn() {
 		mockTimeService();
-		stubGetBean(ContextIdNames.ORDER_RETURN_SKU, OrderReturnSkuImpl.class);
+		stubGetPrototypeBean(ContextIdNames.ORDER_RETURN_SKU, OrderReturnSku.class, OrderReturnSkuImpl.class);
 
 		OrderReturn orderReturn = new OrderReturnImpl();
 
@@ -791,13 +703,13 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 				return new OrderSkuImpl();
 			}
 		};
-		stubGetBean(ContextIdNames.ORDER_SKU_FACTORY, orderSkuFactory);
+		stubGetSingletonBean(ContextIdNames.ORDER_SKU_FACTORY, OrderSkuFactory.class, orderSkuFactory);
 
 		final TaxCalculationService mockTaxCalculationService = context.mock(TaxCalculationService.class);
-		stubGetBean(ContextIdNames.TAX_CALCULATION_SERVICE, mockTaxCalculationService);
+		stubGetSingletonBean(ContextIdNames.TAX_CALCULATION_SERVICE, TaxCalculationService.class, mockTaxCalculationService);
 
 		final TaxSnapshotService mockTaxSnapshotService = context.mock(TaxSnapshotService.class);
-		stubGetBean(ContextIdNames.TAX_SNAPSHOT_SERVICE, mockTaxSnapshotService);
+		stubGetSingletonBean(ContextIdNames.TAX_SNAPSHOT_SERVICE, TaxSnapshotService.class, mockTaxSnapshotService);
 
 		final Set<OrderSku> orderSkus = mockOrderSkuList();
 		final OrderSku orderSku = orderSkus.iterator().next();
@@ -822,8 +734,6 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 				will(returnValue(orderSku));
 			}
 		});
-
-		stubGetBean(ContextIdNames.ORDER_TAX_VALUE, new OrderTaxValueImpl());
 
 		OrderReturnSku returnSku = new OrderReturnSkuImpl();
 		returnSku.initialize();
@@ -882,21 +792,12 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 		orderImpl.setLocale(Locale.CANADA);
 		orderImpl.setCustomer(getCustomer());
 		orderImpl.setBillingAddress(mockOrderAddress());
-		orderImpl.setOrderPayments(mockOrderPayments());
 		orderImpl.setUidPk(TEST_UIDPK);
 		orderImpl.setOrderNumber(TEST_ORDER_NUMBER);
 		OrderShipment orderShipment = mockOrderShipment();
 		orderImpl.addShipment(orderShipment);
 		orderImpl.setStoreCode(getMockedStore().getCode());
 		orderShipment.setStatus(OrderShipmentStatus.SHIPPED);
-	}
-
-	private Set<OrderPayment> mockOrderPayments() {
-		final OrderPayment orderPayment = new OrderPaymentImpl();
-		orderPayment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
-		final Set<OrderPayment> paymentSet = new HashSet<>();
-		paymentSet.add(orderPayment);
-		return paymentSet;
 	}
 
 	private OrderShipment mockOrderShipment() {
@@ -1094,7 +995,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 
 	private void mockTimeService() {
 		final TimeService timeService = context.mock(TimeService.class);
-		stubGetBean(ContextIdNames.TIME_SERVICE, timeService);
+		stubGetSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class, timeService);
 
 		context.checking(new Expectations() {
 			{

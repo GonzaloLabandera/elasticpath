@@ -92,7 +92,7 @@ public class TaxOperationServiceImpl implements TaxOperationService {
 
 	@Override
 	public TaxCalculationResult calculateTaxes(final OrderShipment orderShipment, final TaxOperationContext taxOperationContext) {
-		StoreService storeService = beanFactory.getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		Warehouse defaultWarehouse = storeService.findStoreWithCode(orderShipment.getOrder().getStoreCode()).getWarehouse();
 		TaxAddress originAddress = null;
 		if (defaultWarehouse != null) {
@@ -154,7 +154,7 @@ public class TaxOperationServiceImpl implements TaxOperationService {
 	public void reverseTaxes(final OrderShipment orderShipment, final OrderAddress destinationAddress) throws EpServiceException {
 		final Order order = orderShipment.getOrder();
 
-		StoreService storeService = getBeanFactory().getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = getBeanFactory().getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		Warehouse defaultWarehouse = storeService.findStoreWithCode(order.getStoreCode()).getWarehouse();
 		TaxAddress originAddress = null;
 		if (defaultWarehouse != null) {
@@ -226,7 +226,7 @@ public class TaxOperationServiceImpl implements TaxOperationService {
 
 	@Override
 	public void updateTaxes(final Order order, final TaxDocumentModificationContext taxDocumentModificationContext) {
-		StoreService storeService = getBeanFactory().getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = getBeanFactory().getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		Warehouse defaultWarehouse = storeService.findStoreWithCode(order.getStoreCode()).getWarehouse();
 
 		for (TaxDocumentModificationItem item : taxDocumentModificationContext.get(TaxDocumentModificationType.UPDATE)) {

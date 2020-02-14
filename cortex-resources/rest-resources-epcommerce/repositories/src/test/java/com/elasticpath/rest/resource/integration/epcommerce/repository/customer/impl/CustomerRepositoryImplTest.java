@@ -3,14 +3,10 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer.impl;
 
-import static java.util.Arrays.asList;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,7 +14,7 @@ import static org.mockito.Mockito.when;
 
 import javax.inject.Provider;
 
-import com.google.common.collect.ImmutableMap;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.junit.Before;
@@ -29,7 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.domain.customer.Customer;
@@ -39,8 +34,8 @@ import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.persistence.api.EpPersistenceException;
+import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
-import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
@@ -100,7 +95,7 @@ public class CustomerRepositoryImplTest {
 	@Before
 	public void setUp() {
 		customerRepository = new CustomerRepositoryImpl(mockCustomerService, mockCustomerSessionRepository, mockCustomerSessionService,
-				mockShoppingCartService, coreBeanFactory, cartOrderRepositoryProvider, exceptionTransformer, reactiveAdapter);
+				mockShoppingCartService, coreBeanFactory, cartOrderRepositoryProvider, reactiveAdapter);
 	}
 
 	@Test
@@ -176,27 +171,16 @@ public class CustomerRepositoryImplTest {
 
 	@Test
 	public void testUpdateCustomerWithExistingUserId() {
-		Customer customer = new CustomerImpl();
-		String errorMessage = "debug message";
-		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage(
-				"message-id",
-				errorMessage,
-				ImmutableMap.of("key", "value")
-		);
 
-		when(exceptionTransformer.getExecutionResult(any(UserIdExistException.class))).thenReturn(ExecutionResultFactory
-				.createStateFailureWithMessages(errorMessage, asList(mock(Message.class))));
-		when(mockCustomerService.update(customer)).thenThrow(
-				new UserIdExistException(
-						errorMessage,
-						asList(structuredErrorMessage)
+		UserIdExistException userIdExistException = mock(UserIdExistException.class);
+		when(exceptionTransformer.getResourceOperationFailure(userIdExistException)).thenReturn(ResourceOperationFailure.stateFailure("error"));
+		when(mockCustomerService.update(mockCustomer)).thenThrow(userIdExistException);
 
-				)
-		);
-
-		ExecutionResult result = customerRepository.updateCustomer(customer);
-		assertTrue(THE_RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
-		assertEquals("The resource status returned should be a STATE_FAILURE", ResourceStatus.STATE_FAILURE, result.getResourceStatus());
+		customerRepository.updateCustomer(mockCustomer)
+				.test()
+				.assertError(ResourceOperationFailure.stateFailure("error"))
+				.assertNoValues()
+				.assertNotComplete();
 	}
 
 	@Test
@@ -204,8 +188,10 @@ public class CustomerRepositoryImplTest {
 		Customer customer = new CustomerImpl();
 		when(mockCustomerService.update(customer)).thenThrow(new EpPersistenceException(""));
 
-		ExecutionResult result = customerRepository.updateCustomer(customer);
-		assertServerError(result);
+		customerRepository.updateCustomer(customer)
+				.test()
+				.assertError(EpPersistenceException.class)
+				.assertNoValues();
 	}
 
 	private void assertServerError(final ExecutionResult result) {
@@ -215,30 +201,25 @@ public class CustomerRepositoryImplTest {
 
 	@Test
 	public void testUpdateCustomer() {
-		Customer customer = new CustomerImpl();
-		when(mockCustomerService.update(customer)).thenReturn(customer);
+		when(mockCustomerService.update(mockCustomer)).thenReturn(mockCustomer);
+		when(mockCustomer.getGuid()).thenReturn(CUSTOMER_GUID);
+		when(mockCustomerSessionRepository.invalidateCustomerSessionByGuid(CUSTOMER_GUID)).thenReturn(Completable.complete());
 
-		ExecutionResult result = customerRepository.updateCustomer(customer);
-		assertTrue(THE_RESULT_SHOULD_BE_SUCCESSFUL, result.isSuccessful());
-		assertEquals("The resource status returned should be a UPDATE_OK", ResourceStatus.UPDATE_OK, result.getResourceStatus());
+		customerRepository.updateCustomer(mockCustomer)
+				.test()
+				.assertNoErrors()
+				.assertComplete();
 	}
 
 	@Test
 	public void mergeCustomerShouldReturnErrorWhenAMergeCustomerFails() throws Exception {
-		when(mockShoppingCartService.findOrCreateByShopper(any(Shopper.class))).thenReturn(mockShoppingCart);
-		when(mockShoppingCart.getShopper()).thenReturn(mockShopper);
-		doThrow(new IllegalArgumentException()).when(mockCustomerSessionService).changeFromAnonymousToRegisteredCustomer(
-				mockCustomerSession,
-				mockCustomer,
-				SCOPE);
-
 		ExecutionResult<Object> executionResult = customerRepository.mergeCustomer(mockCustomerSession, mockCustomer, SCOPE);
 		assertServerError(executionResult);
 	}
 
 	@Test
 	public void mergeCustomerShouldReturnSuccess() throws Exception {
-		when(mockShoppingCartService.findOrCreateByShopper(any(Shopper.class))).thenReturn(mockShoppingCart);
+		when(mockShoppingCartService.findOrCreateDefaultCartByCustomerSession(mockCustomerSession)).thenReturn(mockShoppingCart);
 		when(mockCustomerSession.getShopper()).thenReturn(mockShopper);
 		when(mockShoppingCart.getShopper()).thenReturn(mockShopper);
 
@@ -274,16 +255,16 @@ public class CustomerRepositoryImplTest {
 		when(mockCustomer.getGuid()).thenReturn(CUSTOMER_GUID);
 		when(mockAddress.getGuid()).thenReturn(ADDRESS_GUID);
 		when(cartOrderRepositoryProvider.get()).thenReturn(cartOrderRepository);
-		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(SCOPE, CUSTOMER_GUID)).thenReturn(Observable.just(CART_GUID));
-		when(cartOrderRepository.updateShippingAddressOnCartOrderAsSingle(ADDRESS_GUID, CART_GUID, SCOPE))
+		when(cartOrderRepository.findCartOrderGuidsByCustomer(SCOPE, CUSTOMER_GUID)).thenReturn(Observable.just(CART_GUID));
+		when(cartOrderRepository.updateShippingAddressOnCartOrder(ADDRESS_GUID, CART_GUID, SCOPE))
 				.thenReturn(Single.just(true));
 
 		customerRepository.updateShippingAddressOnCustomerCart(mockCustomer, mockAddress)
 				.test()
 				.assertNoErrors();
 
-		verify(cartOrderRepository, times(1)).findCartOrderGuidsByCustomerAsObservable(SCOPE, CUSTOMER_GUID);
-		verify(cartOrderRepository, times(1)).updateShippingAddressOnCartOrderAsSingle(ADDRESS_GUID, CART_GUID, SCOPE);
+		verify(cartOrderRepository, times(1)).findCartOrderGuidsByCustomer(SCOPE, CUSTOMER_GUID);
+		verify(cartOrderRepository, times(1)).updateShippingAddressOnCartOrder(ADDRESS_GUID, CART_GUID, SCOPE);
 	}
 
 

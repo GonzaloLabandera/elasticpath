@@ -34,9 +34,9 @@ public class CategoryDaoAdapterImpl extends AbstractDaoAdapter<Category> {
 	@Override
 	public Category createBean(final Category category) {
 		if (category.isLinked()) {
-			return beanFactory.getBean(ContextIdNames.LINKED_CATEGORY);
+			return beanFactory.getPrototypeBean(ContextIdNames.LINKED_CATEGORY, Category.class);
 		}
-		return beanFactory.getBean(ContextIdNames.CATEGORY);
+		return beanFactory.getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 	}
 
 	@Override

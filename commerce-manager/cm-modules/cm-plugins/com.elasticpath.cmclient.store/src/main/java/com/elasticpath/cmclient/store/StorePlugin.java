@@ -19,7 +19,7 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleContext;
 
 import com.elasticpath.cmclient.core.CmSingletonUtil;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.controller.impl.AbstractBaseControllerImpl;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.UIEvent;
@@ -188,8 +188,9 @@ public class StorePlugin extends AbstractPolicyAwareUIPlugin {
 			@Override
 			public void perspectiveActivated(final IWorkbenchPage page, final IPerspectiveDescriptor perspective) {
 				if (StorePerspectiveFactory.PERSPECTIVE_ID.equalsIgnoreCase(perspective.getId())) {
-					UIEvent<ContentSpace> assignmentTargetEvent = new UIEvent<>(ServiceLocator.getService(ContextIdNames.CONTENTSPACE),
-						EventType.SEARCH, false);
+					UIEvent<ContentSpace> assignmentTargetEvent = new UIEvent<>(
+							BeanLocator.getPrototypeBean(ContextIdNames.CONTENTSPACE, ContentSpace.class),
+							EventType.SEARCH, false);
 					StorePlugin.this.getContentSpacesController().onEvent(assignmentTargetEvent);
 				}
 			}

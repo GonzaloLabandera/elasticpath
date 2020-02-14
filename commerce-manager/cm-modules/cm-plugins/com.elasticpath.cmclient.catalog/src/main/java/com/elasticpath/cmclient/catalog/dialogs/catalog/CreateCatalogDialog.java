@@ -22,7 +22,7 @@ import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.catalog.LanguageSelectionDualListBox;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
@@ -81,7 +81,7 @@ public class CreateCatalogDialog extends AbstractEpDialog {
 		super(parentShell, 1, true);
 		this.catalog = catalog;
 		this.dataBindingCtx = new DataBindingContext();
-		catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 	}
 
 	/**

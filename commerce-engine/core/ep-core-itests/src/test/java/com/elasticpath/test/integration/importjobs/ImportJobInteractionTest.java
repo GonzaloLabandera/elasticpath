@@ -1,11 +1,10 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2014
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration.importjobs;
 
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Duration.ONE_MINUTE;
-import static org.awaitility.Duration.TEN_SECONDS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -50,7 +49,7 @@ public class ImportJobInteractionTest extends ImportJobTestCase {
 		new ImportJobProcessorLauncher(getBeanFactory()).launch();
 
 		/** wait until several row gets imported. */
-		await().atMost(TEN_SECONDS).until(() -> importService.getImportJobStatus(status.getProcessId()).getCurrentRow() != 0);
+		await().atMost(ONE_MINUTE).until(() -> importService.getImportJobStatus(status.getProcessId()).getCurrentRow() != 0);
 		assertEquals(0, status.getFailedRows());
 
 		/** force import cancellation. */
@@ -63,7 +62,7 @@ public class ImportJobInteractionTest extends ImportJobTestCase {
 
 		assertTrue(updatedStatus.isFinished());
 		// at least the last category should not be imported, since import job was canceled.
-		CategoryLookup categoryLookup = getBeanFactory().getBean(ContextIdNames.CATEGORY_LOOKUP);
+		CategoryLookup categoryLookup = getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 		assertNull(categoryLookup.findByCategoryCodeAndCatalog("10100", scenario.getCatalog()));
 
 		Interval interval = new Interval(updatedStatus.getStartTime().getTime(), updatedStatus.getEndTime().getTime());

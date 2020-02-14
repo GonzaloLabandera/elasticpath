@@ -9,6 +9,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.persistence.api.PersistenceSessionFactory;
 
 /**
@@ -34,10 +35,12 @@ public class ImportExportInitialization {
 		sessionFactory.setConnectionFactoryName(null);
 		sessionFactory.setConnectionDriverName(JPADataSource.class.getName());
 
-		final ActiveMQConnectionFactory jmsConnectionFactory = getBeanFactory().getBean("jmsConnectionFactory");
+		final ActiveMQConnectionFactory jmsConnectionFactory = getBeanFactory().getSingletonBean(ContextIdNames.JMS_CONNECTION_FACTORY,
+				ActiveMQConnectionFactory.class);
 		jmsConnectionFactory.setBrokerURL(dataSourceProperties.getJmsUrl());
 
-		final PooledConnectionFactory pooledConnectionFactory = getBeanFactory().getBean("pooledConnectionFactory");
+		final PooledConnectionFactory pooledConnectionFactory = getBeanFactory().getSingletonBean(ContextIdNames.POOLED_CONNECTION_FACTORY,
+				PooledConnectionFactory.class);
 		pooledConnectionFactory.setConnectionFactory(jmsConnectionFactory);
 		pooledConnectionFactory.setMaxConnections(Integer.parseInt(dataSourceProperties.getJmsMaxConnections()));
 		pooledConnectionFactory.setMaximumActiveSessionPerConnection(Integer.parseInt(dataSourceProperties.getJmsMaxConnections()));
@@ -82,7 +85,6 @@ public class ImportExportInitialization {
 	public void setAppProperties(final Properties appProperties) {
 		this.appProperties = appProperties;
 	}
-
 
 
 }

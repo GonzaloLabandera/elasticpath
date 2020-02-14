@@ -72,7 +72,7 @@ public class CouponRepositoryImpl implements CouponRepository {
 
 	@Override
 	public Observable<AppliedCoupon> getAppliedCoupons(final String scope, final String purchaseId) {
-		return orderRepository.findByGuidAsSingle(scope, purchaseId)
+		return orderRepository.findByGuid(scope, purchaseId)
 				.flatMapObservable(order -> Observable.fromIterable(order.getAppliedRules()))
 				.flatMap(appliedRule -> Observable.fromIterable(appliedRule.getAppliedCoupons()));
 	}

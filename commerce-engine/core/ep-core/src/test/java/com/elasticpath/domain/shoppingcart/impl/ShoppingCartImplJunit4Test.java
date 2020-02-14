@@ -97,7 +97,7 @@ public class ShoppingCartImplJunit4Test {
 	public void testGetItemByGuid() {
 		final BeanFactory beanFactory = context.mock(BeanFactory.class);
 		BeanFactoryExpectationsFactory expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, productSkuLookup);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class, productSkuLookup);
 		try {
 			final ShoppingCart shoppingCart = new ShoppingCartImpl();
 
@@ -115,7 +115,8 @@ public class ShoppingCartImplJunit4Test {
 			productSku2.setSkuCode("44444");
 
 			context.checking(new Expectations() { {
-				allowing(beanFactory).getBean("shoppingCartMemento"); will(returnValue(shoppingCartMemento));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class);
+				will(returnValue(shoppingCartMemento));
 				allowing(cartItem1).getSkuGuid(); will(returnValue(productSku1.getGuid()));
 				allowing(cartItem2).getSkuGuid(); will(returnValue(productSku2.getGuid()));
 				allowing(cartItem1).getGuid(); will(returnValue(CART_ITEM_1_GUID));
@@ -491,10 +492,12 @@ public class ShoppingCartImplJunit4Test {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.COUPON_USAGE_SERVICE); will(returnValue(couponUsageService));
-				allowing(beanFactory).getBean(ContextIdNames.COUPON_USAGE); will(returnValue(couponUsage));
-				allowing(beanFactory).getBean(ContextIdNames.COUPON_SERVICE); will(returnValue(couponService));
-				allowing(beanFactory).getBean(ContextIdNames.RULE_SERVICE); will(returnValue(ruleService));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.COUPON_USAGE_SERVICE, CouponUsageService.class);
+				will(returnValue(couponUsageService));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class); will(returnValue(couponUsage));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
+				will(returnValue(couponService));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class); will(returnValue(ruleService));
 				allowing(rule).getUidPk(); will(returnValue(1L));
 				allowing(store).getCode(); will(returnValue(STORECODE));
 
@@ -542,9 +545,11 @@ public class ShoppingCartImplJunit4Test {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.COUPON_USAGE_SERVICE); will(returnValue(couponUsageService));
-				allowing(beanFactory).getBean(ContextIdNames.COUPON_SERVICE); will(returnValue(couponService));
-				allowing(beanFactory).getBean(ContextIdNames.RULE_SERVICE); will(returnValue(ruleService));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.COUPON_USAGE_SERVICE, CouponUsageService.class);
+				will(returnValue(couponUsageService));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
+				will(returnValue(couponService));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class); will(returnValue(ruleService));
 				allowing(rule).getUidPk(); will(returnValue(1L));
 				allowing(store).getCode(); will(returnValue(STORECODE));
 
@@ -556,7 +561,7 @@ public class ShoppingCartImplJunit4Test {
 				oneOf(ruleService).getLimitedUseRule(code); will(returnValue(rule));
 				oneOf(rule).hasLimitedUseCondition(); will(returnValue(true));
 
-				never(beanFactory).getBean(ContextIdNames.COUPON_USAGE_SERVICE);
+				never(beanFactory).getSingletonBean(ContextIdNames.COUPON_USAGE_SERVICE, CouponUsageService.class);
 				never(couponConfig).getUsageType();
 			}
 		});
@@ -747,8 +752,13 @@ public class ShoppingCartImplJunit4Test {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			protected <T> T getSingletonBean(final String beanName, final Class<T> clazz) {
+				return beanFactory.getSingletonBean(beanName, clazz);
+			}
+
+			@Override
+			protected <T> T getPrototypeBean(final String beanName, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(beanName, clazz);
 			}
 		};
 

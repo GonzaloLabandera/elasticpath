@@ -177,14 +177,14 @@ public class BillingAddressSelectorRepositoryImpl<
 	}
 
 	private Completable updateAllCartOrdersBillingAddresses(final Customer customer) {
-		return cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(customer.getStoreCode(), customer.getGuid())
-				.flatMapSingle(cartOrderGuid -> cartOrderRepository.findByGuidAsSingle(customer.getStoreCode(), cartOrderGuid))
+		return cartOrderRepository.findCartOrderGuidsByCustomer(customer.getStoreCode(), customer.getGuid())
+				.flatMapSingle(cartOrderGuid -> cartOrderRepository.findByGuid(customer.getStoreCode(), cartOrderGuid))
 				.flatMapCompletable(cartOrder -> updateCartOrderBillingAddress(customer.getPreferredBillingAddress(), cartOrder));
 	}
 
 	private Completable updateCartOrderBillingAddress(final CustomerAddress address, final CartOrder cartOrder) {
 		cartOrder.setBillingAddressGuid(address.getGuid());
-		return cartOrderRepository.saveCartOrderAsSingle(cartOrder).ignoreElement();
+		return cartOrderRepository.saveCartOrder(cartOrder).ignoreElement();
 	}
 
 	@Reference(target = "(name=addressEntityRepositoryImpl)")

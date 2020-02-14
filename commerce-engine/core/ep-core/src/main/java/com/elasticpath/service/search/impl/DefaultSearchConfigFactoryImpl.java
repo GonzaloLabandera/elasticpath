@@ -27,7 +27,7 @@ public class DefaultSearchConfigFactoryImpl implements SearchConfigFactory {
 	 */
 	@Override
 	public SearchConfig getSearchConfig(final String accessKey) {
-		SearchConfigInternal config = getBeanFactory().getBean(ContextIdNames.SEARCH_CONFIG);
+		SearchConfigInternal config = getBeanFactory().getPrototypeBean(ContextIdNames.SEARCH_CONFIG, SearchConfigInternal.class);
 		config.setSearchHost(hostLocator.getSearchHostLocation());
 		return config;
 	}

@@ -77,7 +77,7 @@ public class ProductAssociationServiceImpl2Test {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 				will(returnValue(new CustomAction("foo") {
 					@Override
 					public Object invoke(final Invocation arg0) throws Throwable {

@@ -68,7 +68,7 @@ public class DynamicContentImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.DYNAMIC_CONTENT);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 				will(returnValue(new DynamicContentImpl()));
 			}
 		});

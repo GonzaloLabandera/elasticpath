@@ -12,7 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.jobs.JobsMessages;
 import com.elasticpath.cmclient.jobs.wizards.RowValidationFault;
 import com.elasticpath.domain.dataimport.ImportBadRow;
@@ -107,7 +107,7 @@ public class ImportJobDataValidatorProc implements IRunnableWithProgress {
 	 * @return import service
 	 */
 	protected ImportService getImportService() {
-		return ServiceLocator.getService("importService"); //$NON-NLS-1$
+		return BeanLocator.getSingletonBean("importService", ImportService.class); //$NON-NLS-1$
 	}
 
 	/** 

@@ -51,7 +51,7 @@
 		<name>Configuration</name>
 		<permissions>
 			<permission>ADMIN_CONFIGURATION_MANAGE</permission>
-			<permission>ADMIN_PAYMENT_GATEWAYS_MANAGE</permission>
+			<permission>ADMIN_PAYMENT_CONFIGURATIONS_MANAGE</permission>
 			<permission>ADMIN_WAREHOUSES_MANAGE</permission>
 			<permission>ADMIN_STORES_MANAGE</permission>
 			<permission>TAXES_MANAGE</permission>
@@ -149,7 +149,7 @@
 		<name>Configuration without data policies</name>
 		<permissions>
 			<permission>ADMIN_CONFIGURATION_MANAGE</permission>
-			<permission>ADMIN_PAYMENT_GATEWAYS_MANAGE</permission>
+			<permission>ADMIN_PAYMENT_CONFIGURATIONS_MANAGE</permission>
 			<permission>ADMIN_WAREHOUSES_MANAGE</permission>
 			<permission>ADMIN_STORES_MANAGE</permission>
 			<permission>TAXES_MANAGE</permission>

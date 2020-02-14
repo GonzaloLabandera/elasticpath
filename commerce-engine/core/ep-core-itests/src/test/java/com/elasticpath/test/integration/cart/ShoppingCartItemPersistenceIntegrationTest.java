@@ -36,7 +36,7 @@ public class ShoppingCartItemPersistenceIntegrationTest extends AbstractCartInte
 	 */
 	@Before
 	public void setUp() throws Exception {
-		cartItemFactory = getBeanFactory().getBean("shoppingItemFactory");
+		cartItemFactory = getBeanFactory().getSingletonBean("shoppingItemFactory", ShoppingItemFactory.class);
 		testPrice = createTestPrice();
 	}
 	
@@ -123,6 +123,6 @@ public class ShoppingCartItemPersistenceIntegrationTest extends AbstractCartInte
 	 * @return the shoppingCartItemService
 	 */
 	public ShoppingItemService getShoppingCartItemService() {
-		return getBeanFactory().getBean("shoppingItemService");
+		return getBeanFactory().getSingletonBean("shoppingItemService", ShoppingItemService.class);
 	}
 }

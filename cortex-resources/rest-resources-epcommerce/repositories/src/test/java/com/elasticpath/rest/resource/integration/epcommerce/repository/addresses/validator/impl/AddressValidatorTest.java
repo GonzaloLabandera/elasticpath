@@ -6,7 +6,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.addresse
 import org.junit.Test;
 
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.definition.addresses.AddressDetailEntity;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.base.NameEntity;
 import com.elasticpath.rest.definitions.validator.constants.ValidationMessages;
@@ -43,7 +42,8 @@ public final class AddressValidatorTest {
 	 */
 	@Test
 	public void testValidationOnAddressEntityWithNoFieldsPopulatedWithinAddressRepresentation() {
-		AddressDetailEntity addressDetailsEntity = createAddressDetailsEntity(null, null, null, null, null, null);
+		com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity =
+				createAddressDetailsEntity(null, null, null, null, null, null);
 		testEntityFieldPopulationWithFailure(null, addressDetailsEntity, NO_VALID_ADDRESS_FIELDS);
 	}
 
@@ -52,7 +52,8 @@ public final class AddressValidatorTest {
 	 */
 	@Test
 	public void testValidationOfStreetAddressOnAddressEntityWithinAddressRepresentation() {
-		AddressDetailEntity addressDetailsEntity = createAddressDetailsEntity(STREET_ADDRESS, null, null, null, null, null);
+		com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity = createAddressDetailsEntity(STREET_ADDRESS, null, null, null, null,
+				null);
 		testEntityFieldPopulationWithSuccess(null, addressDetailsEntity);
 	}
 
@@ -61,7 +62,8 @@ public final class AddressValidatorTest {
 	 */
 	@Test
 	public void testValidationOfExtendedAddressOnAddressEntityWithinAddressRepresentation() {
-		AddressDetailEntity addressDetailsEntity = createAddressDetailsEntity(null, EXTENDED_ADDRESS, null, null, null, null);
+		com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity = createAddressDetailsEntity(null, EXTENDED_ADDRESS, null, null,
+				null, null);
 		testEntityFieldPopulationWithSuccess(null, addressDetailsEntity);
 	}
 
@@ -70,7 +72,7 @@ public final class AddressValidatorTest {
 	 */
 	@Test
 	public void testValidationOfLocalityOnAddressEntityWithinAddressRepresentation() {
-		AddressDetailEntity addressDetailsEntity = createAddressDetailsEntity(null, null, LOCALITY, null, null, null);
+		com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity = createAddressDetailsEntity(null, null, LOCALITY, null, null, null);
 		testEntityFieldPopulationWithSuccess(null, addressDetailsEntity);
 	}
 
@@ -79,7 +81,7 @@ public final class AddressValidatorTest {
 	 */
 	@Test
 	public void testValidationOfRegionOnAddressEntityWithinAddressRepresentation() {
-		AddressDetailEntity addressDetailsEntity = createAddressDetailsEntity(null, null, null, REGION, null, null);
+		com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity = createAddressDetailsEntity(null, null, null, REGION, null, null);
 		testEntityFieldPopulationWithSuccess(null, addressDetailsEntity);
 	}
 
@@ -88,7 +90,8 @@ public final class AddressValidatorTest {
 	 */
 	@Test
 	public void testValidationOfCountryNameOnAddressEntityWithinAddressRepresentation() {
-		AddressDetailEntity addressDetailsEntity = createAddressDetailsEntity(null, null, null, null, COUNTRY_NAME, null);
+		com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity = createAddressDetailsEntity(null, null, null, null, COUNTRY_NAME,
+				null);
 		testEntityFieldPopulationWithSuccess(null, addressDetailsEntity);
 	}
 
@@ -97,7 +100,8 @@ public final class AddressValidatorTest {
 	 */
 	@Test
 	public void testValidationOfPostalCodeOnAddressEntityWithinAddressRepresentation() {
-		AddressDetailEntity addressDetailsEntity = createAddressDetailsEntity(null, null, null, null, null, POSTAL_CODE);
+		com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity = createAddressDetailsEntity(null, null, null, null, null,
+				POSTAL_CODE);
 		testEntityFieldPopulationWithSuccess(null, addressDetailsEntity);
 	}
 
@@ -129,7 +133,7 @@ public final class AddressValidatorTest {
 	}
 
 	private void testEntityFieldPopulationWithSuccess(final NameEntity nameEntity,
-													  final AddressDetailEntity addressDetailsEntity) {
+													  final com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity) {
 		AddressEntity addressEntity = createAddressEntity(nameEntity, addressDetailsEntity);
 		validator.validate(addressEntity)
 				.test()
@@ -137,7 +141,7 @@ public final class AddressValidatorTest {
 	}
 
 	private void testEntityFieldPopulationWithFailure(final NameEntity nameEntity,
-													  final AddressDetailEntity addressDetailsEntity,
+													  final com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity,
 													  final String failureMessage) {
 		AddressEntity addressEntity = createAddressEntity(nameEntity, addressDetailsEntity);
 		validator.validate(addressEntity)
@@ -145,18 +149,18 @@ public final class AddressValidatorTest {
 				.assertError(ResourceOperationFailure.badRequestBody(failureMessage));
 	}
 
-	private AddressEntity createAddressEntity(final NameEntity name, final AddressDetailEntity addressDetailsEntity) {
+	private AddressEntity createAddressEntity(final NameEntity name, final com.elasticpath.rest.definition.base.AddressEntity addressDetailsEntity) {
 		return AddressEntity.builder().withName(name).withAddress(addressDetailsEntity).build();
 	}
 
-	private AddressDetailEntity createAddressDetailsEntity(final String streetAddress,
-															final String extendedAddress,
-															final String locality,
-															final String region,
-															final String countryName,
-															final String postalCode) {
+	private com.elasticpath.rest.definition.base.AddressEntity createAddressDetailsEntity(final String streetAddress,
+																						  final String extendedAddress,
+																						  final String locality,
+																						  final String region,
+																						  final String countryName,
+																						  final String postalCode) {
 
-		return AddressDetailEntity.builder()
+		return com.elasticpath.rest.definition.base.AddressEntity.builder()
 				.withStreetAddress(streetAddress)
 				.withExtendedAddress(extendedAddress)
 				.withLocality(locality)

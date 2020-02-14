@@ -116,7 +116,7 @@ public class ShippingRegionImpl extends AbstractLegacyEntityImpl implements Ship
 			this.regionMap = new HashMap<>();
 			final Matcher regionListMatch = REGION_LIST_PATTERN.matcher(getRegionStr());
 			while (regionListMatch.find()) {
-				Region region = getBean(ContextIdNames.REGION);
+				Region region = getPrototypeBean(ContextIdNames.REGION, Region.class);
 				region.fromString(regionListMatch.group());
 				Region existingRegion = this.regionMap.get(region.getCountryCode());
 				if (existingRegion == null) {

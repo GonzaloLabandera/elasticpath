@@ -117,7 +117,7 @@ public class BusinessObjectResolverImplTest {
 		productBundle1.setGuid("789");
 
 		final int expectTime = 3;
-		when(beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR)).thenReturn(objectDescriptor);
+		when(beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class)).thenReturn(objectDescriptor);
 		when(defaultObjectGuidResolver.resolveGuid(product1)).thenReturn(product1.getGuid());
 		when(defaultObjectGuidResolver.resolveGuid(catalog1)).thenReturn(catalog1.getGuid());
 		when(defaultObjectGuidResolver.resolveGuid(productBundle1)).thenReturn(productBundle1.getGuid());
@@ -158,7 +158,7 @@ public class BusinessObjectResolverImplTest {
 			.as("Incorrect object ID resolved.")
 			.isEqualTo(productBundle1.getGuid());
 
-		verify(beanFactory, times(expectTime)).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		verify(beanFactory, times(expectTime)).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 		verify(defaultObjectGuidResolver).resolveGuid(product1);
 		verify(defaultObjectGuidResolver).resolveGuid(catalog1);
 		verify(defaultObjectGuidResolver).resolveGuid(productBundle1);
@@ -191,11 +191,11 @@ public class BusinessObjectResolverImplTest {
 		baDTO.setGuid(guid);
 		final BusinessObjectDescriptor objectDescriptor = new BusinessObjectDescriptorImpl();
 
-		when(beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR)).thenReturn(objectDescriptor);
+		when(beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class)).thenReturn(objectDescriptor);
 
 		BusinessObjectDescriptor bod = businessObjectResolver.resolveObjectDescriptor(baDTO);
 
-		verify(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		verify(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 		assertThat(bod.getObjectIdentifier())
 			.as("Expected guid to be same")
 			.isEqualTo(guid);
@@ -360,7 +360,8 @@ public class BusinessObjectResolverImplTest {
 		objects.add(catalog1);
 		objects.add(productBundle1);
 
-		when(beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR)).thenAnswer(invocation -> new BusinessObjectDescriptorImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class))
+				.thenAnswer(invocation -> new BusinessObjectDescriptorImpl());
 		when(defaultObjectGuidResolver.resolveGuid(product1)).thenReturn(product1.getGuid());
 		when(defaultObjectGuidResolver.resolveGuid(catalog1)).thenReturn(catalog1.getGuid());
 		when(defaultObjectGuidResolver.resolveGuid(productBundle1)).thenReturn(productBundle1.getGuid());

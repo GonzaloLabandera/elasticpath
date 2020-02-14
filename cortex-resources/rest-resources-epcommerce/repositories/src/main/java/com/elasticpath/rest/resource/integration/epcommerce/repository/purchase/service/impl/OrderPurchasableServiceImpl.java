@@ -33,8 +33,8 @@ public class OrderPurchasableServiceImpl implements OrderPurchasableService {
 		String storeCode = order.getScope().getValue();
 		String cartOrderGuid = order.getOrderId().getValue();
 
-		return cartOrderRepository.findByGuidAsSingle(storeCode, cartOrderGuid)
-				.flatMapObservable(cartOrder -> cartOrderRepository.getEnrichedShoppingCartSingle(storeCode, cartOrder)
+		return cartOrderRepository.findByGuid(storeCode, cartOrderGuid)
+				.flatMapObservable(cartOrder -> cartOrderRepository.getEnrichedShoppingCart(storeCode, cartOrder)
 								.flatMap(shoppingCart -> Single.just(validationService.buildContext(shoppingCart, cartOrder))
 										.map(context -> validationService.validate(context))
 										.map(structuredErrorMessages -> messageConverter.transform(ImmutableList.copyOf(structuredErrorMessages),

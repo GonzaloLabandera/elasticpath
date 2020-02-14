@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.advancedsearch.helpers;
 import java.util.List;
 
 import com.elasticpath.cmclient.advancedsearch.service.AdvancedSearchEventService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -28,7 +28,7 @@ public class ProductAdvancedSearchRequestJob extends AbstractAdvancedSearchReque
 	 */
 	public ProductAdvancedSearchRequestJob(final int pageSize) {
 		super(pageSize);
-		productService = ServiceLocator.getService(ContextIdNames.PRODUCT_SERVICE);
+		productService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class ProductAdvancedSearchRequestJob extends AbstractAdvancedSearchReque
 
 	@Override
 	protected List<Product> getItems(final List<Long> uidList) {
-		final ProductLoadTuner productLoadTuner = ServiceLocator.getService(ContextIdNames.PRODUCT_LOAD_TUNER);
+		final ProductLoadTuner productLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 		productLoadTuner.setLoadingCategories(true);
 		return productService.findByUids(uidList, productLoadTuner);
 	}

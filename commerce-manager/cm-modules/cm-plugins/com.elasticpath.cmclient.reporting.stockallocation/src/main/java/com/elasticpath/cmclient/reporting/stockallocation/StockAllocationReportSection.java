@@ -204,7 +204,7 @@ public class StockAllocationReportSection extends AbstractReportSection {
 	}
 
 	private List<String> getAllStoreNames() {
-		StoreService storeService = LoginManager.getInstance().getBean(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = LoginManager.getInstance().getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		List<Store> stores = storeService.findAllCompleteStores();
 		storeNames = new ArrayList<String>(stores.size());
 		for (Store store : stores) {

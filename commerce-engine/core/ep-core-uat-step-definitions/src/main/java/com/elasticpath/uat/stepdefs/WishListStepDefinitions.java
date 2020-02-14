@@ -90,7 +90,7 @@ public class WishListStepDefinitions {
 			final WishList wishList = wishListBuilderHolder.get().build();
 			wishListService.save(wishList);
 
-			final WishListMessage wishListMessage = beanFactory.getBean(ContextIdNames.WISH_LIST_MESSAGE);
+			final WishListMessage wishListMessage = beanFactory.getPrototypeBean(ContextIdNames.WISH_LIST_MESSAGE, WishListMessage.class);
 			wishListMessage.setSenderName(customer.getFullName());
 			wishListMessage.setMessage("Token Wish List message");
 			wishListMessage.setRecipientEmails(emailRecipient);

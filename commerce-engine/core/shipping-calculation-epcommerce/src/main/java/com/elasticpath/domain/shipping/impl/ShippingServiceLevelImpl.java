@@ -153,7 +153,7 @@ public class ShippingServiceLevelImpl extends AbstractLegacyEntityImpl implement
 	@Transient
 	public LocalizedProperties getLocalizedProperties() {
 		if (localizedProperties == null) {
-			this.localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			this.localizedProperties = getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 			this.localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(), 
 					EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_LOCALIZED_PROPERTY_VALUE);
 		}

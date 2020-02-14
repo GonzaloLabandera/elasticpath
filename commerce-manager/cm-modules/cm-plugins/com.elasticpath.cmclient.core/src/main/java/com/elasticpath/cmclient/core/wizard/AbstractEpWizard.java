@@ -83,9 +83,7 @@ public abstract class AbstractEpWizard<T> extends Wizard implements IPageChangin
 		if (!CoreMessages.EMPTY_STRING.equals(pagesTitleBlank)) {
 			final IWizardPage[] pages = getPages();
 			for (int index = 0; index < pages.length; index++) {
-				pages[index].setTitle(
-					NLS.bind(pagesTitleBlank,
-					new Integer[]{index + 1, pages.length}));
+				pages[index].setTitle(NLS.bind(pagesTitleBlank, new Integer[]{index + 1, pages.length}));
 			}
 		}
 		super.createPageControls(pageContainer);

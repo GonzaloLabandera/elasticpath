@@ -14,7 +14,7 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.helpers.UserViewFormatter;
 import com.elasticpath.cmclient.changeset.views.UserAssignmentDualListBox;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
@@ -32,7 +32,7 @@ import com.elasticpath.service.cmuser.CmUserService;
  */
 public class ChangeSetEditorUsersSection extends AbstractPolicyAwareEditorPageSectionPart {
 
-	private final CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+	private final CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 
 	/**
 	 * Constructs a new section.

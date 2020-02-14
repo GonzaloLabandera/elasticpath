@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <stores>
 <store enabled="true" code="SLRWORLD">
     <globalization default_currency="USD" default_locale="en" content_encoding="UTF-8" sub_country="WA" country="US" timeZone="PST8PDT"/>
@@ -30,15 +34,27 @@
     <tax_jurisdictions>
         <jurisdiction>USTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-        <gateway>GiftCertificate</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
         <type>MasterCard</type>
     </credit_card_types>
+    <payment_provider_configurations>
+        <payment_provider_configuration_guid>no-capabilities-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>smart-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>angry-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>big-amount-fields-happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>address-required-happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>cancel-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>credit-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>reverse-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>modify-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>modify-and-cancel-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>reserve-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>cancel-reserve-fail-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>email-required-payment-provider-config</payment_provider_configuration_guid>
+    </payment_provider_configurations>
     <cart_types>
         <cart_type>
             <name>default</name>
@@ -82,10 +98,6 @@
         <jurisdiction>USTaxJurisdiction</jurisdiction>
         <jurisdiction>GBTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-        <gateway>GiftCertificate</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>Maestro</type>
         <type>American Express</type>
@@ -93,6 +105,22 @@
         <type>Solo</type>
         <type>MasterCard</type>
     </credit_card_types>
+    <payment_provider_configurations>
+        <payment_provider_configuration_guid>no-capabilities-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>smart-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>angry-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>big-amount-fields-happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>address-required-happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>cancel-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>credit-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>reverse-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>modify-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>modify-and-cancel-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>reserve-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>cancel-reserve-fail-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>email-required-payment-provider-config</payment_provider_configuration_guid>
+    </payment_provider_configurations>
     <cart_types>
         <cart_type>
             <name>default</name>
@@ -137,15 +165,27 @@
         <jurisdiction>USTaxJurisdiction</jurisdiction>
         <jurisdiction>GBTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-        <gateway>GiftCertificate</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
         <type>MasterCard</type>
     </credit_card_types>
+    <payment_provider_configurations>
+        <payment_provider_configuration_guid>no-capabilities-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>smart-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>angry-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>address-required-happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>big-amount-fields-happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>cancel-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>credit-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>reverse-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>modify-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>modify-and-cancel-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>reserve-unsupported-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>cancel-reserve-fail-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>email-required-payment-provider-config</payment_provider_configuration_guid>
+    </payment_provider_configurations>
     <cart_types>
         <cart_type>
             <name>default</name>

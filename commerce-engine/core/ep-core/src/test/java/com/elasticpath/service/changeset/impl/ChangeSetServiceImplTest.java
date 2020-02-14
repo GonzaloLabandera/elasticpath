@@ -117,14 +117,14 @@ public class ChangeSetServiceImplTest {
 			will(returnValue(groupMembers));
 
 			//process the first business object member
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 			will(returnValue(new BusinessObjectDescriptorImpl()));
 
 			oneOf(changeSetPolicy).resolveMetaData(with(any(BusinessObjectDescriptor.class)));
 			will(returnValue(new HashMap<String, String>()));
 
 			//process the second business object member
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 			will(returnValue(new BusinessObjectDescriptorImpl()));
 
 			oneOf(changeSetPolicy).resolveMetaData(with(any(BusinessObjectDescriptor.class)));
@@ -133,7 +133,7 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetMemberDao).findBusinessObjectMetadataByDescriptor(with(any(BusinessObjectDescriptor.class)));
 			will(returnValue(new ArrayList<BusinessObjectMetadata>()));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_METADATA);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class);
 			will(returnValue(new BusinessObjectMetadataImpl()));
 
 			oneOf(changeSetMemberDao).addOrUpdateObjectMetadata(with(any(BusinessObjectMetadata.class)));
@@ -161,13 +161,13 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).isChangeAllowed(CHANGE_SET_GUID);
 			will(returnValue(true));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER, BusinessObjectGroupMember.class);
 			will(returnValue(groupMember));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_METADATA);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class);
 			will(returnValue(metadata));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 
 			oneOf(changeSetMemberDao).add(groupMember, Arrays.asList(metadata));
@@ -212,13 +212,13 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).isChangeAllowed(CHANGE_SET_GUID);
 			will(returnValue(true));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER, BusinessObjectGroupMember.class);
 			will(returnValue(groupMember));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_METADATA);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class);
 			will(returnValue(metadata));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 
 			oneOf(changeSetMemberDao).add(groupMember, Arrays.asList(metadata));
@@ -252,10 +252,10 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).isChangeAllowed(changeSetGuid);
 			will(returnValue(true));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER, BusinessObjectGroupMember.class);
 			will(returnValue(groupMember));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 
 			List<BusinessObjectMetadata> noMetadata = Collections.emptyList();
@@ -292,13 +292,13 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).isChangeAllowed(CHANGE_SET_GUID);
 			will(returnValue(true));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER, BusinessObjectGroupMember.class);
 			will(returnValue(groupMember));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_METADATA);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class);
 			will(returnValue(metadata));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 
 			oneOf(changeSetMemberDao).add(groupMember, Arrays.asList(metadata));
@@ -369,10 +369,10 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).isChangeAllowed(changeSetGuid);
 			will(returnValue(true));
 
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_GROUP_MEMBER, BusinessObjectGroupMember.class);
 			will(returnValue(groupMember));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 
 			List<BusinessObjectMetadata> noMetadata = Collections.emptyList();
@@ -436,7 +436,7 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).isChangeAllowed(changeSetGuid);
 			will(returnValue(true));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(changeSetObjectStatus));
 
 			oneOf(changeSetPolicy).getObjectMembershipGuids(objectDescriptor);
@@ -464,7 +464,7 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).isChangeAllowed(changeSetGuid);
 			will(returnValue(true));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(changeSetObjectStatus));
 
 			oneOf(changeSetPolicy).getObjectMembershipGuids(objectDescriptor);
@@ -497,7 +497,7 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).isChangeAllowed(changeSetGuid);
 			will(returnValue(true));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(changeSetObjectStatus));
 
 			oneOf(changeSetDao).findByGuid(changeSetGuid);
@@ -541,7 +541,7 @@ public class ChangeSetServiceImplTest {
 
 		context.checking(new Expectations() { {
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 
 			oneOf(changeSetPolicy).getObjectMembershipGuids(objectDescriptor);
@@ -566,7 +566,7 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).resolveObjectDescriptor(businessObject);
 			will(returnValue(objectDescriptor));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 
 			oneOf(changeSetPolicy).getObjectMembershipGuids(objectDescriptor);
@@ -594,7 +594,7 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).resolveObjectDescriptor(businessObject);
 			will(returnValue(objectDescriptor));
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 		} });
 
@@ -614,7 +614,7 @@ public class ChangeSetServiceImplTest {
 
 		context.checking(new Expectations() { {
 
-			oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_OBJECT_STATUS);
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.CHANGESET_OBJECT_STATUS, ChangeSetObjectStatus.class);
 			will(returnValue(new ChangeSetObjectStatusImpl()));
 
 		} });

@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.catalog.editors.catalog;
 import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.EntityEditorInput;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
@@ -60,12 +60,11 @@ public class CatalogEditorInput extends EntityEditorInput<Long> {
 	public Catalog getCatalog() {
 		if (catalog == null) {
 			// TODO: should there be a context id name for catalogService?
-			final CatalogService catalogService = ServiceLocator.getService(
-					ContextIdNames.CATALOG_SERVICE);
+			final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 			
 			//catalog = catalogService.getCatalog(getUid());
-			FetchGroupLoadTuner catalogEditorLoadTuner = ServiceLocator.getService(
-					ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+			FetchGroupLoadTuner catalogEditorLoadTuner = BeanLocator
+					.getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 			catalogEditorLoadTuner.addFetchGroup(FetchGroupConstants.CATALOG_EDITOR);
 			catalog = catalogService.load(getUid(), catalogEditorLoadTuner, false);
 		}

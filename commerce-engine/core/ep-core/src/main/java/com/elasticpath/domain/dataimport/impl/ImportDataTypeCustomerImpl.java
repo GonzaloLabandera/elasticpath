@@ -91,7 +91,7 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 	 * Populate customer profiles import fields.
 	 */
 	private void createImportFieldsForCustomerProfiles() {
-		AttributeService attributeService = getBean(ContextIdNames.ATTRIBUTE_SERVICE);
+		AttributeService attributeService = getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		final Map<String, Attribute> customerProfileAttributes = attributeService.getCustomerProfileAttributesMap();
 
 		for (final Attribute attribute : customerProfileAttributes.values()) {
@@ -364,7 +364,7 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected ValidatorUtils getValidatorUtils() {
 		if (validatorUtils == null) {
-			validatorUtils = getBean(ContextIdNames.VALIDATOR_UTILS);
+			validatorUtils = getSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class);
 		}
 		return validatorUtils;
 	}
@@ -380,7 +380,7 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected Utility getUtilityBean() {
 		if (utilityBean == null) {
-			utilityBean = getBean(ContextIdNames.UTILITY);
+			utilityBean = getSingletonBean(ContextIdNames.UTILITY, Utility.class);
 		}
 		return utilityBean;
 	}

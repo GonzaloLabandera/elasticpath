@@ -9,7 +9,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.elasticpath.cmclient.admin.taxes.dialogs.TaxCodeDialog;
 import com.elasticpath.cmclient.admin.taxes.views.TaxCodeListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.service.tax.TaxCodeService;
@@ -40,12 +40,11 @@ public class CreateTaxCodeAction extends Action {
 	public void run() {
 		LOG.debug("Create Tax Code action called."); //$NON-NLS-1$
 
-		final TaxCode taxCode = ServiceLocator.getService(ContextIdNames.TAX_CODE);
+		final TaxCode taxCode = BeanLocator.getPrototypeBean(ContextIdNames.TAX_CODE, TaxCode.class);
 
 		final boolean dialogOk = TaxCodeDialog.openCreateDialog(listView.getSite().getShell(), taxCode);
 		if (dialogOk) {
-			final TaxCodeService taxCodeService = ServiceLocator.getService(
-					ContextIdNames.TAX_CODE_SERVICE);
+			final TaxCodeService taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 			taxCodeService.add(taxCode);
 			listView.refreshViewerInput();
 		}

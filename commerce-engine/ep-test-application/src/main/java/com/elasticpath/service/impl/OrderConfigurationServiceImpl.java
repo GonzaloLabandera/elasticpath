@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2013
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.service.impl;
@@ -17,19 +17,13 @@ import org.apache.commons.lang.StringUtils;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.ShoppingItemDto;
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.PaymentToken;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.testcontext.ShoppingTestData;
-import com.elasticpath.plugin.payment.PaymentType;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.CustomerAuthenticationService;
 import com.elasticpath.service.CustomerOrderingService;
@@ -51,8 +45,6 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 	private CustomerOrderingService customerOrderingService;
 
 	private CartDirector cartDirector;
-
-	private BeanFactory beanFactory;
 
 	private ShippingOptionService shippingOptionService;
 
@@ -144,33 +136,6 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 		throw new EpServiceException("Selected shipping option could not be found");
 	}
 
-	/**
-	 * Creates the order payment based on payment token value.
-	 *
-	 * @param customer   the customer
-	 * @param tokenValue the token value
-	 * @return the order payment
-	 */
-	@Override
-	public OrderPayment createOrderPayment(final Customer customer, final String tokenValue) {
-		for (PaymentMethod paymentMethod : customer.getPaymentMethods().all()) {
-			if (paymentMethod instanceof PaymentToken) {
-				PaymentToken paymentToken = (PaymentToken) paymentMethod;
-				if (paymentToken.getValue().equals(tokenValue)) {
-					final OrderPayment orderPayment = beanFactory.getBean(ContextIdNames.ORDER_PAYMENT);
-					orderPayment.setDisplayValue(paymentToken.getDisplayValue());
-					orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-					return orderPayment;
-				}
-			}
-		}
-
-		throw new EpServiceException("Selected token value could not be found");
-	}
-
-	public void setBeanFactory(final BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
-	}
 	/**
 	 * This interface represents methods for selection customer address for given shopping cart.
 	 */

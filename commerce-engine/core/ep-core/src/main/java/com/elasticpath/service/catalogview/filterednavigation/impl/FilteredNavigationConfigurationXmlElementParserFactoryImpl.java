@@ -29,19 +29,24 @@ public class FilteredNavigationConfigurationXmlElementParserFactoryImpl
 		FilteredNavigationConfigurationXmlElementParser xmlElementParser;
 		switch (filterType) {
 			case ATTRIBUTE_FILTER :
-				xmlElementParser = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_FILTER_PARSER);
+				xmlElementParser = getBeanFactory().getSingletonBean(ContextIdNames.ATTRIBUTE_FILTER_PARSER, 
+						FilteredNavigationConfigurationXmlElementParser.class);
 				break;
 			case ATTRIBUTE_RANGE_FILTER :
-				xmlElementParser = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER_PARSER);
+				xmlElementParser = getBeanFactory().getSingletonBean(ContextIdNames.ATTRIBUTE_RANGE_FILTER_PARSER, 
+						FilteredNavigationConfigurationXmlElementParser.class);
 				break;
 			case ATTRIBUTE_KEYWORD_FILTER :
-				xmlElementParser = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_KEYWORD_FILTER_PARSER);
+				xmlElementParser = getBeanFactory().getSingletonBean(ContextIdNames.ATTRIBUTE_KEYWORD_FILTER_PARSER, 
+						FilteredNavigationConfigurationXmlElementParser.class);
 				break;
 			case PRICE_FILTER :
-				xmlElementParser = getBeanFactory().getBean(ContextIdNames.PRICE_FILTER_PARSER);
+				xmlElementParser = getBeanFactory().getSingletonBean(ContextIdNames.PRICE_FILTER_PARSER, 
+						FilteredNavigationConfigurationXmlElementParser.class);
 				break;
 			case BRAND_FILTER :
-				xmlElementParser = getBeanFactory().getBean(ContextIdNames.BRAND_FILTER_PARSER);
+				xmlElementParser = getBeanFactory().getSingletonBean(ContextIdNames.BRAND_FILTER_PARSER, 
+						FilteredNavigationConfigurationXmlElementParser.class);
 				break;
 			default: 
 				throw new IllegalArgumentException("Filter parser id is not valid " + filterType);

@@ -36,7 +36,7 @@ public class CouponConfigDaoAdapterImpl extends AbstractDaoAdapter<CouponConfig>
 
 	@Override
 	public CouponConfig createBean(final CouponConfig couponConfig) {
-		return beanFactory.getBean(ContextIdNames.COUPON_CONFIG);
+		return beanFactory.getPrototypeBean(ContextIdNames.COUPON_CONFIG, CouponConfig.class);
 	}
 
 	@Override

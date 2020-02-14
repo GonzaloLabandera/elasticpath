@@ -79,7 +79,8 @@ public class ProductInventoryManagementServiceImplInventoryResultTest {
 		beanFactory = context.mock(BeanFactory.class);
 		executionResult = new InventoryExecutionResultImpl();
 		expectationFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationFactory.allowingBeanFactoryGetBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, executionResult);
+		expectationFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class,
+				executionResult);
 
 		productSkuLookup = context.mock(ProductSkuLookup.class);
 		productSku = new ProductSkuImpl();
@@ -109,7 +110,7 @@ public class ProductInventoryManagementServiceImplInventoryResultTest {
 			@Override
 			protected void fireNewInventoryEvent(final InventoryDto inventoryDto) {
 				//no-op
-			};
+			}
 		};
 		service.setInventoryFacade(inventoryFacade);
 		service.setProductSkuLookup(productSkuLookup);

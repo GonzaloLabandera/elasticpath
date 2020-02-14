@@ -68,10 +68,10 @@ public class SortingTab extends AbstractPageObject {
 		String selectedRow = "";
 		int retryCounter = 0;
 		do {
-				click(SORTING_TABLE_FIRST_ROW_CSS);
-				sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
-				selectedRow = getSelectedSortAttributeDisplayName();
-				retryCounter++;
+			click(SORTING_TABLE_FIRST_ROW_CSS);
+			sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
+			selectedRow = getSelectedSortAttributeDisplayName();
+			retryCounter++;
 		} while ("".equals(selectedRow) && retryCounter < Constants.RETRY_COUNTER_5);
 		return selectedRow;
 	}
@@ -105,6 +105,9 @@ public class SortingTab extends AbstractPageObject {
 	}
 
 	public void verifySortAttributeExistsInTable(final SortAttribute sortAttribute) {
+		assertThat(isElementPresent(By.cssSelector(SORTING_TABLE_CSS)))
+				.as("Sorting table is not present as expected")
+				.isTrue();
 		selectSortAttribute(sortAttribute.getDisplayName());
 		WebElement row = getSelectedSortAttribute();
 

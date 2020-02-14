@@ -39,7 +39,7 @@ public class PurchaseBillingAddressEntityRepositoryImpl<E extends AddressEntity,
 		String purchaseId = identifier.getPurchase().getPurchaseId().getValue();
 		String scope = identifier.getPurchase().getPurchases().getScope().getValue();
 
-		return orderRepository.findByGuidAsSingle(scope, purchaseId)
+		return orderRepository.findByGuid(scope, purchaseId)
 				.flatMap(order -> reactiveAdapter.fromNullableAsSingle(order::getBillingAddress, BILLING_ADDRESS_NOT_FOUND))
 				.map(this::convertCustomerAddressToAddressEntity);
 	}

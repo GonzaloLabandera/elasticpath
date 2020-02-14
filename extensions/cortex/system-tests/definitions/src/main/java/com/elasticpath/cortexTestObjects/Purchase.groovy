@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortexTestObjects
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
@@ -76,8 +80,8 @@ class Purchase extends CommonMethods {
 				.stopIfFailure()
 	}
 
-	static void paymentmeans() {
-		client.paymentmeans()
+	static void purchasepaymentinstruments() {
+		client.paymentinstruments()
 				.stopIfFailure()
 	}
 
@@ -101,11 +105,11 @@ class Purchase extends CommonMethods {
 		return names
 	}
 
-	static def getPaymentDisplayName() {
-		paymentmeans()
+	static def getPaymentInstrumentName() {
+		purchasepaymentinstruments()
 		client.element()
 				.stopIfFailure()
-		return client["display-name"]
+		return client["name"]
 	}
 
 	static void verifyPurchaseItemsBySkuCode(List<String> skuCodeList) {
@@ -151,9 +155,9 @@ class Purchase extends CommonMethods {
 		verifyPurchaseItemsByProductName(productName)
 	}
 
-	static void selectPaymentMeans(String paymentMeans) {
-		paymentmeans()
-		openLinkRelWithFieldWithValue("element", "display-name", paymentMeans)
+	static void selectPaymentInstruments(String paymentInstruments) {
+		purchasepaymentinstruments()
+		openLinkRelWithFieldWithValue("element", "name", paymentInstruments)
 	}
 
 	static def getShippingOptionCost() {

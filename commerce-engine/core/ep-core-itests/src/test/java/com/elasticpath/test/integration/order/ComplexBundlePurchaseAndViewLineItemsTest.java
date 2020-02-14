@@ -3,12 +3,12 @@
  */
 package com.elasticpath.test.integration.order;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
 
@@ -17,18 +17,17 @@ import com.elasticpath.test.integration.DirtiesDatabase;
  */
 public class ComplexBundlePurchaseAndViewLineItemsTest extends DbTestCase {
 
-	private ShoppingCartImpl shoppingCart;
-
 	/**
 	 * Tests that the shopping cart can be serialized even when services are
 	 * linked during a get.
 	 *
-	 * @throws Exception if a failure is detected
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testSerialization() throws Exception {
-		shoppingCart = getBeanFactory().getBean(ContextIdNames.SHOPPING_CART);
+	public void testSerialization() {
+		final ShoppingCart shoppingCart = getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
+		
+		assertNotNull(shoppingCart);
 	}
 
 }

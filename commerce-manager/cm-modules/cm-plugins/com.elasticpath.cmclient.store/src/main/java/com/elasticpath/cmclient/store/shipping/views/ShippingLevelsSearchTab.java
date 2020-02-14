@@ -13,7 +13,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.EpSortingCompositeControl;
@@ -125,8 +125,8 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 
 	private void populateControls() {
 		shippingRegionCombo.add(ShippingLevelsMessages.get().ShippingLevelsAllShippingRegionsComboboxItem, INDEX_ALL);
-		ShippingRegionService shippingRegionService = ServiceLocator.getService(
-				EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
+		ShippingRegionService shippingRegionService = BeanLocator
+				.getSingletonBean(EpShippingContextIdNames.SHIPPING_REGION_SERVICE, ShippingRegionService.class);
 		shippingRegions = shippingRegionService.list();
 		for (ShippingRegion shippingRegion : shippingRegions) {
 			shippingRegionCombo.setData(shippingRegion.getName(), shippingRegion);
@@ -134,7 +134,7 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 		}
 
 		storeCombo.add(ShippingLevelsMessages.get().ShippingLevelsAllStoresComboboxItem, INDEX_ALL);
-		StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		stores = storeService.findAllCompleteStores();
 		AuthorizationService.getInstance().removeUnathorizedStoresFrom(stores);
 

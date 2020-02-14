@@ -83,7 +83,7 @@ public class ProductSkuServiceImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testSaveOrUpdate() {
-		stubGetBean(ContextIdNames.PRODUCT_SERVICE, mockProductService);
+		stubGetSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class, mockProductService);
 
 		Product product = new ProductImpl();
 		product.initialize();
@@ -114,8 +114,6 @@ public class ProductSkuServiceImplTest extends AbstractEPServiceTestCase {
 		final ProductSku productSku = new ProductSkuImpl();
 		productSku.initialize();
 		productSku.setUidPk(productSkuUid);
-		ArrayList<Long> productUidList = new ArrayList<>();
-		productUidList.add(productSku.getUidPk());
 
 		context.checking(new Expectations() {
 			{

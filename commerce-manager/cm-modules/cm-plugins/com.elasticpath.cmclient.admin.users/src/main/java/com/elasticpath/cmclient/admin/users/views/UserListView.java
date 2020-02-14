@@ -31,8 +31,8 @@ import com.elasticpath.cmclient.admin.users.event.AdminUsersEventListener;
 import com.elasticpath.cmclient.admin.users.event.AdminUsersEventService;
 import com.elasticpath.cmclient.admin.users.helpers.UserSearchRequestJob;
 import com.elasticpath.cmclient.admin.users.wizards.UserWizard;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.helpers.AbstractSearchRequestJob;
@@ -276,10 +276,10 @@ public class UserListView extends AbstractSortListView implements AdminUsersEven
 		public void run() {
 			LOG.debug("CreateUser Action called."); //$NON-NLS-1$
 			// Create a new user
-			CmUser newUser = (CmUser) ServiceLocator.getService(ContextIdNames.CMUSER);
+			CmUser newUser = BeanLocator.getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
 			// Create the wizard
 			if (Window.OK == UserWizard.showWizard(UserListView.this.getSite().getShell(), newUser)) {
-				CmUserService cmUserService = (CmUserService) ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+				CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 				try {
 					cmUserService.add(newUser);
 				} catch (EmailSendException exception) {
@@ -311,7 +311,7 @@ public class UserListView extends AbstractSortListView implements AdminUsersEven
 			LOG.debug("EditUser Action called."); //$NON-NLS-1$
 			CmUser editableUser = getPersistedCmUser((IStructuredSelection) UserListView.this.getViewer().getSelection());
 			if (Window.OK == UserWizard.showWizard(UserListView.this.getSite().getShell(), editableUser)) {
-				CmUserService cmUserService = (CmUserService) ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+				CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 				cmUserService.update(editableUser);
 				refreshViewerInput();
 			}
@@ -319,7 +319,7 @@ public class UserListView extends AbstractSortListView implements AdminUsersEven
 
 		private CmUser getPersistedCmUser(final IStructuredSelection selectedUser) {
 			String userName = ((CmUser) selectedUser.getFirstElement()).getUserName();
-			CmUserService service = (CmUserService) ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+			CmUserService service = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 			return service.findByUserNameWithAccessInfo(userName);
 		}
 	}
@@ -359,7 +359,7 @@ public class UserListView extends AbstractSortListView implements AdminUsersEven
 
 		private void disableCmUser(final CmUser cmUser) {
 			LOG.info("Disabling user: " + cmUser.getFirstName()); //$NON-NLS-1$
-			CmUserService service = (CmUserService) ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+			CmUserService service = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 			try {
 				final CmUser userToDisable = service.get(cmUser.getUidPk());
 				userToDisable.setEnabled(false);
@@ -397,7 +397,7 @@ public class UserListView extends AbstractSortListView implements AdminUsersEven
 			if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), AdminUsersMessages.get().ChangePasswordDialogConfirmTitle,
 					AdminUsersMessages.get().ChangePasswordDialogConfirm)) {
 				String userEmail = ((CmUser) selectedUser.getFirstElement()).getEmail();
-				CmUserService service = (CmUserService) ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+				CmUserService service = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 				try {
 					final CmUser updatedUser = service.resetUserPassword(userEmail);
 					

@@ -66,7 +66,7 @@ public class ApplicationLockManager {
 
 
 	private void initializeSettingsReader() {
-		settingsReader = ServiceLocator.getService(ContextIdNames.CACHED_SETTINGS_READER);
+		settingsReader = BeanLocator.getSingletonBean(ContextIdNames.CACHED_SETTINGS_READER, SettingsReader.class);
 	}
 
 	/**

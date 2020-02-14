@@ -13,7 +13,6 @@ import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderSku;
-import com.elasticpath.rest.command.ExecutionResult;
 
 /**
  * The facade for operations with orders.
@@ -25,27 +24,16 @@ public interface OrderRepository {
 	 *
 	 * @param storeCode the store code
 	 * @param orderGuid the order GUID
-	 * @return ExecutionResult with the order
-	 * @deprecated use findByGuidAsSingle
-	 */
-	@Deprecated
-	ExecutionResult<Order> findByGuid(String storeCode, String orderGuid);
-
-	/**
-	 * Find by order GUID.
-	 *
-	 * @param storeCode the store code
-	 * @param orderGuid the order GUID
 	 * @return Single with the order
 	 */
-	Single<Order> findByGuidAsSingle(String storeCode, String orderGuid);
+	Single<Order> findByGuid(String storeCode, String orderGuid);
 
 	/**
 	 * Find all order Ids for Customer GUID.
 	 *
 	 * @param storeCode the store code
 	 * @param customerGuid the customer GUID
-	 * @return ExecutionResult with the order Ids
+	 * @return order Ids
 	 */
 	Observable<String> findOrderIdsByCustomerGuid(String storeCode, String customerGuid);
 

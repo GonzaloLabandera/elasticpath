@@ -100,7 +100,7 @@ public class RuleServiceImpl2Test {
 			final Rule rule = new PromotionRuleImpl();
 
 			context.checking(new Expectations() { {
-				exactly(2).of(beanFactory).getBean(with(same(ContextIdNames.PROMOTION_RULE)));
+				exactly(2).of(beanFactory).getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 				will(returnValue(rule));
 			} });
 

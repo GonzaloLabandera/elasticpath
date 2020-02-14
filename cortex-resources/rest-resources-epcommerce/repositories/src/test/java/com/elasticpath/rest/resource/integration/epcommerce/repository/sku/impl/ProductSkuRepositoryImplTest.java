@@ -3,7 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.sku.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,8 +25,6 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.ResourceStatus;
-import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.catalog.BundleIdentifier;
 import com.elasticpath.service.catalog.ProductSkuLookup;
@@ -92,18 +89,18 @@ public class ProductSkuRepositoryImplTest {
 		final ProductSku mockProductSku = mock(ProductSku.class);
 		when(productSkuLookup.findByGuid(SKU_GUID)).thenReturn(mockProductSku);
 
-		ExecutionResult<ProductSku> result = repository.getProductSkuWithAttributesByGuid(SKU_GUID);
-
-		assertThat(result.isSuccessful()).isTrue();
-		assertThat(result.getData()).isEqualTo(mockProductSku);
+		repository.getProductSkuWithAttributesByGuid(SKU_GUID)
+				.test()
+				.assertNoErrors()
+				.assertValue(mockProductSku);
 	}
 
 	@Test
 	public void testGetProductSkuWithAttributesByGuidNotFound() {
-		ExecutionResult<ProductSku> result = repository.getProductSkuWithAttributesByGuid(SKU_GUID);
-
-		assertThat(result.isFailure()).isTrue();
-		assertThat(result.getResourceStatus()).isEqualTo(ResourceStatus.NOT_FOUND);
+		repository.getProductSkuWithAttributesByGuid(SKU_GUID)
+				.test()
+				.assertError(ResourceOperationFailure.notFound(NOT_FOUND_MESSAGE))
+				.assertNoValues();
 	}
 
 	@Test

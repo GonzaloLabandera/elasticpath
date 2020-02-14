@@ -29,7 +29,7 @@ public class GiftCertificateTestPersister {
 	 */
 	public GiftCertificateTestPersister(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		this.certificateService = beanFactory.getBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE);
+		this.certificateService = beanFactory.getSingletonBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE, GiftCertificateService.class);
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class GiftCertificateTestPersister {
 			final String theme, final Customer purchaser, final String orderGuid, final Date creationDate, 
 			final Date lastModifiedDate, final String message, final String recipientEmail) {
 		
-		final GiftCertificate giftCertificate = beanFactory.getBean(ContextIdNames.GIFT_CERTIFICATE);
+		final GiftCertificate giftCertificate = beanFactory.getPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class);
 		
 		if (store != null) {
 			giftCertificate.setStore(store);

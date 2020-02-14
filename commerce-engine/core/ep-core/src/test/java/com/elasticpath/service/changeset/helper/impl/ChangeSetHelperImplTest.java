@@ -85,10 +85,10 @@ public class ChangeSetHelperImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(elasticPath).getBean(ContextIdNames.CHANGESET_MEMBER);
+				oneOf(elasticPath).getPrototypeBean(ContextIdNames.CHANGESET_MEMBER, ChangeSetMember.class);
 				will(returnValue(new ChangeSetMemberImpl()));
 
-				oneOf(elasticPath).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+				oneOf(elasticPath).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 				will(returnValue(new BusinessObjectDescriptorImpl()));
 
 			}
@@ -105,10 +105,10 @@ public class ChangeSetHelperImplTest {
 		assertEquals("expects one meta data per member", 1, resultChangeSetMember1.getMetadata().size());
 		assertEquals("expects the meta data key to be key1", "key1", resultChangeSetMember1.getMetadata().keySet().iterator().next());
 		assertEquals("expects the meta data value to be value1", "value1", resultChangeSetMember1.getMetadata().values().iterator().next());
-		assertEquals("expects the buisness object descriptor should be point to the same object.", 
+		assertEquals("expects the buisness object descriptor should be point to the same object.",
 						expectedBusinessObjectDescriptor, resultChangeSetMember1.getBusinessObjectDescriptor());
 }
-	
+
 	/**
 	 * Tests that if the {@link ChangeSetMember} bean does not implement the mutator we throw a sensible exception.
 	 */
@@ -116,9 +116,9 @@ public class ChangeSetHelperImplTest {
 	public void testConvertWithWrongChangeSetMemberImplementation() {
 		// change set member not implementing ChangeSetMutator
 		final ChangeSetMember changeSetMember = context.mock(ChangeSetMember.class);
-		
+
 		final Collection<BusinessObjectGroupMember> memberCollection = new HashSet<>();
-		
+
 		final Collection<BusinessObjectMetadata> metadataCollection = new HashSet<>();
 
 		final BusinessObjectGroupMember member1 = new BusinessObjectGroupMemberImpl();
@@ -137,10 +137,10 @@ public class ChangeSetHelperImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(elasticPath).getBean(ContextIdNames.CHANGESET_MEMBER);
+				oneOf(elasticPath).getPrototypeBean(ContextIdNames.CHANGESET_MEMBER, ChangeSetMember.class);
 				will(returnValue(changeSetMember));
 
-				oneOf(elasticPath).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+				oneOf(elasticPath).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 				will(returnValue(new BusinessObjectDescriptorImpl()));
 
 			}

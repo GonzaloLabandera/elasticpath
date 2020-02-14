@@ -37,7 +37,7 @@ import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.dialogs.cartitemmodifier.tablelabelcontentprovider.CartItemModifierGroupLabelProvider;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModelImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
@@ -98,13 +98,13 @@ public class AddEditCartItemModifierGroupDialog extends AbstractPolicyAwareDialo
 	private ModifierGroup cartItemModifierGroup;
 
 	private final ModifierService modifierService =
-			ServiceLocator.getService(ContextIdNames.MODIFIER_SERVICE);
+			BeanLocator.getSingletonBean(ContextIdNames.MODIFIER_SERVICE, ModifierService.class);
 
 	private Locale selectedLocale;
 
 	private String originalCode;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private List<String> allLocalesTags;
 
@@ -168,7 +168,7 @@ public class AddEditCartItemModifierGroupDialog extends AbstractPolicyAwareDialo
 	}
 
 	private void createCartItemModifierGroup() {
-		this.cartItemModifierGroup = ServiceLocator.getService(ContextIdNames.MODIFIER_GROUP);
+		this.cartItemModifierGroup = BeanLocator.getPrototypeBean(ContextIdNames.MODIFIER_GROUP, ModifierGroup.class);
 		this.originalCode = "";
 	}
 
@@ -451,7 +451,7 @@ public class AddEditCartItemModifierGroupDialog extends AbstractPolicyAwareDialo
 			if (!display.isEmpty()) {
 				ModifierGroupLdf currentGroupLDF = this.getCartItemModifierGroup().getModifierGroupLdfByLocale(lang);
 				if (currentGroupLDF == null) {
-					currentGroupLDF = ServiceLocator.getService(ContextIdNames.MODIFIER_GROUP_LDF);
+					currentGroupLDF = BeanLocator.getPrototypeBean(ContextIdNames.MODIFIER_GROUP_LDF, ModifierGroupLdf.class);
 					currentGroupLDF.setDisplayName(display);
 					currentGroupLDF.setLocale(lang);
 					this.getCartItemModifierGroup().addModifierGroupLdf(currentGroupLDF);

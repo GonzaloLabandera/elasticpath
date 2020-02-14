@@ -26,7 +26,7 @@ import com.elasticpath.cmclient.conditionbuilder.component.ActionEventListener;
 import com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages;
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditioncomposite.SavedConditionComposite;
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditions.handlers.ConditionHandler;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
@@ -320,7 +320,7 @@ public abstract class AbstractConditionPanel<MODEL extends  SellingContext> {
 			modelWrapper.getModel().getCondition(tagDictionaryGuid);
 
 		if (conditionalExpression == null || conditionalExpression.isNamed()) {
-			conditionalExpression = ServiceLocator.getService(ContextIdNames.CONDITIONAL_EXPRESSION);
+			conditionalExpression = BeanLocator.getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 			conditionalExpression.setName(String.valueOf(System.nanoTime()));
 			conditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
 		}

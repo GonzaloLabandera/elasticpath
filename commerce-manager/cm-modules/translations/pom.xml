@@ -21,6 +21,7 @@
 		<module>com.elasticpath.cmclient.admin.customers.nl1</module>
 		<module>com.elasticpath.cmclient.admin.nl1</module>
 		<module>com.elasticpath.cmclient.admin.payment.nl1</module>
+		<module>com.elasticpath.cmclient.admin.paymentconfigurations.nl1</module>
 		<module>com.elasticpath.cmclient.admin.shipping.nl1</module>
 		<module>com.elasticpath.cmclient.admin.stores.nl1</module>
 		<module>com.elasticpath.cmclient.admin.taxes.nl1</module>

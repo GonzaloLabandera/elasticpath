@@ -19,10 +19,10 @@ import org.eclipse.ui.PlatformUI;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.editors.catalog.CatalogEditorInput;
 import com.elasticpath.cmclient.catalog.editors.category.CategoryEditor;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.helpers.CategoryListener;
@@ -52,7 +52,7 @@ import com.elasticpath.service.store.StoreService;
 public class DeleteCatalogCategoryAction extends AbstractCatalogViewAction implements ProductListener, CategoryListener {
 
 	private final ChangeSetHelper changeSetHelper;
-	private final CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+	private final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 	private final CategoryService categoryService;
 	/**
 	 * Constructs a edit catalog category action.
@@ -92,8 +92,7 @@ public class DeleteCatalogCategoryAction extends AbstractCatalogViewAction imple
 	 * @return true if the given catalog is in use by a store.
 	 */
 	boolean isInUseByStore(final Catalog catalog) {
-		final StoreService storeService = ServiceLocator.getService(
-				ContextIdNames.STORE_SERVICE);
+		final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		final Collection<Long> catalogUids = new ArrayList<>();
 		catalogUids.add(catalog.getUidPk());
 		return !storeService.findStoresWithCatalogUids(catalogUids).isEmpty();
@@ -167,7 +166,7 @@ public class DeleteCatalogCategoryAction extends AbstractCatalogViewAction imple
 	private boolean canCategoryBeDeleted(final Shell shell, final IWorkbenchPage workbenchPage, final Locale defaultLocale,
 			final Category selectedCategory) {
 		// get the complex guid to find open category editor
-		ChangeSetService changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		ChangeSetService changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 		String categoryGuid = changeSetService.resolveObjectGuid(selectedCategory);
 
 		// Cannot delete a category if its editor is open
@@ -191,20 +190,18 @@ public class DeleteCatalogCategoryAction extends AbstractCatalogViewAction imple
 
 	private void deleteCatalog(final Catalog selectedCatalog) {
 		// First, remove all CategoryTypes associated with this Catalog
-		final CategoryTypeService categoryTypeService = ServiceLocator.getService(
-				ContextIdNames.CATEGORY_TYPE_SERVICE);
+		final CategoryTypeService categoryTypeService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_TYPE_SERVICE, CategoryTypeService.class);
 		categoryTypeService.removeCategoryTypes(selectedCatalog.getUidPk());
 
 		// Remove the Synonym Groups, which shouldn't be referenced elsewhere
-		final SynonymGroupService synonymGroupService = ServiceLocator.getService(
-				ContextIdNames.SYNONYM_GROUP_SERVICE);
+		final SynonymGroupService synonymGroupService = BeanLocator.getSingletonBean(ContextIdNames.SYNONYM_GROUP_SERVICE, SynonymGroupService.class);
 		Collection <SynonymGroup> allSynonymGroups = synonymGroupService.findAllSynonymGroupForCatalog(selectedCatalog.getUidPk());
 		for (SynonymGroup synGroup : allSynonymGroups) {
 			synonymGroupService.remove(synGroup);
 		}
 		
 		final PriceListAssignmentHelperService priceListAssignmentHelperService 
-			= ServiceLocator.getService(ContextIdNames.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE);
+			= BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE, PriceListAssignmentHelperService.class);
 		
 		priceListAssignmentHelperService.deletePriceListAssignmentsByCatalogCode(selectedCatalog.getCode());
 
@@ -214,7 +211,7 @@ public class DeleteCatalogCategoryAction extends AbstractCatalogViewAction imple
 		}
 
 		// Then, remove the Catalog itself
-		final CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		catalogService.remove(selectedCatalog);
 
 		// Fire an event to refresh the browse list view

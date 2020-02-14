@@ -93,7 +93,7 @@ public class ProductInventoryManagementServiceImpl implements ProductInventoryMa
 
 		// If no existing record, create an empty one, otherwise reload the updated record
 		if (inventoryDtoExisiting == null) {
-			inventoryDtoExisiting = beanFactory.getBean(ContextIdNames.INVENTORYDTO);
+			inventoryDtoExisiting = beanFactory.getPrototypeBean(ContextIdNames.INVENTORYDTO, InventoryDto.class);
 			inventoryDtoExisiting.setSkuCode(inventoryDto.getSkuCode());
 			inventoryDtoExisiting.setWarehouseUid(inventoryDto.getWarehouseUid());
 		} else {
@@ -152,7 +152,7 @@ public class ProductInventoryManagementServiceImpl implements ProductInventoryMa
 			final int quantity, final String reason, final ProductSku productSku, final Map<String, Object> logAttributes) {
 		if (eventType == null || inventoryDto == null) {
 			// return empty inventory result in case the inventory or command are null
-			return beanFactory.getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			return beanFactory.getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
 		}
 
 		final Product product = productSku.getProduct();
@@ -234,7 +234,7 @@ public class ProductInventoryManagementServiceImpl implements ProductInventoryMa
 			final int quantity, final String reason, final AvailabilityCriteria availabilityCriteria, final Map<String, Object> logAttributes) {
 
 		if (availabilityCriteria == AvailabilityCriteria.ALWAYS_AVAILABLE) {
-			return beanFactory.getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			return beanFactory.getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
 		}
 
 		CommandFactory inventoryCommandFactory = inventoryFacade.getInventoryCommandFactory();
@@ -266,7 +266,8 @@ public class ProductInventoryManagementServiceImpl implements ProductInventoryMa
 		}
 
 		if (availabilityCriteria == AvailabilityCriteria.ALWAYS_AVAILABLE) {
-			InventoryExecutionResult inventoryEventResult = beanFactory.getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			InventoryExecutionResult inventoryEventResult = beanFactory.getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT,
+					InventoryExecutionResult.class);
 			inventoryEventResult.setQuantity(quantity);
 			return inventoryEventResult;
 		}
@@ -295,7 +296,8 @@ public class ProductInventoryManagementServiceImpl implements ProductInventoryMa
 			final String reason, final AvailabilityCriteria availabilityCriteria, final Map<String, Object> logAttributes) {
 
 		if (availabilityCriteria == AvailabilityCriteria.ALWAYS_AVAILABLE) {
-			InventoryExecutionResult inventoryEventResult = beanFactory.getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			InventoryExecutionResult inventoryEventResult = beanFactory.getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT,
+					InventoryExecutionResult.class);
 			inventoryEventResult.setQuantity(quantity);
 			return inventoryEventResult;
 		}
@@ -324,7 +326,7 @@ public class ProductInventoryManagementServiceImpl implements ProductInventoryMa
 			final String reason, final AvailabilityCriteria availabilityCriteria, final Map<String, Object> logAttributes) {
 
 		if (availabilityCriteria == AvailabilityCriteria.ALWAYS_AVAILABLE) {
-			return beanFactory.getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			return beanFactory.getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
 		}
 
 		CommandFactory inventoryCommandFactory = inventoryFacade.getInventoryCommandFactory();

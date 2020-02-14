@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -14,9 +18,9 @@
 	<import resource="classpath:tax-calculation-connectivity-api.xml"/>
 	<import resource="classpath:spring/commons/structuredErrorMessage.xml"/>
 	<import resource="classpath:spring/service/validation-strategies.xml"/>
+	<import resource="../../spring/service/orderpaymentapi-service.xml" />
 	<import resource="datapolicy.xml" />
 	<import resource="tag-service.xml" />
-
 
 	<bean id="applicationName" class="java.lang.String">
 		<constructor-arg value="CoreOSGiBundle"/>
@@ -34,7 +38,7 @@
 	<!-- CM Users for now will remain with SHA-1 -->
 	<alias alias="cmPasswordEncoder" name="sha1PasswordEncoder"/>
 
-	<bean id="txProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<bean id="txProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="transactionAttributes">
 			<props>
@@ -60,6 +64,7 @@
 				<prop key="disconnectCartFromShopperAndCustomerSession">PROPAGATION_REQUIRED</prop>
 				<prop key="checkout">PROPAGATION_NEVER</prop>
 				<prop key="completeShipment">PROPAGATION_NEVER</prop>
+				<prop key="processOrderShipmentPayment">PROPAGATION_NEVER</prop>
 				<prop key="createOffer">PROPAGATION_REQUIRED</prop>
 				<prop key="findOrCreateShopper">PROPAGATION_REQUIRED</prop>
 				<prop key="getCartByCustomerSession">PROPAGATION_NEVER</prop>
@@ -73,7 +78,6 @@
 				<prop key="writeOrderLock">PROPAGATION_REQUIRES_NEW</prop>
 				<prop key="releaseOrderLock">PROPAGATION_REQUIRED</prop>
 				<prop key="forceReleaseOrderLock">PROPAGATION_REQUIRES_NEW</prop>
-				<prop key="findOrderByOrderNumber">PROPAGATION_REQUIRED</prop>
 				<!-- Special calls -->
 
 				<prop key="*">PROPAGATION_SUPPORTS,readOnly</prop>
@@ -146,6 +150,7 @@
 		<property name="elasticPath" ref="elasticPath" />
 		<property name="customerGroupService" ref="customerGroupService" />
 		<property name="shopperCleanupService" ref="shopperCleanupService" />
+		<property name="orderPaymentApiCleanupService" ref="orderPaymentApiCleanupService" />
 		<property name="userIdentityService" ref="epUserIdentityService" />
 		<property name="timeService" ref="timeService" />
 		<property name="storeService" ref="storeService" />
@@ -206,6 +211,12 @@
 
 	<bean id="customerPostLoadStrategy" class="com.elasticpath.service.customer.impl.CustomerPostLoadStrategy">
 		<property name="attributeService" ref="attributeService"/>
+	</bean>
+	<bean id="productTypePostLoadStrategy" class="com.elasticpath.service.catalog.impl.ProductTypePostLoadStrategy">
+		<property name="skuOptionService" ref="skuOptionService"/>
+	</bean>
+	<bean id="productSkuOptionValuePostLoadStrategy" class="com.elasticpath.service.catalog.impl.ProductSkuOptionValuePostLoadStrategy">
+		<property name="skuOptionService" ref="skuOptionService"/>
 	</bean>
 
 	<bean id="customerProfileAttributes"
@@ -383,7 +394,7 @@
 
 	<bean id="giftCertificateTransactionService" parent="txProxyTemplate">
 		<property name="target">
-			<bean class="com.elasticpath.service.payment.impl.GiftCertificateTransactionServiceImpl">
+			<bean class="com.elasticpath.service.giftcertificate.impl.GiftCertificateTransactionServiceImpl">
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 				<property name="elasticPath" ref="elasticPath"/>
 				<property name="giftCertificateCodeGenerator" ref="giftCertificateCodeGenerator"/>
@@ -526,6 +537,7 @@
 		<property name="shopperService" ref="shopperService"/>
 		<property name="storeService" ref="storeService"/>
 		<property name="timeService" ref="timeService" />
+		<property name="orderPaymentApiCleanupService" ref="orderPaymentApiCleanupService" />
 		<property name="loadTuners" ref="shoppingCartServiceLoadTuners" />
 	</bean>
 
@@ -594,7 +606,6 @@
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 		<property name="timeService" ref="timeService"/>
 		<property name="allocationService" ref="allocationService"/>
-		<property name="paymentService" ref="paymentService"/>
 		<property name="defaultLoadTuner" >
 			<bean class="com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl">
 				<property name="fetchGroups" >
@@ -673,7 +684,7 @@
 		</property>
 	</bean>
 
-	<bean id="skuOptionService" parent="txProxyTemplate">
+	<bean id="nonCachingSkuOptionService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.catalog.impl.SkuOptionServiceImpl">
 				<property name="persistenceEngine" ref="persistenceEngine"/>
@@ -940,16 +951,6 @@
 		</property>
 	</bean>
 
-	<bean id="paymentGatewayService" parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.service.payment.impl.PaymentGatewayServiceImpl">
-				<property name="persistenceEngine" ref="persistenceEngine"/>
-				<property name="elasticPath" ref="elasticPath"/>
-				<property name="paymentGatewayFactory" ref="paymentGatewayFactory"/>
-			</bean>
-		</property>
-	</bean>
-
 	<bean id="catalogService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.catalog.impl.CatalogServiceImpl">
@@ -967,21 +968,6 @@
 			</bean>
 		</property>
 	</bean>
-
-	<bean id="paymentService" parent="txProxyTemplate">
-		<property name="target" ref="paymentServiceTarget"/>
-	</bean>
-
-	<bean id="paymentServiceTargetTemplate" abstract="true"
-		  class="com.elasticpath.service.payment.impl.PaymentServiceImpl">
-		<property name="paymentHandlerFactory" ref="paymentHandlerFactory"/>
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-		<property name="paymentGatewayService" ref="paymentGatewayService"/>
-		<property name="storeService" ref="storeService"/>
-		<property name="beanFactory" ref="coreBeanFactory"/>
-	</bean>
-
-	<bean id="paymentServiceTarget" parent="paymentServiceTargetTemplate"/>
 
 	<bean id="indexNotificationService" parent="txProxyTemplate">
 		<property name="target">
@@ -1307,7 +1293,7 @@
 	<bean id="skuOptionFacetConfigurationStrategy"
 			class="com.elasticpath.service.catalogview.filterednavigation.facetconfigurationstrategies.impl.SkuOptionFacetConfigurationStrategy">
 		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="skuOptionService" ref="cachedSkuOptionService"/>
+		<property name="skuOptionService" ref="skuOptionService"/>
 	</bean>
 
 
@@ -1756,11 +1742,6 @@
 		</property>
 	</bean>
 
-	<bean id="tagConditionDSLBuilder" class="com.elasticpath.tags.service.impl.GroovyConditionDSLBuilderImpl">
-		<property name="tagDefinitionReader" ref="tagDefinitionReader"/>
-		<property name="validationFacade" ref="conditionValidationFacade"/>
-	</bean>
-
 	<bean id="tagDictionaryService"  parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.tags.service.impl.TagDictionaryServiceImpl">
@@ -1832,10 +1813,6 @@
 				<property name="tagConditionDao" ref="tagConditionDao" />
 			</bean>
 		</property>
-	</bean>
-
-	<bean id="tagConditionBuilder" class="com.elasticpath.tags.service.impl.ConditionBuilderImpl">
-		<property name="tagDefinitionReader" ref="tagDefinitionReader" />
 	</bean>
 
 	<bean id="tagOperatorService" class="com.elasticpath.tags.service.impl.TagOperatorServiceImpl">
@@ -2255,13 +2232,13 @@
 		<property name="proxyInterface" value="com.elasticpath.service.search.SortAttributeService" />
 		<property name="proxy" ref="sortAttributeServiceProxy"/>
 	</bean>
-	<bean id="cachingSkuOptionServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
-		<property name="fallbackImplementation" ref="skuOptionService"/>
+	<bean id="skuOptionServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="nonCachingSkuOptionService"/>
 	</bean>
 
-	<bean id="cachedSkuOptionService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+	<bean id="skuOptionService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
 		<property name="proxyInterface" value="com.elasticpath.service.catalog.SkuOptionService" />
-		<property name="proxy" ref="cachingSkuOptionServiceProxy"/>
+		<property name="proxy" ref="skuOptionServiceProxy"/>
 	</bean>
 
 	<bean id="attributeServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
@@ -2394,6 +2371,7 @@
         <property name="target" >
             <bean class="com.elasticpath.service.customer.impl.AnonymousCustomerCleanupServiceImpl" >
               <property name="shopperCleanupService" ref="shopperCleanupService" />
+			  <property name="orderPaymentApiCleanupService" ref="orderPaymentApiCleanupService" />
               <property name="customerConsentService" ref="customerConsentService" />
               <property name="persistenceEngine" ref="persistenceEngine"/>
             </bean>
@@ -2453,10 +2431,6 @@
 	  <property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
 
-	<bean id="paymentGatewayDtoAssembler" class="com.elasticpath.common.dto.paymentgateway.PaymentGatewayDtoAssembler">
-		<property name="paymentGatewayFactory" ref="paymentGatewayFactory"/>
-	</bean>
-
 	<bean id="warehouseDtoAssembler" class="com.elasticpath.common.dto.warehouse.WarehouseDtoAssembler">
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
@@ -2472,7 +2446,6 @@
 	<bean id="customerDtoAssembler" class="com.elasticpath.common.dto.customer.CustomerDtoAssembler">
 		<property name="beanFactory" ref="coreBeanFactory" />
 		<property name="customerGroupService" ref="customerGroupService"/>
-		<property name="paymentTokenDTOTransformer" ref="paymentTokenDTOTransformer"/>
 	</bean>
 
 	<bean id="customerGroupDtoAssembler" class="com.elasticpath.common.dto.customer.CustomerGroupDtoAssembler">
@@ -2491,22 +2464,6 @@
 		<property name="customerProfileAttributeService" ref="customerProfileAttributeService"/>
 	</bean>
 
-	<bean id="storeDtoAssembler" class="com.elasticpath.common.dto.store.StoreDtoAssembler">
-		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="catalogService" ref="catalogService"/>
-		<property name="paymentGatewayService" ref="paymentGatewayService"/>
-		<property name="taxCodeService" ref="taxCodeService"/>
-		<property name="taxJurisdictionService" ref="taxJurisdictionService"/>
-		<property name="warehouseService" ref="warehouseService"/>
-		<property name="storeService" ref="storeService"/>
-		<property name="modifierService" ref="modifierService" />
-	</bean>
-
-	<bean id="storeAssociationDtoAssembler" class="com.elasticpath.common.dto.store.StoreAssociationDtoAssembler">
-		<property name="beanFactory" ref="coreBeanFactory" />
-		<property name="storeService" ref="storeService" />
-		<property name="storeAssociationService" ref="storeAssociationService" />
-	</bean>
 
 	<bean id="cmUserDtoAssembler" class="com.elasticpath.common.dto.cmuser.CmUserDtoAssembler">
 		<property name="beanFactory" ref="coreBeanFactory"/>
@@ -2780,52 +2737,12 @@
 
 	<bean id="flagBasedAvailabilityStrategy" class="com.elasticpath.service.catalogview.impl.FlagBasedAvailabilityStrategyImpl"/>
 
-	<bean id="paymentHandlerFactory" class="com.elasticpath.domain.payment.impl.PaymentHandlerFactoryImpl"/>
-
-	<bean id="abstractPaymentGatewayFactory" class="com.elasticpath.domain.payment.impl.PaymentGatewayFactoryImpl" abstract="true">
-		<property name="certificatePathPrefixProvider">
-			<settings:setting path="COMMERCE/SYSTEM/PAYMENTGATEWAY/certificatesDirectory"/>
-		</property>
-		<property name="giftCertificateTransactionService" ref="giftCertificateTransactionService"/>
-		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="gatewayClasses">
-			<set value-type="java.lang.Class">
-				<value>com.elasticpath.service.payment.gateway.impl.NullPaymentGatewayPluginImpl</value>
-				<value>com.elasticpath.service.payment.gateway.impl.NullExternalAuthPaymentGatewayPluginImpl</value>
-				<value>com.elasticpath.service.payment.gateway.impl.ExchangePaymentGatewayPluginImpl</value>
-				<value>com.elasticpath.service.payment.gateway.impl.GiftCertificatePaymentGatewayPluginImpl</value>
-				<value>com.elasticpath.paymentgateways.testdouble.PaymentGatewayPluginTestDouble</value>
-			</set>
-		</property>
-	</bean>
-
-	<bean id="paymentGatewayFactory" parent="abstractPaymentGatewayFactory"/>
-
-	<bean id="paymentGatewayTransactionService" class="com.elasticpath.plugin.payment.transaction.service.impl.PaymentGatewayTransactionServiceImpl"/>
-
-    <bean id="paymentMethodTransformerFactory" class="com.elasticpath.service.payment.gateway.impl.PaymentMethodTransformerFactoryImpl">
-		<constructor-arg ref="paymentMethodTransformers" />
-	</bean>
-
-	<util:map id="paymentMethodTransformers" key-type="java.lang.Class">
-		<entry key="com.elasticpath.domain.customer.impl.PaymentTokenImpl" value-ref ="paymentTokenTransformer" />
-	</util:map>
-
-	<bean id="paymentTokenTransformer" class="com.elasticpath.service.payment.gateway.impl.PaymentTokenTransformer">
-			<property name="beanFactory" ref="coreBeanFactory"/>
-	</bean>
-
 	<bean id="giftCertificateEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher" />
 	</bean>
 
 	<bean id="dataImportEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher" />
-	</bean>
-
-	<bean id="paymentTokenDTOBuilder" class="com.elasticpath.common.dto.customer.builder.PaymentTokenDTOBuilder"/>
-	<bean id="paymentTokenDTOTransformer" class="com.elasticpath.common.dto.customer.transformer.PaymentTokenDTOTransformer">
-			<property name="paymentTokenDTOBuilder" ref="paymentTokenDTOBuilder"/>
 	</bean>
 
 	<bean id="environmentInfoService" class="com.elasticpath.service.environment.impl.EmbeddedEnvironmentInfoService">
@@ -2844,52 +2761,6 @@
 	</bean>
 
 	<bean id="taxCodeRetriever" class="com.elasticpath.service.tax.impl.TaxCodeRetrieverImpl" />
-
-	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
-		<property name="converters">
-			<set>
-				<bean class="com.elasticpath.service.payment.converter.AddressToDto">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.DtoToOrderPayment">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.DtoToPayerAuthenticationEnrollmentResult">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.DtoToPayerAuthValidationValue">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.OrderPaymentToAuthorizationRequest">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.OrderPaymentToCaptureRequest">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.OrderPaymentToDto">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.OrderPaymentToMoneyDto">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.OrderPaymentToPaymentMethod">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.OrderShipmentToDto">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.OrderSkuToDto">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.PayerAuthValidationValueToDto">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-				<bean class="com.elasticpath.service.payment.converter.ShoppingCartToDto">
-					<property name="beanFactory" ref="coreBeanFactory"/>
-				</bean>
-			</set>
-		</property>
-	</bean>
 
 	<bean id="pricingSnapshotServiceTemplate" class="com.elasticpath.service.shoppingcart.impl.PricingSnapshotServiceImpl" abstract="true">
 		<property name="beanFactory" ref="coreBeanFactory"/>
@@ -2993,4 +2864,8 @@
 		<ref bean="CATEGORY_LOAD_TUNER_MASTER_AND_PARENT"/>
 		<ref bean="SHOPPING_ITEM_LOAD_TUNER_DEFAULT"/>
 	</util:list>
+
+	<bean id="customerAndUserEmailAddressesExtractionStrategy"
+		  class="com.elasticpath.service.email.impl.CustomerAndUserEmailAddressesExtractionStrategyImpl"/>
+
 </beans>

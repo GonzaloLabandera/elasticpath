@@ -44,7 +44,7 @@ public class ShoppingItemRecurringPriceAssemblerImpl implements ShoppingItemRecu
 	public void assemblePrice(final Price price, final Set<ShoppingItemRecurringPrice> recurringPrices) {
 		PricingScheme pricingScheme = price.getPricingScheme();
 		if (pricingScheme == null) {
-			pricingScheme = beanFactory.getBean(ContextIdNames.PRICING_SCHEME);
+			pricingScheme = beanFactory.getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class);
 		}
 		price.setPricingScheme(pricingScheme);
 
@@ -54,11 +54,11 @@ public class ShoppingItemRecurringPriceAssemblerImpl implements ShoppingItemRecu
 		}
 		
 		for (ShoppingItemRecurringPrice recPrice : recurringPrices) {
-			PriceSchedule schedule = beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE);
+			PriceSchedule schedule = beanFactory.getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class);
 			PaymentSchedule paymentSchedule = getPaymentScheduleHelper().getPaymentSchedule(recPrice);
 			schedule.setPaymentSchedule(paymentSchedule);
 			schedule.setType(PriceScheduleType.RECURRING);
-			Price schedulePrice = beanFactory.getBean(ContextIdNames.PRICE);
+			Price schedulePrice = beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 			schedulePrice.setListPrice(createMoney(recPrice.getSimplePrice().getListUnitPrice(), price.getCurrency()));
 			
 			Money salePrice = createMoney(recPrice.getSimplePrice().getSaleUnitPrice(), price.getCurrency());
@@ -81,7 +81,8 @@ public class ShoppingItemRecurringPriceAssemblerImpl implements ShoppingItemRecu
 		if (price != null && price.getPricingScheme() != null) {
 			Collection<PriceSchedule> schedules = price.getPricingScheme().getSchedules(PriceScheduleType.RECURRING);
 			for (PriceSchedule schedule : schedules) {
-				ShoppingItemRecurringPrice recPrice = beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE);
+				ShoppingItemRecurringPrice recPrice = beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE, 
+						ShoppingItemRecurringPrice.class);
 				recPrice.setPaymentFrequency(schedule.getPaymentSchedule().getPaymentFrequency());
 				recPrice.setScheduleDuration(schedule.getPaymentSchedule().getScheduleDuration());
 				recPrice.setPaymentScheduleName(schedule.getPaymentSchedule().getName());

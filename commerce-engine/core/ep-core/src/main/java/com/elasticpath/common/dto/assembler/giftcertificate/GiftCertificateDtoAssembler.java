@@ -15,7 +15,7 @@ import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.store.StoreService;
 
 /**
- * Assembler for {@link com.elasticpath.common.dto.giftcertificate.GiftCertificateDTO} and {@link com.elasticpath.domain.catalog.GiftCertificate}. 
+ * Assembler for {@link com.elasticpath.common.dto.giftcertificate.GiftCertificateDTO} and {@link com.elasticpath.domain.catalog.GiftCertificate}.
  */
 public class GiftCertificateDtoAssembler extends AbstractDtoAssembler<GiftCertificateDTO, GiftCertificate> {
 
@@ -25,10 +25,10 @@ public class GiftCertificateDtoAssembler extends AbstractDtoAssembler<GiftCertif
 
 	private CustomerService customerService;
 
-	
+
 	@Override
 	public GiftCertificate getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.GIFT_CERTIFICATE);
+		return beanFactory.getPrototypeBean(ContextIdNames.GIFT_CERTIFICATE, GiftCertificate.class);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class GiftCertificateDtoAssembler extends AbstractDtoAssembler<GiftCertif
 		target.setCode(source.getGiftCertificateCode());
 		target.setCreationDate(source.getCreationDate());
 		target.setLastModifiedDate(source.getLastModifiedDate());
-		
+
 		target.setRecipientName(source.getRecipientName());
 		target.setRecipientEmail(source.getRecipientEmail());
 		target.setSenderName(source.getSenderName());
@@ -73,7 +73,7 @@ public class GiftCertificateDtoAssembler extends AbstractDtoAssembler<GiftCertif
 		target.setPurchaser(findCustomerByGuid(source.getPurchaserGuid()));
 		target.setOrderGuid(source.getOrderGuid());
 	}
-	
+
 	/**
 	 * Retrieves purchaser guid from {@link com.elasticpath.domain.catalog.GiftCertificate).
 	 * @param source the gift certificate
@@ -81,23 +81,23 @@ public class GiftCertificateDtoAssembler extends AbstractDtoAssembler<GiftCertif
 	 */
 	protected String getPurchaserGuid(final GiftCertificate source) {
 		Customer purchaser = source.getPurchaser();
-		
+
 		if (purchaser == null) {
 			return null;
 		}
-		
+
 		return purchaser.getGuid();
 	}
-	
+
 	/**
-	 * Returns the {@link com.elasticpath.domain.store.Store} associated with the given code. 
-	 * @param storeCode code for the {@link com.elasticpath.domain.store.Store} 
+	 * Returns the {@link com.elasticpath.domain.store.Store} associated with the given code.
+	 * @param storeCode code for the {@link com.elasticpath.domain.store.Store}
 	 * @return the requested {@link com.elasticpath.domain.store.Store}
 	 * @throws EpServiceException if the {@link com.elasticpath.domain.store.Store} is not found.
 	 */
 	protected Store findStoreWithCode(final String storeCode) {
 		Store store = storeService.findStoreWithCode(storeCode);
-		
+
 		if (store == null) {
 			throw new EpServiceException("Store with code " + storeCode + " not found.");
 		}
@@ -105,15 +105,15 @@ public class GiftCertificateDtoAssembler extends AbstractDtoAssembler<GiftCertif
 	}
 
 	/**
-	 * Returns the {@link ccom.elasticpath.domain.customer.Customere} associated with the given guid. 
-	 * @param customerGuid guid for the {@link com.elasticpath.domain.customer.Customer} 
+	 * Returns the {@link ccom.elasticpath.domain.customer.Customere} associated with the given guid.
+	 * @param customerGuid guid for the {@link com.elasticpath.domain.customer.Customer}
 	 * @return the requested {@link com.elasticpath.domain.customer.Customer}
 	 */
 	protected Customer findCustomerByGuid(final String customerGuid) {
 		return customerService.findByGuid(customerGuid);
 	}
 
-	
+
 	/**
 	 * @return the beanFactory
 	 */

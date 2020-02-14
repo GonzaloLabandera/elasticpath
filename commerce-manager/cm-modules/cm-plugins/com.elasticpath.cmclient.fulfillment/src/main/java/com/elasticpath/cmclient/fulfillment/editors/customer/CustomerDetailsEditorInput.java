@@ -10,7 +10,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.core.CoreImageRegistry;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.EntityEditorInput;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -64,7 +64,7 @@ public class CustomerDetailsEditorInput extends EntityEditorInput<Long> {
 	 */
 	private Customer retrieveCustomer() {
 		if (customerInstance == null) {
-			final CustomerService customerService = ServiceLocator.getService(ContextIdNames.CUSTOMER_SERVICE);
+			final CustomerService customerService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 			final List<Long> customerList = new ArrayList<>(1);
 			customerList.add(customerUid);
 			final List<Customer> customers = customerService.findByUids(customerList);

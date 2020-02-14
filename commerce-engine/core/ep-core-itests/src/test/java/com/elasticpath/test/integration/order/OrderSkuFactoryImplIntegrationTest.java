@@ -24,6 +24,7 @@ import org.jmock.lib.action.CustomAction;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -32,13 +33,13 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
+import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ItemType;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
@@ -78,14 +79,18 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 	private CatalogTestPersister catalogTestPersister;
 	private ProductSkuLookup productSkuLookup;
 	private ProductService productService;
+	
+	@Autowired
+	private BundleApportioningCalculator bundleApportioningCalculator;
+	
+	@Autowired
+	private DiscountApportioningCalculator discountApportioningCalculator;
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	@Mock
 	private ShoppingCartTaxSnapshot pricingSnapshot;
-
-	private ShoppingCart shoppingCart;
 
 	private static BigDecimal valueOf(final double value) {
 		return BigDecimal.valueOf(value).setScale(2);
@@ -94,8 +99,8 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 	@Before
 	public void setUp() {
 		final BeanFactory beanFactory = getTac().getBeanFactory();
-		productSkuLookup = beanFactory.getBean(ContextIdNames.PRODUCT_SKU_LOOKUP);
-		productService = beanFactory.getBean(ContextIdNames.PRODUCT_SERVICE);
+		productSkuLookup = beanFactory.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
+		productService = beanFactory.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 
 		TestDataPersisterFactory persisterFactory = getTac().getPersistersFactory();
 		catalogTestPersister = persisterFactory.getCatalogTestPersister();
@@ -124,8 +129,8 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 			}
 		};
 		factory.setBeanFactory(beanFactory);
-		factory.setBundleApportioner((BundleApportioningCalculator) beanFactory.getBean(ContextIdNames.BUNDLE_APPORTIONING_CALCULATOR));
-		factory.setDiscountApportioner((DiscountApportioningCalculator) beanFactory.getBean(ContextIdNames.DISCOUNT_APPORTIONING_CALCULATOR));
+		factory.setBundleApportioner(bundleApportioningCalculator);
+		factory.setDiscountApportioner(discountApportioningCalculator);
 		factory.setProductSkuLookup(productSkuLookup);
 	}
 
@@ -624,12 +629,12 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 				product = catalogTestPersister.persistProductWithSku(catalog, category, null, BigDecimal.ONE, Currency.getInstance("USD"),
 						"brand", "product" + ++counter, "productName", skuCode, TaxTestPersister.TAX_CODE_GOODS, AvailabilityCriteria.ALWAYS_AVAILABLE, 0);
 			} else {
-				product = getTac().getBeanFactory().getBean(ContextIdNames.PRODUCT_BUNDLE);
+				product = getTac().getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_BUNDLE, ProductBundle.class);
 				product.setProductType(
 						catalogTestPersister.persistProductType("productType" + ++counter, catalog, TaxTestPersister.TAX_CODE_GOODS, false));
 				product.setCategories(Collections.singleton(category));
 				product.setCode("productBundle" + ++counter);
-				sku = getTac().getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU);
+				sku = getTac().getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 				sku.setSkuCode(skuCode);
 				product.addOrUpdateSku(sku);
 

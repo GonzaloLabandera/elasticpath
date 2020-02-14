@@ -106,7 +106,7 @@
 		<constructor-arg ref="identityTypeByCatalogEventTypesMap"/>
 	</bean>
 
-	<util:map id="identityTypeByCatalogEventTypesMap" key-type="java.lang.String" value-type="java.util.List">
+	<util:map id="identityTypeByCatalogEventTypesMap" key-type="java.lang.String" value-type="java.lang.String">
 		<entry>
 			<key>
 				<util:constant static-field="com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.OPTION_IDENTITY_TYPE"/>
@@ -123,9 +123,7 @@
 			<key>
 				<util:constant static-field="com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.FIELD_METADATA_IDENTITY_TYPE"/>
 			</key>
-			<list value-type="java.lang.String">
-				<value>FIELD_METADATA_UPDATED</value>
-			</list>
+			<value>FIELD_METADATA_UPDATED</value>
 		</entry>
 		<entry>
 			<key>

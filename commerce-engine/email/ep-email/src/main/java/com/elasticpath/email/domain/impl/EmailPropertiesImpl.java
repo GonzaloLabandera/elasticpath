@@ -3,10 +3,12 @@
  */
 package com.elasticpath.email.domain.impl;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.elasticpath.commons.util.EmailAddressUtil;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
 import com.elasticpath.email.domain.EmailProperties;
 
@@ -129,5 +131,9 @@ public class EmailPropertiesImpl extends AbstractEpDomainImpl implements EmailPr
 		this.defaultSubject = defaultSubject;
 	}
 
+	@Override
+	public List<String> getRecipientAddresses() {
+		return EmailAddressUtil.split(getRecipientAddress());
+	}
 
 }

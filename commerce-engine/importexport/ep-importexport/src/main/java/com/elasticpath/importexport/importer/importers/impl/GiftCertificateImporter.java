@@ -1,6 +1,7 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
+
 package com.elasticpath.importexport.importer.importers.impl;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ import com.elasticpath.importexport.importer.context.ImportContext;
 import com.elasticpath.importexport.importer.importers.SavingStrategy;
 import com.elasticpath.importexport.importer.types.ImportStrategyType;
 import com.elasticpath.service.catalog.GiftCertificateService;
-import com.elasticpath.service.payment.GiftCertificateTransactionService;
+import com.elasticpath.service.giftcertificate.GiftCertificateTransactionService;
 /**
  * Importer for {@link com.elasticpath.common.dto.giftcertificate.GiftCertificateDTO} and its associated domain class.
  */

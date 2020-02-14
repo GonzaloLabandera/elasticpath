@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<bean id="externalPluginLoader" class="com.elasticpath.provider.payment.service.provider.impl.ExternalPluginLoaderImpl"/>
+	<bean id="paymentProviderService" class="com.elasticpath.provider.payment.service.provider.impl.PaymentProviderServiceImpl" init-method="init"/>
+
+	<bean id="paymentProviderConfigurationService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.provider.payment.service.configuration.impl.PaymentProviderConfigurationServiceImpl">
+				<constructor-arg name="persistenceEngine" ref="persistenceEngine"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="paymentInstrumentService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.provider.payment.service.instrument.impl.PaymentInstrumentServiceImpl">
+				<constructor-arg name="persistenceEngine" ref="persistenceEngine"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="paymentProviderConfigWorkflow" class="com.elasticpath.provider.payment.workflow.impl.PaymentProviderConfigWorkflowImpl">
+		<constructor-arg name="paymentProviderConfigurationService" ref="paymentProviderConfigurationService"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="paymentProviderWorkflow" class="com.elasticpath.provider.payment.workflow.impl.PaymentProviderWorkflowImpl">
+		<constructor-arg name="paymentProviderService" ref="paymentProviderService"/>
+	</bean>
+
+	<bean id="paymentInstrumentWorkflow" class="com.elasticpath.provider.payment.workflow.impl.PaymentInstrumentWorkflowImpl">
+		<constructor-arg name="paymentInstrumentService" ref="paymentInstrumentService"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="paymentHistoryWorkflow" class="com.elasticpath.provider.payment.workflow.impl.PaymentHistoryWorkflowImpl">
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+		<constructor-arg name="paymentHistory" ref="paymentHistory"/>
+	</bean>
+
+	<bean id="paymentAPIWorkflow" class="com.elasticpath.provider.payment.workflow.impl.PaymentAPIWorkflowImpl">
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="paymentInstrumentCreationProcessor" class="com.elasticpath.provider.payment.service.processor.impl.PaymentInstrumentCreationProcessorImpl">
+		<constructor-arg name="paymentProviderConfigurationService" ref="paymentProviderConfigurationService"/>
+		<constructor-arg name="paymentProviderService" ref="paymentProviderService"/>
+		<constructor-arg name="paymentInstrumentService" ref="paymentInstrumentService"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="reservationProcessor" class="com.elasticpath.provider.payment.service.processor.impl.ReservationProcessorImpl">
+		<constructor-arg name="paymentProviderConfigurationService" ref="paymentProviderConfigurationService"/>
+		<constructor-arg name="paymentProviderService" ref="paymentProviderService"/>
+		<constructor-arg name="paymentHistory" ref="paymentHistory"/>
+		<constructor-arg name="moneyDtoCalculator" ref="moneyDtoCalculator"/>
+		<constructor-arg name="paymentAPIWorkflow" ref="paymentAPIWorkflow"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="cancelReservationProcessor" class="com.elasticpath.provider.payment.service.processor.impl.CancelReservationProcessorImpl">
+		<constructor-arg name="paymentProviderConfigurationService" ref="paymentProviderConfigurationService"/>
+		<constructor-arg name="paymentProviderService" ref="paymentProviderService"/>
+		<constructor-arg name="paymentHistory" ref="paymentHistory"/>
+		<constructor-arg name="moneyDtoCalculator" ref="moneyDtoCalculator"/>
+		<constructor-arg name="paymentAPIWorkflow" ref="paymentAPIWorkflow"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="modifyReservationProcessor" class="com.elasticpath.provider.payment.service.processor.impl.ModifyReservationProcessorImpl">
+		<constructor-arg name="paymentProviderConfigurationService" ref="paymentProviderConfigurationService"/>
+		<constructor-arg name="paymentProviderService" ref="paymentProviderService"/>
+		<constructor-arg name="paymentHistory" ref="paymentHistory"/>
+		<constructor-arg name="moneyDtoCalculator" ref="moneyDtoCalculator"/>
+		<constructor-arg name="paymentAPIWorkflow" ref="paymentAPIWorkflow"/>
+		<constructor-arg name="reservationProcessor" ref="reservationProcessor"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="chargeProcessor" class="com.elasticpath.provider.payment.service.processor.impl.ChargeProcessorImpl">
+		<constructor-arg name="paymentProviderConfigurationService" ref="paymentProviderConfigurationService"/>
+		<constructor-arg name="paymentProviderService" ref="paymentProviderService"/>
+		<constructor-arg name="paymentHistory" ref="paymentHistory"/>
+		<constructor-arg name="moneyDtoCalculator" ref="moneyDtoCalculator"/>
+		<constructor-arg name="paymentAPIWorkflow" ref="paymentAPIWorkflow"/>
+		<constructor-arg name="reservationProcessor" ref="reservationProcessor"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="creditProcessor" class="com.elasticpath.provider.payment.service.processor.impl.CreditProcessorImpl">
+		<constructor-arg name="paymentProviderConfigurationService" ref="paymentProviderConfigurationService"/>
+		<constructor-arg name="paymentProviderService" ref="paymentProviderService"/>
+		<constructor-arg name="paymentHistory" ref="paymentHistory"/>
+		<constructor-arg name="moneyDtoCalculator" ref="moneyDtoCalculator"/>
+		<constructor-arg name="paymentAPIWorkflow" ref="paymentAPIWorkflow"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="paymentHistory" class="com.elasticpath.provider.payment.service.history.PaymentHistoryImpl">
+		<constructor-arg name="paymentEventHandlers" ref="paymentEventHandlers"/>
+		<constructor-arg name="moneyDtoCalculator" ref="moneyDtoCalculator"/>
+		<constructor-arg name="paymentEventValidators" ref="paymentEventValidators"/>
+		<constructor-arg name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<util:map id="paymentEventHandlers" map-class="java.util.HashMap" key-type="com.elasticpath.plugin.payment.provider.dto.TransactionType">
+		<entry key="RESERVE" value-ref="reservePaymentEventHandler"/>
+		<entry key="MODIFY_RESERVE" value-ref="modifyReservePaymentEventHandler"/>
+		<entry key="CANCEL_RESERVE" value-ref="cancelReservePaymentEventHandler"/>
+		<entry key="CREDIT" value-ref="creditPaymentEventHandler"/>
+		<entry key="MANUAL_CREDIT" value-ref="creditPaymentEventHandler"/>
+		<entry key="CHARGE" value-ref="chargePaymentEventHandler"/>
+		<entry key="REVERSE_CHARGE" value-ref="reverseChargePaymentEventHandler"/>
+	</util:map>
+
+	<bean id="reservePaymentEventHandler" class="com.elasticpath.provider.payment.service.history.handler.ReservePaymentEventHandler"/>
+	<bean id="modifyReservePaymentEventHandler" class="com.elasticpath.provider.payment.service.history.handler.ModifyReservePaymentEventHandler"/>
+	<bean id="cancelReservePaymentEventHandler" class="com.elasticpath.provider.payment.service.history.handler.CancelReservePaymentEventHandler"/>
+	<bean id="creditPaymentEventHandler" class="com.elasticpath.provider.payment.service.history.handler.CreditPaymentEventHandler"/>
+	<bean id="chargePaymentEventHandler" class="com.elasticpath.provider.payment.service.history.handler.ChargePaymentEventHandler"/>
+	<bean id="reverseChargePaymentEventHandler" class="com.elasticpath.provider.payment.service.history.handler.ReverseChargePaymentEventHandler"/>
+
+	<bean id="moneyDtoCalculator" class="com.elasticpath.provider.payment.service.history.util.MoneyDtoCalculator"/>
+
+	<util:list id="paymentEventValidators" value-type="com.elasticpath.provider.payment.service.history.validator.PaymentEventValidator">
+		<ref bean="paymentEventCurrencyValidator"/>
+		<ref bean="paymentEventDateValidator"/>
+		<ref bean="paymentEventNegativeAmountValidator"/>
+		<ref bean="paymentEventSequenceValidator"/>
+	</util:list>
+
+	<bean id="paymentEventCurrencyValidator" class="com.elasticpath.provider.payment.service.history.validator.PaymentEventCurrencyValidator"/>
+	<bean id="paymentEventDateValidator" class="com.elasticpath.provider.payment.service.history.validator.PaymentEventDateValidator"/>
+	<bean id="paymentEventNegativeAmountValidator"
+		  class="com.elasticpath.provider.payment.service.history.validator.PaymentEventNegativeAmountValidator"/>
+	<bean id="paymentEventSequenceValidator" class="com.elasticpath.provider.payment.service.history.validator.PaymentEventSequenceValidator">
+		<constructor-arg ref="validPaymentEventSequences"/>
+	</bean>
+
+	<util:map id="validPaymentEventSequences" map-class="java.util.HashMap" key-type="com.elasticpath.plugin.payment.provider.dto.TransactionType">
+		<entry key="RESERVE">
+			<list value-type="com.elasticpath.plugin.payment.provider.dto.TransactionType">
+				<value>MODIFY_RESERVE</value>
+				<value>CANCEL_RESERVE</value>
+				<value>CHARGE</value>
+			</list>
+		</entry>
+		<entry key="MODIFY_RESERVE">
+			<list value-type="com.elasticpath.plugin.payment.provider.dto.TransactionType">
+				<value>MODIFY_RESERVE</value>
+				<value>CANCEL_RESERVE</value>
+				<value>CHARGE</value>
+			</list>
+		</entry>
+		<entry key="CANCEL_RESERVE">
+			<list value-type="com.elasticpath.plugin.payment.provider.dto.TransactionType"/>
+		</entry>
+		<entry key="CHARGE">
+			<list value-type="com.elasticpath.plugin.payment.provider.dto.TransactionType">
+				<value>REVERSE_CHARGE</value>
+				<value>CREDIT</value>
+				<value>MANUAL_CREDIT</value>
+			</list>
+		</entry>
+		<entry key="REVERSE_CHARGE">
+			<list value-type="com.elasticpath.plugin.payment.provider.dto.TransactionType"/>
+		</entry>
+		<entry key="CREDIT">
+			<list value-type="com.elasticpath.plugin.payment.provider.dto.TransactionType">
+				<value>CREDIT</value>
+				<value>MANUAL_CREDIT</value>
+			</list>
+		</entry>
+		<entry key="MANUAL_CREDIT">
+			<list value-type="com.elasticpath.plugin.payment.provider.dto.TransactionType">
+				<value>CREDIT</value>
+				<value>MANUAL_CREDIT</value>
+			</list>
+		</entry>
+	</util:map>
+
+</beans>

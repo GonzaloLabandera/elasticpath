@@ -31,11 +31,14 @@ import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.support.impl.DistinctAttributeValueCriterionImpl;
 import com.elasticpath.service.attribute.AttributeService;
+import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
 
 /**
@@ -54,6 +57,8 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 	private AttributeService attributeService;
 
 	private PersistenceEngine mockPersistenceEngine;
+	
+	private BeanFactoryExpectationsFactory bfef;
 
 	/**
 	 * Prepares for tests.
@@ -67,9 +72,12 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		mockPersistenceEngine = getMockPersistenceEngine();
 		attributeService.setPersistenceEngine(mockPersistenceEngine);
 
-		stubGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
-		stubGetBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, AttributeLocalizedPropertyValueImpl.class);
+		bfef = getBeanFactoryExpectationsFactory();
+
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, AttributeUsageImpl.class);
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, LocalizedPropertiesImpl.class);
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, LocalizedPropertyValue.class,
+				AttributeLocalizedPropertyValueImpl.class);
 	}
 
 	/**
@@ -158,7 +166,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		final Attribute attribute = new AttributeImpl();
 		attribute.setKey("attKeyLoad");
 		attribute.setUidPk(uid);
-		stubGetBean(ContextIdNames.ATTRIBUTE, AttributeImpl.class);
+		bfef.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class, AttributeImpl.class);
 		// expectations
 		context.checking(new Expectations() {
 			{

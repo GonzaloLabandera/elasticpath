@@ -42,7 +42,7 @@ public class SolrIndexSearchServiceImplTest extends AbstractEPTestCase {
 	@Test
 	public void testSearch() {
 		SearchCriteria searchCriteria = new CategorySearchCriteria();
-		stubGetBean(ContextIdNames.SOLR_SEARCH_RESULT, new SolrIndexSearchResult());
+		stubGetPrototypeBean(ContextIdNames.SOLR_SEARCH_RESULT, SolrIndexSearchResult.class, new SolrIndexSearchResult());
 		this.indexSearchService.search(searchCriteria);
 
 		searchCriteria = new CustomerSearchCriteria();

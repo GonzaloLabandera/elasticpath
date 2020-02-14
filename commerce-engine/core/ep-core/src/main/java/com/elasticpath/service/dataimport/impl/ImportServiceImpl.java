@@ -528,49 +528,49 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	}
 
 	private void retrieveCustomerImportDataType(final Map<String, ImportDataType> importDataTypes) {
-		final ImportDataType importDataType = getBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER);
+		final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER, ImportDataType.class);
 		importDataType.init(null);
 		importDataTypes.put(importDataType.getName(), importDataType);
 	}
 
 	private void retrieveCustomerAddressImportDataType(final Map<String, ImportDataType> importDataTypes) {
-		final ImportDataType importDataType = getBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER_ADDRESS);
+		final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CUSTOMER_ADDRESS, ImportDataType.class);
 		importDataType.init(null);
 		importDataTypes.put(importDataType.getName(), importDataType);
 	}
 
 	private void retrieveProductAssociationImportDataType(final Map<String, ImportDataType> importDataTypes) {
-		final ImportDataType importDataType = getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_ASSOCIATION);
+		final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_ASSOCIATION, ImportDataType.class);
 		importDataType.init(null);
 		importDataTypes.put(importDataType.getName(), importDataType);
 	}
 
 	private void retrieveProductCategoryAssociationImportDataType(final Map<String, ImportDataType> importDataTypes) {
-		final ImportDataType importDataType =
-				getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION);
+		final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION, ImportDataType.class);
 		importDataType.init(null);
 		importDataTypes.put(importDataType.getName(), importDataType);
 
 	}
 
 	private void retrieveInventoryImportDataType(final Map<String, ImportDataType> importDataTypes) {
-		final ImportDataType importDataType = getBean(ContextIdNames.IMPORT_DATA_TYPE_INVENTORY);
+		final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_INVENTORY, ImportDataType.class);
 		importDataType.init(null);
 		importDataTypes.put(importDataType.getName(), importDataType);
 	}
 
 	private void retrieveBaseAmountImportDataType(final Map<String, ImportDataType> importDataTypes) {
-		final ImportDataType importDataType = getBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT);
+		final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT, ImportDataType.class);
 		importDataType.init(null);
 		importDataTypes.put(importDataType.getName(), importDataType);
 	}
 
 	private void retrieveCouponImportDataType(final Map<String, ImportDataType> importDataTypes) {
-		final ImportDataType importDataTypeCouponCode = getBean(ContextIdNames.IMPORT_DATA_TYPE_COUPONCODE);
+		final ImportDataType importDataTypeCouponCode = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_COUPONCODE, ImportDataType.class);
 		importDataTypeCouponCode.init(null);
 		importDataTypes.put(importDataTypeCouponCode.getName(), importDataTypeCouponCode);
 
-		final ImportDataType importDataTypeCouponCodeEmail = getBean(ContextIdNames.IMPORT_DATA_TYPE_COUPONCODE_EMAIL);
+		final ImportDataType importDataTypeCouponCodeEmail = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_COUPONCODE_EMAIL,
+				ImportDataType.class);
 		importDataTypeCouponCodeEmail.init(null);
 		importDataTypes.put(importDataTypeCouponCodeEmail.getName(), importDataTypeCouponCodeEmail);
 	}
@@ -579,7 +579,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		final List<ProductType> productTypes = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_TYPE_BY_CATALOG_EAGER", catalogUid);
 
 		for (ProductType productType : productTypes) {
-			final ImportDataType importDataType = getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT);
+			final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT, ImportDataType.class);
 			importDataType.init(productType);
 			importDataTypes.put(importDataType.getName(), importDataType);
 		}
@@ -591,7 +591,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		for (final CategoryType categoryType : categoryTypes) {
 			// getPersistenceEngine().initialize(categoryType.getAttributeGroup().getAttributeGroupAttributes());
 
-			final ImportDataType importDataType = getBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY);
+			final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY, ImportDataType.class);
 			importDataType.init(categoryType);
 			importDataTypes.put(importDataType.getName(), importDataType);
 		}
@@ -604,7 +604,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 			if (productType.isMultiSku()) {
 				// getPersistenceEngine().initialize(productType.getSkuAttributeGroup().getAttributeGroupAttributes());
 
-				final ImportDataType importDataType = getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_SKU);
+				final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_SKU, ImportDataType.class);
 				importDataType.init(productType);
 				importDataTypes.put(importDataType.getName(), importDataType);
 			}
@@ -655,7 +655,8 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	@Override
 	public ImportDataType initImportDataTypeLocalesAndCurrencies(final ImportDataType importDataType, final ImportJob importJob) {
 		if (importJob.getCatalog() != null) {
-			final PriceListHelperService priceListHelperService = getBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE);
+			final PriceListHelperService priceListHelperService = getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE,
+					PriceListHelperService.class);
 			importDataType.setSupportedLocales(importJob.getCatalog().getSupportedLocales());
 			importDataType.setSupportedCurrencies(priceListHelperService.getAllCurrenciesFor(importJob.getCatalog()));
 			importDataType.setRequiredCurrency(getRequiredCurrency(importJob, priceListHelperService));
@@ -711,7 +712,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		sanityCheck();
 		ImportJob importJob = null;
 		if (importJobUid <= 0) {
-			importJob = getBean(ContextIdNames.IMPORT_JOB);
+			importJob = getPrototypeBean(ContextIdNames.IMPORT_JOB, ImportJob.class);
 		} else {
 			importJob = getPersistentBeanFinder().get(ContextIdNames.IMPORT_JOB, importJobUid);
 		}
@@ -727,7 +728,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	@Override
 	public List<ImportBadRow> validateCsvFormat(final ImportJobRequest importJobRequest) {
 		validateImportJobRequest(importJobRequest);
-		final CsvFileReader csvFileReader = getBean(ContextIdNames.CSV_FILE_READER);
+		final CsvFileReader csvFileReader = getPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class);
 		csvFileReader
 				.open(getRemoteCsvFileName(importJobRequest.getImportSource()),
 						importJobRequest.getImportSourceColDelimiter(),
@@ -746,7 +747,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 			rowNumber++;
 			final int fieldsNumber = nextLine.length - 1;
 			if (fieldsNumber != fieldsNumberOfTitleLine.intValue()) {
-				final ImportBadRow importBadRow = getBean(ContextIdNames.IMPORT_BAD_ROW);
+				final ImportBadRow importBadRow = getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 				importBadRow.setRowNumber(rowNumber);
 				importBadRow.setRow(nextLine[0]);
 
@@ -817,7 +818,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		}
 
 		if (!faults.isEmpty()) {
-			final ImportBadRow importBadRow = getBean(ContextIdNames.IMPORT_BAD_ROW);
+			final ImportBadRow importBadRow = getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			importBadRow.setRowNumber(0);
 			importBadRow.setRow(titleRow[0]);
 			importBadRow.addImportFaults(faults);
@@ -836,7 +837,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	 */
 	@Override
 	public List<List<String>> getPreviewData(final ImportJob importJob, final int maxPreviewRows, final boolean returnRawData) {
-		final CsvFileReader csvFileReader = getBean(ContextIdNames.CSV_FILE_READER);
+		final CsvFileReader csvFileReader = getPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class);
 		csvFileReader.open(getRemoteCsvFileName(importJob.getCsvFileName()),
 				importJob.getCsvFileColDelimeter(), importJob.getCsvFileTextQualifier());
 		final List<String[]> previewDataWithOriginalLine = csvFileReader.getTopLines(maxPreviewRows);
@@ -906,7 +907,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		importJobRequest.setImportSource(getRemoteCsvFileName(importJobRequest.getImportSource()));
 
 		final ImportDataType importDataType = findImportDataType(importJobRequest.getImportJob().getImportDataTypeName());
-		ImportJobRunner importJobRunner = getBean(importDataType.getImportJobRunnerBeanName());
+		ImportJobRunner importJobRunner = getPrototypeBean(importDataType.getImportJobRunnerBeanName(), ImportJobRunner.class);
 		importJobRunner.init(importJobRequest, importJobRequest.getRequestId());
 
 		return importJobRunner.validate(importJobRequest.getReportingLocale());
@@ -939,7 +940,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		ImportJob importJob = importJobRequest.getImportJob();
 		CmUser initiator = importJobRequest.getInitiator();
 
-		ImportNotification notification = getBean(ContextIdNames.IMPORT_NOTIFICATION);
+		ImportNotification notification = getPrototypeBean(ContextIdNames.IMPORT_NOTIFICATION, ImportNotification.class);
 		notification.setAction(ImportAction.LAUNCH_IMPORT);
 		notification.setImportJob(importJob);
 		notification.setImportSource(importJobRequest.getImportSource());
@@ -987,7 +988,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		validateImportJobRequest(importJobRequest);
 
 		String localFile = getRemoteCsvFileName(importJobRequest.getImportSource());
-		final CsvFileReader csvFileReader = getBean(ContextIdNames.CSV_FILE_READER);
+		final CsvFileReader csvFileReader = getPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class);
 		csvFileReader.open(localFile,
 				importJobRequest.getImportSourceColDelimiter(),
 				importJobRequest.getImportSourceTextQualifier());
@@ -1023,7 +1024,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	 * @return an import fault error
 	 */
 	protected ImportFault getImportFaultError() {
-		final ImportFault importFault = getBean(ContextIdNames.IMPORT_FAULT);
+		final ImportFault importFault = getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 		importFault.setLevel(ImportFault.ERROR);
 		return importFault;
 	}
@@ -1067,7 +1068,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 			return;
 		}
 		ImportNotification launchNotification = launchNotifications.get(0);
-		ImportNotification notification = getBean(ContextIdNames.IMPORT_NOTIFICATION);
+		ImportNotification notification = getPrototypeBean(ContextIdNames.IMPORT_NOTIFICATION, ImportNotification.class);
 		notification.setImportJob(launchNotification.getImportJob());
 		notification.setAction(ImportAction.CANCEL_IMPORT);
 		notification.setInitiator(cancelledBy);

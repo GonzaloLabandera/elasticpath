@@ -4,7 +4,7 @@
 package com.elasticpath.cmclient.catalog.policy;
 
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.StateDeterminer;
@@ -94,6 +94,6 @@ public class IncludeLinkedCategoryAuthorizationStatePolicy extends AbstractState
 	}	
 
 	protected CategoryLookup getCategoryLookup() {
-		return ServiceLocator.getService(ContextIdNames.CATEGORY_LOOKUP);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 	}
 }

@@ -36,7 +36,8 @@ public class SkuOptionFacetConfigurationStrategy implements FacetConfigurationSt
 	public void process(final FilteredNavigationConfiguration config, final Facet facet) {
 		SkuOption skuOption = skuOptionService.findByKey(facet.getBusinessObjectId());
 		for (SkuOptionValue skuOptionValue : skuOption.getOptionValues()) {
-			SkuOptionValueFilter skuOptionValueFilter = beanFactory.getBean(ContextIdNames.SKU_OPTION_VALUE_FILTER);
+			SkuOptionValueFilter skuOptionValueFilter = beanFactory.getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE_FILTER, 
+					SkuOptionValueFilter.class);
 			Map<String, Object> properties = new HashMap<>();
 			properties.put(SkuOptionValueFilter.SKU_OPTION_VALUE_PROPERTY_KEY, skuOptionValue);
 			skuOptionValueFilter.initialize(properties);

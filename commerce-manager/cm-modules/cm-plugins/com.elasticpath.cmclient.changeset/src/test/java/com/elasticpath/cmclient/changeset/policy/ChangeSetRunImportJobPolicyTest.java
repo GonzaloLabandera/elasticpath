@@ -11,7 +11,7 @@ import org.junit.Test;
 
 
 import com.elasticpath.cmclient.ChangeSetTestBase;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -123,17 +123,16 @@ public class ChangeSetRunImportJobPolicyTest extends ChangeSetTestBase {
 	@Test
 	public void testStateCategoryNoPermission() {
 		BeanFactory mockBeanFactory = mock(BeanFactory.class);
-		ServiceLocator.setBeanFactory(mockBeanFactory);
-
-		when(mockBeanFactory.getBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY))
+		BeanLocator.setBeanFactory(mockBeanFactory);
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY, ImportDataTypeCategoryImpl.class))
 			.thenReturn(new ImportDataTypeCategoryImpl());
-		when(mockBeanFactory.getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT))
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT, ImportDataTypeProductImpl.class))
 			.thenReturn(new ImportDataTypeProductImpl());
-		when(mockBeanFactory.getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_SKU))
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_SKU, ImportDataTypeProductSkuImpl.class))
 			.thenReturn(new ImportDataTypeProductSkuImpl());
-		when(mockBeanFactory.getBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION))
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION, ImportDataTypeProductCategoryAssociationImpl.class))
 			.thenReturn(new ImportDataTypeProductCategoryAssociationImpl());
-		when(mockBeanFactory.getBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT))
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT, ImportDataTypeBaseAmountImpl.class))
 			.thenReturn(new ImportDataTypeBaseAmountImpl());
 
 

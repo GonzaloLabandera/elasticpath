@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -149,7 +150,7 @@ public class CartDirectorServiceImplIntegrationTest extends DbTestCase {
 	 * @return the shopping cart
 	 */
 	private ShoppingCart createShoppingCart() {
-		final ShoppingCart shoppingCart = getBeanFactory().getBean("shoppingCart");
+		final ShoppingCart shoppingCart = getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		final Shopper shopper = TestShopperFactoryForTestApplication.getInstance().createNewShopperWithMemento();
 		shoppingCart.setShopper(shopper);
 		shoppingCart.setStore(scenario.getStore());

@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.store.promotions.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.common.dto.CouponUsageModelDto;
 import com.elasticpath.commons.pagination.Page;
 import com.elasticpath.commons.pagination.SearchCriterion;
@@ -59,7 +59,7 @@ public class CouponUsageModelDtoDatabasePaginatorLocator implements SearchablePa
 	 */
 	protected CouponUsageService getCouponUsageService() {
 		if (couponUsageService == null) {
-			couponUsageService = ServiceLocator.getService("couponUsageService"); //$NON-NLS-1$
+			couponUsageService = BeanLocator.getSingletonBean("couponUsageService", CouponUsageService.class); //$NON-NLS-1$
 		}
 		return couponUsageService;
 	}

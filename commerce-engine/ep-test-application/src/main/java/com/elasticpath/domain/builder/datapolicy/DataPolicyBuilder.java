@@ -207,7 +207,7 @@ public class DataPolicyBuilder implements DomainObjectBuilder<DataPolicy> {
 
 	@Override
 	public DataPolicy build() {
-		DataPolicy dataPolicy = beanFactory.getBean(ContextIdNames.DATA_POLICY);
+		DataPolicy dataPolicy = beanFactory.getPrototypeBean(ContextIdNames.DATA_POLICY, DataPolicy.class);
 		dataPolicy.setUidPk(uidpk);
 		dataPolicy.setGuid(guid);
 		dataPolicy.setPolicyName(policyName);

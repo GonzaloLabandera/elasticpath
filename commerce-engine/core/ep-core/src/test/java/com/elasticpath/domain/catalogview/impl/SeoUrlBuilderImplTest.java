@@ -70,10 +70,10 @@ public class SeoUrlBuilderImplTest extends AbstractCatalogDataTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		stubGetBean(ContextIdNames.UTILITY, UtilityImpl.class);
+		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
 
 		CatalogLocaleFallbackPolicyFactory localePolicyFactory = new CatalogLocaleFallbackPolicyFactory();
-		stubGetBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, localePolicyFactory);
+		stubGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, CatalogLocaleFallbackPolicyFactory.class, localePolicyFactory);
 
 		UrlUtilityImpl urlUtility = new UrlUtilityImpl();
 		urlUtility.setCharacterEncoding("UTF-8");

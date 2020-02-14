@@ -41,47 +41,47 @@ import com.elasticpath.plugin.tax.domain.impl.StringTaxDocumentId;
 public class TaxDocumentAdapter {
 
 	private BeanFactory beanFactory;
-	
+
 	/**
 	 * Adapts {@link TaxDocument}} data values to a {@link TaxJournalRecord}.
-	 * 
-	 * @param taxDocument the tax document
+	 *
+	 * @param taxDocument         the tax document
 	 * @param taxOperationContext the tax operation
 	 * @return a list of {@link TaxJournalRecord}
 	 */
-	public  List<TaxJournalRecord> toTaxJournalRecords(final TaxDocument taxDocument, final TaxOperationContext taxOperationContext) {
-		
+	public List<TaxJournalRecord> toTaxJournalRecords(final TaxDocument taxDocument, final TaxOperationContext taxOperationContext) {
+
 		List<TaxJournalRecord> taxJournals = new ArrayList<>();
-		
+
 		TaxedItemContainer taxedItemContainer = taxDocument.getTaxedItemContainer();
 		String taxDocumentId = taxOperationContext.getDocumentId().toString();
-		
+
 		BigDecimal amountSign = getSign(taxDocument.getJournalType());
-		
+
 		for (TaxedItem item : taxedItemContainer.getItems()) {
 			for (TaxRecord taxRecord : item.getTaxRecords()) {
-				TaxJournalRecord taxJournalRecord = getBeanFactory().getBean(ContextIdNames.TAX_JOURNAL_RECORD);
-				
+				TaxJournalRecord taxJournalRecord = getBeanFactory().getPrototypeBean(ContextIdNames.TAX_JOURNAL_RECORD, TaxJournalRecord.class);
+
 				taxJournalRecord.setTaxName(taxRecord.getTaxName());
 				taxJournalRecord.setTaxJurisdiction(taxRecord.getTaxJurisdiction());
 				taxJournalRecord.setTaxRegion(taxRecord.getTaxRegion());
 				taxJournalRecord.setTaxRate(taxRecord.getTaxRate());
 				taxJournalRecord.setTaxProvider(taxRecord.getTaxProvider());
-				taxJournalRecord.setTaxCode(taxRecord.getTaxCode());				
+				taxJournalRecord.setTaxCode(taxRecord.getTaxCode());
 				taxJournalRecord.setItemCode(item.getItemCode());
-				
+
 				taxJournalRecord.setItemAmount(item.getPrice().multiply(amountSign));
 				taxJournalRecord.setTaxAmount(taxRecord.getTaxValue().multiply(amountSign));
-				
+
 				taxJournalRecord.setDocumentId(taxDocumentId);
 				taxJournalRecord.setJournalType(taxDocument.getJournalType().toString());
 				taxJournalRecord.setTransactionType(taxOperationContext.getTransactionType().toString());
 				taxJournalRecord.setOrderNumber(taxOperationContext.getOrderNumber());
-				
+
 				taxJournalRecord.setStoreCode(taxedItemContainer.getStoreCode());
 				taxJournalRecord.setCurrency(taxedItemContainer.getCurrency().getCurrencyCode());
 				taxJournalRecord.setTaxInclusive(taxedItemContainer.isTaxInclusive());
-				
+
 				taxJournalRecord.setItemGuid(getItemGuid(item, taxOperationContext));
 				taxJournalRecord.setItemObjectType(getItemObjectType(item, taxOperationContext));
 
@@ -90,63 +90,64 @@ public class TaxDocumentAdapter {
 		}
 		return taxJournals;
 	}
-	
+
 	private BigDecimal getSign(final TaxJournalType journalType) {
-		
+
 		if (journalType == TaxJournalType.REVERSAL) {
 			return BigDecimal.ONE.negate();
 		}
-			return BigDecimal.ONE;
+		return BigDecimal.ONE;
 	}
 
 	private String getItemGuid(final TaxedItem item, final TaxOperationContext taxOperationContext) {
 		if (StringUtils.equals(item.getItemCode(), TaxCode.TAX_CODE_SHIPPING)) {
 			return taxOperationContext.getShippingItemReferenceId();
-		} 
-		return item.getItemGuid();				
+		}
+		return item.getItemGuid();
 	}
-	
+
 	private String getItemObjectType(final TaxedItem item, final TaxOperationContext taxOperationContext) {
-		
+
 		if (StringUtils.equals(item.getItemCode(), TaxCode.TAX_CODE_SHIPPING)) {
 			switch (taxOperationContext.getItemObjectType()) {
-			case ORDER_SKU:
-				return TaxItemObjectType.ORDER_SHIPMENT.toString();
-			case ORDER_RETURN_SKU:
-				return TaxItemObjectType.ORDER_RETURN.toString();
-			default:
-				return StringUtils.EMPTY;
+				case ORDER_SKU:
+					return TaxItemObjectType.ORDER_SHIPMENT.toString();
+				case ORDER_RETURN_SKU:
+					return TaxItemObjectType.ORDER_RETURN.toString();
+				default:
+					return StringUtils.EMPTY;
 			}
 		}
-		
+
 		return taxOperationContext.getItemObjectType().toString();
 	}
-	
+
 	/**
 	 * Adapts {@link TaxJournalRecord}} data values to a {@link TaxDocument}.
-	 * 
-	 * @param taxJournals the collection of tax journal records
+	 *
+	 * @param taxJournals        the collection of tax journal records
 	 * @param destinationAddress destination address
-	 * @param originAddress origin address
+	 * @param originAddress      origin address
 	 * @return a tax document
 	 */
 	public TaxDocument toTaxDocument(final List<TaxJournalRecord> taxJournals,
-										final TaxAddress destinationAddress,
-										final TaxAddress originAddress) {
+									 final TaxAddress destinationAddress,
+									 final TaxAddress originAddress) {
 
 		if (CollectionUtils.isEmpty(taxJournals)) {
 			return null;
 		}
-		
-		MutableTaxDocument document = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAX_DOCUMENT);
+
+		MutableTaxDocument document = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAX_DOCUMENT, MutableTaxDocument.class);
 		document.setDocumentId(StringTaxDocumentId.fromString(taxJournals.get(0).getDocumentId()));
 		document.setTaxProviderName(taxJournals.get(0).getTaxProvider());
 		document.setJournalType(getJournalType(taxJournals.get(0).getJournalType()));
-		
-		MutableTaxedItemContainer taxedItemContainer = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER);
-		
+
+		MutableTaxedItemContainer taxedItemContainer = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER,
+				MutableTaxedItemContainer.class);
+
 		Currency currency = Currency.getInstance(taxJournals.get(0).getCurrency());
-		
+
 		taxedItemContainer.setCurrency(currency);
 		taxedItemContainer.setStoreCode(taxJournals.get(0).getStoreCode());
 		taxedItemContainer.setTaxInclusive(taxJournals.get(0).isTaxInclusive());
@@ -154,63 +155,63 @@ public class TaxDocumentAdapter {
 		taxedItemContainer.setOriginAddress(originAddress);
 
 		Map<String, List<TaxJournalRecord>> itemTaxJournals = getItemTaxJournals(taxJournals);
-		
+
 		for (Entry<String, List<TaxJournalRecord>> entry : itemTaxJournals.entrySet()) {
-			
-			MutableTaxedItem taxedItem = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAXED_ITEM);
-			
+
+			MutableTaxedItem taxedItem = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM, MutableTaxedItem.class);
+
 			TaxJournalRecord journalRecord = entry.getValue().get(0);
-			
+
 			taxedItem.setTaxableItem(TaxableItemBuilder.newBuilder()
-														.withTaxCode(journalRecord.getTaxCode())
-														.withCurrency(currency)
-														.withItemCode(journalRecord.getItemCode())
-														.withItemGuid(getItemGuid(journalRecord))
-														.withItemAmount(journalRecord.getItemAmount().abs())
-														.build());
-			
+					.withTaxCode(journalRecord.getTaxCode())
+					.withCurrency(currency)
+					.withItemCode(journalRecord.getItemCode())
+					.withItemGuid(getItemGuid(journalRecord))
+					.withItemAmount(journalRecord.getItemAmount().abs())
+					.build());
+
 			for (TaxJournalRecord taxJournal : entry.getValue()) {
 				taxedItem.addTaxRecord(TaxRecordBuilder.newBuilder()
-														.withTaxCode(taxJournal.getTaxCode())
-														.withTaxName(taxJournal.getTaxName())
-														.withTaxJurisdiction(taxJournal.getTaxJurisdiction())
-														.withTaxRegion(taxJournal.getTaxRegion())
-														.withTaxRate(taxJournal.getTaxRate())
-														.withTaxValue(taxJournal.getTaxAmount().abs())
-														.withTaxProvider(taxJournal.getTaxProvider())
-														.build());
-			
+						.withTaxCode(taxJournal.getTaxCode())
+						.withTaxName(taxJournal.getTaxName())
+						.withTaxJurisdiction(taxJournal.getTaxJurisdiction())
+						.withTaxRegion(taxJournal.getTaxRegion())
+						.withTaxRate(taxJournal.getTaxRate())
+						.withTaxValue(taxJournal.getTaxAmount().abs())
+						.withTaxProvider(taxJournal.getTaxProvider())
+						.build());
+
 			}
-			
+
 			taxedItemContainer.addTaxedItem(taxedItem);
 		}
-			
+
 		document.setTaxedItemContainer(taxedItemContainer);
 		return document;
 	}
 
 	private String getItemGuid(final TaxJournalRecord journalRecord) {
-		
+
 		if (StringUtils.isBlank(journalRecord.getItemGuid())) {
 			return journalRecord.getItemCode();
 		}
-		
+
 		return journalRecord.getItemGuid();
 	}
 
 	private Map<String, List<TaxJournalRecord>> getItemTaxJournals(final List<TaxJournalRecord> taxJournals) {
 
 		Map<String, List<TaxJournalRecord>> itemTaxJournals = new HashMap<>();
-		
+
 		for (TaxJournalRecord taxJournalRecord : taxJournals) {
-			
+
 			List<TaxJournalRecord> records = itemTaxJournals.get(taxJournalRecord.getItemCode());
-			
+
 			if (records == null) {
 				records = new ArrayList<>();
 			}
 			records.add(taxJournalRecord);
-			
+
 			itemTaxJournals.put(taxJournalRecord.getItemCode(), records);
 		}
 		return itemTaxJournals;
@@ -220,11 +221,11 @@ public class TaxDocumentAdapter {
 		if (StringUtils.isBlank(journalType)) {
 			return null;
 		}
-		
+
 		try {
 			return TaxJournalType.valueOf(journalType.toUpperCase(Locale.US));
 		} catch (IllegalArgumentException exc) {
-			return null; 
+			return null;
 		}
 	}
 

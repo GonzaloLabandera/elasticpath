@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.catalog.dialogs.categorytype;
 
 import org.eclipse.swt.widgets.Composite;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.service.changeset.ChangeSetMemberAction;
 
@@ -14,7 +14,7 @@ import com.elasticpath.service.changeset.ChangeSetMemberAction;
  */
 public class UpdatableCategoryTypeDialog extends CategoryTypeDialog {
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	@Override
 	protected void createButtonsForButtonBar(final Composite parent) {

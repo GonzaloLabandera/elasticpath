@@ -11,7 +11,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
-import com.elasticpath.rest.command.ExecutionResult;
 
 /**
  * The facade for operations with the pricing snapshots.
@@ -23,18 +22,8 @@ public interface PricingSnapshotRepository {
 	 *
 	 * @param shoppingCart the shopping cart
 	 * @return the cart's pricing snapshot
-	 * @deprecated use {@link #getShoppingCartPricingSnapshotSingle} instead
 	 */
-	@Deprecated
-	ExecutionResult<ShoppingCartPricingSnapshot> getShoppingCartPricingSnapshot(ShoppingCart shoppingCart);
-
-	/**
-	 * Gets the cart pricing snapshot.
-	 *
-	 * @param shoppingCart the shopping cart
-	 * @return the cart's pricing snapshot
-	 */
-	Single<ShoppingCartPricingSnapshot> getShoppingCartPricingSnapshotSingle(ShoppingCart shoppingCart);
+	Single<ShoppingCartPricingSnapshot> getShoppingCartPricingSnapshot(ShoppingCart shoppingCart);
 
 	/**
 	 * Gets the item pricing snapshot for the given item.

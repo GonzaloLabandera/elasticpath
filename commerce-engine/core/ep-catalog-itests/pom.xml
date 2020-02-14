@@ -33,6 +33,12 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-catalog-batch</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-core-caching</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>

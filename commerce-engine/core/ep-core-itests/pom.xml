@@ -135,16 +135,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-test-payment-gateway</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-test-cybersource-gateway</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>aopalliance</groupId>
 			<artifactId>aopalliance</artifactId>
 		</dependency>

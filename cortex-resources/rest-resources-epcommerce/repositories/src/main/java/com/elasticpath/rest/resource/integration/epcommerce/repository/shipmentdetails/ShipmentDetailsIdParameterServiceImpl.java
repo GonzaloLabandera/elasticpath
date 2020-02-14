@@ -27,7 +27,7 @@ public class ShipmentDetailsIdParameterServiceImpl implements ShipmentDetailsIdP
 
 	@Override
 	public Observable<IdentifierPart<Map<String, String>>> findShipmentDetailsIds(final String scope, final String userId) {
-		return cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(scope, userId)
+		return cartOrderRepository.findCartOrderGuidsByCustomer(scope, userId)
 				.flatMapMaybe(orderId -> shipmentDetailsService.getShipmentDetailsIdForOrder(scope, orderId))
 				.map(fieldValueMap -> (IdentifierPart<Map<String, String>>) CompositeIdentifier.of(fieldValueMap))
 				.doOnError(throwable -> LOG.info("Shipment details were empty for scope '{}' and user id '{}'.", scope, userId))

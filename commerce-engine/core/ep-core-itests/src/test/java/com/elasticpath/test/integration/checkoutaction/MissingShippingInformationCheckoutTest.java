@@ -1,14 +1,14 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2012
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.test.integration.checkoutaction;
 
+import static com.elasticpath.commons.constants.ContextIdNames.CART_ORDER_SERVICE;
+import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART_SERVICE;
 import static org.junit.Assert.assertFalse;
 
-import java.util.Collections;
 import java.util.Currency;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -16,7 +16,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
@@ -26,22 +25,21 @@ import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.factory.TestShoppingCartFactoryForTestApplication;
 import com.elasticpath.domain.misc.CheckoutResults;
-import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.sellingchannel.director.CartDirector;
+import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.catalog.ProductService;
-import com.elasticpath.service.payment.gateway.impl.NullPaymentGatewayPluginImpl;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
+import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.service.shoppingcart.actions.exception.CheckoutValidationException;
 import com.elasticpath.test.integration.BasicSpringContextTest;
@@ -91,7 +89,6 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		scenario = getTac().useScenario(SimpleStoreScenario.class);
 
 		final Store store = scenario.getStore();
-		store.setPaymentGateways(setUpPaymentGatewayAndProperties());
 		anonymousCustomer = getTac().getPersistersFactory().getStoreTestPersister().createDefaultCustomer(store);
 		shoppingContext = shoppingContextBuilder
 				.withCustomer(anonymousCustomer)
@@ -99,12 +96,6 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 				.build();
 		shopperService.save(shoppingContext.getShopper());
 		shoppingCart = createEmptyShoppingCartWithScenarioStore();
-
-		// Reset the payment gateway for each test.
-		NullPaymentGatewayPluginImpl.setFailOnCapture(false);
-		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(false);
-		NullPaymentGatewayPluginImpl.setFailOnReversePreAuthorization(false);
-		NullPaymentGatewayPluginImpl.setFailOnSale(false);
 	}
 
 	/**
@@ -122,7 +113,6 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		CheckoutResults checkoutResult = checkoutService.checkout(shoppingCart,
 				taxSnapshot,
 				shoppingContext.getCustomerSession(),
-				getOrderPayment(),
 				false);
 
 		assertFalse("Order should succeed.", checkoutResult.isOrderFailed());
@@ -144,7 +134,6 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		CheckoutResults checkoutResult = checkoutService.checkout(shoppingCart,
 				taxSnapshot,
 				shoppingContext.getCustomerSession(),
-				getOrderPayment(),
 				false);
 
 		assertFalse("Order should succeed.", checkoutResult.isOrderFailed());
@@ -169,7 +158,7 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 
 		// When I set the shipping address to null and checkout
 		shoppingCart.setShippingAddress(null);
-		checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), getOrderPayment(), true);
+		checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
 
 		// Then I get a MissingShippingAddressException thrown
 	}
@@ -185,6 +174,15 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		shoppingCart.setCustomerSession(customerSession);
 		shoppingCart.setBillingAddress(getAddress());
 		shoppingCart.setShippingAddress(getAddress());
+
+		final ShoppingCartService shoppingCartService = getBeanFactory().getSingletonBean(SHOPPING_CART_SERVICE, ShoppingCartService.class);
+		shoppingCartService.saveOrUpdate(shoppingCart);
+
+		final CartOrderService cartOrderService = getBeanFactory().getSingletonBean(CART_ORDER_SERVICE, CartOrderService.class);
+		cartOrderService.createOrderIfPossible(shoppingCart);
+
+		getTac().getPersistersFactory().getPaymentInstrumentPersister().persistPaymentInstrument(shoppingCart);
+
 		return shoppingCart;
 	}
 
@@ -192,17 +190,8 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		shoppingCart.setSelectedShippingOption(scenario.getShippingOption());
 	}
 
-	private OrderPayment getOrderPayment() {
-		final OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setCreatedDate(new Date());
-		orderPayment.setCurrencyCode("USD");
-		orderPayment.setEmail(anonymousCustomer.getEmail());
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD_DIRECT_POST);
-		return orderPayment;
-	}
-
 	private Address getAddress() {
-		final Address address = getBeanFactory().getBean(ContextIdNames.CUSTOMER_ADDRESS);
+		final Address address = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 		address.setFirstName("Billy");
 		address.setLastName("Bob");
 		address.setCountry("CA");
@@ -214,12 +203,6 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		return address;
 	}
 
-	private Set<PaymentGateway> setUpPaymentGatewayAndProperties() {
-		final Set<PaymentGateway> gateways = new HashSet<>();
-		gateways.add(getTac().getPersistersFactory().getStoreTestPersister().persistDefaultPaymentGateway());
-		return gateways;
-	}
-
 	private Product createPhysicalProduct() {
 		return getTac().getPersistersFactory().getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
 				scenario.getCategory(), scenario.getWarehouse());
@@ -229,7 +212,7 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		Product digitalProduct = createPhysicalProduct();
 		digitalProduct.getDefaultSku().setShippable(false);
 
-		ProductService prodService = getBeanFactory().getBean(ContextIdNames.PRODUCT_SERVICE);
+		ProductService prodService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		digitalProduct = prodService.saveOrUpdate(digitalProduct);
 		return digitalProduct;
 	}

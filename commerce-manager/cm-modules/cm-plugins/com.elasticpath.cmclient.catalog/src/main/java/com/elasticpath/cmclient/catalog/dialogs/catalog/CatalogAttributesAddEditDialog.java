@@ -31,10 +31,10 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModelImpl;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -127,7 +127,7 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 		final Locale selectedLocale) {
 
 		super(parentShell, DIALOG_NUMBER_OF_COLUMN, false);
-		this.attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		this.attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		initializeDialog(attribute, isGlobal, attributeService.getAttributeTypeMap(), getUsageMap());
 		// TODO Review what list of locales to present if there is no Catalog
 		supportedLocales = catalogModel == null ? Arrays.asList(Locale.getAvailableLocales()) : catalogModel.getCatalog().getSupportedLocales();
@@ -202,8 +202,8 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 			}
 			String typekey = (String) usageMap.keySet().toArray()[attrUsageCombo
 					.getSelectionIndex() - 1];
-			attribute.setAttributeUsage(((AttributeUsage) ServiceLocator.getService(ContextIdNames.ATTRIBUTE_USAGE))
-							.getAttributeUsageById(Integer.parseInt(typekey)));
+			attribute.setAttributeUsage(BeanLocator.getPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class)
+					.getAttributeUsageById(Integer.parseInt(typekey)));
 			return Status.OK_STATUS;
 		}
 	}	
@@ -266,8 +266,8 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 		attrTypeCombo.select(0);
 		getAttribute().setAttributeType(
 				getAttributeType((String) typeMap.keySet().toArray()[0]));
-		getAttribute().setAttributeUsage(((AttributeUsage) ServiceLocator.getService(ContextIdNames.ATTRIBUTE_USAGE))
-						.getAttributeUsageById(Integer.parseInt((String) usageMap.keySet().toArray()[0])));
+		getAttribute().setAttributeUsage(BeanLocator.getPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class)
+				.getAttributeUsageById(Integer.parseInt((String) usageMap.keySet().toArray()[0])));
 	}
 
 	@Override
@@ -301,7 +301,7 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 	 */
 	public Attribute getAttribute() {
 		if (attribute == null) {
-			attribute = ServiceLocator.getService(ContextIdNames.ATTRIBUTE);
+			attribute = BeanLocator.getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 			attribute.setGlobal(isGlobal);
 		}
 		return attribute;
@@ -523,10 +523,10 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 	@Override
 	public void setObjectGuid(final String objectGuid) {
 		if (objectGuid == null) {
-			attribute = ServiceLocator.getService(ContextIdNames.ATTRIBUTE);
+			attribute = BeanLocator.getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 			editMode = false;
 		} else {
-			attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+			attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 			attribute = attributeService.findByKey(objectGuid);
 			initializeDialog(attribute, false, attributeService.getAttributeTypeMap(), attributeService.getAttributeUsageMap());
 			editMode = true;

@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
 
 /**
  * Unit test for the {@code IdentityQueryExecutor} class.
@@ -34,10 +32,6 @@ public class IdentityQueryExecutorTest {
 
 	@Mock private EntityManager entityManager;
 
-	@Before
-	public void init() {
-		identityQueryExecutor.setQueryUtil(new QueryUtil());
-	}
 	/**
 	 * Test whether a query is executed for a given entity class and UID PK.
 	 */

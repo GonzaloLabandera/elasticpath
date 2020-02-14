@@ -21,5 +21,10 @@ public enum OrderPaymentStatus {
 	/**
 	 * The <code>OrderPaymentStatus</code> instance for "Failed".
 	 */
-	FAILED;
+	FAILED,
+
+	/**
+	 * The <code>PaymentStatus</code> instance for "Skipped".
+	 */
+	SKIPPED
 }

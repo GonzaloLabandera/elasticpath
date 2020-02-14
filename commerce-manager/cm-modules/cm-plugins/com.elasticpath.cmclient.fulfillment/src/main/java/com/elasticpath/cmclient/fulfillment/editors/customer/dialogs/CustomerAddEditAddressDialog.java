@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -103,10 +103,10 @@ public class CustomerAddEditAddressDialog extends AbstractEpDialog {
 		super(parentShell, 2, false);
 		this.customer = (Customer) viewer.getInput();
 		this.viewOnly = viewOnly;
-		this.addressProxy = ServiceLocator.getService(ContextIdNames.CUSTOMER_ADDRESS);
+		this.addressProxy = BeanLocator.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 		
 		if (isAdd) {
-			this.address = ServiceLocator.getService(ContextIdNames.CUSTOMER_ADDRESS);
+			this.address = BeanLocator.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 			this.address.setCountry(DEFAULT_COUNTRY);
 			addAddress = true;
 		} else {

@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages;
 import com.elasticpath.cmclient.admin.configuration.AdminConfigurationPlugin;
 import com.elasticpath.cmclient.admin.configuration.models.SettingsModel;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -69,7 +69,7 @@ public class EditSettingMetadataDialog extends AbstractEpDialog {
 		this.model = model;
 		if (metadata == null) {
 			isEdit = false;
-			this.metadata = ServiceLocator.getService(ContextIdNames.SETTING_METADATA);
+			this.metadata = BeanLocator.getPrototypeBean(ContextIdNames.SETTING_METADATA, SettingMetadata.class);
 			this.metadata.setKey(StringUtils.EMPTY);
 			this.metadata.setValue(StringUtils.EMPTY);
 		} else {

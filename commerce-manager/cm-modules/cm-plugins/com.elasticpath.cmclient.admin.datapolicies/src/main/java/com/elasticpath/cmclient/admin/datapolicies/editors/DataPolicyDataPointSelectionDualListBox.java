@@ -19,7 +19,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesMessages;
 import com.elasticpath.cmclient.admin.datapolicies.dialogs.DataPointDialog;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.AbstractEpDualListBoxControl;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -53,7 +53,7 @@ public class DataPolicyDataPointSelectionDualListBox extends AbstractEpDualListB
 												   final EpState editableState) {
 		super(parentComposite, model, availableTitle, assignedTitle, ALL_BUTTONS | MULTI_SELECTION,
 				parentComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true), editableState);
-		this.dataPointService = ServiceLocator.getService(ContextIdNames.DATA_POINT_SERVICE);
+		this.dataPointService = BeanLocator.getSingletonBean(ContextIdNames.DATA_POINT_SERVICE, DataPointService.class);
 	}
 
 	/**

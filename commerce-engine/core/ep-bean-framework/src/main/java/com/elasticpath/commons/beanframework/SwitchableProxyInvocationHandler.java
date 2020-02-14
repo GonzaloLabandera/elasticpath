@@ -4,6 +4,7 @@
 package com.elasticpath.commons.beanframework;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -28,6 +29,10 @@ public class SwitchableProxyInvocationHandler<T> implements InvocationHandler {
 
 	@Override
 	public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-		return method.invoke(switchableProxyBinder.getProxy(), args);
+		try {
+			return method.invoke(switchableProxyBinder.getProxy(), args);
+		} catch (InvocationTargetException ite) {
+			throw ite.getCause();
+		}
 	}
 }

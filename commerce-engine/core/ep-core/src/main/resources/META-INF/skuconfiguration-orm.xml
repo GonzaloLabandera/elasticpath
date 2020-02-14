@@ -9,13 +9,6 @@
 				WHERE s.optionKey = ?1
 			</query>
 		</named-query>
-		<named-query name="SKU_OPTION_VALUE_FIND_BY_KEY">
-			<query>
-				SELECT s
-				FROM SkuOptionValueImpl s
-				WHERE s.optionValueKey = ?1
-			</query>
-		</named-query>
 		<named-query name="SKU_OPTION_FIND_UIDPK_BY_KEY">
 			<query>
 				SELECT s.uidPk
@@ -27,26 +20,6 @@
 			<query>
 				SELECT s
 				FROM SkuOptionImpl s
-			</query>
-		</named-query>
-		<named-query name="SKU_OPTION_SELECT_ALL_EAGER">
-			<query>
-				SELECT s
-				FROM SkuOptionImpl s
-				LEFT OUTER JOIN FETCH s.optionValueMap
-			</query>
-		</named-query>
-		<named-query name="SKU_OPTION_IN_USE_PRODUCT_TYPE">
-			<query>
-				SELECT so.uidPk
-				FROM ProductTypeImpl p
-				LEFT OUTER JOIN p.skuOptions so
-			</query>
-		</named-query>
-		<named-query name="SKU_OPTIONVALUE_IN_USE_PRODUCT_TYPE">
-			<query>
-				SELECT DISTINCT pskuvalue.skuOptionValue.uidPk
-				FROM JpaAdaptorOfSkuOptionValueImpl pskuvalue
 			</query>
 		</named-query>
 		<named-query name="SKU_OPTIONVALUE_FIND_UIDPK_BY_KEY">
@@ -84,6 +57,29 @@
 				SELECT sov.skuOptionValue.uidPk
 				FROM JpaAdaptorOfSkuOptionValueImpl sov
 				WHERE sov.skuOptionValue.uidPk = ?1
+			</query>
+		</named-query>
+		<named-query name="SKU_OPTIONS_BY_PRODUCT_TYPE_UID">
+			<query>
+				SELECT so
+				FROM ProductTypeImpl p
+				LEFT OUTER JOIN p.skuOptions so
+				WHERE p.uidPk = ?1
+			</query>
+		</named-query>
+		<named-query name="SKU_OPTIONVALUE_FIND_BY_OPTION_AND_VALUE_KEYS">
+			<query>
+				SELECT sov
+				FROM SkuOptionValueImpl sov
+				WHERE sov.skuOptionInternal.optionKey = ?1
+				AND sov.optionValueKey = ?2
+			</query>
+		</named-query>
+		<named-query name="SKU_OPTIONVALUE_FIND_BY_UID">
+			<query>
+				SELECT sov
+				FROM SkuOptionValueImpl sov
+				WHERE sov.uidPk = ?1
 			</query>
 		</named-query>
 </entity-mappings>

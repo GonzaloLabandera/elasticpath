@@ -183,8 +183,8 @@ public class ShippingAddressSelectorRepositoryImplTest {
 		when(customer.getPreferredShippingAddress()).thenReturn(customerAddress);
 		when(customerAddress.getGuid()).thenReturn(ADDRESS_GUID);
 		when(cartOrder.getGuid()).thenReturn(CART_ORDER_GUID);
-		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(STORE_CODE, CUSTOMERGUID)).thenReturn(cartOrderGuidObservable);
-		when(cartOrderRepository.updateShippingAddressOnCartOrderAsSingle(ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE))
+		when(cartOrderRepository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMERGUID)).thenReturn(cartOrderGuidObservable);
+		when(cartOrderRepository.updateShippingAddressOnCartOrder(ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE))
 				.thenReturn(Single.just(Boolean.TRUE));
 
 		prototype.selectChoice(shippingAddressSelectorChoiceIdentifier)

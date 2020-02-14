@@ -6,8 +6,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
-import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
 import com.elasticpath.selenium.dialogs.AddCustomerSegmentMembershipDialog;
+import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.util.Constants;
@@ -46,6 +46,8 @@ public class CustomerEditor extends AbstractPageObject {
 	private static final String DATA_POINT_COLUMN_CSS = DATA_POINT_PARENT_CSS + COLUMN_ID;
 	private static final String DATA_POINT_LIST_ROW_COLUMN_CSS = DATA_POINT_PARENT_CSS + "div[row-id='%s']";
 	private static final String DATA_POINT_VALUE_COLUMN_CSS = " div[column-num='2']";
+	private static final String DATA_POLICY_COLUMN_NAME = "Data Policy Name";
+	private static final String DATA_POINT_COLUMN_NAME = "Data Point Name";
 
 	/**
 	 * Constructor.
@@ -229,7 +231,7 @@ public class CustomerEditor extends AbstractPageObject {
 	 * @param dataPolicyName String
 	 */
 	public void verifyDataPolicyExists(final String dataPolicyName) {
-		assertThat(selectItemInEditorPaneWithScrollBar(DATA_POLICY_PARENT_CSS, DATA_POLICY_COLUMN_CSS, dataPolicyName))
+		assertThat(selectItemInEditorPaneWithScrollBar(DATA_POLICY_PARENT_CSS, DATA_POLICY_COLUMN_CSS, dataPolicyName, DATA_POLICY_COLUMN_NAME))
 				.as("Unable to find Data Policy - " + dataPolicyName)
 				.isTrue();
 	}
@@ -240,7 +242,8 @@ public class CustomerEditor extends AbstractPageObject {
 	 * @param dataPointValue String
 	 */
 	public void selectDataPoint(final String dataPointValue) {
-		assertThat(selectItemInEditorPaneWithScrollBarNonJSCheck(DATA_POINT_PARENT_CSS, DATA_POINT_COLUMN_CSS, dataPointValue))
+		assertThat(selectItemInEditorPaneWithScrollBarNonJSCheck(DATA_POINT_PARENT_CSS, DATA_POINT_COLUMN_CSS,
+				dataPointValue, DATA_POINT_COLUMN_NAME))
 				.as("Unable to find Data Point Value - " + dataPointValue)
 				.isTrue();
 	}

@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.commons.beanframework.BeanFactory;
 
@@ -30,8 +30,8 @@ public  class ChangeSetTestBase {
 
 	@Before
 	public void setUp() {
-		ServiceLocator.setBeanFactory(beanFactory);
-		when(beanFactory.getBean(ChangeSetHelper.BEAN_ID)).thenReturn(changeSetHelper);
+		BeanLocator.setBeanFactory(beanFactory);
+		when(beanFactory.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class)).thenReturn(changeSetHelper);
 	}
 
 }

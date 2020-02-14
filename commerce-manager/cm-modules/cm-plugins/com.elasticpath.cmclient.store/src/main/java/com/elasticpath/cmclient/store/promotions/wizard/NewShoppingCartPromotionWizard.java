@@ -11,7 +11,7 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.AbstractSellingContextConditionWizardPage;
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionShopperWizardPage;
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionTimeWizardPage;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.promotions.CouponCollectionModel;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
@@ -142,8 +142,8 @@ public class NewShoppingCartPromotionWizard extends AbstractEPCampaignWizard<Rul
 
 		CouponConfig couponConfig = couponConfigurationPage.getModel().getCouponConfig();
 		if (couponConfig.getUsageType() != null) {
-			RuleCondition limitedUseCouponCondition = ServiceLocator.getService(
-					RuleElementType.LIMITED_USE_COUPON_CODE_CONDITION.getPropertyKey());
+			RuleCondition limitedUseCouponCondition = BeanLocator.getPrototypeBean(
+					RuleElementType.LIMITED_USE_COUPON_CODE_CONDITION.getPropertyKey(), RuleCondition.class);
 			model.addCondition(limitedUseCouponCondition);
 			model = ruleService.update(model);
 			
@@ -159,7 +159,7 @@ public class NewShoppingCartPromotionWizard extends AbstractEPCampaignWizard<Rul
 	}
 	
 	private boolean ruleNameExists(final String ruleName) {
-		final RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
+		final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		try {
 			if (ruleService.findByName(ruleName) != null) {
 				return true;
@@ -177,18 +177,18 @@ public class NewShoppingCartPromotionWizard extends AbstractEPCampaignWizard<Rul
 		super(PromotionsMessages.get().CreatePromotionsWizard_Title, null, PromotionsImageRegistry
 				.getImage(PromotionsImageRegistry.PROMOTION_SHOPPING_CREATE));
 
-		SellingContext sellingContext = ServiceLocator.getService(ContextIdNames.SELLING_CONTEXT);
+		SellingContext sellingContext = BeanLocator.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 
-		final RuleSetService ruleSetService = ServiceLocator.getService(ContextIdNames.RULE_SET_SERVICE);
+		final RuleSetService ruleSetService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
 
-		model = ServiceLocator.getService(ContextIdNames.PROMOTION_RULE);
+		model = BeanLocator.getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 		model.setRuleSet(ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO));
 		model.setEnabled(true);
 		model.setSellingContext(sellingContext);
 
-		ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE);
-		couponConfigService = ServiceLocator.getService(ContextIdNames.COUPON_CONFIG_SERVICE);
-		changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+		ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
+		couponConfigService = BeanLocator.getSingletonBean(ContextIdNames.COUPON_CONFIG_SERVICE, CouponConfigService.class);
+		changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	}
 	
 	@Override

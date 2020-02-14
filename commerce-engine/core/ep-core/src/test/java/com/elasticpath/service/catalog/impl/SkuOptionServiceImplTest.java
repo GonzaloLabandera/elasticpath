@@ -7,7 +7,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.Java6Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -199,21 +198,6 @@ public class SkuOptionServiceImplTest {
 		skuOptionService.remove(skuOption);
 
 		verify(jpaPersistenceEngine).delete(skuOption);
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.service.SkuOptionServiceImpl.list()'.
-	 */
-	@Test
-	public void testList() {
-		final List<Object> skuOptionList = Collections.singletonList(any());
-		// expectations
-		when(jpaPersistenceEngine.retrieveByNamedQuery("SKU_OPTION_SELECT_ALL_EAGER")).thenReturn(skuOptionList);
-
-		final List<SkuOption> retrievedSkuOptionList = skuOptionService.list();
-
-		assertThat(skuOptionList).isEqualTo(retrievedSkuOptionList);
-		verify(jpaPersistenceEngine).retrieveByNamedQuery("SKU_OPTION_SELECT_ALL_EAGER");
 	}
 
 	/**

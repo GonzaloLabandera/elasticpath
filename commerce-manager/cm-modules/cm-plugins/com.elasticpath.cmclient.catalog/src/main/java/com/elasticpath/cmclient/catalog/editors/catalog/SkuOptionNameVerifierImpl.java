@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.catalog.editors.catalog;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.service.catalog.SkuOptionService;
 
@@ -12,7 +12,7 @@ import com.elasticpath.service.catalog.SkuOptionService;
  */
 public class SkuOptionNameVerifierImpl implements SkuOptionNameVerifier {
 
-	private final SkuOptionService skuOptionService = ServiceLocator.getService(ContextIdNames.SKU_OPTION_SERVICE);
+	private final SkuOptionService skuOptionService = BeanLocator.getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
 	
 	@Override
 	public boolean verifySkuOptionKey(final String newValue) {

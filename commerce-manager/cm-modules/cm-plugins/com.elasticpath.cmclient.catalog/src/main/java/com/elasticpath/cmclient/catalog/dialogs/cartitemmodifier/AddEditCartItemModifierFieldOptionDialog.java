@@ -24,7 +24,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -143,7 +143,7 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 	}
 
 	private void createModifierFieldOption() {
-		this.cartItemModifierFieldOption = ServiceLocator.getService(ContextIdNames.MODIFIER_FIELD_OPTION);
+		this.cartItemModifierFieldOption = BeanLocator.getPrototypeBean(ContextIdNames.MODIFIER_FIELD_OPTION, ModifierFieldOption.class);
 		this.originalValue = "";
 	}
 
@@ -375,7 +375,7 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 				ModifierFieldOptionLdf currentOptionLDF =
 						this.getModifierFieldOption().getModifierFieldOptionsLdfByLocale(lang);
 				if (currentOptionLDF == null) {
-					currentOptionLDF = ServiceLocator.getService(ContextIdNames.MODIFIER_OPTION_LDF);
+					currentOptionLDF = BeanLocator.getPrototypeBean(ContextIdNames.MODIFIER_OPTION_LDF, ModifierFieldOptionLdf.class);
 					currentOptionLDF.setDisplayName(display);
 					currentOptionLDF.setLocale(lang);
 					this.getModifierFieldOption().addModifierFieldOptionLdf(currentOptionLDF);

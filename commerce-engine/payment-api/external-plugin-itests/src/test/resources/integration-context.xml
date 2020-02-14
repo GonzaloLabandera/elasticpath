@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	   ">
+
+	<context:annotation-config/>
+
+	<import resource="classpath:integration-core-context.xml"/>
+	<import resource="classpath:ep-test-application.xml"/>
+	<import resource="classpath:spring/service/payment-provider-api-service.xml"/>
+
+	<!-- Opt out of messaging. -->
+	<bean id="domainEventMessagePublisher" class="com.elasticpath.messaging.stub.EventMessagePublisherStubImpl"/>
+	<bean id="catalogEventMessagePublisher" class="com.elasticpath.messaging.stub.EventMessagePublisherStubImpl"/>
+
+	<!-- Extension point for plugging in additional test components. -->
+	<!-- This must occur as the last import in the context to facilitate overriding existing beans. -->
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/ep-itest-plugin.xml"/>
+
+	<bean id="externalPluginLoader" class="com.elasticpath.provider.payment.service.provider.ExternalPluginLoaderExtensionForIntegrationTesting"/>
+
+</beans>

@@ -3,6 +3,7 @@
  */
 package com.elasticpath.caching.core.pricing;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.elasticpath.domain.pricing.PriceListStack;
@@ -10,7 +11,10 @@ import com.elasticpath.domain.pricing.PriceListStack;
 /**
  * A key used to define a unique pricing. Combines a PriceListStack and ProductSku.
  */
-public class PricingCacheKey {
+public class PricingCacheKey implements Serializable {
+
+	/** Serial version id. */
+	private static final long serialVersionUID = 20090909L;
 
 	private final PriceListStack stack;
 	private final String skuCode;

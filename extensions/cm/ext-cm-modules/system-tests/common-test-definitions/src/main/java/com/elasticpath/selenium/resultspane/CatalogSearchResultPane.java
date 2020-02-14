@@ -48,6 +48,19 @@ public class CatalogSearchResultPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Verifies product doesn't exist.
+	 *
+	 * @param productName String
+	 */
+	public void verifyProductNameDoesNotExist(final String productName) {
+		setWebDriverImplicitWait(1);
+		assertThat(isProductNameInList(productName))
+				.as("Expected Product does not exist in search result - " + productName)
+				.isFalse();
+		setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
 	 * Verifies if product exists.
 	 *
 	 * @param productCode String

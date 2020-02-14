@@ -33,8 +33,8 @@ import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.event.EventOriginatorType;
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.order.OrderEvent;
 import com.elasticpath.domain.order.impl.OrderEventImpl;
-import com.elasticpath.domain.order.impl.OrderPaymentImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.persistence.api.Persistable;
@@ -92,8 +92,8 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 	public void testCartItemLastModifiedDate() throws InterruptedException {
 		Product product = productsScenario.getShippableProducts().get(0);
 		ProductSku sku = product.getDefaultSku();
-		
-		ShoppingItemImpl shoppingCartItem = getBeanFactory().getBean(ContextIdNames.SHOPPING_ITEM);
+
+		ShoppingItemImpl shoppingCartItem = getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPING_ITEM, ShoppingItemImpl.class);
 		shoppingCartItem.setSkuGuid(sku.getGuid());
 		Price price = new PriceImpl();
 		price.setCurrency(Currency.getInstance(CAD));
@@ -146,39 +146,7 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 		assertEquals("The date before save should be earlier than the last persistent date", 
 				-1, lastModifiedDateBeforeSave.compareTo(persistedProfileValue.getLastModifiedDate()));
 	}
-	
-	/**
-	 * Tests an OrderPayment's last modified date.
-	 * @throws InterruptedException 
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testOrderPaymentLastModifiedDate() throws InterruptedException {
-		Order order = getBeanFactory().getBean(ContextIdNames.ORDER);
-		order.setLocale(Locale.US);
-		order.setCreatedDate(new Date());
-		order.setStoreCode(storeScenario.getStore().getCode());
 
-		orderService.add(order);
-
-		OrderPaymentImpl orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setCreatedDate(new Date());
-		orderPayment.setAmount(BigDecimal.ZERO);
-		orderPayment.setOrder(order);
-		
-		OrderPaymentImpl persistedOrderPayment = saveDomainModelObject(orderPayment);
-		
-		final Date lastModifiedDateBeforeSave = persistedOrderPayment.getLastModifiedDate();
-		orderPayment.setAmount(BigDecimal.ONE);
-		Thread.sleep(1);
-		
-		persistedOrderPayment = saveDomainModelObject(orderPayment);
-		
-		assertEquals("The date before save should be earlier than the last persistent date", 
-				-1, lastModifiedDateBeforeSave.compareTo(persistedOrderPayment.getLastModifiedDate()));
-			
-	}
-	
 	/**
 	 * Tests an OrderEvent's last modified date.
 	 * @throws InterruptedException 
@@ -186,13 +154,12 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testOrderEventLastModifiedDate() throws InterruptedException {
-		
-		OrderEventImpl orderEvent = getBeanFactory().getBean(ContextIdNames.ORDER_EVENT);
+		OrderEvent orderEvent = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_EVENT, OrderEvent.class);
 		orderEvent.setCreatedDate(new Date());
 		orderEvent.setOriginatorType(EventOriginatorType.CMUSER);
 		orderEvent.setTitle("TestTitle");
 		
-		OrderEventImpl persistedOrderEvent = saveDomainModelObject(orderEvent);
+		OrderEvent persistedOrderEvent = saveDomainModelObject(orderEvent);
 		
 		final Date lastModifiedDateBeforeSave = persistedOrderEvent.getLastModifiedDate();
 		orderEvent.setNote("TestNote");
@@ -212,7 +179,7 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testOrderLastModifiedDate() throws InterruptedException {
-		Order order = getBeanFactory().getBean(ContextIdNames.ORDER);
+		Order order = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER, Order.class);
 		order.setLocale(Locale.US);
 		order.setCreatedDate(new Date());
 		order.setStoreCode(storeScenario.getStore().getCode());
@@ -248,8 +215,8 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testCategoryLastModifiedDate() throws InterruptedException {
-		CategoryService categoryService = getBeanFactory().getBean(ContextIdNames.CATEGORY_SERVICE);
-		CategoryLookup categoryLookup = getBeanFactory().getBean(ContextIdNames.CATEGORY_LOOKUP);
+		CategoryService categoryService = getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
+		CategoryLookup categoryLookup = getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 
 		// create a category
 		Category category = new CategoryImpl();

@@ -3,15 +3,18 @@
  */
 package com.elasticpath.persistence.openjpa.executors;
 
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.MAX_ALLOWED_LIST_PARAMETERS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
 
 /**
  * Unit test for the {@code NamedQueryExecutor} class.
@@ -46,50 +48,50 @@ public class NamedQueryExecutorWithListTest {
 
 	@Mock private EntityManager entityManager;
 	@Mock private OpenJPAQuery query;
-	@Mock private QueryUtil queryUtil;
-
-	@Mock private List persistables;
+	@Mock private Persistable persistable;
+	private List<Persistable> persistables;
 
 	@Before
 	public void init() {
+		persistables = Lists.newArrayList(persistable);
+
 		namedQueryWithListExecutor
 			.withQueryName(NAMED_QUERY);
 
-		when(queryUtil.createNamedQuery(entityManager, NAMED_QUERY)).thenReturn(query);
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+
 	}
 
 	/**
 	 * Test whether a query is executed with a map with parameters.
 	 */
 	@Test
-	public void shouldExecuteMultiResultQueryWithParameters() {
+	public void shouldExecuteMultiResultQueryWithMapParameters() {
+
+		when(query.getResultList()).thenReturn(persistables);
 
 		List<String> paramList1 = Lists.newArrayList("val1", "val2");
 
 		String listParam = "param1";
-		String csvParamList = "'val1','val2'";
-
-		OpenJPAQuery configuredQuery = mock(OpenJPAQuery.class);
 
 		Map<String, Collection<String>> mapParams = Maps.newHashMap();
 		mapParams.put(listParam, paramList1);
-
-		when(queryUtil.getResults(configuredQuery)).thenReturn(persistables);
-		when(queryUtil.getInParameterValues(paramList1)).thenReturn(csvParamList);
-		when(queryUtil.insertListIntoQuery(query, listParam, csvParamList)).thenReturn(configuredQuery);
 
 		List result = namedQueryWithListExecutor
 			.withParameters(mapParams)
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
-		verify(queryUtil).getInParameterValues(paramList1);
-		verify(queryUtil).insertListIntoQuery(query, listParam, csvParamList);
-		verify(queryUtil).getResults(configuredQuery);
+		verify(query).getResultList();
+		verify(query).setParameter(listParam, paramList1);
+
+		verify(query, never()).setFirstResult(anyInt());
+		verify(query, never()).setMaxResults(anyInt());
+		verify(query, never()).setParameters((Object[]) null);
+
 		verifyNoMoreInteractions(query);
-		verifyNoMoreInteractions(configuredQuery);
 	}
 
 	/**
@@ -98,19 +100,14 @@ public class NamedQueryExecutorWithListTest {
 	@Test
 	public void shouldExecuteMultiResultQueryWithFirstAndMaxResults() {
 
+		when(query.getResultList()).thenReturn(persistables);
+
 		int fistResult = 1;
 		int maxResults = 1;
 		String listParam = "param1";
-		Object[] arrayParams = {listParam};
+		Object[] arrayParams = {"param1value"};
 
 		List<String> listValues = Lists.newArrayList("1", "2");
-		String csvParamList = "'1','2'";
-
-		OpenJPAQuery configuredQuery = mock(OpenJPAQuery.class);
-
-		when(queryUtil.insertListIntoQuery(query, listParam, csvParamList)).thenReturn(configuredQuery);
-		when(queryUtil.getInParameterValues(listValues)).thenReturn(csvParamList);
-		when(queryUtil.getResults(configuredQuery)).thenReturn(persistables);
 
 		List result = namedQueryWithListExecutor
 			.withFirstResult(fistResult)
@@ -121,17 +118,15 @@ public class NamedQueryExecutorWithListTest {
 			.executeMultiResultQuery(entityManager);
 
 		assertThat(result)
-			.isSameAs(persistables);
+			.contains(persistable);
 
-		verify(queryUtil).getInParameterValues(listValues);
-		verify(queryUtil).insertListIntoQuery(query, listParam, csvParamList);
-		verify(configuredQuery).setFirstResult(fistResult);
-		verify(configuredQuery).setMaxResults(maxResults);
-		verify(queryUtil).setQueryParameters(configuredQuery, arrayParams);
+		verify(query).getResultList();
+		verify(query).setParameter(listParam, listValues);
+		verify(query).setFirstResult(fistResult);
+		verify(query).setMaxResults(maxResults);
+		verify(query).setParameters(arrayParams);
 
-		verify(queryUtil).getResults(configuredQuery);
 		verifyNoMoreInteractions(query);
-		verifyNoMoreInteractions(configuredQuery);
 	}
 
 	/**
@@ -141,9 +136,14 @@ public class NamedQueryExecutorWithListTest {
 	public void shouldExecuteMultiResultQueryInBatches() {
 
 		String listParam = "listParam";
-		Object[] arrayParams = {listParam};
+		Object[] arrayParams = {"param1val"};
 
-		List<String> listValues = Lists.newArrayList("1", "2");
+		List<Integer> listValues = new ArrayList<>();
+
+		//we need at list 2 chunks - to create the first one, MAX_ALLOWED_LIST_PARAMETERS elements are required
+		for (int i = 1; i <= MAX_ALLOWED_LIST_PARAMETERS + 1; i++) {
+			listValues.add(i);
+		}
 
 		Persistable customEntity1 = new CustomEntityImpl();
 		Persistable customEntity2 = new CustomEntityImpl();
@@ -151,11 +151,7 @@ public class NamedQueryExecutorWithListTest {
 		List resultList1 = Lists.newArrayList(customEntity1);
 		List resultList2 = Lists.newArrayList(customEntity2);
 
-		OpenJPAQuery configuredQuery = mock(OpenJPAQuery.class);
-
-		when(queryUtil.insertListIntoQuery(eq(query), eq(listParam), any())).thenReturn(configuredQuery);
-		when(queryUtil.splitCollection(listValues, arrayParams.length)).thenReturn(listValues);
-		when(queryUtil.getResults(configuredQuery)).thenReturn(resultList1, resultList2);
+		when(query.getResultList()).thenReturn(resultList1, resultList2);
 
 		List result = namedQueryWithListExecutor
 			.withParameters(arrayParams)
@@ -163,14 +159,16 @@ public class NamedQueryExecutorWithListTest {
 			.withListParameterName(listParam)
 			.executeMultiResultQuery(entityManager);
 
-		assertThat(result).contains(customEntity1, customEntity2);
+		assertThat(result)
+			.contains(customEntity1, customEntity2);
 
-		verify(queryUtil).insertListIntoQuery(query, listParam, "1");
-		verify(queryUtil).insertListIntoQuery(query, listParam, "2");
-		verify(queryUtil, times(2)).setQueryParameters(configuredQuery, arrayParams);
-		verify(queryUtil, times(2)).getResults(configuredQuery);
+		verify(query, times(2)).getResultList();
+		verify(query, times(2)).setParameters(arrayParams);
+		verify(query, times(2)).setParameter(eq(listParam), anyCollection());
+		verify(query, never()).setFirstResult(anyInt());
+		verify(query, never()).setMaxResults(anyInt());
+
 		verifyNoMoreInteractions(query);
-		verifyNoMoreInteractions(configuredQuery);
 	}
 
 	private class CustomEntityImpl implements Persistable {

@@ -21,6 +21,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
+import com.elasticpath.persistence.api.AbstractPersistableImpl;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
@@ -43,7 +44,7 @@ public class AttributeValueImplTest {
 	public void setUp() throws Exception {
 		beanFactory = mockery.mock(BeanFactory.class);
 		beanFactoryExpectationsFactory = new BeanFactoryExpectationsFactory(mockery, beanFactory);
-		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, new UtilityImpl());
+		beanFactoryExpectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, UtilityImpl.class, new UtilityImpl());
 
 		attributeValueImpl1 = new ProductAttributeValueImpl();
 	}
@@ -122,7 +123,10 @@ public class AttributeValueImplTest {
 	public void testSetDecimalValue() {
 		final BigDecimal value = new BigDecimal("3");
 		attributeValueImpl1.setDecimalValue(value);
-		assertSame(value, attributeValueImpl1.getDecimalValue());
+
+		final BigDecimal adjustedValue = value.setScale(AbstractPersistableImpl.DECIMAL_SCALE, AbstractPersistableImpl.ROUNDING_MODE);
+
+		assertEquals(adjustedValue, attributeValueImpl1.getDecimalValue());
 	}
 
 	/**

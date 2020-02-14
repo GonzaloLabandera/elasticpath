@@ -52,6 +52,6 @@ public class CartToOrderLinkRepositoryImplTest {
 		repository.getOrderByCartId(SCOPE, CART_ID)
 				.test();
 
-		verify(cartOrderRepository, times(1)).findByCartGuidSingle(CART_ID);
+		verify(cartOrderRepository, times(1)).findByCartGuid(CART_ID);
 	}
 }

@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
@@ -60,7 +61,7 @@ public class ProductAssociationServiceImplTest extends BasicSpringContextTest {
 	@Before
 	public void setUp() throws Exception {
 		scenario = getTac().useScenario(SingleStoreMultiCatalogScenario.class);
-		service = getBeanFactory().getBean("productAssociationService");
+		service = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_ASSOCIATION_SERVICE, ProductAssociationService.class);
 		store = scenario.getStore();
 		category = scenario.getCategory();
 		catalog = scenario.getCatalog();

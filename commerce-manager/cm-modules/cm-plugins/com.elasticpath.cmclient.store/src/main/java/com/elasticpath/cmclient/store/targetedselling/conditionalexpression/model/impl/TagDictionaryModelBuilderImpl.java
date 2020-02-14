@@ -2,14 +2,14 @@
  * Copyright (c) Elastic Path Software Inc., 2017
  */
 /**
- * 
+ *
  */
 package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.model.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
 import com.elasticpath.cmclient.store.targetedselling.conditionalexpression.model.ComboViewerModelBuilder;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -21,8 +21,8 @@ import com.elasticpath.tags.service.TagDictionaryService;
  *
  */
 public class TagDictionaryModelBuilderImpl implements ComboViewerModelBuilder<TagDictionary> {
-	
-	private static final String[] DICTIONARIES_WHITE_LIST = { 
+
+	private static final String[] DICTIONARIES_WHITE_LIST = {
 		"SHOPPER", //$NON-NLS-1$
 		"TIME", //$NON-NLS-1$
 		"STORES" //$NON-NLS-1$
@@ -31,7 +31,7 @@ public class TagDictionaryModelBuilderImpl implements ComboViewerModelBuilder<Ta
 	@Override
 	public TagDictionary[] getModel() {
 
-		TagDictionary tagDictionaryAll = ServiceLocator.getService(ContextIdNames.TAG_DICTIONARY);
+		TagDictionary tagDictionaryAll = BeanLocator.getPrototypeBean(ContextIdNames.TAG_DICTIONARY, TagDictionary.class);
 		tagDictionaryAll.setName(TargetedSellingMessages.get().ConditionalExpressionAll);
 
 		List<TagDictionary> list = new ArrayList<>(getDictionariesForSavedConditions());
@@ -54,12 +54,12 @@ public class TagDictionaryModelBuilderImpl implements ComboViewerModelBuilder<Ta
 				returnList.add(tagDictionary);
 			}
 		}
-		
+
 		return returnList;
 	}
 
 	private TagDictionaryService getTagDictionaryService() {
-		return ServiceLocator.getService(ContextIdNames.TAG_DICTIONARY_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.TAG_DICTIONARY_SERVICE, TagDictionaryService.class);
 	}
 
 

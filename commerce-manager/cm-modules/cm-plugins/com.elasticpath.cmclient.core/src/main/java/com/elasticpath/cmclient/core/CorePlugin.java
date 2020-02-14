@@ -1,10 +1,11 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2007
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cmclient.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -18,12 +19,16 @@ import org.eclipse.rap.rwt.service.UISession;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.url.URLConstants;
+import org.osgi.service.url.URLStreamHandlerService;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.handlers.libjar.LibJarURLStreamHandlerService;
 import com.elasticpath.domain.misc.PropertyBased;
 import com.elasticpath.service.remote.ResourceRetrievalService;
 
@@ -43,6 +48,8 @@ public class CorePlugin extends AbstractUIPlugin {
 	private static final Set<Runnable> PRE_STARTUP_CALLBACKS = new HashSet<>();
 	private static final Set<Runnable> POST_STARTUP_CALLBACKS = new HashSet<>();
 
+	private ServiceRegistration<URLStreamHandlerService> libJarRegistration;
+
 	/**
 	 * The constructor.
 	 */
@@ -53,7 +60,15 @@ public class CorePlugin extends AbstractUIPlugin {
 	@Override
 	public void start(final BundleContext context) throws Exception {
 		super.start(context);
+		registerLibJarURLStreamHandlerService(context);
 		createApplicationContext();
+	}
+
+	@SuppressWarnings({"squid:S1149"})
+	private void registerLibJarURLStreamHandlerService(final BundleContext context) {
+		final Hashtable<String, String[]> properties = new Hashtable<>();
+		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[]{LibJarURLStreamHandlerService.LIB_JAR_PROTOCOL});
+		libJarRegistration = context.registerService(URLStreamHandlerService.class, new LibJarURLStreamHandlerService(), properties);
 	}
 
 	@Override
@@ -66,6 +81,8 @@ public class CorePlugin extends AbstractUIPlugin {
 		}
 
 		super.stop(context);
+
+		libJarRegistration.unregister();
 
 		//Close Spring context
 		if (this.appContext != null) {
@@ -104,7 +121,7 @@ public class CorePlugin extends AbstractUIPlugin {
 
 		appContext = new ClassPathXmlApplicationContext("spring/application-context.xml"); //$NON-NLS-1$
 
-		ServiceLocator.setBeanFactory((BeanFactory) appContext.getBean("coreBeanFactory"));
+		BeanLocator.setBeanFactory((BeanFactory) appContext.getBean("coreBeanFactory"));
 
 		initializeAdditionalEpServices();
 	}
@@ -123,7 +140,7 @@ public class CorePlugin extends AbstractUIPlugin {
 		Map<String, Properties> propertiesMap = getPropertiesMap();
 
 		for (final String service : propertyBasedServices) {
-			final PropertyBased propertyBased = ServiceLocator.getService(service);
+			final PropertyBased propertyBased = BeanLocator.getSingletonBean(service, PropertyBased.class);
 			propertyBased.setPropertiesMap(propertiesMap);
 		}
 	}
@@ -131,7 +148,8 @@ public class CorePlugin extends AbstractUIPlugin {
 	private Map<String, Properties> getPropertiesMap() {
 		LOG.debug("Retrieving properties from remote ResourceRetrievalService"); //$NON-NLS-1$
 
-		final ResourceRetrievalService resourceRetrievalService = ServiceLocator.getService("remoteResourceRetrievalService"); //$NON-NLS-1$
+		final ResourceRetrievalService resourceRetrievalService = BeanLocator
+				.getSingletonBean("remoteResourceRetrievalService", ResourceRetrievalService.class); //$NON-NLS-1$
 
 		Map<String, Properties> propertiesMap = resourceRetrievalService.getProperties();
 		if (propertiesMap == null || propertiesMap.isEmpty()) {

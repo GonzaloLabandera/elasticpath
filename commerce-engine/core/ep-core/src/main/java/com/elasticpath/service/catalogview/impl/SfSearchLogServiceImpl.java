@@ -54,7 +54,7 @@ public class SfSearchLogServiceImpl extends AbstractEpPersistenceServiceImpl imp
 		sanityCheck();
 		SfSearchLog log = null;
 		if (sfSearchLogUid <= 0) {
-			log = getBean(ContextIdNames.SF_SEARCH_LOG);
+			log = getPrototypeBean(ContextIdNames.SF_SEARCH_LOG, SfSearchLog.class);
 		} else {
 			log = getPersistenceEngine().load(SfSearchLog.class, sfSearchLogUid);
 		}
@@ -74,7 +74,7 @@ public class SfSearchLogServiceImpl extends AbstractEpPersistenceServiceImpl imp
 		sanityCheck();
 		SfSearchLog log = null;
 		if (sfSearchLogUid <= 0) {
-			log = getBean(ContextIdNames.SF_SEARCH_LOG);
+			log = getPrototypeBean(ContextIdNames.SF_SEARCH_LOG, SfSearchLog.class);
 		} else {
 			log = getPersistenceEngine().get(SfSearchLog.class, sfSearchLogUid);
 		}

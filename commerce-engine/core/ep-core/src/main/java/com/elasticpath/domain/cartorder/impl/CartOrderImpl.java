@@ -18,19 +18,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
 import org.apache.openjpa.persistence.DataCache;
-import org.apache.openjpa.persistence.Dependent;
 import org.apache.openjpa.persistence.PersistentCollection;
 
 import com.elasticpath.domain.cartorder.CartOrder;
-import com.elasticpath.domain.customer.impl.AbstractPaymentMethodImpl;
 import com.elasticpath.persistence.api.AbstractEntityImpl;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 
 /**
  * Implementation of CartOrder, CartOrder should not be used in versions of EP prior to 6.4.
@@ -56,8 +52,6 @@ public class CartOrderImpl extends AbstractEntityImpl implements CartOrder {
 	private long uidPk;
 
 	private String guid;
-
-	private PaymentMethod paymentMethod;
 
 	private Set<String> couponCodes = new HashSet<>();
 
@@ -124,47 +118,6 @@ public class CartOrderImpl extends AbstractEntityImpl implements CartOrder {
 			throw new IllegalArgumentException("Parameter [guid] cannot be null.");
 		}
 		setShoppingCartGuidInternal(guid);
-	}
-
-	@ManyToOne(targetEntity = AbstractPaymentMethodImpl.class, cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
-	@JoinColumn(name = "PAYMENT_METHOD_UID")
-	@Dependent
-	protected PaymentMethod getPaymentMethodInternal() {
-		return paymentMethod;
-	}
-
-	protected void setPaymentMethodInternal(final PaymentMethod paymentMethod) {
-		this.paymentMethod = paymentMethod;
-	}
-
-	@Override
-	public PaymentMethod getPaymentMethod() {
-		return getPaymentMethodInternal();
-	}
-	
-	@Override
-	public void clearPaymentMethod() {
-		setPaymentMethodInternal(null);
-	}
-
-	@Override
-	public void usePaymentMethod(final PaymentMethod paymentMethod) {
-		if (paymentMethod == null) {
-			throw new IllegalArgumentException("payment method must not be null");
-		}
-
-		if (!(paymentMethod instanceof AbstractPaymentMethodImpl)) {
-			throw new IllegalArgumentException("payment method must be a subclass of " + AbstractPaymentMethodImpl.class.getSimpleName());
-		}
-
-		AbstractPaymentMethodImpl<?> abstractPaymentMethod = (AbstractPaymentMethodImpl<?>) paymentMethod;
-		setPaymentMethodInternal(abstractPaymentMethod.copy());
-	}
-
-	@Override
-	@Deprecated
-	public void setPaymentMethod(final PaymentMethod paymentMethod) {
-		usePaymentMethod(paymentMethod);
 	}
 
 	@Override

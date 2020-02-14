@@ -40,7 +40,7 @@ public interface ShippingOptionRepository {
 	 *
 	 * @param storeCode the store code
 	 * @param shipmentDetailsId the shipment details id
-	 * @return ExecutionResult with the collection of valid shipping option codes
+	 * @return collection of valid shipping option codes
 	 */
 	Observable<String> findShippingOptionCodesForShipment(String storeCode, Map<String, String> shipmentDetailsId);
 

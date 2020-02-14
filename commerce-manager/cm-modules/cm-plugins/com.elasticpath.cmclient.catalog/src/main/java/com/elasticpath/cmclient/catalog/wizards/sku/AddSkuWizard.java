@@ -10,7 +10,7 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.wizard.AbstractEpWizard;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -103,7 +103,7 @@ public class AddSkuWizard extends AbstractEpWizard <Product> {
 	}
 	
 	private ProductSku createNewSku() {
-		return (ProductSku) ServiceLocator.getService(ContextIdNames.PRODUCT_SKU);
+		return (ProductSku) BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_SKU, Object.class);
 	}
 	
 }

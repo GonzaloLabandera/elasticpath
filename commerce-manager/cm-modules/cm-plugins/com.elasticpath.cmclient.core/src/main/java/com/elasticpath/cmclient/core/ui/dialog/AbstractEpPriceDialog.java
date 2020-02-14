@@ -24,7 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
@@ -82,7 +82,7 @@ public abstract class AbstractEpPriceDialog extends AbstractCatalogObjectFinderD
 		if (priceListHelperService != null) {
 			return priceListHelperService;
 		}
-		return ServiceLocator.getService(ContextIdNames.PRICE_LIST_HELPER_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE, PriceListHelperService.class);
 	}
 
 	/**
@@ -160,7 +160,7 @@ public abstract class AbstractEpPriceDialog extends AbstractCatalogObjectFinderD
 	 * @return List of BaseAmountSummaryDTO 
 	 */
 	protected List<BaseAmountSummaryDTO> getPricesToShow(final Object selectedItem) {
-		BaseAmountFilter filter = ServiceLocator.getService(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter filter = BeanLocator.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		populateFilter(selectedItem, filter);
 		
 		Map<PriceListDescriptorDTO, List<BaseAmountDTO>> itemPricesMap = getItemPricesMap(filter);

@@ -20,7 +20,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.wizard.EpWizardDialog;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
@@ -47,7 +47,7 @@ public class CreateNamedConditionHandler extends AbstractPolicyAwareHandler {
 
 	protected CreateHandlerService<ConditionalExpression> getService() {
 		return new TagConditionCreateHandlerServiceAdapter(
-				ServiceLocator.getService(ContextIdNames.TAG_CONDITION_SERVICE));
+				BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, com.elasticpath.tags.service.TagConditionService.class));
 	}
 
 	@Override

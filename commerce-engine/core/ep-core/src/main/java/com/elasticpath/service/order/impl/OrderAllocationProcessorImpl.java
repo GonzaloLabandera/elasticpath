@@ -179,7 +179,7 @@ public class OrderAllocationProcessorImpl implements OrderAllocationProcessor {
 	}
 
 	private OrderAllocationProcessor getOrderAllocationProcessor() {
-		return getBeanFactory().getBean(ContextIdNames.ORDER_ALLOCATION_PROCESSOR);
+		return getBeanFactory().getSingletonBean(ContextIdNames.ORDER_ALLOCATION_PROCESSOR, OrderAllocationProcessor.class);
 	}
 
 	/**

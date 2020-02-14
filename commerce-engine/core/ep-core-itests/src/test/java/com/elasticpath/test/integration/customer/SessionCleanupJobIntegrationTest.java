@@ -146,7 +146,7 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 	}
 
 	private SessionCleanupJob createSessionCleanupJob() {
-		TimeService timeService = getBeanFactory().getBean(ContextIdNames.TIME_SERVICE);
+		TimeService timeService = getBeanFactory().getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 
 		SessionCleanupJob sessionCleanupJob = new SessionCleanupJob();
 		sessionCleanupJob.setTimeService(timeService);
@@ -340,7 +340,7 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 
 
 	private Customer createAnonymousCustomer(final String email) {
-		final Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		final Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setEmail(email);
 		customer.setStoreCode(getScenarioStore().getCode());
 		customer.setAnonymous(true);
@@ -422,7 +422,7 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 	}
 
 	private Customer createAndSaveCustomer(final String email) {
-		final Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		final Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setUserId(email);
 		customer.setEmail(email);
 		customer.setStoreCode(getScenarioStore().getCode());

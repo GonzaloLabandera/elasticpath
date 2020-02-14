@@ -20,7 +20,6 @@ import com.elasticpath.rest.resource.integration.epcommerce.common.authenticatio
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 
 /**
  * Automatically applies coupons to new customer.
@@ -38,8 +37,6 @@ public class CouponAutoApplyRoleTransitionEventHandler implements ScopedEventEnt
 	private CartOrderRepository cartOrderRepository;
 	@Reference
 	private ShoppingCartRepository shoppingCartRepository;
-	@Reference
-	private ReactiveAdapter reactiveAdapter;
 
 
 	@Override
@@ -73,18 +70,18 @@ public class CouponAutoApplyRoleTransitionEventHandler implements ScopedEventEnt
 							String customerEmailAddress = shoppingCart.getShopper().getCustomer().getEmail();
 							return storeRepository.findStoreAsSingle(storeCode)
 									.flatMapCompletable(store -> filterAndAutoApplyCoupons(cartOrder, customerEmailAddress, store)
-											.flatMapCompletable(isCartOrderUpdated -> isCartOrderUpdated 
-													? cartOrderRepository.saveCartOrderAsSingle(cartOrder).ignoreElement() 
+											.flatMapCompletable(isCartOrderUpdated -> isCartOrderUpdated
+													? cartOrderRepository.saveCartOrder(cartOrder).ignoreElement()
 													: Completable.complete()));
 						}));
 	}
 
 	private Single<CartOrder> getCartOrder(final ShoppingCart shoppingCart) {
-		return cartOrderRepository.findByCartGuidSingle(shoppingCart.getGuid());
+		return cartOrderRepository.findByCartGuid(shoppingCart.getGuid());
 	}
 
 	private Single<Boolean> filterAndAutoApplyCoupons(final CartOrder cartOrder, final String customerEmailAddress, final Store store) {
-		return reactiveAdapter.fromRepositoryAsSingle(() -> cartOrderRepository.filterAndAutoApplyCoupons(cartOrder, store, customerEmailAddress));
+		return cartOrderRepository.filterAndAutoApplyCoupons(cartOrder, store, customerEmailAddress);
 	}
 
 }

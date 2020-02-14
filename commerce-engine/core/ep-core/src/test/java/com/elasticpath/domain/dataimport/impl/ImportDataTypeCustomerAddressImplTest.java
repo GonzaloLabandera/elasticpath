@@ -23,6 +23,7 @@ import com.elasticpath.commons.constants.GlobalConstants;
 import com.elasticpath.commons.exception.EpBooleanBindException;
 import com.elasticpath.commons.exception.EpInvalidValueBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.customer.CustomerAddress;
@@ -87,7 +88,7 @@ public class ImportDataTypeCustomerAddressImplTest extends AbstractEPTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.UTILITY, UtilityImpl.class);
+		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
 
 		this.customerAddressImportType = new ImportDataTypeCustomerAddressImpl();
 
@@ -503,7 +504,7 @@ public class ImportDataTypeCustomerAddressImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testCreateValueObject() {
-		stubGetBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddressImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class, CustomerAddressImpl.class);
 		CustomerAddress customerAddress = (CustomerAddress) this.customerAddressImportType.createValueObject();
 		assertNotNull(customerAddress);
 	}
@@ -605,6 +606,6 @@ public class ImportDataTypeCustomerAddressImplTest extends AbstractEPTestCase {
 				will(returnValue(subCountryMap.keySet()));
 			}
 		});
-		stubGetBean(ContextIdNames.GEOGRAPHY, geographyMock);
+		stubGetSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class, geographyMock);
 	}
 }

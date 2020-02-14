@@ -32,7 +32,7 @@ import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.Chang
 import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapter;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -58,8 +58,8 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 
 
 	private static final String CATALOG_CART_ITEM_TABLE = "Catalog Cart Item"; //$NON-NLS-1$
-	private final ModifierService modifierService = ServiceLocator.getService(ContextIdNames.MODIFIER_SERVICE);
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ModifierService modifierService = BeanLocator.getSingletonBean(ContextIdNames.MODIFIER_SERVICE, ModifierService.class);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private final ChangeSetColumnDecorator changeSetColumnDecorator = new ChangeSetColumnDecorator();
 	private List<ModifierGroup> catalogCartItemModifierGroups;

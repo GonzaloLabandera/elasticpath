@@ -129,8 +129,9 @@ public class DtoCsvLineReaderImpl<T> implements DtoCsvLineReader<T> {
 	 * @param rowNumber the row position within the file
 	 * @return the valid row
 	 */
+	@SuppressWarnings("unchecked")
 	ImportValidRow<T> createImportValidRow(final T dto, final String row, final int rowNumber) {
-		ImportValidRow<T> validRow = getBeanFactory().getBean(ContextIdNames.IMPORT_VALID_ROW);
+		ImportValidRow<T> validRow = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_VALID_ROW, ImportValidRow.class);
 		validRow.setDto(dto);
 		validRow.setRow(row);
 		validRow.setRowNumber(rowNumber);
@@ -140,8 +141,9 @@ public class DtoCsvLineReaderImpl<T> implements DtoCsvLineReader<T> {
 	/**
 	 * @return a new CsvReadResult implementation
 	 */
+	@SuppressWarnings("unchecked")
 	CsvReadResult<T> getReadResultBean() {
-		return getBeanFactory().getBean(ContextIdNames.CSV_READ_RESULT);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CSV_READ_RESULT, CsvReadResult.class);
 	}
 
 	/**
@@ -194,7 +196,7 @@ public class DtoCsvLineReaderImpl<T> implements DtoCsvLineReader<T> {
 	 * @return a new CsvFileReader
 	 */
 	CsvFileReader getCsvFileReader() {
-		return getBeanFactory().getBean(ContextIdNames.CSV_FILE_READER);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class);
 	}
 
 	/**
@@ -271,7 +273,7 @@ public class DtoCsvLineReaderImpl<T> implements DtoCsvLineReader<T> {
 	 */
 	ImportBadRow createImportBadRow(
 			final int rowNumber, final String firstString, final List<ImportFault> faults) {
-		final ImportBadRow badRow = getBeanFactory().getBean(ContextIdNames.IMPORT_BAD_ROW);
+		final ImportBadRow badRow = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 		badRow.setRowNumber(rowNumber);
 		badRow.setRow(firstString);
 		badRow.addImportFaults(faults);

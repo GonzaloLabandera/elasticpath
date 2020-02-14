@@ -26,12 +26,10 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.PriceScheduleImpl;
 import com.elasticpath.domain.catalog.impl.PricingSchemeImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
 import com.elasticpath.domain.quantity.Quantity;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemRecurringPrice;
-import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.subscriptions.PaymentSchedule;
 import com.elasticpath.domain.subscriptions.impl.PaymentScheduleImpl;
 import com.elasticpath.domain.tax.TaxCode;
@@ -100,7 +98,7 @@ public class ShoppingItemRecurringPriceAssemblerIntegrationTest extends DbTestCa
 		monthlyPrice = new PriceImpl();  //this is the "top" Price object
 		monthlyPrice.setPricingScheme(monthlyPricingScheme);
 		
-		final PaymentScheduleHelper paymentScheduleHelper = getBeanFactory().getBean("paymentScheduleHelper");
+		final PaymentScheduleHelper paymentScheduleHelper = getBeanFactory().getSingletonBean("paymentScheduleHelper", PaymentScheduleHelper.class);
 		
 		recurringPriceAssembler = new ShoppingItemRecurringPriceAssemblerImpl();
 		recurringPriceAssembler.setBeanFactory(getBeanFactory());
@@ -116,8 +114,6 @@ public class ShoppingItemRecurringPriceAssemblerIntegrationTest extends DbTestCa
 		persistProductWithSku();
 		ShoppingItemDto shoppingItemDto = new ShoppingItemDto("skuCode", 1);
 		
-		Store store = getScenario().getStore();
-		CustomerSessionImpl customerSession = getCustomerSession();
 		ShoppingItem shoppingItem = assembler.createShoppingItem(shoppingItemDto);
 		
 		//now that the base shoppingItem is all setup - let's add recurringPrices to the price object
@@ -166,17 +162,5 @@ public class ShoppingItemRecurringPriceAssemblerIntegrationTest extends DbTestCa
 				orderLimit);
 		return product;
 		
-	}
-
-	private CustomerSessionImpl getCustomerSession() {
-		return new CustomerSessionImpl() {
-			private static final long serialVersionUID = -5268177574493014610L;
-
-			@Override
-			public Currency getCurrency() {
-				// TODO Auto-generated method stub
-				return getScenario().getStore().getDefaultCurrency();
-			}
-		};
 	}
 }

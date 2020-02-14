@@ -13,8 +13,8 @@ import com.elasticpath.cmclient.changeset.ChangeSetPlugin;
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventListener;
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventService;
 import com.elasticpath.cmclient.changeset.helpers.impl.ChangeSetPermissionsHelperImpl;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.actions.AbstractDynamicPullDownActionDelegate;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
@@ -40,7 +40,7 @@ public class ChangeSetPullDownActionDelegate extends AbstractDynamicPullDownActi
 
 	private static final int MAX_DISPLAY_LENGTH = 15;
 	private final ChangeSetManagementService changeSetManagementService
-			= ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+			= BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 	private IWorkbenchWindow workbenchWindow;
 
 	@Override
@@ -58,7 +58,7 @@ public class ChangeSetPullDownActionDelegate extends AbstractDynamicPullDownActi
 		searchCriteria.setChangeSetStateCode(ChangeSetStateCode.OPEN);
 		searchCriteria.setSortingType(StandardSortBy.NAME);
 		searchCriteria.setSortingOrder(SortOrder.ASCENDING);
-		ChangeSetLoadTuner noMembersLoadTuner = ServiceLocator.getService(ContextIdNames.CHANGESET_LOAD_TUNER);
+		ChangeSetLoadTuner noMembersLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.CHANGESET_LOAD_TUNER, ChangeSetLoadTuner.class);
 		noMembersLoadTuner.setLoadingMemberObjects(false);
 		
 		if (cmUser.isSuperUser()) {

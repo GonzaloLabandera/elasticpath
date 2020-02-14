@@ -37,11 +37,13 @@ import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
+import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
 import com.elasticpath.domain.customer.impl.CustomerGroupImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
@@ -139,11 +141,12 @@ public class CustomerDtoAssemblerTest {
 		address = createAddress();
 		defaultCustomerGroup = createDefaultCustomerGroup();
 		customerGroup = createCustomerGroup();
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, utility);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddressImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class, CustomerAddressImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthentication.class,
+				CustomerAuthenticationImpl.class);
 
 		customerDtoAssembler = new CustomerDtoAssembler();
 		customerDtoAssembler.setBeanFactory(beanFactory);

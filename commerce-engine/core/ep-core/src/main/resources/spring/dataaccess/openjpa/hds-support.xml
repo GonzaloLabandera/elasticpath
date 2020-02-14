@@ -7,7 +7,6 @@
 
 	<bean id="entityModifiedListener" class="com.elasticpath.persistence.impl.EntityModifiedListener">
 		<property name="hdsSupportBean" ref="hdsSupportBean"/>
-		<property name="queryUtil" ref="queryUtil"/>
 	</bean>
 
 	<bean id="abstractReadOnlyEntityMangerFactory" class="com.elasticpath.persistence.openjpa.impl.ConfigurableLocalContainerEntityManagerFactoryBean"
@@ -60,7 +59,6 @@
 	<bean id="jpaAnnotationParser" class="com.elasticpath.persistence.openjpa.util.JPAAnnotationParser"/>
 
 	<bean id="queryReader" class="com.elasticpath.persistence.openjpa.impl.QueryReader"/>
-	<bean id="queryUtil" class="com.elasticpath.persistence.openjpa.util.QueryUtil"/>
 
 	<bean id="queryRouterMetaInfoHolder" class="com.elasticpath.persistence.openjpa.util.QueryRouterMetaInfoHolder">
 		<property name="hdsSupportBean" ref="hdsSupportBean"/>
@@ -78,7 +76,6 @@
 	<!-- @@@@@@@@@ Query Executors @@@@@@@@@@@@@@@@ -->
 	<bean id="abtractQueryExecutor" class="com.elasticpath.persistence.openjpa.executors.AbstractQueryExecutor" abstract="true">
 		<property name="queryRouter" ref="queryRouter"/>
-		<property name="queryUtil" ref="queryUtil"/>
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 	</bean>
 

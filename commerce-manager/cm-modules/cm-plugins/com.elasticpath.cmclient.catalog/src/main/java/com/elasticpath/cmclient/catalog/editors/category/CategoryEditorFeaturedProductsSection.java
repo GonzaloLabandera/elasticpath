@@ -29,9 +29,9 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.ui.dialog.ProductFinderDialog;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
@@ -214,7 +214,7 @@ public class CategoryEditorFeaturedProductsSection extends AbstractPolicyAwareEd
 	 *         category uid
 	 */
 	private List<Product> getFeaturedProductsInCategory(final long categoryUid) {
-		final CategoryService categoryService = ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE);
+		final CategoryService categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 		final List<Object[]> sortedObjectPairs = categoryService.getFeaturedProductsList(categoryUid);
 		final List<Product> sortedProducts = new ArrayList<>();
 
@@ -271,8 +271,7 @@ public class CategoryEditorFeaturedProductsSection extends AbstractPolicyAwareEd
 				MessageDialog.openWarning(getManagedForm().getForm().getShell(), CatalogMessages.get().CategoryFeaturedDialog_AddWarningTitle,
 						addProductWarningMsg);
 			} else {
-				final ProductLookup productLookup = ServiceLocator.getService(
-						ContextIdNames.PRODUCT_LOOKUP);
+				final ProductLookup productLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 				final Product featuredProduct = productLookup.findByUid(selectedProduct.getUidPk());
 				featuredProducts.add(featuredProduct);
 				
@@ -322,7 +321,7 @@ public class CategoryEditorFeaturedProductsSection extends AbstractPolicyAwareEd
 	public void commit(final boolean onSave) {
 		super.commit(onSave);
 
-		final ProductService productService = ServiceLocator.getService(ContextIdNames.PRODUCT_SERVICE);
+		final ProductService productService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 
 		// "Un-feature" any products that were removed from the featured product list
 		for (final Long currDeletedProductUid : this.deletedFeaturedProductUids) {

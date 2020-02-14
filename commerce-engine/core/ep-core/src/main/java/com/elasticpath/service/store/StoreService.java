@@ -4,6 +4,7 @@
 package com.elasticpath.service.store;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -146,6 +147,16 @@ public interface StoreService extends EpPersistenceService {
 	 * @return all the {@link Store}s that are associated with the given catalog UIDs
 	 */
 	Collection<Store> findStoresWithCatalogUids(Collection<Long> catalogUids);
+
+	/**
+	 * Find all the store ids that are associated with the given catalog UIDs.
+	 *
+	 * @param catalogUids a collection of catalog UIDs.
+	 * @return all the store ids that are associated with the given catalog UIDs.
+	 */
+	default Collection<String> findStoreCodeForStoresWithCatalogUids(Collection<Long> catalogUids) {
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Finds all the {@link Store}s that are associated with the given catalog code (guid).

@@ -28,7 +28,7 @@ import com.elasticpath.cmclient.catalog.editors.sku.ProductSkuDetailsPage;
 import com.elasticpath.cmclient.catalog.exception.RequiredAttributesChangedForProductTypeException;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.dto.catalog.PriceListSectionModel;
 import com.elasticpath.cmclient.core.dto.catalog.ProductModel;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
@@ -75,7 +75,7 @@ public class ProductEditor extends AbstractPolicyAwareFormEditor implements Chan
 	
 	private PolicyActionContainer editorContainer;
 	
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	
 	private final ProductModelController productModelController;
 	

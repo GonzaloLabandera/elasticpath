@@ -234,7 +234,7 @@ public class InventoryLowStockReportSection extends AbstractReportSection {
 	}
 
 	private Collection<Locale>  loadAllLocalesForMasterCatalogsInSystem() {
-		final CatalogService catalogService = (CatalogService) LoginManager.getInstance().getBean(ContextIdNames.CATALOG_SERVICE);
+		final CatalogService catalogService = (CatalogService) LoginManager.getInstance().getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		
 		return catalogService.findAllCatalogLocales();
 	}
@@ -262,7 +262,7 @@ public class InventoryLowStockReportSection extends AbstractReportSection {
 	}
 	
 	private void loadAllBrands() {
-		final BrandService brandService = (BrandService) LoginManager.getInstance().getBean(ContextIdNames.BRAND_SERVICE);
+		final BrandService brandService = (BrandService) LoginManager.getInstance().getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 		final List<Brand> brands = brandService.list();
 		brandByCode = new HashMap<String, Brand>();
 		for (Brand brand : brands) {
@@ -271,7 +271,7 @@ public class InventoryLowStockReportSection extends AbstractReportSection {
 	}
 	
 	private List<String> getAllWarehouseNamesAndUids() {
-		WarehouseService warehouseService = (WarehouseService) LoginManager.getInstance().getBean(ContextIdNames.WAREHOUSE_SERVICE);
+		WarehouseService warehouseService = (WarehouseService) LoginManager.getInstance().getSingletonBean(ContextIdNames.WAREHOUSE_SERVICE, WarehouseService.class);
 		List<Warehouse> warehouses = warehouseService.findAllWarehouses();
 		warehouseNames = new ArrayList<String>(warehouses.size());
 		warehouseUids = new ArrayList<Long>(warehouses.size());

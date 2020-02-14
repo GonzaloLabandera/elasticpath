@@ -600,7 +600,7 @@ public class ImportDataTypeCategoryImpl extends AbstractImportDataTypeImpl {
 
 	@Override
 	public void deleteEntity(final Entity entity) {
-		CategoryService categoryService = getBean(ContextIdNames.CATEGORY_SERVICE);
+		CategoryService categoryService = getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 		categoryService.removeCategoryTree(entity.getUidPk());
 	}
 
@@ -623,7 +623,7 @@ public class ImportDataTypeCategoryImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected ValidatorUtils getValidatorUtils() {
 		if (validatorUtils == null) {
-			validatorUtils = getBean(ContextIdNames.VALIDATOR_UTILS);
+			validatorUtils = getSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class);
 		}
 		return validatorUtils;
 	}
@@ -639,7 +639,7 @@ public class ImportDataTypeCategoryImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected Utility getUtilityBean() {
 		if (utility == null) {
-			utility = getBean(ContextIdNames.UTILITY);
+			utility = getSingletonBean(ContextIdNames.UTILITY, Utility.class);
 		}
 		return utility;
 	}
@@ -654,7 +654,7 @@ public class ImportDataTypeCategoryImpl extends AbstractImportDataTypeImpl {
 	 */
 	protected CategoryLookup getCategoryLookup() {
 		if (categoryLookup == null) {
-			categoryLookup = getBean(ContextIdNames.CATEGORY_LOOKUP);
+			categoryLookup = getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 		}
 
 		return categoryLookup;

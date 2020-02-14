@@ -15,20 +15,6 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 public interface ShoppingCartPricingSnapshot {
 
 	/**
-	 * Get the amount redeemed from gift certificate.
-	 *
-	 * @return the gift certificate discounted from the total
-	 */
-	BigDecimal getGiftCertificateDiscount();
-
-	/**
-	 * Get the amount redeemed from gift certificate.
-	 *
-	 * @return the gift certificate discount as a <code>Money</code> object
-	 */
-	Money getGiftCertificateDiscountMoney();
-
-	/**
 	 * Given a ShoppingItem, returns the corresponding {@link ShoppingItemPricingSnapshot}.
 	 * If no such snapshot exists, throws an EpServiceException.
 	 *

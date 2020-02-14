@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -93,8 +93,8 @@ public class DataFieldMappingPage extends WizardPage {
 		this.setDescription(description);
 		this.importJob = importJob;
 		this.mappedImportData = new MappedImportData();
-		this.importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
-		this.csvFileReader = ServiceLocator.getService(ContextIdNames.CSV_FILE_READER);
+		this.importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
+		this.csvFileReader = BeanLocator.getPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class);
 		firstViewOfPage = true;
 	}
 

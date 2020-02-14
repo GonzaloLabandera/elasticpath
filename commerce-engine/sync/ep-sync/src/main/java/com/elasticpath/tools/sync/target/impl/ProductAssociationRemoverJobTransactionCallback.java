@@ -5,7 +5,6 @@ package com.elasticpath.tools.sync.target.impl;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.service.catalog.ProductAssociationService;
@@ -30,8 +29,6 @@ public class ProductAssociationRemoverJobTransactionCallback implements JobTrans
 	
 	private ProductAssociationService productAssociationService;
 
-	private BeanFactory beanFactory;
-	
 	@Override
 	public void postUpdateJobEntryHook(final JobEntry jobEntry, final Persistable targetPersistence) {
 		if (jobEntry.getSourceObject() instanceof Product) {
@@ -43,16 +40,6 @@ public class ProductAssociationRemoverJobTransactionCallback implements JobTrans
 			
 			productAssociationService.removeByCriteria(criteria);
 		}
-	}
-
-	/**
-	 * Get bean with specified id from bean factory.
-	 *
-	 * @param beanID id string of the bean to get
-	 * @return the bean
-	 */
-	protected Object getBean(final String beanID) {
-		return beanFactory.getBean(beanID);
 	}
 
 	@Override
@@ -67,15 +54,6 @@ public class ProductAssociationRemoverJobTransactionCallback implements JobTrans
 	 */
 	public void setProductAssociationService(final ProductAssociationService productAssociationService) {
 		this.productAssociationService = productAssociationService;
-	}
-	
-	/**
-	 * Set the spring bean factory to use.
-	 * 
-	 * @param beanFactory instance
-	 */
-	public void setBeanFactory(final BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
 	}
 	
 }

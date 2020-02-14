@@ -41,13 +41,13 @@ public class AppliedPromotionsForCartRepositoryImpl<I extends AppliedPromotionsF
 		CartIdentifier cartIdentifier = identifier.getCart();
 		String cartId = cartIdentifier.getCartId().getValue();
 		String scope = cartIdentifier.getCarts().getScope().getValue();
-		return cartOrderRepository.getEnrichedShoppingCartSingle(scope, cartId, CartOrderRepository.FindCartOrder.BY_CART_GUID)
+		return cartOrderRepository.getEnrichedShoppingCart(scope, cartId, CartOrderRepository.FindCartOrder.BY_CART_GUID)
 				.flatMap(this::getPromotionIdentifiersFromShoppingCart)
 				.flatMapObservable(appliedPromotions -> buildPromotionIdentifiers(scope, appliedPromotions));
 	}
 
 	private Single<Collection<String>> getPromotionIdentifiersFromShoppingCart(final ShoppingCart shoppingCart) {
-		return pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)
+		return pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart)
 				.map(pricingSnapshot -> promotionRepository.getAppliedCartPromotions(pricingSnapshot));
 	}
 

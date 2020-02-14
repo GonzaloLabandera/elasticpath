@@ -1,4 +1,10 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortex.dce.purchases
+
+import static org.assertj.core.api.Assertions.assertThat
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static com.elasticpath.cortex.dce.CommonAssertion.assertAddress
@@ -7,7 +13,6 @@ import static com.elasticpath.cortex.dce.CommonMethods.searchAndOpenItemWithKeyw
 import static com.elasticpath.cortex.dce.SharedConstants.*
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
-import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.DataTable
 import cucumber.api.java.en.And
@@ -18,6 +23,7 @@ import cucumber.api.java.en.When
 import com.elasticpath.cortex.dce.CommonMethods
 import com.elasticpath.cortex.dce.LoginSteps
 import com.elasticpath.cortex.dce.SharedConstants
+import com.elasticpath.cortex.dce.addresses.AddressQuery
 import com.elasticpath.cortexTestObjects.*
 
 class PurchaseSteps {
@@ -49,7 +55,7 @@ class PurchaseSteps {
 
 	@When('^I create a purchase and view the purchase details$')
 	static void submitPurchaseViewDetails() {
-		CommonMethods.addEmailPaymentTokenAndAddress()
+		CommonMethods.addEmailPaymentInstrumentAndAddress()
 		createPurchaseWithFollow()
 	}
 
@@ -63,7 +69,7 @@ class PurchaseSteps {
 	@Given('^I have previously made a purchase with item code (.+)$')
 	static void createAndSubmitNewOrder(def skuCode) {
 		CommonMethods.lookupAndAddToCart(skuCode, 1)
-		CommonMethods.addEmailPaymentTokenAndAddress()
+		CommonMethods.addEmailPaymentInstrumentAndAddress()
 		createPurchaseWithFollow()
 	}
 
@@ -158,23 +164,23 @@ class PurchaseSteps {
 		return codes
 	}
 
-	@When('^I view the purchase payment means$')
-	static void viewPurchasePayment() {
+	@When('^I view the purchase payment instruments$')
+	static void viewPurchasePaymentInsruments() {
 		client.GET("/")
 				.defaultprofile()
 				.purchases()
 				.element()
-				.paymentmeans()
+				.paymentinstruments()
 				.stopIfFailure()
 	}
 
-	@When('^I view a single purchase payment mean$')
-	static void viewRandomPurchasePayment() {
+	@When('^I view a single purchase payment instrument')
+	static void viewRandomPurchasePaymentInstrument() {
 		client.GET("/")
 				.defaultprofile()
 				.purchases()
 				.element()
-				.paymentmeans()
+				.paymentinstruments()
 				.element()
 				.stopIfFailure()
 	}
@@ -602,15 +608,15 @@ class PurchaseSteps {
 		Order.submitPurchase()
 	}
 
-	@Then('^the payment token created is used for the order$')
-	static void verifyPaymentTokenUsedForOrder() {
-		client.paymentmeans()
+	@Then('^the payment instrument created is used for the order$')
+	static void verifyPaymentInstrumentUsedForOrder() {
+		client.paymentinstruments()
 				.element()
 				.stopIfFailure()
 
-		assertThat(client["display-name"])
-				.as("Token display name is not as expected")
-				.isEqualTo(TEST_TOKEN_DISPLAY_NAME)
+		assertThat(client["name"])
+				.as("Instrument name is not as expected")
+				.isEqualTo(DEFAULT_PAYMENT_CONFIGURATION_NAME)
 	}
 
 	@And('^The store the shopper is in fulfils shipments with no delay$')
@@ -697,16 +703,35 @@ class PurchaseSteps {
 	}
 
 	@And('^I (?:create|have) an order for scope (.+) with following skus?$')
-	static void purchaseSKUs(String scope, DataTable dataTable) {
+	static void purchaseSKUsWithDefaultPaymentAndBillingAddress(String scope, DataTable dataTable) {
 		LoginSteps.registerNewShopperAndLoginWithScope(scope)
 		CommonMethods.addItemsToCart(dataTable)
-		CommonMethods.addDefaultTokenAndBillingAddress()
+		CommonMethods.addPaymentInstrumentAndBillingAddress()
+		Order.submitPurchase()
+	}
+
+	@And('^I (?:create|have) an order with (.+) address with following skus?$')
+	static void purchaseWithDefaulBillingAddress(String countryCode, DataTable dataTable) {
+		CommonMethods.addItemsToCart(dataTable)
+		if (countryCode.equals("CA")) {
+			Profile.addCanadianBillingAddress()
+		} else if (countryCode.equals("US")) {
+			Profile.addUSBillingAddress()
+		} else if (countryCode.equals("GB")) {
+			Profile.addGBBillingAddress()
+		}
+		AddressQuery.setEmail()
 		Order.submitPurchase()
 	}
 
 	@And('^I (?:create|have) an order with Canadian address for scope (.+) with following skus?$')
 	static void purchaseWithCanadianAddress(String scope, DataTable dataTable) {
 		purchaseWithBillingCountryCode(scope, "CA", dataTable)
+	}
+
+	@And('^I (?:create|have) an order with GB address for scope (.+) with following skus?$')
+	static void purchaseWithGBAddress(String scope, DataTable dataTable) {
+		purchaseWithBillingCountryCode(scope, "GB", dataTable)
 	}
 
 	@And('^I (?:create|have) an order with US address for scope (.+) with following skus?$')
@@ -721,8 +746,10 @@ class PurchaseSteps {
 			Profile.addCanadianBillingAddress()
 		} else if (countryCode.equals("US")) {
 			Profile.addUSBillingAddress()
+		} else if (countryCode.equals("GB")) {
+			Profile.addGBBillingAddress()
 		}
-		Order.addDefaultToken()
+		Order.addOrderPaymentInstrument()
 		Order.submitPurchase()
 	}
 
@@ -732,7 +759,7 @@ class PurchaseSteps {
 		Map<String, String> configurationFields = dataTable.asMap(String, String)
 		FindItemBy.skuCode(skuCode)
 		Item.addItemToCart(quantity, configurationFields)
-		CommonMethods.addDefaultTokenAndBillingAddress()
+		CommonMethods.addPaymentInstrumentAndBillingAddress()
 		Order.submitPurchase()
 	}
 
@@ -740,7 +767,7 @@ class PurchaseSteps {
 	static void createOrderWithPromotion(String scope, String couponCode, DataTable dataTable) {
 		LoginSteps.registerNewShopperAndLoginWithScope(scope)
 		CommonMethods.addItemsToCart(dataTable)
-		CommonMethods.addDefaultTokenAndBillingAddress()
+		CommonMethods.addPaymentInstrumentAndBillingAddress()
 		Order.applyCoupon(couponCode)
 		Order.submitPurchase()
 	}

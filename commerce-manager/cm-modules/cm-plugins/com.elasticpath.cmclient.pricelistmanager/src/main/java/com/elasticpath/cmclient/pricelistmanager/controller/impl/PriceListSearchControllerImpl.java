@@ -8,8 +8,8 @@ package com.elasticpath.cmclient.pricelistmanager.controller.impl;
 
 import java.util.Collection;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.pricelistmanager.controller.PriceListManagerSearchController;
 import com.elasticpath.cmclient.pricelistmanager.event.PriceListSearchEvent;
 import com.elasticpath.cmclient.pricelistmanager.model.PriceListManagerSearchResultsModel;
@@ -67,7 +67,7 @@ public class PriceListSearchControllerImpl implements PriceListManagerSearchCont
 	 * @return the PriceListService for client applications
 	 */
 	PriceListService getPriceListService() {
-		return ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 	}
 
 }

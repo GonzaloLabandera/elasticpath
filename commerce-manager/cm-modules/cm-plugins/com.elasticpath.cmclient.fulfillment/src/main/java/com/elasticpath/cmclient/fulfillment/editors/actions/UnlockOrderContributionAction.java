@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.fulfillment.editors.actions;
 
 import org.eclipse.jface.action.Action;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.editors.order.AbstractOrderPage;
@@ -36,7 +36,7 @@ public class UnlockOrderContributionAction extends Action {
 	@Override
 	public void run() {
 		final OrderLockService orderLockService =
-				ServiceLocator.getService(ContextIdNames.ORDER_LOCK_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.ORDER_LOCK_SERVICE, OrderLockService.class);
 		final Order order = ((OrderEditor) orderPage.getEditor()).getModel();
 		final OrderLock orderLock = orderLockService.getOrderLock(order);
 		if (orderLock != null) {

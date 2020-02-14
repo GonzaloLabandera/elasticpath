@@ -39,7 +39,7 @@ public class ShippingAddressResolutionStrategy implements StructuredErrorResolut
 	public Maybe<ResourceIdentifier> getResourceIdentifier(final StructuredErrorMessage message, final String cortexResourceID) {
 		if (StringUtils.equals(message.getMessageId(), ShippingAddressShoppingCartValidatorImpl.MESSAGE_ID)) {
 			 return shoppingCartRepository.findStoreForCartGuid(cortexResourceID)
-					.flatMapMaybe(storeCode-> cartOrderRepository.findByCartGuidSingle(cortexResourceID)
+					.flatMapMaybe(storeCode-> cartOrderRepository.findByCartGuid(cortexResourceID)
 							.flatMapMaybe(cartOrder -> Maybe.just(
 
 

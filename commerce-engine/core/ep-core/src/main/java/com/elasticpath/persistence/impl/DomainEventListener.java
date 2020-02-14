@@ -127,7 +127,7 @@ public class DomainEventListener extends AbstractLifecycleListener implements Up
 		if (persistenceEngine == null) {
 			synchronized (this) {
 				if (persistenceEngine == null) {
-					persistenceEngine = beanFactory.getBean(ContextIdNames.PERSISTENCE_ENGINE);
+					persistenceEngine = beanFactory.getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, JpaPersistenceEngine.class);
 				}
 			}
 		}

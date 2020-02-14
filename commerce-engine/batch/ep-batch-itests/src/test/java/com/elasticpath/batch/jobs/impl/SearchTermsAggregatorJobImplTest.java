@@ -55,6 +55,8 @@ public class SearchTermsAggregatorJobImplTest extends XaTransactionTestSupport {
 	@Autowired
 	private BeanFactory beanFactory;
 	@Autowired
+	private TimeService timeService;
+	@Autowired
 	@Qualifier("searchTermsService")
 	private SearchTermsService searchTermsService;
 	@Autowired
@@ -65,8 +67,6 @@ public class SearchTermsAggregatorJobImplTest extends XaTransactionTestSupport {
 
 	@Before
 	public void setUp() {
-		TimeService timeService = beanFactory.getBean("timeService");
-
 		searchTermsAggregatorJob = new SearchTermsAggregatorJobImpl();
 		searchTermsAggregatorJob.setPersistenceEngine(persistenceEngine);
 		searchTermsAggregatorJob.setTimeService(timeService);
@@ -299,7 +299,7 @@ public class SearchTermsAggregatorJobImplTest extends XaTransactionTestSupport {
 	}
 
 	private SearchTerms createSearchTerms(final String keywords) {
-		SearchTerms searchTerms = beanFactory.getBean(ContextIdNames.SEARCH_TERMS);
+		SearchTerms searchTerms = beanFactory.getPrototypeBean(ContextIdNames.SEARCH_TERMS, SearchTerms.class);
 		searchTerms.setKeywords(keywords);
 		return searchTerms;
 	}

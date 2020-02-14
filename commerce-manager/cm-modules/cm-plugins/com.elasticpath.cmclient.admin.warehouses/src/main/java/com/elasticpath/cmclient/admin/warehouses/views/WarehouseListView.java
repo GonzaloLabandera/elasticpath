@@ -21,8 +21,8 @@ import com.elasticpath.cmclient.admin.warehouses.AdminWarehousesPlugin;
 import com.elasticpath.cmclient.admin.warehouses.actions.CreateWarehouseAction;
 import com.elasticpath.cmclient.admin.warehouses.actions.DeleteWarehouseAction;
 import com.elasticpath.cmclient.admin.warehouses.actions.EditWarehouseAction;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
@@ -71,7 +71,7 @@ public class WarehouseListView extends AbstractListView {
 	 */
 	public WarehouseListView() {
 		super(false, WAREHOUSE_LIST_TABLE);
-		warehouseService = (WarehouseService) ServiceLocator.getService(ContextIdNames.WAREHOUSE_SERVICE);
+		warehouseService = BeanLocator.getSingletonBean(ContextIdNames.WAREHOUSE_SERVICE, WarehouseService.class);
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class WarehouseListView extends AbstractListView {
 
 		/** Default constructor. */
 		public WarehouseListViewLabelProvider() {
-			geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
+			geography = BeanLocator.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 		}
 
 		@Override

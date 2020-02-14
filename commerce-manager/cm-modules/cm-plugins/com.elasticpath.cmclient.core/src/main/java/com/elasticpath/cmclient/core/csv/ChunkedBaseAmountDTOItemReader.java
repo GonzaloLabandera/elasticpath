@@ -13,7 +13,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.database.AbstractPagingItemReader;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.pricing.service.BaseAmountFilterExt;
 import com.elasticpath.common.pricing.service.PriceListService;
@@ -44,7 +44,7 @@ public class ChunkedBaseAmountDTOItemReader extends AbstractPagingItemReader<Bas
 			throw new IllegalArgumentException("Batch pipeline did not provide required pricing locale parameter"); //$NON-NLS-1$
 		}
 
-		filter =  ServiceLocator.getService(ContextIdNames.BASE_AMOUNT_FILTER_EXT);
+		filter = BeanLocator.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER_EXT, BaseAmountFilterExt.class);
 		// TODO: Locale is not required by the filter or query.  It's only included for legacy reasons...
 		filter.setLocale(pricingLocale);
 		filter.setPriceListDescriptorGuid(priceListGuid);

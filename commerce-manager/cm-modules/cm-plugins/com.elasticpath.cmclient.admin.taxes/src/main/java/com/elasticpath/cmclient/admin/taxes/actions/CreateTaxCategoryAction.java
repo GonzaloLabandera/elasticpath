@@ -8,7 +8,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.elasticpath.cmclient.admin.taxes.dialogs.TaxCategoryDialog;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.tax.TaxCategory;
@@ -48,14 +48,14 @@ public class CreateTaxCategoryAction extends Action {
 	@Override
 	public void run() {
 		LOG.debug("Create Tax Category action called."); //$NON-NLS-1$
-		TaxCategory taxCategory = ServiceLocator.getService(ContextIdNames.TAX_CATEGORY);
+		TaxCategory taxCategory = BeanLocator.getPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class);
 
 		boolean dialogOk = TaxCategoryDialog.openCreateDialog(tableView.getSwtTable().getShell(), taxCategory, taxJurisdiction);
 
 		if (dialogOk) {
 			
 			if (taxCategory.getFieldMatchType() == TaxCategoryTypeEnum.FIELD_MATCH_COUNTRY) {
-				TaxRegion taxRegion = ServiceLocator.getService(ContextIdNames.TAX_REGION);
+				TaxRegion taxRegion = BeanLocator.getPrototypeBean(ContextIdNames.TAX_REGION, TaxRegion.class);
 				taxRegion.setRegionName(taxJurisdiction.getRegionCode());
 				taxCategory.getTaxRegionSet().add(taxRegion);			
 			}

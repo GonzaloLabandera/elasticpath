@@ -61,6 +61,8 @@ public abstract class AbstractDataPointValueReader implements DataPointValueRead
 
 	/**
 	 * Create a dynamic query and pass it to {@link DataPointValueService#readValuesByQuery(String, String, Collection, Object[])}.
+	 * The order at which we return data from the table matters. Refer to the constant INDEX fields and return Object[]
+	 * that corresponds to that order.
 	 *
 	 * @param dataPointKeys the list of data point keys to create a query for.
 	 * @return the query

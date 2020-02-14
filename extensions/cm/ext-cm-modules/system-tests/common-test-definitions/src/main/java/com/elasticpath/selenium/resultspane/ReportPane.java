@@ -227,6 +227,17 @@ public class ReportPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Verifies the Data Points are missing for Customer Data report.
+	 *
+	 * @param dataPointValue customer data report.
+	 */
+	public void verifyMissingReportContent(final String dataPointValue) {
+		assertThat(isColumnValuePresent(dataPointValue, 1))
+				.as("Report contains Data Point Value that should be missing.")
+				.isFalse();
+	}
+
+	/**
 	 * Gets the row by column value.
 	 *
 	 * @param columnValue the column value

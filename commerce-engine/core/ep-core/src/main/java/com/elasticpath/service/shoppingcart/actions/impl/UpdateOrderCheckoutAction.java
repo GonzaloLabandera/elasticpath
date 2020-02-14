@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
@@ -24,19 +24,17 @@ public class UpdateOrderCheckoutAction implements ReversibleCheckoutAction {
 		// Notify the checkout event handler before the order is persisted
 		// No part of the order should be saved until after this point so that
 		// the checkoutEventHandler can reject an order by throwing an exception
-		checkoutEventHandler.preCheckoutOrderPersist(context.getShoppingCart(),
-				context.getOrderPaymentList(), context.getOrder());
+		checkoutEventHandler.preCheckoutOrderPersist(context.getShoppingCart(),	context.getOrder());
 
 		//process and update order - should limit our updates to once
 		final Order updatedOrder = orderService.processOrderOnCheckout(context.getOrder(),
 				context.getShoppingCart().isExchangeOrderShoppingCart());
 		context.setOrder(updatedOrder);
-		context.setOrderPaymentList(updatedOrder.getOrderPayments());
 	}
 
 	@Override
 	public void rollback(final CheckoutActionContext context)
-	throws EpSystemException {
+			throws EpSystemException {
 		// NO OP
 	}
 

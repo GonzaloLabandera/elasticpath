@@ -13,7 +13,7 @@ import com.elasticpath.cmclient.conditionbuilder.wizard.pages.AbstractSellingCon
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionShopperWizardPage;
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionStoresWizardPage;
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionTimeWizardPage;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
@@ -61,7 +61,7 @@ public class DynamicContentDeliveryWizard extends AbstractEPCampaignWizard<Dynam
 
 	private static final String STORES_CONDITION_PAGE = "STORES_CONDITION_PAGE"; //$NON-NLS-1$
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private DynamicContentDeliveryModelAdapter model;
 
@@ -112,7 +112,7 @@ public class DynamicContentDeliveryWizard extends AbstractEPCampaignWizard<Dynam
 	@Override
 	public void addPages() {
 
-		TagConditionService tagConditionService = ServiceLocator.getService(ContextIdNames.TAG_CONDITION_SERVICE);
+		TagConditionService tagConditionService = BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
 
 		List<ConditionalExpression> shopperNameConditions = tagConditionService.getNamedConditions(TagDictionary.DICTIONARY_SHOPPER_GUID);
 		List<ConditionalExpression> timeNameConditions = tagConditionService.getNamedConditions(TagDictionary.DICTIONARY_TIME_GUID);
@@ -249,8 +249,8 @@ public class DynamicContentDeliveryWizard extends AbstractEPCampaignWizard<Dynam
 	private DynamicContentDelivery saveDynamicContentDelivery() {
 		DynamicContentDeliveryModelAdapter dcaWrapper = getModel();
 		SellingContextHelper.saveSellingContextManually(dcaWrapper);
-		DynamicContentDeliveryService service = ServiceLocator.getService(
-				ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+		DynamicContentDeliveryService service = BeanLocator
+				.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 		return service.saveOrUpdate(dcaWrapper.getDynamicContentDelivery());
 	}
 
@@ -275,9 +275,10 @@ public class DynamicContentDeliveryWizard extends AbstractEPCampaignWizard<Dynam
 	public void setObjectGuid(final String objectGuid) {
 		DynamicContentDelivery dcd;
 		if (objectGuid == null) {
-			dcd = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY);
+			dcd = BeanLocator.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY, DynamicContentDelivery.class);
 		} else {
-			DynamicContentDeliveryService dcdService = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+			DynamicContentDeliveryService dcdService = BeanLocator
+					.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 			dcd = dcdService.findByGuid(objectGuid);
 			if (dcd == null) {
 				throw new IllegalArgumentException(

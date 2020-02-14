@@ -28,8 +28,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 
 import com.elasticpath.cmclient.admin.users.AdminUsersMessages;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.security.Activity;
 import com.elasticpath.cmclient.core.security.Permission;
 import com.elasticpath.cmclient.core.service.PermissionsProvider;
@@ -211,7 +211,7 @@ public class RolePermissionsDualListbox {
 		for (final Activity activityName : knownPermissions.keySet()) {
 			final PermissionsNode permissionsNode = new PermissionsNode(activityName.getName());
 			for (final Permission permission : knownPermissions.get(activityName)) {
-				final UserPermission userPermission = ServiceLocator.getService(ContextIdNames.USER_PERMISSION);
+				final UserPermission userPermission = BeanLocator.getPrototypeBean(ContextIdNames.USER_PERMISSION, UserPermission.class);
 				userPermission.setAuthority(permission.getKey());
 				final PermissionsNode childNode = new PermissionsNode(permission.getName());
 				childNode.setUserPermission(userPermission);

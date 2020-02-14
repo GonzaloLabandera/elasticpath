@@ -126,7 +126,6 @@
 
 	<bean id="productAssociationRemoverJobTransactionCallback"
 		class="com.elasticpath.tools.sync.target.impl.ProductAssociationRemoverJobTransactionCallback">
-		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="productAssociationService" ref="productAssociationService"/>
 	</bean>
 	

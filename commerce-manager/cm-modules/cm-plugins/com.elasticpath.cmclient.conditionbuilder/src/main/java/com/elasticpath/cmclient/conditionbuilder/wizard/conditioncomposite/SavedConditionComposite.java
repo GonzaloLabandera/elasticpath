@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import com.elasticpath.cmclient.conditionbuilder.adapter.BaseModelAdapter;
 import com.elasticpath.cmclient.conditionbuilder.adapter.impl.tag.BaseModelAdapterImpl;
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.GridLayoutUtil;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -84,7 +84,7 @@ public class SavedConditionComposite extends Composite {
 		}
 		(this.conditionsList).sort((cExp1, cExp2) -> cExp1.getName().compareToIgnoreCase(cExp2.getName()));
 		// create dummy expression for "select..." prompt
-		ConditionalExpression dummyExpression = ServiceLocator.getService(ContextIdNames.CONDITIONAL_EXPRESSION);
+		ConditionalExpression dummyExpression = BeanLocator.getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 		dummyExpression.setName(pleaseSelectMessage);
 		this.conditionsList.add(0, dummyExpression);
 		

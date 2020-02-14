@@ -51,7 +51,7 @@ public class EpDomainValidatorTest {
 	public void testValidate() {
 		DomainObject domainObject = new DomainObject();
 
-		when(coreBeanFactory.getBean("validator")).thenReturn(validator);
+		when(coreBeanFactory.getSingletonBean("validator", Validator.class)).thenReturn(validator);
 		HashSet<ConstraintViolation<DomainObject>> constraintViolations = new HashSet<>();
 		when(validator.validate(domainObject, Default.class)).thenReturn(constraintViolations);
 		ExecutionResult<Void> validationResult = ExecutionResultFactory.createReadOK(null);
@@ -71,7 +71,7 @@ public class EpDomainValidatorTest {
 	public void testValidateProperty() {
 		DomainObject domainObject = new DomainObject();
 
-		when(coreBeanFactory.getBean("validator")).thenReturn(validator);
+		when(coreBeanFactory.getSingletonBean("validator", Validator.class)).thenReturn(validator);
 		HashSet<ConstraintViolation<DomainObject>> constraintViolations = new HashSet<>();
 		when(validator.validateProperty(domainObject, FIELD_NAME, Default.class)).thenReturn(constraintViolations);
 		ExecutionResult<Void> validationResult = ExecutionResultFactory.createReadOK(null);

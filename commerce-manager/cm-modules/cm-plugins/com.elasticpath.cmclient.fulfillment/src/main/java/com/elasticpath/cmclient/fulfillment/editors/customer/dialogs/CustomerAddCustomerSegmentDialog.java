@@ -17,7 +17,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -77,7 +77,7 @@ public class CustomerAddCustomerSegmentDialog extends AbstractEpDialog {
 	
 	private EpState populateCustomerSegmentList() {
 		final CustomerGroupService customerGroupService =
-				ServiceLocator.getService(ContextIdNames.CUSTOMER_GROUP_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_GROUP_SERVICE, CustomerGroupService.class);
 		
 		for (CustomerGroup customerGroup : customerGroupService.list()) {
 			if (!customer.getCustomerGroups().contains(customerGroup)) {
@@ -177,7 +177,7 @@ public class CustomerAddCustomerSegmentDialog extends AbstractEpDialog {
 		// FIXME: should disable save button instead of this check
 		if (!customerSegmentList.isEmpty()) {
 			if (customerService == null) {
-				customerService = ServiceLocator.getService(ContextIdNames.CUSTOMER_SERVICE);
+				customerService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 			}
 			customer.addCustomerGroup(customerGroup);
 			super.okPressed();

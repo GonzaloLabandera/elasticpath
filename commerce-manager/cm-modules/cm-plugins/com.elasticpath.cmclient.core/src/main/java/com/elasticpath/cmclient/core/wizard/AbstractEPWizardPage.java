@@ -11,10 +11,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.rules.RuleElement;
 import com.elasticpath.domain.rules.RuleParameter;
+import com.elasticpath.money.MoneyFormatter;
 
 /**
  * An abstract wizard page for all the input wizard pages.
@@ -214,4 +217,7 @@ public abstract class AbstractEPWizardPage<T> extends WizardPage {
 		return null;
 	}
 
+	protected MoneyFormatter getMoneyFormatter() {
+		return BeanLocator.getSingletonBean(ContextIdNames.MONEY_FORMATTER, MoneyFormatter.class);
+	}
 }

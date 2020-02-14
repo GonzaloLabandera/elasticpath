@@ -39,12 +39,13 @@ public class PaginatorFactoryImpl implements PaginatorFactory {
 	 * @param objectClass the object class
 	 * @return a paginator instance or null if not found
 	 */
+	@SuppressWarnings("unchecked")
 	protected <T> Paginator<T> findPaginator(final Class<T> objectClass) {
 		String beanName = paginators.get(objectClass);
 		if (beanName == null) {
 			return null;
 		}
-		return beanFactory.getBean(beanName);
+		return beanFactory.getPrototypeBean(beanName, Paginator.class);
 	}
 	
 	

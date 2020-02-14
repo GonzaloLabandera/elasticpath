@@ -162,7 +162,8 @@ public class SyncJobObjectsProcessorImplTest {
 
 		context.checking(new Expectations() { {
 
-			oneOf(syncBeanFactory).getTargetBean(ContextIdNames.PERSISTENCE_ENGINE); will(returnValue(persistenceEngine));
+			oneOf(syncBeanFactory).getTargetBean(ContextIdNames.PERSISTENCE_ENGINE);
+			will(returnValue(persistenceEngine));
 			oneOf(persistenceEngine).clearCache();
 			oneOf(persistenceSession).close();
 		} });

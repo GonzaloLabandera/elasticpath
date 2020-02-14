@@ -92,7 +92,7 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindProductByGuidWithNullReturn() {
-		stubGetBean(ContextIdNames.PRODUCT, ProductImpl.class);
+		stubGetPrototypeBean(ContextIdNames.PRODUCT, Product.class, ProductImpl.class);
 		context.checking(new Expectations() {
 			{
 		
@@ -112,7 +112,7 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindProductByGuidWithOneReturn() {
-		stubGetBean(ContextIdNames.PRODUCT, ProductImpl.class);
+		stubGetPrototypeBean(ContextIdNames.PRODUCT, Product.class, ProductImpl.class);
 
 		final List<Product> products = new ArrayList<>();
 		Product product = new ProductImpl();
@@ -135,7 +135,7 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindProductByGuidWithMoreThanOneReturn() {
-		stubGetBean(ContextIdNames.PRODUCT, ProductImpl.class);
+		stubGetPrototypeBean(ContextIdNames.PRODUCT, Product.class, ProductImpl.class);
 
 		final List<Product> products = new ArrayList<>();
 		Product product = new ProductImpl();
@@ -210,7 +210,7 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 			}
 		});
 		assertNull(this.importGuidHelper.findCustomerByGuid(NON_EXIST_GUID));
-	};
+	}
 
 	/**
 	 * Test method for 'com.elasticpath.service.impl.AbstractImportJobRunnerImpl.findProductSkuByGuid(String)'.

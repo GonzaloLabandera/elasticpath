@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -36,7 +40,7 @@
 						com.elasticpath.extensions.*
 					</_exportcontents>
 					<Import-Package>
-						!*
+						com.elasticpath.plugin.payment.provider.*;resolution:="optional"
 					</Import-Package>
 					<Eclipse-RegisterBuddy>com.elasticpath.cmclient.core</Eclipse-RegisterBuddy>
 					<Require-Bundle>com.elasticpath.cmclient.core;visibility:=reexport</Require-Bundle>
@@ -51,7 +55,6 @@
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ext-core</artifactId>
 		</dependency>
-
 	</dependencies>
 </project>
 

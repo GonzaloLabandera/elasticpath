@@ -3,6 +3,9 @@
  */
 package com.elasticpath.uat.stepdefs;
 
+import java.util.Map;
+
+import cucumber.api.DataTable;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,12 @@ public class ShoppingCartStepDefinitions {
 	@Given("^I have an item in my shopping cart$")
 	public void addNonZeroPhysicalItemToCart() throws Exception {
 		checkoutTestCartBuilderHolder.set(checkoutTestCartBuilder.withPhysicalProduct());
+	}
+
+	@Given("^my shopping cart with following cart data$")
+	public void setCartDataOnShoppingCart(final DataTable cartDataTable) {
+		Map<String, String> cartData = cartDataTable.asMap(String.class, String.class);
+		checkoutTestCartBuilder.withCartData(cartData);
 	}
 
 	@Given("^I have added a Gift Certificate for \"(.+) <([^>]*)>\" to my shopping cart$")

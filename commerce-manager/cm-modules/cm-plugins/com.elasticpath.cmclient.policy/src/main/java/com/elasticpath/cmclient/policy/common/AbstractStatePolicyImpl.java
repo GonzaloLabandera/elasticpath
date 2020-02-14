@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.policy.common;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.StateChangeTarget;
@@ -16,7 +16,7 @@ import com.elasticpath.cmclient.policy.StatePolicyDelegate;
  */
 public abstract class AbstractStatePolicyImpl implements StatePolicy {
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	@Override
 	public void init(final Object dependentObject) {

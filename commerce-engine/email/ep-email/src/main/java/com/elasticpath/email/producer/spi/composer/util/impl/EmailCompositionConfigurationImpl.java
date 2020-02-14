@@ -3,6 +3,7 @@
  */
 package com.elasticpath.email.producer.spi.composer.util.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.elasticpath.domain.store.Store;
@@ -89,6 +90,11 @@ public class EmailCompositionConfigurationImpl implements EmailCompositionConfig
 	@Override
 	public String getRecipientAddress() {
 		return emailProperties.getRecipientAddress();
+	}
+
+	@Override
+	public List<String> getRecipientAddresses() {
+		return emailProperties.getRecipientAddresses();
 	}
 
 	/**

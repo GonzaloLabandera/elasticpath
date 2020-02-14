@@ -94,7 +94,7 @@ public class TagGroupTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testAddGroup() {
-		final TagGroup tagGroup = getBeanFactory().getBean(ContextIdNames.TAG_GROUP);
+		final TagGroup tagGroup = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_GROUP, TagGroup.class);
 		tagGroup.setGuid(NEW_GROUP_GUID);
 		
 		getTxTemplate().execute(new TransactionCallback<Object>() {

@@ -15,7 +15,10 @@ public class CompleteShipmentDialog extends AbstractDialog {
 	private static final String SHIPMENT_ID_INPUT_CSS = COMPLETE_SHIPMENT_PARENT_CSS + "div[widget-id='Shipment ID'] input";
 	private static final String VALIDATE_BUTTON_CSS = COMPLETE_SHIPMENT_PARENT_CSS + "div[widget-id='Validate'][widget-type='Button']";
 	private static final String COMPLETE_BUTTON_CSS = COMPLETE_SHIPMENT_PARENT_CSS + "div[widget-id='Complete'][widget-type='Button']";
-
+	private static final String FORCE_COMPLETION_BUTTON_CSS = COMPLETE_SHIPMENT_PARENT_CSS
+			+ "div[widget-id='Force Completion'][widget-type='Button']";
+	private static final String FORCE_COMPLETE_SHIPMENT_CONFIRM_DIALOG = "com.elasticpath.cmclient.warehouse.WarehouseMessages"
+			+ ".CompleteShipment_ShipmentForceCompletionOkDialogTitle";
 
 	/**
 	 * Constructor.
@@ -43,22 +46,52 @@ public class CompleteShipmentDialog extends AbstractDialog {
 	}
 
 	/**
+	 * Clicks complete button and wait while dialog disappears.
+	 */
+	public void clickCompleteButtonAndWaitDialogDisappears() {
+		clickCompleteButton();
+		waitTillElementDisappears(By.cssSelector(COMPLETE_SHIPMENT_PARENT_CSS));
+	}
+
+	/**
 	 * Clicks complete button.
 	 */
 	public void clickCompleteButton() {
 		clickButton(COMPLETE_BUTTON_CSS, "Complete");
-		waitTillElementDisappears(By.cssSelector(COMPLETE_SHIPMENT_PARENT_CSS));
 	}
 
 	/**
 	 * Completes shipment.
 	 *
-	 * @param shipmentId the code
+	 * @param shipmentId shipment ID
 	 */
 	public void completeShipment(final String shipmentId) {
 		enterShipmentId(shipmentId);
 		clickValidateButton();
-		clickCompleteButton();
+		clickCompleteButtonAndWaitDialogDisappears();
+	}
+
+	/**
+	 * Force complete shipment.
+	 * @param shipmentID shipment ID
+	 * @return ShipmentCompletionErrorDialog
+	 */
+	public ShipmentCompletionErrorDialog forceCompleteShipment(final String shipmentID) {
+		enterShipmentId(shipmentID);
+		clickValidateButton();
+		clickButton(COMPLETE_BUTTON_CSS, "Complete");
+		return new ShipmentCompletionErrorDialog(getDriver());
+	}
+
+	/**
+	 * Click force completion button.
+	 * @return ConfirmDialog
+	 */
+	public void clickForceCompletionButton() {
+		clickButton(FORCE_COMPLETION_BUTTON_CSS, "Force Completion");
+		ConfirmDialog confirmDialog = new ConfirmDialog(getDriver());
+		confirmDialog.clickOKButton(FORCE_COMPLETE_SHIPMENT_CONFIRM_DIALOG);
+		waitTillElementDisappears(By.cssSelector(COMPLETE_SHIPMENT_PARENT_CSS));
 	}
 
 }

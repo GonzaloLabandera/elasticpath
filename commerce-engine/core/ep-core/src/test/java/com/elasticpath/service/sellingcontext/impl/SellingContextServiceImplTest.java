@@ -55,7 +55,7 @@ public class SellingContextServiceImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.SELLING_CONTEXT);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 				will(returnValue(new SellingContextImpl()));
 			}
 		});

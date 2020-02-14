@@ -50,7 +50,7 @@ public class AttributeDaoAdapter extends AbstractDaoAdapter<Attribute> {
 
 	@Override
 	public Attribute createBean(final Attribute bean) {
-		return beanFactory.getBean(ContextIdNames.ATTRIBUTE);
+		return beanFactory.getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 	}
 
 	/**

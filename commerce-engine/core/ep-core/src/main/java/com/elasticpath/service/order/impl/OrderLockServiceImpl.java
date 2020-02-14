@@ -45,7 +45,7 @@ public class OrderLockServiceImpl extends AbstractEpPersistenceServiceImpl imple
 			return null;
 		}
 
-		final OrderLock orderLock = getBean(ContextIdNames.ORDER_LOCK);
+		final OrderLock orderLock = getPrototypeBean(ContextIdNames.ORDER_LOCK, OrderLock.class);
 		orderLock.setOrder(order);
 		orderLock.setCmUser(cmUser);
 		orderLock.setCreatedDate(getTimeService().getCurrentTime().getTime());
@@ -56,7 +56,7 @@ public class OrderLockServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 		// Obtain order lock.
 		try {
-			final OrderLockService transactionalOrderLockService = getBean(ContextIdNames.ORDER_LOCK_SERVICE);
+			final OrderLockService transactionalOrderLockService = getSingletonBean(ContextIdNames.ORDER_LOCK_SERVICE, OrderLockService.class);
 			return transactionalOrderLockService.writeOrderLock(orderLock);
 		} catch (final DataAccessException e) {
 			LOG.info("Lock already exists for order [" + orderLock.getOrder().getGuid() + "]");
@@ -145,7 +145,7 @@ public class OrderLockServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		sanityCheck();
 		OrderLock orderLock = null;
 		if (orderLockUid <= 0) {
-			orderLock = getBean(ContextIdNames.ORDER_LOCK);
+			orderLock = getPrototypeBean(ContextIdNames.ORDER_LOCK, OrderLock.class);
 		} else {
 			orderLock = getPersistentBeanFinder().get(ContextIdNames.ORDER_LOCK, orderLockUid);
 		}

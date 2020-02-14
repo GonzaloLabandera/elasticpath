@@ -7,8 +7,8 @@ import java.util.Arrays;
 
 import org.eclipse.swt.graphics.Image;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.TableItems;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.tablelableprovider.AbstractTableLabelProviderDecorator;
@@ -31,7 +31,7 @@ public class ChangeSetTableLabelProviderDecorator<T> extends AbstractTableLabelP
 
 	private final TableItems<T> tableItems;
 	
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	/**
 	 * Constructor.

@@ -90,5 +90,4 @@ class ConfigurableCartSteps {
 	static void verifyConfigurableLineitem(DataTable itemDetailsTable) {
 		assertItemConfiguration(itemDetailsTable)
 	}
-
 }

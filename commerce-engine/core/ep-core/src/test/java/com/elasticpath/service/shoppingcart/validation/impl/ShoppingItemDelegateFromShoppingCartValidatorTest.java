@@ -38,6 +38,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
+import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
 
 /**
  * Unit tests for {@link ShoppingItemDelegateFromShoppingCartValidatorImpl}.
@@ -108,7 +109,7 @@ public class ShoppingItemDelegateFromShoppingCartValidatorTest {
 
 	@Before
 	public void setup() {
-		given(beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT))
+		given(beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT, ShoppingItemValidationContext.class))
 				.willAnswer(invocation -> new ShoppingItemValidationContextImpl());
 		given(store.getCode()).willReturn(STORE_CODE);
 		given(shoppingCart.getStore()).willReturn(store);

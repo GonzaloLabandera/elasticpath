@@ -18,16 +18,13 @@ import java.util.Set;
 import org.jmock.Expectations;
 import org.junit.Test;
 
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.ProductDeleted;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
-import com.elasticpath.domain.catalog.impl.ProductDeletedImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.persistence.dao.ProductDao;
 import com.elasticpath.service.catalog.ProductLookup;
@@ -44,8 +41,6 @@ public class ProductServiceImplOldTest extends AbstractEPServiceTestCase {
 	private final ProductDao mockProductDao = context.mock(ProductDao.class);
 	private final ProductLookup mockProductLookup = context.mock(ProductLookup.class);
 
-	private ProductDeleted productDeleted;
-
 	private final ProductSkuService mockProductSkuService = context.mock(ProductSkuService.class);
 
 	/**
@@ -60,8 +55,6 @@ public class ProductServiceImplOldTest extends AbstractEPServiceTestCase {
 
 		initializeProductServiceWithMocks(productServiceImpl);
 
-		productDeleted = new ProductDeletedImpl();
-		stubGetBean(ContextIdNames.PRODUCT_DELETED, productDeleted);
 	}
 
 	private void initializeProductServiceWithMocks(final ProductServiceImpl productService) {

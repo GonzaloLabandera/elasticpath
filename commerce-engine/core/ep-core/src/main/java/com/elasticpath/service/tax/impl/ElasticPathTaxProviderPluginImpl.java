@@ -26,7 +26,7 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 	 * Elastic Path default Tax Provider name.
 	 */
 	public static final String PROVIDER_NAME = "ElasticPath";
-	
+
 	private BeanFactory beanFactory;
 	private TaxCalculator taxCalculator;
 	private TaxOperationResolvers taxOperationResolvers;
@@ -35,7 +35,7 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 	public String getName() {
 		return PROVIDER_NAME;
 	}
-	
+
 	@Override
 	public TaxedItemContainer calculate(final TaxableItemContainer container) {
 		return getTaxCalculator().calculate(container, getTaxOperationResolvers());
@@ -47,7 +47,8 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 			if (taxOperationResolvers == null) {
 				taxOperationResolvers = new TaxOperationResolvers();
 
-				TaxRateDescriptorResolver taxRateDescriptorResolver = getBeanFactory().getBean(TaxContextIdNames.TAX_RATE_DESCRIPTOR_RESOLVER);
+				TaxRateDescriptorResolver taxRateDescriptorResolver =
+						getBeanFactory().getPrototypeBean(TaxContextIdNames.TAX_RATE_DESCRIPTOR_RESOLVER, TaxRateDescriptorResolver.class);
 				taxOperationResolvers.putResolver(TaxRateDescriptorResolver.class, taxRateDescriptorResolver);
 			}
 			return taxOperationResolvers;
@@ -61,7 +62,7 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 	public void setTaxCalculator(final TaxCalculator taxCalculator) {
 		this.taxCalculator = taxCalculator;
 	}
-	
+
 	public BeanFactory getBeanFactory() {
 		return beanFactory;
 	}
@@ -69,7 +70,7 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
-	
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (!(obj instanceof TaxRateDescriptor)) {
@@ -78,7 +79,7 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 		TaxProviderPluginInvoker taxProvider = (TaxProviderPluginInvoker) obj;
 		return Objects.equals(getName(), taxProvider.getName());
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(getName());

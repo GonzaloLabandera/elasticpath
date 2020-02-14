@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<bean id="paymentProviderConfiguration" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.impl.PaymentProviderConfigurationImpl"/>
+	<bean id="paymentProviderConfigurationData" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.impl.PaymentProviderConfigurationDataImpl"/>
+	<bean id="paymentInstrument" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.impl.PaymentInstrumentImpl"/>
+	<bean id="paymentInstrumentData" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.impl.PaymentInstrumentDataImpl"/>
+	<bean id="paymentLocalizedProperties" scope="prototype"
+		  class="com.elasticpath.provider.payment.PaymentLocalizedPropertiesImpl"/>
+	<bean id="paymentLocalizedPropertyValue" scope="prototype"
+		  class="com.elasticpath.provider.payment.PaymentLocalizedPropertyValueImpl"/>
+
+	<bean id="paymentEventHistoryRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.history.PaymentEventHistoryRequest"/>
+	<bean id="paymentEventHistoryResponse" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.history.PaymentEventHistoryResponse"/>
+
+	<bean id="reserveRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.transaction.reservation.ReserveRequest"/>
+	<bean id="chargeRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.transaction.charge.ChargeRequest"/>
+	<bean id="modifyReservationRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.transaction.modify.ModifyReservationRequest"/>
+	<bean id="cancelReservationRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.transaction.cancel.CancelReservationRequest"/>
+	<bean id="cancelAllReservationsRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.transaction.cancel.CancelAllReservationsRequest"/>
+	<bean id="creditRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.transaction.credit.CreditRequest"/>
+	<bean id="manualCreditRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.transaction.credit.ManualCreditRequest"/>
+	<bean id="reverseChargeRequest" scope="prototype"
+		  class="com.elasticpath.provider.payment.domain.transaction.credit.ReverseChargeRequest"/>
+
+	<bean id="picInstructionsDTO" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.instructions.PICInstructionsDTO"/>
+	<bean id="picInstructionsFieldsDTO" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.instructions.PICInstructionsFieldsDTO"/>
+	<bean id="paymentProviderConfigDTO" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.configuration.PaymentProviderConfigDTO"/>
+	<bean id="paymentProviderPluginDTO" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.provider.PaymentProviderPluginDTO"/>
+	<bean id="paymentProviderPluginsDTO" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.provider.PaymentProviderPluginsDTO"/>
+
+	<bean id="paymentInstrumentDTO" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.instrument.PaymentInstrumentDTO"/>
+	<bean id="orderPaymentInstrumentDTO" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.instrument.OrderPaymentInstrumentDTO"/>
+	<bean id="paymentInstrumentCreationFieldsDTO" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.instrument.PaymentInstrumentCreationFieldsDTO"/>
+
+	<bean id="paymentEvent" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.event.PaymentEvent"/>
+
+	<bean id="paymentInstrumentCreationInstructionsRequest" scope="prototype"
+		  class="com.elasticpath.plugin.payment.provider.capabilities.instructions.PICInstructionsRequest"/>
+	<bean id="paymentInstrumentCreationRequest" scope="prototype"
+		  class="com.elasticpath.plugin.payment.provider.capabilities.creation.PaymentInstrumentCreationRequest"/>
+	<bean id="reserveCapabilityRequest" scope="prototype"
+		  class="com.elasticpath.plugin.payment.provider.capabilities.reservation.ReserveCapabilityRequest"/>
+	<bean id="chargeCapabilityRequest" scope="prototype"
+		  class="com.elasticpath.plugin.payment.provider.capabilities.charge.ChargeCapabilityRequest"/>
+	<bean id="modifyCapabilityRequest" scope="prototype"
+		  class="com.elasticpath.plugin.payment.provider.capabilities.reservation.ModifyCapabilityRequest"/>
+	<bean id="cancelCapabilityRequest" scope="prototype"
+		  class="com.elasticpath.plugin.payment.provider.capabilities.reservation.CancelCapabilityRequest"/>
+	<bean id="creditCapabilityRequest" scope="prototype"
+		  class="com.elasticpath.plugin.payment.provider.capabilities.credit.CreditCapabilityRequest"/>
+	<bean id="reverseChargeCapabilityRequest" scope="prototype"
+		  class="com.elasticpath.plugin.payment.provider.capabilities.charge.ReverseChargeCapabilityRequest"/>
+	<bean id="paymentEventRelationshipRegistry" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.history.PaymentEventRelationshipRegistry"/>
+	<bean id="paymentEventChain" scope="prototype"
+		  class="com.elasticpath.provider.payment.service.history.PaymentEventChain"/>
+</beans>

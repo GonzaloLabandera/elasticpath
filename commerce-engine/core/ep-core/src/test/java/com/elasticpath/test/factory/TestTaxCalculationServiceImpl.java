@@ -110,7 +110,7 @@ public class TestTaxCalculationServiceImpl extends TaxCalculationServiceImpl {
 	// CHECKSTYLE:ON
 
 	protected ProductSkuLookup getProductSkuLookup() {
-		return beanFactory.getBean(ContextIdNames.PRODUCT_SKU_LOOKUP);
+		return beanFactory.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 	}
 
 	@Override

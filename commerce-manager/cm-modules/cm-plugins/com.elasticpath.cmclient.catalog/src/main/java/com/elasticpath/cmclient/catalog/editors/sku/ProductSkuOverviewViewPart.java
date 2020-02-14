@@ -30,7 +30,7 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
 import com.elasticpath.cmclient.catalog.wizards.product.create.RepeatableDelayedTask;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
@@ -328,7 +328,7 @@ public class ProductSkuOverviewViewPart extends AbstractProductSkuOverviewViewPa
 
 	private void populateTaxCode() {
 		if (taxCodeCombo != null) {
-			final TaxCodeService taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+			final TaxCodeService taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 			final List<TaxCode> originalCodeList = taxCodeService.list();
 			this.taxCodeList = new ArrayList<>(originalCodeList.size());
 	

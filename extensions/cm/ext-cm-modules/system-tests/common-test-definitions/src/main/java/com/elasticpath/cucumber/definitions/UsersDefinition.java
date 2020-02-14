@@ -116,9 +116,10 @@ public class UsersDefinition {
 
 		DBConnector dbConnector = new DBConnector();
 		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET PASSWORD='" + DigestUtils.sha1Hex(userMap.get(PASSWORD)) + "' WHERE USER_NAME='"
-				+ newUserName + "';");
-		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET STATUS='1' WHERE USER_NAME='" + newUserName + "';");
-		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET LAST_CHANGED_PASSWORD_DATE='2022-01-01 12:00:00' WHERE USER_NAME='" + newUserName + "';");
+				+ newUserName + "'");
+		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET STATUS='1' WHERE USER_NAME='" + newUserName + "'");
+		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET LAST_CHANGED_PASSWORD_DATE='" + dbConnector.getDate("2025-01-01 12:00:00")
+				+ "' WHERE USER_NAME='" + newUserName + "'");
 	}
 
 	/**
@@ -316,8 +317,8 @@ public class UsersDefinition {
 
 		String lastChangedDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH).format(calendar.getTime());
 
-		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET LAST_CHANGED_PASSWORD_DATE='" + lastChangedDate + "' WHERE USER_NAME='" + newUserName
-				+ "';");
+		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET LAST_CHANGED_PASSWORD_DATE='" + dbConnector.getDate(lastChangedDate)
+				+ "' WHERE USER_NAME='" + newUserName + "'");
 
 		dbConnector.closeAll();
 	}
@@ -382,12 +383,13 @@ public class UsersDefinition {
 				+ ",LAST_CHANGED_PASSWORD_DATE,FAILED_LOGIN_ATTEMPTS,GUID,STATUS,ALL_WAREHOUSE_ACCESS,ALL_CATALOG_ACCESS"
 				+ ",ALL_STORE_ACCESS,ALL_PRICELIST_ACCESS,LAST_MODIFIED_DATE) VALUES (" + uidpk + ",'" + newUserName
 				+ COMMA + newUserName + "@elasticpath.com','" + userMap.get("First Name") + COMMA + userMap.get("Last Name")
-				+ COMMA + DigestUtils.sha1Hex(userMap.get(PASSWORD)) + COMMA + date + COMMA + date + COMMA + date + "',0,'" + UUID.randomUUID()
-				.toString() + "',1,1,1,1,1,'" + date + "');";
+				+ COMMA + DigestUtils.sha1Hex(userMap.get(PASSWORD)) + COMMA + dbConnector.getDate(date) + COMMA
+				+ dbConnector.getDate(date) + COMMA + dbConnector.getDate(date) + "',0,'" + UUID.randomUUID().toString()
+				+ "',1,1,1,1,1,'" + dbConnector.getDate(date) + "')";
 
 		dbConnector.executeUpdateQuery(query);
 
-		dbConnector.executeUpdateQuery("INSERT INTO TCMUSERROLEX (CM_USER_UID, USER_ROLE_UID) VALUES (" + uidpk + ", '201');");
+		dbConnector.executeUpdateQuery("INSERT INTO TCMUSERROLEX (CM_USER_UID, USER_ROLE_UID) VALUES (" + uidpk + ", '201')");
 		dbConnector.closeAll();
 	}
 

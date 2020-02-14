@@ -25,7 +25,6 @@ import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
-import com.elasticpath.domain.catalog.impl.PriceTierImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.dataimport.CatalogImportField;
 import com.elasticpath.domain.dataimport.ImportField;
@@ -77,8 +76,7 @@ public class ImportDataTypeProductCategoryAssociationImplTest extends AbstractEP
 
 		this.productCategoryAssociationImportType = new ImportDataTypeProductCategoryAssociationImpl();
 
-		stubGetBean(ContextIdNames.PRICE_TIER, PriceTierImpl.class);
-		stubGetBean(ContextIdNames.UTILITY, utility);
+		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
 
 		this.productCategory = new ProductCategoryImportBean();
 

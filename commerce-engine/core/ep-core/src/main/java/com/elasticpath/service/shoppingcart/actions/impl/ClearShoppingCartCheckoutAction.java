@@ -1,24 +1,24 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.cartorder.CartOrderService;
+import com.elasticpath.service.orderpaymentapi.CartOrderPaymentInstrumentService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutAction;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
 
 /**
- * CheckoutAction to remove all items from the shoppingCart after converting the cart to an order. It alse removes 
- * the cart order.
+ * CheckoutAction to remove all items from the shoppingCart after converting the cart to an order. It also removes the cart order.
  */
 public class ClearShoppingCartCheckoutAction implements FinalizeCheckoutAction {
 
 	private ShoppingCartService shoppingCartService;
-	
 	private CartOrderService cartOrderService;
+	private CartOrderPaymentInstrumentService cartOrderPaymentInstrumentService;
 
 	@Override
 	public void execute(final FinalizeCheckoutActionContext context) throws EpSystemException {
@@ -35,7 +35,7 @@ public class ClearShoppingCartCheckoutAction implements FinalizeCheckoutAction {
 		//physical deletion of CartOrder instance associated with the old cart
 		cartOrderService.removeIfExistsByShoppingCart(oldShoppingCart);
 	}
-	
+
 	protected ShoppingCartService getShoppingCartService() {
 		return shoppingCartService;
 	}
@@ -50,5 +50,13 @@ public class ClearShoppingCartCheckoutAction implements FinalizeCheckoutAction {
 
 	protected CartOrderService getCartOrderService() {
 		return cartOrderService;
+	}
+
+	public void setCartOrderPaymentInstrumentService(final CartOrderPaymentInstrumentService cartOrderPaymentInstrumentService) {
+		this.cartOrderPaymentInstrumentService = cartOrderPaymentInstrumentService;
+	}
+
+	protected CartOrderPaymentInstrumentService getCartOrderPaymentInstrumentService() {
+		return cartOrderPaymentInstrumentService;
 	}
 }

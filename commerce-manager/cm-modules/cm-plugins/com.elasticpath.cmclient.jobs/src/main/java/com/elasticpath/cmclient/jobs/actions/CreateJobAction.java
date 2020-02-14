@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.jobs.actions;
 import java.util.HashMap;
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -44,14 +45,14 @@ public class CreateJobAction extends AbstractAuthorizedJobAction {
 			final ImageDescriptor imageDescriptor, final String permission, final int type) {
 		super(text, imageDescriptor, permission);
 		this.listView = listView;
-		importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+		importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 		this.type = type;
 		setEnabled(isAuthorized());
 	}
 
 	@Override
 	public void run() {
-		ImportJob importJob = ServiceLocator.getService(ContextIdNames.IMPORT_JOB);
+		ImportJob importJob = BeanLocator.getPrototypeBean(ContextIdNames.IMPORT_JOB, ImportJob.class);
 		initImportJobDefaultValues(importJob);
 		ImportJobWizard wizard = new ImportJobWizard(importJob, type);
 		WizardDialog dialog = new EpWizardDialog(listView.getSite().getShell(), wizard);

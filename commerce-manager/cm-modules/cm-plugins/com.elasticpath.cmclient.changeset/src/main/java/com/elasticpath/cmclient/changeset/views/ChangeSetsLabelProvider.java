@@ -9,7 +9,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.helpers.UserViewFormatter;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -22,7 +22,7 @@ import com.elasticpath.service.cmuser.CmUserService;
  */
 public class ChangeSetsLabelProvider extends LabelProvider implements ITableLabelProvider {
 	
-	private final CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+	private final CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 	
 	/**
 	 * Column index of change set name.

@@ -3,8 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil
-		.buildPromotionIdentifiers;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil.buildPromotionIdentifiers;
 
 import java.util.Collection;
 
@@ -44,13 +43,13 @@ public class AppliedPromotionsForCartLineItemRepositoryImpl<I extends AppliedPro
 		CartIdentifier cartIdentifier = lineItemIdentifier.getLineItems().getCart();
 		String scope = cartIdentifier.getCarts().getScope().getValue();
 		String cartId = cartIdentifier.getCartId().getValue();
-		return cartOrderRepository.getEnrichedShoppingCartSingle(scope, cartId, CartOrderRepository.FindCartOrder.BY_CART_GUID)
+		return cartOrderRepository.getEnrichedShoppingCart(scope, cartId, CartOrderRepository.FindCartOrder.BY_CART_GUID)
 				.flatMap(shoppingCart -> getAppliedPromotionIds(lineItemId, shoppingCart))
 				.flatMapObservable(appliedPromotions -> buildPromotionIdentifiers(scope, appliedPromotions));
 	}
 
 	private Single<Collection<String>> getAppliedPromotionIds(final String lineItemId, final ShoppingCart shoppingCart) {
-		return pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)
+		return pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart)
 				.map(pricingSnapshot -> promotionRepository.getAppliedCartLineitemPromotions(shoppingCart, pricingSnapshot, lineItemId));
 	}
 

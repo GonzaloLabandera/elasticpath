@@ -12,7 +12,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesMessages;
 import com.elasticpath.cmclient.admin.datapolicies.event.DataPolicyEventService;
 import com.elasticpath.cmclient.admin.datapolicies.views.DataPolicyListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.datapolicy.DataPolicy;
@@ -36,12 +36,12 @@ public class DisableDataPolicyAction extends Action {
 	public DisableDataPolicyAction(final DataPolicyListView listView, final String text, final ImageDescriptor imageDescriptor) {
 		super(text, imageDescriptor);
 		this.listView = listView;
-		this.dataPolicyService = ServiceLocator.getService(ContextIdNames.DATA_POLICY_SERVICE);
+		this.dataPolicyService = BeanLocator.getSingletonBean(ContextIdNames.DATA_POLICY_SERVICE, DataPolicyService.class);
 	}
 
 	@Override
 	public void run() {
-		ServiceLocator.getService(ContextIdNames.DATA_POLICY_SERVICE);
+		BeanLocator.getSingletonBean(ContextIdNames.DATA_POLICY_SERVICE, DataPolicyService.class);
 		Optional<DataPolicy> dataPolicyOptional = listView.getSelectedDataPolicy();
 
 		dataPolicyOptional = dataPolicyOptional

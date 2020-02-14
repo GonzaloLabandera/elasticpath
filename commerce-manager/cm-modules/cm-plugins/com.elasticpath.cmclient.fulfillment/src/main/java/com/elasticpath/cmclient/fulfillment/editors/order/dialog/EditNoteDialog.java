@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
@@ -51,7 +51,7 @@ public class EditNoteDialog extends AbstractEpDialog {
 	public EditNoteDialog(final Shell parentShell, final OrderEvent orderEvent, final boolean viewOnly) {
 		super(parentShell, 2, false);
 		this.orderEvent = orderEvent;
-		this.orderNoteProxy = ServiceLocator.getService(ContextIdNames.ORDER_EVENT);
+		this.orderNoteProxy = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_EVENT, OrderEvent.class);
 		orderNoteProxy.setNote(orderEvent.getNote());
 
 		this.bindingContext = new DataBindingContext();

@@ -17,7 +17,7 @@ import com.elasticpath.cmclient.catalog.editors.model.ProductModelController;
 import com.elasticpath.cmclient.catalog.wizards.product.create.ComboModel;
 import com.elasticpath.cmclient.catalog.wizards.product.create.PlaSortingPolicy;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
@@ -61,8 +61,8 @@ public class PriceListDropDownPart extends AbstractStatePolicyTargetImpl impleme
 		this.controller = controller;
 		this.product = product;
 		this.selectionAction = selectionAction;
-		this.plaHelperService = ServiceLocator.getService(
-				ContextIdNames.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE);
+		this.plaHelperService = BeanLocator
+				.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_HELPER_SERVICE, PriceListAssignmentHelperService.class);
 		this.locale = locale;
 	}
 

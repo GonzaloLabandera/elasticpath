@@ -68,7 +68,7 @@ public class SelectableValuesTest extends BasicSpringContextTest {
     }    
     
     private TagValueType createTagValueType() {
-    	return getBeanFactory().getBean(ContextIdNames.TAG_VALUE_TYPE);
+    	return getBeanFactory().getPrototypeBean(ContextIdNames.TAG_VALUE_TYPE, TagValueType.class);
     }
     
 }

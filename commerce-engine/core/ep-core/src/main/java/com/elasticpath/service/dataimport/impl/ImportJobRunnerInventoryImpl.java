@@ -47,7 +47,7 @@ public class ImportJobRunnerInventoryImpl extends AbstractImportJobRunnerImpl {
 	 * Constructor.
 	 */
 	public ImportJobRunnerInventoryImpl() {
-		pims = getBean(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE);
+		pims = getSingletonBean(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE, ProductInventoryManagementService.class);
 	}
 
 
@@ -146,7 +146,7 @@ public class ImportJobRunnerInventoryImpl extends AbstractImportJobRunnerImpl {
 	 */
 	@Override
 	protected void postCommitUnitTransactionCommit() {
-		OrderAllocationProcessor processor = getBean(ContextIdNames.ORDER_ALLOCATION_PROCESSOR);
+		OrderAllocationProcessor processor = getSingletonBean(ContextIdNames.ORDER_ALLOCATION_PROCESSOR, OrderAllocationProcessor.class);
 		for (String skuCode : inventorySKUCodes) {
 			try {
 				processor.processOutstandingOrders(skuCode, getWarehouseObject().getCode());

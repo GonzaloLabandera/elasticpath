@@ -15,7 +15,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetImageRegistry;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.adapters.EmailHyperlinkAdapter;
 import com.elasticpath.cmclient.core.formatting.MetadataDateFormat;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
@@ -39,9 +39,9 @@ public class ChangeSetInfoBlock implements ICompositeBlock {
 	private static final int MARGIN_VALUE = 0;
 	private static final int EMPTY_COMPOSITE_HORIZONTAL_SPAN = 4;
 	private static final int HYPERLINK_VERTICAL_IDENT = -2;
-	private final ChangeSetService changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
-	private final CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetService changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
+	private final CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	
 	private final Image changeSetImage = ChangeSetImageRegistry.CHANGESET.createImage();
 

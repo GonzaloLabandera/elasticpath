@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -72,6 +76,7 @@
 		<maven-sling-plugin.version>2.1.0</maven-sling-plugin.version>
 		<trinidad.plugin.version>20120309</trinidad.plugin.version>
 
+		<war-plugin-directory>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/plugins</war-plugin-directory>
 		<war-bundle-directory>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/bundles</war-bundle-directory>
 		<war-bundle-directory-level-1>${war-bundle-directory}-level1</war-bundle-directory-level-1>
 		<war-bundle-directory-level-2>${war-bundle-directory}-level2</war-bundle-directory-level-2>

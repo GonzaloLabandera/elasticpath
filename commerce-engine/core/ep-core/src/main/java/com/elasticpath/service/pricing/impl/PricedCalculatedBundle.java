@@ -73,7 +73,7 @@ public class PricedCalculatedBundle implements Priced {
 
 				//a bundle with no constituents will have a real 0.00 list price.
 				if (CollectionUtils.isEmpty(pricingScheme.getSchedules())) {
-					PriceSchedule purchaseTimeSchedule = getBeanFactory().getBean(ContextIdNames.PRICE_SCHEDULE);
+					PriceSchedule purchaseTimeSchedule = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class);
 					purchaseTimeSchedule.setType(PriceScheduleType.PURCHASE_TIME);
 					pricingScheme.setPriceForSchedule(purchaseTimeSchedule, price);
 				}
@@ -112,7 +112,7 @@ public class PricedCalculatedBundle implements Priced {
 		}
 
 		List<BundleConstituent> constituents = bundle.getConstituents();
-		PricingScheme pricingScheme = getBeanFactory().getBean(ContextIdNames.PRICING_SCHEME);
+		PricingScheme pricingScheme = getBeanFactory().getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class);
 		if (CollectionUtils.isEmpty(constituents)) {
 			return pricingScheme;
 		}
@@ -190,7 +190,7 @@ public class PricedCalculatedBundle implements Priced {
 		List<Pair<BundleConstituent, SimplePrice>> simplePrices = preparePricesForSchedule(prices, priceSchedule);
 		final Set<Integer> tierMins = getTierMinQuantities(simplePrices);
 		tierMins.add(bundleMinTierQuantity);
-		Price price = getBeanFactory().getBean(ContextIdNames.PRICE);
+		Price price = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		price.setCurrency(getPriceProvider().getCurrency());
 		PriceTier prevTier = null;
 		boolean applyAdjustments = shouldApplyAdjustments(priceSchedule);
@@ -333,7 +333,7 @@ public class PricedCalculatedBundle implements Priced {
 		}
 
 		// finally compose a new price tier and set the list and sale price and return the price tier for the bundle for this price tier level
-		PriceTier newTier = getBeanFactory().getBean(ContextIdNames.PRICE_TIER);
+		PriceTier newTier = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class);
 
 		newTier.setMinQty(minQty);
 		newTier.setListPrice(totalListPrice);
@@ -458,7 +458,7 @@ public class PricedCalculatedBundle implements Priced {
 
 
 	private Price createZeroPrice() {
-		Price price = getBeanFactory().getBean(ContextIdNames.PRICE);
+		Price price = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		Money zero = Money.valueOf(BigDecimal.ZERO, getPriceProvider().getCurrency());
 		price.setListPrice(zero);
 		return price;

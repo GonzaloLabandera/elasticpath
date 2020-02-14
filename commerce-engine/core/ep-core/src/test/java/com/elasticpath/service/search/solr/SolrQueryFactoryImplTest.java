@@ -104,27 +104,27 @@ public class SolrQueryFactoryImplTest {
 	private QueryComposer queryComposer;
 
 	private CatalogAwareSearchCriteria searchCriteria;
-	
+
 	private AttributeService attributeService;
-	
+
 	private Analyzer analyzer;
-	
+
 	private SpellSuggestionSearchCriteria spellSuggestionSearchCriteria;
 
 	private KeywordSearchCriteria keywordSearchCriteria;
 
 	private SearchConfig searchConfig;
-	
+
 	private List<Filter<?>> filterQueries;
-	
+
 	private CategoryService categoryService;
-	
+
 	private BrandService brandService;
 
 	private BeanFactory beanFactory;
 
 	private SearchConfigFactory searchConfigFactory;
-	
+
 	private Category category;
 
 	private Catalog catalog;
@@ -132,14 +132,14 @@ public class SolrQueryFactoryImplTest {
 	private FacetService facetService;
 	/**
 	 * Prepare for test.
-	 * 
+	 *
 	 * @throws Exception in case of error
 	 */
 	@Before
 	public void setUp() throws Exception {
 		category = context.mock(Category.class);
 		filterQueries = constructNonStoreAwareFilters();
-		
+
 		final SortOrder sortOrder = SortOrder.ASCENDING;
 		final SortBy sortBy = StandardSortBy.RELEVANCE;
 
@@ -152,31 +152,31 @@ public class SolrQueryFactoryImplTest {
 
 		queryComposer = context.mock(QueryComposer.class);
 		searchCriteria = context.mock(CatalogAwareSearchCriteria.class);
-		
+
 		spellSuggestionSearchCriteria = context.mock(SpellSuggestionSearchCriteria.class);
 
 		searchConfig = context.mock(SearchConfig.class);
-		
+
 		beanFactory = context.mock(BeanFactory.class);
 		searchConfigFactory = context.mock(SearchConfigFactory.class);
 		facetService = context.mock(FacetService.class);
 
 		solrQueryFactoryImpl = new SolrQueryFactoryImpl();
-		solrQueryFactoryImpl.setBeanFactory(beanFactory); 
+		solrQueryFactoryImpl.setBeanFactory(beanFactory);
 		solrQueryFactoryImpl.setSearchConfigFactory(searchConfigFactory);
 		solrQueryFactoryImpl.setAttributeService(attributeService);
 		solrQueryFactoryImpl.setFacetService(facetService);
-		
+
 		attributeService = context.mock(AttributeService.class);
-		
+
 		categoryService = context.mock(CategoryService.class);
-		
+
 		brandService = context.mock(BrandService.class);
-		
+
 		catalog = context.mock(Catalog.class);
-		
+
 		analyzer = context.mock(Analyzer.class);
-		
+
 		context.checking(new Expectations() {
 			{
 				allowing(searchCriteria).getIndexType(); will(returnValue(IndexType.PRODUCT));
@@ -186,16 +186,16 @@ public class SolrQueryFactoryImplTest {
 				allowing(searchCriteria).getSortingOrder(); will(returnValue(sortOrder));
 				allowing(searchCriteria).getFilters(); will(returnValue(filterQueries));
 				allowing(searchCriteria).getCatalogCode(); will(returnValue("catalog_code"));
-				
+
 				allowing(spellSuggestionSearchCriteria).getLocale(); will(returnValue(Locale.US));
-				
-				allowing(beanFactory).getBean(ContextIdNames.CATEGORY); will(returnValue(category));
-				
+
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.CATEGORY, Category.class); will(returnValue(category));
+
 				allowing(category).getCode(); will(returnValue("myCategoryCode"));
 
 				allowing(catalog).getCode(); will(returnValue("myCatalogCode"));
 				allowing(facetService).findAllSearchableFacets("storeCode"); will(returnValue(Collections.emptyList()));
-				
+
 				ignoring(analyzer);
 			}
 		});
@@ -223,7 +223,7 @@ public class SolrQueryFactoryImplTest {
 	}
 
 	private List<Filter<?>> constructNonStoreAwareFilters() {
-		
+
 		final AttributeRangeFilter attributeRangeFilter = context.mock(AttributeRangeFilter.class);
 		final AttributeValueWithType attributeValue = context.mock(AttributeValueWithType.class);
 		final AttributeValueFilter attributeValueFilter = context.mock(AttributeValueFilter.class);
@@ -236,32 +236,32 @@ public class SolrQueryFactoryImplTest {
 		context.checking(new Expectations() {
 			{
 				allowing(attributeValue).getStringValue(); will(returnValue("some string"));
-				
+
 				allowing(attributeRangeFilter).getLowerValue(); will(returnValue(attributeValue));
 				allowing(attributeRangeFilter).getUpperValue(); will(returnValue(attributeValue));
 				allowing(attributeRangeFilter).getRangeType(); will(returnValue(RangeFilterType.BETWEEN));
 				allowing(attributeRangeFilter).getAttribute(); will(returnValue(constructAttribute("some key")));
 				allowing(attributeRangeFilter).getLocale(); will(returnValue(Locale.US));
-				
+
 				allowing(attributeValueFilter).getAttribute(); will(returnValue(constructAttribute("some other key")));
 				allowing(attributeValueFilter).getLocale(); will(returnValue(Locale.US));
 				allowing(attributeValueFilter).getAttributeValue(); will(returnValue(attributeValue));
-				
+
 				allowing(brand).getCode(); will(returnValue("some code"));
 				allowing(brandFilter).getBrand(); will(returnValue(brand));
 				allowing(brandFilter).getBrands(); will(returnValue(brands));
-				
+
 				allowing(category).getUidPk(); will(returnValue(CATEGORY_UID));
 				allowing(categoryFilter).getCategory(); will(returnValue(category));
 			}
 		});
-		
+
 		final List<Filter<?>> filters = new ArrayList<>();
 		filters.add(attributeRangeFilter);
 		filters.add(attributeValueFilter);
 		filters.add(brandFilter);
 		filters.add(categoryFilter);
-		
+
 		return filters;
 	}
 
@@ -291,13 +291,13 @@ public class SolrQueryFactoryImplTest {
 				oneOf(queryComposer).composeQuery(null, null); will(returnValue(nonFuzzyQuery));
 			}
 		});
-		
+
 		SolrQueryFactoryImpl factory = new SolrQueryFactoryImpl();
-		
+
 		assertSame(fuzzyQuery, factory.createLuceneQuery(queryComposer, null, null, true));
 		assertSame(nonFuzzyQuery, factory.createLuceneQuery(queryComposer, null, null, false));
 	}
-	
+
 	/**
 	 * Test that createSolrQueryFromLuceneQuery() creates a solr query of type "standard".
 	 */
@@ -327,17 +327,17 @@ public class SolrQueryFactoryImplTest {
 		SolrQuery query = new SolrQuery();
 		factory.addInvariantTerms(query, START_INDEX, MAX_ROWS, searchConfig);
 		assertTrue(query.toString().contains(startIndexQuery.toString()));
-		
+
 		//Manually create a query that has the properties we're looking for
 		SolrQuery rowsQuery = new SolrQuery();
 		startIndexQuery.setRows(MAX_ROWS);
 		//compare the manually-created query against the one modified by the method we're testing
 		query = new SolrQuery();
 		factory.addInvariantTerms(query, START_INDEX, MAX_ROWS, searchConfig);
-		
-		assertTrue(query.toString().contains(rowsQuery.toString()));		
+
+		assertTrue(query.toString().contains(rowsQuery.toString()));
 	}
-	
+
 	/**
 	 * Test that filters are added to the solr query.
 	 */
@@ -348,9 +348,9 @@ public class SolrQueryFactoryImplTest {
 				oneOf(categoryService).findCodeByUid(CATEGORY_UID); will(returnValue(CATEGORY_CODE));
 			}
 		});
-		
+
 		SolrQuery query = new SolrQuery();
-		
+
 		this.solrQueryFactoryImpl.addFiltersToQuery(query, searchCriteria);
 		// check that filters are added
 		Matcher matcher = Pattern.compile("fq=").matcher(query.toString());
@@ -361,7 +361,7 @@ public class SolrQueryFactoryImplTest {
 		assertEquals(filterQueries.size(), numMatches);
 	}
 
-	
+
 	/**
 	 * Test that dummy filters are ignored.
 	 */
@@ -370,21 +370,21 @@ public class SolrQueryFactoryImplTest {
 		SolrQuery query = new SolrQuery();
 		AdvancedSearchFilteredNavSeparatorFilter dummyFilter = new AdvancedSearchFilteredNavSeparatorFilterImpl();
 		dummyFilter.initialize("");
-		final List<Filter<AdvancedSearchFilteredNavSeparatorFilter>> filters 
+		final List<Filter<AdvancedSearchFilteredNavSeparatorFilter>> filters
 			= new ArrayList<>();
 		filters.add(dummyFilter);
-		
+
 		final CatalogAwareSearchCriteria searchCriteria = context.mock(CatalogAwareSearchCriteria.class, "criteriaForDummy");
 		context.checking(new Expectations() {
 			{
 				allowing(searchCriteria).getFilters(); will(returnValue(filters));
 			}
 		});
-		
+
 		this.solrQueryFactoryImpl.addFiltersToQuery(query, searchCriteria);
 
 		assertNull(query.getFilterQueries());
-	}	
+	}
 
 	/**
 	 * Test that real filters are added to the query.
@@ -395,7 +395,7 @@ public class SolrQueryFactoryImplTest {
 			{
 				oneOf(brandService).findByCode("F00001"); will(returnValue(new BrandImpl() {
 					private static final long serialVersionUID = 1L;
-					
+
 					@Override
 					public String getCode() {
 						return "F00001";
@@ -408,26 +408,26 @@ public class SolrQueryFactoryImplTest {
 				oneOf(categoryService).findCodeByUid(CATEGORY_UID); will(returnValue(CATEGORY_CODE));
 			}
 		});
-		
+
 		SolrQuery query = new SolrQuery();
-		
+
 		BrandFilter  brandFilter = new BrandFilterImpl() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected BrandService getBrandService() {
 				return brandService;
-			}				
+			}
 		};
 		brandFilter.initialize("bF00001");
 		List<Filter<BrandFilter>> filters = new ArrayList<>();
 		filters.add(brandFilter);
-		
+
 		this.solrQueryFactoryImpl.addFiltersToQuery(query, searchCriteria);
 
 		assertNotNull(query.getFilterQueries());
-	}		
-	
+	}
+
 	/**
 	 * Test method for
 	 * {@link SolrQueryFactoryImpl#composeKeywordQuery(KeywordSearchCriteria, int, int, SearchConfig, boolean)}.
@@ -460,7 +460,7 @@ public class SolrQueryFactoryImplTest {
 		assertTrue(query.toString().contains(rowsQuery.toString()));
 		assertTrue(query.toString().contains(CommonParams.QT));
 		assertTrue(query.toString().contains(CommonParams.SORT));
-		
+
 		// check that filters are added
 		Matcher matcher = Pattern.compile("fq=").matcher(query.toString());
 		int numMatches = 0;
@@ -470,9 +470,9 @@ public class SolrQueryFactoryImplTest {
 		// the catalog brings one more filter query
 		assertEquals(filterQueries.size() + 1, numMatches);
 	}
-	
+
 	/**
-	 * Test that addCategoryFilter adds a CategoryFilter to the list of filter queries if 
+	 * Test that addCategoryFilter adds a CategoryFilter to the list of filter queries if
 	 * the search criteria contains a categoryUid.
 	 */
 	@Test
@@ -481,12 +481,12 @@ public class SolrQueryFactoryImplTest {
 		final CategoryFilter categoryFilter = context.mock(CategoryFilter.class);
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(ContextIdNames.CATEGORY_FILTER); will(returnValue(categoryFilter));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.CATEGORY_FILTER, CategoryFilter.class); will(returnValue(categoryFilter));
 				oneOf(category).setUidPk(1L);
 				oneOf(categoryFilter).setCategory(category);
 			}
 		});
-		
+
 		List<Filter<?>> filterQueries = new ArrayList<>();
 		KeywordSearchCriteria searchCriteria = new KeywordSearchCriteria();
 		searchCriteria.setCategoryUid(1L);
@@ -500,7 +500,7 @@ public class SolrQueryFactoryImplTest {
 		}
 		assertTrue(containsCategoryFilter);
 	}
-	
+
 	/**
 	 * Test method for {@link SolrQueryFactoryImpl#composeSpellingQuery(SpellSuggestionSearchCriteria, SearchConfig)}.
 	 */
@@ -515,7 +515,7 @@ public class SolrQueryFactoryImplTest {
 				oneOf(spellSuggestionSearchCriteria).getPotentialMisspelledStrings(); will(returnValue(misspellings));
 			}
 		});
-		
+
 		SolrQuery query = solrQueryFactoryImpl.composeSpellingQuery(spellSuggestionSearchCriteria, searchConfig);
 		SolrQuery testQuery = new SolrQuery();
 		for (String str : misspellings) {
@@ -532,12 +532,12 @@ public class SolrQueryFactoryImplTest {
 		assertTrue(query.toString().contains(testQuery.toString()));
 
 		assertTrue(query.toString().contains(CommonParams.QT));
-		
+
 		testQuery = new SolrQuery();
 		testQuery.set(SpellingParams.LOCALE, locale.toString());
 		assertTrue(query.toString().contains(testQuery.toString()));
 	}
-	
+
 	/**
 	 * Test method that checks to see if a match all query is handled correctly. The output should
 	 * produce a query that is able to be parsed by the query parser.
@@ -555,13 +555,13 @@ public class SolrQueryFactoryImplTest {
 
 		SolrQuery query = solrQueryFactoryImpl.composeSpecificQuery(queryComposer, searchCriteria, START_INDEX, MAX_ROWS,
 				searchConfig, false, ImmutableMap.of());
-		
+
 		final QueryParser queryParser = new QueryParser("",
 				new SimpleAnalyzer());
 		assertNotNull(query.get(CommonParams.QT));
 		queryParser.parse(query.get(CommonParams.QT));
 	}
-	
+
 	/**
 	 * Test that the query for date range rounds up to the minute.
 	 */

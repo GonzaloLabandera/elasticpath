@@ -7,7 +7,6 @@ import static com.elasticpath.persistence.support.FetchFieldConstants.CART_ITEM_
 import static com.elasticpath.persistence.support.FetchFieldConstants.OPTION_VALUE_MAP;
 import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_ATTRIBUTE_GROUP_ATTRIBUTES;
 import static com.elasticpath.persistence.support.FetchFieldConstants.SKU_ATTRIBUTE_GROUP_ATTRIBUTES;
-import static com.elasticpath.persistence.support.FetchFieldConstants.SKU_OPTIONS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -79,7 +78,6 @@ public class ProductTypeLoadTunerImplTest {
 
 		verify(mockFetchPlan).addField(ProductTypeImpl.class, PRODUCT_ATTRIBUTE_GROUP_ATTRIBUTES);
 		verify(mockFetchPlan).addField(ProductTypeImpl.class, SKU_ATTRIBUTE_GROUP_ATTRIBUTES);
-		verify(mockFetchPlan).addField(ProductTypeImpl.class, SKU_OPTIONS);
 		verify(mockFetchPlan).addField(ProductSkuImpl.class, OPTION_VALUE_MAP);
 		verify(mockFetchPlan).addFields(ProductTypeImpl.class, CART_ITEM_MODIFIER_GROUPS);
 	}

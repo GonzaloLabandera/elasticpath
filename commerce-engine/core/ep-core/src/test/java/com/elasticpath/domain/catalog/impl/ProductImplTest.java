@@ -61,6 +61,8 @@ import com.elasticpath.domain.catalog.ProductCategory;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.localization.LocaleFallbackPolicy;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
@@ -108,8 +110,10 @@ public class ProductImplTest {
 	public void setUp() throws Exception {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, AttributeLocalizedPropertyValueImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, 
+				LocalizedPropertiesImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, LocalizedPropertyValue.class,
+				AttributeLocalizedPropertyValueImpl.class);
 
 		productImpl = new ProductImpl();
 
@@ -645,7 +649,8 @@ public class ProductImplTest {
 				return policy;
 			}
 		};
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, factory);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, 
+				CatalogLocaleFallbackPolicyFactory.class, factory);
 
 		//set up policy context
 		context.checking(new Expectations() {
@@ -675,7 +680,8 @@ public class ProductImplTest {
 				return policy;
 			}
 		};
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, factory);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, 
+				CatalogLocaleFallbackPolicyFactory.class, factory);
 		//set up policy context
 		context.checking(new Expectations() {
 			{
@@ -705,7 +711,8 @@ public class ProductImplTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY); will(returnValue(factory));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, CatalogLocaleFallbackPolicyFactory.class);
+				will(returnValue(factory));
 				oneOf(policy).getLocales();
 				will(returnValue(new ArrayList<>(Arrays.asList(NON_DEFAULT_LOCALE))));
 				oneOf(policy).getPrimaryLocale(); will(returnValue(NON_DEFAULT_LOCALE));
@@ -1254,7 +1261,8 @@ public class ProductImplTest {
 	@Test
 	public void testExtensionClassesCanOverrideLocaleDependantFieldsFactory() {
 		final CatalogLocaleFallbackPolicyFactory factory = new CatalogLocaleFallbackPolicyFactory();
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, factory);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, 
+				CatalogLocaleFallbackPolicyFactory.class, factory);
 
 		ExtProductImpl product = new ExtProductImpl();
 		LocaleDependantFields ldf = product.getLocaleDependantFieldsWithoutFallBack(Locale.ENGLISH);

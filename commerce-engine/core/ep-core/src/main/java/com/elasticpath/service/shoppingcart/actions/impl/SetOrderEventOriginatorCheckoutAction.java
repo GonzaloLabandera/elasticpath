@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2014
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 

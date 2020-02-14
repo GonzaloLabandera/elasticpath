@@ -9,7 +9,7 @@ Feature: Tests order resource validation
       | messageType | messageId             | debugMessage                              | linkedTo                             |
       | needinfo    | need.billing.address  | Billing address must be specified.        | orders.billingaddress-info           |
       | needinfo    | need.email            | Customer email address must be specified. | orders.email-info                    |
-      | needinfo    | need.payment.method   | Payment method must be specified.         | paymentmethods.paymentmethod-info    |
+      | needinfo    | need.payment.method   | Payment method must be specified.         | paymentmethods.order-payment-methods    |
       | needinfo    | need.shipping.option  | Shipping option must be specified.           | shipmentdetails.shipping-option-info |
       | needinfo    | need.shipping.address | Shipping address must be specified.       | shipmentdetails.destination-info     |
 
@@ -21,7 +21,7 @@ Feature: Tests order resource validation
       | messageType | messageId            | debugMessage                              | linkedTo                          |
       | needinfo    | need.billing.address | Billing address must be specified.        | orders.billingaddress-info        |
       | needinfo    | need.email           | Customer email address must be specified. | orders.email-info                 |
-      | needinfo    | need.payment.method  | Payment method must be specified.         | paymentmethods.paymentmethod-info |
+      | needinfo    | need.payment.method  | Payment method must be specified.         | paymentmethods.order-payment-methods |
     And there is no advisor linked to shipping-option-info
     And there is no advisor linked to destination-info
 
@@ -36,7 +36,7 @@ Feature: Tests order resource validation
       | needinfo    | need.payment.method   | Payment method must be specified.         |
       | needinfo    | need.shipping.option  | Shipping option must be specified.           |
       | needinfo    | need.shipping.address | Shipping address must be specified.       |
-    When I create a payment method for my order
+    When I create a payment instrument for my order
     And I add an address with country CA and region BC
     And I create an email for my order
     And I retrieve the order
@@ -55,7 +55,7 @@ Feature: Tests order resource validation
   Scenario Outline: Shipping option need info links
     Given I have authenticated as a newly registered shopper
     And I add item with code <SHIPPABLE_ITEM> to my cart
-    And I create address with Country GB, Extended-Address County with no shipping options, Locality London, Organization Company Inc, Phone-Number 555-555-5555, Postal-Code N0N 0N0, Region , Street-Address fake street, Family-Name Test and Given-Name Test
+    And I create address with Country CN, Extended-Address County with no shipping options, Locality Beijing, Organization Company Inc, Phone-Number 555-555-5555, Postal-Code N0N 0N0, Region , Street-Address fake street, Family-Name Test and Given-Name Test
     And I fill in payment methods needinfo
     When I retrieve the order
     Then there is an advisor message with the following fields:

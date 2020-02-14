@@ -11,7 +11,7 @@
 			http://www.springframework.org/schema/util
 			http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-	<import resource="structuredMessage.xml" />
+	<import resource="structuredMessage.xml"/>
 
 	<bean id="globalMessageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basenames">
@@ -57,7 +57,8 @@
 		<property name="defaultRefreshStrategy" ref="immediateRefreshStrategy"/>
 	</bean>
 
-	<bean name="epCustomerViolationsInterpreter" class="com.elasticpath.rest.resource.integration.epcommerce.common.validator.EpConstraintViolationsInterpreterImpl">
+	<bean name="epCustomerViolationsInterpreter"
+		  class="com.elasticpath.rest.resource.integration.epcommerce.common.validator.EpConstraintViolationsInterpreterImpl">
 		<constructor-arg>
 			<map>
 				<entry key="customerProfile.profileValueMap[CP_FIRST_NAME]" value="given-name"/>
@@ -69,21 +70,21 @@
 	</bean>
 
 	<util:map id="profileAttributeToFieldNameMap">
-		<entry key="CP_FIRST_NAME" value="given-name" />
-		<entry key="CP_LAST_NAME" value="family-name" />
-		<entry key="CP_EMAIL" value="email" />
-		<entry key="CP_PREF_LOCALE" value="preferred-locale" />
-		<entry key="CP_PREF_CURR" value="preferred-currency" />
-		<entry key="CP_ANONYMOUS_CUST" value="anonymous" />
-		<entry key="CP_PHONE" value="phone" />
-		<entry key="CP_FAX" value="fax" />
-		<entry key="CP_GENDER" value="gender" />
-		<entry key="CP_COMPANY" value="company" />
-		<entry key="CP_DOB" value="date-of-birth" />
-		<entry key="CP_HTML_EMAIL" value="html-email" />
-		<entry key="CP_BE_NOTIFIED" value="notification" />
-		<entry key="CP_BUSINESS_NUMBER" value="business-number" />
-		<entry key="CP_TAX_EXEMPTION_ID" value="tax-exemption-id" />
+		<entry key="CP_FIRST_NAME" value="given-name"/>
+		<entry key="CP_LAST_NAME" value="family-name"/>
+		<entry key="CP_EMAIL" value="email"/>
+		<entry key="CP_PREF_LOCALE" value="preferred-locale"/>
+		<entry key="CP_PREF_CURR" value="preferred-currency"/>
+		<entry key="CP_ANONYMOUS_CUST" value="anonymous"/>
+		<entry key="CP_PHONE" value="phone"/>
+		<entry key="CP_FAX" value="fax"/>
+		<entry key="CP_GENDER" value="gender"/>
+		<entry key="CP_COMPANY" value="company"/>
+		<entry key="CP_DOB" value="date-of-birth"/>
+		<entry key="CP_HTML_EMAIL" value="html-email"/>
+		<entry key="CP_BE_NOTIFIED" value="notification"/>
+		<entry key="CP_BUSINESS_NUMBER" value="business-number"/>
+		<entry key="CP_TAX_EXEMPTION_ID" value="tax-exemption-id"/>
 	</util:map>
 
 	<bean name="profileAttributeFieldTransformer"
@@ -118,12 +119,13 @@
 				<ref bean="customerAddressConverter"/>
 				<ref bean="addressEntityConverter"/>
 				<ref bean="purchaseEntityConverter"/>
-				<ref bean="paymentMeansEntityConverter"/>
 				<ref bean="productSkuToItemDefinitionEntityConverter"/>
 				<ref bean="productToOfferDefinitionEntityConverter"/>
 				<ref bean="skuOptionValueToItemDefinitionOptionEntityConverter"/>
 				<ref bean="bundleConstituentToItemDefinitionComponentEntityConverter"/>
 				<ref bean="skuOptionValueToItemDefinitionOptionValueEntityConverter"/>
+				<ref bean="addressEntityToAddressDTOConverter"/>
+				<ref bean="customerAddressToAddressDTOConverter"/>
 			</set>
 		</property>
 	</bean>
@@ -140,12 +142,12 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="controlledTraits" parent="controlledTraitsParent" />
+	<bean id="controlledTraits" parent="controlledTraitsParent"/>
 
 	<bean id="trustedTraitSettingProvider" class="com.elasticpath.settings.provider.impl.SettingValueProviderImpl">
-		<property name="path" value="COMMERCE/SYSTEM/API/enableTrustedTraits" />
-		<property name="settingsReader" ref="settingsService" />
-		<property name="settingValueTypeConverter" ref="settingValueTypeConverter" />
+		<property name="path" value="COMMERCE/SYSTEM/API/enableTrustedTraits"/>
+		<property name="settingsReader" ref="settingsService"/>
+		<property name="settingValueTypeConverter" ref="settingValueTypeConverter"/>
 	</bean>
 
 	<context:component-scan base-package="com.elasticpath.rest" scope-resolver="org.springframework.context.annotation.Jsr330ScopeMetadataResolver"/>

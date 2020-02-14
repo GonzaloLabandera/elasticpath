@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.core.helpers;
 
 import java.util.Currency;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
@@ -37,11 +37,11 @@ public class PriceHelper {
 	}
 
 	/**
-	 * Retrieves a {@link Price} instance using {@link ServiceLocator#getService(String)}.
+	 * Retrieves a {@link Price} instance using {@link BeanLocator#getPrototypeBean(String, Class)}.
 	 * @return the new {@link Price} instance
 	 */
 	protected Price createPrice() {
-		return ServiceLocator.getService(ContextIdNames.PRICE);
+		return BeanLocator.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 	}
 
 }

@@ -94,16 +94,21 @@ public class CustomerAuthenticationImpl extends AbstractLegacyPersistenceImpl im
 		if (StringUtils.isBlank(clearTextPassword)) {
 			setPassword(null);
 		} else {
-			final PasswordEncoder passwordEncoder = getBean(ContextIdNames.PASSWORDENCODER);
-			final SaltFactory<String> saltFactory = getBean(ContextIdNames.SALT_FACTORY);
+			final PasswordEncoder passwordEncoder = getSingletonBean(ContextIdNames.PASSWORDENCODER, PasswordEncoder.class);
+			final SaltFactory<String> saltFactory = getSaltFactoryBean();
 			setSalt(saltFactory.createSalt());
 			setPassword(passwordEncoder.encodePassword(clearTextPassword, getSalt()));
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private SaltFactory<String> getSaltFactoryBean() {
+		return getSingletonBean(ContextIdNames.SALT_FACTORY, SaltFactory.class);
+	}
+
 	@Override
 	public String resetPassword() {
-		final PasswordGenerator passwordGenerator = getBean("passwordGenerator");
+		final PasswordGenerator passwordGenerator = getSingletonBean(ContextIdNames.PASSWORD_GENERATOR, PasswordGenerator.class);
 		final String newPassword = passwordGenerator.getPassword();
 		setClearTextPassword(newPassword);
 		return newPassword;

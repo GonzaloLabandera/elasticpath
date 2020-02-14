@@ -47,7 +47,7 @@ public abstract class AbstractBaseAmountDtoInsertUpdateImporter extends Abstract
 	 * @return ImportFault fault object
 	 */
 	protected ImportFault createImportFault(final BaseAmountDTO baseAmountDto) {
-		final ImportFault fault = getBeanFactory().getBean(ContextIdNames.IMPORT_FAULT);
+		final ImportFault fault = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 		fault.setLevel(ImportFault.ERROR);
 		fault.setCode("import.csvFile.badRow.databaseError");
 		if (baseAmountDto == null) {
@@ -108,7 +108,7 @@ public abstract class AbstractBaseAmountDtoInsertUpdateImporter extends Abstract
 	 * @return the base amount from database.
 	 */
 	protected BaseAmount findBaseAmount(final BaseAmount baseAmount) {
-		BaseAmountFilter filter = getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter filter = getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		filter.setObjectGuid(baseAmount.getObjectGuid());
 		filter.setObjectType(baseAmount.getObjectType());
 		filter.setQuantity(baseAmount.getQuantity());
@@ -144,7 +144,7 @@ public abstract class AbstractBaseAmountDtoInsertUpdateImporter extends Abstract
 	 * @param baseAmount the BaseAmount to delete
 	 */
 	protected void delete(final BaseAmount baseAmount) {
-		final BaseAmountFilter filter = getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		final BaseAmountFilter filter = getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 
 		filter.setObjectGuid(baseAmount.getObjectGuid());
 		filter.setObjectType(baseAmount.getObjectType());
@@ -197,7 +197,7 @@ public abstract class AbstractBaseAmountDtoInsertUpdateImporter extends Abstract
 	 */
 	public TimeService getTimeService() {
 		if (timeService == null) {
-			timeService = getBeanFactory().getBean(ContextIdNames.TIME_SERVICE);
+			timeService = getBeanFactory().getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		}
 		return timeService;
 	}

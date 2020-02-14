@@ -4,7 +4,6 @@
     <resource>system_configuration.xml</resource>
 	<resource>tax_codes.xml</resource>
 	<resource>tax_jurisdictions.xml</resource>
-	<resource>payment_gateways.xml</resource>
 	<resource>customer_groups.xml</resource>
 	<resource>customerprofile_attributes.xml</resource>
 	<resource>user_roles.xml</resource>

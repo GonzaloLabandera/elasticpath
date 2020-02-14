@@ -22,7 +22,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
@@ -105,8 +105,8 @@ public class SkuSearchViewTab extends AbstractCatalogSearchViewTab implements Se
 
 
 		searchJob = new SkuSearchRequestJob();
-		skuOptionService = ServiceLocator.getService(ContextIdNames.SKU_OPTION_SERVICE);
-		catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		skuOptionService = BeanLocator.getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
+		catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 
 		CatalogEventService.getInstance().addCatalogListener(this);
 	}
@@ -345,7 +345,7 @@ public class SkuSearchViewTab extends AbstractCatalogSearchViewTab implements Se
 	 */
 	protected SkuSearchCriteria getModel() {
 		if (searchCriteria == null) {
-			searchCriteria = ServiceLocator.getService(ContextIdNames.SKU_SEARCH_CRITERIA);
+			searchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.SKU_SEARCH_CRITERIA, SkuSearchCriteria.class);
 			// Set default sorting criteria
 			searchCriteria.setSortingOrder(SortOrder.ASCENDING);
 			searchCriteria.setSortingType(StandardSortBy.SKU_CODE);

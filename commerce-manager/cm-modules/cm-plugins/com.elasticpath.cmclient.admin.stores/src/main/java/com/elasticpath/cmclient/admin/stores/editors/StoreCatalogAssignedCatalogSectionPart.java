@@ -10,7 +10,7 @@ import org.eclipse.ui.forms.editor.FormPage;
 
 import com.elasticpath.cmclient.admin.stores.AdminStoresImageRegistry;
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
@@ -33,7 +33,7 @@ public class StoreCatalogAssignedCatalogSectionPart extends AbstractStoreAssigne
 	public StoreCatalogAssignedCatalogSectionPart(final FormPage formPage, final AbstractCmClientFormEditor editor,
 			final boolean editable) {
 		super(formPage, editor);
-		this.catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		this.catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		this.getSection().setEnabled(editable);
 	}
 

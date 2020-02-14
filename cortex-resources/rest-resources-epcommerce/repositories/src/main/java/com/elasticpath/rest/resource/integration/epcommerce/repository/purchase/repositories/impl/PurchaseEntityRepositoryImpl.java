@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl;
 
@@ -46,7 +46,7 @@ public class PurchaseEntityRepositoryImpl<E extends PurchaseEntity, I extends Pu
 	public Single<PurchaseEntity> findOne(final PurchaseIdentifier identifier) {
 		String scope = identifier.getPurchases().getScope().getValue();
 		String purchaseId = identifier.getPurchaseId().getValue();
-		return orderRepository.findByGuidAsSingle(scope, purchaseId)
+		return orderRepository.findByGuid(scope, purchaseId)
 				.map(this::convertOrderToPurchaseEntity);
 	}
 

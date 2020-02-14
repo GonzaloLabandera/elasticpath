@@ -4,12 +4,12 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl;
 
 import io.reactivex.Maybe;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
-import com.elasticpath.rest.definition.paymentmethods.PaymentmethodInfoIdentifier;
+import com.elasticpath.rest.definition.paymentmethods.OrderPaymentMethodsIdentifier;
 import com.elasticpath.rest.id.ResourceIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
@@ -28,7 +28,7 @@ public class NoPaymentMethodResolutionStrategy implements StructuredErrorResolut
 	/**
 	 * Transforms structured error resolution into a resource identifier.
 	 *
-	 * @param message a structured error message
+	 * @param message          a structured error message
 	 * @param cortexResourceID the cart Id.
 	 * @return a resource identifier, or Optional.empty() if none exists.
 	 */
@@ -38,18 +38,18 @@ public class NoPaymentMethodResolutionStrategy implements StructuredErrorResolut
 
 			return shoppingCartRepository.findStoreForCartGuid(cortexResourceID)
 					.flatMapMaybe(
-					storeCode -> cartOrderRepository.findByCartGuidSingle(cortexResourceID)
-							.flatMapMaybe(cartOrder -> Maybe.just(buildPaymentInfoIdentifier(storeCode, cartOrder))));
-
+							storeCode -> cartOrderRepository.findByCartGuid(cortexResourceID)
+									.flatMapMaybe(cartOrder -> Maybe.just(buildPaymentInfoIdentifier(storeCode, cartOrder))));
 		}
 		return Maybe.empty();
 	}
 
-	private PaymentmethodInfoIdentifier buildPaymentInfoIdentifier(final String storeCode, final CartOrder cartOrder) {
-		return PaymentmethodInfoIdentifier.builder().withOrder(OrderIdentifier.builder()
-				.withOrderId(StringIdentifier.of(cartOrder.getGuid()))
-				.withScope(StringIdentifier.of(storeCode))
-				.build())
+	private OrderPaymentMethodsIdentifier buildPaymentInfoIdentifier(final String storeCode, final CartOrder cartOrder) {
+		return OrderPaymentMethodsIdentifier.builder()
+				.withOrder(OrderIdentifier.builder()
+						.withOrderId(StringIdentifier.of(cartOrder.getGuid()))
+						.withScope(StringIdentifier.of(storeCode))
+						.build())
 				.build();
 	}
 
@@ -61,7 +61,7 @@ public class NoPaymentMethodResolutionStrategy implements StructuredErrorResolut
 		this.shoppingCartRepository = shoppingCartRepository;
 	}
 
-	protected  CartOrderRepository getCartOrderRepository() {
+	protected CartOrderRepository getCartOrderRepository() {
 		return cartOrderRepository;
 	}
 

@@ -144,7 +144,7 @@ public class ImportCustomerAddressTest extends ImportJobTestCase {
 //		// update customer addresses once again with less data
 //		executeImportJob(createDeleteCustomerAddressImportJob());
 //
-//		CustomerService customerService = (CustomerService) elasticPath.getBean(ContextIdNames.CUSTOMER_SERVICE);
+//		CustomerService customerService = (CustomerService) elasticPath.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 //		Customer customer = customerService.findByCategoryAndCatalogCode("101");
 //		assertTrue(customer.getAddresses().isEmpty());
 //		

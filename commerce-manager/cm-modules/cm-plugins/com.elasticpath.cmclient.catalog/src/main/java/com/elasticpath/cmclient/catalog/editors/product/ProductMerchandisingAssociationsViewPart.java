@@ -36,9 +36,9 @@ import org.eclipse.ui.IPropertyListener;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.dialogs.product.ProductMerchandisingAssociationDialog;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.TableItems;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -151,7 +151,7 @@ public class ProductMerchandisingAssociationsViewPart extends DefaultStatePolicy
 		this.catalog = catalog;
 		this.tableViewers = new HashMap<>();
 		this.editor = editor;
-		this.associationService = ServiceLocator.getService(ContextIdNames.PRODUCT_ASSOCIATION_SERVICE);
+		this.associationService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_ASSOCIATION_SERVICE, ProductAssociationService.class);
 	}
 
 	@Override

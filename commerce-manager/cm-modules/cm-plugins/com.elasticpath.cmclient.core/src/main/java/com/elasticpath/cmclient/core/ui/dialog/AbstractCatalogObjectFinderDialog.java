@@ -13,7 +13,7 @@ import java.util.Set;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.search.SafeSearchCodes;
 import com.elasticpath.cmclient.core.search.impl.SafeSearchCodesImpl;
@@ -83,7 +83,7 @@ public abstract class AbstractCatalogObjectFinderDialog extends AbstractEpFinder
 	 * @return the list of authorized catalogs
 	 */
 	protected List<Catalog> getInitializeAuthorizedCatalogsList() {
-		final CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		List<Catalog> catalogList = catalogService.findAllCatalogs(); 
 		AuthorizationService.getInstance().filterAuthorizedCatalogs(catalogList);
 		

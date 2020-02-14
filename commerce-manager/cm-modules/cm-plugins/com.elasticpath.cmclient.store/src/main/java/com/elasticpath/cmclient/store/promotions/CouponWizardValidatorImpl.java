@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.store.promotions;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.promotions.CouponCollectionModel;
 import com.elasticpath.cmclient.core.promotions.CouponValidator;
 import com.elasticpath.cmclient.core.promotions.ValidationState;
@@ -54,7 +54,7 @@ public class CouponWizardValidatorImpl implements CouponValidator {
 	}
 	
 	private Collection<String> doCouponCodesExist(final Collection<String> couponCodes) {
-		CouponService couponService = ServiceLocator.getService(ContextIdNames.COUPON_SERVICE);
+		CouponService couponService = BeanLocator.getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
 		return couponService.findExistingCouponCodes(couponCodes);
 	}
 }

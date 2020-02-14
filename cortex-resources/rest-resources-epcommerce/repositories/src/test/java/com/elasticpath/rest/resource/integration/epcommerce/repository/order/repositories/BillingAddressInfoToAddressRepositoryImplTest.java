@@ -45,7 +45,7 @@ public class BillingAddressInfoToAddressRepositoryImplTest {
 
 	@Test
 	public void shouldReturnNoValuesIfCartBillingAddressDoesNotExistTest() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
 		when(cartOrderRepository.getBillingAddress(cartOrder)).thenReturn(Maybe.empty());
 		repository.getElements(getBillingAddressInfoIdentifier())
 				.test()
@@ -55,7 +55,7 @@ public class BillingAddressInfoToAddressRepositoryImplTest {
 
 	@Test
 	public void shouldReturnGuidIfCartBillingAddressExistTest() {
-		when(cartOrderRepository.findByGuidAsSingle(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.findByGuid(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
 		when(cartOrderRepository.getBillingAddress(cartOrder)).thenReturn(Maybe.just(address));
 		when(address.getGuid()).thenReturn(ADDRESS_GUID);
 		repository.getElements(getBillingAddressInfoIdentifier())

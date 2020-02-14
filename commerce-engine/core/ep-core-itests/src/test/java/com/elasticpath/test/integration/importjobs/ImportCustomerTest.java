@@ -14,7 +14,6 @@ import java.util.Locale;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.test.integration.DirtiesDatabase;
@@ -23,9 +22,6 @@ import com.elasticpath.test.integration.DirtiesDatabase;
  * Test import job for Customer.
  */
 public class ImportCustomerTest extends ImportJobTestCase {
-
-	@Autowired
-	private Utility utility;
 
 	@Autowired
 	private CustomerService customerService;

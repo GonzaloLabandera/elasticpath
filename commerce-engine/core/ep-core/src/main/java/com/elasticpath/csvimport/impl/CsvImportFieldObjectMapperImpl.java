@@ -141,7 +141,7 @@ public class CsvImportFieldObjectMapperImpl<T> implements CsvImportFieldObjectMa
 	 * @return the created ImportFault
 	 */
 	ImportFault createImportFault(final int faultLevel, final String faultCode, final Object[] faultArgs) {
-		final ImportFault fault = getBeanFactory().getBean(ContextIdNames.IMPORT_FAULT);
+		final ImportFault fault = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 		fault.setLevel(faultLevel);
 		fault.setCode(faultCode);
 		fault.setArgs(faultArgs);

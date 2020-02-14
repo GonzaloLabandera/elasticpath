@@ -6,9 +6,9 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.transfor
 import java.util.List;
 
 import com.elasticpath.base.exception.structured.EpValidationException;
+import com.elasticpath.base.exception.structured.InvalidBusinessStateException;
 import com.elasticpath.base.exception.structured.StructuredErrorMessageException;
-import com.elasticpath.commons.exception.InvalidBusinessStateException;
-import com.elasticpath.commons.exception.UnavailableException;
+import com.elasticpath.base.exception.structured.UnavailableException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.command.ExecutionResult;

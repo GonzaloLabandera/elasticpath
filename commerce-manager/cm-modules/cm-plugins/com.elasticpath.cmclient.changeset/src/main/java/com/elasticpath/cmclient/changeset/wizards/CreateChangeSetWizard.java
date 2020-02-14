@@ -8,8 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import com.elasticpath.cmclient.changeset.ChangeSetImageRegistry;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventService;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
 import com.elasticpath.cmclient.core.wizard.AbstractEpWizard;
@@ -50,7 +50,8 @@ public class CreateChangeSetWizard extends AbstractEpWizard<ChangeSet> {
 	 *
 	 */
 	private void addChangeSet(final ChangeSet changeSet) {
-		ChangeSetManagementService changeSetManagementService = ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+		ChangeSetManagementService changeSetManagementService = BeanLocator
+				.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 		// use the current cm user as the creator of the change set
 		CmUser createdByCmUser = LoginManager.getCmUser();
 		changeSet.setCreatedByUserGuid(createdByCmUser.getGuid());
@@ -66,7 +67,7 @@ public class CreateChangeSetWizard extends AbstractEpWizard<ChangeSet> {
 	@Override
 	protected ChangeSet getModel() {
 		if (changeSet == null) {
-			changeSet = ServiceLocator.getService(ContextIdNames.CHANGE_SET);
+			changeSet = BeanLocator.getPrototypeBean(ContextIdNames.CHANGE_SET, ChangeSet.class);
 		}
 		return changeSet;
 	}

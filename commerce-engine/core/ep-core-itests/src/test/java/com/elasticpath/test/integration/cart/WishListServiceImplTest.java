@@ -118,8 +118,7 @@ public class WishListServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private WishList createWishList() {
-		final WishList wishList = getBeanFactory().getBean(ContextIdNames.WISH_LIST);
-		return wishList;
+		return getBeanFactory().getPrototypeBean(ContextIdNames.WISH_LIST, WishList.class);
 	}
 
 	/**
@@ -138,7 +137,8 @@ public class WishListServiceImplTest extends BasicSpringContextTest {
 		custSession.setCreationDate(new Date());
 		custSession.setLastAccessedDate(new Date());
 		custSession.setShopper(shopper);
-		final CustomerSessionService customerSessionService = getBeanFactory().getBean("customerSessionService");
+		final CustomerSessionService customerSessionService = getBeanFactory().getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE,
+				CustomerSessionService.class);
 		customerSessionService.add(custSession);
 
 		final WishList wishList = createWishList();

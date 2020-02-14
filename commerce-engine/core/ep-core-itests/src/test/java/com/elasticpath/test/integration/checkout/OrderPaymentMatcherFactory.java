@@ -1,149 +1,85 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
-
 package com.elasticpath.test.integration.checkout;
 
-import com.elasticpath.domain.order.OrderPayment;
+import static com.elasticpath.plugin.payment.provider.dto.TransactionType.CANCEL_RESERVE;
+import static com.elasticpath.plugin.payment.provider.dto.TransactionType.CHARGE;
+import static com.elasticpath.plugin.payment.provider.dto.TransactionType.CREDIT;
+import static com.elasticpath.plugin.payment.provider.dto.TransactionType.RESERVE;
+import static com.elasticpath.plugin.payment.provider.dto.TransactionType.REVERSE_CHARGE;
+
 import com.elasticpath.domain.order.OrderPaymentStatus;
-import com.elasticpath.plugin.payment.PaymentType;
 
 /**
  * Factory for creating {@link OrderPaymentMatcher}s for integration tests.
  */
 public class OrderPaymentMatcherFactory {
-
 	private OrderPaymentMatcherFactory() {
 		// Prohibit instances of this class being created.
 	}
 
 	/**
-	 * Gets a successful token capture matcher.
+	 * Gets a successful credit.
 	 *
-	 * @return the successful token capture
+	 * @return the successful credit
 	 */
-	public static OrderPaymentMatcher createSuccessfulTokenCapture() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.PAYMENT_TOKEN)
-				.withTransaction(OrderPayment.CAPTURE_TRANSACTION)
-				.build();
+	public static OrderPaymentMatcher createSuccessfulCredit() {
+		return new OrderPaymentMatcher(OrderPaymentStatus.APPROVED, CREDIT);
 	}
 
 	/**
-	 * Gets a successful token authorization matcher.
+	 * Gets a successful charge.
 	 *
-	 * @return the successful token authorization
+	 * @return the successful charge
 	 */
-	public static OrderPaymentMatcher createSuccessfulTokenAuthorization() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.PAYMENT_TOKEN)
-				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
-				.build();
-	}
-	
-	/**
-	 * Gets a successful token credit matcher.
-	 *
-	 * @return the successful token credit
-	 */
-	public static OrderPaymentMatcher createSuccessfulTokenCredit() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.PAYMENT_TOKEN)
-				.withTransaction(OrderPayment.CREDIT_TRANSACTION)
-				.build();
+	public static OrderPaymentMatcher createSuccessfulCharge() {
+		return new OrderPaymentMatcher(OrderPaymentStatus.APPROVED, CHARGE);
 	}
 
 	/**
-	 * Gets a successful credit card authorization matcher.
+	 * Gets a successful cancel.
 	 *
-	 * @return the successful credit card authorization matcher
+	 * @return the successful cancel
 	 */
-	public static OrderPaymentMatcher createSuccessfulCreditCardAuthorization() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.CREDITCARD_DIRECT_POST)
-				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
-				.build();
+	public static OrderPaymentMatcher createSuccessfulCancel() {
+		return new OrderPaymentMatcher(OrderPaymentStatus.APPROVED, CANCEL_RESERVE);
 	}
 
 	/**
-	 * Gets a failed credit card authorization matcher.
+	 * Gets a successful reverse charge.
 	 *
-	 * @return the failed credit card authorization matcher
+	 * @return the successful reverse charge
 	 */
-	public static OrderPaymentMatcher createFailedCreditCardAuthorization() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.FAILED)
-				.withType(PaymentType.CREDITCARD_DIRECT_POST)
-				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
-				.build();
+	public static OrderPaymentMatcher createSuccessfulReverseCharge() {
+		return new OrderPaymentMatcher(OrderPaymentStatus.APPROVED, REVERSE_CHARGE);
 	}
 
 	/**
-	 * Gets a successful credit card capture matcher.
+	 * Gets a successful treserve.
 	 *
-	 * @return the successful credit card capture matcher
+	 * @return the successful reserve
 	 */
-	public static OrderPaymentMatcher createSuccessfulCreditCardCapture() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.CREDITCARD_DIRECT_POST)
-				.withTransaction(OrderPayment.CAPTURE_TRANSACTION)
-				.build();
+	public static OrderPaymentMatcher createSuccessfulReserve() {
+		return new OrderPaymentMatcher(OrderPaymentStatus.APPROVED, RESERVE);
+	}
+
+
+	/**
+	 * Gets a failed reserve.
+	 *
+	 * @return the failed reserve
+	 */
+	public static OrderPaymentMatcher createFailedReserve() {
+		return new OrderPaymentMatcher(OrderPaymentStatus.FAILED, RESERVE);
 	}
 
 	/**
-	 * Gets a successful gift certificate capture matcher.
+	 * Gets a failed charge.
 	 *
-	 * @return the successful gift certificate capture
+	 * @return the failed charge
 	 */
-	public static OrderPaymentMatcher createSuccessfulGiftCertificateCapture() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.GIFT_CERTIFICATE)
-				.withTransaction(OrderPayment.CAPTURE_TRANSACTION)
-				.build();
-	}
-	
-	/**
-	 * Gets a successful gift certificate authorization matcher.
-	 *
-	 * @return the successful gift certificate authorization
-	 */
-	public static OrderPaymentMatcher createSuccessfulGiftCertificateAuthorization() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.GIFT_CERTIFICATE)
-				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
-				.build();
-	}
-
-	/**
-	 * Gets a failed token capture matcher.
-	 *
-	 * @return the failed token capture
-	 */
-	public static OrderPaymentMatcher createFailedTokenAuthorization() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.FAILED)
-				.withType(PaymentType.PAYMENT_TOKEN)
-				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
-				.build();
-	}
-
-	/**
-	 * Gets a failed token capture matcher.
-	 *
-	 * @return the failed token capture
-	 */
-	public static OrderPaymentMatcher createFailedTokenCapture() {
-		return OrderPaymentMatcher.builder()
-				.withStatus(OrderPaymentStatus.FAILED)
-				.withType(PaymentType.PAYMENT_TOKEN)
-				.withTransaction(OrderPayment.CAPTURE_TRANSACTION)
-				.build();
+	public static OrderPaymentMatcher createFailedCharge() {
+		return new OrderPaymentMatcher(OrderPaymentStatus.FAILED, CHARGE);
 	}
 }

@@ -22,20 +22,6 @@
 		</property>
 	</bean>
 
-	<bean id="additionalAuthorizationService" parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.service.impl.AdditionalAuthorizationServiceImpl">
-				<property name="paymentService">
-					<ref bean="paymentService" />
-				</property>
-				<property name="elasticPath">
-					<ref bean="elasticPath" />
-				</property>
-				<property name="storeService" ref="nonCachingStoreService"/>
-			</bean>
-		</property>
-	</bean>
-
 	<bean id="shipmentService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.impl.ShipmentServiceImpl">

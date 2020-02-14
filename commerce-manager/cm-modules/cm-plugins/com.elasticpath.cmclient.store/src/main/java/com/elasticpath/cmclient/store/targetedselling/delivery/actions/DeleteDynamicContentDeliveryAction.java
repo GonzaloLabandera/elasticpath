@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditions.handlers.ConditionHandler;
 import com.elasticpath.cmclient.conditionbuilder.wizard.model.impl.StoresConditionModelAdapterImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
@@ -41,9 +41,9 @@ public class DeleteDynamicContentDeliveryAction extends BaseDynamicContentDelive
 
 	/** DynamicContentSearchResultsView list view. */
 	private final DynamicContentDeliverySearchResultsView listView;
-	private final DynamicContentDeliveryService dynamicContentDeliveryService = ServiceLocator.getService(
-		ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final DynamicContentDeliveryService dynamicContentDeliveryService = BeanLocator
+			.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	/**
 	 * The constructor.

@@ -19,7 +19,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
+
 import javax.persistence.EntityNotFoundException;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -29,8 +33,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultMessage;
 import org.apache.log4j.Logger;
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.retry.RetryException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.elasticpath.catalog.batch.message.CatalogBatchEventMessageProcessor;
 import com.elasticpath.catalog.exception.ValidationException;
@@ -69,6 +72,8 @@ import com.elasticpath.test.util.Utils;
  * Integration tests for Catalog Batch functionality.
  */
 @JmsBrokerConfigurator(url = JMS_BROKER_URL)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesDatabase
 public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 
 	public static final String JMS_BROKER_URL = "tcp://localhost:61622";
@@ -133,7 +138,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testProjectionAndProjectionHistoryRepositoryShouldBeEmptyWhenBuildAllOptionsMessageReceivedAndCleanUpDatabaseIsTrue()
 			throws Exception {
 		final String skuOptionCode = Utils.uniqueCode(CODE);
@@ -151,7 +155,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void projectionAndProjectionHistoryRepositoryShouldNotBeEmptyWhenBuildAllOptionsMessageReceivedAndCleanUpDatabaseIsFalse()
 			throws Exception {
 		final String skuOptionCode = Utils.uniqueCode(CODE);
@@ -171,7 +174,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void projectionRepositoryShouldContainsOneProjectionWhenBuildAllOptionsMessageReceivedAndCleanUpDatabaseIsTrue()
 			throws Exception {
 		final int expectedNumberOfCatalogEvents = 1;
@@ -204,7 +206,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void projectionEntityAndProjectionHistoryEntityShouldBeStoredInRepositoriesWhenBuildAllOptionsMessageReceivedAndCleanUpDatabaseIsFalse()
 			throws Exception {
 		final Catalog catalog = createCatalog("Test Catalog", Locale.ENGLISH, Currency.getInstance(Locale.CANADA));
@@ -240,7 +241,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void projectionRepositoryShouldContainsSixProjectionsWhenBuildAllCategoriesMessageReceivedAndCleanUpDatabaseIsTrue() throws Exception {
 		final int expectedNumberOfCatalogEventsCategoryCreated = 6;
 		final int expectedNumberOfEventsAfterBatchProcessing = 2;
@@ -298,7 +298,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void projectionRepositoryShouldContainsSixProjectionsWhenBuildAllCategoriesMessageReceivedAndCleanUpDatabaseIsFalse() throws Exception {
 		final int expectedNumberOfCatalogEventsCategoryCreated = 6;
 
@@ -348,7 +347,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testRetryAndSuccess() throws Exception {
 		final Exchange exchange = createExchange(START_JOB, RETRY_SUCCEEDING_JOB, Collections.emptyMap());
 		spyTransactionManager.reset();
@@ -375,7 +373,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testRetryAndFailureWithDataAccessException() throws Exception {
 		final Exchange exchange = createExchange(START_JOB, RETRY_FAILING_JOB, Collections.emptyMap());
 		spyTransactionManager.reset();
@@ -394,7 +391,6 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testFailureAndNoRetryWithRuntimeException() throws Exception {
 		final Exchange exchange = createExchange(START_JOB, FAILING_JOB_RUNTIME_EXCEPTION, Collections.emptyMap());
 		spyTransactionManager.reset();
@@ -473,7 +469,7 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	private SkuOption persistSkuOption(final Catalog catalog, final String name) {
-		final SkuOption skuOption = getBeanFactory().getBean(ContextIdNames.SKU_OPTION);
+		final SkuOption skuOption = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 
 		skuOption.setCatalog(catalog);
 		skuOption.setOptionKey(name);

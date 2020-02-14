@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.reporting.returnsandexchanges.ReturnsAndExchangesPreparedStatementBuilder;
 import com.elasticpath.cmclient.reporting.returnsandexchanges.ReturnsAndExchangesReportMessages;
@@ -128,7 +128,8 @@ public class ReturnsAndExchangesReportServiceImpl {
 	private List<Object[]> flattenOrderReturnResults(final List<Object[]> orderReturnSkuResults,
 													 final Map<String, Object[]> taxMap) {
 
-		final OrderReturnSkuReason orderReturnSkuReasons = ServiceLocator.getService(ContextIdNames.ORDER_RETURN_SKU_REASON);
+		final OrderReturnSkuReason orderReturnSkuReasons = BeanLocator
+				.getSingletonBean(ContextIdNames.ORDER_RETURN_SKU_REASON, OrderReturnSkuReason.class);
 		final List<Object[]> reportList = new ArrayList<>();
 
 		String currRmaCode = "";
@@ -207,7 +208,7 @@ public class ReturnsAndExchangesReportServiceImpl {
 	}
 
 	private ReportService getReportService() {
-		return ServiceLocator.getService(ContextIdNames.REPORT_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.REPORT_SERVICE, ReportService.class);
 	}
 
 	private ReturnsAndExchangesPreparedStatementBuilder getPreparedStatementBuilder() {

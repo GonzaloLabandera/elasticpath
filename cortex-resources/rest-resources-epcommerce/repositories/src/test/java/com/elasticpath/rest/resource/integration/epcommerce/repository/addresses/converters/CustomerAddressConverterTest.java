@@ -6,6 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.addresse
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,7 +17,6 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.rest.definition.addresses.AddressDetailEntity;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.base.NameEntity;
 
@@ -44,13 +44,19 @@ public class CustomerAddressConverterTest {
 	@InjectMocks
 	private CustomerAddressConverter converter;
 
+	@Before
+	public void setup() {
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class)).thenReturn(new CustomerAddressImpl());
+	}
+
 	@Test
 	public void shouldHaveAllCustomerAddressDetails() {
-		when(coreBeanFactory.getBean(ContextIdNames.CUSTOMER_ADDRESS)).thenReturn(new CustomerAddressImpl());
 		AddressEntity addressEntity = AddressEntity.builder()
 				.withAddressId(ADDRESS_ID)
 				.withName(getNameEntity())
-				.withAddress(getAddressDetailEntity())
+				.withAddress(getAddressEntity())
+				.withPhoneNumber(PHONE_NUMBER)
+				.withOrganization(ORGANIZATION)
 				.build();
 
 		CustomerAddress customerAddress = converter.convert(addressEntity);
@@ -68,8 +74,7 @@ public class CustomerAddressConverterTest {
 	}
 
 	@Test
-	public void shouldHaveNoAddressDetailsGivenNullAddressDetailEntity() {
-		when(coreBeanFactory.getBean(ContextIdNames.CUSTOMER_ADDRESS)).thenReturn(new CustomerAddressImpl());
+	public void shouldHaveNoAddressDetailsGivenNullAddresEntity() {
 		AddressEntity addressEntity = AddressEntity.builder()
 				.withAddressId(ADDRESS_ID)
 				.withName(getNameEntity())
@@ -91,10 +96,11 @@ public class CustomerAddressConverterTest {
 
 	@Test
 	public void shouldHaveNoNamesGivenNullNameEntity() {
-		when(coreBeanFactory.getBean(ContextIdNames.CUSTOMER_ADDRESS)).thenReturn(new CustomerAddressImpl());
 		AddressEntity addressEntity = AddressEntity.builder()
 				.withAddressId(ADDRESS_ID)
-				.withAddress(getAddressDetailEntity())
+				.withAddress(getAddressEntity())
+				.withPhoneNumber(PHONE_NUMBER)
+				.withOrganization(ORGANIZATION)
 				.build();
 
 		CustomerAddress customerAddress = converter.convert(addressEntity);
@@ -111,16 +117,14 @@ public class CustomerAddressConverterTest {
 		assertThat(customerAddress.getLastName()).isNull();
 	}
 
-	private AddressDetailEntity getAddressDetailEntity() {
-		return AddressDetailEntity.builder()
+	private com.elasticpath.rest.definition.base.AddressEntity getAddressEntity() {
+		return com.elasticpath.rest.definition.base.AddressEntity.builder()
 				.withStreetAddress(STREET_ADDRESS)
 				.withExtendedAddress(EXTENDED_ADDRESS)
 				.withRegion(REGIONS)
 				.withPostalCode(POSTAL_CODE)
 				.withLocality(LOCALITY)
 				.withCountryName(COUNTRY)
-				.withPhoneNumber(PHONE_NUMBER)
-				.withOrganization(ORGANIZATION)
 				.build();
 	}
 

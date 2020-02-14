@@ -1,13 +1,10 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.persistence.support;
 
 import java.util.Collection;
 
-import com.elasticpath.domain.order.OrderPaymentStatus;
-import com.elasticpath.domain.order.OrderShipmentStatus;
-import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.persistence.support.impl.CriteriaQuery;
 import com.elasticpath.service.search.query.OrderReturnSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
@@ -31,16 +28,6 @@ public interface OrderCriterion {
 		/** Query returns ENTITY. */
 		ENTITY
 	}
-
-	/**
-	 * Returns the criteria used to query by status.
-	 *
-	 * @param orderStatus the status of the order
-	 * @param paymentStatus the status of the payment
-	 * @param shipmentStatus the status of the shipment
-	 * @return the criteria used to query by status
-	 */
-	CriteriaQuery getStatusCriteria(OrderStatus orderStatus, OrderPaymentStatus paymentStatus, OrderShipmentStatus shipmentStatus);
 
 	/**
 	 * Returns the criteria used to query by customer property of String type, i.e. 'email', 'firstName', 'lastName' etc.

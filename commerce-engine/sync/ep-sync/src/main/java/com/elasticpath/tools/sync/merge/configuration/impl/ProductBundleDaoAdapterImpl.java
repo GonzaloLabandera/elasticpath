@@ -28,7 +28,7 @@ public class ProductBundleDaoAdapterImpl extends AbstractDaoAdapter<ProductBundl
 
 	@Override
 	public ProductBundle createBean(final ProductBundle bean) {
-		return beanFactory.getBean(ContextIdNames.PRODUCT_BUNDLE);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_BUNDLE, ProductBundle.class);
 	}
 
 	@Override

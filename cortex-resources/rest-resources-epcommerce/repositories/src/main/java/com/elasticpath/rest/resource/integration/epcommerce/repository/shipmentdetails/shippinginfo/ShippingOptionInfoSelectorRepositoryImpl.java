@@ -142,7 +142,7 @@ public class ShippingOptionInfoSelectorRepositoryImpl<SI extends ShippingOptionI
 			return Single.just(SelectStatus.EXISTING);
 		} else {
 			cartOrder.setShippingOptionCode(shippingOptionId);
-			return cartOrderRepository.saveCartOrderAsSingle(cartOrder)
+			return cartOrderRepository.saveCartOrder(cartOrder)
 					.flatMap(savedCartOrder -> Single.just(SelectStatus.SELECTED));
 		}
 	}

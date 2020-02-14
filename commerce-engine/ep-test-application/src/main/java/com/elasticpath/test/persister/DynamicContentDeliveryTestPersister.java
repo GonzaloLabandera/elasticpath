@@ -45,40 +45,44 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Construct DynamicContentDeliveryTestPersister.
+	 *
 	 * @param beanFactory - elastic path bean factory
 	 */
 	public DynamicContentDeliveryTestPersister(final BeanFactory beanFactory) {
 
 		this.beanFactory = beanFactory;
 
-		dynamicContentDeliveryService = this.beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+		dynamicContentDeliveryService = this.beanFactory.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE,
+				DynamicContentDeliveryService.class);
 
-		dynamicContentService = this.beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE);
+		dynamicContentService = this.beanFactory.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class);
 
-		contentSpaceService = this.beanFactory.getBean(ContextIdNames.CONTENTSPACE_SERVICE);
+		contentSpaceService = this.beanFactory.getSingletonBean(ContextIdNames.CONTENTSPACE_SERVICE, ContentSpaceService.class);
 
-		sellingContextService = this.beanFactory.getBean(ContextIdNames.SELLING_CONTEXT_SERVICE);
+		sellingContextService = this.beanFactory.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class);
 
-		tagConditionService = this.beanFactory.getBean(ContextIdNames.TAG_CONDITION_SERVICE);
+		tagConditionService = this.beanFactory.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
 
-		tagDefinitionReader = this.beanFactory.getBean(ContextIdNames.TAG_DEFINITION_READER);
+		tagDefinitionReader = this.beanFactory.getSingletonBean(ContextIdNames.TAG_DEFINITION_READER, TagDefinitionReader.class);
 	}
 
 	/**
 	 * Persist DynamicContentAssignment into database.
+	 *
 	 * @param dynamicContentDeliveryName instance to persist.
-	 * @param dynamicContentName dynamic content name.
-	 * @param priority priority for this assignment 1..10 (1 is the highest)
-	 * @param contentspaces the array of contentspace names
+	 * @param dynamicContentName         dynamic content name.
+	 * @param priority                   priority for this assignment 1..10 (1 is the highest)
+	 * @param contentspaces              the array of contentspace names
 	 * @return persistent instance of DynamicContentDelivery.
 	 */
 	public DynamicContentDelivery persistDynamicContentAssignment(
 			final String dynamicContentDeliveryName, final String dynamicContentName,
-			final int priority, final String...contentspaces) {
+			final int priority, final String... contentspaces) {
 
 		final DynamicContent content = findDynamicContent(dynamicContentName);
 
-		final DynamicContentDelivery dynamicContentAssignment = beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY);
+		final DynamicContentDelivery dynamicContentAssignment = beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY,
+				DynamicContentDelivery.class);
 		dynamicContentAssignment.setGuid(dynamicContentDeliveryName);
 		dynamicContentAssignment.setName(dynamicContentDeliveryName);
 		dynamicContentAssignment.setPriority(priority);
@@ -101,13 +105,13 @@ public class DynamicContentDeliveryTestPersister {
 	 * create conditional expression.
 	 *
 	 * @param tagDictionaryGuid the tag identifier
-	 * @param condition the condition build using DSL Builder
+	 * @param condition         the condition build using DSL Builder
 	 * @return conditional expression
 	 */
 	public ConditionalExpression createConditionalExpression(
 			final String tagDictionaryGuid, final String conditionGuid, final String condition) {
 
-		ConditionalExpression conditionalExpression = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
+		ConditionalExpression conditionalExpression = beanFactory.getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 		conditionalExpression.setGuid("guid_" + conditionGuid);
 		conditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
 		conditionalExpression.setName("name_" + tagDictionaryGuid);
@@ -122,13 +126,13 @@ public class DynamicContentDeliveryTestPersister {
 	 * create conditional expression.
 	 *
 	 * @param tagDictionaryGuid the tag identifier
-	 * @param condition the condition build using DSL Builder
+	 * @param condition         the condition build using DSL Builder
 	 * @return conditional expression
 	 */
 	public ConditionalExpression createConditionalExpression(
 			final String tagDictionaryGuid, final String condition) {
 
-		ConditionalExpression conditionalExpression = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
+		ConditionalExpression conditionalExpression = beanFactory.getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 		conditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
 		conditionalExpression.setName("name_" + tagDictionaryGuid);
 		conditionalExpression.setDescription("desc_" + tagDictionaryGuid);
@@ -142,16 +146,16 @@ public class DynamicContentDeliveryTestPersister {
 	 * persist conditions for dynamicContentAssignment.
 	 *
 	 * @param dynamicContentDelivery the assignment
-	 * @param shopper the condition
-	 * @param time the condition
-	 * @param stores the condition
+	 * @param shopper                the condition
+	 * @param time                   the condition
+	 * @param stores                 the condition
 	 * @return updated assignment with selling context containing conditions
 	 */
 	public DynamicContentDelivery persistDynamicContentDeliveryConditions(
 			final DynamicContentDelivery dynamicContentDelivery,
 			final ConditionalExpression shopper, final ConditionalExpression time, final ConditionalExpression stores) {
 
-		SellingContext sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
+		SellingContext sellingContext = beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 
 		sellingContext.setPriority(1);
 		sellingContext.setCondition("SHOPPER", shopper);
@@ -194,6 +198,7 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * get all DynamicContentDelivery from db by its name.
+	 *
 	 * @return list of all deliveries
 	 */
 	public List<DynamicContentDelivery> findDynamicContentDeliveryAll() {
@@ -204,6 +209,7 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Persist DynamicContentDelivery into database.
+	 *
 	 * @param dynamicContentDelivery instance to persist
 	 * @return persistent instance of DynamicContentAssignment.
 	 */
@@ -225,13 +231,14 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Persist DynamicContent into database.
+	 *
 	 * @param dynamicContentName instance to persist.
-	 * @param wrapperId the wrapper id.
+	 * @param wrapperId          the wrapper id.
 	 * @return persistent instance of DynamicContent.
 	 */
 	public DynamicContent persistDynamicContent(final String dynamicContentName, final String wrapperId) {
 
-		final DynamicContent dynamicContent = beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT);
+		final DynamicContent dynamicContent = beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 		dynamicContent.setName(dynamicContentName);
 		dynamicContent.setGuid(dynamicContentName);
 		dynamicContent.setContentWrapperId(wrapperId);
@@ -242,14 +249,15 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Persist DynamicContent into database.
+	 *
 	 * @param dynamicContentName instance to persist.
-	 * @param wrapperId the wrapper id.
-	 * @param description description
+	 * @param wrapperId          the wrapper id.
+	 * @param description        description
 	 * @return persistent instance of DynamicContent.
 	 */
 	public DynamicContent persistDynamicContent(final String dynamicContentName, final String wrapperId, final String description) {
 
-		final DynamicContent dynamicContent = beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT);
+		final DynamicContent dynamicContent = beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 		dynamicContent.setName(dynamicContentName);
 		dynamicContent.setGuid(dynamicContentName);
 		dynamicContent.setContentWrapperId(wrapperId);
@@ -261,6 +269,7 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Find DynamicContent in database by name.
+	 *
 	 * @param dynamicContentName instance to find.
 	 * @return persistent instance of DynamicContent.
 	 */
@@ -272,14 +281,15 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Persist parameter of DynamicContent into database.
+	 *
 	 * @param dynamicContent the dynamic content to append parameter to.
-	 * @param parameterName name of parameter (Must end with "Localized" to be localized).
+	 * @param parameterName  name of parameter (Must end with "Localized" to be localized).
 	 * @param parameterValue the value.
-	 * @param locale the language
+	 * @param locale         the language
 	 * @return persistent instance of DynamicContent.
 	 */
 	public DynamicContent persistDynamicContentParameter(final DynamicContent dynamicContent,
-			final String parameterName, final String parameterValue, final String locale) {
+														 final String parameterName, final String parameterValue, final String locale) {
 
 		final List<ParameterValue> parameterValues = dynamicContent.getParameterValues();
 		ParameterValue value = null;
@@ -295,9 +305,9 @@ public class DynamicContentDeliveryTestPersister {
 		if (value == null) { // create a new one
 			boolean isLocalizable = isLocalizable(locale);
 
-			value = beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_PARAMETER_VALUE);
+			value = beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_PARAMETER_VALUE, ParameterValue.class);
 
-			final Parameter parameter = beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER);
+			final Parameter parameter = beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER, Parameter.class);
 			parameter.setName(parameterName);
 			parameter.setParameterId(parameterName);
 			parameter.setLocalizable(isLocalizable);
@@ -324,13 +334,14 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Persist ContentSpace into database.
+	 *
 	 * @param contentSpaceId contentspace id
-	 * @param description description
+	 * @param description    description
 	 * @return persistent instance of ContentSpace
 	 */
 	public ContentSpace persistContentSpace(final String contentSpaceId, final String description) {
 
-		final ContentSpace contentSpace = beanFactory.getBean(ContextIdNames.CONTENTSPACE);
+		final ContentSpace contentSpace = beanFactory.getPrototypeBean(ContextIdNames.CONTENTSPACE, ContentSpace.class);
 		contentSpace.setTargetId(contentSpaceId);
 		contentSpace.setGuid(contentSpaceId);
 		contentSpace.setDescription(description);
@@ -340,14 +351,15 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Persisnt ContentSpace into the database.
-	 * @param guid guid
-	 * @param targetId targetId
+	 *
+	 * @param guid        guid
+	 * @param targetId    targetId
 	 * @param description description
 	 * @return persistent instance of ContentSpace
 	 */
 	public ContentSpace persistContentSpace(final String guid, final String targetId, final String description) {
 
-		final ContentSpace contentSpace = beanFactory.getBean(ContextIdNames.CONTENTSPACE);
+		final ContentSpace contentSpace = beanFactory.getPrototypeBean(ContextIdNames.CONTENTSPACE, ContentSpace.class);
 		contentSpace.setTargetId(targetId);
 		contentSpace.setGuid(guid);
 		contentSpace.setDescription(description);
@@ -357,6 +369,7 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Find ContentSpace in database by guid.
+	 *
 	 * @param contentSpaceName instance to find.
 	 * @return persistent instance of ContentSpace.
 	 */
@@ -368,6 +381,7 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Find selling context by GUID.
+	 *
 	 * @param guid the guid of selling context
 	 * @return the persistent selling context entity or null
 	 */
@@ -378,6 +392,7 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * find conditonal expression by its guid.
+	 *
 	 * @param guid the guid
 	 * @return conditional expression
 	 */
@@ -389,6 +404,7 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * find tag definition by its guid.
+	 *
 	 * @param guid the guid
 	 * @return tag definition
 	 */
@@ -401,22 +417,20 @@ public class DynamicContentDeliveryTestPersister {
 	/**
 	 * Persist DynamicContentDelivery with Selling context into database.
 	 *
-	 * @param dcd
-	 *            the dynamic content delivery
-	 * @param sellingConditionType
-	 *            the type (dictionary guid) for the condition associated to the
-	 *            selling context
-	 * @param sellingCondition
-	 *            the condition string
+	 * @param dcd                  the dynamic content delivery
+	 * @param sellingConditionType the type (dictionary guid) for the condition associated to the
+	 *                             selling context
+	 * @param sellingCondition     the condition string
 	 */
-	public DynamicContentDelivery persistDCDWithSellingContext( final DynamicContentDelivery dcd,
-			final String sellingConditionType, final String sellingCondition, final String conditionGuid) {
+	public DynamicContentDelivery persistDCDWithSellingContext(final DynamicContentDelivery dcd,
+															   final String sellingConditionType, final String sellingCondition,
+															   final String conditionGuid) {
 
 		// create selling context with condition
 		SellingContext sellingContext = findSellingContextByGuid(dcd.getSellingContextGuid());
-		if ( sellingContext == null ) {
-			sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
-			sellingContext.setGuid("dcd guid "+ dcd.getGuid());
+		if (sellingContext == null) {
+			sellingContext = beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
+			sellingContext.setGuid("dcd guid " + dcd.getGuid());
 			sellingContext.setName("selling context for " + dcd.getName());
 			sellingContext.setDescription("selling context for " + dcd.getName());
 			sellingContext.setPriority(dcd.getPriority());
@@ -434,22 +448,19 @@ public class DynamicContentDeliveryTestPersister {
 	/**
 	 * Persist DynamicContentDelivery with Selling context into database.
 	 *
-	 * @param dcd
-	 *            the dynamic content delivery
-	 * @param sellingConditionType
-	 *            the type (dictionary guid) for the condition associated to the
-	 *            selling context
-	 * @param sellingCondition
-	 *            the condition string
+	 * @param dcd                  the dynamic content delivery
+	 * @param sellingConditionType the type (dictionary guid) for the condition associated to the
+	 *                             selling context
+	 * @param sellingCondition     the condition string
 	 */
-	public DynamicContentDelivery persistDCDWithSellingContext( final DynamicContentDelivery dcd,
-			final String sellingConditionType, final String sellingCondition) {
+	public DynamicContentDelivery persistDCDWithSellingContext(final DynamicContentDelivery dcd,
+															   final String sellingConditionType, final String sellingCondition) {
 
 		// create selling context with condition
 		SellingContext sellingContext = findSellingContextByGuid(dcd.getSellingContextGuid());
-		if ( sellingContext == null ) {
-			sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
-			sellingContext.setGuid("dcd guid "+ dcd.getGuid());
+		if (sellingContext == null) {
+			sellingContext = beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
+			sellingContext.setGuid("dcd guid " + dcd.getGuid());
 			sellingContext.setName("selling context for " + dcd.getName());
 			sellingContext.setDescription("selling context for " + dcd.getName());
 			sellingContext.setPriority(dcd.getPriority());
@@ -467,16 +478,16 @@ public class DynamicContentDeliveryTestPersister {
 
 	/**
 	 * Persist DynamicContentDelivery with Selling context with saved condition  into database.
-	 *
+	 * <p>
 	 * The saved condition is existed in the DB, the new created Selling context need to be persisted in
 	 * to DB first, then assign the saved condition to it, then to be persisted by Selling Context Service
 	 * saveOrUpdate. Otherwise, get exception
 	 * EntityExistsException: Attempt to persist detached object ConditionalExpressionImpl
 	 *
-	 * @param dcd the dynamic content delivery
+	 * @param dcd                the dynamic content delivery
 	 * @param savedConditionName the name
 	 */
-	public DynamicContentDelivery persistDCDWithSavedCondition( final DynamicContentDelivery dcd, final String savedConditionName) {
+	public DynamicContentDelivery persistDCDWithSavedCondition(final DynamicContentDelivery dcd, final String savedConditionName) {
 
 		ConditionalExpression condition = findConditionalExpressionByGuid(savedConditionName);
 
@@ -487,8 +498,8 @@ public class DynamicContentDeliveryTestPersister {
 
 		// create selling context with condition
 		SellingContext sellingContext = findSellingContextByGuid(dcd.getSellingContextGuid());
-		if ( sellingContext == null ) {
-			sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
+		if (sellingContext == null) {
+			sellingContext = beanFactory.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 			sellingContext.setName("selling context for " + dcd.getName());
 			sellingContext.setDescription("selling context for " + dcd.getName());
 			sellingContext.setPriority(dcd.getPriority());

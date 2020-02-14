@@ -21,8 +21,8 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.admin.taxes.TaxesImageRegistry;
 import com.elasticpath.cmclient.admin.taxes.TaxesMessages;
 import com.elasticpath.cmclient.admin.taxes.TaxesPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
@@ -207,7 +207,7 @@ public class TaxValueDialog extends AbstractEpDialog {
 
 	@Override
 	protected void populateControls() {
-		final TaxCodeService taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+		final TaxCodeService taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		final Properties properties = new Properties();
 
 		if (isEditDialog) {
@@ -255,10 +255,10 @@ public class TaxValueDialog extends AbstractEpDialog {
 	private void saveTaxValues() {
 		final Properties properties = taxValuesPropertyTable.getProperties();
 		final Map<String, TaxValue> taxValuesMap = new HashMap<>();
-		TaxCodeService taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+		TaxCodeService taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		for (final Entry<Object, Object> entry : properties.entrySet()) {
 			if (!"".equals(entry.getValue().toString())) { //$NON-NLS-1$
-				final TaxValue taxValue = ServiceLocator.getService(ContextIdNames.TAX_VALUE);
+				final TaxValue taxValue = BeanLocator.getPrototypeBean(ContextIdNames.TAX_VALUE, TaxValue.class);
 				//TODO: how to retrieve tax code some other way.
 				taxValue.setTaxCode(taxCodeService.findByCode(entry.getKey().toString()));
 

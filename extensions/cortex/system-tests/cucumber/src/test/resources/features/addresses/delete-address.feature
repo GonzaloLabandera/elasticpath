@@ -12,11 +12,12 @@ Feature: DELETE address
       | country-name     | <COUNTRY>          |
       | extended-address | <EXTENDED_ADDRESS> |
       | locality         | <LOCALITY>         |
-      | organization     | <ORGANIZATION>     |
-      | phone-number     | <PHONE_NUMBER>     |
       | postal-code      | <POSTAL_CODE>      |
       | region           | <REGION>           |
       | street-address   | <STREET_ADDRESS>   |
+    And the address with postal code <POSTAL_CODE> should contain the top level values
+      | organization | <ORGANIZATION> |
+      | phone-number | <PHONE_NUMBER> |
     When attempting a DELETE on the address
     Then the HTTP status is no content
     And I view my profile

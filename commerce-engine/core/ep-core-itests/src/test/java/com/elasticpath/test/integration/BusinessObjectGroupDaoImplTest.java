@@ -5,6 +5,7 @@ package com.elasticpath.test.integration;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -113,18 +114,32 @@ public class BusinessObjectGroupDaoImplTest extends BasicSpringContextTest {
 		
 		assertEquals("Sorting by object type should bring 'pear' in third place", "pear", resultIter.next().getObjectType());
 	}
-	
+
+	@DirtiesDatabase
+	@Test
+	public void shouldFindFilteredGroupMembersByGroupId() {
+
+		Collection<BusinessObjectGroupMember> result = businessObjectGroupDao.
+			findFilteredGroupMembersByGroupId(GROUP_ID1, 2, NUMBER_4, TYPE_ORDERING_FIELD, Arrays.asList("apple", "cranberry"));
+
+		assertEquals("Expects 2 result entries", 2, result.size());
+
+		Iterator<BusinessObjectGroupMember> resultIter = result.iterator();
+
+		assertEquals("Sorting by object type should bring 'pear' in third place", "pear", resultIter.next().getObjectType());
+	}
+
 	/**
 	 * Creates a sample list of business object group members into the data store.
 	 */
 	private void createSampleTestData() {
 		// save entries in mixed order
-		String[][] entries = new String[][] { 
-					{GROUP_ID1, "testGuid2", "objectId2", "apple" }, 
-					{GROUP_ID1, "testGuid4", "objectId4", "pear" }, 
-					{GROUP_ID1, "testGuid1", "objectId1", "banana" }, 
-					{GROUP_ID1, "testGuid3", "objectId3", "orange" }, 
-					{GROUP_ID1, "testGuid5", "objectId5", "strawberry" }, 
+		String[][] entries = new String[][] {
+					{GROUP_ID1, "testGuid2", "objectId2", "apple" },
+					{GROUP_ID1, "testGuid4", "objectId4", "pear" },
+					{GROUP_ID1, "testGuid1", "objectId1", "banana" },
+					{GROUP_ID1, "testGuid3", "objectId3", "orange" },
+					{GROUP_ID1, "testGuid5", "objectId5", "strawberry" },
 				};
 		for (String[] entry : entries) {
 			BusinessObjectGroupMember objectGroupMember = new BusinessObjectGroupMemberImpl();

@@ -3,6 +3,8 @@
  */
 package com.elasticpath.cache.impl;
 
+import java.util.List;
+
 import com.elasticpath.cache.Cache;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -72,6 +74,16 @@ public class OpenJPAEntityCacheDecorator<K, V extends Persistable> implements Ca
 	@Override
 	public boolean containsKey(final K key) {
 		return decoratedCache.containsKey(key);
+	}
+
+	@Override
+	public V getByPartialKey(final K partialKey) {
+		return decoratedCache.getByPartialKey(partialKey);
+	}
+
+	@Override
+	public List<V> getAllByPartialKey(final K partialKey) {
+		return decoratedCache.getAllByPartialKey(partialKey);
 	}
 
 	protected PersistenceEngine getPersistenceEngine() {

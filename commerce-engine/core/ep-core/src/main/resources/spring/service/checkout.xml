@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -18,44 +22,40 @@
 	<!-- !!!! DOCshippingServiceLevelService -->
 	<bean id="abstractCheckoutServiceDelegate" abstract="true" class="com.elasticpath.service.shoppingcart.impl.CheckoutServiceImpl">
 		<property name="shippingOptionService" ref="shippingOptionService"/>
-
-		<property name="setupActionList" ref="setupActions" />
-
+		<property name="setupActionList" ref="setupActions"/>
 		<property name="reversibleActionList" ref="reversibleActions"/>
-
-		<property name="finalizeActionList" ref="finalizeActions" />
-
+		<property name="finalizeActionList" ref="finalizeActions"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="cartOrderService" ref="cartOrderService"/>
 
 	</bean>
 
 	<util:list id="setupActions" list-class="java.util.ArrayList">
-		<ref bean="preCheckoutCheckoutAction" />
-		<ref bean="removeEmptyGiftCardsCheckoutAction" />
-		<ref bean="validationCheckoutAction" />
-		<ref bean="updateCustomerCheckoutAction" />
+		<ref bean="preCheckoutCheckoutAction"/>
+		<ref bean="validationCheckoutAction"/>
+		<ref bean="updateCustomerCheckoutAction"/>
 	</util:list>
 
 	<util:list id="reversibleActions" list-class="java.util.ArrayList">
-		<ref bean="createNewOrderCheckoutAction" />
-		<ref bean="populateOrderDataCheckoutAction" />
-		<ref bean="createGiftCertificatesCheckoutAction" />
-		<ref bean="populateTemplateOrderPaymentCheckoutAction" />
-		<ref bean="authorizePaymentsCheckoutAction" />
-		<ref bean="updateLimitedUsageNumbersCheckoutAction" />
-		<ref bean="subscriptionCreditCheckCheckoutAction" />
-		<ref bean="updateOrderCheckoutAction" />
-		<ref bean="commitOrderTaxCheckoutAction" />
-		<ref bean="processCouponCustomerAssignmentsCheckoutAction" />
-		<ref bean="createNewOrderEventCheckoutAction" />
-		<ref bean="initiateFulfilmentCheckoutAction" />
-		<ref bean="capturePaymentsCheckoutAction" />
+		<ref bean="createNewOrderCheckoutAction"/>
+		<ref bean="setOrderEventOriginatorCheckoutAction"/>
+		<ref bean="populateOrderDataCheckoutAction"/>
+		<ref bean="createGiftCertificatesCheckoutAction"/>
+		<ref bean="updateLimitedUsageNumbersCheckoutAction"/>
+		<ref bean="updateOrderCheckoutAction"/>
+		<ref bean="createOrderPaymentInstrumentsCheckoutAction"/>
+		<ref bean="authorizePaymentsCheckoutAction"/>
+		<ref bean="commitOrderTaxCheckoutAction"/>
+		<ref bean="processCouponCustomerAssignmentsCheckoutAction"/>
+		<ref bean="createNewOrderEventCheckoutAction"/>
+		<ref bean="initiateFulfilmentCheckoutAction"/>
+		<ref bean="capturePaymentsCheckoutAction"/>
 	</util:list>
 
 	<util:list id="finalizeActions" list-class="java.util.ArrayList">
-		<ref bean="clearShoppingCartCheckoutAction" />
-		<ref bean="postCheckoutCheckoutAction" />
-		<ref bean="logContextOverrideDateSetAction" />
+		<ref bean="clearShoppingCartCheckoutAction"/>
+		<ref bean="postCheckoutCheckoutAction"/>
+		<ref bean="logContextOverrideDateSetAction"/>
 	</util:list>
 	<!-- !!!! DOCshippingServiceLevelService -->
 
@@ -72,7 +72,7 @@
 	</bean>
 
 	<bean id="checkoutEventHandler" class="com.elasticpath.service.shoppingcart.impl.CompositeCheckoutEventHandlerImpl">
-		<property name="checkoutEventHandlers" ref="checkoutEventHandlers" />
+		<property name="checkoutEventHandlers" ref="checkoutEventHandlers"/>
 	</bean>
 
 	<!-- Define list of checkout event handlers here. Note that this definition is overridden in serviceSF.xml -->
@@ -90,11 +90,11 @@
 		<property name="timeService" ref="timeService"/>
 		<property name="orderService" ref="orderService"/>
 		<property name="checkoutService" ref="checkoutService"/>
-		<property name="paymentService" ref="paymentService"/>
 		<property name="shippingOptionService" ref="shippingOptionService"/>
 		<property name="productSkuLookup" ref="productSkuLookup"/>
 		<property name="customerSessionService" ref="customerSessionService"/>
 		<property name="shopperService" ref="shopperService"/>
+		<property name="shoppingCartService" ref="shoppingCartService"/>
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 		<property name="storeService" ref="storeService"/>
 		<property name="returnTaxOperationService" ref="returnTaxOperationService"/>
@@ -119,12 +119,14 @@
         </property>
         <property name="pricingSnapshotService" ref="pricingSnapshotService"/>
 		<property name="taxSnapshotService" ref="taxSnapshotService"/>
+		<property name="cartOrderService" ref="cartOrderService"/>
+		<property name="cartOrderPaymentInstrumentService" ref="cartOrderPaymentInstrumentService"/>
 	</bean>
 
 	<bean id="returnAndExchangeServiceTarget" parent="returnAndExchangeServiceTargetTemplate"/>
 
 	<bean id="createNewOrderCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.CreateNewOrderCheckoutAction">
-		<property name="orderFactory" ref="orderFactory" />
+		<property name="orderFactory" ref="orderFactory"/>
 		<property name="orderService" ref="orderService"/>
 	</bean>
 
@@ -147,131 +149,109 @@
 	</bean>
 
 	<bean id="createGiftCertificatesCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.CreateGiftCertificatesCheckoutAction">
-		<property name="giftCertificateService" ref="giftCertificateService" />
-		<property name="giftCertificateFactory" ref="giftCertificateFactory" />
-		<property name="productSkuLookup" ref="productSkuLookup" />
+		<property name="giftCertificateService" ref="giftCertificateService"/>
+		<property name="giftCertificateFactory" ref="giftCertificateFactory"/>
+		<property name="productSkuLookup" ref="productSkuLookup"/>
 		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
 	</bean>
 
-	<bean id="populateTemplateOrderPaymentCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.PopulateTemplateOrderPaymentCheckoutAction" />
-
 	<bean id="updateLimitedUsageNumbersCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.UpdateLimitedUsageNumbersCheckoutAction" >
-		<property name="orderService" ref="orderService" />
-		<property name="couponUsageService" ref="couponUsageService" />
-	</bean>
-
-	<bean id="authorizePaymentsCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.AuthorizePaymentsCheckoutAction">
-		<property name="paymentService" ref="paymentService" />
-	</bean>
-
-	<bean id="capturePaymentsCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.CapturePaymentsCheckoutAction">
-		<property name="paymentService" ref="paymentService" />
+		  class="com.elasticpath.service.shoppingcart.actions.impl.UpdateLimitedUsageNumbersCheckoutAction">
 		<property name="orderService" ref="orderService"/>
+		<property name="couponUsageService" ref="couponUsageService"/>
 	</bean>
 
-	<bean id="updateOrderCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.UpdateOrderCheckoutAction">
-		<property name="orderService" ref="orderService" />
-		<property name="checkoutEventHandler" ref="checkoutEventHandler" />
+	<bean id="authorizePaymentsCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.AuthorizePaymentsCheckoutAction">
+		<property name="orderPaymentApiService" ref="orderPaymentApiService"/>
+	</bean>
+
+	<bean id="capturePaymentsCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.CapturePaymentsCheckoutAction">
+		<property name="orderService" ref="orderService"/>
+		<property name="orderPaymentApiService" ref="orderPaymentApiService"/>
+		<property name="orderPaymentService" ref="orderPaymentService"/>
+	</bean>
+
+	<bean id="updateOrderCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.UpdateOrderCheckoutAction">
+		<property name="orderService" ref="orderService"/>
+		<property name="checkoutEventHandler" ref="checkoutEventHandler"/>
 	</bean>
 
 	<bean id="processCouponCustomerAssignmentsCheckoutAction"
 		  class="com.elasticpath.service.shoppingcart.actions.impl.ProcessCouponCustomerAssignmentsCheckoutAction">
-		<property name="couponUsageService" ref="couponUsageService" />
+		<property name="couponUsageService" ref="couponUsageService"/>
 	</bean>
 
-	<bean id="createNewOrderEventCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.CreateNewOrderEventCheckoutAction">
+	<bean id="createNewOrderEventCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.CreateNewOrderEventCheckoutAction">
 		<property name="eventMessageFactory" ref="eventMessageFactory"/>
-		<property name="eventMessagePublisher" ref="orderEventMessagePublisher" />
+		<property name="eventMessagePublisher" ref="orderEventMessagePublisher"/>
 	</bean>
 
-	<bean id="preCheckoutCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.PreCheckoutCheckoutAction">
-		<property name="checkoutEventHandler" ref="checkoutEventHandler" />
+	<bean id="preCheckoutCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.PreCheckoutCheckoutAction">
+		<property name="checkoutEventHandler" ref="checkoutEventHandler"/>
 	</bean>
 
-	<bean id="subscriptionCreditCheckCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.SubscriptionCreditCheckCheckoutAction">
-		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="storeService" ref="storeService" />
-		<property name="timeService" ref="timeService" />
+	<bean id="updateCustomerCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.UpdateCustomerCheckoutAction">
+		<property name="customerService" ref="customerService"/>
+		<property name="shopperService" ref="shopperService"/>
 	</bean>
 
-	<bean id="updateCustomerCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.UpdateCustomerCheckoutAction">
-		<property name="customerService" ref="customerService" />
-		<property name="shopperService" ref="shopperService" />
+	<bean id="clearShoppingCartCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.ClearShoppingCartCheckoutAction">
+		<property name="shoppingCartService" ref="shoppingCartService"/>
+		<property name="cartOrderService" ref="cartOrderService"/>
+		<property name="cartOrderPaymentInstrumentService" ref="cartOrderPaymentInstrumentService"/>
 	</bean>
 
-	<bean id="clearShoppingCartCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.ClearShoppingCartCheckoutAction">
-		<property name="shoppingCartService" ref="shoppingCartService" />
-		<property name="cartOrderService" ref="cartOrderService" />
+	<bean id="logContextOverrideDateSetAction" class="com.elasticpath.service.shoppingcart.actions.impl.LogShoppingContextDateOverriddenAction">
+		<property name="orderEventHelper" ref="orderEventHelper"/>
 	</bean>
 
-	<bean id="logContextOverrideDateSetAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.LogShoppingContextDateOverriddenAction">
-		<property name="orderEventHelper" ref="orderEventHelper" />
+	<bean id="postCheckoutCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.PostCheckoutCheckoutAction">
+		<property name="checkoutEventHandler" ref="checkoutEventHandler"/>
 	</bean>
 
-	<bean id="postCheckoutCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.PostCheckoutCheckoutAction">
-		<property name="checkoutEventHandler" ref="checkoutEventHandler" />
-	</bean>
-
-	<bean id="commitOrderTaxCheckoutAction"
-		class="com.elasticpath.service.shoppingcart.actions.impl.CommitOrderTaxCheckoutAction">
-		<property name="taxOperationService" ref="taxOperationService" />
+	<bean id="commitOrderTaxCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.CommitOrderTaxCheckoutAction">
+		<property name="taxOperationService" ref="taxOperationService"/>
 	</bean>
 
 	<bean id="initiateFulfilmentCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.InitiateFulfilmentCheckoutAction">
 		<property name="orderService" ref="orderService"/>
 	</bean>
 
-	<bean id="externalAuthCheckoutService" class="com.elasticpath.service.shoppingcart.impl.ExternalAuthCheckoutServiceImpl">
-		<property name="beanFactory" ref="coreBeanFactory" />
-		<property name="checkoutService" ref="checkoutService" />
-		<property name="orderSkuFactory" ref="orderSkuFactory" />
-		<property name="paymentService" ref="paymentService" />
-		<property name="timeService" ref="timeService" />
+	<util:constant id="physicalShipmentType" static-field="com.elasticpath.domain.shipping.ShipmentType.PHYSICAL"/>
+	<util:constant id="electronicShipmentType" static-field="com.elasticpath.domain.shipping.ShipmentType.ELECTRONIC"/>
+
+	<bean id="orderShipmentHandlerFactory" class="com.elasticpath.commons.handlers.order.impl.OrderShipmentHandlerFactoryImpl">
+		<property name="orderShipmentHandlerMap">
+			<map>
+				<entry key-ref="physicalShipmentType" value-ref="physcialOrderShipmentHandler"/>
+				<entry key-ref="electronicShipmentType" value-ref="electronicOrderShipmentHandler"/>
+			</map>
+		</property>
 	</bean>
 
-	    <util:constant id="physicalShipmentType" static-field="com.elasticpath.domain.shipping.ShipmentType.PHYSICAL"/>
-    <util:constant id="electronicShipmentType" static-field="com.elasticpath.domain.shipping.ShipmentType.ELECTRONIC"/>
-
-    <bean id="orderShipmentHandlerFactory"
-        class="com.elasticpath.commons.handlers.order.impl.OrderShipmentHandlerFactoryImpl">
-        <property name="orderShipmentHandlerMap">
-            <map>
-                <entry key-ref="physicalShipmentType" value-ref="physcialOrderShipmentHandler"/>
-                <entry key-ref="electronicShipmentType" value-ref="electronicOrderShipmentHandler"/>
-            </map>
-        </property>
-    </bean>
-
-    <bean id="physcialOrderShipmentHandler"
-        class="com.elasticpath.commons.handlers.order.impl.PhysicalOrderShipmentHandler">
+	<bean id="physcialOrderShipmentHandler" class="com.elasticpath.commons.handlers.order.impl.PhysicalOrderShipmentHandler">
 		<property name="productSkuLookup" ref="productSkuLookup"/>
-    </bean>
+	</bean>
 
-    <bean id="electronicOrderShipmentHandler"
-        class="com.elasticpath.commons.handlers.order.impl.ElectronicOrderShipmentHandler">
+	<bean id="electronicOrderShipmentHandler" class="com.elasticpath.commons.handlers.order.impl.ElectronicOrderShipmentHandler">
 		<property name="productSkuLookup" ref="productSkuLookup"/>
-    </bean>
+	</bean>
 
-	<bean id="validationCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.ValidationCheckoutAction">
+	<bean id="validationCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.ValidationCheckoutAction">
 		<property name="validationService" ref="purchaseCartValidationService"/>
 	</bean>
 
-	<bean id="removeEmptyGiftCardsCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.RemoveEmptyGiftCardsCheckoutAction">
-		<property name="giftCertificateService" ref="giftCertificateService"/>
+	<bean id="createOrderPaymentInstrumentsCheckoutAction"
+		  class="com.elasticpath.service.shoppingcart.actions.impl.CreateOrderPaymentInstrumentsCheckoutAction">
+		<property name="orderPaymentInstrumentService" ref="orderPaymentInstrumentService"/>
+		<property name="filteredPaymentInstrumentService" ref="filteredPaymentInstrumentService"/>
+		<property name="orderPaymentApiCleanupService" ref="orderPaymentApiCleanupService"/>
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="setOrderEventOriginatorCheckoutAction"
+		  class="com.elasticpath.service.shoppingcart.actions.impl.SetOrderEventOriginatorCheckoutAction">
+		<property name="eventOriginatorHelper" ref="eventOriginatorHelper"/>
 	</bean>
 
 </beans>

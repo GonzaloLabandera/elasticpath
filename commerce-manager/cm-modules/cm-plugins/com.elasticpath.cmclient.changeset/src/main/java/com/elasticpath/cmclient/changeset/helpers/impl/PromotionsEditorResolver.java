@@ -7,7 +7,7 @@ import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.changeset.helpers.EditorResolver;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.domain.rules.Rule;
@@ -23,7 +23,7 @@ public class PromotionsEditorResolver implements EditorResolver {
 	 */
 	public static final String PROMOTIONS_EDITOR_PREFIX = "com.elasticpath.cmclient.store.promotions.editors.PromotionsEditor"; //$NON-NLS-1$
 
-	private final RuleService ruleService = ServiceLocator.getService(ContextIdNames.RULE_SERVICE); //$NON-NLS-1$
+	private final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class); //$NON-NLS-1$
 
 	/**
 	 * {@inheritDoc}.

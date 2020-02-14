@@ -87,8 +87,8 @@ public class ImportDataTypeProductAssociationImplTest extends AbstractEPTestCase
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociationImpl.class);
-		stubGetBean(ContextIdNames.UTILITY, utility);
+		stubGetPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class, ProductAssociationImpl.class);
+		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
 
 		this.productAssociationImportType = new ImportDataTypeProductAssociationImpl();
 
@@ -101,7 +101,7 @@ public class ImportDataTypeProductAssociationImplTest extends AbstractEPTestCase
 	}
 
 	private void setupProductAssociation() {
-		this.productAssociation = getBeanFactory().getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+		this.productAssociation = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 	}
 
 	private void setupImportService() {

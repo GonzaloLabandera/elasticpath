@@ -22,8 +22,8 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.product.StoreRulesViewPart;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -97,7 +97,7 @@ public class ProductDetailsWizardPage1 extends AbstractEPWizardPage<ProductModel
 
 		setDescription(description);
 		setTitle(title);
-		productService = ServiceLocator.getService(ContextIdNames.PRODUCT_SERVICE);
+		productService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 	}
 
 	@Override
@@ -220,7 +220,7 @@ public class ProductDetailsWizardPage1 extends AbstractEPWizardPage<ProductModel
 
 		// Populate taxCode combo
 		final TaxCodeService taxCodeService =
-				ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		final List<TaxCode> codeList = taxCodeService.list();
 		this.taxCodeList = new ArrayList<>();
 		for (final TaxCode currTaxCode : codeList) {
@@ -235,7 +235,7 @@ public class ProductDetailsWizardPage1 extends AbstractEPWizardPage<ProductModel
 	 */
 	private void populateProductTypes() {
 		final ProductTypeService productTypeService =
-				ServiceLocator.getService(ContextIdNames.PRODUCT_TYPE_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_TYPE_SERVICE, ProductTypeService.class);
 		final long catalogUidPk = getProduct().getMasterCatalog().getUidPk();
 
 		if (isProductBundle()) {
@@ -265,7 +265,7 @@ public class ProductDetailsWizardPage1 extends AbstractEPWizardPage<ProductModel
 	private void populateBrand() {
 		// Populate brand combo
 		final BrandService brandService =
-				ServiceLocator.getService(ContextIdNames.BRAND_SERVICE);
+				BeanLocator.getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 		this.brandList = brandService.findAllBrandsFromCatalog(getProduct().getMasterCatalog().getUidPk());
 
 		Collections.sort(brandList, new BrandComparator(CorePlugin.getDefault().getDefaultLocale()));

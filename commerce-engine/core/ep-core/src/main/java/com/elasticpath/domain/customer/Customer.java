@@ -595,12 +595,6 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	CustomerRoleMapper getCustomerRoleMapper();
 
 	/**
-	 * Gets this customer's payment tokens.
-	 * @return this customer's payment tokens
-	 */
-	CustomerPaymentMethods getPaymentMethods();
-
-	/**
 	 * Get this customer's business number.
 	 *
 	 * @return the customer's business number

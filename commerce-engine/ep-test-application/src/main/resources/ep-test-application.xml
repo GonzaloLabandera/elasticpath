@@ -75,22 +75,6 @@
 
 	<bean id="storeAndCatalogScenario" class="com.elasticpath.test.persister.testscenarios.StoreAndCatalogScenario"/>
 
-	<bean id="paymentGatewayFactory" class="com.elasticpath.domain.factory.TestPaymentGatewayPluginFactoryImpl">
-		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="paymentGatewayPlugins">
-			<set>
-				<bean class="com.elasticpath.service.payment.gateway.impl.NullPaymentGatewayPluginImpl"/>
-				<bean class="com.elasticpath.service.payment.gateway.impl.NullExternalAuthPaymentGatewayPluginImpl"/>
-				<bean class="com.elasticpath.service.payment.gateway.impl.NullExternalAuthPaymentGatewayPluginImpl"/>
-				<bean class="com.elasticpath.paymentgateways.testdouble.PaymentGatewayPluginTestDouble"/>
-				<bean class="com.elasticpath.service.payment.gateway.impl.GiftCertificatePaymentGatewayPluginImpl">
-					<property name="giftCertificateTransactionService" ref="giftCertificateTransactionService" />
-				</bean>
-				<bean class="com.elasticpath.service.payment.gateway.impl.ExchangePaymentGatewayPluginImpl"/>
-			</set>
-		</property>
-	</bean>
-	
 	<bean id="shoppingCartTaxTestVerifier" class="com.elasticpath.tax.ShoppingCartTaxTestVerifier"/>
 
 	<bean id="orderTaxTestVerifier" class="com.elasticpath.tax.OrderTaxTestVerifier"/>

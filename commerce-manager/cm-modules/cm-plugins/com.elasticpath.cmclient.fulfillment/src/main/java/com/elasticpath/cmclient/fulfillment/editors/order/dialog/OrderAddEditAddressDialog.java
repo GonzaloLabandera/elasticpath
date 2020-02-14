@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -106,11 +106,11 @@ public class OrderAddEditAddressDialog extends AbstractEpDialog {
 			newAddress = shipment.getShipmentAddress();
 		}
 		
-		addressProxy = ServiceLocator.getService(ContextIdNames.ORDER_ADDRESS);
+		addressProxy = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 	
 		this.viewOnly = viewOnly;
 		if (isAdd) {
-			this.address = ServiceLocator.getService(ContextIdNames.ORDER_ADDRESS);
+			this.address = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 			this.address.setCountry(DEFAULT_COUNTRY);
 			addAddress = true;
 		} else {

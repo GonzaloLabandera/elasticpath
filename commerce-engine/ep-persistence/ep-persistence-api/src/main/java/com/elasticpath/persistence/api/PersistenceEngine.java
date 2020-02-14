@@ -274,6 +274,24 @@ public interface PersistenceEngine {
 	<T> List<T> retrieveByNamedQuery(String queryName, FlushMode flushMode, Object... parameters);
 
 	/**
+	 * Retrieve a list of persistent instances with the specified named query and parameters, as well as the combination of
+	 * flush mode and ignore-changes flag.
+	 *
+	 * Using the right combination of flush mode and ignore-changes flag, the query results may be obtained from the local cache or the db.
+	 *
+	 * @see @link{http://openjpa.apache.org/builds/2.4.0/apache-openjpa/docs/manual.html#ref_guide_dbsetup_retain}
+	 *
+	 * @param <T> the object's type to retrieve
+	 * @param queryName the named query
+	 * @param flushMode the flush mode to use when executing the query
+	 * @param ignoreChanges whether to ignore changes in local cache
+	 * @param parameters the parameters to be used with the given query
+	 * @return a list of persistent instances
+	 * @throws EpPersistenceException in case of persistence errors
+	 */
+	<T> List<T> retrieveByNamedQuery(String queryName, FlushMode flushMode, boolean ignoreChanges, Object[] parameters);
+
+	/**
 	 * Retrieves a collection of persistent instances with the specified named query. Parameter
 	 * names should <i>not</i> be numerical.
 	 *

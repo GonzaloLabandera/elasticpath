@@ -92,7 +92,7 @@ public class ShipmentRepositoryImpl implements ShipmentRepository {
 
 	@Override
 	public Observable<PhysicalOrderShipment> findAll(final String storeCode, final String orderGuid) {
-		return orderRepository.findByGuidAsSingle(storeCode, orderGuid)
+		return orderRepository.findByGuid(storeCode, orderGuid)
 				.flatMapObservable(order -> order.getPhysicalShipments() == null
 						? Observable.empty() : Observable.fromIterable(order.getPhysicalShipments()));
 	}
@@ -135,7 +135,7 @@ public class ShipmentRepositoryImpl implements ShipmentRepository {
 	@Override
 	public Single<ProductSku> getProductSku(final String purchaseId, final String shipmentId, final String lineItemId) {
 		return getOrderSku(purchaseId, shipmentId, lineItemId)
-				.flatMap(orderSku -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(orderSku.getSkuGuid()));
+				.flatMap(orderSku -> productSkuRepository.getProductSkuWithAttributesByGuid(orderSku.getSkuGuid()));
 	}
 
 	@Override

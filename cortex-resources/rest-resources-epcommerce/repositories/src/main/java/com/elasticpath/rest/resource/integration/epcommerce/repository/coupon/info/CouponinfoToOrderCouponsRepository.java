@@ -34,7 +34,7 @@ public class CouponinfoToOrderCouponsRepository<CI extends CouponinfoIdentifier,
 		String storeCode = identifier.getOrder().getScope().getValue();
 		String cartOrderGuid = identifier.getOrder().getOrderId().getValue();
 
-		return cartOrderRepository.findByGuidAsSingle(storeCode, cartOrderGuid)
+		return cartOrderRepository.findByGuid(storeCode, cartOrderGuid)
 				.flatMapObservable(cartOrder -> Observable.fromIterable(cartOrder.getCouponCodes())
 						.map(couponCode -> buildOrderCouponIdentifier(order, couponCode)));
 	}

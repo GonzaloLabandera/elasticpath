@@ -18,7 +18,7 @@ import org.eclipse.rap.fileupload.FileDetails;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.jobs.JobsMessages;
 import com.elasticpath.commons.util.AssetRepository;
 
@@ -29,7 +29,7 @@ import com.elasticpath.commons.util.AssetRepository;
 public class CsvFileUploadReceiver extends DiskFileUploadReceiver {
 
 	private static final Logger LOG = Logger.getLogger(CsvFileUploadReceiver.class);
-	private final AssetRepository assetRepository = ServiceLocator.getService("assetRepository");
+	private final AssetRepository assetRepository = BeanLocator.getSingletonBean("assetRepository", AssetRepository.class);
 
 	private final Display display;
 

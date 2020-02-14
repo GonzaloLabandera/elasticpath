@@ -99,7 +99,8 @@ public class ProductXmlServiceImpl implements ProductXmlService {
 
 		String productUri = "";
 		if (isSeoEnabled) {
-			StoreSeoUrlBuilderFactoryImpl storeSeoUrlBuilderFactory = beanFactory.getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+			StoreSeoUrlBuilderFactoryImpl storeSeoUrlBuilderFactory = beanFactory.getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY,
+					StoreSeoUrlBuilderFactoryImpl.class);
 			SeoUrlBuilder urlBuilder = storeSeoUrlBuilderFactory.getStoreSeoUrlBuilder();
 
 			productUri = "/" + urlBuilder.productSeoUrl(product, defaultLocale);

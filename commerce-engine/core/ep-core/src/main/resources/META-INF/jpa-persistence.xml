@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
 <persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 	<persistence-unit name="commerce-persistence-unit">
 
@@ -13,7 +17,7 @@
 		<mapping-file>META-INF/dataimport-orm.xml</mapping-file>
 		<mapping-file>META-INF/inventory-orm.xml</mapping-file>
 		<mapping-file>META-INF/order-orm.xml</mapping-file>
-		<mapping-file>META-INF/payment-orm.xml</mapping-file>
+		<mapping-file>META-INF/giftcertificate-orm.xml</mapping-file>
 		<mapping-file>META-INF/rules-orm.xml</mapping-file>
 		<mapping-file>META-INF/search-orm.xml</mapping-file>
 		<mapping-file>META-INF/shopper-orm.xml</mapping-file>
@@ -30,12 +34,12 @@
 		<mapping-file>META-INF/contentspace-orm.xml</mapping-file>
 		<mapping-file>META-INF/audit-orm.xml</mapping-file>
 		<mapping-file>META-INF/oauthtoken-orm.xml</mapping-file>
-		<mapping-file>META-INF/paymenttoken-orm.xml</mapping-file>
 		<mapping-file>META-INF/cartitemmodifier-orm.xml</mapping-file>
 		<mapping-file>META-INF/modifier-orm.xml</mapping-file>
 		<mapping-file>META-INF/datapolicy-orm.xml</mapping-file>
 		<mapping-file>META-INF/datapoint-value-orm.xml</mapping-file>
 		<mapping-file>META-INF/dependent-items-orm.xml</mapping-file>
+		<mapping-file>META-INF/orderpayment-orm.xml</mapping-file>
 
 		<class>com.elasticpath.domain.attribute.impl.AbstractAttributeValueImpl</class>
 		<class>com.elasticpath.domain.attribute.impl.AttributeGroupAttributeImpl</class>
@@ -104,7 +108,6 @@
 		<class>com.elasticpath.domain.order.impl.OrderDataImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderEventImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderLockImpl</class>
-		<class>com.elasticpath.domain.order.impl.OrderPaymentImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderReturnImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderReturnSkuImpl</class>
 		<class>com.elasticpath.domain.order.impl.AbstractOrderShipmentImpl</class>
@@ -177,8 +180,6 @@
 		<class>com.elasticpath.domain.store.impl.WarehouseAddressImpl</class>
 		<class>com.elasticpath.domain.store.impl.StoreImpl</class>
 		<class>com.elasticpath.domain.store.impl.CreditCardTypeImpl</class>
-		<class>com.elasticpath.domain.payment.impl.PaymentGatewayImpl</class>
-		<class>com.elasticpath.domain.payment.impl.PaymentGatewayPropertyImpl</class>
 		<class>com.elasticpath.domain.advancedsearch.impl.AdvancedSearchQueryImpl</class>
 		<class>com.elasticpath.domain.store.impl.StoreCurrencyImpl</class>
 		<class>com.elasticpath.domain.store.impl.StoreLocaleImpl</class>
@@ -209,8 +210,6 @@
 		<class>com.elasticpath.domain.auth.OAuth2AuthenticationMemento</class>
 		<class>com.elasticpath.domain.auth.ClientAuthenticationMemento</class>
 		<class>com.elasticpath.domain.auth.UserAuthenticationMemento</class>
-		<class>com.elasticpath.domain.customer.impl.AbstractPaymentMethodImpl</class>
-		<class>com.elasticpath.domain.customer.impl.PaymentTokenImpl</class>
 		<class>com.elasticpath.domain.customer.impl.StoreCustomerAttributeImpl</class>
 		<class>com.elasticpath.domain.customer.impl.AttributePolicyImpl</class>
 
@@ -282,8 +281,19 @@
 		<!-- Facets -->
 		<class>com.elasticpath.domain.search.impl.FacetImpl</class>
 
+		<!-- Search -->
 		<class>com.elasticpath.domain.search.impl.SortAttributeImpl</class>
 		<class>com.elasticpath.domain.search.impl.SortLocalizedNameImpl</class>
+
+		<!-- Order Payment API -->
+		<class>com.elasticpath.domain.orderpaymentapi.impl.AbstractCorePaymentInstrumentImpl</class>
+		<class>com.elasticpath.domain.orderpaymentapi.impl.OrderPaymentInstrumentImpl</class>
+		<class>com.elasticpath.domain.orderpaymentapi.impl.CartOrderPaymentInstrumentImpl</class>
+		<class>com.elasticpath.domain.orderpaymentapi.impl.CustomerPaymentInstrumentImpl</class>
+		<class>com.elasticpath.domain.orderpaymentapi.impl.CustomerDefaultPaymentInstrumentImpl</class>
+		<class>com.elasticpath.domain.orderpaymentapi.impl.OrderPaymentDataImpl</class>
+		<class>com.elasticpath.domain.orderpaymentapi.impl.OrderPaymentImpl</class>
+		<class>com.elasticpath.domain.orderpaymentapi.impl.StorePaymentProviderConfigImpl</class>
 
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 

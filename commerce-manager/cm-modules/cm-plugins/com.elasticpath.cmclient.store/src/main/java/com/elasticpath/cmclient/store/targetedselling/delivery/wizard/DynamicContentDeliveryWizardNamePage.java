@@ -16,7 +16,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
@@ -232,8 +232,8 @@ public class DynamicContentDeliveryWizardNamePage extends
 	 * @return true - if another object with given name exists, false otherwise
 	 */
 	private boolean dcNameExists(final String dcName) {
-		final DynamicContentDeliveryService dcaService = 
-			ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+		final DynamicContentDeliveryService dcaService =
+				BeanLocator.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 		try {
 			final DynamicContentDelivery dynamicContentDelivery = dcaService.findByName(dcName);
 

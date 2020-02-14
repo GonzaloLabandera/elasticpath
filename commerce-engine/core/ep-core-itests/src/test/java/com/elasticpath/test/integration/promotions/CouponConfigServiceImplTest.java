@@ -81,7 +81,7 @@ public class CouponConfigServiceImplTest extends DbTestCase {
 		final int usageLimit = 3;
 		
 		Rule rule = promoPersister.createAndPersistSimpleShoppingCartPromotion("test promo 2", scenario.getStore().getCode(), "test2", false);
-		RuleCondition couponCondition = getBeanFactory().getBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND);
+		RuleCondition couponCondition = getBeanFactory().getPrototypeBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, RuleCondition.class);
 		rule.addCondition(couponCondition);
 		rule = ruleService.update(rule);
 		assertRuleContainsCondition(rule);
@@ -110,7 +110,7 @@ public class CouponConfigServiceImplTest extends DbTestCase {
 	public void testAddForNonExistentRule() {
 		final int usageLimit = 3;
 		
-		CouponConfig couponConfig = beanFactory.getBean(ContextIdNames.COUPON_CONFIG);
+		CouponConfig couponConfig = beanFactory.getPrototypeBean(ContextIdNames.COUPON_CONFIG, CouponConfig.class);
 		couponConfig.setDefaultValues();
 		couponConfig.setRuleCode("NOSUCHCODE");
 		couponConfig.setUsageLimit(usageLimit);
@@ -177,7 +177,7 @@ public class CouponConfigServiceImplTest extends DbTestCase {
 	}
 	
 	private CouponConfig createCouponConfig() {
-		return getBeanFactory().getBean(ContextIdNames.COUPON_CONFIG);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.COUPON_CONFIG, CouponConfig.class);
 	}
 	
 

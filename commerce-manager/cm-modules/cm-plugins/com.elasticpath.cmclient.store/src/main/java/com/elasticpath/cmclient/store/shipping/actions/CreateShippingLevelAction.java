@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.store.shipping.dialogs.ShippingLevelDialog;
 import com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView;
 import com.elasticpath.commons.constants.EpShippingContextIdNames;
@@ -42,11 +42,12 @@ public class CreateShippingLevelAction extends Action {
 	public void run() {
 		LOG.debug("CreateShippingLevel Action called."); //$NON-NLS-1$
 
-		ShippingServiceLevel shippingLevel = ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL);
+		ShippingServiceLevel shippingLevel = BeanLocator
+				.getPrototypeBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL, ShippingServiceLevel.class);
 
 		if (ShippingLevelDialog.openCreateDialog(listView.getSite().getShell(), shippingLevel)) {
-			ShippingServiceLevelService shippingService = ServiceLocator.getService(
-					EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+			ShippingServiceLevelService shippingService = BeanLocator
+					.getSingletonBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
 			shippingService.add(shippingLevel);
 			listView.refreshViewerInput();
 		}

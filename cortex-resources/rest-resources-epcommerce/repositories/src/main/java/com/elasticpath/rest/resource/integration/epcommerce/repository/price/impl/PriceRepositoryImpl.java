@@ -126,7 +126,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 	@Override
 	@CacheResult(uniqueIdentifier = "getPrice")
 	public Single<Price> getPrice(final String storeCode, final String skuCode) {
-		return customerSessionRepository.findOrCreateCustomerSessionAsSingle()
+		return customerSessionRepository.findOrCreateCustomerSession()
 				.map(ShopperReference::getShopper)
 				.flatMap(shopper -> Single.just(shoppingItemDtoFactory.createDto(skuCode, SINGLE_QTY))
 						.flatMap(shoppingItemDto -> getPriceFromShoppingItemDto(storeCode, shopper, shoppingItemDto, skuCode)));
@@ -161,7 +161,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 		return prices
 					.filter(pricePredicate)
 					.reduce(reducer)
-					.blockingGet(coreBeanFactory.getBean(ContextIdNames.PRICE));
+					.blockingGet(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class));
 	}
 
 	@CacheResult(uniqueIdentifier = "getPrices")
@@ -223,7 +223,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 	}
 
 	private Single<Price> getPriceUsingPromotedPrice(final Product product) {
-		return customerSessionRepository.findOrCreateCustomerSessionAsSingle()
+		return customerSessionRepository.findOrCreateCustomerSession()
 				.map(ShopperReference::getShopper)
 				.flatMap(shopper -> storeRepository.findStoreAsSingle(shopper.getStoreCode())
 						.flatMap(store -> getPriceSingleForProduct(product, shopper, store)));

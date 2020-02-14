@@ -90,7 +90,7 @@ public class ShopperCleanupServiceImpl implements ShopperCleanupService, Shopper
 	}
 
 	protected ShopperDependencyCleanupService getShopperDependencyCleanupService() {
-		return getBeanFactory().getBean(ContextIdNames.SHOPPER_CLEANUP_SERVICE);
+		return getBeanFactory().getSingletonBean(ContextIdNames.SHOPPER_CLEANUP_SERVICE, ShopperDependencyCleanupService.class);
 	}
 
 }

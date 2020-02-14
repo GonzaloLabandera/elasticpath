@@ -26,7 +26,7 @@ public class ProductTypeDaoAdapterImpl extends AbstractDaoAdapter<ProductType> {
 
 	@Override
 	public ProductType createBean(final ProductType productType) {
-		return beanFactory.getBean(ContextIdNames.PRODUCT_TYPE);
+		return beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 	}
 
 	@Override

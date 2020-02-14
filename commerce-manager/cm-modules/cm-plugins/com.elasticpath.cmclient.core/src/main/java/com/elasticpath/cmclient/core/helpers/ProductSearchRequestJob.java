@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.service.CatalogEventService;
@@ -38,7 +38,7 @@ public class ProductSearchRequestJob extends AbstractSearchRequestJob<Product> i
 	public ProductSearchRequestJob(final boolean loadSku) {
 		super();
 
-		this.productService = ServiceLocator.getService(ContextIdNames.PRODUCT_SERVICE);
+		this.productService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		this.loadSku = loadSku;
 	}
 
@@ -82,10 +82,11 @@ public class ProductSearchRequestJob extends AbstractSearchRequestJob<Product> i
 			LOG.debug(String.format("Converting %1$S UID(s) to products.", uidList.size())); //$NON-NLS-1$
 		}
 
-		final ProductLoadTuner productLoadTuner = ServiceLocator.getService(ContextIdNames.PRODUCT_LOAD_TUNER);
+		final ProductLoadTuner productLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 		productLoadTuner.setLoadingCategories(true);
 		if (loadSku) {
-			final ProductSkuLoadTuner productSkuLoadTuner = ServiceLocator.getService(ContextIdNames.PRODUCT_SKU_LOAD_TUNER);
+			final ProductSkuLoadTuner productSkuLoadTuner = BeanLocator
+					.getPrototypeBean(ContextIdNames.PRODUCT_SKU_LOAD_TUNER, ProductSkuLoadTuner.class);
 			
 			productLoadTuner.setProductSkuLoadTuner(productSkuLoadTuner);
 			productLoadTuner.setLoadingSkus(true);

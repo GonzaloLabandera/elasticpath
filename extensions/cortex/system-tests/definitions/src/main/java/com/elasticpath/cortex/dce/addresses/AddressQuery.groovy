@@ -1,24 +1,19 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortex.dce.addresses
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
-
 import static com.elasticpath.cortex.dce.SharedConstants.ELEMENT_LINK
 import static com.elasticpath.cortex.dce.SharedConstants.TEST_EMAIL_VALUE
-import static com.elasticpath.cortex.dce.SharedConstants.TEST_TOKEN
-import static com.elasticpath.cortex.dce.SharedConstants.TEST_TOKEN_DISPLAY_NAME
-import static AddressConstants.DEFAULT_COUNTRY_NAME
-import static AddressConstants.DEFAULT_FAMILY_NAME
-import static AddressConstants.DEFAULT_GIVEN_NAME
-import static AddressConstants.DEFAULT_LOCALITY
-import static AddressConstants.DEFAULT_POSTAL_CODE
-import static AddressConstants.DEFAULT_POSTAL_REGION
-import static AddressConstants.DEFAULT_STREE_ADDRESS_SNIPPET
+import static com.elasticpath.cortex.dce.addresses.AddressConstants.*
 import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.java.en.And
 import cucumber.api.java.en.When
 
-import com.elasticpath.cortexTestObjects.Order
+import com.elasticpath.cortexTestObjects.Payment
 import com.elasticpath.cortexTestObjects.Profile
 
 class AddressQuery {
@@ -30,7 +25,7 @@ class AddressQuery {
 
 	@And('^I fill in payment methods needinfo$')
 	static void setPaymentMethod() {
-		Order.addToken(TEST_TOKEN_DISPLAY_NAME, TEST_TOKEN)
+		Payment.createUnsavedPaymentInstrumentWithDefaultName()
 	}
 
 	@And('^I fill in email needinfo$')

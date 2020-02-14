@@ -161,7 +161,7 @@ public class TagOperatorImpl extends AbstractLegacyEntityImpl implements TagOper
 	@Transient
 	public LocalizedProperties getLocalizedProperties() {
 		if (localizedProperties == null) {
-			this.localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			this.localizedProperties = getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 			this.localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(), ContextIdNames.TAG_DEFINITION_LOCALIZED_PROPERTY_VALUE);
 		}
 		return this.localizedProperties;

@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.wizard;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.store.AbstractEPCampaignWizard;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingImageRegistry;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
@@ -36,7 +36,7 @@ public class NewConditionalExpressionWizard extends AbstractEPCampaignWizard<Con
 		super(TargetedSellingMessages.get().NewConditionalExpressionCreateWizard_Title,
 				null, 
 				TargetedSellingImageRegistry.getImage(TargetedSellingImageRegistry.IMAGE_DYNAMIC_CONTENT_CREATE_ACTION));
-		model = ServiceLocator.getService(ContextIdNames.TAG_CONDITION);
+		model = BeanLocator.getPrototypeBean(ContextIdNames.TAG_CONDITION, ConditionalExpression.class);
 		model.setNamed(true);
 		setNeedsProgressMonitor(true);
 	}

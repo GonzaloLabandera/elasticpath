@@ -21,7 +21,7 @@ import com.elasticpath.cmclient.catalog.editors.sku.ProductBundleSkuOverviewView
 import com.elasticpath.cmclient.catalog.editors.sku.ProductSkuDigitalAssetViewPart;
 import com.elasticpath.cmclient.catalog.editors.sku.ProductSkuOverviewViewPart;
 import com.elasticpath.cmclient.catalog.editors.sku.ProductSkuShippingViewPart;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -102,7 +102,7 @@ public class SingleSkuWizardPage5 extends AbstractEPWizardPage<ProductModel> imp
 
 		super(PAGE_LAYOUT_NUM_COLUMNS, false, pageName, new DataBindingContext());
 
-		digitalAsset = ServiceLocator.getService(ContextIdNames.DIGITAL_ASSET);
+		digitalAsset = BeanLocator.getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 		setDescription(description);
 		setTitle(title);
 		setPageComplete(false);
@@ -235,7 +235,7 @@ public class SingleSkuWizardPage5 extends AbstractEPWizardPage<ProductModel> imp
 		ProductSku prodSku = getProduct().getDefaultSku();
 
 		if (prodSku == null) {
-			prodSku = ServiceLocator.getService(ContextIdNames.PRODUCT_SKU);
+			prodSku = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 			prodSku.setStartDate(getProduct().getStartDate());
 			prodSku.setSkuCode(EMPTY_STRING);
 		}

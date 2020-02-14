@@ -7,18 +7,15 @@ import java.util.Collection;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
-import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.plugin.payment.PaymentGatewayType;
 
 /**
  * <code>Store</code> represents a store made available to customers.
@@ -298,27 +295,6 @@ public interface Store extends Persistable, Comparable<Store> {
 	void setTimeZone(TimeZone timeZone);
 
 	/**
-	 * Gets a set of available payment gateways for this <code>Store</code>.
-	 *
-	 * @return a set of available payment gateways for this <code>Store</code>.
-	 */
-	Set<PaymentGateway> getPaymentGateways();
-
-	/**
-	 * Sets a set of available payment gateways for this <code>Store</code>.
-	 *
-	 * @param paymentGateways a set of available payment gateways for this <code>Store</code>.
-	 */
-	void setPaymentGateways(Set<PaymentGateway> paymentGateways);
-
-	/**
-	 * Gets a map of available payment gateways for this <code>Store</code>.
-	 *
-	 * @return a map of available payment gateways for this <code>Store</code>.
-	 */
-	Map<PaymentGatewayType, PaymentGateway> getPaymentGatewayMap();
-
-	/**
 	 * Gets the unique code associated with the <code>Store</code>.
 	 *
 	 * @return the unique code associated with the <code>Store</code>
@@ -446,13 +422,6 @@ public interface Store extends Persistable, Comparable<Store> {
 	 * @param storeState the storeState to set
 	 */
 	void setStoreState(StoreState storeState);
-
-	/**
-	 * Determines if this {@link Store} is configured with a gateway that supports the selected {@link PaymentGatewayType}.
-	 * @param paymentGatewayType the payment type of the gateway
-	 * @return true if a gateway is configured with the supported payment type, false otherwise.
-	 */
-	boolean supportsPaymentGatewayType(PaymentGatewayType paymentGatewayType);
 
 	/**
 	 * Gets the shopping cart types associated with the store.

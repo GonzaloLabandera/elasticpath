@@ -50,10 +50,12 @@ import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.domain.store.impl.WarehouseImpl;
 import com.elasticpath.inventory.InventoryDto;
+import com.elasticpath.inventory.InventoryExecutionResult;
 import com.elasticpath.inventory.InventoryKey;
 import com.elasticpath.inventory.dao.InventoryDao;
 import com.elasticpath.inventory.dao.InventoryJournalDao;
 import com.elasticpath.inventory.domain.Inventory;
+import com.elasticpath.inventory.domain.InventoryJournal;
 import com.elasticpath.inventory.domain.impl.InventoryImpl;
 import com.elasticpath.inventory.domain.impl.InventoryJournalImpl;
 import com.elasticpath.inventory.impl.InventoryDtoAssembler;
@@ -96,15 +98,9 @@ public class ProductInventoryManagementServiceImplTest {
 
 	private static final long WAREHOUSE_UID = 1L;
 
-	private static final String INVENTORY_JOURNAL = "inventoryJournal";
-
 	private static final int THREE = 3;
 
-	private static final String ALLOCATION_RESULT = "allocationResult";
-
 	private static final String PRODUCT = "PRODUCT";
-
-	private static final String EXECUTION_RESULT = ContextIdNames.INVENTORY_EXECUTION_RESULT;
 
 	private static final String ORDER_SKU_SELECT_BY_CODE_AND_STATUS = "ORDER_SKU_SELECT_BY_CODE_AND_STATUS";
 
@@ -330,8 +326,9 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				allowing(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
-				allowing(beanFactory).getBean(INVENTORY_JOURNAL);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
 				will(returnValue(inventoryJournal));
 				allowing(inventoryDao).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory));
 				allowing(inventoryJournalDao).getRollup(inventoryKey); will(returnValue(ijRollup));
@@ -417,11 +414,14 @@ public class ProductInventoryManagementServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(ALLOCATION_RESULT); will(returnValue(new AllocationResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.ALLOCATION_RESULT, AllocationResult.class);
+				will(returnValue(new AllocationResultImpl()));
 
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				allowing(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
-				allowing(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
 
 				allowing(productSkuLookup).findByGuid(productSku.getGuid()); will(returnValue(productSku));
 				allowing(inventoryDao).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory));
@@ -466,8 +466,10 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
-				allowing(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 
 				allowing(inventoryDao).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory));
 				allowing(inventoryJournalDao).getRollup(inventoryKey); will(returnValue(ijRollup));
@@ -496,8 +498,10 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
-				allowing(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 				allowing(inventoryDao2).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory2));
 				allowing(inventoryJournalDao2).getRollup(inventoryKey); will(returnValue(ijRollup2));
 				oneOf(inventoryJournalDao2).saveOrUpdate(inventoryJournal); will(returnValue(new InventoryJournalImpl()));
@@ -551,9 +555,12 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
-				oneOf(beanFactory).getBean(ALLOCATION_RESULT); will(returnValue(new AllocationResultImpl()));
-				oneOf(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.ALLOCATION_RESULT, AllocationResult.class);
+				will(returnValue(new AllocationResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 
 				allowing(productSkuLookup).findByGuid(productSku.getGuid()); will(returnValue(productSku));
 				allowing(inventoryDao).getInventory(skuCode, warehouseUid); will(returnValue(inventory));
@@ -571,7 +578,8 @@ public class ProductInventoryManagementServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 			}
 		});
 
@@ -584,7 +592,8 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
 				allowing(inventoryDao2).getInventory(skuCode, warehouseUid); will(returnValue(inventory2));
 				oneOf(inventoryJournalDao).saveOrUpdate(inventoryJournal); will(returnValue(new InventoryJournalImpl()));
 			}
@@ -626,8 +635,10 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
-				oneOf(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 
 				allowing(inventoryDao).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory));
 				allowing(inventoryJournalDao).getRollup(inventoryKey); will(returnValue(ijRollup));
@@ -644,7 +655,8 @@ public class ProductInventoryManagementServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 			}
 		});
 
@@ -660,7 +672,8 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
 				atLeast(1).of(inventoryDao2).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory2));
 				atLeast(1).of(inventoryJournalDao2).saveOrUpdate(inventoryJournal); will(returnValue(new InventoryJournalImpl()));
 				atLeast(1).of(inventoryJournalDao2).getRollup(inventoryKey); will(returnValue(ijRollup2));
@@ -702,8 +715,10 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
-				oneOf(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 
 				atLeast(1).of(inventoryDao).getInventory(skuCode, WAREHOUSE_UID); will(returnValue(inventory));
 				atLeast(1).of(inventoryJournalDao).getRollup(inventoryKey); will(returnValue(ijRollup));
@@ -720,7 +735,8 @@ public class ProductInventoryManagementServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 			}
 		});
 
@@ -738,7 +754,8 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
 				atLeast(1).of(inventoryDao2).getInventory(skuCode, WAREHOUSE_UID); will(returnValue(inventory2));
 				atLeast(1).of(inventoryJournalDao2).saveOrUpdate(inventoryJournal); will(returnValue(new InventoryJournalImpl()));
 				atLeast(1).of(inventoryJournalDao2).getRollup(inventoryKey); will(returnValue(ijRollup2));
@@ -877,8 +894,10 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
-				allowing(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 
 				allowing(inventoryDao).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory));
 				allowing(inventoryJournalDao).getRollup(inventoryKey); will(returnValue(new InventoryJournalRollupImpl()));
@@ -919,7 +938,8 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				final InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
 				allowing(inventoryDao3).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory3));
 				atLeast(1).of(inventoryJournalDao3).saveOrUpdate(inventoryJournal); will(returnValue(inventoryJournal));
 				atLeast(1).of(inventoryJournalDao3).getRollup(inventoryKey); will(returnValue(new InventoryJournalRollupImpl()));
@@ -987,9 +1007,12 @@ public class ProductInventoryManagementServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				oneOf(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
-				oneOf(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
-				atLeast(1).of(beanFactory).getBean(ALLOCATION_RESULT); will(returnValue(new AllocationResultImpl()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
+				atLeast(1).of(beanFactory).getPrototypeBean(ContextIdNames.ALLOCATION_RESULT, AllocationResult.class);
+				will(returnValue(new AllocationResultImpl()));
 
 				allowing(productSkuLookup).findByGuid(productSku.getGuid()); will(returnValue(productSku));
 				allowing(inventoryDao).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory));
@@ -1095,10 +1118,13 @@ public class ProductInventoryManagementServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				atLeast(1).of(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
-				atLeast(1).of(beanFactory).getBean(ALLOCATION_RESULT); will(returnValue(new AllocationResultImpl()));
+				atLeast(1).of(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
+				atLeast(1).of(beanFactory).getPrototypeBean(ContextIdNames.ALLOCATION_RESULT, AllocationResult.class);
+				will(returnValue(new AllocationResultImpl()));
 				InventoryJournalImpl inventoryJournal = new InventoryJournalImpl();
-				allowing(beanFactory).getBean(INVENTORY_JOURNAL); will(returnValue(inventoryJournal));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL, InventoryJournal.class);
+				will(returnValue(inventoryJournal));
 				allowing(productSkuLookup).findByGuid(productSku.getGuid()); will(returnValue(productSku));
 				oneOf(productSkuService).getPreOrBackOrderDetails(SKU_CODE); will(returnValue(preOrBackOrderDetails));
 				exactly(THREE).of(inventoryDao).getInventory(SKU_CODE, WAREHOUSE_UID); will(returnValue(inventory));
@@ -1168,7 +1194,8 @@ public class ProductInventoryManagementServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(EXECUTION_RESULT); will(returnValue(new InventoryExecutionResultImpl()));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT, InventoryExecutionResult.class);
+				will(returnValue(new InventoryExecutionResultImpl()));
 				allowing(productSkuLookup).findBySkuCode(SKU_CODE); will(returnValue(productSku));
 			}
 		});

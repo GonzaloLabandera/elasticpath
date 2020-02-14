@@ -34,6 +34,7 @@ import com.elasticpath.domain.catalog.ConstituentItem;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.PriceSchedule;
 import com.elasticpath.domain.catalog.PriceScheduleType;
+import com.elasticpath.domain.catalog.PriceTier;
 import com.elasticpath.domain.catalog.PricingScheme;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
@@ -48,6 +49,7 @@ import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.domain.pricing.BaseAmount;
 import com.elasticpath.domain.pricing.BaseAmountObjectType;
 import com.elasticpath.domain.pricing.PriceAdjustment;
+import com.elasticpath.domain.pricing.PriceListStack;
 import com.elasticpath.domain.pricing.impl.BaseAmountImpl;
 import com.elasticpath.domain.pricing.impl.PriceAdjustmentImpl;
 import com.elasticpath.domain.pricing.impl.PriceListStackImpl;
@@ -121,7 +123,7 @@ public class PriceLookupServiceImplTest {
 		pricedEntityFactory.setDefaultDataSource(baseAmountService);
 
 		final TimeService timeService = mock(TimeService.class);
-		when(beanFactory.getBean(ContextIdNames.TIME_SERVICE)).thenReturn(timeService);
+		when(beanFactory.getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class)).thenReturn(timeService);
 		when(timeService.getCurrentTime()).thenReturn(new Date());
 
 		service.setBeanFactory(beanFactory);
@@ -159,10 +161,10 @@ public class PriceLookupServiceImplTest {
 		final ProductSku sku = mock(ProductSku.class);
 		final Product product = mock(Product.class);
 
-		when(beanFactory.getBean(ContextIdNames.PRICE_TIER)).thenAnswer(invocation -> new PriceTierImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE)).thenAnswer(invocation -> new PriceScheduleImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICING_SCHEME)).thenAnswer(invocation -> new PricingSchemeImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class)).thenAnswer(invocation -> new PriceTierImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class)).thenAnswer(invocation -> new PriceScheduleImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class)).thenAnswer(invocation -> new PricingSchemeImpl());
 
 		when(sku.getSkuCode()).thenReturn(SKU);
 		when(sku.getProduct()).thenReturn(product);
@@ -184,11 +186,11 @@ public class PriceLookupServiceImplTest {
 		final Product product = mock(Product.class);
 		final ProductSku sku0 = mock(ProductSku.class, "sku0");
 
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_TIER)).thenAnswer(invocation -> new PriceTierImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_LIST_STACK)).thenAnswer(invocation -> new PriceListStackImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE)).thenAnswer(invocation -> new PriceScheduleImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICING_SCHEME)).thenAnswer(invocation -> new PricingSchemeImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class)).thenAnswer(invocation -> new PriceTierImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_LIST_STACK, PriceListStack.class)).thenAnswer(invocation -> new PriceListStackImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class)).thenAnswer(invocation -> new PriceScheduleImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class)).thenAnswer(invocation -> new PricingSchemeImpl());
 
 
 		when(sku0.getSkuCode()).thenReturn(SKU_GUID1);
@@ -292,10 +294,10 @@ public class PriceLookupServiceImplTest {
 		prodSkus.put(SKU_GUID0, sku0);
 		prodSkus.put(SKU_GUID1, sku1);
 
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_TIER)).thenAnswer(invocation -> new PriceTierImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE)).thenAnswer(invocation -> new PriceScheduleImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICING_SCHEME)).thenAnswer(invocation -> new PricingSchemeImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class)).thenAnswer(invocation -> new PriceTierImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class)).thenAnswer(invocation -> new PriceScheduleImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class)).thenAnswer(invocation -> new PricingSchemeImpl());
 
 		final PriceListStackImpl plStack = new PriceListStackImpl();
 		plStack.addPriceList(ANY);
@@ -481,10 +483,10 @@ public class PriceLookupServiceImplTest {
 	 */
 	@Test
 	public void testPricingScheme() {
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_TIER)).thenAnswer(invocation -> new PriceTierImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE)).thenAnswer(invocation -> new PriceScheduleImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICING_SCHEME)).thenAnswer(invocation -> new PricingSchemeImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class)).thenAnswer(invocation -> new PriceTierImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class)).thenAnswer(invocation -> new PriceScheduleImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class)).thenAnswer(invocation -> new PricingSchemeImpl());
 
 		final List<BaseAmount> amounts = new ArrayList<>();
 		BaseAmount baseAmount = createBaseAmount(PL_GUID, "1", "17.99", "14.99", PRODUCT_GUID, BaseAmountObjectType.PRODUCT.toString());
@@ -545,10 +547,10 @@ public class PriceLookupServiceImplTest {
 	 */
 	@Test
 	public void testCalculatedBundlePrice() {
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_TIER)).thenAnswer(invocation -> new PriceTierImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE)).thenAnswer(invocation -> new PriceScheduleImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICING_SCHEME)).thenAnswer(invocation -> new PricingSchemeImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class)).thenAnswer(invocation -> new PriceTierImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_SCHEDULE, PriceSchedule.class)).thenAnswer(invocation -> new PriceScheduleImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class)).thenAnswer(invocation -> new PricingSchemeImpl());
 
 		final ProductSku productSku = mock(ProductSku.class);
 		final ProductBundle productBundle = mock(ProductBundle.class);
@@ -618,8 +620,8 @@ public class PriceLookupServiceImplTest {
 	 */
 	@Test
 	public void testCalculatedBundlePriceWithNullConstituentPrice() {
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICING_SCHEME)).thenAnswer(invocation -> new PricingSchemeImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICING_SCHEME, PricingScheme.class)).thenAnswer(invocation -> new PricingSchemeImpl());
 
 		final ProductSku productSku = mock(ProductSku.class);
 		final ProductBundle productBundle = mock(ProductBundle.class);

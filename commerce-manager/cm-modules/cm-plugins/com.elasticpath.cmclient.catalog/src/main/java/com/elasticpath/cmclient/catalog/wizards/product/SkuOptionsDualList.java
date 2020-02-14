@@ -13,7 +13,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareDualListBox;
@@ -73,8 +73,7 @@ public class SkuOptionsDualList extends AbstractPolicyAwareDualListBox<List<SkuO
 	@Override
 	public Collection<SkuOption> getAvailable() {
 		if (availableOptions == null) {
-			final SkuOptionService skuOptionService = ServiceLocator.getService(
-					ContextIdNames.SKU_OPTION_SERVICE);
+			final SkuOptionService skuOptionService = BeanLocator.getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
 			availableOptions = skuOptionService.findAllSkuOptionFromCatalog(this.catalog.getUidPk());
 		}
 		return availableOptions;

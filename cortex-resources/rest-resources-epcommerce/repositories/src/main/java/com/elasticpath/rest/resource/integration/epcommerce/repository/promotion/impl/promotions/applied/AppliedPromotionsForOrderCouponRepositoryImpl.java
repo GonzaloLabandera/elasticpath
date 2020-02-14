@@ -3,8 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil
-		.buildPromotionIdentifiers;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil.buildPromotionIdentifiers;
 
 import java.util.Collection;
 
@@ -42,13 +41,13 @@ public class AppliedPromotionsForOrderCouponRepositoryImpl<I extends AppliedProm
 		String scope = identifier.getOrderCoupon().getOrder().getScope().getValue();
 		String cartId = identifier.getOrderCoupon().getOrder().getOrderId().getValue();
 		String couponId = identifier.getOrderCoupon().getCouponId().getValue();
-		return cartOrderRepository.getEnrichedShoppingCartSingle(scope, cartId, CartOrderRepository.FindCartOrder.BY_ORDER_GUID)
+		return cartOrderRepository.getEnrichedShoppingCart(scope, cartId, CartOrderRepository.FindCartOrder.BY_ORDER_GUID)
 				.flatMap(shoppingCart -> getAppliedPromotions(couponId, shoppingCart))
 				.flatMapObservable(appliedPromotions -> buildPromotionIdentifiers(scope, appliedPromotions));
 	}
 
 	private Single<Collection<String>> getAppliedPromotions(final String couponId, final ShoppingCart shoppingCart) {
-		return pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)
+		return pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart)
 				.flatMap(pricingSnapshot -> couponRepository.findByCouponCode(couponId)
 						.map(coupon -> promotionRepository.getAppliedPromotionsForCoupon(pricingSnapshot, coupon)));
 	}

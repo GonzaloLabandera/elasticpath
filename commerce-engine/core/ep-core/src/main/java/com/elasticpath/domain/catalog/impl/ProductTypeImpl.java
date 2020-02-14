@@ -58,8 +58,10 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
  */
 @Entity
 @Table(name = ProductTypeImpl.TABLE_NAME)
-@FetchGroup(name = FetchGroupConstants.PRODUCT_INDEX, attributes = { @FetchAttribute(name = "productAttributeGroupAttributes"),
-		@FetchAttribute(name = "name"), @FetchAttribute(name = "multiSku"), @FetchAttribute(name = "skuOptions"),
+@FetchGroup(name = FetchGroupConstants.PRODUCT_INDEX, attributes = {
+		@FetchAttribute(name = "productAttributeGroupAttributes"),
+		@FetchAttribute(name = "name"),
+		@FetchAttribute(name = "multiSku"),
 		@FetchAttribute(name = "excludedFromDiscount") })
 @SuppressWarnings({ "PMD.UselessOverridingMethod", "PMD.GodClass" })
 public class ProductTypeImpl extends AbstractLegacyEntityImpl implements ProductType {
@@ -138,7 +140,7 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 	 * @return the set of options for configuring SKUs of this product or null if there are no configurable options
 	 */
 	@Override
-	@ManyToMany(targetEntity = SkuOptionImpl.class, fetch = FetchType.EAGER, cascade = { CascadeType.REFRESH, CascadeType.MERGE })
+	@ManyToMany(targetEntity = SkuOptionImpl.class, cascade = { CascadeType.REFRESH, CascadeType.MERGE })
 	@JoinTable(name = "TPRODUCTTYPESKUOPTION", joinColumns = { @JoinColumn(name = "PRODUCT_TYPE_UID") },
 			inverseJoinColumns = { @JoinColumn(name = "SKU_OPTION_UID") })
 	public Set<SkuOption> getSkuOptions() {
@@ -229,7 +231,7 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 	@Transient
 	public AttributeGroup getProductAttributeGroup() {
 		if (productAttributeGroup == null) {
-			productAttributeGroup = getBean(ContextIdNames.ATTRIBUTE_GROUP);
+			productAttributeGroup = getPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class);
 		}
 		productAttributeGroup.setAttributeGroupAttributes(getProductAttributeGroupAttributes());
 		return productAttributeGroup;
@@ -302,7 +304,7 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 	@Transient
 	public AttributeGroup getSkuAttributeGroup() {
 		if (skuAttributeGroup == null) {
-			skuAttributeGroup = getBean(ContextIdNames.ATTRIBUTE_GROUP);
+			skuAttributeGroup = getPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class);
 		}
 		skuAttributeGroup.setAttributeGroupAttributes(getSkuAttributeGroupAttributes());
 		return skuAttributeGroup;
@@ -315,7 +317,7 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 	public void initialize() {
 		super.initialize();
 		if (getSkuAttributeGroup() == null) {
-			AttributeGroup attributeGroup = getBean(ContextIdNames.ATTRIBUTE_GROUP);
+			AttributeGroup attributeGroup = getPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class);
 			setSkuAttributeGroup(attributeGroup);
 		}
 	}

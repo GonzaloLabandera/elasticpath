@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.commons.ThreadLocalMap;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.persistence.api.ChangeType;
@@ -34,7 +35,9 @@ public class CatalogAuditTest extends AbstractAuditTestSupport {
 	@DirtiesDatabase
 	@Test
 	public void testAuditingForCreateCatalog() {
-		ThreadLocalMap<String, Object> metadata = getBeanFactory().getBean("persistenceListenerMetadataMap");
+		@SuppressWarnings("unchecked")
+		ThreadLocalMap<String, Object> metadata = (ThreadLocalMap<String, Object>) getBeanFactory()
+				.getSingletonBean(ContextIdNames.PERSISTENCELISTENER_METADATA_MAP, ThreadLocalMap.class);
 		metadata.put("changeSetGuid", "changeSetGuid1");
 		metadata.put("userGuid", "userGuid1");
 
@@ -52,7 +55,9 @@ public class CatalogAuditTest extends AbstractAuditTestSupport {
 	@DirtiesDatabase
 	@Test
 	public void testAuditingForDeleteCatalog() {
-		ThreadLocalMap<String, Object> metadata = getBeanFactory().getBean("persistenceListenerMetadataMap");
+		@SuppressWarnings("unchecked")
+		ThreadLocalMap<String, Object> metadata = (ThreadLocalMap<String, Object>) getBeanFactory()
+				.getSingletonBean(ContextIdNames.PERSISTENCELISTENER_METADATA_MAP, ThreadLocalMap.class);
 		metadata.put("changeSetGuid", "changeSetGuid1");
 		metadata.put("userGuid", "userGuid1");
 
@@ -72,7 +77,9 @@ public class CatalogAuditTest extends AbstractAuditTestSupport {
 	@DirtiesDatabase
 	@Test
 	public void testAuditingForUpdateCatalog() {
-		ThreadLocalMap<String, Object> metadata = getBeanFactory().getBean("persistenceListenerMetadataMap");
+		@SuppressWarnings("unchecked")
+		ThreadLocalMap<String, Object> metadata = (ThreadLocalMap<String, Object>) getBeanFactory()
+				.getSingletonBean(ContextIdNames.PERSISTENCELISTENER_METADATA_MAP, ThreadLocalMap.class);
 		metadata.put("changeSetGuid", "changeSetGuid1");
 		metadata.put("userGuid", "userGuid1");
 

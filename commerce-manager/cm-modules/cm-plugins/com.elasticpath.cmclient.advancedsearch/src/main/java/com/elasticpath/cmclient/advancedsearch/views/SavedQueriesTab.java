@@ -31,8 +31,8 @@ import com.elasticpath.cmclient.advancedsearch.AdvancedSearchMessages;
 import com.elasticpath.cmclient.advancedsearch.actions.TabQueryAction;
 import com.elasticpath.cmclient.advancedsearch.helpers.AdvancedSearchQuerySelector;
 import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpTabFolder;
@@ -94,7 +94,7 @@ public class SavedQueriesTab implements AdvancedSearchQuerySelector {
 	 */
 	public SavedQueriesTab(final IEpTabFolder tabFolder, final int tabIndex,
 			final AbstractAdvancedSearchView advancedSearchView) {
-		this.searchQueryDao = ServiceLocator.getService(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO);
+		this.searchQueryDao = BeanLocator.getSingletonBean(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO, AdvancedSearchQueryDao.class);
 		this.advancedSearchView = advancedSearchView;
 		final IEpLayoutComposite savedQueriesTab = tabFolder.addTabItem(AdvancedSearchMessages.get().SavedQueries,
 				AdvancedSearchImageRegistry.getImage(AdvancedSearchImageRegistry.QUERY), tabIndex, 1, false);

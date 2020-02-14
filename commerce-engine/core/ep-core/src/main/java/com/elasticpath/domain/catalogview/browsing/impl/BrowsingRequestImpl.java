@@ -278,7 +278,8 @@ public class BrowsingRequestImpl extends AbstractCatalogViewRequestImpl implemen
 	 * @return seoUrlBuilder the store specific SeoUrlBuilder
 	 */
 	protected SeoUrlBuilder getSeoUrlBuilder() {
-		StoreSeoUrlBuilderFactory storeSeoUrlBuilderFactory = getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+		StoreSeoUrlBuilderFactory storeSeoUrlBuilderFactory = getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY,
+				StoreSeoUrlBuilderFactory.class);
 		return storeSeoUrlBuilderFactory.getStoreSeoUrlBuilder();
 	}
 }

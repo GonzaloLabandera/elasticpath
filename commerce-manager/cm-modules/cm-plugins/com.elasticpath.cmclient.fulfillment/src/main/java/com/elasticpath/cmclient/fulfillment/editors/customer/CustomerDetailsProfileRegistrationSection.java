@@ -27,7 +27,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -106,7 +106,7 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 
 	/**
 	 * Constructor to create a new Section in an editor's FormPage.
-	 * 
+	 *
 	 * @param formPage the formpage
 	 * @param editor the CmClientFormEditor that contains the form
 	 */
@@ -261,10 +261,9 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 	}
 
 	private Collection<Store> getSharedLoginStores(final Store registeredStore) {
-		final StoreService storeService = ServiceLocator.getService(
-				ContextIdNames.STORE_SERVICE);
+		final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		final FetchGroupLoadTuner loadTuner =
-				ServiceLocator.getService(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+				BeanLocator.getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		loadTuner.addFetchGroup(FetchGroupConstants.STORE_SHARING);
 		return storeService.getTunedStores(registeredStore.getAssociatedStoreUids(), loadTuner);
 	}
@@ -374,7 +373,7 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 
 	/**
 	 * Sets the customer gender to the model object.
-	 * 
+	 *
 	 * @param comboIndex the gender combo index
 	 */
 	private void setCustomerGender(final int comboIndex) {
@@ -420,8 +419,8 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 			// if the editor is open and the user set the customer to registered
 			// disable the combo as it should not be changed back to anonymous
 			userTypeCombo.setEnabled(!customer.isRegistered());
-			final CustomerRegistrationService customerRegistrationService = ServiceLocator.getService(
-					ContextIdNames.CUSTOMER_REGISTRATION_SERVICE);
+			final CustomerRegistrationService customerRegistrationService = BeanLocator
+					.getSingletonBean(ContextIdNames.CUSTOMER_REGISTRATION_SERVICE, CustomerRegistrationService.class);
 			customerRegistrationService.registerCustomerAndSendPassword(customer);
 
 			MessageDialog.openInformation(getSection().getShell(), FulfillmentMessages.get().CustomerDetailsPage_CreatePassInfoTitle,
@@ -446,9 +445,9 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 	 *
 	 * @return the store service
 	 */
-	protected StoreService getStoreService() { 
+	protected StoreService getStoreService() {
 		if (storeService == null) {
-			storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+			storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		}
 		return storeService;
 	}

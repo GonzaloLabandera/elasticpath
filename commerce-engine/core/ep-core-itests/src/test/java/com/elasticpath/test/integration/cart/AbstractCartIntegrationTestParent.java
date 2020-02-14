@@ -22,7 +22,6 @@ import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.tax.TaxCode;
-import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.persister.TaxTestPersister;
@@ -34,9 +33,6 @@ public abstract class AbstractCartIntegrationTestParent extends DbTestCase {
 
 	@Autowired
 	protected ShopperService shopperService;
-
-	@Autowired
-	private CustomerSessionService customerSessionService;
 
 	protected CustomerSession createCustomerSession() {
 		return createCustomerSession(null);
@@ -50,14 +46,14 @@ public abstract class AbstractCartIntegrationTestParent extends DbTestCase {
 		final CustomerSession customerSession = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(
 				shopper);
 
-		final PriceListHelperService priceListHelperService = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE);
+		final PriceListHelperService priceListHelperService = getBeanFactory().getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE, PriceListHelperService.class);
 		final Currency currency = priceListHelperService.getDefaultCurrencyFor(getScenario().getCatalog());
 		customerSession.setCurrency(currency);
 		return customerSession;
 	}
 
 	protected ShoppingCart createShoppingCart(final CustomerSession customerSession) {
-		final ShoppingCart shoppingCart = getBeanFactory().getBean(ContextIdNames.SHOPPING_CART);
+		final ShoppingCart shoppingCart = getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		shoppingCart.setStore(getScenario().getStore());
 		shoppingCart.setCustomerSession(customerSession);
 		customerSession.setShoppingCart(shoppingCart);
@@ -67,7 +63,7 @@ public abstract class AbstractCartIntegrationTestParent extends DbTestCase {
 
 	protected Product persistProductWithSku() {
 		final TaxCode taxCode = getPersisterFactory().getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS);
-		final PriceListHelperService priceListHelperService = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE);
+		final PriceListHelperService priceListHelperService = getBeanFactory().getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE, PriceListHelperService.class);
 		final Currency currency = priceListHelperService.getDefaultCurrencyFor(getScenario().getCatalog());
 		final int orderLimit = Integer.MAX_VALUE;
 		return getPersisterFactory().getCatalogTestPersister().persistProductWithSku(

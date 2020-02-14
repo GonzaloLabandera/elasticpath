@@ -76,14 +76,14 @@ public class ShippingCalculationConnectivityAPISpringXmlVerificationTest {
 
 		final SoftAssertions soft = new SoftAssertions();
 
-		soft.assertThat(getBean(SHIPPING_CALCULATION_SERVICE)).isNotNull().isInstanceOf(ShippingCalculationService.class);
-		soft.assertThat(getBean(UNPRICED_SHIPPING_CALCULATION_PLUGIN_SELECTOR)).isNotNull()
+		soft.assertThat(context.getBean(SHIPPING_CALCULATION_SERVICE)).isNotNull().isInstanceOf(ShippingCalculationService.class);
+		soft.assertThat(context.getBean(UNPRICED_SHIPPING_CALCULATION_PLUGIN_SELECTOR)).isNotNull()
 				.isInstanceOf(StaticUnpricedShippingCalculationPluginSelectorImpl.class);
-		soft.assertThat(getBean(PRICED_SHIPPING_CALCULATION_PLUGIN_SELECTOR)).isNotNull()
+		soft.assertThat(context.getBean(PRICED_SHIPPING_CALCULATION_PLUGIN_SELECTOR)).isNotNull()
 				.isInstanceOf(StaticPricedShippingCalculationPluginSelectorImpl.class);
-		soft.assertThat(getBean(UNPRICED_SHIPPING_CALCULATION_PLUGIN_LIST)).isNotNull().isInstanceOf(List.class);
-		soft.assertThat(getBean(UNPRICED_SHIPPING_CALCULATION_PLUGIN_LIST)).isNotNull().isInstanceOf(List.class);
-		soft.assertThat(getBean(NON_CACHING_SHIPPING_CALCULATION_SERVICE)).isNotNull().isInstanceOf(ShippingCalculationService.class);
+		soft.assertThat(context.getBean(UNPRICED_SHIPPING_CALCULATION_PLUGIN_LIST)).isNotNull().isInstanceOf(List.class);
+		soft.assertThat(context.getBean(UNPRICED_SHIPPING_CALCULATION_PLUGIN_LIST)).isNotNull().isInstanceOf(List.class);
+		soft.assertThat(context.getBean(NON_CACHING_SHIPPING_CALCULATION_SERVICE)).isNotNull().isInstanceOf(ShippingCalculationService.class);
 
 		soft.assertAll();
 	}
@@ -93,19 +93,19 @@ public class ShippingCalculationConnectivityAPISpringXmlVerificationTest {
 
 		final SoftAssertions soft = new SoftAssertions();
 
-		soft.assertThat(getBean(SHIPPING_OPTION)).isNotSameAs(getBean(SHIPPING_OPTION))
+		soft.assertThat(context.getBean(SHIPPING_OPTION)).isNotSameAs(context.getBean(SHIPPING_OPTION))
 				.isInstanceOf(ShippingOptionImpl.class);
-		soft.assertThat(getBean(SHIPPING_CALCULATION_RESULT)).isNotSameAs(getBean(SHIPPING_CALCULATION_RESULT))
+		soft.assertThat(context.getBean(SHIPPING_CALCULATION_RESULT)).isNotSameAs(context.getBean(SHIPPING_CALCULATION_RESULT))
 				.isInstanceOf(ShippingCalculationResultImpl.class);
-		soft.assertThat(getBean(SHIPPING_ADDRESS)).isNotSameAs(getBean(SHIPPING_ADDRESS))
+		soft.assertThat(context.getBean(SHIPPING_ADDRESS)).isNotSameAs(context.getBean(SHIPPING_ADDRESS))
 				.isInstanceOf(ShippingAddressImpl.class);
-		soft.assertThat(getBean(UNPRICED_SHIPPABLE_ITEM)).isNotSameAs(getBean(UNPRICED_SHIPPABLE_ITEM))
+		soft.assertThat(context.getBean(UNPRICED_SHIPPABLE_ITEM)).isNotSameAs(context.getBean(UNPRICED_SHIPPABLE_ITEM))
 				.isInstanceOf(ShippableItemImpl.class);
-		soft.assertThat(getBean(PRICED_SHIPPABLE_ITEM)).isNotSameAs(getBean(PRICED_SHIPPABLE_ITEM))
+		soft.assertThat(context.getBean(PRICED_SHIPPABLE_ITEM)).isNotSameAs(context.getBean(PRICED_SHIPPABLE_ITEM))
 				.isInstanceOf(PricedShippableItemImpl.class);
-		soft.assertThat(getBean(UNPRICED_SHIPPABLE_ITEM_CONTAINER)).isNotSameAs(getBean(UNPRICED_SHIPPABLE_ITEM_CONTAINER))
+		soft.assertThat(context.getBean(UNPRICED_SHIPPABLE_ITEM_CONTAINER)).isNotSameAs(context.getBean(UNPRICED_SHIPPABLE_ITEM_CONTAINER))
 				.isInstanceOf(ShippableItemContainerImpl.class);
-		soft.assertThat(getBean(PRICED_SHIPPABLE_ITEM_CONTAINER)).isNotSameAs(getBean(PRICED_SHIPPABLE_ITEM_CONTAINER))
+		soft.assertThat(context.getBean(PRICED_SHIPPABLE_ITEM_CONTAINER)).isNotSameAs(context.getBean(PRICED_SHIPPABLE_ITEM_CONTAINER))
 				.isInstanceOf(PricedShippableItemContainerImpl.class);
 
 		soft.assertAll();
@@ -116,11 +116,11 @@ public class ShippingCalculationConnectivityAPISpringXmlVerificationTest {
 
 		final SoftAssertions soft = new SoftAssertions();
 
-		soft.assertThat(getBean(SHIPPING_OPTION_BUILDER)).isNotSameAs(getBean(SHIPPING_OPTION_BUILDER))
+		soft.assertThat(context.getBean(SHIPPING_OPTION_BUILDER)).isNotSameAs(context.getBean(SHIPPING_OPTION_BUILDER))
 				.isInstanceOf(ShippingOptionBuilder.class);
-		soft.assertThat(getBean(SHIPPING_CALCULATION_RESULT_BUILDER)).isNotSameAs(getBean(SHIPPING_CALCULATION_RESULT_BUILDER))
+		soft.assertThat(context.getBean(SHIPPING_CALCULATION_RESULT_BUILDER)).isNotSameAs(context.getBean(SHIPPING_CALCULATION_RESULT_BUILDER))
 				.isInstanceOf(ShippingCalculationResultBuilder.class);
-		soft.assertThat(getBean(SHIPPING_ADDRESS_BUILDER)).isNotSameAs(getBean(SHIPPING_ADDRESS_BUILDER))
+		soft.assertThat(context.getBean(SHIPPING_ADDRESS_BUILDER)).isNotSameAs(context.getBean(SHIPPING_ADDRESS_BUILDER))
 				.isInstanceOf(ShippingAddressBuilder.class);
 
 		soft.assertAll();
@@ -131,28 +131,26 @@ public class ShippingCalculationConnectivityAPISpringXmlVerificationTest {
 
 		final SoftAssertions soft = new SoftAssertions();
 
-		soft.assertThat(getBean(SHIPPING_OPTION_BUILDER_SUPPLIER)).isSameAs(getBean(SHIPPING_OPTION_BUILDER_SUPPLIER))
+		soft.assertThat(context.getBean(SHIPPING_OPTION_BUILDER_SUPPLIER)).isSameAs(context.getBean(SHIPPING_OPTION_BUILDER_SUPPLIER))
 				.isInstanceOf(Supplier.class);
-		soft.assertThat(getBean(SHIPPING_CALCULATION_RESULT_BUILDER_SUPPLIER)).isSameAs(getBean(SHIPPING_CALCULATION_RESULT_BUILDER_SUPPLIER))
+		soft.assertThat(context.getBean(SHIPPING_CALCULATION_RESULT_BUILDER_SUPPLIER)).isSameAs(
+				context.getBean(SHIPPING_CALCULATION_RESULT_BUILDER_SUPPLIER))
 				.isInstanceOf(Supplier.class);
-		soft.assertThat(getBean(SHIPPING_ADDRESS_BUILDER_SUPPLIER)).isSameAs(getBean(SHIPPING_ADDRESS_BUILDER_SUPPLIER))
+		soft.assertThat(context.getBean(SHIPPING_ADDRESS_BUILDER_SUPPLIER)).isSameAs(context.getBean(SHIPPING_ADDRESS_BUILDER_SUPPLIER))
 				.isInstanceOf(Supplier.class);
-		soft.assertThat(getBean(UNPRICED_SHIPPABLE_ITEM_BUILDER_SUPPLIER)).isSameAs(getBean(UNPRICED_SHIPPABLE_ITEM_BUILDER_SUPPLIER))
+		soft.assertThat(context.getBean(UNPRICED_SHIPPABLE_ITEM_BUILDER_SUPPLIER)).isSameAs(
+				context.getBean(UNPRICED_SHIPPABLE_ITEM_BUILDER_SUPPLIER))
 				.isInstanceOf(Supplier.class);
-		soft.assertThat(getBean(PRICED_SHIPPABLE_ITEM_BUILDER_SUPPLIER)).isSameAs(getBean(PRICED_SHIPPABLE_ITEM_BUILDER_SUPPLIER))
+		soft.assertThat(context.getBean(PRICED_SHIPPABLE_ITEM_BUILDER_SUPPLIER)).isSameAs(context.getBean(PRICED_SHIPPABLE_ITEM_BUILDER_SUPPLIER))
 				.isInstanceOf(Supplier.class);
-		soft.assertThat(getBean(UNPRICED_SHIPPABLE_ITEM_CONTAINER_BUILDER_SUPPLIER))
-				.isSameAs(getBean(UNPRICED_SHIPPABLE_ITEM_CONTAINER_BUILDER_SUPPLIER))
+		soft.assertThat(context.getBean(UNPRICED_SHIPPABLE_ITEM_CONTAINER_BUILDER_SUPPLIER))
+				.isSameAs(context.getBean(UNPRICED_SHIPPABLE_ITEM_CONTAINER_BUILDER_SUPPLIER))
 				.isInstanceOf(Supplier.class);
-		soft.assertThat(getBean(PRICED_SHIPPABLE_ITEM_CONTAINER_BUILDER_SUPPLIER))
-				.isSameAs(getBean(PRICED_SHIPPABLE_ITEM_CONTAINER_BUILDER_SUPPLIER))
+		soft.assertThat(context.getBean(PRICED_SHIPPABLE_ITEM_CONTAINER_BUILDER_SUPPLIER))
+				.isSameAs(context.getBean(PRICED_SHIPPABLE_ITEM_CONTAINER_BUILDER_SUPPLIER))
 				.isInstanceOf(Supplier.class);
 
 		soft.assertAll();
-	}
-
-	private Object getBean(final String beanName) {
-		return context.getBean(beanName);
 	}
 
 	/**

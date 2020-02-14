@@ -13,11 +13,8 @@ import io.reactivex.Single;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -33,7 +30,6 @@ import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionService;
@@ -56,7 +52,6 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	private final ShoppingCartService shoppingCartService;
 	private final BeanFactory coreBeanFactory;
 	private final Provider<CartOrderRepository> cartOrderRepositoryProvider;
-	private final ExceptionTransformer exceptionTransformer;
 	private final ReactiveAdapter reactiveAdapter;
 
 
@@ -69,28 +64,18 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	 * @param shoppingCartService         shopping cart service
 	 * @param coreBeanFactory             beanFactory.
 	 * @param cartOrderRepositoryProvider cart order repository
-	 * @param exceptionTransformer        the exception transformer
 	 * @param reactiveAdapter             the reactive adapter
 	 */
 	@Inject
 	@SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
 	CustomerRepositoryImpl(
-			@Named("customerService")
-			final CustomerService customerService,
-			@Named("customerSessionRepository")
-			final CustomerSessionRepository customerSessionRepository,
-			@Named("customerSessionService")
-			final CustomerSessionService customerSessionService,
-			@Named("shoppingCartService")
-			final ShoppingCartService shoppingCartService,
-			@Named("coreBeanFactory")
-			final BeanFactory coreBeanFactory,
-			@Named("cartOrderRepository")
-			final Provider<CartOrderRepository> cartOrderRepositoryProvider,
-			@Named("exceptionTransformer")
-			final ExceptionTransformer exceptionTransformer,
-			@Named("reactiveAdapter")
-			final ReactiveAdapter reactiveAdapter) {
+			@Named("customerService") final CustomerService customerService,
+			@Named("customerSessionRepository") final CustomerSessionRepository customerSessionRepository,
+			@Named("customerSessionService") final CustomerSessionService customerSessionService,
+			@Named("shoppingCartService") final ShoppingCartService shoppingCartService,
+			@Named("coreBeanFactory") final BeanFactory coreBeanFactory,
+			@Named("cartOrderRepository") final Provider<CartOrderRepository> cartOrderRepositoryProvider,
+			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
 
 		this.customerService = customerService;
 		this.customerSessionRepository = customerSessionRepository;
@@ -98,22 +83,22 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 		this.shoppingCartService = shoppingCartService;
 		this.coreBeanFactory = coreBeanFactory;
 		this.cartOrderRepositoryProvider = cartOrderRepositoryProvider;
-		this.exceptionTransformer = exceptionTransformer;
 		this.reactiveAdapter = reactiveAdapter;
 	}
 
 	@Override
 	public Customer createNewCustomerEntity() {
-		return coreBeanFactory.getBean(ContextIdNames.CUSTOMER);
+		return coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 	}
 
 	@Override
 	@CacheResult
 	public ExecutionResult<Customer> findCustomerByUserId(final String storeCode, final String userId) {
 		return new ExecutionResultChain() {
+			@Override
 			public ExecutionResult<?> build() {
-				CustomerSession customerSessionResult = Assign.ifSuccessful(findCustomerSessionByUserIdWithoutException(storeCode, userId));
-				Customer customer = customerSessionResult.getShopper().getCustomer();
+				final CustomerSession customerSessionResult = Assign.ifSuccessful(findCustomerSessionByUserIdWithoutException(storeCode, userId));
+				final Customer customer = customerSessionResult.getShopper().getCustomer();
 				Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
 				customer.setStoreCode(storeCode);
 
@@ -125,7 +110,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	private ExecutionResult<CustomerSession> findCustomerSessionByUserIdWithoutException(final String storeCode, final String userId) {
 		try {
 			return customerSessionRepository.findCustomerSessionByUserId(storeCode, userId);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(String.format("Error when finding customer session by store code %s and user ID %s", storeCode, userId), e);
 			return ExecutionResultFactory.createServerError("Server error when finding customer session by user ID");
 		}
@@ -135,9 +120,10 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	@CacheResult
 	public ExecutionResult<Customer> findCustomerByGuid(final String guid) {
 		return new ExecutionResultChain() {
+			@Override
 			public ExecutionResult<?> build() {
-				CustomerSession customerSessionResult = Assign.ifSuccessful(findByCustomerSessionByGuidWithoutException(guid));
-				Customer customer = customerSessionResult.getShopper().getCustomer();
+				final CustomerSession customerSessionResult = Assign.ifSuccessful(findByCustomerSessionByGuidWithoutException(guid));
+				final Customer customer = customerSessionResult.getShopper().getCustomer();
 				Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
 
 				return ExecutionResultFactory.createReadOK(customer);
@@ -149,6 +135,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	@CacheResult
 	public ExecutionResult<Void> isCustomerGuidExists(final String guid) {
 		return new ExecutionResultChain() {
+			@Override
 			public ExecutionResult<?> build() {
 				final boolean customerExists = customerService.isCustomerGuidExists(guid);
 				if (!customerExists) {
@@ -162,7 +149,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	private ExecutionResult<CustomerSession> findByCustomerSessionByGuidWithoutException(final String guid) {
 		try {
 			return customerSessionRepository.findCustomerSessionByGuid(guid);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(String.format("Error when finding customer session by guid %s", guid), e);
 			return ExecutionResultFactory.createServerError("Server error when finding customer session by guid");
 		}
@@ -176,26 +163,9 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 	@Override
 	@CacheRemove(typesToInvalidate = Customer.class)
-	public ExecutionResult<Void> updateCustomer(final Customer customer) {
-		ExecutionResult<Void> result;
-		// Note: We need to catch EpValidationException before EpSystemException.
-		try {
-			customerService.update(customer);
-			customerSessionRepository.invalidateCustomerSessionByGuid(customer.getGuid());
-			result = ExecutionResultFactory.createUpdateOK();
-		} catch (UserIdExistException error) {
-			result = exceptionTransformer.getExecutionResult(error);  // uses getExecutionResult(InvalidBusinessStateException)
-		} catch (EpValidationException error) {
-			result = exceptionTransformer.getExecutionResult(error);  // uses getExecutionResult(EpValidationException)
-		} catch (EpSystemException error) {
-			result = ExecutionResultFactory.createServerError(error.getMessage());
-		}
-		return result;
-	}
-
-	@Override
-	public Completable updateCustomerAsCompletable(final Customer customer) {
-		return reactiveAdapter.fromServiceAsCompletable(() -> customerService.update(customer));
+	public Completable updateCustomer(final Customer customer) {
+		return reactiveAdapter.fromServiceAsSingle(() -> customerService.update(customer))
+				.flatMapCompletable(updatedCustomer -> customerSessionRepository.invalidateCustomerSessionByGuid(customer.getGuid()));
 	}
 
 	@Override
@@ -221,11 +191,11 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	protected Completable updateShippingAddressOnCustomerCart(final Customer updatedCustomer, final CustomerAddress address) {
 		if (updatedCustomer.getPreferredShippingAddress() != null
 				&& updatedCustomer.getPreferredShippingAddress().getGuid().equals(address.getGuid())) {
-			CartOrderRepository cartOrderRepository = cartOrderRepositoryProvider.get();
-			return cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(updatedCustomer.getStoreCode(), updatedCustomer.getGuid())
+			final CartOrderRepository cartOrderRepository = cartOrderRepositoryProvider.get();
+			return Completable.fromSingle(cartOrderRepository.findCartOrderGuidsByCustomer(updatedCustomer.getStoreCode(), updatedCustomer.getGuid())
 					.firstElement()
-					.flatMapCompletable(cartGuid -> cartOrderRepository
-							.updateShippingAddressOnCartOrderAsSingle(address.getGuid(), cartGuid, updatedCustomer.getStoreCode()).toCompletable());
+					.flatMapSingle(cartGuid -> cartOrderRepository
+							.updateShippingAddressOnCartOrder(address.getGuid(), cartGuid, updatedCustomer.getStoreCode())));
 		}
 
 		return Completable.complete();
@@ -239,14 +209,14 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 	@Override
 	public ExecutionResult<Object> mergeCustomer(final CustomerSession customerSession,
-			final Customer recipientCustomer,
-			final String validatedStoreCode) {
+												 final Customer recipientCustomer,
+												 final String validatedStoreCode) {
 		try {
 			ensureShopperHasAssociatedShoppingCart(customerSession);
 
 			customerSessionService.changeFromAnonymousToRegisteredCustomer(customerSession, recipientCustomer, validatedStoreCode);
 
-		} catch (Exception exception) {
+		} catch (final Exception exception) {
 			LOG.error("Error merging customer session", exception);
 			return ExecutionResultFactory.createServerError("Server error when merging customer session");
 		}
@@ -257,10 +227,10 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	@CacheRemove(typesToInvalidate = Customer.class)
 	public ExecutionResult<Customer> addUnauthenticatedUser(final Customer customer) {
 		try {
-			Customer authenticatedCustomer = customerService.addByAuthenticate(customer, IS_AUTHENTICATE);
+			final Customer authenticatedCustomer = customerService.addByAuthenticate(customer, IS_AUTHENTICATE);
 
 			return ExecutionResultFactory.createReadOK(authenticatedCustomer);
-		} catch (Exception exception) {
+		} catch (final Exception exception) {
 			LOG.error("Error adding unauthenticated user: {}", customer, exception);
 			return ExecutionResultFactory.createServerError("Server error when adding unauthenticated user");
 		}
@@ -271,12 +241,24 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 		return customer.isFirstTimeBuyer();
 	}
 
+	@Override
+	public Single<CustomerAddress> createAddressForCustomer(final Customer customer, final CustomerAddress customerAddress) {
+		for (CustomerAddress existingAddress : customer.getAddresses()) {
+			if (existingAddress.equals(customerAddress)) {
+				return Single.just(existingAddress);
+			}
+		}
+
+		return addAddress(customer, customerAddress)
+				.map(updatedCustomer -> customerAddress);
+	}
+
 
 	/*
-	* This is necessary for the CE session management update handlers to work correctly.
- 	*/
+	 * This is necessary for the CE session management update handlers to work correctly.
+	 */
 	private void ensureShopperHasAssociatedShoppingCart(final CustomerSession customerSession) {
-		ShoppingCart donorShoppingCart = shoppingCartService.findOrCreateByShopper(customerSession.getShopper());
+		final ShoppingCart donorShoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
 		donorShoppingCart.getShopper().setCurrentShoppingCart(donorShoppingCart);
 	}
 }

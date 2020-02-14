@@ -65,7 +65,7 @@ public class B2CMultiCartResolutionStrategyImpl extends  AbstractEpMultiCartStra
 
 	@Override
 	 public Single<ShoppingCart> getShoppingCartSingle(final String cartGuid) {
-		return getCustomerSessionRepository().findOrCreateCustomerSessionAsSingle()
+		return getCustomerSessionRepository().findOrCreateCustomerSession()
 				.flatMap(customerSession -> getShoppingCartSingle(cartGuid, customerSession));
 	}
 
@@ -79,7 +79,7 @@ public class B2CMultiCartResolutionStrategyImpl extends  AbstractEpMultiCartStra
 
 	@Override
 	public Single<String> getDefaultShoppingCartGuid() {
-		return getCustomerSessionRepository().findOrCreateCustomerSessionAsSingle()
+		return getCustomerSessionRepository().findOrCreateCustomerSession()
 				.flatMap(this::getDefaultCartGuid);
 	}
 
@@ -92,7 +92,7 @@ public class B2CMultiCartResolutionStrategyImpl extends  AbstractEpMultiCartStra
 
 	@Override
 	public Single<ShoppingCart> getDefaultShoppingCart() {
-		return getCustomerSessionRepository().findOrCreateCustomerSessionAsSingle()
+		return getCustomerSessionRepository().findOrCreateCustomerSession()
 				.flatMap(this::getDefaultCart);
 	}
 

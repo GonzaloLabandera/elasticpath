@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.jobs.handlers;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -37,7 +37,7 @@ import com.elasticpath.service.dataimport.ImportService;
  */
 public class RunCsvImportForCouponCodesHandler extends AbstractPolicyAwareHandler {
 
-	private final ImportService importService = ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+	private final ImportService importService = BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 	
 	private static final String IMPORT_JOB_FOR_COUPON_CODES = "Coupon Codes Import"; //$NON-NLS-1$
 	

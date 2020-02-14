@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.TableSelectionProvider;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
@@ -56,7 +56,7 @@ public class PricingWizardPage6 extends AbstractPolicyAwareWizardPage<ProductMod
 	private final ComboModel comboModel = new ComboModel();
 
 	private final int initialComboSelectionIndex;
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	// Allow us to detect if the user changes the product code
 	private String productCodeSnapshot;

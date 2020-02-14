@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.widgets.Display;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.helpers.AbstractSearchRequestJob;
@@ -30,11 +30,10 @@ public class OrderReturnSearchRequestJob extends AbstractSearchRequestJob<OrderR
 
 	/**
 	 * Default constructor.
-	 * 
 	 */
 	public OrderReturnSearchRequestJob() {
 		super();
-		orderReturnService = ServiceLocator.getService(ContextIdNames.ORDER_RETURN_SERVICE);
+		orderReturnService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_RETURN_SERVICE, ReturnAndExchangeService.class);
 	}
 
 	@Override
@@ -45,7 +44,7 @@ public class OrderReturnSearchRequestJob extends AbstractSearchRequestJob<OrderR
 
 	/**
 	 * Gets a list of {@link OrderReturn} with the given <code>uidList</code>.
-	 * 
+	 *
 	 * @param uidList a list of {@link OrderReturn} UIDs
 	 * @return a list of {@link OrderReturn}s
 	 */
@@ -59,7 +58,7 @@ public class OrderReturnSearchRequestJob extends AbstractSearchRequestJob<OrderR
 		}
 		return orderReturnService.findByUids(uidList);
 	}
-	
+
 	@Override
 	protected SearchJob getSearchJob(final Display display) {
 		return new OrderReturnDatabaseSearchJobImpl(this, display);

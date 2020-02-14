@@ -3,15 +3,14 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.COUPON_CODE;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.PURCHASE_ID;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.COUPON_CODE;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.PURCHASE_ID;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 
 import java.util.Collections;
 
@@ -69,7 +68,7 @@ public class CouponRepositoryImplTest {
 	@Before
 	public void setUp() {
 		couponRepository = new CouponRepositoryImpl(couponService, couponUsageService, orderRepository, reactiveAdapter);
-		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
+		when(orderRepository.findByGuid(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
 	}
 
 	@Test

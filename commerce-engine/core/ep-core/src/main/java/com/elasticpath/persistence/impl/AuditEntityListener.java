@@ -380,7 +380,7 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 	 */
 	protected AuditDao getAuditDao() {
 		if (auditDao == null) {
-			auditDao = getBeanFactory().getBean(ContextIdNames.AUDIT_DAO);
+			auditDao = getBeanFactory().getSingletonBean(ContextIdNames.AUDIT_DAO, AuditDao.class);
 		}
 		return auditDao;
 	}
@@ -573,7 +573,8 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 	 */
 	protected JpaPersistenceEngine getPersistenceEngine() {
 		if (persistenceEngine == null) {
-			persistenceEngine = getBeanFactory().getBean(ContextIdNames.PERSISTENCE_ENGINE);
+			persistenceEngine = getBeanFactory().getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE,
+					JpaPersistenceEngine.class);
 		}
 		return persistenceEngine;
 	}

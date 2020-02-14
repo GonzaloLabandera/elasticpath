@@ -3,12 +3,11 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.shippinginfo;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.CartOrderRepositoryImpl.ORDER_WITH_GUID_NOT_FOUND;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil.createShipmentDetailsId;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -168,7 +167,7 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 	@Test
 	public void verifySelectChoiceReturnsCompletable() {
 		when(cartOrderRepository.findByShipmentDetailsId(SCOPE, shipmentDetailsId)).thenReturn(Single.just(cartOrder));
-		when(cartOrderRepository.saveCartOrderAsSingle(cartOrder)).thenReturn(Single.just(cartOrder));
+		when(cartOrderRepository.saveCartOrder(cartOrder)).thenReturn(Single.just(cartOrder));
 
 		repository.selectChoice(choiceIdentifier)
 				.test()
@@ -176,7 +175,7 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 				.assertComplete();
 
 		verify(cartOrder).setShippingOptionCode(SELECTED_ID);
-		verify(cartOrderRepository).saveCartOrderAsSingle(cartOrder);
+		verify(cartOrderRepository).saveCartOrder(cartOrder);
 	}
 
 	@Test

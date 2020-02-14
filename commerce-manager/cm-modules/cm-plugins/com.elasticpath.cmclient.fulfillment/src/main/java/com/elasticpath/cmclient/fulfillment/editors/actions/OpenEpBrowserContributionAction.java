@@ -9,7 +9,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.settings.SettingsService;
@@ -120,7 +120,7 @@ public class OpenEpBrowserContributionAction extends Action {
 	 * Gets the store URL value from the settings framework.
 	 */
 	private String getStoreUrl() {
-		SettingsService service = ServiceLocator.getService("settingsService"); //$NON-NLS-1$
+		SettingsService service = BeanLocator.getSingletonBean("settingsService", SettingsService.class); //$NON-NLS-1$
 		//Get the URL and remove the trailing slash if it's there
 		String storeUrl = service.getSettingValue(SETTING_STOREFRONT_URL, store.getCode()).getValue();
 		return StringUtils.chomp(storeUrl, "/"); //$NON-NLS-1$

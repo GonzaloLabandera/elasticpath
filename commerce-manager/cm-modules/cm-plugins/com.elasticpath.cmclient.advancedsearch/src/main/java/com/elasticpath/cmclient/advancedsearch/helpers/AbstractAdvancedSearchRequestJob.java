@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Display;
 import com.elasticpath.cmclient.advancedsearch.AdvancedSearchPlugin;
 import com.elasticpath.cmclient.advancedsearch.service.EPQLSearchService;
 import com.elasticpath.cmclient.advancedsearch.service.impl.EPQLSearchServiceImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.persistence.api.Persistable;
@@ -158,7 +158,7 @@ public abstract class AbstractAdvancedSearchRequestJob<T extends Persistable> {
 
 		private static final int WORK_UNITS = SEARCH_UNITS_WORK + DISPLAY_UNITS_WORK + FIRE_ITEMS_WORK;
 
-		private final IndexUtility indexUtility = (IndexUtility) ServiceLocator.getService("indexUtility"); //$NON-NLS-1$
+		private final IndexUtility indexUtility = BeanLocator.getSingletonBean("indexUtility", IndexUtility.class); //$NON-NLS-1$
 
 		private final EPQLSearchService searchService = new EPQLSearchServiceImpl();
 

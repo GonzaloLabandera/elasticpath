@@ -43,7 +43,7 @@ public class DynamicContentDaoAdapterImpl extends AbstractDaoAdapter<DynamicCont
 
 	@Override
 	public DynamicContent createBean(final DynamicContent bean) {
-		return beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT);
+		return beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 	}
 
 	@Override

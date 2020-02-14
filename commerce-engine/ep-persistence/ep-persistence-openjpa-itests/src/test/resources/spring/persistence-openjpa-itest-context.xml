@@ -67,7 +67,6 @@
 		<property name="persistenceEngineOperationListeners" ref="persistenceEngineOperationListeners"/>
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 		<property name="queryReader" ref="queryReader"/>
-		<property name="queryUtil" ref="queryUtil"/>
 	</bean>
 
 	<!-- Has a dependency of an applicationInitialization bean which can do any initialization the application requires -->

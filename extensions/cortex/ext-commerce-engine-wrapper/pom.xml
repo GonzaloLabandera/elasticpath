@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -82,13 +86,17 @@
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
 						<Embed-Directory>${dependency.directory}</Embed-Directory>
+						<!-- Whitelisting globbed regular expression, that's why it's long, see: https://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html#embedding-dependencies -->
 						<Embed-Dependency>
 							ep-core;scope=compile|runtime;inline=true,
 							ext-core;scope=compile|runtime,
-							!(ep-core|ep-cache|openjpa-osgi-wrapper|ep-persistence-api|org.apache.servicemix.bundles.ehcache|org.apache.bval.bundle|commons-beanutils|org.apache.servicemix.bundles.commons-collections|guava|drools-core|drools-compiler|drools-persistence-api|drools-persistence-jpa|kie-api|kie-soup-maven-support|kie-internal|kie-soup-project-datamodel-commons|kie-soup-project-datamodel-api|kie-soup-commons|protobuf-java|mvel2|quartz|javax.mail|commons-codec|xstream);scope=compile|runtime
+							!(ep-core|ep-cache|openjpa-osgi-wrapper|ep-persistence-api|org.apache.servicemix.bundles.ehcache|org.apache.bval.bundle|commons-beanutils|org.apache.servicemix.bundles.commons-collections|guava|drools-core|drools-compiler|drools-persistence-api|drools-persistence-jpa|kie-api|kie-soup-maven-support|kie-internal|kie-soup-project-datamodel-commons|kie-soup-project-datamodel-api|kie-soup-commons|protobuf-java|mvel2|quartz|javax.mail|commons-codec|org.apache.servicemix.bundles.xstream|xstream);scope=compile|runtime
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>
+							org.osgi.framework,
+							org.osgi.service.url,
+							javax.security.*;resolution:=optional,
 							javax.crypto.*,
 							javax.management,
 							javax.net.ssl,
@@ -179,6 +187,7 @@
 							javax.persistence.criteria,
 							javax.persistence.spi,
 							javax.persistence.metamodel,
+							com.elasticpath.plugin.payment.provider.*,
 							!*
 						</Import-Package>
 						<_nouses>true</_nouses>
@@ -253,6 +262,7 @@
 						<Implementation-Title>${project.name}</Implementation-Title>
 						<Implementation-Version>${dce.version}</Implementation-Version>
 						<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						<Bundle-Activator>com.elasticpath.commons.handlers.osgi.Activator</Bundle-Activator>
 					</instructions>
 				</configuration>
 				<dependencies>
@@ -284,7 +294,6 @@
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ext-core</artifactId>
 			<version>${project.version}</version>
-
 		</dependency>
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
@@ -315,7 +324,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core</artifactId>
-			<version>${dce.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.elasticpath</groupId>
@@ -538,7 +546,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>shipping-calculation-epcommerce</artifactId>
-			<version>${dce.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.elasticpath</groupId>
@@ -609,7 +616,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-querylanguage</artifactId>
-			<version>${dce.version}</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -639,18 +645,6 @@
 		<dependency>
 			<groupId>org.apache.zookeeper</groupId>
 			<artifactId>zookeeper</artifactId>
-		</dependency>
-		<!-- CyberSource WS -->
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 

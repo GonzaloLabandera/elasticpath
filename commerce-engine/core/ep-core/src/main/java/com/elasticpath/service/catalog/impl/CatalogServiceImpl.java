@@ -73,7 +73,7 @@ public class CatalogServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 	public Catalog getCatalog(final long catalogUid) throws EpServiceException {
 		sanityCheck();
 		if (catalogUid <= 0) {
-			return getBean(ContextIdNames.CATALOG);
+			return getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
 		}
 
 		return getPersistentBeanFinder().get(ContextIdNames.CATALOG, catalogUid);
@@ -194,7 +194,7 @@ public class CatalogServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 		throws EpServiceException {
 		sanityCheck();
 		if (catalogUid <= 0) {
-			return getBean(ContextIdNames.CATALOG);
+			return getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
 		}
 
 		return getPersistentBeanFinder()

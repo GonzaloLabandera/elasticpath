@@ -21,7 +21,7 @@ import com.elasticpath.cmclient.catalog.editors.ViewSynchronizer;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetPlugin;
 import com.elasticpath.cmclient.changeset.editors.support.ChangeSetInfoEditorPage;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.policy.PolicyPlugin;
 import com.elasticpath.cmclient.policy.StatePolicyGovernable;
@@ -140,7 +140,7 @@ public class ChangeSetActionUtil {
 	 * @return the change set service bean.
 	 */
 	protected ChangeSetService getChangeSetService() {
-		return ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 	}
 
 	/**

@@ -13,6 +13,7 @@ import com.elasticpath.domain.dataimport.ImportJob;
 import com.elasticpath.domain.dataimport.ImportJobRequest;
 import com.elasticpath.domain.dataimport.ImportType;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
+import com.elasticpath.domain.misc.RandomGuid;
 
 /**
  * A request containing required data for a import job process to be initiated.
@@ -51,7 +52,7 @@ public class ImportJobRequestImpl extends AbstractEpDomainImpl implements Import
 	 * Assigns a unique request ID.
 	 */
 	public ImportJobRequestImpl() {
-		requestId = getBean(ContextIdNames.RANDOM_GUID).toString();
+		requestId = getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class).toString();
 	}
 
 	/**

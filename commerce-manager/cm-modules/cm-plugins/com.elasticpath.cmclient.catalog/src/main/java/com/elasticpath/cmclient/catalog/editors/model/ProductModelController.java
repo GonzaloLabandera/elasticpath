@@ -15,8 +15,8 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cmclient.catalog.CanDeleteObjectResult;
 import com.elasticpath.cmclient.catalog.CanDeleteObjectResultImpl;
 import com.elasticpath.cmclient.catalog.exception.RequiredAttributesChangedForProductTypeException;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.dto.catalog.ProductModel;
 import com.elasticpath.cmclient.core.dto.catalog.ProductSkuModel;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -60,20 +60,23 @@ public class ProductModelController {
 	/** SKU. */
 	public static final String PRODUCT_SKU_TYPE = "SKU"; //$NON-NLS-1$
 
-	private final ProductService productService = getBean(ContextIdNames.PRODUCT_SERVICE);
-	private final ProductBundleService productBundleService = getBean(ContextIdNames.PRODUCT_BUNDLE_SERVICE);
+	private final ProductService productService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
+	private final ProductBundleService productBundleService = BeanLocator
+			.getSingletonBean(ContextIdNames.PRODUCT_BUNDLE_SERVICE, ProductBundleService.class);
 
-	private final ProductSkuService productSkuService = getBean(ContextIdNames.PRODUCT_SKU_SERVICE);
+	private final ProductSkuService productSkuService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_SERVICE, ProductSkuService.class);
 
-	private final PriceListHelperService priceListHelperService = getBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE);
+	private final PriceListHelperService priceListHelperService = BeanLocator
+			.getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE, PriceListHelperService.class);
 
-	private final PriceListService priceListService = getBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+	private final PriceListService priceListService = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 
-	private final ProductModelService productModelService = getBean("productModelService"); //$NON-NLS-1$
+	private final ProductModelService productModelService = BeanLocator
+			.getSingletonBean("productModelService", ProductModelService.class); //$NON-NLS-1$
 
-	private final ChangeSetHelper changeSetHelper = getBean(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
-	private final ProductTypeDao productTypeDao = getBean("productTypeDao"); //$NON-NLS-1$
+	private final ProductTypeDao productTypeDao = BeanLocator.getSingletonBean("productTypeDao", ProductTypeDao.class); //$NON-NLS-1$
 
 	/**
 	 * Builds product wizard model.
@@ -356,7 +359,7 @@ public class ProductModelController {
 	 *         <code>Product</code> displayable in product editor
 	 */
 	ProductLoadTuner createProductLoadTuner() {
-		final ProductLoadTuner productLoadTuner = getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
+		final ProductLoadTuner productLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 
 		productLoadTuner.setLoadingProductType(true);
 		productLoadTuner.setLoadingAttributeValue(true);
@@ -366,16 +369,4 @@ public class ProductModelController {
 		return productLoadTuner;
 	}
 
-	/**
-	 * Convenience method for getting a bean instance from bean factory.
-	 * 
-	 * @param <T>
-	 *            the type of bean to return
-	 * @param beanName
-	 *            the name of the bean to get and instance of.
-	 * @return an instance of the requested bean.
-	 */
-	<T> T getBean(final String beanName) {
-		return ServiceLocator.getService(beanName);
-	}
 }

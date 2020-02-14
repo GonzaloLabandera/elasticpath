@@ -12,8 +12,8 @@ import org.eclipse.swt.widgets.Display;
 
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetPermissions;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.helpers.SearchItemsLocator;
 import com.elasticpath.cmclient.core.search.impl.AbstractSearchJobImpl;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -54,10 +54,10 @@ public class ChangeSetSearchJob extends AbstractSearchJobImpl {
 				COUNT_UNITS_WORK + THREE_UNITS_OF_WORK);
 
 		try {
-			ChangeSetManagementService changeSetManagementService = ServiceLocator.getService(
-				ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+			ChangeSetManagementService changeSetManagementService = BeanLocator
+					.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 
-			ChangeSetLoadTuner noMembersLoadTuner = ServiceLocator.getService(ContextIdNames.CHANGESET_LOAD_TUNER);
+			ChangeSetLoadTuner noMembersLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.CHANGESET_LOAD_TUNER, ChangeSetLoadTuner.class);
 			noMembersLoadTuner.setLoadingMemberObjects(false);
 			noMembersLoadTuner.setLoadingMemberObjectsMetadata(false);
 

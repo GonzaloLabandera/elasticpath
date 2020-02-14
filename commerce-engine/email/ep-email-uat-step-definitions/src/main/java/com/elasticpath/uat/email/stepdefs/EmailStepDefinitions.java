@@ -13,11 +13,15 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -31,6 +35,7 @@ import com.google.common.collect.Iterables;
 import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
+import groovy.json.internal.IO;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.log4j.Logger;
 import org.apache.velocity.tools.generic.DateTool;
@@ -107,22 +112,46 @@ public class EmailStepDefinitions {
 
 	@Then("^(?:.+) should (?:receive|exist) (\\d+) email(?:\\(s\\))? in (?:my|their|the) (.+) inbox$")
 	public void verifyEmailsReceived(final int expectedNumberOfEmails, final String recipientEmailAddress) throws Exception {
-		final NotifyBuilder notifyBuilder = emailSendingMockInterceptor.createNotifyBuilderForEmailSendingMockInterceptor()
-				.filter(header("to").contains(recipientEmailAddress))
-				.whenDone(expectedNumberOfEmails)
-				.create();
+		verifyEmailsReceivedForMultipleRecipients(expectedNumberOfEmails, Collections.singletonList(recipientEmailAddress));
+	}
+
+	/**
+	 * Verifies the emails received for multiple recipients.
+	 *
+	 * @param expectedNumberOfEmails  expected number of emails.
+	 * @param recipientEmailAddresses list of recipient email addresses.
+	 * @throws MessagingException the messaging exception
+	 * @throws IOException the IO exception
+	 */
+	@Then("^I should receive (\\d+) email in each of following inboxes$")
+	public void verifyEmailsReceivedForMultipleRecipients(final int expectedNumberOfEmails, final List<String> recipientEmailAddresses)
+			throws MessagingException, IOException {
+		final List<NotifyBuilder> notifyBuilders = recipientEmailAddresses.stream()
+				.map(address -> emailSendingMockInterceptor.createNotifyBuilderForEmailSendingMockInterceptor()
+						.filter(header("to").contains(address))
+						.whenDone(expectedNumberOfEmails)
+						.create())
+				.collect(Collectors.toList());
 
 		// Execute the code that will result in an email being sent. To avoid a race condition we can't
 		// have that code run before the notify builder is created.
 		emailSendingCommandHolder.get().run();
 
-		assertTrue("Timed out waiting for email to be sent",
-				   notifyBuilder.matches(MAX_SECONDS_TO_WAIT_FOR_EMAIL, TimeUnit.SECONDS));
+		notifyBuilders.forEach(notifyBuilder -> assertTrue("Timed out waiting for email to be sent",
+				notifyBuilder.matches(MAX_SECONDS_TO_WAIT_FOR_EMAIL, TimeUnit.SECONDS)));
 
+		final List<Mailbox> mailboxes = new ArrayList<>(recipientEmailAddresses.size());
+		for (final String address : recipientEmailAddresses) {
+			Mailbox mailbox = getMessages(expectedNumberOfEmails, address);
+			mailboxes.add(mailbox);
+		}
 
-		final Mailbox messages = getMessages(expectedNumberOfEmails, recipientEmailAddress);
+		final Map<String, Message> emailMessageMap = new HashMap<>(mailboxes.size());
 
-		final Map<String, Message> emailMessageMap = new HashMap<>(messages.size());
+		final List<Message> messages = mailboxes.stream()
+				.flatMap(List<Message>::stream)
+				.collect(Collectors.toList());
+
 		for (final Message message : messages) {
 			emailMessageMap.put(message.getSubject(), message);
 

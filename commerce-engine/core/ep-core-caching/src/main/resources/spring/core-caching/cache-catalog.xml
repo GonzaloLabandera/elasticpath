@@ -315,24 +315,24 @@
 		<property name="findFeaturedProductsUidCache" ref="featuredProductsUidCache" />
 	</bean>
 
-	<bean id="cachingSkuOptionServiceFindByKeyEhCache"
-		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-		<property name="name" value="cachingSkuOptionServiceFindByKeyCache"/>
-		<property name="cacheManager" ref="epEhcacheManager"/>
-		<property name="timeToLive" value="600"/>
-		<property name="timeToIdle" value="600"/>
-	</bean>
-
-	<bean id="cachingSkuOptionServiceFindByKeyCache"
+	<bean id="skuOptionsCache"
 		  factory-bean="localCacheFactory" factory-method="createCache"
-		  depends-on="cachingSkuOptionServiceFindByKeyEhCache">
-		<constructor-arg value="cachingSkuOptionServiceFindByKeyCache"/>
+		  depends-on="skuOptionsCacheEhCache">
+		<constructor-arg value="skuOptionsCache"/>
 	</bean>
 
-	<bean id="cachingSkuOptionService" class="com.elasticpath.caching.core.catalog.CachingSkuOptionServiceImpl">
-		<property name="fallbackSkuOptionService" ref="skuOptionService" />
-		<property name="findByKeyCache" ref="cachingSkuOptionServiceFindByKeyCache" />
+	<bean id="skuOptionsCacheEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="skuOptionsCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="86400"/>
+		<property name="timeToIdle" value="86400"/>
+	</bean>
 
+	<bean id="cachingSkuOptionService" class="com.elasticpath.caching.core.catalog.CachingSkuOptionServiceImpl" init-method="init">
+		<property name="fallbackSkuOptionService" ref="nonCachingSkuOptionService" />
+		<property name="productTypeDao" ref="productTypeDao" />
+		<property name="skuOptionsCache" ref="skuOptionsCache" />
 	</bean>
 
 	<bean id="cachingSolrQueryFactorySearchableAttributeEhCache"

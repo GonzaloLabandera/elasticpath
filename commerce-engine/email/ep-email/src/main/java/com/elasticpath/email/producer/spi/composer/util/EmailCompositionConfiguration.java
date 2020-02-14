@@ -3,6 +3,7 @@
  */
 package com.elasticpath.email.producer.spi.composer.util;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.elasticpath.domain.store.Store;
@@ -28,10 +29,17 @@ public interface EmailCompositionConfiguration {
 
 	/**
 	 * Returns the email address for the recipient of the email.
-	 *
+	 * It might be one email address or multiple email addresses inline.
 	 * @return the email address for the recipient of the email
 	 */
 	String getRecipientAddress();
+
+	/**
+	 * Returns a list of email addresses for the recipients.
+	 *
+	 * @return a list of email addresses for the recipients.
+	 */
+	List<String> getRecipientAddresses();
 
 	/**
 	 * Returns the subject of the email.

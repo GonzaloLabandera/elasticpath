@@ -14,7 +14,12 @@ import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.dataimport.ImportJob;
 import com.elasticpath.domain.dataimport.impl.AbstractImportDataTypeImpl;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
+import com.elasticpath.domain.dataimport.impl.ImportDataTypeCategoryImpl;
+import com.elasticpath.domain.dataimport.impl.ImportDataTypeProductCategoryAssociationImpl;
+import com.elasticpath.domain.dataimport.impl.ImportDataTypeProductImpl;
+import com.elasticpath.domain.dataimport.impl.ImportDataTypeProductSkuImpl;
+import com.elasticpath.domain.pricing.csvimport.impl.ImportDataTypeBaseAmountImpl;
 
 /**
  * Policy which determines whether the Run Import Job button can display.
@@ -102,21 +107,25 @@ public class ChangeSetRunImportJobPolicy extends AbstractStatePolicyImpl {
 	void populateJobNamePrefixSet() {
 		// Determine the ImportJob name prefixes which require change set permissions.
 
-		final AbstractImportDataTypeImpl categoryImportDataType = ServiceLocator.getService(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY);
+		final AbstractImportDataTypeImpl categoryImportDataType =
+				BeanLocator.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY, ImportDataTypeCategoryImpl.class);
 		jobNamePrefixesRequiringCSPermissions.add(categoryImportDataType.getPrefixOfName());
 
-		final AbstractImportDataTypeImpl productImportDataType = ServiceLocator.getService(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT);
+		final AbstractImportDataTypeImpl productImportDataType =
+				BeanLocator.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT, ImportDataTypeProductImpl.class);
 		jobNamePrefixesRequiringCSPermissions.add(productImportDataType.getPrefixOfName());
 
-		final AbstractImportDataTypeImpl productSkuImportDataType = ServiceLocator.getService(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_SKU);
+		final AbstractImportDataTypeImpl productSkuImportDataType =
+				BeanLocator.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_SKU, ImportDataTypeProductSkuImpl.class);
 		jobNamePrefixesRequiringCSPermissions.add(productSkuImportDataType.getPrefixOfName());
 
-		final AbstractImportDataTypeImpl productCategoryImportDataType = ServiceLocator.getService(
-			ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION);
+		final AbstractImportDataTypeImpl productCategoryImportDataType = BeanLocator.getPrototypeBean(
+			ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_CATEGORY_ASSOCIATION, ImportDataTypeProductCategoryAssociationImpl.class);
 
 		jobNamePrefixesRequiringCSPermissions.add(productCategoryImportDataType.getPrefixOfName());
 
-		final AbstractImportDataTypeImpl baseAmountImportDataType = ServiceLocator.getService(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT);
+		final AbstractImportDataTypeImpl baseAmountImportDataType =
+				BeanLocator.getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT, ImportDataTypeBaseAmountImpl.class);
 		jobNamePrefixesRequiringCSPermissions.add(baseAmountImportDataType.getPrefixOfName());
 	}
 

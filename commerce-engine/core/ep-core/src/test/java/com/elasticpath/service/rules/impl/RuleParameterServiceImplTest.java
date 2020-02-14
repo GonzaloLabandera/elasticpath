@@ -18,6 +18,7 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.rules.RuleParameter;
+import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.impl.RuleParameterImpl;
 import com.elasticpath.domain.rules.impl.RuleScenariosImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -56,7 +57,7 @@ public class RuleParameterServiceImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.RULE_SCENARIOS);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.RULE_SCENARIOS, RuleScenarios.class);
 				will(returnValue(new RuleScenariosImpl()));
 
 				allowing(beanFactory).getBeanImplClass(ContextIdNames.RULE_PARAMETER);

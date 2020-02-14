@@ -12,12 +12,10 @@ import static org.mockito.BDDMockito.given;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -92,7 +90,7 @@ public class AutoSelectableBundleConstituentDelegateValidatorImplTest {
 	@Test
 	public void testTreeWithNestedBundles() {
 		// Given
-		given(beanFactory.getBean(ContextIdNames.PRODUCT_SKU_VALIDATION_CONTEXT))
+		given(beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU_VALIDATION_CONTEXT, ProductSkuValidationContext.class))
 				.willAnswer(invocation -> new ProductSkuValidationContextImpl());
 		given(priceLookupFacade.getPromotedPriceForSku(any(ProductSku.class), eq(store), eq(shopper))).willReturn(price);
 

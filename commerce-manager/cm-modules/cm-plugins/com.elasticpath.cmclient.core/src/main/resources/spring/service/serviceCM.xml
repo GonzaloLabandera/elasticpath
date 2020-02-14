@@ -18,6 +18,7 @@
 	<import resource="classpath:spring/geoip/geoip-demo.xml"/>
 	<!-- pulled from ep-core.jar -->
 	<import resource="classpath:spring/commons/validators.xml" /><!-- required by core service/service.xml -->
+	<import resource="classpath:spring/service/orderpaymentapi-service.xml" />
 	<import resource="classpath:spring/service/service.xml" />
 	<import resource="classpath:spring/service/changeset-services.xml" />
 	<import resource="classpath:spring/service/checkout.xml" />

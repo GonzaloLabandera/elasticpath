@@ -34,7 +34,7 @@ public class UpdateStoreCommandImpl implements UpdateStoreCommand {
 
 	/**
 	 * Updates the store and setting values.
-	 * 
+	 *
 	 * @return command result
 	 */
 	@Override
@@ -71,23 +71,24 @@ public class UpdateStoreCommandImpl implements UpdateStoreCommand {
 
 	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
 	private StoreService getStoreService() {
-		return ElasticPathImpl.getInstance().getBean(ContextIdNames.STORE_SERVICE);
+		return ElasticPathImpl.getInstance().getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 	}
 
 	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
 	private SettingsService getSettingsService() {
-		return ElasticPathImpl.getInstance().getBean(ContextIdNames.SETTINGS_SERVICE);
+		return ElasticPathImpl.getInstance().getSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class);
 	}
 
 	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
 	private StoreCustomerAttributeService getStoreCustomerAttributeService() {
-		return ElasticPathImpl.getInstance().getBean(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE_SERVICE);
+		return ElasticPathImpl.getInstance().getSingletonBean(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE_SERVICE, StoreCustomerAttributeService.class);
 	}
 
 	public void setUpdateStoreCommandResult(final UpdateStoreCommandResult updateStoreCommandResult) {
 		this.updateStoreCommandResult = updateStoreCommandResult;
 	}
 
+	@Override
 	public void setStoreCustomerAttributes(final Map<String, StoreCustomerAttribute> storeCustomerAttributes) {
 		this.storeCustomerAttributes = storeCustomerAttributes;
 	}

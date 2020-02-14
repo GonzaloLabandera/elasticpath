@@ -12,7 +12,7 @@ import org.eclipse.osgi.util.NLS;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetPermissions;
 import com.elasticpath.cmclient.changeset.views.ChangeSetsView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.domain.changeset.ChangeSetStateCode;
@@ -66,7 +66,7 @@ public class PublishChangeSetActionDelegate extends AbstractChangeStateActionDel
 
 	private SettingsReader getSettingReader() {
 		if (settingsReader == null) {
-			settingsReader = ServiceLocator.getService(ContextIdNames.CACHED_SETTINGS_READER);
+			settingsReader = BeanLocator.getSingletonBean(ContextIdNames.CACHED_SETTINGS_READER, SettingsReader.class);
 		}
 		return settingsReader;
 	}

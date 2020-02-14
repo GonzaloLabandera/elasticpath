@@ -31,7 +31,7 @@ public class CustomerUnmarshallingTest {
 		CustomerDTO customerDto = (CustomerDTO) outputDto;
 
 		CustomerDTO expectedCustomerDto = testCustomerDTOBuilderFactory
-				.createWithPaymentMethods()
+				.create()
 				.build();
 
 		assertEquals("The unmarshalled customer dto should be the same as expected",
@@ -56,7 +56,7 @@ public class CustomerUnmarshallingTest {
 		CustomerDTO customerDto = (CustomerDTO) outputDto;
 
 		CustomerDTO expectedCustomerDto = testCustomerDTOBuilderFactory
-				.createWithPaymentMethods()
+				.create()
 				.build();
 		assertEquals("The unmarshalled customer dto should be the same as expected",
 				expectedCustomerDto,

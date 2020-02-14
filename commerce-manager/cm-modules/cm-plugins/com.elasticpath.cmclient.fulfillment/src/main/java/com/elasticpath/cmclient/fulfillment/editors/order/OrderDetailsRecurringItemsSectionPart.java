@@ -34,7 +34,7 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
@@ -547,7 +547,7 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 	 */
 	protected PricingSnapshotService getPricingSnapshotService() {
 		if (pricingSnapshotService == null) {
-			pricingSnapshotService = ServiceLocator.getService(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
+			pricingSnapshotService = BeanLocator.getSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
 		}
 		return pricingSnapshotService;
 	}

@@ -106,7 +106,7 @@ public class CustomerAddressBuilder implements DomainObjectBuilder<CustomerAddre
 
     @Override
     public CustomerAddress build() {
-    	CustomerAddress customerAddress = beanFactory.getBean(ContextIdNames.CUSTOMER_ADDRESS);
+    	CustomerAddress customerAddress = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 		customerAddress.setGuid((String) ObjectUtils.defaultIfNull(guid, "testGuid"));
 		customerAddress.setUidPk((Long) ObjectUtils.defaultIfNull(uidPk, 0L));
 		customerAddress.setFirstName((String) ObjectUtils.defaultIfNull(firstName, "James"));

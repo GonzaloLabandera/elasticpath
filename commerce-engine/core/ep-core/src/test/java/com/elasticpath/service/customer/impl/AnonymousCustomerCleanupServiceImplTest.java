@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.customer.impl;
 
@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 
 /**
@@ -30,6 +31,7 @@ public class AnonymousCustomerCleanupServiceImplTest {
 	private PersistenceEngine persistenceEngine;
 	private ShopperCleanupService shopperCleanupService;
 	private CustomerConsentService customerConsentService;
+	private OrderPaymentApiCleanupService orderPaymentApiCleanupService;
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -42,10 +44,12 @@ public class AnonymousCustomerCleanupServiceImplTest {
 		persistenceEngine = context.mock(PersistenceEngine.class);
 		shopperCleanupService = context.mock(ShopperCleanupService.class);
 		customerConsentService = context.mock(CustomerConsentService.class);
+		orderPaymentApiCleanupService = context.mock(OrderPaymentApiCleanupService.class);
 		anonymousCustomerCleanupServiceImpl = new AnonymousCustomerCleanupServiceImpl();
 		anonymousCustomerCleanupServiceImpl.setPersistenceEngine(persistenceEngine);
 		anonymousCustomerCleanupServiceImpl.setShopperCleanupService(shopperCleanupService);
 		anonymousCustomerCleanupServiceImpl.setCustomerConsentService(customerConsentService);
+		anonymousCustomerCleanupServiceImpl.setOrderPaymentApiCleanupService(orderPaymentApiCleanupService);
 	}
 
 	/**
@@ -98,6 +102,7 @@ public class AnonymousCustomerCleanupServiceImplTest {
 				will(returnValue(shopperUidsToDelete.size()));
 
 				allowing(customerConsentService).deleteByCustomerUids(customerUidsToDelete);
+				allowing(orderPaymentApiCleanupService).removeByCustomerUidList(customerUidsToDelete);
 
 				allowing(persistenceEngine).executeNamedQueryWithList("DELETE_CUSTOMER_BY_UID_LIST", "list", customerUidsToDelete);
 				will(returnValue(customerUidsToDelete.size()));

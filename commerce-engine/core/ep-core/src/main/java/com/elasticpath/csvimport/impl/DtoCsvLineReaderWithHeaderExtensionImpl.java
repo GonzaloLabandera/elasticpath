@@ -65,8 +65,9 @@ public class DtoCsvLineReaderWithHeaderExtensionImpl<T, HEADER> extends DtoCsvLi
 	 * @param rowNumber the row position within the file
 	 * @return the valid row
 	 */
+	@SuppressWarnings("unchecked")
 	private ImportValidRow<HEADER> createImportValidRowForHeader(final HEADER dto, final String row, final int rowNumber) {
-		ImportValidRow<HEADER> validRow = getBeanFactory().getBean(ContextIdNames.IMPORT_VALID_ROW);
+		ImportValidRow<HEADER> validRow = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_VALID_ROW, ImportValidRow.class);
 		validRow.setDto(dto);
 		validRow.setRow(row);
 		validRow.setRowNumber(rowNumber);
@@ -81,10 +82,11 @@ public class DtoCsvLineReaderWithHeaderExtensionImpl<T, HEADER> extends DtoCsvLi
 	 * @param validRows the valid rows
 	 * @return the read result
 	 */
+	@SuppressWarnings("unchecked")
 	private CsvReadResult<HEADER> createReadResultForHeader(final int totalRows,
 			final Collection<ImportBadRow> badRows, final Collection<ImportValidRow<HEADER>> validRows) {
 
-		CsvReadResult<HEADER> readResult = getBeanFactory().getBean(ContextIdNames.CSV_READ_RESULT);
+		CsvReadResult<HEADER> readResult = getBeanFactory().getPrototypeBean(ContextIdNames.CSV_READ_RESULT, CsvReadResult.class);
 		for (ImportBadRow badRow : badRows) {
 			readResult.addBadRow(badRow);
 		}

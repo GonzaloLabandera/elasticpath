@@ -20,7 +20,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.comparator.DynamicContentComparator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingImageRegistry;
@@ -152,7 +152,8 @@ public class DynamicContentTableViwer {
 
 	
 	private static List<DynamicContent> getAllDynamicContents() {
-		DynamicContentService dynamicContentService = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_SERVICE);
+		DynamicContentService dynamicContentService = BeanLocator
+				.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class);
 		return dynamicContentService.findAll();
 	}
 

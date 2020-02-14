@@ -84,7 +84,7 @@ public class BillingAddressSelectorRepositoryImpl<SI extends BillingaddressInfoS
 		String addressId = billingaddressInfoSelectorChoiceIdentifier.getAddress().getAddressId().getValue();
 		String scope = orderIdentifier.getScope().getValue();
 		String orderId = orderIdentifier.getOrderId().getValue();
-		return cartOrderRepository.findByGuidAsSingle(scope, orderId)
+		return cartOrderRepository.findByGuid(scope, orderId)
 				.flatMap(cartOrder -> setBillingAddress(cartOrder, addressId))
 				.map(selectStatus -> SelectResult.<BillingaddressInfoSelectorIdentifier>builder()
 						.withIdentifier(billingaddressInfoSelectorChoiceIdentifier.getBillingaddressInfoSelector())
@@ -104,7 +104,7 @@ public class BillingAddressSelectorRepositoryImpl<SI extends BillingaddressInfoS
 			return Single.just(SelectStatus.EXISTING);
 		} else {
 			cartOrder.setBillingAddressGuid(addressId);
-			return cartOrderRepository.saveCartOrderAsSingle(cartOrder)
+			return cartOrderRepository.saveCartOrder(cartOrder)
 					.flatMap(savedCartOrder -> Single.just(SelectStatus.SELECTED));
 		}
 	}
@@ -120,7 +120,7 @@ public class BillingAddressSelectorRepositoryImpl<SI extends BillingaddressInfoS
 		String scope = orderIdentifier.getScope().getValue();
 		String orderId = orderIdentifier.getOrderId().getValue();
 
-		return cartOrderRepository.findByGuidAsSingle(scope, orderId)
+		return cartOrderRepository.findByGuid(scope, orderId)
 				.flatMapMaybe(cartOrder -> cartOrderRepository.getBillingAddress(cartOrder));
 	}
 

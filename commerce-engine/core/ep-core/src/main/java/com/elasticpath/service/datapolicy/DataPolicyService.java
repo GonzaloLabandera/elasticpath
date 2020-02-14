@@ -8,6 +8,7 @@ import java.util.List;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.exception.DuplicateKeyException;
 import com.elasticpath.domain.datapolicy.DataPolicy;
+import com.elasticpath.domain.datapolicy.DataPolicyDescription;
 import com.elasticpath.domain.datapolicy.DataPolicyState;
 
 /**
@@ -131,6 +132,28 @@ public interface DataPolicyService {
 	 * @throws EpServiceException - in case of any errors.
 	 */
 	List<DataPolicy> findActiveDataPoliciesForSegmentsAndStore(List<String> segmentCodes, String store) throws EpServiceException;
+
+	/**
+	 * Find all active data policies by the store with/without disabled policies.
+	 *
+	 * @param storeCode        the store to find the data policies for.
+	 * @param customerGuid customer guid
+	 * @param includeDisabledPolicies flag to indicate inclusion of the disabled policies
+	 * @return list of data policy objects corresponding to the segments.
+	 * @throws EpServiceException - in case of any errors.
+	 */
+	List<DataPolicyDescription> findAllActiveDataPoliciesByStoreWithDisabledOption(String storeCode, String customerGuid,
+																				   boolean includeDisabledPolicies) throws EpServiceException;
+
+	/**
+	 * Find all active data policies for customer.
+	 *
+	 * @param storeCode    store code
+	 * @param customerGuid customer guid
+	 * @return list of data policy objects corresponding to the segments.
+	 * @throws EpServiceException - in case of any errors.
+	 */
+	List<DataPolicyDescription> findAllActiveDataPoliciesForCustomer(String storeCode, String customerGuid) throws EpServiceException;
 
 	/**
 	 * Check if the data policies are enabled for a store via a system configuration setting.

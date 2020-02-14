@@ -20,11 +20,11 @@ import com.elasticpath.persistence.api.support.PersistablePostLoadStrategy;
  * Occasionally, domain objects need to be post processed after they are loaded by OpenJPA.
  * If this can be done without invoking services or persistence, then this is a straightforward processing
  * task involving a @PostLoad annotation or an @EntityListener.
- *
+ * <p>
  * However, if services, and especially spring services are required to do the post processing,
  * then this is more complicated, since @PostLoad listeners and @EntityListeners have no access
  * to the Spring context.
- *
+ * <p>
  * The PersistablePostLoadListener provides a standardized way to do post load initialization
  * on OpenJPA entities with spring injected beans.
  */
@@ -60,10 +60,11 @@ public class PersistablePostLoadListener implements LoadListener {
 		if (postLoadStrategies == null) {
 			try {
 				List<PersistablePostLoadStrategy<? extends Persistable>> strategies =
-					new ArrayList<>(postLoadStrategyIds.size());
+						new ArrayList<>(postLoadStrategyIds.size());
 				for (String beanName : postLoadStrategyIds) {
+					@SuppressWarnings("unchecked")
 					final PersistablePostLoadStrategy<? extends Persistable> strategy =
-							getBeanFactory().getBean(beanName);
+							getBeanFactory().getSingletonBean(beanName, PersistablePostLoadStrategy.class);
 					strategies.add(strategy);
 				}
 

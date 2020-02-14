@@ -61,7 +61,7 @@ public class ShippingOptionInfoRepositoryImpl<E extends ShippingOptionEntity, I 
 	private Single<ShippingPricingSnapshot> getShippingPricingSnapshot(final String scope, final Map<String, String> shipmentDetailsId,
 																	   final ShippingOption shippingOption) {
 		return cartOrderRepository.getEnrichedShoppingCartForShipments(scope, shipmentDetailsId)
-				.flatMap(cart -> pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(cart)
+				.flatMap(cart -> pricingSnapshotRepository.getShoppingCartPricingSnapshot(cart)
 						.map(shoppingCartPricingSnapshot -> shoppingCartPricingSnapshot.getShippingPricingSnapshot(shippingOption)));
 	}
 

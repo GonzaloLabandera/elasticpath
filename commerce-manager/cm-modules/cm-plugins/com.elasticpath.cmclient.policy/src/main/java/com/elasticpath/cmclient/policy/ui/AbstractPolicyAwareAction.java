@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.registry.ObjectRegistry;
 import com.elasticpath.cmclient.core.registry.ObjectRegistryListener;
@@ -33,7 +33,7 @@ import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
  */
 public abstract class AbstractPolicyAwareAction extends Action implements StatePolicyTarget, StateChangeTarget, ObjectRegistryListener {
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	private final StatePolicyDelegate delegate = new DefaultStatePolicyDelegateImpl();
 	
 	private StatePolicy statePolicy;

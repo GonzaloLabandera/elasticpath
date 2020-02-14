@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <stores>
 <store enabled="true" code="searchbee">
     <globalization default_currency="CAD" default_locale="en_CA" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="Europe/London"/>
@@ -30,9 +34,6 @@
     <tax_jurisdictions>
         <jurisdiction>CATaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -69,9 +70,6 @@
         <jurisdiction>CATaxJurisdiction</jurisdiction>
         <jurisdiction>USTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -118,9 +116,6 @@
     <tax_jurisdictions>
         <jurisdiction>CATaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -162,10 +157,8 @@
     <tax_jurisdictions>
         <jurisdiction>CATaxJurisdiction</jurisdiction>
         <jurisdiction>USTaxJurisdiction</jurisdiction>
+        <jurisdiction>GBTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -220,9 +213,6 @@
         <jurisdiction>CATaxJurisdiction</jurisdiction>
 		<jurisdiction>GBTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -260,9 +250,6 @@
     <tax_jurisdictions>
         <jurisdiction>CATaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -300,9 +287,6 @@
     <tax_jurisdictions>
         <jurisdiction>CATaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -343,9 +327,6 @@
     <tax_jurisdictions>
         <jurisdiction>CATaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
@@ -385,15 +366,13 @@
         <jurisdiction>CATaxJurisdiction</jurisdiction>
         <jurisdiction>USTaxJurisdiction</jurisdiction>
     </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>Visa</type>
         <type>MasterCard</type>
     </credit_card_types>
 </store>
+
 <store code="SyndicationBilingualStore" enabled="true">
     <globalization timeZone="Europe/London" country="AU" sub_country="" content_encoding="UTF-8" default_locale="en" default_currency="CAD"/>
     <url>https://SyndicationBilingualStore.com</url>
@@ -420,16 +399,13 @@
     </warehouses>
     <tax_codes/>
     <tax_jurisdictions/>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-        <gateway>GiftCertificate</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>MasterCard</type>
         <type>Visa</type>
     </credit_card_types>
 </store>
+
 <store code="SyndicationSingleLanguageStore" enabled="true">
     <globalization timeZone="Europe/London" country="AU" sub_country="" content_encoding="UTF-8" default_locale="fr" default_currency="CAD"/>
     <url>https://SyndicationSingleLanguageStore.com</url>
@@ -455,10 +431,6 @@
     </warehouses>
     <tax_codes/>
     <tax_jurisdictions/>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-        <gateway>GiftCertificate</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>MasterCard</type>
@@ -490,9 +462,6 @@
     </warehouses>
     <tax_codes/>
     <tax_jurisdictions/>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
     <credit_card_types>
         <type>American Express</type>
         <type>MasterCard</type>

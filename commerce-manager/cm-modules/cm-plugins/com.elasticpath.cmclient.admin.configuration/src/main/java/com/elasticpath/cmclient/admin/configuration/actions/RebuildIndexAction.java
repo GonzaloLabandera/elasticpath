@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.elasticpath.cmclient.admin.configuration.AdminConfigurationImageRegistry;
 import com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages;
 import com.elasticpath.cmclient.admin.configuration.models.IndexBuildStatusSelector;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.search.IndexNotification;
 import com.elasticpath.domain.search.UpdateType;
@@ -44,7 +44,7 @@ public class RebuildIndexAction extends Action {
 		this.shell = shell;
 		this.setToolTipText(AdminConfigurationMessages.get().RebuildIndex);
 		this.indexBuildStatusSelector = selector;
-		this.indexNotificationService = ServiceLocator.getService(ContextIdNames.INDEX_NOTIFICATION_SERVICE);
+		this.indexNotificationService = BeanLocator.getSingletonBean(ContextIdNames.INDEX_NOTIFICATION_SERVICE, IndexNotificationService.class);
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class RebuildIndexAction extends Action {
 			indexType.getIndexName()))) {
 			LOG.info("Rebuilding Index with Type : " + indexType); //$NON-NLS-1$
 
-			final IndexNotification indexNotification = ServiceLocator.getService(ContextIdNames.INDEX_NOTIFICATION);
+			final IndexNotification indexNotification = BeanLocator.getPrototypeBean(ContextIdNames.INDEX_NOTIFICATION, IndexNotification.class);
 			indexNotification.setIndexType(indexType);
 			indexNotification.setUpdateType(UpdateType.REBUILD);
 			indexNotificationService.add(indexNotification);

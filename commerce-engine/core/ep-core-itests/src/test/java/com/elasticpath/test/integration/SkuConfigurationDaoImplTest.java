@@ -59,11 +59,12 @@ public class SkuConfigurationDaoImplTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testDuplicateSkuOptionValues() {
-		final SkuOptionService optionService = getBeanFactory().getBean(ContextIdNames.SKU_OPTION_SERVICE);
-		final ProductService productService = getBeanFactory().getBean(ContextIdNames.PRODUCT_SERVICE);
-		final ProductSkuService skuService = getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU_SERVICE);
-		final ProductSkuLookup skuLookup = getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU_LOOKUP);
-		final ProductTypeService productTypeService = getBeanFactory().getBean(ContextIdNames.PRODUCT_TYPE_SERVICE);
+		final SkuOptionService optionService = getBeanFactory().getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
+		final ProductService productService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
+		final ProductSkuService skuService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SKU_SERVICE, ProductSkuService.class);
+		final ProductSkuLookup skuLookup = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
+		final ProductTypeService productTypeService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_TYPE_SERVICE,
+				ProductTypeService.class);
 		
 		final Catalog catalog = scenario.getCatalog();
 		
@@ -74,7 +75,7 @@ public class SkuConfigurationDaoImplTest extends DbTestCase {
 		optionService.add(skuOptionSize);
 		
 		// Create a product type
-		ProductType productType = getBeanFactory().getBean(ContextIdNames.PRODUCT_TYPE);
+		ProductType productType = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 		populateProductType(catalog, productType, skuOptionColor, skuOptionSize);
 		productTypeService.add(productType);
 
@@ -154,7 +155,7 @@ public class SkuConfigurationDaoImplTest extends DbTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private ProductSku createAndAddSku(final Product product, Pair<SkuOption, String>... skuOptionValues) {
-		ProductSku productSku = this.getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU);
+		ProductSku productSku = this.getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 		productSku.setSkuCode(new RandomGuidImpl().toString());
 		productSku.setStartDate(new Date());
 
@@ -167,12 +168,12 @@ public class SkuConfigurationDaoImplTest extends DbTestCase {
 
 	private SkuOption createSkuOption(final Catalog catalog, final String name, final String... options) {
 		// Create a new SKU Option
-		SkuOption skuOption = getBeanFactory().getBean(ContextIdNames.SKU_OPTION);
+		SkuOption skuOption = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 		// create a Color sku option
 		populateSkuOption(catalog, skuOption, name);
 
 		for (String option : options) {
-			SkuOptionValue greenColorSkuOptionValue = getBeanFactory().getBean(ContextIdNames.SKU_OPTION_VALUE);
+			SkuOptionValue greenColorSkuOptionValue = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE, SkuOptionValue.class);
 			greenColorSkuOptionValue.setOptionValueKey(option);
 			skuOption.addOptionValue(greenColorSkuOptionValue);
 		}		
@@ -187,7 +188,7 @@ public class SkuConfigurationDaoImplTest extends DbTestCase {
 
 	private void populateProductType(final Catalog catalog, final ProductType productType, final SkuOption... skuOptions) {
 		productType.setName("FR_PC_CARD");
-		TaxCodeService taxCodeService = getBeanFactory().getBean(ContextIdNames.TAX_CODE_SERVICE);
+		TaxCodeService taxCodeService = getBeanFactory().getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		TaxCode taxCode = taxCodeService.findByCode("GOODS");
 		productType.setTaxCode(taxCode);
 		productType.setMultiSku(true);
@@ -199,7 +200,7 @@ public class SkuConfigurationDaoImplTest extends DbTestCase {
 	}
 
 	private Product createMultiSkuProduct(final Catalog catalog, final ProductType productType) {
-		TaxCodeService taxCodeService = getBeanFactory().getBean(ContextIdNames.TAX_CODE_SERVICE);
+		TaxCodeService taxCodeService = getBeanFactory().getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		TaxCode taxCode = taxCodeService.findByCode("GOODS");
 		Category defaultCategory = scenario.getCategory();
 		return persisterFactory.getCatalogTestPersister().persistSimpleProduct("product1", productType.getName(), catalog, defaultCategory, taxCode);

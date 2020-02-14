@@ -1,9 +1,10 @@
 package com.elasticpath.cortex.dce.addresses
 
+import static org.assertj.core.api.Assertions.assertThat
+
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
 import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_SCOPE
 import static com.elasticpath.cortex.dce.addresses.AddressConstants.ADDRESS_LINK_TYPE
-import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.DataTable
 import cucumber.api.java.en.And
@@ -114,6 +115,22 @@ class AddressFormFieldSteps {
 			def value = map.getValue()
 
 			assertThat(client.body."$addressFormNode"."$key")
+					.as("Expected $key does not match")
+					.isEqualTo(value)
+		}
+	}
+
+	@Then('^the address with postal code (.+) should contain the top level values$')
+	static void verifyAddressContainsTopLevelValues(String postalCode, DataTable dataTable) {
+		Profile.getAddressWithPostalCode(postalCode)
+
+		def mapList = dataTable.asMap(String, String)
+
+		for (def map : mapList) {
+			def key = map.getKey()
+			def value = map.getValue()
+
+			assertThat(client.body."$key")
 					.as("Expected $key does not match")
 					.isEqualTo(value)
 		}

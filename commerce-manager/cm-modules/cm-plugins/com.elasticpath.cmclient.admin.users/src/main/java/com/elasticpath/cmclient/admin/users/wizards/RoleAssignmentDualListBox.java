@@ -13,7 +13,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import com.elasticpath.cmclient.admin.users.AdminUsersMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.AbstractEpDualListBoxControl;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -77,7 +77,7 @@ public class RoleAssignmentDualListBox extends AbstractEpDualListBoxControl<CmUs
 
 	@Override
 	public Collection<UserRole> getAvailable() {
-		final UserRoleService service = (UserRoleService) ServiceLocator.getService(ContextIdNames.USER_ROLE_SERVICE);
+		final UserRoleService service = BeanLocator.getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 		return service.list();
 	}
 

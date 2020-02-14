@@ -39,7 +39,7 @@ public class DeliveryListRepositoryImpl<I extends DeliveriesIdentifier, LI exten
 		String orderId = order.getOrderId().getValue();
 		String storeCode = order.getScope().getValue();
 
-		return cartOrderRepository.findByGuidAsSingle(storeCode, orderId)
+		return cartOrderRepository.findByGuid(storeCode, orderId)
 				.map(CartOrder::getShoppingCartGuid)
 				.flatMapObservable(this::getShoppingCartDeliveryTypes)
 				.map(deliveryId -> getDeliveryIdentifier(order, deliveryId));

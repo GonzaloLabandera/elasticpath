@@ -99,9 +99,9 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		stubGetBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResultImpl.class);
-		stubGetBean(ContextIdNames.TAX_CATEGORY, TaxCategoryImpl.class);
-		stubGetBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdictionImpl.class);
+		stubGetPrototypeBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResult.class, TaxCalculationResultImpl.class);
+		stubGetPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class, TaxCategoryImpl.class);
+		stubGetPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class, TaxJurisdictionImpl.class);
 
 		taxSnapshotService = new TaxSnapshotServiceImpl();
 		taxSnapshotService.setBeanFactory(getBeanFactory());

@@ -19,7 +19,7 @@ import com.elasticpath.cmclient.admin.shipping.AdminShippingImageRegistry;
 import com.elasticpath.cmclient.admin.shipping.AdminShippingMessages;
 import com.elasticpath.cmclient.admin.shipping.AdminShippingPlugin;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
@@ -162,7 +162,8 @@ public class ShippingRegionDialog extends AbstractEpDialog {
 				IEpLayoutData.BEGINNING, IEpLayoutData.BEGINNING, false, true));
 
 		EpState state = EpState.EDITABLE;
-		if (((ShippingServiceLevelService) ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE))
+		if (((ShippingServiceLevelService) BeanLocator.getSingletonBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE,
+				ShippingServiceLevelService.class))
 				.getShippingRegionInUseUidList().contains(shippingRegion.getUidPk())) {
 			state = EpState.READ_ONLY;
 		}
@@ -199,7 +200,8 @@ public class ShippingRegionDialog extends AbstractEpDialog {
 			return true;
 		}
 
-		if (!((ShippingRegionService) ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_REGION_SERVICE))
+		if (!((ShippingRegionService) BeanLocator.getSingletonBean(EpShippingContextIdNames.SHIPPING_REGION_SERVICE,
+				ShippingRegionService.class))
 				.nameExists(getShippingRegion())) {
 			return true;
 		}
@@ -243,7 +245,8 @@ public class ShippingRegionDialog extends AbstractEpDialog {
 		HashMap<String, Region> regionMap = new HashMap<>();
 
 		for (Country country : countrySelectionDualListBox.getAssigned()) {
-			Region region = regionMap.computeIfAbsent(country.getCountryCode(), key -> ServiceLocator.getService(ContextIdNames.REGION));
+			Region region = regionMap.computeIfAbsent(country.getCountryCode(), key -> BeanLocator.getPrototypeBean(ContextIdNames.REGION,
+					 Region.class));
 
 			region.setCountryCode(country.getCountryCode());
 			if (country.getSubCountryCode() != null) {
@@ -292,7 +295,7 @@ public class ShippingRegionDialog extends AbstractEpDialog {
 	}
 
 	protected Geography getGeography() {
-		return (Geography) ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
+		return BeanLocator.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 	}
 
 }

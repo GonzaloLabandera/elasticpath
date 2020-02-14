@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2015
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 
 package com.elasticpath.service.shoppingcart.actions.impl;
@@ -67,7 +67,7 @@ public class CreateNewOrderCheckoutActionTest {
 	}
 
 	@Test
-	public void verifyExecuteDelegatesToOrderFactory() throws Exception {
+	public void verifyExecuteDelegatesToOrderFactory() {
 		final boolean orderExchange = false;
 		final boolean awaitExchangeCompletion = false;
 		final OrderReturn exchange = null;
@@ -79,10 +79,10 @@ public class CreateNewOrderCheckoutActionTest {
 				shoppingCart,
 				taxSnapshot,
 				customerSession,
-				null,
 				orderExchange,
 				awaitExchangeCompletion,
-				exchange);
+				exchange,
+				null);
 
 		checkoutAction.execute(checkoutActionContext);
 
@@ -104,7 +104,7 @@ public class CreateNewOrderCheckoutActionTest {
 	}
 
 	@Test
-	public void verifyExecuteDelegatesToOrderFactoryForExchanges() throws Exception {
+	public void verifyExecuteDelegatesToOrderFactoryForExchanges() {
 		final boolean orderExchange = true;
 		final boolean awaitExchangeCompletion = true;
 		final OrderReturn exchange = mock(OrderReturn.class);
@@ -116,10 +116,10 @@ public class CreateNewOrderCheckoutActionTest {
 				shoppingCart,
 				taxSnapshot,
 				customerSession,
-				null,
 				orderExchange,
 				awaitExchangeCompletion,
-				exchange);
+				exchange,
+				null);
 
 		checkoutAction.execute(checkoutActionContext);
 

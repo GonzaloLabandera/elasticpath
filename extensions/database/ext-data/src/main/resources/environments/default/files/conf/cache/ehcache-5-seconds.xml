@@ -274,13 +274,6 @@
 		   statistics="true"
 	/>
 
-	<cache name="cachingSkuOptionServiceFindByKeyCache"
-		   timeToIdleSeconds="5"
-		   timeToLiveSeconds="5"
-		   maxEntriesLocalHeap="10000"
-		   statistics="true"
-	/>
-
 	<cache name="loadFilteredNavigationConfigurationCache"
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"

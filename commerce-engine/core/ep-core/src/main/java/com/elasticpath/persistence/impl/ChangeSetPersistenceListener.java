@@ -142,7 +142,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	public TimeService getTimeService() {
 		if (timeService == null) {
-			timeService = beanFactory.getBean(ContextIdNames.TIME_SERVICE);
+			timeService = beanFactory.getSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class);
 		}
 		return timeService;
 	}
@@ -153,7 +153,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	ChangeSetService getChangeSetService() {
 		if (changeSetService == null) {
-			changeSetService = beanFactory.getBean(ContextIdNames.CHANGESET_SERVICE);
+			changeSetService = beanFactory.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 		}
 		return changeSetService;
 	}
@@ -193,7 +193,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	protected JpaPersistenceEngine getPersistenceEngine() {
 		if (persistenceEngine == null) {
-			persistenceEngine = getBeanFactory().getBean(ContextIdNames.PERSISTENCE_ENGINE);
+			persistenceEngine = getBeanFactory().getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, JpaPersistenceEngine.class);
 		}
 
 		return persistenceEngine;
@@ -219,7 +219,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	protected BusinessObjectMetadata createAndPopulateMetadata(final String key,
 			final ChangeType changeType, final BusinessObjectDescriptor objectDescriptor) {
 
-		BusinessObjectMetadata metadata = beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_METADATA);
+		BusinessObjectMetadata metadata = beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class);
 		metadata.setMetadataKey(key);
 		metadata.setMetadataValue(getAction(changeType).getName());
 		BusinessObjectGroupMember businessObjectGroupMember = getBusinessObjectGroupDao().findGroupMemberByObjectDescriptor(objectDescriptor);
@@ -235,7 +235,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	}
 
 	private ChangeSetPolicy getChangeSetPolicy() {
-		return getBeanFactory().getBean("changeSetPolicy");
+		return getBeanFactory().getSingletonBean(ContextIdNames.CHANGESET_POLICY, ChangeSetPolicy.class);
 	}
 
 	/**
@@ -365,7 +365,8 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	protected ChangeSetMemberDao getChangeSetMemberDao() {
 		if (changeSetMemberDao == null) {
-			changeSetMemberDao = beanFactory.getBean(ContextIdNames.CHANGE_SET_MEMBER_DAO);
+			changeSetMemberDao = beanFactory.getSingletonBean(ContextIdNames.CHANGE_SET_MEMBER_DAO,
+					ChangeSetMemberDao.class);
 		}
 		return changeSetMemberDao;
 	}
@@ -376,7 +377,8 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	protected BusinessObjectGroupDao getBusinessObjectGroupDao() {
 		if (businessObjectGroupDao == null) {
-			businessObjectGroupDao = beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_GROUP_DAO);
+			businessObjectGroupDao = beanFactory.getSingletonBean(ContextIdNames.BUSINESS_OBJECT_GROUP_DAO,
+					BusinessObjectGroupDao.class);
 		}
 		return businessObjectGroupDao;
 	}
@@ -415,7 +417,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	public ChangeSetHelper getChangeSetHelper() {
 		if (changeSetHelper == null) {
-			changeSetHelper = beanFactory.getBean(ContextIdNames.CHANGESET_HELPER);
+			changeSetHelper = beanFactory.getSingletonBean(ContextIdNames.CHANGESET_HELPER, ChangeSetHelper.class);
 		}
 		return changeSetHelper;
 	}

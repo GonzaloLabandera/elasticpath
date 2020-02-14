@@ -56,16 +56,16 @@ public class CheckoutWithPromotionsTest {
 //		checkoutService = (CheckoutService) elasticPath
 //				.getBean("checkoutService");
 //		ruleService = (RuleService) elasticPath
-//				.getBean(ContextIdNames.RULE_SERVICE);
+//				.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 //		ruleSetService = (RuleSetService) elasticPath
-//				.getBean(ContextIdNames.RULE_SET_SERVICE);
+//				.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
 //		ruleEngine = (RecompilingRuleEngine) elasticPath
 //				.getBean("epRuleEngine");
 //		scenario.getStore().setPaymentGateways(
 //				setUpPaymentGatewayAndProperties());
 //
 //		final Rule freeCaseWithCameraRule = (Rule) elasticPath
-//				.getBean(ContextIdNames.PROMOTION_RULE);
+//				.getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 //		freeCaseWithCameraRule.setRuleSet(ruleSetService
 //				.findByScenarioId(RuleScenarios.CART_SCENARIO));
 //		freeCaseWithCameraRule.setEnabled(true);
@@ -73,7 +73,7 @@ public class CheckoutWithPromotionsTest {
 //		freeCaseWithCameraRule.setName("Free Case With Digital Camera");
 //		freeCaseWithCameraRule.setStartDate(new Date());
 //		CmUserService cmUserService = (CmUserService) elasticPath
-//				.getBean(ContextIdNames.CMUSER_SERVICE);
+//				.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 //		freeCaseWithCameraRule.setCmUser(cmUserService.findByUserName("admin"));
 //		freeCaseWithCameraRule.addEligibility((RuleEligibility) elasticPath
 //				.getBean(ContextIdNames.EVERYONE_ELIGIBILITY));
@@ -205,7 +205,7 @@ public class CheckoutWithPromotionsTest {
 //
 //	private OrderPayment getOrderPayment() {
 //		OrderPayment orderPayment = (OrderPayment) elasticPath
-//				.getBean(ContextIdNames.ORDER_PAYMENT);
+//				.getPrototypeBean(ContextIdNames.ORDER_PAYMENT, OrderPayment.class);
 //		orderPayment.setCardHolderName("test test");
 //		orderPayment.setCardType("001");
 //		orderPayment.setCreatedDate(new Date());
@@ -228,7 +228,7 @@ public class CheckoutWithPromotionsTest {
 //
 //	protected ShoppingCart createEmptyShoppingCart() {
 //		ShoppingCart shoppingCart = (ShoppingCart) elasticPath
-//				.getBean(ContextIdNames.SHOPPING_CART);
+//				.getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 //		shoppingCart.setDefaultValues();
 //		shoppingCart.setBillingAddress(address);
 //		shoppingCart.setShippingAddress(address);

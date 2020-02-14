@@ -148,7 +148,7 @@ public final class ProductSkuBuilder implements DomainObjectBuilder<ProductSku> 
 
 	@Override
 	public ProductSku build() {
-		ProductSku productSku = beanFactory.getBean(ContextIdNames.PRODUCT_SKU);
+		ProductSku productSku = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 
 		productSku.setStartDate(startDate);
 		productSku.setEndDate(endDate);

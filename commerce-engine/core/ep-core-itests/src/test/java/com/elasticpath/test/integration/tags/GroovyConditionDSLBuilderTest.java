@@ -15,15 +15,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.domain.LogicalOperator;
 import com.elasticpath.tags.domain.LogicalOperatorType;
 import com.elasticpath.tags.domain.TagDefinition;
-import com.elasticpath.tags.domain.impl.TagValueTypeImpl;
+import com.elasticpath.tags.domain.TagValueType;
 import com.elasticpath.tags.service.ConditionValidationFacade;
 import com.elasticpath.tags.service.InvalidConditionTreeException;
 import com.elasticpath.tags.service.TagDefinitionReader;
@@ -41,9 +39,6 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 	
 	private GroovyConditionDSLBuilderImpl groovyDSLBuilder;
 
-	@Autowired
-	private BeanFactory beanFactory;
-
 	/**
 	 * Create a stub of the TagDefinition reader for the test.
 	 */
@@ -52,10 +47,10 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 		public List<TagDefinition> getTagDefinitions() {
 			final List<TagDefinition> tagDefinitions = new ArrayList<>();
 			String[] tags = {"refererUrl", "refererUrl", "location", "age", "memberType"};
-			TagValueTypeImpl tagValueType = getBeanFactory().getBean(ContextIdNames.TAG_VALUE_TYPE);
+			TagValueType tagValueType = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_VALUE_TYPE, TagValueType.class);
 			tagValueType.setJavaType(String.class.getCanonicalName());
 			for (String tagGuid : tags) {
-			TagDefinition tagDefinition = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
+			TagDefinition tagDefinition = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 			tagDefinition.setGuid(tagGuid);
 			tagDefinition.setValueType(tagValueType);
 			tagDefinitions.add(tagDefinition);			
@@ -482,10 +477,10 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 	public void testAddingRightOperandsWithoutQuotingThem() throws InvalidConditionTreeException {
 		LogicalOperator rootNode = new LogicalOperator(LogicalOperatorType.AND);
 		
-		final TagDefinition memberType = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
+		final TagDefinition memberType = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 		memberType.setGuid("memberType");
 		memberType.setName("memberType");
-		TagValueTypeImpl tagValueType = getBeanFactory().getBean(ContextIdNames.TAG_VALUE_TYPE);
+		TagValueType tagValueType = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_VALUE_TYPE, TagValueType.class);
 		tagValueType.setJavaType(String.class.getCanonicalName());
 		memberType.setValueType(tagValueType);
 		
@@ -505,10 +500,10 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 	public void testAddingIntegerRightOperands() throws InvalidConditionTreeException {
 		LogicalOperator rootNode = new LogicalOperator(LogicalOperatorType.AND);
 		
-		final TagDefinition age = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
+		final TagDefinition age = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 		age.setGuid("age");
 		age.setName("age");
-		TagValueTypeImpl tagValueType = getBeanFactory().getBean(ContextIdNames.TAG_VALUE_TYPE);
+		TagValueType tagValueType = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_VALUE_TYPE, TagValueType.class);
 		tagValueType.setJavaType(Integer.class.getCanonicalName());
 		age.setValueType(tagValueType);
 		
@@ -528,10 +523,10 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 	public void testAddingCollectionRightOperands() throws InvalidConditionTreeException {
 		LogicalOperator rootNode = new LogicalOperator(LogicalOperatorType.AND);
 		
-		final TagDefinition age = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
+		final TagDefinition age = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 		age.setGuid("age");
 		age.setName("age");
-		TagValueTypeImpl tagValueType = getBeanFactory().getBean(ContextIdNames.TAG_VALUE_TYPE);
+		TagValueType tagValueType = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_VALUE_TYPE, TagValueType.class);
 		tagValueType.setJavaType(String.class.getCanonicalName());
 		age.setValueType(tagValueType);
 
@@ -549,10 +544,10 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 	public void testAddingMapRightOperands() throws InvalidConditionTreeException {
 		LogicalOperator rootNode = new LogicalOperator(LogicalOperatorType.AND);
 		
-		final TagDefinition age = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
+		final TagDefinition age = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 		age.setGuid("age");
 		age.setName("age");
-		TagValueTypeImpl tagValueType = getBeanFactory().getBean(ContextIdNames.TAG_VALUE_TYPE);
+		TagValueType tagValueType = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_VALUE_TYPE, TagValueType.class);
 		tagValueType.setJavaType(String.class.getCanonicalName());
 		age.setValueType(tagValueType);
 
@@ -570,10 +565,10 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 	public void testAddingArrayRightOperands() throws InvalidConditionTreeException {
 		LogicalOperator rootNode = new LogicalOperator(LogicalOperatorType.AND);
 		
-		final TagDefinition age = getBeanFactory().getBean(ContextIdNames.TAG_DEFINITION);
+		final TagDefinition age = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_DEFINITION, TagDefinition.class);
 		age.setGuid("age");
 		age.setName("age");
-		TagValueTypeImpl tagValueType = getBeanFactory().getBean(ContextIdNames.TAG_VALUE_TYPE);
+		TagValueType tagValueType = getBeanFactory().getPrototypeBean(ContextIdNames.TAG_VALUE_TYPE, TagValueType.class);
 		tagValueType.setJavaType(String.class.getCanonicalName());
 		age.setValueType(tagValueType);
 

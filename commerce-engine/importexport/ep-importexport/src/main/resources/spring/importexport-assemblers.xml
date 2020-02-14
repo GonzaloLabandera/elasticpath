@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	">
+
+	<bean id="storeDtoAssembler" class="com.elasticpath.importexport.common.assembler.store.StoreDtoAssembler">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="catalogService" ref="catalogService"/>
+		<property name="taxCodeService" ref="taxCodeService"/>
+		<property name="taxJurisdictionService" ref="taxJurisdictionService"/>
+		<property name="warehouseService" ref="warehouseService"/>
+		<property name="storeService" ref="storeService"/>
+		<property name="modifierService" ref="modifierService"/>
+		<property name="storePaymentProviderConfigService" ref="storePaymentProviderConfigService"/>
+	</bean>
+
+	<bean id="storeAssociationDtoAssembler" class="com.elasticpath.importexport.common.assembler.store.StoreAssociationDtoAssembler">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="storeService" ref="storeService"/>
+		<property name="storeAssociationService" ref="storeAssociationService"/>
+	</bean>
+
+	<bean id="paymentProviderDtoAssembler" class="com.elasticpath.importexport.common.assembler.paymentprovider.PaymentProviderDTOAssembler"/>
+
+</beans>

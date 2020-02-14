@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmSingletonUtil;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.common.CMContextIdNames;
 import com.elasticpath.cmclient.core.util.CookieUtil;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
@@ -156,6 +156,6 @@ public class TimeZoneInfo {
 	}
 
 	private Map<String, String> getTimezoneFormats() {
-		return ServiceLocator.getService(CMContextIdNames.TIMEZONE_FORMAT_MAP);
+		return BeanLocator.getSingletonBean(CMContextIdNames.TIMEZONE_FORMAT_MAP, Map.class);
 	}
 }

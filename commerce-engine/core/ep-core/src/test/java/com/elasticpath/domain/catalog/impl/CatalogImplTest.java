@@ -90,7 +90,7 @@ public class CatalogImplTest {
 		catalog.setCode(new RandomGuidImpl().toString());
 		return catalog;
 	}
-	
+
 	/**
 	 * Test that you can't set the default locale to null.
 	 */
@@ -228,13 +228,8 @@ public class CatalogImplTest {
 
 		final class StubbedElasticPathImpl extends ElasticPathImpl {
 			@Override
-			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
-				return getBean(name);
-			}
-
 			@SuppressWarnings("unchecked")
-			@Override
-			public <T> T getBean(final String name) {
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
 				if (name.equals(ContextIdNames.CATALOG_LOCALE)) {
 					return (T) new CatalogLocaleImpl();
 				}

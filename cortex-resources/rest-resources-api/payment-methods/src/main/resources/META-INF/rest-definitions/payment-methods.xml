@@ -1,129 +1,108 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
 
 	<family>
 		<name>paymentmethods</name>
 		<description>
-			<![CDATA[The Payment Methods resource is responsible for the customer's paymentmethods. This resource lists all the paymentmethods
-defined for the customer payment tokens. Selecting a payment method for a purchase is set
-during the purchase's order phase.]]>
+			<![CDATA[
+			The Payment Methods resource is the payment mechanism selected to create the customer's payment instrument, such as a credit card or PayPal.
+
+			To submit a payment, create one or more payment instruments. Each payment instrument must correspond to a chosen payment method.
+
+			]]>
 		</description>
 
 		<uri-part>
-			<name>paymentmethod-id</name>
-			<description><![CDATA[The payment method ID]]></description>
+			<name>payment-method-id</name>
+			<description><![CDATA[The payment method ID.]]></description>
 			<string/>
 		</uri-part>
 
 		<resource>
-			<name>paymentmethods</name>
-			<description><![CDATA[An order resource that identifies items to be purchased.]]></description>
-			<uri>{base.family}/{base.scope}</uri>
-			<list-of>paymentmethod</list-of>
+			<name>profile-payment-methods</name>
+			<description><![CDATA[The payment methods resource for a profile.]]></description>
+			<uri>{base.family}/{profiles.profile}</uri>
+			<list-of>profile-payment-method</list-of>
 		</resource>
 
 		<resource>
-			<name>default-paymentmethod</name>
-			<description><![CDATA[The default payment method.]]></description>
-			<uri>{paymentmethods}/default</uri>
-			<alias>paymentmethod</alias>
-		</resource>
-
-		<resource>
-			<name>paymentmethod</name>
-			<description><![CDATA[The payment method.]]></description>
-			<uri>{paymentmethods}/{paymentmethod-id}</uri>
-			<entity>payment-token</entity>
-			<!-- Payment-tokens and payment-methods have a bidirectional dependency because payment-methods
-				emits payment-token entities. This problem will be addressed ,possibly by making payment-methods a linked resource
-				rather than a data list resource. Until then this resource entity declaration has to be commented out.
-
-				Temporarily resolving this by duplicating the payment-token entity in this resource.
-
-			<entity>paymenttokens.payment-token</entity>
-		-->
-		</resource>
-		<resource>
-			<name>paymentmethod-info</name>
-			<description><![CDATA[The payment method info for an order.]]></description>
-			<uri>{base.family}/info/{orders.order}</uri>
-			<entity>controls.info</entity>
-		</resource>
-
-		<resource>
-			<name>paymentmethod-for-order</name>
-			<description><![CDATA[The payment method for an order.]]></description>
+			<name>order-payment-methods</name>
+			<description><![CDATA[The payment methods resource for an order.]]></description>
 			<uri>{base.family}/{orders.order}</uri>
-			<entity>payment-token</entity>
-			<!-- as with payment-method, this resource also vends payment-token. -->
+			<list-of>order-payment-method</list-of>
 		</resource>
+
+		<resource>
+			<name>profile-payment-method</name>
+			<description>
+				<![CDATA[A payment method supported by the store, such as a credit card, debit, or cash and accessed through the profile.]]>
+			</description>
+			<uri>{profile-payment-methods}/{payment-method-id}</uri>
+			<entity>payment-method</entity>
+		</resource>
+
+		<resource>
+			<name>order-payment-method</name>
+			<description>
+				<![CDATA[A payment method supported by the store, such as a credit card, debit, or cash and accessed through the order.]]>
+			</description>
+			<uri>{order-payment-methods}/{payment-method-id}</uri>
+			<entity>payment-method</entity>
+		</resource>
+
+
 
 		<relationship>
-			<name>paymentmethods-for-profile</name>
-			<description><![CDATA[The customer's payment methods.]]></description>
+			<name>profile-payment-methods-for-profile-payment-method</name>
+			<description><![CDATA[Link from the profile payment methods resource to an individual payment method.]]></description>
+			<rel>paymentmethods</rel>
+			<from>profile-payment-method</from>
+			<to>profile-payment-methods</to>
+		</relationship>
+
+		<relationship>
+			<name>order-payment-methods-for-order-payment-method</name>
+			<description><![CDATA[Link from the order payment methods resource to an individual order payment method.]]></description>
+			<rel>paymentmethods</rel>
+			<from>order-payment-method</from>
+			<to>order-payment-methods</to>
+		</relationship>
+
+		<relationship>
+			<name>profile-payment-methods-for-profile</name>
+			<description><![CDATA[Link from a profile to the available payment methods for that scope and profile.]]></description>
 			<rel>paymentmethods</rel>
 			<rev>profile</rev>
 			<from>profiles.profile</from>
-			<to>paymentmethods</to>
+			<to>profile-payment-methods</to>
 		</relationship>
 
 		<relationship>
-			<name>default-paymentmethod</name>
-			<description><![CDATA[The customer's default payment method.]]></description>
-			<rel>default</rel>
-			<rev>list</rev>
-			<from>paymentmethods</from>
-			<to>default-paymentmethod</to>
-		</relationship>
-
-		<relationship>
-			<name>paymentmethod-info-for-order</name>
-			<description><![CDATA[Read the payment method currently selected for the order.]]></description>
+			<name>order-payment-methods-for-order</name>
+			<description><![CDATA[Link from an order to the available payment methods for that scope.]]></description>
 			<rel>paymentmethodinfo</rel>
 			<rev>order</rev>
 			<from>orders.order</from>
-			<to>paymentmethod-info</to>
-		</relationship>
-
-		<relationship>
-			<name>paymentmethod-for-order</name>
-			<description><![CDATA[Read a payment method.]]></description>
-			<rel>paymentmethod</rel>
-			<from>paymentmethod-info</from>
-			<to>paymentmethod-for-order</to>
+			<to>order-payment-methods</to>
 		</relationship>
 
 		<entity>
 			<name>payment-method</name>
-			<description><![CDATA[Describes a payment method.]]></description>
+			<description><![CDATA[Describes a payment method, such as a credit card, debit, or cash]]></description>
 			<property>
-				<name>payment-method-id</name>
-				<description><![CDATA[The payment method identifier.]]></description>
-				<internal/>
+				<name>name</name>
+				<description><![CDATA[The payment method name.]]></description>
 				<string/>
 			</property>
-		</entity>
-
-
-		<!--
-		Temporarily copying payment-token entity from payment-tokens resource to resolve dependency issue.
-
-		-->
-		<entity>
-			<name>payment-token</name>
-			<description><![CDATA[The payment token entity.]]></description>
-			<is-a>payment-method</is-a>
 			<property>
 				<name>display-name</name>
-				<description><![CDATA[A description of the payment token to be used for display purposes.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>token</name>
-				<description><![CDATA[The payment token created by a payment tokenization service.]]></description>
+				<description><![CDATA[The localized payment method name, intended for display in the client application.]]></description>
 				<string/>
 			</property>
 		</entity>
-
 	</family>
 </definitions>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2014
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.uat.email.order;
 
@@ -13,7 +13,10 @@ import org.junit.runner.RunWith;
  * This will run all Cucumber features found on the classpath.
  */
 @RunWith(Cucumber.class)
-@CucumberOptions(format = { "pretty", "html:target/cucumber", "json:target/cucumber.json" }, glue = "com.elasticpath.uat")
+@CucumberOptions(
+		format = {"pretty", "html:target/cucumber", "json:target/cucumber.json"},
+		glue = "com.elasticpath.uat"
+)
 public class RunCucumberIT {
 
 }

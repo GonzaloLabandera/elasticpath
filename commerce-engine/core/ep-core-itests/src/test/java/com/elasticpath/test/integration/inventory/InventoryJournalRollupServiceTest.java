@@ -84,7 +84,8 @@ public class InventoryJournalRollupServiceTest extends DbTestCase {
 	}
 
 	private void insertInventoryJournalLock(InventoryKey inventoryKey) {
-		InventoryJournalLock inventoryJournalLock = getBeanFactory().getBean(ContextIdNames.INVENTORY_JOURNAL_LOCK);
+		InventoryJournalLock inventoryJournalLock = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_JOURNAL_LOCK, 
+				InventoryJournalLock.class);
 		inventoryJournalLock.setSkuCode(inventoryKey.getSkuCode());
 		inventoryJournalLock.setWarehouseUid(inventoryKey.getWarehouseUid());
 		inventoryJournalLockDao.saveOrUpdate(inventoryJournalLock);

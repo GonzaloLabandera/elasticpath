@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.converters;
 
@@ -56,6 +56,7 @@ public class PurchaseEntityConverter implements Converter<Order, PurchaseEntity>
 
 	private static Map<OrderStatus, PurchaseStatus> createStatusMap() {
 		Map<OrderStatus, PurchaseStatus> statusMap = new HashMap<>();
+		statusMap.put(OrderStatus.CREATED, PurchaseStatus.IN_PROGRESS);
 		statusMap.put(OrderStatus.AWAITING_EXCHANGE, PurchaseStatus.IN_PROGRESS);
 		statusMap.put(OrderStatus.FAILED, PurchaseStatus.IN_PROGRESS);
 		statusMap.put(OrderStatus.IN_PROGRESS, PurchaseStatus.IN_PROGRESS);

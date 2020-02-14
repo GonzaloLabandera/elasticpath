@@ -11,7 +11,7 @@ import com.elasticpath.cmclient.advancedsearch.AdvancedSearchMessages;
 import com.elasticpath.cmclient.advancedsearch.actions.QueryBuilderAction;
 import com.elasticpath.cmclient.advancedsearch.catalog.views.AdvancedSearchProductListView;
 import com.elasticpath.cmclient.advancedsearch.helpers.ProductAdvancedSearchRequestJob;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -39,7 +39,8 @@ public abstract class AbstractAdvancedSearchView extends AbstractCmClientView im
 
 	private QueryBuilderTab queryBuilderTab;
 
-	private final AdvancedSearchQueryDao searchQueryDao = ServiceLocator.getService(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO);
+	private final AdvancedSearchQueryDao searchQueryDao = BeanLocator
+			.getSingletonBean(ContextIdNames.ADVANCED_SEARCH_QUERY_DAO, AdvancedSearchQueryDao.class);
 
 	private final ProductAdvancedSearchRequestJob productSearchJob = new ProductAdvancedSearchRequestJob(getPagination());
 
@@ -99,7 +100,7 @@ public abstract class AbstractAdvancedSearchView extends AbstractCmClientView im
 	public void selectQueryBuilderTab(final QueryBuilderAction queryBuilderAction) {
 		switch (queryBuilderAction) {
 		case CREATE:
-			AdvancedSearchQuery searchQuery = ServiceLocator.getService(ContextIdNames.ADVANCED_SEARCH_QUERY);
+			AdvancedSearchQuery searchQuery = BeanLocator.getPrototypeBean(ContextIdNames.ADVANCED_SEARCH_QUERY, AdvancedSearchQuery.class);
 			queryBuilderTab.prepareForCreateAction(searchQuery);
 			break;
 		case OPEN:
@@ -117,8 +118,7 @@ public abstract class AbstractAdvancedSearchView extends AbstractCmClientView im
 	@Override
 	public void checkQueryBuilderTabAfterDelete(final AdvancedSearchQuery searchQuery) {
 		if (queryBuilderTab.getSearchQuery().equals(searchQuery)) {
-			queryBuilderTab.prepareForCreateAction(ServiceLocator.getService(
-					ContextIdNames.ADVANCED_SEARCH_QUERY));
+			queryBuilderTab.prepareForCreateAction(BeanLocator.getPrototypeBean(ContextIdNames.ADVANCED_SEARCH_QUERY, AdvancedSearchQuery.class));
 		}
 	}
 

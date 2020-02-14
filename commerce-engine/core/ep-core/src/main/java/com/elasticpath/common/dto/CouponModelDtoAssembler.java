@@ -13,24 +13,24 @@ import com.elasticpath.domain.rules.CouponConfig;
  */
 public class CouponModelDtoAssembler {
 	private final BeanFactory beanFactory;
-	
+
 	/**
 	 * Constructor for {@link CouponModelDtoAssembler}.
-	 * @param beanFactory the bean factory used to create coupons 
+	 * @param beanFactory the bean factory used to create coupons
 	 */
 	public CouponModelDtoAssembler(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
-	
+
 	/**
 	 * convert CouponModelDto to Coupon.
-	 * 
+	 *
 	 * @param source the CoupoModelDto
 	 * @param couponConfig the coupon configuration for this coupon
 	 * @return the Coupon
 	 */
 	public Coupon assembleDomain(final CouponModelDto source, final CouponConfig couponConfig) {
-		Coupon coupon = beanFactory.getBean(ContextIdNames.COUPON);
+		Coupon coupon = beanFactory.getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 		coupon.setCouponCode(source.getCouponCode());
 		coupon.setCouponConfig(couponConfig);
 		if (!CouponUsageModelDto.class.isAssignableFrom(source.getClass())) {

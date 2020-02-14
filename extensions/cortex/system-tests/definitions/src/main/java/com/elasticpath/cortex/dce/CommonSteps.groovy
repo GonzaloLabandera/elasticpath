@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortex.dce
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
@@ -21,11 +25,19 @@ class CommonSteps {
 	static String savedRel
 	static final USER_TRAITS_HEADER = "x-ep-user-traits"
 
-	static RESPONSE_MAP = ['OK'                 : 200, 'OK, created': 201, 'no content': 204, 'bad request': 400, 'unauthorized': 401,
-						'forbidden'             : 403, 'not found': 404, 'method not allowed': 405, 'conflict': 409,
-						'unsupported media type': 415, 'server failure': 500]
+	static RESPONSE_MAP = ['OK'                    : 200,
+						   'OK, created'           : 201,
+						   'no content'            : 204,
+						   'bad request'           : 400,
+						   'unauthorized'          : 401,
+						   'forbidden'             : 403,
+						   'not found'             : 404,
+						   'method not allowed'    : 405,
+						   'conflict'              : 409,
+						   'unsupported media type': 415,
+						   'server failure'        : 500]
 
-	
+
 	@Then('^(?:the operation is identified as|the HTTP status is) (.+)$')
 	static void verifyOperationUndefinedWithResponse(String response) {
 		assertThat(client.response.status)
@@ -63,7 +75,7 @@ class CommonSteps {
 	@Then('^I specify the (.*) and follow (?:the link|links) (.+)$')
 	static void followLinks(String format, String resources) {
 		/* this step will follow a list of links separated by '->'
-		ie. When I follow links cart -> order -> paymentmethodinfo
+		ie. When I follow links cart -> order -> paymentmethodsresource
 		 */
 		navigateResources(resources, format)
 	}
@@ -71,7 +83,7 @@ class CommonSteps {
 	@Then('^I follow (?:the link|links) (.+)$')
 	static void navigateToResource(String resources) {
 		/* this step will follow a list of links separated by '->'
-		ie. When I follow links cart -> order -> paymentmethodinfo
+		ie. When I follow links cart -> order -> paymentmethodsresource
 		 */
 		navigateResources(resources)
 	}
@@ -84,7 +96,7 @@ class CommonSteps {
 	@Then('^I navigate links (.+)$')
 	static void navigateToResourceFromRoot(String resources) {
 		/* this step will follow a list of links separated by '->'
-		ie. When I follow links cart -> order -> paymentmethodinfo
+		ie. When I follow links cart -> order -> paymentmethodsresource
 		 */
 		client.GET("/")
 		navigateResources(resources)
@@ -291,7 +303,7 @@ class CommonSteps {
 
 	@Then('^I should see the field links is empty$')
 	static void verifyNoOtherLinks() {
-		def actualLinks = getClient().body.links.collect{link -> link.rel}
+		def actualLinks = getClient().body.links.collect { link -> link.rel }
 
 		// Verifies if the list is exactly the same and in the same order.
 		assertThat(actualLinks)
@@ -302,7 +314,7 @@ class CommonSteps {
 	@Then('^I should see the following links$')
 	static void verifyLinksListMatches(DataTable linksTable) {
 		def linksList = linksTable.asList(String)
-		def actualLinks = getClient().body.links.collect{link -> link.rel}
+		def actualLinks = getClient().body.links.collect { link -> link.rel }
 
 		assertThat(actualLinks)
 				.as("links list is not as expected")
@@ -312,7 +324,7 @@ class CommonSteps {
 	@Then('^I should not see the following links$')
 	static void verifyLinksListDoesNotMatchAny(DataTable linksTable) {
 		def linksList = linksTable.asList(String)
-		def actualLinks = getClient().body.links.collect{link -> link.rel}
+		def actualLinks = getClient().body.links.collect { link -> link.rel }
 
 		assertThat(actualLinks)
 				.as("links list is not as expected")
@@ -564,7 +576,7 @@ class CommonSteps {
 	@Then('^I should not see a choice with field (.+) and value (.+)')
 	static void verifyChoiceNotExists(String field, String choice) {
 		assertThat(isChoiceExists(field, choice))
-				.as("Unable to find choice - $choice")
+				.as("Choice still exists - $choice")
 				.isFalse()
 	}
 
@@ -671,9 +683,9 @@ class CommonSteps {
 	static class KeyValue {
 		String key
 		String value
-	
+
 		Map<String, String> formMap
-	
+
 		def getFormMap() {
 			formMap = new HashMap<String, String>()
 			formMap.put(key, value)
@@ -684,9 +696,9 @@ class CommonSteps {
 	static class NameValue {
 		String name
 		String value
-	
+
 		Map<String, String> nameValueMap
-	
+
 		def nameValueMap() {
 			nameValueMap = new HashMap<String, String>()
 			nameValueMap.put(name, value)

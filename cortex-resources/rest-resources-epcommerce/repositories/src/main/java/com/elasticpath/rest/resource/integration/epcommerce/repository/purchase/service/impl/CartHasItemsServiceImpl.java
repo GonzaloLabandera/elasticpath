@@ -39,7 +39,7 @@ public class CartHasItemsServiceImpl implements CartHasItemsService {
 		String storeCode = order.getScope().getValue();
 		String cartOrderGuid = order.getOrderId().getValue();
 
-		Single<ShoppingCart> shoppingCartSingle = cartOrderRepository.findByGuidAsSingle(storeCode, cartOrderGuid)
+		Single<ShoppingCart> shoppingCartSingle = cartOrderRepository.findByGuid(storeCode, cartOrderGuid)
 				.flatMap(cartOrder -> getShoppingCart(StringIdentifier.of(storeCode), cartOrder));
 
 		return shoppingCartSingle.map(ShoppingCart::isEmpty);
@@ -71,7 +71,7 @@ public class CartHasItemsServiceImpl implements CartHasItemsService {
 	 * @return the shopping cart
 	 */
 	protected Single<ShoppingCart> getShoppingCart(final IdentifierPart<String> scope, final CartOrder cartOrder) {
-		return cartOrderRepository.getEnrichedShoppingCartSingle(scope.getValue(), cartOrder);
+		return cartOrderRepository.getEnrichedShoppingCart(scope.getValue(), cartOrder);
 	}
 
 	@Reference

@@ -43,7 +43,7 @@ import com.elasticpath.cmclient.catalog.helpers.BundleConstituentTableContentPro
 import com.elasticpath.cmclient.catalog.helpers.BundleConstituentTableLabelProvider;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -171,7 +171,7 @@ public class BundleItemsSection extends AbstractPolicyAwareEditorPageSectionPart
 	private SelectionRule getSelectionRuleFromRuleInput(final ProductBundle bundle) {
 		SelectionRule selectionRule = bundle.getSelectionRule();
 		if (selectionRule == null) {
-			selectionRule = ServiceLocator.getService(ContextIdNames.BUNDLE_SELECTION_RULE);
+			selectionRule = BeanLocator.getPrototypeBean(ContextIdNames.BUNDLE_SELECTION_RULE, SelectionRule.class);
 		}
 
 		if (selectRuleCombo.getSelectionIndex() > 1) {
@@ -390,7 +390,7 @@ public class BundleItemsSection extends AbstractPolicyAwareEditorPageSectionPart
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(final SelectionEvent event) {
-				BundleConstituent bundleConstituent = ServiceLocator.getService(ContextIdNames.BUNDLE_CONSTITUENT);
+				BundleConstituent bundleConstituent = BeanLocator.getPrototypeBean(ContextIdNames.BUNDLE_CONSTITUENT, BundleConstituent.class);
 				ProductBundleConstituentsDialog dialog = new ProductBundleConstituentsDialog(getShell(), bundleConstituent, false,
 						getProductBundleModel());
 				if (dialog.open() == Window.OK) {

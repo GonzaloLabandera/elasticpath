@@ -5,15 +5,13 @@ package com.elasticpath.test.validation;
 
 import java.util.Collection;
 import java.util.Set;
-
 import javax.validation.ConstraintViolation;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.GlobalConstants;
@@ -41,7 +39,7 @@ public class CustomerValidationTest extends AbstractValidationTest {
 	/** Test initialization. */
 	@Before
 	public void initialize() {
-		customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 	}
 
 	/** Test validation wiring using null. */
@@ -139,17 +137,17 @@ public class CustomerValidationTest extends AbstractValidationTest {
 				String.format("customerProfile.%s", extensionAttributeKey));
 
 		// now add another unknown attribute
-		Attribute attribute = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE);
+		Attribute attribute = getBeanFactory().getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 		attribute.setGlobal(true);
 		attribute.setRequired(true);
 		attribute.setKey(extensionAttributeKey);
 		attribute.setAttributeUsage(AttributeUsageImpl.CUSTOMERPROFILE_USAGE);
 		attribute.setAttributeType(AttributeType.SHORT_TEXT);
 
-		AttributeService attributeService = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_SERVICE);
+		AttributeService attributeService = getBeanFactory().getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		attributeService.add(attribute);
 
-		Customer extensionCustomer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		Customer extensionCustomer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		populateAttributeValues(extensionCustomer, ootbAttributes);
 
 		violations = getValidator().validate(extensionCustomer);

@@ -13,11 +13,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.apache.commons.lang.StringUtils;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
@@ -59,13 +58,13 @@ public class CustomerImplTest {
 			private static final long serialVersionUID = 740L;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+				return beanFactory.getSingletonBean(name, clazz);
 			}
 		};
 
-		when(beanFactory.getBean(ContextIdNames.CUSTOMER_AUTHENTICATION)).thenReturn(customerAuthentication);
-		when(beanFactory.getBean(ContextIdNames.PASSWORDENCODER)).thenReturn(passwordEncoder);
+		when(beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthentication.class)).thenReturn(customerAuthentication);
+		when(beanFactory.getSingletonBean(ContextIdNames.PASSWORDENCODER, PasswordEncoder.class)).thenReturn(passwordEncoder);
 
 		customerImpl = CustomerBuilder.newCustomer(beanFactory).build();
 
@@ -259,7 +258,7 @@ public class CustomerImplTest {
 	@Test
 	public void testSetClearTextPassword() {
 		@SuppressWarnings("unchecked") final SaltFactory<String> saltFactory = mock(SaltFactory.class);
-		when(beanFactory.getBean(ContextIdNames.SALT_FACTORY)).thenReturn(saltFactory);
+		when(beanFactory.getSingletonBean(ContextIdNames.SALT_FACTORY, SaltFactory.class)).thenReturn(saltFactory);
 
 		final String[] passwords = new String[] { "AbCdEfGhI", "AbCdEfGhIjKlMnOpQrS", "aA123_$@#^&", "", null };
 		final String[] hashedPasswords = new String[] { "d60c7aaba158d8270ec509390438152ca931ec6a", "32a6ea3419c4d9653cf51c6500f3accef2012ab0",

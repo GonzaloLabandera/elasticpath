@@ -246,6 +246,6 @@ public class BrandFilterImpl extends AbstractFilterImpl<BrandFilter> implements 
 	 * @return the brand service
 	 */
 	protected BrandService getBrandService() {
-		return getBean(ContextIdNames.BRAND_SERVICE);
+		return getSingletonBean(ContextIdNames.BRAND_SERVICE, BrandService.class);
 	}
 }

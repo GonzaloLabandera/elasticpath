@@ -8,15 +8,16 @@ import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
+
+import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheResult;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShipmentShippingOptionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
+import com.elasticpath.service.shipping.ShippingOptionResult;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
@@ -30,42 +31,40 @@ public class ShipmentShippingOptionRepositoryImpl implements ShipmentShippingOpt
 
 	private final ResourceOperationContext resourceOperationContext;
 	private final ShippingOptionService shippingOptionService;
+	private final ReactiveAdapter reactiveAdapter;
 
 	/**
 	 * Constructor.
-	 *
-	 * @param resourceOperationContext a {@link ResourceOperationContext}
+	 *  @param resourceOperationContext a {@link ResourceOperationContext}
 	 * @param shippingOptionService a {@link ShippingOptionService}
+	 * @param reactiveAdapter a {@link ReactiveAdapter}
 	 */
 	@Inject
 	public ShipmentShippingOptionRepositoryImpl(
-		@Named("resourceOperationContext")
-		final ResourceOperationContext resourceOperationContext,
-		@Named("shippingOptionService")
-		final ShippingOptionService shippingOptionService) {
+			@Named("resourceOperationContext")
+			final ResourceOperationContext resourceOperationContext,
+			@Named("shippingOptionService")
+			final ShippingOptionService shippingOptionService,
+			@Named("reactiveAdapter")
+			final ReactiveAdapter reactiveAdapter) {
 		this.resourceOperationContext = resourceOperationContext;
 		this.shippingOptionService = shippingOptionService;
+		this.reactiveAdapter = reactiveAdapter;
 	}
 
 	@Override
 	@CacheResult
-	public ExecutionResult<ShippingOption> findByCode(final String shippingOptionCode) {
+	public Single<ShippingOption> findByCode(final String shippingOptionCode, final String storeCode) {
 
 		final Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
-		final String scope = SubjectUtil.getScope(resourceOperationContext.getSubject());
 
-		return new ExecutionResultChain() {
-			@Override
-			protected ExecutionResult<?> build() {
-				ShippingOption shippingOption = Assign.ifNotNull(shippingOptionService
-								.getAllShippingOptions(scope, locale)
-								.getAvailableShippingOptions().stream()
-								.filter(shippingOptionParam -> Objects.equals(shippingOptionCode, shippingOptionParam.getCode()))
-								.findFirst().orElse(null),
-						OnFailure.returnNotFound(SHIPPING_OPTION_NOT_FOUND));
-				return ExecutionResultFactory.createReadOK(shippingOption);
-			}
-		}.execute();
+		return reactiveAdapter.fromServiceAsSingle(() -> shippingOptionService
+				.getAllShippingOptions(storeCode, locale))
+				.map(ShippingOptionResult::getAvailableShippingOptions)
+				.flatMapObservable(Observable::fromIterable)
+				.filter(shippingOption -> Objects.equals(shippingOptionCode, shippingOption.getCode()))
+				.firstOrError()
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(SHIPPING_OPTION_NOT_FOUND)));
 	}
 
 }

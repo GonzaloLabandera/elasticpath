@@ -14,8 +14,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.osgi.util.NLS;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.jobs.JobsMessages;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.common.pricing.service.PriceListService;
@@ -34,10 +34,10 @@ public class ImportJobDataValidatorProcForBaseAmount extends ImportJobDataValida
 	private String validationMessage;
 
 	private final ImportService importService =
-		ServiceLocator.getService(ContextIdNames.IMPORT_SERVICE);
+			BeanLocator.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 
 	private final PriceListService plService =
-		ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+			BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 
 	private static final int LIST_PRICE_INDEX = 4;
 	private static final int SALE_PRICE_INDEX = 5;

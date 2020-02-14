@@ -14,6 +14,7 @@ import org.jmock.Expectations;
 import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
@@ -29,6 +30,7 @@ import com.elasticpath.domain.catalog.impl.CatalogLocaleImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
+import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.misc.impl.BrandLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.service.catalog.CategoryLookup;
@@ -64,8 +66,8 @@ public class ProductXmlServiceImplTest extends AbstractEPServiceTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-		stubGetBean(ContextIdNames.UTILITY, UtilityImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CATALOG_LOCALE, SupportedLocale.class, CatalogLocaleImpl.class);
+		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
 	}
 
 	protected ProductXmlServiceImpl createProductXmlService() {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"
+	   profile="dummyProfile">
+
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
+	<import resource="payment-plugin-connectivity-mocks.xml"/>
+
+</beans>

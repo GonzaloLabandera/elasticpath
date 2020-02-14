@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.store.targetedselling.delivery.controller.impl;
 
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.controller.impl.AbstractBaseControllerImpl;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.event.UIEvent;
@@ -44,8 +44,8 @@ public class DynamicContentDeliveryControllerImpl extends AbstractBaseController
 	 */
 	private DynamicContentDeliveryService getService() {
 		if (dynamicContentService == null) {
-			dynamicContentService = ServiceLocator.getService(
-					ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);			
+			dynamicContentService = BeanLocator
+					.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 		}
 		return dynamicContentService;
 	}

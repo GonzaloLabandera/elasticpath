@@ -21,7 +21,7 @@ public class ImportTestPersister {
 	 *            the ElasticPath bean factory
 	 */
 	public ImportTestPersister(final BeanFactory beanFactory) {
-		importService = beanFactory.getBean(ContextIdNames.IMPORT_SERVICE);
+		importService = beanFactory.getSingletonBean(ContextIdNames.IMPORT_SERVICE, ImportService.class);
 	}
 
 	/**

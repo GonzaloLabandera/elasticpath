@@ -5,9 +5,12 @@
 package com.elasticpath.service.datapolicy;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.elasticpath.commons.util.Pair;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.service.datapolicy.impl.DataPointValue;
 import com.elasticpath.service.search.IndexType;
@@ -30,6 +33,14 @@ public interface DataPointValueService {
 	 * @return the number of removed data point values
 	 */
 	int removeValues(Collection<DataPointValue> dataPointValues);
+
+	/**
+	 * Return a list of customer data point values for the given list of data points.
+	 *
+	 * @param customerGuidToDataPoints the map with customer GUID-to-set of data points
+	 * @return the list of customer data point values
+	 */
+	int removeValues(Map<String, ? extends Collection<DataPoint>> customerGuidToDataPoints);
 
 	/**
 	 * Remove data point values by executing a dynamic query.
@@ -100,4 +111,14 @@ public interface DataPointValueService {
 	 * @return the list of customer data points
 	 */
 	Collection<DataPointValue> getCustomerDataPointValuesForStoreByPolicyGuid(String customerGuid, String storeCode, String dataPolicyGuid);
+
+	/**
+	 * Get all of the data points for the customer for every segment specified in settings.
+	 * Must return null if request was unsuccessful.
+	 *
+	 * @param storeCode store code
+	 * @param userId    user id
+	 * @return pair of customer and list of data points
+	 */
+	Pair<Customer, List<DataPoint>> findAllActiveDataPointsForCustomer(String storeCode, String userId);
 }

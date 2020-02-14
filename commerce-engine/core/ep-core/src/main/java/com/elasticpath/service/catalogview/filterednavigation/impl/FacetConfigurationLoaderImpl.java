@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.search.Facet;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader;
@@ -26,7 +27,8 @@ public class FacetConfigurationLoaderImpl implements FilteredNavigationConfigura
 
 	@Override
 	public FilteredNavigationConfiguration loadFilteredNavigationConfiguration(final String storeCode) {
-		FilteredNavigationConfiguration config = beanFactory.getBean("filteredNavigationConfiguration");
+		FilteredNavigationConfiguration config = beanFactory.getPrototypeBean(ContextIdNames.FILTERED_NAVIGATION_CONFIGURATION,
+				FilteredNavigationConfiguration.class);
 		List<Facet> facets = getFacetService().findAllFacetableFacetsForStore(storeCode);
 		facets.stream().filter(facet -> !facet.getDisplayNameMap().isEmpty())
 				.forEach(facet -> getFacetConfigurationStrategyForFacet(facet).process(config, facet));

@@ -25,8 +25,8 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
@@ -118,9 +118,9 @@ public class NewPromotionWizardDetailsPage extends AbstractEPWizardPage<Rule> {
 		this.catalogPromotion = catalogPromotion;
 
 		if (catalogPromotion) {
-			final CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
-			final PriceListAssignmentService plaService = ServiceLocator.getService(
-					ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+			final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
+			final PriceListAssignmentService plaService = BeanLocator
+					.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE, PriceListAssignmentService.class);
 			
 			List<String> catalogCodes = plaService.listAssignedCatalogsCodes();
 			catalogs = catalogService.listAllCatalogsWithCodes(catalogCodes);
@@ -128,7 +128,7 @@ public class NewPromotionWizardDetailsPage extends AbstractEPWizardPage<Rule> {
 			AuthorizationService.getInstance().filterAuthorizedCatalogs(catalogs);
 			stores = null;
 		} else {
-			final StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+			final StoreService storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 			stores = storeService.findAllCompleteStores();
 			AuthorizationService.getInstance().filterAuthorizedStores(stores);
 			catalogs = null;
@@ -496,8 +496,8 @@ public class NewPromotionWizardDetailsPage extends AbstractEPWizardPage<Rule> {
 	private void bindLimitedUsagePromotionText(final EpControlBindingProvider bindingProvider) {
 		
 		//Obtain the rule condition for the limited usage promotions (also known as the Limited Usage Condition)
-		limitedUsagePromotionRuleCondition = ServiceLocator.getService(
-				RuleElementType.LIMITED_USAGE_PROMOTION_CONDITION.getPropertyKey());
+		limitedUsagePromotionRuleCondition = BeanLocator.getPrototypeBean(
+				RuleElementType.LIMITED_USAGE_PROMOTION_CONDITION.getPropertyKey(), RuleCondition.class);
 
 		//Retrieve the rule parameter by key
 		limitedUsagePromotionRuleParameter = getRuleParameterByKey(limitedUsagePromotionRuleCondition, RuleParameter.ALLOWED_LIMIT);

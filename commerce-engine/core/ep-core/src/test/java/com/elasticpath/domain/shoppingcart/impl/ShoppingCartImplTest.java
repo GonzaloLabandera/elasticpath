@@ -3,8 +3,6 @@
  */
 package com.elasticpath.domain.shoppingcart.impl;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,10 +30,9 @@ import java.util.UUID;
 import org.jmock.Expectations;
 import org.junit.Test;
 
-import org.hamcrest.Matchers;
-
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.GiftCertificate;
@@ -43,30 +40,24 @@ import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
-import com.elasticpath.domain.catalog.impl.GiftCertificateImpl;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.BrandLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shopper.impl.ShopperImpl;
-import com.elasticpath.domain.shopper.impl.ShopperMementoImpl;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShippingPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
-import com.elasticpath.domain.store.Store;
-import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.domain.tax.impl.TaxCategoryImpl;
 import com.elasticpath.domain.tax.impl.TaxJurisdictionImpl;
@@ -74,7 +65,7 @@ import com.elasticpath.inventory.InventoryDto;
 import com.elasticpath.inventory.impl.InventoryDtoImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.StandardMoneyFormatter;
-import com.elasticpath.plugin.payment.exceptions.PaymentProcessingException;
+import com.elasticpath.service.catalog.GiftCertificateService;
 import com.elasticpath.service.catalog.impl.GiftCertificateServiceImpl;
 import com.elasticpath.service.catalog.impl.ProductInventoryManagementServiceImpl;
 import com.elasticpath.service.order.impl.AllocationServiceImpl;
@@ -82,6 +73,7 @@ import com.elasticpath.service.shoppingcart.impl.ItemPricing;
 import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
 import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
+import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.impl.SettingsServiceImpl;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.factory.TestCustomerSessionFactory;
@@ -125,13 +117,13 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		super.setUp();
 
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-		stubGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
+		stubGetPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class, ShoppingCartMementoImpl.class);
 		stubGetBean(ContextIdNames.TAX_CATEGORY, TaxCategoryImpl.class);
-		stubGetBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResultImpl.class);
+		stubGetPrototypeBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResult.class, TaxCalculationResultImpl.class);
 		stubGetBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdictionImpl.class);
 
-		stubGetBean(ContextIdNames.UTILITY, new UtilityImpl());
-		stubGetBean("settingsService", new SettingsServiceImpl());
+		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
+		stubGetSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class, new SettingsServiceImpl());
 
 		TaxAddressAdapter adapter = new TaxAddressAdapter();
 		stubGetBean(ContextIdNames.TAX_ADDRESS_ADAPTER, adapter);
@@ -140,7 +132,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		initializeShoppingCart(shoppingCart);
 
-		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
+		stubGetSingletonBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE, GiftCertificateService.class,
 				new GiftCertificateServiceImpl() {
 					@Override
 					public BigDecimal getBalance(final GiftCertificate giftCertificate) {
@@ -397,25 +389,6 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		assertNotNull(shoppingCart.getTotalMoney());
 		assertTrue("Total should not be zero", BigDecimal.ZERO.compareTo(shoppingCart.getTotalMoney().getAmount()) < 0);
-	}
-
-	/**
-	 * Tests that getTotal() retrieves the total properly.
-	 */
-	@Test
-	public void testGetTotalBiggerGCAmount() {
-		final ShoppingCartImpl shoppingCart = getShoppingCart();
-
-		final StoreImpl store = new StoreImpl();
-		shoppingCart.setStore(store);
-
-		final BigDecimal giftCertificateAmount = shoppingCart.getTotal().add(BigDecimal.TEN);
-		final GiftCertificate giftCertificate = mockGiftCertificate(store, giftCertificateAmount, shoppingCart.getCustomerSession().getCurrency());
-		shoppingCart.applyGiftCertificate(giftCertificate);
-
-		assertNotNull(shoppingCart.getTotalMoney());
-		assertEquals("Total should be zero if we apply a GC with a balance greater than the total previously",
-				0, BigDecimal.ZERO.compareTo(shoppingCart.getTotalMoney().getAmount()));
 	}
 
 	private long getUniqueUid() {
@@ -698,213 +671,6 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	/**
-	 * Test method for apply gift certificate redeem.
-	 */
-	@Test
-	public void testApplyGiftCertificateRedeem() {
-		final ShoppingCart shoppingCart = getShoppingCart();
-		final CustomerSession customerSession = shoppingCart.getCustomerSession();
-
-		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(),
-				BigDecimal.TEN,
-				customerSession.getCurrency());
-		shoppingCart.applyGiftCertificate(giftCertificate);
-		assertTrue(shoppingCart.getAppliedGiftCertificates().contains(giftCertificate));
-	}
-
-	/**
-	 * Test method for apply gift certificate redeem.
-	 */
-	@Test
-	public void testApplyGiftCertificateRedeemTwice() {
-		final ShoppingCart shoppingCart = getShoppingCart();
-		final CustomerSession customerSession = shoppingCart.getCustomerSession();
-
-		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN, customerSession.getCurrency());
-		shoppingCart.applyGiftCertificate(giftCertificate);
-		assertTrue(shoppingCart.getAppliedGiftCertificates().contains(giftCertificate));
-		assertEquals(shoppingCart.getAppliedGiftCertificates().size(), 1);
-
-		shoppingCart.applyGiftCertificate(giftCertificate);
-		assertTrue(shoppingCart.getAppliedGiftCertificates().contains(giftCertificate));
-		assertEquals(shoppingCart.getAppliedGiftCertificates().size(), 1);
-	}
-
-	/**
-	 * Test applying two gift certificates with the same amount.
-	 */
-	@Test
-	public void testApplyTwoGiftCertificatesWithSameAmount() {
-		final ShoppingCart shoppingCart = getShoppingCart();
-		final CustomerSession customerSession = shoppingCart.getCustomerSession();
-
-		final GiftCertificate giftCertificate1 = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN, customerSession.getCurrency());
-		final GiftCertificate giftCertificate2 = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN, customerSession.getCurrency());
-
-		shoppingCart.applyGiftCertificate(giftCertificate1);
-		assertTrue(shoppingCart.getAppliedGiftCertificates().contains(giftCertificate1));
-		assertEquals(1, shoppingCart.getAppliedGiftCertificates().size());
-
-		shoppingCart.applyGiftCertificate(giftCertificate2);
-		assertTrue(shoppingCart.getAppliedGiftCertificates().contains(giftCertificate2));
-		assertTrue(shoppingCart.getAppliedGiftCertificates().contains(giftCertificate1));
-		assertEquals("Two gift certificates should have been applied", 2, shoppingCart.getAppliedGiftCertificates().size());
-
-	}
-
-	/**
-	 * Test method for apply gift certificate redeem.
-	 */
-	@Test
-	public void testApplyGiftCertificateRedeemWithZeroBalance() {
-		final BigDecimal balance = BigDecimal.ZERO;
-
-		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
-				new GiftCertificateServiceImpl() {
-					@Override
-					public BigDecimal getBalance(final GiftCertificate giftCertificate) {
-						return balance;
-					}
-				});
-
-		final ShoppingCart shoppingCart = getShoppingCart();
-		final CustomerSession customerSession = shoppingCart.getCustomerSession();
-
-		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), balance, customerSession.getCurrency());
-		try {
-			shoppingCart.applyGiftCertificate(giftCertificate);
-			fail("Expected domain exception due to zero balance");
-		} catch (PaymentProcessingException ppe) {
-			// Success
-			assertNotNull(ppe);
-		}
-
-	}
-
-	/**
-	 * Test method for apply gift certificate redeem.
-	 */
-	@Test
-	public void testApplyGiftCertificateRedeemWrongCurrency() {
-		final ShoppingCart shoppingCart = getShoppingCart();
-		final CustomerSession customerSession = shoppingCart.getCustomerSession();
-
-		Currency currency = Currency.getInstance(Locale.ITALY);
-		assertThat("Shopping cart currency must not be the gift certificate currency", customerSession.getCurrency(),
-				Matchers.not(equalTo(currency)));
-		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN, currency);
-
-		try {
-			shoppingCart.applyGiftCertificate(giftCertificate);
-			fail("Expected domain exception due to mismatch currency code");
-		} catch (PaymentProcessingException ppe) {
-			// Success
-			assertNotNull(ppe);
-		}
-
-	}
-
-	/**
-	 * Test method for apply gift certificate redeem.
-	 */
-	@Test
-	public void testGetGiftCertificateDiscountWhenTotalIsLess() {
-		ShoppingCartImpl shoppingCart = newShoppingCartForGiftCertificateTests(BigDecimal.ONE);
-
-		shoppingCart.setStore(new StoreImpl());
-		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN,
-				shoppingCart.getCustomerSession().getCurrency());
-		shoppingCart.applyGiftCertificate(giftCertificate);
-
-		assertEquals("The redeemed GC amount should be not more than the shopping cart total",
-				BigDecimal.ONE, shoppingCart.getGiftCertificateDiscount());
-	}
-
-	/**
-	 * Test method for apply gift certificate redeem.
-	 */
-	@Test
-	public void testGetGiftCertificateDiscountWhenTotalIsMore() {
-		ShoppingCartImpl shoppingCart = newShoppingCartForGiftCertificateTests(new BigDecimal("15"));
-
-		shoppingCart.setStore(new StoreImpl());
-
-		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN,
-				shoppingCart.getCustomerSession().getCurrency());
-		shoppingCart.applyGiftCertificate(giftCertificate);
-
-		assertEquals("The redeemed GC amount should exactly its amount when total > GC amount",
-				BigDecimal.TEN, shoppingCart.getGiftCertificateDiscount());
-	}
-
-
-	private ShoppingCartImpl newShoppingCartForGiftCertificateTests(final BigDecimal totalBeforeRedeem) {
-		final ShopperImpl shopper = new ShopperImpl();
-		shopper.setShopperMemento(new ShopperMementoImpl());
-		shopper.setUidPk(0L);
-
-		final CustomerSession customerSession = new CustomerSessionImpl();
-		customerSession.setCustomerSessionMemento(new CustomerSessionMementoImpl());
-		customerSession.setShopper(shopper);
-		customerSession.setCurrency(Currency.getInstance(Locale.CANADA));
-
-		final ShoppingCartImpl shoppingCart = new ShoppingCartImpl() {
-			private static final long serialVersionUID = 1955987907161856611L;
-
-			@Override
-			public BigDecimal getTotalBeforeRedeem() {
-				return totalBeforeRedeem;
-			}
-		};
-		shoppingCart.setCustomerSession(customerSession);
-		return shoppingCart;
-	}
-
-	/**
-	 * Test method for apply gift certificate redeem.
-	 */
-	@Test
-	public void testApplyGiftCertificateRedeems() {
-		final long uidPkGc1 = 1L;
-		final long uidPkGc2 = 2L;
-		final ShoppingCart shoppingCart = getShoppingCart();
-		final CustomerSession customerSession = shoppingCart.getCustomerSession();
-
-		final GiftCertificate giftCertificate = new GiftCertificateImpl();
-		giftCertificate.setUidPk(uidPkGc1);
-		giftCertificate.setPurchaseAmount(BigDecimal.TEN);
-		giftCertificate.setCurrencyCode(customerSession.getCurrency().getCurrencyCode());
-		giftCertificate.setStore(shoppingCart.getStore());
-
-		shoppingCart.applyGiftCertificate(giftCertificate);
-
-		final GiftCertificate giftCertificate2 = new GiftCertificateImpl();
-		giftCertificate2.setUidPk(uidPkGc2);
-		giftCertificate2.setPurchaseAmount(BigDecimal.ONE);
-		giftCertificate2.setCurrencyCode(customerSession.getCurrency().getCurrencyCode());
-		giftCertificate2.setStore(shoppingCart.getStore());
-
-		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
-				new GiftCertificateServiceImpl() {
-					@Override
-					public BigDecimal getBalance(final GiftCertificate giftCert) {
-						if (giftCert.getUidPk() == uidPkGc1) {
-							return giftCertificate.getPurchaseAmount();
-						} else if (giftCert.getUidPk() == uidPkGc2) {
-							return giftCertificate2.getPurchaseAmount();
-						}
-						return null;
-					}
-				});
-
-		shoppingCart.applyGiftCertificate(giftCertificate2);
-
-		assertEquals(shoppingCart.getAppliedGiftCertificates().size(), 2);
-		assertThat(shoppingCart.getAppliedGiftCertificates(), containsInAnyOrder(giftCertificate, giftCertificate2));
-
-	}
-
-	/**
 	 * Returns a newly created address.
 	 *
 	 * @return a newly created address
@@ -1115,21 +881,6 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 //		// test after adding new product to shopping cart, the computed price has been cleared.
 //		assertNull(price.getComputedPrice());
 //	}
-
-	private GiftCertificate mockGiftCertificate(final Store store, final BigDecimal amount, final Currency currency) {
-		final GiftCertificate certificate = context.mock(GiftCertificate.class, "GiftCertificate-" + getUniqueUid());
-		context.checking(new Expectations() {
-			{
-				allowing(certificate).getStore();
-				will(returnValue(store));
-				allowing(certificate).getCurrencyCode();
-				will(returnValue(currency.getCurrencyCode()));
-				allowing(certificate).getPurchaseAmount();
-				will(returnValue(amount));
-			}
-		});
-		return certificate;
-	}
 
 	@Test
 	public void testGetCartItemsWithNullItemsFromMemento() {
@@ -1536,6 +1287,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		assertNull("Null is returned when there is no parent", shoppingCart.getParentProductSku(parent));
 	}
 
+	@Override
 	protected ShippingOption createShippingOption(final String shippingOptionCode) {
 		final ShippingOption shippingOption = context.mock(ShippingOption.class, "Shipping Option " + UUID.randomUUID().toString());
 

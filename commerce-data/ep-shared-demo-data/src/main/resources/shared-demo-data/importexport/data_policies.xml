@@ -67,7 +67,7 @@
 			</data_point>
 		</data_points>
 		<start_date>2018-01-01T10:41:00-08:00</start_date>
-		<end_date>2019-12-31T10:41:00-08:00</end_date>
+		<end_date>2037-12-31T10:41:00-08:00</end_date>
 		<state>DRAFT</state>
 		<reference_key>DP12345</reference_key>
 		<description>Minimum information required for account identification and fraud prevention.</description>
@@ -116,7 +116,7 @@
 			</data_point>
 		</data_points>
 		<start_date>2018-01-01T10:41:00-08:00</start_date>
-		<end_date>2019-12-31T10:41:00-08:00</end_date>
+		<end_date>2037-12-31T10:41:00-08:00</end_date>
 		<state>ACTIVE</state>
 		<reference_key>DP12346</reference_key>
 		<description>Profile contact and address information used for internal marketing purposes.</description>
@@ -154,7 +154,7 @@
 			</data_point>
 		</data_points>
 		<start_date>2018-01-01T10:41:00-08:00</start_date>
-		<end_date>2019-12-31T10:41:00-08:00</end_date>
+		<end_date>2037-12-31T10:41:00-08:00</end_date>
 		<state>ACTIVE</state>
 		<reference_key>DP12347</reference_key>
 		<description>Addresses saved in the profile for convenience and expedited checkout.</description>
@@ -346,7 +346,7 @@
 			</data_point>
 		</data_points>
 		<start_date>2018-01-01T10:41:00-08:00</start_date>
-		<end_date>2019-12-31T10:41:00-08:00</end_date>
+		<end_date>2037-12-31T10:41:00-08:00</end_date>
 		<state>ACTIVE</state>
 		<reference_key>DP12347</reference_key>
 		<description>Addresses and contact information required to process orders and for legal auditing purposes.</description>

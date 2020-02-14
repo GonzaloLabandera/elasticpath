@@ -47,9 +47,6 @@ public final class WarehouseImageRegistry extends AbstractImageRegistry {
 	/** Open original button. */
 	public static final ImageDescriptor IMAGE_OPEN_ORIGINAL_ORDER_BUTTON = getImageDescriptor(PLUGIN_ID, "order_default_22.png"); //$NON-NLS-1$
 
-	/** Complete Shipment dialog image.*/
-	public static final ImageDescriptor IMAGE_COMPLETE_SHIPMENT = getImageDescriptor(PLUGIN_ID, "shipping-complete_default_22.png"); //$NON-NLS-1$
-
 	/** Complete Shipment dialog title image.*/
 	public static final ImageDescriptor IMAGE_VALIDATE_BUTTON = getImageDescriptor(PLUGIN_ID, "accept_default_22.png"); //$NON-NLS-1$
 

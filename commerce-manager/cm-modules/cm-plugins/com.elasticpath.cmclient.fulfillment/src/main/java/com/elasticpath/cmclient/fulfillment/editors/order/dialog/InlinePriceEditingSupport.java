@@ -25,7 +25,7 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.ValidationErrorLocation;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -85,10 +85,10 @@ public class InlinePriceEditingSupport extends AbstractInlineEditingSupport {
 	
 	private final AdvancedTableCellEditor cellEditor;
 	
-	private final PriceLookupFacade priceLookupFacade = ServiceLocator.getService(ContextIdNames.PRICE_LOOKUP_FACADE);
+	private final PriceLookupFacade priceLookupFacade = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LOOKUP_FACADE, PriceLookupFacade.class);
 
 	private final PriceListLookupService priceListLookupService = 
-		(PriceListLookupService) ServiceLocator.getService(ContextIdNames.PRICE_LIST_LOOKUP_SERVICE);
+		BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_LOOKUP_SERVICE, PriceListLookupService.class);
 	private ProductSkuLookup productSkuLookup;
 
 	private Action updatePriceAction;
@@ -313,8 +313,8 @@ public class InlinePriceEditingSupport extends AbstractInlineEditingSupport {
 	}
 
 	private void updatePrice(final OrderSku orderSku, final BigDecimal listPrice, final BigDecimal salePrice, final BigDecimal unitPrice) {
-		PriceTier tier = ServiceLocator.getService(ContextIdNames.PRICE_TIER);
-		Price price =  ServiceLocator.getService(ContextIdNames.PRICE);
+		PriceTier tier = BeanLocator.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class);
+		Price price = BeanLocator.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		if (orderSku.getCurrency() == null) {
 			price.setCurrency(orderCurrency);
 		} else {
@@ -395,7 +395,7 @@ public class InlinePriceEditingSupport extends AbstractInlineEditingSupport {
 	 */
 	protected PricingSnapshotService getPricingSnapshotService() {
 		if (pricingSnapshotService == null) {
-			pricingSnapshotService = ServiceLocator.getService(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
+			pricingSnapshotService = BeanLocator.getSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
 		}
 		return pricingSnapshotService;
 	}

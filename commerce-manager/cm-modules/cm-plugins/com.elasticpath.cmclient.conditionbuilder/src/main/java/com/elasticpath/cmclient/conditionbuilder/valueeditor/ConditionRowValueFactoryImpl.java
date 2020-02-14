@@ -32,8 +32,8 @@ import com.elasticpath.cmclient.conditionbuilder.adapter.ConditionModelAdapter;
 import com.elasticpath.cmclient.conditionbuilder.adapter.service.ConditionModelValidationService;
 import com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages;
 import com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -483,7 +483,7 @@ public class ConditionRowValueFactoryImpl implements ConditionRowValueFactory {
 	}
 
 	private String getValueForTextboxProductFinderDialog(final ConditionModelAdapter modelAdapter) {
-		final ProductLookup productLookup = ServiceLocator.getService(ContextIdNames.PRODUCT_LOOKUP);
+		final ProductLookup productLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 		final Product product = productLookup.findByGuid(String.valueOf(modelAdapter.getTagValue()));
 		if (product == null) {
 			return StringUtils.EMPTY;
@@ -492,7 +492,7 @@ public class ConditionRowValueFactoryImpl implements ConditionRowValueFactory {
 	}
 
 	private String getValueForTextboxCategoryFinderDialog(final ConditionModelAdapter modelAdapter) {
-		final CategoryService categoryService = ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE);
+		final CategoryService categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 		final Category category = categoryService.findByCode(String.valueOf(modelAdapter.getTagValue()));
 		if (category == null) {
 			return StringUtils.EMPTY;

@@ -2,12 +2,6 @@
 <importconfiguration>
   <xmlvalidation>true</xmlvalidation>
   <importstrategy>
-    <importer type="PAYMENTGATEWAY">
-      <importstrategy>INSERT_OR_UPDATE</importstrategy>
-      <dependentelements>
-        <dependentelement type="PAYMENT_GATEWAY_PROPERTIES">CLEAR_COLLECTION</dependentelement>
-      </dependentelements>
-    </importer>
     <importer type="DYNAMICCONTENT">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>
     </importer>
@@ -140,7 +134,7 @@
   <retrieval>
     <method>FILE</method>
     <!-- Maven copies src/main/resources/data into here -->
-    		<source>${data.population.data.directory}/shared-demo-data/importexport/</source>
+    		<source>${data.population.data.directory}/shared-demo-data/shared-demo-data/importexport/</source>
   </retrieval>
   <transformerschain/>
 </importconfiguration>

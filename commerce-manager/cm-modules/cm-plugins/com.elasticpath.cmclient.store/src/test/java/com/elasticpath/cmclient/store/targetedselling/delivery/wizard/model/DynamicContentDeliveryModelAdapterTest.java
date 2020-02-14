@@ -10,12 +10,11 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import com.elasticpath.cmclient.core.ServiceLocator;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.sellingcontext.SellingContext;
@@ -54,8 +53,8 @@ public class DynamicContentDeliveryModelAdapterTest {
 	@Before
 	public void initializeMockObjects() {
 
-		ServiceLocator.setBeanFactory(beanFactory);
-		when(beanFactory.getBean(ContextIdNames.SELLING_CONTEXT_SERVICE)).thenReturn(sellingContextService);
+		BeanLocator.setBeanFactory(beanFactory);
+		when(beanFactory.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class)).thenReturn(sellingContextService);
 
 		sellingContext = new SellingContextImpl();
 		sellingContext.setGuid(SELLING_CONTEXT_GUID);

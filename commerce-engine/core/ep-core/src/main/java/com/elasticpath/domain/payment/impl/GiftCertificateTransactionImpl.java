@@ -1,6 +1,7 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2007
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
+
 package com.elasticpath.domain.payment.impl;
 
 import java.math.BigDecimal;

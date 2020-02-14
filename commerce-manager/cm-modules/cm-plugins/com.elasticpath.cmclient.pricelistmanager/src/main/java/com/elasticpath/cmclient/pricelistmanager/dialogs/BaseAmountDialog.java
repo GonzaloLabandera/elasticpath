@@ -25,9 +25,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
@@ -609,7 +609,7 @@ public class BaseAmountDialog extends AbstractPolicyAwareDialog implements Objec
 	private BaseAmountDTO createNewBaseAmount() {
 		BaseAmountDTO baseAmount = BaseAmountDTOCreator.createModel();
 		// set new DTO GUID
-		RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
+		RandomGuid randomGuid = BeanLocator.getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class);
 		baseAmount.setGuid(randomGuid.toString());
 		baseAmount.setPriceListDescriptorGuid(priceListController.getPriceListDescriptor().getGuid());
 		return baseAmount;
@@ -621,7 +621,7 @@ public class BaseAmountDialog extends AbstractPolicyAwareDialog implements Objec
 	 * @return the instance of the price list service
 	 */
 	protected PriceListService getPriceListService() {
-		return ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 	}
 
 	/**

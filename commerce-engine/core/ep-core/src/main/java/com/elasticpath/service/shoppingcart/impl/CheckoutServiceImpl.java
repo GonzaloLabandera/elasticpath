@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.impl;
 
@@ -16,14 +16,16 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
-import com.elasticpath.domain.order.OrderPayment;
+import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderReturn;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
-import com.elasticpath.plugin.payment.exceptions.PaymentProcessingException;
-import com.elasticpath.service.payment.PaymentStructuredErrorException;
+import com.elasticpath.provider.payment.service.PaymentsException;
+import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.shipping.ShippingOptionResult;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
@@ -52,6 +54,8 @@ public class CheckoutServiceImpl implements CheckoutService {
 	private ShippingOptionService shippingOptionService;
 
 	private BeanFactory beanFactory;
+
+	private CartOrderService cartOrderService;
 
 	@Override
 	public void retrieveShippingOption(final ShoppingCart shoppingCart) {
@@ -118,8 +122,8 @@ public class CheckoutServiceImpl implements CheckoutService {
 
 	@Override
 	public CheckoutResults checkout(final ShoppingCart shoppingCart, final ShoppingCartTaxSnapshot pricingSnapshot,
-									final CustomerSession customerSession, final OrderPayment orderPayment) {
-		return checkout(shoppingCart, pricingSnapshot, customerSession, orderPayment, true);
+									final CustomerSession customerSession) {
+		return checkout(shoppingCart, pricingSnapshot, customerSession, true);
 	}
 
 	@Override
@@ -127,12 +131,11 @@ public class CheckoutServiceImpl implements CheckoutService {
 			final ShoppingCart shoppingCart,
 			final ShoppingCartTaxSnapshot pricingSnapshot,
 			final CustomerSession customerSession,
-			final OrderPayment orderPayment,
 			final boolean throwExceptions) {
-		final CheckoutResults checkoutResults = beanFactory.getBean(ContextIdNames.CHECKOUT_RESULTS);
+		final CheckoutResults checkoutResults = beanFactory.getPrototypeBean(ContextIdNames.CHECKOUT_RESULTS, CheckoutResults.class);
 		if (!shoppingCart.isExchangeOrderShoppingCart()) {
 			try {
-				this.checkoutInternal(shoppingCart, pricingSnapshot, customerSession, orderPayment, false, false, null, checkoutResults);
+				this.checkoutInternal(shoppingCart, pricingSnapshot, customerSession, false, false, null, checkoutResults);
 			} catch (final RuntimeException exception) {
 				if (throwExceptions || checkoutResults.getOrder() == null) {
 					throw exception;
@@ -145,13 +148,13 @@ public class CheckoutServiceImpl implements CheckoutService {
 	}
 
 	@Override
-	public void checkoutExchangeOrder(final OrderReturn exchange, final OrderPayment orderPayment, final boolean awaitExchangeCompletion) {
-		final CheckoutResults checkoutResults = beanFactory.getBean(ContextIdNames.CHECKOUT_RESULTS);
+	public void checkoutExchangeOrder(final OrderReturn exchange, final boolean awaitExchangeCompletion) {
+		final CheckoutResults checkoutResults = beanFactory.getPrototypeBean(ContextIdNames.CHECKOUT_RESULTS, CheckoutResults.class);
 		final ShoppingCart shoppingCart = exchange.getExchangeShoppingCart();
 		if (shoppingCart.isExchangeOrderShoppingCart()) {
 			final boolean isOrderExchange = true;
 			this.checkoutInternal(shoppingCart, exchange.getExchangePricingSnapshot(), exchange.getExchangeCustomerSession(),
-					orderPayment, isOrderExchange, awaitExchangeCompletion, exchange, checkoutResults);
+					isOrderExchange, awaitExchangeCompletion, exchange, checkoutResults);
 		}
 	}
 
@@ -161,7 +164,6 @@ public class CheckoutServiceImpl implements CheckoutService {
 	 * @param shoppingCart            the {@link com.elasticpath.domain.shoppingcart.ShoppingCart}
 	 * @param pricingSnapshot         the {@link com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot}
 	 * @param customerSession         the {@link com.elasticpath.domain.customer.CustomerSession}
-	 * @param templateOrderPayment    orderPayment representing the payment detail information (not including gift certificates)
 	 * @param isOrderExchange         whether this order is part of an exchange
 	 * @param awaitExchangeCompletion whether the order created via this checkout must wait for completion of a physical
 	 *                                exchange before being filled
@@ -172,14 +174,13 @@ public class CheckoutServiceImpl implements CheckoutService {
 	protected void checkoutInternal(final ShoppingCart shoppingCart,
 									final ShoppingCartTaxSnapshot pricingSnapshot,
 									final CustomerSession customerSession,
-									final OrderPayment templateOrderPayment,
 									final boolean isOrderExchange,
 									final boolean awaitExchangeCompletion,
 									final OrderReturn exchange,
 									final CheckoutResults checkoutResults) {
 		//CHECKSTYLE:ON
 		final CheckoutActionContext actionContext = createActionContext(
-				shoppingCart, pricingSnapshot, customerSession, templateOrderPayment, isOrderExchange,
+				shoppingCart, pricingSnapshot, customerSession, isOrderExchange,
 				awaitExchangeCompletion, exchange);
 
 		// Keep track of ReversibleCheckoutAction objects so we can rollback if necessary.
@@ -203,9 +204,6 @@ public class CheckoutServiceImpl implements CheckoutService {
 		} catch (final EpSystemException e) {
 			rollbackCheckout(executedActions, actionContext, e);
 			throw e;
-		} catch (final PaymentProcessingException e) {
-			rollbackCheckout(executedActions, actionContext, e);
-			throw new PaymentStructuredErrorException(e);
 		} catch (final Exception e) {
 			rollbackCheckout(executedActions, actionContext, e);
 			throw new EpServiceException("Checkout failed.", e);
@@ -240,7 +238,6 @@ public class CheckoutServiceImpl implements CheckoutService {
 	 * @param shoppingCart                the {@link com.elasticpath.domain.shoppingcart.ShoppingCart}
 	 * @param shoppingCartPricingSnapshot the {@link com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot}
 	 * @param customerSession             the {@link com.elasticpath.domain.customer.CustomerSession}
-	 * @param templateOrderPayment        a place holder for the order payment details (credit card #, etc)
 	 * @param isOrderExchange             is this an exchange?
 	 * @param awaitExchangeCompletion     ???
 	 * @param exchange                    the order return details
@@ -250,12 +247,11 @@ public class CheckoutServiceImpl implements CheckoutService {
 			final ShoppingCart shoppingCart,
 			final ShoppingCartTaxSnapshot shoppingCartPricingSnapshot,
 			final CustomerSession customerSession,
-			final OrderPayment templateOrderPayment,
 			final boolean isOrderExchange,
 			final boolean awaitExchangeCompletion,
 			final OrderReturn exchange) {
-		return new CheckoutActionContextImpl(shoppingCart, shoppingCartPricingSnapshot, customerSession, templateOrderPayment,
-				isOrderExchange, awaitExchangeCompletion, exchange);
+		return new CheckoutActionContextImpl(shoppingCart, shoppingCartPricingSnapshot, customerSession,
+				isOrderExchange, awaitExchangeCompletion, exchange, this::findCartOrderInContext);
 	}
 
 	/**
@@ -271,7 +267,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
 	private void rollbackCheckout(final List<ReversibleCheckoutAction> executedActions,
 								  final CheckoutActionContext actionContext, final Exception exception) {
-		if (exception instanceof PaymentProcessingException) {
+		if (exception instanceof PaymentsException) {
 			LOG.debug("Payment processing error occurred during checkout", exception);
 		} else {
 			LOG.error("Error occurred during checkout", exception);
@@ -283,6 +279,27 @@ public class CheckoutServiceImpl implements CheckoutService {
 			action.rollback(actionContext);
 		}
 		LOG.debug("Checkout rollback process completed.");
+	}
+
+	private CartOrder findCartOrderInContext(final Shopper shopper, final Order order) {
+		if (shopper == null) {
+			LOG.error("Shopper not found in checkout action context");
+			return null;
+		}
+
+		if (order == null) {
+			LOG.error("Order not found in checkout action context");
+			return null;
+		}
+
+		final String storeCode = shopper.getStoreCode();
+		final String cartOrderGuid = order.getCartOrderGuid();
+		final CartOrder cartOrder = cartOrderService.findByStoreCodeAndGuid(storeCode, cartOrderGuid);
+		if (cartOrder == null) {
+			LOG.error("CartOrder not found by store code and guid: " + storeCode + " and " + cartOrderGuid);
+		}
+
+		return cartOrder;
 	}
 
 	protected ShippingOptionService getShippingOptionService() {
@@ -321,4 +338,11 @@ public class CheckoutServiceImpl implements CheckoutService {
 		this.beanFactory = beanFactory;
 	}
 
+	public void setCartOrderService(final CartOrderService cartOrderService) {
+		this.cartOrderService = cartOrderService;
+	}
+
+	protected CartOrderService getCartOrderService() {
+		return cartOrderService;
+	}
 }

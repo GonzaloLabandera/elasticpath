@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,6 +17,7 @@ import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.AbstractDialog;
 import com.elasticpath.selenium.dialogs.ConfigureFacetDialog;
 import com.elasticpath.selenium.dialogs.ConfigureRangeFacetDialog;
+import com.elasticpath.selenium.dialogs.ErrorDialog;
 import com.elasticpath.selenium.util.Constants;
 
 /**
@@ -23,7 +25,7 @@ import com.elasticpath.selenium.util.Constants;
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class StoreEditor extends AbstractPageObject {
-
+	private static final Logger LOGGER = Logger.getLogger(AbstractPageObject.class);
 	private static final String DIV_ADMIN_STORES_MESSAGES = "div[automation-id='com.elasticpath.cmclient.admin.stores.AdminStoresMessages";
 	private static final String DIV_COLUMN_ID_S = "div[column-id='%s']";
 
@@ -38,8 +40,9 @@ public class StoreEditor extends AbstractPageObject {
 			+ "Country'][widget-type='CCombo']";
 	private static final String STORE_SUB_COUNTRY_COMBO_CSS = STORE_EDITOR_PARENT_CSS + ".StoreSubCountry'][widget-id='Store "
 			+ "Sub-Country'][widget-type='CCombo']";
-	private static final String STORE_PRIMARY_PAYMENT_GATEWAY_COMBO_CSS = STORE_EDITOR_PARENT_CSS + ".PrimaryPaymentGateway'][widget-id='Payment "
-			+ "Gateway'][widget-type='CCombo']";
+	private static final String PAYMENT_PROVIDER_CONFIGURATION_TABLE = "div[widget-id='Store Payment Provider Configurations'][widget-type='Table']";
+	private static final String PAYMENT_PROVIDER_CONFIGURATION_ROW = PAYMENT_PROVIDER_CONFIGURATION_TABLE + " div[row-id='%s']";
+	private static final String PAYMENT_CONFIGURATION_CHECKBOX_CSS = PAYMENT_PROVIDER_CONFIGURATION_ROW + "+div div:nth-child(2)";
 	private static final String TAB_CSS = "div[widget-id='%s'][seeable='true']";
 	private static final String STORE_RADIO_BUTTON_CSS = "div[widget-id='%s'][appearance-id='radio-button']";
 	private static final String STORE_ADD_LANGUAGE_BUTTON_CSS = "div[widget-id='Language Selection']~ div div div[widget-id='Add']";
@@ -119,7 +122,11 @@ public class StoreEditor extends AbstractPageObject {
 	 * Maximizes store editor.
 	 */
 	public void maximizeStoreEditor() {
-		click(STORE_EDITOR_MAXIMIZE_BUTTON_CSS);
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
+		if (isElementPresent(By.cssSelector(STORE_EDITOR_MAXIMIZE_BUTTON_CSS))) {
+			click(STORE_EDITOR_MAXIMIZE_BUTTON_CSS);
+		}
+		setWebDriverImplicitWaitToDefault();
 	}
 
 	/**
@@ -201,14 +208,32 @@ public class StoreEditor extends AbstractPageObject {
 	}
 
 	/**
-	 * Select store primary payment gateway.
+	 * Select store payment configuration.
 	 *
-	 * @param paymentGateway String
+	 * @param paymentConfiguration String
 	 */
-	public void selectStorePrimaryPaymentGateway(final String paymentGateway) {
-		assertThat(selectComboBoxItem(STORE_PRIMARY_PAYMENT_GATEWAY_COMBO_CSS, paymentGateway))
-				.as("Unable to find payment gateway - " + paymentGateway)
-				.isTrue();
+	public void selectStorePaymentConfiguration(final String paymentConfiguration) {
+		if (!("").equals(paymentConfiguration) || !paymentConfiguration.isEmpty()) {
+			assertThat(selectItemInEditorPaneWithScrollBar(PAYMENT_PROVIDER_CONFIGURATION_TABLE, "div[column-id='%s']",
+					paymentConfiguration, "Configuration Name"))
+					.as("Unable to find payment configuration - " + paymentConfiguration)
+					.isTrue();
+
+			clickCheckBox(String.format(PAYMENT_CONFIGURATION_CHECKBOX_CSS, paymentConfiguration));
+			LOGGER.debug("Selected Payment configuration for store - " + paymentConfiguration);
+		}
+		sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
+	}
+
+	/**
+	 * verifies inactive payment configuration not available for store.
+	 * @param inactivePaymentConfiguration String
+	 */
+	public void verifyPaymentConfigurationNotExist(final String inactivePaymentConfiguration) {
+		maximizeStoreEditor();
+		assertThat(isElementPresent(By.cssSelector(String.format(PAYMENT_CONFIGURATION_CHECKBOX_CSS, inactivePaymentConfiguration))))
+				.as("Inactive payment configuration should not be available for store - " + inactivePaymentConfiguration)
+				.isFalse();
 	}
 
 	/**
@@ -237,7 +262,7 @@ public class StoreEditor extends AbstractPageObject {
 				verifyTabIsSelected(tabName, "StoreEditor_TaxesPage_Title");
 				break;
 			case "Payments":
-				verifyTabIsSelected(tabName, "Payments");
+				verifyTabIsSelected(tabName, "StorePaymentProviderConfigurations");
 				break;
 			case "Shared Customer Accounts ":
 				verifyTabIsSelected(tabName, "SharedCustomerAccounts");
@@ -386,7 +411,7 @@ public class StoreEditor extends AbstractPageObject {
 	}
 
 	/**
-	 * Change a stores State.
+	 * Change a stores State and confirm.
 	 *
 	 * @param newStoreState String
 	 */
@@ -486,5 +511,14 @@ public class StoreEditor extends AbstractPageObject {
 	public List<String> getVisibleFacetGroups() {
 		List<WebElement> facetGroupElements = getDriver().findElements(By.cssSelector(FACET_TABLE_FACET_GROUP_COLUMN_VALUE_CSS));
 		return facetGroupElements.stream().map(WebElement::getText).collect(Collectors.toList());
+	}
+
+	/**
+	 * Verifies error message is displayed.
+	 *
+	 * @param expErrorMessage String
+	 */
+	public void verifyErrorMessageDisplayed(final String expErrorMessage) {
+		new ErrorDialog(getDriver()).verifyErrorMessage(expErrorMessage);
 	}
 }

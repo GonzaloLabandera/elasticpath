@@ -1,149 +1,54 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
 
 	<family>
 		<name>paymentmethods</name>
 
 		<plan>
-			<name>orders-paymentmethods-selector</name>
-			<description>
-				<![CDATA[Use a selector to select paymentmethod to use for the purchase. Follow the workflow to read the paymentmethodsinfo
-and then create a choice to select the paymentmethod to use for the purchase.]]>
-			</description>
+			<name>read-profile-payment-methods</name>
+			<description><![CDATA[Retrieve the available profile payment methods for a store.]]></description>
 			<step>
-				<description><![CDATA[Retrieve the selector.]]></description>
-				<start>paymentmethod-info</start>
-				<follow-link>selector</follow-link>
-				<link-back>paymentmethodinfo</link-back>
-				<result>paymentmethods-selector</result>
+				<description><![CDATA[Read the list of profile payment methods.]]></description>
+				<start>profiles.profile</start>
+				<follow-link>paymentmethods</follow-link>
+				<result>profile-payment-methods</result>
 			</step>
+		</plan>
+
+		<plan>
+			<name>read-profile-payment-method</name>
+			<description><![CDATA[Retrieve a shopper's profile payment method for a store.]]></description>
 			<step>
-				<description><![CDATA[Retrieve a choice.]]></description>
-				<start>paymentmethods-selector</start>
-				<follow-link>choice</follow-link>
-				<link-back>selector</link-back>
-				<result>paymentmethods-selector-choice</result>
+				<description><![CDATA[Read a profile payment method.]]></description>
+				<start>profile-payment-methods</start>
+				<follow-link>element</follow-link>
+				<result>profile-payment-method</result>
 			</step>
+		</plan>
+
+		<plan>
+			<name>read-order-payment-methods</name>
+			<description><![CDATA[Retrieve the available order payment methods for a store.]]></description>
 			<step>
-				<description><![CDATA[Retrieve a selected choice, if any.]]></description>
-				<start>paymentmethods-selector</start>
-				<follow-link>chosen</follow-link>
-				<link-back>selector</link-back>
-				<result>paymentmethods-selector-choice</result>
-			</step>
-			<step>
-				<description><![CDATA[Retrieve a choice'sdescription.]]></description>
-				<start>paymentmethods-selector-choice</start>
-				<follow-link>description</follow-link>
-				<result>paymentmethod</result>
-			</step>
-			<step>
-				<description><![CDATA[Select a choice.]]></description>
-				<start>paymentmethods-selector-choice</start>
-				<submit/>
-				<to>paymentmethods-selector-choice</to>
-				<via-link>selectaction</via-link>
-				<result>paymentmethod</result>
+				<description><![CDATA[Read the list of order payment methods.]]></description>
+				<start>orders.order</start>
+				<follow-link>paymentmethodinfo</follow-link>
+				<result>order-payment-methods</result>
 			</step>
 		</plan>
 
 		<plan>
 			<name>read-order-payment-method</name>
-			<description><![CDATA[Read the payment method currently selected for the order.]]></description>
+			<description><![CDATA[Retrieve an order payment method for a store.]]></description>
 			<step>
-				<description><![CDATA[Read payment method info from the order.]]></description>
-				<start>orders.order</start>
-				<follow-link>paymentmethodinfo</follow-link>
-				<link-back>order</link-back>
-				<result>paymentmethod-info</result>
-			</step>
-			<step>
-				<description><![CDATA[Read a payment method.]]></description>
-				<start>paymentmethod-info</start>
-				<follow-link>paymentmethod</follow-link>
-				<result>paymentmethod</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-paymentmethod-needinfo-from-order</name>
-			<description>
-				<![CDATA[Read payment-needinfo from order. When a paymentmethod needinfo is on the order, it means the payment method has not
-been selected for the purchase. Follow the workflow to read the needinfo.]]>
-			</description>
-			<step>
-				<description><![CDATA[Read payment-needinfo from order. ]]></description>
-				<start>orders.order</start>
-				<follow-link>needinfo</follow-link>
-				<result>paymentmethod-info</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-paymentmethod-needinfo-from-purchaseform</name>
-			<description>
-				<![CDATA[Read payment needinfo from the purchase form. When a payment method needinfo is on the purchase form, it means
-the payment method has not been selected for the purchase. Follow the workflow to read the needinfo.]]>
-			</description>
-			<step>
-				<description><![CDATA[Read payment needinfo from purchase form.]]></description>
-				<start>purchases.create-purchase-form</start>
-				<follow-link>needinfo</follow-link>
-				<result>paymentmethod-info</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-customer-payment-methods</name>
-			<description><![CDATA[Read the list of available customer payment methods.]]></description>
-			<step>
-				<description><![CDATA[Customer profile to list of available customer payment methods.]]></description>
-				<start>profiles.profile</start>
-				<follow-link>paymentmethods</follow-link>
-				<result>paymentmethods</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-customer-payment-method</name>
-			<description><![CDATA[Read a payment method from the list of available customer payment methods.]]></description>
-			<step>
-				<description><![CDATA[Read a payment method from the list of available customer payment methods.]]></description>
-				<start>paymentmethods</start>
+				<description><![CDATA[Read an order payment method.]]></description>
+				<start>order-payment-methods</start>
 				<follow-link>element</follow-link>
-				<result>paymentmethod</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-default-payment-method</name>
-			<description><![CDATA[Read the customer's default payment method. The default payment method is the first payment method the customer created.]]></description>
-			<step>
-				<description><![CDATA[Read default payment method.]]></description>
-				<start>paymentmethods</start>
-				<follow-link>default</follow-link>
-				<link-back>list</link-back>
-				<result>paymentmethod</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>delete-payment-method</name>
-			<description>
-				<![CDATA[Delete a payment method from a shopper's profile. If you delete a payment method that has already been selected for an order,
-that payment method will be deleted from the profile but not from the order. The payment method will remain selected on the order until
-that order is purchased.]]>
-			</description>
-			<step>
-				<description><![CDATA[Read a payment method from the list of available customer payment methods.]]></description>
-				<start>paymentmethods</start>
-				<follow-link>element</follow-link>
-				<result>paymentmethod</result>
-			</step>
-			<step>
-				<description><![CDATA[Delete a payment method.]]></description>
-				<start>paymentmethod</start>
-				<delete-self/>
+				<result>order-payment-method</result>
 			</step>
 		</plan>
 

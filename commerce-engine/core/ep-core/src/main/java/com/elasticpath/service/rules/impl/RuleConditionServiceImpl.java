@@ -52,7 +52,7 @@ public class RuleConditionServiceImpl extends AbstractEpPersistenceServiceImpl i
 		sanityCheck();
 		getPersistenceEngine().delete(ruleCondition);
 	}
-	
+
 	/**
 	 * Load the ruleCondition with the given UID.
 	 * Throw an unrecoverable exception if there is no matching database row.
@@ -67,12 +67,12 @@ public class RuleConditionServiceImpl extends AbstractEpPersistenceServiceImpl i
 	public RuleCondition load(final long ruleConditionUid) throws EpServiceException {
 		return this.load(ruleConditionUid, null);
 	}
-	
+
 	/**
-	 * Load the ruleCondition with the given UID if it is greater than 0; 
+	 * Load the ruleCondition with the given UID if it is greater than 0;
 	 * otherwise get new instance of the ruleCondition of the given ruleConditionType
 	 * from the spring beanFactory (assuming bean id is the same as the ruleConditionType).
-	 * 
+	 *
 	 * Throw an unrecoverable exception if there is no matching database row.
 	 *
 	 * @param ruleConditionUid the ruleCondition UID
@@ -86,14 +86,14 @@ public class RuleConditionServiceImpl extends AbstractEpPersistenceServiceImpl i
 		RuleCondition ruleCondition = null;
 		if (ruleConditionUid > 0) {
 			ruleCondition = getPersistenceEngine().load(RuleCondition.class, ruleConditionUid);
-		} else if (ruleConditionType != null) { 
-			ruleCondition = getBean(ruleConditionType);
+		} else if (ruleConditionType != null) {
+			ruleCondition = getPrototypeBean(ruleConditionType, RuleCondition.class);
 		}
 		return ruleCondition;
 	}
-	
+
 	/**
-	 * Get the ruleCondition with the given UID. 
+	 * Get the ruleCondition with the given UID.
 	 * Return null if no matching record exists.
 	 *
 	 * @param ruleConditionUid the ruleCondition UID
@@ -106,12 +106,12 @@ public class RuleConditionServiceImpl extends AbstractEpPersistenceServiceImpl i
 	public RuleCondition get(final long ruleConditionUid) throws EpServiceException {
 		return this.get(ruleConditionUid, null);
 	}
-	
+
 	/**
-	 * Get the ruleCondition with the given UID if it is greater than 0; 
+	 * Get the ruleCondition with the given UID if it is greater than 0;
 	 * otherwise get new instance of the ruleCondition of the given ruleConditionType
 	 * from the spring beanFactory (assuming bean id is the same as the ruleConditionType).
-	 * 
+	 *
 	 * Return null if no matching record exists.
 	 *
 	 * @param ruleConditionUid the ruleCondition UID
@@ -125,15 +125,15 @@ public class RuleConditionServiceImpl extends AbstractEpPersistenceServiceImpl i
 		RuleCondition ruleCondition = null;
 		if (ruleConditionUid > 0) {
 			ruleCondition = getPersistenceEngine().get(RuleCondition.class, ruleConditionUid);
-		} else if (ruleConditionType != null) { 
-			ruleCondition = getBean(ruleConditionType);
+		} else if (ruleConditionType != null) {
+			ruleCondition = getPrototypeBean(ruleConditionType, RuleCondition.class);
 		}
 		return ruleCondition;
 	}
-	
+
 	/**
 	 * Generic get method for all persistable domain models.
-	 * 
+	 *
 	 * @param uid the persisted instance uid
 	 * @return the persisted instance if exists, otherwise null
 	 * @throws EpServiceException - in case of any errors
@@ -142,5 +142,5 @@ public class RuleConditionServiceImpl extends AbstractEpPersistenceServiceImpl i
 	public Object getObject(final long uid) throws EpServiceException {
 		return get(uid);
 	}
-	
+
 }

@@ -16,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.attribute.Attribute;
@@ -225,7 +226,8 @@ public class AdvancedSearchRequestImplTest {
 		final AdvancedSearchFilteredNavSeparatorFilter separatorFilter = context.mock(AdvancedSearchFilteredNavSeparatorFilter.class);
 
 		final FilterFactory advancedSearchFactory = context.mock(FilterFactory.class, "asfactory");
-		expectationsFactory.allowingBeanFactoryGetBean("advancedSearchFilterFactory", advancedSearchFactory);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.ADVANCED_SEARCH_FILTER_FACTORY, FilterFactory.class, 
+				advancedSearchFactory);
 
 		context.checking(new Expectations() {
 			{
@@ -257,8 +259,10 @@ public class AdvancedSearchRequestImplTest {
 				FilterFactory filteredNavFactory = context.mock(FilterFactory.class, "fnfactory");
 				FilterFactory advancedSearchFactory = context.mock(FilterFactory.class, "asfactory");
 
-				allowing(beanFactory).getBean("filterFactory"); will(returnValue(filteredNavFactory));
-				allowing(beanFactory).getBean("advancedSearchFilterFactory"); will(returnValue(advancedSearchFactory));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.FILTER_FACTORY, FilterFactory.class);
+				will(returnValue(filteredNavFactory));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.ADVANCED_SEARCH_FILTER_FACTORY, FilterFactory.class); 
+				will(returnValue(advancedSearchFactory));
 
 				allowing(advancedSearchFactory).getFilter(asfilterStr, store); will(returnValue(asfilter));
 				allowing(advancedSearchFactory).getFilter(separator, store); will(returnValue(separatorFilter));
@@ -315,7 +319,8 @@ public class AdvancedSearchRequestImplTest {
 			{
 				AttributeService attributeService = context.mock(AttributeService.class, "attrService");
 				Attribute attribute = context.mock(Attribute.class, "attr");
-				allowing(beanFactory).getBean("attributeService"); will(returnValue(attributeService));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
+				will(returnValue(attributeService));
 				allowing(attributeService).findByKey(with(any(String.class))); will(returnValue(attribute));
 			}
 		});
@@ -355,9 +360,9 @@ public class AdvancedSearchRequestImplTest {
 			this.dummyFilter = dummyFilter;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		protected <T> T getBean(final String beanName) {
+		@SuppressWarnings("unchecked")
+		protected <T> T getPrototypeBean(final String beanName, final Class<T> clazz)  {
 			return (T) dummyFilter;
 		}
 	}

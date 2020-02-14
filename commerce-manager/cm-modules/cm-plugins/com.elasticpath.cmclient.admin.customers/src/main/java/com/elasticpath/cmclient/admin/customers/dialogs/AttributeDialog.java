@@ -22,9 +22,9 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.admin.customers.AdminCustomersImageRegistry;
 import com.elasticpath.cmclient.admin.customers.AdminCustomersMessages;
 import com.elasticpath.cmclient.admin.customers.AdminCustomersPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -80,7 +80,7 @@ public class AttributeDialog extends AbstractEpDialog {
 	public AttributeDialog(final Shell parentShell, final Attribute attribute, final String title, final Image image) {
 		super(parentShell, 2, false);
 		this.context = new DataBindingContext();
-		this.attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		this.attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		this.attribute = attribute;
 		this.title = title;
 		this.image = image;

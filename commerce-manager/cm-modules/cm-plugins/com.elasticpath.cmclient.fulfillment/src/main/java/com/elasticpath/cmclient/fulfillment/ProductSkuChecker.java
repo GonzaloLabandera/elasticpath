@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.fulfillment;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.common.pricing.service.PriceLookupFacade;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
@@ -36,19 +36,20 @@ public class ProductSkuChecker {
 	 */
 	public ProductSkuChecker(final Order order) {
 		store = order.getStore();
-		priceLookupFacade = ServiceLocator.getService(ContextIdNames.PRICE_LOOKUP_FACADE);
+		priceLookupFacade = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LOOKUP_FACADE, PriceLookupFacade.class);
 
 		final Customer customer = order.getCustomer();
 
-		final ShopperService shopperService = ServiceLocator.getService(ContextIdNames.SHOPPER_SERVICE);
+		final ShopperService shopperService = BeanLocator.getSingletonBean(ContextIdNames.SHOPPER_SERVICE, ShopperService.class);
 		Shopper shopper = shopperService.findOrCreateShopper(customer, store.getCode());
-		
-		final CustomerSessionService customerSessionService = ServiceLocator.getService(ContextIdNames.CUSTOMER_SESSION_SERVICE);
+
+		final CustomerSessionService customerSessionService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE,
+				CustomerSessionService.class);
 		CustomerSession customerSessionWithShopper = customerSessionService.createWithShopper(shopper);
 		customerSession = customerSessionService.initializeCustomerSessionForPricing(customerSessionWithShopper, 
 				store.getCode(), order.getCurrency());
 
-		final ShoppingCartService shoppingCartService = ServiceLocator.getService(ContextIdNames.SHOPPING_CART_SERVICE);
+		final ShoppingCartService shoppingCartService = BeanLocator.getSingletonBean(ContextIdNames.SHOPPING_CART_SERVICE, ShoppingCartService.class);
 		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateByShopper(customerSession.getShopper());
 		customerSession.getShopper().setCurrentShoppingCart(shoppingCart);
 	}

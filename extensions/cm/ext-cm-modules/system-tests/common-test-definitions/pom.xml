@@ -17,7 +17,7 @@
 
 	<properties>
 		<!-- Dependency versions -->
-		<ep.selenium.framework.version>1.5.3</ep.selenium.framework.version>
+		<ep.selenium.framework.version>1.5.4</ep.selenium.framework.version>
 		<sonar.skip>true</sonar.skip>
 	</properties>
 
@@ -87,10 +87,6 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-query-analyzer</artifactId>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

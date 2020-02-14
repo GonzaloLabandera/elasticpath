@@ -71,7 +71,7 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 				.test();
 		
 		verify(mockCartOrder, times(1)).setBillingAddressGuid(NEW_ADDRESS_GUID);
-		verify(cartOrderRepository, times(1)).saveCartOrderAsSingle(mockCartOrder);
+		verify(cartOrderRepository, times(1)).saveCartOrder(mockCartOrder);
 	}
 	
 	@Test
@@ -95,7 +95,7 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 		cartOrdersDefaultAddressPopulator.updateAllCartOrdersAddresses(mockCustomer, mockAddress, STORE_CODE, false, true)
 				.test();
 
-		verify(cartOrderRepository, times(1)).updateShippingAddressOnCartOrderAsSingle(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
+		verify(cartOrderRepository, times(1)).updateShippingAddressOnCartOrder(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
 	}
 	
 	@Test
@@ -107,7 +107,7 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 				.test()
 				.assertNoErrors();
 
-		verify(cartOrderRepository, never()).updateShippingAddressOnCartOrderAsSingle(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
+		verify(cartOrderRepository, never()).updateShippingAddressOnCartOrder(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
 	}
 	
 	@Test
@@ -117,7 +117,7 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 				.test()
 				.assertError(ResourceOperationFailure.notFound());
 
-		verify(cartOrderRepository, never()).updateShippingAddressOnCartOrderAsSingle(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
+		verify(cartOrderRepository, never()).updateShippingAddressOnCartOrder(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
 		verify(mockCartOrder, never()).setBillingAddressGuid(NEW_ADDRESS_GUID);
 		verify(cartOrderRepository, never()).saveCartOrder(mockCartOrder);
 	}
@@ -130,7 +130,7 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 				.test()
 				.assertError(ResourceOperationFailure.notFound());
 
-		verify(cartOrderRepository, never()).updateShippingAddressOnCartOrderAsSingle(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
+		verify(cartOrderRepository, never()).updateShippingAddressOnCartOrder(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
 		verify(mockCartOrder, never()).setBillingAddressGuid(NEW_ADDRESS_GUID);
 		verify(cartOrderRepository, never()).saveCartOrder(mockCartOrder);
 	}
@@ -145,7 +145,7 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 				.test()
 				.assertError(ResourceOperationFailure.notFound());
 
-		verify(cartOrderRepository, never()).updateShippingAddressOnCartOrderAsSingle(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
+		verify(cartOrderRepository, never()).updateShippingAddressOnCartOrder(NEW_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
 		verify(mockCartOrder, never()).setBillingAddressGuid(NEW_ADDRESS_GUID);
 		verify(cartOrderRepository, never()).saveCartOrder(mockCartOrder);
 	}
@@ -165,11 +165,11 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 	}
 
 	private void allowingCartOrderForGuid(final Single<CartOrder> result) {
-		when(cartOrderRepository.findByGuidAsSingle(STORE_CODE, CART_ORDER_GUID)).thenReturn(result);
+		when(cartOrderRepository.findByGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(result);
 	}
 
 	private void allowingCartOrderGuidsByCustomer(final Observable<String> result) {
-		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(STORE_CODE, CUSTOMER_GUID)).thenReturn(result);
+		when(cartOrderRepository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMER_GUID)).thenReturn(result);
 	}
 
 

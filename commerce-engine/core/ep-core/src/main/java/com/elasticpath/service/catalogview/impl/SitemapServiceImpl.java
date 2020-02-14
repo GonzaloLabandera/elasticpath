@@ -85,7 +85,7 @@ public class SitemapServiceImpl extends AbstractCatalogViewServiceImpl implement
 
 	@Override
 	public SitemapResult sitemap(final SitemapRequest sitemapRequest, final CustomerSession customerSession, final int pageNumber) {
-		final SitemapResult result = beanFactory.getBean(ContextIdNames.SITEMAP_RESULT);
+		final SitemapResult result = beanFactory.getPrototypeBean(ContextIdNames.SITEMAP_RESULT, SitemapResult.class);
 		result.setSitemapRequest(sitemapRequest);
 		final PriceListStack priceListStack = customerSession.getShopper().getPriceListStack();
 
@@ -174,14 +174,15 @@ public class SitemapServiceImpl extends AbstractCatalogViewServiceImpl implement
 
 	@Override
 	protected CatalogViewResult createCatalogViewResult() {
-		return beanFactory.getBean(ContextIdNames.SITEMAP_RESULT);
+		return beanFactory.getPrototypeBean(ContextIdNames.SITEMAP_RESULT, CatalogViewResult.class);
 	}
 
 	@Override
 	protected ProductCategorySearchCriteria createCriteriaForProductSearch(
 			final CatalogViewRequest request, final boolean includeSubCategories) {
 		final SitemapRequest sitemapRequest = (SitemapRequest) request;
-		final ProductSearchCriteria searchCriteria = beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+		final ProductSearchCriteria searchCriteria = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA,
+				ProductSearchCriteria.class);
 
 		// only want exact matches when browsing
 		searchCriteria.setFuzzySearchDisabled(true);

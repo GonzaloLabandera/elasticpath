@@ -40,7 +40,7 @@ public class TaxesCalculatorImplTest {
 	@Test
 	public void ensureTaxIsCalculatedBeforeTaxIsRead() {
 		ShoppingCart shoppingCart = mock(ShoppingCart.class);
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(STORE_CODE, EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
+		when(cartOrderRepository.getEnrichedShoppingCart(STORE_CODE, EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
 				.thenReturn(Single.just(shoppingCart));
 
 		ShoppingCartTaxSnapshot taxSnapshot = mock(ShoppingCartTaxSnapshot.class);
@@ -57,7 +57,7 @@ public class TaxesCalculatorImplTest {
 
 	@Test
 	public void ensureErrorPropagationOfFailedGetCartWhenCalculatingTax() {
-		when(cartOrderRepository.getEnrichedShoppingCartSingle(STORE_CODE, NOT_EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
+		when(cartOrderRepository.getEnrichedShoppingCart(STORE_CODE, NOT_EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
 
 		calculator.calculateTax(STORE_CODE, NOT_EXISTS_GUID)

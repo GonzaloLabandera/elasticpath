@@ -37,7 +37,7 @@ public class DynamicContentTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testAddDynamicContent() {		
-		final DynamicContent dynamicContent  = getBeanFactory().getBean(ContextIdNames.DYNAMIC_CONTENT);
+		final DynamicContent dynamicContent  = getBeanFactory().getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 		dynamicContent.setContentWrapperId(CONTENT_WRAPPER_ID);
 		dynamicContent.setName(DYNAMIC_CONTENT_NAME);
 		
@@ -59,7 +59,7 @@ public class DynamicContentTest extends DbTestCase {
 	 * @return uidPk of stored object. 
 	 */
 	private long createSingleDynamicContent() {
-		final DynamicContent dynamicContent  = getBeanFactory().getBean(ContextIdNames.DYNAMIC_CONTENT);
+		final DynamicContent dynamicContent  = getBeanFactory().getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 		dynamicContent.setContentWrapperId(CONTENT_WRAPPER_ID);
 		dynamicContent.setName(DYNAMIC_CONTENT_NAME);
 		return dynamicContentService.add(dynamicContent).getUidPk();

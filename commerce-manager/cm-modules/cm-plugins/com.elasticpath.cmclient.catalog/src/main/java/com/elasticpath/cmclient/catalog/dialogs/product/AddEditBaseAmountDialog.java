@@ -20,8 +20,8 @@ import org.eclipse.ui.PlatformUI;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
@@ -131,7 +131,7 @@ public class AddEditBaseAmountDialog extends AbstractPolicyAwareDialog implement
 		BaseAmountDTO baseAmount = BaseAmountDTOCreator.createModel();
 
 		// set new DTO GUID
-		RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
+		RandomGuid randomGuid = BeanLocator.getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class);
 		baseAmount.setGuid(randomGuid.toString());
 
 		return baseAmount;
@@ -366,7 +366,7 @@ public class AddEditBaseAmountDialog extends AbstractPolicyAwareDialog implement
 		if (priceListService != null) {
 			return priceListService;
 		}
-		return ServiceLocator.getService(ContextIdNames.PRICE_LIST_CLIENT_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_CLIENT_SERVICE, PriceListService.class);
 	}
 
 	@Override

@@ -12,7 +12,6 @@ import org.springframework.core.convert.converter.Converter;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.rest.definition.addresses.AddressDetailEntity;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.base.NameEntity;
 
@@ -28,20 +27,19 @@ public class CustomerAddressConverter implements Converter<AddressEntity, Custom
 	/**
 	 * Constructor.
 	 *
-	 * @param coreBeanFactory    coreBeanFactory
+	 * @param coreBeanFactory coreBeanFactory
 	 */
 	@Inject
 	public CustomerAddressConverter(
-			@Named("coreBeanFactory")
-			final BeanFactory coreBeanFactory) {
+			@Named("coreBeanFactory") final BeanFactory coreBeanFactory) {
 		this.coreBeanFactory = coreBeanFactory;
 	}
 
 	@Override
 	public CustomerAddress convert(final AddressEntity addressEntity) {
-		CustomerAddress domainAddress = coreBeanFactory.getBean(ContextIdNames.CUSTOMER_ADDRESS);
+		CustomerAddress domainAddress = coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
 
-		AddressDetailEntity address = addressEntity.getAddress();
+		com.elasticpath.rest.definition.base.AddressEntity address = addressEntity.getAddress();
 		if (address != null) {
 			domainAddress.setStreet1(address.getStreetAddress());
 			domainAddress.setStreet2(address.getExtendedAddress());
@@ -49,9 +47,10 @@ public class CustomerAddressConverter implements Converter<AddressEntity, Custom
 			domainAddress.setSubCountry(address.getRegion());
 			domainAddress.setCountry(address.getCountryName());
 			domainAddress.setZipOrPostalCode(address.getPostalCode());
-			domainAddress.setPhoneNumber(address.getPhoneNumber());
-			domainAddress.setOrganization(address.getOrganization());
 		}
+
+		domainAddress.setPhoneNumber(addressEntity.getPhoneNumber());
+		domainAddress.setOrganization(addressEntity.getOrganization());
 
 		NameEntity nameEntity = addressEntity.getName();
 

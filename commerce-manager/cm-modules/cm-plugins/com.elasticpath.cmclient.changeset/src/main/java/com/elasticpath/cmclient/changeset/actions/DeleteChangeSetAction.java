@@ -19,7 +19,7 @@ import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.editors.ChangeSetEditor;
 import com.elasticpath.cmclient.changeset.event.ChangeSetEventService;
 import com.elasticpath.cmclient.changeset.views.ChangeSetsView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
@@ -37,7 +37,7 @@ public class DeleteChangeSetAction extends Action {
 	
 	private final ChangeSetsView changeSetsView;
 	private final IWorkbenchPartSite workbenchPartSite;
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	/**
 	 *
 	 * @param changeSetsView the change set view
@@ -84,7 +84,7 @@ public class DeleteChangeSetAction extends Action {
 	}
 
 	private ChangeSetManagementService getChangeSetManagementService() {
-		return ServiceLocator.getService(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE, ChangeSetManagementService.class);
 	}
 
 	private boolean verifyChangeSetIsActive(final ChangeSet changeSet) {

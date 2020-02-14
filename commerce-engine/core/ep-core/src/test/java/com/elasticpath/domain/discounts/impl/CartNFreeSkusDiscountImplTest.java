@@ -58,7 +58,7 @@ public class CartNFreeSkusDiscountImplTest {
 		container = context.mock(DiscountItemContainer.class);
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(ContextIdNames.TOTALLING_APPLIER);
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.TOTALLING_APPLIER, TotallingApplier.class);
 				will(returnValue(totallingApplier));
 
 				oneOf(totallingApplier).setDiscountItemContainer(container);

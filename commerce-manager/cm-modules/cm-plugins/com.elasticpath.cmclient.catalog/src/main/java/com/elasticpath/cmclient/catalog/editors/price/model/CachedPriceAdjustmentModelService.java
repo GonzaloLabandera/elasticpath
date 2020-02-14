@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.common.pricing.service.PriceListHelperService;
@@ -24,7 +24,8 @@ import com.elasticpath.domain.pricing.PriceAdjustment;
  * A price adjustment service that constructs price adjustment model.
  */
 public class CachedPriceAdjustmentModelService {
-	private final PriceListHelperService priceListHelperService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_HELPER_SERVICE);
+	private final PriceListHelperService priceListHelperService = BeanLocator
+			.getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE, PriceListHelperService.class);
 
 	private final Map<PriceListDescriptorDTO, PriceAdjustmentModelRoot> cachedModels =
 			new HashMap<>();
@@ -92,7 +93,7 @@ public class CachedPriceAdjustmentModelService {
 					}
 					// add if not found
 					if (!found && adjustmentAmount != null) {
-						PriceAdjustment priceAdjustment = ServiceLocator.getService(ContextIdNames.PRICE_ADJUSTMENT);
+						PriceAdjustment priceAdjustment = BeanLocator.getPrototypeBean(ContextIdNames.PRICE_ADJUSTMENT, PriceAdjustment.class);
 						priceAdjustment.setPriceListGuid(plGuid);
 						priceAdjustment.setAdjustmentAmount(adjustmentAmount);
 						bundleConstituent.addPriceAdjustment(priceAdjustment);

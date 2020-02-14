@@ -7,11 +7,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository.SKU_CODE_KEY;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Sets;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -33,6 +36,7 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.id.IdentifierPart;
+import com.elasticpath.rest.id.util.CompositeIdUtil;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.catalog.BundleIdentifier;
@@ -249,6 +253,28 @@ public class ItemRepositoryImplTest {
 				.test()
 				.assertError(ResourceOperationFailure.notFound(BUNDLE_CONS_NOT_FOUND))
 				.assertNoValues();
+	}
+
+	@Test
+	public void testGetDefaultItemIdForProductReturnsSuccessfully() {
+		ImmutableSortedMap<String, String> expectedMap = ImmutableSortedMap.of(SKU_CODE_KEY, SKU_CODE);
+		String expectedEncodedCompositeId = CompositeIdUtil.encodeCompositeId(expectedMap);
+
+		String defaultItemIdForProduct = itemRepository.getDefaultItemIdForProduct(product);
+		assertThat(defaultItemIdForProduct).isEqualTo(expectedEncodedCompositeId);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void testGetDefaultItemIdForProductDoesNotAcceptNull() {
+		itemRepository.getDefaultItemIdForProduct(null);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void testGetDefaultItemIdForProductDoesNotAcceptProductWithoutSku() {
+		Product productWithoutSku = mock(Product.class);
+		when(productWithoutSku.getDefaultSku()).thenReturn(null);
+
+		itemRepository.getDefaultItemIdForProduct(productWithoutSku);
 	}
 
 	private ProductSku createProductSku(final String skuCode) {

@@ -30,13 +30,11 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
@@ -70,8 +68,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingList;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.money.Money;
-import com.elasticpath.plugin.payment.exceptions.GiftCertificateCurrencyMismatchException;
-import com.elasticpath.plugin.payment.exceptions.GiftCertificateZeroBalanceException;
 import com.elasticpath.plugin.tax.builder.TaxExemptionBuilder;
 import com.elasticpath.plugin.tax.domain.TaxExemption;
 import com.elasticpath.sellingchannel.ShoppingItemFactory;
@@ -124,10 +120,6 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	private boolean codeValid = true;
 
 	private boolean estimateMode;
-
-	private final Set<GiftCertificate> appliedGiftCertificates = new HashSet<>();
-
-	private BigDecimal appliedGiftCertificateTotal = BigDecimal.ZERO;
 
 	private TaxCalculationResult taxCalculationResult;
 
@@ -204,16 +196,6 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * Get the applied gift certificate.
-	 *
-	 * @return the appliedGiftCertificates
-	 */
-	@Override
-	public Set<GiftCertificate> getAppliedGiftCertificates() {
-		return appliedGiftCertificates;
-	}
-
-	/**
 	 * Get the gift certificate service.
 	 *
 	 * @return GiftCertificateService
@@ -221,7 +203,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	protected GiftCertificateService getGiftCertificateService() {
 		// Note that the service field must be transient and included in ShoppingCartImplIntegrationTest.testSerialization().
 		if (giftCertificateService == null) {
-			giftCertificateService = this.getBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE);
+			giftCertificateService = this.getSingletonBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE, GiftCertificateService.class);
 		}
 		return giftCertificateService;
 	}
@@ -234,7 +216,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	protected RuleService getRuleService() {
 		// Note that the service field must be transient and included in ShoppingCartImplIntegrationTest.testSerialization().
 		if (ruleService == null) {
-			ruleService = this.getBean(ContextIdNames.RULE_SERVICE);
+			ruleService = this.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 		}
 		return ruleService;
 	}
@@ -246,40 +228,6 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	protected Map<String, ShippingPricing> getShippingPricingMap() {
 		return shippingPricingMap;
-	}
-
-	/**
-	 * Add the gift certificate to the set which will be redeemed.
-	 *
-	 * @param giftCertificate the gift certificate to be redeemed.
-	 * @throws {@link com.elasticpath.domain.EpDomainException} when the currency mismatch or balance is zero.
-	 */
-	@Override
-	public void applyGiftCertificate(final GiftCertificate giftCertificate) {
-		if (giftCertificate == null || !ObjectUtils.equals(giftCertificate.getStore(), getStore())) {
-			return;
-		}
-		if (!getCustomerSession().getCurrency().getCurrencyCode().equals(giftCertificate.getCurrencyCode())) {
-			throw new GiftCertificateCurrencyMismatchException("Currency mismatch, the current shopping cart can't accept this gift certificate.");
-		}
-
-		if (getGiftCertificateService().getBalance(giftCertificate).compareTo(BigDecimal.ZERO) <= 0) {
-			throw new GiftCertificateZeroBalanceException("This gift certificate has a zero balance.");
-		}
-		if (!getAppliedGiftCertificates().contains(giftCertificate)) {
-			getAppliedGiftCertificates().add(giftCertificate);
-		}
-
-		// Calculate the gift certificate values.
-		calculateAppliedGcTotal();
-
-	}
-
-	private void calculateAppliedGcTotal() {
-		appliedGiftCertificateTotal = BigDecimal.ZERO;
-		for (GiftCertificate appliedGc : getAppliedGiftCertificates()) {
-			appliedGiftCertificateTotal = appliedGiftCertificateTotal.add(getGiftCertificateService().getBalance(appliedGc));
-		}
 	}
 
 	/**
@@ -552,20 +500,13 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public BigDecimal getTotal() {
-		final BigDecimal totalBeforeRedeem = getTotalBeforeRedeem();
-		final BigDecimal zero = BigDecimal.ZERO.setScale(totalBeforeRedeem.scale());
+		final BigDecimal total = getTotalAmount();
 
-		BigDecimal total = zero;
-		if (totalBeforeRedeem.compareTo(BigDecimal.ZERO) > 0) {
-			BigDecimal redeemAmount = getGiftCertificateDiscount();
-			total = totalBeforeRedeem.subtract(redeemAmount);
-
-			if (total.compareTo(BigDecimal.ZERO) < 0) {
-				return zero;
-			}
+		if (total.compareTo(BigDecimal.ZERO) > 0) {
+			return total;
 		}
 
-		return total;
+		return BigDecimal.ZERO.setScale(total.scale());
 	}
 
 	@Override
@@ -579,11 +520,11 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * The total amount before gift certificate redemption.
+	 * The total amount.
 	 *
-	 * @return total amount before gift certificate redemption
+	 * @return total amount.
 	 */
-	BigDecimal getTotalBeforeRedeem() {
+	BigDecimal getTotalAmount() {
 		BigDecimal subtotal = getSubtotal();
 		BigDecimal shippingCost = getShippingCost().getAmount();
 
@@ -728,30 +669,6 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * Get the amount redeemed from gift certificate.
-	 *
-	 * @return the gift certificate discounted from the total
-	 */
-	@Override
-	public BigDecimal getGiftCertificateDiscount() {
-		BigDecimal totalBeforeRedeem = getTotalBeforeRedeem();
-		if (appliedGiftCertificateTotal.compareTo(totalBeforeRedeem) > 0) {
-			return totalBeforeRedeem;
-		}
-		return appliedGiftCertificateTotal;
-	}
-
-	/**
-	 * Get the amount redeemed from gift certificate.
-	 *
-	 * @return the gift certificate discount as a <code>Money</code> object
-	 */
-	@Override
-	public Money getGiftCertificateDiscountMoney() {
-		return createMoney(getGiftCertificateDiscount());
-	}
-
-	/**
 	 * Returns true if an order subtotal discount has been applied.
 	 *
 	 * @return true if an order subtotal discount has been applied
@@ -785,15 +702,13 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		getCartMementoItems(getShoppingCartMemento()).clear();
 		promotionCodes.clear();
 		clearPromotions();
-		getAppliedGiftCertificates().clear();
-		appliedGiftCertificateTotal = BigDecimal.ZERO;
 		shippingPricingMap.clear();
 	}
 
 	private TaxCalculationResult getNewTaxCalculationResult() {
-		TaxCalculationResult taxCalculationResult = getBean(ContextIdNames.TAX_CALCULATION_RESULT);
-		taxCalculationResult.initialize(getCustomerSession().getCurrency());
-		return taxCalculationResult;
+		TaxCalculationResult taxCalcResult = getPrototypeBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResult.class);
+		taxCalcResult.initialize(getCustomerSession().getCurrency());
+		return taxCalcResult;
 	}
 
 	/**
@@ -1041,7 +956,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public Money getBeforeTaxTotal() {
-		Money total = createMoney(getTotalBeforeRedeem());
+		Money total = createMoney(getTotalAmount());
 
 		return total.subtract(getTaxCalculationResult().getTotalTaxes());
 	}
@@ -1402,7 +1317,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 				// ensure we have a coupon usage record (with a use set to 0)
 				// if required.
 
-				CouponUsage newCouponUsage = getBean(ContextIdNames.COUPON_USAGE);
+				CouponUsage newCouponUsage = getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 				newCouponUsage.setCustomerEmailAddress(customerEmailAddress);
 				newCouponUsage.setCoupon(coupon);
 				newCouponUsage.setUseCount(0);
@@ -1586,7 +1501,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	@Override
 	public ShoppingCartMemento getShoppingCartMemento() {
 		if (shoppingCartMemento == null) {
-			shoppingCartMemento = getBean(ContextIdNames.SHOPPING_CART_MEMENTO);
+			shoppingCartMemento = getPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class);
 
 			if (shopper != null) {
 				shoppingCartMemento.setShopper(shopper);
@@ -1644,14 +1559,14 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 * @return the cartItemFactory
 	 */
 	public ShoppingItemFactory getCartItemFactory() {
-		return getBean("cartItemFactory");
+		return getSingletonBean("cartItemFactory", ShoppingItemFactory.class);
 	}
 
 	/**
 	 * @return the priceLookupService
 	 */
 	public PriceLookupService getPriceLookupService() {
-		return getBean("priceLookupService");
+		return getSingletonBean(ContextIdNames.PRICE_LOOKUP_SERVICE, PriceLookupService.class);
 	}
 
 	@Override
@@ -1668,7 +1583,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public Collection<ShoppingItem> getApportionedLeafItems() {
-		OrderSkuFactory orderSkuFactory = getBean(ContextIdNames.ORDER_SKU_FACTORY);
+		OrderSkuFactory orderSkuFactory = getSingletonBean(ContextIdNames.ORDER_SKU_FACTORY, OrderSkuFactory.class);
 		Collection<OrderSku> rootItems = orderSkuFactory.createOrderSkus(this.getShoppingItems(shoppingItem -> !shoppingItem.isBundleConstituent()),
 				this, getCustomerSession().getLocale());
 		Collection<ShoppingItem> leafItems = new ArrayList<>();
@@ -1702,7 +1617,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	protected CouponUsageService getCouponUsageService() {
 		// Note that the service field must be transient and included in ShoppingCartImplIntegrationTest.testSerialization().
 		if (couponUsageService == null) {
-			couponUsageService = this.getBean(ContextIdNames.COUPON_USAGE_SERVICE);
+			couponUsageService = this.getSingletonBean(ContextIdNames.COUPON_USAGE_SERVICE, CouponUsageService.class);
 		}
 		return couponUsageService;
 	}
@@ -1715,7 +1630,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	protected CouponService getCouponService() {
 		// Note that the service field must be transient and included in ShoppingCartImplIntegrationTest.testSerialization().
 		if (couponService == null) {
-			couponService = this.getBean(ContextIdNames.COUPON_SERVICE);
+			couponService = this.getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
 		}
 		return couponService;
 	}
@@ -1795,7 +1710,8 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	@Override
 	public Set<ShipmentType> getShipmentTypes() {
-		final ShoppingCartShipmentTypeEvaluator evaluator = getBean(ContextIdNames.SHOPPING_CART_SHIPMENT_TYPE_EVALUATOR);
+		final ShoppingCartShipmentTypeEvaluator evaluator = getPrototypeBean(ContextIdNames.SHOPPING_CART_SHIPMENT_TYPE_EVALUATOR,
+				ShoppingCartShipmentTypeEvaluator.class);
 
 		getAllShoppingItemsStream()
 				.filter(shoppingItem -> !shoppingItem.isBundle(getProductSkuLookup()))
@@ -1865,7 +1781,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	protected ProductSkuLookup getProductSkuLookup() {
 		if (productSkuLookup == null) {
-			productSkuLookup = getBean(ContextIdNames.PRODUCT_SKU_LOOKUP);
+			productSkuLookup = getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 		}
 		return productSkuLookup;
 	}
@@ -1876,7 +1792,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	protected DiscountApportioningCalculator getDiscountCalculator() {
 		if (discountCalculator == null) {
-			discountCalculator = getBean(ContextIdNames.DISCOUNT_APPORTIONING_CALCULATOR);
+			discountCalculator = getSingletonBean(ContextIdNames.DISCOUNT_APPORTIONING_CALCULATOR, DiscountApportioningCalculator.class);
 		}
 		return discountCalculator;
 	}
@@ -1911,7 +1827,8 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	protected ShoppingItemSubtotalCalculator getShoppingItemSubtotalCalculator() {
 		if (this.shoppingItemSubtotalCalculator == null) {
-			this.shoppingItemSubtotalCalculator = getBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR);
+			this.shoppingItemSubtotalCalculator = getSingletonBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR,
+					ShoppingItemSubtotalCalculator.class);
 		}
 		return this.shoppingItemSubtotalCalculator;
 	}
@@ -1921,9 +1838,10 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 *
 	 * @return the predicate
 	 */
+	@SuppressWarnings("unchecked")
 	protected Predicate<ShoppingItem> getShippableItemPredicate() {
 		if (this.shippableItemPredicate == null) {
-			this.shippableItemPredicate = getBean(ContextIdNames.SHIPPABLE_ITEM_PREDICATE);
+			this.shippableItemPredicate = (Predicate<ShoppingItem>) getSingletonBean(ContextIdNames.SHIPPABLE_ITEM_PREDICATE, Predicate.class);
 		}
 		return this.shippableItemPredicate;
 	}
@@ -1947,6 +1865,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 
+	@Override
 	public Map<String, CartData> getCartData() {
 		return getShoppingCartMemento().getCartData();
 	}

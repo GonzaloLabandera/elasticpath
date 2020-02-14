@@ -26,7 +26,8 @@ public class AddProductSkuToCartValidationServiceImpl
 	@Override
 	public ProductSkuValidationContext buildContext(final ProductSku productSku, final ProductSku parentProductSku,
 			final Store store, final Shopper shopper) {
-		final ProductSkuValidationContext context = beanFactory.getBean(ContextIdNames.PRODUCT_SKU_VALIDATION_CONTEXT);
+		final ProductSkuValidationContext context = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU_VALIDATION_CONTEXT,
+				ProductSkuValidationContext.class);
 		context.setProductSku(productSku);
 		context.setParentProductSku(parentProductSku);
 		context.setStore(store);

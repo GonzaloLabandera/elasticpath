@@ -2,6 +2,11 @@
  * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.persistence.openjpa.impl;
+
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.createDynamicJPQLQuery;
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.getResults;
+import static com.elasticpath.persistence.openjpa.util.QueryUtil.splitCollection;
+
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,9 +17,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
 
-import org.apache.log4j.Logger;
 import org.apache.openjpa.datacache.DataCache;
 import org.apache.openjpa.kernel.Broker;
 import org.apache.openjpa.persistence.JPAFacadeHelper;
@@ -25,6 +28,8 @@ import org.apache.openjpa.persistence.OpenJPAQuery;
 import org.apache.openjpa.persistence.QueryResultCache;
 import org.apache.openjpa.persistence.StoreCache;
 import org.apache.openjpa.persistence.StoreCacheImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -41,14 +46,13 @@ import com.elasticpath.persistence.openjpa.JpaPersistenceEngineInternal;
 import com.elasticpath.persistence.openjpa.JpaPersistenceSession;
 import com.elasticpath.persistence.openjpa.PersistenceInterceptor;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
 
 /**
  * The JPA implementation of <code>PersistenceEngine</code>.
  */
-@SuppressWarnings({ "unchecked", "PMD.TooManyMethods", "PMD.ExcessiveClassLength", "PMD.GodClass" })
+@SuppressWarnings({ "PMD.TooManyMethods", "PMD.ExcessiveClassLength", "PMD.GodClass" })
 public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
-	private static final Logger LOG = Logger.getLogger(JpaPersistenceEngineImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(JpaPersistenceEngineImpl.class);
 
 	private static final String CAUGHT_AN_EXCEPTION = "Caught an exception";
 
@@ -59,11 +63,8 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 
 	private FetchPlanHelper fetchPlanHelper;
 	private QueryReader queryReader;
-	private QueryUtil queryUtil;
-
 
 	private List<PersistenceEngineOperationListener> operationListeners = Collections.emptyList();
-
 
 	// @@@@@@@@@@@@ Read operations @@@@@@@@@@@@@@@@@@@@@
 	/**
@@ -210,9 +211,11 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 		try {
 			newEntityManager = createNewEntityManager();
 
-			Query newQuery = newEntityManager.createQuery(query);
-			queryUtil.setQueryParameters(newQuery, parameters);
-			return queryUtil.getResults(newQuery);
+			OpenJPAQuery<?> newQuery = createDynamicJPQLQuery(newEntityManager, query);
+
+			newQuery.setParameters(parameters);
+
+			return getResults(newQuery);
 		} catch (final DataAccessException e) {
 			throw new EpPersistenceException(CAUGHT_AN_EXCEPTION, e);
 		} finally {
@@ -228,33 +231,29 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	 *
 	 * @param <T> the object's type to retrieve
 	 * @param <E> the type of values used in the query
-	 * @param query the HQL query
+	 * @param queryString the HQL query
 	 * @param values the collection of values
 	 * @param listParameterName the name of the parameter for the list values
 	 * @param parameters the parameters to be used with the criteria
 	 * @return a list of persistent instances.
 	 */
 	@Override
-	public <T, E> List<T> retrieveWithListWithNewSession(final String query, final String listParameterName, final Collection<E> values,
+	@SuppressWarnings("rawtypes")
+	public <T, E> List<T> retrieveWithListWithNewSession(final String queryString, final String listParameterName, final Collection<E> values,
 														 final Object... parameters) {
 		EntityManager newEntityManager = null;
 		try {
 			newEntityManager = createNewEntityManager();
+			OpenJPAQuery query = createDynamicJPQLQuery(newEntityManager, queryString);
 
-			int parameterCount = 0;
-			if (parameters != null) {
-				parameterCount = parameters.length;
-			}
+			List<List<E>> listOfSubListsOfValues = splitCollection(values);
 
-			List<String> listParameters = queryUtil.splitCollection(values, parameterCount);
 			final List<T> result = new ArrayList<>();
-			for (String listParameter : listParameters) {
-				OpenJPAQuery<T> jpaQuery = OpenJPAPersistence.cast(newEntityManager.createQuery(query));
+			for (List<E> subListOfValues : listOfSubListsOfValues) {
+				query.setParameters(parameters);
+				query.setParameter(listParameterName, subListOfValues);
 
-				Query newQuery = queryUtil.insertListIntoQuery(jpaQuery, listParameterName, listParameter);
-				queryUtil.setQueryParameters(newQuery, parameters);
-
-				result.addAll(queryUtil.getResults(newQuery));
+				result.addAll(getResults(query));
 			}
 			return result;
 		} catch (final DataAccessException e) {
@@ -298,6 +297,13 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	@Override
 	public <T> List<T> retrieveByNamedQuery(final String queryName, final FlushMode flushMode, final Object... parameters) {
 		return queryReader.retrieveByNamedQuery(queryName, flushMode, parameters);
+	}
+
+	@Override
+	public <T> List<T> retrieveByNamedQuery(final String queryName, final FlushMode flushMode, final boolean ignoreChanges,
+		final Object[] parameters) {
+
+		return queryReader.retrieveByNamedQuery(queryName, flushMode, ignoreChanges, parameters);
 	}
 
 	/**
@@ -405,14 +411,12 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	 */
 	@Override
 	public int bulkUpdate(final String sql, final Object... parameters) {
-		OpenJPAQuery<?> query = OpenJPAPersistence.cast(entityManager.createQuery(sql));
+		OpenJPAQuery<?> query = getQueryForDynamicQuery(sql);
 		ChangeType changeType = getChangeTypeFor(query);
 		fireBeginBulkOperationEvent(query, parameters, changeType);
 
 		try {
-			if (parameters != null) {
-				queryUtil.setQueryParameters(query, parameters);
-			}
+			query.setParameters(parameters);
 
 			return query.executeUpdate();
 
@@ -552,7 +556,7 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	@Override
 	public int executeNamedQuery(final String queryName, final Object... parameters) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Executing named query: " + queryName);
+			LOG.debug("Executing named query {}", queryName);
 		}
 
 		OpenJPAQuery<?> query = getPersistingQueryForNamedQuery(queryName);
@@ -560,7 +564,8 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 		fireBeginBulkOperationEvent(queryName, query, parameters, changeType);
 
 		try {
-			queryUtil.setQueryParameters(query, parameters);
+			query.setParameters(parameters);
+
 			return query.executeUpdate();
 		} catch (final DataAccessException e) {
 			throw new EpPersistenceException(CAUGHT_AN_EXCEPTION, e);
@@ -573,7 +578,7 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	@Override
 	public int executeQuery(final String dynamicQuery, final Object... parameters) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Executing dynamic query: " + dynamicQuery);
+			LOG.debug("Executing dynamic query {}", dynamicQuery);
 		}
 
 		OpenJPAQuery<?> query = getQueryForDynamicQuery(dynamicQuery);
@@ -581,7 +586,8 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 		fireBeginBulkOperationEvent("Dynamic Query", query, parameters, changeType);
 
 		try {
-			queryUtil.setQueryParameters(query, parameters);
+			query.setParameters(parameters);
+
 			return query.executeUpdate();
 		} catch (final DataAccessException e) {
 			throw new EpPersistenceException(CAUGHT_AN_EXCEPTION, e);
@@ -604,19 +610,22 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 		final Collection<E> values, final Object... parameters) {
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("executing dynamic query with list: " + dynamicQuery + "==" + listParameterName);
+			LOG.debug("executing dynamic query {} with list {}", dynamicQuery, listParameterName);
 		}
-		List<String> listParameters = queryUtil.splitCollection(values, 0);
+
+		OpenJPAQuery<?> query = getQueryForDynamicQuery(dynamicQuery);
+		List<List<E>> listOfSubListsOfValues = splitCollection(values);
+
 		int result = 0;
-		for (String listParameter : listParameters) {
-			OpenJPAQuery<?> query = getQueryForDynamicQuery(dynamicQuery);
-			Query newQuery = queryUtil.insertListIntoQuery(query, listParameterName, listParameter);
-			queryUtil.setQueryParameters(newQuery, parameters);
+		for (List<E> subListOfValues : listOfSubListsOfValues) {
+			query.setParameters(parameters);
+			query.setParameter(listParameterName, subListOfValues);
 
 			ChangeType changeType = getChangeTypeFor(query);
 			fireBeginBulkOperationEvent("Dynamic Query", query, parameters, changeType);
+
 			try {
-				result += newQuery.executeUpdate();
+				result += query.executeUpdate();
 			} finally {
 				fireEndBulkOperationEvent(changeType);
 			}
@@ -638,19 +647,22 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	public <E> int executeNamedQueryWithList(final String queryName, final String listParameterName, final Collection<E> values,
 		final Object... parameters) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("executing named query: " + queryName);
+			LOG.debug("executing named query {}", queryName);
 		}
-		List<String> listParameters = queryUtil.splitCollection(values, 0);
+
+		OpenJPAQuery<Integer> query = getPersistingQueryForNamedQuery(queryName);
+		List<List<E>> listOfSubListsOfValues  = splitCollection(values);
+
 		int result = 0;
-		for (String listParameter : listParameters) {
-			OpenJPAQuery<Integer> query = getPersistingQueryForNamedQuery(queryName);
-			Query newQuery = queryUtil.insertListIntoQuery(query, listParameterName, listParameter);
-			queryUtil.setQueryParameters(newQuery, parameters);
+
+		for (List<E> subListOfValues : listOfSubListsOfValues) {
+			query.setParameters(parameters);
+			query.setParameter(listParameterName, subListOfValues);
 
 			ChangeType changeType = getChangeTypeFor(query);
 			fireBeginBulkOperationEvent(queryName, query, parameters, changeType);
 			try {
-				result += newQuery.executeUpdate();
+				result += query.executeUpdate();
 			} finally {
 				fireEndBulkOperationEvent(changeType);
 			}
@@ -1030,6 +1042,7 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	/*
 	 Returned query will participate in a persisting operation (INSERT, UPDATE, DELETE)
 	 */
+	@SuppressWarnings("unchecked")
 	private <T> OpenJPAQuery<T> getPersistingQueryForNamedQuery(final String queryName) {
 		try {
 			return OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName));
@@ -1041,9 +1054,10 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	/*
 		DML query is built dynamically
 	 */
+	@SuppressWarnings("unchecked")
 	private <T> OpenJPAQuery<T> getQueryForDynamicQuery(final String dynamicQuery) {
 		try {
-			return OpenJPAPersistence.cast(entityManager.createQuery(dynamicQuery));
+			return createDynamicJPQLQuery(entityManager, dynamicQuery);
 		} catch (final DataAccessException e) {
 			throw new EpPersistenceException("Exception was thrown when create named query.", e);
 		}
@@ -1056,8 +1070,5 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 
 	public void setQueryReader(final QueryReader queryReader) {
 		this.queryReader = queryReader;
-	}
-	public void setQueryUtil(final QueryUtil queryUtil) {
-		this.queryUtil = queryUtil;
 	}
 }

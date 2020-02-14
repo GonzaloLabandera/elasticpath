@@ -71,7 +71,7 @@ import com.elasticpath.selenium.wizards.CreateProductWizard;
  * Product Definition.
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessiveParameterList",
-		"PMD.ExcessiveImports"})
+		"PMD.ExcessiveImports", "PMD.ExcessivePublicCount"})
 public class ProductAndBundleDefinition {
 	private static final String FALSE_VALUE = "false";
 	private final CatalogManagement catalogManagement;
@@ -297,6 +297,15 @@ public class ProductAndBundleDefinition {
 	 */
 	public void verifyProductByName(final String productName) {
 		searchForProductByName(productName);
+		verifyProductIsInList(productName);
+	}
+
+	/**
+	 * Verifies product is displayed in a result list.
+	 *
+	 * @param productName product name.
+	 */
+	public void verifyProductIsInList(final String productName) {
 		int index = 0;
 		while (!catalogSearchResultPane.isProductNameInList(productName) && index < Constants.UUID_END_INDEX) {
 			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
@@ -304,6 +313,23 @@ public class ProductAndBundleDefinition {
 			index++;
 		}
 		catalogSearchResultPane.verifyProductNameExists(productName);
+	}
+
+	/**
+	 * Searches for product and verifies it is displayed in a result list.
+	 *
+	 * @param productName product name.
+	 */
+	public void verifyProductNameIsNotInList(final String productName) {
+		int index = 0;
+		catalogSearchResultPane.setWebDriverImplicitWait(1);
+		while (catalogSearchResultPane.isProductNameInList(productName) && index < Constants.UUID_END_INDEX) {
+			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			searchForProductByName(productName);
+			index++;
+		}
+		catalogSearchResultPane.setWebDriverImplicitWaitToDefault();
+		catalogSearchResultPane.verifyProductNameDoesNotExist(productName);
 	}
 
 
@@ -700,7 +726,7 @@ public class ProductAndBundleDefinition {
 	@When("^I edit newly created product name to (.+)$")
 	public void editProductName(final String productName) {
 		productEditor = catalogSearchResultPane.openProductEditorWithProductName(this.product.getProductName());
-		this.product.setProductName(productName);
+		this.product.setProductName(productName + "-" + Utility.getRandomUUID());
 		productEditor.enterProductName(this.product.getProductName());
 		catalogManagementActionToolbar.saveAll();
 		productEditor.closeProductEditor(this.product.getProductCode());
@@ -756,6 +782,36 @@ public class ProductAndBundleDefinition {
 	@When("^I search for product by name (.*) and verify it appears in a result list$")
 	public void searchForProductName(final String productName) {
 		verifyProductByName(productName);
+	}
+
+	/**
+	 * Search for product by name.
+	 *
+	 * @param productName product name.
+	 */
+	@When("^I search product by name (.*)$")
+	public void searchProductByName(final String productName) {
+		searchForProductByName(productName);
+	}
+
+	/**
+	 * Verify product is not in the result list.
+	 *
+	 * @param productName product name.
+	 */
+	@Then("^product (.*) is not in the result list$")
+	public void verifyProductDoesNotExist(final String productName) {
+		verifyProductNameIsNotInList(productName);
+	}
+
+	/**
+	 * Verify product is in the result list.
+	 *
+	 * @param productName product name.
+	 */
+	@Then("^product (.*) is in the result list$")
+	public void verifyProductExists(final String productName) {
+		verifyProductIsInList(productName);
 	}
 
 	/**
@@ -1177,7 +1233,6 @@ public class ProductAndBundleDefinition {
 	 * Closes previously opened sku editor.
 	 *
 	 * @param skuCode sku code opened in editor.
-	 *
 	 */
 	@Then("^I close opened previously sku editor for sku (.+)$")
 	public void closeSkuEditor(final String skuCode) {
@@ -1773,13 +1828,14 @@ public class ProductAndBundleDefinition {
 	@After(value = "@cleanUpProductEnableDateDB", order = Constants.CLEANUP_ORDER_FIRST)
 	public void saveCurrentProductEnableDatePropertyUsingDb() {
 		DBConnector dbc = new DBConnector();
-		SimpleDateFormat dbDateFormat = new SimpleDateFormat("YYYY-M-d HH:mm:ss", Locale.ENGLISH);
+		SimpleDateFormat dbDateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss", Locale.ENGLISH);
 		Calendar calendar = Calendar.getInstance();
 		/*we add 1 day to "last_modified_date" value to resolve potential issue
 		of having different time zones on jenkins server and app under test server*/
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 		dbc.updateProductEnableDate(
-				this.product.getProductCode(), dbDateFormat.format(this.product.getEnableDateTime()), dbDateFormat.format(calendar.getTime()));
+				this.product.getProductCode(), dbc.getDate(dbDateFormat.format(this.product.getEnableDateTime())),
+				dbc.getDate(dbDateFormat.format(calendar.getTime())));
 	}
 
 	/**
@@ -2012,5 +2068,27 @@ public class ProductAndBundleDefinition {
 	@When("^I finish creating sku product")
 	public void finishCreatingSkuProduct() {
 		createProductWizard.clickFinish();
+	}
+
+	/**
+	 * Edit the availability rule and save.
+	 *
+	 * @param availabilityRule Availability Rule name.
+	 */
+	@When("^I edit the availability rule to (.+)$")
+	public void editAvailabilityRule(final String availabilityRule) {
+		productEditor.selectAvailabilityRule(availabilityRule);
+		catalogManagementActionToolbar.saveAll();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Verify the updated availability rule.
+	 *
+	 * @param availabilityRule Availability Rule name.
+	 */
+	@Then("^the product has the availability rule (.+)$")
+	public void verifyAvailabilityRule(final String availabilityRule) {
+		productEditor.verifyAvailabilityRule(availabilityRule);
 	}
 }

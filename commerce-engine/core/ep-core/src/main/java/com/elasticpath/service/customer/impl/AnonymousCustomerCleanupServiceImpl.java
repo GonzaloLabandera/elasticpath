@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.customer.impl;
 
@@ -13,6 +13,7 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.customer.AnonymousCustomerCleanupService;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
+import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 
 /**
@@ -27,6 +28,8 @@ public class AnonymousCustomerCleanupServiceImpl implements AnonymousCustomerCle
 	private ShopperCleanupService shopperCleanupService;
 
 	private CustomerConsentService customerConsentService;
+
+	private OrderPaymentApiCleanupService orderPaymentApiCleanupService;
 
 	/**
 	 * Delete anonymous customers.
@@ -79,6 +82,7 @@ public class AnonymousCustomerCleanupServiceImpl implements AnonymousCustomerCle
 	}
 
 	private int deleteCustomersByUids(final List<Long> customerUids) {
+		getOrderPaymentApiCleanupService().removeByCustomerUidList(customerUids);
 		return getPersistenceEngine().executeNamedQueryWithList("DELETE_CUSTOMER_BY_UID_LIST", "list", customerUids);
 	}
 
@@ -135,5 +139,23 @@ public class AnonymousCustomerCleanupServiceImpl implements AnonymousCustomerCle
 	 */
 	public void setCustomerConsentService(final CustomerConsentService customerConsentService) {
 		this.customerConsentService = customerConsentService;
+	}
+
+	/**
+	 * Gets the Order Payment API cleanup service.
+	 *
+	 * @return the Order Payment API cleanup service
+	 */
+	protected OrderPaymentApiCleanupService getOrderPaymentApiCleanupService() {
+		return orderPaymentApiCleanupService;
+	}
+
+	/**
+	 * Sets the Order Payment API cleanup service.
+	 *
+	 * @param orderPaymentApiCleanupService the Order Payment API cleanup service
+	 */
+	public void setOrderPaymentApiCleanupService(final OrderPaymentApiCleanupService orderPaymentApiCleanupService) {
+		this.orderPaymentApiCleanupService = orderPaymentApiCleanupService;
 	}
 }

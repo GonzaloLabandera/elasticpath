@@ -183,7 +183,7 @@ public class CatalogImpl extends AbstractLegacyEntityImpl implements Catalog {
 	 */
 	@Transient
 	protected Collection<Locale> getAllMasterCatalogLocales() {
-		CatalogService catalogService = getBean(ContextIdNames.CATALOG_SERVICE);
+		CatalogService catalogService = getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		return catalogService.findAllCatalogLocales();
 	}
 
@@ -202,7 +202,7 @@ public class CatalogImpl extends AbstractLegacyEntityImpl implements Catalog {
 		if (supportedLocales.contains(this.getDefaultLocale()) || this.getDefaultLocale() == null) {
 			Set<SupportedLocale> supportedCatalogLocales = new HashSet<>();
 			for (Locale locale : supportedLocales) {
-				SupportedLocale cLocale = getBean(ContextIdNames.CATALOG_LOCALE);
+				SupportedLocale cLocale = getPrototypeBean(ContextIdNames.CATALOG_LOCALE, SupportedLocale.class);
 				cLocale.setLocale(locale);
 				supportedCatalogLocales.add(cLocale);
 			}
@@ -299,7 +299,7 @@ public class CatalogImpl extends AbstractLegacyEntityImpl implements Catalog {
 		if (this.getSupportedLocales().contains(locale)) {
 			return;
 		}
-		SupportedLocale cLocale = getBean(ContextIdNames.CATALOG_LOCALE);
+		SupportedLocale cLocale = getPrototypeBean(ContextIdNames.CATALOG_LOCALE, SupportedLocale.class);
 		cLocale.setLocale(locale);
 		this.getSupportedLocalesInternal().add(cLocale);
 	}

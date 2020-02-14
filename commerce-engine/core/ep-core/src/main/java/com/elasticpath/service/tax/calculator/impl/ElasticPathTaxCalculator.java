@@ -35,15 +35,16 @@ public class ElasticPathTaxCalculator implements TaxCalculator {
 
 	@Override
 	public TaxedItemContainer calculate(final TaxableItemContainer container, final TaxOperationResolvers taxOperationResolvers) {
-		final MutableTaxedItemContainer result = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER);
+		final MutableTaxedItemContainer result = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER, 
+				MutableTaxedItemContainer.class);
 		result.initialize(container);
 
 		final TaxRateDescriptorResolver taxRateDescriptorResolver = taxOperationResolvers.getResolver(TaxRateDescriptorResolver.class);
-		
+
 		for (TaxableItem taxableItem : container.getItems()) {
-			final MutableTaxedItem taxedItem = getBeanFactory().getBean(TaxContextIdNames.MUTABLE_TAXED_ITEM);
+			final MutableTaxedItem taxedItem = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM, MutableTaxedItem.class);
 			taxedItem.setTaxableItem(taxableItem);
-			
+
 			final TaxRateDescriptorResult taxRateDescriptorResult = taxRateDescriptorResolver.findTaxRateDescriptors(taxableItem, container);
 			BigDecimal includeTaxAmount = BigDecimal.ZERO;
 
@@ -65,7 +66,7 @@ public class ElasticPathTaxCalculator implements TaxCalculator {
 
 				taxedItem.addTaxRecord(taxRecord);
 			}
-			
+
 			taxedItem.setPriceBeforeTax(taxedItem.getPrice().subtract(includeTaxAmount));
 			taxedItem.setQuantity(taxableItem.getQuantity());
 

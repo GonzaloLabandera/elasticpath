@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 import com.elasticpath.common.dto.store.StoreAssociationDTO;
 import com.elasticpath.common.dto.store.StoreDTO;
 import com.elasticpath.domain.catalog.Catalog;
-import com.elasticpath.domain.payment.PaymentGateway;
+import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.tax.TaxJurisdiction;
@@ -26,6 +26,7 @@ import com.elasticpath.importexport.exporter.search.ImportExportSearcher;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
 import com.elasticpath.ql.parser.EPQueryType;
+import com.elasticpath.service.orderpaymentapi.StorePaymentProviderConfigService;
 import com.elasticpath.service.store.StoreAssociationService;
 import com.elasticpath.service.store.StoreService;
 
@@ -39,6 +40,8 @@ public class StoreExporter extends AbstractExporterImpl<Store, StoreDTO, String>
 	private StoreService storeService;
 
 	private StoreAssociationService storeAssociationService;
+
+	private StorePaymentProviderConfigService storePaymentProviderConfigService;
 
 	private ImportExportSearcher importExportSearcher;
 	
@@ -128,10 +131,14 @@ public class StoreExporter extends AbstractExporterImpl<Store, StoreDTO, String>
 				}
 			}
 
-			if (dependencyRegistry.supportsDependency(PaymentGateway.class)) {
-				for (PaymentGateway gateway : store.getPaymentGateways()) {
-					dependencyRegistry.addGuidDependency(PaymentGateway.class, gateway.getName());
-				}
+			addPaymentDependencies(dependencyRegistry, store);
+		}
+	}
+
+	private void addPaymentDependencies(final DependencyRegistry dependencyRegistry, final Store store) {
+		if (dependencyRegistry.supportsDependency(StorePaymentProviderConfig.class)) {
+			for (StorePaymentProviderConfig paymentProviderConfig : storePaymentProviderConfigService.findByStore(store)) {
+				dependencyRegistry.addGuidDependency(StorePaymentProviderConfig.class, paymentProviderConfig.getPaymentProviderConfigGuid());
 			}
 		}
 	}
@@ -150,6 +157,13 @@ public class StoreExporter extends AbstractExporterImpl<Store, StoreDTO, String>
 	 */
 	public void setStoreAssociationService(final StoreAssociationService storeAssociationService) {
 		this.storeAssociationService = storeAssociationService;
+	}
+
+	/**
+	 * @param storePaymentProviderConfigService the storePaymentProviderConfigService to set
+	 */
+	public void setStorePaymentProviderConfigService(final StorePaymentProviderConfigService storePaymentProviderConfigService) {
+		this.storePaymentProviderConfigService = storePaymentProviderConfigService;
 	}
 
 	public void setStoreAdapter(final DomainAdapter<Store, StoreDTO> storeAdapter) {

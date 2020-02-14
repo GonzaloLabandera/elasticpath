@@ -66,9 +66,6 @@ public class ChangeSetServiceImplTest extends BasicSpringContextTest {
 	private static final DirectedSortingField [] ORDERING_FIELD = new DirectedSortingField [] {
 			new DirectedSortingField(ChangeSetMemberSortingField.OBJECT_ID, SortingDirection.ASCENDING) };
 
-	@Autowired
-	private CmUserService cmUserService;
-
 	private static final int PAGE_SIZE = 50;
 
 	/**
@@ -79,7 +76,7 @@ public class ChangeSetServiceImplTest extends BasicSpringContextTest {
 	@Before
 	public void setUp() throws Exception {
 		// create a new change set
-		changeSet = getBeanFactory().getBean(ContextIdNames.CHANGE_SET);
+		changeSet = getBeanFactory().getPrototypeBean(ContextIdNames.CHANGE_SET, ChangeSet.class);
 		changeSet.setName("sample changeset name");
 		changeSet.setCreatedDate(new Date());
 		changeSet.setCreatedByUserGuid(getTac().getPersistersFactory().getStoreTestPersister().getCmUser().getGuid());
@@ -199,7 +196,7 @@ public class ChangeSetServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testAddNewUserToChangeSet() {
 
-		final ChangeSet newChangeSet = getBeanFactory().getBean(ContextIdNames.CHANGE_SET);
+		final ChangeSet newChangeSet = getBeanFactory().getPrototypeBean(ContextIdNames.CHANGE_SET, ChangeSet.class);
 		newChangeSet.setName("add changeset " + System.currentTimeMillis());
 		newChangeSet.setDescription("add change set desc");
 		newChangeSet.setCreatedByUserGuid(getTac().getPersistersFactory().getStoreTestPersister().getCmUser().getGuid());
@@ -225,7 +222,7 @@ public class ChangeSetServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testRemoveUserFromChangeSet() {
 
-		final ChangeSet newChangeSet = getBeanFactory().getBean(ContextIdNames.CHANGE_SET);
+		final ChangeSet newChangeSet = getBeanFactory().getPrototypeBean(ContextIdNames.CHANGE_SET, ChangeSet.class);
 		newChangeSet.setName("remove changeset " + System.currentTimeMillis());
 		newChangeSet.setDescription("remove change set desc");
 		newChangeSet.setCreatedByUserGuid(getTac().getPersistersFactory().getStoreTestPersister().getCmUser().getGuid());
@@ -263,8 +260,8 @@ public class ChangeSetServiceImplTest extends BasicSpringContextTest {
 
 		persistObjectMembers(0, totalElements);
 
-		PaginatorFactory factory = getBeanFactory().getBean("paginatorFactory"); //$NON-NLS-1$
-		PaginationConfig config = getBeanFactory().getBean("paginationConfig"); //$NON-NLS-1$;
+		PaginatorFactory factory = getBeanFactory().getSingletonBean(ContextIdNames.PAGINATOR_FACTORY, PaginatorFactory.class); //$NON-NLS-1$
+		PaginationConfig config = getBeanFactory().getPrototypeBean(ContextIdNames.PAGINATION_CONFIG, PaginationConfig.class); //$NON-NLS-1$;
 		config.setObjectId(changeSet.getGuid());
 		config.setPageSize(PAGE_SIZE);
 		config.setSortingFields(ORDERING_FIELD);
@@ -367,8 +364,8 @@ public class ChangeSetServiceImplTest extends BasicSpringContextTest {
 
 		persistObjectMembers(0, number133);
 
-		PaginatorFactory factory = getBeanFactory().getBean("paginatorFactory"); //$NON-NLS-1$
-		PaginationConfig config = getBeanFactory().getBean("paginationConfig"); //$NON-NLS-1$;
+		PaginatorFactory factory = getBeanFactory().getSingletonBean(ContextIdNames.PAGINATOR_FACTORY, PaginatorFactory.class); //$NON-NLS-1$
+		PaginationConfig config = getBeanFactory().getPrototypeBean(ContextIdNames.PAGINATION_CONFIG, PaginationConfig.class); //$NON-NLS-1$;
 		config.setObjectId(changeSet.getGuid());
 		config.setPageSize(PAGE_SIZE);
 		config.setSortingFields(ORDERING_FIELD);
@@ -458,8 +455,8 @@ public class ChangeSetServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testAvailableUsers() {
-		CmUserService cmUserService = getBeanFactory().getBean(ContextIdNames.CMUSER_SERVICE);
-		UserRoleService userRoleService = getBeanFactory().getBean(ContextIdNames.USER_ROLE_SERVICE);
+		CmUserService cmUserService = getBeanFactory().getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
+		UserRoleService userRoleService = getBeanFactory().getSingletonBean(ContextIdNames.USER_ROLE_SERVICE, UserRoleService.class);
 
 		CmUser nonSuperUser = new CmUserImpl();
 		nonSuperUser.setUserName("testUser");

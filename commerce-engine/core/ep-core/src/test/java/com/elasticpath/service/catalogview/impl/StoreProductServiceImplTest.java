@@ -60,6 +60,7 @@ import com.elasticpath.domain.catalogview.StoreProductSku;
 import com.elasticpath.domain.catalogview.StoreProductSkuFactory;
 import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
 import com.elasticpath.domain.catalogview.impl.StoreProductSkuFactoryImpl;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
@@ -132,7 +133,7 @@ public class StoreProductServiceImplTest {
 				ProductSkuConstituentImpl.class);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociationImpl.class);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.BUNDLE_CONSTITUENT, BundleConstituentImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 
 		storeProductServiceImpl.setAvailabilityStrategies(Collections.singletonList(availabilityStrategy));
 		storeProductServiceImpl.setBundleIdentifier(bundleIdentifier);

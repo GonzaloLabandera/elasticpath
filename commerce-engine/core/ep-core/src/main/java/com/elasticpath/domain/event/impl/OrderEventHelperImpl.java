@@ -1,11 +1,10 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2007
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.event.impl;
 
 import static java.lang.String.format;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,11 +17,8 @@ import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.event.EventOriginatorType;
 import com.elasticpath.domain.event.OrderEventHelper;
-import com.elasticpath.domain.event.OrderEventPaymentDetailFormatter;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderEvent;
-import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
@@ -30,14 +26,16 @@ import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.MoneyFormatter;
-import com.elasticpath.plugin.payment.PaymentType;
+import com.elasticpath.provider.payment.service.event.PaymentEvent;
+import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentDTO;
+import com.elasticpath.provider.payment.workflow.PaymentInstrumentWorkflow;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 
 /**
  * The helper on the <code>OrderEvent</code>. Help to generate the event details to track the order changes.
  */
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class OrderEventHelperImpl implements OrderEventHelper {
 	private static final String TITLE_ORDER_PLACED = "Order Placed";
 
@@ -89,7 +87,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 	private static final String TITLE_EXCHANGE_COMPLETED = "Exchange Completed";
 
-	private Map<PaymentType, OrderEventPaymentDetailFormatter> formatterMap;
+	private PaymentInstrumentWorkflow paymentInstrumentWorkflow;
 
 	private TimeService timeService;
 	private MoneyFormatter moneyFormatter;
@@ -113,7 +111,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 	/**
 	 * Extension point.
-	 *
+	 * <p>
 	 * Gets detail by populating the full name of customer in order who placed the order.
 	 *
 	 * @param order the order
@@ -143,7 +141,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when order shipment released.
 	 *
-	 * @param order the order
+	 * @param order    the order
 	 * @param shipment the order shipment
 	 */
 	@Override
@@ -161,7 +159,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when order shipment canceled.
 	 *
-	 * @param order the order
+	 * @param order    the order
 	 * @param shipment the order shipment
 	 */
 	@Override
@@ -180,7 +178,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	 * Log the event when notes added.
 	 *
 	 * @param order the order
-	 * @param note the note
+	 * @param note  the note
 	 */
 	@Override
 	public void logOrderNote(final Order order, final String note) {
@@ -193,63 +191,73 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when payment captured.
 	 *
-	 * @param order the order
-	 * @param orderPayment the order payment
+	 * @param order        the order
+	 * @param paymentEvent payment event
 	 */
 	@Override
-	public void logOrderPaymentCaptured(final Order order, final OrderPayment orderPayment) {
-
-		if (orderPayment == null || !orderPayment.getTransactionType().equals(OrderPayment.CAPTURE_TRANSACTION)
-				|| orderPayment.getStatus() != OrderPaymentStatus.APPROVED) {
-			return; // Not a valid order payment capture.
-		}
-
+	public void logOrderPaymentCaptured(final Order order, final PaymentEvent paymentEvent) {
 		EventOriginator originator = getSystemEventOriginator();
 
-		StringBuilder detail = new StringBuilder();
-		detail.append("Payment Captured at ");
-		detail.append(orderPayment.getCreatedDate());
-		detail.append(" with total ");
-		detail.append(getMoneyFormatter().formatCurrency(orderPayment.getAmountMoney(), order.getLocale()));
-		detail.append(" on ");
-		detail.append(orderPayment.getPaymentMethod());
-		detail.append(getPaymentDetails(orderPayment));
-		detail.append('.');
-
-		OrderEvent orderEvent = createOrderEvent(detail.toString(), TITLE_PAYMENT_CAPTURED, originator);
+		final Money money = Money.valueOf(paymentEvent.getAmount().getAmount(), order.getCurrency());
+		final PaymentInstrumentDTO paymentInstrument = paymentEvent.getOrderPaymentInstrumentDTO().getPaymentInstrument();
+		String detail = "Payment Captured at "
+				+ paymentEvent.getDate()
+				+ " with total "
+				+ getMoneyFormatter().formatCurrency(money, order.getLocale())
+				+ " on "
+				+ paymentInstrumentWorkflow.findByGuid(paymentInstrument.getGUID()).getName()
+				+ '.';
+		OrderEvent orderEvent = createOrderEvent(detail, TITLE_PAYMENT_CAPTURED, originator);
 		order.addOrderEvent(orderEvent);
 	}
 
 	/**
-	 * Log the event when payment refund.
+	 * Log the event of refund payment.
 	 *
-	 * @param order the order
-	 * @param orderPayment the order payment
+	 * @param order        the order
+	 * @param paymentEvent payment event
 	 */
 	@Override
-	public void logOrderPaymentRefund(final Order order, final OrderPayment orderPayment) {
-
-		if (orderPayment == null || !orderPayment.getTransactionType().equals(OrderPayment.CREDIT_TRANSACTION)
-				|| orderPayment.getStatus() != OrderPaymentStatus.APPROVED) {
-			return; // Not a valid order payment refund.
-		}
-
+	public void logOrderPaymentRefund(final Order order, final PaymentEvent paymentEvent) {
 		EventOriginator originator = order.getModifiedBy();
 		if (originator == null) {
 			originator = getSystemEventOriginator();
 		}
 
-		StringBuilder detail = new StringBuilder();
-		detail.append("Refund at ");
-		detail.append(orderPayment.getCreatedDate());
-		detail.append(" with total ");
-		detail.append(getMoneyFormatter().formatCurrency(orderPayment.getAmountMoney(), order.getLocale()));
-		detail.append(" to ");
-		detail.append(orderPayment.getPaymentMethod());
-		detail.append(getPaymentDetails(orderPayment));
-		detail.append('.');
+		final Money money = Money.valueOf(paymentEvent.getAmount().getAmount(), order.getCurrency());
+		final PaymentInstrumentDTO paymentInstrument = paymentEvent.getOrderPaymentInstrumentDTO().getPaymentInstrument();
+		String detail = "Refund on "
+				+ paymentEvent.getDate()
+				+ " of "
+				+ getMoneyFormatter().formatCurrency(money, order.getLocale())
+				+ " to "
+				+ paymentInstrumentWorkflow.findByGuid(paymentInstrument.getGUID()).getName()
+				+ '.';
+		OrderEvent orderEvent = createOrderEvent(detail, TITLE_PAYMENT_REFUND, originator);
 
-		OrderEvent orderEvent = createOrderEvent(detail.toString(), TITLE_PAYMENT_REFUND, originator);
+		order.addOrderEvent(orderEvent);
+	}
+
+	/**
+	 * Log the event of manual refund payment.
+	 *
+	 * @param order        the order
+	 * @param paymentEvent payment event
+	 */
+	@Override
+	public void logOrderPaymentManualRefund(final Order order, final PaymentEvent paymentEvent) {
+		EventOriginator originator = order.getModifiedBy();
+		if (originator == null) {
+			originator = getSystemEventOriginator();
+		}
+
+		final Money money = Money.valueOf(paymentEvent.getAmount().getAmount(), order.getCurrency());
+		String detail = "Manual refund on "
+				+ paymentEvent.getDate()
+				+ " of "
+				+ getMoneyFormatter().formatCurrency(money, order.getLocale())
+				+ '.';
+		OrderEvent orderEvent = createOrderEvent(detail, TITLE_PAYMENT_REFUND, originator);
 
 		order.addOrderEvent(orderEvent);
 	}
@@ -276,7 +284,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 			currencyCodeANDMoneyValueAndSymbol = moneyFormatter.formatCurrency(listUnitPrice, order.getLocale());
 		}
 		String detail = format("New Sku (%1$s @ %2$s of %3$s) is added to the shipment #%5$s, order total changed to %4$s.",
-				orderSku.getQuantity(), currencyCodeANDMoneyValueAndSymbol,	getOrderSkuDisplay(orderSku),
+				orderSku.getQuantity(), currencyCodeANDMoneyValueAndSymbol, getOrderSkuDisplay(orderSku),
 				moneyFormatter.formatCurrency(order.getTotalMoney(), order.getLocale()), shipment.getShipmentNumber());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_SKU_ADDED, originator);
@@ -351,7 +359,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when shipping method changed.
 	 *
-	 * @param order the order
+	 * @param order    the order
 	 * @param shipment the shipment.
 	 */
 	@Override
@@ -374,7 +382,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when shipping address changed.
 	 *
-	 * @param order the order
+	 * @param order    the order
 	 * @param shipment the shipment.
 	 */
 	@Override
@@ -437,7 +445,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when order return is created.
 	 *
-	 * @param order the order
+	 * @param order       the order
 	 * @param orderReturn the order return
 	 */
 	@Override
@@ -446,7 +454,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 		EventOriginator originator = getEventOriginator(order);
 
 		String detail = String.format("Order return with RMA code #%1$s is created. Return note: %2$s", orderReturn.getRmaCode(),
-			StringUtils.defaultIfBlank(orderReturn.getReturnComment(), ""));
+				StringUtils.defaultIfBlank(orderReturn.getReturnComment(), ""));
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_RETURN_CREATED, originator);
 
@@ -456,7 +464,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when order exchange is created.
 	 *
-	 * @param order the order
+	 * @param order         the order
 	 * @param orderExchange the order return
 	 */
 	@Override
@@ -465,7 +473,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 		EventOriginator originator = getEventOriginator(order);
 
 		String detail = String.format("Order exchange with RMA code #%1$s is created. Return note: %2$s", orderExchange.getRmaCode(),
-			StringUtils.defaultIfBlank(orderExchange.getReturnComment(), ""));
+				StringUtils.defaultIfBlank(orderExchange.getReturnComment(), ""));
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_ORDER_EXCHANGE_CREATED, originator);
 
@@ -475,7 +483,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when receive the return item.
 	 *
-	 * @param order the order
+	 * @param order       the order
 	 * @param orderReturn the order return
 	 */
 	@Override
@@ -497,7 +505,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when the order return is changed.
 	 *
-	 * @param order the order
+	 * @param order       the order
 	 * @param orderReturn the order return
 	 */
 	@Override
@@ -515,7 +523,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when the order return is canceled.
 	 *
-	 * @param order the order
+	 * @param order       the order
 	 * @param orderReturn the order return
 	 */
 	@Override
@@ -533,7 +541,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when the order return is completed.
 	 *
-	 * @param order the order
+	 * @param order       the order
 	 * @param orderReturn the order return
 	 */
 	@Override
@@ -566,7 +574,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when the exchange order is canceled.
 	 *
-	 * @param order the exchange order
+	 * @param order         the exchange order
 	 * @param orderExchange the orderExchange
 	 */
 	@Override
@@ -574,7 +582,8 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = format("Order exchange #%1$s is canceled.", orderExchange.getRmaCode());
+		String detail = format("Exchange with RMA#%1$s and Exchange Order#%2$s is cancelled.",
+				orderExchange.getRmaCode(), orderExchange.getExchangeOrder().getOrderNumber());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_EXCHANGE_CANCELED, originator);
 
@@ -584,7 +593,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	/**
 	 * Log the event when the exchange order is completed.
 	 *
-	 * @param order the exchange order
+	 * @param order         the exchange order
 	 * @param orderExchange the orderExchange
 	 */
 	@Override
@@ -613,20 +622,20 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	}
 
 	private EventOriginator getSystemEventOriginator() {
-		EventOriginatorHelper helper = beanFactory.getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		EventOriginatorHelper helper = beanFactory.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 		return helper.getSystemOriginator();
 	}
 
 	/**
 	 * Creates an {@link OrderEvent}.
-	 * 
-	 * @param detail detail message
-	 * @param title the title
+	 *
+	 * @param detail     detail message
+	 * @param title      the title
 	 * @param originator the originator
 	 * @return instance of {@link OrderEvent}
 	 */
 	protected OrderEvent createOrderEvent(final String detail, final String title, final EventOriginator originator) {
-		OrderEvent orderEvent = beanFactory.getBean(ContextIdNames.ORDER_EVENT);
+		OrderEvent orderEvent = beanFactory.getPrototypeBean(ContextIdNames.ORDER_EVENT, OrderEvent.class);
 		orderEvent.setOriginatorType(originator.getType());
 		orderEvent.setCreatedBy(originator.getCmUser());
 		orderEvent.setCreatedDate(this.timeService.getCurrentTime());
@@ -634,24 +643,6 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		orderEvent.setNote(detail);
 		return orderEvent;
-	}
-
-	private String getPaymentDetails(final OrderPayment orderPayment) {
-		return getPaymentDetailsFormatter(orderPayment).formatPaymentDetails(orderPayment);
-	}
-
-	private OrderEventPaymentDetailFormatter getPaymentDetailsFormatter(final OrderPayment orderPayment) {
-		OrderEventPaymentDetailFormatter formatter = formatterMap.get(orderPayment.getPaymentMethod());
-
-		if (formatter == null) {
-			throw new IllegalArgumentException("No formatter found for " + orderPayment.getPaymentMethod());
-		} else {
-			return formatter;
-		}
-	}
-
-	public void setFormatterMap(final Map<PaymentType, OrderEventPaymentDetailFormatter> formatterMap) {
-		this.formatterMap = formatterMap;
 	}
 
 	public void setTimeService(final TimeService timeService) {
@@ -676,6 +667,14 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 	public void setPricingSnapshotService(final PricingSnapshotService pricingSnapshotService) {
 		this.pricingSnapshotService = pricingSnapshotService;
+	}
+
+	public PaymentInstrumentWorkflow getPaymentInstrumentWorkflow() {
+		return paymentInstrumentWorkflow;
+	}
+
+	public void setPaymentInstrumentWorkflow(final PaymentInstrumentWorkflow paymentInstrumentWorkflow) {
+		this.paymentInstrumentWorkflow = paymentInstrumentWorkflow;
 	}
 
 }

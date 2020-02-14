@@ -73,7 +73,7 @@ public abstract class AbstractEPInventoryStrategy extends AbstractInventoryStrat
 
 			if (inventory == null) {
 				// It's going to insert a new inventory.
-				inventory = getBeanFactory().getBean(ContextIdNames.INVENTORY);
+				inventory = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY, Inventory.class);
 				inventory.initialize();
 				inventory.setWarehouseUid(inventoryDto.getInventoryKey().getWarehouseUid());
 				inventory.setSkuCode(inventoryDto.getInventoryKey().getSkuCode());
@@ -82,7 +82,8 @@ public abstract class AbstractEPInventoryStrategy extends AbstractInventoryStrat
 			getInventoryDtoAssembler().copyFieldsFromDtoToDomain(inventory, inventoryDto);
 			// save to database
 			getInventoryDao().saveOrUpdate(inventory);
-			InventoryExecutionResult executionResult = getBeanFactory().getBean(ContextIdNames.INVENTORY_EXECUTION_RESULT);
+			InventoryExecutionResult executionResult = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORY_EXECUTION_RESULT,
+					InventoryExecutionResult.class);
 			setExecutionResult(executionResult);
 		}
 	}

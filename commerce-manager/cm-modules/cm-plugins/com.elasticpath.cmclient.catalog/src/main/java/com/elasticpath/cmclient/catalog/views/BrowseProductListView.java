@@ -22,7 +22,7 @@ import org.eclipse.ui.PlatformUI;
 import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -138,7 +138,7 @@ public class BrowseProductListView extends AbstractProductListView {
 	 * Creates new search criteria and populates it with category id and default search values.
 	 */
 	private ProductSearchCriteria createSearchCriteria(final Category category) {
-		ProductSearchCriteria criteria = ServiceLocator.getService(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
+		ProductSearchCriteria criteria = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class);
 
 		if (category.isLinked()) {
 			criteria.setOnlySearchMasterCategory(true);
@@ -352,11 +352,12 @@ public class BrowseProductListView extends AbstractProductListView {
 		}
 
 		private Product getProductWithAttributes(final String productGuid) {
-			ProductLoadTuner productLoadTuner = ServiceLocator.getService(ContextIdNames.PRODUCT_LOAD_TUNER);
+			ProductLoadTuner productLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 			productLoadTuner.setLoadingAttributeValue(true);
 			productLoadTuner.setLoadingCategories(true);
 
-			QueryService<Product> productQueryService = ServiceLocator.getService(ContextIdNames.PRODUCT_QUERY_SERVICE);
+			QueryService<Product> productQueryService = (QueryService<Product>) BeanLocator
+					.getSingletonBean(ContextIdNames.PRODUCT_QUERY_SERVICE, QueryService.class);
 
 			QueryResult<Product> queryResult = productQueryService.query(CriteriaBuilder.criteriaFor(Product.class)
 					.with(ProductRelation.having().codes(productGuid)).usingLoadTuner(productLoadTuner).returning(ResultType.ENTITY));
@@ -407,11 +408,12 @@ public class BrowseProductListView extends AbstractProductListView {
 		}
 
 		private Product getProductWithAttributes(final String productGuid) {
-			ProductLoadTuner productLoadTuner = ServiceLocator.getService(ContextIdNames.PRODUCT_LOAD_TUNER);
+			ProductLoadTuner productLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_LOAD_TUNER, ProductLoadTuner.class);
 			productLoadTuner.setLoadingAttributeValue(true);
 			productLoadTuner.setLoadingCategories(true);
 
-			QueryService<Product> productQueryService = ServiceLocator.getService(ContextIdNames.PRODUCT_QUERY_SERVICE);
+			QueryService<Product> productQueryService = (QueryService<Product>) BeanLocator
+					.getSingletonBean(ContextIdNames.PRODUCT_QUERY_SERVICE, QueryService.class);
 
 			QueryResult<Product> queryResult = productQueryService.query(CriteriaBuilder.criteriaFor(Product.class)
 					.with(ProductRelation.having().codes(productGuid)).usingLoadTuner(productLoadTuner).returning(ResultType.ENTITY));

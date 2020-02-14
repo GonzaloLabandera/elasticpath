@@ -33,7 +33,7 @@ public class DiscountsEntityForPurchaseRepositoryImpl<E extends DiscountEntity, 
 		String purchaseId = identifier.getPurchase().getPurchaseId().getValue();
 		String scope = identifier.getPurchase().getPurchases().getScope().getValue();
 
-		return orderRepository.findByGuidAsSingle(scope, purchaseId)
+		return orderRepository.findByGuid(scope, purchaseId)
 				.map(order -> moneyTransformer.transformToEntity(order.getSubtotalDiscountMoney(), order.getLocale()))
 				.map(costEntity -> DiscountEntity.builder()
 						.addingDiscount(costEntity)

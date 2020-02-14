@@ -177,7 +177,7 @@ public abstract class DbTestCase extends BasicSpringContextTest {
 			final String subCountry, final String url, final TimeZone timeZone, final String code, final String emailSenderName, final String emailSenderAddress, final String storeAdminEmailAddress,
 			final Catalog catalog, final Locale defaultLocale, final Currency defaultCurrency) {
 
-		final Store store = getBeanFactory().getBean(ContextIdNames.STORE);
+		final Store store = getBeanFactory().getPrototypeBean(ContextIdNames.STORE, Store.class);
 		store.setCountry(country);
 		store.setName(name);
 		store.setStoreType(storeType);

@@ -29,9 +29,9 @@ public class OrderPaymentGiftCertificateFieldReader extends AbstractDataPointVal
 	public String getReadQuery(final Collection<String> dataPointKeys) {
 
 		String query =  "SELECT #alias#.uidPk, #alias#.creationDate, #alias#.lastModifiedDate,"
-			.concat(getCsvDbFieldsByDataPointKeys("#alias#.", dataPointKeys))
-			.concat(" FROM #TABLE#")
-			.concat(" WHERE #alias#.purchaser.guid = ?1");
+				.concat(getCsvDbFieldsByDataPointKeys("#alias#.", dataPointKeys))
+				.concat(" FROM #TABLE#")
+				.concat(" WHERE #alias#.purchaser.guid = ?1");
 
 		return finalizedJPQLQuerys(query);
 	}

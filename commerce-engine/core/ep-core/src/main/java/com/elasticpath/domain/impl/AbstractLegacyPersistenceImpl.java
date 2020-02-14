@@ -4,8 +4,7 @@
 package com.elasticpath.domain.impl;
 
 import com.elasticpath.base.Initializable;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.Utility;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.persistence.api.AbstractPersistableImpl;
 
@@ -13,7 +12,7 @@ import com.elasticpath.persistence.api.AbstractPersistableImpl;
  * This class provides methods to allow accessing {@link ElasticPath} and getting beans from within the
  * persistent objects.
  */
-public abstract class AbstractLegacyPersistenceImpl extends AbstractPersistableImpl implements Initializable {
+public abstract class AbstractLegacyPersistenceImpl extends AbstractPersistableImpl implements Initializable, BeanFactory {
 	/**
 	 * Serial version id.
 	 */
@@ -21,8 +20,8 @@ public abstract class AbstractLegacyPersistenceImpl extends AbstractPersistableI
 
 	/**
 	 * Get the ElasticPath singleton.
-	 * Consider using {@link #getBean(String)} for obtaining new
-	 * instances of prototype beans.
+	 * Consider using {@link #getPrototypeBean(String, Class)} directly on the bean factory
+	 * for obtaining new instances of prototype beans.
 	 *
 	 * @return elasticpath the ElasticPath singleton.
 	 */
@@ -31,14 +30,25 @@ public abstract class AbstractLegacyPersistenceImpl extends AbstractPersistableI
 		return ElasticPathImpl.getInstance();
 	}
 
-	/**
-	 * Convenience method for getting a bean instance from elastic path.
-	 * @param <T> the type of bean to return
-	 * @param beanName the name of the bean to get and instance of.
-	 * @return an instance of the requested bean.
-	 */
-	protected <T> T getBean(final String beanName) {
-		return getElasticPath().<T>getBean(beanName);
+	@Override
+	@Deprecated
+	public <T> T getBean(final String beanName) {
+		return getElasticPath().getBean(beanName);
+	}
+
+	@Override
+	public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+		return getElasticPath().getPrototypeBean(name, clazz);
+	}
+
+	@Override
+	public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+		return getElasticPath().getSingletonBean(name, clazz);
+	}
+
+	@Override
+	public <T> Class<T> getBeanImplClass(final String beanName) {
+		return getElasticPath().getBeanImplClass(beanName);
 	}
 
 	/**
@@ -60,15 +70,5 @@ public abstract class AbstractLegacyPersistenceImpl extends AbstractPersistableI
 	@Override
 	public void initialize() {
 		setDefaultValues();
-	}
-
-	/**
-	 * Returns the <code>Utility</code> singleton.
-	 * @return the <code>Utility</code> singleton.
-	 * @deprecated If the implementation class needs the Utility object it should be retrieved inside that class.
-	 */
-	@Deprecated
-	public Utility getUtility() {
-		return getBean(ContextIdNames.UTILITY);
 	}
 }

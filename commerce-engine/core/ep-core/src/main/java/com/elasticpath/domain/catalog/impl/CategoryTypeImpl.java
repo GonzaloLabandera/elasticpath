@@ -108,7 +108,7 @@ public class CategoryTypeImpl extends AbstractLegacyEntityImpl implements Catego
 	@Transient
 	public AttributeGroup getAttributeGroup() {
 		if (categoryAttributeGroup == null) {
-			categoryAttributeGroup = getBean(ContextIdNames.ATTRIBUTE_GROUP);
+			categoryAttributeGroup = getPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class);
 		}
 		categoryAttributeGroup.setAttributeGroupAttributes(getCategoryAttributeGroupAttributes());
 		return categoryAttributeGroup;
@@ -165,7 +165,7 @@ public class CategoryTypeImpl extends AbstractLegacyEntityImpl implements Catego
 		super.initialize();
 
 		if (categoryAttributeGroup == null) {
-			categoryAttributeGroup = getBean(ContextIdNames.ATTRIBUTE_GROUP);
+			categoryAttributeGroup = getPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class);
 		}
 	}
 

@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.rest.definition.addresses.AddressDetailEntity;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.base.NameEntity;
 import com.elasticpath.rest.resource.integration.commons.addresses.transform.AddressTransformer;
@@ -37,15 +36,13 @@ public class AddressTransformerTest {
 
 	@Test
 	public void ensureAllFieldsAreCopied() {
-		AddressDetailEntity expectedAddressEntity = AddressDetailEntity.builder()
+		com.elasticpath.rest.definition.base.AddressEntity expectedAddressEntity = com.elasticpath.rest.definition.base.AddressEntity.builder()
 				.withStreetAddress(STREET1)
 				.withExtendedAddress(STREET2)
 				.withLocality(CITY)
 				.withCountryName(COUNTRY)
 				.withRegion(SUB_COUNTRY)
 				.withPostalCode(ZIP_CODE)
-				.withPhoneNumber(null)
-				.withOrganization(null)
 				.build();
 		NameEntity nameEntity = NameEntity.builder()
 				.withGivenName(FIRST_NAME)
@@ -56,6 +53,8 @@ public class AddressTransformerTest {
 				.withAddressId(ADDRESS_GUID)
 				.withAddress(expectedAddressEntity)
 				.withName(nameEntity)
+				.withPhoneNumber(null)
+				.withOrganization(null)
 				.build();
 
 		Address address = new CustomerAddressImpl();

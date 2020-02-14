@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
+import com.elasticpath.domain.catalog.PriceTier;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.PriceTierImpl;
 import com.elasticpath.domain.pricing.BaseAmount;
@@ -54,11 +55,11 @@ public class PricePopulatorImplTest {
 	 */
 	@Test
 	public void testPopulatePriceWithNoBaseAmounts() {
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
 
 		Collection<BaseAmount> amounts = new ArrayList<>();
 		Currency currency = Currency.getInstance(Locale.CANADA);
-		Price price = beanFactory.getBean(ContextIdNames.PRICE);
+		Price price = beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		boolean found = pricePopulator.populatePriceFromBaseAmounts(amounts, currency, price);
 		assertThat(found).isFalse();
 	}
@@ -68,13 +69,13 @@ public class PricePopulatorImplTest {
 	 */
 	@Test
 	public void testPopulatePriceWithNullBaseAmounts() {
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
 
 		BaseAmount baseAmount = new BaseAmountImpl(GUID, GUID, SKU, BigDecimal.ONE, null, null, GUID);
 		Collection<BaseAmount> amounts = new ArrayList<>();
 		amounts.add(baseAmount);
 		Currency currency = Currency.getInstance(Locale.CANADA);
-		Price price = beanFactory.getBean(ContextIdNames.PRICE);
+		Price price = beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		boolean found = pricePopulator.populatePriceFromBaseAmounts(amounts, currency, price);
 		assertThat(found).isFalse();
 	}
@@ -84,8 +85,8 @@ public class PricePopulatorImplTest {
 	 */
 	@Test
 	public void testPopulatePriceWithNullPrices() {
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_TIER)).thenAnswer(invocation -> new PriceTierImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class)).thenAnswer(invocation -> new PriceTierImpl());
 
 		Collection<BaseAmount> amounts = new ArrayList<>();
 		amounts.add(createBaseAmount("PL", "1", "9.99", "4.99", "PROD",
@@ -94,7 +95,7 @@ public class PricePopulatorImplTest {
 		amounts.add(new BaseAmountImpl(GUID, GUID, SKU, BigDecimal.TEN, null, null, GUID));
 
 		Currency currency = Currency.getInstance(Locale.CANADA);
-		Price price = beanFactory.getBean(ContextIdNames.PRICE);
+		Price price = beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		boolean found = pricePopulator.populatePriceFromBaseAmounts(amounts, currency, price);
 		assertThat(found).isTrue();
 		assertThat(price.getPriceTiers()).hasSize(1);
@@ -104,8 +105,8 @@ public class PricePopulatorImplTest {
 	 */
 	@Test
 	public void testPopulatePrice() {
-		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
-		when(beanFactory.getBean(ContextIdNames.PRICE_TIER)).thenAnswer(invocation -> new PriceTierImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRICE_TIER, PriceTier.class)).thenAnswer(invocation -> new PriceTierImpl());
 
 		Collection<BaseAmount> amounts = new ArrayList<>();
 		amounts.add(createBaseAmount("PL", "1", "9.99", "4.99", "PROD",
@@ -114,7 +115,7 @@ public class PricePopulatorImplTest {
 				BaseAmountObjectType.PRODUCT.toString()));
 
 		Currency currency = Currency.getInstance(Locale.CANADA);
-		Price price = beanFactory.getBean(ContextIdNames.PRICE);
+		Price price = beanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class);
 		boolean found = pricePopulator.populatePriceFromBaseAmounts(amounts, currency, price);
 		assertThat(found).isTrue();
 		assertThat(price.getPriceTiers()).hasSize(2);

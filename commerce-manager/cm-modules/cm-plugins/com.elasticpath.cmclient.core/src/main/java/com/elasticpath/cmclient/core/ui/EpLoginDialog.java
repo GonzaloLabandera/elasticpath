@@ -27,7 +27,7 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -237,7 +237,7 @@ public class EpLoginDialog extends AbstractEpDialog {
 	}
 
 	private String getAdminEmailAddress() {
-		SettingsReader settingsReader = ServiceLocator.getService("settingsService");
+		SettingsReader settingsReader = BeanLocator.getSingletonBean("settingsService", SettingsReader.class);
 		return settingsReader.getSettingValue(SETTING_GLOBAL_SENDER_ADDRESS).getValue();
 	}
 

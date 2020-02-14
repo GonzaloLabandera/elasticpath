@@ -95,7 +95,7 @@ public class ShoppingItemFactoryImplTest {
 				will(returnValue(SKU_GUID));
 				allowing(product).getProductType();
 				will(returnValue(productType));
-				allowing(beanFactory).getBean(ContextIdNames.SHOPPING_ITEM);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SHOPPING_ITEM, ShoppingItem.class);
 				will(returnValue(new ShoppingItemImpl()));
 				allowing(product).getMinOrderQty();
 				will(returnValue(1));
@@ -127,7 +127,7 @@ public class ShoppingItemFactoryImplTest {
 				will(returnValue(SKU_GUID));
 				allowing(bundle).getProductType();
 				will(returnValue(productType));
-				allowing(beanFactory).getBean(ContextIdNames.SHOPPING_ITEM);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SHOPPING_ITEM, ShoppingItem.class);
 				will(returnValue(new ShoppingItemImpl()));
 				allowing(bundle).getMinOrderQty();
 				will(returnValue(1));
@@ -145,7 +145,7 @@ public class ShoppingItemFactoryImplTest {
 		final BeanFactory mockBeanFactory = context.mock(BeanFactory.class);
 		context.checking(new Expectations() {
 			{
-				oneOf(mockBeanFactory).getBean(ContextIdNames.SHOPPING_ITEM);
+				oneOf(mockBeanFactory).getPrototypeBean(ContextIdNames.SHOPPING_ITEM, ShoppingItem.class);
 				will(returnValue(new ShoppingItemImpl()));
 			}
 		});
@@ -199,7 +199,8 @@ public class ShoppingItemFactoryImplTest {
 				allowing(productSku).getGuid();
 				will(returnValue(skuGuid));
 				oneOf(product).getCode(); will(returnValue("ProductA"));
-				allowing(beanFactory).getBean("shoppingItem"); will(returnValue(shoppingItem));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SHOPPING_ITEM, ShoppingItem.class);
+				will(returnValue(shoppingItem));
 				allowing(product).getProductType();	will(returnValue(productType));
 				allowing(productType).getName(); will(returnValue("Gift Certificates"));
 				allowing(shoppingItem).setSkuGuid(skuGuid);

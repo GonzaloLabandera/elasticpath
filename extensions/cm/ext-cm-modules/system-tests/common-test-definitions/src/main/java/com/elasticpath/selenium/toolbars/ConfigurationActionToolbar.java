@@ -2,12 +2,14 @@ package com.elasticpath.selenium.toolbars;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.ManageTaxValueDialog;
 import com.elasticpath.selenium.navigations.UserSearch;
 import com.elasticpath.selenium.resultspane.CustomerSegmentResultPane;
+import com.elasticpath.selenium.resultspane.PaymentConfigurationsResultPane;
 import com.elasticpath.selenium.resultspane.ProfileAttributePane;
 import com.elasticpath.selenium.resultspane.SearchIndexesResultPane;
 import com.elasticpath.selenium.resultspane.ShippingRegionsPane;
@@ -19,6 +21,7 @@ import com.elasticpath.selenium.resultspane.TaxJurisdictionsPane;
 import com.elasticpath.selenium.resultspane.UserRolesResultPane;
 import com.elasticpath.selenium.resultspane.WarehousesPane;
 import com.elasticpath.selenium.resultspane.DataPolicyResultPane;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Configuration Toolbar.
@@ -54,6 +57,9 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 	private static final String CONFIGURATION_SECTION_LINK_CSS = "div[widget-id='%s']";
 	private static final String DATA_POLICY_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesMessages"
 			+ ".DataPoliciesAdminSection_DataPolicies']";
+	private static final String PAYMENT_CONFIGURATIONS_CSS = "div[automation-id='com.elasticpath.cmclient.admin.paymentconfigurations"
+			+ ".AdminPaymentConfigurationMessages.PaymentConfigsAdminItemCompositeFactory_Admin']";
+	private static final Logger LOGGER = Logger.getLogger(ConfigurationActionToolbar.class);
 
 	/**
 	 * Constructor.
@@ -195,6 +201,8 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 	 * Clicks Save  button.
 	 */
 	public void clickSaveButton() {
+		sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+		LOGGER.debug("Clicking Save Button");
 		clickButton(SAVE_BUTTON_CSS, "Save Button");
 		getWaitDriver().waitForElementToBeClickable(By.cssSelector(RELOAD_ACTIVE_EDITOR_BUTTON_CSS));
 	}
@@ -211,6 +219,15 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 	public DataPolicyResultPane clickDataPolicies() {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(DATA_POLICY_LINK_CSS)));
 		return new DataPolicyResultPane(getDriver());
+	}
+
+	/**
+	 * Clicks on Payment Configurations link.
+	 * @return PaymentConfigurationsResultPane
+	 */
+	public PaymentConfigurationsResultPane clickPaymentConfigurations() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(PAYMENT_CONFIGURATIONS_CSS)));
+		return new PaymentConfigurationsResultPane(getDriver());
 	}
 
 	/**

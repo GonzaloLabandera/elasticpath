@@ -31,7 +31,7 @@ public class InvalidEmailResolutionStrategy implements StructuredErrorResolution
 
 		if (StringUtils.equals(message.getMessageId(), EmailAddressShoppingCartValidatorImpl.MESSAGE_ID)) {
 			return shoppingCartRepository.getShoppingCart(cortexResourceID)
-					.flatMapMaybe(shoppingCart -> cartOrderRepository.findByCartGuidSingle(cortexResourceID)
+					.flatMapMaybe(shoppingCart -> cartOrderRepository.findByCartGuid(cortexResourceID)
 							.flatMapMaybe(cartOrder -> {
 								EmailInfoIdentifier emailInfoIdentifier = buildEmailInfoIdentifier(shoppingCart, cartOrder);
 								return Maybe.just(emailInfoIdentifier);

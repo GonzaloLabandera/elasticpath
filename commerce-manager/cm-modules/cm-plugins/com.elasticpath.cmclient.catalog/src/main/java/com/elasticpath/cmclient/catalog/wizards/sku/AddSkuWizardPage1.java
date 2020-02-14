@@ -45,7 +45,7 @@ import com.elasticpath.cmclient.catalog.editors.sku.ProductSkuShippingViewPart;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
@@ -103,9 +103,9 @@ public class AddSkuWizardPage1 extends AbstractEPWizardPage<Product> implements 
 
 	private final Map<CCombo, List<SkuOptionValue>> skuOptionAndValueMap = new HashMap<>();
 
-	private final SkuOptionService skuOptionService = ServiceLocator.getService(ContextIdNames.SKU_OPTION_SERVICE);
+	private final SkuOptionService skuOptionService = BeanLocator.getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
 
-	private final ProductSkuService skuService = ServiceLocator.getService(ContextIdNames.PRODUCT_SKU_SERVICE);
+	private final ProductSkuService skuService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_SERVICE, ProductSkuService.class);
 
 	private ControlDecoration skuCodeDecoration;
 
@@ -115,7 +115,7 @@ public class AddSkuWizardPage1 extends AbstractEPWizardPage<Product> implements 
 
 	private IStatus currentStatus;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private final Map<SkuOption, Label> skuOptionLockIconMap = new HashMap<>();
 
@@ -181,7 +181,7 @@ public class AddSkuWizardPage1 extends AbstractEPWizardPage<Product> implements 
 
 		super(2, false, pageName, databindingContext);
 
-		digitalAsset = ServiceLocator.getService(ContextIdNames.DIGITAL_ASSET);
+		digitalAsset = BeanLocator.getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 
 		this.title = title;
 		setMessage(CatalogMessages.get().AddSkuWizardPage1_Msg);
@@ -370,7 +370,7 @@ public class AddSkuWizardPage1 extends AbstractEPWizardPage<Product> implements 
 	}
 
 	private void populateTaxCode() {
-		final TaxCodeService taxCodeService = ServiceLocator.getService(ContextIdNames.TAX_CODE_SERVICE);
+		final TaxCodeService taxCodeService = BeanLocator.getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		final List<TaxCode> originalCodeList = taxCodeService.list();
 		this.taxCodeList = new ArrayList<>(originalCodeList.size() + 1);
 		addNullTaxCodeOption(taxCodeCombo, taxCodeList);

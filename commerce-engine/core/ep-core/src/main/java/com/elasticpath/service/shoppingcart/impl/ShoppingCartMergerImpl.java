@@ -11,7 +11,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
-import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPredicateUtils;
@@ -90,10 +89,6 @@ public class ShoppingCartMergerImpl implements ShoppingCartMerger {
 	protected void mergeTransientData(final ShoppingCart recipient, final ShoppingCart donor) {
 
 		recipient.applyPromotionCodes(donor.getPromotionCodes());
-
-		for (GiftCertificate giftCertificate : donor.getAppliedGiftCertificates()) {
-			recipient.applyGiftCertificate(giftCertificate);
-		}
 
 		recipient.setCmUserUID(donor.getCmUserUID());
 	}

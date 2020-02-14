@@ -350,7 +350,7 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 			conditions.add((RuleCondition) ruleElement);
 		} else if (RuleAction.ACTION_KIND.equals(ruleElement.getKind())) {
 			// actiion salience is configured in spring config domainModel.xml
-			RuleAction action = getBean(ruleElement.getType());
+			RuleAction action = getPrototypeBean(ruleElement.getType(), RuleAction.class);
 			// update transient value from spring setting
 			((RuleAction) ruleElement).setSalience(action.getSalience());
 			actions.add((RuleAction) ruleElement);
@@ -645,7 +645,7 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 
 	@Transient
 	private ConditionDSLBuilder getConditionDSLBuilder() {
-		return getBean(ContextIdNames.TAG_CONDITION_DSL_BUILDER);
+		return getSingletonBean(ContextIdNames.TAG_CONDITION_DSL_BUILDER, ConditionDSLBuilder.class);
 	}
 
 
@@ -907,7 +907,7 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 	@Transient
 	public LocalizedProperties getLocalizedProperties() {
 		if (localizedProperties == null) {
-			localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			localizedProperties = getPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class);
 			localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(), ContextIdNames.RULE_LOCALIZED_PROPERTY_VALUE);
 		}
 		return localizedProperties;

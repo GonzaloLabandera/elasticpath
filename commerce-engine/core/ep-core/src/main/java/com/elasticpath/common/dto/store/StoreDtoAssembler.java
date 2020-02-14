@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.common.dto.assembler.AbstractDtoAssembler;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -19,7 +18,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
 import com.elasticpath.domain.modifier.ModifierGroup;
-import com.elasticpath.domain.payment.PaymentGateway;
+import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
 import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
@@ -29,7 +28,7 @@ import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.service.catalog.CatalogService;
 import com.elasticpath.service.modifier.ModifierService;
-import com.elasticpath.service.payment.PaymentGatewayService;
+import com.elasticpath.service.orderpaymentapi.StorePaymentProviderConfigService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.store.WarehouseService;
 import com.elasticpath.service.tax.TaxCodeService;
@@ -37,8 +36,12 @@ import com.elasticpath.service.tax.TaxJurisdictionService;
 
 /**
  * Assembler for {@link Store} domain object and {@link StoreDTO}.
+
+ * @deprecated
+ * Now using commerce-engine\importexport\ep-importexport\src\main\java\com\elasticpath\importexport\common\assembler\store\StoreDtoAssembler
  */
 @SuppressWarnings({"PMD.GodClass"})
+@Deprecated
 public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 
 	private BeanFactory beanFactory;
@@ -51,14 +54,14 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 
 	private TaxJurisdictionService taxJurisdictionService;
 
-	private PaymentGatewayService paymentGatewayService;
+	private StorePaymentProviderConfigService storePaymentProviderConfigService;
 
 	private StoreService storeService;
 	private ModifierService modifierService;
 
 	@Override
 	public Store getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.STORE);
+		return beanFactory.getPrototypeBean(ContextIdNames.STORE, Store.class);
 	}
 
 	@Override
@@ -81,7 +84,7 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 	 * @return a new, uninitialized {@link creditCardType}.
 	 */
 	protected CreditCardType creditCardTypeDomainFactory() {
-		return beanFactory.getBean(ContextIdNames.CREDIT_CARD_TYPE);
+		return beanFactory.getPrototypeBean(ContextIdNames.CREDIT_CARD_TYPE, CreditCardType.class);
 	}
 
 	/**
@@ -114,7 +117,9 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		target.setStoreType(source.getStoreType());
 
 		target.setDescription(source.getDescription());
-		target.setCatalogCode(source.getCatalog().getCode());
+		if (source.getCatalog() != null) {
+			target.setCatalogCode(source.getCatalog().getCode());
+		}
 
 		target.setDisplayOutOfStock(source.isDisplayOutOfStock());
 
@@ -146,10 +151,10 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		}
 		Collections.sort(target.getTaxJurisdictions());
 
-		for (PaymentGateway paymentGateway : source.getPaymentGateways()) {
-			target.getPaymentGateways().add(paymentGateway.getName());
+		for (StorePaymentProviderConfig paymentProviderConfig : storePaymentProviderConfigService.findByStore(source)) {
+			target.getPaymentProviderPluginConfigGuids().add(paymentProviderConfig.getPaymentProviderConfigGuid());
 		}
-		Collections.sort(target.getPaymentGateways());
+		Collections.sort(target.getPaymentProviderPluginConfigGuids());
 
 		for (CreditCardType creditCardType : source.getCreditCardTypes()) {
 			target.getCreditCardTypes().add(creditCardType.getCreditCardType());
@@ -211,7 +216,6 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		populateWarehousesForDomain(source, target);
 		populateTaxCodesForDomain(source, target);
 		populateTaxJurisdictionsForDomain(source, target);
-		populatePaymentGatewaysForDomain(source, target);
 		populateCreditCardTypesForDomain(source, target);
 
 		populateCartTypesForDomain(source, target);
@@ -266,29 +270,6 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 			target.setSupportedLocales(locales);
 		} catch (DefaultValueRemovalForbiddenException e) {
 			throw new EpSystemException("While setting supported locales on store " + source.getCode(), e);
-		}
-	}
-
-	private void populatePaymentGatewaysForDomain(final StoreDTO source, final Store target) {
-		PaymentGateway existingGateway;
-
-		for (String gatewayName : source.getPaymentGateways()) {
-
-			try {
-				existingGateway = paymentGatewayService.getGatewayByName(gatewayName);
-			} catch (EpServiceException e) {
-				throw new EpSystemException("Store with the code " + source.getCode() + " references payment gateway named " + gatewayName
-						+ " which we had trouble fetching. Maybe run an export/import on payment gateways first.", e);
-			}
-
-			for (PaymentGateway gateway : target.getPaymentGateways()) {
-				if (gateway.getName().equals(gatewayName)) {
-					target.getPaymentGateways().remove(gateway);
-					break;
-				}
-			}
-
-			target.getPaymentGateways().add(existingGateway);
 		}
 	}
 
@@ -382,8 +363,8 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		this.taxJurisdictionService = taxJurisdictionService;
 	}
 
-	public void setPaymentGatewayService(final PaymentGatewayService paymentGatewayService) {
-		this.paymentGatewayService = paymentGatewayService;
+	public void setStorePaymentProviderConfigService(final StorePaymentProviderConfigService storePaymentProviderConfigService) {
+		this.storePaymentProviderConfigService = storePaymentProviderConfigService;
 	}
 
 	/**

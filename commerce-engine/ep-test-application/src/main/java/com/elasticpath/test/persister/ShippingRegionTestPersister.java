@@ -35,7 +35,7 @@ public class ShippingRegionTestPersister {
 	public ShippingRegionTestPersister(final BeanFactory beanFactory) {
 
 		this.beanFactory = beanFactory;
-		shippingRegionService = this.beanFactory.getBean(SHIPPING_REGION_SERVICE);
+		shippingRegionService = this.beanFactory.getSingletonBean(SHIPPING_REGION_SERVICE, ShippingRegionService.class);
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class ShippingRegionTestPersister {
 	public ShippingRegion persistShippingRegion(final String guid, final String name, final String regionStr)
 			throws ShippingRegionExistException {
 
-		final ShippingRegion shippingRegion = this.beanFactory.getBean(SHIPPING_REGION);
+		final ShippingRegion shippingRegion = this.beanFactory.getPrototypeBean(SHIPPING_REGION, ShippingRegion.class);
 		shippingRegion.setGuid(guid);
 		shippingRegion.setName(name);
 		//regionStr should look like[$countryCode($region1,$region2)]
@@ -85,7 +85,7 @@ public class ShippingRegionTestPersister {
 	 * @return peresisted shipping region
 	 */
 	public final ShippingRegion persistShippingRegion(final String guid, final String name, final Map<String, Region> regions) {
-		final ShippingRegion shippingRegion = this.beanFactory.getBean(SHIPPING_REGION);
+		final ShippingRegion shippingRegion = this.beanFactory.getPrototypeBean(SHIPPING_REGION, ShippingRegion.class);
 		shippingRegion.setGuid(guid);
 		shippingRegion.setName(name);
 		shippingRegion.setRegionMap(regions);

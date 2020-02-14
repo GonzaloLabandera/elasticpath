@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,12 +44,11 @@ import com.elasticpath.persistence.api.PersistenceEngineOperationListener;
 import com.elasticpath.persistence.api.PersistenceSessionFactory;
 import com.elasticpath.persistence.openjpa.JpaPersistenceSession;
 import com.elasticpath.persistence.openjpa.PersistenceInterceptor;
-import com.elasticpath.persistence.openjpa.util.QueryUtil;
 
 /**
  * Test that the methods of the JPA Persistence Engine behave as expected.
  */
-@SuppressWarnings({"unchecked", "PMD.TooManyMethods", "PMD.ExcessiveClassLength", "PMD.UselessOverridingMethod", "PMD.GodClass"})
+@SuppressWarnings({"unchecked", "rawtypes", "PMD.TooManyMethods"})
 @RunWith(MockitoJUnitRunner.class)
 public class JpaPersistenceEngineImplTest {
 
@@ -73,8 +71,6 @@ public class JpaPersistenceEngineImplTest {
 	private PersistenceSessionFactory sessionFactory;
 	@Mock
 	private QueryReader queryReader;
-	@Mock
-	private QueryUtil queryUtil;
 
 	private static final long UIDPK = 1000L;
 
@@ -219,10 +215,11 @@ public class JpaPersistenceEngineImplTest {
 		when(query.getOperation()).thenReturn(QueryOperationType.UPDATE);
 
 		persistenceEngine.bulkUpdate(queryString, parameters);
+
 		verify(entityManager).createQuery(queryString);
 		verify(query).getOperation();
 		verify(query).executeUpdate();
-		verify(queryUtil).setQueryParameters(query, parameters);
+		verify(query).setParameters(parameters);
 	}
 
 	/**
@@ -403,7 +400,7 @@ public class JpaPersistenceEngineImplTest {
 		verify(entityManager).createNamedQuery(NAMED_QUERY);
 		verify(query).getOperation();
 		verify(query).executeUpdate();
-		verify(queryUtil).setQueryParameters(query, new Object[0]);
+		//verify(queryUtil).setQueryParameters(query, new Object[0]);
 		assertThat(result)
 			.as("The return value should be the row count returned by executeUpdate")
 			.isEqualTo(rowsUpdated);
@@ -624,7 +621,7 @@ public class JpaPersistenceEngineImplTest {
 		final String query = "SELECT so FROM SomeObjectImpl so WHERE so.field = ?1";
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
 		final JpaPersistenceSession session = mock(JpaPersistenceSession.class);
-		final Query jpaQuery = mock(Query.class);
+		final OpenJPAQuery jpaQuery = mock(OpenJPAQuery.class);
 
 		when(sessionFactory.createPersistenceSession()).thenReturn(session);
 		when(session.getEntityManager()).thenReturn(entityManager);
@@ -635,8 +632,8 @@ public class JpaPersistenceEngineImplTest {
 		verify(sessionFactory).createPersistenceSession();
 		verify(session).getEntityManager();
 		verify(entityManager).createQuery(query);
-		verify(queryUtil).setQueryParameters(jpaQuery, parameters);
-		verify(queryUtil).getResults(jpaQuery);
+		verify(jpaQuery).setParameters(parameters);
+		verify(jpaQuery).getResultList();
 	}
 
 	/**
@@ -646,22 +643,21 @@ public class JpaPersistenceEngineImplTest {
 	@Test
 	public final void testRetrieveWithListWithNewSession() {
 		final String query = "SELECT so FROM SomeObjectImpl so WHERE so.uidPk in (:list) AND so.field = :someField";
-		final Map<String, Object> parameters = ImmutableMap.of("somefield", SOME_PARAMETER);
+		final Object[] parameters = new Object[]{ImmutableMap.of("somefield", SOME_PARAMETER)};
 		final Set<Long> values = ImmutableSet.of(UIDPK, UIDPK2);
-		final Query newQuery = mock(Query.class);
+		final List<Long> listOfValues = Lists.newArrayList(values);
 		final OpenJPAQuery<Entity> jpaQuery = mock(OpenJPAQuery.class);
 		final JpaPersistenceSession session = mock(JpaPersistenceSession.class);
 
 		when(sessionFactory.createPersistenceSession()).thenReturn(session);
 		when(session.getEntityManager()).thenReturn(entityManager);
 		when(entityManager.createQuery(query)).thenReturn(jpaQuery);
-		when(queryUtil.insertListIntoQuery(jpaQuery, LIST_PARAMETER_NAME, "1000,1001")).thenReturn(newQuery);
-		when(queryUtil.splitCollection(values, parameters.size())).thenReturn(Lists.newArrayList("1000,1001"));
 
 		persistenceEngine.retrieveWithListWithNewSession(query, LIST_PARAMETER_NAME, values, parameters);
 
-		verify(queryUtil).setQueryParameters(newQuery, new Object[]{parameters});
-		verify(queryUtil).getResults(newQuery);
+		verify(jpaQuery).getResultList();
+		verify(jpaQuery).setParameter(LIST_PARAMETER_NAME, listOfValues);
+		verify(jpaQuery).setParameters(parameters);
 	}
 
 	/**
@@ -671,8 +667,8 @@ public class JpaPersistenceEngineImplTest {
 	public final void testRetrieveWithNewSessionString() {
 		final String query = "SELECT so FROM SomeObjectImpl so";
 		final JpaPersistenceSession session = mock(JpaPersistenceSession.class);
-		final Query jpaQuery = mock(Query.class);
-		final Map<String, String> parameters = Collections.emptyMap();
+		final OpenJPAQuery jpaQuery = mock(OpenJPAQuery.class);
+		final Object[] parameters = new Object[]{Collections.emptyMap()};
 
 		when(sessionFactory.createPersistenceSession()).thenReturn(session);
 		when(session.getEntityManager()).thenReturn(entityManager);
@@ -683,8 +679,8 @@ public class JpaPersistenceEngineImplTest {
 		verify(sessionFactory).createPersistenceSession();
 		verify(session).getEntityManager();
 		verify(entityManager).createQuery(query);
-		verify(queryUtil).setQueryParameters(jpaQuery, new Object[]{parameters});
-		verify(queryUtil).getResults(jpaQuery);
+		verify(jpaQuery).setParameters(parameters);
+		verify(jpaQuery).getResultList();
 	}
 
 	/**
@@ -791,7 +787,7 @@ public class JpaPersistenceEngineImplTest {
 		persistenceEngine.executeNamedQuery(NAMED_QUERY, parameters);
 
 		verify(entityManager).createNamedQuery(NAMED_QUERY);
-		verify(queryUtil).setQueryParameters(query, parameters);
+		verify(query).setParameters(parameters);
 		verify(query).executeUpdate();
 	}
 
@@ -802,20 +798,17 @@ public class JpaPersistenceEngineImplTest {
 	@Test
 	public final void testExecuteNamedQueryWithListStringStringCollectionOfE() {
 		final Set<Long> values = ImmutableSet.of(UIDPK, UIDPK2);
-		final String csvValues = UIDPK + "," + UIDPK2;
 		final OpenJPAQuery<Entity> query = mock(OpenJPAQuery.class);
-		final Query newQuery = mock(Query.class);
+		final List<Long> listOfValues = Lists.newArrayList(values);
 
 		when(entityManager.createNamedQuery(NAMED_QUERY_WITH_LIST)).thenReturn(query);
-		when(queryUtil.insertListIntoQuery(query, LIST_PARAMETER_NAME, csvValues)).thenReturn(newQuery);
-		when(queryUtil.splitCollection(values, 0)).thenReturn(Lists.newArrayList(csvValues));
 		when(query.getOperation()).thenReturn(QueryOperationType.SELECT);
 
 		persistenceEngine.executeNamedQueryWithList(NAMED_QUERY_WITH_LIST, LIST_PARAMETER_NAME, values);
 
 		verify(entityManager).createNamedQuery(NAMED_QUERY_WITH_LIST);
-		verify(newQuery).executeUpdate();
-		verify(queryUtil).setQueryParameters(newQuery, new Object[0]);
+		verify(query).executeUpdate();
+		verify(query).setParameter(LIST_PARAMETER_NAME, listOfValues);
 	}
 
 	/**
@@ -826,20 +819,37 @@ public class JpaPersistenceEngineImplTest {
 	public final void testExecuteNamedQueryWithListStringStringCollectionOfEObjectArray() {
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
 		final Set<Long> values = ImmutableSet.of(UIDPK, UIDPK2);
-		final String csvValues = UIDPK + "," + UIDPK2;
+		final List<Long> listOfValues = Lists.newArrayList(values);
 		final OpenJPAQuery<Entity> query = mock(OpenJPAQuery.class);
-		final Query newQuery = mock(Query.class);
 
 		when(entityManager.createNamedQuery(NAMED_QUERY_WITH_LIST)).thenReturn(query);
-		when(queryUtil.insertListIntoQuery(query, LIST_PARAMETER_NAME, csvValues)).thenReturn(newQuery);
-		when(queryUtil.splitCollection(values, 0)).thenReturn(Lists.newArrayList(csvValues));
 		when(query.getOperation()).thenReturn(QueryOperationType.SELECT);
 
 		persistenceEngine.executeNamedQueryWithList(NAMED_QUERY_WITH_LIST, LIST_PARAMETER_NAME, values, parameters);
 
 		verify(entityManager).createNamedQuery(NAMED_QUERY_WITH_LIST);
-		verify(newQuery).executeUpdate();
-		verify(queryUtil).setQueryParameters(newQuery, parameters);
+		verify(query).executeUpdate();
+		verify(query).setParameters(parameters);
+		verify(query).setParameter(LIST_PARAMETER_NAME, listOfValues);
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public final void testRetrieveByNamedQueryStringFlushModeIgnoreChangesAndParametersArray() {
+
+		boolean ignoreChanges = true;
+
+		final Object[] parameters = new Object[] { SOME_PARAMETER, SOME_OTHER_PARAMETER };
+
+		when(queryReader.retrieveByNamedQuery(NAMED_QUERY, FlushMode.COMMIT, ignoreChanges, parameters)).thenReturn(ImmutableList.of("dbresult"));
+
+		List<Object> result = persistenceEngine.retrieveByNamedQuery(NAMED_QUERY, FlushMode.COMMIT, ignoreChanges, parameters);
+
+		verify(queryReader).retrieveByNamedQuery(NAMED_QUERY, FlushMode.COMMIT, ignoreChanges, parameters);
+
+		assertThat(result)
+			.as("Retrieve gives back results from OpenJPA")
+			.containsOnly("dbresult");
 	}
 
 	/**

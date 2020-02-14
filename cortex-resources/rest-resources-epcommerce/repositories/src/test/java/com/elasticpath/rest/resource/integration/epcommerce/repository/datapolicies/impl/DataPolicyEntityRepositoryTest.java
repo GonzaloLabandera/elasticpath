@@ -122,6 +122,14 @@ public class DataPolicyEntityRepositoryTest {
 	}
 
 	@Test
+	public void submitNoResourceIdentifier() {
+		when(resourceOperationContext.getResourceIdentifier()).thenReturn(Optional.empty());
+		dataPolicyEntityRepository.submit(createDataPolicyEntity(dataPolicy1, Boolean.TRUE.toString()), SCOPE)
+				.test()
+				.assertError(ResourceOperationFailure.badRequestBody("No policy GUID found on the request."));
+	}
+
+	@Test
 	public void findOneReturnsAcceptedDataPolicyWhenCustomerConsentExistsAndConsentGranted() {
 		when(dataPolicyRepository.findValidDataPolicy(POLICY_GUID_1, SCOPE.getValue(), Collections.singletonList(subjectAttribute)))
 				.thenReturn(Single.just(dataPolicy1));

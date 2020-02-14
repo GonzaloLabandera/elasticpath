@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.pricing.BaseAmount;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.service.pricing.PriceUpdatedNotificationService;
@@ -91,7 +92,7 @@ public class BaseAmountJobTransactionCallbackListener implements JobTransactionC
 	 * @return the priceUpdatedNotificationService
 	 */
 	public PriceUpdatedNotificationService getPriceUpdatedNotificationService() {
-		return coreBeanFactory.getBean("priceUpdatedNotificationService");
+		return coreBeanFactory.getSingletonBean(ContextIdNames.PRICE_UPDATED_NOTIFICATION_SERVICE, PriceUpdatedNotificationService.class);
 	}
 
 	public void setCoreBeanFactory(final BeanFactory coreBeanFactory) {

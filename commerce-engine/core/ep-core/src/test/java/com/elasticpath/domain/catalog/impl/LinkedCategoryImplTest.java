@@ -29,6 +29,8 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.domain.localization.LocaleFallbackPolicy;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.test.jmock.AbstractEPTestCase;
@@ -57,8 +59,8 @@ public class LinkedCategoryImplTest extends AbstractEPTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+		stubGetPrototypeBean(ContextIdNames.CATALOG_LOCALE, SupportedLocale.class, CatalogLocaleImpl.class);
+		stubGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, LocalizedPropertiesImpl.class);
 		
 		setupCategoryType();
 
@@ -214,9 +216,6 @@ public class LinkedCategoryImplTest extends AbstractEPTestCase {
 		final String oldGuid = linkedCategoryImpl.getGuid();
 
 		// set default values again, no value should be changed.
-		final String newGuid = "AAAAAAAAABBBB";
-		stubGetBean(ContextIdNames.RANDOM_GUID, newGuid);
-
 		linkedCategoryImpl.initialize();
 		assertEquals(oldGuid, linkedCategoryImpl.getGuid());
 		assertSame(oldDate, linkedCategoryImpl.getStartDate());

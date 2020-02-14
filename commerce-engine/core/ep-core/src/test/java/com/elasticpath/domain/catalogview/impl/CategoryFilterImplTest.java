@@ -72,7 +72,8 @@ public class CategoryFilterImplTest  {
 		categoryLookup = context.mock(CategoryLookup.class);
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.CATEGORY_LOOKUP); will(returnValue(categoryLookup));
+				allowing(beanFactory).getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
+				will(returnValue(categoryLookup));
 			}
 		});
 		catalog = context.mock(Catalog.class);

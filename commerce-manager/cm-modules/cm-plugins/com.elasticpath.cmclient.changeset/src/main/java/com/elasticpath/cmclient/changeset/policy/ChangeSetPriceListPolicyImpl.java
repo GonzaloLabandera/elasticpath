@@ -12,7 +12,7 @@ import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.service.pricing.PriceListDescriptorService;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 
 /**
  * Change set policies for price list descriptors. Currently governs <code>PriceListEditor</code> and 
@@ -32,7 +32,7 @@ public class ChangeSetPriceListPolicyImpl extends AbstractStatePolicyImpl {
 	@Override
 	public void init(final Object dependentObject) {
 		pldDto = (PriceListDescriptorDTO) dependentObject;
-		priceListDescriptorService = ServiceLocator.getService(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE);
+		priceListDescriptorService = BeanLocator.getSingletonBean(ContextIdNames.PRICE_LIST_DESCRIPTOR_SERVICE, PriceListDescriptorService.class);
 	}
 
 	@Override

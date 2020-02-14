@@ -11,6 +11,7 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.email.domain.EmailProperties;
 import com.elasticpath.email.handler.order.helper.OrderEmailPropertyHelper;
 import com.elasticpath.sellingchannel.presentation.OrderPresentationHelper;
+import com.elasticpath.service.email.EmailAddressesExtractionStrategy;
 import com.elasticpath.service.store.StoreService;
 
 /**
@@ -31,6 +32,8 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 
 	private BeanFactory beanFactory;
 
+	private EmailAddressesExtractionStrategy emailAddressesExtractionStrategy;
+
 	@Override
 	public EmailProperties getOrderConfirmationEmailProperties(final Order order) {
 		final EmailProperties emailProperties = getEmailPropertiesBeanInstance();
@@ -41,7 +44,7 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 		emailProperties.setEmailLocale(order.getLocale());
 		emailProperties.setHtmlTemplate(ORDER_CONF_EMAIL_HTML_TEMPLATE);
 		emailProperties.setTextTemplate(ORDER_CONF_EMAIL_TXT_TEMPLATE);
-		emailProperties.setRecipientAddress(order.getCustomer().getEmail());
+		emailProperties.setRecipientAddress(getInlineRecipientAddress(order));
 		emailProperties.setStoreCode(order.getStoreCode());
 		emailProperties.getTemplateResources().put("orderItemFormBeanMap", getOrderPresentationHelper().createOrderItemFormBeanMap(order));
 		return emailProperties;
@@ -58,7 +61,7 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 		emailProperties.setEmailLocale(order.getLocale());
 		emailProperties.setHtmlTemplate(SHIPMENT_CONF_EMAIL_HTML_TEMPLATE);
 		emailProperties.setTextTemplate(SHIPMENT_CONF_EMAIL_TXT_TEMPLATE);
-		emailProperties.setRecipientAddress(order.getCustomer().getEmail());
+		emailProperties.setRecipientAddress(getInlineRecipientAddress(order));
 		emailProperties.setStoreCode(order.getStoreCode());
 		emailProperties.getTemplateResources().put("orderItemFormBeanList", getOrderPresentationHelper().createOrderItemFormBeanList(orderShipment));
 
@@ -69,7 +72,7 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 	 * @return
 	 */
 	private EmailProperties getEmailPropertiesBeanInstance() {
-		return getBeanFactory().getBean(ContextIdNames.EMAIL_PROPERTIES);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.EMAIL_PROPERTIES, EmailProperties.class);
 	}
 
 	@Override
@@ -88,6 +91,15 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 		emailProperties.setStoreCode(store.getCode());
 
 		return emailProperties;
+	}
+
+	/**
+	 * Gets the inline recipient addresses from order.
+	 * @param order the order.
+	 * @return the inline recipient addresses.
+	 */
+	private String getInlineRecipientAddress(final Order order) {
+		return emailAddressesExtractionStrategy.extractToInline(order);
 	}
 
 	/**
@@ -118,5 +130,10 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 
 	protected BeanFactory getBeanFactory() {
 		return beanFactory;
+	}
+
+	public void setEmailAddressesExtractionStrategy(
+			final EmailAddressesExtractionStrategy emailAddressesExtractionStrategy) {
+		this.emailAddressesExtractionStrategy = emailAddressesExtractionStrategy;
 	}
 }

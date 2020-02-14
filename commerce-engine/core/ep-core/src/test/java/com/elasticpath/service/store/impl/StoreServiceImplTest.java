@@ -97,7 +97,8 @@ public class StoreServiceImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		when(beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA)).thenReturn(new ProductSearchCriteria());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class))
+				.thenReturn(new ProductSearchCriteria());
 	}
 
 	/**
@@ -154,11 +155,6 @@ public class StoreServiceImplTest {
 			protected boolean updateProductsNotificationRequired(final Store storeBeforePersistence) {
 				return false;
 			}
-
-			@Override
-			public <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
-			}
 		};
 
 		assertThat(storeServiceImpl.buildProductUpdateCriteria(null)).isNull();
@@ -170,8 +166,8 @@ public class StoreServiceImplTest {
 			}
 
 			@Override
-			public <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
 			}
 		};
 
@@ -389,7 +385,7 @@ public class StoreServiceImplTest {
 		storeServiceImpl = new StoreServiceImpl() {
 			@SuppressWarnings("unchecked")
 			@Override
-			public <T> T getBean(final String beanName) {
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
 				return (T) store;
 			}
 		};

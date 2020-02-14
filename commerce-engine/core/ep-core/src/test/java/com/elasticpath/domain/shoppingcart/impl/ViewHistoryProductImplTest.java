@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.service.catalogview.impl.ThreadLocalStorageImpl;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
@@ -94,7 +96,7 @@ public class ViewHistoryProductImplTest {
 		// Set expectations
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean("threadLocalStorage");
+				oneOf(beanFactory).getSingletonBean(ContextIdNames.THREAD_LOCAL_STORAGE, ThreadLocalStorageImpl.class);
 				will(returnValue(storeConfig));
 				
 				oneOf(storeConfig).getStore();
@@ -219,7 +221,7 @@ public class ViewHistoryProductImplTest {
 		// Set expectations
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean("threadLocalStorage");
+				oneOf(beanFactory).getSingletonBean(ContextIdNames.THREAD_LOCAL_STORAGE, ThreadLocalStorageImpl.class);
 				will(returnValue(storeConfig));
 
 				oneOf(storeConfig).getStore();

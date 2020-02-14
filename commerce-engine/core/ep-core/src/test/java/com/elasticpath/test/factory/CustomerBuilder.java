@@ -46,9 +46,10 @@ public class CustomerBuilder extends CustomerImplBuilderBase<CustomerBuilder> {
 				private static final long serialVersionUID = 740L;
 
 				@Override
-				public <T> T getBean(final String beanName) {
-					return beanFactory.getBean(beanName);
+				public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+					return beanFactory.getPrototypeBean(name, clazz);
 				}
+
 			};
 		}
 		customer.initialize();

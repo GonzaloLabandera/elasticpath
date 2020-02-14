@@ -20,7 +20,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
@@ -72,7 +72,7 @@ public class CatalogSkuOptionAddEditDialog extends AbstractPolicyAwareDialog imp
 
 	private PolicyActionContainer addEditSkuOptionDialogContainer;
 
-	private final SkuOptionService skuOptionService = ServiceLocator.getService(ContextIdNames.SKU_OPTION_SERVICE);
+	private final SkuOptionService skuOptionService = BeanLocator.getSingletonBean(ContextIdNames.SKU_OPTION_SERVICE, SkuOptionService.class);
 
 	private boolean openFromChangesetView;
 	
@@ -170,7 +170,7 @@ public class CatalogSkuOptionAddEditDialog extends AbstractPolicyAwareDialog imp
 	 */
 	public SkuOption getSkuOption() {
 		if (skuOption == null) {
-			this.skuOption = ServiceLocator.getService(ContextIdNames.SKU_OPTION);
+			this.skuOption = BeanLocator.getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 			this.skuOption.setCatalog(this.catalog);
 		}
 		return skuOption;

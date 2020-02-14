@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;
 import com.elasticpath.cmclient.changeset.ChangeSetPermissions;
 import com.elasticpath.cmclient.changeset.helpers.UserViewFormatter;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareDualListBox;
@@ -118,7 +118,7 @@ public class UserAssignmentDualListBox extends AbstractPolicyAwareDualListBox<Ch
 	public Collection<ChangeSetUserView> getAssigned() {
 		Collection<String> changeSetUserGuids = this.getModel().getAssignedUserGuids();
 					
-		final ChangeSetService changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		final ChangeSetService changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 		
 		changeSetUserViews = changeSetService.getChangeSetUserViews(changeSetUserGuids);
 		return changeSetUserViews;
@@ -126,7 +126,7 @@ public class UserAssignmentDualListBox extends AbstractPolicyAwareDualListBox<Ch
 
 	@Override
 	public Collection<ChangeSetUserView> getAvailable() {
-		ChangeSetService service = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		ChangeSetService service = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 		return service.getAvailableUsers(ChangeSetPermissions.CHANGE_SET_PERMISSIONS_MANAGE, 
 				ChangeSetPermissions.WORK_WITH_CHANGE_SETS_PERMISSION);		
 	}
@@ -147,7 +147,7 @@ public class UserAssignmentDualListBox extends AbstractPolicyAwareDualListBox<Ch
 	 */
 	protected class UserAvailableViewerFilter extends ViewerFilter {
 		
-		private final CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		private final CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 
 		@Override
 		public boolean select(final Viewer viewer, final Object parentElement, final Object element) {							
@@ -181,7 +181,7 @@ public class UserAssignmentDualListBox extends AbstractPolicyAwareDualListBox<Ch
 	 */
 	protected class UserAssignedViewerFilter extends ViewerFilter {
 		
-		private final CmUserService cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		private final CmUserService cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 
 		@Override
 		public boolean select(final Viewer viewer, final Object parentElement, final Object element) {							

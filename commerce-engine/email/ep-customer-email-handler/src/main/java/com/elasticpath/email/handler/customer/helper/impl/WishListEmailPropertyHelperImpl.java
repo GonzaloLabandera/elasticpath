@@ -51,7 +51,7 @@ public class WishListEmailPropertyHelperImpl extends AbstractEpDomainImpl implem
 	 * @return
 	 */
 	private EmailProperties getEmailPropertiesBeanInstance() {
-		return getBean(ContextIdNames.EMAIL_PROPERTIES);
+		return getPrototypeBean(ContextIdNames.EMAIL_PROPERTIES, EmailProperties.class);
 	}
 
 	public void setProductSkuLookup(final ProductSkuLookup productSkuLookup) {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cmclient.fulfillment.wizards;
 
@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.elasticpath.cmclient.fulfillment.wizards.shipmentreturn.OrderReturnWizardValidator;
 import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.order.OrderReturnSku;

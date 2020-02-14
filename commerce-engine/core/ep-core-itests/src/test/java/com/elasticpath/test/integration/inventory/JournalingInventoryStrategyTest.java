@@ -17,6 +17,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.Product;
@@ -36,7 +37,6 @@ import com.elasticpath.inventory.domain.impl.InventoryJournalLockImpl;
 import com.elasticpath.inventory.impl.InventoryDtoImpl;
 import com.elasticpath.inventory.strategy.InventoryJournalRollupService;
 import com.elasticpath.inventory.strategy.impl.JournalingInventoryStrategy;
-import com.elasticpath.service.catalog.ProductSkuService;
 import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.util.Utils;
 
@@ -54,7 +54,8 @@ public class JournalingInventoryStrategyTest extends DbTestCase {
 	@Autowired
 	private JournalingInventoryStrategy journalingInventoryStrategy;
 	@Autowired
-	private ProductSkuService productSkuService;
+	@Qualifier("inventoryJournalRollupService")
+	private InventoryJournalRollupService rollupService;
 
 	InventoryCommand command;
 
@@ -200,7 +201,8 @@ public class JournalingInventoryStrategyTest extends DbTestCase {
 		Set<String> skuCodes = new HashSet<>();
 		skuCodes.add(inventoryKey1.getSkuCode());
 		skuCodes.add(inventoryKey2.getSkuCode());
-		Map<String, InventoryDto> inventoriesForSkusInWarehouse = journalingInventoryStrategy.getInventoriesForSkusInWarehouse(skuCodes, inventoryKey1.getWarehouseUid());
+		Map<String, InventoryDto> inventoriesForSkusInWarehouse = journalingInventoryStrategy.getInventoriesForSkusInWarehouse(skuCodes, 
+				inventoryKey1.getWarehouseUid());
 		assertEquals(1, inventoriesForSkusInWarehouse.size());
 		assertEquals(-36, inventoriesForSkusInWarehouse.get(inventoryKey1.getSkuCode()).getAvailableQuantityInStock());
 		
@@ -212,7 +214,6 @@ public class JournalingInventoryStrategyTest extends DbTestCase {
 		// testing for rollup service
 		// For this case, because for each inventory key there are only one row in TINVENTORYJOURNAL
 		// They shall be not touched.
-		InventoryJournalRollupService rollupService = getBeanFactory().getBean("inventoryJournalRollupService");
 		rollup(rollupService);
 		
 		Inventory inventory1 = inventoryDao.getInventory(inventoryKey1.getSkuCode(), inventoryKey1.getWarehouseUid());

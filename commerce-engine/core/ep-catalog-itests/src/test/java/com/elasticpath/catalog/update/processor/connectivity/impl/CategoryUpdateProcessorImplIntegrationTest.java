@@ -25,10 +25,10 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.log4j.Logger;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.TransactionStatus;
 
 import com.elasticpath.catalog.entity.AbstractProjection;
@@ -61,6 +61,8 @@ import com.elasticpath.test.jta.XaTransactionTestSupport;
  * Integration tests for {@link CategoryUpdateProcessorImpl}.
  */
 @JmsBrokerConfigurator(url = JMS_BROKER_URL)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesDatabase
 public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTestSupport {
 
 	public static final String JMS_BROKER_URL = "tcp://localhost:61624";
@@ -121,7 +123,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldRemoveDeletedChildProjectionFromParentChildList() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 3;
 
@@ -152,7 +153,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldCreateNewProjectionHistoryWhenEventIsDeletedAndSameProjectionNotExistInDatabase()
 			throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCategoryDeletedEvents = 1;
@@ -183,7 +183,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldNotCreateAnyProjectionsWhenCategoryEntitiesNotExistAndEventCategoryDeleted() {
 		final EventMessage eventMessage = eventMessageFactory.createEventMessage(CATEGORY_DELETED, WRONG_COMPOUND_GUID);
 		categoryDeletedEventHandler.handleMessage(eventMessage);
@@ -196,7 +195,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldCreateNewProjectionWhenEventIsLinkCreatedAndSameProjectionNotExistInDatabase() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 2;
 		final int expectedNumberOfProjectionEntities = 2;
@@ -227,7 +225,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldCreateNewProjectionHistoryWhenEventIsLinkDeletedAndSameProjectionExistsInDatabase()
 			throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 1;
@@ -268,7 +265,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldNotCreateAnyProjectionsWhenCategoryEntitiesNotExistAndEventCategoryLinkDeleted() {
 		final EventMessage eventMessage = eventMessageFactory.createEventMessage(CATEGORY_LINK_DELETED, WRONG_COMPOUND_GUID);
 		categoryUnlinkedEventHandler.handleMessage(eventMessage);
@@ -281,7 +277,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	@SuppressWarnings("unchecked")
 	public void childrenListShouldContainsChildrenInParticularOrderAndNotContainsDuplicateAndShouldBe6ProjectionsFor3CategoryAnd2Stores()
 			throws DefaultValueRemovalForbiddenException {
@@ -325,7 +320,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatChangingTheVisibilityOfTheParentCategoryToFalseLeadsToAChangeInTheVisibilityOfHisChildrenToFalse()
 			throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 2;
@@ -368,7 +362,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatChangingTheVisibilityOfTheParentCategoryToTrueLeadsToAChangeInTheVisibilityOfHisChildrenToTrue()
 			throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfEventsAfterCategoryUpdate = 3;
@@ -412,7 +405,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatLinkedParentCategoryUpdateChildCategoryListIfChildWasExcludedOrIncluded() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCategoryCreatedEvents = 6;
 		final int expectedNumberOfCategoryUpdatedEventsAfterExclude = 3;
@@ -491,7 +483,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void shouldUpdateLinkedCategoryIfMasterCategoryWasUpdated() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 2;
 
@@ -533,7 +524,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatIncludedLinkedCategoryShouldBeTombstonedIfMasterCategoryWas() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 2;
 
@@ -576,7 +566,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatExcludedLinkedCategoryShouldBeTombstonedIfMasterCategoryWasnot() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 1;
 
@@ -619,7 +608,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatIncludedLinkedCategoryShouldBeNotTombstonedIfMasterCategoryWasnot() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 2;
 
@@ -662,7 +650,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatExcludedLinkedCategoryShouldBeTombstonedIfMasterCategoryWas() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCatalogEvents = 1;
 
@@ -704,26 +691,27 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 		assertThat(linkedCategoryProjectionAfterDelete.isDeleted()).isEqualTo(true);
 	}
 
-	@Ignore("PB-7339 - test fails often")
 	@Test
-	@DirtiesDatabase
 	public void testThatDisableDateUpdatesAfterUpdatingProjection()
 			throws DefaultValueRemovalForbiddenException {
+		final int expectedNumberOfCatalogEvents = 1;
 		final Store store1 = createAndPersistStore();
 		final Catalog catalog1 = store1.getCatalog();
 
 		final CategoryType categoryType = createAndPersistCategoryType(CATEGORY_TYPE_GUID, CATEGORY_TYPE, catalog1);
 		final Category category = createAndPersistCategory(CATEGORY_GUID, CATEGORY_CODE, categoryType, catalog1, false, null);
-
-		categoryUpdateProcessor.processCategoryCreated(category);
+		await().atMost(TEN_SECONDS).until(() -> isProjectionExists(CATEGORY_IDENTITY_TYPE, category.getCode(), store1.getCode()));
 
 		final com.elasticpath.catalog.entity.category.Category createdProjection = findCategoryProjectionByStoreAndCode(store1, category);
 		assertThat(createdProjection).extracting(Projection::getDisableDateTime).isNull();
 
+		final NotifyBuilder catalogNotifyBuilderForUpdateCategory = new NotifyBuilder(catalogCamelContext)
+				.from(JMS_CATALOG_ENDPOINT).whenExactlyCompleted(expectedNumberOfCatalogEvents).create();
+
 		category.setEndDate(new Date(System.currentTimeMillis() + ONE_MINUTE));
 		updateAndPersistCategory(category);
 
-		categoryUpdateProcessor.processCategoryUpdated(category);
+		await().atMost(TEN_SECONDS).until(catalogNotifyBuilderForUpdateCategory::matches);
 
 
 		final com.elasticpath.catalog.entity.category.Category updatedProjection = findCategoryProjectionByStoreAndCode(store1, category);
@@ -731,7 +719,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	}
 
 	@Test
-	@DirtiesDatabase
 	public void testThatLinkedChildrenCategoryUpdatedIfParentWasExcludedOrIncluded() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCategoryCreatedEvents = 4;
 		final int expectedNumberOfCategoryUpdatedEventsAfterExclude = 3;

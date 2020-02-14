@@ -15,6 +15,8 @@ public abstract class AbstractWizard extends AbstractPageObject {
 	private static final String BACK_BUTTON = "div[widget-id='< Back']";
 	private static final String CANCEL_BUTTON = "div[widget-id='Cancel']";
 	private static final String FINISH_BUTTON = "div[widget-id='Finish']";
+	private static final String DONE_BUTTON = "div[widget-id='Done']";
+	private static final String OK_BUTTON = "div[widget-id='OK']";
 	private static String wizardType;
 	private static String wizardStep;
 
@@ -70,6 +72,22 @@ public abstract class AbstractWizard extends AbstractPageObject {
 	public void clickFinish() {
 		clickButton(FINISH_BUTTON, "Finish");
 		waitTillElementDisappears(By.cssSelector(FINISH_BUTTON));
+	}
+
+	/**
+	 * Clicks Done.
+	 */
+	public void clickDone() {
+		clickButton(DONE_BUTTON, "Done");
+		waitTillElementDisappears(By.cssSelector(DONE_BUTTON));
+	}
+
+	/**
+	 * Clicks OK.
+	 */
+	public void clickOk() {
+		clickButton(OK_BUTTON, "OK");
+		waitTillElementDisappears(By.cssSelector(OK_BUTTON));
 	}
 
 	/**

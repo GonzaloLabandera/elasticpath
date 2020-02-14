@@ -1,0 +1,238 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>paymentinstruments</name>
+		<description>
+			<![CDATA[
+			Payment instruments are specific, concrete instances of a payment method, such as a credit card, individual cheque, or other form of payment.
+			Payment providers require specific creation information, provided through third-party-defined payment instructions, in order to instantiate valid payment instruments.
+			]]>
+		</description>
+
+		<uri-part>
+			<name>payment-instrument-id</name>
+			<description><![CDATA[The payment Instrument ID]]></description>
+			<string/>
+		</uri-part>
+
+		<resource>
+			<name>payment-instruments</name>
+			<description><![CDATA[Payment instruments resource for a profile.]]></description>
+			<uri>{base.family}/{base.scope}</uri>
+			<list-of>payment-instrument</list-of>
+		</resource>
+
+		<resource>
+			<name>payment-instrument</name>
+			<description><![CDATA[The payment provider instrument.]]></description>
+			<uri>{payment-instruments}/{payment-instrument-id}</uri>
+			<entity>payment-instrument</entity>
+		</resource>
+
+		<resource>
+			<name>order-payment-instrument</name>
+			<description><![CDATA[The order payment provider instrument.]]></description>
+			<uri>{base.family}/{orders.order}/orderpaymentinstrument/{payment-instrument-id}</uri>
+			<entity>order-payment-instrument</entity>
+		</resource>
+
+		<resource>
+			<name>order-payment-instrument-form</name>
+			<description><![CDATA[A payment instrument form for an order.]]></description>
+			<uri>{base.family}/{paymentmethods.order-payment-method}/paymentinstrument/form</uri>
+			<form>
+				<entity>order-payment-instrument-for-form</entity>
+				<action-rel>createpaymentinstrumentaction</action-rel>
+				<result>order-payment-instrument</result>
+			</form>
+		</resource>
+
+		<resource>
+			<name>profile-payment-instrument-form</name>
+			<description><![CDATA[A payment instrument form for profile payment method.]]></description>
+			<uri>{base.family}/{paymentmethods.profile-payment-method}/paymentinstrument/form</uri>
+			<form>
+				<entity>payment-instrument-for-form</entity>
+				<action-rel>createpaymentinstrumentaction</action-rel>
+				<result>payment-instrument</result>
+			</form>
+		</resource>
+
+		<advisor>
+			<name>profile-payment-instrument-form</name>
+			<description><![CDATA[Provides a blocking advisor to enforce creation fields during profile payment instrument creation, as required by the third-party payment provider. Required fields might include a billing address or email address.]]></description>
+			<blocks>profile-payment-instrument-form</blocks>
+		</advisor>
+
+		<advisor>
+			<name>order-payment-instrument-form</name>
+			<description><![CDATA[Provides a blocking advisor to enforce creation fields during profile payment instrument creation, as required by the third-party payment provider. Required fields might include a billing address or email address.]]></description>
+			<blocks>order-payment-instrument-form</blocks>
+		</advisor>
+
+		<relationship>
+			<name>payment-instruments-for-profile</name>
+			<description><![CDATA[The link from profile to the list of saved payment instruments.]]></description>
+			<rel>paymentinstruments</rel>
+			<rev>profile</rev>
+			<from>profiles.profile</from>
+			<to>payment-instruments</to>
+		</relationship>
+
+		<relationship>
+			<name>payment-instrument-form-for-order-payment-method</name>
+			<description><![CDATA[The link from an order payment method to a payment instrument form.]]></description>
+			<rel>paymentinstrumentform</rel>
+			<rev>orderpaymentmethod</rev>
+			<from>paymentmethods.order-payment-method</from>
+			<to>order-payment-instrument-form</to>
+		</relationship>
+
+		<relationship>
+			<name>payment-instrument-form-for-profile-payment-method</name>
+			<description><![CDATA[The link from a profile payment method to payment instrument form.]]></description>
+			<rel>paymentinstrumentform</rel>
+			<rev>profilepaymentmethod</rev>
+			<from>paymentmethods.profile-payment-method</from>
+			<to>profile-payment-instrument-form</to>
+		</relationship>
+
+		<relationship>
+			<name>payment-instrument-to-payment-instruments</name>
+			<description><![CDATA[The link from a payment instrument to payment instruments.]]></description>
+			<rel>paymentinstruments</rel>
+			<from>payment-instrument</from>
+			<to>payment-instruments</to>
+		</relationship>
+
+		<relationship>
+			<name>payment-instrument-to-profile-payment-method</name>
+			<description><![CDATA[Link from a payment instrument to the profile payment method.]]></description>
+			<rel>paymentmethod</rel>
+			<from>payment-instrument</from>
+			<to>paymentmethods.profile-payment-method</to>
+		</relationship>
+
+		<relationship>
+			<name>payment-instrument-to-order-payment-method</name>
+			<description><![CDATA[Link from a payment instrument to the order payment method.]]></description>
+			<rel>paymentmethod</rel>
+			<from>order-payment-instrument</from>
+			<to>paymentmethods.order-payment-method</to>
+		</relationship>
+
+		<entity>
+			<name>payment-instrument-attributes</name>
+			<description>
+				<![CDATA[Indicates specific attributes for the individual payment instrument, such as payment token. These attributes differentiate it from other payment instruments.]]>
+			</description>
+			<dynamic/>
+		</entity>
+
+		<entity>
+			<name>payment-instrument-for-form</name>
+			<description><![CDATA[Describes payment instrument entity for form.]]></description>
+			<property>
+				<name>default-on-profile</name>
+				<description><![CDATA[Indicates whether to set a payment instrument as the default one on a profile.]]></description>
+				<boolean/>
+			</property>
+			<property>
+				<name>name</name>
+				<description><![CDATA[Shopper identifiable name of a payment instrument, such as "My Amex" or "My Visa".]]></description>
+				<string/>
+			</property>
+			<property>
+				<name>payment-instrument-identification-form</name>
+				<description>
+					<![CDATA[Payment instrument-specific attributes, underscoring the individual payment instrument through dynamic fields required by the payment gateway for payment instrument creation.
+					Populate these fields with payment instrument identification information returned by the third-party payment gateway, such as a payment token.]]>
+				</description>
+				<is-a>payment-instrument-attributes</is-a>
+			</property>
+			<property>
+				<name>billing-address</name>
+				<description>
+					<![CDATA[Billing address information to attach to the payment instrument.]]>
+				</description>
+				<is-a>addresses.address</is-a>
+			</property>
+		</entity>
+
+		<entity>
+			<name>order-payment-instrument-for-form</name>
+			<description><![CDATA[Describes the order payment instrument entity for form.]]></description>
+			<is-a>payment-instrument-for-form</is-a>
+			<property>
+				<name>limit-amount</name>
+				<description><![CDATA[Describes the limit on the payment instrument.]]></description>
+				<decimal/>
+			</property>
+			<property>
+				<name>save-on-profile</name>
+				<description><![CDATA[Indicates whether to save a payment instrument on a profile.]]></description>
+				<boolean/>
+			</property>
+		</entity>
+
+		<entity>
+			<name>payment-instrument</name>
+			<description><![CDATA[Describes the concrete payment instrument, backed by a third-party payment provider.]]></description>
+			<property>
+				<name>payment-instrument-identification-attributes</name>
+				<description>
+					<![CDATA[Indicates specific attributes for the individual payment instrument, such as payment token. These attributes differentiate it from other payment instruments.]]>
+				</description>
+				<is-a>payment-instrument-attributes</is-a>
+			</property>
+			<property>
+				<name>default-on-profile</name>
+				<description><![CDATA[Indicates if this is the default payment instrument on the profile.]]></description>
+				<boolean/>
+			</property>
+			<property>
+				<name>name</name>
+				<description><![CDATA[Payment instrument name.]]></description>
+				<string/>
+			</property>
+		</entity>
+
+		<entity>
+			<name>order-payment-instrument</name>
+			<description><![CDATA[Describes an order payment instrument.]]></description>
+			<is-a>payment-instrument</is-a>
+			<property>
+				<name>limit-amount</name>
+				<description><![CDATA[Describes the limit on the payment instrument.]]></description>
+				<is-a>base.cost</is-a>
+			</property>
+			<property>
+				<name>saved-on-profile</name>
+				<description><![CDATA[Indicates whether a payment instrument is saved on a profile.]]></description>
+				<boolean/>
+			</property>
+		</entity>
+
+		<relationship>
+			<name>default-payment-instrument-for-payment-instruments</name>
+			<description><![CDATA[Provides the default payment instrument from profile.]]></description>
+			<rel>default</rel>
+			<from>payment-instruments</from>
+			<to>payment-instrument</to>
+		</relationship>
+
+		<relationship>
+			<name>default-payment-instrument-for-order-payment-instrument-selector</name>
+			<description><![CDATA[Provides the profile default payment instrument to use on an order.]]></description>
+			<rel>default</rel>
+			<from>order-payment-instrument-selector</from>
+			<to>payment-instrument</to>
+		</relationship>
+	</family>
+
+</definitions>
+

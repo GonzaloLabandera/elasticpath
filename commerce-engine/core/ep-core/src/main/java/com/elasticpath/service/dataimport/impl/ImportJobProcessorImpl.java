@@ -321,7 +321,7 @@ public class ImportJobProcessorImpl implements ImportJobProcessor {
 	 * @return the import job runner
 	 */
 	protected ImportJobRunner getImportJobRunner(final String importJobRunnerBeanName) {
-		return beanFactory.getBean(importJobRunnerBeanName);
+		return beanFactory.getPrototypeBean(importJobRunnerBeanName, ImportJobRunner.class);
 	}
 
 	/**

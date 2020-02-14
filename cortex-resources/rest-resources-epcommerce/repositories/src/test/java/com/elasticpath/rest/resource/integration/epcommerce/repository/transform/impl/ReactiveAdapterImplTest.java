@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.structured.EpValidationException;
-import com.elasticpath.commons.exception.InvalidBusinessStateException;
+import com.elasticpath.base.exception.structured.InvalidBusinessStateException;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.command.ExecutionResultFactory;

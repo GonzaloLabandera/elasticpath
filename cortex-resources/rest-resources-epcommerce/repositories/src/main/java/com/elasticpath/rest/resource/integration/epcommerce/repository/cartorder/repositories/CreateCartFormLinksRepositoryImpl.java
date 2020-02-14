@@ -30,7 +30,7 @@ public class CreateCartFormLinksRepositoryImpl<E extends CartsIdentifier, I exte
 
 
 	@Reference(name = "resourceOperationContext")
-	private  ResourceOperationContext resourceOperationContext;
+	private ResourceOperationContext resourceOperationContext;
 
 	@Reference(name = "multicartResolutionStrategyListHolder")
 	private MultiCartResolutionStrategyHolder holder;
@@ -39,11 +39,10 @@ public class CreateCartFormLinksRepositoryImpl<E extends CartsIdentifier, I exte
 	private CustomerSessionRepository customerSessionRepository;
 
 
-
 	@Override
 	public Observable<CreateCartFormIdentifier> getElements(final CartsIdentifier identifier) {
 		Subject subject = resourceOperationContext.getSubject();
-		CustomerSession customerSession = customerSessionRepository.findOrCreateCustomerSessionAsSingle().blockingGet();
+		CustomerSession customerSession = customerSessionRepository.findOrCreateCustomerSession().blockingGet();
 
 		return Observable.fromIterable(holder.getStrategies().stream().filter(strategy
 				-> strategy.isApplicable(subject) && strategy.supportsCreate(subject, customerSession.getShopper(),

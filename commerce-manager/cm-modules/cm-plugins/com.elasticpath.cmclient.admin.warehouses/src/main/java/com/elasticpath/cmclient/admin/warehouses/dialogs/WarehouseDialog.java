@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.admin.warehouses.AdminWarehousesImageRegistry;
 import com.elasticpath.cmclient.admin.warehouses.AdminWarehousesMessages;
 import com.elasticpath.cmclient.admin.warehouses.AdminWarehousesPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -234,8 +234,7 @@ public final class WarehouseDialog extends AbstractEpDialog implements ModifyLis
 
 		// we can only change code if we creating a warehouse
 		if (!isEditWarehouse()) {
-			final WarehouseService warehouseService = (WarehouseService) ServiceLocator.getService(
-					ContextIdNames.WAREHOUSE_SERVICE);
+			final WarehouseService warehouseService = BeanLocator.getSingletonBean(ContextIdNames.WAREHOUSE_SERVICE, WarehouseService.class);
 			if (warehouseService.findByCode(warehouse.getCode()) != null) {
 				setErrorMessage(AdminWarehousesMessages.get().WarehouseCodeExists);
 				return;

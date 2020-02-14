@@ -6,8 +6,11 @@ package com.elasticpath.domain.skuconfiguration.impl;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -24,6 +27,7 @@ import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
+import com.elasticpath.domain.skuconfiguration.LazyLoadableSkuOptionValue;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.persistence.api.AbstractEntityImpl;
@@ -41,11 +45,10 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 @Table(name = JpaAdaptorOfSkuOptionValueImpl.TABLE_NAME)
 @FetchGroups({
 	@FetchGroup(name = FetchGroupConstants.PRODUCT_INDEX, attributes = {
-		@FetchAttribute(name = "optionKey"),
-		@FetchAttribute(name = "skuOptionValue")
+		@FetchAttribute(name = "optionKey")
 		})
 })
-public class JpaAdaptorOfSkuOptionValueImpl extends AbstractEntityImpl implements SkuOptionValue {
+public class JpaAdaptorOfSkuOptionValueImpl extends AbstractEntityImpl implements SkuOptionValue, LazyLoadableSkuOptionValue {
 	/**
 	 * Serial version id.
 	 */
@@ -58,6 +61,8 @@ public class JpaAdaptorOfSkuOptionValueImpl extends AbstractEntityImpl implement
 
 	private SkuOptionValue skuOptionValue;
 
+	private Long skuOptionValueUidInternal;
+
 	private String optionKey;
 
 	private long uidPk;
@@ -67,27 +72,41 @@ public class JpaAdaptorOfSkuOptionValueImpl extends AbstractEntityImpl implement
 	 *
 	 * @return the sku option value
 	 */
-	@ManyToOne(targetEntity = SkuOptionValueImpl.class)
+	@ManyToOne(targetEntity = SkuOptionValueImpl.class, fetch = FetchType.LAZY)
 	@JoinColumn (name = "OPTION_VALUE_UID", nullable = false)
 	@ForeignKey
 	public SkuOptionValue getSkuOptionValue() {
 		return skuOptionValue;
 	}
 
-	/**
-	 * Set the sku option value.
-	 *
-	 * @param skuOptionValue the value
-	 */
 	public void setSkuOptionValue(final SkuOptionValue skuOptionValue) {
 		this.skuOptionValue = skuOptionValue;
 	}
 
+	@Override
+	@Basic
+	@Column(name = "OPTION_VALUE_UID", nullable = false)
+	public Long getSkuOptionValueUidInternal() {
+		if (skuOptionValue != null) {
+			return skuOptionValue.getUidPk();
+		}
+		return skuOptionValueUidInternal;
+	}
+
 	/**
-	 * Get the option key.
+	 * This method modifies OPTION_VALUE_UID FK and <strong>must not</strong> be during development.
+	 * It is used solely by the OpenJPA framework.
+	 * The main purpose of exposing the FK is to allow fetching of SkuOptionValue instances in
+	 * {@link com.elasticpath.service.catalog.impl.ProductSkuOptionValuePostLoadStrategy} without calling
+	 * {@link JpaAdaptorOfSkuOptionValueImpl#getSkuOptionValue}, which would trigger additional DB calls.
 	 *
-	 * @return the option key
+	 * @param skuOptionValueUidInternal the internal sku option value ID
 	 */
+	protected void setSkuOptionValueUidInternal(final Long skuOptionValueUidInternal) {
+		this.skuOptionValueUidInternal = skuOptionValueUidInternal;
+	}
+
+	@Override
 	@Column(name = "OPTION_KEY")
 	public String getOptionKey() {
 		return optionKey;
@@ -262,7 +281,7 @@ public class JpaAdaptorOfSkuOptionValueImpl extends AbstractEntityImpl implement
 	@Transient
 	public String getDisplayName(final Locale locale) {
 		if (getSkuOptionValue() != null) {
-			return getSkuOptionValue().getDisplayName(locale);
+			return getSkuOptionValue().getDisplayName(locale, true);
 		}
 		return null;
 	}
@@ -343,14 +362,14 @@ public class JpaAdaptorOfSkuOptionValueImpl extends AbstractEntityImpl implement
 		}
 		final JpaAdaptorOfSkuOptionValueImpl other = (JpaAdaptorOfSkuOptionValueImpl) obj;
 
-		return Objects.equals(skuOptionValue, other.getSkuOptionValue())
+		return Objects.equals(skuOptionValueUidInternal, other.skuOptionValueUidInternal)
 			&& Objects.equals(optionKey, other.getOptionKey());
 
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(skuOptionValue, optionKey);
+		return Objects.hash(skuOptionValueUidInternal, optionKey);
 	}
 
 }

@@ -11,7 +11,6 @@ Feature: Order Shipment
       | skuCode     | quantity |
       | digital_sku | 1        |
     When I search and open order editor for the latest order
-    And I select Details tab in the Order Editor
     Then I should see the following Shipment Summary
       | shipment-number | item-sub-total | shipment-discount | item-taxes | shipment-total |
       | E-shipment      | 20.00          | 6.00              | 0.91       | 14.91          |
@@ -24,7 +23,6 @@ Feature: Order Shipment
       | skuCode            | quantity |
       | 20off_shipping_sku | 1        |
     When I search and open order editor for the latest order
-    And I select Details tab in the Order Editor
     Then I should see the following Shipment Summary
       | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
       | 1               | 10.00          | 0.40          | 0.00              | 10.40            | 1.20       | 0.05           | 11.65          |
@@ -36,7 +34,6 @@ Feature: Order Shipment
       | skuCode      | quantity |
       | physical_sku | 1        |
     When I search and open order editor for the latest order
-    And I select Details tab in the Order Editor
     Then the Shipping Method should be Canada Post 2 days
     And I should see the following Shipment Summary
       | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
@@ -47,10 +44,9 @@ Feature: Order Shipment
       | skuCode      | quantity |
       | physical_sku | 1        |
     When I search and open order editor for the latest order
-    And I select Details tab in the Order Editor
     And I change the Shipping Method to the following
-      | Shipping Method | <SHIPPING_METHOD> |
-      | Payment Source  | test-token        |
+      | Shipping Method | <SHIPPING_METHOD>       |
+    And I complete Payment Authorization with Original payment source payment source
     Then the Shipping Method should be <SHIPPING_METHOD>
     And I should see the following Shipment Summary
       | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
@@ -65,11 +61,10 @@ Feature: Order Shipment
       | skuCode      | quantity |
       | physical_sku | 1        |
     When I search and open order editor for the latest order
-    And I select Details tab in the Order Editor
     And I change the Shipping Information to the following
       | Shipping Method | <SHIPPING_METHOD>                                                     |
       | Address         | James Potter, 4567 BumbleBee Dr, Unit 80, Corte Madera, CA, 94727, US |
-      | Payment Source  | test-token                                                            |
+    And I complete Payment Authorization with Original payment source payment source
     Then the Shipping Method should be <SHIPPING_METHOD>
     And I should see the following Shipment Summary
       | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
@@ -87,7 +82,6 @@ Feature: Order Shipment
       | skuCode    | quantity |
       | <sku-code> | 4        |
     When I search and open order editor for the latest order
-    And I select Details tab in the Order Editor
     Then I should see the applied promotion of 55_percent_off_4_items in the order details
     And I should see the following line items in the Shipment table
       | sku-code   | sale-price | quantity | discount | total-price |
@@ -96,44 +90,40 @@ Feature: Order Shipment
       | sku-code     |
       | physical_sku |
 
-    Scenario: Verify Order Shipment lineitem section fields - physical item
-      When I authenticate as a registered user harry.potter@elasticpath.com for scope mobee to create an order with following sku
-        | skuCode                 | quantity |
-        | handsfree_shippable_sku | 1        |
-      And I search and open order editor for the latest order
-      And I select Details tab in the Order Editor
-      Then I should see the following shipment with lineitem details
-        | shipmentType | shipmentNumber | bundleName | inventory | skuCode                 | productName     | skuOptions | listPrice | salePrice | quantity | discount | totalPrice | paymentSchedule |
-        | physical     | 1              |            | Allocated | handsfree_shippable_sku | Samsung Headset |            | 120.00    | 100.00    | 1        | 0.00     | 100.00     |                 |
+  Scenario: Verify Order Shipment lineitem section fields - physical item
+    When I authenticate as a registered user harry.potter@elasticpath.com for scope mobee to create an order with following sku
+      | skuCode                 | quantity |
+      | handsfree_shippable_sku | 1        |
+    And I search and open order editor for the latest order
+    Then I should see the following shipment with lineitem details
+      | shipmentType | shipmentNumber | bundleName | inventory | skuCode                 | productName     | skuOptions | listPrice | salePrice | quantity | discount | totalPrice | paymentSchedule |
+      | physical     | 1              |            | Allocated | handsfree_shippable_sku | Samsung Headset |            | 120.00    | 100.00    | 1        | 0.00     | 100.00     |                 |
 
-    Scenario: Verify Order Shipment lineitem section fields - digital item
-      When I authenticate as a registered user harry.potter@elasticpath.com for scope mobee to create an order with following sku
-        | skuCode   | quantity |
-        | tt0984938 | 1        |
-      And I search and open order editor for the latest order
-      And I select Details tab in the Order Editor
-      Then I should see the following shipment with lineitem details
-        | shipmentType | shipmentNumber | bundleName | inventory | skuCode   | productName                                 | skuOptions | listPrice | salePrice | quantity | discount | totalPrice | paymentSchedule |
-        | e-shipment   |                |            |           | tt0984938 | Harry Potter and the Deathly Hallows Part 2 |            | 21.99     | 20.00     | 1        | 0.00     | 20.00      |                 |
+  Scenario: Verify Order Shipment lineitem section fields - digital item
+    When I authenticate as a registered user harry.potter@elasticpath.com for scope mobee to create an order with following sku
+      | skuCode   | quantity |
+      | tt0984938 | 1        |
+    And I search and open order editor for the latest order
+    Then I should see the following shipment with lineitem details
+      | shipmentType | shipmentNumber | bundleName | inventory | skuCode   | productName                                 | skuOptions | listPrice | salePrice | quantity | discount | totalPrice | paymentSchedule |
+      | e-shipment   |                |            |           | tt0984938 | Harry Potter and the Deathly Hallows Part 2 |            | 21.99     | 20.00     | 1        | 0.00     | 20.00      |                 |
 
-    Scenario: Verify Order Shipment lineitem section fields - recurring item
-      When I authenticate as a registered user harry.potter@elasticpath.com for scope mobee to create an order with following sku
-        | skuCode            | quantity |
-        | phone_plan_mon_sku | 1        |
-      And I search and open order editor for the latest order
-      And I select Details tab in the Order Editor
-      Then I should see the following shipment with lineitem details
-        | shipmentType | shipmentNumber | bundleName | inventory | skuCode            | productName | skuOptions | listPrice | salePrice | quantity | discount | totalPrice | paymentSchedule |
-        | recurring    |                |            |           | phone_plan_mon_sku | Phone Plan  | per month  | 30.00     | 30.00     | 1        | 0.00     | 30.00      | per month       |
+  Scenario: Verify Order Shipment lineitem section fields - recurring item
+    When I authenticate as a registered user harry.potter@elasticpath.com for scope mobee to create an order with following sku
+      | skuCode            | quantity |
+      | phone_plan_mon_sku | 1        |
+    And I search and open order editor for the latest order
+    Then I should see the following shipment with lineitem details
+      | shipmentType | shipmentNumber | bundleName | inventory | skuCode            | productName | skuOptions | listPrice | salePrice | quantity | discount | totalPrice | paymentSchedule |
+      | recurring    |                |            |           | phone_plan_mon_sku | Phone Plan  | per month  | 30.00     | 30.00     | 1        | 0.00     | 30.00      | per month       |
 
-    Scenario: Verify Order Shipment lineitem section fields - bundle items
-      When I authenticate as a registered user harry.potter@elasticpath.com for scope mobee to create an order with following sku
-        | skuCode                                    | quantity |
-        | bundleWithPhysicalAndDigitalComponents_sku | 1        |
-      And I search and open order editor for the latest order
-      And I select Details tab in the Order Editor
-      Then I should see the following shipment with lineitem details
-        | shipmentType | shipmentNumber | bundleName                                  | inventory | skuCode                                                    | productName                                                    | skuOptions | listPrice | salePrice | quantity | discount | totalPrice | paymentSchedule |
-        | physical     | 1              | Bundle with Physical and Digital Components | Allocated | physicalItemFromBundleWithPhysicalAndDigitalComponents_sku | Physical Item From Bundle With Physical and Digital Components |            | 20.00     | 20.00     | 1        | 0.00     | 20.00      |                 |
-        | e-shipment   |                | Bundle with Physical and Digital Components |           | digitalItemFromBundleWithPhysicalAndDigitalComponents_sku  | Digital Item From Bundle With Physical and Digital Components  |            | 20.00     | 20.00     | 1        | 0.00     | 20.00      |                 |
+  Scenario: Verify Order Shipment lineitem section fields - bundle items
+    When I authenticate as a registered user harry.potter@elasticpath.com for scope mobee to create an order with following sku
+      | skuCode                                    | quantity |
+      | bundleWithPhysicalAndDigitalComponents_sku | 1        |
+    And I search and open order editor for the latest order
+    Then I should see the following shipment with lineitem details
+      | shipmentType | shipmentNumber | bundleName                                  | inventory | skuCode                                                    | productName                                                    | skuOptions | listPrice | salePrice | quantity | discount | totalPrice | paymentSchedule |
+      | physical     | 1              | Bundle with Physical and Digital Components | Allocated | physicalItemFromBundleWithPhysicalAndDigitalComponents_sku | Physical Item From Bundle With Physical and Digital Components |            | 20.00     | 20.00     | 1        | 0.00     | 20.00      |                 |
+      | e-shipment   |                | Bundle with Physical and Digital Components |           | digitalItemFromBundleWithPhysicalAndDigitalComponents_sku  | Digital Item From Bundle With Physical and Digital Components  |            | 20.00     | 20.00     | 1        | 0.00     | 20.00      |                 |
 

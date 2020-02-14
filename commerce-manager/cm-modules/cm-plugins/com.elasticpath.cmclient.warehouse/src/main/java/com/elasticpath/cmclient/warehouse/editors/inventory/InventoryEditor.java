@@ -8,13 +8,12 @@ import java.util.Collections;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.warehouse.WarehouseMessages;
 import com.elasticpath.cmclient.warehouse.WarehousePlugin;
@@ -31,10 +30,14 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
  */
 public class InventoryEditor extends AbstractCmClientFormEditor {
 
-	/** ID of the editor. It is the same as the class name. */
+	/**
+	 * ID of the editor. It is the same as the class name.
+	 */
 	public static final String ID_EDITOR = InventoryEditor.class.getName();
 
-	/** Property changed uid. */
+	/**
+	 * Property changed uid.
+	 */
 	public static final int INVENTORY_PROPERTY = 128;
 
 	private ProductSkuLookup productSkuLookup;
@@ -51,8 +54,9 @@ public class InventoryEditor extends AbstractCmClientFormEditor {
 		final String editorUid = String.valueOf(editorID);
 		final Long productSkuUid = Long.valueOf(editorUid.substring(0,
 				editorUid.length() - String.valueOf(WarehousePerspectiveFactory.getCurrentWarehouse().getUidPk()).length()));
-		productInventoryManagementService = ServiceLocator.getService(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE);
-		productSkuLookup = ServiceLocator.getService(ContextIdNames.PRODUCT_SKU_LOOKUP);
+		productInventoryManagementService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_INVENTORY_MANAGEMENT_SERVICE,
+				ProductInventoryManagementService.class);
+		productSkuLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 		initModel(productSkuUid);
 		setPartName(productSKU.getSkuCode() + "-" + WarehousePerspectiveFactory.getCurrentWarehouse().getName()); //$NON-NLS-1$
 	}
@@ -132,7 +136,7 @@ public class InventoryEditor extends AbstractCmClientFormEditor {
 	private InventoryDto loadInventory(final ProductSku productSku, final long warehouseUid) {
 		InventoryDto inventoryDto = productInventoryManagementService.getInventory(productSku.getSkuCode(), warehouseUid);
 		if (inventoryDto == null) {
-			inventoryDto = ServiceLocator.getService(ContextIdNames.INVENTORYDTO);
+			inventoryDto = BeanLocator.getPrototypeBean(ContextIdNames.INVENTORYDTO, InventoryDto.class);
 			inventoryDto.setWarehouseUid(warehouseUid);
 			inventoryDto.setSkuCode(productSku.getSkuCode());
 		}
@@ -147,8 +151,8 @@ public class InventoryEditor extends AbstractCmClientFormEditor {
 	@Override
 	protected String getSaveOnCloseMessage() {
 		return
-			NLS.bind(WarehouseMessages.get().Inventory_Editor_OnSavePrompt,
-			getEditorName());
+				NLS.bind(WarehouseMessages.get().Inventory_Editor_OnSavePrompt,
+						getEditorName());
 	}
 
 	@Override

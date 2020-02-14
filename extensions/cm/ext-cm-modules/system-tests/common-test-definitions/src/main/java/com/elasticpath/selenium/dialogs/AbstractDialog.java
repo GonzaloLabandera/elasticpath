@@ -1,5 +1,7 @@
 package com.elasticpath.selenium.dialogs;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -22,6 +24,7 @@ public abstract class AbstractDialog extends AbstractPageObject {
 	private static final String SAVE_BUTTON_CSS = "div[widget-id='Save']";
 	private static final String MOVERIGHT_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='Add']";
 	private static final String MOVEALLLEFT_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='Remove All']";
+	private static final String CLOSE_BUTTON = "div[widget-id='Close'][widget-type='Button']";
 
 	/**
 	 * constructor.
@@ -37,6 +40,13 @@ public abstract class AbstractDialog extends AbstractPageObject {
 	 */
 	public void clickCancel() {
 		clickButton(CANCEL_BUTTON_CSS, "Cancel");
+	}
+
+	/**
+	 * Clicks close.
+	 */
+	public void clickClose() {
+		clickButton(CLOSE_BUTTON, "Close");
 	}
 
 	/**
@@ -94,4 +104,21 @@ public abstract class AbstractDialog extends AbstractPageObject {
 	public void clickMoveAllLeft(final String dialogAutomationId) {
 		clickButton(String.format(MOVEALLLEFT_BUTTON_CSS, dialogAutomationId), dialogAutomationId);
 	}
+
+	/**
+	 * Verifies error message is displayed.
+	 *
+	 * @param errorMessage String
+	 */
+	public void verifyErrorMessageDisplayed(final String errorMessage) {
+		setWebDriverImplicitWait(2);
+		try {
+			getDriver().findElement(By.cssSelector("div[widget-id*='" + errorMessage + "']"));
+		} catch (Exception e) {
+			assertThat(false)
+					.as("Expected error message validation failed - '" + errorMessage + "'").isEqualTo(true);
+		}
+		setWebDriverImplicitWaitToDefault();
+	}
+
 }

@@ -171,7 +171,7 @@ public class DataSyncEventMessageBuilderImpl<T extends DataSyncEventMessageBuild
 	 */
 	protected ChangeSet findChangeSet() {
 		if (changeSet == null) {
-			final ChangeSetLoadTuner changeSetLoadTuner = getBeanFactory().getBean(CHANGESET_LOAD_TUNER);
+			final ChangeSetLoadTuner changeSetLoadTuner = getBeanFactory().getPrototypeBean(CHANGESET_LOAD_TUNER, ChangeSetLoadTuner.class);
 			changeSetLoadTuner.setLoadingMemberObjects(false);
 			changeSetLoadTuner.setLoadingMemberObjectsMetadata(false);
 			changeSet = getChangeSetManagementService().get(changeSetGuid, changeSetLoadTuner);

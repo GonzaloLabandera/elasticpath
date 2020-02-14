@@ -9,6 +9,7 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.email.domain.EmailProperties;
 import com.elasticpath.email.handler.order.helper.ReturnExchangeEmailPropertyHelper;
+import com.elasticpath.service.email.EmailAddressesExtractionStrategy;
 
 /**
  * Helper for constructing {@link OrderReturn} email properties.
@@ -27,21 +28,32 @@ public class ReturnExchangeEmailPropertyHelperImpl implements ReturnExchangeEmai
 
 	private BeanFactory beanFactory;
 
+	private EmailAddressesExtractionStrategy emailAddressesExtractionStrategy;
+
 	@Override
 	public EmailProperties getOrderReturnEmailProperties(final OrderReturn orderReturn) {
 		final Order order = orderReturn.getOrder();
-		EmailProperties emailProperties = getBeanFactory().getBean(ContextIdNames.EMAIL_PROPERTIES);
+		EmailProperties emailProperties = getBeanFactory().getPrototypeBean(ContextIdNames.EMAIL_PROPERTIES, EmailProperties.class);
 		emailProperties.getTemplateResources().put("orderReturn", orderReturn);
 		emailProperties.getTemplateResources().put(LOCALE_KEY_FOR_VM_TEMPLATE, order.getLocale());
 		emailProperties.setDefaultSubject("Order Return Confirmation");
 		emailProperties.setLocaleDependentSubjectKey("RMA.emailSubject");
 		emailProperties.setEmailLocale(order.getLocale());
 		emailProperties.setStoreCode(order.getStoreCode());
-		emailProperties.setRecipientAddress(order.getCustomer().getEmail());
+		emailProperties.setRecipientAddress(getInlineRecipientAddress(order));
 
 		setEmailTemplate(emailProperties, orderReturn);
 		
 		return emailProperties;
+	}
+
+	/**
+	 * Gets the inline recipient addresses from order.
+	 * @param order the order.
+	 * @return the inline recipient addresses.
+	 */
+	private String getInlineRecipientAddress(final Order order) {
+		return emailAddressesExtractionStrategy.extractToInline(order);
 	}
 
 	private void setEmailTemplate(final EmailProperties emailProperties, final OrderReturn orderReturn) {
@@ -61,5 +73,9 @@ public class ReturnExchangeEmailPropertyHelperImpl implements ReturnExchangeEmai
 
 	protected BeanFactory getBeanFactory() {
 		return beanFactory;
+	}
+
+	public void setEmailAddressesExtractionStrategy(final EmailAddressesExtractionStrategy emailAddressesExtractionStrategy) {
+		this.emailAddressesExtractionStrategy = emailAddressesExtractionStrategy;
 	}
 }

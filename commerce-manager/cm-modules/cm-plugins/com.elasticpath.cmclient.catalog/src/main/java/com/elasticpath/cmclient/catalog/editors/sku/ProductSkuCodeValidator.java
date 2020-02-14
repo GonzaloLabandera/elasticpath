@@ -13,7 +13,7 @@ import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.service.catalog.ProductSkuService;
@@ -72,7 +72,7 @@ public class ProductSkuCodeValidator implements IValidator {
 	 * @return product sku service
 	 */
 	protected ProductSkuService getProductSkuService() {
-		return (ProductSkuService) ServiceLocator.getService(ContextIdNames.PRODUCT_SKU_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_SERVICE, ProductSkuService.class);
 	}
 	
 	/**

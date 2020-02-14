@@ -65,7 +65,7 @@ public class DataPointServiceImplTest {
 	@Before
 	public void setUp() {
 		Mockito.<Class<DataPoint>>when(elasticPath.getBeanImplClass(ContextIdNames.DATA_POINT)).thenReturn(DataPoint.class);
-		when(elasticPath.getBean(ContextIdNames.DATA_POINT)).thenReturn(dataPoint1);
+		when(elasticPath.getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class)).thenReturn(dataPoint1);
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class DataPointServiceImplTest {
 	public void loadWithUidPkOfZeroReturnsNewDataPointFromBean() {
 		assertThat(dataPointServiceImpl.load(0)).isEqualTo(dataPoint1);
 
-		verify(elasticPath).getBean(ContextIdNames.DATA_POINT);
+		verify(elasticPath).getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class);
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class DataPointServiceImplTest {
 	@Test
 	public void getWithUidPkOfZeroReturnsNewDataPointFromBean() {
 		assertThat(dataPointServiceImpl.get(0)).isEqualTo(dataPoint1);
-		verify(elasticPath).getBean(ContextIdNames.DATA_POINT);
+		verify(elasticPath).getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class);
 	}
 
 	@Test

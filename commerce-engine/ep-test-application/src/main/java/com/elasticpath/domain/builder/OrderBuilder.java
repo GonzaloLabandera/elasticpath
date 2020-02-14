@@ -1,9 +1,7 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.builder;
-
-import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,18 +11,13 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.impl.EventOriginatorHelperImpl;
-import com.elasticpath.domain.factory.OrderPaymentFactory;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderShipment;
-import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.payment.PaymentResult;
-import com.elasticpath.service.payment.PaymentService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.OrderFactory;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
@@ -41,21 +34,13 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 	private CheckoutService checkoutService;
 
 	@Autowired
-	private OrderPaymentFactory orderPaymentFactory;
-
-	@Autowired
 	private OrderFactory orderFactory;
-
-	@Autowired
-	private PaymentService paymentService;
 
 	@Autowired
 	private PricingSnapshotService pricingSnapshotService;
 
 	@Autowired
 	private TaxSnapshotService taxSnapshotService;
-
-	private OrderPayment templateOrderPayment;
 
 	private boolean allShipmentsCompleted;
 
@@ -85,21 +70,6 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 
 	public OrderBuilder withGiftCertificateProduct() {
 		checkoutTestCartBuilder.withGiftCertificateProduct();
-		return this;
-	}
-
-	public OrderBuilder withTemplateOrderPayment(final OrderPayment templateOrderPayment) {
-		this.templateOrderPayment = templateOrderPayment;
-		return this;
-	}
-
-	public OrderBuilder withTokenizedTemplateOrderPayment() {
-		this.templateOrderPayment = orderPaymentFactory.createTemplateTokenizedOrderPayment();
-		return this;
-	}
-
-	public OrderBuilder withGateway(final PaymentGateway gateway) {
-		checkoutTestCartBuilder.withGateway(gateway);
 		return this;
 	}
 
@@ -133,7 +103,6 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 		CheckoutResults results = checkoutService.checkout(shoppingCart,
 														   taxSnapshot,
 														   shoppingContext.getCustomerSession(),
-														   templateOrderPayment,
 														   true);
 		Order order = results.getOrder();
 
@@ -173,10 +142,6 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 															shoppingCart,
 															taxSnapshot);
 		order.releaseOrder();
-
-		final PaymentResult paymentResult = paymentService.initializePayments(order, templateOrderPayment, shoppingCart.getAppliedGiftCertificates());
-
-		order.setOrderPayments(new HashSet<>(paymentResult.getProcessedPayments()));
 
 		if (allShipmentsCompleted) {
 			order = completePhysicalShipmentsForOrder(order, sendShipmentConfirmationEmail);

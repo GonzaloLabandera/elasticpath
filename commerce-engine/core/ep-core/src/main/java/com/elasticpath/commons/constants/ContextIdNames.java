@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006-2014
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.commons.constants;
 
@@ -17,6 +17,9 @@ public final class ContextIdNames {
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	/** bean id for implementation of com.elasticpath.service.audit.AuditDao. */
 	public static final String AUDIT_DAO = "auditDao";
+
+	/** bean id for implementation of com.elasticpath.commons.security.PasswordPolicy. */
+	public static final String ACCOUNT_PASS_WORD_POLICY = "accountPasswordPolicy";
 
 	/** bean id for implementation of com.elasticpath.domain.CategoryType. */
 	public static final String CATEGORY_TYPE = "categoryType";
@@ -71,6 +74,9 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.CmUserSession. */
 	public static final String CM_USER_SESSION = "cmUserSession";
+
+	/** bean id for implementation of com.elasticpath.commons.security.CmPasswordPolicy. */
+	public static final String CM_PASS_WORD_POLICY = "cmPasswordPolicy";
 
 	/** bean id for implementation of com.elasticpath.domain.catalog.impl.AbstractCategoryImpl. */
 	public static final String ABSTRACT_CATEGORY = "abstractCategory";
@@ -192,9 +198,6 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.domain.UserRole. */
 	public static final String USER_ROLE = "userRole";
 
-	/** bean id for implementation of com.elasticpath.domain.order.OrderPayment. */
-	public static final String ORDER_PAYMENT = "orderPayment";
-
 	/** bean id for abstract order shipment - physical and electronic derive from this. */
 	public static final String ABSTRACT_ORDER_SHIPMENT = "abstractOrderShipment";
 
@@ -278,6 +281,14 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.shoppingcart.ViewHistory. */
 	public static final String VIEW_HISTORY = "viewHistory";
+
+	/**
+	 * bean id for implementation of com.elasticpath.domain.shoppingcart.ViewHistoryProduct.
+	 */
+	public static final String VIEW_HISTORY_PRODUCT = "viewHistoryProduct";
+
+	/** Bean id for implementation of com.elasticpath.domain.dataimport.ImportNotificationMetadata. */
+	public static final String IMPORT_NOTIFICATION_METADATA = "importNotificationMetadata";
 
 	/** bean id for implementation of com.elasticpath.domain.rules.AppliedRule. */
 	public static final String APPLIED_RULE = "appliedRule";
@@ -616,7 +627,6 @@ public final class ContextIdNames {
 	public static final String CUSTOMER_PROFILE_ATTRIBUTE_SERVICE = "customerProfileAttributeService";
 
 
-
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	// Content Wrapper Repository
 
@@ -718,6 +728,9 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.commons.util.impl.UtilityImpl. */
 	public static final String UTILITY = "utility";
 
+	/** bean id for implementation of com.elasticpath.commons.util.MessageSourceCache. */
+	public static final String MESSAGE_SOURCE_CACHE = "messageSourceCache";
+
 	/** bean id for implementation of com.elasticpath.commons.util.PasswordGenerator. */
 	public static final String PASSWORD_GENERATOR = "passwordGenerator";
 
@@ -726,6 +739,9 @@ public final class ContextIdNames {
 
 	/** bean id for CM User implementation of org.springframework.security.authentication.encoding.PasswordEncoder. */
 	public static final String CM_PASSWORDENCODER = "cmPasswordEncoder";
+
+	/** bean id for implementation of com.elasticpath.commons.security.PasswordPolicy. */
+	public static final String RETRY_ATTEMPT_PASS_WORD_POLICY = "retryAttemptPasswordPolicy";
 
 	/** bean id for implementation of com.elasticpath.domain.catalogview.SearchRequest. */
 	public static final String SEARCH_REQUEST = "searchRequest";
@@ -828,6 +844,9 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.settings.impl.CachedSettingsReaderImpl. */
 	public static final String CACHED_SETTINGS_READER = "cachedSettingsReader";
+
+	/** bean id for implementation of com.elasticpath.settings.impl.SettingValueFactoryWithDefinitionImpl. */
+	public static final String SETTING_VALUE_FACTORY = "settingValueFactory";
 
 	/** bean id for implementation of com.elasticpath.common.pricing.service.PriceListService. */
 	public static final String PRICE_LIST_CLIENT_SERVICE = "priceListService";
@@ -973,6 +992,9 @@ public final class ContextIdNames {
 	/** bean id for com.elasticpath.service.index.impl.indexSearchServiceImpl. */
 	public static final String INDEX_SEARCH_SERVICE = "indexSearchService";
 
+	/** bean id for implementation of com.elasticpath.service.search.IndexBuildStatusService. */
+	public static final String INDEX_BUILD_STATUS_SERVICE = "indexBuildStatusService";
+
 	/** bean id for implementation of com.elasticpath.service.store.WarehouseService. */
 	public static final String WAREHOUSE_SERVICE = "warehouseService";
 
@@ -990,18 +1012,6 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.store.CreditCardType. */
 	public static final String CREDIT_CARD_TYPE = "creditCardType";
-
-	/** bean id for implementation of com.elasticpath.service.payment.PaymentGatewayService. */
-	public static final String PAYMENT_GATEWAY_SERVICE = "paymentGatewayService";
-
-	/** bean id for implementation of com.elasticpath.domain.payment.PaymentGatewayFactory. */
-	public static final String PAYMENT_GATEWAY_FACTORY = "paymentGatewayFactory";
-
-	/** bean id for the implementation of com.elasticpath.plugin.payment.service.PaymentGatewayTransactionService. */
-	public static final String PAYMENT_GATEWAY_TRANSACTION_SERVICE = "paymentGatewayTransactionService";
-
-	/** bean id for implementation of com.elasticpath.domain.payment.PaymentGatewayProperty. */
-	public static final String PAYMENT_GATEWAY_PROPERTY = "paymentGatewayProperty";
 
 	/** bean id for implementation of com.elasticpath.domain.misc.EmailProperties. */
 	public static final String EMAIL_PROPERTIES = "emailProperties";
@@ -1029,6 +1039,9 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.catalogview.DisplayableFilter. */
 	public static final String DISPLAYABLE_FILTER = "displayableFilter";
+
+	/** bean id for implementation of com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration. */
+	public static final String FILTERED_NAVIGATION_CONFIGURATION = "filteredNavigationConfiguration";
 
 	/** bean id for implementation of com.elasticpath.domain.misc.CheckoutResults. */
 	public static final String CHECKOUT_RESULTS = "checkoutResults";
@@ -1072,12 +1085,6 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.domain.search.Synonym. */
 	public static final String SYNONYM = "synonym";
 
-	/** bean id for implementation of com.elasticpath.service.payment.PaymentResult. */
-	public static final String PAYMENT_RESULT = "paymentResult";
-
-	/** bean id for implementation of com.elasticpath.service.payment.PaymentService. */
-	public static final String PAYMENT_SERVICE = "paymentService";
-
 	/** bean id for implementation of com.elasticpath.domain.misc.OrderingComparator. */
 	public static final String ORDERING_COMPARATOR = "orderingComparator";
 
@@ -1090,23 +1097,11 @@ public final class ContextIdNames {
 	/** bean id for implementation of org.apache.lucene.analysis.Analyzer. */
 	public static final String SYNONYM_ANALYZER = "synonymAnalyzer";
 
-	/** bean id for implementation of com.elasticpath.domain.payment.CreditCardDirectPostPaymentHandler. */
-	public static final String PAYMENT_HANDLER_CREDITCARD_DIRECT_POST = "paymentHandlerCreditCardDirectPost";
-
-	/** bean id for implementation of com.elasticpath.domain.payment.TokenPaymentHandler. */
-	public static final String PAYMENT_HANDLER_TOKEN = "paymentHandlerToken";
-
 	/** bean id for implementation of com.elasticpath.domain.payment.PayPalExpressPaymentHandler. */
 	public static final String PAYMENT_HANDLER_PAYPAL = "paymentHandlerPayPal";
 
 	/** bean id for implementation of com.elasticpath.domain.payment.DirectPostPayPalExpressPaymentHandler. */
 	public static final String PAYMENT_HANDLER_DIRECT_POST_PAYPAL = "paymentHandlerDirectPostPayPal";
-
-	/** bean id for implementation of com.elasticpath.domain.payment.ExchangePaymentHandler. */
-	public static final String PAYMENT_HANDLER_EXCHANGE = "paymentHandlerReturnAndExchange";
-
-	/** bean id for implementation of com.elasticpath.domain.payment.GiftCertificatePaymentHandler. */
-	public static final String PAYMENT_HANDLER_GIFTCERTIFICATE = "paymentHandlerGiftCertificate";
 
 	/** bean id for implementation of com.elasticpath.domain.misc.CustomerEmailPropertyHelper. */
 	public static final String EMAIL_PROPERTY_HELPER_CUSTOMER = "emailPropertyHelperCustomer";
@@ -1131,6 +1126,9 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of {@link com.elasticpath.service.search.IndexNotificationService}. */
 	public static final String INDEX_NOTIFICATION_SERVICE = "indexNotificationService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.pricing.PriceUpdatedNotificationService}. */
+	public static final String PRICE_UPDATED_NOTIFICATION_SERVICE = "priceUpdatedNotificationService";
 
 	/** bean id for implementation of com.elasticpath.service.order.AllocationService. */
 	public static final String ALLOCATION_SERVICE = "allocationService";
@@ -1161,7 +1159,7 @@ public final class ContextIdNames {
 
 	/** bean id for com.elasticpath.settings.domain.SettingDefinition. */
 	public static final String SETTING_DEFINITION = "settingDefinition";
-	
+
 	/** bean id for com.elasticpath.settings.domain.SettingValue. */
 	public static final String SETTING_VALUE = "settingValue";
 
@@ -1239,6 +1237,9 @@ public final class ContextIdNames {
 
 	/** bean id for {@link com.elasticpath.service.changeset.ChangeSetManagementService}. */
 	public static final String CHANGESET_MANAGEMENT_SERVICE = "changeSetManagementService";
+
+	/** bean id for {@link com.elasticpath.service.changeset.ChangeSetPolicy}. */
+	public static final String CHANGESET_POLICY = "changeSetPolicy";
 
 	/** bean id for {@link com.elasticpath.domain.changeset.ChangeSetObjectStatus}. */
 	public static final String CHANGESET_OBJECT_STATUS = "changeSetObjectStatus";
@@ -1445,6 +1446,12 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.service.catalogview.FilterFactory}. */
 	public static final String FILTER_FACTORY = "filterFactory";
 
+	/** bean id for {@link com.elasticpath.service.catalogview.FilterFactory}. */
+	public static final String ADVANCED_SEARCH_FILTER_FACTORY = "advancedSearchFilterFactory";
+
+	/** bean id for {@link com.elasticpath.service.catalogview.impl.ThreadLocalStorageImpl}. */
+	public static final String THREAD_LOCAL_STORAGE = "threadLocalStorage";
+
 	/** bean id for {@link com.elasticpath.domain.catalogview.search.AdvancedSearchConfigurationProvider}. */
 	public static final String ADVANCED_SEARCH_CONFIGURATION_PROVIDER = "advancedSearchConfigurationProvider";
 
@@ -1477,6 +1484,9 @@ public final class ContextIdNames {
 
 	/** bean id for {@link com.elasticpath.sellingchannel.impl.ShoppingItemRecurringPriceAssemblerImpl}. */
 	public static final String SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER = "shoppingItemRecurringPriceAssembler";
+
+	/** bean id for {@link com.elasticpath.sellingchannel.presentation.OrderItemPresentationBean}. */
+	public static final String ORDER_ITEM_PRESENTATION_BEAN = "orderItemPresentationBean";
 
 	/** bean id for {@link com.elasticpath.service.pricing.datasource.BaseAmountDataSourceFactoryBuilder}. */
 	public static final String BASE_AMOUNT_DATA_SOURCE_FACTORY_BUILDER = "baseAmountDataSourceFactoryBuilder";
@@ -1518,6 +1528,21 @@ public final class ContextIdNames {
 
 	/** bean id for {@link com.elasticpath.domain.auth.OAuth2AccessTokenMemento}. */
 	public static final String OAUTH2_ACCESS_TOKEN_MEMENTO = "oAuth2AccessTokenMemento";
+
+	/** bean id for {@link com.elasticpath.domain.audit.DataChanged}. */
+	public static final String DATA_CHANGED = "dataChanged";
+
+	/** bean id for {@link com.elasticpath.domain.audit.ChangeTransaction}. */
+	public static final String CHANGE_TRANSACTION = "changeTransaction";
+
+	/** bean id for {@link com.elasticpath.domain.audit.ChangeTransactionMetadata}. */
+	public static final String CHANGE_TRANSACTION_METADATA = "changeTransactionMetadata";
+
+	/** bean id for {@link com.elasticpath.domain.audit.SingleChangeOperation}. */
+	public static final String SINGLE_CHANGE_OPERATION = "singleChangeOperation";
+
+	/** bean id for {@link com.elasticpath.domain.audit.BulkChangeOperation}. */
+	public static final String BULK_CHANGE_OPERATION = "bulkChangeOperation";
 
 	/** bean id for {@link com.elasticpath.domain.cartorder.CartOrder}. */
 	public static final String CART_ORDER = "cartOrder";
@@ -1564,12 +1589,6 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.domain.catalog.impl.LocaleFallbackPolicyFactory}. */
 	public static final String LOCALE_FALLBACK_POLICY_FACTORY = "localeFallbackPolicyFactory";
 
-	/** bean id for {@link com.elasticpath.domain.payment.impl.PaymentGatewayImpl}. */
-	public static final String PAYMENT_GATEWAY = "paymentGateway";
-
-	/** bean id for {@link com.elasticpath.domain.order.impl.TemplateOrderShipmentImpl}. */
-	public static final String TEMPLATE_ORDER_SHIPMENT = "templateOrderShipment";
-
 	/** bean id for {@link com.elasticpath.domain.order.impl.TaxJournalRecordImpl}. */
 	public static final String TAX_JOURNAL_RECORD = "taxJournalRecord";
 
@@ -1585,47 +1604,8 @@ public final class ContextIdNames {
 	/** bean if for {@link com.elasticpath.service.tax.TaxCodeRetriever}. */
 	public static final String TAX_CODE_RETRIEVER = "taxCodeRetriever";
 
-	/** bean id for {@link org.springframework.core.convert.ConversionService}. */
-	public static final String CONVERSION_SERVICE = "conversionService";
-
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.AddressDto}. */
-	public static final String ADDRESS_DTO = "addressDto";
-
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.MoneyDto}. */
-	public static final String MONEY_DTO = "moneyDto";
-
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.OrderPaymentDto}. */
-	public static final String ORDER_PAYMENT_DTO = "orderPaymentDto";
-
-	/** bean id for {@link com.elasticpath.service.payment.gateway.GiftCertificateOrderPaymentDto}. */
-	public static final String GIFT_CERTIFICATE_ORDER_PAYMENT_DTO = "giftCertificateOrderPaymentDto";
-
-	/** bean id for (@link com.elasticpath.plugin.payment.transaction.AuthorizationTransactionRequest}. */
-	public static final String AUTHORIZATION_TRANSACTION_REQUEST = "authorizationTransactionRequest";
-
-	/** bean id for {@link com.elasticpath.service.payment.gateway.GiftCertificateAuthorizationRequest}. */
-	public static final String GIFT_CERTIFICATE_AUTHORIZATION_REQUEST = "giftCertificateAuthorizationRequest";
-
-	/** bean id for (@link com.elasticpath.plugin.payment.transaction.CaptureTransactionRequest}. */
-	public static final String CAPTURE_TRANSACTION_REQUEST = "captureTransactionRequest";
-
-	/** bean id for {@link com.elasticpath.service.payment.gateway.GiftCertificateCaptureRequest}. */
-	public static final String GIFT_CERTIFICATE_CAPTURE_REQUEST = "giftCertificateCaptureRequest";
-
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.TokenPaymentMethod}. */
-	public static final String TOKEN_PAYMENT_METHOD = "tokenPaymentMethod";
-
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.OrderSkuDto}. */
-	public static final String ORDER_SKU_DTO = "orderSkuDto";
-
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.OrderShipmentDto}. */
-	public static final String ORDER_SHIPMENT_DTO = "orderShipmentDto";
-
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.PayerAuthValidationValueDto}. */
-	public static final String PAYER_AUTH_VALIDATION_VALUE_DTO = "payerAuthValidationValueDto";
-
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.ShoppingCartDto}. */
-	public static final String SHOPPING_CART_DTO = "shoppingCartDto";
+	/** bean id for {@link com.elasticpath.common.dto.AddressDTO}. */
+	public static final String BASE_ADDRESS_DTO = "baseAddressDto";
 
 	/** bean id for {@link com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator}. */
 	public static final String SHOPPING_ITEM_SUBTOTAL_CALCULATOR = "shoppingItemSubtotalCalculator";
@@ -1728,23 +1708,124 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.service.search.FacetService. */
 	public static final String FACET_SERVICE = "facetService";
 
-	/** bean id for implementation of com.elasticpath.domain.search.Facet. */
+	/** bean id for implementation of {@link com.elasticpath.domain.search.Facet}. */
 	public static final String FACET = "facet";
 
-	/** bean id for implementation of com.elasticpath.domain.sort.SortAttribute. */
+	/** bean id for implementation of {@link com.elasticpath.domain.search.SortAttribute}. */
 	public static final String SORT_ATTRIBUTE = "sortAttribute";
 
-	/** bean id for implementation of com.elasticpath.domain.sort.SortLocalizedName. */
+	/** bean id for implementation of {@link com.elasticpath.domain.search.SortLocalizedName}. */
 	public static final String SORT_LOCALIZED_NAME = "sortLocalizedName";
 
-	/** bean id for implementation of com.elasticpath.service.search.SortAttributeService. */
+	/** bean id for implementation of {@link com.elasticpath.service.search.SortAttributeService}. */
 	public static final String SORT_ATTRIBUTE_SERVICE = "sortAttributeService";
 
 	/**
 	 * bean id for implementation of com.elasticpath.service.cart.CartType. */
 	public static final String CART_TYPE = "cartType";
-	/** bean id for implementation of com.elasticpath.service.payment.gateway.PaymentMethodTransformerFactory. */
-	public static final String PAYMENT_METHOD_TRANSFORMER_FACTORY = "paymentMethodTransformerFactory";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.orderpaymentapi.OrderPaymentInstrument}. */
+	public static final String ORDER_PAYMENT_INSTRUMENT = "orderPaymentInstrument";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument}. */
+	public static final String CART_ORDER_PAYMENT_INSTRUMENT = "cartOrderPaymentInstrument";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.orderpaymentapi.CustomerPaymentInstrument}. */
+	public static final String CUSTOMER_PAYMENT_INSTRUMENT = "customerPaymentInstrument";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.orderpaymentapi.CustomerDefaultPaymentInstrument}. */
+	public static final String CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT = "customerDefaultPaymentInstrument";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig}. */
+	public static final String STORE_PAYMENT_PROVIDER_CONFIG = "storePaymentProviderConfig";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.orderpaymentapi.OrderPayment}. */
+	public static final String ORDER_PAYMENT = "orderPayment";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.orderpaymentapi.OrderPaymentData}. */
+	public static final String ORDER_PAYMENT_DATA = "orderPaymentData";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.OrderPaymentService}. */
+	public static final String ORDER_PAYMENT_SERVICE = "orderPaymentService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.management.PaymentStatisticService}. */
+	public static final String PAYMENT_STATISTIC_SERVICE = "paymentStatisticService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.management.PaymentStatistic}. */
+	public static final String PAYMENT_STATISTIC = "paymentStatistic";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.OrderPaymentInstrumentService}. */
+	public static final String ORDER_PAYMENT_INSTRUMENT_SERVICE = "orderPaymentInstrumentService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.CustomerPaymentInstrumentService}. */
+	public static final String CUSTOMER_PAYMENT_INSTRUMENT_SERVICE = "customerPaymentInstrumentService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.OrderPaymentApiService}. */
+	public static final String ORDER_PAYMENT_API_SERVICE = "orderPaymentApiService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService}. */
+	public static final String ORDER_PAYMENT_API_CLEANUP_SERVICE = "orderPaymentApiCleanupService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.CustomerDefaultPaymentInstrumentService}. */
+	public static final String CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_SERVICE = "customerDefaultPaymentInstrumentService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.management.PaymentProviderConfigManagementService}. */
+	public static final String PAYMENT_PROVIDER_CONFIG_MANAGEMENT_SERVICE = "paymentProviderConfigManagementService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.management.PaymentInstrumentManagementService}. */
+	public static final String PAYMENT_INSTRUMENT_MANAGEMENT_SERVICE = "paymentInstrumentManagementService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.FilteredPaymentInstrumentService}. */
+	public static final String FILTERED_PAYMENT_INSTRUMENT_SERVICE = "filteredPaymentInstrumentService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.StorePaymentProviderConfigService}. */
+	public static final String STORE_PAYMENT_PROVIDER_CONFIG_SERVICE = "storePaymentProviderConfigService";
+
+	/** bean id for implementation of {@link com.elasticpath.service.orderpaymentapi.management.PaymentProviderManagementService}. */
+	public static final String PAYMENT_PROVIDER_MANAGEMENT_SERVICE = "paymentProviderManagementService";
+
+	/** bean id for implementation of {@link com.elasticpath.plugin.payment.provider.dto.AddressDTO}. */
+	public static final String PAYMENT_ADDRESS_DTO = "paymentAddressDTO";
+
+	/** bean id for implementation of {@link com.elasticpath.plugin.payment.provider.dto.MoneyDTO}. */
+	public static final String PAYMENT_MONEY_DTO = "paymentMoneyDTO";
+
+	/** bean id for implementation of {@link com.elasticpath.plugin.payment.provider.dto.OrderContext}. */
+	public static final String PAYMENT_ORDER_CONTEXT_DTO = "paymentOrderContextDTO";
+
+	/** bean id for implementation of {@link com.elasticpath.plugin.payment.provider.dto.PICFieldsRequestContextDTO}. */
+	public static final String PIC_FIELDS_REQUEST_CONTEXT_DTO = "picFieldsRequestContextDTO";
+
+	/** bean id for implementation of {@link com.elasticpath.plugin.payment.provider.dto.PICRequestContextDTO}. */
+	public static final String PIC_REQUEST_CONTEXT_DTO = "picRequestContextDTO";
+
+	/** bean id for implementation of {@link com.elasticpath.plugin.payment.provider.dto.CustomerContextDTO}. */
+	public static final String PAYMENT_CUSTOMER_CONTEXT_DTO = "paymentCustomerContextDTO";
+
+	/** bean id for implementation of {@link com.elasticpath.plugin.payment.provider.dto.OrderSkuDTO}. */
+	public static final String PAYMENT_ORDER_SKU_DTO = "paymentOrderSkuDTO";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.orderpaymentapi.OrderPaymentAmounts}. */
+	public static final String ORDER_PAYMENT_AMOUNTS = "orderPaymentAmounts";
+
+	/** bean id for implementation of com.elasticpath.commons.security.PasswordPolicy. */
+	public static final String MAXIMUM_AGE_PASS_WORD_POLICY = "maximumAgePasswordPolicy";
+
+	/**
+	 * bean id for implementation of com.elasticpath.service.OrderConfigurationService.
+	 */
+	public static final String ORDER_CONFIGURATION_SERVICE = "orderConfigurationService";
+
+	/**
+	 * bean id for implementation of com.elasticpath.test.persister.TestApplicationContext.
+	 */
+	public static final String TEST_APPLICATION_CONTEXT = "testApplicationContext";
+
+	/** bean id for implementation of org.apache.activemq.ActiveMQConnectionFactory. */
+	public static final String JMS_CONNECTION_FACTORY = "jmsConnectionFactory";
+
+	/** bean id for implementation of org.apache.activemq.pool.PooledConnectionFactory. */
+	public static final String POOLED_CONNECTION_FACTORY = "pooledConnectionFactory";
 
 	private ContextIdNames() {
 		// Do not instantiate this class

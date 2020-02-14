@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.pricelistmanager.dialogs;
 
 import org.eclipse.swt.widgets.Composite;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
@@ -19,7 +19,7 @@ import com.elasticpath.common.dto.pricing.BaseAmountDTO;
  */
 public class UpdatableBaseAmountDialog extends BaseAmountDialog {
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	@Override
 	protected void createButtonsForButtonBar(final Composite parent) {

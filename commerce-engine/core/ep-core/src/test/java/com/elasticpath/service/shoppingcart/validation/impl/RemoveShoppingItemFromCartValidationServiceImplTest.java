@@ -58,7 +58,8 @@ public class RemoveShoppingItemFromCartValidationServiceImplTest {
 
 	@Before
 	public void setUp() {
-		when(beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT)).thenReturn(new ShoppingItemValidationContextImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT, ShoppingItemValidationContext.class))
+				.thenReturn(new ShoppingItemValidationContextImpl());
 		when(shoppingCart.getStore()).thenReturn(store);
 		when(shoppingCart.getShopper()).thenReturn(shopper);
 		when(shoppingItem.getSkuGuid()).thenReturn(PRODUCT_SKU_GUID);

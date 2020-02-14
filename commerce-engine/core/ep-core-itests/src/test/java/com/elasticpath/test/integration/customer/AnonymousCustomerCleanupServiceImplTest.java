@@ -1,16 +1,17 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration.customer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import static com.elasticpath.test.integration.datapolicy.AbstractDataPolicyTest.CUSTOMER_CONSENT_UNIQUE_CODE;
 import static com.elasticpath.test.integration.datapolicy.AbstractDataPolicyTest.DATA_POLICY_DESCRIPTION;
 import static com.elasticpath.test.integration.datapolicy.AbstractDataPolicyTest.DATA_POLICY_NAME;
 import static com.elasticpath.test.integration.datapolicy.AbstractDataPolicyTest.DATA_POLICY_REFERENCE_KEY;
 import static com.elasticpath.test.integration.datapolicy.AbstractDataPolicyTest.getSegments;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,6 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
@@ -54,6 +54,7 @@ import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.persister.OrderTestPersister;
+import com.elasticpath.test.persister.PaymentInstrumentPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
 import com.elasticpath.test.persister.testscenarios.AbstractScenario;
 import com.elasticpath.test.persister.testscenarios.ProductsScenario;
@@ -63,7 +64,7 @@ import com.elasticpath.test.util.Utils;
 /**
  * Integration tests of {@link AnonymousCustomerCleanupServiceImpl}.
  */
-@ContextConfiguration(locations="/integration-mock-time-service.xml", inheritLocations = true)
+@ContextConfiguration(locations="/integration-mock-time-service.xml")
 public class AnonymousCustomerCleanupServiceImplTest extends BasicSpringContextTest {
 
 	private static final String REGISTERED_EMAIL = "john.doe@elasticpath.com";
@@ -94,10 +95,13 @@ public class AnonymousCustomerCleanupServiceImplTest extends BasicSpringContextT
 	private MockTimeServiceImpl mockTimeService;
 
 	@Autowired
-	DataPolicyService dataPolicyService;
+	private DataPolicyService dataPolicyService;
 
 	@Autowired
-	CustomerConsentService customerConsentService;
+	private CustomerConsentService customerConsentService;
+
+	@Autowired
+	private PaymentInstrumentPersister paymentInstrumentPersister;
 
 	private Date afterRemovalDate;
 
@@ -176,7 +180,7 @@ public class AnonymousCustomerCleanupServiceImplTest extends BasicSpringContextT
 
 		CartOrder retrievedCartOrder = cartOrderService.findByShoppingCartGuid(shoppingCartGuid);
 		assertNull("The associated cart order should have been removed.", retrievedCartOrder);
-		
+
 		WishList retrievedWishList = wishListService.get(wishList.getUidPk());
 		assertNull("The associated wish list should have been removed.", retrievedWishList);
 
@@ -304,7 +308,11 @@ public class AnonymousCustomerCleanupServiceImplTest extends BasicSpringContextT
 		}
 
 		customer.setLastModifiedDate(lastModifiedDate);
-		return customerService.update(customer);
+		final Customer persistedCustomer = customerService.update(customer);
+
+		paymentInstrumentPersister.persistPaymentInstrument(persistedCustomer, null);
+
+		return persistedCustomer;
 	}
 
 	private void assertDatabaseStillHasCustomer(final Customer customer) {

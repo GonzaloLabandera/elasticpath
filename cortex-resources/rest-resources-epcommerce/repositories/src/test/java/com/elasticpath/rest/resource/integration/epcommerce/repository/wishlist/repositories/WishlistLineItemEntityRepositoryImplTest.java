@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableList;
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -37,7 +36,6 @@ import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
 
@@ -85,14 +83,6 @@ public class WishlistLineItemEntityRepositoryImplTest {
 
 	@Mock
 	private ModifiersRepository modifiersRepository;
-
-	@InjectMocks
-	private ReactiveAdapterImpl reactiveAdapter;
-
-	@Before
-	public void setUp() {
-		repository.setReactiveAdapter(reactiveAdapter);
-	}
 
 	@Test
 	public void verifySubmitReturnNotFoundWhenDefaultWishlistIdNotFound() {
@@ -186,7 +176,7 @@ public class WishlistLineItemEntityRepositoryImplTest {
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(itemRepository.getItemIdForSku(productSku)).thenReturn(SKU_CODE);
 		when(shoppingItem.getFields()).thenReturn(ITEM_ID_MAP);
-		when(modifiersRepository.findModifiersByProduct(product)).thenReturn(ImmutableList.of(modifierField));
+		when(modifiersRepository.findModifiersByProduct(product)).thenReturn(Single.just(ImmutableList.of(modifierField)));
 		when(modifierField.getCode()).thenReturn(ItemRepository.SKU_CODE_KEY);
 		when(wishList.getGuid()).thenReturn(WISHLIST_ID);
 

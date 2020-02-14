@@ -439,7 +439,7 @@ public class ChangeSetPersistenceListenerTest {
 		final BusinessObjectDescriptor businessObjectDescriptor = new BusinessObjectDescriptorImpl();
 
 		context.checking(new Expectations() { {
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_METADATA); will(returnValue(metadata));
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class); will(returnValue(metadata));
 			oneOf(metadata).setMetadataKey(ACTION);
 			oneOf(metadata).setMetadataValue("DELETE");
 			allowing(businessObjectGroupDao)

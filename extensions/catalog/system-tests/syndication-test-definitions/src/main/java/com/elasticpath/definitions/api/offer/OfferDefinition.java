@@ -38,6 +38,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.hamcrest.Matcher;
 
+import com.elasticpath.definitions.api.helpers.Constants;
+import com.elasticpath.definitions.api.helpers.StepsHelper;
 import com.elasticpath.definitions.stateobjects.Context;
 import com.elasticpath.definitions.testobjects.SingleOfferApiResponse;
 import com.elasticpath.definitions.utils.DataHelper;
@@ -788,6 +790,7 @@ public class OfferDefinition {
 	}
 
 	private void getLatestOfferProjection(final String store, final String code) {
+		StepsHelper.sleep(Constants.API_SLEEP_TIME);
 		response = given()
 				.when()
 				.get(String.format(SingleOfferApiResponse.OFFER_URL, store, code));

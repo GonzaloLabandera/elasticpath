@@ -10,7 +10,7 @@ import org.eclipse.ui.PartInitException;
 import com.elasticpath.cmclient.changeset.ChangeSetImageRegistry;
 import com.elasticpath.cmclient.changeset.editors.support.ChangeSetInfoEditorPage;
 import com.elasticpath.cmclient.changeset.helpers.EditorEventObserver.IEditorListener;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.changeset.ChangeSetObjectStatus;
@@ -29,7 +29,7 @@ public class EditorSupport implements IEditorListener {
 	 * Constructor.
 	 */
 	public EditorSupport() {
-		this.changeSetService = ServiceLocator.getService(ContextIdNames.CHANGESET_SERVICE);
+		this.changeSetService = BeanLocator.getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 	}
 
 	@Override

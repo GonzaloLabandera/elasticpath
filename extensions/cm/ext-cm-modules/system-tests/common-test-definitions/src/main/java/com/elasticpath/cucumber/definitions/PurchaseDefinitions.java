@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cucumber.definitions;
 
 import java.util.Map;
@@ -63,7 +67,7 @@ public class PurchaseDefinitions {
 		LoginSteps.registerNewShopperAndLoginWithScope(scope);
 		FindItemBy.skuCode(this.product.getSkuCode());
 		Item.addItemToCart(1);
-		Order.addDefaultTokenAndBillingAddress();
+		Order.addPaymentInstrumentAndBillingAddress();
 		Order.submitPurchase();
 	}
 
@@ -78,6 +82,7 @@ public class PurchaseDefinitions {
 	public void createRegUserOrder(final String customerName, final String scope, final DataTable dataTable) {
 		LoginSteps.loginAsRegisteredShopperOnScope(customerName, scope);
 		CommonMethods.addItemsToCart(dataTable);
+		Order.addOrderPaymentInstrument();
 		Order.submitPurchase();
 	}
 

@@ -70,9 +70,10 @@ public class ViewHistoryImpl extends AbstractEpDomainImpl implements ViewHistory
 	 */
 	protected ViewHistoryProduct createHistoryProduct(final Product product) {
 
-		ViewHistoryProduct viewHistoryProduct = getBean("viewHistoryProduct");
+		ViewHistoryProduct viewHistoryProduct = getPrototypeBean(ContextIdNames.VIEW_HISTORY_PRODUCT, ViewHistoryProduct.class);
 
-		StoreSeoUrlBuilderFactory storeSeoUrlBuilderFactory = getBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY);
+		StoreSeoUrlBuilderFactory storeSeoUrlBuilderFactory = getSingletonBean(ContextIdNames.STORE_SEO_URL_BUILDER_FACTORY,
+				StoreSeoUrlBuilderFactory.class);
 		SeoUrlBuilder seoUrlBuilder = storeSeoUrlBuilderFactory.getStoreSeoUrlBuilder();
 
 		viewHistoryProduct.loadProductInfo(product, seoUrlBuilder);

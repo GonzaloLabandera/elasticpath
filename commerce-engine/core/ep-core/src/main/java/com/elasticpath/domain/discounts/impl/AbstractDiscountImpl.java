@@ -164,7 +164,7 @@ public abstract class AbstractDiscountImpl extends AbstractEpDomainImpl implemen
 	 * @return the populated <code>PromotionRuleExceptions</code> object
 	 */
 	protected PromotionRuleExceptions getPromotionRuleExceptions(final String exceptionStr) {
-		PromotionRuleExceptions promotionRuleExceptions = getBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS);
+		PromotionRuleExceptions promotionRuleExceptions = getPrototypeBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS, PromotionRuleExceptions.class);
 		promotionRuleExceptions.populateFromExceptionStr(exceptionStr);
 		return promotionRuleExceptions;
 	}
@@ -179,7 +179,7 @@ public abstract class AbstractDiscountImpl extends AbstractEpDomainImpl implemen
 	protected TotallingApplier getTotallingApplier(final boolean actuallyApply,
 			final DiscountItemContainer discountItemContainer,
 			final long ruleId) {
-		TotallingApplier applier = getBean(ContextIdNames.TOTALLING_APPLIER);
+		TotallingApplier applier = getPrototypeBean(ContextIdNames.TOTALLING_APPLIER, TotallingApplier.class);
 		applier.setActuallyApply(actuallyApply);
 		applier.initializeMaxItems(getAvailableDiscountQuantity());
 		applier.setDiscountItemContainer(discountItemContainer);
@@ -197,10 +197,10 @@ public abstract class AbstractDiscountImpl extends AbstractEpDomainImpl implemen
 	}
 
 	protected ProductSkuLookup getProductSkuLookup() {
-		return getBean(ContextIdNames.PRODUCT_SKU_LOOKUP);
+		return getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 	}
 
 	protected ProductService getProductService() {
-		return getBean(ContextIdNames.PRODUCT_SERVICE);
+		return getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 	}
 }

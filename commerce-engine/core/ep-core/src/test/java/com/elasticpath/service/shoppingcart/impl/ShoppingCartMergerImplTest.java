@@ -48,7 +48,6 @@ public class ShoppingCartMergerImplTest {
 				allowing(donor).getRootShoppingItems();
 				allowing(donor).getNumItems();
 				allowing(donor).getPromotionCodes();
-				allowing(donor).getAppliedGiftCertificates();
 				allowing(recipient).getRootShoppingItems();
 				allowing(recipient).getNumItems();
 

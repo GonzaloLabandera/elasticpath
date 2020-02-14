@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.order.impl;
 
@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,7 +40,6 @@ import com.elasticpath.domain.order.ElectronicOrderShipment;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderEvent;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
@@ -54,12 +54,12 @@ import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.impl.TaxCodeImpl;
 import com.elasticpath.money.Money;
-import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.plugin.tax.domain.TaxAddress;
 import com.elasticpath.plugin.tax.domain.TaxOperationContext;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.TaxCalculationService;
+import com.elasticpath.service.tax.TaxOperationService;
 import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
 import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
 import com.elasticpath.service.tax.impl.TaxCalculationServiceImpl;
@@ -69,7 +69,7 @@ import com.elasticpath.service.tax.impl.TaxOperationServiceImpl;
  * Test cases for <code>OrderImpl</code>.
  */
 @RunWith(MockitoJUnitRunner.class)
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength", "PMD.ExcessiveImports" })
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength", "PMD.ExcessiveImports"})
 public class OrderImplTest {
 
 	private static final String HST = "HST";
@@ -95,6 +95,7 @@ public class OrderImplTest {
 	private BeanFactory beanFactory;
 
 	private static final double ALLOWABLE_ERROR = 0.0000001;
+
 	/**
 	 * Prepare for the tests.
 	 *
@@ -103,7 +104,7 @@ public class OrderImplTest {
 	@Before
 	public void setUp() throws Exception {
 
-		when(beanFactory.getBean(ContextIdNames.STORE_SERVICE)).thenReturn(storeService);
+		when(beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class)).thenReturn(storeService);
 
 		when(storeService.findStoreWithCode(getMockedStore().getCode())).thenReturn(getMockedStore());
 
@@ -121,8 +122,9 @@ public class OrderImplTest {
 
 			@Override
 			public TaxCalculationResult calculateTaxes(final String storeCode, final TaxAddress destinationAddress, final TaxAddress originAddress,
-					final Money shippingCost, final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap,
-					final Money preTaxDiscount, final TaxOperationContext taxOperationContext) {
+													   final Money shippingCost,
+													   final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap,
+													   final Money preTaxDiscount, final TaxOperationContext taxOperationContext) {
 				final TaxCalculationResult taxResult = new TaxCalculationResultImpl();
 				taxResult.setDefaultCurrency(Currency.getInstance(Locale.US));
 
@@ -156,7 +158,7 @@ public class OrderImplTest {
 		taxOperationService.setBeanFactory(beanFactory);
 		taxOperationService.setAddressAdapter(new TaxAddressAdapter());
 
-		when(beanFactory.getBean(ContextIdNames.TAX_OPERATION_SERVICE)).thenReturn(taxOperationService);
+		when(beanFactory.getSingletonBean(ContextIdNames.TAX_OPERATION_SERVICE, TaxOperationService.class)).thenReturn(taxOperationService);
 	}
 
 	/**
@@ -186,8 +188,8 @@ public class OrderImplTest {
 			}
 		};
 		assertThat(order.getSubtotal())
-			.as("Order subtotal should be the sum of its shipment subtotals, and the scale should be 2.")
-			.isEqualTo("20.00");
+				.as("Order subtotal should be the sum of its shipment subtotals, and the scale should be 2.")
+				.isEqualTo("20.00");
 	}
 
 	/**
@@ -275,24 +277,6 @@ public class OrderImplTest {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderImpl.getOrderShipments()'.
-	 */
-	@Test
-	public void testGetSetOrderPayments() {
-		Order order = createTestOrder();
-		OrderPayment orderPayment = new OrderPaymentImpl();
-		Set<OrderPayment> paymentSet = new HashSet<>();
-		paymentSet.add(orderPayment);
-		order.setOrderPayments(paymentSet);
-		assertThat(order.getOrderPayments()).isEqualTo(paymentSet);
-
-		int numPayments = order.getOrderPayments().size();
-		OrderPayment anotherOrderPayment = new OrderPaymentImpl();
-		order.addOrderPayment(anotherOrderPayment);
-		assertThat(order.getOrderPayments()).hasSize(numPayments + 1);
-	}
-
-	/**
 	 * Test method for 'com.elasticpath.domain.impl.OrderImpl.getOrderEvents()'.
 	 */
 	@Test
@@ -358,8 +342,8 @@ public class OrderImplTest {
 			}
 		};
 		assertThat(order.getBeforeTaxSubtotalMoney().getRawAmount())
-			.as("Order beforeTaxSubtotal should be the sum of its shipment beforeTaxSubtotals, and the scale should be 2.")
-			.isEqualTo("20.00");
+				.as("Order beforeTaxSubtotal should be the sum of its shipment beforeTaxSubtotals, and the scale should be 2.")
+				.isEqualTo("20.00");
 		assertThat(order.getBeforeTaxSubtotalMoney().getCurrency()).isEqualTo(CURRENCY);
 	}
 
@@ -397,21 +381,17 @@ public class OrderImplTest {
 			}
 		};
 		assertThat(order.getSubtotalDiscountMoney().getRawAmount())
-			.as("Order subtotal discount should be the sum of its shipment subtotal discounts, and the scale should be 2.")
-			.isEqualTo("20.00");
+				.as("Order subtotal discount should be the sum of its shipment subtotal discounts, and the scale should be 2.")
+				.isEqualTo("20.00");
 		assertThat(order.getSubtotalDiscountMoney().getCurrency()).isEqualTo(CURRENCY);
 	}
 
-	/** Test for getOrderShippingCostMoney(). */
+	/**
+	 * Test for getOrderShippingCostMoney().
+	 */
 	@Test
 	public void testGetOrderShippingCostMoney() {
 		Order order = createTestOrder();
-		OrderPayment orderPayment = new OrderPaymentImpl();
-		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		orderPayment.setCurrencyCode(CURRENCY.getCurrencyCode());
-		Set<OrderPayment> paymentSet = new HashSet<>();
-		paymentSet.add(orderPayment);
-		order.setOrderPayments(paymentSet);
 		order.setUidPk(TEST_UIDPK);
 		order.setOrderNumber(TEST_ORDER_NUMBER1);
 
@@ -427,16 +407,12 @@ public class OrderImplTest {
 
 	}
 
-	/** Test for getBeforeTaxShippingCostMoney(). */
+	/**
+	 * Test for getBeforeTaxShippingCostMoney().
+	 */
 	@Test
 	public void testGetBeforeTaxShippingCostMoney() {
 		Order order = createTestOrder();
-		OrderPayment orderPayment = new OrderPaymentImpl();
-		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		orderPayment.setCurrencyCode(CURRENCY.getCurrencyCode());
-		Set<OrderPayment> paymentSet = new HashSet<>();
-		paymentSet.add(orderPayment);
-		order.setOrderPayments(paymentSet);
 		order.setUidPk(TEST_UIDPK);
 		order.setOrderNumber(TEST_ORDER_NUMBER1);
 
@@ -453,7 +429,9 @@ public class OrderImplTest {
 
 	}
 
-	/** test for OrderImpl method. */
+	/**
+	 * test for OrderImpl method.
+	 */
 	@Test
 	public void testGetShippingAddress() {
 		Order order = createTestOrder();
@@ -683,6 +661,30 @@ public class OrderImplTest {
 		assertThat(order.isHoldable()).isFalse();
 	}
 
+	/**
+	 * Test method for 'com.elasticpath.domain.order.impl.OrderImpl.getAdjustedOrderTotalMoney'.
+	 */
+	@Test
+	public void testGetAdjustedOrderTotalMoney() {
+		final BigDecimal total = BigDecimal.TEN;
+		final BigDecimal canceledTotal = BigDecimal.ONE;
+		final BigDecimal expected = total.subtract(canceledTotal).setScale(2, BigDecimal.ROUND_UNNECESSARY);
+
+		final PhysicalOrderShipmentImpl canceled = new PhysicalOrderShipmentImpl();
+		canceled.setStatus(OrderShipmentStatus.CANCELLED);
+		canceled.setTotal(canceledTotal);
+
+		final PhysicalOrderShipmentImpl reserved = new PhysicalOrderShipmentImpl();
+		reserved.setStatus(OrderShipmentStatus.INVENTORY_ASSIGNED);
+		reserved.setTotal(BigDecimal.ONE);
+
+		OrderImpl order = createTestOrder();
+		order.setTotal(total);
+		order.setShipments(Arrays.asList(canceled, reserved));
+
+		assertThat(order.getAdjustedOrderTotalMoney().getAmount()).isEqualTo(expected);
+	}
+
 	private OrderImpl createOrderInProgress() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.IN_PROGRESS);
@@ -710,8 +712,8 @@ public class OrderImplTest {
 	public void testPersistedOrderAddPhysicalShipment() {
 		Order order = createTestOrder();
 		assertThat(order.isPersisted())
-			.as("Order should be persistent")
-			.isTrue();
+				.as("Order should be persistent")
+				.isTrue();
 		OrderShipment orderShipment = createPhysicalOrderShipmentForOrder(order);
 		orderShipment.setStatus(OrderShipmentStatus.INVENTORY_ASSIGNED);
 		order.addShipment(orderShipment);
@@ -758,7 +760,7 @@ public class OrderImplTest {
 		assertThat(order.isPersisted()).isFalse();
 		OrderShipment orderShipment = new PhysicalOrderShipmentImpl();
 		assertThatThrownBy(() -> order.addShipment(orderShipment))
-			.isInstanceOf(OrderNotPersistedException.class);
+				.isInstanceOf(OrderNotPersistedException.class);
 	}
 
 	@Test
@@ -766,8 +768,8 @@ public class OrderImplTest {
 		Order order = createTestOrder();
 
 		assertThat(order.getFieldValue(FOO))
-			.as("Getter of non-existent order data key should return null")
-			.isNull();
+				.as("Getter of non-existent order data key should return null")
+				.isNull();
 		assertThat(order.getFieldValues()).isEmpty();
 	}
 
@@ -777,11 +779,11 @@ public class OrderImplTest {
 		order.setFieldValue(FOO, BAR);
 
 		assertThat(order.getFieldValue(FOO))
-			.as("Getter/Setters should work as expected")
-			.isEqualTo(BAR);
+				.as("Getter/Setters should work as expected")
+				.isEqualTo(BAR);
 		assertThat(order.getFieldValues())
-			.as("Map getter should also work")
-			.containsOnly(entry(FOO, BAR));
+				.as("Map getter should also work")
+				.containsOnly(entry(FOO, BAR));
 	}
 
 	/**
@@ -824,7 +826,7 @@ public class OrderImplTest {
 			}
 
 			assertThat(taxEntry.getValue().getAmount().doubleValue())
-				.isCloseTo(actualValue.doubleValue(), within(ALLOWABLE_ERROR));
+					.isCloseTo(actualValue.doubleValue(), within(ALLOWABLE_ERROR));
 		}
 	}
 
@@ -891,8 +893,8 @@ public class OrderImplTest {
 			}
 
 			assertThat(taxEntry.getValue().getAmount().doubleValue())
-				.as("For %s", taxEntry.getKey())
-				.isCloseTo(actualValue.doubleValue(), within(ALLOWABLE_ERROR));
+					.as("For %s", taxEntry.getKey())
+					.isCloseTo(actualValue.doubleValue(), within(ALLOWABLE_ERROR));
 		}
 	}
 
@@ -923,8 +925,13 @@ public class OrderImplTest {
 			}
 
 			@Override
-			protected <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
+			}
+
+			@Override
+			public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+				return beanFactory.getSingletonBean(name, clazz);
 			}
 		};
 		order.addShipment(orderShipment);
@@ -941,8 +948,13 @@ public class OrderImplTest {
 			}
 
 			@Override
-			protected <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
+			}
+
+			@Override
+			public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+				return beanFactory.getSingletonBean(name, clazz);
 			}
 		};
 		order.addShipment(orderShipment);
@@ -961,8 +973,8 @@ public class OrderImplTest {
 		orderShipment.addShipmentOrderSku(orderSku2);
 
 		assertThat(order.getOrderSkuByGuid("NO-SUCH-GUID"))
-			.as("Expected null when attempting to retrieve an OrderSku not contained within the order")
-			.isNull();
+				.as("Expected null when attempting to retrieve an OrderSku not contained within the order")
+				.isNull();
 	}
 
 	@Test
@@ -1012,8 +1024,8 @@ public class OrderImplTest {
 		order.setStatus(OrderStatus.IN_PROGRESS);
 
 		assertThat(order.isReleasable())
-			.as("Expected order not to be releasable with a status of IN_PROGRESS")
-			.isFalse();
+				.as("Expected order not to be releasable with a status of IN_PROGRESS")
+				.isFalse();
 	}
 
 	@Test
@@ -1022,8 +1034,8 @@ public class OrderImplTest {
 		order.setStatus(OrderStatus.COMPLETED);
 
 		assertThat(order.isReleasable())
-			.as("Expected order not to be releasable with a status of COMPLETED")
-			.isFalse();
+				.as("Expected order not to be releasable with a status of COMPLETED")
+				.isFalse();
 	}
 
 	@Test
@@ -1032,8 +1044,8 @@ public class OrderImplTest {
 		order.setStatus(OrderStatus.CANCELLED);
 
 		assertThat(order.isReleasable())
-			.as("Expected order not to be releasable with a status of CANCELLED")
-			.isFalse();
+				.as("Expected order not to be releasable with a status of CANCELLED")
+				.isFalse();
 	}
 
 	@Test
@@ -1042,8 +1054,8 @@ public class OrderImplTest {
 		order.setStatus(OrderStatus.PARTIALLY_SHIPPED);
 
 		assertThat(order.isReleasable())
-			.as("Expected order not to be releasable with a status of PARTIALLY_SHIPPED")
-			.isFalse();
+				.as("Expected order not to be releasable with a status of PARTIALLY_SHIPPED")
+				.isFalse();
 	}
 
 	@Test
@@ -1052,8 +1064,8 @@ public class OrderImplTest {
 		order.setStatus(OrderStatus.FAILED);
 
 		assertThat(order.isReleasable())
-			.as("Expected order not to be releasable with a status of FAILED")
-			.isFalse();
+				.as("Expected order not to be releasable with a status of FAILED")
+				.isFalse();
 	}
 
 	@Test
@@ -1062,8 +1074,8 @@ public class OrderImplTest {
 		order.setStatus(OrderStatus.CREATED);
 
 		assertThat(order.isReleasable())
-			.as("Expected order to be releasable with a status of CREATED")
-			.isTrue();
+				.as("Expected order to be releasable with a status of CREATED")
+				.isTrue();
 	}
 
 	@Test
@@ -1072,8 +1084,8 @@ public class OrderImplTest {
 		order.setStatus(OrderStatus.ONHOLD);
 
 		assertThat(order.isReleasable())
-			.as("Expected order to be releasable with a status of ONHOLD")
-			.isTrue();
+				.as("Expected order to be releasable with a status of ONHOLD")
+				.isTrue();
 	}
 
 	@Test
@@ -1082,8 +1094,8 @@ public class OrderImplTest {
 		order.setStatus(OrderStatus.AWAITING_EXCHANGE);
 
 		assertThat(order.isReleasable())
-			.as("Expected order to be releasable with a status of AWAITING_EXCHANGE")
-			.isTrue();
+				.as("Expected order to be releasable with a status of AWAITING_EXCHANGE")
+				.isTrue();
 	}
 
 	/**
@@ -1147,7 +1159,7 @@ public class OrderImplTest {
 	 * @return the default mocked store.
 	 */
 	protected Store getMockedStore() {
-		Set <TaxCode> taxCodes = new HashSet<>();
+		Set<TaxCode> taxCodes = new HashSet<>();
 		taxCodes.add(createTaxCode(TaxCode.TAX_CODE_SHIPPING));
 		taxCodes.add(createTaxCode(TAX_CODE));
 
@@ -1163,4 +1175,57 @@ public class OrderImplTest {
 		taxCode.setGuid(System.currentTimeMillis() + taxCodeName);
 		return taxCode;
 	}
+
+	@Test
+	public void testSumUpFutureShipmentsAmount() {
+		final Order order = createTestOrder();
+		final ServiceOrderShipmentImpl shipment1 = new ServiceOrderShipmentImpl();
+		shipment1.setTotal(BigDecimal.ONE);
+		shipment1.setStatus(OrderShipmentStatus.INVENTORY_ASSIGNED);
+		order.addShipment(shipment1);
+		final ServiceOrderShipmentImpl shipment2 = new ServiceOrderShipmentImpl();
+		shipment2.setTotal(BigDecimal.ONE);
+		shipment2.setStatus(OrderShipmentStatus.RELEASED);
+		order.addShipment(shipment2);
+
+		final Money money = order.sumUpFutureShipmentAmounts();
+
+		assertThat(money.getAmount()).isEqualTo(BigDecimal.valueOf(2).setScale(2));
+		assertThat(money.getCurrency()).isEqualTo(CURRENCY);
+	}
+
+	@Test
+	public void testSumUpFutureShipmentsAmountFiltersOutShippedOnes() {
+		final Order order = createTestOrder();
+		final ServiceOrderShipmentImpl shipment1 = new ServiceOrderShipmentImpl();
+		shipment1.setTotal(BigDecimal.ONE);
+		shipment1.setStatus(OrderShipmentStatus.SHIPPED);
+		order.addShipment(shipment1);
+		final ServiceOrderShipmentImpl shipment2 = new ServiceOrderShipmentImpl();
+		shipment2.setTotal(BigDecimal.ONE);
+		shipment2.setStatus(OrderShipmentStatus.INVENTORY_ASSIGNED);
+		order.addShipment(shipment2);
+
+		final Money money = order.sumUpFutureShipmentAmounts();
+
+		assertThat(money.getAmount()).isEqualTo(BigDecimal.ONE.setScale(2));
+	}
+
+	@Test
+	public void testSumUpFutureShipmentsAmountFiltersOutCancelledOnes() {
+		final Order order = createTestOrder();
+		final ServiceOrderShipmentImpl shipment1 = new ServiceOrderShipmentImpl();
+		shipment1.setTotal(BigDecimal.ONE);
+		shipment1.setStatus(OrderShipmentStatus.INVENTORY_ASSIGNED);
+		order.addShipment(shipment1);
+		final ServiceOrderShipmentImpl shipment2 = new ServiceOrderShipmentImpl();
+		shipment2.setTotal(BigDecimal.ONE);
+		shipment2.setStatus(OrderShipmentStatus.CANCELLED);
+		order.addShipment(shipment2);
+
+		final Money money = order.sumUpFutureShipmentAmounts();
+
+		assertThat(money.getAmount()).isEqualTo(BigDecimal.ONE.setScale(2));
+	}
+
 }

@@ -1,7 +1,8 @@
 package com.elasticpath.cortex.dce.hal
 
-import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static org.assertj.core.api.Assertions.assertThat
+
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 
 import cucumber.api.DataTable
 import cucumber.api.java.en.And
@@ -116,16 +117,16 @@ class HalFormatSteps {
 		def addressformHref = client.body._links.self.href + "?followlocation"
 
 		client.POST(addressformHref, [
-				address: ["country-name"    : countryCode,
-						  "extended-address": extendedAddress,
-						  "locality"        : locale,
-						  "organization"    : organization,
-						  "phone-number"    : phoneNumber,
-						  "postal-code"     : postalCode,
-						  "region"          : regionCode,
-						  "street-address"  : streetAddress],
-				name   : ["family-name": familyName,
-						  "given-name" : givenName]
+				"organization": organization,
+				"phone-number": phoneNumber,
+				address       : ["country-name"    : countryCode,
+								 "extended-address": extendedAddress,
+								 "locality"        : locale,
+								 "postal-code"     : postalCode,
+								 "region"          : regionCode,
+								 "street-address"  : streetAddress],
+				name          : ["family-name": familyName,
+								 "given-name" : givenName]
 		])
 	}
 
@@ -137,6 +138,19 @@ class HalFormatSteps {
 			def value = map.getValue()
 
 			assertThat(client.body."$addressFormNode"."$key")
+					.as("Expected $key does not match")
+					.isEqualTo(value)
+		}
+	}
+
+	@Then('^I should see top level values from the POST$')
+	static void verifyPOSTContains(DataTable dataTable) {
+		def mapList = dataTable.asMap(String, String)
+		for (def map : mapList) {
+			def key = map.getKey()
+			def value = map.getValue()
+
+			assertThat(client.body."$key")
 					.as("Expected $key does not match")
 					.isEqualTo(value)
 		}

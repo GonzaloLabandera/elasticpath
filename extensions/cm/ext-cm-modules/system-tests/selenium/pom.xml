@@ -134,8 +134,9 @@
 			<version>2.4.15</version>
 		</dependency>
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
+			<groupId>${epdb.maven.groupId}</groupId>
+			<artifactId>${epdb.maven.artifactId}</artifactId>
+			<version>${epdb.maven.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -171,6 +172,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.0.0-M4</version>
 				<executions>
 					<execution>
 						<goals>

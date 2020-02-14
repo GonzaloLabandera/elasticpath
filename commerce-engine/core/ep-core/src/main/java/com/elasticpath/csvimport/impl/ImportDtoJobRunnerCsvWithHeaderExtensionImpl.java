@@ -211,7 +211,7 @@ public class ImportDtoJobRunnerCsvWithHeaderExtensionImpl extends ImportDtoJobRu
 	 * @return the base amount from database.
 	 */
 	protected BaseAmount findBaseAmount(final BaseAmountDTO dto) {
-		BaseAmountFilter filter = getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter filter = getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		filter.setObjectGuid(dto.getObjectGuid());
 		filter.setObjectType(dto.getObjectType());
 		filter.setQuantity(dto.getQuantity());
@@ -259,9 +259,9 @@ public class ImportDtoJobRunnerCsvWithHeaderExtensionImpl extends ImportDtoJobRu
 		// verify the change set status of the object in case change sets are enabled
 		if (!checkChangeSetStatus(priceListDescriptor, getImportJobRequest().getChangeSetGuid())) {
 			// verify the changeset status only if the verification of the line was successful
-			ImportBadRow badRow = getBeanFactory().getBean(ContextIdNames.IMPORT_BAD_ROW);
+			ImportBadRow badRow = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			// report error
-			final ImportFault importFault = getBeanFactory().getBean(ContextIdNames.IMPORT_FAULT);
+			final ImportFault importFault = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 			importFault.setCode("import.csvFile.badRow.priceListUnavailableForChangeSet");
 			importFault.setArgs(new Object[] {priceListDescriptor.getName(), getImportJobRequest().getChangeSetGuid()});
 			badRow.addImportFault(importFault);

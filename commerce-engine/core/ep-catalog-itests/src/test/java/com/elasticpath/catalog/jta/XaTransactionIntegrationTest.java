@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Elastic Path Software Inc., 2018
  */
+
 package com.elasticpath.catalog.jta;
 
 import static com.elasticpath.catalog.jta.XaTransactionIntegrationTest.JMS_BROKER_URL;
@@ -9,9 +10,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Locale;
 
+import org.junit.Test;
+
 import org.apache.activemq.broker.BrokerService;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionException;
 
@@ -72,7 +74,7 @@ public class XaTransactionIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	private SkuOption createSkuOption() {
-		final SkuOption skuOption = getBeanFactory().getBean(ContextIdNames.SKU_OPTION);
+		final SkuOption skuOption = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 		skuOption.initialize();
 		skuOption.setOptionKey(Utils.uniqueCode(SKU_OPTION_KEY));
 		skuOption.setCatalog(createAndPersistStore().getCatalog());

@@ -1,9 +1,12 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
+
 package com.elasticpath.cortex.dce.coupons
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_SCOPE
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
-
 import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.java.en.And
@@ -159,6 +162,7 @@ class CouponsSteps {
 				.stopIfFailure()
 
 		Order.removeAllAppliedCoupons()
+		Order.addOrderPaymentInstrument()
 
 		// for a purchase to have a coupon it must trigger a promotion.
 		FindItemBy.productName(productName)

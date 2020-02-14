@@ -55,7 +55,7 @@ public class TaxCodeServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.TAX_CODE);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.TAX_CODE, TaxCode.class);
 				will(returnValue(taxCode));
 				allowing(beanFactory).getBeanImplClass(ContextIdNames.TAX_CODE);
 				will(returnValue(TaxCodeImpl.class));

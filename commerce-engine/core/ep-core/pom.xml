@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +18,15 @@
 	<description>Core eCommerce services and data structures.</description>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.annotation</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-base</artifactId>
@@ -41,19 +54,21 @@
 
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>payment-provider-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>payment-plugin-connectivity</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-persistence-openjpa</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-payment-gateway-connectivity-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
 			<artifactId>shipping-calculation-connectivity-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-test-payment-gateway</artifactId>
 		</dependency>
 
 		<dependency>
@@ -198,6 +213,18 @@
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-compiler</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.thoughtworks.xstream</groupId>
+					<artifactId>xstream</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
 		</dependency>
 
 		<dependency>
@@ -665,6 +692,8 @@
 						<Bundle-Localization>plugin</Bundle-Localization>
 						<Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
 						<Import-Package>
+							org.osgi.framework,
+							org.osgi.service.url,
 							com.elasticpath.commons.beanframework,
 							com.elasticpath.commons.beanframework.impl,
 							com.elasticpath.commons.beanframework.spring,
@@ -672,7 +701,7 @@
 						</Import-Package>
 						<Implementation-Build>${buildNumber}</Implementation-Build>
 						<Implementation-Version>${project.version} (r ${buildNumber} )</Implementation-Version>
-
+						<Bundle-Activator>com.elasticpath.commons.handlers.osgi.Activator</Bundle-Activator>
 					</instructions>
 				</configuration>
 			</plugin>

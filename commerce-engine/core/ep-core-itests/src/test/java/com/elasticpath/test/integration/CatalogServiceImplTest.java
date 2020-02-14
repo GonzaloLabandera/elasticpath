@@ -123,11 +123,11 @@ public class CatalogServiceImplTest extends BasicSpringContextTest {
 		
 		Catalog virtual = catalogTestPersister.persistCatalog(VIRTUAL, false);
 		Category virtualCategory = catalogTestPersister.persistCategory("VCAT", virtual, m1CategoryType, null, null);
-		CategoryService categoryService = getBeanFactory().getBean(ContextIdNames.CATEGORY_SERVICE);
+		CategoryService categoryService = getBeanFactory().getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 		virtualCategory.setVirtual(true);
 		categoryService.saveOrUpdate(virtualCategory);
 		
-		ProductService productService = getBeanFactory().getBean(ContextIdNames.PRODUCT_SERVICE);
+		ProductService productService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		product1.addCategory(virtualCategory);
 		product2.addCategory(virtualCategory);
 		productService.saveOrUpdate(product1);

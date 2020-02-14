@@ -25,7 +25,7 @@ import com.elasticpath.tags.service.ConditionEvaluatorService;
  * Build price list stacks through {@link PriceListAssignment}s.
  */
 public class PLAStackLookupStrategy implements PriceListStackLookupStrategy {
-	
+
 	private final PriceListAssignmentByPriorityComparatorImpl priceListAssignmentComparator = new PriceListAssignmentByPriorityComparatorImpl();
 
 	private ConditionEvaluatorService conditionEvaluatorService;
@@ -42,38 +42,38 @@ public class PLAStackLookupStrategy implements PriceListStackLookupStrategy {
 				currency.getCurrencyCode(),
 				true
 		);
-		
+
 		final PriceListStack stack = createPriceListStack(currency);
-		
+
 		if (CollectionUtils.isNotEmpty(allPriceListAssignments)) {
-			
+
 			if (tagSet != null) {
-				allPriceListAssignments = 
+				allPriceListAssignments =
 					filterPriceListAssignmentsForTagSet(tagSet, allPriceListAssignments);
 			}
-			
+
 			populatePriceListStack(orderPriceListAssignment(allPriceListAssignments), stack);
-			
+
 		}
 		return stack;
 	}
-	
-	
+
+
 	/**
-	 * provided the current tag set available removes price assignments that do not satisfy the 
+	 * provided the current tag set available removes price assignments that do not satisfy the
 	 * selling context.
 	 * @param tagSet the current tag set
 	 * @param allPriceListAssignments all price lists
 	 */
 	private List<PriceListAssignment> filterPriceListAssignmentsForTagSet(final TagSet tagSet,
 			final List<PriceListAssignment> allPriceListAssignments) {
-		
+
 		List<PriceListAssignment> availablePriceListAssignments = new ArrayList<>();
 		for (PriceListAssignment pla : allPriceListAssignments) {
-			
+
 			final SellingContext context = pla.getSellingContext();
-			
-			final boolean isApplicable = context == null 
+
+			final boolean isApplicable = context == null
 										|| context.isSatisfied(getConditionEvaluatorService(), tagSet).isSuccess();
 			if (isApplicable) {
 				availablePriceListAssignments.add(pla);
@@ -81,14 +81,14 @@ public class PLAStackLookupStrategy implements PriceListStackLookupStrategy {
 		}
 		return availablePriceListAssignments;
 	}
-	
+
 	/**
 	 * Create (@link PriceListStack} and fill price list guids from given  list of {@link PriceListAssignment}.
 	 * @param currency the currency
-	 * @return instance of {@link PriceListStack} 
+	 * @return instance of {@link PriceListStack}
 	 */
 	protected PriceListStack createPriceListStack(final Currency currency) {
-		PriceListStack priceListStack = beanFactory.getBean(ContextIdNames.PRICE_LIST_STACK);
+		PriceListStack priceListStack = beanFactory.getPrototypeBean(ContextIdNames.PRICE_LIST_STACK, PriceListStack.class);
 		priceListStack.setCurrency(currency);
 		return priceListStack;
 	}
@@ -108,9 +108,9 @@ public class PLAStackLookupStrategy implements PriceListStackLookupStrategy {
 		}
 	}
 
-	
+
 	/**
-	 * Reorder given price list assignments by priority and uidPk. 
+	 * Reorder given price list assignments by priority and uidPk.
 	 * @param priceListAssignments list to reorder
 	 * @return sorted list
 	 */
@@ -129,7 +129,7 @@ public class PLAStackLookupStrategy implements PriceListStackLookupStrategy {
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
-	
+
 
 	/**
 	 * Get the evaluator service instance.
@@ -173,5 +173,5 @@ public class PLAStackLookupStrategy implements PriceListStackLookupStrategy {
 	public BeanFactory getBeanFactory() {
 		return beanFactory;
 	}
-	
+
 }

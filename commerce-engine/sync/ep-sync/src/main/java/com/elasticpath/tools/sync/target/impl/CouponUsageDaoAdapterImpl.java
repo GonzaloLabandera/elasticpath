@@ -29,9 +29,9 @@ public class CouponUsageDaoAdapterImpl extends AbstractDaoAdapter<CouponUsage> i
 	private BeanFactory beanFactory;
 
 	private CouponUsageService couponUsageService;
-	
+
 	private CouponService couponService;
-	
+
 	@Override
 	public List<String> getAssociatedGuids(final Class<?> clazz, final String guid) {
 		if (Rule.class.isAssignableFrom(clazz)) {
@@ -60,14 +60,14 @@ public class CouponUsageDaoAdapterImpl extends AbstractDaoAdapter<CouponUsage> i
 		if (persistentUsage == null) {
 			resolveCoupon(newPersistence);
 			couponUsageService.add(newPersistence);
-		}		
+		}
 	}
 
 	private void resolveCoupon(final CouponUsage mergedPersistence) {
 		String couponCode = mergedPersistence.getCoupon().getCouponCode();
 		Coupon coupon = couponService.findByCouponCode(couponCode);
 		if (coupon == null) {
-			throw new SyncToolRuntimeException("Could not find Coupon on Target system: " + couponCode  
+			throw new SyncToolRuntimeException("Could not find Coupon on Target system: " + couponCode
 					+ ". The Coupon must always be persisted first");
 		}
 		mergedPersistence.setCoupon(coupon);
@@ -75,12 +75,12 @@ public class CouponUsageDaoAdapterImpl extends AbstractDaoAdapter<CouponUsage> i
 
 	@Override
 	public CouponUsage createBean(final CouponUsage bean) {
-		return beanFactory.getBean(ContextIdNames.COUPON_USAGE);
+		return beanFactory.getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 	}
 
 	@Override
 	public CouponUsage get(final String guid) {
-		try {		
+		try {
 			return (CouponUsage) getEntityLocator().locatePersistence(guid, CouponUsage.class);
 		} catch (SyncToolConfigurationException e) {
 			throw new SyncToolRuntimeException("Unable to locate Coupon Usage persistence", e);
@@ -96,7 +96,7 @@ public class CouponUsageDaoAdapterImpl extends AbstractDaoAdapter<CouponUsage> i
 		couponUsageService.delete(couponUsage);
 		return true;
 	}
-	
+
 	@Override
 	public CouponUsage update(final CouponUsage mergedPersistence) throws SyncToolRuntimeException {
 		resolveCoupon(mergedPersistence);
@@ -109,14 +109,14 @@ public class CouponUsageDaoAdapterImpl extends AbstractDaoAdapter<CouponUsage> i
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
-	
+
 	/**
 	 * @param couponUsageService the couponUsageService to set
 	 */
 	public void setCouponUsageService(final CouponUsageService couponUsageService) {
 		this.couponUsageService = couponUsageService;
 	}
-	
+
 	/**
 	 * @param couponService the coupon service to set
 	 */

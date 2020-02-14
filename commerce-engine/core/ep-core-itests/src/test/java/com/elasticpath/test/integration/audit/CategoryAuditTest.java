@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.commons.ThreadLocalMap;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryType;
@@ -109,8 +110,8 @@ public class CategoryAuditTest extends AbstractAuditTestSupport {
 		CategoryType categoryType = persisterFactory.getCatalogTestPersister()
 									.persistCategoryType(Utils.uniqueCode("catType"),
 										catalog);
-				
-		Category masterCategory = getBeanFactory().getBean("category");
+
+		Category masterCategory = getBeanFactory().getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 		masterCategory.setCategoryType(categoryType);
 		masterCategory.setCatalog(catalog);
 		masterCategory.setCode(Utils.uniqueCode("category"));

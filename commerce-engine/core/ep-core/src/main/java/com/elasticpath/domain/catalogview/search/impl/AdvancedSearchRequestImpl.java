@@ -39,7 +39,7 @@ public class AdvancedSearchRequestImpl extends AbstractSearchRequestImpl impleme
 
 	private FilterFactory getAdvancedSearchFilterFactory() {
 		if (advancedSearchFilterFactory == null) {
-			advancedSearchFilterFactory = getBean("advancedSearchFilterFactory");
+			advancedSearchFilterFactory = getSingletonBean(ContextIdNames.ADVANCED_SEARCH_FILTER_FACTORY, FilterFactory.class);
 		}
 		return advancedSearchFilterFactory;
 	}
@@ -132,7 +132,7 @@ public class AdvancedSearchRequestImpl extends AbstractSearchRequestImpl impleme
 	
 	@Override
 	public List<Filter<?>> getAdvancedSearchFilters() {
-		Filter<?> separator = getBean(ContextIdNames.ADVANCED_SEARCH_FILTERED_NAV_SEPARATOR_FILTER);
+		Filter<?> separator = getPrototypeBean(ContextIdNames.ADVANCED_SEARCH_FILTERED_NAV_SEPARATOR_FILTER, Filter.class);
 		if (getFilters().contains(separator)) {
 			List<Filter<?>> advSearchFilters = new ArrayList<>();
 			for (Filter<?> filter : getFilters()) {

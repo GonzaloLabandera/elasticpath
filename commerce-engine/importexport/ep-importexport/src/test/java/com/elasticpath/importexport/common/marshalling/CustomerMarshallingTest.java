@@ -32,7 +32,7 @@ public class CustomerMarshallingTest {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		xmlMarshaller.marshal(testCustomerDTOBuilderFactory
-				.createWithPaymentMethods()
+				.create()
 				.build(),
 				out);
 

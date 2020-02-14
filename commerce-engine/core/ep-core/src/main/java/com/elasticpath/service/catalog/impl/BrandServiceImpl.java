@@ -59,7 +59,7 @@ public class BrandServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		sanityCheck();
 		Brand brand = null;
 		if (brandUid <= 0) {
-			brand = getBean(ContextIdNames.BRAND);
+			brand = getPrototypeBean(ContextIdNames.BRAND, Brand.class);
 		} else {
 			brand = getPersistentBeanFinder().get(ContextIdNames.BRAND, brandUid);
 		}

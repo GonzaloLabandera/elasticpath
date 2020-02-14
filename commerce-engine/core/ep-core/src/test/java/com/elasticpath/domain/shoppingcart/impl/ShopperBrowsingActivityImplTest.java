@@ -45,7 +45,9 @@ public class ShopperBrowsingActivityImplTest {
 
 		final CatalogViewResultHistory catalogViewResultHistory = context.mock(CatalogViewResultHistory.class);
 
-		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CATALOG_VIEW_RESULT_HISTORY, catalogViewResultHistory);
+		beanFactoryExpectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CATALOG_VIEW_RESULT_HISTORY,
+				CatalogViewResultHistory.class,
+				catalogViewResultHistory);
 
 		context.checking(new Expectations() {
 			{

@@ -16,10 +16,10 @@ import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -53,8 +53,8 @@ public class CategoryEditor extends AbstractPolicyAwareFormEditor {
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) throws PartInitException {
 		category = input.getAdapter(Category.class);
-		categoryLookup = ServiceLocator.getService(ContextIdNames.CATEGORY_LOOKUP);
-		categoryService = ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE);
+		categoryLookup = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
+		categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 
 		pageContainer = addPolicyActionContainer("categoryEditor"); //$NON-NLS-1$
 

@@ -33,7 +33,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.dto.catalog.PriceListEditorModel;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
@@ -118,7 +118,7 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 
 	private final TableSelectionProvider selectionChangedListener;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private final boolean isChangeSetsEnabled;
 
@@ -154,9 +154,9 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 	private final BaseAmountTableProperties tableProperties;
 
 	private final List<BaseAmountDTO> emptyObjects = new ArrayList<>();
-	
+
 	private int baseColumnCount;
-	
+
 	// Keeps the list of extension column names, if any, for later use.
 	private List<Pair> extensionColumnNames = new ArrayList<Pair>();
 
@@ -209,7 +209,7 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 					baseAmountTableContentProvider.getQuantityComparator()
 				);
 		}
-		
+
 		// Initialize the count of base columns.
 		baseColumnCount = 0;
 	}
@@ -609,22 +609,22 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 				getTableProperties().getSalePriceWidth()),
 				baseAmountTableContentProvider.getSaleValueComparator());
 	}
-	
+
 	/**
 	 * Creates the columns for extension plugins, if any.
 	 */
 	protected void createExtensionColumns() {
 		// Set the number of base columns.
 		this.baseColumnCount = baseAmountTableViewer.getColumnsCount();
-		
+
 		// Preserve the column names for later use.
 		extensionColumnNames = getExtensionColumnNames();
-		
+
 		for (Pair extensionColumnName : extensionColumnNames) {
 			// Create the column with the second part of the Pair, which should be the localized label.
 			registerSortableColumn(baseAmountTableViewer.addTableColumn(extensionColumnName.getSecond().toString(), INITIAL_WIDTH_MED),
 					baseAmountTableContentProvider.getDefaultComparator());
-		}		
+		}
 	}
 
 	/**
@@ -634,11 +634,11 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 		createStandardBaseAmountTableColumns();
 		createExtensionColumns();
 	}
-	
+
 	private List<Pair> getExtensionColumnNames() {
 		List<Pair> columnNames = new ArrayList<>();
 		PluginHelper.findTables(getClass().getSimpleName(), getPluginId())
-				.forEach(column -> 
+				.forEach(column ->
 					columnNames.addAll(((EPTableColumnNameCreator) column).visitColumnNameLabels()));
 		return columnNames;
 	}
@@ -751,9 +751,9 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 		BaseAmountDTO dto = baseAmountDto;
 		if (dto == null) {
 			dto = BaseAmountDTOCreator.createModel();
-					
+
 			// set new DTO defaults
-			final RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
+			final RandomGuid randomGuid = BeanLocator.getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class);
 			dto.setGuid(randomGuid.toString());
 			editMode = false;
 			dto.setObjectGuid(null);
@@ -998,8 +998,8 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 		return tableProperties;
 	}
 
-	private String getSkuGuidForSkuCode(final String skuCode) { 
-		ProductSkuLookup productSkuLookup = ServiceLocator.getService(ContextIdNames.PRODUCT_SKU_LOOKUP);
+	private String getSkuGuidForSkuCode(final String skuCode) {
+		ProductSkuLookup productSkuLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 		ProductSku productSku = productSkuLookup.findBySkuCode(skuCode);
 		if (productSku == null) {
 			return null;
@@ -1016,13 +1016,13 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 	 */
 	public String getExtensionColumnText(final Object element, final int columnIndex) {
 		int extensionIndex = columnIndex - this.baseColumnCount;
-		
+
 		if (extensionIndex < 0) {
 			LOG.warn("Invalid columnIndex: " + columnIndex);
 			// This shouldn't happen, but just in case...
 			return ""; //$NON-NLS-1$
 		}
-		
+
 		List<EPTableColumnCreator> tables = PluginHelper
 				.findTables(this.getClass().getSimpleName(), getPluginId());
 		String result = StringUtils.EMPTY;

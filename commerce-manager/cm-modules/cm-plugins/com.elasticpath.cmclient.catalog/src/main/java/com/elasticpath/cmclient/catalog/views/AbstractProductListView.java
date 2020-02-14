@@ -25,7 +25,7 @@ import com.elasticpath.cmclient.catalog.actions.DeleteProductAction;
 import com.elasticpath.cmclient.catalog.actions.product.CreateProductAction;
 import com.elasticpath.cmclient.catalog.actions.product.CreateProductBundleAction;
 import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
@@ -238,7 +238,7 @@ public abstract class AbstractProductListView extends AbstractSortListView imple
 	 * @return product service
 	 */
 	public ProductService getProductService() {
-		return ServiceLocator.getService(ContextIdNames.PRODUCT_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 	}
 
 

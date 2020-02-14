@@ -82,7 +82,8 @@ public class BaseAmountMetadataResolver extends AbstractMetadataResolverImpl {
 	 * @return the name of the related object
 	 */
 	protected String getRelatedObjectName(final String objectGuid, final String objectType) {
-		BusinessObjectDescriptor targetObjectDescriptor = getBeanFactory().getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		BusinessObjectDescriptor targetObjectDescriptor = getBeanFactory().getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR,
+				BusinessObjectDescriptor.class);
 		targetObjectDescriptor.setObjectIdentifier(objectGuid);
 		targetObjectDescriptor.setObjectType(objectType);
 		String name = null;

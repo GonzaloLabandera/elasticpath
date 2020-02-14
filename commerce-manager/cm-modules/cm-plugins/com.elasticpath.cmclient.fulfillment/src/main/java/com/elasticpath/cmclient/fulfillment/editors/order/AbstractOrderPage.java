@@ -19,7 +19,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -219,7 +219,7 @@ public abstract class AbstractOrderPage extends AbstractCmClientEditorPage {
 	
 	private OrderLockService getOrderLockService() {
 		if (orderLockService == null) {
-			orderLockService = ServiceLocator.getService(ContextIdNames.ORDER_LOCK_SERVICE);
+			orderLockService = BeanLocator.getSingletonBean(ContextIdNames.ORDER_LOCK_SERVICE, OrderLockService.class);
 		}
 		return orderLockService;
 	}

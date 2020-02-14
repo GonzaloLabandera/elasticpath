@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.store.targetedselling.dynamiccontent.controller
 
 import java.util.List;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.controller.impl.AbstractBaseControllerImpl;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
@@ -59,10 +59,10 @@ public class DynamicContentListControllerImpl
 	}
 	
 	private DynamicContentDeliveryService getDynamicContentAssignmentService() {
-		return ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 	}
 	
 	private DynamicContentService getDynamicContentService() {
-		return ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_SERVICE, DynamicContentService.class);
 	}
 }

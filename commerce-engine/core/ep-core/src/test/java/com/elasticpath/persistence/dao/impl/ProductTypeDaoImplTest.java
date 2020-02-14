@@ -69,18 +69,18 @@ public class ProductTypeDaoImplTest {
 				// override this method to not call SQL
 			}
 		};
-		
+
 		mockPersistenceEngine = context.mock(PersistenceEngine.class);
 		mockFetchPlanHelper = context.mock(FetchPlanHelper.class);
 		mockTimeService = context.mock(TimeService.class);
 		mockBeanFactory = context.mock(BeanFactory.class);
-		
+
 		productTypeDao.setPersistenceEngine(mockPersistenceEngine);
 		productTypeDao.setFetchPlanHelper(mockFetchPlanHelper);
 		productTypeDao.setTimeService(mockTimeService);
 		productTypeDao.setBeanFactory(mockBeanFactory);
 	}
-	
+
 	/**
 	 * Test the finding of a product type by name method.
 	 */
@@ -93,10 +93,10 @@ public class ProductTypeDaoImplTest {
 		} catch (EpServiceException e) {
 			assertNotNull(e);
 		}
-		
+
 		// test no matching name
 		final List<ProductType> emptyList = new ArrayList<>();
-		
+
 		final ProductType productType = new ProductTypeImpl();
 		productType.setName("No Such Name");
 		context.checking(new Expectations() {
@@ -105,13 +105,13 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(emptyList));
 			}
 		});
-		
+
 		assertNull(productTypeDao.findProductType(productType.getName()));
-		
+
 		// test matching name
 		final List<ProductType> list = new ArrayList<>();
 		list.add(productType);
-		
+
 		productType.setName("Valid Name");
 		context.checking(new Expectations() {
 			{
@@ -119,13 +119,13 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(list));
 			}
 		});
-		
+
 		assertNotNull(productTypeDao.findProductType(productType.getName()));
-		
+
 		// test inconsistent data
 		final ProductType duplicateProductType = new ProductTypeImpl();
 		list.add(duplicateProductType);
-		
+
 		productType.setName("Duplicate Name");
 		context.checking(new Expectations() {
 			{
@@ -133,7 +133,7 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(list));
 			}
 		});
-		
+
 		try {
 			productTypeDao.findProductType(productType.getName());
 			fail("EpServiceException must be thrown.");
@@ -141,7 +141,7 @@ public class ProductTypeDaoImplTest {
 			assertNotNull(e);
 		}
 	}
-	
+
 	/**
 	 * Tests the product type initialize method for a product type that does not exist yet.
 	 */
@@ -164,7 +164,7 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(ProductTypeImpl.class));
 			}
 		});
-		
+
 		assertNull(productTypeDao.initialize(productType));
 	}
 
@@ -175,7 +175,7 @@ public class ProductTypeDaoImplTest {
 	public void testInitializeWithProduct() {
 		// create a product type with attributes and SKU options
 		final ProductType productType = new ProductTypeImpl();
-		
+
 		AttributeGroup group = new AttributeGroupImpl();
 		Set<AttributeGroupAttribute> attributes = new HashSet<>();
 		AttributeGroupAttribute attributeGA = new AttributeGroupAttributeImpl();
@@ -204,18 +204,18 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(ProductTypeImpl.class));
 			}
 		});
-		
-				
+
+
 		assertSame(productType, productTypeDao.initialize(productType));
 	}
-	
+
 	/**
 	 * Test method for {@link ProductTypeDaoImpl#isInUse(long)}.
 	 */
 	@Test
 	public void testIsInUse() {
 		final long nonExistantProductTypeUid = 123L;
-		
+
 		// test the return of an empty list, meaning, not in use
 		context.checking(new Expectations() {
 			{
@@ -223,7 +223,7 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(new ArrayList<Long>()));
 			}
 		});
-		
+
 		// an empty list means not in use
 		assertFalse(productTypeDao.isInUse(nonExistantProductTypeUid));
 
@@ -236,11 +236,11 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(productTypeList));
 			}
 		});
-		
+
 		// a list with an ID means in use
 		assertTrue(productTypeDao.isInUse(nonExistantProductTypeUid));
 	}
-	
+
 	/**
 	 * Tests listing of all used UIDs.
 	 */
@@ -251,22 +251,22 @@ public class ProductTypeDaoImplTest {
 				oneOf(mockPersistenceEngine).retrieveByNamedQuery(with("PRODUCT_TYPE_USED_UIDS"), with(any(Object[].class)));
 			}
 		});
-		
+
 		productTypeDao.listUsedUids();
 	}
-	
+
 	/**
 	 * Test method for {@link ProductTypeDaoImpl#findAllProductTypeFromCatalog(long)}.
 	 */
 	@Test
 	public void testFindAllProductTypeFromCatalog() {
 		final List<ProductType> productTypeList = new ArrayList<>();
-		
+
 		final ProductType productType = new ProductTypeImpl();
 		final long productTypeUid = 1234L;
 		productType.setUidPk(productTypeUid);
 		productTypeList.add(productType);
-		
+
 		// expectations
 		context.checking(new Expectations() {
 			{
@@ -274,10 +274,10 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(productTypeList));
 			}
 		});
-		
+
 		assertSame("Invalid list returned.", productTypeList, productTypeDao.findAllProductTypeFromCatalog(productTypeUid));
 	}
-	
+
 	/**
 	 * Tests the named query for listing all product types.
 	 */
@@ -291,7 +291,7 @@ public class ProductTypeDaoImplTest {
 
 		productTypeDao.list();
 	}
-	
+
 	/**
 	 * Tests remove.
 	 */
@@ -303,10 +303,10 @@ public class ProductTypeDaoImplTest {
 				oneOf(mockPersistenceEngine).delete(productType);
 			}
 		});
-		
+
 		productTypeDao.remove(productType);
 	}
-	
+
 	/**
 	 * Tests the get by UID.
 	 */
@@ -315,14 +315,14 @@ public class ProductTypeDaoImplTest {
 		final long negativeUid = -1;
 		context.checking(new Expectations() {
 			{
-				oneOf(mockBeanFactory).getBean(ContextIdNames.PRODUCT_TYPE);
+				oneOf(mockBeanFactory).getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 				will(returnValue(productType));
 			}
 		});
 		ProductType productType = productTypeDao.get(negativeUid);
-		
+
 		assertFalse("The ProductType should not have been persisted. Negative UID.", productType.isPersisted());
-		
+
 		final long nonExistantProductTypeUid = 123L;
 		context.checking(new Expectations() {
 			{
@@ -333,11 +333,11 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(ProductTypeImpl.class));
 			}
 		});
-		
+
 		productType = productTypeDao.get(nonExistantProductTypeUid);
 		assertNull("get should return null for non-existent object", productType);
 	}
-	
+
 	/**
 	 * Tests the generic getObject method.
 	 */
@@ -347,16 +347,16 @@ public class ProductTypeDaoImplTest {
 		context.checking(new Expectations() {
 			{
 				oneOf(mockFetchPlanHelper).setLazyFields(ProductTypeImpl.class, Collections.emptyList());
-				oneOf(mockBeanFactory).getBean(ContextIdNames.PRODUCT_TYPE);
-				will(returnValue(productType));
+				oneOf(mockBeanFactory).getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
+					will(returnValue(productType));
 			}
 		});
-		
+
 		productTypeDao.getObject(0, fieldsToLoad);
 	}
-	
+
 	/**
-	 * Tests persistence with a null <code>PersistenceEngine</code>.  
+	 * Tests persistence with a null <code>PersistenceEngine</code>.
 	 */
 	@Test
 	public void testNullPersistenceEngine() {
@@ -369,7 +369,7 @@ public class ProductTypeDaoImplTest {
 			assertNotNull(e);
 		}
 	}
-	
+
 	/**
 	 * Tests saving a <code>ProductType</code>.
 	 */
@@ -386,10 +386,10 @@ public class ProductTypeDaoImplTest {
 		});
 
 		ProductType returnVal = productTypeDao.add(productType);
-		
+
 		assertSame("The ProductType should be persisted and returned.", productType, returnVal);
 	}
-	
+
 	/**
 	 * Tests persistence of a product type with null object.
 	 * NOTE: This documents the current behaviour only, which is incorrect.
@@ -403,10 +403,10 @@ public class ProductTypeDaoImplTest {
 			}
 		});
 		ProductType returnProductType = productTypeDao.add(null);
-		
+
 		assertSame("Adding nothing should have just returned nothing.", null, returnProductType);
 	}
-	
+
 	/**
 	 * Tests persistence of a product type with null name.
 	 * NOTE: This documents the current behaviour only, which is incorrect.
@@ -423,7 +423,7 @@ public class ProductTypeDaoImplTest {
 		ProductType returnProductType = productTypeDao.add(productType);
 		assertSame(productType, returnProductType);
 	}
-	
+
 	/**
 	 * Tests persistence of a product type with empty name.
 	 * NOTE: This documents the current behaviour only, which is incorrect.
@@ -440,7 +440,7 @@ public class ProductTypeDaoImplTest {
 		ProductType returnProductType = productTypeDao.add(productType);
 		assertSame(productType, returnProductType);
 	}
-	
+
 	/**
 	 * Test method for 'com.elasticpath.service.ProductTypeServiceImpl.update(Attribute)'.
 	 * Simple test, doesn't really check the deleting of attribute values.
@@ -451,7 +451,7 @@ public class ProductTypeDaoImplTest {
 
 		final ProductType productType = getEmptyProductType(uid);
 		productType.setProductAttributeGroupAttributes(new HashSet<>());
-		
+
 		final ProductType updatedProductType = getEmptyProductType(uid);
 
 		// expectations
@@ -476,11 +476,11 @@ public class ProductTypeDaoImplTest {
 				will(returnValue(ProductTypeImpl.class));
 			}
 		});
-		
+
 		ProductType returnedProductType = productTypeDao.update(productType);
 		assertSame(updatedProductType, returnedProductType);
 	}
-	
+
 	private ProductType getEmptyProductType(final long uid) {
 		ProductType productType = new ProductTypeImpl();
 		productType.setName("new name");
@@ -495,5 +495,5 @@ public class ProductTypeDaoImplTest {
 
 		return productType;
 	}
-	
+
 }

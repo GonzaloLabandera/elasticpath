@@ -3,9 +3,6 @@
  */
 package com.elasticpath.service.datapolicy.impl;
 
-import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_CONSENT;
-import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_CONSENT_HISTORY;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,10 +13,12 @@ import java.util.Set;
 import org.springframework.beans.BeanUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.DuplicateKeyException;
 import com.elasticpath.domain.datapolicy.ConsentAction;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.datapolicy.DataPolicy;
+import com.elasticpath.domain.datapolicy.impl.CustomerConsentHistoryImpl;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 
@@ -40,7 +39,7 @@ public class CustomerConsentServiceImpl extends AbstractEpPersistenceServiceImpl
 		getPersistenceEngine().flush();
 
 		//insert into history table as well
-		CustomerConsent history = getBean(CUSTOMER_CONSENT_HISTORY);
+		CustomerConsent history = getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT_HISTORY, CustomerConsentHistoryImpl.class);
 		BeanUtils.copyProperties(savedConsent, history);
 		getPersistenceEngine().save(history);
 
@@ -100,9 +99,9 @@ public class CustomerConsentServiceImpl extends AbstractEpPersistenceServiceImpl
 	public CustomerConsent load(final long customerConsentUid) throws EpServiceException {
 		CustomerConsent customerConsent;
 		if (customerConsentUid <= 0) {
-			customerConsent = getBean(CUSTOMER_CONSENT);
+			customerConsent = getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT, CustomerConsent.class);
 		} else {
-			customerConsent = getPersistentBeanFinder().load(CUSTOMER_CONSENT, customerConsentUid);
+			customerConsent = getPersistentBeanFinder().load(ContextIdNames.CUSTOMER_CONSENT, customerConsentUid);
 		}
 		return customerConsent;
 	}
@@ -111,9 +110,9 @@ public class CustomerConsentServiceImpl extends AbstractEpPersistenceServiceImpl
 	public CustomerConsent get(final long customerConsentUid) throws EpServiceException {
 		CustomerConsent customerConsent;
 		if (customerConsentUid <= 0) {
-			customerConsent = getBean(CUSTOMER_CONSENT);
+			customerConsent = getPrototypeBean(ContextIdNames.CUSTOMER_CONSENT, CustomerConsent.class);
 		} else {
-			customerConsent = getPersistentBeanFinder().get(CUSTOMER_CONSENT, customerConsentUid);
+			customerConsent = getPersistentBeanFinder().get(ContextIdNames.CUSTOMER_CONSENT, customerConsentUid);
 		}
 		return customerConsent;
 	}
@@ -181,10 +180,10 @@ public class CustomerConsentServiceImpl extends AbstractEpPersistenceServiceImpl
 	}
 
 	@Override
-	public void deleteByCustomerUids(final List<Long>  customerUids) {
-	    getPersistenceEngine().executeNamedQueryWithList("CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS_LATEST", LIST_STRING, customerUids);
-	    getPersistenceEngine().executeNamedQueryWithList("CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS", LIST_STRING, customerUids);
-	    getPersistenceEngine().flush();
+	public void deleteByCustomerUids(final List<Long> customerUids) {
+		getPersistenceEngine().executeNamedQueryWithList("CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS_LATEST", LIST_STRING, customerUids);
+		getPersistenceEngine().executeNamedQueryWithList("CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS", LIST_STRING, customerUids);
+		getPersistenceEngine().flush();
 	}
 
 

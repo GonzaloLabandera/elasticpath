@@ -20,8 +20,8 @@ import com.elasticpath.cmclient.admin.taxes.TaxesPlugin;
 import com.elasticpath.cmclient.admin.taxes.actions.CreateTaxJurisdictionAction;
 import com.elasticpath.cmclient.admin.taxes.actions.DeleteTaxJurisdictionAction;
 import com.elasticpath.cmclient.admin.taxes.actions.EditTaxJurisdictionAction;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -63,7 +63,7 @@ public class TaxJurisdictionsListView extends AbstractListView {
 	 */
 	public TaxJurisdictionsListView() {
 		super(false, TAX_JURISDICTION_TABLE);
-		taxJurisdictionService = ServiceLocator.getService(ContextIdNames.TAX_JURISDICTION_SERVICE);
+		taxJurisdictionService = BeanLocator.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class TaxJurisdictionsListView extends AbstractListView {
 
 		/** Default constructor. */
 		public TaxJurisdictionListViewLabelProvider() {
-			geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
+			geography = BeanLocator.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 		}
 
 		@Override

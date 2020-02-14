@@ -106,7 +106,7 @@ Feature: B2B Buyer functionality
       | roles         | BUYER    |
     When I fill in email needinfo
     And I fill in billing address needinfo
-    And I create a payment method for my profile
+    And I create a payment instrument for my profile
     When I login using jwt authorization with the following details
       | customer_guid | accountD |
       | user-id       | buyerB   |

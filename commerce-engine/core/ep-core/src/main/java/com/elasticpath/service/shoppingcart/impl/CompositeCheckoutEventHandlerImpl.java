@@ -1,14 +1,12 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2011
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.service.shoppingcart.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.shoppingcart.CheckoutEventHandler;
 
@@ -40,12 +38,11 @@ public class CompositeCheckoutEventHandlerImpl implements CheckoutEventHandler {
 	 * </p>
 	 *
 	 * @param shoppingCart the {@link ShoppingCart} being checked out
-	 * @param orderPayment information about the method of payment
 	 */
 	@Override
-	public void preCheckout(final ShoppingCart shoppingCart, final OrderPayment orderPayment) {
+	public void preCheckout(final ShoppingCart shoppingCart) {
 		for (final CheckoutEventHandler checkoutEventHandler : getCheckoutEventHandlers()) {
-			checkoutEventHandler.preCheckout(shoppingCart, orderPayment);
+			checkoutEventHandler.preCheckout(shoppingCart);
 		}
 	}
 
@@ -59,16 +56,15 @@ public class CompositeCheckoutEventHandlerImpl implements CheckoutEventHandler {
 	 * caller. No subsequent {@link CheckoutEventHandler} instances will be invoked from
 	 * that point onward.
 	 * </p>
-	 * 
-	 * @param shoppingCart the {@link ShoppingCart} being checked out
-	 * @param orderPayment information about the method of payment
+	 *
+	 * @param shoppingCart   the {@link ShoppingCart} being checked out
 	 * @param completedOrder the order object resulting from the checkout
 	 */
 	@Override
 	public void preCheckoutOrderPersist(final ShoppingCart shoppingCart,
-										final Collection<OrderPayment> orderPayment, final Order completedOrder) {
+										final Order completedOrder) {
 		for (final CheckoutEventHandler checkoutEventHandler : getCheckoutEventHandlers()) {
-			checkoutEventHandler.preCheckoutOrderPersist(shoppingCart, orderPayment, completedOrder);
+			checkoutEventHandler.preCheckoutOrderPersist(shoppingCart, completedOrder);
 		}
 	}
 
@@ -82,16 +78,14 @@ public class CompositeCheckoutEventHandlerImpl implements CheckoutEventHandler {
 	 * caller. No subsequent {@link CheckoutEventHandler} instances will be invoked from
 	 * that point onward.
 	 * </p>
-	 * 
-	 * @param shoppingCart with the {@link ShoppingCart} being checked out
-	 * @param orderPayment information about the method of payment
+	 *
+	 * @param shoppingCart   with the {@link ShoppingCart} being checked out
 	 * @param completedOrder the order object resulting from the checkout
 	 */
 	@Override
-	public void postCheckout(final ShoppingCart shoppingCart, final OrderPayment orderPayment,
-							 final Order completedOrder) {
+	public void postCheckout(final ShoppingCart shoppingCart, final Order completedOrder) {
 		for (final CheckoutEventHandler checkoutEventHandler : getCheckoutEventHandlers()) {
-			checkoutEventHandler.postCheckout(shoppingCart, orderPayment, completedOrder);
+			checkoutEventHandler.postCheckout(shoppingCart, completedOrder);
 		}
 	}
 

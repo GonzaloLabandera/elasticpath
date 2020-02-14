@@ -25,8 +25,10 @@ public class CsvImportFieldBaseAmountDtoMapperImpl extends CsvImportFieldObjectM
 	 * @return the DtoImportDataType for BaseAmountDTOs
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public DtoImportDataType<BaseAmountDTO> getDtoImportDataType() {
-		DtoImportDataType<BaseAmountDTO> type = getBeanFactory().getBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT);
+		DtoImportDataType<BaseAmountDTO> type = getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT,
+				DtoImportDataType.class);
 		type.init(null);
 		return type;
 	}

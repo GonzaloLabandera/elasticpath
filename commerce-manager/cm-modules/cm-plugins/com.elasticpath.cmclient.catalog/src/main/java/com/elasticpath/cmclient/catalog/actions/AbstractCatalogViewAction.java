@@ -11,7 +11,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
 import com.elasticpath.cmclient.catalog.views.CatalogBrowseView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.StatePolicy;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareAction;
@@ -30,7 +30,7 @@ public abstract class AbstractCatalogViewAction extends AbstractPolicyAwareActio
 	/** Listener for selection events in the workbench. */
 	private ISelectionListener pageSelectionListener;
 	private Object selectedObject;
-	private final CategoryService categoryService = ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE);
+	private final CategoryService categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 
 	/**
 	 * Constructor.

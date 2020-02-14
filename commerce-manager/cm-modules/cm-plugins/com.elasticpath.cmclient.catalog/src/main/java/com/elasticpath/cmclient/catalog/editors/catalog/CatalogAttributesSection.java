@@ -42,7 +42,7 @@ import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapte
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.EpUiException;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.comparator.AttributeViewerComparatorByNameIgnoreCase;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -71,7 +71,7 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 	private static final int HEIGHT_HINT = 100;
 	private static final String CATALOG_ATTRIBUTES_TABLE = "Catalog Attributes"; //$NON-NLS-1$
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private final ChangeSetColumnDecorator changeSetColumnDecorator = new ChangeSetColumnDecorator();
 
@@ -129,7 +129,7 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 	 */
 	public CatalogAttributesSection(final FormPage formPage, final AbstractCmClientFormEditor editor, final List<Attribute> catalogAttributes) {
 		super(formPage, editor);
-		attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		setTableItems(getModel().getAttributeTableItems());
 
 		if (catalogAttributes == null) {

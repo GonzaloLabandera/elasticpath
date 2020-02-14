@@ -50,6 +50,9 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	/** Order image. */
 	public static final ImageDescriptor IMAGE_ORDER = getImageDescriptor(PLUGIN_ID, EMPTY_IMAGE); //$NON-NLS-1$
 
+	/** View order details button - Order Payment history. */
+	public static final ImageDescriptor IMAGE_VIEW_ORDER_DETAILS = getImageDescriptor(PLUGIN_ID, EMPTY_IMAGE);  //$NON-NLS-1$
+
 	/** Product image. */
 	public static final ImageDescriptor IMAGE_PRODUCT = getImageDescriptor(PLUGIN_ID, "product_default_22.png"); //$NON-NLS-1$
 

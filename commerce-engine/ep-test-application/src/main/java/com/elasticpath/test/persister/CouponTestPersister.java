@@ -35,52 +35,52 @@ public class CouponTestPersister {
 
 	/**
 	 * Constructor initializes necessary services and beanFactory.
-	 * 
+	 *
 	 * @param beanFactory Elastic Path factory for creating instances of beans.
 	 */
 	public CouponTestPersister(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		this.couponService = beanFactory.getBean(ContextIdNames.COUPON_SERVICE);
-		this.couponUsageService = beanFactory.getBean(ContextIdNames.COUPON_USAGE_SERVICE);
-		this.couponConfigService = beanFactory.getBean(ContextIdNames.COUPON_CONFIG_SERVICE);
-		this.ruleService = beanFactory.getBean(ContextIdNames.RULE_SERVICE);
+		this.couponService = beanFactory.getSingletonBean(ContextIdNames.COUPON_SERVICE, CouponService.class);
+		this.couponUsageService = beanFactory.getSingletonBean(ContextIdNames.COUPON_USAGE_SERVICE, CouponUsageService.class);
+		this.couponConfigService = beanFactory.getSingletonBean(ContextIdNames.COUPON_CONFIG_SERVICE, CouponConfigService.class);
+		this.ruleService = beanFactory.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
 	}
 
 	/**
 	 * Creates and persists coupon based on a {@link CouponConfig}.
-	 * 
+	 *
 	 * @param couponConfig {@link CouponConfig}.
 	 * @param couponCode code of the coupon.
 	 * @return the added {@link Coupon}.
 	 */
 	public Coupon createAndPersistCoupon(final CouponConfig couponConfig, final String couponCode) {
-		Coupon coupon = beanFactory.getBean(ContextIdNames.COUPON);
+		Coupon coupon = beanFactory.getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 		coupon.setCouponCode(couponCode);
 		coupon.setCouponConfig(couponConfig);
 
 		return couponService.add(coupon);
 	}
-	
+
 	/**
 	 * Creates and persists coupon based on a {@link CouponConfig}.
-	 * 
+	 *
 	 * @param couponConfig {@link CouponConfig}.
 	 * @param couponCode code of the coupon.
 	 * @param suspended True if the coupon is suspended from use
 	 * @return the added {@link Coupon}.
 	 */
 	public Coupon createAndPersistCoupon(final CouponConfig couponConfig, final String couponCode, final boolean suspended) {
-		Coupon coupon = beanFactory.getBean(ContextIdNames.COUPON);
+		Coupon coupon = beanFactory.getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 		coupon.setCouponCode(couponCode);
 		coupon.setCouponConfig(couponConfig);
 		coupon.setSuspended(suspended);
 
 		return couponService.add(coupon);
-	}	
+	}
 
 	/**
 	 * Creates and persists a {@link CouponConfig} with specified promotion code, limited usage and whether it's customer specific.
-	 * 
+	 *
 	 * @param promotionCode the promotion code.
 	 * @param limitedUsage the limited usage.
 	 * @param usageType the coupon usage type
@@ -88,9 +88,9 @@ public class CouponTestPersister {
 	 * @param duration the duration in days
 	 * @return {@link CouponConfig}.
 	 */
-	public CouponConfig createAndPersistCouponConfig(final String promotionCode, final int limitedUsage, final CouponUsageType usageType, 
+	public CouponConfig createAndPersistCouponConfig(final String promotionCode, final int limitedUsage, final CouponUsageType usageType,
 			final boolean limitedDuration, final int duration, final boolean multiUsePerOrder) {
-		CouponConfig couponConfig = beanFactory.getBean(ContextIdNames.COUPON_CONFIG);
+		CouponConfig couponConfig = beanFactory.getPrototypeBean(ContextIdNames.COUPON_CONFIG, CouponConfig.class);
 		couponConfig.setRuleCode(promotionCode);
 		couponConfig.setUsageLimit(limitedUsage);
 		couponConfig.setUsageType(usageType);
@@ -103,7 +103,7 @@ public class CouponTestPersister {
 
 	/**
 	 * Creates and persists a {@link CouponConfig} with specified promotion code, limited usage and whether it's customer specific.
-	 * 
+	 *
 	 * @param promotionCode the promotion code.
 	 * @param limitedUsage the limited usage.
 	 * @param usageType the coupon usage type
@@ -115,7 +115,7 @@ public class CouponTestPersister {
 
 	/**
 	 * Creates and persists a coupon usage based on a {@link Coupon}.
-	 * 
+	 *
 	 * @param coupon the {@link Coupon}.
 	 * @param email the email.
 	 * @return {@link CouponUsage}.
@@ -126,7 +126,7 @@ public class CouponTestPersister {
 
 	/**
 	 * Creates and persists a coupon usage based on a {@link Coupon}.
-	 * 
+	 *
 	 * @param coupon the {@link Coupon}.
 	 * @param email the email.
 	 * @param suspended True if the coupon is suspended
@@ -135,11 +135,11 @@ public class CouponTestPersister {
 	public CouponUsage createAndPersistCouponUsage(final Coupon coupon, final String email, final boolean suspended) {
 		return createAndPersistCouponUsage(coupon, email, 0, true, suspended);
 	}
-	
+
 	/**
 	 * Creates and persists a coupon usage based on a {@link Coupon}.
 	 * Note: default coupons to be active in user's cart.
-	 * 
+	 *
 	 * @param coupon the {@link Coupon}.
 	 * @param email the email.
 	 * @param useCount use count.
@@ -151,7 +151,7 @@ public class CouponTestPersister {
 
 	/**
 	 * Creates and persists a coupon usage based on a {@link Coupon}.
-	 * 
+	 *
 	 * @param coupon the {@link Coupon}.
 	 * @param email the email.
 	 * @param useCount use count.
@@ -162,7 +162,7 @@ public class CouponTestPersister {
 	public CouponUsage createAndPersistCouponUsage(final Coupon coupon,
 			final String email, final int useCount, final boolean activeInCart,
 			final boolean suspended) {
-		CouponUsage couponUsage = beanFactory.getBean(ContextIdNames.COUPON_USAGE);
+		CouponUsage couponUsage = beanFactory.getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 		couponUsage.setCoupon(coupon);
 		couponUsage.setCustomerEmailAddress(email);
 		couponUsage.setUseCount(useCount);
@@ -170,32 +170,32 @@ public class CouponTestPersister {
 		couponUsage.setSuspended(suspended);
 		return couponUsageService.add(couponUsage);
 	}
-	
+
 	/**
 	 * Find coupon for code.
-	 * 
+	 *
 	 * @param couponCode the coupon code
 	 * @return the coupon
 	 */
 	public Coupon findCouponByCouponCode(final String couponCode) {
 		return couponService.findByCouponCode(couponCode);
 	}
-	
+
 	/**
 	 * Find coupon for rule code.
-	 * 
+	 *
 	 * @param ruleCode the coupon code
 	 * @return the coupon
 	 */
 	public Collection<Coupon> findCouponsByRuleCode(final String ruleCode) {
 		return couponService.findCouponsForRuleCode(ruleCode);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Finds a coupon usage by the coupon code.
-	 * 
+	 *
 	 * @param couponCode the coupon code
 	 * @return the coupon usage
 	 */
@@ -205,7 +205,7 @@ public class CouponTestPersister {
 
 	/**
 	 * Finds a coupon config by a rule code.
-	 * 
+	 *
 	 * @param ruleCode the rule code.
 	 * @return {@link CouponConfig}.
 	 */
@@ -215,17 +215,17 @@ public class CouponTestPersister {
 
 	/**
 	 * Finds a rule by rule code.
-	 * 
+	 *
 	 * @param ruleCode the rule code.
 	 * @return {@link Rule}.
 	 */
 	public Rule findRuleByCode(final String ruleCode) {
 		return ruleService.findByRuleCode(ruleCode);
 	}
-	
+
 	/**
 	 * Finds a coupon usage by coupon code and email address.
-	 * 
+	 *
 	 * @param couponCode the coupon code.
 	 * @param emailAddress the email address.
 	 * @return {@link CouponUsage}.
@@ -236,8 +236,8 @@ public class CouponTestPersister {
 
 	/**
 	 * Updates coupon usage.
-	 * 
-	 * @param usageToUpdate the coupon usage to update. 
+	 *
+	 * @param usageToUpdate the coupon usage to update.
 	 * @return the new coupon usage.
 	 */
 	public CouponUsage updateCouponUsage(final CouponUsage usageToUpdate) {
@@ -246,8 +246,8 @@ public class CouponTestPersister {
 
 	/**
 	 * Updates coupon.
-	 * 
-	 * @param coupon to update. 
+	 *
+	 * @param coupon to update.
 	 * @return the new coupon.
 	 */
 	public Coupon updateCoupon(final Coupon coupon) {
@@ -256,7 +256,7 @@ public class CouponTestPersister {
 
 	/**
 	 * Start the coupon duration for any limited duration coupons for the given email address.
-	 * 
+	 *
 	 * @param email the email address associated with coupons that should be started
 	 * @param storeUidPk store uid
 	 * @param shoppingDate the date to start at
@@ -270,10 +270,10 @@ public class CouponTestPersister {
 			}
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Find the collection of all coupon usage records by email address.
-	 * 
+	 *
 	 * @param emailAddress the email address
 	 * @param storeUidPk store uid
 	 * @return the collection of coupon usages
@@ -281,10 +281,10 @@ public class CouponTestPersister {
 	public Collection<CouponUsage> findCouponUsageByEmail(final String emailAddress, final Long storeUidPk) {
 		return couponUsageService.findEligibleUsagesByEmailAddress(emailAddress, storeUidPk);
 	}
-	
-	/** 
+
+	/**
 	 * Find the coupon usage records by email address and coupon code.
-	 * 
+	 *
 	 * @param emailAddress the email address
 	 * @param couponCode the coupon code
 	 * @return the collection of coupon usages
@@ -292,7 +292,7 @@ public class CouponTestPersister {
 	public CouponUsage findCouponUsageByEmail(final String emailAddress, final String couponCode) {
 		return couponUsageService.findByCouponCodeAndEmail(couponCode, emailAddress);
 	}
-	
+
 	/**
 	 * @param ruleCode the promotion rule code
 	 * @return collection of found coupon usages for rule
@@ -300,5 +300,5 @@ public class CouponTestPersister {
 	public Collection<CouponUsage> findCouponUsageByRuleCode(final String ruleCode) {
 		return couponUsageService.findByRuleCode(ruleCode);
 	}
-	
+
 }

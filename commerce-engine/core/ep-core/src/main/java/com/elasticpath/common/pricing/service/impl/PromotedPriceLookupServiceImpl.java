@@ -131,12 +131,10 @@ public class PromotedPriceLookupServiceImpl implements PromotedPriceLookupServic
 		}
 	}
 
-
-
 	protected BaseAmountDataSourceFactoryBuilder getDataSourceFactoryBuilder() {
-		return getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_DATA_SOURCE_FACTORY_BUILDER);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_DATA_SOURCE_FACTORY_BUILDER,
+				BaseAmountDataSourceFactoryBuilder.class);
 	}
-
 
 	public void setPriceLookupService(final PriceLookupService priceLookupService) {
 		this.priceLookupService = priceLookupService;

@@ -441,8 +441,9 @@ public class FilterFactoryImpl implements FilterFactory {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T extends Filter<?>> T getFilterBean(final String filterBeanName) {
-		T filterBean = beanFactory.getBean(filterBeanName);
+		T filterBean = (T) beanFactory.getPrototypeBean(filterBeanName, Filter.class);
 		filterBean.setSeparatorInToken(getSeparatorInToken());
 		return filterBean;
 	}

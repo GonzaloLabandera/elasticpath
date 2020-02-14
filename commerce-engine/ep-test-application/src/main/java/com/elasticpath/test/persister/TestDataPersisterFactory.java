@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.persister;
 
@@ -31,7 +31,11 @@ public class TestDataPersisterFactory {
 	@Autowired
 	@Qualifier("taxTestPersister")
 	private TaxTestPersister taxTestPersister;
-	
+
+	@Autowired
+	@Qualifier("paymentInstrumentPersister")
+	private PaymentInstrumentPersister paymentInstrumentPersister;
+
 	private StoreTestPersister storeTestPersister;
 	private PromotionTestPersister promotionTestPersister;
 	private OrderTestPersister orderTestPersister;
@@ -48,8 +52,7 @@ public class TestDataPersisterFactory {
 	private GiftCertificateTestPersister giftCertificateTestPersister;
 	private CmUserTestPersister cmUserTestPersister;
 	private CmImportJobTestPersister cmImportJobTestPersister;
-	private PaymentGatewayTestPersister paymentGatewayTestPersister;
-	
+
 	@Autowired
 	private BeanFactory beanFactory;
 
@@ -78,6 +81,14 @@ public class TestDataPersisterFactory {
 	 */
 	public TaxTestPersister getTaxTestPersister() {
 		return taxTestPersister;
+	}
+
+	/**
+	 * return the cartOrderPaymentInstrumentPersister
+	 * @return cartOrderPaymentInstrumentPersister
+	 */
+	public PaymentInstrumentPersister getPaymentInstrumentPersister() {
+		return paymentInstrumentPersister;
 	}
 
 	/**
@@ -243,17 +254,5 @@ public class TestDataPersisterFactory {
 			cmImportJobTestPersister = new CmImportJobTestPersister(beanFactory);
 		}
 		return cmImportJobTestPersister;
-	}
-
-	/**
-	 * return a {@link PaymentGatewayTestPersister}.
-	 * 
-	 * @return the {@link PaymentGatewayTestPersister}
-	 */
-	public PaymentGatewayTestPersister getPaymentGatewayTestPersister() {
-		if (paymentGatewayTestPersister == null) {
-			paymentGatewayTestPersister = new PaymentGatewayTestPersister(beanFactory);
-		}
-		return paymentGatewayTestPersister;
 	}
 }

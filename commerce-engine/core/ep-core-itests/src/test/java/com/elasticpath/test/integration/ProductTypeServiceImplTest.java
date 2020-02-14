@@ -270,7 +270,7 @@ public class ProductTypeServiceImplTest extends DbTestCase {
 		assertFalse(catalogs.isEmpty());
 		
 		// create a SKU attribute
-		SkuOption skuOption = getBeanFactory().getBean(ContextIdNames.SKU_OPTION);
+		SkuOption skuOption = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 		skuOption.initialize();
 		skuOption.setCatalog(catalogs.get(0));
 		skuOption.setOptionKey(skuOptionKey);
@@ -346,12 +346,12 @@ public class ProductTypeServiceImplTest extends DbTestCase {
 	 */
 	public ProductType addProductType(final String productTypeName, final String guid) {
 		// get a tax code to assign to the product type
-		TaxCodeService taxCodeService = getBeanFactory().getBean("taxCodeService");
+		TaxCodeService taxCodeService = getBeanFactory().getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
 		TaxCode taxCode = taxCodeService.findByCode(PRODUCT_TYPE_TAX_CODE);
 		assertNotNull(taxCode);
 		
 		// create test product type
-		ProductType productType = getBeanFactory().getBean(ContextIdNames.PRODUCT_TYPE);
+		ProductType productType = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 		productType.initialize();
 		
 		productType.setName(productTypeName);
@@ -378,7 +378,8 @@ public class ProductTypeServiceImplTest extends DbTestCase {
 		assertFalse(allProductAttributes.isEmpty());
 		
 		// just use the first available product attribute to create a group attribute
-		final AttributeGroupAttribute productTypeAttribute = getBeanFactory().getBean(ContextIdNames.PRODUCT_TYPE_PRODUCT_ATTRIBUTE);
+		final AttributeGroupAttribute productTypeAttribute = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_TYPE_PRODUCT_ATTRIBUTE,
+				AttributeGroupAttribute.class);
 		productTypeAttribute.setAttribute(allProductAttributes.get(0));
 		
 		// create and associate the product attribute group to the new product type
@@ -394,7 +395,7 @@ public class ProductTypeServiceImplTest extends DbTestCase {
 	 */
 	private void addSkuAttribute(final ProductType productType) {
 		// create a SKU attribute
-		Attribute skuAttribute = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE);
+		Attribute skuAttribute = getBeanFactory().getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 		skuAttribute.initialize();
 		skuAttribute.setKey(attributeKey);
 		skuAttribute.setDisplayName(attributeKey, Locale.ENGLISH);
@@ -404,7 +405,8 @@ public class ProductTypeServiceImplTest extends DbTestCase {
 		attributeService.add(skuAttribute);
 		
 		// create a group attribute
-		AttributeGroupAttribute groupAttribute = getBeanFactory().getBean(ContextIdNames.PRODUCT_TYPE_SKU_ATTRIBUTE);
+		AttributeGroupAttribute groupAttribute = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_TYPE_SKU_ATTRIBUTE, 
+				AttributeGroupAttribute.class);
 		groupAttribute.setAttribute(skuAttribute);
 		
 		// create and associate the SKU attribute group to the new product type

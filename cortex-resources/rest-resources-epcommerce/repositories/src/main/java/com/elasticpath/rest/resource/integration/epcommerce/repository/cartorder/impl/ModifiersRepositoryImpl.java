@@ -16,25 +16,22 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierFieldOption;
 import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
+import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.carts.LineItemConfigurationEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.modifier.ModifierService;
 
 /**
@@ -54,83 +51,60 @@ public class ModifiersRepositoryImpl implements ModifiersRepository {
 	private final ShoppingCartRepository shoppingCartRepository;
 	private final ProductSkuRepository productSkuRepository;
 	private final OrderRepository orderRepository;
+	private final ReactiveAdapter reactiveAdapter;
 
 	/**
 	 * Constructor of service contexts repository.
 	 *
-	 * @param modifierService a {@link ModifierService}.
-	 * @param shoppingCartRepository  a {@link ShoppingCartRepository}.
-	 * @param productSkuRepository    a {@link ProductSkuRepository}.
-	 * @param orderRepository         a {@link OrderRepository}.
+	 * @param modifierService        a {@link ModifierService}.
+	 * @param shoppingCartRepository a {@link ShoppingCartRepository}.
+	 * @param productSkuRepository   a {@link ProductSkuRepository}.
+	 * @param orderRepository        a {@link OrderRepository}.
+	 * @param reactiveAdapter        a {@link ReactiveAdapter}.
 	 */
 	@Inject
 	public ModifiersRepositoryImpl(
-			@Named("modifierService")
-			final ModifierService modifierService,
-			@Named("shoppingCartRepository")
-			final ShoppingCartRepository shoppingCartRepository,
-			@Named("productSkuRepository")
-			final ProductSkuRepository productSkuRepository,
-			@Named("orderRepository")
-			final OrderRepository orderRepository) {
+			@Named("modifierService") final ModifierService modifierService,
+			@Named("shoppingCartRepository") final ShoppingCartRepository shoppingCartRepository,
+			@Named("productSkuRepository") final ProductSkuRepository productSkuRepository,
+			@Named("orderRepository") final OrderRepository orderRepository,
+			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
 
 		this.modifierService = modifierService;
 		this.shoppingCartRepository = shoppingCartRepository;
 		this.productSkuRepository = productSkuRepository;
 		this.orderRepository = orderRepository;
+		this.reactiveAdapter = reactiveAdapter;
 	}
 
 	@Override
-	public ExecutionResult<ModifierGroup> findModifierGroupByCode(final String modifierGroupCode) {
+	public Single<ModifierGroup> findModifierGroupByCode(final String modifierGroupCode) {
 		checkNotNull(modifierGroupCode);
-
-		return new ExecutionResultChain() {
-			@Override
-			public ExecutionResult<?> build() {
-				ModifierGroup modifierGroup = Assign.ifNotNull(
-					modifierService.findModifierGroupByCode(modifierGroupCode),
-					OnFailure.returnNotFound(MODIFIERGROUP_NOT_FOUND_MESSAGE));
-				return ExecutionResultFactory.createReadOK(modifierGroup);
-			}
-		}.execute();
+		return reactiveAdapter.fromServiceAsSingle(() -> modifierService.findModifierGroupByCode(modifierGroupCode))
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(MODIFIERGROUP_NOT_FOUND_MESSAGE)));
 	}
 
 	@Override
-	public ExecutionResult<ModifierField> findModifierFieldBy(final String modifierFieldCode,
-			final String modifierGroupCode) {
+	public Single<ModifierField> findModifierFieldBy(final String modifierFieldCode,
+													 final String modifierGroupCode) {
 		checkNotNull(modifierGroupCode);
 		checkNotNull(modifierFieldCode);
 
-		return new ExecutionResultChain() {
-			@Override
-			public ExecutionResult<?> build() {
-				ModifierField modifierField = Assign.ifNotNull(
-					getModifierField(modifierFieldCode, modifierGroupCode),
-					OnFailure.returnNotFound(MODIFIERFIELD_NOT_FOUND_MESSAGE));
-				return ExecutionResultFactory.createReadOK(modifierField);
-			}
-		}.execute();
+		return getModifierField(modifierFieldCode, modifierGroupCode)
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(MODIFIERFIELD_NOT_FOUND_MESSAGE)));
 	}
 
 	@Override
-	public ExecutionResult<ModifierFieldOption> findModifierFieldOptionBy(final String modifierOptionValue,
-			final String modifierFieldCode, final String modifierGroupCode) {
+	public Single<ModifierFieldOption> findModifierFieldOptionBy(final String modifierOptionValue,
+																 final String modifierFieldCode, final String modifierGroupCode) {
 		checkNotNull(modifierGroupCode);
 		checkNotNull(modifierFieldCode);
 		checkNotNull(modifierOptionValue);
 
-		return new ExecutionResultChain() {
-			@Override
-			public ExecutionResult<?> build() {
-				ModifierField modifierField = Assign.ifNotNull(
-					getModifierField(modifierFieldCode, modifierGroupCode),
-					OnFailure.returnNotFound(MODIFIERFIELDOPTION_NOT_FOUND_MESSAGE));
-				ModifierFieldOption modifierFieldOption = Assign.ifNotNull(
-					getModifierFieldOption(modifierOptionValue, modifierField),
-					OnFailure.returnNotFound(MODIFIERFIELDOPTION_NOT_FOUND_MESSAGE));
-				return ExecutionResultFactory.createReadOK(modifierFieldOption);
-			}
-		}.execute();
+		return getModifierField(modifierFieldCode, modifierGroupCode)
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(MODIFIERFIELDOPTION_NOT_FOUND_MESSAGE)))
+				.map(modifierField -> getModifierFieldOption(modifierOptionValue, modifierField))
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(MODIFIERFIELDOPTION_NOT_FOUND_MESSAGE)));
 	}
 
 	@Override
@@ -142,8 +116,8 @@ public class ModifiersRepositoryImpl implements ModifiersRepository {
 
 	@Override
 	public Single<Map<ModifierField, String>> findPurchaseItemModifierValues(final String storeCode, final String purchaseGuid,
-			final String purchaseLineItemGuid) {
-		return orderRepository.findByGuidAsSingle(storeCode, purchaseGuid)
+																			 final String purchaseLineItemGuid) {
+		return orderRepository.findByGuid(storeCode, purchaseGuid)
 				.map(order -> order.getOrderSkuByGuid(purchaseLineItemGuid))
 				.flatMap(orderSku -> getFieldValues(orderSku.getSkuGuid(), orderSku.getFields()));
 	}
@@ -160,17 +134,17 @@ public class ModifiersRepositoryImpl implements ModifiersRepository {
 
 	private Set<ModifierField> getModifierFields(final Set<ModifierGroup> modifierGroups) {
 		return modifierGroups.stream().map(ModifierGroup::getModifierFields)
-			.flatMap(Set::stream)
-			.collect(Collectors.toCollection(LinkedHashSet::new));
+				.flatMap(Set::stream)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	private Single<Set<ModifierGroup>> getModifierGroups(final String skuGuid) {
-		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(skuGuid)
+		return productSkuRepository.getProductSkuWithAttributesByGuid(skuGuid)
 				.map(productSku -> productSku.getProduct().getProductType().getModifierGroups());
 	}
 
 	private Map<ModifierField, String> getModifierFieldValues(final Map<String, String> itemData,
-			final Set<ModifierField> allModifierFields) {
+															  final Set<ModifierField> allModifierFields) {
 		Map<ModifierField, String> matchingModifierFieldData = new LinkedHashMap<>(allModifierFields.size());
 		for (ModifierField modField : allModifierFields) {
 			String key = modField.getCode();
@@ -179,20 +153,15 @@ public class ModifiersRepositoryImpl implements ModifiersRepository {
 		return matchingModifierFieldData;
 	}
 
-	private ModifierField getModifierField(final String modifierFieldCode, final String modifierGroupCode) {
-		ModifierField modifierField = null;
-
-		ModifierGroup modifierGroup = modifierService.findModifierGroupByCode(modifierGroupCode);
-		for (ModifierField field : modifierGroup.getModifierFields()) {
-			if (modifierField == null && StringUtils.equals(modifierFieldCode, field.getCode())) {
-				modifierField = field;
-			}
-		}
-		return modifierField;
+	private Single<ModifierField> getModifierField(final String modifierFieldCode, final String modifierGroupCode) {
+		return reactiveAdapter.fromServiceAsSingle(() -> modifierService.findModifierGroupByCode(modifierGroupCode))
+				.flatMapObservable(modifierGroup -> Observable.fromIterable(modifierGroup.getModifierFields())
+						.filter(modifierField -> StringUtils.equals(modifierFieldCode, modifierField.getCode())))
+				.firstOrError();
 	}
 
 	private ModifierFieldOption getModifierFieldOption(final String modifierOptionValue,
-			final ModifierField modifierField) {
+													   final ModifierField modifierField) {
 		ModifierFieldOption modifierFieldOption = null;
 
 		for (ModifierFieldOption option : modifierField.getModifierFieldOptions()) {
@@ -206,40 +175,29 @@ public class ModifiersRepositoryImpl implements ModifiersRepository {
 	@Override
 	public Single<LineItemConfigurationEntity> getConfiguration(final String itemId) {
 		return productSkuRepository.getProductSkuWithAttributesByCode(itemId)
+				.flatMap(productSku -> findModifiersByProduct(productSku.getProduct()))
 				.map(this::buildLineItemConfigurationEntity);
 	}
 
-	private LineItemConfigurationEntity buildLineItemConfigurationEntity(final ProductSku productSku) {
-		List<ModifierField> fields = findModifiersByProduct(productSku.getProduct());
-
+	private LineItemConfigurationEntity buildLineItemConfigurationEntity(final List<ModifierField> fields) {
 		LineItemConfigurationEntity.Builder configBuilder = LineItemConfigurationEntity.builder();
-		if (fields != null) {
-			fields.forEach(field -> configBuilder.addingProperty(field.getCode(), ""));
-		}
+		fields.forEach(field -> configBuilder.addingProperty(field.getCode(), ""));
 		return configBuilder.build();
 	}
 
 	@Override
-	public List<ModifierField> findModifiersByProduct(final Product product) {
-
-		return modifierService.findModifierFieldsByProductType(product.getProductType());
-
+	public Single<List<ModifierField>> findModifiersByProduct(final Product product) {
+		return reactiveAdapter.fromServiceAsSingle(() -> modifierService.findModifierFieldsByProductType(product.getProductType()));
 	}
 
 	@Override
-	public List<String> findMissingRequiredFieldCodesByShoppingItem(final ShoppingItem shoppingItem) {
-
-		// find fields by given sku guid.
-		ProductSku productSku = productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid()).blockingGet();
-		List<ModifierField> fields = findModifiersByProduct(productSku.getProduct());
-
-		// find and return the missed code.
-		return fields.stream()
-			.filter(ModifierField::isRequired)
-			.map(ModifierField::getCode)
-			.filter(code -> StringUtils.isBlank(shoppingItem.getFields().get(code)))
-			.collect(Collectors.toList());
-
+	public Observable<String> findMissingRequiredFieldCodesByShoppingItem(final ShoppingItem shoppingItem) {
+		return productSkuRepository.getProductSkuWithAttributesByGuid(shoppingItem.getSkuGuid())
+				.flatMap(productSku -> findModifiersByProduct(productSku.getProduct()))
+				.flatMapObservable(Observable::fromIterable)
+				.filter(ModifierField::isRequired)
+				.map(ModifierField::getCode)
+				.filter(code -> StringUtils.isBlank(shoppingItem.getFields().get(code)));
 	}
 
 }

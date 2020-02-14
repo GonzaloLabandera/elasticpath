@@ -15,7 +15,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import com.elasticpath.cmclient.core.ServiceLocator;
+
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.store.targetedselling.delivery.wizard.model.DynamicContentDeliveryModelAdapter;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -61,10 +62,10 @@ public class SellingContextHelperTest {
 	 */
 	@Before
 	public void initializeMockObjects() {
-		ServiceLocator.setBeanFactory(beanFactory);
+		BeanLocator.setBeanFactory(beanFactory);
 
-		when(beanFactory.getBean(ContextIdNames.TAG_CONDITION_SERVICE)).thenReturn(tagConditionService);
-		when(beanFactory.getBean(ContextIdNames.SELLING_CONTEXT_SERVICE)).thenReturn(sellingContextService);
+		when(beanFactory.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class)).thenReturn(tagConditionService);
+		when(beanFactory.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class)).thenReturn(sellingContextService);
 	}
 
 	/**

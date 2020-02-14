@@ -12,9 +12,9 @@ import javax.inject.Singleton;
 import org.springframework.core.convert.ConversionService;
 
 import com.elasticpath.base.exception.structured.EpValidationException;
+import com.elasticpath.base.exception.structured.InvalidBusinessStateException;
 import com.elasticpath.base.exception.structured.StructuredErrorMessageException;
-import com.elasticpath.commons.exception.InvalidBusinessStateException;
-import com.elasticpath.commons.exception.UnavailableException;
+import com.elasticpath.base.exception.structured.UnavailableException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.command.ExecutionResult;
@@ -40,10 +40,8 @@ public class ExceptionTransformerImpl implements ExceptionTransformer {
 	 */
 	@Inject
 	ExceptionTransformerImpl(
-			@Named("conversionService")
-			final ConversionService conversionService,
-			@Named("structuredErrorMessageTransformer")
-			final StructuredErrorMessageTransformer structuredErrorMessageTransformer) {
+			@Named("conversionService") final ConversionService conversionService,
+			@Named("structuredErrorMessageTransformer") final StructuredErrorMessageTransformer structuredErrorMessageTransformer) {
 		this.conversionService = conversionService;
 		this.structuredErrorMessageTransformer = structuredErrorMessageTransformer;
 	}

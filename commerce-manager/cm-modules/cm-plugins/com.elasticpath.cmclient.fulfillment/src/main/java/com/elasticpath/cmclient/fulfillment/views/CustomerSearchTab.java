@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -63,7 +63,8 @@ public class CustomerSearchTab implements ISearchTab {
 
 	private List<Store> stores;
 
-	private final CustomerSearchCriteria searchCriteria = ServiceLocator.getService(ContextIdNames.CUSTOMER_SEARCH_CRITERIA);
+	private final CustomerSearchCriteria searchCriteria = BeanLocator.getPrototypeBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA,
+			CustomerSearchCriteria.class);
 
 	private final CustomerSearchRequestJob searchJob = new CustomerSearchRequestJob();
 

@@ -41,7 +41,7 @@ public class SynonymGroupImplTest extends AbstractEPTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		stubGetBean(ContextIdNames.SYNONYM, SynonymImpl.class);
+		stubGetPrototypeBean(ContextIdNames.SYNONYM, Synonym.class, SynonymImpl.class);
 		
 		synonymGroupImpl = new SynonymGroupImpl();
 		synonymGroupImpl.setConceptTerm(CONCEPT_TERM);

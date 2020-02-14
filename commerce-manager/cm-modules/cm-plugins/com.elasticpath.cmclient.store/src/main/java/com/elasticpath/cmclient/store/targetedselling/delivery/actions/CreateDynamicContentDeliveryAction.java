@@ -9,7 +9,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.wizard.EpWizardDialog;
 import com.elasticpath.cmclient.store.targetedselling.delivery.wizard.DynamicContentDeliveryWizard;
@@ -39,8 +39,8 @@ public class CreateDynamicContentDeliveryAction extends BaseDynamicContentDelive
 		LOG.debug("CreateDynamicContentAssignment Action called."); //$NON-NLS-1$
 
 		DynamicContentDeliveryModelAdapter model =
-				new DynamicContentDeliveryModelAdapter(ServiceLocator.getService(
-				ContextIdNames.DYNAMIC_CONTENT_DELIVERY));
+				new DynamicContentDeliveryModelAdapter(BeanLocator.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY,
+						com.elasticpath.domain.targetedselling.DynamicContentDelivery.class));
 
 		final DynamicContentDeliveryWizard wizard = new DynamicContentDeliveryWizard(model);
 		final WizardDialog dialog = new EpWizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);

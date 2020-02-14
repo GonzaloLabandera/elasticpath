@@ -3,12 +3,14 @@
  */
 package com.elasticpath.cmclient.core;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
@@ -30,6 +32,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
 	private IWorkbenchAction reloadEditorAction;
 	private ActionContributionItem reloadViewItem;
+
+	private static final Logger LOG = Logger.getLogger(ApplicationActionBarAdvisor.class);
 
 	/**
 	 * Constructor.
@@ -76,7 +80,21 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 		reloadEditorAction.setImageDescriptor(CoreImageRegistry.IMAGE_REFRESH_ACTIVE_LARGE);
 		reloadEditorAction.setDisabledImageDescriptor(CoreImageRegistry.IMAGE_REFRESH_LARGE);
 
-		reloadViewItem = new ActionContributionItem(reloadEditorAction);
+		reloadViewItem = new ActionContributionItem(reloadEditorAction) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void fill(final ToolBar parent, final int index) {
+				super.fill(parent, index);
+				reloadViewItem.getWidget().addListener(SWT.Resize, event -> {
+					if (event.type == SWT.RESIZE) {
+						LOG.error("reload menu item resized " +  reloadViewItem.getWidget());
+						LOG.error("reload menu item width " +  event.width);
+					}
+				});
+			}
+		};
 		reloadViewItem.setMode(ActionContributionItem.MODE_FORCE_TEXT);
 		register(reloadEditorAction);
 

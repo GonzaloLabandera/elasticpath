@@ -3,15 +3,14 @@
  */
 package com.elasticpath.service.rules.impl;  // NOPMD
 
+import static com.elasticpath.test.factory.ShoppingCartStubBuilder.aCart;
+import static com.elasticpath.test.factory.ShoppingCartStubBuilder.aShoppingItem;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
-import static com.elasticpath.test.factory.ShoppingCartStubBuilder.aCart;
-import static com.elasticpath.test.factory.ShoppingCartStubBuilder.aShoppingItem;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.impl.AttributeGroupImpl;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Catalog;
@@ -51,10 +51,12 @@ import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerGroupImpl;
 import com.elasticpath.domain.discounts.DiscountItemContainer;
+import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.CatalogItemDiscountRecordImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl;
@@ -129,7 +131,8 @@ public class PromotionRuleDelegateImplTest {
 	public void setUp() {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS, PromotionRuleExceptionsImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS, PromotionRuleExceptions.class,
+				PromotionRuleExceptionsImpl.class);
 
 		ruleDelegate = new PromotionRuleDelegateImpl();
 		ruleDelegate.setProductSkuLookup(productSkuLookup);
@@ -359,8 +362,8 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testProductIs() {
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroupImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class, AttributeGroupImpl.class);
 
 		ProductType productType = new ProductTypeImpl();
 		productType.initialize();
@@ -381,8 +384,8 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testBrandIs() {
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroupImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ATTRIBUTE_GROUP, AttributeGroup.class, AttributeGroupImpl.class);
 
 		ProductType productType = new ProductTypeImpl();
 		productType.initialize();
@@ -653,7 +656,8 @@ public class PromotionRuleDelegateImplTest {
 				.withCustomerSession(customerSession)
 				.build();
 
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class,
+				ShoppingCartMementoImpl.class);
 
 		context.checking(new Expectations() {
 			{

@@ -1,5 +1,7 @@
 package com.elasticpath.selenium.editor;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -23,6 +25,8 @@ public class RmaEditor extends AbstractPageObject {
 	private static final String RETURNED_QUANTITY_COLUMN_DISABLED_INPUT_CSS = ITEMS_TABLE_PARENT_CSS
 			+ "div:not([appearance-id='ccombo-field'])[style*='display: none'] > input:not([readonly])";
 	private static final String RETURNED_STATE_COLUMN_CSS = ITEMS_TABLE_PARENT_CSS + "div[row-id='%s'] div[column-num='5']";
+	private static final String RMA_STATUS_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='RMA Status'] > input";
+	private static final String ATTRIBUTE_VALUE = "value";
 
 	/**
 	 * Constructor.
@@ -73,5 +77,16 @@ public class RmaEditor extends AbstractPageObject {
 	public OrderEditor clickOpenOriginalOrderButton() {
 		clickEditorButton("Open Original Order...");
 		return new OrderEditor(getDriver());
+	}
+
+	/**
+	 * Verifies RMA status.
+	 *
+	 * @param expectedRMAStatus the expected RMA status.
+	 */
+	public void verifyRMAStatus(final String expectedRMAStatus) {
+		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(RMA_STATUS_INPUT_CSS)).getAttribute(ATTRIBUTE_VALUE))
+				.as("RMA Status validation failed")
+				.isEqualTo(expectedRMAStatus);
 	}
 }

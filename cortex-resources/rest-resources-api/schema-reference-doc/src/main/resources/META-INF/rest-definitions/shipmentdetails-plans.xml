@@ -37,7 +37,7 @@ Retrieves the order's destinationinfo, which contains links to:
 
 		<plan>
 			<name>select-shipping-address</name>
-			<description><![CDATA[Uses a Selector to select a shipping option (i.e. FedEx, Canada Post, etc) to use for the order.]]></description>
+			<description><![CDATA[Uses a Selector to select a shipping address to use for the order.]]></description>
 			<step>
 				<description><![CDATA[Retrieve the selector.]]></description>
 				<start>destination-info</start>
@@ -76,13 +76,38 @@ Retrieves the order's destinationinfo, which contains links to:
 		</plan>
 
 		<plan>
-			<name>read-order-address-form</name>
+			<name>read-order-shipping-address-form</name>
 			<description><![CDATA[Retrieve the address form to create a new shipping address for the order.]]></description>
 			<step>
 				<description><![CDATA[The address form.]]></description>
 				<start>destination-info</start>
 				<follow-link>addressform</follow-link>
 				<result>addresses.address-form</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>add-shipping-address-from-delivery</name>
+			<description>Create a shipping address from the delivery.</description>
+			<step>
+				<description>Delivery to destinationinfo.</description>
+				<start>orders.delivery</start>
+				<follow-link>destinationinfo</follow-link>
+				<result>destination-info</result>
+			</step>
+			<step>
+				<description>Destinationinfo to addressform.</description>
+				<start>destination-info</start>
+				<follow-link>addressform</follow-link>
+				<result>addresses.address-form</result>
+			</step>
+			<step>
+				<description>Submit the form to create an address</description>
+				<start>addresses.address-form</start>
+				<submit></submit>
+				<to>addresses.address-form</to>
+				<via-link>createaddressaction</via-link>
+				<result>addresses.address</result>
 			</step>
 		</plan>
 

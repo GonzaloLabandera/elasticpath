@@ -12,8 +12,8 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.misc.Geography;
@@ -218,6 +218,6 @@ public class EpCountrySelectorControl {
 	}
 
 	private static Geography getGeography() {
-		return ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
+		return BeanLocator.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 	}
 }

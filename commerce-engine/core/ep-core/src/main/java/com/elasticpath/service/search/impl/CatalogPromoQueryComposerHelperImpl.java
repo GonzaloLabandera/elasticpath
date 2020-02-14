@@ -228,9 +228,10 @@ public class CatalogPromoQueryComposerHelperImpl implements CatalogPromoQueryCom
 		}
 		return false;
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	private <T extends SearchCriteria> T getNewCriteriaInstance(final String beanId) {
-		T searchCriteria = elasticPath.getBean(beanId);
+		T searchCriteria = (T) elasticPath.getPrototypeBean(beanId, SearchCriteria.class);
 		// These aren't required for the search, but required by the service
 		searchCriteria.setLocale(Locale.US);
 		searchCriteria.setCurrency(Currency.getInstance(Locale.US));

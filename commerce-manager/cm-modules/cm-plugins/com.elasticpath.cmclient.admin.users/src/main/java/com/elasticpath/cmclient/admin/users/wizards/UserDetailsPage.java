@@ -15,7 +15,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
 import com.elasticpath.cmclient.admin.users.AdminUsersMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -139,7 +139,7 @@ public class UserDetailsPage extends AbstractEPWizardPage<CmUser> {
 	}
 
 	private boolean userNameExists() {
-		final CmUserService service = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		final CmUserService service = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 
 		LOG.debug("Checking if UserName exists"); //$NON-NLS-1$
 		if (service.userNameExists(this.cmUser)) {
@@ -149,7 +149,7 @@ public class UserDetailsPage extends AbstractEPWizardPage<CmUser> {
 	}
 
 	private boolean emailExists() {
-		final CmUserService service = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
+		final CmUserService service = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
 
 		LOG.debug("Checking if Email exists"); //$NON-NLS-1$
 		if (service.emailExists(this.cmUser)) {

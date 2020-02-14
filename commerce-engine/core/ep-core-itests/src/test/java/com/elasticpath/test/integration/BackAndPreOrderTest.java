@@ -46,7 +46,7 @@ public class BackAndPreOrderTest {
 //				scenario.getCategory(), scenario.getWarehouse());
 //		// save the pre-order enabled product
 //		product.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_FOR_PRE_ORDER);
-//		ProductService productService = elasticPath.getBean(ContextIdNames.PRODUCT_SERVICE);
+//		ProductService productService = elasticPath.getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 //		product = productService.saveOrUpdate(product);
 //		anonymousCustomer = tac.getPersistersFactory().getStoreTestPersister().createDefaultCustomer(scenario.getStore());
 //		shoppingCart = createShoppingCart();
@@ -76,7 +76,7 @@ public class BackAndPreOrderTest {
 //		checkoutService.checkout(shoppingCart, templateOrderPayment);
 //
 //		// get order service
-//		OrderService orderService = (OrderService) elasticPath.getBean(ContextIdNames.ORDER_SERVICE);
+//		OrderService orderService = (OrderService) elasticPath.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 //
 //		// only one order should have been created by the checkout service
 //		List<Order> ordersList = orderService.findOrderByCustomerGuid(shoppingCart.getCustomerSession().getCustomer().getGuid(), true);
@@ -153,7 +153,7 @@ public class BackAndPreOrderTest {
 //		checkoutService.checkout(shoppingCart, templateOrderPayment);
 //
 //		// get order service
-//		OrderService orderService = (OrderService) elasticPath.getBean(ContextIdNames.ORDER_SERVICE);
+//		OrderService orderService = (OrderService) elasticPath.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 //
 //		// only one order should have been created by the checkout service
 //		List<Order> ordersList = orderService.findOrderByCustomerGuid(shoppingCart.getCustomerSession().getCustomer().getGuid(), true);
@@ -240,7 +240,7 @@ public class BackAndPreOrderTest {
 //		checkoutService.checkout(shoppingCart, templateOrderPayment);
 //
 //		// get order service
-//		OrderService orderService = (OrderService) elasticPath.getBean(ContextIdNames.ORDER_SERVICE);
+//		OrderService orderService = (OrderService) elasticPath.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 //
 //		// only one order should have been created by the checkout service
 //		List<Order> ordersList = orderService.findOrderByCustomerGuid(shoppingCart.getCustomerSession().getCustomer().getGuid(), true);
@@ -316,7 +316,7 @@ public class BackAndPreOrderTest {
 //	 * @return
 //	 */
 //	private OrderPayment getOrderPayment() {
-//		OrderPayment orderPayment = (OrderPayment) elasticPath.getBean(ContextIdNames.ORDER_PAYMENT);
+//		OrderPayment orderPayment = (OrderPayment) elasticPath.getPrototypeBean(ContextIdNames.ORDER_PAYMENT, OrderPayment.class);
 //		orderPayment.setCardHolderName("test test");
 //		orderPayment.setCardType("001");
 //		orderPayment.setCreatedDate(new Date());
@@ -334,7 +334,7 @@ public class BackAndPreOrderTest {
 //	 * @return
 //	 */
 //	private ShoppingCart createShoppingCart() {
-//		ShoppingCart shoppingCart = (ShoppingCart) elasticPath.getBean(ContextIdNames.SHOPPING_CART);
+//		ShoppingCart shoppingCart = (ShoppingCart) elasticPath.getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 //		shoppingCart.setDefaultValues();
 //
 //		shoppingCart.setCustomerSession(getCustomerSession());
@@ -347,7 +347,7 @@ public class BackAndPreOrderTest {
 //		shoppingCart.setCurrency(Currency.getInstance(Locale.US));
 //		shoppingCart.setStore(scenario.getStore());
 //
-//		ShoppingCartService shoppingCartService = (ShoppingCartService) elasticPath.getBean(ContextIdNames.SHOPPING_CART_SERVICE);
+//		ShoppingCartService shoppingCartService = (ShoppingCartService) elasticPath.getSingletonBean(ContextIdNames.SHOPPING_CART_SERVICE, ShoppingCartService.class);
 //
 //		shoppingCartService.update(shoppingCart);
 //
@@ -358,7 +358,7 @@ public class BackAndPreOrderTest {
 //	 * @return
 //	 */
 //	private CustomerSession getCustomerSession() {
-//		CustomerSession session = (CustomerSession) elasticPath.getBean(ContextIdNames.CUSTOMER_SESSION);
+//		CustomerSession session = (CustomerSession) elasticPath.getPrototypeBean(ContextIdNames.CUSTOMER_SESSION, CustomerSession.class);
 //		session.setCreationDate(new Date());
 //		session.setCurrency(Currency.getInstance(Locale.US));
 //		session.setLastAccessedDate(new Date());
@@ -395,6 +395,6 @@ public class BackAndPreOrderTest {
 //	}
 //
 //	public EventOriginatorHelper getEventOriginatorHelper() {
-//		return (EventOriginatorHelper) elasticPath.getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+//		return (EventOriginatorHelper) elasticPath.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 //	}
 }

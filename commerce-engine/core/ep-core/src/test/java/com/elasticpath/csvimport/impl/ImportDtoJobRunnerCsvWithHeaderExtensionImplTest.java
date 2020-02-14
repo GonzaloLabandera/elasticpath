@@ -34,11 +34,15 @@ import com.elasticpath.common.pricing.service.BaseAmountFilter;
 import com.elasticpath.common.pricing.service.impl.BaseAmountFilterImpl;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.csvimport.CsvReadResult;
 import com.elasticpath.csvimport.CsvReaderConfiguration;
 import com.elasticpath.csvimport.DtoImportDataType;
+import com.elasticpath.csvimport.ImportValidRow;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.cmuser.impl.CmUserImpl;
 import com.elasticpath.domain.dataimport.ImportAction;
+import com.elasticpath.domain.dataimport.ImportBadRow;
+import com.elasticpath.domain.dataimport.ImportFault;
 import com.elasticpath.domain.dataimport.ImportJob;
 import com.elasticpath.domain.dataimport.ImportNotification;
 import com.elasticpath.domain.dataimport.impl.AbstractImportTypeImpl;
@@ -78,11 +82,11 @@ public class ImportDtoJobRunnerCsvWithHeaderExtensionImplTest {
 	private static final int ITEMS_6 = 6;
 	private static final int ITEMS_8 = 8;
 
-	private static final Integer INTEGER_7 = Integer.valueOf(7);
-	private static final Integer INTEGER_6 = Integer.valueOf(6);
-	private static final Integer INTEGER_5 = Integer.valueOf(5);
-	private static final Integer INTEGER_3 = Integer.valueOf(3);
-	private static final Integer INETEGER_2 = Integer.valueOf(2);
+	private static final Integer INTEGER_7 = 7;
+	private static final Integer INTEGER_6 = 6;
+	private static final Integer INTEGER_5 = 5;
+	private static final Integer INTEGER_3 = 3;
+	private static final Integer INTEGER_2 = 2;
 
 	private final String csvFile =
 			"productName,productCode,skuCode,skuConfiguration,Qty,listPrice_CanadianPriceList_CAD,salePrice_CanadianPriceList_CAD"
@@ -163,7 +167,7 @@ public class ImportDtoJobRunnerCsvWithHeaderExtensionImplTest {
 
 	private Map<String, Integer> mappings;
 
-	private final PriceListDescriptor priceListDescriptor = context.mock(PriceListDescriptor.class);;
+	private final PriceListDescriptor priceListDescriptor = context.mock(PriceListDescriptor.class);
 
 	private DtoImportDataType<BaseAmountDTO> dtoImportDataType;
 	private DtoImportDataType<PriceListDescriptorDTO> dtoImportDataTypeForHeader;
@@ -297,23 +301,29 @@ public class ImportDtoJobRunnerCsvWithHeaderExtensionImplTest {
 				allowing(importJob).getImportType(); will(returnValue(AbstractImportTypeImpl.INSERT_UPDATE_TYPE));
 				allowing(importJob).getMaxAllowErrors(); will(returnValue(Integer.MAX_VALUE));
 
-				allowing(beanFactory).getBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT); will(returnValue(dtoImportDataType));
-				allowing(beanFactory).getBean(ContextIdNames.CSV_FILE_READER); will(returnValue(csvFileReader));
-				allowing(beanFactory).getBean(ContextIdNames.CSV_READER_CONFIGURATION); will(returnValue(csvReaderConfiguration));
-				allowing(beanFactory).getBean(ContextIdNames.RANDOM_GUID); will(returnValue(randomGuid));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_BASEAMOUNT, DtoImportDataType.class); 
+				will(returnValue(dtoImportDataType));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class); will(returnValue(csvFileReader));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.CSV_READER_CONFIGURATION, CsvReaderConfiguration.class); 
+				will(returnValue(csvReaderConfiguration));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class); will(returnValue(randomGuid));
 
-				oneOf(beanFactory).getBean(ContextIdNames.CSV_READ_RESULT); will(returnValue(new CsvReadResultImpl<>()));
-				oneOf(beanFactory).getBean(ContextIdNames.CSV_READ_RESULT); will(returnValue(new CsvReadResultImpl<>()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.CSV_READ_RESULT, CsvReadResult.class); 
+				will(returnValue(new CsvReadResultImpl<>()));
+				oneOf(beanFactory).getPrototypeBean(ContextIdNames.CSV_READ_RESULT, CsvReadResult.class); 
+				will(returnValue(new CsvReadResultImpl<>()));
 
-				expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.IMPORT_VALID_ROW, ImportValidRowImpl.class);
+				expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.IMPORT_VALID_ROW, ImportValidRow.class, 
+						ImportValidRowImpl.class);
 
-				allowing(beanFactory).getBean(ContextIdNames.BASE_AMOUNT_FILTER); will(returnValue(new BaseAmountFilterImpl()));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class); 
+				will(returnValue(new BaseAmountFilterImpl()));
 
-				allowing(beanFactory).getBean(ContextIdNames.IMPORT_FAULT); will(returnValue(new ImportFaultImpl()));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class); will(returnValue(new ImportFaultImpl()));
 
-				allowing(beanFactory).getBean(ContextIdNames.IMPORT_BAD_ROW); will(returnValue(new ImportBadRowImpl()));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class); will(returnValue(new ImportBadRowImpl()));
 
-				allowing(beanFactory).getBean(ContextIdNames.RANDOM_GUID); will(returnValue(randomGuid));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class); will(returnValue(randomGuid));
 
 				allowing(priceListDescriptor).getGuid(); will(returnValue("PRICE_LIST_DESCRIPTOR_GUID1"));
 
@@ -331,7 +341,7 @@ public class ImportDtoJobRunnerCsvWithHeaderExtensionImplTest {
 	 */
 	private void initMappings() {
 		mappings = new HashMap<>();
-		mappings.put("productCode", INETEGER_2);
+		mappings.put("productCode", INTEGER_2);
 		mappings.put("skuCode", INTEGER_3);
 		mappings.put("quantity", INTEGER_5);
 		mappings.put("listPrice", INTEGER_6);

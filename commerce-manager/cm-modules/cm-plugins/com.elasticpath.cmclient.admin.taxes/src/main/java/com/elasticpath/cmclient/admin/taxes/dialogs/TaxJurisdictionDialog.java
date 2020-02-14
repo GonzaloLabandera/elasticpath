@@ -33,10 +33,10 @@ import com.elasticpath.cmclient.admin.taxes.TaxesPlugin;
 import com.elasticpath.cmclient.admin.taxes.actions.CreateTaxCategoryAction;
 import com.elasticpath.cmclient.admin.taxes.actions.DeleteTaxCategoryAction;
 import com.elasticpath.cmclient.admin.taxes.actions.EditTaxCategoryAction;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -114,7 +114,7 @@ public class TaxJurisdictionDialog extends AbstractEpDialog {
 		this.taxJurisdiction = taxJurisdiction;
 		this.title = title;
 		this.image = image;
-		taxJurisdictionService = ServiceLocator.getService(ContextIdNames.TAX_JURISDICTION_SERVICE);
+		taxJurisdictionService = BeanLocator.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public class TaxJurisdictionDialog extends AbstractEpDialog {
 
 	@Override
 	protected void populateControls() {
-		Geography geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
+		Geography geography = BeanLocator.getSingletonBean(ContextIdNames.GEOGRAPHY, Geography.class);
 
 		if (isEditTaxJurisdiction()) {
 			String countryDisplayName = geography.getCountryDisplayName(taxJurisdiction.getRegionCode(), CorePlugin.getDefault().getDefaultLocale());

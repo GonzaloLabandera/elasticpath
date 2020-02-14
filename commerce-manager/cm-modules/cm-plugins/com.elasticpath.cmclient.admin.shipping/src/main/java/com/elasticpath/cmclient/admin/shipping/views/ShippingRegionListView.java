@@ -17,7 +17,7 @@ import com.elasticpath.cmclient.admin.shipping.AdminShippingPlugin;
 import com.elasticpath.cmclient.admin.shipping.actions.CreateShippingRegionAction;
 import com.elasticpath.cmclient.admin.shipping.actions.DeleteShippingRegionAction;
 import com.elasticpath.cmclient.admin.shipping.actions.EditShippingRegionAction;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
 import com.elasticpath.commons.constants.EpShippingContextIdNames;
@@ -53,7 +53,7 @@ public class ShippingRegionListView extends AbstractListView {
 	public ShippingRegionListView() {
 		super(false, SHIPPING_REGION_TABLE);
 
-		shippingRegionService = ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
+		shippingRegionService = BeanLocator.getSingletonBean(EpShippingContextIdNames.SHIPPING_REGION_SERVICE, ShippingRegionService.class);
 	}
 
 	@Override

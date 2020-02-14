@@ -11,7 +11,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.store.shipping.ShippingLevelsMessages;
 import com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView;
 import com.elasticpath.commons.constants.EpShippingContextIdNames;
@@ -47,8 +47,8 @@ public class DeleteShippingLevelAction extends Action {
 
 		final ShippingServiceLevel selectedServiceLevel = listView.getSelectedShippingLevel();
 
-		final ShippingServiceLevelService shippingService = ServiceLocator.getService(
-				EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+		final ShippingServiceLevelService shippingService = BeanLocator
+				.getSingletonBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
 
 		Shell parent = listView.getSite().getShell();
 

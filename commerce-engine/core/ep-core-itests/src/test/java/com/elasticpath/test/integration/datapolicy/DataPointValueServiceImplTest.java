@@ -1,11 +1,10 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2018
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.test.integration.datapolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -16,7 +15,6 @@ import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.domain.attribute.CustomerProfileValue;
@@ -33,13 +31,9 @@ import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.domain.datapolicy.impl.DataPointImpl;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
-import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.impl.OrderAddressImpl;
-import com.elasticpath.domain.order.impl.OrderPaymentImpl;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.persister.Persister;
-import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.service.catalog.GiftCertificateService;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
 import com.elasticpath.service.datapolicy.DataPointValueService;
@@ -78,8 +72,9 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		customerService.update(customer);
 
 		shoppingContext = shoppingContextBuilder
-			.withCustomer(customer)
-			.build();
+				.withCustomer(customer)
+				.withStoreCode(customer.getStoreCode())
+				.build();
 
 		shoppingContextPersister.persist(shoppingContext);
 
@@ -598,18 +593,9 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 
 	private Order createOrderWithGiftCertificateProduct(final boolean toCheckout) {
-		OrderPayment orderPayment = new OrderPaymentImpl();
-
-		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		orderPayment.setAmount(BigDecimal.valueOf(1223L));
-		orderPayment.setCreatedDate(new Date());
-		orderPayment.setStatus(OrderPaymentStatus.APPROVED);
-		orderPayment.setEmail("xx@email.com");
-
 		OrderBuilder gcOrderBuilder =  orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
 			.withShoppingContext(shoppingContext)
-			.withGiftCertificateProduct()
-			.withTemplateOrderPayment(orderPayment);
+			.withGiftCertificateProduct();
 
 		return toCheckout ? gcOrderBuilder.checkout() : gcOrderBuilder.build();
 	}

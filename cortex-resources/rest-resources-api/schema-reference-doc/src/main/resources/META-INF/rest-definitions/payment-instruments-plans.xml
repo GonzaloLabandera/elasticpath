@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>paymentinstruments</name>
+
+		<plan>
+			<name>read-payment-instruments</name>
+			<description><![CDATA[Read the list of payment instruments created on the profile.]]></description>
+			<step>
+				<description><![CDATA[Read payment instruments.]]></description>
+				<start>profiles.profile</start>
+				<follow-link>paymentinstruments</follow-link>
+				<result>payment-instruments</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-payment-instrument</name>
+			<description><![CDATA[Read the payment instrument previously created on the profile.]]></description>
+			<step>
+				<description><![CDATA[Read payment instrument.]]></description>
+				<start>payment-instruments</start>
+				<follow-link>element</follow-link>
+				<result>payment-instrument</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>add-payment-instrument</name>
+			<description><![CDATA[Submit a payment instrument form from the profile.]]></description>
+			<step>
+				<description><![CDATA[Provide a payment instrument form to create a payment instrument.]]></description>
+				<start>paymentmethods.profile-payment-method</start>
+				<follow-link>paymentinstrumentform</follow-link>
+				<result>profile-payment-instrument-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Sumbit a payment instrument form.]]></description>
+				<start>profile-payment-instrument-form</start>
+				<submit/>
+				<to>profile-payment-instrument-form</to>
+				<via-link>createpaymentinstrumentaction</via-link>
+				<result>payment-instrument</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>select-order-payment-instrument</name>
+			<description><![CDATA[Select a payment instrument to be used on the order.]]></description>
+			<step>
+				<description><![CDATA[The order payment instrument selector.]]></description>
+				<start>orders.order</start>
+				<follow-link>paymentinstrumentselector</follow-link>
+				<result>order-payment-instrument-selector</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice.]]></description>
+				<start>order-payment-instrument-selector</start>
+				<follow-link>choice</follow-link>
+				<link-back>selector</link-back>
+				<result>order-payment-instrument-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Select a choice.]]></description>
+				<start>order-payment-instrument-selector-choice</start>
+				<submit/>
+				<to>order-payment-instrument-selector-choice</to>
+				<via-link>selectaction</via-link>
+				<result>order-payment-instrument-selector</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-payment-instrument-choice</name>
+			<description>
+				<![CDATA[Use the order payment instrument selector to read a payment instrument choice available from profile.]]>
+			</description>
+			<step>
+				<description><![CDATA[The order payment instrument selector.]]></description>
+				<start>orders.order</start>
+				<follow-link>paymentinstrumentselector</follow-link>
+				<result>order-payment-instrument-selector</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the choice.]]></description>
+				<start>order-payment-instrument-selector</start>
+				<follow-link>choice</follow-link>
+				<link-back>selector</link-back>
+				<result>order-payment-instrument-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice's description.]]></description>
+				<start>order-payment-instrument-selector-choice</start>
+				<follow-link>description</follow-link>
+				<result>payment-instrument</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-chosen-order-payment-instrument</name>
+			<description><![CDATA[Use the order payment instrument selector to read the chosen order payment instrument.]]></description>
+			<step>
+				<description><![CDATA[The order payment instrument selector.]]></description>
+				<start>orders.order</start>
+				<follow-link>paymentinstrumentselector</follow-link>
+				<result>order-payment-instrument-selector</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the chosen choice.]]></description>
+				<start>order-payment-instrument-selector</start>
+				<follow-link>chosen</follow-link>
+				<link-back>selector</link-back>
+				<result>order-payment-instrument-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice's description.]]></description>
+				<start>order-payment-instrument-selector-choice</start>
+				<follow-link>description</follow-link>
+				<result>order-payment-instrument</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>add-order-payment-instrument</name>
+			<description><![CDATA[Submit a payment instrument form from the order.]]></description>
+			<step>
+				<description><![CDATA[Provide a payment instrument form to create an order payment instrument.]]></description>
+				<start>paymentmethods.order-payment-method</start>
+				<follow-link>paymentinstrumentform</follow-link>
+				<result>order-payment-instrument-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Sumbit an order payment instrument form.]]></description>
+				<start>order-payment-instrument-form</start>
+				<submit/>
+				<to>order-payment-instrument-form</to>
+				<via-link>createpaymentinstrumentaction</via-link>
+				<result>order-payment-instrument</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-default-payment-instrument</name>
+			<description><![CDATA[Read the profile's default payment instrument.]]></description>
+			<step>
+				<description><![CDATA[The default payment instrument.]]></description>
+				<start>payment-instruments</start>
+				<follow-link>default</follow-link>
+				<result>payment-instrument</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-chosen-default-payment-instrument</name>
+			<description><![CDATA[Use the profile's default payment instrument selector to read the chosen instrument.]]></description>
+			<step>
+				<description><![CDATA[The profile's default payment instrument selector.]]></description>
+				<start>payment-instruments</start>
+				<follow-link>defaultinstrumentselector</follow-link>
+				<result>profile-default-payment-instrument-selector</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the chosen choice.]]></description>
+				<start>profile-default-payment-instrument-selector</start>
+				<follow-link>chosen</follow-link>
+				<link-back>defaultinstrumentselector</link-back>
+				<result>profile-default-payment-instrument-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice's description.]]></description>
+				<start>profile-default-payment-instrument-selector-choice</start>
+				<follow-link>description</follow-link>
+				<result>payment-instrument</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-default-payment-instrument-choice</name>
+			<description><![CDATA[Use the profile's default payment instrument selector to read a choice.]]></description>
+			<step>
+				<description><![CDATA[The profile's default payment instrument default selector.]]></description>
+				<start>payment-instruments</start>
+				<follow-link>defaultinstrumentselector</follow-link>
+				<result>profile-default-payment-instrument-selector</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the chosen choice.]]></description>
+				<start>profile-default-payment-instrument-selector</start>
+				<follow-link>choice</follow-link>
+				<link-back>defaultinstrumentselector</link-back>
+				<result>profile-default-payment-instrument-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice's description.]]></description>
+				<start>profile-default-payment-instrument-selector-choice</start>
+				<follow-link>description</follow-link>
+				<result>payment-instrument</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>select-default-payment-instrument</name>
+			<description><![CDATA[Use the profile's default payment instrument selector to select a payment instrument.]]></description>
+			<step>
+				<description><![CDATA[The profile's default payment instrument selector.]]></description>
+				<start>payment-instruments</start>
+				<follow-link>defaultinstrumentselector</follow-link>
+				<result>profile-default-payment-instrument-selector</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice.]]></description>
+				<start>profile-default-payment-instrument-selector</start>
+				<follow-link>choice</follow-link>
+				<link-back>defaultinstrumentselector</link-back>
+				<result>profile-default-payment-instrument-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Select a choice.]]></description>
+				<start>profile-default-payment-instrument-selector-choice</start>
+				<submit/>
+				<to>profile-default-payment-instrument-selector-choice</to>
+				<via-link>selectaction</via-link>
+				<result>payment-instrument</result>
+			</step>
+		</plan>
+
+	</family>
+</definitions>

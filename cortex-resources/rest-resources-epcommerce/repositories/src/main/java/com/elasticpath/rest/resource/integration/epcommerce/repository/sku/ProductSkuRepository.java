@@ -8,7 +8,6 @@ import io.reactivex.Single;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
-import com.elasticpath.rest.command.ExecutionResult;
 
 /**
  * Product SKU repository.
@@ -29,16 +28,7 @@ public interface ProductSkuRepository {
 	 * @param skuGuid the sku guid
 	 * @return the product sku with attributes by guid
 	 */
-	Single<ProductSku> getProductSkuWithAttributesByGuidAsSingle(String skuGuid);
-
-	/**
-	 * Gets the product sku with attributes by the sku guid.
-	 *
-	 * @param skuGuid the sku guid
-	 * @return the product sku with attributes by guid
-	 */
-	@Deprecated
-	ExecutionResult<ProductSku> getProductSkuWithAttributesByGuid(String skuGuid);
+	Single<ProductSku> getProductSkuWithAttributesByGuid(String skuGuid);
 
 	/**
 	 * Determines if a product associated to a product sku (identified by the skuGuid) is a product bundle.

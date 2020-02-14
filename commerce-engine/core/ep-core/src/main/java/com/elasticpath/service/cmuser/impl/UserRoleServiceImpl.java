@@ -83,7 +83,7 @@ public class UserRoleServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		sanityCheck();
 		UserRole userRole = null;
 		if (userRoleUid <= 0) {
-			userRole = getBean(ContextIdNames.USER_ROLE);
+			userRole = getPrototypeBean(ContextIdNames.USER_ROLE, UserRole.class);
 		} else {
 			userRole = getPersistentBeanFinder().load(ContextIdNames.USER_ROLE, userRoleUid);
 		}
@@ -105,7 +105,7 @@ public class UserRoleServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		sanityCheck();
 		UserRole userRole = null;
 		if (userRoleUid <= 0) {
-			userRole = getBean(ContextIdNames.USER_ROLE);
+			userRole = getPrototypeBean(ContextIdNames.USER_ROLE, UserRole.class);
 		} else {
 			userRole = getPersistentBeanFinder().get(ContextIdNames.USER_ROLE, userRoleUid);
 		}
@@ -166,7 +166,7 @@ public class UserRoleServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		}
 		return userRole;
 	}
-	
+
 	/**
 	 * Checks whether the given userRole name exists or not.
 	 *

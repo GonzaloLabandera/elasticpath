@@ -194,7 +194,7 @@ public class StoreProductRepositoryImplTest {
 	@Test
 	public void testFindBySkuGuidWhenProductSkuIsFound() {
 		when(mockProductSku.getProduct()).thenReturn(product1);
-		when(mockProductSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).thenReturn(Single.just(mockProductSku));
+		when(mockProductSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID)).thenReturn(Single.just(mockProductSku));
 		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
 		when(mockStoreProductService.getProductForStore(product1, store)).thenReturn(storeProduct);
 
@@ -202,21 +202,21 @@ public class StoreProductRepositoryImplTest {
 				.test()
 				.assertNoErrors();
 
-		verify(mockProductSkuRepository).getProductSkuWithAttributesByGuidAsSingle(SKU_GUID);
+		verify(mockProductSkuRepository).getProductSkuWithAttributesByGuid(SKU_GUID);
 		verify(mockStoreRepository).findStoreAsSingle(SCOPE);
 		verify(mockStoreProductService).getProductForStore(product1, store);
 	}
 
 	@Test
 	public void testFindBySkuGuidWhenProductSkuIsNotFound() {
-		when(mockProductSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID))
+		when(mockProductSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
 
 		storeProductRepository.findDisplayableStoreProductWithAttributesBySkuGuid(SCOPE, SKU_GUID)
 				.test()
 				.assertError(ResourceOperationFailure.notFound());
 
-		verify(mockProductSkuRepository).getProductSkuWithAttributesByGuidAsSingle(SKU_GUID);
+		verify(mockProductSkuRepository).getProductSkuWithAttributesByGuid(SKU_GUID);
 		verifyZeroInteractions(mockStoreRepository);
 		verifyZeroInteractions(mockStoreProductService);
 	}

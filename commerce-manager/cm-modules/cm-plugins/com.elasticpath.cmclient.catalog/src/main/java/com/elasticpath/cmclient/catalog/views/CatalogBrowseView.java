@@ -45,7 +45,7 @@ import com.elasticpath.cmclient.catalog.actions.RefreshCatalogTreeAction;
 import com.elasticpath.cmclient.catalog.actions.ReorderCategoryDownAction;
 import com.elasticpath.cmclient.catalog.actions.ReorderCategoryUpAction;
 import com.elasticpath.cmclient.catalog.actions.product.CreateProductAction;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
@@ -85,7 +85,7 @@ public class CatalogBrowseView extends AbstractCmClientView implements ChangeSet
 		 * @return an array of catalogs
 		 */
 		public Object[] getElements() {
-			final CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+			final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 
 			final List<Catalog> catalogList = catalogService.findAllCatalogs();
 			AuthorizationService.getInstance().filterAuthorizedCatalogs(catalogList);
@@ -449,8 +449,7 @@ public class CatalogBrowseView extends AbstractCmClientView implements ChangeSet
 	 * @return the master catalog for the given category.
 	 */
 	Catalog getCategoryMasterCatalog(final Category category) {
-		return ((CategoryService) (ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE)))
-			.getMasterCatalog(category);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class).getMasterCatalog(category);
 	}
 	
 	/**
@@ -488,11 +487,11 @@ public class CatalogBrowseView extends AbstractCmClientView implements ChangeSet
 	}
 
 	protected CategoryLookup getCategoryLookup() {
-		return ServiceLocator.getService(ContextIdNames.CATEGORY_LOOKUP);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 	}
 
 	protected CategoryService getCategoryService() {
-		return ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 	}
 
 	/**

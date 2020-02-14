@@ -21,7 +21,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.core.CmClientResources;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.UpdatePolicy;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -257,7 +257,8 @@ public class OrderDetailsPhysicalShipmentSubSectionShipSummary implements IPrope
 				if (!newSubtotalDiscount.equals(oldSubtotalDiscount)) {  // NOPMD  '!='
 					shipment.setSubtotalDiscount(newSubtotalDiscount);
 					final PhysicalOrderShipmentShippingCostRefresher physicalOrderShipmentShippingCostRefresher =
-							ServiceLocator.getService(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER);
+							BeanLocator.getSingletonBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER,
+									PhysicalOrderShipmentShippingCostRefresher.class);
 					physicalOrderShipmentShippingCostRefresher.refresh(shipment);
 				}
 				return Status.OK_STATUS;

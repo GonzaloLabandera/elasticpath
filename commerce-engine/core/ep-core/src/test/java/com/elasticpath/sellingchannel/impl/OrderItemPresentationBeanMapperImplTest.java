@@ -47,7 +47,7 @@ public class OrderItemPresentationBeanMapperImplTest {
 	@Before
 	public void init() {
 		BeanFactory beanFactory = mock(BeanFactory.class);
-		when(beanFactory.getBean(any())).thenAnswer(invocation -> new OrderItemPresentationBeanImpl());
+		when(beanFactory.getPrototypeBean(any(), any())).thenAnswer(invocation -> new OrderItemPresentationBeanImpl());
 
 		functor = new CopyFunctorTestable();
 		functor.setBeanFactory(beanFactory);

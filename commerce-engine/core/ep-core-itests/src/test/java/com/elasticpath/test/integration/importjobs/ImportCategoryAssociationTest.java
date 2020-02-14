@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.service.catalog.CategoryLookup;
-import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.service.catalog.ProductLookup;
 import com.elasticpath.test.integration.DirtiesDatabase;
 
@@ -24,8 +23,6 @@ import com.elasticpath.test.integration.DirtiesDatabase;
  */
 public class ImportCategoryAssociationTest extends ImportJobTestCase {
 
-	@Autowired
-	private CategoryService categoryService;
 	@Autowired
 	private CategoryLookup categoryLookup;
 	@Autowired

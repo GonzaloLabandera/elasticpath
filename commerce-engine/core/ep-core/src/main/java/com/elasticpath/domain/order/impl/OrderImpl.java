@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2016
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.domain.order.impl;
 
@@ -75,9 +75,8 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderData;
 import com.elasticpath.domain.order.OrderEvent;
-import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderReturn;
+import com.elasticpath.domain.order.OrderReturnStatus;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderSku;
@@ -92,11 +91,9 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
 import com.elasticpath.persistence.support.FetchGroupConstants;
-import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.plugin.tax.builder.TaxExemptionBuilder;
 import com.elasticpath.plugin.tax.domain.TaxExemption;
 import com.elasticpath.service.order.ReturnAndExchangeService;
-import com.elasticpath.service.payment.impl.OrderPaymentHelper;
 
 /**
  * The default implementation of <code>Order</code>.
@@ -189,8 +186,6 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	private Currency currency;
 
 	private BigDecimal total = BigDecimal.ZERO;
-
-	private Set<OrderPayment> orderPayments = new HashSet<>();
 
 	private OrderStatus status = OrderStatus.CREATED;
 
@@ -464,83 +459,6 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	}
 
 	/**
-	 * Get the payment(s) for this order.
-	 *
-	 * @return a set of <code>OrderPayment</code> objects
-	 */
-	@Override
-	@OneToMany(targetEntity = OrderPaymentImpl.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "order")
-	@ElementDependent
-	@OrderBy
-	public Set<OrderPayment> getOrderPayments() {
-		return orderPayments;
-	}
-
-	/**
-	 * Set the payment(s) for this order.
-	 *
-	 * @param orderPayments a set of <code>OrderPayment</code> objects.
-	 */
-	@Override
-	public void setOrderPayments(final Set<OrderPayment> orderPayments) {
-		this.orderPayments = orderPayments;
-	}
-
-	/**
-	 * Convenience method to retrieve a default order payment for this order. This should only be used when only a single payment is supported for a
-	 * single order.
-	 *
-	 * @return the first order payment for this Order
-	 */
-	@Override
-	@Transient
-	public OrderPayment getOrderPayment() {
-		if (getOrderPayments() == null || getOrderPayments().isEmpty()) {
-			return null;
-		}
-		// Find a payment which is not a gift certificate.
-		for (OrderPayment orderPayment : getOrderPayments()) {
-			if (orderPayment != null && !PaymentType.GIFT_CERTIFICATE.equals(orderPayment.getPaymentMethod())
-					&& !PaymentType.RETURN_AND_EXCHANGE.equals(orderPayment.getPaymentMethod())) {
-				return orderPayment;
-			}
-		}
-		// if no non-gift cert payment found return the first one as there seems to be only gift certificate or exchange payments
-		return getOrderPayments().iterator().next();
-	}
-
-	/**
-	 * retrieve total amount by redeem the GiftCertificates.
-	 *
-	 * @return the total amount by redeem the GiftCertificates
-	 */
-	@Override
-	@Transient
-	public BigDecimal getTotalGiftCertificateDiscount() {
-		return OrderPaymentHelper.getTotalGiftCertificateDiscount(this);
-	}
-
-	/**
-	 * Get the total discount money for GC.
-	 *
-	 * @return a <code>Money</code> object representing the total discount money
-	 */
-	@Transient
-	public Money getTotalGiftCertificateDiscountMoney() {
-		return Money.valueOf(getTotalGiftCertificateDiscount(), getCurrency());
-	}
-
-	/**
-	 * Add a payment to the order.
-	 *
-	 * @param orderPayment an <code>OrderPayment</code>
-	 */
-	@Override
-	public void addOrderPayment(final OrderPayment orderPayment) {
-		getOrderPayments().add(orderPayment);
-	}
-
-	/**
 	 * Get the shipments associated with this order.
 	 *
 	 * @return the orders's <code>OrderShipment</code>s
@@ -798,6 +716,19 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 		return Money.valueOf(getTotal(), getCurrency());
 	}
 
+	@Override
+	@Transient
+	public Money getAdjustedOrderTotalMoney() {
+		// sum total amounts for all the shipments that are canceled
+		final BigDecimal cancelled = getAllShipments()
+				.stream()
+				.filter(shipment -> OrderShipmentStatus.CANCELLED.equals(shipment.getShipmentStatus()))
+				.map(OrderShipment::getTotal)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return Money.valueOf(getTotal().subtract(cancelled), getCurrency());
+	}
+
 	/**
 	 * Set the order total paid by the customer.
 	 *
@@ -834,28 +765,6 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	@Transient
 	public Money getSubtotalDiscountMoney() {
 		return Money.valueOf(getSubtotalDiscount(), getCurrency());
-	}
-
-	/**
-	 * Get the balance money of all items in the cart.
-	 *
-	 * @return a <code>Money</code> object representing the balance money
-	 */
-	@Override
-	@Transient
-	public Money getBalanceMoney() {
-		return Money.valueOf(getBalanceAmount(), getCurrency());
-	}
-
-	/**
-	 * Get the paid amount money of all items in the cart.
-	 *
-	 * @return a <code>Money</code> object representing the paid amount money
-	 */
-	@Override
-	@Transient
-	public Money getPaidAmountMoney() {
-		return Money.valueOf(getPaidAmount(), getCurrency());
 	}
 
 	/**
@@ -947,61 +856,6 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 */
 	void setStatus(final OrderStatus status) {
 		this.status = status;
-	}
-
-	/**
-	 * Return the paid amount for this order.
-	 *
-	 * @return the paid amount for this order.
-	 */
-	@Override
-	@Transient
-	public BigDecimal getPaidAmount() {
-		BigDecimal paidAmount = BigDecimal.ZERO.setScale(2);
-		for (Object element : getOrderPayments()) {
-			final OrderPayment curOrderPayment = (OrderPayment) element;
-			if (curOrderPayment.getTransactionType().equals(OrderPayment.CAPTURE_TRANSACTION)
-					&& curOrderPayment.getStatus() == OrderPaymentStatus.APPROVED) {
-				paidAmount = paidAmount.add(curOrderPayment.getAmount());
-			}
-		}
-		return paidAmount;
-	}
-
-	/**
-	 * Return the credit amount for this order.
-	 *
-	 * @return the credit amount for this order.
-	 */
-	@Override
-	@Transient
-	public BigDecimal getCreditAmount() {
-		BigDecimal creditAmount = BigDecimal.ZERO.setScale(2);
-		for (OrderPayment orderPayment : getOrderPayments()) {
-			if (orderPayment.getTransactionType().equals(OrderPayment.CREDIT_TRANSACTION)
-					&& orderPayment.getStatus() == OrderPaymentStatus.APPROVED) {
-				creditAmount = creditAmount.add(orderPayment.getAmount());
-			}
-		}
-		return creditAmount;
-	}
-
-	/**
-	 * Return the balance amount for this order.
-	 *
-	 * @return the balance amount for this order.
-	 */
-	@Override
-	@Transient
-	public BigDecimal getBalanceAmount() {
-		BigDecimal balanceAmount = getTotal();
-		// subtract total amounts for all the shipments that are canceled
-		for (OrderShipment shipment : getAllShipments()) {
-			if (OrderShipmentStatus.CANCELLED.equals(shipment.getShipmentStatus())) {
-				balanceAmount = balanceAmount.subtract(shipment.getTotal());
-			}
-		}
-		return getExchangeOrderAmount(balanceAmount).subtract(getPaidAmount());
 	}
 
 	/**
@@ -1428,7 +1282,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 * This method should be called by the OrderService only.
 	 */
 	@Override
-	public void awaitExchnageCompletionOrder() {
+	public void awaitExchangeCompletionOrder() {
 		setStatus(OrderStatus.AWAITING_EXCHANGE);
 	}
 
@@ -1608,39 +1462,25 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	@Transient
 	public OrderReturn getExchange() {
 		if (isExchangeOrder() && exchange == null) {
-			ReturnAndExchangeService exchangeService = getBean(ContextIdNames.ORDER_RETURN_SERVICE);
+			ReturnAndExchangeService exchangeService = getSingletonBean(ContextIdNames.ORDER_RETURN_SERVICE, ReturnAndExchangeService.class);
 			exchange = exchangeService.getExchange(getUidPk());
 		}
 		return exchange;
 	}
 
-	/**
-	 *
-	 * @param exchnage the exchnage to set
-	 */
 	@Override
-	public void setExchange(final OrderReturn exchnage) {
-		exchange = exchnage;
+	public void setExchange(final OrderReturn exchange) {
+		this.exchange = exchange;
 	}
 
-	/**
-	 * Get the discount due to exchange. The amount is calculated as
-	 * exchange.total-exchange.refunded. Valid for exchange order only, otherwise return zero.
-	 *
-	 * @return the due to exchange amount
-	 * @throws EpDomainException is exchange order contains more than 1 shipment.
-	 */
 	@Override
 	@Transient
 	public BigDecimal getDueToRMA() {
 		BigDecimal dueToRMA = BigDecimal.ZERO;
 		if (isExchangeOrder() && getExchange() != null) {
-			if (getAllShipments() != null && getAllShipments().size() == 1) {
-				getExchange().recalculateOrderReturn();
-				dueToRMA = getExchange().getReturnTotal().subtract(getExchange().getRefundedTotal());
-			} else {
-				//In this case it's unclear now how to redistribute(subtract) exchange.total between multiple shipments.
-				throw new EpDomainException("Exchange order can't have more than 1 shipment.");
+			getExchange().recalculateOrderReturn();
+			if (getExchange().getReturnStatus() != OrderReturnStatus.COMPLETED) {
+				dueToRMA = getExchange().getReturnTotal();
 			}
 		}
 		return dueToRMA;
@@ -1650,23 +1490,6 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	@Transient
 	public Money getDueToRMAMoney() {
 		return Money.valueOf(getDueToRMA(), getCurrency());
-	}
-
-	private BigDecimal getExchangeOrderAmount(final BigDecimal regularAmount) {
-		//reduce money to be authorized on return's amount
-		BigDecimal amount = regularAmount;
-		if (isExchangeOrder()) {
-			getExchange().recalculateOrderReturn();
-			final BigDecimal returnTotal = getExchange().getReturnTotal();
-			final BigDecimal exchangeOrderAmount = regularAmount.subtract(returnTotal);
-			if (exchangeOrderAmount.compareTo(BigDecimal.ZERO) >= 0) {
-				amount = exchangeOrderAmount;
-			} else {
-				amount = BigDecimal.ZERO;
-			}
-		}
-
-		return amount;
 	}
 
 	/**
@@ -1855,4 +1678,17 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 
 		return Collections.unmodifiableMap(fieldValues);
 	}
+
+	@Override
+	public Money sumUpFutureShipmentAmounts() {
+		BigDecimal amount = BigDecimal.ZERO;
+		for (OrderShipment shipment : getAllShipments()) {
+			final OrderShipmentStatus shipmentStatus = shipment.getShipmentStatus();
+			if (shipmentStatus != OrderShipmentStatus.SHIPPED && shipmentStatus != OrderShipmentStatus.CANCELLED) {
+				amount = amount.add(shipment.getTotal());
+			}
+		}
+		return Money.valueOf(amount, getCurrency());
+	}
+
 }

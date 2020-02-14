@@ -509,8 +509,8 @@ public class ProductSkuImpl extends AbstractListenableEntityImpl implements Prod
 			JpaAdaptorOfSkuOptionValueImpl adaptor = (JpaAdaptorOfSkuOptionValueImpl) getOptionValueMap().get(skuOption.getOptionKey());
 			adaptor.setSkuOptionValue(skuOption.getOptionValue(valueCode));
 		} else {
-			JpaAdaptorOfSkuOptionValueImpl adaptor = getBean(
-					ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR);
+			JpaAdaptorOfSkuOptionValueImpl adaptor = getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR,
+					JpaAdaptorOfSkuOptionValueImpl.class);
 			adaptor.setOptionKey(skuOption.getOptionKey());
 			adaptor.setSkuOptionValue(skuOption.getOptionValue(valueCode));
 

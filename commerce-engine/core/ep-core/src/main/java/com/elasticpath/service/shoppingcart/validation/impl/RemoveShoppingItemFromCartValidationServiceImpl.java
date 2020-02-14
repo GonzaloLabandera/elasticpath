@@ -24,7 +24,8 @@ public class RemoveShoppingItemFromCartValidationServiceImpl
 
 	@Override
 	public ShoppingItemValidationContext buildContext(final ShoppingCart shoppingCart, final ShoppingItem shoppingItem) {
-		final ShoppingItemValidationContext context = beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT);
+		final ShoppingItemValidationContext context = beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT,
+				ShoppingItemValidationContext.class);
 		context.setShoppingCart(shoppingCart);
 		context.setShoppingItem(shoppingItem);
 		context.setParentProductSku(shoppingCart.getParentProductSku(shoppingItem));

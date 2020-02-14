@@ -94,7 +94,7 @@ public class StoreSeoUrlBuilderFactoryImpl implements StoreSeoUrlBuilderFactory 
 	private SeoUrlBuilder createSeoUrlBuilder(final Store store) {
 		
 		// Create a new coreSeoUrlBuilder	
-		SeoUrlBuilder seoUrlBuilder = beanFactory.getBean(ContextIdNames.SEO_URL_BUILDER);
+		SeoUrlBuilder seoUrlBuilder = beanFactory.getPrototypeBean(ContextIdNames.SEO_URL_BUILDER, SeoUrlBuilder.class);
 		seoUrlBuilder.setStore(store);
 		seoUrlBuilder.setFieldSeparator(fieldSeparator);
 		return seoUrlBuilder;

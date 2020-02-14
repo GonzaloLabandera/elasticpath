@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.store.StoreEditorModel;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
@@ -47,8 +47,8 @@ public class StoreSortAttributes {
 	public StoreSortAttributes(final StoreEditorModel storeEditorModel) {
 		this.storeEditorModel = storeEditorModel;
 		storeCode = storeEditorModel.getStoreCode();
-		sortAttributeService = ServiceLocator.getService(ContextIdNames.SORT_ATTRIBUTE_SERVICE);
-		catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		sortAttributeService = BeanLocator.getSingletonBean(ContextIdNames.SORT_ATTRIBUTE_SERVICE, SortAttributeService.class);
+		catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class StoreSortAttributes {
 
 	private SortAttribute initializeSortAttribute(final String businessObjectId, final SortAttributeType sortAttributeType,
 												  final SortAttributeGroup sortAttributeGroup) {
-		SortAttribute sortAttribute = ServiceLocator.getService(ContextIdNames.SORT_ATTRIBUTE);
+		SortAttribute sortAttribute = BeanLocator.getPrototypeBean(ContextIdNames.SORT_ATTRIBUTE, SortAttribute.class);
 		sortAttribute.setSortAttributeType(sortAttributeType);
 		sortAttribute.setStoreCode(storeCode);
 		sortAttribute.setBusinessObjectId(businessObjectId);

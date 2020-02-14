@@ -11,9 +11,8 @@ import com.elasticpath.service.rules.RuleElementService;
 
 /**
  * Provides rule condition component related services.
- *
  */
-public class RuleElementServiceImpl extends AbstractEpPersistenceServiceImpl implements RuleElementService  {
+public class RuleElementServiceImpl extends AbstractEpPersistenceServiceImpl implements RuleElementService {
 	/**
 	 * Adds the given ruleElement.
 	 *
@@ -45,7 +44,6 @@ public class RuleElementServiceImpl extends AbstractEpPersistenceServiceImpl imp
 	 * Delete the ruleElement.
 	 *
 	 * @param ruleElement the ruleElement to remove
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
@@ -53,30 +51,28 @@ public class RuleElementServiceImpl extends AbstractEpPersistenceServiceImpl imp
 		sanityCheck();
 		getPersistenceEngine().delete(ruleElement);
 	}
-	
+
 	/**
 	 * Load the ruleElement with the given UID.
 	 * Throw an unrecoverable exception if there is no matching database row.
 	 *
 	 * @param ruleElementUid the ruleElement UID
-	 *
 	 * @return the rule if UID exists, otherwise null
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
 	public RuleElement load(final long ruleElementUid) throws EpServiceException {
 		return this.load(ruleElementUid, null);
 	}
-	
+
 	/**
-	 * Load the ruleElement with the given UID if it is greater than 0; 
+	 * Load the ruleElement with the given UID if it is greater than 0;
 	 * otherwise get new instance of the ruleElement of the given ruleElementType
 	 * from the spring beanFactory (assuming bean id is the same as the ruleElementType).
-	 * 
+	 * <p>
 	 * Throw an unrecoverable exception if there is no matching database row.
 	 *
-	 * @param ruleElementUid the ruleElement UID
+	 * @param ruleElementUid  the ruleElement UID
 	 * @param ruleElementType the ruleElement type
 	 * @return the rule if it exists, otherwise null.
 	 * @throws EpServiceException in case of errors.
@@ -87,35 +83,33 @@ public class RuleElementServiceImpl extends AbstractEpPersistenceServiceImpl imp
 		RuleElement ruleElement = null;
 		if (ruleElementUid > 0) {
 			ruleElement = getPersistentBeanFinder().load(ContextIdNames.ABSTRACT_RULE_ELEMENT, ruleElementUid);
-		} else if (ruleElementType != null) { 
-			ruleElement = getBean(ruleElementType);
+		} else if (ruleElementType != null) {
+			ruleElement = getPrototypeBean(ruleElementType, RuleElement.class);
 		}
 		return ruleElement;
 	}
-	
+
 	/**
-	 * Get the ruleElement with the given UID. 
+	 * Get the ruleElement with the given UID.
 	 * Return null if no matching record exists.
 	 *
 	 * @param ruleElementUid the ruleElement UID
-	 *
 	 * @return the ruleElement if UID exists, otherwise null
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
 	public RuleElement get(final long ruleElementUid) throws EpServiceException {
 		return this.get(ruleElementUid, null);
 	}
-	
+
 	/**
-	 * Get the ruleElement with the given UID if it is greater than 0; 
+	 * Get the ruleElement with the given UID if it is greater than 0;
 	 * otherwise get new instance of the ruleElement of the given ruleElementType
 	 * from the spring beanFactory (assuming bean id is the same as the ruleElementType).
-	 * 
+	 * <p>
 	 * Return null if no matching record exists.
 	 *
-	 * @param ruleElementUid the ruleElement UID
+	 * @param ruleElementUid  the ruleElement UID
 	 * @param ruleElementType the ruleElement type
 	 * @return the rule if it exists, otherwise null.
 	 * @throws EpServiceException in case of errors.
@@ -126,15 +120,15 @@ public class RuleElementServiceImpl extends AbstractEpPersistenceServiceImpl imp
 		RuleElement ruleElement = null;
 		if (ruleElementUid > 0) {
 			ruleElement = getPersistentBeanFinder().get(ContextIdNames.ABSTRACT_RULE_ELEMENT, ruleElementUid);
-		} else if (ruleElementType != null) { 
-			ruleElement = getBean(ruleElementType);
+		} else if (ruleElementType != null) {
+			ruleElement = getPrototypeBean(ruleElementType, RuleElement.class);
 		}
 		return ruleElement;
 	}
-	
+
 	/**
 	 * Generic get method for all persistable domain models.
-	 * 
+	 *
 	 * @param uid the persisted instance uid
 	 * @return the persisted instance if exists, otherwise null
 	 * @throws EpServiceException - in case of any errors
@@ -143,5 +137,5 @@ public class RuleElementServiceImpl extends AbstractEpPersistenceServiceImpl imp
 	public Object getObject(final long uid) throws EpServiceException {
 		return get(uid);
 	}
-	
+
 }

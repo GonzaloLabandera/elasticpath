@@ -179,6 +179,27 @@ public class QueryReader implements ApplicationContextAware {
 	}
 
 	/**
+	 * @see com.elasticpath.persistence.api.PersistenceEngine#retrieveByNamedQuery(String, FlushMode, boolean, Object...)
+	 *
+	 * @param <T> the object's type to retrieve
+	 * @param queryName the named query
+	 * @param flushMode the flush mode to use when executing the query
+	 * @param ignoreChanges whether to ignore changes in local cache
+	 * @param parameters the parameters to be used with the given query
+	 * @return a list of persistent instances
+	 */
+	public <T> List<T> retrieveByNamedQuery(final String queryName, final FlushMode flushMode, final boolean ignoreChanges,
+		final Object... parameters) {
+
+		return getNamedQueryExecutor()
+			.withQueryName(queryName)
+			.withParameters(parameters)
+			.withFlushMode(flushMode)
+			.withIgnoreChanges(ignoreChanges)
+			.executeAndReturnResultList();
+	}
+
+	/**
 	 * @see com.elasticpath.persistence.api.PersistenceEngine#retrieveByNamedQuery(String, Map)
 	 *
 	 * @param <T> the object's type to retrieve

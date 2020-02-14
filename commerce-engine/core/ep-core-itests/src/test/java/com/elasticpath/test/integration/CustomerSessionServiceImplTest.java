@@ -21,11 +21,9 @@ import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplicati
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionCleanupService;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.shopper.ShopperService;
-import com.elasticpath.service.store.StoreService;
 import com.elasticpath.test.db.DbTestCase;
 
 /**
@@ -39,12 +37,6 @@ public class CustomerSessionServiceImplTest extends DbTestCase {
 
 	@Autowired
 	private CustomerSessionCleanupService customerSessionCleanupService;
-
-	@Autowired
-	private CustomerService customerService;
-
-	@Autowired
-	private StoreService storeService;
 
 	@Autowired
 	private ShopperService shopperService;

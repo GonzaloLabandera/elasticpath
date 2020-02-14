@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2014
+/*
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.messaging.camel.jackson;
 
@@ -72,6 +72,7 @@ public class EventMessageObjectMapperTest {
 				// I really wish I could spy this instead of having to mock it
 				ignoring(module).getModuleName();
 				ignoring(module).version();
+				ignoring(module).getDependencies();
 				ignoring(module).setupModule(with(any(Module.SetupContext.class)));
 				ignoring(module).getTypeId();
 			}

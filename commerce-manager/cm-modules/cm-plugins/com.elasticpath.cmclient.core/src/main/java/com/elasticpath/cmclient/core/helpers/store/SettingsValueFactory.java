@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.core.helpers.store;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
@@ -25,7 +25,7 @@ public class SettingsValueFactory implements SettingsFactory {
 	 */
 	public SettingsValueFactory(final StoreEditorModel editorModel) {
 		this.editorModel = editorModel;
-		settingsService = ServiceLocator.getService(ContextIdNames.SETTINGS_SERVICE);
+		settingsService = BeanLocator.getSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class);
 	}
 
 	@Override

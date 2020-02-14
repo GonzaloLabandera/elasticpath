@@ -110,7 +110,7 @@ public class TaxJurisdictionServiceImpl extends AbstractEpPersistenceServiceImpl
 		sanityCheck();
 		TaxJurisdiction taxJurisdiction = null;
 		if (taxJurisdictionUid <= 0) {
-			taxJurisdiction = getBean(ContextIdNames.TAX_JURISDICTION);
+			taxJurisdiction = getPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class);
 		} else {
 			taxJurisdiction = getPersistentBeanFinder().load(ContextIdNames.TAX_JURISDICTION, taxJurisdictionUid);
 		}
@@ -122,7 +122,7 @@ public class TaxJurisdictionServiceImpl extends AbstractEpPersistenceServiceImpl
 		sanityCheck();
 		TaxJurisdiction taxJurisdiction = null;
 		if (taxJurisdictionUid <= 0) {
-			taxJurisdiction = getBean(ContextIdNames.TAX_JURISDICTION);
+			taxJurisdiction = getPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class);
 		} else {
 			taxJurisdiction = getPersistentBeanFinder().get(ContextIdNames.TAX_JURISDICTION, taxJurisdictionUid);
 		}
@@ -180,7 +180,7 @@ public class TaxJurisdictionServiceImpl extends AbstractEpPersistenceServiceImpl
 	 */
 	protected TaxJurisdiction filterTaxJurisdictonByRegion(final TaxAddress address, final TaxJurisdiction taxJurisdiction) {
 
-		final TaxJurisdiction foundTaxJurisdiction = getBean(ContextIdNames.TAX_JURISDICTION);
+		final TaxJurisdiction foundTaxJurisdiction = getPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class);
 		foundTaxJurisdiction.setUidPk(taxJurisdiction.getUidPk());
 		foundTaxJurisdiction.setRegionCode(taxJurisdiction.getRegionCode());
 		foundTaxJurisdiction.setPriceCalculationMethod(taxJurisdiction.getPriceCalculationMethod());
@@ -236,7 +236,7 @@ public class TaxJurisdictionServiceImpl extends AbstractEpPersistenceServiceImpl
 		for (TaxCategory taxCategory : categorySet) {
 			final TaxRegion foundTaxRegion = taxCategory.getTaxRegion(region);
 			if (taxCategory.getFieldMatchType() == categoryTypeEnum && foundTaxRegion != null) {
-				final TaxCategory foundTaxCategory = getBean(ContextIdNames.TAX_CATEGORY);
+				final TaxCategory foundTaxCategory = getPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class);
 
 				foundTaxCategory.setName(taxCategory.getName());
 				foundTaxCategory.setLocalizedProperties(taxCategory.getLocalizedProperties());

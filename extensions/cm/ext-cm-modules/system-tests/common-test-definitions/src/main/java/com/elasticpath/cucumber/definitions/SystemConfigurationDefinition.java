@@ -79,6 +79,7 @@ public class SystemConfigurationDefinition {
 	 */
 	@When("^I add new defined values record for system setting with following data$")
 	public void addNewDefinedValueForSetting(final Map<String, String> recordValues) {
+		ensureSystemSettingIsNotThere(recordValues.get("setting"));
 		systemConfigurationResultPane.selectSettingName(recordValues.get("setting"));
 		addEditConfigurationValueDialog = systemConfigurationResultPane.clickNewDefinedValueButton();
 		if (!"null".equalsIgnoreCase(recordValues.get("context"))) {
@@ -117,5 +118,17 @@ public class SystemConfigurationDefinition {
 	public void removeDefinedValueRecord(final Map<String, String> recordValues) {
 		systemConfigurationResultPane.selectSettingName(recordValues.get("setting"));
 		systemConfigurationResultPane.removeDefinedValueRecord(recordValues.get("context"), recordValues.get("value"));
+	}
+
+	/**
+	 * Deletes record specified by Context/Value pair.
+	 *
+	 * @param setting setting
+	 */
+	@When("^I ensure table values for the following system setting (.+) do not exist$")
+	public void ensureSystemSettingIsNotThere(final String setting) {
+		systemConfigurationResultPane.minimizeSystemConfigurationEditorPane();
+		systemConfigurationResultPane.selectSettingName(setting);
+		systemConfigurationResultPane.clearDefinedValueTable();
 	}
 }

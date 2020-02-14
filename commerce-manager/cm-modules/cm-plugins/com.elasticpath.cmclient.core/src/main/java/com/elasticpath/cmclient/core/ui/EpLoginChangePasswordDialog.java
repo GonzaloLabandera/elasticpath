@@ -20,11 +20,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -81,9 +81,9 @@ public class EpLoginChangePasswordDialog extends AbstractEpDialog implements Mod
 		super(parentShell, 1, false);
 		//This style removes dialog buttons: [O] [X]
 		setShellStyle(SWT.TITLE);
-		cmUserService = ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE);
-		passwordEncoder = ServiceLocator.getService(ContextIdNames.CM_PASSWORDENCODER);
-		cmPasswordPolicy = ServiceLocator.getService("cmPasswordPolicy"); //$NON-NLS-1$
+		cmUserService = BeanLocator.getSingletonBean(ContextIdNames.CMUSER_SERVICE, CmUserService.class);
+		passwordEncoder = BeanLocator.getSingletonBean(ContextIdNames.CM_PASSWORDENCODER, PasswordEncoder.class);
+		cmPasswordPolicy = BeanLocator.getSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class);
 
 		authenticationService = AuthenticationServiceImpl.getInstance();
 		setUserToChange(userToChange);

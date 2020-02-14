@@ -15,7 +15,7 @@ import org.eclipse.ui.PlatformUI;
 import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.wizards.category.CreateCategoryWizard;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.registry.ObjectRegistry;
@@ -115,10 +115,10 @@ public class CreateSubCategoryAction extends AbstractCatalogViewAction implement
 		final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 
 		LOG.debug("CreateCategoryAction called."); //$NON-NLS-1$
-		final Category subCategory = ServiceLocator.getService(ContextIdNames.CATEGORY);
+		final Category subCategory = BeanLocator.getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 		
 		// Set the sub-category's catalog object with the parent category's catalog (reloaded as we require all fields).
-		CatalogService catalogService = ServiceLocator.getService(ContextIdNames.CATALOG_SERVICE);
+		CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 		Catalog catalog = catalogService.getCatalog(category.getCatalog().getUidPk());		
 		subCategory.setCatalog(catalog);
 		

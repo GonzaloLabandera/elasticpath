@@ -7,6 +7,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 import com.elasticpath.domain.catalog.Product;
@@ -14,7 +15,6 @@ import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierFieldOption;
 import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.definition.carts.LineItemConfigurationEntity;
 
 /**
@@ -28,7 +28,7 @@ public interface ModifiersRepository {
 	 * @param code the code for the cart item modifier group to retrieve
 	 * @return the cart item modifier group identified by the code
 	 */
-	ExecutionResult<ModifierGroup> findModifierGroupByCode(String code);
+	Single<ModifierGroup> findModifierGroupByCode(String code);
 
 	/**
 	 * This method retrieves the cart item modifier field corresponding to the given group code and field code.
@@ -37,7 +37,7 @@ public interface ModifiersRepository {
 	 * @param modifierGroupCode the code for the cart item modifier Group  from which the field need to be retrieved
 	 * @return the cart item modifier field identified by the code
 	 */
-	ExecutionResult<ModifierField> findModifierFieldBy(String modifierFieldCode, String modifierGroupCode);
+	Single<ModifierField> findModifierFieldBy(String modifierFieldCode, String modifierGroupCode);
 
 	/**
 	 * This method retrieves the cart item modifier field Option corresponding to the group code, field code and option value.
@@ -47,7 +47,7 @@ public interface ModifiersRepository {
 	 * @param modifierGroupCode   the code for the cart item modifier Group  from which the field need to be retrieved
 	 * @return the cart item modifier field identified by the code
 	 */
-	ExecutionResult<ModifierFieldOption> findModifierFieldOptionBy(String modifierOptionValue,
+	Single<ModifierFieldOption> findModifierFieldOptionBy(String modifierOptionValue,
 		String modifierFieldCode, String modifierGroupCode);
 
 	/**
@@ -87,7 +87,7 @@ public interface ModifiersRepository {
 	 * @param product the product
 	 * @return the list of cart item modifier.
 	 */
-	List<ModifierField> findModifiersByProduct(Product product);
+	Single<List<ModifierField>> findModifiersByProduct(Product product);
 
 	/**
 	 * Find missing required fields in given shopping item.
@@ -95,6 +95,6 @@ public interface ModifiersRepository {
 	 * @param shoppingItem the shopping item.
 	 * @return the list of cart item modifier fields which are missing.
 	 */
-	List<String> findMissingRequiredFieldCodesByShoppingItem(ShoppingItem shoppingItem);
+	Observable<String> findMissingRequiredFieldCodesByShoppingItem(ShoppingItem shoppingItem);
 
 }

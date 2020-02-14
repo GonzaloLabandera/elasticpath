@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.store.targetedselling.delivery.actions;
 import org.apache.commons.collections.MapUtils;
 
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.AbstractSellingContextAdapter;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.service.sellingcontext.SellingContextService;
@@ -168,11 +168,11 @@ public final class SellingContextHelper {
 	}
 
 	private static SellingContextService getSellingContextService() {
-		return ServiceLocator.getService(ContextIdNames.SELLING_CONTEXT_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class);
 	}
 
 	private static TagConditionService getTagConditionService() {
-		return ServiceLocator.getService(ContextIdNames.TAG_CONDITION_SERVICE);
+		return BeanLocator.getSingletonBean(ContextIdNames.TAG_CONDITION_SERVICE, TagConditionService.class);
 	}
 
 }

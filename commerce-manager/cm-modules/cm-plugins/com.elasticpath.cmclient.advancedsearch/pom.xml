@@ -17,5 +17,9 @@
 			<groupId>com.elasticpath.cmclient</groupId>
 			<artifactId>com.elasticpath.cmclient.core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.cmclient</groupId>
+			<artifactId>com.elasticpath.cmclient.catalog</artifactId>
+		</dependency>
 	</dependencies>
 </project>

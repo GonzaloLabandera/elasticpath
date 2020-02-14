@@ -43,6 +43,7 @@ import com.elasticpath.domain.rules.impl.RuleSetImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
 
@@ -129,7 +130,7 @@ public class OrderAppliedRuleWithCouponPersistenceIntegrationTest extends BasicS
 	}
 
 	private PersistenceEngine getPersistenceEngine() {
-		return getBeanFactory().getBean(ContextIdNames.PERSISTENCE_ENGINE);
+		return getBeanFactory().getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, JpaPersistenceEngine.class);
 	}
 	
 	private TransactionTemplate getTxTemplate() {

@@ -3,7 +3,7 @@
 Feature: Default Address Selection
 
   Background:
-    Given a registered shopper has payment methods saved to his profile
+    Given a registered shopper has payment instruments saved to his profile
     And I add an address with country CA and region BC
     And I add an address with country CA and region QC
 

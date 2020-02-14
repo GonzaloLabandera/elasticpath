@@ -43,7 +43,7 @@ public class ShoppingItemFactoryImpl implements ShoppingItemFactory {
 	 * @return a shopping item form bean instance
 	 */
 	protected ShoppingItem createShoppingItemBean() {
-		return beanFactory.getBean(ContextIdNames.SHOPPING_ITEM);
+		return beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM, ShoppingItem.class);
 	}
 
 	/**

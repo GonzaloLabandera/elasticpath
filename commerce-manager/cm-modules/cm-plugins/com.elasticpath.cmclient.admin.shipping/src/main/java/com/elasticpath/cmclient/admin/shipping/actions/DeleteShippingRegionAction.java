@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.admin.shipping.AdminShippingMessages;
 import com.elasticpath.cmclient.admin.shipping.views.ShippingRegionListView;
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
 import com.elasticpath.service.shipping.ShippingRegionService;
@@ -39,10 +39,10 @@ public class DeleteShippingRegionAction extends Action {
 		super(text, image);
 		this.listView = listView;
 
-		serviceLevelService = ServiceLocator.getService(
-				EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
-		shippingRegionService = ServiceLocator.getService(
-				EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
+		serviceLevelService = BeanLocator.getSingletonBean(
+				EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE, ShippingServiceLevelService.class);
+		shippingRegionService = BeanLocator.getSingletonBean(
+				EpShippingContextIdNames.SHIPPING_REGION_SERVICE, ShippingRegionService.class);
 	}
 
 	@Override

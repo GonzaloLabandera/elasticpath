@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.catalog.editors.catalog;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.ui.framework.IEpTreeViewer;
@@ -23,7 +23,7 @@ public class ChangeSetColumnDecorator {
 
 	private int changeSetActionColumnWidth = CHANGE_SET_ACTION_COLUMN_WIDTH;
 
-	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
+	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	/**
 	 * The table section's availability for change set decoration.

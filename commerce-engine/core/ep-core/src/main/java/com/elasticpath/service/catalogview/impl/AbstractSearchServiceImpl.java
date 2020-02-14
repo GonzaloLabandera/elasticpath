@@ -52,7 +52,7 @@ public abstract class AbstractSearchServiceImpl extends AbstractCatalogViewServi
 	 */
 	@Override
 	protected CatalogViewResult createCatalogViewResult() {
-		return beanFactory.getBean(ContextIdNames.SEARCH_RESULT);
+		return beanFactory.getPrototypeBean(ContextIdNames.SEARCH_RESULT, CatalogViewResult.class);
 	}
 
 	/**
@@ -109,7 +109,7 @@ public abstract class AbstractSearchServiceImpl extends AbstractCatalogViewServi
 	 * @param result the search result
 	 */
 	protected void logSearch(final SearchRequest searchRequest, final SearchResult result) {
-		SfSearchLog log = beanFactory.getBean(ContextIdNames.SF_SEARCH_LOG);
+		SfSearchLog log = beanFactory.getPrototypeBean(ContextIdNames.SF_SEARCH_LOG, SfSearchLog.class);
 
 		log.setCategoryRestriction(searchRequest.getCategoryUid());
 		log.setKeywords(searchRequest.getKeyWords());

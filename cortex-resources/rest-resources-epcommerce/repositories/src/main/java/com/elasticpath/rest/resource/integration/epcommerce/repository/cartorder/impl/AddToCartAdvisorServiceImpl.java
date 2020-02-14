@@ -75,7 +75,7 @@ public class AddToCartAdvisorServiceImpl implements AddToCartAdvisorService {
 	@Override
 	public Observable<Message> validateItemPurchasable(final String scope, final ProductSku productSku,
 													   final ProductSku parentProductSku) {
-		return customerSessionRepository.findOrCreateCustomerSessionAsSingle()
+		return customerSessionRepository.findOrCreateCustomerSession()
 				.map(ShopperReference::getShopper)
 				.flatMapObservable(shopper -> storeRepository.findStoreAsSingle(scope)
 						.flatMapObservable(store -> {

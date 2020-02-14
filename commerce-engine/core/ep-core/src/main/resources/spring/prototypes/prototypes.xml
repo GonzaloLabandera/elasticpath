@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
@@ -68,7 +72,6 @@
 	<bean id="baseAmountFilter" scope="prototype" class="com.elasticpath.common.pricing.service.impl.BaseAmountFilterImpl"/>
 	<bean id="baseAmountFilterExt" scope="prototype" class="com.elasticpath.common.pricing.service.impl.BaseAmountFilterExtImpl"/>
 	<bean id="priceAdjustment" scope="prototype" class="com.elasticpath.domain.pricing.impl.PriceAdjustmentImpl"/>
-	<bean id="moneyFormatter" scope="prototype" class="com.elasticpath.money.StandardMoneyFormatter"/>
 	<bean id="taxCalculationResult" scope="prototype" class="com.elasticpath.service.tax.impl.TaxCalculationResultImpl"/>
 	<bean id="attributeValue" scope="prototype" class="com.elasticpath.domain.attribute.impl.TransientAttributeValueImpl"/>
 	<bean id="ruleSet" scope="prototype" class="com.elasticpath.domain.rules.impl.RuleSetImpl"/>
@@ -76,7 +79,6 @@
 	<bean id="shoppingCartMemento" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl"/>
 	<bean id="shoppingItem" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl"/>
 	<bean id="wishListMessage" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.WishListMessageImpl"/>
-	<bean id="orderPayment" scope="prototype" class="com.elasticpath.domain.order.impl.OrderPaymentImpl"/>
 	<bean id="abstractOrderShipment" scope="prototype" class="com.elasticpath.domain.order.impl.AbstractOrderShipmentImpl"/>
 	<bean id="physicalOrderShipment" scope="prototype" class="com.elasticpath.domain.order.impl.PhysicalOrderShipmentImpl"/>
 	<bean id="electronicOrderShipment" scope="prototype" class="com.elasticpath.domain.order.impl.ElectronicOrderShipmentImpl"/>
@@ -226,8 +228,6 @@
 	<bean id="warehouseAddress" scope="prototype" class="com.elasticpath.domain.store.impl.WarehouseAddressImpl"/>
 	<bean id="store" scope="prototype" class="com.elasticpath.domain.store.impl.StoreImpl"/>
 	<bean id="creditCardType" scope="prototype" class="com.elasticpath.domain.store.impl.CreditCardTypeImpl"/>
-	<bean id="paymentGateway" scope="prototype" class="com.elasticpath.domain.payment.impl.PaymentGatewayImpl"/>
-	<bean id="paymentGatewayProperty" scope="prototype" class="com.elasticpath.domain.payment.impl.PaymentGatewayPropertyImpl"/>
 
 	<bean id="catalog" scope="prototype" class="com.elasticpath.domain.catalog.impl.CatalogImpl"/>
 	<bean id="catalogLocale" scope="prototype" class="com.elasticpath.domain.catalog.impl.CatalogLocaleImpl"/>
@@ -239,22 +239,6 @@
 	<bean id="payerAuthValidationValue" scope="prototype" class="com.elasticpath.domain.misc.impl.PayerAuthValidationValueImpl"/>
 	<bean id="synonymGroup" scope="prototype" class="com.elasticpath.domain.search.impl.SynonymGroupImpl"/>
 	<bean id="synonym" scope="prototype" class="com.elasticpath.domain.search.impl.SynonymImpl"/>
-	<bean id="paymentResult" scope="prototype" class="com.elasticpath.service.payment.impl.PaymentResultImpl"/>
-	<bean id="paymentHandlerCreditCardDirectPost" scope="prototype" class="com.elasticpath.domain.payment.impl.CreditCardDirectPostPaymentHandler">
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-	</bean>
-	<bean id="paymentHandlerToken" scope="prototype" class="com.elasticpath.domain.payment.impl.TokenPaymentHandler">
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-	</bean>
-	<bean id="paymentHandlerPayPal" scope="prototype" class="com.elasticpath.domain.payment.impl.PayPalExpressPaymentHandler">
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-	</bean>
-	<bean id="paymentHandlerReturnAndExchange" scope="prototype" class="com.elasticpath.domain.payment.impl.ExchangePaymentHandler">
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-	</bean>
-	<bean id="paymentHandlerGiftCertificate" scope="prototype" class="com.elasticpath.domain.payment.impl.GiftCertificatePaymentHandler">
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-	</bean>
 	<bean id="orderingComparator" scope="prototype" class="com.elasticpath.domain.misc.impl.OrderingComparatorImpl"/>
 	<bean id="currencyCodeComparator" scope="prototype" class="com.elasticpath.domain.misc.impl.CurrencyCodeComparatorImpl"/>
 	<bean id="couponUsageByCouponCodeComparator"
@@ -342,25 +326,12 @@
 	<bean id="searchTermsActivity" scope="prototype" class="com.elasticpath.domain.search.query.impl.SearchTermsActivityImpl"/>
 	<bean id="imageMap" scope="prototype" class="com.elasticpath.domain.asset.impl.ImageMapImpl"/>
 	<bean id="imageMapWithAbsolutePath" scope="prototype" class="com.elasticpath.domain.asset.impl.ImageMapWithAbsolutePathImpl"/>
-	<bean id="templateOrderShipment" scope="prototype" class="com.elasticpath.domain.order.impl.TemplateOrderShipmentImpl"/>
 	<bean id="taxJournalRecord" scope="prototype" class="com.elasticpath.domain.order.impl.TaxJournalRecordImpl"/>
 	<bean id="taxDocumentModificationContext" scope="prototype" class="com.elasticpath.service.tax.TaxDocumentModificationContext"/>
 	<bean id="orderItemPresentationBean" class="com.elasticpath.sellingchannel.presentation.impl.OrderItemPresentationBeanImpl" scope="prototype"/>
 	<bean id="cartType" scope="prototype" class="com.elasticpath.domain.shoppingcart.CartType" />
 	<!-- Payment Gateway Connectivity API DTO classes -->
-	<bean id="addressDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.AddressDtoImpl"/>
-	<bean id="moneyDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.MoneyDtoImpl"/>
-	<bean id="orderPaymentDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.OrderPaymentDtoImpl"/>
-	<bean id="giftCertificateOrderPaymentDto" scope="prototype" class="com.elasticpath.service.payment.gateway.impl.GiftCertificateOrderPaymentDtoImpl"/>
-	<bean id="authorizationTransactionRequest" scope="prototype" class="com.elasticpath.plugin.payment.transaction.impl.AuthorizationTransactionRequestImpl"/>
-	<bean id="giftCertificateAuthorizationRequest" scope="prototype" class="com.elasticpath.service.payment.gateway.impl.GiftCertificateAuthorizationRequestImpl"/>
-	<bean id="captureTransactionRequest" scope="prototype" class="com.elasticpath.plugin.payment.transaction.impl.CaptureTransactionRequestImpl"/>
-	<bean id="giftCertificateCaptureRequest" scope="prototype" class="com.elasticpath.service.payment.gateway.impl.GiftCertificateCaptureRequestImpl"/>
-	<bean id="tokenPaymentMethod" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.TokenPaymentMethodImpl"/>
-	<bean id="orderSkuDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.OrderSkuDtoImpl"/>
-	<bean id="orderShipmentDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.OrderShipmentDtoImpl"/>
-	<bean id="payerAuthValidationValueDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.PayerAuthValidationValueDtoImpl"/>
-	<bean id="shoppingCartDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.ShoppingCartDtoImpl"/>
+	<bean id="baseAddressDto" scope="prototype" class="com.elasticpath.common.dto.AddressDTO"/>
 
 	<!-- Price-accessible facade of Shopping Item for Exchanges -->
 	<bean id="exchangeItem" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl"/>
@@ -394,8 +365,27 @@
 	<!-- Facets -->
 	<bean id="facet" scope="prototype" class="com.elasticpath.domain.search.impl.FacetImpl"/>
 
+	<!-- Search -->
 	<bean id="sortAttribute" scope="prototype" class="com.elasticpath.domain.search.impl.SortAttributeImpl"/>
 	<bean id="sortLocalizedName" scope="prototype" class="com.elasticpath.domain.search.impl.SortLocalizedNameImpl"/>
+
+	<!-- Order Payments -->
+	<bean id="orderPaymentInstrument" scope="prototype" class="com.elasticpath.domain.orderpaymentapi.impl.OrderPaymentInstrumentImpl"/>
+	<bean id="cartOrderPaymentInstrument" scope="prototype" class="com.elasticpath.domain.orderpaymentapi.impl.CartOrderPaymentInstrumentImpl"/>
+	<bean id="orderPayment" scope="prototype" class="com.elasticpath.domain.orderpaymentapi.impl.OrderPaymentImpl"/>
+	<bean id="orderPaymentData" scope="prototype" class="com.elasticpath.domain.orderpaymentapi.impl.OrderPaymentDataImpl"/>
+	<bean id="customerPaymentInstrument" scope="prototype" class="com.elasticpath.domain.orderpaymentapi.impl.CustomerPaymentInstrumentImpl"/>
+	<bean id="customerDefaultPaymentInstrument" scope="prototype" class="com.elasticpath.domain.orderpaymentapi.impl.CustomerDefaultPaymentInstrumentImpl"/>
+	<bean id="storePaymentProviderConfig" scope="prototype" class="com.elasticpath.domain.orderpaymentapi.impl.StorePaymentProviderConfigImpl"/>
+	<bean id="paymentAddressDTO" scope="prototype" class="com.elasticpath.plugin.payment.provider.dto.AddressDTO"/>
+	<bean id="paymentMoneyDTO" scope="prototype" class="com.elasticpath.plugin.payment.provider.dto.MoneyDTO"/>
+	<bean id="paymentOrderContextDTO" scope="prototype" class="com.elasticpath.plugin.payment.provider.dto.OrderContext"/>
+	<bean id="picFieldsRequestContextDTO" scope="prototype" class="com.elasticpath.plugin.payment.provider.dto.PICFieldsRequestContextDTO"/>
+	<bean id="picRequestContextDTO" scope="prototype" class="com.elasticpath.plugin.payment.provider.dto.PICRequestContextDTO"/>
+	<bean id="paymentCustomerContextDTO" scope="prototype" class="com.elasticpath.plugin.payment.provider.dto.CustomerContextDTO"/>
+	<bean id="paymentOrderSkuDTO" scope="prototype" class="com.elasticpath.plugin.payment.provider.dto.OrderSkuDTO"/>
+	<bean id="paymentStatistic" scope="prototype" class="com.elasticpath.service.orderpaymentapi.management.PaymentStatistic"/>
+	<bean id="orderPaymentAmounts" scope="prototype" class="com.elasticpath.domain.orderpaymentapi.OrderPaymentAmounts"/>
 
 	<!-- Tag Localization for Import/Export -->
 	<bean id="tagDefinitionLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.TagDefinitionLocalizedPropertyValueImpl"/>

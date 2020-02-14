@@ -182,7 +182,7 @@ public class PromotionRuleDelegateImplNewTest {
 	 * are returned.
 	 */
 	@Test
-	public void testCalculateAvailableDiscountQuantitySingleUsePerOrder() {
+	public void testCalculateAvailableDiscountQuantitySingleReservePerPIPerOrder() {
 
 		final CouponConfig couponConfig = new CouponConfigImpl();
 		couponConfig.setUsageType(CouponUsageType.LIMIT_PER_ANY_USER);

@@ -26,8 +26,8 @@ import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -78,7 +78,7 @@ public class ProductMerchandisingAssociationDialog extends AbstractEpDialog impl
 
 	private DataBindingContext bindingContext;
 
-	private final transient ProductLookup productLookup = (ProductLookup) ServiceLocator.getService(ContextIdNames.PRODUCT_LOOKUP);
+	private final transient ProductLookup productLookup = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_LOOKUP, ProductLookup.class);
 
 	private final int nextOrder;
 
@@ -208,7 +208,7 @@ public class ProductMerchandisingAssociationDialog extends AbstractEpDialog impl
 			productCodeText.setText(productAssociation.getTargetProduct().getCode());
 
 		} else {
-			this.productAssociation = ServiceLocator.getService(ContextIdNames.PRODUCT_ASSOCIATION);
+			this.productAssociation = BeanLocator.getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 			this.productAssociation.setCatalog(this.catalog);
 			this.productAssociation.setOrdering(this.nextOrder);
 			this.productAssociation.setAssociationType(associationType);

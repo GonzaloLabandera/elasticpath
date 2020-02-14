@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2014
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.cucumber.orderreturn;
 
@@ -23,7 +23,6 @@ import com.elasticpath.cucumber.shoppingcart.ShoppingCartStepDefinitionsHelper;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.misc.PropertyBased;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderReturnStatus;
@@ -35,7 +34,8 @@ import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.order.ReturnAndExchangeService;
-import com.elasticpath.service.order.ReturnExchangeType;
+import com.elasticpath.service.order.ReturnExchangeRefundTypeEnum;
+import com.elasticpath.service.orderpaymentapi.management.PaymentInstrumentManagementService;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
@@ -84,7 +84,7 @@ public class OrderReturnStepDefinitionsHelper {
 		orderReturn.getOrder().setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
 		
 		orderReturnHolder.set(returnAndExchangeService.createShipmentReturn(orderReturn, 
-																			ReturnExchangeType.PHYSICAL_RETURN_REQUIRED, 
+																			ReturnExchangeRefundTypeEnum.PHYSICAL_RETURN_REQUIRED,
 																			order.getPhysicalShipments().get(0), 
 																			orderReturn.getOrder().getModifiedBy()));		
 	}
@@ -167,16 +167,19 @@ public class OrderReturnStepDefinitionsHelper {
 		
 		OrderReturn exchangeReturn = returnAndExchangeService.createExchange(
 				orderReturn, 
-				ReturnExchangeType.ORIGINAL_PAYMENT, 
-				getPaymentByCardHolderName(orderReturn.getOrder(), OrderPayment.CAPTURE_TRANSACTION));
+				ReturnExchangeRefundTypeEnum.REFUND_TO_ORIGINAL,
+				getPaymentInstrumentManagementService().findOrderInstruments(orderReturn.getOrder()));
 		exchangeReturn.recalculateOrderReturn();
 		
 		orderReturnHolder.set(exchangeReturn);
 	}
-	
+
+	private PaymentInstrumentManagementService getPaymentInstrumentManagementService() {
+		return coreBeanFactory.getSingletonBean(ContextIdNames.PAYMENT_INSTRUMENT_MANAGEMENT_SERVICE, PaymentInstrumentManagementService.class);
+	}
+
 	private FetchGroupLoadTuner getTuner() {
-		
-		FetchGroupLoadTuner tuner = (FetchGroupLoadTuner) coreBeanFactory.getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		FetchGroupLoadTuner tuner = coreBeanFactory.getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		tuner.addFetchGroup(FetchGroupConstants.ORDER_INDEX, 
 			FetchGroupConstants.ORDER_NOTES, 
 			FetchGroupConstants.ALL);
@@ -189,11 +192,11 @@ public class OrderReturnStepDefinitionsHelper {
 	 * @return EventOriginatorHelper
 	 */
 	private EventOriginatorHelper getEventOriginatorHelper() {
-		return coreBeanFactory.getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER);
+		return coreBeanFactory.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 	}
 	
 	private void setUpProperties() {
-		final PropertyBased propertyBased = (PropertyBased) coreBeanFactory.getBean(ContextIdNames.ORDER_RETURN_SKU_REASON);
+		final PropertyBased propertyBased = coreBeanFactory.getSingletonBean(ContextIdNames.ORDER_RETURN_SKU_REASON, PropertyBased.class);
 
 		Map<String, Properties> propertiesMap = new HashMap<>();
 
@@ -242,14 +245,5 @@ public class OrderReturnStepDefinitionsHelper {
 		
 		return 0;
 	}
-	
-	private OrderPayment getPaymentByCardHolderName(final Order order, final String transactionType) {
-		for (OrderPayment orderPayment : order.getOrderPayments()) {
-			if (StringUtils.equals(orderPayment.getTransactionType(), transactionType)) {
-				return orderPayment;
-			}
-		}
-		
-		return null;
-	}
+
 }

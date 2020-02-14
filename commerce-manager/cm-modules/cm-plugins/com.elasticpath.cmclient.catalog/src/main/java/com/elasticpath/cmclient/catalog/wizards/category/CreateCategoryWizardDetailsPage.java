@@ -21,8 +21,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -117,8 +117,7 @@ public class CreateCategoryWizardDetailsPage extends AbstractEPWizardPage<Catego
 
 	@Override
 	public void populateControls() {
-		final CategoryTypeService categoryTypeService = ServiceLocator.getService(
-				ContextIdNames.CATEGORY_TYPE_SERVICE);
+		final CategoryTypeService categoryTypeService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_TYPE_SERVICE, CategoryTypeService.class);
 
 		final List<CategoryType> catTypesInCatalog;
 		if (getModel().isVirtual()) {
@@ -184,8 +183,7 @@ public class CreateCategoryWizardDetailsPage extends AbstractEPWizardPage<Catego
 			return false;
 		}
 
-		final CategoryService categoryService = ServiceLocator.getService(
-				ContextIdNames.CATEGORY_SERVICE);
+		final CategoryService categoryService = BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_SERVICE, CategoryService.class);
 
 		if (categoryService.isCodeInUse(this.getModel().getCode())) {
 			setErrorMessage(
@@ -260,6 +258,6 @@ public class CreateCategoryWizardDetailsPage extends AbstractEPWizardPage<Catego
 	}
 
 	protected CategoryLookup getCategoryLookup() {
-		return ServiceLocator.getService(ContextIdNames.CATEGORY_LOOKUP);
+		return BeanLocator.getSingletonBean(ContextIdNames.CATEGORY_LOOKUP, CategoryLookup.class);
 	}
 }

@@ -63,6 +63,7 @@ public class ProductEditor extends AbstractPageObject {
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorSingleSkuOverview_DigitalAsset'][seeable='true']";
 	private static final String PRIMARY_CATEGORY_TAX_CODE = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='Primary Category'][widget-type='CCombo']";
 	private static final String VALUE = "value";
+	private static final String AVAILABILITY_RULE_CSS = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='Availability Rule'][widget-type='CCombo']";
 
 	/**
 	 * Constructor.
@@ -89,6 +90,7 @@ public class ProductEditor extends AbstractPageObject {
 	 *
 	 * @param tabName the tab name.
 	 */
+	@Override
 	public void selectTab(final String tabName) {
 		String cssSelector = String.format(TAB_CSS, tabName);
 		resizeWindow(cssSelector);
@@ -479,5 +481,27 @@ public class ProductEditor extends AbstractPageObject {
 					.as("Invalid shippable type entered - " + shippableType)
 					.isTrue();
 		}
+	}
+
+	/**
+	 * Selects an availability rule.
+	 *
+	 * @param availabilityRule Availability Rule name.
+	 */
+	public void selectAvailabilityRule(final String availabilityRule) {
+		assertThat(selectComboBoxItem(AVAILABILITY_RULE_CSS, availabilityRule))
+				.as("Unable to find availability rule - " + availabilityRule)
+				.isTrue();
+	}
+
+	/**
+	 * Verifies the product's availability rule.
+	 *
+	 * @param availabilityRule Availability Rule name.
+	 */
+	public void verifyAvailabilityRule(final String availabilityRule) {
+		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(AVAILABILITY_RULE_CSS + " input")).getAttribute(VALUE))
+				.as("Availability rule validation failed")
+				.isEqualTo(availabilityRule);
 	}
 }

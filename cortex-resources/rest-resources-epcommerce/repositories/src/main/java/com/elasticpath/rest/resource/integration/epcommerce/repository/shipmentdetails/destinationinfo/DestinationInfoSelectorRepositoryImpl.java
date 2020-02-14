@@ -130,7 +130,7 @@ public class DestinationInfoSelectorRepositoryImpl<SI extends DestinationInfoSel
 		String orderId = destinationInfoIdentifier.getShipmentDetailsId().getValue().get(ShipmentDetailsConstants.ORDER_ID);
 		String addressId = destinationInfoSelectorChoiceIdentifier.getAddress().getAddressId().getValue();
 		return destinationInfoService.validateOrderIsShippable(scope, orderId)
-				.flatMap(validatedId -> cartOrderRepository.updateShippingAddressOnCartOrderAsSingle(addressId, orderId, scope))
+				.flatMap(validatedId -> cartOrderRepository.updateShippingAddressOnCartOrder(addressId, orderId, scope))
 				.map(isAddressUpdated -> {
 					SelectStatus status = isAddressUpdated ? SelectStatus.SELECTED : SelectStatus.EXISTING;
 					return SelectResult.<DestinationInfoSelectorIdentifier>builder()

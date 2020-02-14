@@ -9,12 +9,13 @@ Feature: purchase resource advisor tests
       | messageType | messageId             | debugMessage                              | linkedTo                             | blocks            |
       | needinfo    | need.billing.address  | Billing address must be specified.        | orders.billingaddress-info           | submitorderaction |
       | needinfo    | need.email            | Customer email address must be specified. | orders.email-info                    | submitorderaction |
-      | needinfo    | need.payment.method   | Payment method must be specified.         | paymentmethods.paymentmethod-info    | submitorderaction |
+      | needinfo    | need.payment.method   | Payment method must be specified.         | paymentmethods.order-payment-methods | submitorderaction |
       | needinfo    | need.shipping.address | Shipping address must be specified.       | shipmentdetails.destination-info     | submitorderaction |
-      | needinfo    | need.shipping.option  | Shipping option must be specified.           | shipmentdetails.shipping-option-info | submitorderaction |
+      | needinfo    | need.shipping.option  | Shipping option must be specified.        | shipmentdetails.shipping-option-info | submitorderaction |
     When I create an email for my order
     And I fill in billing address needinfo
     And I fill in payment methods needinfo
+    And I retrieve the purchase form
     Then there is no advisor linked to billingaddress-info
     And there is no advisor linked to email-info
     And there is no advisor linked to paymentmethod-info
@@ -25,12 +26,12 @@ Feature: purchase resource advisor tests
   Scenario: Cannot submit order when needinfo link exists
     Given I login as a public shopper
     And I add item with code FocUSsku to my cart
-    And I create address with Country GB, Extended-Address County with no shipping options, Locality London, Organization Company Inc, Phone-Number 555-555-5555, Postal-Code N0N 0N0, Region , Street-Address fake street, Family-Name Test and Given-Name Test
+    And I create address with Country CN, Extended-Address County with no shipping options, Locality Beijing, Organization Company Inc, Phone-Number 555-555-5555, Postal-Code N0N 0N0, Region , Street-Address fake street, Family-Name Test and Given-Name Test
     And I create an email for my order
     And I fill in payment methods needinfo
     And I retrieve the purchase form
     And there is an advisor message with the following fields:
-      | messageType | messageId            | debugMessage                    | linkedTo                             | blocks            |
+      | messageType | messageId            | debugMessage                       | linkedTo                             | blocks            |
       | needinfo    | need.shipping.option | Shipping option must be specified. | shipmentdetails.shipping-option-info | submitorderaction |
     When post to a created submitorderaction uri
     Then the HTTP status is conflict

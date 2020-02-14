@@ -4,10 +4,11 @@
 
 package com.elasticpath.cmclient.store.targetedselling.delivery.views;
 
+import com.elasticpath.commons.util.Utility;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
@@ -57,8 +58,8 @@ public class DynamicContentDeliverySearchResultsView extends
 	 */
 	public DynamicContentDeliverySearchResultsView() {
 		super(false, CONTENT_DELIVERY_TABLE);
-		labelProvider = new DynamicContentDeliverySearchResultsViewLabelProvider(ServiceLocator.getService(ContextIdNames.UTILITY));
-		storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		labelProvider = new DynamicContentDeliverySearchResultsViewLabelProvider(BeanLocator.getSingletonBean(ContextIdNames.UTILITY, Utility.class));
+		storeService = BeanLocator.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
 		labelProvider.setAllStores(storeService.findAllStores());
 	}
 
@@ -149,7 +150,8 @@ public class DynamicContentDeliverySearchResultsView extends
 	@Override
 	public Object resolveObjectMember(final Object changeSetObjectSelection) {
 		DynamicContentDeliveryModelAdapter adapter = (DynamicContentDeliveryModelAdapter) changeSetObjectSelection;
-		DynamicContentDeliveryService dcdService = ServiceLocator.getService(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE);
+		DynamicContentDeliveryService dcdService = BeanLocator
+				.getSingletonBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY_SERVICE, DynamicContentDeliveryService.class);
 		return dcdService.findByGuid(adapter.getGuid());
 	}
 

@@ -47,7 +47,7 @@ public class ShopperServiceImplIntegrationTest extends AbstractCartIntegrationTe
 		SimpleStoreScenario scenario = (SimpleStoreScenario) getTac().getScenario(SimpleStoreScenario.class);
 		final String storeCode = scenario.getStore().getCode();
 
-		Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setAnonymous(true);
 		customer.setStoreCode(storeCode);
 		customer = customerService.add(customer);
@@ -68,13 +68,13 @@ public class ShopperServiceImplIntegrationTest extends AbstractCartIntegrationTe
 		SimpleStoreScenario scenario = (SimpleStoreScenario) getTac().getScenario(SimpleStoreScenario.class);
 		final String storeCode = scenario.getStore().getCode();
 
-		Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setAnonymous(true);
 		customer.setStoreCode(storeCode);
 		customer.setGuid(GUID);
 		customer = customerService.add(customer);
 
-		Shopper expectedShopper = getBeanFactory().getBean(ContextIdNames.SHOPPER);
+		Shopper expectedShopper = getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPER, Shopper.class);
 		expectedShopper.setCustomer(customer);
 		shopperService.save(expectedShopper);
 
@@ -92,12 +92,12 @@ public class ShopperServiceImplIntegrationTest extends AbstractCartIntegrationTe
 		SimpleStoreScenario scenario = (SimpleStoreScenario) getTac().getScenario(SimpleStoreScenario.class);
 		final String storeCode = scenario.getStore().getCode();
 
-		Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		customer.setUserId("testFindByCustomerAndStore@ShopperServiceImplIntegrationTest.com");
 		customer.setStoreCode(storeCode);
 		customer = customerService.add(customer);
 
-		Shopper expectedShopper = getBeanFactory().getBean(ContextIdNames.SHOPPER);
+		Shopper expectedShopper = getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPER, Shopper.class);
 		expectedShopper.setCustomer(customer);
 		expectedShopper.setStoreCode(storeCode);
 		shopperService.save(expectedShopper);

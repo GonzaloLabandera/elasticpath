@@ -15,6 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalogview.SeoUrlBuilder;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.store.Store;
@@ -61,7 +62,7 @@ public class StoreSeoUrlBuilderFactoryTest {
 		// expectations
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean("coreSeoUrlBuilder");
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SEO_URL_BUILDER, SeoUrlBuilder.class);
 				will(onConsecutiveCalls(returnValue(new SeoUrlBuilderImpl()), returnValue(new SeoUrlBuilderImpl())));
 			}
 		});
@@ -193,7 +194,7 @@ public class StoreSeoUrlBuilderFactoryTest {
 
 				// Allow any number of seoUrlBuilders to be created
 				final Sequence builderSequence = context.sequence("builderSequence");
-				allowing(beanFactory).getBean("coreSeoUrlBuilder");
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.SEO_URL_BUILDER, SeoUrlBuilder.class);
 				inSequence(builderSequence);
 				will(returnValue(new SeoUrlBuilderImpl()));
 
