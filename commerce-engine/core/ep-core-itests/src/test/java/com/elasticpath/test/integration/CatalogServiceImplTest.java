@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
@@ -34,6 +35,7 @@ public class CatalogServiceImplTest extends BasicSpringContextTest {
 	private static final String VIRTUAL = "VIRTUAL";
 
 	@Autowired
+	@Qualifier("catalogService")
 	private CatalogService service;
 
 	private CatalogTestPersister catalogTestPersister;

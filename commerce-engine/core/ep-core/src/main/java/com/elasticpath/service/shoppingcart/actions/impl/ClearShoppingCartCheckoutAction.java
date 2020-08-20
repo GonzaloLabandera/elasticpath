@@ -5,7 +5,6 @@ package com.elasticpath.service.shoppingcart.actions.impl;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.orderpaymentapi.CartOrderPaymentInstrumentService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutAction;
@@ -17,7 +16,6 @@ import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContex
 public class ClearShoppingCartCheckoutAction implements FinalizeCheckoutAction {
 
 	private ShoppingCartService shoppingCartService;
-	private CartOrderService cartOrderService;
 	private CartOrderPaymentInstrumentService cartOrderPaymentInstrumentService;
 
 	@Override
@@ -31,9 +29,10 @@ public class ClearShoppingCartCheckoutAction implements FinalizeCheckoutAction {
 		}
 		//free some memory - doesn't incur new db calls because the cart is not saved nor referenced anywhere else
 		oldShoppingCart.clearItems();
-
-		//physical deletion of CartOrder instance associated with the old cart
-		cartOrderService.removeIfExistsByShoppingCart(oldShoppingCart);
+		/*
+			all cart-related data (cart orders, CO payment instruments, CO coupons) etc will be completely removed by the
+			InactiveCartsCleanupJob
+		 */
 	}
 
 	protected ShoppingCartService getShoppingCartService() {
@@ -42,14 +41,6 @@ public class ClearShoppingCartCheckoutAction implements FinalizeCheckoutAction {
 
 	public void setShoppingCartService(final ShoppingCartService shoppingCartService) {
 		this.shoppingCartService = shoppingCartService;
-	}
-
-	public void setCartOrderService(final CartOrderService cartOrderService) {
-		this.cartOrderService = cartOrderService;
-	}
-
-	protected CartOrderService getCartOrderService() {
-		return cartOrderService;
 	}
 
 	public void setCartOrderPaymentInstrumentService(final CartOrderPaymentInstrumentService cartOrderPaymentInstrumentService) {

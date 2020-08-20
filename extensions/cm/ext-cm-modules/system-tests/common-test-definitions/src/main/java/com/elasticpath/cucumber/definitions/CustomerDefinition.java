@@ -1,17 +1,25 @@
 package com.elasticpath.cucumber.definitions;
 
+import static com.elasticpath.selenium.framework.util.SeleniumDriverSetup.getDriver;
+import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
+import com.elasticpath.selenium.dialogs.AddAccountAssociateDialog;
+import com.elasticpath.selenium.dialogs.DeleteAccountAssociateDialog;
 import com.elasticpath.selenium.editor.CustomerEditor;
-import com.elasticpath.selenium.navigations.CustomerService;
+import com.elasticpath.selenium.navigations.CustomerServiceNavigation;
+import com.elasticpath.selenium.resultspane.AccountSearchResultPane;
 import com.elasticpath.selenium.resultspane.CustomerSearchResultsPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.DBConnector;
@@ -19,19 +27,31 @@ import com.elasticpath.selenium.util.DBConnector;
 /**
  * Customer step definition.
  */
-@SuppressWarnings({"PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class CustomerDefinition {
-	private final CustomerService customerService;
+	private final CustomerServiceNavigation customerServiceNavigation;
 	private CustomerSearchResultsPane customerSearchResultsPane;
 	private CustomerEditor customerEditor;
+	private AddAccountAssociateDialog addAccountAssociateDialog;
 	private final ActivityToolbar activityToolbar;
+	private final WebDriver driver;
+
+	private static final String CUSTOMER_EDITOR_FIELDS_CSS = "div[appearance-id='label-wrapper'][automation-id*='com"
+			+ ".elasticpath.cmclient.fulfillment.FulfillmentMessages.Profile%sSection']";
+
+	private static final String CHILD_IN_TABLE_CSS = "div[parent-widget-id='Child Accounts'] div[column-id='%s']";
+	private static final String OPEN_ACCOUNT_BUTTON_CSS = "div[widget-id='Open Account Profile...']";
+	private static final String CHILD_ACCOUNT_BTN_CSS = "div[widget-id='Add Child Account...']";
+	private static final String CHILD_ACCOUNT_HYPERLINK_CSS = "div[appearance-id='hyperlink'][widget-type=Hyperlink]";
+	private static final String CUSTOMER_EDITOR_TABS_CSS = "div[appearance-id='ctab-item'][automation-id*='_Title']";
 
 	/**
 	 * Constructor.
 	 */
 	public CustomerDefinition() {
-		customerService = new CustomerService(SetUp.getDriver());
-		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		driver = getDriver();
+		customerServiceNavigation = new CustomerServiceNavigation(driver);
+		activityToolbar = new ActivityToolbar(driver);
 	}
 
 	/**
@@ -39,29 +59,49 @@ public class CustomerDefinition {
 	 */
 	@When("^I select Customers tab")
 	public void clicksCustomersTab() {
-		customerService.clickCustomersTab();
+		customerServiceNavigation.clickCustomersTab();
 	}
 
 	/**
-	 * Search for customer by email or user id.
+	 * Search for customer by shared id.
 	 *
-	 * @param customerEmailID the customer email id.
+	 * @param customerSharedID the customer shared id.
 	 */
-	@When("^I search for customer by email ID (.+)$")
-	public void searchCustomerIdEmail(final String customerEmailID) {
-		searchCustomer(() -> enterCustomerEmailID(customerEmailID));
+	@When("^I search for customer by shared ID (.+)$")
+	public void searchCustomerSharedId(final String customerSharedID) {
+		searchCustomer(() -> enterCustomerSharedID(customerSharedID));
 	}
 
 	/**
-	 * Search for customer by email or user id with Store filter.
+	 * Search for customer by email.
 	 *
-	 * @param customerEmailID the customer email id.
+	 * @param customerEmail the customer email.
+	 */
+	@When("^I search for customer by email (.+)$")
+	public void searchCustomerEmail(final String customerEmail) {
+		searchCustomer(() -> enterCustomerEmail(customerEmail));
+	}
+
+	/**
+	 * Search for customer by username.
+	 *
+	 * @param customerUsername the customer username.
+	 */
+	@When("^I search for customer by username (.+)$")
+	public void searchCustomerUsername(final String customerUsername) {
+		searchCustomer(() -> enterCustomerUsername(customerUsername));
+	}
+
+	/**
+	 * Search for customer by email with Store filter.
+	 *
+	 * @param customerEmail   the customer email.
 	 * @param store           Store associated with the customer
 	 */
-	@When("^I search for customer by email (.+) with store filter (.+)$")
-	public void searchCustomerEmailAndStore(final String customerEmailID, final String store) {
-		fillSearchForm(() -> customerService.enterEmailUserID(customerEmailID));
-		customerService.selectStore(store);
+	@When("^I search for customer by store filter (.+) and email (.+)$")
+	public void searchCustomerEmailAndStore(final String store, final String customerEmail) {
+		fillSearchForm(() -> customerServiceNavigation.enterEmail(customerEmail));
+		customerServiceNavigation.selectStore(store);
 		clickCustomerSearch();
 	}
 
@@ -72,7 +112,7 @@ public class CustomerDefinition {
 	 */
 	@When("^I search for customer by first name (.+)$")
 	public void searchCustomerFirstName(final String firstName) {
-		searchCustomer(() -> customerService.enterFirstName(firstName));
+		searchCustomer(() -> customerServiceNavigation.enterFirstName(firstName));
 	}
 
 	/**
@@ -82,7 +122,7 @@ public class CustomerDefinition {
 	 */
 	@When("^I search for customer by last name (.+)$")
 	public void searchCustomerLastName(final String lastName) {
-		searchCustomer(() -> customerService.enterLastName(lastName));
+		searchCustomer(() -> customerServiceNavigation.enterLastName(lastName));
 	}
 
 	/**
@@ -92,17 +132,37 @@ public class CustomerDefinition {
 	 */
 	@When("^I search for customer by zip code (.+)$")
 	public void searchCustomerZipCode(final String zipCode) {
-		searchCustomer(() -> customerService.enterPostalCode(zipCode));
+		searchCustomer(() -> customerServiceNavigation.enterPostalCode(zipCode));
 	}
 
 	/**
 	 * Verify Customer exists.
 	 *
-	 * @param expectedCustomerID the expected customer Id.
+	 * @param expectedCustomerSharedId the expected customer sharedId.
 	 */
-	@Then("^I should see customer with email ID (.+) in result list$")
-	public void verifyCustomerExists(final String expectedCustomerID) {
-		verifyCustomerSearchResult(expectedCustomerID, CustomerSearchResultsPane.EMAIL_ADDRESS_COLUMN);
+	@Then("^I should see customer with shared ID (.+) in result list$")
+	public void verifyCustomerExists(final String expectedCustomerSharedId) {
+		verifyCustomerSearchResult(expectedCustomerSharedId, CustomerSearchResultsPane.SHARED_ID_COLUMN);
+	}
+
+	/**
+	 * Checks if there is entry with provided email in a search result table.
+	 *
+	 * @param expectedCustomerEmail the expected customer email.
+	 */
+	@Then("^I should see customer with email (.+) in result list$")
+	public void verifyCustomerEmailInList(final String expectedCustomerEmail) {
+		verifyCustomerSearchResult(expectedCustomerEmail, CustomerSearchResultsPane.EMAIL_ADDRESS_COLUMN);
+	}
+
+	/**
+	 * Checks if there is entry with provided username in a search result table.
+	 *
+	 * @param expectedCustomerUsername the expected customer email.
+	 */
+	@Then("^I should see customer with username (.+) in result list$")
+	public void verifyCustomerUsernameInList(final String expectedCustomerUsername) {
+		verifyCustomerSearchResult(expectedCustomerUsername, CustomerSearchResultsPane.USERNAME_COLUMN);
 	}
 
 	/**
@@ -168,7 +228,7 @@ public class CustomerDefinition {
 	/**
 	 * Checks if all entries of search results table contain provided email address (partial match).
 	 *
-	 * @param expectedEmailAddress  expected email address for verification
+	 * @param expectedEmailAddress expected email address for verification
 	 */
 	@Then("^All entries in result list have (.+) as a part of Email Address$")
 	public void verifyUserIdEntriesInList(final String expectedEmailAddress) {
@@ -186,15 +246,57 @@ public class CustomerDefinition {
 	/**
 	 * Search and open Customer editor.
 	 *
-	 * @param customerEmailID the customer email id.
+	 * @param customerSharedID the customer shared id.
 	 */
-	@When("^I search and open customer editor for email ID (.+)$")
-	public void openCustomerEditor(final String customerEmailID) {
+	@When("^I search and open customer editor for shared ID (.+)$")
+	public void openCustomerEditor(final String customerSharedID) {
 		activityToolbar.clickCustomerServiceButton();
-		customerService.clickCustomersTab();
-		enterCustomerEmailID(customerEmailID);
+		customerServiceNavigation.clickCustomersTab();
+		enterCustomerSharedID(customerSharedID);
 		clickCustomerSearch();
-		customerEditor = customerSearchResultsPane.selectAndOpenCustomerEditor(customerEmailID);
+		customerEditor = customerSearchResultsPane.selectAndOpenCustomerEditor(customerSharedID);
+	}
+
+	/**
+	 * Search and open Customer editor.
+	 *
+	 * @param customerEmail the customer email.
+	 */
+	@When("^I search and open customer editor for customer by email (.+)$")
+	public void searchCustomerByEmail(final String customerEmail) {
+		activityToolbar.clickCustomerServiceButton();
+		customerServiceNavigation.clickCustomersTab();
+		enterCustomerEmail(customerEmail);
+		clickCustomerSearch();
+		customerEditor = customerSearchResultsPane.selectAndOpenCustomerEditor(customerEmail);
+	}
+
+	/**
+	 * Search and open Customer editor.
+	 *
+	 * @param customerUsername the customer username.
+	 */
+	@When("^I search and open customer editor for username (.+)$")
+	public void searchCustomerByUsername(final String customerUsername) {
+		activityToolbar.clickCustomerServiceButton();
+		customerServiceNavigation.clickCustomersTab();
+		enterCustomerUsername(customerUsername);
+		clickCustomerSearch();
+		customerEditor = customerSearchResultsPane.selectAndOpenCustomerEditor(customerUsername);
+	}
+
+	/**
+	 * Search and open Account editor.
+	 *
+	 * @param accountSharedID account shared id.
+	 */
+	@When("^I search and open account editor for shared ID (.+)$")
+	public void openAccountEditor(final String accountSharedID) {
+		activityToolbar.clickCustomerServiceButton();
+		customerServiceNavigation.clickAccountsTab();
+		customerServiceNavigation.enterAccountSharedID(accountSharedID);
+		AccountSearchResultPane accountSearchResultPane = customerServiceNavigation.clickAccountSearch();
+		customerEditor = accountSearchResultPane.selectAndOpenAccountEditor(accountSharedID);
 	}
 
 	/**
@@ -204,7 +306,7 @@ public class CustomerDefinition {
 	 */
 	@When("^I search for customer by phone number (.+)$")
 	public void searchCustomerByPhone(final String phoneNumber) {
-		searchCustomer(() -> customerService.enterPhoneNumber(phoneNumber));
+		searchCustomer(() -> customerServiceNavigation.enterPhoneNumber(phoneNumber));
 	}
 
 	/**
@@ -215,6 +317,15 @@ public class CustomerDefinition {
 	@When("^I select (.+) tab in the Customer Editor$")
 	public void selectCustomerEditorTab(final String tabName) {
 		customerEditor.clickTab(tabName);
+	}
+
+	/**
+	 * Add new child account.
+	 */
+	@When("^I add new child$")
+	public void selectCustomerEditorTab() throws InterruptedException {
+		customerEditor.clickButton(CHILD_ACCOUNT_BTN_CSS, "Open Account Profile...");
+		sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
 	}
 
 	/**
@@ -231,17 +342,24 @@ public class CustomerDefinition {
 		customerSearchResultsPane.closePane("Customer Search Results");
 	}
 
+	private void enterCustomerSharedID(final String customerSharedID) {
+		customerServiceNavigation.enterSharedID(customerSharedID);
+	}
 
-	private void enterCustomerEmailID(final String customerEmailID) {
-		customerService.enterEmailUserID(customerEmailID);
+	private void enterCustomerEmail(final String customerEmail) {
+		customerServiceNavigation.enterEmail(customerEmail);
+	}
+
+	private void enterCustomerUsername(final String customerUsername) {
+		customerServiceNavigation.enterUsername(customerUsername);
 	}
 
 	private void enterPhoneNumber(final String phoneNumber) {
-		customerService.enterPhoneNumber(phoneNumber);
+		customerServiceNavigation.enterPhoneNumber(phoneNumber);
 	}
 
 	private void clickCustomerSearch() {
-		customerSearchResultsPane = customerService.clickCustomerSearch();
+		customerSearchResultsPane = customerServiceNavigation.clickCustomerSearch();
 		//this call ensures that the search results table appears on the page
 		customerSearchResultsPane.isSearchResultTableEmpty();
 	}
@@ -353,6 +471,124 @@ public class CustomerDefinition {
 	}
 
 	/**
+	 * Verify that the correct set of fields are displayed.
+	 *
+	 * @param sectionTitle   customer editor section title.
+	 * @param expectedFields expected set of fields.
+	 */
+	@Then("^I should see following fields in the (.+) section:$")
+	public void verifyFieldsInGivenSection(final String sectionTitle, final List<String> expectedFields) {
+		final List<String> fieldLabels = driver.findElements(By.cssSelector(String.format(CUSTOMER_EDITOR_FIELDS_CSS, sectionTitle.split(" ")[0])))
+				.stream().map(WebElement::getText).collect(Collectors.toList());
+		fieldLabels.remove(sectionTitle);
+
+		verifyFieldsMatching(fieldLabels, expectedFields, sectionTitle);
+	}
+
+	/**
+	 * Verify ordered parents of account.
+	 *
+	 * @param expectedParents expected set of parents.
+	 */
+	@Then("^I should see account with ordered parents:$")
+	public void verifyParentsChain(final List<String> expectedParents) {
+		final List<String> fieldLabels = driver.findElements(By.cssSelector(CHILD_ACCOUNT_HYPERLINK_CSS))
+				.stream().map(WebElement::getText).collect(Collectors.toList());
+
+		assertThat(fieldLabels.equals(expectedParents)).isTrue();
+	}
+
+	/**
+	 * Verify account children.
+	 */
+	@Then("^Child Accounts table contains first level (.+) child")
+	public void verifyFirstLevelAccountChild(final String expectedChild) {
+		final List<String> children =
+				driver.findElements(By.cssSelector("div[parent-widget-id='Child Accounts'] div[column-num='0']"))
+						.stream()
+						.map(WebElement::getText)
+						.collect(Collectors.toList());
+
+		assertThat(children.get(0))
+				.as("Account shows not expected child.")
+				.isEqualTo(expectedChild);
+	}
+
+	/**
+	 * Open child.
+	 */
+	@Then("^I open (.+) child")
+	public void openChild(final String expectedChild) {
+		customerEditor.click(By.cssSelector(String.format(CHILD_IN_TABLE_CSS, expectedChild)));
+		customerEditor.clickButton(OPEN_ACCOUNT_BUTTON_CSS, "Open Account Profile...");
+	}
+
+	/**
+	 * Check direct parent.
+	 */
+	@Then("^I should see opened account with direct parent (.+) name")
+	public void checkAccountDirectParentBusinessName(final String expectedParent) {
+		final String parent = driver.findElements(By.cssSelector(CHILD_ACCOUNT_HYPERLINK_CSS))
+				.stream()
+				.map(WebElement::getText)
+				.reduce((first, second) -> second)
+				.orElse(null);
+
+		assertThat(parent)
+				.as("Direct parent is not matched.")
+				.isEqualTo(expectedParent);
+	}
+
+	/**
+	 * Verify that the correct set of tabs are displayed.
+	 *
+	 * @param expectedTabs expected set of tabs.
+	 */
+	@Then("^I should see following tabs:$")
+	public void verifyTabs(final List<String> expectedTabs) {
+		final List<String> tabLabels = driver.findElements(By.cssSelector(CUSTOMER_EDITOR_TABS_CSS))
+				.stream().map(WebElement::getText).collect(Collectors.toList());
+		verifyTabsMatching(tabLabels, expectedTabs);
+	}
+
+	/**
+	 * Checks the number and composition of tabs.
+	 *
+	 * @param tabLabels    actual set of tabs.
+	 * @param expectedTabs expected set of tabs.
+	 */
+	private void verifyTabsMatching(final List<String> tabLabels, final List<String> expectedTabs) {
+		assertThat(tabLabels.size())
+				.as("Customer editor doesn't contain expected amount of tabs")
+				.isEqualTo(expectedTabs.size());
+		for (int i = 0; i < tabLabels.size(); i++) {
+			assertThat(tabLabels.get(i).equals(expectedTabs.get(i)))
+					.as(String.format("Customer editor doesn't contain expected tab: '%s' doesn't match '%s'",
+							tabLabels.get(i), expectedTabs.get(i)))
+					.isTrue();
+		}
+	}
+
+	/**
+	 * Checks the number and composition of fields.
+	 *
+	 * @param fieldLabels    actual set of fields.
+	 * @param expectedFields expected set of fields.
+	 * @param sectionTitle   customer editor section title.
+	 */
+	private void verifyFieldsMatching(final List<String> fieldLabels, final List<String> expectedFields, final String sectionTitle) {
+		assertThat(fieldLabels.size())
+				.as(sectionTitle + " section doesn't contain expected amount of fields")
+				.isEqualTo(expectedFields.size());
+		for (int i = 0; i < fieldLabels.size(); i++) {
+			assertThat(fieldLabels.get(i).contains(expectedFields.get(i)))
+					.as(String.format("%s section doesn't contain expected field: '%s' doesn't contain '%s'",
+							sectionTitle, fieldLabels.get(i), expectedFields.get(i)))
+					.isTrue();
+		}
+	}
+
+	/**
 	 * Resets Data Policy State.
 	 *
 	 * @param dataPolicyName String.
@@ -380,7 +616,7 @@ public class CustomerDefinition {
 	 */
 	private void fillSearchForm(final Runnable runnable) {
 		clicksCustomersTab();
-		customerService.clearInputFieldsInCustomersTab();
+		customerServiceNavigation.clearInputFieldsInCustomersTab();
 		runnable.run();
 	}
 
@@ -418,6 +654,52 @@ public class CustomerDefinition {
 		assertThat(customerSearchResultsPane.isCustomerInListPartialMatch(verificationCriteria, columnIndex))
 				.as("The search result doesn't contain expected entry")
 				.isTrue();
+	}
+	
+	/**
+	 * Add Associate.
+	 *
+	 * @param userEmail the user email.
+	 */
+	@When("^I add associate user (.+)$")
+	public void addAssociateUser(final String userEmail) {
+		customerEditor.verifyAssociateDoesNotExist(userEmail);
+		addAccountAssociateDialog = customerEditor.clickAddAssociateButton();
+		addAccountAssociateDialog.enterUserEmail(userEmail);
+		addAccountAssociateDialog.clickSave();
+	}
+	
+	@Then("^user with email (.+) is added to the Associates table$")
+	public void verifyAssociateIsAdded(final String userEmail) {
+		customerEditor.verifyAssociateExists(userEmail);
+	}
+	
+	@When("^I delete associate user (.+)$")
+	public void deleteAssociateUser(final String userEmail) {
+		customerEditor.verifyAssociateExists(userEmail);
+		DeleteAccountAssociateDialog deleteAccountAssociateDialog = customerEditor.clickDeleteAssociateButton();
+		deleteAccountAssociateDialog.clickOK();
+	}
+	
+	@Then("^user with email (.+) is removed from the Associates table$")
+	public void verifyAssociateIsRemoved(final String userEmail) {
+		customerEditor.verifyAssociateDoesNotExist(userEmail);
+	}
+	
+	/**
+	 * Unlike {@link #addAssociateUser()}, this method does not wait for the dialog to close, as we expect to verify an error message instead.
+	 * @param userEmail the user email
+	 */
+	@When("^I add invalid associate user (.+)$")
+	public void addInvalidAssociateUser(final String userEmail) {
+		addAccountAssociateDialog = customerEditor.clickAddAssociateButton();
+		addAccountAssociateDialog.enterUserEmail(userEmail);
+		addAccountAssociateDialog.clickButton(AddAccountAssociateDialog.SAVE_BUTTON_CSS, "Save");
+	}
+	
+	@Then("^the following error message is displayed: (.+)$")
+	public void verifyError(final String errorMessage) {
+		customerEditor.verifyErrorMessageDisplayed(errorMessage);
 	}
 
 }

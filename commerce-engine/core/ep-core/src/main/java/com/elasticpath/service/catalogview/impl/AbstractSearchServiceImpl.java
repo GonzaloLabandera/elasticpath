@@ -20,7 +20,6 @@ import com.elasticpath.domain.catalogview.search.SearchResult;
 import com.elasticpath.domain.search.SfSearchLog;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.catalog.CategoryService;
-import com.elasticpath.service.catalogview.PaginationService;
 import com.elasticpath.service.catalogview.SearchCriteriaFactory;
 import com.elasticpath.service.catalogview.SfSearchLogService;
 import com.elasticpath.service.misc.TimeService;
@@ -35,8 +34,6 @@ import com.elasticpath.service.search.index.IndexSearchResult;
 public abstract class AbstractSearchServiceImpl extends AbstractCatalogViewServiceImpl {
 
 	private SearchCriteriaFactory searchCriteriaFactory;
-
-	private PaginationService paginationService;
 
 	private SfSearchLogService sfSearchLogService;
 
@@ -61,10 +58,11 @@ public abstract class AbstractSearchServiceImpl extends AbstractCatalogViewServi
 	 * @param request      the search request
 	 * @param shoppingCart the shopping car
 	 * @param pageNumber   the page number of the results
+	 * @param pageSize     the number of results per page
 	 * @param result       the search results
 	 */
 	protected void searchForProducts(final CatalogViewRequest request, final ShoppingCart shoppingCart,
-									final int pageNumber, final SearchResult result) {
+									final int pageNumber, final int pageSize, final SearchResult result) {
 		final boolean loadProductAssociations = false;
 
 		// get featured product list first
@@ -72,9 +70,7 @@ public abstract class AbstractSearchServiceImpl extends AbstractCatalogViewServi
 
 		// get normal products, don't include featured products
 		final IndexSearchResult productResults = searchProducts(request, true, true, shoppingCart.getShopper().getPriceListStack());
-		String storeCode = getStoreConfig().getStoreCode();
-		int numberOfItemsPerPage = getPaginationService().getNumberOfItemsPerPage(storeCode);
-		final List<Long> productUids = getPagedResults(productResults, pageNumber, numberOfItemsPerPage);
+		final List<Long> productUids = getPagedResults(productResults, pageNumber, pageSize);
 
 		List<StoreProduct> products = getStoreProductService().getProductsForStore(productUids, shoppingCart.getStore(), loadProductAssociations);
 		products = getIndexUtility().sortDomainList(productUids, products);
@@ -141,22 +137,6 @@ public abstract class AbstractSearchServiceImpl extends AbstractCatalogViewServi
 	 */
 	protected SearchCriteriaFactory getSearchCriteriaFactory() {
 		return searchCriteriaFactory;
-	}
-
-	/**
-	 * @return a {@link PaginationService}
-	 */
-	protected PaginationService getPaginationService() {
-		return paginationService;
-	}
-
-	/**
-	 * Sets the pagination service.
-	 * 
-	 * @param paginationService the {@link PaginationService} to use
-	 */
-	public void setPaginationService(final PaginationService paginationService) {
-		this.paginationService = paginationService;
 	}
 
 	/**

@@ -14,8 +14,8 @@ import com.elasticpath.plugin.tax.domain.TaxableItemContainer;
 import com.elasticpath.plugin.tax.domain.TaxedItemContainer;
 import com.elasticpath.plugin.tax.rate.TaxRateDescriptor;
 import com.elasticpath.plugin.tax.resolver.TaxOperationResolvers;
-import com.elasticpath.plugin.tax.resolver.TaxRateDescriptorResolver;
 import com.elasticpath.plugin.tax.spi.AbstractTaxProviderPluginSPI;
+import com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver;
 
 /**
  * ElasticPath tax provider plugin.

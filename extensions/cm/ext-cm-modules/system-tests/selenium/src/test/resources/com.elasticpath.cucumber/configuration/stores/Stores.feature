@@ -32,14 +32,18 @@ Feature: Store
     Then the store list should show Open state
 
   @regressionTest @configuration @store
-  Scenario: Profile Attribute Policy
+  Scenario Outline: Profile Attribute Policy
     When I edit the newly created store
     And I view the store profile attribute policies list
-    Then the store profile attribute list should not have a policy for Company
+    Then the store profile attribute list should not have a policy for <ATTRIBUTE>
     When I view the store profile attribute policies list
-    And I add the store profile attribute Company with a policy of DEFAULT
-    Then the store profile attribute list should have a policy for attribute Company with a policy of DEFAULT
-    When I edit the store profile attribute Company and change the policy to READ_ONLY
-    Then the store profile attribute list should have a policy for attribute Company with a policy of READ_ONLY
-    When I remove the store profile attribute Company
-    Then the store profile attribute list should not have a policy for Company
+    And I add the store profile attribute <ATTRIBUTE> with a policy of DEFAULT
+    Then the store profile attribute list should have a policy for attribute <ATTRIBUTE> with a policy of DEFAULT
+    When I edit the store profile attribute <ATTRIBUTE> and change the policy to READ_ONLY
+    Then the store profile attribute list should have a policy for attribute <ATTRIBUTE> with a policy of READ_ONLY
+    When I remove the store profile attribute <ATTRIBUTE>
+    Then the store profile attribute list should not have a policy for <ATTRIBUTE>
+
+    Examples:
+      | ATTRIBUTE              |
+      | Company (User Profile) |

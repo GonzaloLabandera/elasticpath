@@ -7,8 +7,8 @@ import static com.elasticpath.domain.attribute.impl.AbstractAttributeValueImpl.p
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -25,6 +25,8 @@ import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeUsage;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.persistence.support.DistinctAttributeValueCriterion;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
@@ -351,7 +353,7 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	 */
 	@Override
 	public Map<String, String> getAttributeTypeMap() {
-		Map<String, String> typeMap = new LinkedHashMap<>();
+		Map<String, String> typeMap = new HashMap<>();
 
 		for (final AttributeType type : AttributeType.values()) {
 			typeMap.put(String.valueOf(type.getTypeId()), type.getNameMessageKey());
@@ -492,19 +494,47 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		this.distinctAttributeValueCriterion = distinctAttributeValueCriterion;
 	}
 
-	/**
-	 * Returns a map of all system attributes.
-	 *
-	 * @return a map of all system attributes
-	 */
+	@Deprecated
 	@Override
 	public Map<String, Attribute> getCustomerProfileAttributesMap() {
-		Map<String, Attribute> customerProfileAttributesMap = new LinkedHashMap<>();
-		List<Attribute> customerProfileAttributesList = getCustomerProfileAttributes();
+		return getCustomerProfileAttributesMap(AttributeUsageImpl.USER_PROFILE_USAGE);
+	}
+
+	/**
+	 * Returns a list of customer profile attributes.
+	 *
+	 * @return a list of customer profile attributes
+	 */
+	@Deprecated
+	@Override
+	public List<Attribute> getCustomerProfileAttributes() {
+		return getCustomerProfileAttributes(AttributeUsageImpl.USER_PROFILE_USAGE);
+	}
+	
+	/**
+	 * Returns a map of all customer profile attributes.
+	 *
+	 * @return a map of all customer profile attributes
+	 */
+	@Override
+	public Map<String, Attribute> getCustomerProfileAttributesMap(final AttributeUsage... attributeUsages) {
+
+		List<Attribute> customerProfileAttributesList = getCustomerProfileAttributes(attributeUsages);
+		Map<String, Attribute> customerProfileAttributesMap = new HashMap<>(customerProfileAttributesList.size());
+		
 		for (Attribute attribute : customerProfileAttributesList) {
 			customerProfileAttributesMap.put(attribute.getKey(), attribute);
 		}
 		return customerProfileAttributesMap;
+	}
+	
+	@Override
+	public Map<String, Attribute> getCustomerProfileAttributesMapByCustomerType(final CustomerType customerType) {
+		if (customerType == CustomerType.ACCOUNT) {
+			return getCustomerProfileAttributesMap(AttributeUsageImpl.ACCOUNT_PROFILE_USAGE);
+		} else {
+			return getCustomerProfileAttributesMap(AttributeUsageImpl.USER_PROFILE_USAGE);
+		}
 	}
 
 	/**
@@ -513,8 +543,15 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	 * @return a list of customer profile attributes
 	 */
 	@Override
-	public List<Attribute> getCustomerProfileAttributes() {
-		return getAttributes(AttributeUsage.CUSTOMERPROFILE);
+	public List<Attribute> getCustomerProfileAttributes(final AttributeUsage... attributeUsages) {
+		
+		List<Attribute> attributes = new ArrayList<>();
+
+		for (AttributeUsage usage: attributeUsages) {
+			attributes.addAll(getAttributes(usage.getValue()));
+		}
+		
+		return attributes;
 	}
 
 	/**
@@ -614,9 +651,15 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		return buildAttributeValueInfo(attribute, attributeValues);
 	}
 
+	@Deprecated
 	@Override
 	public Set<String> getCustomerProfileAttributeKeys() {
-		return getAttributes(AttributeUsage.CUSTOMERPROFILE)
+		return this.getCustomerProfileAttributeKeys(AttributeUsageImpl.USER_PROFILE_USAGE);
+	}
+	
+	@Override
+	public Set<String> getCustomerProfileAttributeKeys(final AttributeUsage attributeUsage) {
+		return getAttributes(attributeUsage)
 				.stream().map(Attribute::getKey)
 				.collect(Collectors.toSet());
 	}

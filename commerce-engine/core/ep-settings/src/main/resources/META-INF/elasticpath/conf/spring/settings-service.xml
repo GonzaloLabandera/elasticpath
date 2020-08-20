@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		">
+
+	<context:annotation-config />
+
+	<bean id="settingsService" parent="txProxyTemplate">
+		<property name="target" ref="settingsServiceTarget"/>
+	</bean>
+
+	<bean id="settingsServiceTarget" parent="settingsServiceTargetTemplate"/>
+
+	<bean id="settingsServiceTargetTemplate" class="com.elasticpath.settings.impl.SettingsServiceImpl"
+			abstract="true">
+		<property name="settingsDao" ref="settingsDao"/>
+		<property name="settingValueFactory" ref="settingValueFactory"/>
+		<property name="systemPropertyOverrides" ref="settingsSystemPropertyOverrides"/>
+	</bean>
+
+	<bean id="settingsDao" parent="txProxyTemplate">
+		<property name="target" ref="settingsDaoTarget"/>
+	</bean>
+
+	<bean id="settingsDaoTarget" parent="settingsDaoTargetTemplate"/>
+
+	<bean id="settingsDaoTargetTemplate" class="com.elasticpath.settings.dao.impl.SettingsDaoImpl"
+		  abstract="true">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+	</bean>
+
+	<bean id="settingValueFactory" class="com.elasticpath.settings.impl.SettingValueFactoryWithDefinitionImpl"/>
+
+	<!-- Potentital settings overrides via JVM system properties -->
+	<util:map id="settingsSystemPropertyOverrides" key-type="java.lang.String">
+		<entry key="ep.asset.location" value="COMMERCE/SYSTEM/ASSETS/assetLocation"/>
+		<entry key="ep.changesets.enabled" value="COMMERCE/SYSTEM/CHANGESETS/enable"/>
+		<entry key="ep.smtp.host" value="COMMERCE/SYSTEM/EMAIL/mailHost"/>
+		<entry key="ep.smtp.port" value="COMMERCE/SYSTEM/EMAIL/mailPort"/>
+		<entry key="ep.smtp.scheme" value="COMMERCE/SYSTEM/EMAIL/smtpScheme"/>
+		<entry key="ep.smtp.username" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationUser"/>
+		<entry key="ep.smtp.password" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationPassword"/>
+		<entry key="ep.search.default.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
+		<entry key="ep.search.master.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
+	</util:map>
+
+	<bean id="immediateRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ImmediateRefreshStrategyImpl">
+		<property name="settingsReader" ref="settingsService" />
+	</bean>
+	<bean id="intervalRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.IntervalRefreshStrategyImpl">
+		<property name="settingsReader" ref="settingsService"/>
+		<property name="timeoutParamKey" value="timeout"/>
+	</bean>
+	<bean id="applicationLifetimeRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ApplicationLifetimeRefreshStrategyImpl">
+		<property name="settingsReader" ref="settingsService" />
+	</bean>
+
+	<bean id="cachedSettingsReaderTemplate" class="com.elasticpath.settings.impl.CachedSettingsReaderImpl" >
+		<property name="settingsService" ref="settingsService" />
+		<property name="refreshStrategies">
+			<map>
+				<entry key="interval" value-ref="intervalRefreshStrategy"/>
+				<entry key="immediate" value-ref="immediateRefreshStrategy"/>
+				<entry key="application" value-ref="applicationLifetimeRefreshStrategy"/>
+			</map>
+		</property>
+		<property name="refreshStrategyKey" value="apiRefreshStrategy"/>
+		<property name="defaultRefreshStrategy" ref="immediateRefreshStrategy"/>
+	</bean>
+
+	<!--  Default binding. Can be overridden by including a similar line in an xml file read after this one. -->
+	<bean id="settingsReader" parent="cachedSettingsReaderTemplate"/>
+
+</beans>

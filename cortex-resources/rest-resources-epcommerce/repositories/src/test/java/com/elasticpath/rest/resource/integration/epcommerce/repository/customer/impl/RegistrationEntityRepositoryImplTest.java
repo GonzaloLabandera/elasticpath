@@ -15,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.exception.UserIdExistException;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.profiles.ProfileIdentifier;
@@ -78,9 +78,9 @@ public class RegistrationEntityRepositoryImplTest {
 		when(customerRepository.getCustomer(TEST_CUSTOMER_GUID)).thenReturn(Single.just(customer));
 		when(formEntityToCustomerEnhancer.registrationEntityToCustomer(registrationEntity, customer)).thenReturn(customer);
 
-		UserIdExistException userIdExistException = mock(UserIdExistException.class);
-		when(customerRegistrationService.registerCustomer(customer)).thenThrow(userIdExistException);
-		when(exceptionTransformer.getResourceOperationFailure(userIdExistException)).thenReturn(ResourceOperationFailure.stateFailure());
+		EpValidationException sharedIdExistException = mock(EpValidationException.class);
+		when(customerRegistrationService.registerCustomer(customer)).thenThrow(sharedIdExistException);
+		when(exceptionTransformer.getResourceOperationFailure(sharedIdExistException)).thenReturn(ResourceOperationFailure.stateFailure());
 
 		registrationEntityRepository.update(registrationEntity, profileIdentifier)
 				.test()

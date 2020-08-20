@@ -6,14 +6,17 @@ package com.elasticpath.cmclient.fulfillment.editors.customer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -22,13 +25,18 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.editor.FormPage;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.core.BeanLocator;
-import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
@@ -40,31 +48,41 @@ import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpDateTimePicker;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.support.FetchGroupConstants;
+import com.elasticpath.service.customer.AccountTreeService;
 import com.elasticpath.service.customer.CustomerRegistrationService;
+import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.store.StoreService;
 
 /**
  * UI representation of the customer details profile registration section.
  */
-@SuppressWarnings({ "PMD.GodClass" })
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyFields"})
 public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientEditorPageSectionPart {
 
-	private static final String[] USER_TYPE_STRINGS = new String[] { FulfillmentMessages.get().ProfileRegistrationSection_TypeRegistered,
-			FulfillmentMessages.get().ProfileRegistrationSection_TypeGuest };
+	private static final String[] USER_TYPE_STRINGS = new String[]{FulfillmentMessages.get().ProfileRegistrationSection_TypeGuest,
+			FulfillmentMessages.get().ProfileRegistrationSection_TypeRegistered,
+			FulfillmentMessages.get().ProfileRegistrationSection_TypeAccount};
 
-	private static final String[] GENDER_STRINGS = new String[] { FulfillmentMessages.get().ProfileRegistrationSection_Male,
-			FulfillmentMessages.get().ProfileRegistrationSection_Female, FulfillmentMessages.get().ProfileRegistrationSection_Gender_Not_Available };
+	private static final String[] SELECTABLE_USER_TYPE_STRINGS = new String[]{FulfillmentMessages.get().ProfileRegistrationSection_TypeGuest,
+			FulfillmentMessages.get().ProfileRegistrationSection_TypeRegistered};
 
-	private static final String[] YES_NO_STRINGS = new String[] { FulfillmentMessages.get().ProfileRegistrationSection_Yes,
-			FulfillmentMessages.get().ProfileRegistrationSection_No };
+	private static final String[] GENDER_STRINGS = new String[]{FulfillmentMessages.get().ProfileRegistrationSection_Male,
+			FulfillmentMessages.get().ProfileRegistrationSection_Female, FulfillmentMessages.get().ProfileRegistrationSection_Gender_Not_Available};
+
+	private static final String[] YES_NO_STRINGS = new String[]{FulfillmentMessages.get().ProfileRegistrationSection_Yes,
+			FulfillmentMessages.get().ProfileRegistrationSection_No};
+	private static final int HIERARCHY_TREESHOLD = 4;
+	private static final int MAX_LAST_PARENTS = 3;
 
 	private final Customer customer;
 
@@ -104,17 +122,30 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 
 	private StoreService storeService;
 
+	private final AccountTreeService accountTreeService;
+
+	private final CustomerService customerService;
+
+	private final IWorkbenchPartSite workbenchPartSite;
+
+	private static final Logger LOG = Logger.getLogger(CustomerDetailsProfileRegistrationSection.class);
+
 	/**
 	 * Constructor to create a new Section in an editor's FormPage.
 	 *
-	 * @param formPage the formpage
-	 * @param editor the CmClientFormEditor that contains the form
+	 * @param formPage           the formpage
+	 * @param editor             the CmClientFormEditor that contains the form
+	 * @param workbenchPartSite the workbench part site.
 	 */
-	public CustomerDetailsProfileRegistrationSection(final FormPage formPage, final AbstractCmClientFormEditor editor) {
+	public CustomerDetailsProfileRegistrationSection(final FormPage formPage, final AbstractCmClientFormEditor editor,
+													 final IWorkbenchPartSite workbenchPartSite) {
 		super(formPage, editor, ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
 		this.customer = (Customer) editor.getModel();
+		this.accountTreeService = BeanLocator.getSingletonBean(ContextIdNames.ACCOUNT_TREE_SERVICE, AccountTreeService.class);
+		this.customerService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 		this.customerStore = getStoreService().findStoreWithCode(customer.getStoreCode());
 		this.listener = editor;
+		this.workbenchPartSite = workbenchPartSite;
 	}
 
 	@Override
@@ -140,53 +171,108 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 		final IEpLayoutData labelData = this.mainPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData fieldData = this.mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING, true, false);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_RegDate, labelData);
-		this.dateRegisteredText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
-
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_StoreReg, labelData);
-		this.storeRegisteredText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
-
 		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_UserType, labelData);
 		this.userTypeCombo = this.mainPane.addComboBox(authorization, fieldData);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_LocalePref, labelData);
-		this.preferredLocaleCombo = this.mainPane.addComboBox(authorization, fieldData);
+		if (!customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_CurrencyPref, labelData);
-		this.preferredCurrencyCombo = this.mainPane.addComboBox(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_RegDate, labelData);
+			this.dateRegisteredText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_BirthDate, labelData);
-		this.birthDateComponent = this.mainPane.addDateTimeComponent(IEpDateTimePicker.STYLE_DATE, authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_StoreReg, labelData);
+			this.storeRegisteredText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_Gender, labelData);
-		this.genderCombo = this.mainPane.addComboBox(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_LocalePref, labelData);
+			this.preferredLocaleCombo = this.mainPane.addComboBox(authorization, fieldData);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_RecHttpMail, labelData);
-		this.htmlEmailCombo = this.mainPane.addComboBox(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_CurrencyPref, labelData);
+			this.preferredCurrencyCombo = this.mainPane.addComboBox(authorization, fieldData);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_RecNewsletter, labelData);
-		this.newsLetterCombo = this.mainPane.addComboBox(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_BirthDate, labelData);
+			this.birthDateComponent = this.mainPane.addDateTimeComponent(IEpDateTimePicker.STYLE_DATE, authorization, fieldData);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_BusinessNumber, labelData);
-		this.businessNumberText = this.mainPane.addTextField(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_Gender, labelData);
+			this.genderCombo = this.mainPane.addComboBox(authorization, fieldData);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_TaxExemptionId, labelData);
-		this.taxExemptionIdText = this.mainPane.addTextField(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_RecHttpMail, labelData);
+			this.htmlEmailCombo = this.mainPane.addComboBox(authorization, fieldData);
+
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_RecNewsletter, labelData);
+			this.newsLetterCombo = this.mainPane.addComboBox(authorization, fieldData);
+
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_BusinessNumber, labelData);
+			this.businessNumberText = this.mainPane.addTextField(authorization, fieldData);
+
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_TaxExemptionId, labelData);
+			this.taxExemptionIdText = this.mainPane.addTextField(authorization, fieldData);
+		}
+
+		if (customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			addParents(labelData, fieldData);
+		}
+	}
+
+	private void addParents(final IEpLayoutData labelData, final IEpLayoutData fieldData) {
+		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_ParentHierarchy, labelData);
+		final List<String> pathToRoot = accountTreeService.fetchPathToRoot(customer);
+
+		if (pathToRoot.size() > HIERARCHY_TREESHOLD) {
+			addParents(pathToRoot.get(pathToRoot.size() - 1), fieldData);
+			this.mainPane.addLabel("...", fieldData);
+			this.mainPane.addEmptyComponent(null);
+
+			final List<String> nearestChildren = pathToRoot.stream()
+					.limit(MAX_LAST_PARENTS)
+					.collect(Collectors.toList());
+			Collections.reverse(nearestChildren);
+			nearestChildren.forEach(guid -> addParents(guid, fieldData));
+		} else {
+			Collections.reverse(pathToRoot);
+			pathToRoot.forEach(guid -> addParents(guid, fieldData));
+		}
+	}
+
+	private void addParents(final String guid, final IEpLayoutData fieldData) {
+		createHyperLinkAccount(customerService.findByGuid(guid), fieldData);
+		this.mainPane.addEmptyComponent(null);
+	}
+
+	private void createHyperLinkAccount(final Customer parentCustomer, final IEpLayoutData fieldData) {
+		final Hyperlink emailHyperlink = this.mainPane.addHyperLinkText(parentCustomer.getBusinessNumber(), EpState.EDITABLE, fieldData);
+		emailHyperlink.setToolTipText(parentCustomer.getBusinessName());
+		emailHyperlink.setText(parentCustomer.getBusinessName());
+		emailHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+
+			@Override
+			public void linkActivated(final HyperlinkEvent event) {
+				final IEditorInput editorInput = new CustomerDetailsEditorInput(parentCustomer.getUidPk());
+
+				try {
+					workbenchPartSite.getPage().openEditor(editorInput, AccountDetailsEditor.ID_EDITOR);
+				} catch (final PartInitException e) {
+					LOG.error("Can not open account details editor", e);
+				}
+			}
+		});
 	}
 
 	@Override
 	protected void populateControls() {
+		this.userTypeCombo.setItems(USER_TYPE_STRINGS);
+		userTypeCombo.setEnabled(false);
+		if (this.customer.getCustomerType().getName().equalsIgnoreCase(CustomerType.REGISTERED_USER.getName())) {
+			this.userTypeCombo.setText(USER_TYPE_STRINGS[1]);
+		} else if (this.customer.getCustomerType().getName().equalsIgnoreCase(CustomerType.ACCOUNT.getName())) {
+			this.userTypeCombo.setText(USER_TYPE_STRINGS[2]);
+			return;
+		} else {
+			this.userTypeCombo.setItems(SELECTABLE_USER_TYPE_STRINGS);
+			userTypeCombo.setEnabled(true);
+			this.userTypeCombo.setText(USER_TYPE_STRINGS[0]);
+		}
+
 		this.dateRegisteredText.setText(String.valueOf(this.customer.getCreationDate()));
 		this.storeRegisteredText.setText(customerStore.getName());
-
-		this.userTypeCombo.setItems(USER_TYPE_STRINGS);
-
-		if (this.customer.isRegistered()) {
-			this.userTypeCombo.setText(USER_TYPE_STRINGS[0]);
-			this.userTypeCombo.setEnabled(false);
-		} else {
-			this.userTypeCombo.setText(USER_TYPE_STRINGS[1]);
-		}
 
 		initPreferredLocaleCombo();
 
@@ -290,85 +376,87 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 
 	@Override
 	protected void bindControls(final DataBindingContext bindingContext) {
-		final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
+		if (!customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
 
-		bindingProvider.bind(bindingContext, this.preferredLocaleCombo, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				return setSelectedLocale((Integer) value);
-			}
-		}, true);
-
-		bindingProvider.bind(bindingContext, this.userTypeCombo, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				updateUserType(value);
-				return Status.OK_STATUS;
-			}
-		}, true);
-
-		bindingProvider.bind(bindingContext, this.preferredCurrencyCombo, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				final int intVal = (Integer) value;
-				if (intVal > -1) {
-					final String currencyCode = preferredCurrencyCombo.getItem(intVal);
-					customer.setPreferredCurrency(Currency.getInstance(currencyCode));
+			bindingProvider.bind(bindingContext, this.preferredLocaleCombo, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					return setSelectedLocale((Integer) value);
 				}
-				return Status.OK_STATUS;
-			}
-		}, true);
+			}, true);
 
-		bindingProvider.bind(bindingContext, this.birthDateComponent.getSwtText(), EpValidatorFactory.DATE, null,
-				new ObservableUpdateValueStrategy() {
-					@Override
-					protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-						return setDate(value);
+			bindingProvider.bind(bindingContext, this.userTypeCombo, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					updateUserType(value);
+					return Status.OK_STATUS;
+				}
+			}, true);
+
+			bindingProvider.bind(bindingContext, this.preferredCurrencyCombo, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					final int intVal = (Integer) value;
+					if (intVal > -1) {
+						final String currencyCode = preferredCurrencyCombo.getItem(intVal);
+						customer.setPreferredCurrency(Currency.getInstance(currencyCode));
 					}
-				}, true);
+					return Status.OK_STATUS;
+				}
+			}, true);
 
-		bindingProvider.bind(bindingContext, this.genderCombo, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				final int gender = (Integer) value;
-				setCustomerGender(gender);
-				return Status.OK_STATUS;
-			}
-		}, true);
+			bindingProvider.bind(bindingContext, this.birthDateComponent.getSwtText(), EpValidatorFactory.DATE, null,
+					new ObservableUpdateValueStrategy() {
+						@Override
+						protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+							return setDate(value);
+						}
+					}, true);
 
-		bindingProvider.bind(bindingContext, this.htmlEmailCombo, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				final boolean toReceiveHtmlEmail = (Integer) value == 0;
-				customer.setHtmlEmailPreferred(toReceiveHtmlEmail);
-				return Status.OK_STATUS;
-			}
-		}, true);
+			bindingProvider.bind(bindingContext, this.genderCombo, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					final int gender = (Integer) value;
+					setCustomerGender(gender);
+					return Status.OK_STATUS;
+				}
+			}, true);
 
-		bindingProvider.bind(bindingContext, this.newsLetterCombo, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				final boolean toBeNotified = (Integer) value == 0;
-				customer.setToBeNotified(toBeNotified);
-				return Status.OK_STATUS;
-			}
-		}, true);
+			bindingProvider.bind(bindingContext, this.htmlEmailCombo, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					final boolean toReceiveHtmlEmail = (Integer) value == 0;
+					customer.setHtmlEmailPreferred(toReceiveHtmlEmail);
+					return Status.OK_STATUS;
+				}
+			}, true);
 
-		bindingProvider.bind(bindingContext, this.businessNumberText, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				customer.setBusinessNumber(String.valueOf(value));
-				return Status.OK_STATUS;
-			}
-		}, true);
+			bindingProvider.bind(bindingContext, this.newsLetterCombo, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					final boolean toBeNotified = (Integer) value == 0;
+					customer.setToBeNotified(toBeNotified);
+					return Status.OK_STATUS;
+				}
+			}, true);
 
-		bindingProvider.bind(bindingContext, this.taxExemptionIdText, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				customer.setTaxExemptionId(String.valueOf(value));
-				return Status.OK_STATUS;
-			}
-		}, true);
+			bindingProvider.bind(bindingContext, this.businessNumberText, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					customer.setBusinessNumber(String.valueOf(value));
+					return Status.OK_STATUS;
+				}
+			}, true);
+
+			bindingProvider.bind(bindingContext, this.taxExemptionIdText, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					customer.setTaxExemptionId(String.valueOf(value));
+					return Status.OK_STATUS;
+				}
+			}, true);
+		}
 	}
 
 	/**
@@ -431,11 +519,10 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 	}
 
 	private void updateUserType(final Object value) {
+		Integer customerTypeOrdinalValue = ((Integer) value) + 1;
 		if (userTypeCombo.isEnabled()) {
-			final boolean isGuest = ((Integer) value == 1);
-			customer.setAnonymous(isGuest);
+			customer.setCustomerType(CustomerType.valueOf(customerTypeOrdinalValue));
 			((CustomerDetailsEditor) getEditor()).fireUpdateActions();
-
 			markDirty();
 		}
 	}

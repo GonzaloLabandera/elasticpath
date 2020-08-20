@@ -4,6 +4,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.price.impl;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,6 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +39,8 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
+import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
@@ -52,7 +56,10 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.Produ
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTransformer;
+import com.elasticpath.service.catalogview.StoreProductService;
+import com.elasticpath.service.store.StoreService;
 
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.TooManyFields"})
 @RunWith(MockitoJUnitRunner.class)
 public class PriceRepositoryImplTest {
 
@@ -91,6 +98,14 @@ public class PriceRepositoryImplTest {
 	private MoneyTransformer moneyTransformer;
 	@Mock
 	private BeanFactory coreBeanFactory;
+	@Mock
+	private StoreProductService storeProductService;
+	@Mock
+	private StoreService storeService;
+	@Mock
+	private StoreProduct storeProduct;
+	@Mock
+	private ProductSku sku1, sku2, sku3;
 
 	private Product product;
 	private ProductSkuImpl sku;
@@ -103,7 +118,8 @@ public class PriceRepositoryImplTest {
 	@Before
 	public void setUp() {
 		priceRepository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository, mockCustomerSessionRepository,
-				mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository, reactiveAdapterImpl, coreBeanFactory, moneyTransformer);
+				mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository, reactiveAdapterImpl, coreBeanFactory,
+				storeService, storeProductService, moneyTransformer);
 	}
 
 	@Test
@@ -246,18 +262,23 @@ public class PriceRepositoryImplTest {
 
 	@Test
 	public void testEmptyPriceForPriceRange() {
-		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());
+		mockGetActiveSkusMethodCalls();
+		when(storeProduct.isSkuDisplayable(any())).thenReturn(true);
+
 		StoreProductRepository storeProductRepository = mock(StoreProductRepository.class);
 		PriceRepository repository = priceRepositoryWithMultiSkuProductAndPrices(storeProductRepository);
 		repository.getPriceRange(STORE_CODE, PRODUCT_GUID_CODE)
 				.test()
 				.assertValue(offerPriceEntity -> offerPriceEntity.getListPriceRange().getFromPrice().size() == 0);
-		verify(storeProductRepository, times(1)).findByGuid(any());
+		verify(storeProductRepository, times(1))
+				.findDisplayableStoreProductWithAttributesByProductGuid(STORE_CODE, PRODUCT_GUID_CODE);
 	}
 
 	@Test
 	public void testNonEmptyPriceForPriceRange() {
-		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());
+		mockGetActiveSkusMethodCalls();
+		when(storeProduct.isSkuDisplayable(any())).thenReturn(true);
+
 		PriceRepository repository = priceRepositoryWithMultiSkuProductAndPrices(mock(StoreProductRepository.class));
 		when(moneyTransformer.transformToEntity(any()))
 				.thenReturn(CostEntity.builder().withAmount(BigDecimal.ZERO).withCurrency(USD).withDisplay(ZERO_USD).build());
@@ -273,7 +294,9 @@ public class PriceRepositoryImplTest {
 
 	@Test
 	public void testNoPurchasePriceFallsBackToListPriceForPriceRange() {
-		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());
+		mockGetActiveSkusMethodCalls();
+		when(storeProduct.isSkuDisplayable(any())).thenReturn(true);
+
 		PriceRepository repository = priceRepositoryWithNoSalePrice(mock(StoreProductRepository.class));
 		when(moneyTransformer.transformToEntity(any()))
 				.thenReturn(CostEntity.builder().withAmount(BigDecimal.ZERO).withCurrency(USD).withDisplay(ZERO_USD).build());
@@ -283,6 +306,52 @@ public class PriceRepositoryImplTest {
 				.assertValue(offerPriceRangeEntity -> offerPriceRangeEntity.getListPriceRange()
 						.equals(offerPriceRangeEntity.getPurchasePriceRange()));
 
+	}
+
+
+	@Test
+	public void testPriceRangesIgnoreSkusWithoutPrices() {
+		mockGetActiveSkusMethodCalls();
+		when(storeProduct.isSkuDisplayable(any())).thenReturn(true);
+
+		PriceRepository repository = priceRepositoryWithMissingPricesForSomeSkus(mock(StoreProductRepository.class));
+		repository.getPriceRange(STORE_CODE, PRODUCT_GUID_CODE)
+				.test()
+				.assertNoErrors()
+				.assertValue(offerPriceRangeEntity -> offerPriceRangeEntity.getListPriceRange()
+						.equals(offerPriceRangeEntity.getPurchasePriceRange()));
+
+	}
+
+
+
+	@Test
+	public void testPriceRangesIgnoreSkusWhereAvailabilityIsFalse() {
+		mockGetActiveSkusMethodCalls();
+
+		when(sku1.getSkuCode()).thenReturn(SKU_1);
+		when(sku2.getSkuCode()).thenReturn(SKU_2);
+		when(sku3.getSkuCode()).thenReturn(SKU_3);
+
+		when(storeProduct.isSkuDisplayable(sku1.getSkuCode())).thenReturn(false);
+		when(storeProduct.isSkuDisplayable(sku2.getSkuCode())).thenReturn(true);
+		when(storeProduct.isSkuDisplayable(sku3.getSkuCode())).thenReturn(true);
+
+		PriceRepository repository = priceRepositoryWithMultiSkuProductAndPrices(mock(StoreProductRepository.class));
+
+		BigDecimal bigDecimalTwo = BigDecimal.valueOf(2);
+		String currency = Currency.getInstance(Locale.getDefault()).getCurrencyCode();
+		String display = bigDecimalTwo.toString() + " " + currency;
+
+		when(moneyTransformer.transformToEntity(Money.valueOf(bigDecimalTwo, Currency.getInstance(Locale.getDefault()))))
+				.thenReturn(CostEntity.builder().withAmount(bigDecimalTwo).withCurrency(currency).withDisplay(display).build());
+
+		repository.getPriceRange(STORE_CODE, PRODUCT_GUID_CODE)
+				.test()
+				.assertNoErrors()
+				.assertValue(offerPriceRangeEntity -> offerPriceRangeEntity.getListPriceRange().getFromPrice().get(0).getAmount()
+						.equals(offerPriceRangeEntity.getListPriceRange().getToPrice().get(0).getAmount()))
+						.equals(bigDecimalTwo);
 	}
 
 
@@ -302,7 +371,7 @@ public class PriceRepositoryImplTest {
 		mockItemRepositoryToReturnSku();
 		mockPriceLookupFacadeToReturnPriceForSku(price);
 	}
-	
+
 	private void setupMockStore() {
 		when(mockCustomerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(mockCustomerSession));
 		when(mockCustomerSession.getShopper()).thenReturn(mockShopper);
@@ -338,13 +407,13 @@ public class PriceRepositoryImplTest {
 		when(mockPriceLookupFacade.getPromotedPriceForProduct(product, mockStore, mockShopper)).thenReturn(price);
 	}
 
-	private PriceRepository priceRepositoryWithMultiSkuProductAndPrices(final StoreProductRepository storeProductRepository) {
+	private PriceRepository  priceRepositoryWithMultiSkuProductAndPrices(final StoreProductRepository storeProductRepository) {
 		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
 				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
-				reactiveAdapterImpl, coreBeanFactory, moneyTransformer) {
+				reactiveAdapterImpl, coreBeanFactory, storeService, storeProductService, moneyTransformer) {
 			@Override
-			public Single<Price> getPrice(final String storeCode, final String skuCode) {
-				return Single.just(new PriceImpl() {
+			public Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
+				return Maybe.just(new PriceImpl() {
 
 					@Override
 					public Money getListPrice() {
@@ -358,26 +427,27 @@ public class PriceRepositoryImplTest {
 				});
 			}
 		};
-		when(storeProductRepository.findByGuid(any())).thenReturn(Single.just(new ProductImpl() {
-			@Override
-			public Map<String, ProductSku> getProductSkus() {
-				Map<String, ProductSku> result = new HashMap<>();
-				result.put(SKU_1, new ProductSkuImpl());
-				result.put(SKU_2, new ProductSkuImpl());
-				result.put(SKU_3, new ProductSkuImpl());
-				return result;
-			}
-		}));
+		when(storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(anyString(), any()))
+				.thenReturn(Single.just(new StoreProductImpl(new ProductImpl() {
+					@Override
+					public Map<String, ProductSku> getProductSkus() {
+						Map<String, ProductSku> result = new HashMap<>();
+						result.put(SKU_1, sku1);
+						result.put(SKU_2, sku2);
+						result.put(SKU_3, sku3);
+						return result;
+					}
+				})));
 		return repository;
 	}
 
 	private PriceRepository priceRepositoryWithNoSalePrice(final StoreProductRepository storeProductRepository) {
 		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
 				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
-				reactiveAdapterImpl, coreBeanFactory, moneyTransformer) {
+				reactiveAdapterImpl, coreBeanFactory, storeService, storeProductService, moneyTransformer) {
 			@Override
-			public Single<Price> getPrice(final String storeCode, final String skuCode) {
-				return Single.just(new PriceImpl() {
+			public Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
+				return Maybe.just(new PriceImpl() {
 
 					@Override
 					public Money getListPrice() {
@@ -391,18 +461,67 @@ public class PriceRepositoryImplTest {
 				});
 			}
 		};
-		when(storeProductRepository.findByGuid(any())).thenReturn(Single.just(new ProductImpl() {
-			@Override
-			public Map<String, ProductSku> getProductSkus() {
-				Map<String, ProductSku> result = new HashMap<>();
-				result.put(SKU_1, new ProductSkuImpl());
-				result.put(SKU_2, new ProductSkuImpl());
-				result.put(SKU_3, new ProductSkuImpl());
-				return result;
-			}
-		}));
+		when(storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(anyString(), any()))
+				.thenReturn(Single.just(new StoreProductImpl(new ProductImpl() {
+					@Override
+					public Map<String, ProductSku> getProductSkus() {
+						Map<String, ProductSku> result = new HashMap<>();
+						result.put(SKU_1, new ProductSkuImpl());
+						result.put(SKU_2, new ProductSkuImpl());
+						result.put(SKU_3, new ProductSkuImpl());
+						return result;
+					}
+				})));
 		return repository;
 	}
 
+	private PriceRepository priceRepositoryWithMissingPricesForSomeSkus(final StoreProductRepository storeProductRepository) {
+		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
+				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
+				reactiveAdapterImpl, coreBeanFactory, storeService, storeProductService, moneyTransformer) {
+			@Override
+			public Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
+				return Maybe.just(new PriceImpl() {
+
+					@Override
+					public Money getListPrice() {
+						Money money = null;
+						if (SKU_1.equals(skuCode)) {
+							money = Money.valueOf(1, Currency.getInstance(Locale.getDefault()));
+						} else if (SKU_2.equals(skuCode)) {
+							money = Money.valueOf(2, Currency.getInstance(Locale.getDefault()));
+						}
+						return money;
+					}
+
+					@Override
+					public Money getSalePrice() {
+						return null;
+					}
+				});
+			}
+		};
+		when(storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(anyString(), any()))
+				.thenReturn(Single.just(new StoreProductImpl(new ProductImpl() {
+					@Override
+					public Map<String, ProductSku> getProductSkus() {
+						Map<String, ProductSku> result = new HashMap<>();
+						result.put(SKU_1, new ProductSkuImpl());
+						result.put(SKU_2, new ProductSkuImpl());
+						result.put(SKU_3, new ProductSkuImpl());
+						return result;
+					}
+				})));
+		return repository;
+	}
+
+	private void mockGetActiveSkusMethodCalls() {
+		when(mockCustomerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(mockCustomerSession));
+		when(mockCustomerSession.getShopper()).thenReturn(mockShopper);
+		when(mockShopper.getStoreCode()).thenReturn("mobee");
+		when(storeService.findStoreWithCode("mobee")).thenReturn(mockStore);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());
+		when(storeProductService.getProductForStore(any(), any())).thenReturn(storeProduct);
+	}
 
 }

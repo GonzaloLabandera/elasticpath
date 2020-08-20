@@ -6,16 +6,19 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
+import com.elasticpath.selenium.dialogs.AddAccountAssociateDialog;
 import com.elasticpath.selenium.dialogs.AddCustomerSegmentMembershipDialog;
 import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.dialogs.DeleteAccountAssociateDialog;
+import com.elasticpath.selenium.dialogs.ErrorDialog;
 import com.elasticpath.selenium.util.Constants;
 
 
 /**
  * Customer Editor.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class CustomerEditor extends AbstractPageObject {
 
 	private static final String EDITOR_PANE_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
@@ -48,6 +51,10 @@ public class CustomerEditor extends AbstractPageObject {
 	private static final String DATA_POINT_VALUE_COLUMN_CSS = " div[column-num='2']";
 	private static final String DATA_POLICY_COLUMN_NAME = "Data Policy Name";
 	private static final String DATA_POINT_COLUMN_NAME = "Data Point Name";
+	private static final String ACCOUNT_ASSOCIATE_PARENT_CSS = "div[widget-id='Associates Table'][widget-type='Table'][seeable='true'] ";
+	private static final String ACCOUNT_ASSOCIATE_COLUMN_CSS = ACCOUNT_ASSOCIATE_PARENT_CSS + COLUMN_ID;
+	private static final String ACCOUNT_ASSOCIATE_EMAIL_COLUMN_NAME = "Email";
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -56,6 +63,7 @@ public class CustomerEditor extends AbstractPageObject {
 	 */
 	public CustomerEditor(final WebDriver driver) {
 		super(driver);
+		this.driver = driver;
 	}
 
 	/**
@@ -273,8 +281,8 @@ public class CustomerEditor extends AbstractPageObject {
 	 */
 	public void clickDeletePolicyDataButton() {
 		clickEditorButton("Delete Policy Data", DELETE_POLICY_DATA_CSS);
-		new ConfirmDialog(SetUp.getDriver()).clickDeleteButton("FulfillmentMessages.DeletePolicyData_Confirm");
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("FulfillmentMessages.DeletePolicyData_Title");
+		new ConfirmDialog(driver).clickDeleteButton("FulfillmentMessages.DeletePolicyData_Confirm");
+		new ConfirmDialog(driver).clickOKButton("FulfillmentMessages.DeletePolicyData_Title");
 	}
 
 	/**
@@ -324,5 +332,53 @@ public class CustomerEditor extends AbstractPageObject {
 				.isFalse();
 		setWebDriverImplicitWaitToDefault();
 	}
+	
+	/**
+	 * Clicks Add Associate... button.
+	 *
+	 * @return AddAccountAssociateDialog
+	 */
+	public AddAccountAssociateDialog clickAddAssociateButton() {
+		clickEditorButton("Add Associate...", AddAccountAssociateDialog.ADD_ACCOUNT_ASSOCIATES_DIALOG_CSS);
+		return new AddAccountAssociateDialog(getDriver());
+	}
 
+	/**
+	 * Verify user is associated with the account.
+	 *
+	 * @param userEmail the email of the Associate user.
+	 */
+	public void verifyAssociateExists(final String userEmail) {
+		assertThat(selectItemInEditorPaneWithScrollBar(ACCOUNT_ASSOCIATE_PARENT_CSS, ACCOUNT_ASSOCIATE_COLUMN_CSS, userEmail,
+				ACCOUNT_ASSOCIATE_EMAIL_COLUMN_NAME))
+			.as("Unable to find Associate - " + userEmail)
+			.isTrue();
+	}
+	
+	public DeleteAccountAssociateDialog clickDeleteAssociateButton() {
+		clickEditorButton("Remove Associate...", DeleteAccountAssociateDialog.DELETE_ACCOUNT_ASSOCIATE_DIALOG_CSS);
+		return new DeleteAccountAssociateDialog(getDriver());
+	}
+	
+	/**
+	 * Verify that the given associate is not present in the Associates table. 
+	 * 
+	 * @param userEmail the associate user email
+	 */
+	public void verifyAssociateDoesNotExist(final String userEmail) {
+		setWebDriverImplicitWait(1);
+		assertThat(verifyItemIsNotInEditorPane(ACCOUNT_ASSOCIATE_PARENT_CSS, ACCOUNT_ASSOCIATE_COLUMN_CSS, userEmail, "Email"))
+				.as("Account associate should not be present - " + userEmail)
+				.isFalse();
+		setWebDriverImplicitWaitToDefault();
+	}
+	
+	/**
+	 * Verify the given error message is displayed.
+	 * 
+	 * @param expErrorMessage the error message to verify
+	 */
+	public void verifyErrorMessageDisplayed(final String expErrorMessage) {
+		new ErrorDialog(getDriver()).verifyErrorMessage(expErrorMessage);
+	}
 }

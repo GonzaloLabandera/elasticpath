@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2019
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.provider.payment.service;
 
@@ -12,46 +12,20 @@ package com.elasticpath.provider.payment.service;
  */
 public enum PaymentsExceptionMessageId {
 
-	//
-	// Inherited
-	//
-
 	/**
 	 * Payment failed - generic error.
 	 */
 	PAYMENT_FAILED("payment.failed", "Error occurred when processing payment."),
+
 	/**
 	 * Payment failed - declined by payment processor.
 	 */
 	PAYMENT_DECLINED("payment.declined", "Payment was declined."),
+
 	/**
 	 * Payment failed - insufficient funds or daily limit exceeded.
 	 */
 	PAYMENT_INSUFFICIENT_FUNDS("payment.insufficient.funds", "Insufficient funds to process payment."),
-	/**
-	 * Payment failed - payment method is missing.
-	 */
-	PAYMENT_METHOD_MISSING("payment.method.missing", "Payment method must be present"),
-	/**
-	 * Payment failed - payment method has expired.
-	 */
-	PAYMENT_METHOD_EXPIRED("payment.method.expired", "Payment method has expired."),
-	/**
-	 * Payment failed - shipping address is not defined.
-	 */
-	PAYMENT_METHOD_INVALID("payment.method.invalid", "Payment method is invalid."),
-	/**
-	 * Payment failed - currency not supported.
-	 */
-	PAYMENT_CURRENCY_NOT_SUPPORTED("payment.currency.not.supported", "Payment currency is not supported by the store."),
-	/**
-	 * Payment failed - capability unsupported error.
-	 */
-	PAYMENT_CAPABILITY_UNSUPPORTED ("payment.capability.unsupported", "Capability is not supported by payment provider"),
-
-	//
-	// Added for Payment API
-	//
 
 	/**
 	 * Payment instrument creation failed.
@@ -61,7 +35,17 @@ public enum PaymentsExceptionMessageId {
 	/**
 	 * Payment instrument creation failed - empty name.
 	 */
-	PAYMENT_INSTRUMENT_EMPTY_NAME("payment.instrument.name.required", "Name must not be blank.");
+	PAYMENT_INSTRUMENT_EMPTY_NAME("payment.instrument.name.required", "Name must not be blank."),
+
+	/**
+	 * Payment failed - payment method is missing.
+	 */
+	PAYMENT_METHOD_MISSING("payment.method.missing", "Payment method must be present"),
+
+	/**
+	 * Payment failed - capability unsupported error.
+	 */
+	PAYMENT_CAPABILITY_UNSUPPORTED("payment.capability.unsupported", "Capability is not supported by payment provider");
 
 	private final String key;
 	private final String defaultDebugMessage;

@@ -318,7 +318,7 @@ class CommonSteps {
 
 		assertThat(actualLinks)
 				.as("links list is not as expected")
-				.containsExactlyInAnyOrderElementsOf(linksList)
+				.containsAll(linksList)
 	}
 
 	@Then('^I should not see the following links$')
@@ -665,7 +665,7 @@ class CommonSteps {
 	public void getTheHardcodedUri(String uri) {
 
 		client.GET(uri)
-		.stopIfFailure();
+				.stopIfFailure();
 	}
 
 	@And('^I attempt to post to the uri (.+)$')
@@ -676,8 +676,18 @@ class CommonSteps {
 
 		client.POST(uri, [
 				descriptor: fields
-		])				.stopIfFailure()
+		]).stopIfFailure()
 
+	}
+
+	@Then('^there is a (.+) link with the field (.+) with value (.+)')
+	static void getLinkWithFieldValue(String link, String field, String value) {
+
+		def criteria = {identifierResource ->
+			identifierResource[field] == value
+		}
+		client.findLink(link, criteria)
+				.stopIfFailure()
 	}
 
 	static class KeyValue {

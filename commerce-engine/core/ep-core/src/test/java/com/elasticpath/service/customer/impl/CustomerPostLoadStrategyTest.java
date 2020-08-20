@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerGroupImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.service.attribute.AttributeService;
@@ -31,7 +32,7 @@ public class CustomerPostLoadStrategyTest {
 	public void setUp() {
 		context.checking(new Expectations() {
 			{
-				allowing(attributeService).getCustomerProfileAttributesMap();
+				allowing(attributeService).getCustomerProfileAttributesMapByCustomerType(CustomerType.REGISTERED_USER);
 				will(returnValue(new TestCustomerProfileFactory().getProfile()));
 			}
 		});
@@ -61,6 +62,7 @@ public class CustomerPostLoadStrategyTest {
 	@Test
 	public void testThatProcessLoadsCustomerProfileMetadataOntoCustomers() {
 		CustomerImpl customer = new CustomerImpl();
+		customer.setCustomerType(CustomerType.REGISTERED_USER);
 		strategy.process(customer);
 
 		customer.setFirstName("Foo");

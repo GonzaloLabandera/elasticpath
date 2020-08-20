@@ -3,8 +3,8 @@ package com.elasticpath.cucumber.definitions;
 import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.dialogs.CreateEditTaxCodeDialog;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.TaxCodesPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 
@@ -22,7 +22,7 @@ public class TaxCodeDefinition {
 	 * Constructor for Tax Code definitions.
 	 */
 	public TaxCodeDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
+		configurationActionToolbar = new ConfigurationActionToolbar(SeleniumDriverSetup.getDriver());
 	}
 
 	/**

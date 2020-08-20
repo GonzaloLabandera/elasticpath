@@ -46,9 +46,9 @@ public class DomainEventMessageProcessor implements Processor {
 			optionalHandler.orElseThrow(() -> new CamelExecutionException("Handler doesn't exist for event: " + eventType, exchange))
 					.handleMessage(eventMessage);
 		} catch (final EventMessageProcessingException e) {
-			LOGGER.error("Event message processing exception: " + e);
+			LOGGER.error("Event message processing exception.", e);
 		} catch (final Exception e) {
-			LOGGER.error("Event message processing exception: " + e);
+			LOGGER.error("Event message processing exception.", e);
 			exchange.setException(e);
 		}
 	}
@@ -69,5 +69,4 @@ public class DomainEventMessageProcessor implements Processor {
 
 		return (EventMessage) body;
 	}
-
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-02-changeset-settings.xml">
+
+	<changeSet id="2020-02-cleanup-changeset-context-values" author="elasticpath">
+		<comment>[SUP-281] Cleanup COMMERCE/SYSTEM/MESSAGING/CHANGESETS/channelUri context values.</comment>
+		<delete tableName="TSETTINGVALUE">
+			<where>SETTING_DEFINITION_UID = 116</where>
+		</delete>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" value="122"/>
+			<column name="SETTING_DEFINITION_UID" value="116"/>
+			<column name="CONTEXT" value="dataSyncWebApp"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.DataSyncWebApp.VirtualTopic.ep.changesets"/>
+		</insert>
+	</changeSet>
+</databaseChangeLog>

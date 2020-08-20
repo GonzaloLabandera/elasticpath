@@ -6,6 +6,7 @@
 	<resource>tax_jurisdictions.xml</resource>
 	<resource>customer_groups.xml</resource>
 	<resource>customerprofile_attributes.xml</resource>
+	<resource>payment_providers.xml</resource>
 	<resource>user_roles.xml</resource>
 	<resource>cmusers.xml</resource>
 	<resource>shipping_regions.xml</resource>

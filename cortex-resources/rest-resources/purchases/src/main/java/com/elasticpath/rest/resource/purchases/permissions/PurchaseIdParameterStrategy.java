@@ -13,7 +13,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.authorization.parameter.AbstractCollectionValueStrategy;
-import com.elasticpath.rest.definition.purchases.PurchaseEntity;
+import com.elasticpath.rest.definition.accounts.AccountEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
 import com.elasticpath.rest.helix.data.annotation.ResourceRepository;
 import com.elasticpath.rest.id.Identifier;
@@ -31,7 +31,7 @@ public final class PurchaseIdParameterStrategy extends AbstractCollectionValueSt
 
 	@Inject
 	@ResourceRepository
-	private Provider<Repository<PurchaseEntity, PurchaseIdentifier>> repository;
+	private Provider<Repository<AccountEntity, PurchaseIdentifier>> repository;
 
 	@Inject
 	private IdentifierTransformerProvider identifierTransformerProvider;
@@ -40,6 +40,7 @@ public final class PurchaseIdParameterStrategy extends AbstractCollectionValueSt
 	protected Collection<String> getParameterValues(final PrincipalCollection principals) {
 		String scope = PrincipalsUtil.getScope(principals);
 		final IdentifierTransformer<Identifier> identifierTransformer = identifierTransformerProvider.forUriPart(PurchaseIdentifier.PURCHASE_ID);
+
 		return repository.get()
 				.findAll(StringIdentifier.of(scope))
 				.map(purchaseIdentifier -> identifierTransformer.identifierToUri(purchaseIdentifier.getPurchaseId()))

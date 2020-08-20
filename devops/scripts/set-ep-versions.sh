@@ -2,6 +2,8 @@
 
 set -e
 
+COMMON_MVN_OPTS="-B"
+
 function usage() {
   cat << EOF
 Set the version for Elastic Path Commerce projects.
@@ -72,7 +74,8 @@ function install_bom_pom() {
   local project_dir="$1"
   local maven_settings="$2"
 
-  mvn ${maven_settings} clean install -N -f "${project_dir}/bill-of-materials/pom.xml"
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    clean install -N -f "${project_dir}/bill-of-materials/pom.xml"
 }
 
 function set_bom_version() {
@@ -82,7 +85,8 @@ function set_bom_version() {
 
   # SET PROJECT VERSION
 
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/bill-of-materials/pom.xml" \
     -DnewVersion="${platform_version}" \
      --non-recursive
@@ -116,7 +120,8 @@ function set_commerce_parent_version() {
 
   # SET PROJECT VERSION
 
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/pom.xml" \
     -DnewVersion="${platform_version}" \
      --non-recursive
@@ -139,7 +144,8 @@ function set_commerce_engine_version() {
 
   # SET PROJECT VERSION
 
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/commerce-engine/pom.xml" \
     -DnewVersion="${platform_version}"
 }
@@ -163,23 +169,27 @@ function set_commerce_manager_version() {
   # SET PROJECT VERSION
 
   # Update cm-libs POM version
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/commerce-manager/cm-libs/pom.xml" \
     -DnewVersion="${platform_version}"
 
   # Update com.elasticpath.cmclient.docs POM version
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/commerce-manager/com.elasticpath.cmclient.docs/pom.xml" \
     -DnewVersion="${platform_version}"
 
   # Update top-level POM version
-  mvn ${maven_settings} org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \
     -f "${project_dir}/commerce-manager/pom.xml" \
     -Dtycho.mode=maven \
     -DnewVersion="${platform_version}"
 
   # Update non-Tycho dependencies version
-  mvn ${maven_settings} org.eclipse.tycho:ep-tycho-versions-plugin:set-version \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.eclipse.tycho:ep-tycho-versions-plugin:set-version \
     -f "${project_dir}/commerce-manager/cm-modules/pom.xml" \
     -Dtycho.mode=maven \
     -DnewVersion="${platform_version}" \
@@ -198,7 +208,8 @@ function set_cortex_resources_version() {
 
   # SET PROJECT VERSION
 
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/cortex-resources/pom.xml" \
     -DnewVersion="${extensions_version}"
 }
@@ -218,7 +229,8 @@ function set_commerce_data_version() {
 
   # SET PROJECT VERSION
 
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/commerce-data/pom.xml" \
     -DnewVersion="${platform_version}"
 }
@@ -235,7 +247,8 @@ function set_health_monitoring_version() {
 
   # SET PROJECT VERSION
 
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/health-monitoring/pom.xml" \
     -DnewVersion="${platform_version}"
 }
@@ -254,12 +267,14 @@ function set_extensions_version() {
   # Set project's CM version (separated due to Tycho reactor)
   # NOTE: Need to set CM project versions before rest of extensions or else the
   # tycho-versions-plugin will not properly update the MANIFEST.MF files.
-  mvn ${maven_settings} org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \
     -f "${project_dir}/extensions/cm/pom.xml" \
     -Dtycho.mode=maven \
     -DnewVersion="${extensions_version}"
 
-  mvn ${maven_settings} org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \
     -f "${project_dir}/extensions/cm/ext-cm-modules/pom.xml" \
     -Dtycho.mode=maven \
     -DnewVersion="${extensions_version}"
@@ -280,7 +295,8 @@ function set_extensions_version() {
   set_parent_version "${extensions_version}" "${project_dir}/commerce-engine/core/ep-core-tool-itests/selenium/pom.xml"
 
   # Set project version
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/extensions/pom.xml" \
     -DnewVersion="${extensions_version}"
 
@@ -293,7 +309,8 @@ function build_project() {
   local project_dir="$1"
   local maven_settings="$2"
 
-  mvn ${maven_settings} clean install -f "${project_dir}/pom.xml" -DskipAllTests
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    clean install -f "${project_dir}/pom.xml" -DskipAllTests
 }
 
 function main() {

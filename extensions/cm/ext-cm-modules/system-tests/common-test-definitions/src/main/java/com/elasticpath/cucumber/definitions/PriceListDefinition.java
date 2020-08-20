@@ -12,6 +12,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.log4j.Logger;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
@@ -21,10 +22,10 @@ import com.elasticpath.selenium.dialogs.SelectASkuDialog;
 import com.elasticpath.selenium.domainobjects.DST;
 import com.elasticpath.selenium.editor.PriceListEditor;
 import com.elasticpath.selenium.editor.product.ProductEditor;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.PriceListManagement;
 import com.elasticpath.selenium.resultspane.PriceListAssignmentsResultPane;
 import com.elasticpath.selenium.resultspane.PriceListsResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.PriceListActionToolbar;
 import com.elasticpath.selenium.util.Constants;
@@ -55,6 +56,7 @@ public class PriceListDefinition {
 	private static final String CURRENCY = "CAD";
 	private static final int SLEEP_TIME = 1000;
 	private final DST dst;
+	private final WebDriver driver = SeleniumDriverSetup.getDriver();
 
 	/**
 	 * Constructor.
@@ -62,9 +64,9 @@ public class PriceListDefinition {
 	 * @param dst the DST class
 	 */
 	public PriceListDefinition(final DST dst) {
-		priceListActionToolbar = new PriceListActionToolbar(SetUp.getDriver());
-		priceListManagement = new PriceListManagement(SetUp.getDriver());
-		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		priceListActionToolbar = new PriceListActionToolbar(driver);
+		priceListManagement = new PriceListManagement(driver);
+		activityToolbar = new ActivityToolbar(driver);
 		this.dst = dst;
 	}
 
@@ -277,7 +279,7 @@ public class PriceListDefinition {
 	public void deleteNewPriceList() {
 		clickSearchForPriceLists();
 		priceListsResultPane.deletePriceList(uniquePriceListName);
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceList");
+		new ConfirmDialog(driver).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceList");
 	}
 
 	/**
@@ -763,7 +765,7 @@ public class PriceListDefinition {
 		assertThat(uniquePriceListAssignmentName)
 				.as("It's not possible to delete a Price list assignment. A price list assignment name was not generated")
 				.isNotBlank();
-		priceEditorDialog = new PriceEditorDialog(SetUp.getDriver());
+		priceEditorDialog = new PriceEditorDialog(driver);
 		priceEditorDialog.closeDialogIfOpened();
 		deletePLAIfPresent(uniquePriceListName, uniquePriceListAssignmentName);
 		verifyPriceListAssignmentDeleted();
@@ -778,7 +780,7 @@ public class PriceListDefinition {
 				.as("It's not possible to delete a Price list assignment. A price list name was not generated")
 				.isNotBlank();
 		//any dialog which inherits Abstract dialog can be used here
-		priceEditorDialog = new PriceEditorDialog(SetUp.getDriver());
+		priceEditorDialog = new PriceEditorDialog(driver);
 		priceEditorDialog.closeDialogIfOpened();
 		clickPriceListTab();
 		deleteNewPriceList();
@@ -984,7 +986,7 @@ public class PriceListDefinition {
 	private void deletePLA(final String priceList, final String priceListAssignment) {
 		searchPriceListAssignment(priceList);
 		priceListAssignmentsResultPane.deletePriceListAssignment(priceListAssignment);
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
+		new ConfirmDialog(driver).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
 	}
 
 	/**
@@ -996,7 +998,7 @@ public class PriceListDefinition {
 	private void deletePLAIfPresent(final String priceList, final String priceListAssignment) {
 		searchPriceListAssignment(priceList);
 		if (priceListAssignmentsResultPane.deletePriceListAssignmentIfPresent(priceListAssignment)) {
-			new ConfirmDialog(SetUp.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
+			new ConfirmDialog(driver).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
 			LOGGER.debug("Price list assignment was deleted.");
 			return;
 		}

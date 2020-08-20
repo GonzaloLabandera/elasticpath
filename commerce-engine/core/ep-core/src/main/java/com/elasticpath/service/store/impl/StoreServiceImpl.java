@@ -3,14 +3,19 @@
  */
 package com.elasticpath.service.store.impl;
 
+import static com.elasticpath.commons.constants.ContextIdNames.STORE_SERVICE;
+import static com.elasticpath.persistence.api.PersistenceConstants.LIST_PARAMETER_NAME;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -20,8 +25,8 @@ import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
-import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
+import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
@@ -33,9 +38,9 @@ import com.elasticpath.service.store.StoreService;
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implements StoreService {
 
-	private static final String PLACEHOLDER_FOR_LIST = "list";
-
 	private IndexNotificationService indexNotificationService;
+
+	private TimeService timeService;
 
 	/**
 	 * Saves or updates a given <code>Store</code>.
@@ -232,7 +237,7 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 		return getPersistenceEngine()
 			.withLoadTuners(loadTuner)
-			.retrieveByNamedQueryWithList("STORE_WITH_UIDS", PLACEHOLDER_FOR_LIST, storeUids);
+			.retrieveByNamedQueryWithList("STORE_WITH_UIDS", LIST_PARAMETER_NAME, storeUids);
 	}
 
 	/**
@@ -255,7 +260,7 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public Store findStoreWithCode(final String storeCode) throws EpServiceException {
 		sanityCheck();
 		List<Store> storeList = getPersistenceEngine().retrieveByNamedQuery(
-				"FIND_STORE_WITH_CODE", FlushMode.COMMIT, storeCode);
+				"FIND_STORE_WITH_CODE", storeCode);
 		if (!storeList.isEmpty()) {
 			return storeList.get(0);
 		}
@@ -450,7 +455,7 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Collection<Store> findStoresWithCatalogUids(final Collection<Long> catalogUids) {
 		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", PLACEHOLDER_FOR_LIST, catalogUids);
+		return getPersistenceEngine().retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", LIST_PARAMETER_NAME, catalogUids);
 	}
 
 	/**
@@ -517,6 +522,26 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Collection<String> findStoreCodeForStoresWithCatalogUids(final Collection<Long> catalogUids) {
 		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQueryWithList("STORE_CODE_BY_CATALOG_UIDS", PLACEHOLDER_FOR_LIST, catalogUids);
+		return getPersistenceEngine().retrieveByNamedQueryWithList("STORE_CODE_BY_CATALOG_UIDS", LIST_PARAMETER_NAME, catalogUids);
+	}
+
+	@Override
+	public Date calculateCurrentPickDelayTimestamp(final String storeCode) {
+		int warehousePickDelay = getStoreService().findStoreWithCode(storeCode).getWarehouse().getPickDelay();
+
+		return DateUtils.addMinutes(getTimeService().getCurrentTime(), -warehousePickDelay);
+	}
+
+	//return switchable proxy store service to leverage cache
+	private StoreService getStoreService() {
+		return getSingletonBean(STORE_SERVICE, StoreService.class);
+	}
+
+	public void setTimeService(final TimeService timeService) {
+		this.timeService = timeService;
+	}
+
+	protected TimeService getTimeService() {
+		return timeService;
 	}
 }

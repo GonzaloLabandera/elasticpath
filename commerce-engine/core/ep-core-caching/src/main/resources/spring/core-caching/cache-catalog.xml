@@ -232,16 +232,16 @@
 
 	<bean id="findProductAttributeValueByAttributeUidEhCache"
 		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-		<property name="name" value="findProductAttributeValueByAttributeUidCache"/>
+		<property name="name" value="attributeValueByAttributeUidCache"/>
 		<property name="cacheManager" ref="epEhcacheManager"/>
 		<property name="timeToLive" value="600"/>
 		<property name="timeToIdle" value="600"/>
 	</bean>
 
-	<bean id="findProductAttributeValueByAttributeUidCache"
+	<bean id="attributeValueByAttributeUidCache"
 		  factory-bean="localCacheFactory" factory-method="createCache"
 		  depends-on="findProductAttributeValueByAttributeUidEhCache">
-		<constructor-arg value="findProductAttributeValueByAttributeUidCache"/>
+		<constructor-arg value="attributeValueByAttributeUidCache"/>
 	</bean>
 
 	<bean id="cachingAttributeServicefindByKeyEhCache"
@@ -259,10 +259,10 @@
 	</bean>
 
 	<bean id="cachingAttributeService" class="com.elasticpath.caching.core.catalog.CachingAttributeServiceImpl">
-				<property name="fallbackAttributeService" ref="attributeService" />
-				<property name="attributesCache" ref="cachingAttributeServiceAttributesCache"/>
-				<property name="findProductAttributeValueByAttributeUidCache" ref="findProductAttributeValueByAttributeUidCache"/>
-				<property name="findByKeyCache" ref="cachingAttributeServicefindByKeyCache"/>
+		<property name="fallbackAttributeService" ref="attributeService" />
+		<property name="attributesByUsageIdCache" ref="cachingAttributeServiceAttributesCache"/>
+		<property name="attributeValueByAttributeUidCache" ref="attributeValueByAttributeUidCache"/>
+		<property name="attributeByKeyCache" ref="cachingAttributeServicefindByKeyCache"/>
 	</bean>
 
 	<bean id="cachingCategoryServiceFindCodeByUidEhCache"
@@ -463,6 +463,57 @@
 	<bean id="cachingStoreProductService" class="com.elasticpath.caching.core.catalog.CachingStoreProductServiceImpl" >
 		<property name="fallbackService" ref="storeProductService" />
 		<property name="productForStoreCache" ref="productForStoreCache" />
+	</bean>
+
+	<!-- Brand Service -->
+	<bean id="brandByCodeEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="brandByCodeCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="brandByCodeCache" factory-bean="localCacheFactory" factory-method="createCache" depends-on="brandByCodeEhCache">
+		<constructor-arg value="brandByCodeCache"/>
+	</bean>
+
+	<bean id="cachingBrandService" class="com.elasticpath.caching.core.catalog.CachingBrandServiceImpl">
+		<property name="fallbackService" ref="brandService" />
+		<property name="brandByCodeCache" ref="brandByCodeCache"/>
+	</bean>
+
+	<!-- Catalog Service -->
+	<bean id="catalogByCodeEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="catalogByCodeCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="catalogByCodeCache" factory-bean="localCacheFactory" factory-method="createCache" depends-on="catalogByCodeEhCache">
+		<constructor-arg value="catalogByCodeCache"/>
+	</bean>
+
+	<bean id="cachingCatalogService" class="com.elasticpath.caching.core.catalog.CachingCatalogServiceImpl">
+		<property name="fallbackService" ref="catalogService" />
+		<property name="catalogByCodeCache" ref="catalogByCodeCache"/>
+	</bean>
+
+	<!-- Product Type Dao -->
+	<bean id="productTypeByNameEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="productTypeByNameCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="productTypeByNameCache" factory-bean="localCacheFactory" factory-method="createCache" depends-on="productTypeByNameEhCache">
+		<constructor-arg value="productTypeByNameCache"/>
+	</bean>
+
+	<bean id="cachingProductTypeDao" class="com.elasticpath.caching.core.catalog.CachingProductTypeDaoImpl">
+		<property name="fallbackDao" ref="productTypeDao" />
+		<property name="productTypeByNameCache" ref="productTypeByNameCache"/>
 	</bean>
 
 </beans>

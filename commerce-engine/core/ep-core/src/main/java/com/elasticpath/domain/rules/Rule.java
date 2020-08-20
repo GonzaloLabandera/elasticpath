@@ -224,18 +224,16 @@ public interface Rule extends Entity {
 	void setCmUser(CmUser cmUser);
 
 	/**
-	 * Get the starting date from selling context
-	 * that this rule can be applied.
+	 * Get the rule start date, falling back on the condition details within the selling context if necessary.
 	 * @return the start date
 	 */
-	Date getStartDateFromSellingContext();
+	Date getEffectiveStartDate();
 
 	/**
-	 * Get the end date from selling context. After the end date, the rule will no longer be applied.
+	 * Get the rule end date, falling back on the condition details within the selling context if necessary.
 	 * @return the end date
 	 */
-	Date getEndDateFromSellingContext();
-
+	Date getEffectiveEndDate();
 
 	/**
 	 * Returns <code>true</code> if this rule is enabled, <code>false</code> if it is disabled.
@@ -374,6 +372,23 @@ public interface Rule extends Entity {
 	 * @return whether the current date is bounded between the rules start and end dates
 	 */
 	boolean isWithinDateRange();
+
+	/**
+	 * Returns {@code true} if the rule has expired based on the passed date. If the end date is
+	 * {@code null} then the end is treated as unbounded.
+
+	 * @param date date to compare with
+	 * @return whether the rule has expired based on end date
+	 */
+	boolean isExpired(Date date);
+
+	/**
+	 * Returns {@code true} if the rule has expired. If the end date is
+	 * {@code null} then the end is treated as unbounded.
+
+	 * @return whether the rule has expired based on end date
+	 */
+	boolean isExpired();
 
 	/**
 	 *

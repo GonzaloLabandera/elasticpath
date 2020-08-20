@@ -29,41 +29,6 @@ public class OrderPaymentApiCleanupServiceImpl implements OrderPaymentApiCleanup
 	}
 
 	@Override
-	public void removeByCustomerUidList(final List<Long> customerUidList) {
-		sanityCheck();
-
-		getPersistenceEngine().executeNamedQueryWithList(
-				"DELETE_ALL_CUSTOMER_PAYMENT_INSTRUMENTS_BY_CUSTOMER_UID_LIST", LIST_PARAMETER_NAME, customerUidList);
-		getPersistenceEngine().flush();
-	}
-
-	@Override
-	public void removeByShoppingCartGuid(final String cartGuid) {
-		sanityCheck();
-
-		getPersistenceEngine().executeNamedQuery("DELETE_ALL_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPING_CART_GUID", cartGuid);
-		getPersistenceEngine().flush();
-	}
-
-	@Override
-	public void removeByShoppingCartGuids(final List<String> shoppingCartGuids) {
-		sanityCheck();
-
-		getPersistenceEngine().executeNamedQueryWithList(
-				"DELETE_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPING_CART_GUIDS", LIST_PARAMETER_NAME, shoppingCartGuids);
-		getPersistenceEngine().flush();
-	}
-
-	@Override
-	public void removeByShopperUidList(final List<Long> shopperUidList) {
-		sanityCheck();
-
-		getPersistenceEngine().executeNamedQueryWithList(
-				"DELETE_ALL_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPER_UID_LIST", LIST_PARAMETER_NAME, shopperUidList);
-		getPersistenceEngine().flush();
-	}
-
-	@Override
 	public void removeByOrder(final Order order) {
         sanityCheck();
 

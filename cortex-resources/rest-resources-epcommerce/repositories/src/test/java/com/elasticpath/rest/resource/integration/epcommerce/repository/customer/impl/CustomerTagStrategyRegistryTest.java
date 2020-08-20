@@ -12,15 +12,23 @@ import org.junit.Test;
 import org.hamcrest.Matchers;
 import org.mockito.Mockito;
 
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.AccountTagStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerTagStrategy;
 
 public class CustomerTagStrategyRegistryTest {
 
-	CustomerTagStrategyRegistry classUnderTest = new CustomerTagStrategyRegistry();
+	final CustomerTagStrategyRegistry classUnderTest = new CustomerTagStrategyRegistry();
 
 	@Test
 	public void testEmptyRegistry() {
-		Collection<CustomerTagStrategy> strategies = classUnderTest.getStrategies();
+		final Collection<CustomerTagStrategy> strategies = classUnderTest.getStrategies();
+
+		assertThat(strategies, Matchers.empty());
+	}
+
+	@Test
+	public void testEmptyAccountRegistry() {
+		final Collection<AccountTagStrategy> strategies = classUnderTest.getAccountStrategies();
 
 		assertThat(strategies, Matchers.empty());
 	}
@@ -40,5 +48,20 @@ public class CustomerTagStrategyRegistryTest {
 
 		strategies = classUnderTest.getStrategies();
 
-		assertThat(strategies, Matchers.empty());	}
+		assertThat(strategies, Matchers.empty());
+	}
+
+	@Test
+	public void testLoadAndUnloadAccountStrategy() {
+		final AccountTagStrategy strategy = Mockito.mock(AccountTagStrategy.class);
+		classUnderTest.loadAccountStrategy(strategy);
+
+		final Collection<AccountTagStrategy> strategies = classUnderTest.getAccountStrategies();
+		assertThat(strategies, Matchers.contains(strategy));
+
+		classUnderTest.unloadAccountStrategy(strategy);
+
+		final Collection<AccountTagStrategy> strategiesAfterUnloading = classUnderTest.getAccountStrategies();
+		assertThat(strategiesAfterUnloading, Matchers.empty());
+	}
 }

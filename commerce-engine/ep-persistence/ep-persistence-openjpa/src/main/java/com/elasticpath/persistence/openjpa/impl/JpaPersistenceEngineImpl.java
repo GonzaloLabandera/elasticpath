@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -62,9 +61,18 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	private PlatformTransactionManager txManager;
 
 	private FetchPlanHelper fetchPlanHelper;
+	private QueryReaderFactory queryReaderFactory;
 	private QueryReader queryReader;
 
 	private List<PersistenceEngineOperationListener> operationListeners = Collections.emptyList();
+
+	/**
+	 * Create a new instance of {@link QueryReader} and, subsequently {@link com.elasticpath.persistence.openjpa.routing.QueryRouter} per engine
+	 * instance with specific read-write entity manager.
+	 */
+	public void init() {
+		queryReader = queryReaderFactory.createQueryReader(entityManager);
+	}
 
 	// @@@@@@@@@@@@ Read operations @@@@@@@@@@@@@@@@@@@@@
 	/**
@@ -1026,6 +1034,10 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 		this.txManager = txManager;
 	}
 
+	public PlatformTransactionManager getTxManager() {
+		return txManager;
+	}
+
 	private StoreCache getDataCache() {
 		return getOpenJPAEntityManagerFactory().getStoreCache();
 	}
@@ -1063,12 +1075,19 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 		}
 	}
 
-
 	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
 		this.fetchPlanHelper = fetchPlanHelper;
 	}
 
-	public void setQueryReader(final QueryReader queryReader) {
-		this.queryReader = queryReader;
+	public FetchPlanHelper getFetchPlanHelper() {
+		return fetchPlanHelper;
+	}
+
+	public QueryReaderFactory getQueryReaderFactory() {
+		return queryReaderFactory;
+	}
+
+	public void setQueryReaderFactory(final QueryReaderFactory queryReaderFactory) {
+		this.queryReaderFactory = queryReaderFactory;
 	}
 }

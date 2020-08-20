@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
+import java.net.URL;
 
 import org.junit.After;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import com.elasticpath.base.exception.EpSystemException;
 @RunWith(MockitoJUnitRunner.class)
 public class EhcacheConfigurationLoaderTest {
 
+	private static final String RETURNED_RESOURCE_MUST_BE_SAME_AS_ORIGINAL_MSG = "Returned resource must be the same as original";
 	private EhcacheConfigurationLoader fixture;
 	private File expectedResource;
 
@@ -66,7 +68,7 @@ public class EhcacheConfigurationLoaderTest {
 		fixture.setPathname("file://" + expectedResource.getAbsolutePath());
 
 		assertThat(fixture.getResource().getFile())
-				.as("Returned resource must be the same as original")
+				.as(RETURNED_RESOURCE_MUST_BE_SAME_AS_ORIGINAL_MSG)
 				.isEqualTo(expectedResource);
 	}
 
@@ -78,7 +80,7 @@ public class EhcacheConfigurationLoaderTest {
 		fixture.setPathname(expectedResource.getAbsolutePath());
 
 		assertThat(fixture.getResource().getFile())
-				.as("Returned resource must be the same as original")
+				.as(RETURNED_RESOURCE_MUST_BE_SAME_AS_ORIGINAL_MSG)
 				.isEqualTo(expectedResource);
 
 	}
@@ -94,8 +96,29 @@ public class EhcacheConfigurationLoaderTest {
 		fixture.setPathname("${user.home}/ep/conf/junit-test.temp");
 
 		assertThat(fixture.getResource().getFile())
-				.as("Returned resource must be the same as original")
+				.as(RETURNED_RESOURCE_MUST_BE_SAME_AS_ORIGINAL_MSG)
 				.isEqualTo(expectedResource);
 	}
 
+	@Test
+	public void shouldReturnClasspathResourceWhenResourceExists() throws Exception {
+		final String resourcePath = "test.txt";
+		final URL expectedClasspathResource = getClass().getClassLoader().getResource(resourcePath);
+
+		fixture = new EhcacheConfigurationLoader();
+		fixture.setPathname("classpath:" + resourcePath);
+
+		assertThat(fixture.getResource().getURL())
+				.as(RETURNED_RESOURCE_MUST_BE_SAME_AS_ORIGINAL_MSG)
+				.isEqualTo(expectedClasspathResource);
+	}
+
+	@Test
+	public void shouldThrowExceptionWhenClasspathResourceDoesNotExist() {
+		fixture = new EhcacheConfigurationLoader();
+		fixture.setPathname("classpath:somewhere");
+
+		assertThatThrownBy(() -> fixture.getResource())
+				.isInstanceOf(EpSystemException.class);
+	}
 }

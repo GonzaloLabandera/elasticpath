@@ -1,14 +1,20 @@
 package com.elasticpath.cortex.dce.facets
 
-import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
 import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.DataTable
 import cucumber.api.java.en.Then
+import org.apache.log4j.Logger
+
 import com.elasticpath.CucumberDTO.Facet
 import com.elasticpath.cortexTestObjects.Facets
 
 class FacetsSteps {
+
+	private static final Logger LOGGER = Logger.getLogger(FacetsSteps.class)
+	static final int SLEEP_ONE_SECONDS_IN_MILLIS = 1000
+
 	@Then('^the expected facet choice list matches the following list$')
 	static void verifyChoiceList(DataTable choiceListTable) {
 		def choiceList = choiceListTable.asList(Facet)
@@ -17,16 +23,29 @@ class FacetsSteps {
 
 		for (Facet facet : choiceList) {
 			boolean isExist = false
-			client.resume(resultsUri)
-			client.body.links.find {
-				if (it.rel == "choice" || it.rel == "chosen") {
-					client.GET(it.href)
-							.description()
-					if (client["count"] == facet.getCount() && client["value"] == facet.getValue()) {
-						return isExist = true
+			int attempts = 0;
+			// waiting for cache to expire
+			while (!isExist && attempts < 100) {
+				client.resume(resultsUri)
+				client.GET(client.body.self.uri)
+				client.body.links.find {
+					if (it.rel == "choice" || it.rel == "chosen") {
+						client.GET(it.href)
+								.description()
+						LOGGER.debug(attempts + " ..... actual values ..." + client["value"] + "count:" + client["count"])
+						if (client["count"] == facet.getCount() && client["value"] == facet.getValue()) {
+							return isExist = true
 
+						}
 					}
 				}
+				if (isExist) {
+					LOGGER.debug(attempts + " ..... found ..." + facet.value + ":" + facet.count)
+					break
+				}
+				LOGGER.debug(attempts + " .....Unable to find..." + facet.value + ":" + facet.count)
+				sleep(SLEEP_ONE_SECONDS_IN_MILLIS)
+				attempts++;
 			}
 			assertThat(isExist)
 					.as("Unable to find expected facet choice - " + facet.value + ":" + facet.count)

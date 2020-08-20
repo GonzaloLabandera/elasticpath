@@ -1,0 +1,50 @@
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>purchases</name>
+
+		<!-- ... -->
+
+		<resource>
+			<name>purchase-creator</name>
+			<description><![CDATA[Information about who created the purchase.]]></description>
+			<uri>{purchase}/creator</uri>
+			<entity>purchase-creator</entity>
+		</resource>
+
+		<relationship>
+			<name>purchase-to-creator</name>
+			<description><![CDATA[Link from purchase to created-by entity.]]></description>
+			<rel>created-by</rel>
+			<from>purchase</from>
+			<to>purchase-creator</to>
+		</relationship>
+
+		<relationship>
+			<name>purchase-from-creator</name>
+			<description><![CDATA[Link from purchase to created-by entity.]]></description>
+			<rel>purchase</rel>
+			<from>purchase-creator</from>
+			<to>purchase</to>
+		</relationship>
+
+		<entity>
+			<name>purchase-creator</name>
+			<description><![CDATA[Holds information about the user that created the purchase.]]></description>
+			<property>
+				<name>user-email</name>
+				<description><![CDATA[The user's email.]]></description>
+				<string/>
+			</property>
+			<property>
+				<name>user-full-name</name>
+				<description><![CDATA[The user's full name.]]></description>
+				<string/>
+			</property>
+		</entity>
+	</family>
+</definitions>

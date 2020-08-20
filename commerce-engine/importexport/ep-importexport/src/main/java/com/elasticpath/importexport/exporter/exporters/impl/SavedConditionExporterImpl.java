@@ -58,7 +58,7 @@ public class SavedConditionExporterImpl extends AbstractExporterImpl<Conditional
 		conditionGuids.addAll(
 				getImportExportSearcher().searchGuids(
 						getContext().getSearchConfiguration(),
-						EPQueryType.SAVED_CONDITION));
+						EPQueryType.SAVEDCONDITION));
 		 
 		for (String guid : conditionGuids) {
 			ConditionalExpression current = getTagConditionService().findByGuid(guid);			
@@ -83,7 +83,7 @@ public class SavedConditionExporterImpl extends AbstractExporterImpl<Conditional
 
 	@Override
 	public JobType getJobType() {
-		return JobType.SAVED_CONDITION;
+		return JobType.SAVEDCONDITION;
 	}
 
 	private TagConditionService getTagConditionService() {

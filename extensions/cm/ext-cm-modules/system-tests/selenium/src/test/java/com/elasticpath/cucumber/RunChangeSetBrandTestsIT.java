@@ -8,8 +8,10 @@ import org.junit.runner.RunWith;
  * This class is used to run Cucumber Features test scenarios.
  */
 @RunWith(Cucumber.class)
-@CucumberOptions(plugin = {"pretty", "html:target/cucumber-html-reports/changesets/catalogManagement/brand",
-		"json:target/changesets/catalogManagement/brand.json"},
+@CucumberOptions(
+		plugin = {"pretty", "html:target/cucumber-html-reports/changesets/catalogManagement/brand",
+				"json:target/changesets/catalogManagement/brand.json",
+				"junit:target/cucumber-junit-reports/changesets/catalogManagement/brand/cucumber.xml"},
 		glue = {"classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.jms.cucumber", "classpath:com.elasticpath.cortex"},
 		tags = {"@changeset"},
 		features = "src/test/resources/com.elasticpath.cucumber/changesets/catalogManagement/brand")

@@ -41,7 +41,7 @@ public class PatternsTest {
 		assertThat(matcher.find())
 				.isTrue();
 
-		assertThat(matcher.group(1).trim())
+		assertThat(matcher.group(2).trim())
 				.isEqualTo("SELECT t0.GUID");
 	}
 
@@ -84,7 +84,7 @@ public class PatternsTest {
 
 	@Test
 	public void shouldMatchTablePattern() {
-		final Matcher matcher = Patterns.TABLE_PATTERN.matcher("FROM TCARTORDER t0 CROSS JOIN TSHOPPINGCART t1");
+		final Matcher matcher = Patterns.QUERY_TABLE_PATTERN.matcher("FROM TCARTORDER t0 CROSS JOIN TSHOPPINGCART t1");
 
 		assertThat(matcher.find())
 				.isTrue();
@@ -106,7 +106,7 @@ public class PatternsTest {
 
 	@Test
 	public void shouldMatchSQLQueryExeTimePattern() {
-		final Matcher matcher = Patterns.SQL_QUERY_EXE_TIME_PATTERN.matcher("<t 2101959319, conn 1296868722> [1 ms] spent");
+		final Matcher matcher = Patterns.SQL_STATEMENT_EXE_TIME_PATTERN.matcher("<t 2101959319, conn 1296868722> [1 ms] spent");
 
 		assertThat(matcher.find())
 				.isTrue();

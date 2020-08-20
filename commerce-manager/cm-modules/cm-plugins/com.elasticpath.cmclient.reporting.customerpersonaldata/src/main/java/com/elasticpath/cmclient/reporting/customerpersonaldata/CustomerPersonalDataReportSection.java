@@ -51,8 +51,8 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 	public static final String PARAMETER_STORE_UIDPK = "storeUidPk"; //$NON-NLS-1$
 	/** The key for the "store" query parameter. */
 	public static final String PARAMETER_STORE = "store"; //$NON-NLS-1$
-	/** The key for the "userId" query parameter. */
-	public static final String PARAMETER_USER_ID = "userId"; //$NON-NLS-1$
+	/** The key for the "sharedId" query parameter. */
+	public static final String PARAMETER_SHARED_ID = "sharedId"; //$NON-NLS-1$
 	/** The key for the "dateFormat" query parameter. */
 	public static final String PARAMETER_DATE_FORMAT = "dateFormat"; //$NON-NLS-1$
 
@@ -61,7 +61,7 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 
 	private CCombo storeCombo;
 
-	private Text userIdText;
+	private Text sharedIdText;
 
 	private final CustomerPersonalDataParameters parameters = new CustomerPersonalDataParameters();
 	private final ReportAuthorizationUtility reportUtility = new ReportAuthorizationUtility();
@@ -83,11 +83,11 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 			final DataBindingContext context) {
 
 		bindStoreCombo(bindingProvider, context, true);
-		bindUserId(bindingProvider, context);
+		bindSharedId(bindingProvider, context);
 
 		ModifyListener modifyListener = getModifyListener();
 
-		userIdText.addModifyListener(modifyListener);
+		sharedIdText.addModifyListener(modifyListener);
 		storeCombo.addModifyListener(modifyListener);
 	}
 
@@ -107,8 +107,8 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 		parentEpComposite.addLabelBoldRequired(CustomerPersonalDataMessages.get().store, state, null);
 		storeCombo = parentEpComposite.addComboBox(state, data);
 
-		parentEpComposite.addLabelBoldRequired(CustomerPersonalDataMessages.get().userId,  EpState.EDITABLE, data);
-		userIdText = parentEpComposite.addTextField(state, data);
+		parentEpComposite.addLabelBoldRequired(CustomerPersonalDataMessages.get().sharedId,  EpState.EDITABLE, data);
+		sharedIdText = parentEpComposite.addTextField(state, data);
 
 		populateControls();
 	}
@@ -122,7 +122,7 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 		paramsMap.put(PARAMETER_STORE_UIDPK, parameters.getStoreUidPk());
 		paramsMap.put(PARAMETER_STORE, parameters.getStore());
 
-		paramsMap.put(PARAMETER_USER_ID, parameters.getUserId());
+		paramsMap.put(PARAMETER_SHARED_ID, parameters.getSharedId());
 
 		paramsMap.put(PARAMETER_DATE_FORMAT, parameters.getDateFormat());
 
@@ -143,12 +143,12 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 				CustomerPersonalDataReportPermissions.REPORTING_CUSTOMER_PERSONAL_DATA_MANAGE);
 	}
 
-	private void bindUserId(final EpControlBindingProvider bindingProvider, final DataBindingContext context) {
+	private void bindSharedId(final EpControlBindingProvider bindingProvider, final DataBindingContext context) {
 
 
-		this.userIdText.addModifyListener(getModifyListener());
+		this.sharedIdText.addModifyListener(getModifyListener());
 
-		bindingProvider.bind(context, this.userIdText, parameters, PARAMETER_USER_ID, EpValidatorFactory.REQUIRED, null, true); //$NON-NLS-1$
+		bindingProvider.bind(context, this.sharedIdText, parameters, PARAMETER_SHARED_ID, EpValidatorFactory.REQUIRED, null, true); //$NON-NLS-1$
 	}
 
 	private void bindStoreCombo(final EpControlBindingProvider bindingProvider,
@@ -203,7 +203,7 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 	@Override
 	public boolean isInputValid() {
 		boolean storeSelected = storeCombo.getSelectionIndex() > 0;
-		return storeSelected && StringUtils.isNotBlank(userIdText.getText()) && super.isInputValid();
+		return storeSelected && StringUtils.isNotBlank(sharedIdText.getText()) && super.isInputValid();
 	}
 
 	private String[] getStoreNames() {

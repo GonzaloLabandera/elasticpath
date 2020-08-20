@@ -44,6 +44,13 @@
             id="com.elasticpath.cmclient.fulfillment.views.customer.CustomerSearchResultsView"
             name="%searchResultsView.name">
       </view>
+	   <view
+			category="com.elasticpath.cmclient.fulfillment.views.category"
+			class="com.elasticpath.cmclient.fulfillment.views.customer.AccountSearchResultsView"
+			icon="icons/empty_1x1.png"
+			id="com.elasticpath.cmclient.fulfillment.views.customer.AccountSearchResultsView"
+			name="%accountSearchResultsView.name">
+	   </view>
       <view
             category="com.elasticpath.cmclient.fulfillment.views.category"
             class="com.elasticpath.cmclient.fulfillment.views.order.OrderSearchResultsView"
@@ -99,6 +106,13 @@
             id="com.elasticpath.cmclient.fulfillment.editors.customer.CustomerDetailsEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
       </editor>
+	   <editor
+			   name="%accountDetailsEditor.name"
+			   icon="icons/user_default_22.png"
+			   class="com.elasticpath.cmclient.fulfillment.editors.customer.AccountDetailsEditor"
+			   id="com.elasticpath.cmclient.fulfillment.editors.customer.AccountDetailsEditor"
+			   contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
+	   </editor>
       <editor
             name="%orderEditor.name"
             icon="icons/order_default_22.png"
@@ -172,6 +186,10 @@
                activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.customerService"
                key="ASSIGN_CUSTOMER_SEGMENTS"
                name="%assignCustomerSegments.name"/>
+		  <permission
+				  activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.customerService"
+				  key="CREATE_EDIT_ACCOUNTS"
+				  name="%createEditAccounts.name"/>
       </permissions>
       <activity
             id="com.elasticpath.cmclient.fulfillment.authorizations.activity.customerService"

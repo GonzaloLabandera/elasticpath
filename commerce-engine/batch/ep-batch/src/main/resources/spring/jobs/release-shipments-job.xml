@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
+
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+	">
+
+	<bean id="releaseShipmentsBatchProcessor" parent="batchTxProxyTemplate">
+		<property name="target" ref="releasePhysicalShipmentsBatchProcessorTarget"/>
+	</bean>
+
+	<bean id="releasePhysicalShipmentsBatchProcessorTarget" class="com.elasticpath.batch.jobs.impl.shipments.ReleaseShipmentsBatchProcessor">
+		<property name="persistenceEngine" ref="batchPersistenceEngine"/>
+		<property name="storeService" ref="storeService"/>
+		<property name="timeService" ref="timeService"/>
+		<property name="eventOriginatorHelper" ref="eventOriginatorHelper"/>
+		<property name="orderEventHelper" ref="orderEventHelper"/>
+	</bean>
+
+	<bean id="releasePhysicalShipmentsJob" class="com.elasticpath.batch.jobs.impl.shipments.ReleasePhysicalShipmentsJob">
+		<property name="persistenceEngine" ref="batchPersistenceEngine"/>
+		<property name="batchProcessor" ref="releaseShipmentsBatchProcessor" />
+		<property name="configBatchSize">
+			<settings:setting path="COMMERCE/SYSTEM/RELEASESHIPMENTSJOB/batchSize"/><!-- default: 500 -->
+		</property>
+	</bean>
+</beans>

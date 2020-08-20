@@ -6,6 +6,7 @@ import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.AddEditBrandDialog;
 import com.elasticpath.selenium.dialogs.CreateChangeSetDialog;
@@ -19,10 +20,10 @@ import com.elasticpath.selenium.domainobjects.LinkedCategory;
 import com.elasticpath.selenium.domainobjects.Product;
 import com.elasticpath.selenium.domainobjects.ProductType;
 import com.elasticpath.selenium.editor.ChangeSetEditor;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.ChangeSet;
 import com.elasticpath.selenium.resultspane.CatalogProductListingPane;
 import com.elasticpath.selenium.resultspane.ChangeSetSearchResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ChangeSetActionToolbar;
 import com.elasticpath.selenium.util.Constants;
@@ -54,6 +55,7 @@ public class ChangeSetDefinition {
 	private final DST dst;
 	private AddEditBrandDialog addEditBrandDialog;
 	private final ProductAndBundleDefinition productAndBundleDefinition;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -70,9 +72,10 @@ public class ChangeSetDefinition {
 	public ChangeSetDefinition(final ProductType productType, final CartItemModifierGroup cartItemModifierGroup, final Catalog catalog,
 							   final Category category, final LinkedCategory linkedCategory, final CategoryType categoryType, final Product product,
 							   final ProductAndBundleDefinition productAndBundleDefinition, final DST dst) {
-		changeSetActionToolbar = new ChangeSetActionToolbar(SetUp.getDriver());
-		changeSet = new ChangeSet(SetUp.getDriver());
-		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		changeSetActionToolbar = new ChangeSetActionToolbar(driver);
+		changeSet = new ChangeSet(driver);
+		activityToolbar = new ActivityToolbar(driver);
 		this.productType = productType;
 		this.cartItemModifierGroup = cartItemModifierGroup;
 		this.catalog = catalog;
@@ -481,7 +484,7 @@ public class ChangeSetDefinition {
 				.as("It's not possible to finalize a changeset " + changeSetName + ". A changeset name was not generated")
 				.isNotBlank();
 		//any dialog which inherits Abstract dialog can be used here
-		createChangeSetDialog = new CreateChangeSetDialog(SetUp.getDriver());
+		createChangeSetDialog = new CreateChangeSetDialog(driver);
 		createChangeSetDialog.closeDialogIfOpened();
 		searchAndLockNewChangeSet(changeSetName);
 		changeSetSearchResultPane.clickFinalizedButton();

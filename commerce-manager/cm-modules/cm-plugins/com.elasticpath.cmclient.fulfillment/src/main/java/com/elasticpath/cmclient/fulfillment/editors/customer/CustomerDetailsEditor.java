@@ -32,6 +32,9 @@ import com.elasticpath.service.store.StoreService;
  */
 public class CustomerDetailsEditor extends AbstractCmClientFormEditor {
 
+	/** serialVersionUID. */
+	private static final long serialVersionUID = -8223268909559621203L;
+
 	private static final int TOTAL_WORK_UNITS = 3;
 
 	/**
@@ -134,12 +137,12 @@ public class CustomerDetailsEditor extends AbstractCmClientFormEditor {
 
 	@Override
 	public Collection<Locale> getSupportedLocales() {
-		return store.getSupportedLocales();
+		return store == null ? null : store.getSupportedLocales();
 	}
 
 	@Override
 	public Locale getDefaultLocale() {
-		return store.getDefaultLocale();
+		return store == null ? null : store.getDefaultLocale();
 	}
 
 	@Override

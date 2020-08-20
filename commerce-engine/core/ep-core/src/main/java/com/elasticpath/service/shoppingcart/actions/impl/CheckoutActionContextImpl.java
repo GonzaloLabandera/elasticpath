@@ -107,11 +107,6 @@ public class CheckoutActionContextImpl implements CheckoutActionContext {
 	}
 
 	@Override
-	public String getCustomerIpAddress() {
-		return customerSession.getIpAddress();
-	}
-
-	@Override
 	public CustomerSession getCustomerSession() {
 		return customerSession;
 	}

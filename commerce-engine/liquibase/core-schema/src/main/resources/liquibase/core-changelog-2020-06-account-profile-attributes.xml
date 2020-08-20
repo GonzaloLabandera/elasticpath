@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-06-account-profile-attributes.xml">
+
+	<changeSet id="core-changelog-2020-06-account-profile-attributes" author="elasticpath">
+		<comment>[PB-8249] Insert Account Usage Customer Profile Attributes </comment>
+
+		<insert tableName="TATTRIBUTE">
+			<column name="UIDPK" valueNumeric="650"/>
+			<column name="ATTRIBUTE_KEY" value="AP_NAME"/>
+			<column name="LOCALE_DEPENDANT" value="0"/>
+			<column name="ATTRIBUTE_TYPE" value="1"/>
+			<column name="REQUIRED" value="1"/>
+			<column name="VALUE_LOOKUP_ENABLED" value="0"/>
+			<column name="ATTRIBUTE_USAGE" value="5"/>
+			<column name="SYSTEM" value="1"/>
+			<column name="ATTR_GLOBAL" value="0"/>
+		</insert>
+		
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="650" />
+			<column name="OBJECT_UID" value="650" />
+			<column name="LOCALIZED_PROPERTY_KEY" value="attributeDisplayName_en" />
+			<column name="VALUE" value="Business Name" />
+			<column name="TYPE" value="Attribute" />
+		</insert>
+
+		<insert tableName="TATTRIBUTE">
+			<column name="UIDPK" valueNumeric="651"/>
+			<column name="ATTRIBUTE_KEY" value="AP_BUSINESS_NUMBER"/>
+			<column name="LOCALE_DEPENDANT" value="0"/>
+			<column name="ATTRIBUTE_TYPE" value="1"/>
+			<column name="REQUIRED" value="0"/>
+			<column name="VALUE_LOOKUP_ENABLED" value="0"/>
+			<column name="ATTRIBUTE_USAGE" value="5"/>
+			<column name="SYSTEM" value="1"/>
+			<column name="ATTR_GLOBAL" value="0"/>
+		</insert>
+		
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="651" />
+			<column name="OBJECT_UID" value="651" />
+			<column name="LOCALIZED_PROPERTY_KEY" value="attributeDisplayName_en" />
+			<column name="VALUE" value="Business Number" />
+			<column name="TYPE" value="Attribute" />
+		</insert>
+		
+		<insert tableName="TATTRIBUTE">
+			<column name="UIDPK" valueNumeric="652"/>
+			<column name="ATTRIBUTE_KEY" value="AP_FAX"/>
+			<column name="LOCALE_DEPENDANT" value="0"/>
+			<column name="ATTRIBUTE_TYPE" value="1"/>
+			<column name="REQUIRED" value="0"/>
+			<column name="VALUE_LOOKUP_ENABLED" value="0"/>
+			<column name="ATTRIBUTE_USAGE" value="5"/>
+			<column name="SYSTEM" value="1"/>
+			<column name="ATTR_GLOBAL" value="0"/>
+		</insert>
+		
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="652" />
+			<column name="OBJECT_UID" value="652" />
+			<column name="LOCALIZED_PROPERTY_KEY" value="attributeDisplayName_en" />
+			<column name="VALUE" value="Fax" />
+			<column name="TYPE" value="Attribute" />
+		</insert>
+
+		<insert tableName="TATTRIBUTE">
+			<column name="UIDPK" valueNumeric="653"/>
+			<column name="ATTRIBUTE_KEY" value="AP_PHONE"/>
+			<column name="LOCALE_DEPENDANT" value="0"/>
+			<column name="ATTRIBUTE_TYPE" value="1"/>
+			<column name="REQUIRED" value="0"/>
+			<column name="VALUE_LOOKUP_ENABLED" value="0"/>
+			<column name="ATTRIBUTE_USAGE" value="5"/>
+			<column name="SYSTEM" value="1"/>
+			<column name="ATTR_GLOBAL" value="0"/>
+		</insert>
+		
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="653" />
+			<column name="OBJECT_UID" value="653" />
+			<column name="LOCALIZED_PROPERTY_KEY" value="attributeDisplayName_en" />
+			<column name="VALUE" value="Phone" />
+			<column name="TYPE" value="Attribute" />
+		</insert>
+
+		<insert tableName="TATTRIBUTE">
+			<column name="UIDPK" valueNumeric="654"/>
+			<column name="ATTRIBUTE_KEY" value="AP_TAX_EXEMPTION_ID"/>
+			<column name="LOCALE_DEPENDANT" value="0"/>
+			<column name="ATTRIBUTE_TYPE" value="1"/>
+			<column name="REQUIRED" value="0"/>
+			<column name="VALUE_LOOKUP_ENABLED" value="0"/>
+			<column name="ATTRIBUTE_USAGE" value="5"/>
+			<column name="SYSTEM" value="1"/>
+			<column name="ATTR_GLOBAL" value="0"/>
+		</insert>
+		
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="654" />
+			<column name="OBJECT_UID" value="654" />
+			<column name="LOCALIZED_PROPERTY_KEY" value="attributeDisplayName_en" />
+			<column name="VALUE" value="Tax Exemption ID" />
+			<column name="TYPE" value="Attribute" />
+		</insert>
+	</changeSet>
+</databaseChangeLog>

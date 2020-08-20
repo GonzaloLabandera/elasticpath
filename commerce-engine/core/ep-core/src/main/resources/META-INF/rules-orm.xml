@@ -542,7 +542,7 @@
 		<named-query name="PROMOTION_DETAILS">
 			<query>
 				<![CDATA[
-				SELECT o.orderNumber, o.createdDate, o.customer.userId, ac.couponCode, o.currency, o.total
+				SELECT o.orderNumber, o.createdDate, o.customer.sharedId, ac.couponCode, o.currency, o.total
 				FROM OrderImpl o, StoreImpl s, PromotionRuleImpl r, RuleSetImpl rs
 				INNER JOIN o.appliedRules ar
 				LEFT OUTER JOIN ar.appliedCoupons ac

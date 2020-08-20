@@ -7,7 +7,7 @@ import cucumber.api.java.en.When;
 import com.elasticpath.cucumber.definitions.PriceListDefinition;
 import com.elasticpath.cucumber.definitions.ProductAndBundleDefinition;
 import com.elasticpath.selenium.domainobjects.DST;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.sync.SyncConfig;
 
@@ -30,7 +30,7 @@ public class DSTDefinition {
 	public DSTDefinition(final DST dst, final PriceListDefinition priceListDefinition, final ProductAndBundleDefinition productAndBundleDefinition) {
 		this.dst = dst;
 		this.priceListDefinition = priceListDefinition;
-		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		activityToolbar = new ActivityToolbar(SeleniumDriverSetup.getDriver());
 		this.productAndBundleDefinition = productAndBundleDefinition;
 	}
 

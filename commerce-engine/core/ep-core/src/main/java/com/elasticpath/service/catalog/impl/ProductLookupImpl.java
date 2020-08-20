@@ -84,6 +84,33 @@ public class ProductLookupImpl implements ProductLookup {
 
 	}
 
+	@Override
+	public <P extends Product> List<P> findByGuids(final Collection<String> guids) throws EpServiceException {
+		List<P> products = new ArrayList<>();
+		List<List<String>> batchesOfUids = Lists.partition(new ArrayList<>(guids), BATCH_SIZE);
+		for (List<String> batchOfUids : batchesOfUids) {
+			products.addAll(findByGuidsInternal(batchOfUids));
+		}
+		return products;
+	}
+
+	/**
+	 * Internal implementation that finds products by guids.
+	 *
+	 * @param guids the products' guids
+	 * @param <P> the genericized Product sub-class that this finder will return
+	 * @return the products that match the given guids, otherwise an empty list
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
+	 */
+	protected <P extends Product> List<P> findByGuidsInternal(final Collection<String> guids) throws EpServiceException {
+		QueryResult<P> queryResult = getQueryService().query(productCriteria()
+				.with(ProductRelation.having().codes(guids))
+				.usingLoadTuner(productLoadTuner)
+				.returning(ResultType.ENTITY));
+
+		return queryResult.getResults();
+	}
+
 	/**
 	 * Get the criteria builder for a product.
 	 *

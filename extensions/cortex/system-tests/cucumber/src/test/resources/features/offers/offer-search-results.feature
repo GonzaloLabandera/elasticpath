@@ -29,6 +29,14 @@ Feature: Offer Search Results
       | OUT_OF_SCOPE_PRODUCT      |
       | Motorola Wireless Headset |
 
+  Scenario Outline: Offer Search should not return disabled products
+    When I search for offer <DISABLED_PRODUCT>
+    Then there are 0 links of rel element
+
+    Examples:
+      | DISABLED_PRODUCT |
+      | Future Product   |
+
   Scenario Outline: Offer Search should not return products that are not sold separately
     When I search for offer <NOT_SOLD_SEPARATELY_PRODUCT>
     Then the element list does not contains items with display-names

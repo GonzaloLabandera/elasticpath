@@ -27,6 +27,9 @@ public final class JPAQuery implements Serializable {
 	private final String query;
 	private final Collection<String> eagerRelations = new LinkedHashSet<>();
 	private final List<SQLQuery> sqlQueries = new LinkedList<>();
+	private final List<DbStatement> sqlUpdates = new LinkedList<>();
+	private final List<DbStatement> sqlDeletes = new LinkedList<>();
+	private final List<DbStatement> sqlInserts = new LinkedList<>();
 	private Date startedAt;
 
 	/**
@@ -57,6 +60,18 @@ public final class JPAQuery implements Serializable {
 		return sqlQueries;
 	}
 
+	public List<DbStatement> getSqlUpdates() {
+		return sqlUpdates;
+	}
+
+	public List<DbStatement> getSqlDeletes() {
+		return sqlDeletes;
+	}
+
+	public List<DbStatement> getSqlInserts() {
+		return sqlInserts;
+	}
+
 	public Date getStartedAt() {
 		return startedAt;
 	}
@@ -66,6 +81,26 @@ public final class JPAQuery implements Serializable {
 	}
 
 	/**
+	 * Add the statement, along with execution time, to the correct list of statements.
+	 *
+	 * @param statement the statement
+	 * @param exeTimeMillis the statement's execution time
+	 */
+	@SuppressWarnings("PMD.UseLocaleWithCaseConversions")
+	public void addStatement(final String statement, final long exeTimeMillis) {
+		String lowerCaseStatement = statement.toLowerCase();
+
+		if (lowerCaseStatement.startsWith("select")) {
+			this.sqlQueries.add(new SQLQuery(statement, exeTimeMillis));
+		} else if (lowerCaseStatement.startsWith("update")) {
+			this.sqlUpdates.add(new DbStatement(statement, exeTimeMillis));
+		} else if (lowerCaseStatement.startsWith("insert")) {
+			this.sqlInserts.add(new DbStatement(statement, exeTimeMillis));
+		} else  {
+			this.sqlDeletes.add(new DbStatement(statement, exeTimeMillis));
+		}
+	}
+	/**
 	 * Add eager relations string to the collection.
 	 * Only unique (because JPA log may repeat the same string N times for the same JPA query).
 	 *
@@ -73,15 +108,6 @@ public final class JPAQuery implements Serializable {
 	 */
 	public void addEagerRelations(final String eagerRelations) {
 		this.eagerRelations.add(eagerRelations);
-	}
-
-	/**
-	 * Add SQL query to the collection of sql queries.
-	 *
-	 * @param sqlQuery the SQL query
-	 */
-	public void addSQLQuery(final SQLQuery sqlQuery) {
-		this.sqlQueries.add(sqlQuery);
 	}
 
 	@Override

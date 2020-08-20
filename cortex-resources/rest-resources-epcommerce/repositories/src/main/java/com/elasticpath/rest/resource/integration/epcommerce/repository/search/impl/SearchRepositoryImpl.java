@@ -26,6 +26,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.catalog.Product;
+import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.domain.search.Facet;
 import com.elasticpath.domain.search.SortAttribute;
 import com.elasticpath.domain.search.SortValue;
@@ -173,7 +174,8 @@ public class SearchRepositoryImpl implements SearchRepository {
 	public Single<PaginatedResult> searchForItemIds(final int startPageNumber, final int numberOfResultsPerPage,
 													final ProductCategorySearchCriteria productSearchCriteria) {
 		return getSearchResultAsSingle(productSearchCriteria, (startPageNumber - 1) * numberOfResultsPerPage, numberOfResultsPerPage)
-				.flatMap(productSearchResult -> createPaginatedSearchResult(startPageNumber, numberOfResultsPerPage, productSearchResult));
+				.flatMap(productSearchResult -> createPaginatedSearchResult(productSearchCriteria.getStoreCode(),
+						startPageNumber, numberOfResultsPerPage, productSearchResult));
 	}
 
 	@Override
@@ -203,7 +205,7 @@ public class SearchRepositoryImpl implements SearchRepository {
 	}
 
 	private Single<IndexSearchResult> getSearchResultAsSingle(final ProductCategorySearchCriteria productSearchCriteria,
-													  final int startPageNumber, final int numberOfResultsPerPage) {
+															  final int startPageNumber, final int numberOfResultsPerPage) {
 		return reactiveAdapter.fromServiceAsSingle(() -> getSearchResult(productSearchCriteria, startPageNumber, numberOfResultsPerPage));
 	}
 
@@ -218,25 +220,26 @@ public class SearchRepositoryImpl implements SearchRepository {
 													   final int startPageNumber, final int numberOfResultsPerPage) {
 
 		return getSearchResultAsSingle(productSearchCriteria, (startPageNumber - 1) * numberOfResultsPerPage, numberOfResultsPerPage)
-								.flatMap(searchResult -> getSortedProducts(searchResult.getCachedResultUids())
-								.map(sortedProducts -> sortedProducts.stream()
-										.map(product -> ImmutableSortedMap.of(PRODUCT_GUID_KEY, product.getGuid()))
-										.map(CompositeIdUtil::encodeCompositeId)
-										.collect(Collectors.toList()))
-								.map(productIds -> new PaginatedResult(productIds, startPageNumber, numberOfResultsPerPage, searchResult
-										.getLastNumFound())));
+				.flatMap(searchResult -> getSortedProducts(productSearchCriteria.getStoreCode(), searchResult.getCachedResultUids())
+						.map(sortedProducts -> sortedProducts.stream()
+								.map(product -> ImmutableSortedMap.of(PRODUCT_GUID_KEY, product.getGuid()))
+								.map(CompositeIdUtil::encodeCompositeId)
+								.collect(Collectors.toList()))
+						.map(productIds -> new PaginatedResult(productIds, startPageNumber, numberOfResultsPerPage, searchResult
+								.getLastNumFound())));
 	}
 
-	private Single<PaginatedResult> createPaginatedSearchResult(final int startPageNumber, final int numberOfResultsPerPage,
+	private Single<PaginatedResult> createPaginatedSearchResult(final String storeCode,
+																final int startPageNumber, final int numberOfResultsPerPage,
 																final IndexSearchResult productSearchResult) {
 		return Single.just(productSearchResult.getCachedResultUids())
-				.flatMap(this::getSortedProducts)
+				.flatMap(productUids -> getSortedProducts(storeCode, productUids))
 				.map(this::getItemIds)
 				.map(itemIds -> new PaginatedResult(itemIds, startPageNumber, numberOfResultsPerPage, productSearchResult
 						.getLastNumFound()));
 	}
 
-	private List<String> getItemIds(final List<Product> sortedProducts) {
+	private List<String> getItemIds(final List<StoreProduct> sortedProducts) {
 		// translate product IDs to item IDs in the same order
 		List<String> itemIds = new ArrayList<>();
 		for (Product product : sortedProducts) {
@@ -246,10 +249,9 @@ public class SearchRepositoryImpl implements SearchRepository {
 		return itemIds;
 	}
 
-	private Single<List<Product>> getSortedProducts(final List<Long> productUids) {
-		return reactiveAdapter.fromServiceAsSingle(() -> storeProductRepository.findByUids(productUids))
-				.flatMap(products -> reactiveAdapter.fromServiceAsSingle(() -> indexUtility.sortDomainList(productUids,
-						products)));
+	private Single<List<StoreProduct>> getSortedProducts(final String storeCode, final List<Long> productUids) {
+		return reactiveAdapter.fromServiceAsSingle(() -> storeProductRepository.findByUids(storeCode, productUids))
+				.flatMap(products -> reactiveAdapter.fromServiceAsSingle(() -> indexUtility.sortDomainList(productUids, products)));
 	}
 
 	@Override

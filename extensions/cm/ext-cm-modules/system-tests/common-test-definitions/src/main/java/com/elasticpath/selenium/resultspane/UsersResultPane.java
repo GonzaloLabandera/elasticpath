@@ -7,8 +7,8 @@ import org.openqa.selenium.WebDriver;
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateUserDialog;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.UserSearch;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.wizards.EditUser;
 
 /**
@@ -60,7 +60,7 @@ public class UsersResultPane extends AbstractPageObject {
 	 */
 	public void enableUser(final String userName) {
 		openEditUserWizard(userName);
-		final EditUser editUserWizard = new EditUser(SetUp.getDriver());
+		final EditUser editUserWizard = new EditUser(SeleniumDriverSetup.getDriver());
 		editUserWizard.setUserStatus("Active");
 		editUserWizard.clickFinish();
 	}

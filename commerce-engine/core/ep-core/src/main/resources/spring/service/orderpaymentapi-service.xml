@@ -65,6 +65,7 @@
 		<constructor-arg name="pricingSnapshotService" ref="pricingSnapshotService"/>
 		<constructor-arg name="taxSnapshotService" ref="taxSnapshotService"/>
 		<constructor-arg name="customerAddressDao" ref="customerAddressDao"/>
+		<constructor-arg name="paymentHistoryWorkflow" ref="paymentHistoryWorkflow"/>
 	</bean>
 
 	<bean id="paymentProviderConfigManagementService"

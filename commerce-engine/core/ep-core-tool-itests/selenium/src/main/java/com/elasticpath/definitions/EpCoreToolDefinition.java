@@ -13,13 +13,14 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.configuration.Configuration;
 import com.elasticpath.coretool.CoreTool;
 import com.elasticpath.cucumber.definitions.SystemConfigurationDefinition;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.SearchIndexesResultPane;
 import com.elasticpath.selenium.resultspane.SystemConfigurationResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.DBConnector;
 
@@ -39,6 +40,7 @@ public class EpCoreToolDefinition {
 	private static final int INDEX_COUNT_6 = 6;
 	private static final int INDEX_COUNT_1 = 1;
 	private ResultSet resultSet;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -47,11 +49,12 @@ public class EpCoreToolDefinition {
 	 */
 	public EpCoreToolDefinition(final SystemConfigurationDefinition systemConfigurationDefinition) {
 		coreTool = new CoreTool();
-		searchIndexesResultPane = new SearchIndexesResultPane(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		searchIndexesResultPane = new SearchIndexesResultPane(driver);
 		this.systemConfigurationDefinition = systemConfigurationDefinition;
-		this.systemConfigurationResultPane = new SystemConfigurationResultPane(SetUp.getDriver());
+		this.systemConfigurationResultPane = new SystemConfigurationResultPane(driver);
 		dbConnector = new DBConnector();
-		configuration = new Configuration(SetUp.getDriver());
+		configuration = new Configuration(driver);
 	}
 
 	/**
@@ -193,7 +196,7 @@ public class EpCoreToolDefinition {
 	public void verifyDefinedValueCount(final int definedValueCount) {
 		systemConfigurationResultPane.setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_FIVE_SECONDS);
 		if (searchIndexesResultPane.isElementPresent(By.cssSelector("div[widget-id='true'][widget-type='row']"))) {
-			assertThat(SetUp.getDriver().findElements(By.cssSelector("div[widget-id='true'][widget-type='row']")).size())
+			assertThat(driver.findElements(By.cssSelector("div[widget-id='true'][widget-type='row']")).size())
 					.as("Defined value record count is not as expected")
 					.isEqualTo(definedValueCount);
 		}

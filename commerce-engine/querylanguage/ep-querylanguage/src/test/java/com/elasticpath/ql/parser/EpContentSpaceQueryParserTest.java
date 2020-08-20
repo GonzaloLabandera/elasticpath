@@ -35,7 +35,7 @@ public class EpContentSpaceQueryParserTest { // NOPMD
 		contentSpaceConf.initialize();
 		
 		Map<EPQueryType, AbstractEpQLCustomConfiguration> epQLObjectConfiguration = new HashMap<>();
-		epQLObjectConfiguration.put(EPQueryType.CONTENT_SPACE, contentSpaceConf);
+		epQLObjectConfiguration.put(EPQueryType.CONTENTSPACE, contentSpaceConf);
 		
 		EpQueryAssembler epQueryAssembler = new EpQueryAssembler();
 		epQueryAssembler.setEpQLObjectConfiguration(epQLObjectConfiguration);

@@ -6,6 +6,7 @@ package com.elasticpath.cmclient.fulfillment.editors.customer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 
@@ -15,6 +16,7 @@ import com.elasticpath.cmclient.core.editors.EntityEditorInput;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.service.customer.CustomerService;
 
 /**
@@ -39,9 +41,10 @@ public class CustomerDetailsEditorInput extends EntityEditorInput<Long> {
 	@Override
 	public String getName() {
 		final Customer customer = retrieveCustomer();
-		String fullName = customer.getFullName();
-		if (fullName == null || fullName.length() <= 0) {
-			fullName = FulfillmentMessages.get().CustomerDetails_Anonymous;
+		final String fullName = customer.getCustomerType().equals(CustomerType.REGISTERED_USER) ? customer.getFullName()
+				: customer.getBusinessName();
+		if (StringUtils.isEmpty(fullName)) {
+			return FulfillmentMessages.get().CustomerDetails_Anonymous;
 		}
 		return fullName;
 	}
@@ -49,17 +52,16 @@ public class CustomerDetailsEditorInput extends EntityEditorInput<Long> {
 	@Override
 	public String getToolTipText() {
 		final Customer customer = retrieveCustomer();
-		return
-			NLS.bind(FulfillmentMessages.get().CustomerDetails_Tooltip,
-			new Object[]{
-				customer.getFullName(), customer.getUidPk() });
+		final String fullName = customer.getCustomerType().equals(CustomerType.REGISTERED_USER) ? customer.getFullName()
+				: customer.getBusinessName();
+		return NLS.bind(FulfillmentMessages.get().CustomerDetails_Tooltip, new Object[]{fullName, customer.getUidPk()});
 	}
 
 	/**
 	 * Retrieves the product to be displayed/edited from persistent storage. TODO: Only the information to be displayed on a given tab should be
 	 * retrieved. See if there is a better way to do this such that the tab itself causes the product retrieval when the tab is displayed. Also,
 	 * other tabs will need to add to the product as they fetch more data.
-	 * 
+	 *
 	 * @return the <code>Product</code>
 	 */
 	private Customer retrieveCustomer() {

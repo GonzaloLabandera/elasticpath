@@ -29,6 +29,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.service.attribute.AttributeService;
 
 /**
@@ -39,7 +40,7 @@ public class AttributeListView extends AbstractListView {
 	public static final String VIEW_ID = "com.elasticpath.cmclient.admin.customers.views.AttributeListView"; //$NON-NLS-1$
 
 	private static final String ATTRIBUTE_LIST_TABLE = "Attribute List"; //$NON-NLS-1$
-
+	
 	// Column indices
 	private static final int INDEX_ATTRIBUTE_IMAGE = 0;
 
@@ -49,9 +50,11 @@ public class AttributeListView extends AbstractListView {
 
 	private static final int INDEX_ATTRIBUTE_TYPE = 3;
 
-	private static final int INDEX_SYSTEM_ATTRIBUTE = 4;
+	private static final int INDEX_ATTRIBUTE_USAGE = 4;
 
-	private static final int INDEX_REQUIRED_ATTRIBUTE = 5;
+	private static final int INDEX_SYSTEM_ATTRIBUTE = 5;
+
+	private static final int INDEX_REQUIRED_ATTRIBUTE = 6;
 
 	private Action createAttributeAction;
 
@@ -112,9 +115,9 @@ public class AttributeListView extends AbstractListView {
 		final String[] columnNames = new String[] {
 				"", //$NON-NLS-1$
 				AdminCustomersMessages.get().AttributeKey, AdminCustomersMessages.get().AttributeName, AdminCustomersMessages.get().AttributeType,
-				AdminCustomersMessages.get().SystemAttribute, AdminCustomersMessages.get().Required };
+				AdminCustomersMessages.get().AttributeUsage, AdminCustomersMessages.get().SystemAttribute, AdminCustomersMessages.get().Required };
 
-		final int[] columnWidths = new int[] { 1, 180, 200, 120, 120, 100 };
+		final int[] columnWidths = new int[] { 1, 180, 200, 120, 150, 120, 100 };
 
 		for (int i = 0; i < columnNames.length; i++) {
 			table.addTableColumn(columnNames[i], columnWidths[i]);
@@ -145,7 +148,8 @@ public class AttributeListView extends AbstractListView {
 
 	@Override
 	protected Object[] getViewInput() {
-		final List< ? > attributes = attributeService.getCustomerProfileAttributes();
+		final List< ? > attributes = attributeService.getCustomerProfileAttributes(AttributeUsageImpl.USER_PROFILE_USAGE, 
+				AttributeUsageImpl.ACCOUNT_PROFILE_USAGE);
 		Attribute[] attributeArray = attributes.toArray(new Attribute[attributes.size()]);
 		Arrays.sort(attributeArray, Comparator.comparing(Attribute::getKey));
 		return attributeArray;
@@ -160,6 +164,9 @@ public class AttributeListView extends AbstractListView {
 	 * Label provider for the view.
 	 */
 	protected class AttributeListViewLabelProvider extends LabelProvider implements ITableLabelProvider {
+
+		/** serialVersionUID. */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Get the image to put in each column.
@@ -186,6 +193,7 @@ public class AttributeListView extends AbstractListView {
 		@Override
 		public String getColumnText(final Object element, final int columnIndex) {
 			final Attribute attribute = (Attribute) element;
+			
 			switch (columnIndex) {
 			case AttributeListView.INDEX_ATTRIBUTE_IMAGE:
 				return ""; //$NON-NLS-1$;
@@ -195,6 +203,8 @@ public class AttributeListView extends AbstractListView {
 				return attribute.getDisplayName(CorePlugin.getDefault().getDefaultLocale());
 			case AttributeListView.INDEX_ATTRIBUTE_TYPE:
 				return CoreMessages.get().getMessage(attribute.getAttributeType().getNameMessageKey());
+			case AttributeListView.INDEX_ATTRIBUTE_USAGE:
+				return CoreMessages.get().getMessage(attribute.getAttributeUsage().getNameMessageKey());
 			case AttributeListView.INDEX_SYSTEM_ATTRIBUTE:
 				return CoreMessages.get().getMessage(CoreMessages.YES_NO_FOR_BOOLEAN_MSG_PREFIX + attribute.isSystem());
 			case AttributeListView.INDEX_REQUIRED_ATTRIBUTE:

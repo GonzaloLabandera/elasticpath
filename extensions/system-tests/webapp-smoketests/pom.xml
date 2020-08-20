@@ -141,6 +141,8 @@
 										<argument>${h2.port}</argument>
 										<argument>-baseDir</argument>
 										<argument>${project.build.directory}/database</argument>
+										<argument>-tcpPassword</argument>
+										<argument>sa</argument>
 									</arguments>
 								</configuration>
 							</execution>
@@ -155,6 +157,8 @@
 									<arguments>
 										<argument>-tcpShutdown</argument>
 										<argument>tcp://localhost:${h2.port}</argument>
+										<argument>-tcpPassword</argument>
+										<argument>sa</argument>
 									</arguments>
 								</configuration>
 							</execution>
@@ -327,7 +331,6 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>${com.h2database.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -339,7 +342,18 @@
 		<dependency>
 			<groupId>net.sourceforge.htmlunit</groupId>
 			<artifactId>htmlunit</artifactId>
-			<version>2.9</version>
+			<version>2.38.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -388,13 +402,11 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-core</artifactId>
-			<version>${org.apache.camel.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-jms</artifactId>
-			<version>${org.apache.camel.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.geronimo.specs</groupId>

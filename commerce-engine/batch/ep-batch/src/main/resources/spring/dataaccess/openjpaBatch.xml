@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+The entity manager factory and the entity manager beans here are specially created for the batch jobs that do not require lifecycle listeners or
+any other listeners for that matter. The reason for having a specialized, non-listening, EMF is that presence of listeners greatly affect
+the execution of JPQL DELETE statements and to achieve the maximum performance, the lifecycle listeners must be disabled.
+
+Consequently, any pre/post entity operations will not work. Auditing as well.
+
+The "batchPersistenceEngine" and  "batchTxProxyTemplate" beans should be used ONLY if none of the mentioned listeners/functionalities is required.
+Otherwise, use the beans without "batch" prefix.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		">
+
+	<util:list id="batchEntityManagerLifecycleListeners"/>
+	<util:list id="batchPersistenceEngineOperationListeners"/>
+
+	<bean id="batchAbstractEntityManagerFactory" class="com.elasticpath.persistence.openjpa.impl.ConfigurableLocalContainerEntityManagerFactoryBean"
+		  init-method="getObject"
+		  abstract="true">
+		<property name="persistenceUnitManager" ref="persistenceUnitManager"/>
+		<property name="lifecycleListeners" ref="batchEntityManagerLifecycleListeners"/>
+		<property name="hdsSupportSwitch" ref="hdsSupportSwitch"/>
+	</bean>
+
+	<bean id="batchEntityManagerFactory" parent="batchAbstractEntityManagerFactory" depends-on="entityManagerFactory"/>
+
+	<bean id="batchEntityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+		<property name="entityManagerFactory" ref="batchEntityManagerFactory"/>
+	</bean>
+
+	<bean id="batchTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="batchEntityManagerFactory"/>
+	</bean>
+
+	<bean id="batchSessionFactory" class="com.elasticpath.persistence.openjpa.impl.JpaSessionFactoryImpl">
+		<property name="entityManagerFactory" ref="batchEntityManagerFactory"/>
+		<property name="transactionManager" ref="batchTransactionManager"/>
+	</bean>
+
+	<bean id="batchPersistenceEngine" class="org.springframework.aop.framework.ProxyFactoryBean" depends-on="batchEntityManagerFactory">
+		<property name="proxyInterfaces"
+				  value="com.elasticpath.persistence.api.PersistenceEngine,com.elasticpath.persistence.openjpa.JpaPersistenceEngine"/>
+		<property name="target" ref="batchPersistenceEngineTarget"/>
+	</bean>
+
+	<bean id="batchPersistenceEngineTarget" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl" init-method="init">
+
+		<property name="sessionFactory" ref="batchSessionFactory"/>
+		<property name="entityManager" ref="batchEntityManager"/>
+
+		<property name="transactionManager" ref="batchTransactionManager"/>
+		<property name="persistenceEngineOperationListeners" ref="batchPersistenceEngineOperationListeners"/>
+
+		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
+		<property name="queryReaderFactory" ref="queryReaderFactory"/>
+	</bean>
+
+	<bean id="batchTxProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="batchTransactionManager"/>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="process*">PROPAGATION_REQUIRED</prop>
+				<prop key="*">PROPAGATION_SUPPORTS,readOnly</prop>
+			</props>
+		</property>
+	</bean>
+</beans>

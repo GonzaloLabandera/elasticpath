@@ -25,6 +25,18 @@ public interface ShopperMemento extends Persistable {
 	void setCustomer(Customer customer);
 
 	/**
+	 * Gets the {@link Customer} Account associated with this {@link ShopperMemento}.
+	 * @return the {@link Customer} Account associated with this {@link ShopperMemento}.
+	 */
+	Customer getAccount();
+
+	/**
+	 * Sets the {@link Customer} Account associated with this {@link ShopperMemento}.
+	 * @param customer the new {@link Customer} Account
+	 */
+	void setAccount(Customer customer);
+
+	/**
 	 * Gets the code of the {@link Store} associated with this {@link ShopperMemento}.
 	 * @return the store code
 	 */

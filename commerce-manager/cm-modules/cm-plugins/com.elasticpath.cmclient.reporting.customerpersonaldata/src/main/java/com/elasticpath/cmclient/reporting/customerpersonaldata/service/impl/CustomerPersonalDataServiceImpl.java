@@ -46,7 +46,7 @@ public class CustomerPersonalDataServiceImpl {
 		final CustomerPersonalDataParameters params = getParameters();
 		final DateFormat dateFormat =  params.getDateFormat();
 
-		Collection<Object[]> data = getCustomerPersonalDataReportingService().getData(params.getStore(), params.getUserId());
+		Collection<Object[]> data = getCustomerPersonalDataReportingService().getData(params.getStore(), params.getSharedId());
 		data.forEach(datum ->  {
 			datum[CREATED_INDEX] = (datum[CREATED_INDEX] == null ? "" : dateFormat.format((Date) datum[CREATED_INDEX]));
 			datum[LAST_MODIFED_INDEX] = (datum[LAST_MODIFED_INDEX] == null ? "" : dateFormat.format((Date) datum[LAST_MODIFED_INDEX]));

@@ -14,7 +14,7 @@ import com.elasticpath.selenium.dialogs.AddEditBrandDialog;
 import com.elasticpath.selenium.domainobjects.Brand;
 import com.elasticpath.selenium.domainobjects.Product;
 import com.elasticpath.selenium.editor.catalog.tabs.BrandsTab;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.util.Utility;
 
 /**
@@ -33,7 +33,7 @@ public class BrandTabDefinition {
 	 * @param product variable for the product.
 	 */
 	public BrandTabDefinition(final Product product, final Brand brand) {
-		final WebDriver driver = SetUp.getDriver();
+		final WebDriver driver = SeleniumDriverSetup.getDriver();
 		this.brandsTab = new BrandsTab(driver);
 		this.product = product;
 		this.brand = brand;

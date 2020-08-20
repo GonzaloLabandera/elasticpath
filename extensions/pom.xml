@@ -49,6 +49,7 @@
 		<ep.jndi.factory>org.apache.tomcat.jdbc.pool.DataSourceFactory</ep.jndi.factory>
 		<ep.tomcat.maxcachesize>100000</ep.tomcat.maxcachesize>
 		<peaberry.version>1.3</peaberry.version>
+		<cargo.plugin.version>1.6.8</cargo.plugin.version>
 
 		<!-- need to set tomcat8Version for maven-plugin, should be same as tomcat.version-->
 		<tomcat8Version>9.0.10</tomcat8Version>

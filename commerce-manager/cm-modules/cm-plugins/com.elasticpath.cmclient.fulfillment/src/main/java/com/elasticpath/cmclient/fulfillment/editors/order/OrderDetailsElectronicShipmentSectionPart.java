@@ -28,6 +28,7 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.BeanLocator;
+import com.elasticpath.cmclient.core.conversion.EpMonetoryValueConverter;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
@@ -241,7 +242,7 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 		@Override
 		public String getText(final Object element) {
 			final OrderSku orderSku = (OrderSku) element;
-			return orderSku.getDiscountBigDecimal().toString();
+			return new EpMonetoryValueConverter(orderSku.getCurrency()).asString(orderSku.getDiscountBigDecimal());
 		}
 	}
 
@@ -253,8 +254,8 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 		public String getText(final Object element) {
 			final OrderSku orderSku = (OrderSku) element;
 			final ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
-			return pricingSnapshot.getPriceCalc().withCartDiscounts().getAmount().toString();
-
+			return new EpMonetoryValueConverter(orderSku.getCurrency())
+					.asString(pricingSnapshot.getPriceCalc().withCartDiscounts().forUnitPrice().getAmount());
 		}
 	}
 
@@ -266,7 +267,7 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 		public String getText(final Object element) {
 			final OrderSku orderSku = (OrderSku) element;
 			final ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
-			return pricingSnapshot.getListUnitPrice().getRawAmount().toString();
+			return new EpMonetoryValueConverter(orderSku.getCurrency()).asString(pricingSnapshot.getListUnitPrice().getRawAmount());
 		}
 	}
 

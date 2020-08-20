@@ -2,7 +2,7 @@
 <data_policies>
 	<data_policy guid="FF528121-8B14-4D76-9450-93E51BE80CF8">
 		<policy_name>Required Registration Personal Details</policy_name>
-		<retention_period_in_days>365</retention_period_in_days>
+		<retention_period_in_days>5000</retention_period_in_days>
 		<retention_type>FROM_LAST_UPDATE</retention_type>
 		<segments>
 			<segment>EU_Data_Policy</segment>
@@ -79,7 +79,7 @@
 
 	<data_policy guid="52301DD9-CF90-4A4C-B710-1C97C1C4125F">
 		<policy_name>Marketing Contact Information</policy_name>
-		<retention_period_in_days>365</retention_period_in_days>
+		<retention_period_in_days>5000</retention_period_in_days>
 		<retention_type>FROM_LAST_UPDATE</retention_type>
 		<segments>
 			<segment>EU_Data_Policy</segment>
@@ -125,7 +125,7 @@
 
 	<data_policy guid="712DCF0E-4E24-4F64-A822-5F6B8FEF5071">
 		<policy_name>Saved Addresses</policy_name>
-		<retention_period_in_days>365</retention_period_in_days>
+		<retention_period_in_days>5000</retention_period_in_days>
 		<retention_type>FROM_CREATION_DATE</retention_type>
 		<segments>
 			<segment>EU_Data_Policy</segment>
@@ -163,7 +163,7 @@
 
 	<data_policy guid="EC40625C-5DED-4ED9-A9C7-5DE496C4012C">
 		<policy_name>Order Information</policy_name>
-		<retention_period_in_days>1826</retention_period_in_days>
+		<retention_period_in_days>5000</retention_period_in_days>
 		<retention_type>FROM_CREATION_DATE</retention_type>
 		<segments>
 			<segment>EU_Data_Policy</segment>
@@ -355,7 +355,7 @@
 
 	<data_policy guid="d4bb9cf2-22b6-48c6-849e-fe91383bed4e">
 		<policy_name>Automation Active Policy 1</policy_name>
-		<retention_period_in_days>10</retention_period_in_days>
+		<retention_period_in_days>5000</retention_period_in_days>
 		<retention_type>FROM_CREATION_DATE</retention_type>
 		<segments>
 			<segment>automation</segment>
@@ -392,7 +392,7 @@
 
 	<data_policy guid="19f2ed39-d973-4cc7-a313-8e349df9b7bd">
 		<policy_name>Automation Active Policy 2</policy_name>
-		<retention_period_in_days>10</retention_period_in_days>
+		<retention_period_in_days>5000</retention_period_in_days>
 		<retention_type>FROM_CREATION_DATE</retention_type>
 		<segments>
 			<segment>automation</segment>
@@ -436,7 +436,7 @@
 
 	<data_policy guid="3c25b2ce-b713-420e-b203-a6442bbc1d87">
 		<policy_name>Automation Disabled Policy</policy_name>
-		<retention_period_in_days>10</retention_period_in_days>
+		<retention_period_in_days>5000</retention_period_in_days>
 		<retention_type>FROM_CREATION_DATE</retention_type>
 		<segments>
 			<segment>disable_policy</segment>
@@ -467,7 +467,7 @@
 
 	<data_policy guid="BD5617E4-0DEC-4CE8-B694-24A388904CF2">
 		<policy_name>Profile Fields</policy_name>
-		<retention_period_in_days>365</retention_period_in_days>
+		<retention_period_in_days>5000</retention_period_in_days>
 		<retention_type>FROM_LAST_UPDATE</retention_type>
 		<segments>
 			<segment>profile_fields_test</segment>

@@ -22,6 +22,7 @@ import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerProfile;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 
 public class CustomerBuilder extends CustomerImplBuilderBase<CustomerBuilder> {
@@ -54,6 +55,7 @@ public class CustomerBuilder extends CustomerImplBuilderBase<CustomerBuilder> {
 		}
 		customer.initialize();
 		customer.setCustomerProfileAttributes(new TestCustomerProfileFactory().getProfile());
+		customer.setCustomerType(CustomerType.SINGLE_SESSION_USER);
 
 		return customer;
 	}
@@ -75,14 +77,20 @@ class CustomerImplBuilderBase<GeneratorT extends CustomerImplBuilderBase<Generat
 		return instance;
 	}
 
-	public GeneratorT withUserId(final String aValue) {
-		instance.setUserId(aValue);
+	public GeneratorT withSharedId(final String aValue) {
+		instance.setSharedId(aValue);
 
 		return (GeneratorT) this;
 	}
 
 	public GeneratorT withEmail(final String aValue) {
 		instance.setEmail(aValue);
+
+		return (GeneratorT) this;
+	}
+
+	public GeneratorT withUsername(final String aValue) {
+		instance.setUsername(aValue);
 
 		return (GeneratorT) this;
 	}
@@ -147,12 +155,6 @@ class CustomerImplBuilderBase<GeneratorT extends CustomerImplBuilderBase<Generat
 
 	public GeneratorT withClearTextPassword(final String aValue) {
 		instance.setClearTextPassword(aValue);
-
-		return (GeneratorT) this;
-	}
-
-	public GeneratorT withAnonymous(final boolean aValue) {
-		instance.setAnonymous(aValue);
 
 		return (GeneratorT) this;
 	}
@@ -275,4 +277,15 @@ class CustomerImplBuilderBase<GeneratorT extends CustomerImplBuilderBase<Generat
 		return (GeneratorT) this;
 	}
 
+	public GeneratorT withCustomerType(final CustomerType customerType) {
+		instance.setCustomerType(customerType);
+
+		return (GeneratorT) this;
+	}
+
+	public GeneratorT withParentGuid(final String parentGuid) {
+		instance.setParentGuid(parentGuid);
+
+		return (GeneratorT) this;
+	}
 }

@@ -12,6 +12,7 @@ import com.elasticpath.rest.definition.carts.AddToCartFormsIdentifier;
 import com.elasticpath.rest.definition.carts.CartDescriptorIdentifier;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 
@@ -32,8 +33,9 @@ implements LinksRepository<AddToCartFormsIdentifier, CartDescriptorIdentifier> {
 	@Override
 	public Observable<CartDescriptorIdentifier> getElements(final AddToCartFormsIdentifier identifier) {
 		String customerGuid = resourceOperationContext.getUserIdentifier();
+		String accountSharedId = SubjectUtil.getAccountSharedId(resourceOperationContext.getSubject());
 
-		Observable<String> allCarts = shoppingCartRepository.findAllCarts(customerGuid,
+		Observable<String> allCarts = shoppingCartRepository.findAllCarts(customerGuid, accountSharedId,
 				identifier.getCarts().getScope().getValue());
 
 		return allCarts.map(cartGuid -> CartDescriptorIdentifier

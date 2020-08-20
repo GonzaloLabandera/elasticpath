@@ -184,14 +184,14 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 	}
 
 	@Override
-	public Pair<Customer, List<DataPoint>> findAllActiveDataPointsForCustomer(final String storeCode, final String userId) {
+	public Pair<Customer, List<DataPoint>> findAllActiveDataPointsForCustomer(final String storeCode, final String sharedId) {
 
-		Customer customer = getCustomer(storeCode, userId);
+		Customer customer = getCustomer(storeCode, sharedId);
 		if (customer == null) {
 			return null;
 		}
 		List<DataPoint> dataPointsAll = getAllCustomerDataPoints(storeCode, customer.getGuid());
-		List<DataPoint> dataPointsWithConsent = getCustomerDataPointsWithConsent(storeCode, userId);
+		List<DataPoint> dataPointsWithConsent = getCustomerDataPointsWithConsent(storeCode, sharedId);
 
 		// Combine all the data points from segments specified in the system configuration and data points
 		// that have ever been applicable for the customer at some time
@@ -213,9 +213,9 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 				.collect(Collectors.toList());
 	}
 
-	private List<DataPoint> getCustomerDataPointsWithConsent(final String storeCode, final String userId) {
+	private List<DataPoint> getCustomerDataPointsWithConsent(final String storeCode, final String sharedId) {
 		List<Object[]> customerWithDataPoints = getPersistenceEngine()
-				.retrieveByNamedQuery("CUSTOMER_AND_DATA_POINT_BY_STORE_AND_USER_ID", userId, storeCode);
+				.retrieveByNamedQuery("CUSTOMER_AND_DATA_POINT_BY_STORE_AND_SHARED_ID", sharedId, storeCode);
 
 		if (customerWithDataPoints.isEmpty()) {
 			return Collections.emptyList();
@@ -226,9 +226,9 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 				.collect(Collectors.toList());
 	}
 
-	private Customer getCustomer(final String storeCode, final String userId) {
+	private Customer getCustomer(final String storeCode, final String sharedId) {
 		return (Customer) CollectionUtils.find(
-				getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_FIND_BY_USER_ID_AND_STORE_CODE", userId, storeCode),
+				getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_FIND_BY_SHARED_ID_AND_STORE_CODE", sharedId, storeCode),
 				Objects::nonNull
 		);
 	}

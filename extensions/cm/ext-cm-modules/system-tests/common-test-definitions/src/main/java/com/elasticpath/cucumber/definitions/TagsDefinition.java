@@ -15,8 +15,8 @@ import cucumber.api.java.en.When;
 import com.elasticpath.selenium.dialogs.CreateEditTagDefinitionDialog;
 import com.elasticpath.selenium.dialogs.CreateEditTagGroupDialog;
 import com.elasticpath.selenium.domainobjects.TagDefinition;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.TagsResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 
@@ -35,7 +35,7 @@ public class TagsDefinition {
 	 * Create a new instance of TagsDefinition.
 	 */
 	public TagsDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
+		configurationActionToolbar = new ConfigurationActionToolbar(SeleniumDriverSetup.getDriver());
 	}
 
 	/**

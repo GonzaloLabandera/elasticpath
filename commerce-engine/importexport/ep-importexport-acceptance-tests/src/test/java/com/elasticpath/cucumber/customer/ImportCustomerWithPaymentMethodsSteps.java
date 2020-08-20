@@ -51,8 +51,8 @@ import com.elasticpath.service.store.StoreService;
 public class ImportCustomerWithPaymentMethodsSteps {
 	private static final String TEST_PASSWORD = "testPassword";
 	private static final String TEST_SALT = "testSalt";
-	private static final String TEST_USER_ID = "testUser@email.com";
-	private static final String TEST_EMAIL = TEST_USER_ID;
+	private static final String TEST_SHARED_ID = "testUser@email.com";
+	private static final String TEST_EMAIL = TEST_SHARED_ID;
 	private static final String TEST_GUID = "testGuid";
 	private static final String TEST_FIRST_NAME = "testFirstName";
 	private static final String TEST_LAST_NAME = "testLastName";
@@ -205,6 +205,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 				.withFirstName(TEST_FIRST_NAME)
 				.withLastName(TEST_LAST_NAME)
 				.withEmail(TEST_EMAIL)
+				.withUsername(TEST_EMAIL)
 				.withStoreCode(storeService.findAllStores().get(0).getCode())
 				.build();
 
@@ -216,7 +217,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 				.withCreationDate(new Date())
 				.withLastEditDate(new Date())
 				.withStoreCode(storeService.findAllStores().get(0).getCode())
-				.withUserId(TEST_USER_ID)
+				.withSharedId(TEST_SHARED_ID)
 				.withPassword(TEST_PASSWORD)
 				.withSalt(TEST_SALT)
 				.build();

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-06-add-accountmanagement-user-associations.xml">
+
+	<changeSet id="2020-06-add-accountmanagement-user-associations" author="elasticpath">
+		<!-- Create the table -->
+		<createTable tableName="TUSERACCOUNTASSOCIATION">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="USER_CUSTOMER_GUID" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ACCOUNT_CUSTOMER_GUID" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ROLE" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TUSERACCOUNTASSOCIATION"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+
+		<!-- Reference TCUSTOMER -->
+		<addForeignKeyConstraint baseTableName="TUSERACCOUNTASSOCIATION" baseColumnNames="USER_CUSTOMER_GUID"
+								 constraintName="TUSERACCTASSOC_USER_FK" referencedTableName="TCUSTOMER"
+								 referencedColumnNames="GUID" />
+		<addForeignKeyConstraint baseTableName="TUSERACCOUNTASSOCIATION" baseColumnNames="ACCOUNT_CUSTOMER_GUID"
+								 constraintName="TUSERACCTASSOC_ACCT_FK" referencedTableName="TCUSTOMER"
+								 referencedColumnNames="GUID" />
+
+		<!-- Add unique constraints across the two customer ID's, and add
+			indexes for fast lookup -->
+		<addUniqueConstraint tableName="TUSERACCOUNTASSOCIATION" columnNames="USER_CUSTOMER_GUID, ACCOUNT_CUSTOMER_GUID" />
+		<addUniqueConstraint tableName="TUSERACCOUNTASSOCIATION" columnNames="GUID" />
+		<createIndex tableName="TUSERACCOUNTASSOCIATION" indexName="I_USERACCOUNTASSOC_USERID">
+			<column name="USER_CUSTOMER_GUID" />
+		</createIndex>
+		<createIndex tableName="TUSERACCOUNTASSOCIATION" indexName="I_USERACCOUNTASSOC_ACCOUNTID">
+			<column name="ACCOUNT_CUSTOMER_GUID" />
+		</createIndex>
+
+
+
+	</changeSet>
+
+</databaseChangeLog>

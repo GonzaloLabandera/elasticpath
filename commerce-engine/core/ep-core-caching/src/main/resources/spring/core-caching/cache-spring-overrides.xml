@@ -68,4 +68,20 @@
 	<bean factory-bean="attributeServiceProxy" factory-method="bindImplementation">
 		<constructor-arg ref="cachingAttributeService"/>
 	</bean>
+
+	<bean factory-bean="brandServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingBrandService"/>
+	</bean>
+
+	<bean factory-bean="productTypeDaoProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingProductTypeDao"/>
+	</bean>
+
+	<bean factory-bean="catalogServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingCatalogService"/>
+	</bean>
+
+	<bean factory-bean="taxCodeServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingTaxCodeService"/>
+	</bean>
 </beans>

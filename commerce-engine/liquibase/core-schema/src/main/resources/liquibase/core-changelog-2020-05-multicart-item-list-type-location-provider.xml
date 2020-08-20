@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-05-multicart-item-list-type-location-provider.xml">
+
+	<changeSet id="core-changelog-2020-05-multicart-item-list-type-location-provider" author="elasticpath">
+		<comment>[PB-8395] Setting definition for defining cart type to be used by shopping cart resources</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="204"/>
+			<column name="PATH" value="COMMERCE/STORE/shoppingCartItemListType"/>
+			<column name="VALUE_TYPE" value="String"/>
+			<column name="MAX_OVERRIDE_VALUES" value="-1"/>
+			<column name="DEFAULT_VALUE" value="SHOPPING_CART"/>
+			<column name="DESCRIPTION" value="The cart type to use for shopping carts. Can be overridden for each store using context values."/>
+		</insert>
+
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1600"/>
+			<column name="SETTING_DEFINITION_UID" valueNumeric="204"/>
+			<column name="METADATA_KEY" value="apiRefreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+	</changeSet>
+</databaseChangeLog>

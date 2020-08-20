@@ -20,10 +20,9 @@ import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.CustomerPaymentInstrument;
-import com.elasticpath.domain.orderpaymentapi.OrderPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.OrderPayment;
+import com.elasticpath.domain.orderpaymentapi.OrderPaymentInstrument;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
@@ -74,18 +73,6 @@ public class OrderPaymentApiCleanupServiceImplTest extends DbTestCase {
 	}
 
 	@Test
-	public void removeByCustomerUidList() {
-		final Customer customer = persistCustomer();
-		final CustomerPaymentInstrument customerPaymentInstrument =
-				persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(customer, customer.getPreferredBillingAddress());
-
-		testee.removeByCustomerUidList(Collections.singletonList(customer.getUidPk()));
-
-		assertNull("Customer payment instrument was not cleaned",
-				customerPaymentInstrumentService.findByGuid(customerPaymentInstrument.getGuid()));
-	}
-
-	@Test
 	public void removeByOrder() {
 		final Order order = persistOrder();
 		Collection<OrderPaymentInstrument> orderPaymentInstruments = orderPaymentInstrumentService.findByOrder(order);
@@ -117,43 +104,6 @@ public class OrderPaymentApiCleanupServiceImplTest extends DbTestCase {
 			assertNull("Order payment was not cleaned",
 					orderPaymentService.findByGuid(orderPayment.getGuid()));
 		}
-	}
-
-	@Test
-	public void removeByShoppingCartGuid() {
-		final ShoppingCart shoppingCart = persistShoppingCart(persistShopper());
-		final CartOrderPaymentInstrument cartOrderPaymentInstrument =
-				persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(shoppingCart);
-
-		testee.removeByShoppingCartGuid(shoppingCart.getGuid());
-
-		assertNull("Cart payment instrument was not cleaned",
-				cartOrderPaymentInstrumentService.findByGuid(cartOrderPaymentInstrument.getGuid()));
-	}
-
-	@Test
-	public void removeByShoppingCartGuids() {
-		final ShoppingCart shoppingCart = persistShoppingCart(persistShopper());
-		final CartOrderPaymentInstrument cartOrderPaymentInstrument =
-				persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(shoppingCart);
-
-		testee.removeByShoppingCartGuids(Collections.singletonList(shoppingCart.getGuid()));
-
-		assertNull("Cart payment instrument was not cleaned",
-				cartOrderPaymentInstrumentService.findByGuid(cartOrderPaymentInstrument.getGuid()));
-	}
-
-	@Test
-	public void removeByShopperUidList() {
-		final Shopper shopper = persistShopper();
-		final ShoppingCart shoppingCart = persistShoppingCart(shopper);
-		final CartOrderPaymentInstrument cartOrderPaymentInstrument =
-				persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(shoppingCart);
-
-		testee.removeByShopperUidList(Collections.singletonList(shopper.getUidPk()));
-
-		assertNull("Cart payment instrument was not cleaned",
-				cartOrderPaymentInstrumentService.findByGuid(cartOrderPaymentInstrument.getGuid()));
 	}
 
 	private Customer persistCustomer() {

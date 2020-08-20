@@ -34,6 +34,11 @@
 				<entry key="openjpa.Compatibility"
 					   value="QuotedNumbersInQueries=true,convertPositionalParametersToNamed=true,ignoreDetachedStateFieldForProxySerialization=true"/>
 				<entry key="openjpa.ConnectionFactoryProperties" value="PrettyPrint=true, PrettyPrintLineLength=80, PrintParameters=true"/>
+				<entry key="openjpa.DataCache" value="false"/>
+				<entry key="openjpa.QueryCompilationCache" value="true(cacheSize=5000,softReferenceSize=0)"/>
+				<entry key="openjpa.QueryCache" value="false"/>
+				<entry key="openjpa.jdbc.FinderCache" value="false"/>
+				<entry key="openjpa.jdbc.QuerySQLCache" value="false"/>
 			</map>
 		</property>
 	</bean>

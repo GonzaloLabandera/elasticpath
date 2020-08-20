@@ -1,9 +1,16 @@
 # Prerequisite
-  * build project /ep-commerce/extensions/cortex/system-tests to install required dependency with following command:
-   ```java
-    mvn clean install -DskipAllTests
-   ```
+  * Build ep-commerce from root, using the following command:
+  ```java
+  mvn clean install -DskipAllTests
+  ```
+
 # ext-cm-selenium-test
+
+**Building Project**
+
+Build the following projects using this command: mvn clean install -DskipAllTests
+* commerce-extensions/cm/ext-cm-modules/ext-system-tests
+* commerce-extensions/cm/ext-cm-modules/ext-system-tests/selenium
 
 **Setting up commerce/ep-commerce/extensions/cm/ext-cm-modules/ext-system-tests Project in IntelliJ**
 
@@ -26,7 +33,6 @@ Build the following projects using this command: mvn clean install -DskipAllTest
 
 mvn clean install -Dcucumber.options="--tags @example"
 
-
 *Maven Options:*
 * -Dcucumber.options="--tags @example" - You can replace the tag to your own tag. 
 * -Dfailsafe.fork.count="1" - This is the number of parallel tests at the same time. Default is 1 and can be changed to other values depending on number of TestsIT classes.
@@ -36,13 +42,4 @@ mvn clean install -Dcucumber.options="--tags @example"
 **Running subset of tests:**
 * You can run a subset of tests by right clicking and run any one of TestsIT classes under /selenium/src/test/java/com/elasticpath/cucumber/
 * You can create your own local runner class to run your own tagged tests. E.g. RunLocalTestsIT.java which runs your own tagged tests @local 
-    * Do not commit the local runner class and tags as they are only for your local testing purpose. 
-
-*Updating Browser Driver Versions*
-* You can download the latest browser driver from web. e.g. chromedriver.
-* Update the RepositoryMap.xml for the driver version.
-* Has value can be found locally if you run following in bash command locally.
-```
-openssl sha1 <filename>
-```
-* Example: https://github.com/Ardesco/Selenium-Maven-Template/blob/master/src/test/resources/RepositoryMap.xml
+    * Do not commit the local runner class and tags as they are only for your local testing purpose.

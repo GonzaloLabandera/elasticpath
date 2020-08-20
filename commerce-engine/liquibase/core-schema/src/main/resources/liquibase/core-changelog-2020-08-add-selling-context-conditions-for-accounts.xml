@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-08-add-selling-context-conditions-for-accounts.xml">
+
+	<changeSet id="PB-8337-add-selling-context-conditions-for-accounts" author="elasticpath">
+		<comment>Add new tag definitions to shopper conditions for accounts</comment>
+		<!-- Account profile tag group -->
+		<insert tableName="TTAGGROUP">
+			<column name="UIDPK" value="5"/>
+			<column name="GUID" value="ACCOUNT_PROFILE"/>
+		</insert>
+
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="5"/>
+			<column name="OBJECT_UID" value="5"/>
+			<column name="LOCALIZED_PROPERTY_KEY" value="tagGroupDisplayName_en"/>
+			<column name="VALUE" value="Account Profile"/>
+			<column name="TYPE" value="TagGroup"/>
+		</insert>
+
+		<!-- Customer shared ID tag -->
+		<insert tableName="TTAGDEFINITION">
+			<column name="UIDPK" value="25"/>
+			<column name="GUID" value="CUSTOMER_SHARED_ID"/>
+			<column name="NAME" value="CUSTOMER_SHARED_ID"/>
+			<column name="DESCRIPTION" value="The customer's shared ID."/>
+			<column name="TAGVALUETYPE_GUID" value="text"/>
+			<column name="TAGGROUP_UID" value="3"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="CUSTOMER_SHARED_ID"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="PLA_SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="CUSTOMER_SHARED_ID"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="PROMOTIONS_SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="CUSTOMER_SHARED_ID"/>
+		</insert>
+
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="25"/>
+			<column name="OBJECT_UID" value="25"/>
+			<column name="LOCALIZED_PROPERTY_KEY" value="tagDefinitionDisplayName_en"/>
+			<column name="VALUE" value="have customer shared ID"/>
+			<column name="TYPE" value="TagDefinition"/>
+		</insert>
+
+		<!-- Account shared ID tag -->
+		<insert tableName="TTAGDEFINITION">
+			<column name="UIDPK" value="26"/>
+			<column name="GUID" value="ACCOUNT_SHARED_ID"/>
+			<column name="NAME" value="ACCOUNT_SHARED_ID"/>
+			<column name="DESCRIPTION" value="The account's shared ID."/>
+			<column name="TAGVALUETYPE_GUID" value="text"/>
+			<column name="TAGGROUP_UID" value="5"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="ACCOUNT_SHARED_ID"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="PLA_SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="ACCOUNT_SHARED_ID"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="PROMOTIONS_SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="ACCOUNT_SHARED_ID"/>
+		</insert>
+
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="26"/>
+			<column name="OBJECT_UID" value="26"/>
+			<column name="LOCALIZED_PROPERTY_KEY" value="tagDefinitionDisplayName_en"/>
+			<column name="VALUE" value="have account shared ID"/>
+			<column name="TYPE" value="TagDefinition"/>
+		</insert>
+
+		<!-- Account Segment tag -->
+		<insert tableName="TTAGDEFINITION">
+			<column name="UIDPK" value="27"/>
+			<column name="GUID" value="ACCOUNT_SEGMENT"/>
+			<column name="NAME" value="ACCOUNT_SEGMENT"/>
+			<column name="DESCRIPTION" value="Account segments, also known as groups."/>
+			<column name="TAGVALUETYPE_GUID" value="customer_segment_set"/>
+			<column name="TAGGROUP_UID" value="5"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="ACCOUNT_SEGMENT"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="PLA_SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="ACCOUNT_SEGMENT"/>
+		</insert>
+
+		<insert tableName="TTAGDICTIONARYTAGDEFINITION">
+			<column name="TAGDICTIONARY_GUID" value="PROMOTIONS_SHOPPER"/>
+			<column name="TAGDEFINITION_GUID" value="ACCOUNT_SEGMENT"/>
+		</insert>
+
+		<insert tableName="TLOCALIZEDPROPERTIES">
+			<column name="UIDPK" value="27"/>
+			<column name="OBJECT_UID" value="27"/>
+			<column name="LOCALIZED_PROPERTY_KEY" value="tagDefinitionDisplayName_en"/>
+			<column name="VALUE" value="are account segment members"/>
+			<column name="TYPE" value="TagDefinition"/>
+		</insert>
+	</changeSet>
+</databaseChangeLog>

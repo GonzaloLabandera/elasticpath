@@ -17,10 +17,17 @@ Feature: Import Payment Provider Configurations
     When importing payment provider configuration with the importexport tool
     Then there are no any warning and failures in summary
     And database should contain payment provider configurations of
-      | guid  | paymentProviderPluginBeanName | name                 | status   | defaultDisplayName    | localizedNames                                                                   |
-      | 23456 | cybersourceVisaProvider       | Cyper Source Visa    | ACTIVE   | Visa display name     | en:Cyber Source Visa En;fr:Cyber Source Visa Fr;zh:Cyber Source Visa Zh          |
-      | 23457 | paypalProvider                | Paypal Provider      | DRAFT    | Paypal display name   | en:Paypal Provider En;fr:Paypal Provider Fr                                      |
-      | 23458 | yapstoneMasterCard            | Yapstone Master Card | DISABLED | Yapstone display name | en:Yapstone Master Card En;fr:Yapstone Master Card Fr;zh:Yapstone Master Card Zh |
+	  | guid                 | paymentProviderPluginBeanName              | name                 | status   | defaultDisplayName    | localizedNames                                                                   |
+	  | 23456                | cybersourceVisaProvider                    | Cyper Source Visa    | ACTIVE   | Visa display name     | en:Cyber Source Visa En;fr:Cyber Source Visa Fr;zh:Cyber Source Visa Zh          |
+	  | 23457                | paypalProvider                             | Paypal Provider      | DRAFT    | Paypal display name   | en:Paypal Provider En;fr:Paypal Provider Fr                                      |
+	  | 23458                | yapstoneMasterCard                         | Yapstone Master Card | DISABLED | Yapstone display name | en:Yapstone Master Card En;fr:Yapstone Master Card Fr;zh:Yapstone Master Card Zh |
+	  | DemoPaymentProcessor | paymentGatewayNull                         | DemoPaymentProcessor | DRAFT    | DemoPaymentProcessor  |                                                                                  |
+	  | CyberSource          | directPostCybersourcePaymentProviderPlugin | CyberSource          | DRAFT    | CyberSource           |                                                                                  |
+	  | PayflowPro           | paymentGatewayPayflowPro                   | PayflowPro           | DRAFT    | PayflowPro            |                                                                                  |
+	  | PayPal Do Direct     | paymentGatewayPaypalDoDirect               | PayPal Do Direct     | DRAFT    | PayPal Do Direct      |                                                                                  |
+	  | PayPal Express       | paymentGatewayPaypalExpress                | PayPal Express       | DRAFT    | PayPal Express        |                                                                                  |
+	  | GiftCertificate      | giftCertificatePlugin                      | GiftCertificate      | DRAFT    | GiftCertificate       |                                                                                  |
+	  | Exchange             | paymentGatewayExchange                     | Exchange             | DRAFT    | Exchange              |                                                                                  |
 
   Scenario: Import Payment Provider Configuration with existing Payment Provider Configuration
     Given the payment provider configuration import data has been emptied out
@@ -36,6 +43,13 @@ Feature: Import Payment Provider Configurations
       | code     | details |
       | IE-31400 | 23456   |
     And database should contain payment provider configurations of
-      | guid  | paymentProviderPluginBeanName | name              | status | defaultDisplayName  | localizedNames                                                          |
-      | 23456 | cybersourceVisaProvider       | Cyper Source Visa | ACTIVE | Visa display name   | en:Cyber Source Visa En;fr:Cyber Source Visa Fr;zh:Cyber Source Visa Zh |
-      | 23457 | paypalProvider                | Paypal Provider   | DRAFT  | Paypal display name | en:Paypal Provider En;fr:Paypal Provider Fr                             |
+	  | guid                 | paymentProviderPluginBeanName              | name                 | status | defaultDisplayName   | localizedNames                                                          |
+	  | 23456                | cybersourceVisaProvider                    | Cyper Source Visa    | ACTIVE | Visa display name    | en:Cyber Source Visa En;fr:Cyber Source Visa Fr;zh:Cyber Source Visa Zh |
+	  | 23457                | paypalProvider                             | Paypal Provider      | DRAFT  | Paypal display name  | en:Paypal Provider En;fr:Paypal Provider Fr                             |
+	  | DemoPaymentProcessor | paymentGatewayNull                         | DemoPaymentProcessor | DRAFT  | DemoPaymentProcessor |                                                                         |
+	  | CyberSource          | directPostCybersourcePaymentProviderPlugin | CyberSource          | DRAFT  | CyberSource          |                                                                         |
+	  | PayflowPro           | paymentGatewayPayflowPro                   | PayflowPro           | DRAFT  | PayflowPro           |                                                                         |
+	  | PayPal Do Direct     | paymentGatewayPaypalDoDirect               | PayPal Do Direct     | DRAFT  | PayPal Do Direct     |                                                                         |
+	  | PayPal Express       | paymentGatewayPaypalExpress                | PayPal Express       | DRAFT  | PayPal Express       |                                                                         |
+	  | GiftCertificate      | giftCertificatePlugin                      | GiftCertificate      | DRAFT  | GiftCertificate      |                                                                         |
+	  | Exchange             | paymentGatewayExchange                     | Exchange             | DRAFT  | Exchange             |                                                                         |

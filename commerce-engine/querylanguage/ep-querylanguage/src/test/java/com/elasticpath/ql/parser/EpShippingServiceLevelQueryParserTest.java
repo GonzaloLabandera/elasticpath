@@ -35,7 +35,7 @@ public class EpShippingServiceLevelQueryParserTest { // NOPMD
 		sslConf.initialize();
 		
 		Map<EPQueryType, AbstractEpQLCustomConfiguration> epQLObjectConfiguration = new HashMap<>();
-		epQLObjectConfiguration.put(EPQueryType.SHIPPING_SERVICE_LEVEL, sslConf);
+		epQLObjectConfiguration.put(EPQueryType.SHIPPINGSERVICELEVEL, sslConf);
 		
 		EpQueryAssembler epQueryAssembler = new EpQueryAssembler();
 		epQueryAssembler.setEpQLObjectConfiguration(epQLObjectConfiguration);

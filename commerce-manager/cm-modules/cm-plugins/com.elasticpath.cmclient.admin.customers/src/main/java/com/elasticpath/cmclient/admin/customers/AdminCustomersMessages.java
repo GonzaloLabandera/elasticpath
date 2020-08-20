@@ -28,6 +28,8 @@ public final class AdminCustomersMessages {
 	public String AttributeName;
 
 	public String AttributeType;
+	
+	public String AttributeUsage;
 
 	public String SystemAttribute;
 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-add-parent-relationship-tcustomer.xml">
+
+	<changeSet id="PB-8251-add-parent-relationship-tcustomer" author="elasticpath" >
+		<addColumn tableName="TCUSTOMER">
+			<column name="PARENT_CUSTOMER_GUID" type="VARCHAR(64)" />
+		</addColumn>
+
+		<addForeignKeyConstraint baseTableName="TCUSTOMER" baseColumnNames="PARENT_CUSTOMER_GUID" constraintName="TCUSTOMER_PARENT_GUID_FK"
+								 referencedTableName="TCUSTOMER" referencedColumnNames="GUID" />
+
+		<createIndex tableName="TCUSTOMER" indexName="I_CUSTOMER_PARENT">
+			<column name="PARENT_CUSTOMER_GUID" />
+		</createIndex>
+	</changeSet>
+
+</databaseChangeLog>

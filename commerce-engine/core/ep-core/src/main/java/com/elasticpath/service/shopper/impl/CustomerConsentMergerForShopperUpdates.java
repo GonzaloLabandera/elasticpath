@@ -4,6 +4,7 @@
 package com.elasticpath.service.shopper.impl;
 
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
@@ -31,7 +32,7 @@ public final class CustomerConsentMergerForShopperUpdates implements CustomerSes
 	 */
 	@Override
 	public void invalidateShopper(final CustomerSession customerSession, final Shopper invalidShopper) {
-		if (!invalidShopper.getCustomer().isAnonymous()) {
+		if (CustomerType.REGISTERED_USER == invalidShopper.getCustomer().getCustomerType()) {
 			return;
 		}
 

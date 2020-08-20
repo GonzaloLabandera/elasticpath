@@ -97,6 +97,9 @@ public final class FulfillmentImageRegistry extends AbstractImageRegistry {
 	/** Customer segment icon. */
 	public static final ImageDescriptor CUSTOMER_SEGMENT_ICON = getImageDescriptor(PLUGIN_ID, "customer-segment_default_22.png"); //$NON-NLS-1$
 
+	/** Account segment icon. */
+	public static final ImageDescriptor ADD_ACCOUNT_ICON = getImageDescriptor(PLUGIN_ID, "account_add_22.png"); //$NON-NLS-1$
+
 	private FulfillmentImageRegistry() {
 		// utility class
 	}

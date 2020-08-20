@@ -7,6 +7,7 @@ import static com.elasticpath.commons.util.TestDomainMarshaller.marshalObject;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Currency;
@@ -25,6 +26,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.elasticpath.common.dto.store.CartTypeDTO;
 import com.elasticpath.common.dto.store.StoreDTO;
 import com.elasticpath.common.dto.store.StoreGlobalizationDTO;
 import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
@@ -142,6 +144,30 @@ public class ImportStoreSteps {
 	}
 
 	/**
+	 * Verify failures in stores importing summary.
+	 *
+	 * @param dataTable dataTable
+	 */
+	@Then("^the follow failures are in stores importing summary$")
+	public void verifyFailuresIsReportedInSummary(final DataTable dataTable) {
+		final List<Message> failures = summary.getFailures();
+
+		List<String> failureExceptions = failures.stream()
+				.filter(message -> message.getException() != null)
+				.map(message -> message.getException().getMessage())
+				.collect(Collectors.toList());
+
+		dataTable.asList(String.class).forEach(error -> {
+			assertThat(failures)
+					.as("The import should have failures.")
+					.isNotEmpty();
+			assertThat(failureExceptions)
+					.as("The import should contain the expected error: " + error)
+					.contains(error);
+		});
+	}
+
+	/**
 	 * Ensure database contains store with guid wired with payment provider config.
 	 *
 	 * @param code store code.
@@ -247,7 +273,21 @@ public class ImportStoreSteps {
 		storeDTO.setSupportedCurrencies(separateStringToListOfObjects(properties.get("currencies"), SEPARATOR, Currency::getInstance));
 		storeDTO.setTaxCodeGuids(separateStringToListOfStrings(properties.get("tax_codes"), SEPARATOR));
 		storeDTO.setCreditCardTypes(separateStringToListOfStrings(properties.get("credit_card_types"), SEPARATOR));
-		storeDTO.setPaymentProviderConfigGuids(separateStringToListOfStrings(properties.get("payment_provider_configurations"), SEPARATOR));
+		if (properties.containsKey("payment_provider_configurations")) {
+			storeDTO.setPaymentProviderConfigGuids(separateStringToListOfStrings(properties.get("payment_provider_configurations"), SEPARATOR));
+		}
+		if (properties.containsKey("cart_type_name")) {
+			CartTypeDTO cartTypeDTO = new CartTypeDTO();
+			cartTypeDTO.setName(properties.get("cart_type_name"));
+			cartTypeDTO.setGuid(properties.get("cart_type_guid"));
+			List<String> modifierGroups = new ArrayList<>();
+			modifierGroups.add(properties.get("cart_type_modifier_group"));
+			cartTypeDTO.setModifierGroups(modifierGroups);
+			List<CartTypeDTO> cartTypeDTOS = new ArrayList<>();
+			cartTypeDTOS.add(cartTypeDTO);
+			storeDTO.setShoppingCartTypes(cartTypeDTOS);
+		}
+
 		storeDTO.setEnabled(true);
 
 		return storeDTO;

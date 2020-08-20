@@ -148,7 +148,7 @@ public class DataImportStepDefinitions {
 		mappings.put("CP_FIRST_NAME", 3);
 		mappings.put("CP_LAST_NAME", 4);
 		mappings.put("CP_EMAIL", 5);
-		mappings.put("CP_ANONYMOUS_CUST", 6);
+		mappings.put("customerType", 6);
 		mappings.put("CP_HTML_EMAIL", 7);
 		mappings.put("status", 8);
 		mappings.put("creationDate", 9);

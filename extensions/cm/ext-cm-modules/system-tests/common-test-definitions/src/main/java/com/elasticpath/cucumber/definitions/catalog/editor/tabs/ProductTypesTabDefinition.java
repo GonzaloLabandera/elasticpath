@@ -9,15 +9,15 @@ import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.domainobjects.Attribute;
+import com.elasticpath.selenium.domainobjects.CartItemModifierGroup;
+import com.elasticpath.selenium.domainobjects.ProductType;
 import com.elasticpath.selenium.domainobjects.SkuOption;
 import com.elasticpath.selenium.domainobjects.containers.AttributeContainer;
-import com.elasticpath.selenium.domainobjects.CartItemModifierGroup;
 import com.elasticpath.selenium.domainobjects.containers.CartModifierGroupContainer;
-import com.elasticpath.selenium.domainobjects.ProductType;
 import com.elasticpath.selenium.domainobjects.containers.SkuOptionContainer;
 import com.elasticpath.selenium.editor.catalog.CatalogEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.ProductTypeTab;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.AddEditProductTypeWizard;
@@ -36,6 +36,7 @@ public class ProductTypesTabDefinition {
 	private final AttributeContainer attributeContainer;
 	private final CartModifierGroupContainer cartModifierGroupContainer;
 	private final SkuOptionContainer skuOptionContainer;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -49,7 +50,7 @@ public class ProductTypesTabDefinition {
 	public ProductTypesTabDefinition(final CartItemModifierGroup cartItemModifierGroup, final ProductType productType,
 									 final AttributeContainer attributeContainer, final CartModifierGroupContainer cartModifierGroupContainer,
 									 final SkuOptionContainer skuOptionContainer) {
-		final WebDriver driver = SetUp.getDriver();
+		this.driver = SeleniumDriverSetup.getDriver();
 		this.productTypeTab = new ProductTypeTab(driver);
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		this.catalogEditor = new CatalogEditor(driver);
@@ -105,7 +106,6 @@ public class ProductTypesTabDefinition {
 
 	/**
 	 * Set cart item modifier group in product type object.
-	 *
 	 */
 	private void setCartItemModifierGroupCodes() {
 		this.productType.setCartItemModifierGroup(cartModifierGroupContainer.getCartItemModifierGroups()
@@ -154,7 +154,7 @@ public class ProductTypesTabDefinition {
 			}
 		}
 		cartModifierGroupContainer.getCartItemModifierGroups()
-				.forEach(cartItemModifierGroup ->selectCartItemModifierGroup(cartItemModifierGroup.getGroupCode()));
+				.forEach(cartItemModifierGroup -> selectCartItemModifierGroup(cartItemModifierGroup.getGroupCode()));
 
 		setCartItemModifierGroupCodes();
 		addEditProductTypeWizard.checkMultipleSkuBox();
@@ -206,7 +206,7 @@ public class ProductTypesTabDefinition {
 		productTypeTab.selectTab("ProductTypes");
 		productTypeTab.selectProductType(this.productType.getProductTypeName());
 		productTypeTab.clickRemoveProductTypeButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogProductTypesSection_RemoveDialog");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CatalogProductTypesSection_RemoveDialog");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}

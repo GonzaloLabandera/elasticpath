@@ -3,6 +3,7 @@
  */
 package com.elasticpath.importexport.importer.importers.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,8 @@ public abstract class AbstractImporterImpl<DOMAIN extends Persistable, DTO exten
 
 	private Set<String> processedObjectGuids;
 
+	private List<LifecycleListener> commonLifecycleListeners = new ArrayList<>();
+
 	@Override
 	public void initialize(final ImportContext context, final SavingStrategy<DOMAIN, DTO> savingStrategy) {
 		this.context = context;
@@ -54,6 +57,7 @@ public abstract class AbstractImporterImpl<DOMAIN extends Persistable, DTO exten
 		}
 		savingStrategy.setDomainAdapter(getDomainAdapter());
 		savingStrategy.setCollectionsStrategy(getCollectionsStrategy());
+		savingStrategy.setCommonLifecycleListeners(getCommonLifecycleListeners());
 		setProcessedObjectGuids(new HashSet<>());
 	}
 
@@ -239,4 +243,11 @@ public abstract class AbstractImporterImpl<DOMAIN extends Persistable, DTO exten
 		return defaultCommitUnit;
 	}
 
+	protected List<LifecycleListener> getCommonLifecycleListeners() {
+		return commonLifecycleListeners;
+	}
+
+	public void setCommonLifecycleListeners(final List<LifecycleListener> commonLifecycleListeners) {
+		this.commonLifecycleListeners = commonLifecycleListeners;
+	}
 }

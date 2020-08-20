@@ -1,21 +1,16 @@
 # Prerequisite
-  * Build the following projects to install required dependency:
-  ```
-    /ep-commerce/extensions/cortex/system-tests
-    /ep-commerce/extensions/cm/ext-cm-modules/system-tests/selenium
-```
- Use the following command:
+  * Build ep-commerce from root, using the following command:
   ```java
   mvn clean install -DskipAllTests
   ```
-# cm-selenium-test
-**Before Running the Tests**
 
-Ensure the CM you are testing against has the Test ID mode turned on.
-In ext-cm-webapp-runner, run the following:
-```
-mvn clean tomcat8:run-war -Dorg.eclipse.rap.rwt.enableUITests=true
-```
+# cm-selenium-test
+
+**Building Project**
+
+Build the following projects using this command: mvn clean install -DskipAllTests
+* commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests
+* commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests/selenium
 
 **Setting up commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests Project in IntelliJ**
 
@@ -29,11 +24,13 @@ mvn clean tomcat8:run-war -Dorg.eclipse.rap.rwt.enableUITests=true
 6. Go to File > Settings > Editor > File type > Cucumber Scenario
     * add *.feature to the Cucumber Scenario file type.
 
-**Building Project**
+**Before Running the Tests**
 
-Build the following projects using this command: mvn clean install -DskipAllTests
-* commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests
-* commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests/selenium
+Ensure the CM you are testing against has the Test ID mode turned on.
+In ext-cm-webapp-runner, run the following:
+```
+mvn clean tomcat8:run-war -Dorg.eclipse.rap.rwt.enableUITests=true
+```
 
 **Running Tests:**
 
@@ -55,12 +52,3 @@ mvn clean install -Dcucumber.options="--tags @regressionTest"
 * You can run a subset of tests by right clicking and run any one of TestsIT classes under /selenium/src/test/java/com/elasticpath/cucumber/
 * You can create your own local runner class to run your own tagged tests. E.g. RunLocalTestsIT.java which runs your own tagged tests @local 
     * Do not commit the local runner class and tags as they are only for your local testing purpose. 
-
-*Updating Browser Driver Versions*
-* You can download the latest browser driver from web. e.g. chromedriver.
-* Update the RepositoryMap.xml for the driver version.
-* Hash value can be found locally if you run following in bash command locally.
-```
-openssl sha1 <filename>
-```
-* Example: https://github.com/Ardesco/Selenium-Maven-Template/blob/master/src/test/resources/RepositoryMap.xml

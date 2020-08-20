@@ -563,7 +563,7 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 	}
 	private Map <String, String> getUsageMap() {
 		Map <String, String> usageWithoutCustomerProfileMap = new LinkedHashMap<>(getAttributeService().getAttributeUsageMap());
-		usageWithoutCustomerProfileMap.remove(String.valueOf(AttributeUsage.CUSTOMERPROFILE));
+		usageWithoutCustomerProfileMap.remove(String.valueOf(AttributeUsage.USER_PROFILE));
 		return usageWithoutCustomerProfileMap;
 	}
 

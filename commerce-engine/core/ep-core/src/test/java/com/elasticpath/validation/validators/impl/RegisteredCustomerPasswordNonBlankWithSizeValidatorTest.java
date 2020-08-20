@@ -57,20 +57,10 @@ public class RegisteredCustomerPasswordNonBlankWithSizeValidatorTest {
 	}
 
 	/**
-	 * Test password validity when a customer is anonymous.
-	 */
-	@Test
-	public void testCustomerIsAnonymous() {
-		shouldHaveAnonymousCustomer(true);
-		assertTrue("A password is not validated when a customer is anonymous.", validator.isValid(customer, validatorContext));
-	}
-
-	/**
 	 * Test password validity when a customer is not anonymous with valid password.
 	 */
 	@Test
 	public void testCustomerIsNotAnonymousWithValidPassword() {
-		shouldHaveAnonymousCustomer(false);
 		shouldHaveCustomerPassword("hello");
 		assertTrue("The password should be valid when a customer is not anonymous.", validator.isValid(customer, validatorContext));
 	}
@@ -80,7 +70,6 @@ public class RegisteredCustomerPasswordNonBlankWithSizeValidatorTest {
 	 */
 	@Test
 	public void testCustomerIsNotAnonymousWithNullPassword() {
-		shouldHaveAnonymousCustomer(false);
 		shouldHaveCustomerPassword(null);
 		assertFalse("The password should not be valid when a customer is not anonymous and a password is not defined.",
 				validator.isValid(customer, validatorContext));
@@ -91,7 +80,6 @@ public class RegisteredCustomerPasswordNonBlankWithSizeValidatorTest {
 	 */
 	@Test
 	public void testCustomerIsNotAnonymousWithWhitespaceOnly() {
-		shouldHaveAnonymousCustomer(false);
 		shouldHaveCustomerPassword("        ");
 		assertFalse("The password should not be valid when a customer is not anonymous and a password is all whitespace.",
 				validator.isValid(customer, validatorContext));
@@ -102,7 +90,6 @@ public class RegisteredCustomerPasswordNonBlankWithSizeValidatorTest {
 	 */
 	@Test
 	public void testCustomerIsNotAnonymousWithTooShortPassword() {
-		shouldHaveAnonymousCustomer(false);
 		shouldHaveCustomerPassword("bad");
 		assertFalse("The password should not be valid when a customer is not anonymous"
 				+ " and a password is too short.", validator.isValid(customer, validatorContext));
@@ -113,19 +100,9 @@ public class RegisteredCustomerPasswordNonBlankWithSizeValidatorTest {
 	 */
 	@Test
 	public void testCustomerIsNotAnonymousWithTooLongPassword() {
-		shouldHaveAnonymousCustomer(false);
 		shouldHaveCustomerPassword("password_too_long");
 		assertFalse("The password should not be valid when a customer is not anonymous"
 				+ " and a password is too long.", validator.isValid(customer, validatorContext));
-	}
-
-	private void shouldHaveAnonymousCustomer(final boolean anonymous) {
-		context.checking(new Expectations() {
-			{
-				oneOf(customer).isAnonymous();
-				will(returnValue(anonymous));
-			}
-		});
 	}
 
 	private void shouldHaveCustomerPassword(final String password) {

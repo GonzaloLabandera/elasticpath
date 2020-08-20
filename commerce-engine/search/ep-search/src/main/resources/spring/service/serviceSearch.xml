@@ -201,17 +201,8 @@
 		<property name="solrManager" ref="solrManager" />
 		<property name="indexSearchService" ref="indexSearchService" />
 		<property name="indexBuilderFactory" ref="indexBuilderFactory" />
-		<property name="indexBuildStatusDao" ref="indexBuildStatusDao" />
 		<property name="indexBuildPolicy" ref="indexBuildPolicy" />
 		<property name="indexingStatistics" ref="indexingStats" />
-		<property name="indexBuildStatusFactory">
-			<bean
-				class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
-				<property name="targetBeanName">
-					<idref bean="indexBuildStatus" />
-				</property>
-			</bean>
-		</property>
 		<property name="optimizedIndexesListExclusions" ref="optimizedIndexesListExclusions" />
 		<property name="indexBuildPolicyContextFactory" ref="indexBuildPolicyContextFactory" />
 		<property name="indexBuildStatusUpdater" ref="indexBuildStatusUpdater" />

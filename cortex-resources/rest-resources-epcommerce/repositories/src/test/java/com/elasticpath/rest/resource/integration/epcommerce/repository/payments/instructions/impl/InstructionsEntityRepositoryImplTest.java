@@ -65,7 +65,7 @@ public class InstructionsEntityRepositoryImplTest {
 			"billing-address", buildEmptyCustomerAddressEntity().toString());
 	private static final Map<String, String> CONTROL_DATA = ImmutableMap.of("control-data-key", "control-data-value");
 	private static final Map<String, String> PAYLOAD_DATA = ImmutableMap.of("payload-data-key", "payload-data-value");
-	private static final String USER_ID = "USER_ID";
+	private static final String USER_ID = "SHARED_ID";
 	private static final Locale LOCALE = Locale.CANADA;
 	private static final Currency CURRENCY = Currency.getInstance(LOCALE);
 	private static final String FIRST_NAME = "Bruce";

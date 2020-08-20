@@ -45,13 +45,24 @@ public enum AttributeUsageType {
 	},
 
 	/**
-	 * CustomerProfile Usage Type.
+	 * User Profile Usage Type.
 	 */
-	CustomerProfile {
+	UserProfile {
 
 		@Override
 		public AttributeUsage usage() {
-			return AttributeUsageImpl.CUSTOMERPROFILE_USAGE;
+			return AttributeUsageImpl.USER_PROFILE_USAGE;
+		}
+	},
+	
+	/**
+	 * Account Profile Usage Type.
+	 */
+	AccountProfile {
+
+		@Override
+		public AttributeUsage usage() {
+			return AttributeUsageImpl.ACCOUNT_PROFILE_USAGE;
 		}
 	};
 

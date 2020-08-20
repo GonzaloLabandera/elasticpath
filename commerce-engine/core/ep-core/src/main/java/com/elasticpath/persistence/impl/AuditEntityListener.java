@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import javax.persistence.FlushModeType;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -35,8 +34,6 @@ import com.elasticpath.persistence.api.ChangeType;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngineOperationListener;
-import com.elasticpath.persistence.api.PersistenceSession;
-import com.elasticpath.persistence.api.Transaction;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.service.audit.AuditDao;
 
@@ -428,25 +425,10 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 		// If it's a delete then we always create the operation.
 		// Otherwise we only do it if the class is auditable
 		if (ChangeType.DELETE.equals(type) || getAuditableClasses().contains(object.getClass().getName())) {
-
-			// Start a separate transaction for writing operation rows, and force a flush on commit
-			PersistenceSession persistenceSession = getPersistenceEngine().getPersistenceSession();
-			Transaction transaction = persistenceSession.beginTransaction();
-
-			OpenJPAEntityManager openJpaEM = getOpenJPAEntityManager();
-			final FlushModeType flushMode = openJpaEM.getFlushMode();
-			openJpaEM.setFlushMode(FlushModeType.COMMIT);
-
-			try {
-				ChangeTransaction csTransaction = joinChangeTransaction(getTransactionId(), object);
-				ChangeOperation operation = getAuditDao()
-						.persistSingleChangeOperation(object, type,	csTransaction,
-								getNextOperationIndex(getTransactionId()));
-				transaction.commit();
-				setCurrentOperation(operation);
-			} finally {
-				openJpaEM.setFlushMode(flushMode);
-			}
+			ChangeTransaction csTransaction = joinChangeTransaction(getTransactionId(), object);
+			ChangeOperation operation = getAuditDao().persistSingleChangeOperation(object, type, csTransaction,
+				getNextOperationIndex(getTransactionId()));
+       			setCurrentOperation(operation);
 		}
 	}
 
@@ -455,15 +437,9 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 			final String parameters, final ChangeType type) {
 
 		if (isAuditableNamedQuery(queryName)) {
-			// Start a separate transaction for writing operation rows, and force a flush on commit
-			PersistenceSession persistenceSession = getPersistenceEngine().getPersistenceSession();
-			Transaction transaction = persistenceSession.beginTransaction();
-
 			ChangeTransaction csTransaction = joinChangeTransaction(getTransactionId(), null);
 			ChangeOperation operation = getAuditDao().persistBulkChangeOperation(queryString, parameters, type, csTransaction,
 					getNextOperationIndex(getTransactionId()));
-			transaction.commit();
-
 			setCurrentOperation(operation);
 		}
 	}

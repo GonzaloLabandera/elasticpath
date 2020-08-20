@@ -59,7 +59,7 @@ public class EpLoginChangePasswordDialog extends AbstractEpDialog implements Mod
 
 	private Text descriptionText;
 
-	private Text userIdText;
+	private Text usernameText;
 
 	private Text oldPasswordText;
 
@@ -124,8 +124,8 @@ public class EpLoginChangePasswordDialog extends AbstractEpDialog implements Mod
 		final IEpLayoutData labelData = controlPane.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.CENTER, false, false);
 		final IEpLayoutData fieldData = controlPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.CENTER, true, false);
 
-		controlPane.addLabelBoldRequired(CoreMessages.get().EpLoginDialog_LoginUserId, EpState.EDITABLE, labelData);
-		userIdText = controlPane.addTextField(EpState.DISABLED, fieldData);
+		controlPane.addLabelBoldRequired(CoreMessages.get().EpLoginDialog_LoginUsername, EpState.EDITABLE, labelData);
+		usernameText = controlPane.addTextField(EpState.DISABLED, fieldData);
 
 		String oldPassword = CoreMessages.get().EpLoginChangePasswordDialog_CurrentPassword;
 		if (userToChange.isTemporaryPassword()) {
@@ -184,7 +184,7 @@ public class EpLoginChangePasswordDialog extends AbstractEpDialog implements Mod
 	@Override
 	protected void populateControls() {
 		descriptionText.setText(CoreMessages.get().EpLoginChangePasswordDialog_PasswordRestrictions);
-		userIdText.setText(userToChange.getUserName());
+		usernameText.setText(userToChange.getUserName());
 		this.setComplete(false);
 	}
 

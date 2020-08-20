@@ -6,9 +6,11 @@ package com.elasticpath.service.tax.calculator.impl;
 import java.math.BigDecimal;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.plugin.tax.builder.TaxRecordBuilder;
 import com.elasticpath.plugin.tax.calculator.TaxCalculator;
 import com.elasticpath.plugin.tax.common.TaxContextIdNames;
+import com.elasticpath.plugin.tax.domain.TaxAddress;
 import com.elasticpath.plugin.tax.domain.TaxRecord;
 import com.elasticpath.plugin.tax.domain.TaxableItem;
 import com.elasticpath.plugin.tax.domain.TaxableItemContainer;
@@ -19,9 +21,10 @@ import com.elasticpath.plugin.tax.rate.TaxRateDescriptor;
 import com.elasticpath.plugin.tax.rate.TaxRateDescriptorResult;
 import com.elasticpath.plugin.tax.rate.dto.AppliedTaxValue;
 import com.elasticpath.plugin.tax.resolver.TaxOperationResolvers;
-import com.elasticpath.plugin.tax.resolver.TaxRateDescriptorResolver;
 import com.elasticpath.service.tax.TaxCodeRetriever;
+import com.elasticpath.service.tax.TaxJurisdictionService;
 import com.elasticpath.service.tax.impl.ElasticPathTaxProviderPluginImpl;
+import com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver;
 
 /**
  * The ElasticPath tax calculator calculates taxes based on EP tax tables. Taxes for returns are based on the tax rates
@@ -33,6 +36,8 @@ public class ElasticPathTaxCalculator implements TaxCalculator {
 
 	private TaxCodeRetriever taxCodeRetriever;
 
+	private TaxJurisdictionService taxJurisdictionService;
+
 	@Override
 	public TaxedItemContainer calculate(final TaxableItemContainer container, final TaxOperationResolvers taxOperationResolvers) {
 		final MutableTaxedItemContainer result = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER, 
@@ -41,11 +46,18 @@ public class ElasticPathTaxCalculator implements TaxCalculator {
 
 		final TaxRateDescriptorResolver taxRateDescriptorResolver = taxOperationResolvers.getResolver(TaxRateDescriptorResolver.class);
 
+		TaxJurisdiction taxJurisdiction = findTaxJurisdictionByStoreAndAddress(container.getStoreCode(), container.getDestinationAddress());
+
 		for (TaxableItem taxableItem : container.getItems()) {
 			final MutableTaxedItem taxedItem = getBeanFactory().getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM, MutableTaxedItem.class);
 			taxedItem.setTaxableItem(taxableItem);
 
-			final TaxRateDescriptorResult taxRateDescriptorResult = taxRateDescriptorResolver.findTaxRateDescriptors(taxableItem, container);
+			final TaxRateDescriptorResult taxRateDescriptorResult = taxRateDescriptorResolver.findTaxRateDescriptors(
+					taxableItem,
+					container,
+					taxJurisdiction
+			);
+
 			BigDecimal includeTaxAmount = BigDecimal.ZERO;
 
 			for (TaxRateDescriptor taxRateDescriptor : taxRateDescriptorResult.getTaxRateDescriptors()) {
@@ -77,6 +89,21 @@ public class ElasticPathTaxCalculator implements TaxCalculator {
 		return result;
 	}
 
+	/**
+	 * Retrieves a tax jurisdiction for the specified address and store.
+	 *
+	 * @param storeCode the store to use
+	 * @param address   the address to use
+	 * @return an instance of a {@link TaxJurisdiction} or null if none found
+	 */
+	protected TaxJurisdiction findTaxJurisdictionByStoreAndAddress(final String storeCode, final TaxAddress address) {
+		if (storeCode != null && address != null) {
+			return this.getTaxJurisdictionService().retrieveEnabledInStoreTaxJurisdiction(storeCode, address);
+		}
+		return null;
+	}
+
+
 	public BeanFactory getBeanFactory() {
 		return beanFactory;
 	}
@@ -91,6 +118,14 @@ public class ElasticPathTaxCalculator implements TaxCalculator {
 
 	public void setTaxCodeRetriever(final TaxCodeRetriever taxCodeRetriever) {
 		this.taxCodeRetriever = taxCodeRetriever;
+	}
+
+	public TaxJurisdictionService getTaxJurisdictionService() {
+		return taxJurisdictionService;
+	}
+
+	public void setTaxJurisdictionService(final TaxJurisdictionService taxJurisdictionService) {
+		this.taxJurisdictionService = taxJurisdictionService;
 	}
 
 }

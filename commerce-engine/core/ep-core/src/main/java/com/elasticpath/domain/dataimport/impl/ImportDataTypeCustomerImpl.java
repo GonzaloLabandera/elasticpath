@@ -7,6 +7,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -25,10 +29,10 @@ import com.elasticpath.domain.attribute.AttributeValue;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerProfile;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.service.attribute.AttributeService;
-import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.dataimport.ImportGuidHelper;
 import com.elasticpath.validation.service.ValidatorUtils;
 
@@ -77,12 +81,15 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 		// are displayed on the import mapping page.
 		// required fields
 		createImportFieldGuid();
-		createImportFieldUserId();
+		createImportFieldSharedId();
+		createImportFieldCustomerType();
 
 		// optional fields
 		createImportFieldStatus(); // enabled = 1 (default), disabled = 0
 		createImportFieldCreationDate();
+		createImportFieldUsername();
 		createImportFieldPassword();
+		createImportFieldParentGuid();
 
 		createImportFieldsForCustomerProfiles();
 	}
@@ -175,8 +182,111 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 		});
 	}
 
-	private void createImportFieldUserId() {
-		final String importFieldName = PREFIX_OF_FIELD_NAME + "userId";
+	private void createImportFieldSharedId() {
+		final String importFieldName = PREFIX_OF_FIELD_NAME + "sharedId";
+		addImportField(importFieldName, new AbstractImportFieldImpl(importFieldName, String.class.toString(), true, false) {
+			private static final long serialVersionUID = 5000000001L;
+
+			@Override
+			public String getStringValue(final Object object) {
+				typeCheck(object);
+				return ((Customer) object).getSharedId();
+			}
+
+			@Override
+			public void setStringValue(final Object object, final String value, final ImportGuidHelper service) {
+				typeCheck(object);
+				ensureSharedIdHasNotChanged((Customer) object, value, service);
+
+				final String sharedId = checkNullValue(value)
+						? UUID.randomUUID().toString()
+						: value;
+
+				((Customer) object).setSharedId(sharedId);
+			}
+		});
+	}
+
+	/**
+	 * Checks for an update operation, customer with given guid has a different sharedId than the one provided.
+	 *
+	 * @param customer   customer
+	 * @param sharedId sharedId value
+	 * @param importGuidHelper  ImportGuidHelper service
+	 */
+	private void ensureSharedIdHasNotChanged(final Customer customer, final String sharedId, final ImportGuidHelper importGuidHelper) {
+		final Customer persistedCustomer = importGuidHelper.findCustomerByGuid(customer.getGuid());
+		if (persistedCustomer != null && !Objects.equals(sharedId, persistedCustomer.getSharedId())) {
+			final String message = String.format("Could not import CUSTOMER (%s): Shared ID cannot be changed on an existing customer.", sharedId);
+			throw new EpInvalidValueBindException(message);
+		}
+	}
+
+	/**
+	 * Checks for an update operation, customer with given guid has a different sharedId than the one provided.
+	 *
+	 * @param customer   customer
+	 * @param parentGuid parentGuid value
+	 * @param importGuidHelper  ImportGuidHelper service
+	 */
+	private void ensureParentGuidHasNotChanged(final Customer customer, final String parentGuid, final ImportGuidHelper importGuidHelper) {
+		final Customer persistedCustomer = importGuidHelper.findCustomerByGuid(customer.getGuid());
+		if (persistedCustomer != null && !Objects.equals(parentGuid, persistedCustomer.getParentGuid())) {
+			final String message = String.format("Could not import CUSTOMER (%s): Parent Guid cannot be changed on an existing customer.",
+					parentGuid);
+			throw new EpInvalidValueBindException(message);
+		}
+	}
+
+	private void createImportFieldUsername() {
+		final String importFieldName = PREFIX_OF_FIELD_NAME + "username";
+		addImportField(importFieldName, new AbstractImportFieldImpl(importFieldName, String.class.toString(), false, false) {
+
+			private static final long serialVersionUID = 5000000001L;
+
+			@Override
+			public String getStringValue(final Object object) {
+				typeCheck(object);
+				return String.valueOf(((Customer) object).getUsername());
+			}
+
+			@Override
+			public void setStringValue(final Object object, final String value, final ImportGuidHelper service) {
+				typeCheck(object);
+
+				((Customer) object).setUsername(value);
+			}
+		});
+	}
+
+	private void createImportFieldParentGuid() {
+		final String importFieldName = PREFIX_OF_FIELD_NAME + "parentGuid";
+		addImportField(importFieldName, new AbstractImportFieldImpl(importFieldName, String.class.toString(), false, false) {
+
+			private static final long serialVersionUID = 5000000001L;
+
+			@Override
+			public String getStringValue(final Object object) {
+				typeCheck(object);
+				return ((Customer) object).getParentGuid();
+			}
+
+			@Override
+			public void setStringValue(final Object object, final String value, final ImportGuidHelper service) {
+				typeCheck(object);
+				ensureParentGuidHasNotChanged((Customer) object, value, service);
+
+				if (checkNullValue(value)) {
+					throw new EpNonNullBindException(super.getName());
+				}
+
+				((Customer) object).setParentGuid(value);
+			}
+		});
+	}
+
+	private void createImportFieldCustomerType() {
+		final String importFieldName = PREFIX_OF_FIELD_NAME + "customerType";
 		addImportField(importFieldName, new AbstractImportFieldImpl(importFieldName, String.class.toString(), true, false) {
 
 			private static final long serialVersionUID = 5000000001L;
@@ -184,7 +294,7 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 			@Override
 			public String getStringValue(final Object object) {
 				typeCheck(object);
-				return ((Customer) object).getUserId();
+				return ((Customer) object).getCustomerType().toString();
 			}
 
 			@Override
@@ -194,7 +304,15 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 					throw new EpNonNullBindException(super.getName());
 				}
 
-				((Customer) object).setUserId(value);
+				CustomerType customerType = CustomerType.valueOf(value);
+				if (customerType == null) {
+					CustomerType[] customerTypes = CustomerType.class.getEnumConstants();
+					String customerTypeValues = Stream.of(customerTypes).map(CustomerType::getName).collect(Collectors.joining(", "));
+					String message = String.format("Invalid CustomerType value %s for customer %s. Valid values are %s",
+							value, ((Customer) object).getSharedId(), customerTypeValues);
+					throw new EpInvalidValueBindException(message);
+				}
+				((Customer) object).setCustomerType(customerType);
 			}
 		});
 	}
@@ -341,8 +459,7 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 
 	@Override
 	public void deleteEntity(final Entity entity) {
-		CustomerService customerService = getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
-		customerService.remove((Customer) entity);
+		throw new UnsupportedOperationException("Deleting customers is not supported");
 	}
 
 	@Override

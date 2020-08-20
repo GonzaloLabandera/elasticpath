@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import com.elasticpath.common.dto.customer.CustomerDTO;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerGroup;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
 import com.elasticpath.importexport.common.adapters.customer.CustomerAdapter;
@@ -91,7 +92,7 @@ public class CustomerExporter extends AbstractExporterImpl<Customer, CustomerDTO
 	@Override
 	protected void addDependencies(final List<Customer> customers, final DependencyRegistry dependencyRegistry) {
 		for (Customer customer : customers) {
-			if (dependencyRegistry.supportsDependency(Store.class)) {
+			if (dependencyRegistry.supportsDependency(Store.class) && !customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
 				dependencyRegistry.addGuidDependency(Store.class, customer.getStoreCode());
 			}
 

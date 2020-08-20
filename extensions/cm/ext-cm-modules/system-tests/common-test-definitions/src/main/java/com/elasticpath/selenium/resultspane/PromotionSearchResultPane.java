@@ -36,6 +36,17 @@ public class PromotionSearchResultPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Returns true if promotion exists else false.
+	 *
+	 * @param promotionName the promotion name
+	 * @return boolean
+	 */
+	public boolean isPromotionExists(final String promotionName) {
+		return selectItemInCenterPane(PROMOTION_SEARCH_RESULT_PARENT_CSS, PROMOTION_SEARCH_RESULT_LIST_CSS, promotionName,
+				"Promotion Name");
+	}
+
+	/**
 	 * Opens catalog promotion editor.
 	 *
 	 * @return the catalog promotion editor.

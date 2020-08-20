@@ -36,7 +36,7 @@ public class ProfileAttributePane extends AbstractPageObject {
 	 */
 	public void verifyProfileAttributeExists(final String profileAttributeName) {
 		assertThat(selectItemInCenterPaneWithoutPagination(PROFILE_ATTRIBUTE_LIST_PARENT_CSS, PROFILE_ATTRIBUTE_LIST_CSS, profileAttributeName,
-				"Attribute Name"))
+				"Name"))
 				.as("Profile Attribute does not exist in the list - " + profileAttributeName)
 				.isTrue();
 	}
@@ -49,7 +49,7 @@ public class ProfileAttributePane extends AbstractPageObject {
 	public void verifyProfileAttributeIsNotInList(final String profileAttributeName) {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
 		assertThat(verifyItemIsNotInCenterPaneWithoutPagination(PROFILE_ATTRIBUTE_LIST_PARENT_CSS, PROFILE_ATTRIBUTE_LIST_CSS, profileAttributeName,
-				"Attribute Name"))
+				"Name"))
 				.as("Delete failed, warehouse does is still in the list - " + profileAttributeName)
 				.isFalse();
 		setWebDriverImplicitWaitToDefault();

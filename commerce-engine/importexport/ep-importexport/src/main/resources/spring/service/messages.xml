@@ -8,7 +8,7 @@
 >
 	<bean id="messageSource"
 		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-		<property name="basename" value="message-source/messages"/>
+		<property name="basename" value="classpath:message-source/messages"/>
 		<property name="useCodeAsDefaultMessage" value="true" />
 		<property name="fallbackToSystemLocale" value="false"/>
 		<!-- Set cacheSeconds to -1 in Production Environment -->

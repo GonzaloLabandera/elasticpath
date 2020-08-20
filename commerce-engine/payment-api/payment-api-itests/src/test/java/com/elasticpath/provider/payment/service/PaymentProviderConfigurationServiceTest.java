@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.provider.payment.PaymentLocalizedProperties;
 import com.elasticpath.provider.payment.PaymentLocalizedPropertiesImpl;
 import com.elasticpath.provider.payment.PaymentLocalizedPropertyValue;
@@ -40,6 +41,11 @@ import com.elasticpath.test.util.Utils;
 public class PaymentProviderConfigurationServiceTest extends DbTestCase {
 
 	private static final String NAME_FR = "GST (Le Canada)";
+	private static final int INIT_AMOUNT = 0;
+	private static final int EXPECTED_AMOUNT = 2;
+
+	@Autowired
+	PersistenceEngine persistenceEngine;
 
 	@Autowired
 	private PaymentProviderConfigurationService testee;
@@ -83,17 +89,21 @@ public class PaymentProviderConfigurationServiceTest extends DbTestCase {
 	@Test
 	@DirtiesDatabase
 	public void verifyFindByStatus() {
-		PaymentProviderConfiguration configuration1 = createTestPaymentProviderConfiguration();
-		PaymentProviderConfiguration configuration2 = createTestPaymentProviderConfiguration();
+
+		final List<PaymentProviderConfiguration> initPersistedConfigurations = testee.findByStatus(PaymentProviderConfigurationStatus.ACTIVE);
+		assertEquals(INIT_AMOUNT, initPersistedConfigurations.size());
+
+		final PaymentProviderConfiguration configuration1 = createTestPaymentProviderConfiguration();
+		final PaymentProviderConfiguration configuration2 = createTestPaymentProviderConfiguration();
 		configuration1.setStatus(PaymentProviderConfigurationStatus.ACTIVE);
 		configuration2.setStatus(PaymentProviderConfigurationStatus.ACTIVE);
 		testee.saveOrUpdate(configuration1);
 		testee.saveOrUpdate(configuration2);
 
-		List<PaymentProviderConfiguration> persistedConfigurations = testee.findByStatus(PaymentProviderConfigurationStatus.ACTIVE);
-		assertEquals(2, persistedConfigurations.size());
-		assertEquals(PaymentProviderConfigurationStatus.ACTIVE, persistedConfigurations.get(0).getStatus());
-		assertEquals(PaymentProviderConfigurationStatus.ACTIVE, persistedConfigurations.get(1).getStatus());
+		final List<PaymentProviderConfiguration> updatedPersistedConfigurations = testee.findByStatus(PaymentProviderConfigurationStatus.ACTIVE);
+		assertEquals(EXPECTED_AMOUNT, updatedPersistedConfigurations.size());
+		assertEquals(PaymentProviderConfigurationStatus.ACTIVE, updatedPersistedConfigurations.get(0).getStatus());
+		assertEquals(PaymentProviderConfigurationStatus.ACTIVE, updatedPersistedConfigurations.get(1).getStatus());
 	}
 
 	/**

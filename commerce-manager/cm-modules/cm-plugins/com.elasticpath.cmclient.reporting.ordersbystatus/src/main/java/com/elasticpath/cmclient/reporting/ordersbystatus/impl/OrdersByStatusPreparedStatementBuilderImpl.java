@@ -72,7 +72,7 @@ public class OrdersByStatusPreparedStatementBuilderImpl extends PreparedStatemen
 
 	@Override
 	public JpqlQueryBuilder getCustomerInfoQueryAndParams() {
-		final String selectFields = "o.orderNumber, c.uidPk, c.userId, cpv.localizedAttributeKey, cpv.shortTextValue";
+		final String selectFields = "o.orderNumber, c.uidPk, c.sharedId, cpv.localizedAttributeKey, cpv.shortTextValue";
 
 		final JpqlQueryBuilder jpqlQueryBuilder = new JpqlQueryBuilder("OrderImpl", "o", selectFields);
 		jpqlQueryBuilder.appendInnerJoin("o.customer", "c");

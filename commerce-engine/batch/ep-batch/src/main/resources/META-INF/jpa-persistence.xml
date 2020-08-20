@@ -3,5 +3,9 @@
 	<persistence-unit name="commerce-persistence-unit">
 	    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
 		<mapping-file>META-INF/search-query-orm.xml</mapping-file>
+		<mapping-file>META-INF/batch-release-shipments-job-queries-orm.xml</mapping-file>
+		<mapping-file>META-INF/batch-cleanup-inactive-and-abandoned-carts-job-queries-orm.xml</mapping-file>
+		<mapping-file>META-INF/batch-cleanup-anonymous-customers-job-queries-orm.xml</mapping-file>
+		<mapping-file>META-INF/batch-cleanup-expired-oauthtoken-job-orm.xml</mapping-file>
 	</persistence-unit>
 </persistence>

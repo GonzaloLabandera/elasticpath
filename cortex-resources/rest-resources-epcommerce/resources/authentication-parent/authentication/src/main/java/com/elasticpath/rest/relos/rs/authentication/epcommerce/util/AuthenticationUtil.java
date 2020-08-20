@@ -3,17 +3,21 @@
  */
 package com.elasticpath.rest.relos.rs.authentication.epcommerce.util;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import javax.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.rest.identity.RolePrincipal;
 import com.elasticpath.rest.util.collection.CollectionUtil;
-
 
 /**
  * Utilities for use in authentication.
@@ -71,5 +75,23 @@ public final class AuthenticationUtil {
 	 */
 	public static String combinePrincipals(final String scope, final String username) {
 		return scope + SCOPE_DELIM + username;
+	}
+
+	/**
+	 * Update the httpResponse with the passed HTTP response status and error message.
+	 *
+	 * @param httpResponse the HTTP servlet response
+	 * @param responseStatus the HTTP response status to set
+	 * @param errorMessage the error message to put in the body of the response
+	 * @throws IOException if an exception occurs while setting the response body
+	 */
+	public static void reportFailure(final HttpServletResponse httpResponse, final int responseStatus, final StructuredErrorMessage errorMessage)
+			throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		String jsonStr = mapper.writeValueAsString(errorMessage);
+		try (PrintWriter writer = httpResponse.getWriter()) {
+			writer.write(jsonStr);
+		}
+		httpResponse.setStatus(responseStatus);
 	}
 }

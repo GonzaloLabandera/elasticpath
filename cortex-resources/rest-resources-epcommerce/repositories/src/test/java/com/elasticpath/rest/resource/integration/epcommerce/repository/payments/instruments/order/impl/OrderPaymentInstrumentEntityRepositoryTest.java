@@ -55,7 +55,7 @@ public class OrderPaymentInstrumentEntityRepositoryTest {
 	private static final IdentifierPart<String> SCOPE = StringIdentifier.of("MOBEE");
 	private static final IdentifierPart<String> CART_ORDER_ID = StringIdentifier.of("CART_ORDER_ID");
 	private static final String PAYMENT_INSTRUMENT_ID = "PAYMENT_INSTRUMENT_ID";
-	private static final String USER_ID = "USER_ID";
+	private static final String USER_ID = "SHARED_ID";
 	private static final String TEST_NAME = "Test Name";
 	private static final Locale LOCALE = Locale.CANADA;
 

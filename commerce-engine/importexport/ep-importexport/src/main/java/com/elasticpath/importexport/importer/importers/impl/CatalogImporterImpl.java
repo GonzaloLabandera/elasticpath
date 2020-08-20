@@ -207,7 +207,7 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 
 			// should be saved first because product types and category types have references to attributes and sku options
 			saveAttributes(object, catalog, lifecycleListener, attributeSavingStrategy);
-			saveSkuOptions(object, catalog, skuOptionSavingStrategy);
+			saveSkuOptions(object, catalog, lifecycleListener, skuOptionSavingStrategy);
 
 			saveBrands(object, catalog, this.<Brand, BrandDTO>createDefaultSavingStrategy(lifecycleListener));
 
@@ -266,24 +266,9 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 		}
 	}
 
-	private void saveSkuOptions(final CatalogDTO object, final Catalog catalog, final SavingStrategy<SkuOption, SkuOptionDTO> savingStrategy) {
-		final LifecycleListener dummyForSkuOptionListener = new DefaultLifecycleListener() {
-			@Override
-			public void beforeSave(final Persistable persistable) {
-				((SkuOption) persistable).setCatalog(catalog);
-			}
-
-			@Override
-			public void beforePopulate(final Persistable persistable) {
-				SkuOption skuOption = (SkuOption) persistable;
-				if (skuOption.getCatalog() == null) {
-					skuOption.setCatalog(catalog);
-				}
-			}
-		};
-
-		savingStrategy.setLifecycleListener(dummyForSkuOptionListener);
-
+	private void saveSkuOptions(final CatalogDTO object, final Catalog catalog, final LifecycleListener lifecycleListener,
+								final SavingStrategy<SkuOption, SkuOptionDTO> savingStrategy) {
+		savingStrategy.setLifecycleListener(lifecycleListener);
 		for (SkuOptionDTO skuOptionDTO : object.getSkuOptions()) {
 			SkuOption skuOption = skuOptionService.findByKey(skuOptionDTO.getCode());
 

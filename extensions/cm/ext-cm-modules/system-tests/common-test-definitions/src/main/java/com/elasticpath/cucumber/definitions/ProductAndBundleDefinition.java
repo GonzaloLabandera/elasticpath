@@ -52,11 +52,11 @@ import com.elasticpath.selenium.editor.product.tabs.AttributesTab;
 import com.elasticpath.selenium.editor.product.tabs.BundleItemsTab;
 import com.elasticpath.selenium.editor.product.tabs.MerchandisingTab;
 import com.elasticpath.selenium.editor.product.tabs.PricingTab;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.CatalogManagement;
 import com.elasticpath.selenium.resultspane.CatalogProductListingPane;
 import com.elasticpath.selenium.resultspane.CatalogSearchResultPane;
 import com.elasticpath.selenium.resultspane.CatalogSkuSearchResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.toolbars.ChangeSetActionToolbar;
@@ -115,6 +115,7 @@ public class ProductAndBundleDefinition {
 	private final static String ENABLE_DATE = "enableDate";
 	private final static String DISABLE_DATE = "disableDate";
 	private final static String SKU_DETAILS = "SKU Details";
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -132,7 +133,7 @@ public class ProductAndBundleDefinition {
 									  final DST dst, final ProductContainer container, final Brand brand,
 									  final AttributeContainer attributeContainer, final CategoryContainer categoryContainer,
 									  final SkuOptionContainer skuOptionContainer) {
-		final WebDriver driver = SetUp.getDriver();
+		driver = SeleniumDriverSetup.getDriver();
 		catalogManagement = new CatalogManagement(driver);
 		bundleItemsTab = new BundleItemsTab(driver);
 		addPriceTierDialog = new AddPriceTierDialog(driver);
@@ -269,7 +270,7 @@ public class ProductAndBundleDefinition {
 			catalogSearchResultPane.isProductNameInList(this.product.getProductName());
 		}
 		catalogSearchResultPane.clickDeleteProductButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.DeleteProduct");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.DeleteProduct");
 	}
 
 	/**
@@ -285,7 +286,7 @@ public class ProductAndBundleDefinition {
 				catalogSearchResultPane.isProductNameInList(item.getProductName());
 			}
 			catalogSearchResultPane.clickDeleteProductButton();
-			new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.DeleteProduct");
+			new ConfirmDialog(driver).clickOKButton("CatalogMessages.DeleteProduct");
 		}
 
 	}
@@ -1249,7 +1250,7 @@ public class ProductAndBundleDefinition {
 	public void deleteSkuFromProduct(final String productSkuCode) {
 		productEditor.selectSkuDetails(productSkuCode);
 		productEditor.clickRemoveSkuDetailsButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.ProductEditorMultiSkuSection_RemoveConfirmation");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.ProductEditorMultiSkuSection_RemoveConfirmation");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}
@@ -1290,7 +1291,7 @@ public class ProductAndBundleDefinition {
 	public void deleteCategoryAssignment(final String categoryAssignmentName) {
 		productEditor.selectCategoryDetails(categoryAssignmentName);
 		productEditor.clickRemoveCategoryButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CategoryAssignmentPage_RemoveConfirmTitle");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CategoryAssignmentPage_RemoveConfirmTitle");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 		productEditor.closeProductEditor(this.product.getProductCode());
@@ -1317,7 +1318,7 @@ public class ProductAndBundleDefinition {
 	private void excludeCategoryAssignment(final String categoryName) {
 		productEditor.selectCategoryDetails(categoryName);
 		productEditor.clickExcludeCategoryButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CategoryAssignmentPage_RemoveConfirmTitle");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CategoryAssignmentPage_RemoveConfirmTitle");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 		productEditor.closeProductEditor(this.product.getProductCode());
@@ -1421,7 +1422,7 @@ public class ProductAndBundleDefinition {
 	public void deleteMerchandisingTabProduct(final String productCode) {
 		merchandisingTab.verifySelectProductCode(productCode);
 		merchandisingTab.clickRemoveMerchandisingAssociationsButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.ProductMerchandisingAssociationDialog_RemoveTitle");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.ProductMerchandisingAssociationDialog_RemoveTitle");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}
@@ -1431,7 +1432,7 @@ public class ProductAndBundleDefinition {
 	 */
 	@After(value = "@cleanupDependentItem", order = Constants.CLEANUP_ORDER_FIRST)
 	public void deleteCatalogMerchandisingTabProduct() {
-		new OrderEditor(SetUp.getDriver()).closePane("#" + Purchase.getPurchaseNumber());
+		new OrderEditor(driver).closePane("#" + Purchase.getPurchaseNumber());
 		merchandisingTab.selectCatalogTab("Mobile Virtual Catalog");
 		merchandisingTab.clickMerchandisingTab("Dependent Item");
 		deleteMerchandisingTabProduct(dependentLineItem);
@@ -1576,7 +1577,7 @@ public class ProductAndBundleDefinition {
 		merchandisingTab.clickMerchandisingTab(tabName);
 		merchandisingTab.verifySelectProductCode(code);
 		merchandisingTab.clickRemoveMerchandisingAssociationsButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.ProductMerchandisingAssociationDialog_RemoveTitle");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.ProductMerchandisingAssociationDialog_RemoveTitle");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}

@@ -4,7 +4,6 @@
 package com.elasticpath.test.integration.service.shopper.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +56,8 @@ public class ShoppingCartMergerForShopperUpdatesTest extends AbstractCartIntegra
 		CustomerSession anonymousCustomerSession = createCustomerSession();
 		Shopper anonymousShopper = anonymousCustomerSession.getShopper();
 		ShoppingCart anonymousShoppingCart = createShoppingCart(anonymousCustomerSession);
+		anonymousShopper.setCurrentShoppingCart(anonymousShoppingCart);
+
 		shoppingCartService.saveOrUpdate(anonymousShoppingCart);
 
 		shoppingCartMergerForShopperUpdates.invalidateShopper(registeredCustomerSession, anonymousShopper);
@@ -66,8 +67,5 @@ public class ShoppingCartMergerForShopperUpdatesTest extends AbstractCartIntegra
 		assertEquals("The shopping cart used going forward is the one that was associated with the registered account, not the anonymous cart.",
 				registeredShoppingCart.getGuid(),
 				actualShoppingCart.getGuid());
-
-		ShoppingCart updatedAnonymousCart = shoppingCartService.findByGuid(anonymousShoppingCart.getGuid());
-		assertNull("The anonymous cart should have been removed.", updatedAnonymousCart);
 	}
 }

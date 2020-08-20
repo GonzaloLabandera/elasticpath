@@ -3,14 +3,24 @@
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.core.messaging.order.OrderEventType;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
@@ -20,69 +30,69 @@ import com.elasticpath.messaging.factory.EventMessageFactory;
 /**
  * Test class for {@link CreateNewOrderEventCheckoutAction}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CreateNewOrderEventCheckoutActionTest {
 
-	private static final EventType EVENT_TYPE = OrderEventType.ORDER_CREATED;
 	private static final String ORDER_NUMBER = "ORDER123";
 
 	private CheckoutActionContextImpl checkoutContext;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	@Mock
+	private EventMessageFactory eventMessageFactory;
+	@Mock
+	private EventMessagePublisher messagePublisher;
+	@Mock
+	private Order order;
+	@Mock
+	private EventMessage eventMessage;
 
-	private final EventMessageFactory eventMessageFactory = context.mock(EventMessageFactory.class);
-	private final EventMessagePublisher messagePublisher = context.mock(EventMessagePublisher.class);
-	private final Order order = context.mock(Order.class);
-
+	@InjectMocks
 	private CreateNewOrderEventCheckoutAction checkoutAction;
 
 	@Before
 	public void setUp() {
-		checkoutAction = new CreateNewOrderEventCheckoutAction();
-		checkoutAction.setEventMessageFactory(eventMessageFactory);
-		checkoutAction.setEventMessagePublisher(messagePublisher);
-
 		checkoutContext = new CheckoutActionContextImpl(null, null, null, false, false, null, null);
 		checkoutContext.setOrder(order);
 
-		context.checking(new Expectations() {
-			{
-				allowing(order).getOrderNumber();
-				will(returnValue(ORDER_NUMBER));
-			}
-		});
+		when(order.getOrderNumber()).thenReturn(ORDER_NUMBER);
 	}
 
-	@Test(expected = EpSystemException.class)
+	@Test
 	public void verifyExecuteThrowsEpSystemExceptionOnPublishingError() {
-		context.checking(new Expectations() {
-			{
-				final EventMessage eventMessage = context.mock(EventMessage.class);
-				allowing(eventMessageFactory).createEventMessage(with(any(EventType.class)), with(any(String.class)));
-				will(returnValue(eventMessage));
+		when(eventMessageFactory.createEventMessage(any(EventType.class), any(String.class), eq(null)))
+				.thenReturn(eventMessage);
+		doThrow(new RuntimeException("Boom"))
+				.when(messagePublisher).publish(any(EventMessage.class));
 
-				oneOf(messagePublisher).publish(with(any(EventMessage.class)));
-				will(throwException(new Exception("Boom!")));
-			}
-		});
-
-		checkoutAction.execute(checkoutContext);
+		assertThatThrownBy(() -> checkoutAction.execute(checkoutContext))
+				.isInstanceOf(EpSystemException.class)
+				.hasCauseInstanceOf(RuntimeException.class);
 	}
 
 	@Test
 	public void verifyExecutePublishesEventMessage() {
-		context.checking(new Expectations() {
-			{
-				final EventMessage eventMessage = context.mock(EventMessage.class);
-
-				oneOf(eventMessageFactory).createEventMessage(EVENT_TYPE, ORDER_NUMBER);
-				will(returnValue(eventMessage));
-
-				oneOf(messagePublisher).publish(eventMessage);
-			}
-		});
+		when(eventMessageFactory.createEventMessage(any(EventType.class), any(String.class), eq(null)))
+				.thenReturn(eventMessage);
 
 		checkoutAction.execute(checkoutContext);
+
+		verify(messagePublisher).publish(eventMessage);
+	}
+
+	@Test
+	public void verifyExecutePublishesEventMessageWithGiftCertificateFlag() {
+
+		Map<String, Object> data = new HashMap<>();
+		data.put("hasGCs", "true");
+
+		when(eventMessageFactory.createEventMessage(any(EventType.class), any(String.class), eq(data)))
+				.thenReturn(eventMessage);
+		when(order.hasGiftCertificateShipment())
+				.thenReturn(true);
+
+		checkoutAction.execute(checkoutContext);
+
+		verify(messagePublisher).publish(eventMessage);
 	}
 
 }

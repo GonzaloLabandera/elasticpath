@@ -32,7 +32,7 @@ public class CustomerGroupExporter extends AbstractExporterImpl<CustomerGroup, C
 
 	@Override
 	public JobType getJobType() {
-		return JobType.CUSTOMER_GROUP;
+		return JobType.CUSTOMERGROUP;
 	}
 
 	@Override

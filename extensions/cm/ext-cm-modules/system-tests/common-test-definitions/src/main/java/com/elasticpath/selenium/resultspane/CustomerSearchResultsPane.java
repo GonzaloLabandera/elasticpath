@@ -25,12 +25,14 @@ public class CustomerSearchResultsPane extends AbstractPageObject {
 	private static final String CUSTOMER_SEARCH_RESULT_CELL_PARTIAL_MATCH_CSS = CUSTOMER_SEARCH_RESULT_ROW_CSS
 			+ "div[column-id*='%s'][column-num='%s']";
 	private static final String CUSTOMER_EDITOR_TOOLTIP_CSS = "div[widget-id*='Customer #']";
+	public static final String SHARED_ID_COLUMN = "Shared ID";
+	public static final String USERNAME_COLUMN = "Username";
 	public static final String EMAIL_ADDRESS_COLUMN = "Email Address";
 	public static final String FIRST_NAME_COLUMN = "First Name";
 	public static final String LAST_NAME_COLUMN = "Last Name";
 	public static final String PHONE_NUMBER_COLUMN = "Telephone #";
 	public static final int EMAIL_ADDRESS_COLUMN_INDEX = 5;
-	public static final int BILLING_ADDRESS_COLUMN_INDEX = 6;
+	public static final int BILLING_ADDRESS_COLUMN_INDEX = 7;
 
 	/**
 	 * Constructor.
@@ -105,7 +107,7 @@ public class CustomerSearchResultsPane extends AbstractPageObject {
 	 * @return the customer editor.
 	 */
 	public CustomerEditor selectAndOpenCustomerEditor(final String columnValue) {
-		verifyEntryInList(columnValue, EMAIL_ADDRESS_COLUMN);
+		verifyEntryInList(columnValue, SHARED_ID_COLUMN);
 		doubleClick(getSelectedElement(), CUSTOMER_EDITOR_TOOLTIP_CSS);
 		return new CustomerEditor(getDriver());
 	}

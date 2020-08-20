@@ -65,10 +65,10 @@ public class JpqlQueryBuilderTest extends BasicSpringContextTest {
 		JpqlQueryBuilderWhereGroup andGroup = query.getDefaultWhereGroup();
 		andGroup.appendWhereEquals("cust.status", Customer.STATUS_ACTIVE);
 		JpqlQueryBuilderWhereGroup orGroup = new JpqlQueryBuilderWhereGroup(ConjunctionType.OR);
-		orGroup.appendLikeWithWildcards("cust.userId", "Smith");
-		orGroup.appendLikeWildcardOnStart("cust.userId", "Jones");
+		orGroup.appendLikeWithWildcards("cust.sharedId", "Smith");
+		orGroup.appendLikeWildcardOnStart("cust.sharedId", "Jones");
 		andGroup.appendWhereGroup(orGroup);
-		andGroup.appendLikeWildcardOnEnd("cust.userId", "Edwards");
+		andGroup.appendLikeWildcardOnEnd("cust.sharedId", "Edwards");
 
 		// Append order by clause
 		query.appendOrderBy("addr.country", true);

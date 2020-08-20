@@ -38,11 +38,17 @@ public class CustomerDTO implements Dto {
 	@XmlAttribute(required = true)
 	private String guid;
 
-	@XmlAttribute(name = "user_id", required = true)
-	private String userId;
+	@XmlAttribute(name = "shared_id", required = true)
+	private String sharedId;
 
-	@XmlAttribute(name = "store_code", required = true)
+	@XmlAttribute(name = "store_code")
 	private String storeCode;
+
+	@XmlAttribute(name = "parent_guid")
+	private String parentGuid;
+
+	@XmlElement(name = "customer_type", required = true)
+	private String customerType;
 
 	@XmlElement(required = true)
 	private int status;
@@ -53,7 +59,10 @@ public class CustomerDTO implements Dto {
 	@XmlElement(name = "last_edited", required = true)
 	private Date lastEditDate;
 
-	@XmlElement(name = "password", required = true)
+	@XmlElement(name = "username")
+	private String username;
+
+	@XmlElement(name = "password")
 	private String password;
 
 	@XmlElement(name = "salt")
@@ -65,15 +74,6 @@ public class CustomerDTO implements Dto {
 	@XmlElementWrapper(name = "addresses")
 	@XmlElement(name = "address")
 	private List<AddressDTO> addresses = new ArrayList<>();
-
-	/**
-	 * The customer sessions.
-	 * @deprecated No replacement as customer sessions are not maintained through the customer domain object. Marked for removal.
-	 */
-	@XmlElementWrapper(name = "sessions")
-	@XmlElement(name = "session")
-	@Deprecated
-	private List<CustomerSessionDTO> customerSessions;
 
 	@XmlElementWrapper(name = "groups")
 	@XmlElement(name = "group")
@@ -101,12 +101,12 @@ public class CustomerDTO implements Dto {
 		this.guid = guid;
 	}
 
-	public String getUserId() {
-		return userId;
+	public String getSharedId() {
+		return sharedId;
 	}
 
-	public void setUserId(final String userid) {
-		userId = userid;
+	public void setSharedId(final String sharedId) {
+		this.sharedId = sharedId;
 	}
 
 	public String getStoreCode() {
@@ -115,6 +115,30 @@ public class CustomerDTO implements Dto {
 
 	public void setStoreCode(final String storeCode) {
 		this.storeCode = storeCode;
+	}
+
+	public String getParentGuid() {
+		return parentGuid;
+	}
+
+	public void setParentGuid(final String parentGuid) {
+		this.parentGuid = parentGuid;
+	}
+
+	public String getCustomerType() {
+		return this.customerType;
+	}
+
+	public void setCustomerType(final String customerType) {
+		this.customerType = customerType;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(final String username) {
+		this.username = username;
 	}
 
 	public int getStatus() {
@@ -163,28 +187,6 @@ public class CustomerDTO implements Dto {
 
 	public void setAddresses(final List<AddressDTO> addresses) {
 		this.addresses = addresses;
-	}
-
-	/**
-	 * Gets the customer sessions.
-	 *
-	 * @return the customer sessions
-	 * @deprecated No replacement as customer sessions are not maintained through the customer domain object. Marked for removal.
-	 */
-	@Deprecated
-	public List<CustomerSessionDTO> getCustomerSessions() {
-		return customerSessions;
-	}
-
-	/**
-	 * Sets the customer sessions.
-	 *
-	 * @param customerSessions the new customer sessions
-	 * @deprecated No replacement as customer sessions are not maintained through the customer domain object. Marked for removal.
-	 */
-	@Deprecated
-	public void setCustomerSessions(final List<CustomerSessionDTO> customerSessions) {
-		this.customerSessions = customerSessions;
 	}
 
 	public List<String> getGroups() {

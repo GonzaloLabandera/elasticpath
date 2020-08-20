@@ -62,7 +62,9 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 				fetchGroups = {FetchGroupConstants.PRODUCT_INDEX}),
 		@FetchGroup(name = FetchGroupConstants.PRODUCT_INDEX, attributes = {@FetchAttribute(name = "localeDependant"),
 				@FetchAttribute(name = "multiValueType"), @FetchAttribute(name = "attributeTypeId"), @FetchAttribute(name = "key")
-		})
+		}),
+		@FetchGroup(name = FetchGroupConstants.ATTRIBUTE_VALUES,
+				attributes = {@FetchAttribute(name = "multiValueType")})
 })
 public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute {
 	/**

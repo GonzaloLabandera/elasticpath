@@ -1,37 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <user_roles>
-
-	<user_role guid="7AA191A8-6979-7276-7BC8-FC2BC5845493">
-		<name>Configuration</name>
+	<user_role guid="90EC180C-A9F3-A426-7070-AFC0CDBCD58A">
+		<name>Customer Service</name>
 		<permissions>
-			<permission>ADMIN_CONFIGURATION_MANAGE</permission>
-			<permission>ADMIN_PAYMENT_CONFIGURATIONS_MANAGE</permission>
-			<permission>ADMIN_WAREHOUSES_MANAGE</permission>
-			<permission>ADMIN_STORES_MANAGE</permission>
-			<permission>TAXES_MANAGE</permission>
-			<permission>ADMIN_USERS_MANAGE</permission>
-			<permission>ADMIN_GIFT_CERTIFICATE_THEMES_MANAGE</permission>
-			<permission>ADMIN_CUSTOMER_PROFILES_MANAGE</permission>
-			<permission>ADMIN_SHIPPING_MANAGE</permission>
-			<permission>ADMIN_TARGETED_SELLING_MANAGE</permission>
-			<permission>ADMIN_DATA_POLICIES_MANAGE</permission>
+			<permission>CREATE_EDIT_EXCHANGES</permission>
+			<permission>CREATE_EDIT_RETURNS</permission>
+			<permission>CREATE_REFUND</permission>
+			<permission>ORDER_UNLOCK</permission>
+			<permission>FULFILLMENT_ORDER_EDIT</permission>
+			<permission>CUSTUMER_IMPORTS_EXECUTE</permission>
+			<permission>CUSTUMER_IMPORTS_MANAGE</permission>
+			<permission>VIEW_CREDITCARD_NUMBER</permission>
+			<permission>EDIT_GIFT_CERTIFICATE_RECIPIENT</permission>
+			<permission>CUSTOMER_EDIT</permission>
+			<permission>WAREHOUSE_ORDER_SHIPMENT_COMPLETE</permission>
+			<permission>WAREHOUSE_ORDER_RETURN_EDIT</permission>
+			<permission>PRICE_MANAGEMENT_MANAGE_PRODUCT_PRICING</permission>
+			<permission>ASSIGN_CUSTOMER_SEGMENTS</permission>
+			<permission>CREATE_EDIT_ACCOUNTS</permission>
 		</permissions>
 	</user_role>
-
-	<user_role guid="configuration-without-data-policies">
-		<name>Configuration without data policies</name>
-		<permissions>
-			<permission>ADMIN_CONFIGURATION_MANAGE</permission>
-			<permission>ADMIN_PAYMENT_CONFIGURATIONS_MANAGE</permission>
-			<permission>ADMIN_WAREHOUSES_MANAGE</permission>
-			<permission>ADMIN_STORES_MANAGE</permission>
-			<permission>TAXES_MANAGE</permission>
-			<permission>ADMIN_USERS_MANAGE</permission>
-			<permission>ADMIN_GIFT_CERTIFICATE_THEMES_MANAGE</permission>
-			<permission>ADMIN_CUSTOMER_PROFILES_MANAGE</permission>
-			<permission>ADMIN_SHIPPING_MANAGE</permission>
-			<permission>ADMIN_TARGETED_SELLING_MANAGE</permission>
-		</permissions>
-	</user_role>
-
 </user_roles>

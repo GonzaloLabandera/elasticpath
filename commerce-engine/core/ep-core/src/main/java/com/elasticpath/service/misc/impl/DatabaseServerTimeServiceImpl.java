@@ -3,8 +3,6 @@
  */
 package com.elasticpath.service.misc.impl;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -22,10 +20,7 @@ import com.elasticpath.service.misc.TimeService;
 public class DatabaseServerTimeServiceImpl implements TimeService {
 
 	private static final Logger LOG = Logger.getLogger(DatabaseServerTimeServiceImpl.class);
-	private static String databaseType;
-	private static final String ORACLE_DB_NAME = "oracle";
-	private static final String TIME_RETRIEVE_QUERY = "SELECT CURRENT_TIMESTAMP FROM JPA_GENERATED_KEYS WHERE ID='DEFAULT'";
-	private static final String ORACLE_TIME_RETRIEVE_QUERY = "SELECT LOCALTIMESTAMP FROM DUAL";
+	private static final String TIME_RETRIEVE_QUERY = "SELECT LOCALTIMESTAMP FROM DUAL";
 
 	private PersistenceEngine persistenceEngine;
 
@@ -38,14 +33,7 @@ public class DatabaseServerTimeServiceImpl implements TimeService {
 	public Date getCurrentTime() {
 		Date now;
 		try {
-			final String databaseType = getDatabaseType();
-			final List<Date> results = executeTimeQuery(databaseType);
-			if (results.isEmpty()) {
-				throw new EpSystemException("No result returned.");
-			}
-
-			// Get the current date/time from the first result
-			now = results.get(0);
+			now = executeTimeQuery();
 		} catch (final Exception e) {
 			LOG.warn("Could not retrieve db server time!", e);
 			LOG.warn("Will use application server timestamp instead.");
@@ -60,65 +48,26 @@ public class DatabaseServerTimeServiceImpl implements TimeService {
 	}
 	
 	/**
-	 * If the database is Oracle, use the Oracle specific query to get the current time.
-	 * this is required, because Oracle returns an Oracle JDBC specific object which can't
-	 * be converted to Date if the standard CURRENT_TIMESTAMP DB function is used.
-	 * @param dbType the database type
-	 * @return list of date results
+	 * Return current database time.
+	 *
+	 * @return the current database time.
 	 */
-	protected List<Date> executeTimeQuery(final String dbType) {
-		String queryString = TIME_RETRIEVE_QUERY;
-		if (dbType.equalsIgnoreCase(ORACLE_DB_NAME)) {
-			queryString = ORACLE_TIME_RETRIEVE_QUERY;
-		} else {
-			queryString = TIME_RETRIEVE_QUERY;
-		}
+	protected Date executeTimeQuery() {
 		final PersistenceSession session = getPersistenceEngine().getPersistenceSession();
-		final Query<Date> query = session.createSQLQuery(queryString);
+		final Query<Date> query = session.createSQLQuery(TIME_RETRIEVE_QUERY);
 
 		final List<Date> results = query.list();
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Got " + results.size() + " rows for time query: " + queryString);
+			LOG.debug("Got " + results.size() + " rows for time query: " + TIME_RETRIEVE_QUERY);
 		}
 
-		return results;
-	}
-
-	/**
-	 * Gets the type of database that is currently being used by the persistence engine.
-	 *
-	 * @return The database type returned from the database connection. 
-	 * @throws SQLException
-	 */
-	private String getDatabaseType() throws SQLException {
-		
-		// Get the database type from the database connection if it has not yet been set
-		if (databaseType == null) {
-			Connection connection = null;
-			try {
-				connection = getPersistenceEngine().getConnection();
-				final String databaseName = connection.getMetaData().getDatabaseProductName();
-				databaseType = databaseName;
-			} finally {
-				if (connection != null) {
-					connection.close();
-				}
-			}
+		if (results.isEmpty()) {
+			throw new EpSystemException("No result returned.");
 		}
-		
-		return databaseType;
-	}
-	
-	/**
-	 * Sets the database that is currently being used by the persistence engine.
-	 * This method is only for testing purposes and should not be called by
-	 * any code other then test code.
-	 *
-	 * @param type - The name of the database type.
-	 */
-	void setDatabaseType(final String type) {
-		databaseType = type;
+
+		// Get the current date/time from the first result
+		return results.get(0);
 	}
 
 	protected PersistenceEngine getPersistenceEngine() {

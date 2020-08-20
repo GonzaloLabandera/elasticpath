@@ -7,8 +7,8 @@ import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.editor.OrderEditor;
-import com.elasticpath.selenium.navigations.CustomerService;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.navigations.CustomerServiceNavigation;
 import com.elasticpath.selenium.util.Constants;
 
 /**
@@ -21,7 +21,7 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	private static final String ORDER_STATUS_VALUE_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment"
 			+ ".FulfillmentMessages.OrderStatus_%s']";
 	private static final String SEARCH_RESULTS_PANE_WIDGET_ID = "Order Search Results";
-	private final CustomerService customerService;
+	private final CustomerServiceNavigation customerServiceNavigation;
 
 	/**
 	 * Constructor.
@@ -30,7 +30,7 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	 */
 	public OrderSearchResultPane(final WebDriver driver) {
 		super(driver);
-		customerService = new CustomerService(SetUp.getDriver());
+		customerServiceNavigation = new CustomerServiceNavigation(SeleniumDriverSetup.getDriver());
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class OrderSearchResultPane extends AbstractPageObject {
 		int index = 0;
 		while (!isOrderInList && index < Constants.UUID_END_INDEX) {
 			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			customerService.clickOrderSearch();
+			customerServiceNavigation.clickOrderSearch();
 			isOrderInList = isOrderInList(columnValue, columnName);
 			index++;
 		}

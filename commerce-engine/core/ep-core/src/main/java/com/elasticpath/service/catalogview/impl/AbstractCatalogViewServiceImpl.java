@@ -310,16 +310,16 @@ public abstract class AbstractCatalogViewServiceImpl {
 	 *
 	 * @param searchResult the search result to get results from
 	 * @param pageNumber the page number
-	 * @param pagination the pagination size
+	 * @param pageSize the number of results per page
 	 * @return a list of UIDs for the given page number
 	 */
-	protected List<Long> getPagedResults(final IndexSearchResult searchResult, final int pageNumber, final int pagination) {
+	protected List<Long> getPagedResults(final IndexSearchResult searchResult, final int pageNumber, final int pageSize) {
 		if (pageNumber == 0) {
 			return searchResult.getAllResults();
 		}
 
-		final int startIndex = (pageNumber - 1) * pagination;
-		return searchResult.getResults(startIndex, pagination);
+		final int startIndex = (pageNumber - 1) * pageSize;
+		return searchResult.getResults(startIndex, pageSize);
 	}
 
 	private ProductCategorySearchCriteria constructSearchCriteria(final CatalogViewRequest request,
@@ -496,6 +496,10 @@ public abstract class AbstractCatalogViewServiceImpl {
 
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+	}
+
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
 	}
 
 	protected SettingValueProvider<Integer> getFeaturedProductCountSettingValueProvider() {

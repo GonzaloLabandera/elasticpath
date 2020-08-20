@@ -85,17 +85,18 @@ public class OrderSearchResultsView extends AbstractSortListView implements Orde
 
 		final String[] columnNames = new String[] { FulfillmentMessages.get().OrderSearchResultsView_OrderNumber,
 				FulfillmentMessages.get().OrderSearchResultsView_Store, FulfillmentMessages.get().OrderSearchResultsView_CustomerName,
-				FulfillmentMessages.get().OrderSearchResultsView_Date, FulfillmentMessages.get().OrderSearchResultsView_Total,
-				FulfillmentMessages.get().OrderSearchResultsView_Status };
+				FulfillmentMessages.get().OrderSearchResultsView_AccountName, FulfillmentMessages.get().OrderSearchResultsView_Date,
+				FulfillmentMessages.get().OrderSearchResultsView_Total, FulfillmentMessages.get().OrderSearchResultsView_Status };
 		final SortBy[] sortBy = new SortBy[] {
 				StandardSortBy.ORDER_NUMBER,
 				StandardSortBy.STORE_CODE,
 				StandardSortBy.CUSTOMER_NAME,
+				StandardSortBy.BUSINESS_NAME,
 				StandardSortBy.DATE,
 				StandardSortBy.TOTAL,
 				StandardSortBy.STATUS};
 
-		final int[] columnWidths = new int[] { 100, 100, 120, 200, 100, 100 };
+		final int[] columnWidths = new int[] { 100, 100, 120, 120, 200, 100, 100 };
 
 		for (int i = 0; i < columnNames.length; i++) {
 			IEpTableColumn addTableColumn = table.addTableColumn(columnNames[i], columnWidths[i]);

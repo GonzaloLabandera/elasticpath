@@ -16,7 +16,7 @@ public class CustomerEventType extends AbstractExtensibleEnum<CustomerEventType>
 
 	private static final long serialVersionUID = 4025398581967246417L;
 
-	/** Ordinal constant for CUSTOMER_CREATED. */
+	/** Ordinal constant for CUSTOMER_REGISTERED. */
 	public static final int CUSTOMER_REGISTERED_ORDINAL = 0;
 
 	/**
@@ -56,6 +56,14 @@ public class CustomerEventType extends AbstractExtensibleEnum<CustomerEventType>
 	 * Signals that a wishlist has been shared.
 	 */
 	public static final CustomerEventType WISH_LIST_SHARED = new CustomerEventType(WISH_LIST_SHARED_ORDINAL, "WISH_LIST_SHARED");
+
+	/** Ordinal constant for ACCOUNT_CREATED. */
+	public static final int ACCOUNT_CREATED_ORDINAL = 5;
+
+	/**
+	 * Signals that a customer has registered.
+	 */
+	public static final CustomerEventType ACCOUNT_CREATED = new CustomerEventType(ACCOUNT_CREATED_ORDINAL, "ACCOUNT_CREATED");
 
 	/**
 	 * Create an enum value for a enum type. Name is case-insensitive and will be stored in upper-case.

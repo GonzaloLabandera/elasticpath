@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-08-index-customer-auth-uid.xml">
+
+	<changeSet id="2020-08-index-TCUSTOMER-AUTHENTICATION-UID" author="elasticpath" >
+		<comment>[PERF-340] Index TCUSTOMER AUTHENTICATION_UID to prevent table scan on joining TCUSTOMERAUTHENTICATION</comment>
+
+		<createIndex tableName="TCUSTOMER" indexName="I_CUST_AUTH_UID" unique="true">
+			<column name="AUTHENTICATION_UID" />
+		</createIndex>
+	</changeSet>
+</databaseChangeLog>

@@ -78,14 +78,6 @@
 		</property>
 	</bean>
 
-	<bean id="orderShipmentCreatedEventTypePredicate" class="com.elasticpath.messaging.predicate.impl.CompatibleEventTypePredicate">
-		<property name="compatibleEventTypes">
-			<util:list>
-				<util:constant static-field="com.elasticpath.core.messaging.order.OrderEventType.ORDER_SHIPMENT_CREATED"/>
-			</util:list>
-		</property>
-	</bean>
-
 	<bean id="orderShipmentShippedEventTypePredicate" class="com.elasticpath.messaging.predicate.impl.CompatibleEventTypePredicate">
 		<property name="compatibleEventTypes">
 			<util:list>

@@ -514,10 +514,9 @@ public class GiftCertificateServiceImpl extends AbstractEpPersistenceServiceImpl
 	public void resendGiftCertificate(final String emailAddress, final String orderGuid, final String orderSkuGuid) {
 		final Map<String, Object> additionalData = new HashMap<>();
 		additionalData.put("emailAddress", emailAddress);
-		additionalData.put("orderGuid", orderGuid);
-		additionalData.put("orderSkuGuid", orderSkuGuid);
+		additionalData.put("hasGCs", "true");
 
-		sendGiftCertificateEvent(GiftCertificateEventType.RESEND_GIFT_CERTIFICATE, null, additionalData);
+		sendGiftCertificateEvent(GiftCertificateEventType.RESEND_GIFT_CERTIFICATE, orderGuid, additionalData);
 	}
 
 	/**

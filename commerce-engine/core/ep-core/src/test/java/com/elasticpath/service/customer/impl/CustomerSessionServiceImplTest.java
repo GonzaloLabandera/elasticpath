@@ -5,70 +5,66 @@ package com.elasticpath.service.customer.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.ElasticPath;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
+import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
-import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.domain.shopper.ShopperMemento;
+import com.elasticpath.domain.shopper.impl.ShopperImpl;
+import com.elasticpath.domain.shopper.impl.ShopperMementoImpl;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
-import com.elasticpath.service.datapolicy.impl.CustomerConsentServiceImpl;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shopper.ShopperService;
-import com.elasticpath.service.shopper.impl.CustomerConsentMergerForShopperUpdates;
-import com.elasticpath.service.shopper.impl.ShoppingCartMergerForShopperUpdates;
-import com.elasticpath.service.shopper.impl.WishListMergerForShopperUpdates;
-import com.elasticpath.service.shoppingcart.ShoppingCartService;
-import com.elasticpath.service.shoppingcart.impl.ShoppingCartMergerImpl;
-import com.elasticpath.service.shoppingcart.impl.WishListServiceImpl;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Test <code>CustomerSessionServiceImpl</code>.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CustomerSessionServiceImplTest {
 	private static final String STORE_CODE = "STORE_CODE";
-
-	private static final String CUSTOMER_SESSION_TEST_GUID = "testGuid";
 
 	private static final String SHOPPING_START_TIME_TAG = "SHOPPING_START_TIME";
 
 	private static final String SELLING_CHANNEL_TAG = "SELLING_CHANNEL";
 
-	private CustomerSessionServiceImpl customerSessionServiceImpl;
-
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
-	private PersistenceEngine persistenceEngine;
-
-	private BeanFactoryExpectationsFactory expectationsFactory;
-
-	private BeanFactory beanFactory;
-
+	@Mock
+	private ElasticPath elasticPath;
+	@Mock
 	private ShopperService shopperService;
-
-	private ShoppingCartService shoppingCartService;
-
+	@Mock
 	private TimeService timeService;
+	@Mock
+	private CustomerSessionShopperUpdateHandler cartMerger;
+	@Mock
+	private CustomerSessionShopperUpdateHandler wishlistMerger;
+	@Mock
+	private CustomerSessionShopperUpdateHandler customerConsentMerger;
+
+	private final List<CustomerSessionShopperUpdateHandler> updateHandlers = new ArrayList<>();
+
+	@InjectMocks
+	private CustomerSessionServiceImpl customerSessionService;
 
 	/**
 	 * Sets up the test cases.
@@ -77,73 +73,11 @@ public class CustomerSessionServiceImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		persistenceEngine = context.mock(PersistenceEngine.class);
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		shopperService = context.mock(ShopperService.class);
-		shoppingCartService = context.mock(ShoppingCartService.class);
-		timeService = context.mock(TimeService.class);
-
-		customerSessionServiceImpl = new CustomerSessionServiceImpl();
-		customerSessionServiceImpl.setPersistenceEngine(persistenceEngine);
-		customerSessionServiceImpl.setShopperService(shopperService);
-		customerSessionServiceImpl.setTimeService(timeService);
-
-		List<CustomerSessionShopperUpdateHandler> updateHandlers = new ArrayList<>();
-		CustomerSessionShopperUpdateHandler cartMerger =
-				new ShoppingCartMergerForShopperUpdates(shoppingCartService, new ShoppingCartMergerImpl());
-		CustomerSessionShopperUpdateHandler wishlistMerger = new WishListMergerForShopperUpdates(new WishListServiceImpl());
-		CustomerSessionShopperUpdateHandler customerConsentMerger = new CustomerConsentMergerForShopperUpdates(new CustomerConsentServiceImpl());
-
 		updateHandlers.add(cartMerger);
 		updateHandlers.add(wishlistMerger);
 		updateHandlers.add(customerConsentMerger);
 
-		customerSessionServiceImpl.setCustomerSessionUpdateHandlers(updateHandlers);
-	}
-
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.service.CustomerServiceImpl.add(CustomerSession)'.
-	 */
-	@Test
-	public void testAddCustomerSession() {
-		final CustomerSession customerSession = context.mock(CustomerSession.class);
-		final CustomerSessionMemento customerSessionMemento = new CustomerSessionMementoImpl();
-
-		context.checking(new Expectations() { {
-
-			oneOf(customerSession).getCustomerSessionMemento();
-			will(returnValue(customerSessionMemento));
-
-			oneOf(persistenceEngine).save(customerSessionMemento);
-
-		} });
-
-		customerSessionServiceImpl.add(customerSession);
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.service.CustomerServiceImpl.findByGuid(String)'.
-	 *
-	 * Ensures that findByGuid does not create a blank CustomerSession when it doesn't find anything.
-	 */
-	@Test
-	public void testFindCustomerSessionByGuidWithNullReturn() {
-		final String guid = CUSTOMER_SESSION_TEST_GUID;
-		context.checking(new Expectations() { {
-
-			oneOf(persistenceEngine).retrieveByNamedQuery("CUSTOMER_SESSION_FIND_BY_GUID", CUSTOMER_SESSION_TEST_GUID);
-			will(returnValue(Collections.emptyList()));
-
-		} });
-
-		final CustomerSession retrievedCustomerSession = customerSessionServiceImpl.findByGuid(guid);
-		assertNull(retrievedCustomerSession);
+		customerSessionService.setCustomerSessionUpdateHandlers(updateHandlers);
 	}
 
 	/**
@@ -154,18 +88,11 @@ public class CustomerSessionServiceImplTest {
 		final Date shoppingStartTime = new Date();
 		final Currency currency = Currency.getInstance("CAD");
 
-		context.checking(new Expectations() { {
-			oneOf(timeService).getCurrentTime();
-			will(returnValue(shoppingStartTime));
-		} });
-
-		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.TAG_SET, TagSet.class, TagSet.class);
+		when(timeService.getCurrentTime()).thenReturn(shoppingStartTime);
+		when(elasticPath.getPrototypeBean(ContextIdNames.TAG_SET, TagSet.class)).thenReturn(new TagSet());
 
 		final CustomerSession customerSession = new CustomerSessionImpl();
-		final CustomerSessionMemento customerSessionMemento = new CustomerSessionMementoImpl();
-		customerSession.setCustomerSessionMemento(customerSessionMemento);
-
-		customerSessionServiceImpl.initializeCustomerSessionForPricing(customerSession, STORE_CODE, currency);
+		customerSessionService.initializeCustomerSessionForPricing(customerSession, STORE_CODE, currency);
 
 		TagSet tagSet = customerSession.getCustomerTagSet();
 		assertNotNull("TagSet should not be null", tagSet);
@@ -179,4 +106,52 @@ public class CustomerSessionServiceImplTest {
 		assertEquals("Currency is incorrect.", currency, customerSession.getCurrency());
 	}
 
+	@Test
+	public void shouldDeleteAnonymousShopperWhenAnonymousAndRegisteredShoppersAreDifferent() {
+		CustomerSession anonymousCustomerSession = new CustomerSessionImpl();
+		Shopper anonymousShopper = createShopper("anonymousShopperGuid");
+		anonymousCustomerSession.setShopper(anonymousShopper);
+
+		Customer registeredCustomer = new CustomerImpl();
+		Shopper registeredShopper = createShopper("registerShopperGuid");
+
+		when(shopperService.findOrCreateShopper(registeredCustomer, STORE_CODE)).thenReturn(registeredShopper);
+
+		customerSessionService.changeFromAnonymousToRegisteredCustomer(anonymousCustomerSession, registeredCustomer, STORE_CODE);
+
+		verify(shopperService).remove(anonymousShopper);
+		verify(shopperService).save(registeredShopper);
+		verify(cartMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
+		verify(wishlistMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
+		verify(customerConsentMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
+	}
+
+	@Test
+	public void shouldNotDeleteAnonymousShopperWhenAnonymousAndRegisteredShoppersAreSame() {
+		CustomerSession anonymousCustomerSession = new CustomerSessionImpl();
+		Shopper anonymousShopper = createShopper("anonymousShopperGuid");
+		anonymousCustomerSession.setShopper(anonymousShopper);
+
+		Customer registeredCustomer = new CustomerImpl();
+		Shopper registeredShopper = anonymousShopper;
+
+		when(shopperService.findOrCreateShopper(registeredCustomer, STORE_CODE)).thenReturn(registeredShopper);
+
+		customerSessionService.changeFromAnonymousToRegisteredCustomer(anonymousCustomerSession, registeredCustomer, STORE_CODE);
+
+		verify(shopperService, never()).remove(anonymousShopper);
+		verify(shopperService).save(registeredShopper);
+		verify(cartMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
+		verify(wishlistMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
+		verify(customerConsentMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
+	}
+
+	private Shopper createShopper(final String shopperGuid) {
+		Shopper shopper = new ShopperImpl();
+		ShopperMemento shopperMemento = new ShopperMementoImpl();
+		shopper.setShopperMemento(shopperMemento);
+		shopper.setGuid(shopperGuid);
+
+		return shopper;
+	}
 }

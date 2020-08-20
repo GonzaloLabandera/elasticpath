@@ -11,9 +11,12 @@ import java.util.stream.Collectors;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
+import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.commons.exception.DuplicateKeyException;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeUsage;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.persistence.support.DistinctAttributeValueCriterion;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.attribute.impl.AttributeValueInfo;
@@ -22,13 +25,13 @@ import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 /**
  * Caching implementation of the Attribute Service.
  */
-public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImpl implements AttributeService {
+@SuppressWarnings("PMD.GodClass")
+public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImpl implements AttributeService, MutableCachingService<Attribute> {
 
-	private Cache<Integer, List<Attribute>> attributesCache;
-	private Cache<Long, List<AttributeValueInfo>> findProductAttributeValueByAttributeUidCache;
-	private Cache<String, Attribute> findByKeyCache;
+	private Cache<Integer, List<Attribute>> attributesByUsageIdCache;
+	private Cache<Long, List<AttributeValueInfo>> attributeValueByAttributeUidCache;
+	private Cache<String, Attribute> attributeByKeyCache;
 	private AttributeService fallbackAttributeService;
-
 
 	@Override
 	public Attribute add(final Attribute attribute) throws DuplicateKeyException {
@@ -88,11 +91,11 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public Attribute findByKey(final String key) throws EpServiceException {
-		if (findByKeyCache.get(key) != null) {
-			return findByKeyCache.get(key);
+		if (attributeByKeyCache.get(key) != null) {
+			return attributeByKeyCache.get(key);
 		}
 		Attribute attribute = fallbackAttributeService.findByKey(key);
-		findByKeyCache.put(key, attribute);
+		attributeByKeyCache.put(key, attribute);
 		return attribute;
 
 	}
@@ -134,11 +137,11 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public List<Attribute> getAttributes(final int usageId) {
-		if (attributesCache.get(usageId) != null) {
-			return attributesCache.get(usageId);
+		if (attributesByUsageIdCache.get(usageId) != null) {
+			return attributesByUsageIdCache.get(usageId);
 		}
 		List<Attribute> result = fallbackAttributeService.getAttributes(usageId);
-		attributesCache.put(usageId, result);
+		attributesByUsageIdCache.put(usageId, result);
 		return result;
 	}
 
@@ -152,16 +155,33 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 		fallbackAttributeService.setDistinctAttributeValueCriterion(distinctAttributeValueCriterion);
 	}
 
+	@Deprecated
 	@Override
 	public Map<String, Attribute> getCustomerProfileAttributesMap() {
 		return fallbackAttributeService.getCustomerProfileAttributesMap();
 	}
 
+	@Deprecated
 	@Override
 	public List<Attribute> getCustomerProfileAttributes() {
 		return fallbackAttributeService.getCustomerProfileAttributes();
 	}
+	
+	@Override
+	public Map<String, Attribute> getCustomerProfileAttributesMap(final AttributeUsage... attributeUsages) {
+		return fallbackAttributeService.getCustomerProfileAttributesMap(attributeUsages);
+	}
 
+	@Override
+	public List<Attribute> getCustomerProfileAttributes(final AttributeUsage... attributeUsages) {
+		return fallbackAttributeService.getCustomerProfileAttributes(attributeUsages);
+	}
+	
+	@Override
+	public Map<String, Attribute> getCustomerProfileAttributesMapByCustomerType(final CustomerType customerType) {
+		return fallbackAttributeService.getCustomerProfileAttributesMapByCustomerType(customerType);
+	}
+	
 	@Override
 	public List<Attribute> getAttributesExcludeCustomerProfile() {
 		return fallbackAttributeService.getAttributesExcludeCustomerProfile();
@@ -201,12 +221,12 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 	public List<AttributeValueInfo> findProductAttributeValueByAttributeUid(final Attribute attribute) {
 		long attributeUid = attribute.getUidPk();
 
-		if (findProductAttributeValueByAttributeUidCache.get(attributeUid) != null) {
-			return findProductAttributeValueByAttributeUidCache.get(attributeUid);
+		if (attributeValueByAttributeUidCache.get(attributeUid) != null) {
+			return attributeValueByAttributeUidCache.get(attributeUid);
 		}
 
 		List<AttributeValueInfo> result = fallbackAttributeService.findProductAttributeValueByAttributeUid(attribute);
-		findProductAttributeValueByAttributeUidCache.put(attributeUid, result);
+		attributeValueByAttributeUidCache.put(attributeUid, result);
 
 		return result;
 	}
@@ -221,24 +241,51 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 		return fallbackAttributeService.findProductSkuValueAttributeByAttributeUid(attribute);
 	}
 
+	@Deprecated
 	@Override
 	public Set<String> getCustomerProfileAttributeKeys() {
-		return getAttributes(AttributeUsage.CUSTOMERPROFILE)
+		return getCustomerProfileAttributeKeys(AttributeUsageImpl.USER_PROFILE_USAGE);
+	}
+	
+	@Override
+	public Set<String> getCustomerProfileAttributeKeys(final AttributeUsage attributeUsage) {
+		return getAttributes(attributeUsage)
 				.stream().map(Attribute::getKey)
 				.collect(Collectors.toSet());
 	}
 
-	public void setAttributesCache(final Cache<Integer, List<Attribute>> attributesCache) {
-		this.attributesCache = attributesCache;
+	@Override
+	public void cache(final Attribute entity) {
+		attributeByKeyCache.put(entity.getKey(), entity);
+		attributeValueByAttributeUidCache.remove(entity.getUidPk());
+		attributesByUsageIdCache.remove(entity.getAttributeUsage().getValue());
 	}
 
-	public void setFindProductAttributeValueByAttributeUidCache(final Cache<Long, List<AttributeValueInfo>>
-																			 findProductAttributeValueByAttributeUidCache) {
-		this.findProductAttributeValueByAttributeUidCache = findProductAttributeValueByAttributeUidCache;
+	@Override
+	public void invalidate(final Attribute entity) {
+		attributeByKeyCache.remove(entity.getKey());
+		attributeValueByAttributeUidCache.remove(entity.getUidPk());
+		attributesByUsageIdCache.remove(entity.getAttributeUsage().getValue());
 	}
 
-	public void setFindByKeyCache(final Cache<String, Attribute> findByKeyCache) {
-		this.findByKeyCache = findByKeyCache;
+	@Override
+	public void invalidateAll() {
+		attributeByKeyCache.removeAll();
+		attributesByUsageIdCache.removeAll();
+		attributeValueByAttributeUidCache.removeAll();
+	}
+
+	public void setAttributesByUsageIdCache(final Cache<Integer, List<Attribute>> attributesByUsageIdCache) {
+		this.attributesByUsageIdCache = attributesByUsageIdCache;
+	}
+
+	public void setAttributeValueByAttributeUidCache(final Cache<Long, List<AttributeValueInfo>>
+															 attributeValueByAttributeUidCache) {
+		this.attributeValueByAttributeUidCache = attributeValueByAttributeUidCache;
+	}
+
+	public void setAttributeByKeyCache(final Cache<String, Attribute> attributeByKeyCache) {
+		this.attributeByKeyCache = attributeByKeyCache;
 	}
 
 	public void setFallbackAttributeService(final AttributeService fallbackAttributeService) {

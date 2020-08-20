@@ -27,9 +27,6 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.domain.Customer. */
 	public static final String CUSTOMER = "customer";
 
-	/** bean id for implementation of com.elasticpath.domain.CustomerDeleted. */
-	public static final String CUSTOMER_DELETED = "customerDeleted";
-
 	/** bean id for implementation of com.elasticpath.domain.customer.CustomerAuthentication. */
 	public static final String CUSTOMER_AUTHENTICATION = "customerAuthentication";
 
@@ -41,9 +38,6 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.CustomerSession. */
 	public static final String CUSTOMER_SESSION = "customerSession";
-
-	/** bean id for implementation of com.elasticpath.domain.customer.CustomerSessionMemento. */
-	public static final String CUSTOMER_SESSION_MEMENTO = "customerSessionMemento";
 
 	/** bean id for implementation of com.elasticpath.service.customer.CustomerSessionService. */
 	public static final String CUSTOMER_SESSION_SERVICE = "customerSessionService";
@@ -493,6 +487,9 @@ public final class ContextIdNames {
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	/** bean id for implementation of com.elasticpath.service.CustomerService. */
 	public static final String CUSTOMER_SERVICE = "customerService";
+	
+	/** bean id for implementation of com.elasticpath.service.customer.UserAccountAssociationService. */
+	public static final String USER_ACCOUNT_ASSOCIATION_SERVICE = "userAccountAssociationService";
 
 	/** bean id for implementation of com.elasticpath.service.CustomerRegistrationService. */
 	public static final String CUSTOMER_REGISTRATION_SERVICE = "customerRegistrationService";
@@ -843,7 +840,7 @@ public final class ContextIdNames {
 	public static final String BASE_AMOUNT_UPDATE_STRATEGY = "baseAmountUpdateAllOrNothing";
 
 	/** bean id for implementation of com.elasticpath.settings.impl.CachedSettingsReaderImpl. */
-	public static final String CACHED_SETTINGS_READER = "cachedSettingsReader";
+	public static final String SETTINGS_READER = "settingsReader";
 
 	/** bean id for implementation of com.elasticpath.settings.impl.SettingValueFactoryWithDefinitionImpl. */
 	public static final String SETTING_VALUE_FACTORY = "settingValueFactory";
@@ -934,6 +931,12 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.search.CustomerSearchCriteria. */
 	public static final String CUSTOMER_SEARCH_CRITERIA = "customerSearchCriteria";
+
+	/** bean id for implementation of com.elasticpath.domain.search.AccountSearchCriteria. */
+	public static final String ACCOUNT_SEARCH_CRITERIA = "accountSearchCriteria";
+
+	/** bean id for implementation of com.elasticpath.service.customer.AccountTreeService. */
+	public static final String ACCOUNT_TREE_SERVICE = "accountTreeService";
 
 	/** bean id for implementation of com.elasticpath.domain.search.impl.OrderSearchCriteriaImpl. */
 	public static final String ORDER_SEARCH_CRITERIA = "orderSearchCriteria";
@@ -1431,9 +1434,6 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.domain.shopper.impl.ShopperMementoImpl}. */
 	public static final String SHOPPER_MEMENTO = "shopperMemento";
 
-	/** bean id for implementation of com.elasticpath.service.shopper.ShopperCleanupService. */
-	public static final String SHOPPER_CLEANUP_SERVICE = "shopperCleanupService";
-
 	/** bean id for implementation of com.elasticpath.service.shopper.ShopperService. */
 	public static final String SHOPPER_SERVICE = "shopperService";
 
@@ -1826,6 +1826,9 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of org.apache.activemq.pool.PooledConnectionFactory. */
 	public static final String POOLED_CONNECTION_FACTORY = "pooledConnectionFactory";
+
+	/** bean id for implementation of com.elasticpath.domain.customer.impl.UserAccountAssociationImpl. */
+	public static final String USER_ACCOUNT_ASSOCIATION = "userAccountAssociation";
 
 	private ContextIdNames() {
 		// Do not instantiate this class

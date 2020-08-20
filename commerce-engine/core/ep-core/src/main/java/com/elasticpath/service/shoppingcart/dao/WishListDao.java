@@ -3,8 +3,6 @@
  */
 package com.elasticpath.service.shoppingcart.dao;
 
-import java.util.List;
-
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.WishList;
 
@@ -50,20 +48,4 @@ public interface WishListDao {
 	 * @param wishList the wish list
 	 */
 	void remove(WishList wishList);
-
-	/**
-	 * Remove all empty WishLists associated with any of the given Shopper.
-	 *
-	 * @param shopperUids the uids of the associated Shoppers
-	 * @return the number of deleted WishLists.
-	 */
-	int deleteEmptyWishListsByShopperUids(List<Long> shopperUids);
-
-	/**
-	 * Remove all WishLists associated with the given list of Shoppers.
-	 *
-	 * @param shopperUids the uids of the associated Shoppers
-	 * @return the number of deleted WishLists.
-	 */
-	int deleteAllWishListsByShopperUids(List<Long> shopperUids);
 }

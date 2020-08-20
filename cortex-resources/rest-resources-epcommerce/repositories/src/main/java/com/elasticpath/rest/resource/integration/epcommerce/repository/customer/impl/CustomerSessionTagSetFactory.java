@@ -3,13 +3,16 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer.impl;
 
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.AccountTagStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerTagStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.UserTraitsToTagSetTransformer;
 import com.elasticpath.tags.TagSet;
@@ -49,19 +52,33 @@ public class CustomerSessionTagSetFactory {
 	/**
 	 * Create a TagSet.
 	 *
-	 * @param customer the customer to create a TagSet for
+	 * @param shopper the shopper to create a TagSet for
 	 * @return the tag set
 	 */
-	TagSet createTagSet(final Customer customer) {
-		Subject subject = resourceOperationContext.getSubject();
-		TagSet tagSet = subject == null
+	TagSet createTagSet(final Shopper shopper) {
+		final Subject subject = resourceOperationContext.getSubject();
+		final TagSet tagSet = subject == null
 			? new TagSet()
 			: userTraitTransformer.transformUserTraitsToTagSet(subject);
 
+		populateCustomerTagStrategies(shopper.getCustomer(), tagSet);
+
+		populateAccountTagStrategies(shopper.getAccount(), tagSet);
+
+		return tagSet;
+	}
+
+	private void populateCustomerTagStrategies(final Customer customer, final TagSet tagSet) {
 		for (CustomerTagStrategy customerTagStrategy : tagStrategyRegistry.getStrategies()) {
 			customerTagStrategy.populate(customer, tagSet);
 		}
+	}
 
-		return tagSet;
+	private void populateAccountTagStrategies(final Customer account, final TagSet tagSet) {
+		if (Objects.nonNull(account)) {
+			for (final AccountTagStrategy accountTagStrategy : tagStrategyRegistry.getAccountStrategies()) {
+				accountTagStrategy.populate(account, tagSet);
+			}
+		}
 	}
 }

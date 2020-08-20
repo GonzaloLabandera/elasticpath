@@ -32,7 +32,7 @@
 
 		<plan>
 			<name>add-payment-instrument</name>
-			<description><![CDATA[Submit a payment instrument form from the profile.]]></description>
+			<description><![CDATA[Submit a payment instrument form from profile.]]></description>
 			<step>
 				<description><![CDATA[Provide a payment instrument form to create a payment instrument.]]></description>
 				<start>paymentmethods.profile-payment-method</start>
@@ -127,7 +127,7 @@
 
 		<plan>
 			<name>add-order-payment-instrument</name>
-			<description><![CDATA[Submit a payment instrument form from the order.]]></description>
+			<description><![CDATA[Submit a payment instrument form from order.]]></description>
 			<step>
 				<description><![CDATA[Provide a payment instrument form to create an order payment instrument.]]></description>
 				<start>paymentmethods.order-payment-method</start>

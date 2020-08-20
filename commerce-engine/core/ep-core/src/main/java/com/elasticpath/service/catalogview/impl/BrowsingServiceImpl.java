@@ -14,7 +14,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.TopSeller;
@@ -45,33 +44,12 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 	private PaginationService paginationService;
 	private CategoryService categoryService;
 
-	private BeanFactory beanFactory;
-
-	/**
-	 * Perform browsing based on the given browsing request and returns the browsing result.
-	 * <p>
-	 * By giving the previous browsing result history, you may get response quicker. If you don't have it, give a <code>null</code>. It doesn't
-	 * affect the result.
-	 * <p>
-	 * By giving a shopping cart, promotion rules will be applied to the returned products.
-	 * <p>
-	 * By giving the product load tuner, you can fine control what data to be loaded for each product. It is used to improve performance.
-	 *
-	 *
-	 * @param browsingRequest the browsing request
-	 * @param previousBrowsingResultHistory the previous browsing results, give <code>null</code> if you don't have it
-	 * @param shoppingCart the shopping cart, , give <code>null</code> if you don't have it
-	 * @param loadProductAssociations true if product associations should be loaded for each product
-	 * @param pageNumber the current pageNumber
-	 * @return a <code>BrowsingResult</code> instance
-	 */
 	@Override
 	public BrowsingResult browsing(final BrowsingRequest browsingRequest, final CatalogViewResultHistory previousBrowsingResultHistory,
-								   final ShoppingCart shoppingCart, final boolean loadProductAssociations, final int pageNumber) {
+								   final ShoppingCart shoppingCart, final boolean loadProductAssociations, final int pageNumber, final int pageSize) {
 		BrowsingResult result = (BrowsingResult) loadHistory(browsingRequest, previousBrowsingResultHistory);
 
 		if (result.getCategory() == null) {
-			String storeCode = shoppingCart.getStore().getCode();
 			//Get the category from category filter to save some DB calls
 			Category category = null;
 			for (Filter<?> filter : browsingRequest.getFilters()) {
@@ -96,7 +74,7 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 			final IndexSearchResult productResults = retrieveProducts(browsingRequest, category,
 					shoppingCart.getShopper().getPriceListStack());
 
-			List<Long> productUids = getProductsUsingPageNumber(pageNumber, storeCode, productResults);
+			List<Long> productUids = getProductsUsingPageNumber(pageNumber, pageSize, productResults);
 
 			List<StoreProduct> products = getStoreProductService().getProductsForStore(productUids, shoppingCart.getStore(), loadProductAssociations);
 			products = getIndexUtility().sortDomainList(productUids, products);
@@ -117,20 +95,18 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 
 	/**
 	 * Retrieves products based on the page number requested.
-	 * @param pageNumber is the pageNumber
-	 * @param storeCode is the storeCode
+	 * @param pageNumber the page number
+	 * @param pageSize the number of results per page
 	 * @param productResults is the search result for products
 	 * @return list of product uids
 	 */
 	protected List<Long> getProductsUsingPageNumber(final int pageNumber,
-													final String storeCode,
+													final int pageSize,
 													final IndexSearchResult productResults) {
-
-		int paginationNumber = paginationService.getNumberOfItemsPerPage(storeCode);
 
 		int numberOfResults = productResults.getNumFound();
 
-		int lastPageNumber = paginationService.getLastPageNumber(numberOfResults, storeCode);
+		int lastPageNumber = paginationService.getLastPageNumber(numberOfResults, pageSize);
 
 		List<Long> productUids = Collections.emptyList();
 
@@ -138,10 +114,10 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 
 		// Return the max num pages if the page number entered is too large
 		if (pageNumber <= lastPageNumber) {
-			productUids = getPagedResults(productResults, pageNumber, paginationNumber);
+			productUids = getPagedResults(productResults, pageNumber, pageSize);
 		} else {
 			LOG.info("Page number requested " + pageNumber + " ignored, returning page number " + lastPageNumber);
-			productUids = getPagedResults(productResults, lastPageNumber, paginationNumber);
+			productUids = getPagedResults(productResults, lastPageNumber, pageSize);
 		}
 		return productUids;
 	}
@@ -190,14 +166,14 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 	 */
 	@Override
 	protected CatalogViewResult createCatalogViewResult() {
-		return beanFactory.getPrototypeBean(ContextIdNames.BROWSING_RESULT, CatalogViewResult.class);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.BROWSING_RESULT, CatalogViewResult.class);
 	}
 
 	@Override
 	protected ProductCategorySearchCriteria createCriteriaForProductSearch(final CatalogViewRequest request,
 			final boolean includeSubCategories) {
 		final BrowsingRequest browsingRequest = (BrowsingRequest) request;
-		final ProductSearchCriteria searchCriteria = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA,
+		final ProductSearchCriteria searchCriteria = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA,
 				ProductSearchCriteria.class);
 
 		// only want exact matches when browsing
@@ -236,14 +212,8 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 	/**
 	 * @return pagination service
 	 */
-	public PaginationService getPaginationService() {
+	protected PaginationService getPaginationService() {
 		return paginationService;
-	}
-
-	@Override
-	public void setBeanFactory(final BeanFactory beanFactory) {
-		super.setBeanFactory(beanFactory);
-		this.beanFactory = beanFactory;
 	}
 
 	protected CategoryService getCategoryService() {

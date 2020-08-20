@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.customer.Customer;
@@ -20,27 +22,29 @@ import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidator;
 /**
  * Validator to check that the cart modifier data are unique.
  */
-public class UniqueCartDataValidatorImpl  implements ShoppingCartValidator  {
+public class UniqueCartDataValidatorImpl implements ShoppingCartValidator {
 
-	private static final String MESSAGE_ID = "cart.descriptor.not-unique";
+	private static final String ERROR_MESSAGE = "Cart descriptor values are already in use by another shopping cart";
+	private static final String ERROR_ID = "cart.descriptor.not-unique";
 
 	private ShoppingCartService shoppingCartService;
+
 	@Override
 	public Collection<StructuredErrorMessage> validate(final ShoppingCartValidationContext context) {
 		ShoppingCart shoppingCart = context.getShoppingCart();
 
 		Map<String, CartData> newCartData = shoppingCart.getCartData();
 		Shopper shopper = shoppingCart.getShopper();
-
-
-		Customer customer = shopper.getCustomer();
-		String customerGuid = customer.getGuid();
-		List<String> existingCartGuids = getShoppingCartService().findByCustomerAndStore(customerGuid, shopper.getStoreCode());
+		String customerGuid = shopper.getCustomer().getGuid();
+		String accountSharedId = Optional.ofNullable(shopper.getAccount()).map(Customer::getSharedId).orElse(null);
+		List<String> existingCartGuids = getShoppingCartService().findByCustomerAndStore(customerGuid, accountSharedId, shopper.getStoreCode())
+				.stream()
+				.filter(guid -> !shoppingCart.getGuid().equals(guid))
+				.collect(Collectors.toList());
 		Map<String, List<CartData>> cartDataForCarts = getShoppingCartService().findCartDataForCarts(existingCartGuids);
-
 		for (List<CartData> existingCartData : cartDataForCarts.values()) {
 			if (hasSameCartData(existingCartData, newCartData)) {
-				StructuredErrorMessage errorMessage = new StructuredErrorMessage(MESSAGE_ID, MESSAGE_ID, Collections.emptyMap());
+				StructuredErrorMessage errorMessage = new StructuredErrorMessage(ERROR_ID, ERROR_MESSAGE, Collections.emptyMap());
 				return Collections.singletonList(errorMessage);
 			}
 		}

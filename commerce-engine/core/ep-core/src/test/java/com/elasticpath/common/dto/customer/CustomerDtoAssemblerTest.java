@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.unitils.reflectionassert.ReflectionComparatorMode;
 
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.AddressDTO;
 import com.elasticpath.common.dto.customer.builder.CustomerDTOBuilder;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -39,16 +41,22 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerGroup;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
 import com.elasticpath.domain.customer.impl.CustomerGroupImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.RandomGuid;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.service.customer.AccountTreeService;
 import com.elasticpath.service.customer.CustomerGroupService;
+import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.CustomerAddressBuilder;
 import com.elasticpath.test.factory.CustomerBuilder;
+import com.elasticpath.test.factory.TestCustomerProfileFactory;
 
 /**
  * Test {@link CustomerDtoAssembler} functionality.
@@ -73,7 +81,9 @@ public class CustomerDtoAssemblerTest {
 
 	private static final String EMAIL_ADDRESS = "customer@elasticpath.com";
 
-	private static final String USER_ID = "USER_ID";
+	private static final String SHARED_ID = "SHARED_ID";
+
+	private static final String USER_NAME = "USER_NAME";
 
 	private static final String STORE_CODE = "STORE_CODE";
 
@@ -92,6 +102,12 @@ public class CustomerDtoAssemblerTest {
 	private static final String LAST_NAME = "LAST";
 
 	private static final String FIRST_NAME = "FIRST";
+
+	private static final long CUSTOMER_UID = 123L;
+
+	private static final String PARENT_GUID = "ParentGuid";
+
+	private static final String SOME_ROOT_GUID = "someRootGuid";
 
 	private static final Date DATE_OF_BIRTH = new Date();
 
@@ -118,6 +134,10 @@ public class CustomerDtoAssemblerTest {
 
 	private CustomerGroup customerGroup;
 
+	private CustomerService customerService;
+
+	private AccountTreeService accountTreeService;
+
 	private final Utility utility = new UtilityImpl() {
 		private static final long serialVersionUID = 1L;
 
@@ -143,16 +163,23 @@ public class CustomerDtoAssemblerTest {
 		customerGroup = createCustomerGroup();
 		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class, RandomGuidImpl.class);
 		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
-
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedProperties.class, 
+				LocalizedPropertiesImpl.class);
+		
 		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class, CustomerAddressImpl.class);
 		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthentication.class,
 				CustomerAuthenticationImpl.class);
+
+		customerService = context.mock(CustomerService.class);
+		accountTreeService = context.mock(AccountTreeService.class);
 
 		customerDtoAssembler = new CustomerDtoAssembler();
 		customerDtoAssembler.setBeanFactory(beanFactory);
 
 		customerGroupService = context.mock(CustomerGroupService.class);
 		customerDtoAssembler.setCustomerGroupService(customerGroupService);
+		customerDtoAssembler.setCustomerService(customerService);
+		customerDtoAssembler.setAccountTreeService(accountTreeService);
 	}
 
 	/**
@@ -172,6 +199,22 @@ public class CustomerDtoAssemblerTest {
 				.build();
 
 		Customer customer = createCustomer();
+
+
+		CustomerDTO customerDTO = new CustomerDTO();
+		customerDtoAssembler.assembleDto(customer, customerDTO);
+
+		assertReflectionEquals(EXPECTED_DTO_SHOULD_EQUAL_ACTUAL, expectedCustomerDTO, customerDTO, ReflectionComparatorMode.LENIENT_ORDER);
+	}
+
+	/**
+	 * Test customer DTO assembly from domain object with parent guid.
+	 */
+	@Test
+	public void testCustomerAssembleDtoFromDomainObjectWithParentGuid() {
+		CustomerDTO expectedCustomerDTO = createCustomerDTOWithParent(PARENT_GUID, CustomerType.ACCOUNT);
+
+		Customer customer = createAccountWithAllFields(PARENT_GUID);
 
 		CustomerDTO customerDTO = new CustomerDTO();
 		customerDtoAssembler.assembleDto(customer, customerDTO);
@@ -234,6 +277,114 @@ public class CustomerDtoAssemblerTest {
 
 		assertReflectionEquals(EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL, expectedCustomer, customer, ReflectionComparatorMode.LENIENT_DATES);
 		assertFalse("First time buyer field must be false", customer.isFirstTimeBuyer());
+	}
+
+	/**
+	 * Test customer domain with parent assembly from DTO.
+	 */
+	@Test
+	public void testCustomerDomainWithParentAssemblyFromDto() {
+		shouldFindDefaultCustomerGroupByName();
+		shouldFindCustomerGroupsByGuid();
+
+		final Customer parent = createAccount(null);
+
+		shouldFindParentCustomer(parent);
+		shouldFindRootCustomerGuid(parent, SOME_ROOT_GUID);
+
+		Customer expectedCustomer = createAccountWithAllFields(PARENT_GUID);
+
+		CustomerDTO customerDto = createCustomerDTOWithParent(PARENT_GUID, CustomerType.ACCOUNT);
+
+		Customer customer = CustomerBuilder.newCustomer().build();
+
+		customerDtoAssembler.assembleDomain(customerDto, customer);
+
+		assertReflectionEquals(EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL, expectedCustomer, customer, ReflectionComparatorMode.LENIENT_DATES);
+	}
+
+	/**
+	 * Test that assemble domain method throws exception if parent does not exist in database.
+	 */
+	@Test(expected = EpServiceException.class)
+	public void testThatAssembleDomainMethodThrowsExceptionIfParentDoesNotExistInDb() {
+		shouldFindDefaultCustomerGroupByName();
+		shouldFindCustomerGroupsByGuid();
+		shouldFindParentCustomer(null);
+
+		CustomerDTO customerDto = createCustomerDTOWithParent(PARENT_GUID, CustomerType.ACCOUNT);
+		Customer customer = CustomerBuilder.newCustomer().build();
+
+		customerDtoAssembler.assembleDomain(customerDto, customer);
+	}
+
+	/**
+	 * Test that assembleDomain method throws exception if target is persisted and parentGuid of the source is different.
+	 */
+	@Test(expected = EpServiceException.class)
+	public void testThatAssembleDomainMethodThrowsExceptionIfTargetIsPersistedAndParentGuidOfTheSourceIsDifferent() {
+		shouldFindDefaultCustomerGroupByName();
+		shouldFindCustomerGroupsByGuid();
+
+		CustomerDTO customerDto = createCustomerDTOWithParent(PARENT_GUID, CustomerType.ACCOUNT);
+		customerDto.setGuid(SOME_ROOT_GUID);
+
+		Customer customer = CustomerBuilder.newCustomer().build();
+		customer.setUidPk(CUSTOMER_UID);
+
+		customerDtoAssembler.assembleDomain(customerDto, customer);
+	}
+
+	/**
+	 * Test that assembleDomain method throws exception if parent is not Account.
+	 */
+	@Test(expected = EpServiceException.class)
+	public void testThatAssembleDomainMethodThrowsExceptionIfParentIsNotAccount() {
+		shouldFindDefaultCustomerGroupByName();
+		shouldFindCustomerGroupsByGuid();
+
+		final Customer parent = createCustomer();
+
+		shouldFindParentCustomer(parent);
+
+		CustomerDTO customerDto = createCustomerDTOWithParent(PARENT_GUID, CustomerType.ACCOUNT);
+
+		Customer customer = CustomerBuilder.newCustomer().build();
+
+		customerDtoAssembler.assembleDomain(customerDto, customer);
+	}
+
+	/**
+	 * Test that assembleDomain method throws exception if CustomerDto is not an Account.
+	 */
+	@Test(expected = EpServiceException.class)
+	public void testThatAssembleDomainMethodThrowsExceptionIfCustomerDtoIsNotAnAccount() {
+		shouldFindDefaultCustomerGroupByName();
+		shouldFindCustomerGroupsByGuid();
+
+		CustomerDTO customerDto = createCustomerDTOWithParent(PARENT_GUID, CustomerType.SINGLE_SESSION_USER);
+
+		Customer customer = CustomerBuilder.newCustomer().build();
+
+		customerDtoAssembler.assembleDomain(customerDto, customer);
+	}
+
+	private void shouldFindRootCustomerGuid(final Customer parent, final String rootGuid) {
+		context.checking(new Expectations() {
+			{
+				allowing(accountTreeService).fetchPathToRoot(parent);
+				will(returnValue(Collections.singletonList(rootGuid)));
+			}
+		});
+	}
+
+	private void shouldFindParentCustomer(final Customer parent) {
+		context.checking(new Expectations() {
+			{
+				allowing(customerService).findByGuid(PARENT_GUID);
+				will(returnValue(parent));
+			}
+		});
 	}
 
 	/**
@@ -382,6 +533,26 @@ public class CustomerDtoAssemblerTest {
 				.allMatch(date -> date.equals(creationDate));
 	}
 
+	/**
+	 * Test that assembleDomain method throws exception if target is persisted and customer type of the source is different.
+	 */
+	@Test(expected = EpServiceException.class)
+	public void testThatAssembleDomainMethodThrowsExceptionIfTargetIsPersistedAndCustomerTypeOfTheSourceIsDifferent() {
+		shouldFindDefaultCustomerGroupByName();
+		shouldFindCustomerGroupsByGuid();
+
+		CustomerDTO customerDto = createTestCustomerDtoBuilder()
+				.withCustomerType(CustomerType.ACCOUNT.getName())
+				.build();
+
+		Customer customer = CustomerBuilder.newCustomer().build();
+		customer.setCustomerType(CustomerType.REGISTERED_USER);
+		customer.setUidPk(CUSTOMER_UID);
+
+
+		customerDtoAssembler.assembleDomain(customerDto, customer);
+	}
+
 	private void shouldFindDefaultCustomerGroupByName() {
 		context.checking(new Expectations() {
 			{
@@ -421,7 +592,8 @@ public class CustomerDtoAssemblerTest {
 			.withPassword(PASSWORD, SALT)
 			.withStatus(Customer.STATUS_ACTIVE)
 			.withStoreCode(STORE_CODE)
-			.withUserId(USER_ID)
+			.withSharedId(SHARED_ID)
+			.withUsername(USER_NAME)
 			.withAddedCustomerGroup(defaultCustomerGroup)
 			.withAddedCustomerGroup(customerGroup)
 			.withEmail(EMAIL_ADDRESS)
@@ -429,7 +601,7 @@ public class CustomerDtoAssemblerTest {
 			.withPreferredCurrency(PREFERRED_CURRENCY)
 			.withFirstName(FIRST_NAME)
 			.withLastName(LAST_NAME)
-			.withAnonymous(false)
+			.withCustomerType(CustomerType.REGISTERED_USER)
 			.withDateOfBirth(DATE_OF_BIRTH)
 			.withPhoneNumber(PHONE_NUMBER)
 			.withGender(GENDER)
@@ -438,7 +610,24 @@ public class CustomerDtoAssemblerTest {
 			.withHtmlEmailPreferred(true)
 			.withFaxNumber(FAX_NUMBER)
 			.withFirstTimeBuyer(false)
+			.withCustomerType(CustomerType.SINGLE_SESSION_USER)
 			.build();
+	}
+
+	private Customer createAccountWithAllFields(final String parentGuid) {
+		final Customer customer = createCustomer();
+		customer.setParentGuid(parentGuid);
+		customer.setCustomerType(CustomerType.ACCOUNT);
+		customer.setCustomerProfileAttributes(new TestCustomerProfileFactory().getProfile());
+		return customer;
+	}
+
+	private Customer createAccount(final String parentGuid) {
+		final Customer account = CustomerBuilder.newCustomer().build();
+		account.setCustomerType(CustomerType.ACCOUNT);
+		account.setParentGuid(parentGuid);
+		account.setCustomerProfileAttributes(new TestCustomerProfileFactory().getProfile());
+		return account;
 	}
 
 	private CustomerGroup createDefaultCustomerGroup() {
@@ -488,7 +677,6 @@ public class CustomerDtoAssemblerTest {
 		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_PREF_CURR,
 				AttributeType.SHORT_TEXT.toString(),
 				PREFERRED_CURRENCY.toString()));
-		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_ANONYMOUS_CUST, AttributeType.BOOLEAN.toString(), "false"));
 		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_PHONE, AttributeType.SHORT_TEXT.toString(), PHONE_NUMBER));
 		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_FAX, AttributeType.SHORT_TEXT.toString(), FAX_NUMBER));
 		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_GENDER,
@@ -513,8 +701,17 @@ public class CustomerDtoAssemblerTest {
 				.withSalt(SALT)
 				.withStatus(Customer.STATUS_ACTIVE)
 				.withStoreCode(STORE_CODE)
-				.withUserId(USER_ID)
+				.withSharedId(SHARED_ID)
+				.withUsername(USER_NAME)
+				.withCustomerType(CustomerType.SINGLE_SESSION_USER.getName())
 				.withGroups(defaultCustomerGroup.getGuid(), customerGroup.getGuid());
+	}
+
+	private CustomerDTO createCustomerDTOWithParent(final String parentGuid, final CustomerType customerType) {
+		return createTestCustomerDtoBuilder()
+				.withCustomerType(customerType.getName())
+				.withParentGuid(parentGuid)
+				.build();
 	}
 
 	private AddressDTO createAddressDto(final CustomerAddress address) {

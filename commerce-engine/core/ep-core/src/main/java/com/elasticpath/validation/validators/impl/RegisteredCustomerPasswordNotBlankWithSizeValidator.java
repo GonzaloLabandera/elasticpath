@@ -34,15 +34,10 @@ public class RegisteredCustomerPasswordNotBlankWithSizeValidator implements
 	 */
 	@Override
 	public boolean isValid(final Customer customer, final ConstraintValidatorContext context) {
-		boolean valid = true;
-
-		boolean anonymous = customer.isAnonymous();
-		if (!anonymous) {
-			String password = customer.getClearTextPassword();
-			valid = checkBlank(password, context);
-			if (valid) {
-				valid = checkSize(password, context);
-			}
+		String password = customer.getClearTextPassword();
+		boolean valid = checkBlank(password, context);
+		if (valid) {
+			valid = checkSize(password, context);
 		}
 
 		return valid;

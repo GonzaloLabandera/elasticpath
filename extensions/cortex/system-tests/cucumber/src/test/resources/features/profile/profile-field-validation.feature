@@ -44,7 +44,6 @@ Feature: Profile field validations
     And I should see validation error message with message type, message id, debug message, and field
       | messageType | messageId                  | debugMessage                    | fieldName |
       | error       | field.invalid.email.format | not a well-formed email address | email     |
-      | error       | field.required             | username must not be blank      | username  |
 
     Examples:
       | EMAIL |
@@ -65,11 +64,9 @@ Feature: Profile field validations
   Scenario Outline: Profile Email validation - non-unique email - registered shopper
     When I have authenticated as a newly registered shopper
     And I create invalid email <EMAIL>
-    Then the HTTP status is conflict
-    And I should see validation error message with message type, message id, and debug message
-      | messageType | messageId                     | debugMessage                                   |
-      | error       | profile.userid.already.exists | Customer with the given user Id already exists |
+    Then the HTTP status is OK, created
 
     Examples:
       | EMAIL                        |
       | harry.potter@elasticpath.com |
+

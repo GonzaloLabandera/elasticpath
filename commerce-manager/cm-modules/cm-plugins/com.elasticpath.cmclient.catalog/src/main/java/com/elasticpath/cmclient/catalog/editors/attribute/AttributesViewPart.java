@@ -31,6 +31,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpTableColumn;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.domain.attribute.AttributeValue;
 import com.elasticpath.domain.catalog.Category;
+import com.elasticpath.domain.customer.Customer;
 
 /**
  * Attributes UI controls abstraction.
@@ -38,7 +39,10 @@ import com.elasticpath.domain.catalog.Category;
 public class AttributesViewPart implements SelectionListener,
 		ISelectionChangedListener, IAttributeChangedListener {
 
-	private static final String ATTRIBUTES_VIEW_TABLE = "Attributes View"; //$NON-NLS-1$
+	/**
+	 * the name for attribute view table.
+	 */
+	protected static final String ATTRIBUTES_VIEW_TABLE = "Attributes View"; //$NON-NLS-1$
 	/**
 	 * the table viewer for the attribute info table.
 	 */
@@ -198,7 +202,7 @@ public class AttributesViewPart implements SelectionListener,
 		toolBarManager.update(true);
 	}
 
-	private Object getModel() {
+	protected Object getModel() {
 		return model;
 	}
 
@@ -256,6 +260,8 @@ public class AttributesViewPart implements SelectionListener,
 				((Category) getModel()).getAttributeValueMap().put(attr.getLocalizedAttributeKey(), attr);
 			} else if (getModel() instanceof ProductSkuModel) {
 				((ProductSkuModel) getModel()).getProductSku().getAttributeValueMap().put(attr.getLocalizedAttributeKey(), attr);
+			} else if (getModel() instanceof Customer) {
+				((Customer) getModel()).getCustomerProfile().setProfileValue(attr.getLocalizedAttributeKey(), attr.getValue());
 			}
 		}
 	}
@@ -272,7 +278,7 @@ public class AttributesViewPart implements SelectionListener,
 	}
 
 	private void clearAttributeValue(final AttributeValue attr) {
-		Map<String, AttributeValue> attributeValueMap = null;
+		Map<String, ? extends AttributeValue> attributeValueMap = null;
 		if (getModel() instanceof ProductModel) {
 			attributeValueMap = ((ProductModel) getModel()).getProduct().getAttributeValueMap();
 		}
@@ -281,6 +287,9 @@ public class AttributesViewPart implements SelectionListener,
 		}
 		if (getModel() instanceof ProductSkuModel) {
 			attributeValueMap = ((ProductSkuModel) getModel()).getProductSku().getAttributeValueMap();
+		}
+		if (getModel() instanceof Customer) {
+			attributeValueMap = ((Customer) getModel()).getCustomerProfile().getProfileValueMap();
 		}
 		if (attributeValueMap == null) {
 			return;
@@ -332,5 +341,57 @@ public class AttributesViewPart implements SelectionListener,
 	 */
 	public boolean isInitialized() {
 		return attributesTableViewer.getSwtTableViewer().getInput() != null;
+	}
+
+	protected IEpTableViewer getAttributesTableViewer() {
+		return attributesTableViewer;
+	}
+
+	protected void setAttributesTableViewer(final IEpTableViewer attributesTableViewer) {
+		this.attributesTableViewer = attributesTableViewer;
+	}
+
+	protected Button getEditButton() {
+		return editButton;
+	}
+
+	protected void setEditButton(final Button editButton) {
+		this.editButton = editButton;
+	}
+
+	protected IEpLayoutComposite getMainComposite() {
+		return mainComposite;
+	}
+
+	protected void setMainComposite(final IEpLayoutComposite mainComposite) {
+		this.mainComposite = mainComposite;
+	}
+
+	protected Button getResetButton() {
+		return resetButton;
+	}
+
+	protected void setResetButton(final Button resetButton) {
+		this.resetButton = resetButton;
+	}
+
+	protected EpState getRolePermission() {
+		return rolePermission;
+	}
+
+	protected IToolBarManager getToolbarManager() {
+		return toolbarManager;
+	}
+
+	protected ICellEditorDialogService getDialogService() {
+		return dialogService;
+	}
+
+	protected IEpLayoutComposite getButtonsComposite() {
+		return buttonsComposite;
+	}
+
+	protected void setButtonsComposite(final IEpLayoutComposite buttonsComposite) {
+		this.buttonsComposite = buttonsComposite;
 	}
 }

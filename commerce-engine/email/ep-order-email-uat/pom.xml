@@ -41,10 +41,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-order-shipment-creation-message-producer</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-gift-certificate-creation-message-producer</artifactId>
 		</dependency>
 		<dependency>
@@ -124,6 +120,10 @@
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-core</artifactId>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
 		</dependency>
 	</dependencies>
 

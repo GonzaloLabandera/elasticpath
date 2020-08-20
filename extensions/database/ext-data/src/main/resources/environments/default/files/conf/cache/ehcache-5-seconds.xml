@@ -239,7 +239,7 @@
 		   statistics="true"
 	/>
 
-	<cache name="findProductAttributeValueByAttributeUidCache"
+	<cache name="attributeValueByAttributeUidCache"
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"

@@ -26,7 +26,7 @@ import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.UpdatePolicy;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
-import com.elasticpath.cmclient.core.conversion.EpBigDecimalToStringConverter;
+import com.elasticpath.cmclient.core.conversion.EpMonetoryValueConverter;
 import com.elasticpath.cmclient.core.conversion.EpMoneyToStringConverter;
 import com.elasticpath.cmclient.core.conversion.EpStringToBigDecimalConverter;
 import com.elasticpath.cmclient.core.conversion.EpStringToMoneyConverter;
@@ -199,7 +199,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShipSummary implements IPrope
 		shippingCostCurrencyText.setText(orderCurrency);
 		shippingCostText.setText(shipment.getShippingCost().toString());
 		shipmentDiscountCurrencyText.setText(orderCurrency);
-		shipmentDiscountText.setText(shipment.getSubtotalDiscount().toString());
+		shipmentDiscountText.setText(new EpMonetoryValueConverter(order.getCurrency()).asString(shipment.getSubtotalDiscount()));
 		
 		if (!shipment.isInclusiveTax()) {
 			totalBeforeTaxCurrencyText.setText(orderCurrency);
@@ -223,8 +223,11 @@ public class OrderDetailsPhysicalShipmentSubSectionShipSummary implements IPrope
 		
 		final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
 
+        final EpMonetoryValueConverter epMonetoryValueBigDecimalToStringConverter =
+				new EpMonetoryValueConverter(order.getCurrency());
+
 		EpBindingConfiguration bindingConfig = new EpBindingConfiguration(bindingContext, itemSubTotalText, shipment, "subtotal"); //$NON-NLS-1$
-		bindingConfig.configureModelToUiBinding(new EpBigDecimalToStringConverter(), UpdatePolicy.UPDATE);
+		bindingConfig.configureModelToUiBinding(epMonetoryValueBigDecimalToStringConverter, UpdatePolicy.UPDATE);
 		bindingConfig.configureUiToModelBinding(new EpStringToBigDecimalConverter(), EpValidatorFactory.NON_NEGATIVE_BIG_DECIMAL, false);
 		bindingProvider.bind(bindingConfig);
 
@@ -245,7 +248,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShipSummary implements IPrope
 
 		bindingConfig.configureUiToModelBinding(new EpStringToBigDecimalConverter(), EpValidatorFactory.NON_NEGATIVE_BIG_DECIMAL,
 				shippingCostUpdateStrategy, false);
-		bindingConfig.configureModelToUiBinding(new EpBigDecimalToStringConverter(), UpdatePolicy.UPDATE);
+		bindingConfig.configureModelToUiBinding(epMonetoryValueBigDecimalToStringConverter, UpdatePolicy.UPDATE);
 		bindingProvider.bind(bindingConfig);
 
 		// bind subtotalDiscount
@@ -253,7 +256,11 @@ public class OrderDetailsPhysicalShipmentSubSectionShipSummary implements IPrope
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
 				final BigDecimal newSubtotalDiscount = (BigDecimal) value;
-				final BigDecimal oldSubtotalDiscount = shipment.getSubtotalDiscount();
+
+				// Set shipment.getSubtotalDiscount() scale same as newSubtotalDiscount scale, if it is less than newSubtotalDiscount
+				final BigDecimal oldSubtotalDiscount =
+						EpMonetoryValueConverter.upscaleIfApplicable(order.getCurrency(), shipment.getSubtotalDiscount());
+
 				if (!newSubtotalDiscount.equals(oldSubtotalDiscount)) {  // NOPMD  '!='
 					shipment.setSubtotalDiscount(newSubtotalDiscount);
 					final PhysicalOrderShipmentShippingCostRefresher physicalOrderShipmentShippingCostRefresher =
@@ -279,17 +286,17 @@ public class OrderDetailsPhysicalShipmentSubSectionShipSummary implements IPrope
 		}
 
 		bindingConfig = new EpBindingConfiguration(bindingContext, itemTaxText, shipment, "itemTax"); //$NON-NLS-1$
-		bindingConfig.configureModelToUiBinding(new EpBigDecimalToStringConverter(), UpdatePolicy.UPDATE);
+		bindingConfig.configureModelToUiBinding(epMonetoryValueBigDecimalToStringConverter, UpdatePolicy.UPDATE);
 		bindingConfig.configureUiToModelBinding(new EpStringToBigDecimalConverter(), EpValidatorFactory.NON_NEGATIVE_BIG_DECIMAL, false);
 		bindingProvider.bind(bindingConfig);
 
 		bindingConfig = new EpBindingConfiguration(bindingContext, shippingTaxText, shipment, "shippingTax"); //$NON-NLS-1$
-		bindingConfig.configureModelToUiBinding(new EpBigDecimalToStringConverter(), UpdatePolicy.UPDATE);
+		bindingConfig.configureModelToUiBinding(epMonetoryValueBigDecimalToStringConverter, UpdatePolicy.UPDATE);
 		bindingConfig.configureUiToModelBinding(new EpStringToBigDecimalConverter(), EpValidatorFactory.NON_NEGATIVE_BIG_DECIMAL, false);
 		bindingProvider.bind(bindingConfig);
 
 		bindingConfig = new EpBindingConfiguration(bindingContext, shipmentTotalText, shipment, "total"); //$NON-NLS-1$
-		bindingConfig.configureModelToUiBinding(new EpBigDecimalToStringConverter(), UpdatePolicy.UPDATE);
+		bindingConfig.configureModelToUiBinding(epMonetoryValueBigDecimalToStringConverter, UpdatePolicy.UPDATE);
 		bindingConfig.configureUiToModelBinding(new EpStringToBigDecimalConverter(), EpValidatorFactory.NON_NEGATIVE_BIG_DECIMAL, false);
 		bindingProvider.bind(bindingConfig);
 

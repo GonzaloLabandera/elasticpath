@@ -134,11 +134,6 @@ public class CartOrderServiceImpl implements CartOrderService {
 		this.shoppingCartService = shoppingCartService;
 	}
 
-	@Override
-	public void removeIfExistsByShoppingCart(final ShoppingCart shoppingCart) {
-		cartOrderDao.removeByShoppingCartGuid(shoppingCart.getGuid());
-	}
-
 	/**
 	 * When a CartOrder is changed the ShoppingCart should also be updated and therefore both the
 	 * CartOrder and ShoppingCart are not considered abandoned after 60 days.
@@ -150,11 +145,6 @@ public class CartOrderServiceImpl implements CartOrderService {
 		if (cartOrder != null && cartOrder.getShoppingCartGuid() != null) {
 			getShoppingCartService().touch(cartOrder.getShoppingCartGuid());
 		}
-	}
-
-	@Override
-	public int removeIfExistsByShoppingCartGuids(final List<String> shoppingCartGuids) {
-		return cartOrderDao.removeByShoppingCartGuids(shoppingCartGuids);
 	}
 
 	@Override

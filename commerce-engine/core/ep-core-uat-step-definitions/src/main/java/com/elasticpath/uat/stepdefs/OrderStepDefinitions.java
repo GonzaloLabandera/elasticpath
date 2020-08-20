@@ -147,7 +147,7 @@ public class OrderStepDefinitions {
 			orderService.resendOrderConfirmationEvent(orderNumber);
 		});
 	}
-	
+
 	@Given("^(?:I have|a customer has) previously made a purchase$")
 	public void createInProgressOrder() {
 		final Customer customer = buildAndAddCustomer();
@@ -227,7 +227,11 @@ public class OrderStepDefinitions {
 	private PaymentInstrument createPaymentInstrument() {
 		final PaymentInstrument paymentInstrument = beanFactory.getPrototypeBean(PAYMENT_INSTRUMENT, PaymentInstrument.class);
 		paymentInstrument.setName(INSTRUMENT_NAME);
-		paymentInstrument.setPaymentProviderConfiguration(paymentProviderConfigurationService.findAll().get(0));
+		paymentInstrument.setPaymentProviderConfiguration(paymentProviderConfigurationService.findAll()
+				.stream()
+				.filter(config -> "paymentProviderPluginForIntegrationTesting".equals(config.getPaymentProviderPluginId()))
+				.findAny()
+				.orElse(paymentProviderConfigurationService.findAll().get(0)));
 		paymentInstrument.setSingleReservePerPI(false);
 		paymentInstrument.setPaymentInstrumentData(Collections.emptySet());
 

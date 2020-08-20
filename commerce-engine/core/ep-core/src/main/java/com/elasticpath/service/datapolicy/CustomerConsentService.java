@@ -112,12 +112,6 @@ public interface CustomerConsentService {
 	 */
 	void deleteByDataPolicyGuidForCustomer(String dataPolicyGuid, String customerGuid);
 
-	/**
-	 * Delete the customer consents for a given customer uids.
-	 *
-	 * @param customerUids the customer uids of the customer consent.
-	 */
-	void deleteByCustomerUids(List<Long> customerUids);
 
 	/**
 	 * Retrieve a list of customer consents with data policies in {@link com.elasticpath.domain.datapolicy.DataPolicyState#ACTIVE} state

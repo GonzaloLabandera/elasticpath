@@ -13,6 +13,7 @@ import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.orders.OrderEntity;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
+import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
@@ -46,9 +47,10 @@ public class OrderEntityRepositoryImpl<E extends OrderEntity, I extends OrderIde
 
 	@Override
 	public Observable<OrderIdentifier> findAll(final IdentifierPart<String> scope) {
-		String userId = resourceOperationContext.getUserIdentifier();
+		String customerGuid = resourceOperationContext.getUserIdentifier();
+		String accountSharedId = SubjectUtil.getAccountSharedId(resourceOperationContext.getSubject());
 
-		return shoppingCartRepository.findAllCarts(userId, scope.getValue())
+		return shoppingCartRepository.findAllCarts(customerGuid, accountSharedId, scope.getValue())
 				.flatMap(cartId -> reactiveAdapter.fromService(() -> coreCartOrderService.findByShoppingCartGuid(cartId)))
 				.map(cartOrder -> OrderIdentifier.builder()
 						.withOrderId(cartOrder::getGuid)

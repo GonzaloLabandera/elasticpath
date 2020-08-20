@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.PolicyKey;
@@ -51,12 +52,43 @@ public interface CustomerProfileAttributeService {
 	Map<String, Optional<CustomerProfileValue>> getCustomerReadOnlyAttributes(String storeCode, Customer customer);
 
 	/**
+	 * Gets the full set of read-only attributes for a given store and account.
+	 * Combines attributes that already have values for the account along with attributes that do not
+	 * but which are still considered viewable.
+	 *
+	 * @param storeCode the store code
+	 * @param account the customer
+	 * @return the map of attribute keys to attributes
+	 */
+	Map<String, Optional<CustomerProfileValue>> getAccountReadOnlyAttributes(String storeCode, Customer account);
+
+	/**
+	 * Gets the full set of editable attributes for a given store and account.
+	 * Combines attributes that already have values for the account along with attributes that do not
+	 * but which are still considered viewable.
+	 *
+	 * @param storeCode the store code
+	 * @param account the customer
+	 * @return the map of attribute keys to attributes
+	 */
+	Map<String, Optional<CustomerProfileValue>> getAccountEditableAttributes(String storeCode, Customer account);
+
+	/**
+	 * Gets the full set of attributes for a given store and account.
+	 *
+	 * @param account the account
+	 * @return the map of attribute keys to attributes
+	 */
+	Map<String, Optional<CustomerProfileValue>> getAccountAttributes(Customer account);
+
+	/**
 	 * Validates a map of customer attribute values.
 	 * @param attributeValueMap the map of attribute keys and values
 	 * @param storeCode the storeCode used to lookup shared stores to build the validation context.
+	 * @param attributeUsage the attribute usage
 	 * @return error messages for validation failure
 	 */
-	Collection<StructuredErrorMessage> validateAttributes(Map<String, String> attributeValueMap, String storeCode);
+	Collection<StructuredErrorMessage> validateAttributes(Map<String, String> attributeValueMap, String storeCode, AttributeUsage attributeUsage);
 
 	/**
 	 * Returns the map of predefined profile attribute policies.

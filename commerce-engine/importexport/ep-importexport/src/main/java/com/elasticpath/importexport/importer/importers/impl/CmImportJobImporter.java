@@ -66,7 +66,7 @@ public class CmImportJobImporter extends AbstractImporterImpl<ImportJob, CmImpor
 
 	@Override
 	protected CollectionsStrategy<ImportJob, CmImportJobDTO> getCollectionsStrategy() {
-		return new ImportJobCollectionsStrategy(getContext().getImportConfiguration().getImporterConfiguration(JobType.CM_IMPORT_JOB));
+		return new ImportJobCollectionsStrategy(getContext().getImportConfiguration().getImporterConfiguration(JobType.CMIMPORTJOB));
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.schema.StructuredMessageTypes;
@@ -50,9 +51,10 @@ public class CartEntityRepositoryImpl<E extends CartEntity, I extends CartIdenti
 
 	@Override
 	public Observable<CartIdentifier> findAll(final IdentifierPart<String> scope) {
+		String customerGuid = resourceOperationContext.getUserIdentifier();
+		String accountSharedId = SubjectUtil.getAccountSharedId(resourceOperationContext.getSubject());
 
-		String userId = resourceOperationContext.getUserIdentifier();
-		return shoppingCartRepository.findAllCarts(userId, scope.getValue())
+		return shoppingCartRepository.findAllCarts(customerGuid, accountSharedId, scope.getValue())
 				.map(cartId -> CartIdentifier.builder()
 						.withCartId(StringIdentifier.of(cartId))
 						.withCarts(CartsIdentifier.builder().withScope(scope).build())

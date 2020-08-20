@@ -7,9 +7,7 @@ import java.util.UUID;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.exception.ObjectNotExistException;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.service.shopper.ShopperService;
@@ -39,27 +37,6 @@ public class ShopperServiceImpl implements ShopperService {
 	}
 
 	@Override
-	public Shopper findByPersistedCustomerSessionMemento(final CustomerSessionMemento customerSessionMemento) {
-		if (customerSessionMemento == null) {
-			throw new IllegalArgumentException("CustomerSession cannot be null.");
-		}
-
-		if (!customerSessionMemento.isPersisted()) {
-			throw new IllegalArgumentException("CustomerSession must be persisted.");
-		}
-
-		final ShopperMemento retrievedShopperMemento = shopperDao.get(customerSessionMemento.getShopperUid());
-
-		if (retrievedShopperMemento == null) {
-			throw new ObjectNotExistException(String.format("Shopper (uid:%d) should exist for CustomerSession (guid: %s)",
-					customerSessionMemento.getShopperUid(),
-					customerSessionMemento.getGuid()));
-		}
-
-		return createNewShopperFromMemento(retrievedShopperMemento);
-	}
-
-	@Override
 	public Shopper findByCustomerGuid(final String customerGuid) {
 		ShopperMemento shopperMemento = shopperDao.findByCustomerGuid(customerGuid);
 
@@ -80,35 +57,68 @@ public class ShopperServiceImpl implements ShopperService {
 	}
 
 	@Override
-	public Shopper findByCustomerUserIdAndStoreCode(final String customerUserId, final String storeCode) {
-		ShopperMemento shopperMemento = shopperDao.findByCustomerUserIdAndStoreCode(customerUserId, storeCode);
+	public Shopper findByCustomerGuidAndAccountSharedIdAndStore(final String customerGuid, final String accountSharedId, final String storeCode) {
+		ShopperMemento shopperMemento = shopperDao.findByCustomerGuidAccountSharedIdAndStore(customerGuid, accountSharedId, storeCode);
 
 		if (shopperMemento == null) {
 			return null;
 		}
 		return createNewShopperFromMementoAndStore(shopperMemento, shopperMemento.getStoreCode());
 	}
-	
+
+	@Override
+	public Shopper findByCustomerSharedIdAndStoreCode(final String customerSharedId, final String storeCode) {
+		ShopperMemento shopperMemento = shopperDao.findByCustomerSharedIdAndStore(customerSharedId, storeCode);
+
+		if (shopperMemento == null) {
+			return null;
+		}
+		return createNewShopperFromMementoAndStore(shopperMemento, shopperMemento.getStoreCode());
+	}
+
+	@Override
+	public Shopper findByCustomerSharedIdAndAccountSharedIdAndStore(final String customerSharedId, final String accountSharedId,
+																	final String storeCode) {
+		ShopperMemento shopperMemento = shopperDao.findByCustomerSharedIdAndAccountSharedIdAndStore(customerSharedId, accountSharedId, storeCode);
+
+		if (shopperMemento == null) {
+			return null;
+		}
+		return createNewShopperFromMementoAndStore(shopperMemento, shopperMemento.getStoreCode());
+	}
+
 	@Override
 	public Shopper findOrCreateShopper(final Customer customer, final String storeCode) {
-		if (customer == null) {
-			throw new IllegalArgumentException("Customer cannot be null.");
-		}
-
 		ShopperMemento shopperMemento = shopperDao.findByCustomerAndStoreCode(customer, storeCode);
 
 		if (shopperMemento == null) {
 			// create a new one.
 			final String validStoreCode = storeService.findValidStoreCode(storeCode);
-			shopperMemento = createAndSaveNewShoppingMementoWithCustomerAndStore(customer, validStoreCode);
+			shopperMemento = createAndSaveNewShoppingMementoWithCustomerAndStore(customer, validStoreCode, null);
 		}
 
 		return createNewShopperFromMementoAndStore(shopperMemento, shopperMemento.getStoreCode());
 	}
 
-	private ShopperMemento createAndSaveNewShoppingMementoWithCustomerAndStore(final Customer customer, final String storeCode) {
+	@Override
+	public Shopper findOrCreateShopper(final Customer customer, final Customer account, final String storeCode) {
+		ShopperMemento shopperMemento = shopperDao.findByCustomerAccountAndStore(customer, account, storeCode);
+
+		if (shopperMemento == null) {
+			final String validStoreCode = storeService.findValidStoreCode(storeCode);
+			shopperMemento = createAndSaveNewShoppingMementoWithCustomerAndStore(customer, validStoreCode, account);
+		}
+
+		return createNewShopperFromMementoAndStore(shopperMemento, shopperMemento.getStoreCode());
+	}
+
+	private ShopperMemento createAndSaveNewShoppingMementoWithCustomerAndStore(final Customer customer, final String storeCode,
+																			   final Customer account) {
 		ShopperMemento shopperMemento = createShopperMemento();
 		shopperMemento.setCustomer(customer);
+		if (account != null) {
+			shopperMemento.setAccount(account);
+		}
 		shopperMemento.setStoreCode(storeCode);
 		return shopperDao.saveOrUpdate(shopperMemento);
 	}
@@ -147,13 +157,6 @@ public class ShopperServiceImpl implements ShopperService {
 	public void remove(final Shopper shopper) {
 		if (shopper != null && shopper.isPersisted()) {
 			shopperDao.remove(shopper.getShopperMemento());
-		}
-	}
-
-	@Override
-	public void removeIfOrphaned(final Shopper shopper) {
-		if (shopper != null && shopper.isPersisted()) {
-			shopperDao.removeIfOrphaned(shopper.getShopperMemento());
 		}
 	}
 

@@ -37,7 +37,7 @@ public class CustomerProfileAttributeExporter extends AbstractExporterImpl<Attri
 
 	@Override
 	public JobType getJobType() {
-		return JobType.CUSTOMERPROFILE_ATTRIBUTE;
+		return JobType.CUSTOMERPROFILEATTRIBUTE;
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class CustomerProfileAttributeExporter extends AbstractExporterImpl<Attri
 	@Override
 	protected void initializeExporter(final ExportContext context) throws ConfigurationException {
 		attributeKeys = new ArrayList<>();
-		attributeKeys.addAll(getImportExportSearcher().searchGuids(getContext().getSearchConfiguration(), EPQueryType.CUSTOMERPROFILE_ATTRIBUTE));
+		attributeKeys.addAll(getImportExportSearcher().searchGuids(getContext().getSearchConfiguration(), EPQueryType.CUSTOMERPROFILEATTRIBUTE));
 		LOG.info("The list for " + attributeKeys.size() + " customer profile attribute keys retrieved from the database.");
 	}
 
@@ -71,7 +71,8 @@ public class CustomerProfileAttributeExporter extends AbstractExporterImpl<Attri
 		List<Attribute> attributes = new ArrayList<>();
 		for (String key : subList) {
 			Attribute attribute = attributeService.findByKey(key);
-			if (attribute != null && attribute.getAttributeUsage().getValue() == AttributeUsageImpl.CUSTOMERPROFILE_USAGE.getValue()) {
+			if (attribute != null && (attribute.getAttributeUsage().getValue() == AttributeUsageImpl.USER_PROFILE_USAGE.getValue()
+					|| attribute.getAttributeUsage().getValue() == AttributeUsageImpl.ACCOUNT_PROFILE_USAGE.getValue())) {
 				attributes.add(attribute);
 			}
 		}

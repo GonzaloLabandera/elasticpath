@@ -27,6 +27,7 @@ import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.attribute.impl.CustomerProfileValueImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerProfile;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.test.util.Utils;
 
@@ -36,7 +37,7 @@ import com.elasticpath.test.util.Utils;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class CustomerProfileValidationTest extends AbstractValidationTest {
 
-	private static final String PROFILE_VALUE_MAP_FORMAT = "profileValueMap[%s]";
+	private static final String PROFILE_VALUE_MAP_FORMAT = "customerProfile.profileValueMap[%s]";
 
 	private final AtomicInteger count = new AtomicInteger();
 
@@ -52,7 +53,9 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 	@Before
 	public void populateServices() {
 		// cleanup old attributes
-		for (Attribute attribute : attributeService.getCustomerProfileAttributes()) {
+		for (Attribute attribute : attributeService.getCustomerProfileAttributes(
+				AttributeUsageImpl.USER_PROFILE_USAGE,
+				AttributeUsageImpl.ACCOUNT_PROFILE_USAGE)) {
 			attributeService.remove(attribute);
 		}
 	}
@@ -67,7 +70,7 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 		attribute.setGlobal(true);
 		attribute.setRequired(required);
 		attribute.setKey(key);
-		attribute.setAttributeUsage(AttributeUsageImpl.CUSTOMERPROFILE_USAGE);
+		attribute.setAttributeUsage(AttributeUsageImpl.USER_PROFILE_USAGE);
 		attribute.setAttributeType(attributeType);
 		attribute.setMultiValueType(multiValueType);
 		attributeService.add(attribute);
@@ -75,9 +78,10 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 		return attribute;
 	}
 
-	private CustomerProfile createCustomerProfile() {
+	private Customer createCustomer() {
 		Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
-		return customer.getCustomerProfile();
+		customer.setCustomerType(CustomerType.REGISTERED_USER);
+		return customer;
 	}
 
 	/** Tests validation when there are no required attributes. */
@@ -85,10 +89,11 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 	public void testNonRequiredAttributes() {
 		Attribute nonRequired = createTextAttribute("nonRequired", AttributeType.SHORT_TEXT, AttributeMultiValueType.SINGLE_VALUE, false);
 
-		CustomerProfile profile = createCustomerProfile();
+		Customer customer = createCustomer();
+		CustomerProfile profile = customer.getCustomerProfile();
 		profile.setProfileValue(nonRequired.getKey(), "value");
 
-		Set<ConstraintViolation<CustomerProfile>> violations = getValidator().validate(profile);
+		Set<ConstraintViolation<Customer>> violations = getValidator().validate(customer);
 		assertViolationsNotContains("No required attributes shouldn't cause violations", violations, "");
 	}
 
@@ -98,13 +103,14 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 		String attributeKey = "blastoff";
 		Attribute required = createTextAttribute(attributeKey, AttributeType.SHORT_TEXT, AttributeMultiValueType.SINGLE_VALUE, true);
 
-		CustomerProfile profile = createCustomerProfile();
+		Customer customer = createCustomer();
+		CustomerProfile profile = customer.getCustomerProfile();
 
-		Set<ConstraintViolation<CustomerProfile>> violations = getValidator().validate(profile);
+		Set<ConstraintViolation<Customer>> violations = getValidator().validate(customer);
 		assertViolationsContains("Unset required attributes should cause violations", violations, String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey));
 
 		profile.setProfileValue(required.getKey(), "attribute");
-		violations = getValidator().validate(profile);
+		violations = getValidator().validate(customer);
 		assertViolationsNotContains("Violations after setting all required keys", violations, String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey));
 	}
 
@@ -114,19 +120,20 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 		String attributeKey = "hardy";
 		Attribute required = createTextAttribute(attributeKey, AttributeType.SHORT_TEXT, AttributeMultiValueType.SINGLE_VALUE, true);
 
-		CustomerProfile profile = createCustomerProfile();
+		Customer customer = createCustomer();
+		CustomerProfile profile = customer.getCustomerProfile();
 
-		Set<ConstraintViolation<CustomerProfile>> violations = getValidator().validate(profile);
+		Set<ConstraintViolation<Customer>> violations = getValidator().validate(customer);
 		assertViolationsContains("Unset required attributes should cause violations", violations, String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey));
 
 		profile.setProfileValue(required.getKey(), null);
-		violations = getValidator().validate(profile);
+		violations = getValidator().validate(customer);
 		assertViolationsContains("null values are not allowed for required attributes",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey));
 
 		profile.setProfileValue(required.getKey(), "    	   ");
-		violations = getValidator().validate(profile);
+		violations = getValidator().validate(customer);
 		assertViolationsContains("Blank values are not allowed for required attributes",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey));
@@ -140,9 +147,10 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 		Attribute nonRequired = createTextAttribute(nonRequiredAttributeKey, AttributeType.SHORT_TEXT, AttributeMultiValueType.SINGLE_VALUE, false);
 		Attribute required = createTextAttribute(requiredAttributeKey, AttributeType.SHORT_TEXT, AttributeMultiValueType.SINGLE_VALUE, true);
 
-		CustomerProfile profile = createCustomerProfile();
+		Customer customer = createCustomer();
+		CustomerProfile profile = customer.getCustomerProfile();
 
-		Set<ConstraintViolation<CustomerProfile>> violations = getValidator().validate(profile);
+		Set<ConstraintViolation<Customer>> violations = getValidator().validate(customer);
 		assertViolationsContains("Unset required attributes should cause violations",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, requiredAttributeKey));
@@ -152,7 +160,7 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 
 		profile.setProfileValue(nonRequired.getKey(), null);
 		profile.setProfileValue(required.getKey(), "hardy");
-		violations = getValidator().validate(profile);
+		violations = getValidator().validate(customer);
 		assertViolationsNotContains("Violations after setting all required keys",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, nonRequiredAttributeKey));
@@ -162,7 +170,7 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 
 		profile.setProfileValue(nonRequired.getKey(), "ferentschik");
 		profile.setProfileValue(required.getKey(), null);
-		violations = getValidator().validate(profile);
+		violations = getValidator().validate(customer);
 		assertViolationsContains("Setting all non-required attribute but having a required attribute should fail",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, requiredAttributeKey));
@@ -176,9 +184,10 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 		Attribute attribute1 = createTextAttribute(attributeKey1, AttributeType.SHORT_TEXT, AttributeMultiValueType.SINGLE_VALUE, true);
 		Attribute attribute2 = createTextAttribute(attributeKey2, AttributeType.SHORT_TEXT, AttributeMultiValueType.SINGLE_VALUE, true);
 
-		CustomerProfile profile = createCustomerProfile();
+		Customer customer = createCustomer();
+		CustomerProfile profile = customer.getCustomerProfile();
 
-		Set<ConstraintViolation<CustomerProfile>> violations = getValidator().validate(profile);
+		Set<ConstraintViolation<Customer>> violations = getValidator().validate(customer);
 		assertEquals("Both required attributes are not set", 2, violations.size());
 		assertViolationsContains("Unset required attributes should cause violations",
 				violations,
@@ -187,21 +196,21 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 
 		profile.setProfileValue(attribute1.getKey(), null);
 		profile.setProfileValue(attribute2.getKey(), "hardy");
-		violations = getValidator().validate(profile);
+		violations = getValidator().validate(customer);
 		assertViolationsContains("Missing 1 required attribute and not the other should fail",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey1));
 
 		profile.setProfileValue(attribute1.getKey(), "ferentschik");
 		profile.setProfileValue(attribute2.getKey(), null);
-		violations = getValidator().validate(profile);
+		violations = getValidator().validate(customer);
 		assertViolationsContains("Missing 1 required attribute and not the other should fail",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey2));
 
 		profile.setProfileValue(attribute1.getKey(), "value");
 		profile.setProfileValue(attribute2.getKey(), "value2");
-		violations = getValidator().validate(profile);
+		violations = getValidator().validate(customer);
 		assertViolationsNotContains("Both required attributes are set", violations, String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey1));
 		assertViolationsNotContains("Both required attributes are set", violations, String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey2));
 	}
@@ -212,10 +221,11 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 		String attributeKey = "blastoff";
 		Attribute required = createTextAttribute(attributeKey, AttributeType.SHORT_TEXT, AttributeMultiValueType.SINGLE_VALUE, true);
 
-		CustomerProfile profile = createCustomerProfile();
+		Customer customer = createCustomer();
+		CustomerProfile profile = customer.getCustomerProfile();
 
 		profile.setProfileValue(required.getKey(), StringUtils.repeat("A", GlobalConstants.SHORT_TEXT_MAX_LENGTH + 1));
-		Set<ConstraintViolation<CustomerProfile>> violations = getValidator().validate(profile);
+		Set<ConstraintViolation<Customer>> violations = getValidator().validate(customer);
 		assertViolationsContains("Violations after setting all required keys",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey));
@@ -226,10 +236,11 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 	public void testRequiredLongTextAttributesValidationFailsOnTooLongText() {
 		String attributeKey = "blastoff";
 		Attribute required = createTextAttribute(attributeKey, AttributeType.LONG_TEXT, AttributeMultiValueType.SINGLE_VALUE, true);
-		CustomerProfile profile = createCustomerProfile();
+		Customer customer = createCustomer();
+		CustomerProfile profile = customer.getCustomerProfile();
 
 		profile.setProfileValue(required.getKey(), StringUtils.repeat("A", GlobalConstants.LONG_TEXT_MAX_LENGTH + 1));
-		Set<ConstraintViolation<CustomerProfile>> violations = getValidator().validate(profile);
+		Set<ConstraintViolation<Customer>> violations = getValidator().validate(customer);
 		assertViolationsContains("Violations after setting all required keys",
 				violations,
 				String.format(PROFILE_VALUE_MAP_FORMAT, attributeKey));

@@ -19,9 +19,8 @@
 
 	<properties>
 		<groovy.http-builder>0.7.1</groovy.http-builder>
-		<fluent.relos.client.version>1.10.44</fluent.relos.client.version>
+		<fluent.relos.client.version>1.10.45</fluent.relos.client.version>
 
-		<!--<h2database.version>1.3.175</h2database.version>-->
 		<!--<cargo.plugin.version>1.2.4</cargo.plugin.version>-->
 
 		<enableTrustedSubjectHeaderMode>false</enableTrustedSubjectHeaderMode>
@@ -43,7 +42,7 @@
 
 		<charset.encoding>UTF-8</charset.encoding>
 
-		<datasource.url>jdbc:h2:${project.build.directory}/database/CORTEXDB;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE;MVCC=TRUE</datasource.url>
+		<datasource.url>jdbc:h2:${project.build.directory}/database/CORTEXDB;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE</datasource.url>
 		<datasource.driver>org.h2.Driver</datasource.driver>
 		<datasource.username>sa</datasource.username>
 		<datasource.password>sa</datasource.password>
@@ -62,14 +61,13 @@
 				<ep.activemq.configUri>broker:(${ep.activemq.url})?useJmx=false&amp;persistent=false&amp;useShutdownHook=false&amp;brokerName=${ep.jms.host}${ep.jms.port.tcp}</ep.activemq.configUri>
 				<epdb.maven.groupId>com.h2database</epdb.maven.groupId>
 				<epdb.maven.artifactId>h2</epdb.maven.artifactId>
-				<epdb.maven.version>${h2database.version}</epdb.maven.version>
+				<epdb.maven.version>${com.h2database.version}</epdb.maven.version>
 				<epdb.jdbc.driver>org.h2.Driver</epdb.jdbc.driver>
 			</properties>
 			<dependencies>
 				<dependency>
 					<groupId>com.h2database</groupId>
 					<artifactId>h2</artifactId>
-					<version>${h2database.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>com.elasticpath.extensions</groupId>
@@ -206,7 +204,7 @@
 						<groupId>com.elasticpath.tools</groupId>
 						<artifactId>ep-core-tool</artifactId>
 						<configuration>
-							<jdbcUrl>jdbc:h2:${project.build.directory}/database/CORTEXDB;AUTO_SERVER=TRUE;MVCC=TRUE</jdbcUrl>
+							<jdbcUrl>jdbc:h2:${project.build.directory}/database/CORTEXDB;AUTO_SERVER=TRUE</jdbcUrl>
 							<jdbcDriverClass>org.h2.Driver</jdbcDriverClass>
 							<jdbcPassword>sa</jdbcPassword>
 							<jdbcUsername>sa</jdbcUsername>
@@ -454,6 +452,7 @@
 									<cargo.ep.jms.type>${ep.jms.type}</cargo.ep.jms.type>
 									<cargo.ep.jms.factory>${ep.jms.factory}</cargo.ep.jms.factory>
 									<cargo.ep.jms.url>${ep.jms.url}</cargo.ep.jms.url>
+									<cargo.ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</cargo.ep.tomcat.maxcachesize>
 								</properties>
 
 								<files>
@@ -584,7 +583,6 @@
 		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
-			<version>1.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.tests</groupId>
@@ -594,7 +592,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -672,6 +669,16 @@
 			<groupId>${epdb.maven.groupId}</groupId>
 			<artifactId>${epdb.maven.artifactId}</artifactId>
 			<version>${epdb.maven.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

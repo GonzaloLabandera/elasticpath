@@ -57,7 +57,7 @@ public class EpLoginDialog extends AbstractEpDialog {
 	private static final int INITIAL_SIZE_Y = 275;
 
 	private Text passwordText;
-	private Text userIdText;
+	private Text usernameText;
 
 	/**
 	 * Creates the dialog with null parent shell.
@@ -90,20 +90,20 @@ public class EpLoginDialog extends AbstractEpDialog {
 
 		final IEpLayoutData fieldData = dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false);
 
-		dialogComposite.addLabelBold(CoreMessages.get().EpLoginDialog_LoginUserId, null);
-		userIdText = dialogComposite.addTextField(getUserIdState(), fieldData);
-		userIdText.setFocus();
+		dialogComposite.addLabelBold(CoreMessages.get().EpLoginDialog_LoginUsername, null);
+		usernameText = dialogComposite.addTextField(getUsernameState(), fieldData);
+		usernameText.setFocus();
 
 		dialogComposite.addLabelBold(CoreMessages.get().EpLoginDialog_Password, null);
 		passwordText = dialogComposite.addPasswordField(EpState.EDITABLE, fieldData);
 	}
 
 	/**
-	 * Gets the state for user id controls.
+	 * Gets the state for username controls.
 	 *
 	 * @return the EpState
 	 */
-	protected EpState getUserIdState() {
+	protected EpState getUsernameState() {
 		return EpState.EDITABLE;
 	}
 
@@ -125,18 +125,18 @@ public class EpLoginDialog extends AbstractEpDialog {
 	/**
 	 * Populates login filed with given values.
 	 *
-	 * @param userId   the user id
+	 * @param username   the username
 	 * @param password the user password
 	 */
-	protected void populateLoginFields(final String userId, final String password) {
-		userIdText.setText(userId);
+	protected void populateLoginFields(final String username, final String password) {
+		usernameText.setText(username);
 		passwordText.setText(password);
 	}
 
 	@Override
 	protected void bindControls() {
 
-		bindControl(userIdText);
+		bindControl(usernameText);
 		bindControl(passwordText);
 
 	}
@@ -164,12 +164,12 @@ public class EpLoginDialog extends AbstractEpDialog {
 			LOG.debug("Saving connection info"); //$NON-NLS-1$
 		}
 
-		final String userId = userIdText.getText();
+		final String username = usernameText.getText();
 		final String password = passwordText.getText();
 
 		// Do the login
 		try {
-			authenticationService.login(userId, password);
+			authenticationService.login(username, password);
 			if (!AuthorizationService.isAuthorized()) {
 				MessageDialog.openError(getShell(), CoreMessages.get().EpLoginDialog_ErrorTitle_AuthorizationFailed,
 					CoreMessages.get().EpLoginDialog_Error_AuthorizationFailed);

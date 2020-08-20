@@ -16,23 +16,8 @@
 	<import resource="classpath:META-INF/elasticpath/conf/spring/catalog-batch.xml"/>
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
 
-	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="preEntityManagerInitializationList">
-		<property name="jpaProperties">
-			<map>
-				<entry key="javax.persistence.transactionType" value="JTA"/>
-				<entry key="openjpa.TransactionMode" value="managed"/>
-				<entry key="openjpa.ConnectionFactoryMode" value="managed"/>
-				<entry key="openjpa.ConnectionFactory" value-ref="atomikosJdbcDataSource"/>
-				<entry key="openjpa.ConnectionFactory2" value-ref="dataSource"/>
-				<entry key="openjpa.ManagedRuntime"
-					   value="invocation(TransactionManagerMethod=com.atomikos.icatch.jta.TransactionManagerImp.getTransactionManager)"/>
-				<entry key="openjpa.MetaDataRepository" value="Preload=true"/>
-				<entry key="openjpa.Optimistic" value="false"/>
-				<entry key="openjpa.Compatibility" value="QuotedNumbersInQueries=true"/>
-				<entry key="openjpa.ConnectionFactoryProperties" value="PrettyPrint=true, PrettyPrintLineLength=80, PrintParameters=true"/>
-			</map>
-		</property>
-	</bean>
+	<bean id="applicationInitialization" class="com.elasticpath.service.misc.impl.EmptyApplicationInitialization" init-method="init"
+		  depends-on="preEntityManagerInitializationList"/>
 
 	<bean id="jmsBrokerService" class="org.springframework.jndi.JndiObjectFactoryBean">
 		<property name="jndiName" value="java:comp/env/jms/test-broker"/>

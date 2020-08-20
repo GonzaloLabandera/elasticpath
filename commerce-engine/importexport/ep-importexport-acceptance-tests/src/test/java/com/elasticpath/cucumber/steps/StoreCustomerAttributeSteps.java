@@ -78,7 +78,7 @@ public class StoreCustomerAttributeSteps {
 	@Given("^the customer profile attribute (.+) has been created$")
 	public void createCustomerProfileAttribute(final String attributeKey) {
 		tac.getPersistersFactory().getCatalogTestPersister().persistAttribute(scenario.getCatalog().getCode(), attributeKey,
-				attributeKey, AttributeUsageImpl.CUSTOMERPROFILE_USAGE.toString(), AttributeType.SHORT_TEXT.toString(), false,
+				attributeKey, AttributeUsageImpl.USER_PROFILE_USAGE.toString(), AttributeType.SHORT_TEXT.toString(), false,
 				true, false);
 	}
 

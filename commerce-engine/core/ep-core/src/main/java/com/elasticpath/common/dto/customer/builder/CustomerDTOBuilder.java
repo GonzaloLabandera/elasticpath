@@ -18,7 +18,8 @@ import com.elasticpath.common.dto.customer.LegacyCreditCardDTO;
  */
 public class CustomerDTOBuilder {
 	private String guid;
-	private String userId;
+	private String sharedId;
+	private String username;
 	private String storeCode;
 	private int status;
 	private Date creationDate;
@@ -32,6 +33,8 @@ public class CustomerDTOBuilder {
 	private AddressDTO[] addresses;
 	private String[] groups;
 	private boolean isFirstTimeBuyer;
+	private String customerType;
+	private String parentGuid;
 
 	/**
 	 * Set Guid.
@@ -56,13 +59,24 @@ public class CustomerDTOBuilder {
 	}
 
 	/**
-	 * Sets the user id.
+	 * Sets the shared id.
 	 *
-	 * @param userId the user id
+	 * @param sharedId the shared id
 	 * @return this {@link CustomerDTOBuilder}
 	 */
-	public CustomerDTOBuilder withUserId(final String userId) {
-		this.userId = userId;
+	public CustomerDTOBuilder withSharedId(final String sharedId) {
+		this.sharedId = sharedId;
+		return this;
+	}
+
+	/**
+	 * Sets the username.
+	 *
+	 * @param username the user name.
+	 * @return this {@link CustomerDTOBuilder}
+	 */
+	public CustomerDTOBuilder withUsername(final String username) {
+		this.username = username;
 		return this;
 	}
 
@@ -198,6 +212,26 @@ public class CustomerDTOBuilder {
 	}
 
 	/**
+	 * Set the customer type.
+	 * @param customerType the customer type.
+	 * @return this {@link CustomerDTOBuilder}
+	 */
+	public CustomerDTOBuilder withCustomerType(final String customerType) {
+		this.customerType = customerType;
+		return this;
+	}
+
+	/**
+	 * Set the parent guid.
+	 * @param parentGuid parent guid.
+	 * @return this {@link CustomerDTOBuilder}
+	 */
+	public CustomerDTOBuilder withParentGuid(final String parentGuid) {
+		this.parentGuid = parentGuid;
+		return this;
+	}
+
+	/**
 	 * Builds the {@link CustomerDTO} specified.
 	 *
 	 * @return the new built {@link CustomerDTO}
@@ -206,13 +240,16 @@ public class CustomerDTOBuilder {
 		CustomerDTO customerDTO = new CustomerDTO();
 		customerDTO.setGuid(guid);
 		customerDTO.setStoreCode(storeCode);
-		customerDTO.setUserId(userId);
+		customerDTO.setSharedId(sharedId);
+		customerDTO.setUsername(username);
 		customerDTO.setStatus(status);
 		customerDTO.setCreationDate(creationDate);
 		customerDTO.setLastEditDate(lastEditDate);
 		customerDTO.setPassword(password);
 		customerDTO.setSalt(salt);
 		customerDTO.setFirstTimeBuyer(isFirstTimeBuyer);
+		customerDTO.setCustomerType(customerType);
+		customerDTO.setParentGuid(parentGuid);
 
 		customerDTO.setProfileValues(profileValues);
 		if (legacyCreditCards != null) {

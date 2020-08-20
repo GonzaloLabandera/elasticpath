@@ -37,7 +37,7 @@ public class SyncStepDefinitions {
 	@Given("^a source system$")
 	public void createSourceDatabase() {
 		// database created in maven with maven-dependency-plugin, id unpack-source-database
-		File sourceDatabase = file(SOURCE_SYSTEM, "SMOKETESTDB.h2.db");
+		File sourceDatabase = file(SOURCE_SYSTEM, "SMOKETESTDB.mv.db");
 		assert sourceDatabase.exists();
 	}
 
@@ -47,7 +47,7 @@ public class SyncStepDefinitions {
 	@And("^a target system$")
 	public void createTargetDatabase() {
 		// database created in maven with maven-dependency-plugin, id unpack-target-database
-		File targetDatabase = file(TARGET_SYSTEM, "SMOKETESTDB.h2.db");
+		File targetDatabase = file(TARGET_SYSTEM, "SMOKETESTDB.mv.db");
 		assert targetDatabase.exists();
 	}
 

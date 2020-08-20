@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Represents a search criteria that has objects that are within a category.
  */
-public interface ProductCategorySearchCriteria extends CatalogAwareSearchCriteria {
+public interface ProductCategorySearchCriteria extends CatalogAwareSearchCriteria, StoreAwareSearchCriteria {
 
 	/**
 	 * Gets the UID of the category objects that are searched should be in.

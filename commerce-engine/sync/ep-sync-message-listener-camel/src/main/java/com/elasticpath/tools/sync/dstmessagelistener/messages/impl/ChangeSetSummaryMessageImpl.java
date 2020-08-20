@@ -102,16 +102,15 @@ public class ChangeSetSummaryMessageImpl implements ChangeSetSummaryMessage {
 
 	private Map<String, Integer> getMapOfResultCounts(final Collection<? extends SyncResultItem> resultsCollection) {
 		Map<String, Integer> resultsMap = new HashMap<>();
-		resultsCollection.forEach(syncResultItem -> {
-			Integer count = resultsMap.get(syncResultItem.getJobEntryType().getSimpleName()) == null ? 0
-					: resultsMap.get(syncResultItem.getJobEntryType().getSimpleName());
-
-			count = count + 1;
-			resultsMap.put(syncResultItem.getJobEntryType().getSimpleName(), count);
-		});
+		resultsCollection.stream()
+				.filter(syncResultItem -> syncResultItem.getJobEntryType() != null)
+				.forEach(syncResultItem -> {
+					String key = syncResultItem.getJobEntryType().getSimpleName();
+					Integer count = resultsMap.get(key) == null ? 1 : (resultsMap.get(key) + 1);
+					resultsMap.put(key, count);
+				});
 		return resultsMap;
 	}
-
 
 	private String getFormattedResultText(final Map<String, Integer> successMap, final Map<String, Integer> failMap) {
 		String time = getFormattedElapsedTime();
@@ -122,13 +121,14 @@ public class ChangeSetSummaryMessageImpl implements ChangeSetSummaryMessage {
 		LocalDateTime edTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime), ZoneId.systemDefault());
 
 		StringBuilder resultText = new StringBuilder(
-				String.format("<br/> <br/>Change Set Publishing for change set with GUID [%s].  "
-				+ " <br/> <br/>Change Set Name: %s"
-				+ " <br/> <br/>Change Set Description: %s "
-				+ " <br/> <br/>Start Time: %s "
-				+ " <br/> <br/>End Time: %s "
-				+ " <br/> <br/>Elapsed Time: %s "
-				+ " <br/> <br/>Total Number of Objects: %s",
+				String.format("<br/><br/>Change Set Publishing for change set with GUID [%s]."
+				+ "<br/><br/>Change Set Name: %s"
+				+ "<br/><br/>Change Set Description: %s"
+				+ "<br/><br/>Start Time: %s"
+				+ "<br/><br/>End Time: %s"
+				+ "<br/><br/>Elapsed Time: %s"
+				+ "<br/><br/>Total Number of Objects: %s"
+				+ "<br/>",
 				changeSetGuid,
 				changeSetName,
 				changeSetDescription,
@@ -137,9 +137,9 @@ public class ChangeSetSummaryMessageImpl implements ChangeSetSummaryMessage {
 				time,
 				totalObjects));
 
-		addCountsToResultsMessage(successMap, resultText, "Successfully Processed Object Types Summary: <br/>");
+		addCountsToResultsMessage(successMap, resultText, "<br/>Successful Objects:<br/>");
 
-		addCountsToResultsMessage(failMap, resultText, "<br/><br/>FAILED Objects<br/>");
+		addCountsToResultsMessage(failMap, resultText, "<br/>Failed Objects:<br/>");
 
 		return resultText.toString();
 	}

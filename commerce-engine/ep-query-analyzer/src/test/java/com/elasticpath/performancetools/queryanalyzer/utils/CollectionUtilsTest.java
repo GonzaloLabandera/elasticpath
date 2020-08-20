@@ -90,7 +90,7 @@ public class CollectionUtilsTest {
 		final List<Map<String, Integer>> maps = new ArrayList<>();
 		final QueryStatistics statistics = new QueryStatistics();
 
-		maps.add(createMapEntries(statistics.getTotalDBCallsPerTable()));
+		maps.add(createMapEntries(statistics.getTotalDBQueriesPerTable()));
 		maps.add(createMapEntries(statistics.getTotalJPACallsPerEntity()));
 		maps.add(createMapEntries(statistics.getTotalDBCallsPerOperation()));
 		maps.add(createMapEntries(statistics.getTotalJPACallsPerOperation()));

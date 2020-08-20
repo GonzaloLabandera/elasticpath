@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Test pagination service. 
+ * Test pagination service.
  */
 public class PaginationServiceImplTest {
 
@@ -30,40 +30,34 @@ public class PaginationServiceImplTest {
 
 	/**
 	 * Calculate last page number when results even.
-	 * @param pagination
-	 * @param numberOfResults
 	 */
 	@Test
 	public void testGetLastPageNumberEven() {
-						
-		int pageNumber = paginationService.getLastPageNumber(PAGINATION_20, NUM_RESULTS_60);
+
+		int pageNumber = paginationService.getLastPageNumber(NUM_RESULTS_60, PAGINATION_20);
 		assertEquals(PAGENUMBER_3, pageNumber);
-		
+
 	}
-	
+
 	/**
 	 * Calculate last page number when results odd.
-	 * @param pagination
-	 * @param numberOfResults
 	 */
 	@Test
-	public void testGetLastPageNumberOdd() {				
-				
-		int pageNumber = paginationService.getLastPageNumber(PAGINATION_20, NUM_RESULTS_67);
+	public void testGetLastPageNumberOdd() {
+
+		int pageNumber = paginationService.getLastPageNumber(NUM_RESULTS_67, PAGINATION_20);
 		assertEquals(PAGENUMBER_4, pageNumber);
-		
+
 	}
-	
+
 	/**
 	 * Calculate last page number when results zero.
-	 * @param pagination
-	 * @param numberOfResults
 	 */
 	@Test
-	public void testGetLastPageNumberZero() {			
-				
-		int pageNumber = paginationService.getLastPageNumber(PAGINATION_20, NUM_RESULTS_0);
+	public void testGetLastPageNumberZero() {
+
+		int pageNumber = paginationService.getLastPageNumber(NUM_RESULTS_0, PAGINATION_20);
 		assertEquals(PAGENUMBER_0, pageNumber);
-		
+
 	}
 }

@@ -16,6 +16,7 @@
 	<modules>
 		<module>ext-integration-webapp</module>
 		<module>ext-catalog-webservice</module>
+		<module>system-tests</module>
 	</modules>
 </project>
 

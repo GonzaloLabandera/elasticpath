@@ -52,7 +52,7 @@ public class OrderPaymentImpl extends AbstractEntityImpl implements OrderPayment
 	/**
 	 * Table name.
 	 */
-	public static final String TABLE_NAME = "TORDERPAYMENTS";
+	public static final String TABLE_NAME = "TORDERPAYMENT";
 
 	private long uidPk;
 

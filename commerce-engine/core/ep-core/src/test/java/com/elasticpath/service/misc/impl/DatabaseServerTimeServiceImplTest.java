@@ -7,8 +7,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,9 +30,7 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
 @SuppressWarnings("unchecked")
 public class DatabaseServerTimeServiceImplTest {
 
-	private static final String ORACLE_DB_NAME = "oracle";
-	private static final String TIME_RETRIEVE_QUERY = "SELECT CURRENT_TIMESTAMP FROM JPA_GENERATED_KEYS WHERE ID='DEFAULT'";
-	private static final String ORACLE_TIME_RETRIEVE_QUERY = "SELECT LOCALTIMESTAMP FROM DUAL";
+	private static final String TIME_RETRIEVE_QUERY = "SELECT LOCALTIMESTAMP FROM DUAL";
 
 	private static final long THRESHOLD = 1000;
 
@@ -43,12 +39,9 @@ public class DatabaseServerTimeServiceImplTest {
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
-	private BeanFactory beanFactory;
 	private BeanFactoryExpectationsFactory expectationsFactory;
 	private PersistenceEngine mockPersistenceEngine;
 	private PersistenceSession mockPersistenceSession;
-	private Connection mockPersistenceConnection;
-	private DatabaseMetaData mockPersistenceMetaData;
 	private Query<Date> mockQuery;
 
 	/**
@@ -58,24 +51,14 @@ public class DatabaseServerTimeServiceImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		beanFactory = context.mock(BeanFactory.class);
+		final BeanFactory beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		mockPersistenceEngine = context.mock(PersistenceEngine.class);
 		mockPersistenceSession = context.mock(PersistenceSession.class);
-		mockPersistenceConnection = context.mock(Connection.class);
-		mockPersistenceMetaData = context.mock(DatabaseMetaData.class);
 		context.checking(new Expectations() {
 			{
 				allowing(mockPersistenceEngine).getPersistenceSession();
 				will(returnValue(mockPersistenceSession));
-
-				oneOf(mockPersistenceEngine).getConnection();
-				will(returnValue(mockPersistenceConnection));
-
-				oneOf(mockPersistenceConnection).getMetaData();
-				will(returnValue(mockPersistenceMetaData));
-
-				oneOf(mockPersistenceConnection).close();
 			}
 		});
 
@@ -90,8 +73,6 @@ public class DatabaseServerTimeServiceImplTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-		// Reset the database type back to null, so the next test will determine it from scratch
-		this.timeService.setDatabaseType(null);
 		expectationsFactory.close();
 	}
 
@@ -100,47 +81,10 @@ public class DatabaseServerTimeServiceImplTest {
 	 */
 	@Test
 	public void testGetCurrentTime() throws Exception {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockPersistenceMetaData).getDatabaseProductName();
-				will(returnValue(""));
-			}
-		});
 		mockQuery = context.mock(Query.class);
 		context.checking(new Expectations() {
 			{
 				oneOf(mockPersistenceSession).createSQLQuery(TIME_RETRIEVE_QUERY);
-				will(returnValue(mockQuery));
-			}
-		});
-
-		final List<Date> results = new ArrayList<>();
-		final Date now = new Date();
-		results.add(now);
-		context.checking(new Expectations() {
-			{
-				allowing(mockQuery).list();
-				will(returnValue(results));
-			}
-		});
-		assertSame(now, this.timeService.getCurrentTime());
-	}
-
-	/**
-	 * Test getting the current date and time from an Oracle database time service.
-	 */
-	@Test
-	public void testGetCurrentTimeOracle() throws Exception {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockPersistenceMetaData).getDatabaseProductName();
-				will(returnValue(ORACLE_DB_NAME));
-			}
-		});
-		mockQuery = context.mock(Query.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(mockPersistenceSession).createSQLQuery(ORACLE_TIME_RETRIEVE_QUERY);
 				will(returnValue(mockQuery));
 			}
 		});
@@ -163,12 +107,6 @@ public class DatabaseServerTimeServiceImplTest {
 	 */
 	@Test
 	public void testGetCurrentTimeNoResults() throws Exception {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockPersistenceMetaData).getDatabaseProductName();
-				will(returnValue(""));
-			}
-		});
 		mockQuery = context.mock(Query.class);
 		context.checking(new Expectations() {
 			{
@@ -201,12 +139,6 @@ public class DatabaseServerTimeServiceImplTest {
 	 */
 	@Test
 	public void testGetCurrentTimeNullResults() throws Exception {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockPersistenceMetaData).getDatabaseProductName();
-				will(returnValue(""));
-			}
-		});
 		mockQuery = context.mock(Query.class);
 		context.checking(new Expectations() {
 			{

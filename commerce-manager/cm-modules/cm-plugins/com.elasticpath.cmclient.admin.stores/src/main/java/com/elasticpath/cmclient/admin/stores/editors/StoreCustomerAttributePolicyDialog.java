@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
 import com.elasticpath.cmclient.core.BeanLocator;
+import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
@@ -34,6 +35,7 @@ import com.elasticpath.cmclient.core.validation.CompoundValidator;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.customer.AttributePolicy;
 import com.elasticpath.domain.customer.PolicyKey;
 import com.elasticpath.service.attribute.AttributeService;
@@ -225,17 +227,19 @@ public class StoreCustomerAttributePolicyDialog extends AbstractEpDialog {
 		populatePolicies();
 	}
 
+	@SuppressWarnings("restriction")
 	private void populateAttributes() {
 		final CustomerProfileAttributeService customerProfileAttributeService =
 				BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_PROFILE_ATTRIBUTE_SERVICE, CustomerProfileAttributeService.class);
 
 		final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
-		attributes = attributeService.getCustomerProfileAttributes().stream()
+		attributes = attributeService.getCustomerProfileAttributes(AttributeUsageImpl.USER_PROFILE_USAGE, AttributeUsageImpl.ACCOUNT_PROFILE_USAGE)
+				.stream()
 				// don't show attributes that have predefined policies
 				.filter(attribute -> !customerProfileAttributeService.getPredefinedProfileAttributePolicies().containsKey(attribute.getKey()))
 				.sorted(Comparator.comparing(Attribute::getKey))
 				.collect(Collectors.toList());
-		attributes.forEach(attribute -> attributeCombo.add(attribute.getDisplayName(CorePlugin.getDefault().getDefaultLocale())));
+		attributes.forEach(attribute -> attributeCombo.add(getAttributeDisplayName(attribute)));
 
 		final String attributeKey = attributeModel.getAttributeKey();
 		if (attributeKey != null) {
@@ -244,6 +248,14 @@ public class StoreCustomerAttributePolicyDialog extends AbstractEpDialog {
 					.findFirst()
 					.ifPresent(attribute -> attributeCombo.select(attributes.indexOf(attribute) + 1));
 		}
+	}
+
+	private String getAttributeDisplayName(final Attribute attribute) {
+
+		final String attributeName = attribute.getDisplayName(CorePlugin.getDefault().getDefaultLocale());
+		final String attributeUsage = CoreMessages.get().getMessage(attribute.getAttributeUsage().getNameMessageKey());
+
+		return String.format("%s (%s)", attributeName, attributeUsage); //$NON-NLS-1$
 	}
 
 	private void populatePolicies() {

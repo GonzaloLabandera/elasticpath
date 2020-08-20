@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -173,6 +175,27 @@ public class ProductSkuLookupImpl implements ProductSkuLookup {
 			throw new EpServiceException(DUPLICATE_GUID_ERR_MSG + skuCode);
 		}
 		return size == 1;
+	}
+
+	@Override
+	public String findImagePathBySkuGuid(final String skuGuid) {
+		String skuImagePath =  null;
+
+		List<String[]> result = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SKU_IMAGE_BY_GUID", skuGuid);
+
+		if (CollectionUtils.isNotEmpty(result)) {
+			String[] imgPaths = result.get(0);
+
+			//check if sku image exists
+			if (StringUtils.isNotBlank(imgPaths[0])) {
+				skuImagePath = imgPaths[0];
+				//if not, check if product image exists
+			} else if (StringUtils.isNotBlank(imgPaths[1])) {
+				skuImagePath = imgPaths[1];
+			}
+		}
+
+		return skuImagePath;
 	}
 
 	/**

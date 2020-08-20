@@ -24,7 +24,7 @@ import com.elasticpath.importexport.common.util.Timer.Time;
 public class SummaryImpl implements SummaryLogger {
 
 	private final List<Message> failures = new ArrayList<>();
-	
+
 	private final List<Message> warnings = new ArrayList<>();
 
 	private final List<Message> comments = new ArrayList<>();
@@ -32,16 +32,16 @@ public class SummaryImpl implements SummaryLogger {
 	private final Map<JobType, Integer> objectCounters = new TreeMap<>();
 
 	private final Timer timer = new Timer();
-	
+
 	private final Date startDate = new Date();
 
 	private final List<Dto> failedDtos = new ArrayList<>();
-	
+
 	private int addedToChangeSetCount;
 
 	/**
 	 * Adds new failure.
-	 * 
+	 *
 	 * @param failure string which describes a failure
 	 */
 	@Override
@@ -61,28 +61,28 @@ public class SummaryImpl implements SummaryLogger {
 	public void addWarning(final Message warning) {
 		warnings.add(warning);
 	}
-	
+
 	/**
 	 * Adds new comment.
-	 * 
+	 *
 	 * @param comment string which describes a comment
 	 */
 	@Override
 	public void addComment(final Message comment) {
 		comments.add(comment);
 	}
-	
+
 	/**
 	 * Adds +1 to named counter.
-	 * 
+	 *
 	 * @param counter JobType defines counters.
 	 */
 	@Override
 	public void addToCounter(final JobType counter) {
-		Integer count = getCount(counter);	
+		Integer count = getCount(counter);
 		this.objectCounters.put(counter, ++count);
 	}
-	
+
 	@Override
 	public void addToCounter(final JobType counter, final int qty) {
 		Integer count = getCount(counter);
@@ -97,12 +97,12 @@ public class SummaryImpl implements SummaryLogger {
 		return count;
 	}
 
-	
+
 	@Override
 	public Time getElapsedTime() {
 		return timer.getElapsedTime();
 	}
-	
+
 	@Override
 	public String getStartDate() {
 		return startDate.toString();
@@ -135,7 +135,7 @@ public class SummaryImpl implements SummaryLogger {
 	public List<Message> getWarnings() {
 		return new ArrayList<>(warnings);
 	}
-	
+
 	@Override
 	public List<Message> getComments() {
 		return new ArrayList<>(comments);

@@ -4,6 +4,7 @@
 package com.elasticpath.domain.search.impl;
 
 import java.util.Date;
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -196,4 +197,22 @@ public class IndexBuildStatusImpl extends AbstractPersistableImpl implements Ind
 				+ getOperationStartDate() + " processedRecords=" + getProcessedRecords() + " totalRecords=" + getTotalRecords() 
 				+ " indexTypeInternal=" + getIndexTypeInternal();
 	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		IndexBuildStatusImpl that = (IndexBuildStatusImpl) obj;
+		return uidPk == that.uidPk;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(uidPk);
+	}
+
 }

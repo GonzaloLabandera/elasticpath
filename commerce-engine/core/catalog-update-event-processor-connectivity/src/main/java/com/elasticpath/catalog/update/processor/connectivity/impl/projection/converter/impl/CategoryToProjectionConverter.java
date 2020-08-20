@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.elasticpath.catalog.CatalogReaderCapability;
 import com.elasticpath.catalog.entity.AvailabilityRules;
@@ -51,6 +52,8 @@ import com.elasticpath.service.store.StoreService;
  * A projection converter which converts Category {@link com.elasticpath.domain.catalog.Category} to Category {@link Category}.
  */
 public class CategoryToProjectionConverter implements Converter<com.elasticpath.domain.catalog.Category, Category> {
+
+	private static final Logger LOGGER = Logger.getLogger(CategoryToProjectionConverter.class);
 
 	private final CategoryService categoryService;
 	private final CatalogProjectionPluginProvider provider;
@@ -99,9 +102,13 @@ public class CategoryToProjectionConverter implements Converter<com.elasticpath.
 	 */
 	@Override
 	public Category convert(final com.elasticpath.domain.catalog.Category source, final Store store, final Catalog catalog) {
-		return categoryService.canSyndicate(source)
-				? createCategory(source, store, catalog)
-				: createTombstoneCategory(source, store, catalog);
+		if (!categoryService.canSyndicate(source)) {
+			LOGGER.debug("Creating DELETED projection record for category " + source.getCode()
+					+ " because it does not meet syndication requirements.");
+			return createTombstoneCategory(source, store, catalog);
+		}
+
+		return createCategory(source, store, catalog);
 	}
 
 	private Category createCategory(final com.elasticpath.domain.catalog.Category source, final Store store, final Catalog catalog) {

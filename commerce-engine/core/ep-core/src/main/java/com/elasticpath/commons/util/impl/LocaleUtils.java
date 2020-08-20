@@ -34,4 +34,26 @@ public final class LocaleUtils {
 		}
 		return new Locale(locale.getLanguage(), locale.getCountry());
 	}
+
+	/**
+	 * Attempt to read the language or language in combination with country
+	 * for the requested <code>Locale<code/>.
+	 *
+	 * @param locale the locale to get language code
+	 * @return <code>String</code> a language or a language in combination with a country
+	 */
+	public static String getCommerceLocalCode(final Locale locale) {
+		if (locale == null) {
+			throw new IllegalArgumentException("Locale must not be null");
+		}
+
+		StringBuilder result = new StringBuilder();
+		result.append(locale.getLanguage());
+		if (locale.getCountry() != null && !"".equals(locale.getCountry())) {
+			result.append('_');
+			result.append(locale.getCountry());
+		}
+		return result.toString();
+	}
+
 }

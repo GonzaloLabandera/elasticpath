@@ -48,6 +48,7 @@ import com.elasticpath.domain.cmuser.impl.CmUserImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
@@ -289,17 +290,16 @@ public class StoreTestPersister {
 	 */
 	public Customer persistCustomer(final Store store, final String email, final String password) {
 		final Customer customer = beanFactory.getPrototypeBean(CUSTOMER, Customer.class);
-		customer.setUserId(email);
+		customer.setCustomerType(CustomerType.REGISTERED_USER);
+		customer.setUsername(email);
+		customer.setClearTextPassword(password);
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
 		customer.setCreationDate(new Date());
 		customer.setLastEditDate(new Date());
 		customer.setStatus(Customer.STATUS_ACTIVE);
-		customer.setAnonymous(false);
-		customer.setGuid(new RandomGuidImpl().toString());
 		customer.setEmail(email);
 		customer.setStoreCode(store.getCode());
-		customer.setClearTextPassword(password);
 		return customerService.add(customer);
 	}
 
@@ -314,13 +314,12 @@ public class StoreTestPersister {
 	public Customer persistCustomer(final String guid, final Store store, final String email,
 									final CustomerAddress... customerAddresses) {
 		final Customer customer = beanFactory.getPrototypeBean(CUSTOMER, Customer.class);
+		customer.setCustomerType(CustomerType.REGISTERED_USER);
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
-		customer.setUserId(email);
 		customer.setCreationDate(new Date());
 		customer.setLastEditDate(new Date());
 		customer.setStatus(Customer.STATUS_ACTIVE);
-		customer.setAnonymous(false);
 		customer.setGuid(StringUtils.isNotEmpty(guid) ? guid : new RandomGuidImpl().toString());
 		customer.setEmail(email);
 		customer.setStoreCode(store.getCode());
@@ -379,12 +378,8 @@ public class StoreTestPersister {
 
 		CustomerSession session = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
 		session.setShopper(shopper);
-		session.setCreationDate(new Date());
 		session.setCurrency(currency);
-		session.setLastAccessedDate(new Date());
-		session.setGuid(Utils.uniqueCode("session"));
 		session.setLocale(Locale.US);
-		customerSessionService.add(session);
 		session = customerSessionService.initializeCustomerSessionForPricing(session, customer.getStoreCode(), currency);
 
 		shoppingCart.setCustomerSession(session);
@@ -861,9 +856,8 @@ public class StoreTestPersister {
 	 */
 	public Customer createAnonymousCustomer(final Store store) {
 		final Customer customer = beanFactory.getPrototypeBean(CUSTOMER, Customer.class);
-		customer.setUserId(UUID.randomUUID().toString());
+		customer.setCustomerType(CustomerType.SINGLE_SESSION_USER);
 		customer.setStatus(Customer.STATUS_ACTIVE);
-		customer.setAnonymous(true);
 		customer.setGuid(new RandomGuidImpl().toString());
 		customer.setStoreCode(store.getCode());
 		return customerService.add(customer);

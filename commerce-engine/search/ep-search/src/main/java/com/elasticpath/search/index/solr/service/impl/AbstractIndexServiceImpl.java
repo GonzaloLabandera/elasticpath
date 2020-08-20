@@ -10,12 +10,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.ObjectFactory;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.search.IndexBuildStatus;
 import com.elasticpath.domain.search.IndexStatus;
-import com.elasticpath.persistence.dao.IndexBuildStatusDao;
 import com.elasticpath.search.index.pipeline.impl.IndexBuildStatusUpdater;
 import com.elasticpath.search.index.pipeline.stats.IndexingStatistics;
 import com.elasticpath.search.index.pipeline.stats.PipelineStatus;
@@ -43,11 +41,7 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 
 	private IndexingStatistics indexingStatistics;
 
-	private ObjectFactory<IndexBuildStatus> indexBuildStatusFactory;
-
 	private final Map<IndexType, Date> lastInitialized = new ConcurrentHashMap<>();
-
-	private IndexBuildStatusDao indexBuildStatusDao;
 
 	private final Map<IndexType, Object> lockMap = IndexType.values().stream().collect(Collectors.toMap(Function.identity(), key -> new Object()));
 	
@@ -74,11 +68,7 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 		synchronized (lockMap.get(indexType)) {
 			IndexBuildStatus buildStatus = indexingStatistics.getIndexBuildStatus(indexType);
 			if (buildStatus == null) {
-				buildStatus = indexBuildStatusDao.get(indexType);
-				if (buildStatus == null) {
-					buildStatus = indexBuildStatusFactory.getObject();
-					buildStatus.setIndexType(indexType);
-				}
+				buildStatus = indexBuildStatusUpdater.getInitialIndexStatus(indexType);
 			}
 
 			buildStatus.setOperationStartDate(lastInitialized.get(indexType));
@@ -97,16 +87,12 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 		return getIndexBuildStatus(indexType).getLastBuildDate();
 	}
 
-	private boolean wasRebuildInterrupted(final IndexType indexType) {
-		return IndexStatus.REBUILD_IN_PROGRESS.equals(getIndexBuildStatus(indexType).getIndexStatus());
-	}
-
 	/**
 	 * Sets the date of the last time the index was built. We keep track of the <b>start time</b> of the last successful build, so we can always
 	 * build-from-last-build-date to catch up if needed. We also bump up the time even if we didn't do anything by using the {@code #lastInitialized}
 	 * map. This code existed before {@code IndexingPipeline}, as such its lifecycle is different, so it needs to do some checks to see if
 	 * {@code PipelineStatus} has been initialized and such.
-	 * 
+	 *
 	 * @param indexType the index type we're working on.
 	 */
 	protected void setLastBuildDate(final IndexType indexType) {
@@ -125,16 +111,17 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 			return;
 		}
 
-		Date buildDate = pipelineStatus.getCompletionDate();
+		// This is the point in time for which syncronization occured [not the clock time the job finished]
+		Date dataSynchronizationInstant = pipelineStatus.getCompletionDate();
 
-		// pick the latest of last-successful-build or last-initialised
-
-		if (lastInitialized.get(indexType) != null && (buildDate == null || lastInitialized.get(indexType).after(buildDate))) {
-			buildDate = lastInitialized.get(indexType);
+		// pick the latest of last-successful-build or last-initialized
+		Date lastInitializedDate = lastInitialized.get(indexType);
+		if (lastInitializedDate != null
+				&& (dataSynchronizationInstant == null || lastInitializedDate.after(dataSynchronizationInstant))) {
+			dataSynchronizationInstant = lastInitializedDate;
 		}
-		buildStatus.setLastBuildDate(buildDate);
+		buildStatus.setLastBuildDate(dataSynchronizationInstant);
 		updateIndexingStatistics(buildStatus);
-	
 	}
 
 	/**
@@ -159,14 +146,14 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 
 		initialize(indexType);
 
-		final boolean rebuildRequired = wasRebuildInterrupted(indexType) || getLastBuildDate(indexType) == null || isRebuildRequired(indexType);
+		final boolean rebuildRequired = getLastBuildDate(indexType) == null || isRebuildRequired(indexType)
+				|| indexBuildStatusUpdater.wasRebuildInProgress(indexType);
 
 		setIndexStatusInProgress(indexType, rebuildRequired);
 
 		build(indexType, rebuildRequired);
 
 		setIndexStatusComplete(indexType);
-
 	}
 
 	/**
@@ -192,6 +179,8 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 		synchronized (lockMap.get(indexType)) {
 			final IndexBuildStatus buildStatus = getIndexBuildStatus(indexType);
 			buildStatus.setIndexStatus(IndexStatus.COMPLETE);
+			buildStatus.setProcessedRecords(0);
+			buildStatus.setTotalRecords(0);
 			updateIndexingStatistics(buildStatus);
 		}
 	}
@@ -222,7 +211,6 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 
 	private void updateIndexingStatistics(final IndexBuildStatus buildStatus) {
 		indexingStatistics.attachIndexBuildStatus(buildStatus.getIndexType(), buildStatus);
-		
 		indexBuildStatusUpdater.enqueue(buildStatus);
 	}
 
@@ -270,15 +258,6 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 	}
 
 	/**
-	 * Sets the index build status dao.
-	 * 
-	 * @param indexBuildStatusDao the index build status dao
-	 */
-	public void setIndexBuildStatusDao(final IndexBuildStatusDao indexBuildStatusDao) {
-		this.indexBuildStatusDao = indexBuildStatusDao;
-	}
-
-	/**
 	 * Sets the index builder factory.
 	 * 
 	 * @param indexBuilderFactory the index builder factory
@@ -289,10 +268,6 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 
 	public void setIndexingStatistics(final IndexingStatistics indexingStatistics) {
 		this.indexingStatistics = indexingStatistics;
-	}
-
-	public void setIndexBuildStatusFactory(final ObjectFactory<IndexBuildStatus> indexBuildStatusFactory) {
-		this.indexBuildStatusFactory = indexBuildStatusFactory;
 	}
 
 	public IndexingStatistics getIndexingStatistics() {
@@ -306,4 +281,5 @@ public abstract class AbstractIndexServiceImpl extends AbstractEpPersistenceServ
 	public void setIndexBuildStatusUpdater(final IndexBuildStatusUpdater indexBuildStatusUpdater) {
 		this.indexBuildStatusUpdater = indexBuildStatusUpdater;
 	}
+
 }

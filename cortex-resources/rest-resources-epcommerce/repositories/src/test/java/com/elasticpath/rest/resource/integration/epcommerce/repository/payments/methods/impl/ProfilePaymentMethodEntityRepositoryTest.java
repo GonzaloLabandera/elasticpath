@@ -44,7 +44,7 @@ public class ProfilePaymentMethodEntityRepositoryTest {
 	private static final String CONFIG_ID_2 = "CONFIG_GUID_2";
 	private static final Locale LOCALE = Locale.CANADA;
 	private static final Currency CURRENCY = Currency.getInstance(LOCALE);
-	private static final String USER_ID = "USER_ID";
+	private static final String USER_ID = "SHARED_ID";
 
 	@Mock
 	private ResourceOperationContext resourceOperationContext;

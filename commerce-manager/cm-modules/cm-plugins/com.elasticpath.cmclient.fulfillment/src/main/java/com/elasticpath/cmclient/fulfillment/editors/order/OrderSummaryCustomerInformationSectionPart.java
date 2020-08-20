@@ -51,11 +51,17 @@ public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClient
 
 	private final Customer customer;
 
-	private Text userIdText;
+	private final Customer account;
+
+	private Text sharedIdText;
 
 	private Text customerNameText;
 
 	private Text phoneNumberText;
+
+	private Text accountNameText;
+
+	private Button editAccountButton;
 
 	private Button editCustomerButton;
 
@@ -73,6 +79,7 @@ public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClient
 		super(formPage, editor, ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
 		order = (Order) editor.getModel();
 		this.customer = order.getCustomer();
+		this.account = order.getAccount();
 		this.editor = (OrderEditor) editor;
 		editor.addPropertyListener(this);
 	}
@@ -88,13 +95,15 @@ public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClient
 		final IEpLayoutData compositeData = this.mainPane.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.BEGINNING);
 		final IEpLayoutComposite customerInformationComposite = this.mainPane.addTableWrapLayoutComposite(2, false, compositeData);
 		final IEpLayoutComposite editCustomerButtonComposite = this.mainPane.addTableWrapLayoutComposite(1, false, compositeData);
+		final IEpLayoutComposite accountInformationComposite = this.mainPane.addTableWrapLayoutComposite(2, false, compositeData);
+		final IEpLayoutComposite editAccountButtonComposite = this.mainPane.addTableWrapLayoutComposite(1, false, compositeData);
 		final IEpLayoutComposite emailComposite;
 
 		final IEpLayoutData labelData = this.mainPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData fieldData = this.mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING, true, false);
 
-		customerInformationComposite.addLabelBold(FulfillmentMessages.get().CustomerDetails_UserIdLabel, labelData);
-		userIdText = customerInformationComposite.addTextField(EpState.READ_ONLY, fieldData);
+		customerInformationComposite.addLabelBold(FulfillmentMessages.get().CustomerDetails_SharedIdLabel, labelData);
+		sharedIdText = customerInformationComposite.addTextField(EpState.READ_ONLY, fieldData);
 
 		customerInformationComposite.addLabelBold(FulfillmentMessages.get().OrderSummaryCustomerInformationSection_CustomerName, labelData);
 		customerNameText = customerInformationComposite.addTextField(EpState.READ_ONLY, fieldData);
@@ -113,6 +122,9 @@ public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClient
 
 		customerInformationComposite.addLabelBold(FulfillmentMessages.get().OrderSummaryCustomerInformationSection_PhoneNumber, labelData);
 		phoneNumberText = customerInformationComposite.addTextField(EpState.READ_ONLY, fieldData);
+
+		accountInformationComposite.addLabelBold(FulfillmentMessages.get().OrderSummaryCustomerInformationSection_AccountName, labelData);
+		accountNameText = accountInformationComposite.addTextField(EpState.READ_ONLY, fieldData);
 
 		final Image customerEditImage = CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_USER);
 		editCustomerButton = editCustomerButtonComposite.addPushButton(FulfillmentMessages.get().
@@ -137,17 +149,46 @@ public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClient
 				}
 			}
 		});
+		final EpState buttonState = (this.account == null) ? EpState.READ_ONLY : EpState.EDITABLE;
+		editAccountButton = editAccountButtonComposite.addPushButton(FulfillmentMessages.get().
+				OrderSummaryCustomerInformationSection_EditAccountBtn, customerEditImage, buttonState, fieldData);
+		editAccountButton.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetDefaultSelected(final SelectionEvent event) {
+				widgetSelected(event);
+			}
+
+			@Override
+			public void widgetSelected(final SelectionEvent event) {
+				if (account != null) {
+					final IEditorInput editorInput = new CustomerDetailsEditorInput(account.getUidPk());
+					try {
+						IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().
+								getActivePage().openEditor(editorInput, CustomerDetailsEditor.ID_EDITOR);
+						if (editorPart instanceof FormEditor) {
+							((FormEditor) editorPart).setActivePage(CustomerDetailsProfilePage.PAGE_ID);
+						}
+					} catch (final PartInitException e) {
+						LOG.error("Can not open customer details editor", e); //$NON-NLS-1$
+					}
+				}
+			}
+		});
 	}
 
 	@Override
 	protected void populateControls() {
-		this.userIdText.setText(String.valueOf(this.customer.getUserId()));
+		this.sharedIdText.setText(String.valueOf(this.customer.getSharedId()));
 		this.customerNameText.setText(this.customer.getFullName());
 		String phoneNumber = ""; //$NON-NLS-1$
 		if (this.customer.getPhoneNumber() != null) {
 			phoneNumber = this.customer.getPhoneNumber();
 		}
 		this.phoneNumberText.setText(phoneNumber);
+
+		if (this.account != null) {
+			this.accountNameText.setText(this.account.getBusinessName());
+		}
 	}
 
 	@Override

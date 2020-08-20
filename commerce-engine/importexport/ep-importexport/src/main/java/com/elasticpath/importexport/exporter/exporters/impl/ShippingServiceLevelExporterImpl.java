@@ -73,7 +73,7 @@ public class ShippingServiceLevelExporterImpl extends AbstractExporterImpl<Shipp
 		shippingServiceLevelGuids.addAll(
 				getImportExportSearcher().searchGuids(
 						getContext().getSearchConfiguration(),
-						EPQueryType.SHIPPING_SERVICE_LEVEL));
+						EPQueryType.SHIPPINGSERVICELEVEL));
 		
 		LOG.info("Shipping Service Level Export \n\t" + shippingServiceLevelGuids.size()
 				+ " Shipping Service Level GUIDs found for export [" + shippingServiceLevelGuids + "]");
@@ -91,7 +91,7 @@ public class ShippingServiceLevelExporterImpl extends AbstractExporterImpl<Shipp
 
 	@Override
 	public JobType getJobType() {
-		return JobType.SHIPPING_SERVICE_LEVEL;
+		return JobType.SHIPPINGSERVICELEVEL;
 	}
 
 	public ImportExportSearcher getImportExportSearcher() {

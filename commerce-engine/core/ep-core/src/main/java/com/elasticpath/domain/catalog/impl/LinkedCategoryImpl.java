@@ -129,6 +129,17 @@ public class LinkedCategoryImpl extends AbstractCategoryImpl {
 	}
 
 	/**
+	 * Return availability when combining the Included attribute with the MasterCatalog isAvailable method.
+	 *
+	 * @param currentDate the date to check against availability period
+	 * @return <code>true</code> if the category is available.
+	 */
+	@Override
+	public boolean isAvailable(final Date currentDate) {
+		return this.getMasterCategory().isAvailable(currentDate) && isIncluded();
+	}
+
+	/**
 	 * Returns <code>true</code> if the category is available to be displayed.
 	 * 
 	 * @return <code>true</code> if the category is available.
@@ -136,7 +147,7 @@ public class LinkedCategoryImpl extends AbstractCategoryImpl {
 	@Override
 	@Transient
 	public boolean isAvailable() {
-		return this.getMasterCategory().isAvailable() && isIncluded();
+		return this.isAvailable(new Date());
 	}
 
 	/**

@@ -276,7 +276,11 @@ public class CheckoutServiceImpl implements CheckoutService {
 		for (int index = executedActions.size() - 1; index >= 0; index--) {
 			final ReversibleCheckoutAction action = executedActions.get(index);
 			LOG.debug("Executing checkout action rollback " + action.getClass().getName());
-			action.rollback(actionContext);
+			try {
+				action.rollback(actionContext);
+			} catch (Exception ex) {
+				LOG.error("Exception thrown during checkout rollback", ex);
+			}
 		}
 		LOG.debug("Checkout rollback process completed.");
 	}

@@ -45,9 +45,7 @@ import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.ShopperMemento;
@@ -383,9 +381,7 @@ public class CalculatedBundleShoppingItemPriceBuilderTest {
 	}
 
 	private CustomerSession createCustomerSession() {
-		CustomerSessionMemento customerSessionMemento = new CustomerSessionMementoImpl();
 		CustomerSession customerSession = new CustomerSessionImpl();
-		customerSession.setCustomerSessionMemento(customerSessionMemento);
 		customerSession.setCurrency(CAD);
 		return customerSession;
 	}

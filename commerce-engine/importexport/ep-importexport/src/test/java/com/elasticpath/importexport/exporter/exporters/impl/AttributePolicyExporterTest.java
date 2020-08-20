@@ -118,7 +118,7 @@ public class AttributePolicyExporterTest {
 	 */
 	@Test
 	public void testGetJobType() {
-		assertThat(JobType.ATTRIBUTE_POLICY)
+		assertThat(JobType.ATTRIBUTEPOLICY)
 				.as("Incorrect job type returned.")
 				.isEqualTo(attributePolicyExporter.getJobType());
 	}

@@ -241,25 +241,37 @@ public class CategoryImplTest  {
 		Date beforeNow = new Date();
 		beforeNow.setTime(beforeNow.getTime() - timeUnit);
 
-		Date muchBeforeNow = new Date();
-		beforeNow.setTime(beforeNow.getTime() - timeUnit * 2);
-
 		Date afterNow = new Date();
 		afterNow.setTime(afterNow.getTime() + timeUnit);
 
-		categoryImpl.setStartDate(beforeNow);
+		// Dates do no affect the results when it is hidden
+		categoryImpl.setHidden(true);
+		assertThat(categoryImpl.isAvailable()).isFalse();
+
+		categoryImpl.setHidden(false);
 		assertThat(categoryImpl.isAvailable()).isTrue();
 
+
+		// Testing StartDate alternatives
 		categoryImpl.setStartDate(afterNow);
 		assertThat(categoryImpl.isAvailable()).isFalse();
 
 		categoryImpl.setStartDate(beforeNow);
+		assertThat(categoryImpl.isAvailable()).isTrue();
+
+		categoryImpl.setStartDate(null);
+		assertThat(categoryImpl.isAvailable()).isTrue();
+
+
+		// Testing EndDate alternatives
 		categoryImpl.setEndDate(afterNow);
 		assertThat(categoryImpl.isAvailable()).isTrue();
 
-		categoryImpl.setStartDate(muchBeforeNow);
 		categoryImpl.setEndDate(beforeNow);
 		assertThat(categoryImpl.isAvailable()).isFalse();
+
+		categoryImpl.setEndDate(null);
+		assertThat(categoryImpl.isAvailable()).isTrue();
 	}
 
 	/**

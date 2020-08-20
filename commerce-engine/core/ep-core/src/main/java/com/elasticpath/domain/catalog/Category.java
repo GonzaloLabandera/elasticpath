@@ -94,7 +94,15 @@ public interface Category extends Comparable<Category>, Entity, ObjectWithLocale
 	void setAttributeValueGroup(AttributeValueGroup attributeValueGroup);
 
 	/**
-	 * Returns <code>true</code> if the category is available.
+	 * Return availability based on the internal criteria of the <code>Category</code>, based on the specified date.
+	 *
+	 * @param currentDate the date to check against availability period
+	 * @return <code>true</code> if the category is available.
+	 */
+	boolean isAvailable(Date currentDate);
+
+	/**
+	 * Return availability based on the internal criteria of the <code>Category</code>, based on the current date.
 	 *
 	 * @return <code>true</code> if the category is available.
 	 */

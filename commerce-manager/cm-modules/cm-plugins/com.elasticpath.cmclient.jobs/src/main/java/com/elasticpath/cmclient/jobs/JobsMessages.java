@@ -267,6 +267,8 @@ public final class JobsMessages {
 	
 	public String RunWizard_PriceListUnavailableForChangeSet;
 
+	public String RunWizard_ErrorRemoteValidationFailed;
+
 
 	// ----------------------------------------------------
 	// Import data types

@@ -29,7 +29,7 @@
 	<bean id="changeSetEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
 	</bean>
-	
+
 	<import resource="classpath:spring/service/changeset-services.xml" />
 
 	<import resource="classpath*:spring/dataaccess/openjpa/openjpa.xml" />
@@ -359,6 +359,7 @@
 	<bean id="importJobRunnerProduct" class="com.elasticpath.service.dataimport.impl.ImportJobRunnerProductImpl" scope="prototype" parent="abstractImportJobRunner"
 		init-method="init">
 		<property name="timeService" ref="timeService" />
+		<property name="indexNotificationService" ref="indexNotificationService" />
 	</bean>
 
 	<bean id="importJobRunnerProductAssociation" class="com.elasticpath.service.dataimport.impl.ImportJobRunnerProductAssociationImpl" scope="prototype"
@@ -429,32 +430,8 @@
 		<property name="searchHostLocator" ref="searchHostLocator" />
 	</bean>
 
-	<bean id="intervalRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.IntervalRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService"/>
-		<property name="timeoutParamKey" value="timeout"/>
-	</bean>
-
-	<bean id="immediateRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ImmediateRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService" />
-	</bean>
-
-	<bean id="applicationLifetimeRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ApplicationLifetimeRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService" />
-	</bean>
-
-	<bean id="cachedSettingsReader" class="com.elasticpath.settings.impl.CachedSettingsReaderImpl">
-		<property name="settingsService" ref="settingsService" />
-		<property name="refreshStrategies">
-			<map>
-				<entry key="interval" value-ref="intervalRefreshStrategy" />
-				<entry key="immediate" value-ref="immediateRefreshStrategy" />
-				<entry key="application" value-ref="applicationLifetimeRefreshStrategy" />
-			</map>
-		</property>
-		<property name="refreshStrategyKey">
-			<value>sfRefreshStrategy</value>
-		</property>
-		<property name="defaultRefreshStrategy" ref="immediateRefreshStrategy" />
+	<bean id="settingsReader" parent="cachedSettingsReaderTemplate">
+		<property name="refreshStrategyKey" value="sfRefreshStrategy"/>
 	</bean>
 
 	<bean id="contentWrapperLoader" class="com.elasticpath.domain.contentspace.impl.TestContentSpaceMediator$CustomContentWrapperLoaderImpl" />
@@ -643,20 +620,6 @@
 		<property name="importNotificationDao" ref="importNotificationDao" />
 	</bean>
 
-	<bean id="sessionCleanupJob" class="com.elasticpath.domain.customer.impl.SessionCleanupJob">
-		<property name="timeService" ref="timeService" />
-		<property name="customerSessionCleanupService" ref="customerSessionCleanupService" />
-		<property name="shopperCleanupService" ref="shopperCleanupService" />
-		<property name="wishlistService" ref="wishListService" />
-		<property name="shoppingCartService" ref="shoppingCartService" />
-		<property name="batchSizeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SESSIONCLEANUP/batchSize"/>
-		</property>
-		<property name="maxDaysHistoryProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SESSIONCLEANUP/maxHistory"/>
-		</property>
-	</bean>
-
 	<!-- Defined only on ServiceSf.xml.vm - productViewService should be replaced with StoreProductService -->
 	<bean id="productViewService" class="com.elasticpath.service.catalogview.impl.ProductViewServiceImpl">
 		<property name="productService">
@@ -712,4 +675,7 @@
 
 	<bean id="paymentProviderPluginForIntegrationTesting" class="com.elasticpath.service.payment.provider.PaymentProviderPluginForIntegrationTesting"/>
 
+	<bean id="paymentGatewayNull" class="com.elasticpath.service.payment.provider.PaymentProviderPluginForIntegrationTesting"/>
+
+	<bean id="testPersistenceEngine" class="com.elasticpath.persistence.impl.TestPersistenceEngineImpl" parent="persistenceEngineTarget" depends-on="entityManagerFactory"/>
 </beans>

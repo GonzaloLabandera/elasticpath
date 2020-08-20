@@ -8,9 +8,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,19 +18,30 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.elasticpath.commons.constants.GlobalConstants;
 import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.DatabaseLastModifiedDate;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.impl.CustomerRoleMapper;
 import com.elasticpath.persistence.api.Entity;
+import com.elasticpath.validation.constraints.AttributeRequired;
 import com.elasticpath.validation.constraints.EpEmail;
 import com.elasticpath.validation.constraints.NotBlank;
+import com.elasticpath.validation.constraints.RegisteredCustomerAllOrNoneUsernamePasswordSaltFieldsExist;
 import com.elasticpath.validation.constraints.RegisteredCustomerPasswordNotBlankWithSize;
-import com.elasticpath.validation.groups.PasswordChange;
+import com.elasticpath.validation.constraints.RegisteredCustomerUsernameUniqueByStore;
+import com.elasticpath.validation.groups.AccountValidation;
+import com.elasticpath.validation.groups.PasswordCheck;
+import com.elasticpath.validation.groups.UserValidation;
+import com.elasticpath.validation.groups.UsernameUniqueCheck;
 
 /**
  * A <code>Customer</code> is someone with an account in the system for making orders through the Store Front.
  */
+@AttributeRequired
 @RegisteredCustomerPasswordNotBlankWithSize(
-		min = Customer.MINIMUM_PASSWORD_LENGTH, max = GlobalConstants.SHORT_TEXT_MAX_LENGTH, groups = PasswordChange.class)
+		min = Customer.MINIMUM_PASSWORD_LENGTH, max = GlobalConstants.SHORT_TEXT_MAX_LENGTH, groups = PasswordCheck.class)
+@RegisteredCustomerUsernameUniqueByStore(groups = UsernameUniqueCheck.class)
+@RegisteredCustomerAllOrNoneUsernamePasswordSaltFieldsExist
+@SuppressWarnings("PMD.GodClass")
 public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate, DatabaseCreationDate {
 
 	/** The minimum length of a password. */
@@ -54,22 +65,44 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	/** The status - Pending Approval. */
 	int STATUS_PENDING_APPROVAL = 3;
 
-	/** User Id suffix length. */
-	int SUFFIX_LENGTH = 4;
-
 	/**
 	 * Gets the user identifier for this <code>Customer</code>.
 	 *
 	 * @return the user identifier.
+	 * @deprecated use getSharedId instead
 	 */
+	@Deprecated
 	String getUserId();
 
 	/**
 	 * Sets the user identifier for this <code>Customer</code>.
 	 *
 	 * @param userId the new user identifier.
+	 * @deprecated use setSharedId instead
 	 */
+	@Deprecated
 	void setUserId(String userId);
+
+	/**
+	 * Gets the shared user identifier for this <code>Customer</code>.
+	 *
+	 * @return the shared user identifier.
+	 */
+	String getSharedId();
+
+	/**
+	 * Sets the shared user identifier for this <code>Customer</code>.
+	 *
+	 * @param sharedId the new shared user identifier.
+	 */
+	void setSharedId(String sharedId);
+
+	/**
+	 * Sets the username for this <code>Customer</code>.
+	 *
+	 * @param username the username.
+	 */
+	void setUsername(String username);
 
 	/**
 	 * Gets the email address of this <code>Customer</code>.
@@ -127,9 +160,7 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * @return the username
 	 */
 	@Override
-	@NotNull
-	@NotBlank
-	@Size(max = GlobalConstants.SHORT_TEXT_MAX_LENGTH)
+	@Size(max = GlobalConstants.SHORT_TEXT_MAX_LENGTH, groups = UserValidation.class)
 	String getUsername();
 
 	/**
@@ -148,6 +179,13 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * @param salt the password salt
 	 */
 	void setPassword(String password, String salt);
+
+	/**
+	 * Gets the password salt.
+	 *
+	 * @return the password salt.
+	 */
+	String getPasswordSalt();
 
 	/**
 	 * Sets the clear-text password. <br>
@@ -263,7 +301,9 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * Anonymous customers do not have a password and their email address does not need to be unique.
 	 *
 	 * @return true if the customer is anonymous; otherwise false.
+	 * @deprecated use getCustomerType instead
 	 */
+	@Deprecated
 	boolean isAnonymous();
 
 	/**
@@ -271,7 +311,9 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * Registered customers are not anonymous and have a persisted record in the database.
 	 *
 	 * @return true if the customer is registered; otherwise false.
+	 * @deprecated use getCustomerType instead
 	 */
+	@Deprecated
 	boolean isRegistered();
 
 	/**
@@ -279,7 +321,9 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * Anonymous customers do not have a password and their email address does not need to be unique.
 	 *
 	 * @param anonymous - true if the customer is anonymous; otherwise false.
+	 * @deprecated use setCustomerType instead
 	 */
+	@Deprecated
 	void setAnonymous(boolean anonymous);
 
 	/**
@@ -444,6 +488,15 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	void setCustomerProfile(CustomerProfile customerProfile);
 
 	/**
+	 * Sets the customer profile attribute metadata.  This metadata is required to set profile attributes,
+	 * like email, name, etc.  For new customer objects, the metadata is set by the bean factory (see prototypes.xml).
+	 * For existing customers, the metadata is set by OpenJPA via the {@link com.elasticpath.service.customer.impl.CustomerPostLoadStrategy}.
+	 *
+	 * @param attributes the attribute metadata
+	 */
+	void setCustomerProfileAttributes(Map<String, Attribute> attributes);
+
+	/**
 	 * Get the customer authentication.
 	 *
 	 * @return the domain model's <code>CustomerAuthentication</code>
@@ -502,6 +555,9 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	/**
 	 * @return store code for which the customer is associated
 	 */
+	@NotNull(groups = UserValidation.class)
+	@NotBlank(groups = UserValidation.class)
+	@Null(groups = AccountValidation.class)
 	String getStoreCode();
 
 	/**
@@ -633,4 +689,100 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * @return true if customer is a first time buyer
 	 */
 	boolean isFirstTimeBuyer();
+
+	/**
+	 * Get the customer type.
+	 * @return the customer type.
+	 */
+	CustomerType getCustomerType();
+
+	/**
+	 * Set customer type.
+	 * @param customerType the customer type.
+	 */
+	void setCustomerType(CustomerType customerType);
+
+	/**
+	 * Gets the business name.
+	 *
+	 * @return the business name.
+	 */
+	String getBusinessName();
+
+	/**
+	 * Set the business name.
+	 *
+	 * @param businessName the the business name.
+	 */
+	void setBusinessName(String businessName);
+
+	/**
+	 * Gets the business number of account user.
+	 *
+	 * @return the business number.
+	 */
+	String getAccountBusinessNumber();
+
+	/**
+	 * Set the business number of account user.
+	 *
+	 * @param businessNumber the the business number.
+	 */
+	void setAccountBusinessNumber(String businessNumber);
+
+	/**
+	 * Gets the phone number of account user.
+	 *
+	 * @return the phone number.
+	 */
+	String getAccountPhoneNumber();
+
+	/**
+	 * Set the phone number of account user.
+	 *
+	 * @param phoneNumber the the phone number.
+	 */
+	void setAccountPhoneNumber(String phoneNumber);
+
+	/**
+	 * Gets the fax number of account user.
+	 *
+	 * @return the fax number.
+	 */
+	String getAccountFaxNumber();
+
+	/**
+	 * Set the fax number of account user.
+	 *
+	 * @param faxNumber the the fax number.
+	 */
+	void setAccountFaxNumber(String faxNumber);
+
+	/**
+	 * Gets the tax exemption id of account user.
+	 *
+	 * @return the tax exemption id.
+	 */
+	String getAccountTaxExemptionId();
+
+	/**
+	 * Set the tax exemption id of account user.
+	 *
+	 * @param taxExemptionId the tax exemption id.
+	 */
+	void setAccountTaxExemptionId(String taxExemptionId);
+
+	/**
+	 * Gets the parent customer guid for this <code>Customer</code>.
+	 *
+	 * @return the parent customer guid.
+	 */
+	String getParentGuid();
+
+	/**
+	 * Sets the parent customer guid for this <code>Customer</code>.
+	 *
+	 * @param parentGuid the parent customer guid.
+	 */
+	void setParentGuid(String parentGuid);
 }

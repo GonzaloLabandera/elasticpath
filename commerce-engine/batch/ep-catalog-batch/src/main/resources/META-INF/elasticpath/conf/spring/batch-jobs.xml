@@ -157,7 +157,7 @@
 	<bean id="catalogJobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
 		<property name="dataSource" ref="catalogBatchDataSource"/>
 		<property name="transactionManager" ref="transactionManager"/>
-		<property name="isolationLevelForCreate" value="ISOLATION_SERIALIZABLE"/>
+		<property name="isolationLevelForCreate" value="ISOLATION_DEFAULT"/>
 		<property name="tablePrefix" value="BATCH_"/>
 		<property name="incrementerFactory" ref="catalogDataFieldMaxValueIncrementerFactory"/>
 		<property name="validateTransactionState" value="false"/>
@@ -177,7 +177,7 @@
 		<jdbc:script location="${ep.catalog.batch.database.create.script:CLASSPATH:org/springframework/batch/core/schema-mysql.sql}"/>
 	</jdbc:initialize-database>
 
-	<alias name="${ep.catalog.batch.datasource:atomikosJdbcDataSource}" alias="catalogBatchDataSource"/>
+	<alias name="${ep.catalog.batch.datasource:dataSource}" alias="catalogBatchDataSource"/>
 
 	<bean id="optionCleanUpTasklet" class="com.elasticpath.catalog.batch.job.DatabaseCleanupTasklet">
 		<constructor-arg name="catalogService" ref="catalogDataService"/>

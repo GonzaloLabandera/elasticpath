@@ -19,7 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.base.exception.structured.InvalidBusinessStateException;
-import com.elasticpath.commons.exception.UserIdExistException;
+import com.elasticpath.domain.order.DuplicateOrderException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
@@ -134,7 +134,7 @@ public class ReactiveAdapterImplTest {
 				.thenReturn(ResourceOperationFailure.stateFailure());
 
 		reactiveAdapter.fromService(() -> {
-			throw new UserIdExistException("Exception Message", Collections.emptyList());
+			throw new DuplicateOrderException("Exception Message", Collections.emptyList());
 		})
 				.test()
 				.assertError(ResourceOperationFailure.stateFailure());

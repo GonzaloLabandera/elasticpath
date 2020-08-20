@@ -16,6 +16,7 @@
 	<modules>
 		<module>ext-importexport</module>
 		<module>ext-importexport-cli</module>
+		<module>ext-importexport-api</module>
 	</modules>
 </project>
 

@@ -28,7 +28,15 @@
 
 		<plan>
 			<name>read-purchase-form</name>
-			<description><![CDATA[Read the purchase form to complete the purchase.]]></description>
+			<description>
+				<![CDATA[
+Read the purchase form to complete the purchase. Like the order resource, the purchase form may have Needinfo messages.
+Needinfos identify a condition that must be satisfied before a transaction can complete.
+Needinfos link to a selector where the customer can select the missing condition. After the Needinfos are
+satisfied, the order can be submitted to a purchase.
+For a list of messages that can appear on the order, see `needinfo-messages` in the [Structured Messages](../frontend-dev/api/structured-messages.md#needinfo-messages) topic.
+				]]>
+			</description>
 			<!-- Not using the form template here since purchase field does not have any fields.-->
 			<step>
 				<description><![CDATA[Retrieve the form.]]></description>
@@ -52,8 +60,8 @@
 		</plan>
 
 		<plan>
-			<name>read-purchase-lookup-form</name>
-			<description><![CDATA[Retrieve the purchase lookup form.]]></description>
+			<name>read-purchase-look-up-form</name>
+			<description><![CDATA[Retrieve the purchase look-up form.]]></description>
 			<step>
 				<description><![CDATA[The purchase lookup form.]]></description>
 				<start>lookups.lookups</start>

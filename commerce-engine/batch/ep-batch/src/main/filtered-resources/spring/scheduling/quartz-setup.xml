@@ -28,7 +28,6 @@
 		<ref bean="cleanupOrderLocksTrigger"/>
 		<ref bean="importJobCleanupTrigger"/>
 		<ref bean="staleImportJobTrigger"/>
-		<ref bean="cleanupSessionsTrigger"/>
 		<ref bean="inventoryJournalRollupTrigger"/>
 		<ref bean="cleanupAbandonedCartsTrigger"/>
 		<ref bean="cleanupInactiveCartsTrigger"/>

@@ -16,6 +16,7 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.profiles.ProfileEntity;
@@ -91,7 +92,7 @@ public class ProfileAttributeValidatorImpl implements ProfileAttributeValidator 
 		}
 
 		List<Message> messages = structuredErrorMessageTransformer.transform(customerProfileAttributeService.validateAttributes(transformedMap,
-				scope),
+				scope, AttributeUsageImpl.USER_PROFILE_USAGE),
 				profileIdentifier.getProfileId().getValue());
 
 		if (!messages.isEmpty()) {
@@ -110,7 +111,7 @@ public class ProfileAttributeValidatorImpl implements ProfileAttributeValidator 
 	}
 
 	private Set<String> validateRequiredFieldsPresent(final Map<String, String> transformedMap, final Set<String> editableAttributeKeys) {
-		Map<String, Attribute> attributeMap = attributeService.getCustomerProfileAttributesMap();
+		Map<String, Attribute> attributeMap = attributeService.getCustomerProfileAttributesMap(AttributeUsageImpl.USER_PROFILE_USAGE);
 		return editableAttributeKeys.stream()
 				.filter(key -> attributeMap.get(key).isRequired())
 				.filter(key -> !transformedMap.keySet().contains(key))

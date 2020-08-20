@@ -51,6 +51,7 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
 public class ShoppingCartRepositoryImplTest {
 	private static final String CART_GUID = "cart";
 	private static final String USER_GUID = "user";
+	private static final String ACCOUNT_SHARED_ID = "accountSharedId";
 	private static final String SKU_CODE = "sku";
 	private static final String STORE_CODE = "store";
 
@@ -250,9 +251,9 @@ public class ShoppingCartRepositoryImplTest {
 		when(resourceOperationContext.getSubject()).thenReturn(subject);
 
 		when(strategy.isApplicable(subject)).thenReturn(true);
-		when(strategy.findAllCarts(USER_GUID, STORE_CODE, subject))
+		when(strategy.findAllCarts(USER_GUID, ACCOUNT_SHARED_ID, STORE_CODE, subject))
 				.thenReturn(Observable.just(CART_GUID, "OTHER_GUID"));
-		repository.findAllCarts(USER_GUID, STORE_CODE)
+		repository.findAllCarts(USER_GUID, ACCOUNT_SHARED_ID, STORE_CODE)
 				.test()
 				.assertNoErrors()
 				.assertValueCount(2);

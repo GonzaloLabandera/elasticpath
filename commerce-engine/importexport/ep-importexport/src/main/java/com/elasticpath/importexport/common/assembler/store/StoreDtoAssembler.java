@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.common.dto.assembler.AbstractDtoAssembler;
@@ -20,6 +21,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
+import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
 import com.elasticpath.domain.shoppingcart.CartType;
@@ -57,6 +59,8 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 	private StoreService storeService;
 
 	private ModifierService modifierService;
+
+	private List<String> reservedCartModifierKeys;
 
 	@Override
 	public Store getDomainInstance() {
@@ -225,6 +229,17 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		Set<CartType> cartTypes = new HashSet<>(shoppingCartTypes.size());
 
 		for (CartTypeDTO cartTypeDto : shoppingCartTypes) {
+			Set<String> modifierFields = getModifierGroups(cartTypeDto.getModifierGroups()).stream()
+					.flatMap(modifierGroup -> modifierGroup.getModifierFields().stream().map(ModifierField::getCode))
+					.collect(Collectors.toSet());
+
+			modifierFields.forEach(modifier -> {
+				if (reservedCartModifierKeys.contains(modifier)) {
+					throw new EpSystemException("Error creating CART_TYPE " + cartTypeDto.getGuid() + " for Store " + source.getCode()
+							+ ": the modifier group field \"" + modifier + "\" is a reserved field and can not be used on cart type configurations.  "
+							+ "Please choose a different key and re-import.");
+				}
+			});
 
 			CartType cartType = cartTypeDomainFactory();
 			cartType.setName(cartTypeDto.getName());
@@ -364,6 +379,10 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 
 	public void setStorePaymentProviderConfigService(final StorePaymentProviderConfigService storePaymentProviderConfigService) {
 		this.storePaymentProviderConfigService = storePaymentProviderConfigService;
+	}
+
+	public void setReservedCartModifierKeys(final List<String> reservedCartModifierKeys) {
+		this.reservedCartModifierKeys = reservedCartModifierKeys;
 	}
 
 	/**

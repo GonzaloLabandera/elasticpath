@@ -17,6 +17,7 @@ import com.elasticpath.cmclient.reporting.ReportType;
 import com.elasticpath.cmclient.reporting.registration.CustomerRegistrationReportMessages;
 import com.elasticpath.cmclient.reporting.registration.CustomerRegistrationReportSection;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilder;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup.JpqlMatchType;
@@ -88,10 +89,10 @@ public class CustomerRegistrationReportServiceImpl {
 			queryBuilder.appendInnerJoin("c.profileValueMap", "cp2"); //$NON-NLS-1$ //$NON-NLS-2$
 			JpqlQueryBuilderWhereGroup whereGroup = queryBuilder.getDefaultWhereGroup();
 			whereGroup.appendWhereEquals("cp2.booleanValue", false); //$NON-NLS-1$
-			whereGroup.appendWhereEquals("cp2.localizedAttributeKey", CP_ANONYMOUS_CUST); //$NON-NLS-1$
+			whereGroup.appendWhereEquals("c.customerType", CustomerType.SINGLE_SESSION_USER.getName())
 
 			whereGroup.appendWhereInCollection("cp.localizedAttributeKey", Arrays.asList(CP_FIRST_NAME, //$NON-NLS-1$
-					CP_LAST_NAME, CP_EMAIL, CP_ANONYMOUS_CUST, CP_PHONE, CP_PREF_LOCALE, CP_PREF_CURR, CP_HTML_EMAIL, CP_BE_NOTIFIED));
+					CP_LAST_NAME, CP_EMAIL, CP_PHONE, CP_PREF_LOCALE, CP_PREF_CURR, CP_HTML_EMAIL, CP_BE_NOTIFIED));
 		}
 
 		applyQueryFilters(queryBuilder, params);

@@ -407,8 +407,14 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	}
 
 	@Override
-	public List<String> findByCustomerAndStore(final String customerGuid, final String storeCode) throws EpServiceException {
-		return getPersistenceEngine().retrieveByNamedQuery("ACTIVE_SHOPPING_CART_GUID_FIND_BY_CUSTOMER_AND_STORE", customerGuid, storeCode);
+	public List<String> findByCustomerAndStore(final String customerGuid, final String accountSharedId, final String storeCode)
+			throws EpServiceException {
+		if (accountSharedId == null) {
+			return getPersistenceEngine().retrieveByNamedQuery("ACTIVE_SHOPPING_CART_GUID_FIND_BY_CUSTOMER_AND_STORE", customerGuid, storeCode);
+		} else {
+			return getPersistenceEngine().retrieveByNamedQuery("ACTIVE_SHOPPING_CART_GUID_FIND_BY_CUSTOMER_AND_ACCOUNT_AND_STORE", customerGuid,
+					accountSharedId, storeCode);
+		}
 	}
 
 	/**
@@ -446,48 +452,35 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	}
 
 	@Override
-	public int deleteDefaultEmptyShoppingCartsByShopperUids(final List<Long> shopperUids) {
-		if (shopperUids == null) {
+	public int deleteAllShoppingCartsByShopperUid(final Long shopperUid) {
+		if (shopperUid == null) {
 			throw new EpServiceException(SHOPPER_UIDS_NULL_ERROR_MESSAGE);
 		}
-		if (shopperUids.isEmpty()) {
-			return 0;
-		}
 
-		return getPersistenceEngine().executeNamedQueryWithList("DELETE_DEFAULT_EMPTY_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
-	}
+		/*
+			As of PERF-252, cascade deletion is set on the db level for all cart-related tables. The benefit of doing that is that no additional
+			JPQL DELETE calls are required but the one below.
+			It's also very important to understand how JPQL DELETE works: as per documentation, there should be 1:1 between JPQL and native
+			DELETE queries.
 
-	@Override
-	public int deleteAllShoppingCartsByShopperUids(final List<Long> shopperUids) {
-		if (shopperUids == null) {
-			throw new EpServiceException(SHOPPER_UIDS_NULL_ERROR_MESSAGE);
-		}
-		if (shopperUids.isEmpty()) {
-			return 0;
-		}
+			However, what is not mentioned in the docs is that if entity manager factory contains one or more lifecycle listeners, the OpenJPA will
+			fire multiple SELECTs/UPDATEs and DELETEs for every entity that is related with the one being deleted.
 
-		getOrderPaymentApiCleanupService().removeByShopperUidList(shopperUids);
-		getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_CART_ORDERS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
-		return getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
-	}
+			The batch server can work without LC listeners, thus they are disabled so the max possible performance is achieved for the batch server.
+			Conversely, Cortex and similar apps can't work without LC listeners (nor they can be disabled at runtime), thus all DELETE operations
+			will suffer (the more complex entity to delete, the more db calls will be made).
 
-	@Override
-	public int deleteAllInactiveShoppingCartsByShopperUids(final List<Long> shopperUids) {
-		if (shopperUids == null) {
-			throw new EpServiceException(SHOPPER_UIDS_NULL_ERROR_MESSAGE);
-		}
-		if (shopperUids.isEmpty()) {
-			return 0;
-		}
+			See also the comments in PurgeCartsBatchProcessor.
+		 */
+		//in case of carts with bundles, it is mandatory to disable parent-child relation before deleting a cart
+		getPersistenceEngine().executeNamedQuery("DISABLE_PARENT_CHILD_CART_ITEM_RELATION_BY_SHOPPER_UID", shopperUid);
 
-		getOrderPaymentApiCleanupService().removeByShopperUidList(shopperUids);
-		getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_INACTIVE_CART_ORDERS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
-		return getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_INACTIVE_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
+		return getPersistenceEngine().executeNamedQuery("DELETE_SHOPPING_CARTS_BY_SHOPPER_UID", shopperUid);
 	}
 
 	@Override
 	public int deleteShoppingCartsByGuid(final List<String> shoppingCartGuids) {
-		return getPersistenceEngine().executeNamedQueryWithList("SHOPPING_CART_DELETE_BY_GUID", LIST_PARAMETER, shoppingCartGuids);
+		return getPersistenceEngine().executeNamedQueryWithList("DELETE_SHOPPING_CART_BY_GUIDS", LIST_PARAMETER, shoppingCartGuids);
 	}
 
 	@Override

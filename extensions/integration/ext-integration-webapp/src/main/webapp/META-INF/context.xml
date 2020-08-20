@@ -47,7 +47,7 @@
 			  idleTimeout="10000"
 			  description="JMS Connection Factory"
 			  factory="${ep.jms.factory}"
-			  brokerURL="${ep.jms.url}"
+			  brokerURL="failover:${ep.jms.url}"
 	/>
 
 	<Resource name="jms/JMSConnectionFactory-xa"
@@ -58,7 +58,7 @@
 			  idleTimeout="10000"
 			  description="XA JMS Connection Factory"
 			  factory="${ep.jms.xa.factory}"
-			  brokerURL="${ep.jms.url}"
+			  brokerURL="failover:${ep.jms.url}"
 	/>
 
 </Context>

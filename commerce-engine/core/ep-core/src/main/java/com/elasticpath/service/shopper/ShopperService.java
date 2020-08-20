@@ -4,7 +4,6 @@
 package com.elasticpath.service.shopper;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.shopper.Shopper;
 
 /**
@@ -22,12 +21,32 @@ public interface ShopperService {
 	Shopper findOrCreateShopper(Customer customer, String storeCode);
 
 	/**
+	 * Finds a Shopper for this given customer and account.  If none found, then create one.
+	 *
+	 * @param customer Customer to use.
+	 * @param account Account to use.
+	 * @param storeCode the storeCode
+	 * @return Shopper
+	 */
+	Shopper findOrCreateShopper(Customer customer, Customer account, String storeCode);
+
+	/**
 	 * Finds a Shopper for this given customerGuid.
 	 *
 	 * @param customerGuid Customer to use.
 	 * @return Shopper
 	 */
 	Shopper findByCustomerGuid(String customerGuid);
+
+	/**
+	 * Finds a Shopper for this given customerGuid and account shared ID.
+	 *
+	 * @param customerGuid Customer to use.
+	 * @param accountSharedId Account shared ID.
+	 * @param storeCode The store code.
+	 * @return Shopper
+	 */
+	Shopper findByCustomerGuidAndAccountSharedIdAndStore(String customerGuid, String accountSharedId, String storeCode);
 
 	/**
 	 * Finds a Shopper for given customer guid and store code.
@@ -38,21 +57,23 @@ public interface ShopperService {
 	 */
 	Shopper findByCustomerGuidAndStoreCode(String customerGuid, String storeCode);
 	/**
-	 * Finds a Shopper for this given customerUserId.
+	 * Finds a Shopper for this given customerSharedId.
 	 *
-	 * @param customerUserId Customer to use.
+	 * @param customerSharedId Customer SharedId to use.
 	 * @param storeCode the storeCode
 	 * @return Shopper
 	 */
-	Shopper findByCustomerUserIdAndStoreCode(String customerUserId, String storeCode);
+	Shopper findByCustomerSharedIdAndStoreCode(String customerSharedId, String storeCode);
 
 	/**
-	 * Find a shopper for a persisted customer session only.
+	 * Finds a Shopper for this given customerSharedId and accountSharedId.
 	 *
-	 * @param customerSessionMemento the customer session memento
-	 * @return the shopper or null if not found
+	 * @param customerSharedId Customer ID to use.
+	 * @param accountSharedId the account shared ID to use.
+	 * @param storeCode The store code.
+	 * @return Shopper
 	 */
-	Shopper findByPersistedCustomerSessionMemento(CustomerSessionMemento customerSessionMemento);
+	Shopper findByCustomerSharedIdAndAccountSharedIdAndStore(String customerSharedId, String accountSharedId, String storeCode);
 
 	/**
      * Create and save the {@Shopper}.
@@ -84,11 +105,4 @@ public interface ShopperService {
 	 * @param shopper the shopper to be removed
 	 */
 	void remove(Shopper shopper);
-
-	/**
-	 * Remove the shopper, if it is not referenced by any CustomerSessions.
-	 *
-	 * @param shopper the shopper removed
-	 */
-	void removeIfOrphaned(Shopper shopper);
 }

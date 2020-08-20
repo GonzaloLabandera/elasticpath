@@ -2726,4 +2726,77 @@
     </catalog>
 </product>
 
+<product code="bundleWithMultiplePhysicalItems">
+	<catalog code="Mobile">
+		<category code="Accessories">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+	<catalog code="MobileCatalog">
+		<category code="Accessories">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+</product>
+
+<product code="physicalFreeProduct">
+	<catalog code="Mobile">
+		<category code="AcceptanceTestItems">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+	<catalog code="MobileCatalog">
+		<category code="AcceptanceTestItems">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+</product>
+
+<product code="physicalPreOrderProduct">
+	<catalog code="Mobile">
+		<category code="AcceptanceTestItems">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+	<catalog code="MobileCatalog">
+		<category code="AcceptanceTestItems">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+</product>
+
+<product code="physicalBackOrderProduct">
+	<catalog code="Mobile">
+		<category code="AcceptanceTestItems">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+	<catalog code="MobileCatalog">
+		<category code="AcceptanceTestItems">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+</product>
+<product code="futureProduct">
+	<catalog code="Mobile">
+		<category code="AcceptanceTestItems">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+	<catalog code="MobileCatalog">
+		<category code="AcceptanceTestItems">
+			<default>true</default>
+			<featuredorder>0</featuredorder>
+		</category>
+	</catalog>
+</product>
 </productcategoryassociations>

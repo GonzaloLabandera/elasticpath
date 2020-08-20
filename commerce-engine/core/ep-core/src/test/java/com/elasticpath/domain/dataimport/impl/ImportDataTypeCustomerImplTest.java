@@ -4,6 +4,7 @@
 package com.elasticpath.domain.dataimport.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +48,9 @@ import com.elasticpath.validation.service.ValidatorUtils;
 public class ImportDataTypeCustomerImplTest {
 	private static final String TEST_GUID = "aaa";
 
-	private static final String TEST_USERID = "bbb";
+	private static final String TEST_SHARED_ID = "bbb";
+
+	private static final String TEST_USERNAME = "ccc";
 
 	private static final String NON_ALPHANUMERIC = "This.Is.A.Test;";
 
@@ -55,23 +59,32 @@ public class ImportDataTypeCustomerImplTest {
 	// Required Import Fields
 	private static final String IMPORT_FIELD_GUID = "guid";
 
-	private static final String IMPORT_FIELD_USERID = "userId";
+	private static final String IMPORT_FIELD_SHARED_ID = "sharedId";
+
+	private static final String IMPORT_CUSTOMER_TYPE = "customerType";
 
 	// Optional Import Fields
 	private static final String IMPORT_FIELD_PASSWORD = "password";
+
+	private static final String IMPORT_FIELD_USERNAME = "username";
 
 	private static final String IMPORT_FIELD_STATUS = "status";
 
 	private static final String IMPORT_FIELD_CREATIONDATE = "creationDate";
 
-	private static final String[] REQUIRED_FIELDS = new String[] { IMPORT_FIELD_GUID, IMPORT_FIELD_USERID, CustomerImpl.ATT_KEY_CP_ANONYMOUS_CUST,
-			CustomerImpl.ATT_KEY_CP_EMAIL, CustomerImpl.ATT_KEY_CP_FIRST_NAME, CustomerImpl.ATT_KEY_CP_LAST_NAME,
-			CustomerImpl.ATT_KEY_CP_HTML_EMAIL };
+	private static final String IMPORT_FIELD_PARENT_GUID = "parentGuid";
 
-	private static final String[] OPTIONAL_FIELDS = new String[] { IMPORT_FIELD_STATUS, IMPORT_FIELD_PASSWORD, IMPORT_FIELD_CREATIONDATE,
+	private static final String[] REQUIRED_FIELDS = new String[] { IMPORT_FIELD_GUID, IMPORT_FIELD_SHARED_ID, IMPORT_CUSTOMER_TYPE,
+			CustomerImpl.ATT_KEY_CP_EMAIL, CustomerImpl.ATT_KEY_CP_FIRST_NAME, CustomerImpl.ATT_KEY_CP_LAST_NAME,
+			CustomerImpl.ATT_KEY_CP_HTML_EMAIL, CustomerImpl.ATT_KEY_AP_NAME };
+
+	private static final String[] OPTIONAL_FIELDS = new String[] {
+			IMPORT_FIELD_STATUS, IMPORT_FIELD_PASSWORD, IMPORT_FIELD_CREATIONDATE, IMPORT_FIELD_USERNAME, IMPORT_FIELD_PARENT_GUID,
 			CustomerImpl.ATT_KEY_CP_COMPANY, CustomerImpl.ATT_KEY_CP_DOB, CustomerImpl.ATT_KEY_CP_FAX, CustomerImpl.ATT_KEY_CP_GENDER,
 			CustomerImpl.ATT_KEY_CP_PHONE, CustomerImpl.ATT_KEY_CP_PREF_CURR, CustomerImpl.ATT_KEY_CP_PREF_LOCALE,
-			CustomerImpl.ATT_KEY_CP_BE_NOTIFIED, CustomerImpl.ATT_KEY_CP_BUSINESS_NUMBER, CustomerImpl.ATT_KEY_CP_TAX_EXEMPTION_ID };
+			CustomerImpl.ATT_KEY_CP_BE_NOTIFIED, CustomerImpl.ATT_KEY_CP_BUSINESS_NUMBER, CustomerImpl.ATT_KEY_CP_TAX_EXEMPTION_ID,
+			CustomerImpl.ATT_KEY_AP_BUSINESS_NUMBER, CustomerImpl.ATT_KEY_AP_PHONE, CustomerImpl.ATT_KEY_AP_FAX,
+			CustomerImpl.ATT_KEY_AP_TAX_EXEMPTION_ID};
 
 	private ImportDataTypeCustomerImpl customerImportType;
 
@@ -217,22 +230,49 @@ public class ImportDataTypeCustomerImplTest {
 	}
 
 	/**
-	 * Test get import field of user id.
+	 * Test get import field of shared id.
 	 */
 	@Test
-	public void testGetImportFieldOfUserId() {
-		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_USERID);
-		importField.setStringValue(customer, TEST_USERID, importGuidHelper);
-		assertThat(importField.getStringValue(customer)).isEqualTo(TEST_USERID);
+	public void testGetImportFieldOfSharedId() {
+		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_SHARED_ID);
+		importField.setStringValue(customer, TEST_SHARED_ID, importGuidHelper);
+		assertThat(importField.getStringValue(customer)).isEqualTo(TEST_SHARED_ID);
 	}
 
 	/**
 	 * Test get import field of user id fail null.
 	 */
-	@Test(expected = EpNonNullBindException.class)
-	public void testGetImportFieldOfUserIdFailNull() {
-		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_USERID);
+	@Test
+	public void testGetImportFieldOfSharedIdNull() {
+		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_SHARED_ID);
 		importField.setStringValue(customer, GlobalConstants.NULL_VALUE, importGuidHelper);
+		assertTrue(StringUtils.isNotEmpty(importField.getStringValue(customer)));
+	}
+
+	/**
+	 * Test get import field of user name.
+	 */
+	@Test
+	public void testGetImportFieldOfUsernameNonNull() {
+		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_USERNAME);
+		assertThat(importField.getStringValue(customer)).isEqualTo(GlobalConstants.NULL_VALUE);
+
+		//when(customer.getCustomerAuthentication()).thenReturn(customerAuthentication);
+		when(customerAuthentication.getUsername()).thenReturn(TEST_USERNAME);
+		importField.setStringValue(customer, TEST_USERNAME, importGuidHelper);
+		assertThat(importField.getStringValue(customer)).isEqualTo(TEST_USERNAME);
+	}
+
+	/**
+	 * Test get import field of user name.
+	 */
+	@Test
+	public void testGetImportFieldOfUsernameNull() {
+		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_USERNAME);
+		assertThat(importField.getStringValue(customer)).isEqualTo(GlobalConstants.NULL_VALUE);
+
+		importField.setStringValue(customer, GlobalConstants.NULL_VALUE, importGuidHelper);
+		assertThat(importField.getStringValue(customer)).isEqualTo(GlobalConstants.NULL_VALUE);
 	}
 
 	/**

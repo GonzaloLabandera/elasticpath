@@ -70,7 +70,7 @@ public class LoginManager implements ILoginManager {
 		Map<String, String> metadata = (Map<String, String>) BeanLocator
 				.getSingletonBean(ContextIdNames.PERSISTENCELISTENER_METADATA_MAP, Map.class);
 
-		metadata.put(WebConstants.USER_GUID, cmUser.getGuid());
+		metadata.put(WebConstants.CMUSER_GUID, cmUser.getGuid());
 	}
 
 	/**

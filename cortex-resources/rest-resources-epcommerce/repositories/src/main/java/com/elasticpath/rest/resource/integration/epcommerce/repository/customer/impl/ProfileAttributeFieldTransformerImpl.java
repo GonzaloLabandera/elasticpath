@@ -6,7 +6,8 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.customer
 import java.util.Map;
 import java.util.Optional;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ProfileAttributeFieldTransformer;
 
@@ -15,8 +16,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.
  */
 public class ProfileAttributeFieldTransformerImpl implements ProfileAttributeFieldTransformer {
 
-	private final Map<String, String> profileAttributeTranslationMap;
-	private final Map<String, String> reverseAttributeTranslationMap = Maps.newHashMap();
+	private final BiMap<String, String> profileAttributeTranslationMap;
 
 	/**
 	 * Constructor.
@@ -24,11 +24,7 @@ public class ProfileAttributeFieldTransformerImpl implements ProfileAttributeFie
 	 * @param profileAttributeTranslationMap the mapping between field names and attribute keys
 	 */
 	public ProfileAttributeFieldTransformerImpl(final Map<String, String> profileAttributeTranslationMap) {
-		this.profileAttributeTranslationMap = profileAttributeTranslationMap;
-
-		// now add the reverse
-		profileAttributeTranslationMap.keySet().stream()
-				.forEach(key -> reverseAttributeTranslationMap.put(profileAttributeTranslationMap.get(key), key));
+		this.profileAttributeTranslationMap = new ImmutableBiMap.Builder<String, String>().putAll(profileAttributeTranslationMap).build();
 	}
 
 	@Override
@@ -38,6 +34,6 @@ public class ProfileAttributeFieldTransformerImpl implements ProfileAttributeFie
 
 	@Override
 	public String transformToAttributeKey(final String fieldName) {
-		return Optional.ofNullable(reverseAttributeTranslationMap.get(fieldName)).orElse(fieldName);
+		return Optional.ofNullable(profileAttributeTranslationMap.inverse().get(fieldName)).orElse(fieldName);
 	}
 }

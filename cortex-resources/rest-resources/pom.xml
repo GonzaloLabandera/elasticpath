@@ -76,6 +76,7 @@
 		<module>test-utils</module>
 		<module>totals</module>
 		<module>wishlists</module>
+		<module>accounts</module>
 	</modules>
 
 	<dependencies>

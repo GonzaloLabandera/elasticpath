@@ -33,8 +33,8 @@ public class ExportCustomerWithPaymentMethodsSteps {
 	private static final String EXISTING_CUSTOMER_EPQL_QUERY = "FIND Customer WHERE GUID = ";
 	private static final String TEST_GUID = "testGuid";
 	private static final String EXPORT_DIRECTORY_PATH = "target/test-classes/export/ExportCustomerWithPaymentMethodsSteps";
-	private static final String TEST_USER_ID = "testUser@email.com";
-	private static final String TEST_EMAIL = TEST_USER_ID;
+	private static final String TEST_SHARED_ID = "testUser@email.com";
+	private static final String TEST_EMAIL = TEST_SHARED_ID;
 	private static final String TEST_FIRST_NAME = "testFirstName";
 	private static final String TEST_LAST_NAME = "testLastName";
 
@@ -110,6 +110,7 @@ public class ExportCustomerWithPaymentMethodsSteps {
 				.withFirstName(TEST_FIRST_NAME)
 				.withLastName(TEST_LAST_NAME)
 				.withEmail(TEST_EMAIL)
+				.withUsername(TEST_EMAIL)
 				.withStoreCode(storeService.findAllStores().get(0).getCode())
 				.build();
 

@@ -22,6 +22,7 @@ import org.mockito.Captor;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.search.index.pipeline.IndexingStage;
 import com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl;
@@ -53,10 +54,10 @@ public class CustomerSolrInputDocumentCreatorTest {
 	}
 
 	/**
-	 * Test that when the customer has no userId, createDocument returns null.
+	 * Test that when the customer has no sharedId, createDocument returns null.
 	 */
 	@Test
-	public void testCreateDocumentWhenCustomerHasNoUserIdReturnsNull() {
+	public void testCreateDocumentWhenCustomerHasNoSharedIdReturnsNull() {
 		final Customer customer = new CustomerImpl();
 		customerSolrInputDocumentCreator.setEntity(customer);
 		assertThat((Object) customerSolrInputDocumentCreator.createDocument()).isNull();
@@ -80,7 +81,8 @@ public class CustomerSolrInputDocumentCreatorTest {
 		final long uidPk = 2343L;
 		final String storeCode = "dsfsdf";
 		final Date date = new Date();
-		final String userId = "some id";
+		final String sharedId = "some id";
+		final CustomerType customerType = CustomerType.REGISTERED_USER;
 
 		final Customer customer = mock(Customer.class);
 
@@ -94,7 +96,8 @@ public class CustomerSolrInputDocumentCreatorTest {
 		when(customer.getUidPk()).thenReturn(uidPk);
 		when(customer.getAddresses()).thenReturn(new ArrayList<>());
 		when(customer.getCreationDate()).thenReturn(date);
-		when(customer.getUserId()).thenReturn(userId);
+		when(customer.getSharedId()).thenReturn(sharedId);
+		when(customer.getCustomerType()).thenReturn(customerType);
 		customerSolrInputDocumentCreator.setEntity(customer);
 		customerSolrInputDocumentCreator.run();
 
@@ -105,7 +108,7 @@ public class CustomerSolrInputDocumentCreatorTest {
 
 		softly.assertThat((Object) document).isNotNull();
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(String.valueOf(customer.getUidPk()));
-		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_ID)).isEqualTo(userId);
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.SHARED_ID)).isEqualTo(sharedId);
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.FIRST_NAME)).isNull();
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.LAST_NAME)).isNull();
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.EMAIL)).isNull();
@@ -119,7 +122,7 @@ public class CustomerSolrInputDocumentCreatorTest {
 		verify(customer, times(2)).getUidPk();
 		verify(customer).getAddresses();
 		verify(customer).getCreationDate();
-		verify(customer, times(expectedCallsToGetUserId)).getUserId();
+		verify(customer, times(expectedCallsToGetUserId)).getSharedId();
 		verify(customer).getFirstName();
 		verify(customer).getLastName();
 		verify(customer).getEmail();
@@ -137,10 +140,11 @@ public class CustomerSolrInputDocumentCreatorTest {
 		final String firstName = "Jimijimi";
 		final String lastName = "LaibaLaiba";
 		final String email = "jimi.laiba@elasticpath.com";
-		final String userId = "jimi.laiba@elasticpath.com";
+		final String sharedId = "jimi.laiba@elasticpath.com";
 		final String phoneNumber = "012-345-6789";
 		final Date createDate = new Date();
 		final String storeCode = "sdfsdf";
+		final CustomerType customerType = CustomerType.REGISTERED_USER;
 
 		final Customer customer = mock(Customer.class);
 
@@ -154,11 +158,12 @@ public class CustomerSolrInputDocumentCreatorTest {
 		when(customer.getUidPk()).thenReturn(uidPk);
 		when(customer.getAddresses()).thenReturn(new ArrayList<>());
 		when(customer.getCreationDate()).thenReturn(createDate);
-		when(customer.getUserId()).thenReturn(userId);
+		when(customer.getSharedId()).thenReturn(sharedId);
 		when(customer.getFirstName()).thenReturn(firstName);
 		when(customer.getLastName()).thenReturn(lastName);
 		when(customer.getEmail()).thenReturn(email);
 		when(customer.getPhoneNumber()).thenReturn(phoneNumber);
+		when(customer.getCustomerType()).thenReturn(customerType);
 
 		customerSolrInputDocumentCreator.setEntity(customer);
 		customerSolrInputDocumentCreator.run();
@@ -170,7 +175,7 @@ public class CustomerSolrInputDocumentCreatorTest {
 
 		softly.assertThat((Object) document).isNotNull();
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(String.valueOf(uidPk));
-		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_ID)).isEqualTo(analyzer.analyze(userId));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.SHARED_ID)).isEqualTo(analyzer.analyze(sharedId));
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.FIRST_NAME)).isEqualTo(analyzer.analyze(firstName));
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.LAST_NAME)).isEqualTo(analyzer.analyze(lastName));
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.EMAIL)).isEqualTo(analyzer.analyze(email));
@@ -182,7 +187,7 @@ public class CustomerSolrInputDocumentCreatorTest {
 		verify(customer).getUidPk();
 		verify(customer).getAddresses();
 		verify(customer).getCreationDate();
-		verify(customer, times(expectedCallsToGetUserId)).getUserId();
+		verify(customer, times(expectedCallsToGetUserId)).getSharedId();
 		verify(customer).getFirstName();
 		verify(customer).getLastName();
 		verify(customer).getEmail();

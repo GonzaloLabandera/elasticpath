@@ -10,7 +10,7 @@ import com.elasticpath.selenium.dialogs.UserMenuDialog;
 import com.elasticpath.selenium.navigations.CatalogManagement;
 import com.elasticpath.selenium.navigations.ChangeSet;
 import com.elasticpath.selenium.navigations.Configuration;
-import com.elasticpath.selenium.navigations.CustomerService;
+import com.elasticpath.selenium.navigations.CustomerServiceNavigation;
 import com.elasticpath.selenium.navigations.PriceListManagement;
 import com.elasticpath.selenium.navigations.PromotionsShipping;
 import com.elasticpath.selenium.navigations.Reporting;
@@ -79,9 +79,9 @@ public class ActivityToolbar extends AbstractToolbar {
 	 *
 	 * @return CustomerService
 	 */
-	public CustomerService clickCustomerServiceButton() {
+	public CustomerServiceNavigation clickCustomerServiceButton() {
 		clickToolbarButton(TOOLBAR_CUSTOMER_SERVICE_BUTTON_CSS, "Customers");
-		return new CustomerService(getDriver());
+		return new CustomerServiceNavigation(getDriver());
 	}
 
 

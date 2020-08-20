@@ -16,8 +16,6 @@
 	<name>Common Test Definitions</name>
 
 	<properties>
-		<!-- Dependency versions -->
-		<ep.selenium.framework.version>1.5.4</ep.selenium.framework.version>
 		<sonar.skip>true</sonar.skip>
 	</properties>
 
@@ -27,9 +25,8 @@
 			<artifactId>selenium-java</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.repo</groupId>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-selenium-framework</artifactId>
-			<version>${ep.selenium.framework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>

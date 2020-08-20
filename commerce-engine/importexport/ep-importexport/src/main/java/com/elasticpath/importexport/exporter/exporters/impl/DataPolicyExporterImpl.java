@@ -34,7 +34,7 @@ public class DataPolicyExporterImpl extends AbstractExporterImpl<DataPolicy, Dat
 
 	@Override
 	public JobType getJobType() {
-		return JobType.DATA_POLICY;
+		return JobType.DATAPOLICY;
 	}
 
 	@Override

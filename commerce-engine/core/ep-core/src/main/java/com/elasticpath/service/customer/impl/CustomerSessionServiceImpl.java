@@ -10,7 +10,6 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
@@ -37,27 +36,9 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 
 	private TimeService timeService;
 
-	/**
-	 * Adds the given customer session.
-	 *
-	 * @param customerSession the customer session to add
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public void add(final CustomerSession customerSession) throws EpServiceException {
-		getPersistenceEngine().save(customerSession.getCustomerSessionMemento());
-	}
-
-	@Override
-	public void handleShopperChangeAndUpdate(final CustomerSession customerSession, final String storeCode) throws EpServiceException {
-		final Customer incomingCustomer = customerSession.getShopper().getCustomer();
-		changeShopper(customerSession, storeCode, incomingCustomer);
-	}
-
 	@Override
 	public void changeFromAnonymousToRegisteredCustomer(final CustomerSession customerSession, final Customer registeredCustomer,
 														final String storeCode) throws EpServiceException {
-		customerSession.setSignedIn(true);
 		changeShopper(customerSession, storeCode, registeredCustomer);
 	}
 
@@ -72,7 +53,10 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 		// Call list of CustomerSessionShopperUpdateHandlers.
 		handleShopperUpdate(customerSession, invalidatedShopper);
 
-		cleanupShopper(invalidatedShopper, customerSession.getShopper());
+		if (!currentShopper.equals(invalidatedShopper)) {
+			shopperService.remove(invalidatedShopper);
+		}
+
 		shopperService.save(customerSession.getShopper());
 	}
 
@@ -86,69 +70,9 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 		customerSession.setPriceListStackValid(false);
 	}
 
-	private void cleanupShopper(final Shopper invalidatedShopper, final Shopper currentShopper) {
-		if (!currentShopper.equals(invalidatedShopper)) {
-			shopperService.removeIfOrphaned(invalidatedShopper);
-		}
-	}
-
-	/**
-	 * Finds a {@link CustomerSessionMemento} just by its GUID.
-	 *
-	 * @param guid {@link CustomerSessionMemento} GUID.
-	 * @return {@link CustomerSessionMemento} or null.
-	 * @throws EpServiceException - when guid is null.
-	 */
-	private CustomerSessionMemento findMementoByGuid(final String guid) throws EpServiceException {
-		if (guid == null) {
-			throw new EpServiceException("Cannot retrieve null guid.");
-		}
-
-		final List<CustomerSessionMemento> results = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_SESSION_FIND_BY_GUID", guid);
-
-		if (results.isEmpty()) {
-			return null;
-		}
-
-		return results.get(0);
-	}
-
-
-	@Override
-	public CustomerSession findByGuid(final String guid) throws EpServiceException {
-		final CustomerSessionMemento customerSessionMemento = findMementoByGuid(guid);
-
-		if (customerSessionMemento == null) {
-			return null;
-		}
-
-		return recreatePersistedCustomerSessionWithShopper(customerSessionMemento);
-	}
-
-	/**
-	 * Load the customer session with the given UID.
-	 *
-	 * @param customerSessionUid the customer session UID
-	 * @return the customer session if exists, otherwise null
-	 * @throws EpServiceException - in case of any errors
-	 */
-	private CustomerSession load(final long customerSessionUid) throws EpServiceException {
-		if (customerSessionUid <= 0) {
-			return null;
-		}
-
-		final CustomerSessionMemento customerSessionMemento = getPersistentBeanFinder().load(
-				ContextIdNames.CUSTOMER_SESSION_MEMENTO, customerSessionUid);
-		if (customerSessionMemento == null) {
-			return null;
-		}
-
-		return recreatePersistedCustomerSessionWithShopper(customerSessionMemento);
-	}
-
 	@Override
 	public Object getObject(final long uid) throws EpServiceException {
-		return load(uid);
+		throw new UnsupportedOperationException("Not supported");
 	}
 
 	/**
@@ -192,31 +116,11 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	 * @return a new {@link CustomerSession} with no {@link Shopper}.
 	 */
 	private CustomerSession create() {
-		final CustomerSession customerSession = createEmpty();
-		final CustomerSessionMemento customerSessionMemento = getPrototypeBean(ContextIdNames.CUSTOMER_SESSION_MEMENTO,
-				CustomerSessionMemento.class);
-		customerSession.setCustomerSessionMemento(customerSessionMemento);
-
-		return customerSession;
-	}
-
-	private CustomerSession recreatePersistedCustomerSessionWithShopper(final CustomerSessionMemento persistentData) {
-		final CustomerSession customerSession = createEmpty();
-		customerSession.setCustomerSessionMemento(persistentData);
-
-		final Shopper shopper = shopperService.findByPersistedCustomerSessionMemento(persistentData);
-		attachShopper(customerSession, shopper);
-
-		return customerSession;
+		return createEmpty();
 	}
 
 	private CustomerSession createEmpty() {
 		return getPrototypeBean(ContextIdNames.CUSTOMER_SESSION, CustomerSession.class);
-	}
-
-	private void attachShopper(final CustomerSession customerSession, final Shopper shopper) {
-		customerSession.setShopper(shopper);
-		shopper.updateTransientDataWith(customerSession);
 	}
 
 	// Settings/Getters.
@@ -229,10 +133,6 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	 */
 	public void setShopperService(final ShopperService shopperService) {
 		this.shopperService = shopperService;
-	}
-
-	protected CustomerSessionService getCustomerSessionService() {
-		return getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE, CustomerSessionService.class);
 	}
 
 	/**

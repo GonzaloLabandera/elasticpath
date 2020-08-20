@@ -33,6 +33,7 @@ import javax.mail.internet.MimeMultipart;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import cucumber.api.java.After;
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import groovy.json.internal.IO;
@@ -90,6 +91,7 @@ public class EmailStepDefinitions {
 	@Qualifier("emailDtoHolder")
 	private ScenarioContextValueHolder<EmailDto> emailDtoHolder;
 
+	@Before
 	@After
 	public void tearDown() {
 		Mailbox.clearAll();

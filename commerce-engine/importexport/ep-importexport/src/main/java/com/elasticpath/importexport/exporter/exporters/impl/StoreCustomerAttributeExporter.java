@@ -86,7 +86,7 @@ public class StoreCustomerAttributeExporter extends AbstractExporterImpl<StoreCu
 
 	@Override
 	public JobType getJobType() {
-		return JobType.STORE_CUSTOMER_ATTRIBUTE;
+		return JobType.STORECUSTOMERATTRIBUTE;
 	}
 
 	/**

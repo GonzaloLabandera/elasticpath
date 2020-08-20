@@ -11,14 +11,15 @@ import java.util.Map;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.cortex.dce.datapolicies.DataPolicySteps;
 import com.elasticpath.cortexTestObjects.Profile;
 import com.elasticpath.selenium.dialogs.AddViewDataPointDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.editor.DataPolicyEditor;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.DataPolicyResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Utility;
@@ -33,13 +34,15 @@ public class DataPolicyDefinition {
 	private DataPolicyEditor dataPolicyEditor;
 	private final ActivityToolbar activityToolbar;
 	private AddViewDataPointDialog addViewDataPointDialog;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public DataPolicyDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
-		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		configurationActionToolbar = new ConfigurationActionToolbar(driver);
+		activityToolbar = new ActivityToolbar(driver);
 	}
 
 	/**
@@ -102,7 +105,7 @@ public class DataPolicyDefinition {
 		dataPolicyEditor = dataPolicyResultPane.clickCreateDataPolicyButton();
 		dataPolicyEditor.enterDataPolicyName(" ");
 		configurationActionToolbar.saveAll();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("AbstractCmClientFormEditor_ErrorTitle_save");
+		new ConfirmDialog(driver).clickOKButton("AbstractCmClientFormEditor_ErrorTitle_save");
 	}
 
 	/**
@@ -129,7 +132,7 @@ public class DataPolicyDefinition {
 		dataPolicyEditor.enterDataPolicyRetentionPeriod("1");
 		dataPolicyEditor.enterDateTime("StartDate", 0);
 		configurationActionToolbar.saveAll();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("DataPolicyEditor_SegmentsPage_SegmentsRequiredTitle");
+		new ConfirmDialog(driver).clickOKButton("DataPolicyEditor_SegmentsPage_SegmentsRequiredTitle");
 	}
 
 	/**
@@ -200,7 +203,7 @@ public class DataPolicyDefinition {
 	}
 
 	private void ignoreValidationMessage() {
-		new ConfirmDialog(SetUp.getDriver()).clickCancelButton();
+		new ConfirmDialog(driver).clickCancelButton();
 	}
 
 	/**
@@ -210,7 +213,7 @@ public class DataPolicyDefinition {
 	 */
 	@Then("^I can see Validation message for (.+)$")
 	public void verifyDataPointNameKeyValidation(final String dataPointValidation) {
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("DataPolicyEditor_DataPoints_" + dataPointValidation);
+		new ConfirmDialog(driver).clickOKButton("DataPolicyEditor_DataPoints_" + dataPointValidation);
 	}
 
 	/**

@@ -6,15 +6,37 @@ Feature: Customer Search
     And I go to Customer Service
 
   @smokeTest
-  Scenario Outline: Search for customer by email
-    When I search for customer by email ID <emailId>
-    Then I should see customer with email ID <emailId> in result list
+  Scenario Outline: Search for customer by shared Id
+    When I search for customer by shared ID <sharedId>
+    Then I should see customer with shared ID <sharedId> in result list
     And I close customer search results tab
-    When I search for customer by email ID <partialEmail>
-    Then I should see customer with email ID <emailId> in result list
+    When I search for customer by shared ID <partialSharedId>
+    Then I should see empty search results table
 
     Examples:
-      | emailId                      | partialEmail         |
+      | sharedId                           | partialSharedId            |
+      | MOBEE:harry.potter@elasticpath.com | MOBEE:harry.potter@elastic |
+
+  Scenario Outline: Search for customer by email
+    When I search for customer by email <email>
+    Then I should see customer with email <email> in result list
+    And I close customer search results tab
+    When I search for customer by email <partialEmail>
+    Then I should see customer with email <email> in result list
+
+    Examples:
+      | email                        | partialEmail         |
+      | harry.potter@elasticpath.com | harry.potter@elastic |
+
+  Scenario Outline: Search for customer by username
+    When I search for customer by username <username>
+    Then I should see customer with username <username> in result list
+    And I close customer search results tab
+    When I search for customer by username <partialUsername>
+    Then I should see customer with username <username> in result list
+
+    Examples:
+      | username                     | partialUsername      |
       | harry.potter@elasticpath.com | harry.potter@elastic |
 
   Scenario Outline: Search for customer by First name
@@ -62,21 +84,21 @@ Feature: Customer Search
       | 6042154651  | 6042154            |
 
   Scenario Outline: Search for customer by email with Store filter
-    When I search for customer by email <emailId> with store filter <customerStore>
-    Then I should see customer with email ID <emailId> in result list
+    When I search for customer by store filter <customerStore> and email <email>
+    Then I should see customer with email <email> in result list
     And I close customer search results tab
-    When I search for customer by email <emailId> with store filter <nonCustomerStore>
+    When I search for customer by store filter <nonCustomerStore> and email <email>
     Then I should see empty search results table
 
     Examples:
-      | emailId                      | customerStore | nonCustomerStore |
+      | email                        | customerStore | nonCustomerStore |
       | harry.potter@elasticpath.com | Mobee         | Kobee            |
 
   Scenario Outline: Search for customer when there is more than one search result
-    When I search for customer by email <email> with store filter <customerStore>
+    When I search for customer by email <email>
     Then I should see more than one row in result list
     And All entries in result list have <email> as a part of Email Address
 
     Examples:
-      | email                     | customerStore |
-      | male.user@elasticpath.com | Mobee         |
+      | email                     |
+      | male.user@elasticpath.com |

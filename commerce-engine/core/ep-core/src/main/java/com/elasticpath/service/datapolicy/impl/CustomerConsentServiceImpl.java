@@ -179,14 +179,6 @@ public class CustomerConsentServiceImpl extends AbstractEpPersistenceServiceImpl
 
 	}
 
-	@Override
-	public void deleteByCustomerUids(final List<Long> customerUids) {
-		getPersistenceEngine().executeNamedQueryWithList("CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS_LATEST", LIST_STRING, customerUids);
-		getPersistenceEngine().executeNamedQueryWithList("CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS", LIST_STRING, customerUids);
-		getPersistenceEngine().flush();
-	}
-
-
 	/**
 	 * Generic load method for all persistable domain models.
 	 *

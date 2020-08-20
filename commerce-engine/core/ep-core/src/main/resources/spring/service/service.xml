@@ -7,11 +7,12 @@
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:util="http://www.springframework.org/schema/util"
-		xmlns:settings="http://www.elasticpath.com/schema/settings"
+		xmlns:settings="http://www.elasticpath.com/schema/settings" xmlns:extensibleList="http://www.elasticpath.com/schema/extensibleList"
 		xsi:schemaLocation="
 				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+				http://www.elasticpath.com/schema/extensibleList http://www.elasticpath.com/schema/extensibleList/extensibleList.xsd
 		">
 	<import resource="../caching/cache-manager.xml" />
 	<import resource="shipping-service.xml"/>
@@ -21,6 +22,7 @@
 	<import resource="../../spring/service/orderpaymentapi-service.xml" />
 	<import resource="datapolicy.xml" />
 	<import resource="tag-service.xml" />
+	<import resource="classpath:META-INF/elasticpath/conf/spring/settings-service.xml"/>
 
 	<bean id="applicationName" class="java.lang.String">
 		<constructor-arg value="CoreOSGiBundle"/>
@@ -67,8 +69,6 @@
 				<prop key="processOrderShipmentPayment">PROPAGATION_NEVER</prop>
 				<prop key="createOffer">PROPAGATION_REQUIRED</prop>
 				<prop key="findOrCreateShopper">PROPAGATION_REQUIRED</prop>
-				<prop key="getCartByCustomerSession">PROPAGATION_NEVER</prop>
-				<prop key="handleShopperChangeAndUpdate">PROPAGATION_NOT_SUPPORTED</prop>
 				<prop key="holdOrder">PROPAGATION_REQUIRED</prop>
 				<prop key="removeDependantsFromShopper">PROPAGATION_REQUIRES_NEW</prop>
 				<prop key="releaseHoldOnOrder">PROPAGATION_REQUIRED</prop>
@@ -78,6 +78,11 @@
 				<prop key="writeOrderLock">PROPAGATION_REQUIRES_NEW</prop>
 				<prop key="releaseOrderLock">PROPAGATION_REQUIRED</prop>
 				<prop key="forceReleaseOrderLock">PROPAGATION_REQUIRES_NEW</prop>
+				<!-- AuditDao specific calls -->
+				<prop key="persistChangeSetTransaction">PROPAGATION_REQUIRED</prop>
+				<prop key="persistDataChanged">PROPAGATION_REQUIRED</prop>
+				<prop key="persistSingleChangeOperation">PROPAGATION_REQUIRED</prop>
+				<prop key="persistBulkChangeOperation">PROPAGATION_REQUIRED</prop>
 				<!-- Special calls -->
 
 				<prop key="*">PROPAGATION_SUPPORTS,readOnly</prop>
@@ -149,9 +154,7 @@
 		<property name="persistenceEngine" ref="persistenceEngine" />
 		<property name="elasticPath" ref="elasticPath" />
 		<property name="customerGroupService" ref="customerGroupService" />
-		<property name="shopperCleanupService" ref="shopperCleanupService" />
 		<property name="orderPaymentApiCleanupService" ref="orderPaymentApiCleanupService" />
-		<property name="userIdentityService" ref="epUserIdentityService" />
 		<property name="timeService" ref="timeService" />
 		<property name="storeService" ref="storeService" />
 		<property name="fetchPlanHelper" ref="fetchPlanHelper" />
@@ -161,6 +164,7 @@
 		<property name="eventMessageFactory" ref="eventMessageFactory" />
 		<property name="eventMessagePublisher" ref="customerEventMessagePublisher" />
 		<property name="validator" ref="validator" />
+		<property name="customerConstraintValidationService" ref="customerConstraintValidationService" />
 		<property name="constraintViolationTransformer" ref="constraintViolationTransformer" />
 	</bean>
 
@@ -172,12 +176,7 @@
 		<property name="eventMessageFactory" ref="eventMessageFactory"/>
 		<property name="eventMessagePublisher" ref="customerEventMessagePublisher"/>
         <property name="customerService" ref="customerService" />
-        <property name="userIdentityService" ref="epUserIdentityService" />
-        <property name="validator" ref="validator" />
-		<property name="constraintViolationTransformer" ref="constraintViolationTransformer" />
     </bean>
-
-	<bean id="epUserIdentityService" class="com.elasticpath.service.auth.impl.EpUserIdentityService"/>
 
 	<bean id="customerSessionService" parent="txProxyTemplate">
 		<property name="target">
@@ -190,15 +189,6 @@
 			</bean>
 		</property>
 	</bean>
-
-
-    <bean id="customerSessionCleanupService"  parent="txProxyTemplate">
-        <property name="target">
-            <bean class="com.elasticpath.service.customer.impl.CustomerSessionCleanupServiceImpl">
-                <property name="persistenceEngine" ref="persistenceEngine" />
-            </bean>
-        </property>
-    </bean>
 
 	<bean id="customerGroupService" parent="txProxyTemplate">
 		<property name="target">
@@ -220,8 +210,16 @@
 	</bean>
 
 	<bean id="customerProfileAttributes"
-		  factory-bean="attributeService" factory-method="getCustomerProfileAttributesMap"
-		  scope="prototype"/>
+		  factory-bean="attributeService"
+		  factory-method="getCustomerProfileAttributesMap"
+		  scope="prototype">
+		<constructor-arg>
+			<array value-type="com.elasticpath.domain.attribute.AttributeUsage">
+				<util:constant static-field="com.elasticpath.domain.attribute.impl.AttributeUsageImpl.USER_PROFILE_USAGE"/>
+				<util:constant static-field="com.elasticpath.domain.attribute.impl.AttributeUsageImpl.ACCOUNT_PROFILE_USAGE"/>
+			</array>
+		</constructor-arg>
+	</bean>
 
 	<bean id="catalogPromoQueryComposerHelper" class="com.elasticpath.service.search.impl.CatalogPromoQueryComposerHelperImpl">
 		<property name="elasticPath" ref="elasticPath"/>
@@ -387,7 +385,7 @@
 		<property name="utility" ref="utility"/>
 		<property name="giftCertificateTransactionService" ref="giftCertificateTransactionService"/>
 		<property name="eventMessageFactory" ref="eventMessageFactory"/>
-		<property name="eventMessagePublisher" ref="giftCertificateEventMessagePublisher"/>
+		<property name="eventMessagePublisher" ref="orderEventMessagePublisher"/>
 	</bean>
 
 	<bean id="giftCertificateServiceTarget" parent="giftCertificateServiceTargetTemplate" abstract="true"/>
@@ -654,6 +652,15 @@
 		</property>
 	</bean>
 
+	<bean id="brandServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="brandService"/>
+	</bean>
+
+	<bean id="cachedBrandService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.catalog.BrandService"/>
+		<property name="proxy" ref="brandServiceProxy"/>
+	</bean>
+
 	<bean id="taxJurisdictionService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.tax.impl.TaxJurisdictionServiceImpl">
@@ -702,6 +709,15 @@
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 			</bean>
 		</property>
+	</bean>
+
+	<bean id="taxCodeServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="taxCodeService"/>
+	</bean>
+
+	<bean id="cachedTaxCodeService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.tax.TaxCodeService"/>
+		<property name="proxy" ref="taxCodeServiceProxy"/>
 	</bean>
 
 	<bean id="productTypeService" parent="txProxyTemplate">
@@ -885,13 +901,13 @@
 	<bean id="elasticPathTaxCalculator" class="com.elasticpath.service.tax.calculator.impl.ElasticPathTaxCalculator">
 		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="taxCodeRetriever" ref="taxCodeRetriever"/>
+		<property name="taxJurisdictionService" ref="taxJurisdictionService"/>
 	</bean>
 
 	<bean id="taxRateDescriptorResolver" class="com.elasticpath.service.tax.resolver.impl.OverridingTaxRateDescriptorResolver" scope="prototype">
 		<property name="delegate">
 			<bean class="com.elasticpath.service.tax.resolver.impl.TaxRateDescriptorResolverImpl">
 				<property name="beanFactory" ref="coreBeanFactory"/>
-				<property name="taxJurisdictionService" ref="taxJurisdictionService"/>
 			</bean>
 		</property>
 		<property name="beanFactory" ref="coreBeanFactory"/>
@@ -928,6 +944,7 @@
 		<property name="elasticPath" ref="elasticPath"/>
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 		<property name="indexNotificationService" ref="indexNotificationService"/>
+		<property name="timeService" ref="timeService"/>
 	</bean>
 
 	<bean id="nonCachingStoreService" parent="txProxyTemplate">
@@ -958,6 +975,15 @@
 				<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 			</bean>
 		</property>
+	</bean>
+
+	<bean id="catalogServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="catalogService"/>
+	</bean>
+
+	<bean id="cachedCatalogService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.catalog.CatalogService"/>
+		<property name="proxy" ref="catalogServiceProxy"/>
 	</bean>
 
 	<bean id="synonymGroupService" parent="txProxyTemplate">
@@ -1847,6 +1873,24 @@
 
 	<!-- tagging framework end -->
 
+
+	<bean id="userAccountAssociationServiceTargetTemplate" class="com.elasticpath.service.customer.impl.UserAccountAssociationServiceImpl">
+		<property name="customerService" ref="customerService" />
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+		<property name="elasticPath" ref="elasticPath"/>
+		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
+	</bean>
+
+	<bean id="userAccountAssociationServiceTarget" parent="userAccountAssociationServiceTargetTemplate"/>
+
+	<bean id="userAccountAssociationService" parent="txProxyTemplate">
+		<property name="target" ref="userAccountAssociationServiceTarget"/>
+	</bean>
+
+	<bean id="accountTreeService" class="com.elasticpath.service.customer.impl.ParentReferenceAccountTreeServiceImpl">
+		<property name="customerService" ref="customerService" />
+	</bean>
+
 	<!-- validation framework start -->
 
 	<bean id="springExpressionValidationEngine" class="com.elasticpath.validation.service.impl.SpringExpressionValidationEngineImpl">
@@ -2198,6 +2242,10 @@
 		<property name="constraintViolationTransformer" ref="constraintViolationTransformer"/>
 	</bean>
 
+	<bean id="customerConstraintValidationService" class="com.elasticpath.validation.service.impl.CustomerConstraintValidationServiceImpl">
+		<property name="validator" ref="validator" />
+	</bean>
+
 	<bean id="cachingSolrQueryFactoryProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
 		<property name="fallbackImplementation" ref="solrQueryFactory"/>
 	</bean>
@@ -2301,7 +2349,7 @@
 		<constructor-arg ref="customerConsentService" />
 	</bean>
 
-	<bean id="inactiveShoppingCartsRemoverForShopperUpdates" class="com.elasticpath.service.shopper.impl.InactiveShoppingCartsRemoverForShopperUpdates">
+	<bean id="shoppingCartsRemoverForShopperUpdates" class="com.elasticpath.service.shopper.impl.ShoppingCartsRemoverForShopperUpdates">
 		<constructor-arg ref="shoppingCartService" />
 	</bean>
 
@@ -2319,7 +2367,7 @@
 		<ref bean="promotionCodeInvalidatorForShopperUpdates"/>
 		<ref bean="cartOrderCouponsMergerForShopperUpdates"/>
 		<ref bean="customerConsentMergerForShopperUpdates"/>
-		<ref bean="inactiveShoppingCartsRemoverForShopperUpdates"/>
+		<ref bean="shoppingCartsRemoverForShopperUpdates"/>
 	</util:list>
 
 	<alias name="coreShopperUpdateHandlers" alias="shopperUpdateHandlers" />
@@ -2354,29 +2402,6 @@
 			</bean>
 		</property>
 	</bean>
-
-    <bean id="shopperCleanupService" parent="txProxyTemplate">
-        <property name="target" >
-            <bean class="com.elasticpath.service.shopper.impl.ShopperCleanupServiceImpl" >
-              <property name="shopperDao" ref="shopperDao"/>
-              <property name="customerSessionCleanupService" ref="customerSessionCleanupService" />
-              <property name="wishListService" ref="wishListService"/>
-              <property name="shoppingCartService" ref="shoppingCartService"/>
-              <property name="beanFactory" ref="coreBeanFactory" />
-              </bean>
-        </property>
-    </bean>
-
-    <bean id="anonymousCustomerCleanupService" parent="txProxyTemplate">
-        <property name="target" >
-            <bean class="com.elasticpath.service.customer.impl.AnonymousCustomerCleanupServiceImpl" >
-              <property name="shopperCleanupService" ref="shopperCleanupService" />
-			  <property name="orderPaymentApiCleanupService" ref="orderPaymentApiCleanupService" />
-              <property name="customerConsentService" ref="customerConsentService" />
-              <property name="persistenceEngine" ref="persistenceEngine"/>
-            </bean>
-        </property>
-    </bean>
 
     <bean id="cartDirectorTemplate" class="com.elasticpath.sellingchannel.director.impl.CartDirectorImpl">
 		<property name="priceLookupFacade" ref="priceLookupFacade" />
@@ -2446,6 +2471,8 @@
 	<bean id="customerDtoAssembler" class="com.elasticpath.common.dto.customer.CustomerDtoAssembler">
 		<property name="beanFactory" ref="coreBeanFactory" />
 		<property name="customerGroupService" ref="customerGroupService"/>
+		<property name="customerService" ref="customerService" />
+		<property name="accountTreeService" ref="accountTreeService" />
 	</bean>
 
 	<bean id="customerGroupDtoAssembler" class="com.elasticpath.common.dto.customer.CustomerGroupDtoAssembler">
@@ -2592,15 +2619,6 @@
 		<property name="timeService" ref="timeService" />
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
-
-    <bean id="shoppingCartCleanupService" parent="txProxyTemplate">
-        <property name="target" >
-            <bean class="com.elasticpath.service.shoppingcart.impl.ShoppingCartCleanupServiceImpl" >
-                <property name="persistenceEngine" ref="persistenceEngine" />
-                <property name="cartOrderService" ref="cartOrderService" />
-            </bean>
-        </property>
-    </bean>
 
     <bean id="moneyFormatter" class="com.elasticpath.money.StandardMoneyFormatter" >
 		<property name="maxDisplayFractionDigits" value="2"/>
@@ -2867,5 +2885,33 @@
 
 	<bean id="customerAndUserEmailAddressesExtractionStrategy"
 		  class="com.elasticpath.service.email.impl.CustomerAndUserEmailAddressesExtractionStrategyImpl"/>
+
+	<bean id="shoppingCartItemListTypeProvider" class="com.elasticpath.settings.provider.impl.SettingValueProviderImpl">
+		<property name="path" value="COMMERCE/STORE/shoppingCartItemListType"/>
+		<property name="settingsReader" ref="settingsReader"/>
+		<property name="settingValueTypeConverter" ref="settingValueTypeConverter"/>
+	</bean>
+
+	<bean id="multicartItemListTypeLocationProvider" class="com.elasticpath.service.shoppingcart.impl.MulticartItemListTypeLocationProviderImpl	" >
+		<property name="shoppingCartItemListTypeProvider" ref="shoppingCartItemListTypeProvider"/>
+	</bean>
+
+	<bean id="user-id" class="java.lang.String">
+		<constructor-arg value="user-id"/>
+	</bean>
+
+	<bean id="user-name" class="java.lang.String">
+		<constructor-arg value="user-name"/>
+	</bean>
+
+	<bean id="user-email" class="java.lang.String">
+		<constructor-arg value="user-email"/>
+	</bean>
+
+	<extensibleList:create id="reservedCartModifierKeys" overridableId="reservedCartModifierKeyList" valueType="java.lang.String">
+		<ref bean="user-id"/>
+		<ref bean="user-name"/>
+		<ref bean="user-email"/>
+	</extensibleList:create>
 
 </beans>

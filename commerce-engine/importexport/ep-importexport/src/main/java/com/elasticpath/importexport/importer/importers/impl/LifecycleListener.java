@@ -10,23 +10,23 @@ import com.elasticpath.persistence.api.Persistable;
  */
 public interface LifecycleListener {
 	/**
-	 * Calls before populate action, when object has already been created.
+	 * Calls before populate action, for both loaded and newly instantiated objects.
 	 *
-	 * @param persistable the persistable object that will be saved to data base
+	 * @param persistable the persistable object that will be saved to the database
 	 */
 	void beforePopulate(Persistable persistable);
 
 	/**
-	 * Calls before save action, when object has already populated.
+	 * Calls before save action, after object has already been populated.
 	 *
-	 * @param persistable the persistable object that will be saved to data base
+	 * @param persistable the persistable object that will be saved to the database
 	 */
 	void beforeSave(Persistable persistable);
 
 	/**
-	 * Calls after save action, when object has already saved to data base.
+	 * Calls after save action, when object has already been saved to the database.
 	 *
-	 * @param persistable the persistent object
+	 * @param persistable the persistable object that has been saved to the database
 	 */
 	void afterSave(Persistable persistable);
 

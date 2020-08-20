@@ -89,4 +89,14 @@ public interface OrderEvent extends Persistable {
 	 */
 	void setNote(String note);
 
+	/**
+	 * This method is required only for batch jobs, like ReleaseShipmentJobImpl, to facilitate batch processing without involving heavy
+	 * {@link com.elasticpath.domain.order.Order} graph.
+	 *
+	 * Normally, the order UIDPK is set via Order -> OrderEvents relation and this method should never be used in development
+	 * without thorough testing.
+	 *
+	 * @param orderUidPk the order UIDPK to set.
+	 */
+	void setOrderUidPk(Long orderUidPk);
 }

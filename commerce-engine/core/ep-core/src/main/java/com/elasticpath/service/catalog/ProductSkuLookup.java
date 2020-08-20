@@ -81,4 +81,12 @@ public interface ProductSkuLookup {
 	 * @return true if product sku exists
 	 */
 	Boolean isProductSkuExist(String skuCode);
+
+	/**
+	 * Find product SKU's image for given SKU's guid.
+	 *
+	 * @param skuGuid the product sku guid.
+	 * @return if not found, null
+	 */
+	String findImagePathBySkuGuid(String skuGuid);
 }

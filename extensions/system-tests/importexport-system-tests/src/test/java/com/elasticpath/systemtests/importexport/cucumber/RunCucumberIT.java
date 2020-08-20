@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
  * This will run all Cucumber features found on the classpath.
  */
 @RunWith(Cucumber.class)
-@CucumberOptions(format = {"pretty", "html:target/cucumber", "json:target/cucumber.json"})
+@CucumberOptions(plugin = {"pretty", "html:target/cucumber", "json:target/cucumber.json", "junit:target/cucumber-junit-reports/cucumber.xml"})
 public class RunCucumberIT {
 
 }

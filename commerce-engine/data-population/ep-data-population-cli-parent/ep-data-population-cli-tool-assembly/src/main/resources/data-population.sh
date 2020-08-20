@@ -8,5 +8,5 @@ ROUTE_TO_DATA_POPULATION_HOME="."
 . "$BIN_PATH/header.sh"
 
 # Invoke the Data Population CLI Tool
-"$JAVA_CMD" "$JAVA_MEMORY_HEAPSIZE" "$JAVA_MEMORY_MAXPERMSIZE" -Dspring.profiles.active="$PROFILE" -cp "$DP_CLASSPATH" $JAVA_DEBUG_PARMS  \
+"$JAVA_CMD" "$JAVA_MEMORY_HEAPSIZE" "$JAVA_INITIAL_MEMORY_HEAPSIZE" -Dspring.profiles.active="$PROFILE" -cp "$DP_CLASSPATH" $JAVA_DEBUG_PARMS  \
     com.elasticpath.datapopulation.cli.tool.DataPopulationCliApplication "$@"

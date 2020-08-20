@@ -31,6 +31,8 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
+import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
 import com.elasticpath.domain.search.Facet;
 import com.elasticpath.domain.search.SortAttribute;
 import com.elasticpath.domain.search.SortValue;
@@ -127,13 +129,13 @@ public class SearchRepositoryImplTest {
 		final int pageSize = 10;
 
 		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
+		searchCriteria.setStoreCode(STORE_CODE);
 		final Collection<String> expectedItemIds = Arrays.asList("id1", "id2", "id3");
 
 		final List<Long> resultUids = mockIndexSearch(page, pageSize, searchCriteria, expectedItemIds.size());
 		mockProductAndItemCalls(resultUids, expectedItemIds);
 
-		Single<PaginatedResult> itemIdsSearchExecutionResult = repository.searchForItemIds(page, pageSize,
-				searchCriteria);
+		Single<PaginatedResult> itemIdsSearchExecutionResult = repository.searchForItemIds(page, pageSize, searchCriteria);
 
 		itemIdsSearchExecutionResult.test()
 				.assertComplete()
@@ -149,6 +151,7 @@ public class SearchRepositoryImplTest {
 		final int pageSize = 10;
 
 		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
+		searchCriteria.setStoreCode(STORE_CODE);
 		final Collection<String> expectedItemIds = Arrays.asList("id1", "id2", "id3");
 
 		final List<Long> resultUids = mockIndexSearch(page, pageSize, searchCriteria, expectedItemIds.size());
@@ -182,12 +185,15 @@ public class SearchRepositoryImplTest {
 		product2.setCode("two");
 		final Product product3 = new ProductImpl();
 		product3.setCode("three");
-		final List<Product> products = Arrays.asList(product1, product2, product3);
+		final List<StoreProduct> products = Arrays.asList(
+				new StoreProductImpl(product1),
+				new StoreProductImpl(product2),
+				new StoreProductImpl(product3));
 
-		when(storeProductRepository.findByUids(productUids)).thenReturn(products);
+		when(storeProductRepository.findByUids(STORE_CODE, productUids)).thenReturn(products);
 		when(indexUtility.sortDomainList(productUids, products)).thenReturn(products);
 
-		Iterator<Product> productsIterator = products.iterator();
+		Iterator<StoreProduct> productsIterator = products.iterator();
 		Iterator<String> expectedItemIdsIterator = expectedItemIds.iterator();
 		while (productsIterator.hasNext() && expectedItemIdsIterator.hasNext()) {
 			Product product = productsIterator.next();
@@ -201,7 +207,8 @@ public class SearchRepositoryImplTest {
 	public void ensureSearchForItemIdsWhereGetDefaultItemIdFailsReturnsServerError() {
 		final int page = 1;
 		final int pageSize = 10;
-		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
+		final KeywordSearchCriteria searchCriteria = new KeywordSearchCriteria();
+		searchCriteria.setStoreCode(STORE_CODE);
 		final Collection<String> expectedItemIds = Arrays.asList("id1", "id2", "id3");
 		final List<Long> resultUids = mockIndexSearch(page, pageSize, searchCriteria, 2);
 
@@ -214,12 +221,12 @@ public class SearchRepositoryImplTest {
 
 	private void mockProductAndItemCallWithAssertionError(final List<Long> productUids, final Collection<String> expectedItemIds) {
 		final Product product1 = new ProductImpl();
-		final List<Product> products = Arrays.asList(product1);
+		final List<StoreProduct> products = Arrays.asList(new StoreProductImpl(product1));
 
-		when(storeProductRepository.findByUids(productUids)).thenReturn(products);
+		when(storeProductRepository.findByUids(STORE_CODE, productUids)).thenReturn(products);
 		when(indexUtility.sortDomainList(productUids, products)).thenReturn(products);
 
-		Iterator<Product> productsIterator = products.iterator();
+		Iterator<StoreProduct> productsIterator = products.iterator();
 		Iterator<String> expectedItemIdsIterator = expectedItemIds.iterator();
 		while (productsIterator.hasNext() && expectedItemIdsIterator.hasNext()) {
 			Product product = productsIterator.next();
@@ -233,6 +240,7 @@ public class SearchRepositoryImplTest {
 		final int page = 1;
 		final int pageSize = 10;
 		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
+		searchCriteria.setStoreCode(STORE_CODE);
 
 		when(indexSearchService.search(searchCriteria, page - 1, pageSize))
 				.thenThrow(new EpPersistenceException("persistence exception during search"));
@@ -247,6 +255,7 @@ public class SearchRepositoryImplTest {
 		final int page = 1;
 		final int pageSize = 10;
 		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
+		searchCriteria.setStoreCode(STORE_CODE);
 
 		when(indexSearchService.search(searchCriteria, page - 1, pageSize))
 				.thenThrow(new EpPersistenceException("persistence exception during search"));

@@ -67,7 +67,7 @@ public class JpqlQueryBuilder {
 
 	/**
 	 * Constructor containing root table name (i.e. {@code OrderImpl}), root table alias (i.e. {@code o}), and select fields (i.e.
-	 * {@code o.uidPk, o.customer.userId}).
+	 * {@code o.uidPk, o.customer.sharedId}).
 	 * 
 	 * @param tableName name of the root table (i.e. {@code OrderImpl})
 	 * @param alias for the root table (i.e. {@code o})

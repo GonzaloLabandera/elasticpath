@@ -3102,6 +3102,93 @@ SELECT t0.UIDPK, t2.UIDPK, t2.TYPE, t2.LOCALIZED_PROPERTY_KEY, t2.VALUE
     ORDER BY t0.UIDPK ASC
 [params=(String) mobee, (int) 1, (String) ShippingServiceLevel, (String) ShippingServiceLevel]
 2016-06-15 09:14:19,181 [http-bio-9080-exec-1] TRACE org.apache.openjpa.lib.log.SLF4JLogFactory$LogAdapter - <t 793678588, conn 1693389265> [0 ms] spent
+2020-04-24 15:33:07,295 [http-nio-8082-exec-5] TRACE openjpa.Query - Executing query: [UPDATE PhysicalOrderShipmentImpl pos
+				SET pos.status = com.elasticpath.domain.order.OrderShipmentStatus.RELEASED
+				WHERE pos.shipmentNumber in (:list)] with parameters: {list=[21537-1, 21538-1, 21539-1, 21540-1, 21541-1, 21542-1, 21543-1, 21544-1, 21545-1, 21546-1]}
+2020-04-24 15:33:07,296 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> executing prepstmnt 1812859509
+UPDATE TORDERSHIPMENT t0
+    SET t0.STATUS = ?
+    WHERE (t0.SHIPMENT_NUMBER IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)) AND t0.TYPE = ?
+[params=(String) RELEASED, (String) 21537-1, (String) 21538-1, (String) 21539-1, (String) 21540-1, (String) 21541-1, (String) 21542-1, (String) 21543-1, (String) 21544-1, (String) 21545-1, (String) 21546-1, (String) PHYSICAL]
+2020-04-24 15:33:07,297 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [1 ms] spent
+2020-04-24 15:33:07,297 [http-nio-8082-exec-5] TRACE openjpa.Query - Executing query: [UPDATE OrderImpl ord
+				SET ord.lastModifiedDate = :_1
+				WHERE ord.uidPk in (:list)] with parameters: {_1=Fri Apr 24 15:33:07 PDT 2020, list=[203250, 203251, 203252, 203300, 203350, 203351, 203352, 203353, 203354, 203400]}
+2020-04-24 15:33:07,298 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> executing prepstmnt 2065949273
+UPDATE TORDER t0
+    SET t0.LAST_MODIFIED_DATE = ?
+    WHERE (t0.UIDPK IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?))
+[params=(Timestamp) 2020-04-24 15:33:07.154, (long) 203250, (long) 203251, (long) 203252, (long) 203300, (long) 203350, (long) 203351, (long) 203352, (long) 203353, (long) 203354, (long) 203400]
+2020-04-24 15:33:07,298 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,299 [http-nio-8082-exec-5] TRACE openjpa.Runtime - org.apache.openjpa.persistence.EntityManagerImpl@6e96471a.close() invoked.
+2020-04-24 15:33:07,301 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960002, (Timestamp) 2020-04-24 15:33:07.15, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@77c25999, (long) 203250, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,301 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,302 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960003, (Timestamp) 2020-04-24 15:33:07.151, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@78d7868b, (long) 203251, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,302 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,302 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960004, (Timestamp) 2020-04-24 15:33:07.151, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@746db928, (long) 203252, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,302 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,302 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960005, (Timestamp) 2020-04-24 15:33:07.151, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@13f0369, (long) 203300, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,302 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,302 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960006, (Timestamp) 2020-04-24 15:33:07.151, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@4d5d8ae1, (long) 203350, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,303 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,303 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960007, (Timestamp) 2020-04-24 15:33:07.151, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@9faae1f, (long) 203351, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,303 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,303 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960008, (Timestamp) 2020-04-24 15:33:07.152, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@10c7e2f1, (long) 203352, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,303 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,303 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960009, (Timestamp) 2020-04-24 15:33:07.152, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@699a8fcb, (long) 203353, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,304 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,304 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960010, (Timestamp) 2020-04-24 15:33:07.152, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@48b10a9b, (long) 203354, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,304 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,304 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> batching prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960011, (Timestamp) 2020-04-24 15:33:07.152, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@1467dfc4, (long) 203400, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,304 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [0 ms] spent
+2020-04-24 15:33:07,304 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> executing batch prepstmnt 4251849
+INSERT INTO TORDERAUDIT (UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, DETAIL,
+        ORDER_UID, ORIGINATOR_TYPE, TITLE, CREATED_BY)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+[params=(long) 960011, (Timestamp) 2020-04-24 15:33:07.152, (Timestamp) 2020-04-24 15:33:07.156, (Reader) java.io.StringReader@1467dfc4, (long) 203400, (String) SYSTEM, (String) Order Shipment Released, (null) null]
+2020-04-24 15:33:07,306 [http-nio-8082-exec-5] TRACE openjpa.jdbc.SQL - <t 320196029, conn 1194408015> [2 ms] spent
+2020-04-24 15:33:07,310 [http-nio-8082-exec-5] DEBUG com.elasticpath.batch.jobs.impl.shipments.ReleasePhysicalShipmentsJob - Release shipments quartz job completed in (ms): 26
+
 2016-06-15 09:14:19,181 [http-bio-9080-exec-1] TRACE org.apache.openjpa.lib.log.SLF4JLogFactory$LogAdapter - Cache hit while looking up key "200014".
 2016-06-15 09:14:19,181 [http-bio-9080-exec-1] TRACE org.apache.openjpa.lib.log.SLF4JLogFactory$LogAdapter - Cache hit while looking up key "200269".
 2016-06-15 09:14:19,181 [http-bio-9080-exec-1] TRACE org.apache.openjpa.lib.log.SLF4JLogFactory$LogAdapter - Cache hit while looking up key "200270".

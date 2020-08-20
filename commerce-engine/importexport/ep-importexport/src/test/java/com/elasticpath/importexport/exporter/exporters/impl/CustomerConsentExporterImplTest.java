@@ -150,7 +150,7 @@ public class CustomerConsentExporterImplTest {
 	 */
 	@Test
 	public void testJobType() {
-		assertThat(JobType.CUSTOMER_CONSENT)
+		assertThat(JobType.CUSTOMERCONSENT)
 				.as("Incorrect job type returned.")
 				.isEqualTo(customerConsentExporterImpl.getJobType());
 	}

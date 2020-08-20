@@ -39,7 +39,7 @@ public class GiftCertificateExporter  extends AbstractExporterImpl<GiftCertifica
 	
 	@Override
 	public JobType getJobType() {
-		return JobType.GIFT_CERTIFICATE;
+		return JobType.GIFTCERTIFICATE;
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class GiftCertificateExporter  extends AbstractExporterImpl<GiftCertifica
 		giftCertificateGuids.addAll(
 				getImportExportSearcher().searchGuids(
 						getContext().getSearchConfiguration(),
-						EPQueryType.GIFT_CERTIFICATE));
+						EPQueryType.GIFTCERTIFICATE));
 		
 		LOG.info("The list for " + giftCertificateGuids.size() + " gift certificates retrieved from the database.");	
 	}

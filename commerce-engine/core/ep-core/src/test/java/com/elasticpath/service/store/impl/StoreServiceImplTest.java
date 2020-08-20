@@ -3,6 +3,8 @@
  */
 package com.elasticpath.service.store.impl;
 
+import static com.elasticpath.commons.constants.ContextIdNames.STORE_SERVICE;
+import static com.elasticpath.persistence.api.PersistenceConstants.LIST_PARAMETER_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -15,17 +17,17 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableList;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -35,16 +37,19 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
+import com.elasticpath.domain.impl.ElasticPathImpl;
 import com.elasticpath.domain.search.UpdateType;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
+import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.store.impl.StoreImpl;
+import com.elasticpath.domain.store.impl.WarehouseImpl;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
-import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
+import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
@@ -73,10 +78,12 @@ public class StoreServiceImplTest {
 
 	private static final String STORE_WITH_USER_IN_USE = "STORE_WITH_USER_IN_USE";
 
+	private static final String STORE_CODE = "STORE_CODE";
+
+	private static final int WAREHOUSE_PICK_DELAY_MINUTES = 300;
+
 	@InjectMocks
 	private StoreServiceImpl storeServiceImpl;
-
-	private static final String PLACEHOLDER_FOR_LIST = "list";
 
 	@Mock
 	private PersistenceEngine persistenceEngine;
@@ -90,15 +97,25 @@ public class StoreServiceImplTest {
 	@Mock
 	private BeanFactory beanFactory;
 
+	@Mock
+	private TimeService timeService;
+
+	@Mock
+	private StoreService switchableStoreService;
+
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
+
 	/**
 	 * Prepares for tests.
-	 *
-	 * @throws Exception in case of any errors
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
+		elasticPath.setBeanFactory(beanFactory);
+
 		when(beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA, ProductSearchCriteria.class))
 				.thenReturn(new ProductSearchCriteria());
+		when(beanFactory.getSingletonBean(STORE_SERVICE, StoreService.class)).thenReturn(switchableStoreService);
 	}
 
 	/**
@@ -403,10 +420,10 @@ public class StoreServiceImplTest {
 		final String existingCode = "test code";
 		final Store store = mock(Store.class);
 		storeList.add(store);
-		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, FlushMode.COMMIT, existingCode);
+		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, existingCode);
 
 		assertThat(storeServiceImpl.findStoreWithCode(existingCode)).isEqualTo(storeList.get(0));
-		verify(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, FlushMode.COMMIT, existingCode);
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, existingCode);
 	}
 
 	/**
@@ -416,9 +433,9 @@ public class StoreServiceImplTest {
 	public void testFindStoreWithCodeNonExisting() {
 		final List<Store> storeList = new ArrayList<>();
 		final String nonExistingCode = "non existing code";
-		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, FlushMode.COMMIT, nonExistingCode);
+		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, nonExistingCode);
 		assertThat(storeServiceImpl.findStoreWithCode(nonExistingCode)).isNull();
-		verify(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, FlushMode.COMMIT, nonExistingCode);
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, nonExistingCode);
 	}
 
 	/**
@@ -544,7 +561,6 @@ public class StoreServiceImplTest {
 	/**
 	 * Test method for 'com.elasticpath.service.store.StoreServiceImpl.storeInUse()'.
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testStoreInUse() {
 		final long storeUid = 1L;
@@ -590,9 +606,9 @@ public class StoreServiceImplTest {
 		uids.add(2L);
 
 		final Collection<Store> result = new ArrayList<>();
-		doReturn(result).when(persistenceEngine).retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", PLACEHOLDER_FOR_LIST, uids);
+		doReturn(result).when(persistenceEngine).retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", LIST_PARAMETER_NAME, uids);
 		assertThat(storeServiceImpl.findStoresWithCatalogUids(uids)).isEqualTo(result);
-		verify(persistenceEngine).retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", PLACEHOLDER_FOR_LIST, uids);
+		verify(persistenceEngine).retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", LIST_PARAMETER_NAME, uids);
 	}
 
 	/**
@@ -698,6 +714,28 @@ public class StoreServiceImplTest {
 		verify(masterCard).getCreditCardType();
 		verify(store).getCreditCardTypes();
 
+	}
+
+	@Test
+	public void shouldCalculateWarehousePickDelayDateByCallingDBWhenDefaultPickDelayIsNotProvided() {
+		final Store store = new StoreImpl();
+		store.setCode(STORE_CODE);
+
+		final Warehouse warehouse = new WarehouseImpl();
+		warehouse.setPickDelay(WAREHOUSE_PICK_DELAY_MINUTES);
+
+		store.setWarehouses(Collections.singletonList(warehouse));
+
+		Date now = new Date();
+
+		Date expectedPickDelayDate = DateUtils.addMinutes(now, -WAREHOUSE_PICK_DELAY_MINUTES);
+
+		when(switchableStoreService.findStoreWithCode(STORE_CODE)).thenReturn(store);
+		when(timeService.getCurrentTime()).thenReturn(now);
+
+		Date actualPickDelayDate = storeServiceImpl.calculateCurrentPickDelayTimestamp(STORE_CODE);
+
+		assertThat(actualPickDelayDate).isEqualTo(expectedPickDelayDate);
 	}
 
 	/** Convenience interface for mocking object. */

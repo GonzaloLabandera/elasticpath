@@ -241,13 +241,12 @@
 			WHERE UPPER(s.code) = UPPER(?1)
 		</query>
 	</named-query>
-		<named-query name="STORE_CODE_BY_CATALOG_UIDS">
-			<query>
-				SELECT s.code
-				FROM StoreImpl s
-				WHERE s.catalog.uidPk IN (:list)
-			</query>
-		</named-query>
-
+	<named-query name="STORE_CODE_BY_CATALOG_UIDS">
+		<query>
+			SELECT s.code
+			FROM StoreImpl s
+			WHERE s.catalog.uidPk IN (:list)
+		</query>
+	</named-query>
 </entity-mappings>
 

@@ -6,7 +6,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartResourceConstants.CREATE_CART_NOT_SUPPORTED;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartResourceConstants.DEFAULT_CART_NOT_FOUND;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,56 +21,37 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.identity.Subject;
-import com.elasticpath.rest.identity.attribute.SubjectAttribute;
 
 /**
  * B2C strategy for multi-carts.
  */
 @Singleton
 @Named("b2cMulticartStrategy")
-public class B2CMultiCartResolutionStrategyImpl extends  AbstractEpMultiCartStrategyImpl  {
-
-	/**
-	 * this resolution strategy is associated with the default cartType.
-	 */
-	private static final String ASSOCIATED_CARTTYPE = "default";
-
+public class B2CMultiCartResolutionStrategyImpl extends AbstractEpMultiCartStrategyImpl {
 
 	@Override
 	public boolean isApplicable(final Subject subject) {
-
-		if (subject == null) { //anonymous
-			return true;
-		}
-		Collection<SubjectAttribute> attributes = subject.getAttributes();
-
-		return attributes == null || attributes.stream().noneMatch(attr -> attr.getType().equals(ShoppingCartResourceConstants.METADATA));
-	}
-
-
-	@Override
-	protected String getValidCartTypeForStrategy() {
-		return  ASSOCIATED_CARTTYPE;
+		return true;
 	}
 
 	@Override
-	public Observable<String> findAllCarts(final String customerGuid, final String storeCode, final Subject subject) {
+	public Observable<String> findAllCarts(final String customerGuid, final String accountSharedId, final String storeCode, final Subject subject) {
 
 		final String storeCodeUpperCase = storeCode.toUpperCase(Locale.getDefault());
-		List<String> listOfCartIds = getShoppingCartService().findByCustomerAndStore(customerGuid, storeCodeUpperCase);
+		List<String> listOfCartIds = getShoppingCartService().findByCustomerAndStore(customerGuid, accountSharedId, storeCodeUpperCase);
 
 		return Observable.fromIterable(listOfCartIds);
 	}
 
 	@Override
-	 public Single<ShoppingCart> getShoppingCartSingle(final String cartGuid) {
+	public Single<ShoppingCart> getShoppingCartSingle(final String cartGuid) {
 		return getCustomerSessionRepository().findOrCreateCustomerSession()
 				.flatMap(customerSession -> getShoppingCartSingle(cartGuid, customerSession));
 	}
 
 	@Override
 	public boolean supportsCreate(final Subject subject, final Shopper shopper, final String storeCode) {
-		if (!hasMulticartEnabled(storeCode))  {
+		if (!hasMulticartEnabled(storeCode)) {
 			return false;
 		}
 		return shopper.getCustomer().isRegistered();
@@ -100,6 +80,13 @@ public class B2CMultiCartResolutionStrategyImpl extends  AbstractEpMultiCartStra
 	@CacheResult(uniqueIdentifier = "B2CCartForCustomerSession")
 	private ShoppingCart getCartForCustomerSession(final CustomerSession customerSession) {
 		final ShoppingCart cart = getShoppingCartService().findOrCreateDefaultCartByCustomerSession(customerSession);
+
+		getModifierFieldsWithDefaultValues(cart).forEach(modifierField -> {
+			if ((cart.getCartData().get(modifierField.getCode()) == null) || (cart.getCartData().get(modifierField.getCode()).getValue() == null)) {
+				cart.setCartDataFieldValue(modifierField.getCode(), modifierField.getDefaultCartValue());
+			}
+		});
+
 		final ShoppingCart savedCart = getShoppingCartService().saveIfNotPersisted(cart);
 
 		getCartPostProcessor().postProcessCart(savedCart, customerSession.getShopper(), customerSession);
@@ -117,12 +104,8 @@ public class B2CMultiCartResolutionStrategyImpl extends  AbstractEpMultiCartStra
 		if (!hasMulticartEnabled(scope)) {
 			return Single.error(ResourceOperationFailure.stateFailure(CREATE_CART_NOT_SUPPORTED));
 		}
-		
-		return  getCustomerSessionRepository().createCustomerSessionAsSingle()
+
+		return getCustomerSessionRepository().createCustomerSessionAsSingle()
 				.flatMap(customerSession -> createCartInternal(customerSession, descriptors));
 	}
-
-
-
-
 }

@@ -105,7 +105,7 @@ public class ImportStoreCustomerAttributeSteps {
 		final ImportConfiguration importConfiguration =
 				ImportConfigurationBuilder.newInstance()
 						.setRetrievalSource(importDirectory.getPath())
-						.addImporterConfiguration(JobType.STORE_CUSTOMER_ATTRIBUTE, ImportStrategyType.INSERT)
+						.addImporterConfiguration(JobType.STORECUSTOMERATTRIBUTE, ImportStrategyType.INSERT)
 						.build();
 
 		importController.loadConfiguration(importConfiguration);

@@ -17,17 +17,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.cmuser.impl.CmUserImpl;
-import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.rules.DiscountType;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
@@ -37,12 +34,19 @@ import com.elasticpath.domain.rules.RuleExceptionType;
 import com.elasticpath.domain.rules.RuleParameter;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.sellingcontext.SellingContext;
+import com.elasticpath.domain.sellingcontext.impl.SellingContextImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
+import com.elasticpath.tags.domain.ConditionalExpression;
+import com.elasticpath.tags.domain.TagDictionary;
+import com.elasticpath.tags.domain.impl.ConditionalExpressionImpl;
 
-/** Test cases for <code>AbstractRuleImpl</code>. */
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyStaticImports", "PMD.GodClass" })
+/**
+ * Test cases for <code>AbstractRuleImpl</code>.
+ */
+@RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class AbstractRuleImplTest {
 
 	private static final String CAD = "CAD";
@@ -71,23 +75,17 @@ public class AbstractRuleImplTest {
 
 	private static final String CM_USER_FIRST_NAME = "Elastic";
 
-	private AbstractRuleImpl ruleImpl;
+	private static final long SAMPLE_START_DATE_EPOCH = 1483229460000L;
 
-	@org.junit.Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
+	private static final long SAMPLE_END_DATE_EPOCH = 1488240660000L;
+
+	private AbstractRuleImpl ruleImpl;
 
 	/**
 	 * Prepare for each test.
 	 */
 	@Before
 	public void setUp() {
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
-
-
 		ruleImpl = getRuleImpl();
 		ruleImpl.initialize();
 		ruleImpl.setName("Car Sale");
@@ -126,11 +124,6 @@ public class AbstractRuleImplTest {
 		discountAction.addParameter(discountParameter);
 		discountAction.addParameter(currencyParam);
 		ruleImpl.addAction(discountAction);
-	}
-
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
 	}
 
 	private AbstractRuleImpl getRuleImpl() { //NOPMD
@@ -540,6 +533,39 @@ public class AbstractRuleImplTest {
 		assertEquals(SALIENCE_0, actionIter.next().getSalience());
 		assertEquals(SALIENCE_M2, actionIter.next().getSalience());
 		assertEquals(SALIENCE_M9, actionIter.next().getSalience());
+	}
+
+	@Test
+	public void testGetDatesFromSellingContext() {
+		ruleImpl = getRuleImpl();
+
+		ConditionalExpression timeCondition = new ConditionalExpressionImpl();
+		timeCondition.setConditionString("{ AND { SHOPPING_START_TIME.greaterThan (1483229460000L) }  "
+			+ "{ SHOPPING_START_TIME.lessThan (1488240660000L) }  } ");
+
+		SellingContext sellingContext = new SellingContextImpl();
+		sellingContext.setCondition(TagDictionary.DICTIONARY_TIME_GUID, timeCondition);
+
+		ruleImpl.setSellingContext(sellingContext);
+
+		assertEquals(SAMPLE_START_DATE_EPOCH, ruleImpl.getStartDateFromSellingContext().getTime());
+		assertEquals(SAMPLE_END_DATE_EPOCH, ruleImpl.getEndDateFromSellingContext().getTime());
+	}
+
+	@Test
+	public void testGetDatesFromEmptySellingContext() {
+		ruleImpl = getRuleImpl();
+
+		ConditionalExpression timeCondition = new ConditionalExpressionImpl();
+		timeCondition.setConditionString("{ AND {  }  } ");
+
+		SellingContext sellingContext = new SellingContextImpl();
+		sellingContext.setCondition(TagDictionary.DICTIONARY_TIME_GUID, timeCondition);
+
+		ruleImpl.setSellingContext(sellingContext);
+
+		assertNull(ruleImpl.getStartDateFromSellingContext());
+		assertNull(ruleImpl.getEndDateFromSellingContext());
 	}
 
 	private RuleAction getAbstractRuleAction(final int salienceValue) {

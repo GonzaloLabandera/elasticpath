@@ -44,6 +44,7 @@
 				<ref bean="shippingOptionResolutionStrategy"/>
 				<ref bean="billingAddressResolutionStrategy"/>
 				<ref bean="shippingAddressResolutionStrategy"/>
+				<ref bean="shoppingCartModifierResolutionStrategy"/>
 			</list>
 		</property>
 	</bean>
@@ -82,6 +83,12 @@
 
 	<bean id="shippingAddressResolutionStrategy"
 		  class="com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ShippingAddressResolutionStrategy">
+		<property name="shoppingCartRepository" ref="shoppingCartRepository"/>
+		<property name="cartOrderRepository" ref="cartOrderRepository"/>
+	</bean>
+
+	<bean id="shoppingCartModifierResolutionStrategy"
+		  class="com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ShoppingCartModifierResolutionStrategy">
 		<property name="shoppingCartRepository" ref="shoppingCartRepository"/>
 		<property name="cartOrderRepository" ref="cartOrderRepository"/>
 	</bean>

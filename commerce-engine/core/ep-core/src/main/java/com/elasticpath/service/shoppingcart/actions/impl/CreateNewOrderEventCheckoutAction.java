@@ -3,6 +3,9 @@
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.core.messaging.order.OrderEventType;
 import com.elasticpath.messaging.EventMessage;
@@ -23,8 +26,15 @@ public class CreateNewOrderEventCheckoutAction implements ReversibleCheckoutActi
 	@Override
 	public void execute(final CheckoutActionContext context) throws EpSystemException {
 		try {
+			Map<String, Object> data = null;
+			if (context.getOrder().hasGiftCertificateShipment()) {
+				data = new HashMap<>();
+				data.put("hasGCs", "true");
+			}
+
 			final EventMessage orderCreatedEventMessage = getEventMessageFactory().createEventMessage(OrderEventType.ORDER_CREATED,
-					context.getOrder().getOrderNumber());
+					context.getOrder().getOrderNumber(), data);
+
 
 			getEventMessagePublisher().publish(orderCreatedEventMessage);
 		} catch (Exception e) {

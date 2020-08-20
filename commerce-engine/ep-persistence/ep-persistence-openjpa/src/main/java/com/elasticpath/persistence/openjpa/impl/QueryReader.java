@@ -8,29 +8,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-
+import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.persistence.api.FlushMode;
+import com.elasticpath.persistence.openjpa.executors.AbstractQueryExecutor;
 import com.elasticpath.persistence.openjpa.executors.DynamicQueryExecutor;
 import com.elasticpath.persistence.openjpa.executors.IdentityQueryExecutor;
 import com.elasticpath.persistence.openjpa.executors.NamedQueryExecutor;
 import com.elasticpath.persistence.openjpa.executors.NamedQueryWithListExecutor;
+import com.elasticpath.persistence.openjpa.routing.QueryRouter;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 
 /**
  * This is a main interface used for all types of queries. All read methods mirror those in com.elasticpath.persistence.api.PersistenceEngine
  * using specialized query executors.
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class QueryReader implements ApplicationContextAware {
+public class QueryReader {
 
-	private ApplicationContext applicationContext;
-
-	@Override
-	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
-	}
+	private QueryRouter queryRouter;
+	private FetchPlanHelper fetchPlanHelper;
 
 	/**
 	 * @see com.elasticpath.persistence.api.PersistenceEngine#load(Class, long)
@@ -318,18 +314,38 @@ public class QueryReader implements ApplicationContextAware {
 
 
 	public IdentityQueryExecutor getIdentityQueryExecutor() {
-		return (IdentityQueryExecutor) applicationContext.getBean("identityQueryExecutor");
+		return  getQueryExecutor(IdentityQueryExecutor.class);
 	}
 
 	public DynamicQueryExecutor getDynamicQueryExecutor() {
-		return (DynamicQueryExecutor) applicationContext.getBean("dynamicQueryExecutor");
+		return  getQueryExecutor(DynamicQueryExecutor.class);
 	}
 
 	public NamedQueryExecutor getNamedQueryExecutor() {
-		return (NamedQueryExecutor) applicationContext.getBean("namedQueryExecutor");
+		return  getQueryExecutor(NamedQueryExecutor.class);
 	}
 
 	public NamedQueryWithListExecutor getNamedQueryWithListExecutor() {
-		return (NamedQueryWithListExecutor) applicationContext.getBean("namedQueryWithListExecutor");
+		return  getQueryExecutor(NamedQueryWithListExecutor.class);
+	}
+
+	private <T extends AbstractQueryExecutor> T getQueryExecutor(final Class<T> executorClass) {
+		try {
+			T queryExecutor = executorClass.newInstance();
+			queryExecutor.setQueryRouter(queryRouter);
+			queryExecutor.setFetchPlanHelper(fetchPlanHelper);
+
+			return queryExecutor;
+		} catch (Exception e) {
+			throw new EpSystemException("Error occurred while creating a query executor", e);
+		}
+	}
+
+	public void setQueryRouter(final QueryRouter queryRouter) {
+		this.queryRouter = queryRouter;
+	}
+
+	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
+		this.fetchPlanHelper = fetchPlanHelper;
 	}
 }

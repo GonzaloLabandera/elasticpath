@@ -102,6 +102,7 @@ public class SavingStrategyTest {
 			{
 				oneOf(mockLifecycleListener).beforeSave(persistentObject);
 				oneOf(mockLifecycleListener).afterSave(persistentObject);
+				oneOf(mockLifecycleListener).beforePopulate(persistentObject);
 
 				oneOf(mockDomainAdapter).buildDomain(dto, persistentObject);
 				will(returnValue(persistentObject));
@@ -114,6 +115,7 @@ public class SavingStrategyTest {
 
 		context.checking(new Expectations() {
 			{
+				oneOf(mockLifecycleListener).beforePopulate(notPersistentObject);
 				oneOf(mockLifecycleListener).beforeSave(notPersistentObject);
 				oneOf(mockLifecycleListener).afterSave(notPersistentObject);
 
@@ -143,6 +145,7 @@ public class SavingStrategyTest {
 
 		context.checking(new Expectations() {
 			{
+				oneOf(mockLifecycleListener).beforePopulate(notPersistentObject);
 				oneOf(mockLifecycleListener).beforeSave(notPersistentObject);
 				oneOf(mockLifecycleListener).afterSave(notPersistentObject);
 
@@ -172,6 +175,7 @@ public class SavingStrategyTest {
 			{
 				oneOf(mockLifecycleListener).beforeSave(persistentObject);
 				oneOf(mockLifecycleListener).afterSave(persistentObject);
+				oneOf(mockLifecycleListener).beforePopulate(persistentObject);
 
 				oneOf(mockDomainAdapter).buildDomain(dto, persistentObject);
 				will(returnValue(persistentObject));

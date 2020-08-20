@@ -25,6 +25,20 @@ public interface CustomerAccessor {
 	void setCustomer(Customer customer);
 
 	/**
+	 * Gets a {@link Customer} representing an account.
+	 *
+	 * @return a {@link Customer} account.
+	 */
+	Customer getAccount();
+
+	/**
+	 * Sets a {@link Customer} representing an account.
+	 *
+	 * @param account the {@link Customer} account.
+	 */
+	void setAccount(Customer account);
+
+	/**
 	 * Set to true if the {@link Customer} is signed in.
 	 *
 	 * @param signedIn set to true if the {@link Customer} is signed in.

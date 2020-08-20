@@ -3,18 +3,23 @@ package com.elasticpath.smoketests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.FormEncodingType;
+import com.gargoylesoftware.htmlunit.HttpHeader;
+import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test that the applications start up without error.
@@ -49,7 +54,7 @@ public class ApplicationStartupTest {
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
 
-		webClient.closeAllWindows();
+		webClient.close();
 	}
 
 	/**
@@ -69,7 +74,7 @@ public class ApplicationStartupTest {
 		assertTrue(page instanceof TextPage);
 		assertNotNull("Quartz instance not found", jmxClient.getObjectInstance(quartzInstanceMBeanName));
 
-		webClient.closeAllWindows();
+		webClient.close();
 	}
 
 	/**
@@ -82,14 +87,36 @@ public class ApplicationStartupTest {
 	@Test
 	public void testCM() throws FailingHttpStatusCodeException, IOException {
 
-		final WebClient webClient = new WebClient();
+		WebClient webClient = new WebClient();
+		final String cmUrl = getBaseUrl() + settings.getProperty("cm.context");
 
-		final Page page = webClient.getPage(getBaseUrl() + settings.getProperty("cm.context") + settings.getProperty("cm.status.url"));
+		Page page = webClient.getPage(cmUrl + settings.getProperty("cm.status.url"));
 
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
 
-		webClient.closeAllWindows();
+		webClient.close();
+
+		webClient = new WebClient();
+
+		String rwtBody="{\"head\":{\"requestCounter\":0},\"operations\":[]}";
+		//verify that home page is loaded
+		WebRequest postRequest = new WebRequest(new URL(cmUrl + "/"), HttpMethod.POST);
+
+		postRequest.setEncodingType(FormEncodingType.TEXT_PLAIN);
+		postRequest.setAdditionalHeader(HttpHeader.CONTENT_TYPE, "application/json");
+
+		postRequest.setRequestBody(rwtBody);
+
+		try {
+			page = webClient.getPage(postRequest);
+
+			assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+
+		webClient.close();
 	}
 
 	/**
@@ -107,21 +134,21 @@ public class ApplicationStartupTest {
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
 
-		webClient.closeAllWindows();
+		webClient.close();
 	}
 
 	@Test
 	public void testActiveMQWebConsole() throws FailingHttpStatusCodeException, IOException {
 
 		final WebClient webClient = new WebClient();
-		webClient.setJavaScriptEnabled(false);
+		webClient.getOptions().setJavaScriptEnabled(false);
 
 		final Page page = webClient.getPage(getBaseUrl() + settings.getProperty("activemq.context"));
 
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof HtmlPage);
 
-		webClient.closeAllWindows();
+		webClient.close();
 	}
 
 	/**
@@ -139,7 +166,7 @@ public class ApplicationStartupTest {
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
 
-		webClient.closeAllWindows();
+		webClient.close();
 	}
 
 	private String getBaseUrl() {

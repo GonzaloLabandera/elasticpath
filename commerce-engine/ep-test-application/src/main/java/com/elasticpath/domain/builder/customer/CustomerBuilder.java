@@ -16,6 +16,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.builder.DomainObjectBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerGroup;
+import com.elasticpath.domain.customer.CustomerType;
 
 /**
  * A builder that builds {@link Customer}s for testing purposes.
@@ -27,13 +28,14 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
 
 	private String guid;
 	private Long uidPk;
-	private String userId;
+	private String sharedId;
 	private Locale preferredLocale;
+	private String username;
 	private String email;
 	private String firstName;
 	private String lastName;
 	private String clearTextPassword;
-	private Boolean anonymous;
+	private CustomerType customerType;
 	private Date creationDate;
 	private String storeCode;
 	private int status;
@@ -57,10 +59,15 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
 		return this;
 	}
 
-	public CustomerBuilder withUserId(final String userId) {
-        this.userId = userId;
+	public CustomerBuilder withSharedId(final String userId) {
+        this.sharedId = userId;
         return this;
     }
+
+    public CustomerBuilder withUsername(final String username) {
+		this.username = username;
+		return this;
+	}
 
     public CustomerBuilder withEmail(final String email) {
         this.email = email;
@@ -82,8 +89,8 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
         return this;
     }
 
-    public CustomerBuilder withAnonymous(final Boolean anonymous) {
-        this.anonymous = anonymous;
+    public CustomerBuilder withCustomerType(final CustomerType customerType) {
+        this.customerType = customerType;
         return this;
     }
 
@@ -122,8 +129,9 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
         Customer customer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
         setIfNotNull(customer::setUidPk, uidPk);
         setIfNotNull(customer::setGuid, guid);
-        setIfNotNull(customer::setUserId, userId);
+        setIfNotNull(customer::setSharedId, sharedId);
 		customer.setEmail((String) ObjectUtils.defaultIfNull(email, "john.smith@elasticpath.com"));
+		customer.setUsername((String) ObjectUtils.defaultIfNull(username, "john.smith@elasticpath.com"));
 		customer.setPreferredLocale((Locale) ObjectUtils.defaultIfNull(preferredLocale, Locale.ENGLISH));
         customer.setFirstName((String) ObjectUtils.defaultIfNull(firstName, "James"));
         customer.setLastName((String) ObjectUtils.defaultIfNull(lastName, "Bond"));
@@ -131,7 +139,7 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
         customer.setStatus((Integer) ObjectUtils.defaultIfNull(status, Customer.STATUS_ACTIVE));
         customer.setClearTextPassword((String) ObjectUtils.defaultIfNull(clearTextPassword, "password"));
         customer.setStoreCode((String) ObjectUtils.defaultIfNull(storeCode, "storeCode"));
-        customer.setAnonymous((Boolean) ObjectUtils.defaultIfNull(anonymous, Boolean.FALSE));
+        customer.setCustomerType((CustomerType) ObjectUtils.defaultIfNull(customerType, CustomerType.REGISTERED_USER));
         customer.setPhoneNumber(phone);
 
         if (customerGroups != null) {

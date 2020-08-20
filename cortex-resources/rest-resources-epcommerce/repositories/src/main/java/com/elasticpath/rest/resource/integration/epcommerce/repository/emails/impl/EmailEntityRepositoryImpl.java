@@ -51,19 +51,9 @@ public class EmailEntityRepositoryImpl<E extends EmailEntity, I extends EmailIde
 	}
 
 	private Completable updateCustomerWithEmail(final Customer customer, final String email) {
-		// TODO: We will eventually want to migrate to a model where userId and email are ALWAYS independent
-		//  but we're keeping this here until we provide a way for users to manage their userId
-		if (isCustomerUserIdLinkedToEmail(customer)) {
-			customer.setUserId(email);
-		}
-
 		customer.setEmail(email);
 
 		return customerRepository.updateCustomer(customer);
-	}
-
-	private boolean isCustomerUserIdLinkedToEmail(final Customer customer) {
-		return customer.getUserId().equals(customer.getEmail());
 	}
 
 	@Override

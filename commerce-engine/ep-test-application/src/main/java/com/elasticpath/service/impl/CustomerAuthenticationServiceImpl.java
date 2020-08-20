@@ -3,9 +3,6 @@
  */
 package com.elasticpath.service.impl;
 
-import java.util.Date;
-import java.util.UUID;
-
 import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -36,16 +33,16 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 	private Utility utility;
 
 	@Override
-	public void loginStore(final Store store, final String userId) {
-		loginStoreInternal(store, userId, true);
+	public void loginStore(final Store store, final String sharedId) {
+		loginStoreInternal(store, sharedId, true);
 	}
 
-	private void loginStoreInternal(final Store store, final String userId, final boolean primaryCustomerSession) {
-		validate(store, userId);
+	private void loginStoreInternal(final Store store, final String sharedId, final boolean primaryCustomerSession) {
+		validate(store, sharedId);
 
-		final Customer customer = findCustomer(store, userId);
+		final Customer customer = findCustomer(store, sharedId);
 		if (customer == null) {
-			throw new TestApplicationException("Couldn't log into store " + store.getCode() + " with user id " + userId);
+			throw new TestApplicationException("Couldn't log into store " + store.getCode() + " with shared id " + sharedId);
 		}
 
 		handleSignIn(store, customer, primaryCustomerSession);
@@ -56,26 +53,25 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		ShoppingTestData.getInstance().setStore(store);
 	}
 
-	private void validate(final Store store, final String userId) {
+	private void validate(final Store store, final String sharedId) {
 		if (store == null) {
 			throw new TestApplicationException("Store cannot be null");
 		}
 
-		if (userId == null) {
-			throw new TestApplicationException("User id cannot be null");
+		if (sharedId == null) {
+			throw new TestApplicationException("Shared id cannot be null");
 		}
 	}
 
-	private Customer findCustomer(final Store store, final String userId) {
-		final Customer customer = customerService.findByUserId(userId, store.getCode());
+	private Customer findCustomer(final Store store, final String sharedId) {
+		final Customer customer = customerService.findBySharedId(sharedId, store.getCode());
 		if (customer != null) {
 			customer.setPreferredLocale(store.getDefaultLocale());
 		}
 		return customer;
 	}
 
-	private void createAndAddAnonymousCustomerSession(
-			final Store store, final String customerSessionGuid, final Customer customer, final boolean primaryCustomerSession) {
+	private void createAndAddAnonymousCustomerSession(final Store store, final Customer customer, final boolean primaryCustomerSession) {
 		if (customer == null) {
 			//don't persist the customer unless you talk with Ivan, Mike, Edison or Matt (or all).
 			throw new IllegalArgumentException("Customer cannot be null. If your customer is null, consider to use createAnonymousSession.");
@@ -88,14 +84,10 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		shopper.setCustomer(customer);
 
 		CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
-		customerSession.setCreationDate(new Date());
-		customerSession.setLastAccessedDate(new Date());
 		customerSession.setLocale(store.getDefaultLocale());
 		customerSession.setCurrency(store.getDefaultCurrency());
-		customerSession.setGuid(customerSessionGuid);
 		customerSession = customerSessionService.initializeCustomerSessionForPricing(customerSession, store.getCode(), store.getDefaultCurrency());
 
-		customerSessionService.add(customerSession);
 		createOrLoadShoppingCart(customerSession, store, customer);
 
 		shopperService.save(shopper);
@@ -109,26 +101,22 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 	}
 
 	private void handleCustomerSignIn(final Store store, final Customer customer, final boolean primaryCustomerSession) {
-		createAndAddAnonymousCustomerSession(store, obtainCustomerSessionGuid(), customer, primaryCustomerSession);
+		createAndAddAnonymousCustomerSession(store, customer, primaryCustomerSession);
 		if (primaryCustomerSession) {
-			handleCustomerSignIn(store.getCode(), customer, ShoppingTestData.getInstance().getCustomerSession());
+			handleCustomerSignIn(customer, ShoppingTestData.getInstance().getCustomerSession());
 		} else {
-			handleCustomerSignIn(store.getCode(), customer, ShoppingTestData.getInstance().getSecondaryCustomerSession());
+			handleCustomerSignIn(customer, ShoppingTestData.getInstance().getSecondaryCustomerSession());
 		}
 		ShoppingTestData.getInstance().setStore(store);
 	}
 
-	private void handleCustomerSignIn(final String storeCode, final Customer customer, final CustomerSession customerSession) {
+	private void handleCustomerSignIn(final Customer customer, final CustomerSession customerSession) {
 		customerSession.getShopper().setCustomer(customer);
-		customerSession.setSignedIn(true);
-
-		customerSessionService.handleShopperChangeAndUpdate(customerSession, storeCode);
 		customerSession.setPriceListStackValid(false);
 	}
 
 	private void createOrLoadShoppingCart(final CustomerSession customerSession, final Store store) {
 		ShoppingCart shoppingCart = getShoppingCartService().findOrCreateByShopper(customerSession.getShopper());
-		customerSession.setShoppingCart(shoppingCart);
 		customerSession.setCurrency(store.getDefaultCurrency());
 		shoppingCart.setCustomerSession(customerSession);
 		shoppingCart.setStore(store);
@@ -148,10 +136,6 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		}
 
 		return shoppingCart;
-	}
-
-	private String obtainCustomerSessionGuid() {
-		return UUID.randomUUID().toString();
 	}
 
 	@Override

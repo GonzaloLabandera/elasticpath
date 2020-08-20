@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -201,11 +200,11 @@ public class CreateExchangeWizard extends AbstractWizard {
 		checkErrorMessageForAlternatePaymentSource(exchangeMap);
 		selectReservePaymentSource(exchangeMap);
 		clickAuthorizeInDialog();
-		if(paymentProcessingError){
+		if (paymentProcessingError) {
 			return;
 		}
 		final boolean willExchangeOrderCancelled = Boolean.parseBoolean(exchangeMap.getOrDefault("Exchange order will be cancelled", FALSE));
-		if(willExchangeOrderCancelled) {
+		if (willExchangeOrderCancelled) {
 			String orderCreatedLabel = getDriver().findElement(By.cssSelector(NEW_ORDER_CREATED_LABEL)).getText();
 			exchangeOrderNumber = orderCreatedLabel.substring(orderCreatedLabel.lastIndexOf(' ') + 1);
 		}
@@ -276,9 +275,10 @@ public class CreateExchangeWizard extends AbstractWizard {
 
 	/**
 	 * Create exchange for free item with no new reservation for exchange order.
-	 * @param exchangeMap  exchange info map
+	 *
+	 * @param exchangeMap exchange info map
 	 */
-	public void createFreeItemExchange(final Map<String, String> exchangeMap){
+	public void createFreeItemExchange(final Map<String, String> exchangeMap) {
 		String returnSku = exchangeMap.get("Return Sku Code");
 		enterExchangeReturnQuantity(Integer.parseInt(exchangeMap.get("Return Qty")), returnSku);
 		clickNextInDialog();
@@ -323,7 +323,6 @@ public class CreateExchangeWizard extends AbstractWizard {
 		click(SHIPPING_COST_INPUT);
 		WebElement element = getDriver().findElement(By.cssSelector(SHIPPING_COST_INPUT));
 		((JavascriptExecutor) getDriver()).executeScript(String.format("arguments[0].value=\"%s\";", cost), element);
-		element.sendKeys(Keys.ENTER);
 	}
 
 	/**

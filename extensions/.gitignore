@@ -2,6 +2,10 @@
 # ----------------------------
 
 # Ignored files #
+.checkstyle
+.classpath
+.pmd
+.pmdruleset
 .openjpaenhancer
 ImportExport-*.log
 velocity.log

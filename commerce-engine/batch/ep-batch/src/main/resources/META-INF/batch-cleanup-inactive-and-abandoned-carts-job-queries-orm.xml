@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+-->
+	<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+		<!-- Named queries for InactiveCartsCleanupJob -->
+		<named-query name="FIND_INACTIVE_SHOPPING_CART_UIDS">
+			<query>
+				SELECT sc.uidPk
+				FROM ShoppingCartMementoImpl sc
+				WHERE sc.status = 'INACTIVE'
+			</query>
+		</named-query>
+
+		<!-- Named queries for AbandonedCartsCleanupJob -->
+		<named-query name="FIND_ABANDONED_SHOPPING_CART_UIDS">
+			<query>
+				SELECT sc.uidPk
+				FROM ShoppingCartMementoImpl sc
+				WHERE sc.lastModifiedDate &lt;= ?1
+			</query>
+		</named-query>
+
+		<!-- common DMLs -->
+		<named-query name="DELETE_SHOPPING_CART_BY_UIDS">
+			<query>
+				DELETE
+				FROM ShoppingCartMementoImpl sc
+				WHERE sc.uidPk IN (:list)
+			</query>
+		</named-query>
+		<named-query name="DISABLE_PARENT_CHILD_CART_ITEM_RELATION_BY_SHOPPING_CART_UIDS">
+			<query>
+				UPDATE ShoppingItemImpl si SET si.parentItemUid = null
+				WHERE si.childItemCartUid IN (:list)
+			</query>
+		</named-query>
+	</entity-mappings>

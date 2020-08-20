@@ -65,7 +65,6 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 	private CamelContext catalogCamelContext;
 
 	private Category parentLinkedCategory;
-	private Catalog virtualCatalog;
 	private Catalog masterCatalog;
 	private Category masterCategory;
 	private Store virtualStore;
@@ -87,7 +86,6 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 
 		final MultiCategoryScenario scenario = getTac().useScenario(MultiCategoryScenario.class);
 		parentLinkedCategory = scenario.getLinkedCategory();
-		virtualCatalog = scenario.getVirtualCatalog();
 		masterCatalog = scenario.getCategory().getCatalog();
 		masterCategory = scenario.getCategory();
 		virtualStore = scenario.getVirtualStore();
@@ -189,5 +187,4 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 				.filter(projection -> projection.getProjectionId().getStore().equals(virtualStore.getCode())).collect(Collectors.toList());
 		assertEquals(1, result.size());
 	}
-
 }

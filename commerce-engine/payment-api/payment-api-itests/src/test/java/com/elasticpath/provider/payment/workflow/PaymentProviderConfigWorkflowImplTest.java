@@ -38,11 +38,14 @@ public class PaymentProviderConfigWorkflowImplTest extends DbTestCase {
 	@Test
 	@DirtiesDatabase
 	public void ensureFindPaymentProviderConfigurationByStatusFindsPaymentProvider() {
-		PaymentProviderConfigDTO configuration = createAndPersistPaymentProviderConfiguration();
-		List<PaymentProviderConfigDTO> savedConfigurationList
+		final List<PaymentProviderConfigDTO> initConfigurationList =
+				paymentProviderConfigWorkflow.findByStatus(PaymentProviderConfigurationStatus.ACTIVE);
+		assertThat(initConfigurationList).extracting(PaymentProviderConfigDTO::getGuid).doesNotContain(PAYMENT_PROVIDER_CONFIG_GUID);
+
+		final PaymentProviderConfigDTO configuration = createAndPersistPaymentProviderConfiguration();
+		final List<PaymentProviderConfigDTO> updatedConfigurationList
 				= paymentProviderConfigWorkflow.findByStatus(PaymentProviderConfigurationStatus.ACTIVE);
-		assertThat(savedConfigurationList).hasSize(1);
-		assertThat(savedConfigurationList.get(0)).isEqualTo(configuration);
+		assertThat(updatedConfigurationList).contains(configuration);
 	}
 
 	@Test

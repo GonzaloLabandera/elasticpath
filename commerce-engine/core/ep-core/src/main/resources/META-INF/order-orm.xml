@@ -16,6 +16,13 @@
 				WHERE o.orderNumber = ?1
 			</query>
 		</named-query>
+		<named-query name="CUSTOMER_BY_ORDERNUMBER">
+			<query>
+				SELECT o.customer
+				FROM OrderImpl as o
+				WHERE o.orderNumber = ?1
+			</query>
+		</named-query>
 		<named-query name="ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE">
 			<query>
 				SELECT o
@@ -85,14 +92,6 @@
 				AND UPPER(o.storeCode) = UPPER(?2)
 				AND o.status <> 'FAILED'
 				]]>
-			</query>
-		</named-query>
-		<named-query name="ORDERS_BY_ORDER_STATUS_AND_SHIPMENT_STATUS">
-			<query>
-				SELECT o
-				FROM OrderImpl AS o, IN(o.shipments) as ship
-				WHERE o.status in (:listOrderStatus)
-				AND ship.status = :shipmentStatus
 			</query>
 		</named-query>
 		<named-query name="PHYSICAL_SHIPMENTS_BY_STATUS_AND_WAREHOUSE">
@@ -256,7 +255,7 @@
 				AND osku.shipment.uidPk = oship.uidPk
 				AND o.customer.uidPk = c.uidPk
 				AND oship.orderInternal.uidPk = o.uidPk
-				AND c.userId = ?1
+				AND c.sharedId = ?1
 				AND UPPER(o.storeCode) = UPPER(?2)
 				AND o.status <> 'FAILED'
 				AND o.createdDate<= ?3
@@ -272,7 +271,7 @@
 				AND osku.shipment.uidPk = oship.uidPk
 				AND o.customer.uidPk = c.uidPk
 				AND oship.orderInternal.uidPk = o.uidPk
-				AND c.userId = ?1
+				AND c.sharedId = ?1
 				AND UPPER(o.storeCode) = UPPER(?2)
 				AND o.status <> 'FAILED'
 				AND o.createdDate<= ?3
@@ -322,6 +321,5 @@
 		<named-query name="FIND_TAX_JOURNAL_RECORD_BY_DOC_ID_AND_ITEM_CODE_AND_JOURNAL_TYPE">
 			<query>SELECT jr FROM TaxJournalRecordImpl jr WHERE jr.documentId = ?1 AND jr.itemCode = ?2 AND jr.journalType = ?3</query>
 		</named-query>
-	
 </entity-mappings>
 

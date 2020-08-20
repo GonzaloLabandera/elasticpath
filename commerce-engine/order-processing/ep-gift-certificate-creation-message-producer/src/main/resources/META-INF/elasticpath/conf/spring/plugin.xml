@@ -28,9 +28,8 @@
 		</property>
 		<property name="eventMessageDataFormat" ref="eventMessageDataFormat"/>
 		<property name="eventMessageFactory" ref="eventMessageFactory"/>
-		<property name="eventMessagePredicateFilter" ref="orderShipmentCreatedEventTypePredicate"/>
+		<property name="eventMessagePredicateFilter" ref="giftCertificatePropertyAndOrderCreatedEventTypePredicate"/>
 		<property name="eventMessagePublisher" ref="giftCertificateEventMessagePublisher"/>
 		<property name="orderService" ref="orderService"/>
 	</bean>
-
 </beans>

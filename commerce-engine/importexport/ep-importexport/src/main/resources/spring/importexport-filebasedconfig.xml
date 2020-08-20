@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    ">
+
+	<!-- Use the Spring PropertiesFactoryBean to get properties from a file on the classpath as a Properties object -->
+	<bean id="applicationProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="${configLocation:classpath:importexporttool.config}" />
+	</bean>
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreUnresolvablePlaceholders" value="true"></property>
+	</bean>
+
+	<!-- Initializer which will be called before the persistence engine bean is created. -->
+	<!-- this allows the datasource to be overridden -->
+	<bean id="applicationInitialization" class="com.elasticpath.importexport.client.ImportExportInitialization"
+		  init-method="init">
+		<property name="beanFactory" ref="coreBeanFactory" />
+		<property name="appProperties" ref="applicationProperties" />
+	</bean>
+
+	<beans profile="default">
+		<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<property name="locations" value="${configLocation:classpath:importexporttool.config}"></property>
+			<property name="ignoreUnresolvablePlaceholders" value="true"></property>
+		</bean>
+
+		<bean id="applicationInitialization" class="com.elasticpath.importexport.client.DataSourceProperties" factory-method="getInstance">
+			<property name="properties" ref="applicationProperties"/>
+		</bean>
+
+		<bean id="dataSource" class="com.elasticpath.importexport.client.JPADataSource"/>
+	</beans>
+
+</beans>

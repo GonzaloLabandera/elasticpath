@@ -48,7 +48,7 @@ public class CustomerDetailsProfilePage extends AbstractCmClientEditorPage imple
 	protected void addEditorSections(final AbstractCmClientFormEditor editor, final IManagedForm managedForm) {
 		// Create the sections
 		managedForm.addPart(new CustomerDetailsProfileBasicSection(this, editor));
-		managedForm.addPart(new CustomerDetailsProfileRegistrationSection(this, editor));
+		managedForm.addPart(new CustomerDetailsProfileRegistrationSection(this, editor, this.getSite()));
 		managedForm.addPart(new CustomerDetailsProfileAttributesSection(this, editor));
 		addExtensionEditorSections(editor, managedForm, FulfillmentPlugin.PLUGIN_ID, this.getClass().getSimpleName());
 	}

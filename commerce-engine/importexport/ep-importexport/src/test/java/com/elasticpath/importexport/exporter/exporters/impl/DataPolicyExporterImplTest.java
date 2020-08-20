@@ -150,7 +150,7 @@ public class DataPolicyExporterImplTest {
 	 */
 	@Test
 	public void testJobType() {
-		assertThat(JobType.DATA_POLICY)
+		assertThat(JobType.DATAPOLICY)
 				.as("Incorrect job type returned.")
 				.isEqualTo(dataPolicyExporterImpl.getJobType());
 	}

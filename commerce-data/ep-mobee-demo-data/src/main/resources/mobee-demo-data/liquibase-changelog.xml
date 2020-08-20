@@ -471,4 +471,16 @@
 			<where>PATH = 'COMMERCE/SYSTEM/API/enableTrustedTraits'</where>
 		</update>
 	</changeSet>
+	
+	<changeSet id="create-test-changeset" author="elasticpath" context="mobee-data">
+		<insert tableName="TCHANGESET">
+			<column name="UIDPK" valueNumeric="1"/>
+			<column name="NAME" value="Test Change Set"/>
+			<column name="DESCRIPTION" value="Test Change Set"/>
+			<column name="OBJECT_GROUP_ID" value="865223FE-4B81-6971-ED99-0BE65A82C8C2"/>
+			<column name="CREATED_DATE" valueDate="2020-01-01 00:00:00.0t"/>
+			<column name="CREATED_BY_USER_GUID" value="300"/>
+			<column name="STATE_CODE" value="OPEN"/>
+		</insert>
+	</changeSet>
 </databaseChangeLog>

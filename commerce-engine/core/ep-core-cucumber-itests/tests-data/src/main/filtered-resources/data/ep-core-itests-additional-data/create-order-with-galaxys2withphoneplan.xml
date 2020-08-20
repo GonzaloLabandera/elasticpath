@@ -757,22 +757,5 @@
 			<column name="VALUE" valueNumeric="44.03"/>
 			<column name="ORDER_SHIPMENT_UID" valueNumeric="100000"/>
 		</insert>
-		<insert tableName="torderpayment">
-			<column name="UIDPK" valueNumeric="100000"/>
-			<column name="CREATED_DATE" valueDate="2018-02-19 13:21:23.0"/>
-			<column name="DISPLAY_VALUE" value="test-token"/>
-			<column name="AMOUNT" valueNumeric="704.43"/>
-			<column name="REFERENCE_ID" value="testReferenceId"/>
-			<column name="REQUEST_TOKEN" value="testRequestToken"/>
-			<column name="AUTHORIZATION_CODE" value="testAuthorizationCode"/>
-			<column name="TRANSACTION_TYPE" value="Authorization"/>
-			<column name="CURRENCY" value="CAD"/>
-			<column name="EMAIL" value="testEmail"/>
-			<column name="STATUS" value="APPROVED"/>
-			<column name="ORDER_UID" valueNumeric="100000"/>
-			<column name="ORDERSHIPMENT_UID" valueNumeric="100000"/>
-			<column name="PAYMENT_FOR_SUBSCRIPTIONS" valueNumeric="0"/>
-			<column name="LAST_MODIFIED_DATE" valueDate="2018-02-19 13:21:24.0"/>
-		</insert>
 	</changeSet>
 </databaseChangeLog>

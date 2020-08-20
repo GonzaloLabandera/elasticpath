@@ -6,11 +6,14 @@ package com.elasticpath.caching.core.catalog;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
+import com.elasticpath.cache.CacheLoader;
+import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.service.catalog.ProductLookup;
@@ -19,8 +22,14 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 /**
  * A cached version of the {@link com.elasticpath.service.catalog.ProductSkuLookup} interface.
  */
-public class CachingProductSkuLookupImpl implements ProductSkuLookup {
+@SuppressWarnings("PMD.GodClass")
+public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCachingService<ProductSku> {
 	private static final Logger LOG = Logger.getLogger(CachingProductSkuLookupImpl.class);
+
+	private final CacheLoader<String, Long> productUidBySkuGuidCacheLoader = new ProductUidBySkuIdentifierCacheLoader(
+			identifiers -> getFallbackProductSkuLookup().findByGuids(identifiers), ProductSku::getGuid, this::cacheSkuIds);
+	private final CacheLoader<String, Long> productUidBySkuCodeCacheLoader = new ProductUidBySkuIdentifierCacheLoader(
+			identifiers -> getFallbackProductSkuLookup().findBySkuCodes(identifiers), ProductSku::getSkuCode, this::cacheSkuIds);
 
 	private Cache<Long, Long> uidToProductCache;
 	private Cache<String, Long> guidToProductCache;
@@ -83,6 +92,9 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup {
 	public <P extends ProductSku> P findByGuid(final String guid) throws EpServiceException {
 		Long productUid = getGuidToProductCache().get(guid);
 		if (productUid == null) {
+			if (getGuidToProductCache().containsKey(guid)) {
+				return null;
+			}
 			ProductSku productSku = getFallbackProductSkuLookup().findByGuid(guid);
 			if (productSku == null) {
 				LOG.warn("Could not load product sku with guid from fallback sku lookup [" + guid + "]");
@@ -113,8 +125,9 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> List<P> findByGuids(final Collection<String> guids) throws EpServiceException {
+		final Map<String, Long> productUidsBySkuGuids = getGuidToProductCache().getAll(guids, productUidBySkuGuidCacheLoader);
 		ArrayList<P> productSkus = new ArrayList<>();
-		for (String guid : guids) {
+		for (String guid : productUidsBySkuGuids.keySet()) {
 			ProductSku sku = findByGuid(guid);
 			if (sku == null) {
 				continue;
@@ -130,6 +143,9 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup {
 	public <P extends ProductSku> P findBySkuCode(final String skuCode) throws EpServiceException {
 		Long productUid = getSkuCodeToProductCache().get(skuCode);
 		if (productUid == null) {
+			if (getSkuCodeToProductCache().containsKey(skuCode)) {
+				return null;
+			}
 			ProductSku productSku = getFallbackProductSkuLookup().findBySkuCode(skuCode);
 			if (productSku == null) {
 				LOG.warn("Could not load product sku with sku code from fallback sku lookup [" + skuCode + "]");
@@ -160,8 +176,9 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> List<P> findBySkuCodes(final Collection<String> skuCodes) throws EpServiceException {
+		final Map<String, Long> productUidsBySkuCodes = getSkuCodeToProductCache().getAll(skuCodes, productUidBySkuCodeCacheLoader);
 		ArrayList<P> productSkus = new ArrayList<>();
-		for (String skuCode : skuCodes) {
+		for (String skuCode : productUidsBySkuCodes.keySet()) {
 			ProductSku sku = findBySkuCode(skuCode);
 			if (sku == null) {
 				continue;
@@ -181,6 +198,31 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup {
 			getSkuCodeToExistenceStatusCache().put(skuCode, isProductSkuExistStatus);
 		}
 		return isProductSkuExistStatus;
+	}
+
+	@Override
+	public void cache(final ProductSku entity) {
+		cacheSkuIds(entity);
+	}
+
+	@Override
+	public void invalidate(final ProductSku entity) {
+		getUidToProductCache().remove(entity.getUidPk());
+		getGuidToProductCache().remove(entity.getGuid());
+		getSkuCodeToProductCache().remove(entity.getSkuCode());
+	}
+
+	@Override
+	public void invalidateAll() {
+		getUidToProductCache().removeAll();
+		getGuidToProductCache().removeAll();
+		getSkuCodeToProductCache().removeAll();
+		getSkuCodeToExistenceStatusCache().removeAll();
+	}
+
+	@Override
+	public String findImagePathBySkuGuid(final String skuGuid) {
+		return fallbackProductSkuLookup.findImagePathBySkuGuid(skuGuid);
 	}
 
 	/**

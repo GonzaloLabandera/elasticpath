@@ -87,13 +87,6 @@ public interface CheckoutActionContext {
 	OrderReturn getExchange();
 
 	/**
-	 * Returns the Ip Address of the Customer that is doing this checkout.
-	 *
-	 * @return the Customer IP Address.
-	 */
-	String getCustomerIpAddress();
-
-	/**
 	 * Returns the Customer Session.
 	 *
 	 * @return the Customer Session

@@ -114,6 +114,11 @@ class Order extends CommonMethods {
 
 	static void submitPurchaseWithoutFollow() {
 		purchaseform()
+		client.body.messages.each { message ->
+			assertThat(message.type)
+					.as("Purchase is blocked due to the following: " + message["debug-message"])
+					.isNotEqualTo("needinfo")
+		}
 		client.submitorderaction()
 				.stopIfFailure()
 	}

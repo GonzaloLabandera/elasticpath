@@ -128,7 +128,7 @@
 		<entity>
 			<name>payment-instrument-attributes</name>
 			<description>
-				<![CDATA[Indicates specific attributes for the individual payment instrument, such as payment token. These attributes differentiate it from other payment instruments.]]>
+				<![CDATA[Payment instrument-specific attributes, underscoring the individual payment instrument and differentiating it from other instruments.  These attributes might include a payment token or time to live.]]>
 			</description>
 			<dynamic/>
 		</entity>
@@ -149,8 +149,7 @@
 			<property>
 				<name>payment-instrument-identification-form</name>
 				<description>
-					<![CDATA[Payment instrument-specific attributes, underscoring the individual payment instrument through dynamic fields required by the payment gateway for payment instrument creation.
-					Populate these fields with payment instrument identification information returned by the third-party payment gateway, such as a payment token.]]>
+					<![CDATA[Payment instrument-specific attributes, underscoring the individual payment instrument through dynamic fields required by the payment gateway for payment instrument creation. Populate these fields with payment instrument identification information returned by the third-party payment gateway, such as a payment token.]]>
 				</description>
 				<is-a>payment-instrument-attributes</is-a>
 			</property>
@@ -185,13 +184,13 @@
 			<property>
 				<name>payment-instrument-identification-attributes</name>
 				<description>
-					<![CDATA[Indicates specific attributes for the individual payment instrument, such as payment token. These attributes differentiate it from other payment instruments.]]>
+					<![CDATA[Payment instrument-specific attributes, underscoring the individual payment instrument and differentiating it from other instruments.  These attributes might include a payment token or time to live.]]>
 				</description>
 				<is-a>payment-instrument-attributes</is-a>
 			</property>
 			<property>
 				<name>default-on-profile</name>
-				<description><![CDATA[Indicates if this is the default payment instrument on the profile.]]></description>
+				<description><![CDATA[Indicates whether a payment instrument is the default one for a profile.]]></description>
 				<boolean/>
 			</property>
 			<property>

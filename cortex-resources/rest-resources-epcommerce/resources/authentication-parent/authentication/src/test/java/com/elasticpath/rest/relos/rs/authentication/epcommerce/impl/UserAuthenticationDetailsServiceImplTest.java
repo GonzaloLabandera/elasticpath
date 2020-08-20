@@ -62,7 +62,7 @@ public class UserAuthenticationDetailsServiceImplTest {
 	public void testLoadByUserName() {
 		User expectedUser = createValidUser();
 
-		when(customerRepository.findCustomerByUserId(DEFAULT_STORE_CODE, VALID_USER_NAME))
+		when(customerRepository.findCustomerByUsername(VALID_USER_NAME, DEFAULT_STORE_CODE))
 				.thenReturn(ExecutionResultFactory.createReadOK(customer));
 		when(customer.getCustomerAuthentication()).thenReturn(customerAuthentication);
 		when(customer.isEnabled()).thenReturn(true);
@@ -78,7 +78,7 @@ public class UserAuthenticationDetailsServiceImplTest {
 	 */
 	@Test(expected = UsernameNotFoundException.class)
 	public void testLoadWithInvalidStoreCode() {
-		when(customerRepository.findCustomerByUserId(INVALID_STORE_CODE, INVALID_STORE_CODE))
+		when(customerRepository.findCustomerByUsername(INVALID_STORE_CODE, INVALID_STORE_CODE))
 				.thenReturn(ExecutionResultFactory.createNotFound());
 		userAuthenticationDetailsService.loadUserByUsername(INVALID_STORE_CODE, INVALID_STORE_CODE);
 	}
@@ -88,7 +88,7 @@ public class UserAuthenticationDetailsServiceImplTest {
 	 */
 	@Test(expected = UsernameNotFoundException.class)
 	public void testLoadInvalidUser() {
-		when(customerRepository.findCustomerByUserId(DEFAULT_STORE_CODE, INVALID_USER_NAME))
+		when(customerRepository.findCustomerByUsername(INVALID_USER_NAME, DEFAULT_STORE_CODE))
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
 		String storePlusUser = AuthenticationUtil.combinePrincipals(DEFAULT_STORE_CODE, INVALID_USER_NAME);
@@ -100,7 +100,7 @@ public class UserAuthenticationDetailsServiceImplTest {
 	 */
 	@Test(expected = UsernameNotFoundException.class)
 	public void testLoadUnauthenticatableUser() {
-		when(customerRepository.findCustomerByUserId(DEFAULT_STORE_CODE, DISABLED_USER_NAME))
+		when(customerRepository.findCustomerByUsername(DISABLED_USER_NAME, DEFAULT_STORE_CODE))
 				.thenReturn(ExecutionResultFactory.createReadOK(customer));
 		when(customer.getCustomerAuthentication()).thenReturn(null);
 
@@ -113,7 +113,7 @@ public class UserAuthenticationDetailsServiceImplTest {
 	 */
 	@Test(expected = UsernameNotFoundException.class)
 	public void testLoadDisabledUser() {
-		when(customerRepository.findCustomerByUserId(DEFAULT_STORE_CODE, DISABLED_USER_NAME))
+		when(customerRepository.findCustomerByUsername(DISABLED_USER_NAME, DEFAULT_STORE_CODE))
 				.thenReturn(ExecutionResultFactory.createReadOK(customer));
 		when(customer.getCustomerAuthentication()).thenReturn(customerAuthentication);
 		when(customer.isEnabled()).thenReturn(false);

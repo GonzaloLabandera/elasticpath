@@ -6,7 +6,7 @@ Feature: Customer Data Policy
 
   Scenario Outline: View Customer Data Points for Active Data Policy
     Given I go to Customer Service
-    And I search and open customer editor for email ID <EMAIL>
+    And I search and open customer editor for shared ID <SHARED-ID>
     And I select Customer Data Policies tab in the Customer Editor
     When I view Data Points for Data Policy <DATA-POLICY-NAME>
     Then the following data points captured correct customer data
@@ -16,12 +16,12 @@ Feature: Customer Data Policy
       | Customer last name               | automation           |
 
     Examples:
-      | EMAIL                               | DATA-POLICY-NAME           |
-      | automation_data_policy_user2@ep.com | Automation Active Policy 2 |
+      | SHARED-ID                                 | DATA-POLICY-NAME           | EMAIL                               |
+      | MOBEE:automation_data_policy_user2@ep.com | Automation Active Policy 2 | automation_data_policy_user2@ep.com |
 
   Scenario Outline: Delete Customer Data Points
     Given I go to Customer Service
-    And I search and open customer editor for email ID <EMAIL>
+    And I search and open customer editor for shared ID <SHARED-ID>
     And I select Customer Data Policies tab in the Customer Editor
     When I Delete Data Points for Data Policy <DATA-POLICY-NAME>
     Then the following data points remain captured
@@ -32,19 +32,19 @@ Feature: Customer Data Policy
     And Data Point Values are set to Hyphen for following Removable Data Points
       | Customer Billing Address Street1 |
     Examples:
-      | EMAIL                               | DATA-POLICY-NAME           |
-      | automation_data_policy_user1@ep.com | Automation Active Policy 2 |
+      | SHARED-ID                                 | DATA-POLICY-NAME           | EMAIL                               |
+      | MOBEE:automation_data_policy_user1@ep.com | Automation Active Policy 2 | automation_data_policy_user1@ep.com |
 
   Scenario Outline: View Disabled Data Policy for Customer
     Given I Disabled existing data policy <DATA-POLICY-NAME> where consent is given by customer <EMAIL>
     And I go to Customer Service
-    And I search and open customer editor for email ID <EMAIL>
+    And I search and open customer editor for shared ID <EMAIL>
     When I select Customer Data Policies tab in the Customer Editor
     Then Disabled Data Policy <DATA-POLICY-NAME> should not be visible
     When I click on Show Disabled Data Policies
     Then I should see Disabled Data Policy <DATA-POLICY-NAME>
 
     Examples:
-      | EMAIL                               | DATA-POLICY-NAME           |
-      | automation_data_policy_user2@ep.com | Automation Active Policy 1 |
+      | EMAIL                                     | DATA-POLICY-NAME           |
+      | MOBEE:automation_data_policy_user2@ep.com | Automation Active Policy 1 |
 

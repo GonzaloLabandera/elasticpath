@@ -24,6 +24,15 @@
 		<property name="timeService" ref="timeService"/>
 	</bean>
 
+	<bean id="productTypeDaoProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="productTypeDao"/>
+	</bean>
+
+	<bean id="cachedProductTypeDao" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.persistence.dao.ProductTypeDao"/>
+		<property name="proxy" ref="productTypeDaoProxy"/>
+	</bean>
+
 	<bean id="productDaoImpl" class="com.elasticpath.persistence.dao.impl.ProductDaoImpl">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 		<property name="productLoadTunerAll" ref="PRODUCT_LOAD_TUNER_ALL"/>
@@ -140,6 +149,7 @@
 
 	<bean id="categoryQueryComposer" class="com.elasticpath.service.search.solr.query.CategoryQueryComposerImpl" parent="abstractQueryComposer"/>
 	<bean id="customerQueryComposer" class="com.elasticpath.service.search.solr.query.CustomerQueryComposerImpl" parent="abstractQueryComposer"/>
+	<bean id="accountQueryComposer" class="com.elasticpath.service.search.solr.query.AccountQueryComposerImpl" parent="abstractQueryComposer"/>
 	<bean id="promotionQueryComposer" class="com.elasticpath.service.search.solr.query.PromotionQueryComposerImpl" parent="abstractQueryComposer"/>
 	<bean id="userQueryComposer" class="com.elasticpath.service.search.solr.query.UserQueryComposerImpl" parent="abstractQueryComposer"/>
 	<bean id="filteredQueryComposer" class="com.elasticpath.service.search.solr.query.FilteredQueryComposerImpl" parent="abstractQueryComposer">
@@ -304,6 +314,7 @@
 				<entry key="com.elasticpath.service.search.query.ProductSearchCriteria" value-ref="productQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.CategorySearchCriteria" value-ref="categoryQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.CustomerSearchCriteria" value-ref="customerQueryComposer"/>
+				<entry key="com.elasticpath.service.search.query.AccountSearchCriteria" value-ref="accountQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.PromotionSearchCriteria" value-ref="promotionQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.FilteredSearchCriteria" value-ref="filteredQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.UserSearchCriteria" value-ref="userQueryComposer"/>

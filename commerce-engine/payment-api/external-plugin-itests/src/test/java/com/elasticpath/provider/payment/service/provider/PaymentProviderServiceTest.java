@@ -61,7 +61,9 @@ public class PaymentProviderServiceTest extends BasicSpringContextTest {
 		final Collection<PaymentProviderPlugin> plugins = paymentProviderService.getPlugins();
 
 		assertThat(plugins).extracting(PaymentProviderPlugin::getUniquePluginId)
-				.containsExactlyInAnyOrder(EXTERNAL_TEST_PAYMENT_PLUGIN_BEAN_NAME, "paymentProviderPluginForIntegrationTesting");
+				.containsExactlyInAnyOrder(EXTERNAL_TEST_PAYMENT_PLUGIN_BEAN_NAME,
+						"paymentGatewayNull",
+						"paymentProviderPluginForIntegrationTesting");
 	}
 
 	@Test

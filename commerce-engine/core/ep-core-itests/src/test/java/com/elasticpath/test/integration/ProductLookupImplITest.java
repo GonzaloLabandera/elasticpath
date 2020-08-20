@@ -64,6 +64,17 @@ public class ProductLookupImplITest extends DbTestCase {
 	}
 
 	@Test
+	public void testFindByGuids() {
+		final Product product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
+				scenario.getCategory(), scenario.getWarehouse());
+		final String productGuid = product.getGuid();
+		final List<Product> loadedProducts = productLookup.findByGuids(Collections.singletonList(productGuid));
+
+		assertEquals("The loaded product should match the product we asked for",
+				Collections.singletonList(product), loadedProducts);
+	}
+
+	@Test
 	public void testFindByUid() {
 		final Product product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
 				scenario.getCategory(), scenario.getWarehouse());

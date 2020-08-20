@@ -37,6 +37,7 @@ import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.attribute.impl.CustomerProfileValueImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.AttributePolicy;
@@ -123,10 +124,10 @@ public class CustomerProfileAttributeServiceImplTest {
 
 		customerProfileAttributes = setupCustomerProfileAttributes();
 
-		when(attributeService.getCustomerProfileAttributeKeys())
+		when(attributeService.getCustomerProfileAttributeKeys(AttributeUsageImpl.USER_PROFILE_USAGE))
 				.thenReturn(customerProfileAttributes.stream().map(attr -> attr.getKey()).collect(Collectors.toSet()));
 
-		when(attributeService.getCustomerProfileAttributesMap())
+		when(attributeService.getCustomerProfileAttributesMap(AttributeUsageImpl.USER_PROFILE_USAGE))
 				.thenReturn(customerProfileAttributes.stream()
 						.collect(Collectors.toMap(attribute -> attribute.getKey(), Function.identity())));
 
@@ -227,7 +228,7 @@ public class CustomerProfileAttributeServiceImplTest {
 		when(attributeValueValidationService.validate(anyMap(), anyMap()))
 				.thenReturn(Collections.emptyList());
 
-		assertThat(service.validateAttributes(attributeValueMap, STORE))
+		assertThat(service.validateAttributes(attributeValueMap, STORE, AttributeUsageImpl.USER_PROFILE_USAGE))
 				.as("unexpected errors were encountered")
 				.isEmpty();
 
@@ -259,7 +260,7 @@ public class CustomerProfileAttributeServiceImplTest {
 		when(attributeValueValidationService.validate(anyMap(), anyMap()))
 				.thenReturn(Lists.newArrayList(new StructuredErrorMessage(ERROR, ERROR, Collections.emptyMap())));
 
-		assertThat(service.validateAttributes(attributeValueMap, STORE))
+		assertThat(service.validateAttributes(attributeValueMap, STORE, AttributeUsageImpl.USER_PROFILE_USAGE))
 				.as("expected errors were not encountered")
 				.isNotEmpty();
 	}

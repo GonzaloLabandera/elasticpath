@@ -29,7 +29,7 @@ public class StoreAssociationExporter extends AbstractExporterImpl<Store, StoreA
 	
 	@Override
 	public JobType getJobType() {
-		return JobType.STORE_ASSOCIATION;
+		return JobType.STOREASSOCIATION;
 	}
 
 	@Override

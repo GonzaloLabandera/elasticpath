@@ -15,6 +15,7 @@ import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.event.AbstractLifecycleListener;
 import org.apache.openjpa.event.LifecycleEvent;
 import org.apache.openjpa.event.LifecycleEventManager;
+import org.apache.openjpa.event.PostPersistListener;
 import org.apache.openjpa.event.UpdateListener;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
@@ -35,7 +36,8 @@ import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 /**
  * Lifecycle event listener which sends domain events for supported entities.
  */
-public class DomainEventListener extends AbstractLifecycleListener implements UpdateListener, LifecycleEventManager.ListenerAdapter {
+public class DomainEventListener extends AbstractLifecycleListener
+		implements PostPersistListener, UpdateListener, LifecycleEventManager.ListenerAdapter {
 
 	private static final Logger LOGGER = Logger.getLogger(DomainEventListener.class);
 
@@ -46,19 +48,15 @@ public class DomainEventListener extends AbstractLifecycleListener implements Up
 	private EventTypeFactory eventTypeFactory;
 	private  Set<Integer> eventTypes;
 
-
-
 	@Override
-	public void afterPersist(final LifecycleEvent event) {
+	public void afterPersistPerformed(final LifecycleEvent event) {
 		handleEvent(event, EventTypeFactory.EventAction.CREATED);
 	}
-
 
 	@Override
 	public void afterDelete(final LifecycleEvent event) {
 		handleEvent(event, EventTypeFactory.EventAction.DELETED);
 	}
-
 
 	@Override
 	public void afterUpdatePerformed(final LifecycleEvent event) {
@@ -69,7 +67,6 @@ public class DomainEventListener extends AbstractLifecycleListener implements Up
 	public void beforeUpdate(final LifecycleEvent event) {
 		handleEvent(event, EventTypeFactory.EventAction.UPDATED);
 	}
-
 
 	@Override
 	public void afterAttach(final LifecycleEvent event) {
@@ -86,11 +83,10 @@ public class DomainEventListener extends AbstractLifecycleListener implements Up
 
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Domain event message sent: "
-						+ eventAction + " " + event.getSource().getClass() + "with GUID" + domainGuid);
+						+ eventAction + " " + event.getSource().getClass() + " with GUID " + domainGuid);
 			}
 		}
 	}
-
 
 	private String getGuid(final LifecycleEvent event) {
 		if (event.getSource() instanceof Category) {

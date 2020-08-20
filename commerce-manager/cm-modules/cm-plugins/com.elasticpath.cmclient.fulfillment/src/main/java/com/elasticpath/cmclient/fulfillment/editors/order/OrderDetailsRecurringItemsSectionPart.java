@@ -35,6 +35,7 @@ import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.BeanLocator;
+import com.elasticpath.cmclient.core.conversion.EpMonetoryValueConverter;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
@@ -73,7 +74,7 @@ import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports"})
 public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEditorPageSectionPart
 	implements SelectionListener, ISelectionChangedListener {
-	
+
 	private static final Logger LOG = Logger.getLogger(OrderDetailsRecurringItemsSectionPart.class);
 
 	private static final int COLUMN_WIDTH_IMAGE = 21;
@@ -249,7 +250,7 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 		@Override
 		public String getText(final Object element) {
 			final OrderSku orderSku = (OrderSku) element;
-			return orderSku.getDiscountBigDecimal().toString();
+			return new EpMonetoryValueConverter(orderSku.getCurrency()).asString(orderSku.getDiscountBigDecimal());
 		}
 	}
 

@@ -10,11 +10,6 @@
 
 	<artifactId>ep-search-test-support</artifactId>
 	<name>Elastic Path Search Test Support</name>
-	<properties>
-		<jetty.version>9.3.20.v20170531</jetty.version>
-
-	</properties>
-
 
 	<dependencies>
 		<dependency>
@@ -57,13 +52,11 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
-			<version>${jetty.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-runner</artifactId>
-			<version>${jetty.version}</version>
 		</dependency>
 
 		<dependency>

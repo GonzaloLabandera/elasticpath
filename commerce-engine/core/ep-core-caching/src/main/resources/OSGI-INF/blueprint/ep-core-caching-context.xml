@@ -15,4 +15,5 @@
 	<import resource="../../spring/core-caching/cache-catalog.xml"/>
 	<import resource="../../spring/core-caching/cache-pricing.xml"/>
 	<import resource="../../spring/core-caching/cache-rules.xml"/>
+	<import resource="../../spring/core-caching/cache-tax.xml"/>
 </beans>

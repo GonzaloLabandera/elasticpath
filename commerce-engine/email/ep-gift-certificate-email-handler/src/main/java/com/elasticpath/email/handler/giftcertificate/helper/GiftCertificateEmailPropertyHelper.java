@@ -3,8 +3,8 @@
  */
 package com.elasticpath.email.handler.giftcertificate.helper;
 
-import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderSku;
+import java.util.Map;
+
 import com.elasticpath.email.domain.EmailProperties;
 
 /**
@@ -15,11 +15,11 @@ public interface GiftCertificateEmailPropertyHelper {
 	/**
 	 * Gets the {@link EmailProperties} for Gift Certificates confirmation e-mails.
 	 * 
-	 * @param order the order
-	 * @param orderSku the orderSku of the purchased {@code GiftCertificate}
 	 * @param giftCertificateThemeImageFilename the filename of the image to be used for the given gift certificate
+	 * @param emailData the email data
+	 *
 	 * @return {@link EmailProperties}
 	 */
-	EmailProperties getEmailProperties(Order order, OrderSku orderSku, String giftCertificateThemeImageFilename);
+	EmailProperties getEmailProperties(String giftCertificateThemeImageFilename, Map<String, Object> emailData);
 
 }

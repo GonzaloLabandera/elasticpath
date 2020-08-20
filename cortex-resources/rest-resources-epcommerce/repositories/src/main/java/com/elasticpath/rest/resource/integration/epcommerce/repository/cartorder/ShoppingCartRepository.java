@@ -180,14 +180,16 @@ public interface ShoppingCartRepository {
 	 * @return the whether the operation was successful.
 	 */
 	Completable removeAllItemsFromCart(ShoppingCart cart);
+
 	/**
 	 * Find All of the shopping carts for this customer.
 	 *
-	 * @param customerGuid Customer GUID
-	 * @param storeCode    valid store code
+	 * @param customerGuid the customer GUID
+	 * @param accountSharedId the account shared ID
+	 * @param storeCode valid store code
 	 * @return Collection of cart GUID's
 	 */
-	Observable<String> findAllCarts(String customerGuid, String storeCode);
+	Observable<String> findAllCarts(String customerGuid, String accountSharedId, String storeCode);
 
 	/**
 	 * Finds the storecode for the given cart guid.

@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
 
-    <!-- Named queries for CustomerDeletedImpl -->
-        <named-query name="CUSTOMER_UIDS_SELECT_BY_DELETED_DATE">
-			<query>
-				SELECT pd.customerUid
-				FROM CustomerDeletedImpl as pd
-				WHERE pd.deletedDate &gt;= ?1
-			</query>
-        </named-query>
-
     <!-- Named queries for CustomerGroupImpl -->
         <named-query name="CUSTOMERGROUP_SELECT_ALL">
 			<query>
@@ -61,9 +52,7 @@
 			<query>
 				SELECT c.guid
 				FROM CustomerImpl c
-				INNER JOIN c.profileValueMap cp
-				WHERE cp.localizedAttributeKey = 'CP_ANONYMOUS_CUST'
-				AND cp.booleanValue = false
+				WHERE c.customerType &lt;&gt; 'SINGLE_SESSION_USER'
 				AND c.uidPk in (:list)
 			</query>
         </named-query>
@@ -81,6 +70,32 @@
 				WHERE c.guid = ?1
 			</query>
         </named-query>
+		<named-query name="CUSTOMER_TYPE_SELECT_BY_GUID">
+			<query>
+				SELECT c.customerType
+				FROM CustomerImpl as c
+				WHERE c.guid = ?1
+			</query>
+		</named-query>
+		<named-query name="CUSTOMER_FIND_BY_USERNAME_IN_STORES">
+			<query>
+				SELECT c
+				FROM CustomerImpl c, StoreImpl st
+				WHERE c.storeCode = st.code
+				AND c.customerAuthentication.username = ?1
+				AND st.uidPk IN (:list)
+			</query>
+		</named-query>
+		<named-query name="CUSTOMER_GUID_FIND_BY_USERNAME_IN_STORES">
+			<query>
+				SELECT c.guid
+				FROM CustomerImpl c, StoreImpl st
+				WHERE c.storeCode = st.code
+				AND c.customerAuthentication.username = ?1
+				AND (c.guid &lt;&gt; ?2)
+				AND st.uidPk IN (:list)
+			</query>
+		</named-query>
         <named-query name="CUSTOMER_GUID_SELECT_BY_GUID">
 			<query>
 				SELECT c.guid
@@ -104,19 +119,17 @@
         	<query>
 				SELECT c.uidPk
 				FROM CustomerImpl as c
-				INNER JOIN c.profileValueMap cp
-				WHERE ((cp.localizedAttributeKey = 'CP_ANONYMOUS_CUST' AND cp.booleanValue = false)
+				WHERE ((c.customerType &lt;&gt; 'SINGLE_SESSION_USER')
 				OR c.uidPk IN (SELECT o.customer.uidPk from OrderImpl o))
-				AND c.uidPk IN (:list)</query>
+				AND c.uidPk IN (:list)
+			</query>
         </named-query>
         <named-query name="SEARCHABLE_CUSTOMER_UIDS_SELECT_BY_MODIFIED_DATE">
 			<query>
 				SELECT DISTINCT(c.uidPk)
 				FROM CustomerImpl c
-				INNER JOIN c.profileValueMap cp
-				WHERE c.lastEditDate &gt;= ?1
-				AND (cp.localizedAttributeKey = 'CP_FIRST_NAME'
-				OR cp.localizedAttributeKey = 'CP_LAST_NAME')
+				WHERE c.customerType = 'REGISTERED_USER'
+				AND c.lastEditDate &gt;= ?1
 			</query>
         </named-query>
         <named-query name="CUSTOMER_STATUS_BY_UID">
@@ -126,53 +139,60 @@
 				WHERE c.uidPk = ?1
 			</query>
         </named-query>
-        <named-query name="CUSTOMER_GUIDS_BY_USERID_IN_STORE_AND_ASSOCIATED_STORES">
-			<query>
-				SELECT customer.guid
-				FROM CustomerImpl customer, StoreImpl store
-				WHERE customer.userId = ?1
-				AND UPPER(customer.storeCode) = UPPER(store.code)
-				AND (
-						store.uidPk IN (
-							SELECT associatedIds
-							FROM StoreImpl innerStore
-							INNER JOIN innerStore.associatedStoreUids associatedIds
-							WHERE UPPER(innerStore.code) = UPPER(?2)
-						)
-					OR
-						store.uidPk = (
-							SELECT innerStore.uidPk
-							FROM StoreImpl innerStore
-							WHERE UPPER(innerStore.code) = UPPER(?2)
-						)
-				)
-
-			</query>
-        </named-query>
-        <named-query name="CUSTOMER_FIND_BY_USERID_IN_STORES">
+        <named-query name="CUSTOMER_FIND_BY_SHAREDID_IN_STORES">
 			<query>
 				SELECT c
 				FROM CustomerImpl c, StoreImpl st
 				WHERE c.storeCode = st.code
-				AND c.userId = ?1
+				AND c.sharedId = ?1
 				AND st.uidPk IN (:list)
 			</query>
         </named-query>
+		<named-query name="CUSTOMER_FIND_BY_SHAREDID">
+			<query>
+				SELECT c
+				FROM CustomerImpl c
+				where c.sharedId = ?1
+			</query>
+		</named-query>
+		<named-query name="CUSTOMER_GUID_FIND_BY_SHAREDID_AND_CUSTOMER_TYPE">
+			<query>
+				SELECT c.guid
+				FROM CustomerImpl c
+				WHERE c.sharedId = ?1
+				AND c.customerType = ?2
+				AND c.guid &lt;&gt; ?3
+			</query>
+		</named-query>
+		<named-query name="CUSTOMER_COUNT_BY_PROFILEVALUE">
+			<query>
+				SELECT COUNT(cp.uidPk)
+				FROM CustomerProfileValueImpl cp
+				WHERE (cp.localizedAttributeKey = ?1 AND cp.shortTextValue = ?2)
+			</query>
+		</named-query>
+		<named-query name="CUSTOMER_FIND_BY_PROFILEVALUE">
+			<query>
+				SELECT c
+				FROM CustomerImpl c
+				INNER JOIN c.profileValueMap cp
+				WHERE (cp.localizedAttributeKey = ?1 AND cp.shortTextValue = ?2)
+			</query>
+		</named-query>
+		<named-query name="CUSTOMER_GUID_BY_PROFILEVALUE">
+			<query>
+				SELECT c.guid
+				FROM CustomerImpl c
+				INNER JOIN c.profileValueMap cp
+				WHERE (cp.localizedAttributeKey = ?1 AND cp.shortTextValue = ?2)
+			</query>
+		</named-query>
         <named-query name="CUSTOMER_LAST_MODIFIED_DATE">
         	<query>
 			SELECT c.lastEditDate
 			FROM CustomerImpl c
         		WHERE c.guid = ?1
         	</query>
-        </named-query>
-        <named-query name="FIND_UIDS_OF_ANONYMOUS_CUSTOMERS_WITHOUT_ORDERS_AND_LAST_MODIFIED_BEFORE_DATE">
-        	<query>
-			SELECT c.uidPk
-			FROM CustomerImpl c INNER JOIN c.profileValueMap cp
-			WHERE cp.localizedAttributeKey = 'CP_ANONYMOUS_CUST'
-			AND cp.booleanValue = true
-			AND c.lastEditDate &lt;?1 
-			AND c.uidPk NOT IN (SELECT o.customer.uidPk FROM OrderImpl o)</query>
         </named-query>
 		<named-query name="FIND_CUSTOMERS_BY_CUSTOMER_GROUP">
 			<query>
@@ -182,54 +202,88 @@
 				WHERE cg.name = ?1
 			</query>
 		</named-query>
-	<named-query name="DELETE_CUSTOMER_BY_UID_LIST">
+<!--	named queries for UserAccountAssociationServiceImpl -->
+	<named-query name="USER_ACCOUNT_ASSOCIATIONS_FOR_USER">
 		<query>
-                	DELETE FROM CustomerImpl c 
-                	WHERE c.uidPk IN (:list)
+			SELECT ua
+			FROM UserAccountAssociationImpl AS ua
+			WHERE ua.userGuid = ?1
 		</query>
-	</named-query>                
+	</named-query>
 
-    <!-- Named queries for CustomerSessionMementoImpl -->
-        <named-query name="CUSTOMER_SESSION_CONFIRM_GUID_EXISTS_BY_GUID">
-			<query>
-				SELECT cs.guid
-				FROM CustomerSessionMementoImpl AS cs
-				WHERE cs.guid = ?1
-			</query>
-        </named-query>
-        <named-query name="CUSTOMER_SESSION_FIND_BY_GUID">
-			<query>
-				SELECT cs
-				FROM CustomerSessionMementoImpl AS cs
-				WHERE cs.guid = ?1
-			</query>
-        </named-query>
-		<named-query name="CUSTOMER_SESSION_DELETE_BY_GUID_LIST">
-			<query>
-                DELETE FROM CustomerSessionMementoImpl cs 
-                WHERE cs.guid IN (:list)
-			</query>
-		</named-query>
-		<named-query name="CUSTOMER_SESSION_DELETE_BY_SHOPPER_UID_LIST">
-            <query>
-                DELETE FROM CustomerSessionMementoImpl cs 
-                WHERE cs.shopperUid IN (:list)
-            </query>
-        </named-query>
-        <named-query name="OLD_CUSTOMER_SESSION_GUID">
-            <query>
-            	SELECT cs.guid 
-            	FROM CustomerSessionMementoImpl cs 
-            	WHERE cs.lastAccessedDate &lt; ?1
-            </query>
-        </named-query>
-        <named-query name="CUSTOMER_SESSIONS_FROM_GUIDS_IN_LIST">
-            <query>
-            	SELECT cs 
-            	FROM CustomerSessionMementoImpl cs 
-            	WHERE cs.guid IN (:list)
-            </query>
-        </named-query>
+	<named-query name="USER_ACCOUNT_ASSOCIATIONS_FOR_ACCOUNT">
+		<query>
+			SELECT ua
+			FROM UserAccountAssociationImpl AS ua
+			WHERE ua.accountGuid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="USER_ACCOUNT_ASSOCIATION_FOR_USER_AND_ACCOUNT">
+		<query>
+			SELECT ua
+			FROM UserAccountAssociationImpl AS ua
+			WHERE ua.userGuid = ?1
+			AND ua.accountGuid = ?2
+		</query>
+	</named-query>
+
+	<named-query name="USER_ACCOUNT_ASSOCIATION_UIDS_ALL">
+		<query>
+			SELECT ua.uidPk
+			FROM UserAccountAssociationImpl AS ua
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_USER_ACCOUNT_ASSOCIATION_BY_USER_AND_ACCOUNT">
+		<query>
+			DELETE FROM UserAccountAssociationImpl AS ua
+			WHERE ua.userGuid = ?1
+			AND ua.accountGuid = ?2
+		</query>
+	</named-query>
+
+	<named-query name="USER_ACCOUNT_ASSOCIATIONS_BY_UIDS">
+		<query>
+			SELECT ua
+			FROM UserAccountAssociationImpl AS ua
+			WHERE ua.uidPk IN (:list)
+		</query>
+	</named-query>
+	
+	<named-query name="USER_ACCOUNT_EXISTS_BY_ACCOUNT_AND_USER">
+		<query>
+			SELECT COUNT(ua.uidPk)
+			FROM UserAccountAssociationImpl AS ua
+			WHERE ua.accountGuid = ?1
+			AND ua.userGuid = ?2
+		</query>
+	</named-query>
+
+	<named-query name="USER_ACCOUNT_ASSOCIATIONS_BY_GUID">
+		<query>
+			SELECT ua
+			FROM UserAccountAssociationImpl AS ua
+			WHERE ua.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS">
+		<query>
+			SELECT c.guid
+			FROM CustomerImpl AS c
+			WHERE c.parentGuid IN (:guidsThisLevel)
+		</query>
+	</named-query>
+
+	<named-query name="ACCOUNT_PARENT_GUID_BY_CHILD_GUID">
+		<query>
+			SELECT c.parentGuid
+			FROM CustomerImpl AS c
+			WHERE c.guid = ?1
+			AND c.parentGuid IS NOT NULL
+		</query>
+	</named-query>
 
 </entity-mappings>
 

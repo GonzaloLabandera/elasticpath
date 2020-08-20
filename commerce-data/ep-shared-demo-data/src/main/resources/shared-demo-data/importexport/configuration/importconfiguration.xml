@@ -2,6 +2,9 @@
 <importconfiguration>
   <xmlvalidation>true</xmlvalidation>
   <importstrategy>
+    <importer type="PAYMENTPROVIDER">
+      <importstrategy>INSERT</importstrategy>
+    </importer>
     <importer type="DYNAMICCONTENT">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>
     </importer>

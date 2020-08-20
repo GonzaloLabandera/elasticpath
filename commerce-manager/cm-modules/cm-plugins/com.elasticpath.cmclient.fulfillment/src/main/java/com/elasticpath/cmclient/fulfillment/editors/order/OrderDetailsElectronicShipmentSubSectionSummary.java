@@ -17,7 +17,7 @@ import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.UpdatePolicy;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
-import com.elasticpath.cmclient.core.conversion.EpBigDecimalToStringConverter;
+import com.elasticpath.cmclient.core.conversion.EpMonetoryValueConverter;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -139,7 +139,8 @@ public class OrderDetailsElectronicShipmentSubSectionSummary implements IPropert
 		itemTaxCurrencyText.setText(orderCurrency);
 		shipmentTotalCurrencyText.setText(orderCurrency);
 		shipmentDiscountCurrencyText.setText(orderCurrency);
-		shipmentDiscountText.setText(shipment.getSubtotalDiscount().toString());
+		shipmentDiscountText.setText(
+				new EpMonetoryValueConverter(shipment.getOrder().getCurrency()).asString(shipment.getSubtotalDiscount()));
 	}
 
 	/**
@@ -150,16 +151,19 @@ public class OrderDetailsElectronicShipmentSubSectionSummary implements IPropert
 	protected void bindControls(final DataBindingContext bindingContext) {
 		final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
 
+		final EpMonetoryValueConverter epMonetaryValueConverter =
+				new EpMonetoryValueConverter(shipment.getOrder().getCurrency());
+
 		EpBindingConfiguration bindingConfig = new EpBindingConfiguration(bindingContext, itemSubTotalText, shipment, "itemSubtotal"); //$NON-NLS-1$
-		bindingConfig.configureModelToUiBinding(new EpBigDecimalToStringConverter(), UpdatePolicy.UPDATE);
+		bindingConfig.configureModelToUiBinding(epMonetaryValueConverter, UpdatePolicy.UPDATE);
 		bindingProvider.bind(bindingConfig);
 
 		bindingConfig = new EpBindingConfiguration(bindingContext, itemTaxText, shipment, "itemTax"); //$NON-NLS-1$
-		bindingConfig.configureModelToUiBinding(new EpBigDecimalToStringConverter(), UpdatePolicy.UPDATE);
+		bindingConfig.configureModelToUiBinding(epMonetaryValueConverter, UpdatePolicy.UPDATE);
 		bindingProvider.bind(bindingConfig);
 
 		bindingConfig = new EpBindingConfiguration(bindingContext, shipmentTotalText, shipment, "total"); //$NON-NLS-1$
-		bindingConfig.configureModelToUiBinding(new EpBigDecimalToStringConverter(), UpdatePolicy.UPDATE);
+		bindingConfig.configureModelToUiBinding(epMonetaryValueConverter, UpdatePolicy.UPDATE);
 		bindingProvider.bind(bindingConfig);
 	}
 

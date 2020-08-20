@@ -3,10 +3,13 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
+import java.util.Locale;
+
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.elasticpath.commons.util.impl.LocaleUtils;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.offersearches.SortAttributeEntity;
 import com.elasticpath.rest.definition.offersearches.SortAttributeIdentifier;
@@ -29,7 +32,8 @@ public class SortAttributeEntityRepositoryImpl<E extends SortAttributeEntity, I 
 
 	@Override
 	public Single<SortAttributeEntity> findOne(final SortAttributeIdentifier identifier) {
-		String localeCode = SubjectUtil.getLocale(resourceOperationContext.getSubject()).getLanguage();
+		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
+		String localeCode = LocaleUtils.getCommerceLocalCode(locale);
 		String guid = identifier.getSortAttributeSelectorChoice().getSortAttributeId().getValue();
 		return searchRepository.getSortValueByGuidAndLocaleCode(guid, localeCode)
 				.map(sortValue -> SortAttributeEntity.builder()

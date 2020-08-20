@@ -44,7 +44,7 @@ public class SynonymGroupAdapter extends AbstractDomainAdapterImpl<SynonymGroup,
 				throw new IllegalArgumentException();
 			}
 		} catch (IllegalArgumentException exception) {
-			throw new PopulationRollbackException("IE-10000", exception, source.getLocale());
+			throw new PopulationRollbackException("IE-10011", exception, source.getLocale());
 		}
 		target.setLocale(locale);
 		target.setConceptTerm(source.getConceptTerm());

@@ -39,6 +39,20 @@ public interface CustomerAuthentication extends Persistable {
 	void setSalt(String salt);
 
 	/**
+	 * Gets the username.
+	 *
+	 * @return the username.
+	 */
+	String getUsername();
+
+	/**
+	 * Sets the username.
+	 *
+	 * @param username the username.
+	 */
+	void setUsername(String username);
+
+	/**
 	 * Sets the clear-text password. <br>
 	 * The password will be encrypted using a secure hash like MD5 or SHA1 and saved as password.
 	 *

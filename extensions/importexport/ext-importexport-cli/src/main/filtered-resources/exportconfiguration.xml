@@ -55,6 +55,8 @@
    
    <exporter type="TAGGROUP"/>
 
+   <exporter type="USERACCOUNTASSOCIATION"/>
+
   </exporters>
   <packager type="NONE"/>
   <delivery>

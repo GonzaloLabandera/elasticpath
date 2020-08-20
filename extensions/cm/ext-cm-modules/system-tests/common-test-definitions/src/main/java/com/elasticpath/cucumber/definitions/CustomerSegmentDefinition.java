@@ -7,6 +7,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.log4j.Logger;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.cortex.dce.LoginSteps;
 import com.elasticpath.cortexTestObjects.FindItemBy;
@@ -15,8 +16,8 @@ import com.elasticpath.selenium.dialogs.AddCustomerSegmentMembershipDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.editor.CustomerEditor;
 import com.elasticpath.selenium.editor.CustomerSegmentEditor;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.CustomerSegmentResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.toolbars.CustomerServiceActionToolbar;
@@ -41,16 +42,18 @@ public class CustomerSegmentDefinition {
 	private final NavigationDefinition navigationDefinition;
 	private final CustomerDefinition customerDefinition;
 	private final static String TEXT_DISPLAY = "display";
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public CustomerSegmentDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
-		customerEditor = new CustomerEditor(SetUp.getDriver());
-		addCustomerSegmentMembershipDialog = new AddCustomerSegmentMembershipDialog(SetUp.getDriver());
-		activityToolbar = new ActivityToolbar(SetUp.getDriver());
-		customerServiceActionToolbar = new CustomerServiceActionToolbar(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		configurationActionToolbar = new ConfigurationActionToolbar(driver);
+		customerEditor = new CustomerEditor(driver);
+		addCustomerSegmentMembershipDialog = new AddCustomerSegmentMembershipDialog(driver);
+		activityToolbar = new ActivityToolbar(driver);
+		customerServiceActionToolbar = new CustomerServiceActionToolbar(driver);
 		navigationDefinition = new NavigationDefinition();
 		customerDefinition = new CustomerDefinition();
 	}
@@ -101,9 +104,9 @@ public class CustomerSegmentDefinition {
 		addCustomerSegmentMembershipDialog.clickSave();
 		customerEditor.selectCustomerSegment(this.uniqueCustomerSegmentName);
 		customerEditor.clickRemoveSegmentButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("FulfillmentMessages.CustomerSegmentsPageDialog_RemoveConfirm");
+		new ConfirmDialog(driver).clickOKButton("FulfillmentMessages.CustomerSegmentsPageDialog_RemoveConfirm");
 		customerEditor.closeCustomerEditor();
-		new ConfirmDialog(SetUp.getDriver()).clickNoButton("CoreMessages.AbstractCmClientFormEditor_OkTitle_save");
+		new ConfirmDialog(driver).clickNoButton("CoreMessages.AbstractCmClientFormEditor_OkTitle_save");
 	}
 
 	/**
@@ -219,9 +222,10 @@ public class CustomerSegmentDefinition {
 		customerDefinition.selectCustomerEditorTab("Customer Segments");
 
 		this.customerSegmentName = segmentName;
+		this.customerID = customerID;
 		customerEditor.selectCustomerSegment(segmentName);
 		customerEditor.clickRemoveSegmentButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("FulfillmentMessages.CustomerSegmentsPageDialog_RemoveConfirm");
+		new ConfirmDialog(driver).clickOKButton("FulfillmentMessages.CustomerSegmentsPageDialog_RemoveConfirm");
 		customerServiceActionToolbar.clickSaveButton();
 		configurationActionToolbar.clickReloadActiveEditor();
 	}

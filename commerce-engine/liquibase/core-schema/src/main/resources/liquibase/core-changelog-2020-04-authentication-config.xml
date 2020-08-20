@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-04-authentication-config.xml">
+
+<changeSet id="2020-04-authentication-config-customer-identifier-setting" author="elasticpath" >
+	<comment>Adds a setting specifying how the x-ep-user-id header or JWT profile field are used to identify a customer in the EP database.</comment>
+	<insert tableName="TSETTINGDEFINITION">
+		<column name="UIDPK" valueNumeric="163" />
+		<column name="PATH" value="COMMERCE/SYSTEM/CUSTOMER/identifier" />
+		<column name="VALUE_TYPE" value="String" />
+		<column name="MAX_OVERRIDE_VALUES" value="-1" />
+		<column name="DEFAULT_VALUE" value="GUID" />
+		<column name="DESCRIPTION"
+				value="Specifies how the x-ep-user-id header or JWT profile field are used to identify a customer in the EP database. Supported options are: GUID, USER_ID, ATTRIBUTE_VALUE:{key}. Context values can also be set which are selected based on the JWT issuer (iss) value." />
+	</insert>
+
+	<insert tableName="TSETTINGVALUE">
+		<column name="UIDPK" value="118"/>
+		<column name="SETTING_DEFINITION_UID" value="163"/>
+		<column name="CONTEXT" value="punchout_attrval"/>
+		<column name="CONTEXT_VALUE" value="ATTRIBUTE_VALUE:CP_PUNCHOUT_CUSTOMER_KEY"/>
+	</insert>
+
+	<insert tableName="TSETTINGVALUE">
+		<column name="UIDPK" value="119"/>
+		<column name="SETTING_DEFINITION_UID" value="163"/>
+		<column name="CONTEXT" value="punchout_user_id"/>
+		<column name="CONTEXT_VALUE" value="USER_ID"/>
+	</insert>
+
+	<insert tableName="TSETTINGMETADATA">
+		<column name="UIDPK" valueNumeric="1507"/>
+		<column name="SETTING_DEFINITION_UID" valueNumeric="163"/>
+		<column name="METADATA_KEY" value="environmentSpecific"/>
+		<column name="VALUE" value="false"/>
+	</insert>
+
+	<insert tableName="TSETTINGMETADATA">
+		<column name="UIDPK" valueNumeric="1508"/>
+		<column name="SETTING_DEFINITION_UID" valueNumeric="163"/>
+		<column name="METADATA_KEY" value="apiRefreshStrategy"/>
+		<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+	</insert>
+</changeSet>
+
+</databaseChangeLog>

@@ -1,12 +1,13 @@
 package com.elasticpath.cucumber.definitions;
 
-import static com.elasticpath.selenium.setup.SetUp.getDriver;
 
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.editor.InventoryEditor;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.ShippingReceiving;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ShippingReceivingActionToolbar;
@@ -21,14 +22,16 @@ public class ShippingReceivingDefinition {
 	private InventoryEditor inventoryEditor;
 	private int quantityOnHand;
 	private static final String ADD_STOCK_ADJUSTMENT_TYPE = "Add Stock";
+	private final WebDriver driver;
 
 	/**
 	 * Cosntructor.
 	 */
 	public ShippingReceivingDefinition() {
-		activityToolbar = new ActivityToolbar((getDriver()));
-		shippingReceiving = new ShippingReceiving(getDriver());
-		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		activityToolbar = new ActivityToolbar(driver);
+		shippingReceiving = new ShippingReceiving(driver);
+		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(driver);
 	}
 
 	/**

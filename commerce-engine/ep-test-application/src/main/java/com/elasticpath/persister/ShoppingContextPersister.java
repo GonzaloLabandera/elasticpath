@@ -31,7 +31,6 @@ public class ShoppingContextPersister implements Persister<ShoppingContext> {
 
 		customerSession.setShopper(shopper);
 
-		customerSessionService.add(customerSession);
 	}
 
 }

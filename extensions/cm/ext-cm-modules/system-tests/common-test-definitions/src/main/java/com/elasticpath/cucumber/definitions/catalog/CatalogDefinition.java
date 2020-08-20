@@ -46,10 +46,10 @@ import com.elasticpath.selenium.editor.CategoryEditor;
 import com.elasticpath.selenium.editor.catalog.CatalogEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.BrandsTab;
 import com.elasticpath.selenium.editor.product.ProductEditor;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.CatalogManagement;
 import com.elasticpath.selenium.resultspane.CatalogProductListingPane;
 import com.elasticpath.selenium.resultspane.CatalogSearchResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.toolbars.ChangeSetActionToolbar;
@@ -137,7 +137,7 @@ public class CatalogDefinition {
 							 final CategoryTypesTabDefinition categoryTypesTabDefinition,
 							 final ProductAndBundleDefinition productAndBundleDefinition,
 							 final CategoryType categoryType, final AttributeContainer attributeContainer) {
-		driver = SetUp.getDriver();
+		driver = SeleniumDriverSetup.getDriver();
 		catalogManagement = new CatalogManagement(driver);
 		catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		activityToolbar = new ActivityToolbar(driver);
@@ -710,7 +710,7 @@ public class CatalogDefinition {
 		catalogManagement.clickCatalogRefreshButton();
 		selectNewCategory();
 		catalogManagement.clickDeleteCategoryIcon();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton(CATALOG_MESSAGE_DELETE_DIALOG);
+		new ConfirmDialog(driver).clickOKButton(CATALOG_MESSAGE_DELETE_DIALOG);
 	}
 
 	/**
@@ -723,7 +723,7 @@ public class CatalogDefinition {
 		Category category = findCategory(categoryName);
 		catalogManagement.selectCategory(category.getName(ENGLISH));
 		catalogManagement.clickDeleteCategoryIcon();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton(CATALOG_MESSAGE_DELETE_DIALOG);
+		new ConfirmDialog(driver).clickOKButton(CATALOG_MESSAGE_DELETE_DIALOG);
 	}
 
 	/**
@@ -747,7 +747,7 @@ public class CatalogDefinition {
 		Category category = findCategory(categoryName);
 		catalogManagement.selectCategoryInCatalog(catalogName, category.getName(ENGLISH));
 		catalogManagement.clickRemoveLinkedCategoryIcon();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_RemoveLinkedCatDialogTitle");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CatalogBrowseView_Action_RemoveLinkedCatDialogTitle");
 	}
 
 	/**
@@ -778,7 +778,7 @@ public class CatalogDefinition {
 	 */
 	public void deleteLinkedCategory() {
 		catalogManagement.clickRemoveLinkedCategoryIcon();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_RemoveLinkedCatDialogTitle");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CatalogBrowseView_Action_RemoveLinkedCatDialogTitle");
 	}
 
 	/**
@@ -1365,7 +1365,7 @@ public class CatalogDefinition {
 		catalogEditor.selectTab("Attributes");
 		catalogEditor.selectCatalogAttributeValue(this.catalog.getAttributeName());
 		catalogEditor.clickRemoveAttributeButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogAttributesSection_RemoveDialog");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CatalogAttributesSection_RemoveDialog");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}
@@ -1618,7 +1618,7 @@ public class CatalogDefinition {
 		catalogManagement.clickCatalogBrowseTab();
 		catalogManagement.selectCategory(this.category.getCategoryName());
 		catalogManagement.clickDeleteCategoryIcon();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton(CATALOG_MESSAGE_DELETE_DIALOG);
+		new ConfirmDialog(driver).clickOKButton(CATALOG_MESSAGE_DELETE_DIALOG);
 		if (this.catalog.getCatalogName() != null) {
 			this.categoryTypesTabDefinition.deleteNewCategoryType();
 			this.categoryTypesTabDefinition.verifyNewCategoryTypeDelete();
@@ -1660,7 +1660,7 @@ public class CatalogDefinition {
 //		Need to select category again before right click delete.
 		catalogManagement.selectCategory(categoryForDelete.getCategoryName());
 		catalogManagement.clickDeleteCategoryIcon();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton(CATALOG_MESSAGE_DELETE_DIALOG);
+		new ConfirmDialog(driver).clickOKButton(CATALOG_MESSAGE_DELETE_DIALOG);
 	}
 
 	/**

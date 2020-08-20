@@ -3,25 +3,27 @@
  */
 package com.elasticpath.datapopulation.core.service.filtering;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.TreeMap;
 import javax.inject.Provider;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer;
@@ -73,10 +75,6 @@ public class FileFilterer {
 	 * Default file encoding to read and write the input and output files respectively.
 	 */
 	public static final String DEFAULT_FILE_ENCODING = "UTF-8";
-	/**
-	 * Number of lines to filter before flushing the {@link OutputStream} to avoid keeping too much in memory when filtering large files.
-	 */
-	protected static final int FLUSH_LINE_THRESHOLD = 200;
 	/**
 	 * A {@link Map} containing a valid system properties mode Strings mapped to their corresponding Integer code used by
 	 * {@link com.elasticpath.datapopulation.core.service.filtering.helper.impl.PropertyPlaceholderStringValueResolver} internally.
@@ -307,76 +305,53 @@ public class FileFilterer {
 	protected <OS extends OutputStream> void filter(final InputStream input, final Provider<OS> outputProvider,
 													final StringValueResolver lineFilterer)
 			throws IOException {
-		// Read the whole input in first before writing the filtered output since we could be overwriting the input
-		// depending on if the same file is specified as the output file for example
-		final List<String> inputLines = readInput(input, DpResourceUtils.isNotStandardIn(input));
 
-		// Now write the filtered output, we delay resolving the OutputStream from the provider until after we've read the input
-		// in case it's outputting to the same location
-		filter(inputLines, outputProvider.get(), lineFilterer);
-	}
+		//input will be filtered to a temp file before being written to the output location.
+		final File tempFile = File.createTempFile("file-filter", ".txt");
 
-	/**
-	 * Reads the {@link InputStream}'s contents into a {@link List} of {@link String}s. If closeInputStream is true, the method closes the
-	 * {@link InputStream} before returning.
-	 *
-	 * @param input            the {@link InputStream} to read.
-	 * @param closeInputStream true if the {@link InputStream} should be closed before returning; false otherwise.
-	 * @return the line contents of the {@link InputStream}.
-	 * @throws IOException if any problem occurred reading the {@link InputStream}
-	 */
-	@SuppressWarnings("unchecked")
-	protected List<String> readInput(final InputStream input, final boolean closeInputStream) throws IOException {
-		final List<String> inputLines;
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, getFileEncoding()));
+			 BufferedOutputStream tempOut = new BufferedOutputStream(new FileOutputStream(tempFile))) {
 
-		try {
-			// Enforce the file encoding so it's not platform dependent
-			inputLines = IOUtils.readLines(input, getFileEncoding());
-		} finally {
-			if (input != null) {
-				try {
-					if (closeInputStream) {
-						input.close();
-					}
-				} catch (final IOException e) {
-					LOG.warn("Unable to close InputStream: + " + input, e);
-				}
+			LOG.info("writing to temp file: " + tempFile.getAbsolutePath());
+			filter(reader, tempOut, lineFilterer);
+
+			if (DpResourceUtils.isNotStandardIn(input)) {
+				input.close();
 			}
-		}
 
-		return inputLines;
+			OutputStream out = outputProvider.get();
+			Files.copy(tempFile.toPath(), out);
+
+			if (DpResourceUtils.isNotStandardOutOrErr(out)) {
+				out.close();
+			}
+
+		}
 	}
 
 	// Helper methods
 
 	/**
-	 * Uses the given {@link StringValueResolver} to iterate through the input and write the filtered lines to the {@link OutputStream} given.
+	 * Uses the given {@link StringValueResolver} to write the filtered lines to the {@link OutputStream} given.
 	 * <p>
-	 * Note: This method closes the {@link OutputStream} once complete, if closeOutputStream is true, as long as the {@link OutputStream} is not
-	 * {@link System#out} or {@link System#err} this is done.
+	 * Note: This method closes the {@link OutputStream} once complete, as long as the {@link OutputStream} is not
+	 * {@link System#out} or {@link System#err}.
 	 * </p>
 	 *
 	 * @param inputLines   the input to iterate through.
 	 * @param output       the {@link OutputStream} to write to.
-	 * @param lineFilterer the line filterer to use to filter each line before writing it out.
+	 * @param lineFilterer the StringValueResolver to use to process each line before writing it out.
 	 *                     {@link System#err}.
 	 */
-	private void filter(final List<String> inputLines, final OutputStream output, final StringValueResolver lineFilterer) {
+	private void filter(final BufferedReader inputLines, final BufferedOutputStream output, final StringValueResolver lineFilterer) {
 		// Use a Writer so we can enforce the file encoding so it's not platform dependent
 		final PrintWriter writer = createPrintWriter(output);
 
 		try {
-			final Iterator<String> iter = inputLines.iterator();
-
-			for (int i = 0; iter.hasNext(); i++) {
-				final String inputLine = iter.next();
-				writer.println(lineFilterer.resolveStringValue(inputLine));
-
-				// Flush each time we reach the threshold
-				if (i % FLUSH_LINE_THRESHOLD == 0) {
-					writer.flush();
-				}
-			}
+			inputLines.lines()
+					.map(lineFilterer::resolveStringValue)
+					.filter(Objects::nonNull)
+					.forEachOrdered(writer::println);
 		} finally {
 			writer.flush();
 

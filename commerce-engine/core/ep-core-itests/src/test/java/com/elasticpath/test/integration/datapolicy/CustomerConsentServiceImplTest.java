@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.datapolicy.ConsentAction;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.datapolicy.DataPoint;
@@ -55,7 +56,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 		CustomerConsent customerConsent =
 				createAndSaveCustomerConsent(scenario.getStore().getCode(), CUSTOMER_CONSENT_UNIQUE_CODE, TEST_EMAIL);
 
-		Customer newCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, true);
+		Customer newCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.SINGLE_SESSION_USER);
 
 		customerConsentService.updateCustomerGuids(customerConsent.getCustomerGuid() , newCustomer.getGuid());
 
@@ -119,7 +120,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 	@DirtiesDatabase
 	public void verifyReturnsListOfAllCustomerConsentsWhenUsingListMethod() {
 		DataPolicy dataPolicy = createAndSaveDataPolicy(scenario.getStore().getCode());
-		Customer persistedCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer persistedCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, persistedCustomer, dataPolicy);
 		CustomerConsent consent = createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE2, persistedCustomer, dataPolicy);
@@ -182,7 +183,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 	@Test
 	@DirtiesDatabase
 	public void findByDataPolicyGuidForCustomerLatestReturnsCustomerConsentWhenConsentExistsForDataPolicy() {
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 		DataPolicy dataPolicy = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE);
 		CustomerConsent customerConsent = createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, customer, dataPolicy, new Date());
 
@@ -206,7 +207,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 	@Test
 	@DirtiesDatabase
 	public void verifyFindWithActiveDataPoliciesByCustomerGuid() {
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 		DataPolicy activeDataPolicy = createAndSaveDataPolicyWithState(DATA_POLICY_UNIQUE_CODE, DataPolicyState.ACTIVE);
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, customer, activeDataPolicy, new Date());
 
@@ -224,7 +225,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 	@DirtiesDatabase
 	public void verifyFindWithActiveAndDisabledDataPoliciesByCustomerGuid() {
 		Date customerConsentDate = new Date();
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 		DataPolicy activeDataPolicy = createAndSaveDataPolicyWithState(DATA_POLICY_UNIQUE_CODE, DataPolicyState.ACTIVE);
 		DataPolicy disabledDataPolicy = createAndSaveDataPolicyWithState(DATA_POLICY_UNIQUE_CODE2, DataPolicyState.DISABLED);
 
@@ -251,10 +252,10 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 		DataPolicy disabledDataPolicy = createAndSaveDataPolicyWithState(DATA_POLICY_UNIQUE_CODE2, DataPolicyState.DISABLED);
 
 		Date customerConsentDate = new Date();
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, customer, activeDataPolicy, customerConsentDate);
 
-		Customer customer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, true);
+		Customer customer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.SINGLE_SESSION_USER);
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE2, customer2, disabledDataPolicy, customerConsentDate);
 
 		List<CustomerConsent> customerConsents = customerConsentService.findWithActiveDataPoliciesByCustomerGuid(customer.getGuid(), true);
@@ -270,7 +271,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 	@Test
 	@DirtiesDatabase
 	public void findByDataPolicyGuidForCustomerLatestReturnsLatestCustomerConsentWhenMoreThanOneConsentExists() {
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 		DataPolicy dataPolicy = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE);
 		CustomerConsent customerConsent1 = createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, customer, dataPolicy, YESTERDAY_DATE);
 		CustomerConsent customerConsent2 = createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, customer, dataPolicy, TODAY_DATE);
@@ -292,7 +293,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicy.getDataPoints().add(dataPoint);
 		dataPolicyService.update(dataPolicy);
 
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, customer, dataPolicy, YESTERDAY_DATE);
 
 		assertThat(customerConsentService.customerHasGivenConsentForAtLeastOneDataPolicy(customer.getGuid(), Sets.newHashSet(dataPolicy)))
@@ -307,7 +308,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicy.getDataPoints().add(dataPoint);
 		dataPolicyService.update(dataPolicy);
 
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 
 		assertThat(customerConsentService.customerHasGivenConsentForAtLeastOneDataPolicy(customer.getGuid(), Sets.newHashSet(dataPolicy)))
 				.isFalse();
@@ -316,7 +317,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 	@Test
 	@DirtiesDatabase
 	public void customerHasGivenConsentForAtLeastOneDataPolicyReturnsTrueWhenTheMostRecentDataPolicyIsAccepted() {
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 		DataPolicy dataPolicy = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE);
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, customer, dataPolicy, ConsentAction.REVOKED, TODAY_DATE);
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, customer, dataPolicy, ConsentAction.GRANTED, TODAY_DATE);

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-05-cart-cleanup-jobs.xml">
+
+	<changeSet id="2020-05-cart-cleanup-jobs-recreate-FKs-with-cascade-delete" author="elasticpath" failOnError="true" dbms="mysql, h2">
+		<comment>[PERF-252] Drop and create FKs with CASCADE deletion</comment>
+
+		<!-- Set cascade deletion for TCARTORDERPAYMENTINSTRUMENT -->
+		<dropForeignKeyConstraint constraintName="COPI_CARTORDER_FK" baseTableName="TCARTORDERPAYMENTINSTRUMENT" />
+		<addForeignKeyConstraint constraintName="COPI_CARTORDER_FK" 		 onDelete="CASCADE"
+								 baseTableName="TCARTORDERPAYMENTINSTRUMENT" referencedTableName="TCARTORDER"
+								 baseColumnNames="CART_ORDER_UID" 			 referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TSHOPPINGITEMRECURRINGPRICE -->
+		<dropForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRICE_FK_1" baseTableName="TSHOPPINGITEMRECURRINGPRICE" />
+		<addForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRI_FK_1" onDelete="CASCADE"
+								 baseTableName="TSHOPPINGITEMRECURRINGPRICE" 	   referencedTableName="TCARTITEM"
+								 baseColumnNames="CARTITEM_UID" 			 	   referencedColumnNames="UIDPK"/>
+
+		<!-- Set cascade deletion for TCARTITEM and parent item shopping cart ID -->
+		<dropForeignKeyConstraint constraintName="TCARTITEM_FK_CART" baseTableName="TCARTITEM" />
+		<addForeignKeyConstraint constraintName="TCARTITEM_FK_CART"  onDelete="CASCADE"
+								 baseTableName="TCARTITEM" 			 referencedTableName="TSHOPPINGCART"
+								 baseColumnNames="SHOPPING_CART_UID" referencedColumnNames="UIDPK"/>
+
+		<!-- Set cascade deletion for TSHOPPINGITEMDATA -->
+		<dropForeignKeyConstraint constraintName="TCARTITEM_FK" baseTableName="TSHOPPINGITEMDATA" />
+		<addForeignKeyConstraint constraintName="FK_SHOPPING_ITEM_DATA_CARTITEM" onDelete="CASCADE"
+								 baseTableName="TSHOPPINGITEMDATA" 				 referencedTableName="TCARTITEM"
+								 baseColumnNames="CARTITEM_UID"    				 referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TCARTDATA -->
+		<addForeignKeyConstraint constraintName="FK_CART_DATA_SHOPPING_CART" onDelete="CASCADE"
+								 baseTableName="TCARTDATA"			 		 referencedTableName="TSHOPPINGCART"
+								 baseColumnNames="SHOPPING_CART_UID" 		 referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TCARTITEM and child item shopping cart ID -->
+		<addForeignKeyConstraint constraintName="FK_CART_ITEM_CHILD_CART" 		   onDelete="CASCADE"
+								 baseTableName="TCARTITEM" 			 			   referencedTableName="TSHOPPINGCART"
+								 baseColumnNames="CHILD_ITEM_CART_UID"  		   referencedColumnNames="UIDPK"/>
+
+		<!-- Set cascade deletion for TCARTORDERCOUPON -->
+		<addForeignKeyConstraint constraintName="FK_CO_COUPON_CART_ORDER" onDelete="CASCADE"
+								 baseTableName="TCARTORDERCOUPON" 				  referencedTableName="TCARTORDER"
+								 baseColumnNames="CARTORDER_UID"  				  referencedColumnNames="UIDPK"/>
+
+		<!-- The last FK, in the TCARTORDER table, can'be created if dangling cart orders (those without shopping carts) exist.
+			 This liquibase extension ensures that all dangling cart orders are purged before FK creation
+		-->
+		<customChange class="liquibase.ext.elasticpath.PurgeDanglingCartOrders">
+			<param name="batchSize">5000</param>
+		</customChange>
+
+		<!-- Set cascade deletion for TCARTORDER -->
+		<addForeignKeyConstraint constraintName="FK_CART_ORDER_SHOPPING_CART" onDelete="CASCADE"
+								 baseTableName="TCARTORDER" 			 	  referencedTableName="TSHOPPINGCART"
+								 baseColumnNames="SHOPPINGCART_GUID" 	 	  referencedColumnNames="GUID"/>
+
+	</changeSet>
+
+	<changeSet id="2020-05-cart-cleanup-jobs-recreate-FKs-with-cascade-delete" author="elasticpath" failOnError="true" dbms="oracle">
+		<comment>[PERF-252] Drop and create FKs with CASCADE deletion</comment>
+
+		<!-- Set cascade deletion for TCARTORDERPAYMENTINSTRUMENT -->
+		<dropForeignKeyConstraint constraintName="COPI_CARTORDER_FK" baseTableName="TCARTORDERPAYMENTINSTRUMENT" />
+		<addForeignKeyConstraint constraintName="COPI_CARTORDER_FK" 		 onDelete="CASCADE"
+								 baseTableName="TCARTORDERPAYMENTINSTRUMENT" referencedTableName="TCARTORDER"
+								 baseColumnNames="CART_ORDER_UID" 			 referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TSHOPPINGITEMRECURRINGPRICE -->
+		<dropForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRI_FK_1"  baseTableName="TSHOPPINGITEMRECURRINGPRICE" />
+		<addForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRI_FK_1"   onDelete="CASCADE"
+								 baseTableName="TSHOPPINGITEMRECURRINGPRICE" 	   referencedTableName="TCARTITEM"
+								 baseColumnNames="CARTITEM_UID" 			 	   referencedColumnNames="UIDPK"/>
+
+		<!-- Set cascade deletion for TCARTITEM and parent item shopping cart ID -->
+		<dropForeignKeyConstraint constraintName="TCARTITEM_FK_CART" baseTableName="TCARTITEM" />
+		<addForeignKeyConstraint constraintName="TCARTITEM_FK_CART"  onDelete="CASCADE"
+								 baseTableName="TCARTITEM" 			 referencedTableName="TSHOPPINGCART"
+								 baseColumnNames="SHOPPING_CART_UID" referencedColumnNames="UIDPK"/>
+
+		<!-- Set cascade deletion for TSHOPPINGITEMDATA -->
+		<dropForeignKeyConstraint constraintName="TCARTITEM_FK" baseTableName="TSHOPPINGITEMDATA" />
+		<addForeignKeyConstraint constraintName="FK_SHOPPING_ITEM_DATA_CARTITEM" onDelete="CASCADE"
+								 baseTableName="TSHOPPINGITEMDATA" 				 referencedTableName="TCARTITEM"
+								 baseColumnNames="CARTITEM_UID"    				 referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TCARTDATA -->
+		<addForeignKeyConstraint constraintName="FK_CART_DATA_SHOPPING_CART" onDelete="CASCADE"
+								 baseTableName="TCARTDATA"			 		 referencedTableName="TSHOPPINGCART"
+								 baseColumnNames="SHOPPING_CART_UID" 		 referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TCARTITEM and child item shopping cart ID -->
+		<addForeignKeyConstraint constraintName="FK_CART_ITEM_CHILD_CART" onDelete="CASCADE"
+								 baseTableName="TCARTITEM" 			 			   referencedTableName="TSHOPPINGCART"
+								 baseColumnNames="CHILD_ITEM_CART_UID"  		   referencedColumnNames="UIDPK"/>
+
+		<!-- Set cascade deletion for TCARTORDERCOUPON -->
+		<addForeignKeyConstraint constraintName="FK_CO_COUPON_CART_ORDER" onDelete="CASCADE"
+								 baseTableName="TCARTORDERCOUPON" 				  referencedTableName="TCARTORDER"
+								 baseColumnNames="CARTORDER_UID"  				  referencedColumnNames="UIDPK"/>
+
+		<!-- The last FK, in the TCARTORDER table, can'be created if dangling cart orders (those without shopping carts) exist.
+			 This liquibase extension ensures that all dangling cart orders are purged before FK creation
+		-->
+		<customChange class="liquibase.ext.elasticpath.PurgeDanglingCartOrders">
+			<param name="batchSize">5000</param>
+		</customChange>
+
+		<!-- Set cascade deletion for TCARTORDER -->
+		<addForeignKeyConstraint constraintName="FK_CART_ORDER_SHOPPING_CART" onDelete="CASCADE"
+								 baseTableName="TCARTORDER" 			 	  referencedTableName="TSHOPPINGCART"
+								 baseColumnNames="SHOPPINGCART_GUID" 	 	  referencedColumnNames="GUID"/>
+
+	</changeSet>
+</databaseChangeLog>

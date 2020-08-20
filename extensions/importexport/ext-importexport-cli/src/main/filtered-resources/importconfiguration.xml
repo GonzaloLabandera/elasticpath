@@ -154,6 +154,9 @@
    <importer type="TAGGROUP">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>
     </importer>
+    <importer type="USERACCOUNTASSOCIATION">
+      <importstrategy>INSERT_OR_UPDATE</importstrategy>
+    </importer>
   </importstrategy>
   <packager type="NONE"/>
   <retrieval>

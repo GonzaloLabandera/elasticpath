@@ -234,8 +234,8 @@ public class ReportingRuleServiceImpl implements ReportingRuleService {
 			CouponConfig couponConfig = couponConfigService.findByRuleCode(rule.getCode());
 			objects[USAGE_TYPE_IDX] = getUsageTypeName(couponConfig);			
 			if (RuleScenarios.CART_SCENARIO == (Integer) objects[SCENARIO_IDX]) {
-				objects[START_DATETIME_IDX] = rule.getStartDateFromSellingContext();
-				objects[END_DATETIME_IDX] = rule.getEndDateFromSellingContext();				
+				objects[START_DATETIME_IDX] = rule.getEffectiveStartDate();
+				objects[END_DATETIME_IDX] = rule.getEffectiveEndDate();
 			}
 		}
 	}

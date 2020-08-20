@@ -11,8 +11,10 @@ import io.reactivex.Single;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderSku;
+import com.elasticpath.rest.cache.CacheResult;
 
 /**
  * The facade for operations with orders.
@@ -77,5 +79,34 @@ public interface OrderRepository {
 	 * @return ProductSku of OrderSku
 	 */
 	Single<ProductSku> findProductSku(String scope, String orderId, List<String> guidPathFromRootItem);
+
+	/**
+	 * Find the order ids by customer account guid.
+	 *
+	 * @param storeCode the store code
+	 * @param accountGuid the account guid
+	 * @param firstResult the first result
+	 * @param maxResults the max number of results
+	 * @return the order ids
+	 */
+	@CacheResult
+	Observable<String> findOrderIdsByAccountGuid(String storeCode, String accountGuid, int firstResult, int maxResults);
+
+	/**
+	 * Get the number of account purchases.
+	 *
+	 * @param storeCode the store code
+	 * @param accountGuid the customer guid of the account
+	 * @return the number of account purchases
+	 */
+	long getAccountPurchasesSize(String storeCode, String accountGuid);
+
+	/**
+	 * Get the customer by the order number.
+	 *
+	 * @param orderNumber the order number
+	 * @return the customer
+	 */
+	Customer getCustomerByOrderNumber(String orderNumber);
 
 }

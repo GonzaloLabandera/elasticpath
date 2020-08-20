@@ -115,6 +115,10 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>shipping-calculation-plugin-epcommerce</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

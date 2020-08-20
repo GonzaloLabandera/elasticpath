@@ -25,24 +25,6 @@ public interface CustomerSessionService extends EpPersistenceService {
 	CustomerSession createWithShopper(Shopper shopper);
 
 	/**
-	 * Adds the given customer session.
-	 *
-	 * @param customerSession the customer session to add
-	 * @throws EpServiceException - in case of any errors
-	 */
-	void add(CustomerSession customerSession) throws EpServiceException;
-
-	/**
-	 * Handles a ShopperChange (such as merging {@link com.elasticpath.domain.shoppingcart.ShoppingCart}s
-	 * and {@link com.elasticpath.domain.shoppingcart.WishList}s) and updating the {@link CustomerSession}.
-	 *
-	 * @param customerSession the {@link CustomerSession} to update
-	 * @param storeCode the storeCode associated with the {@link CustomerSession}
-	 * @throws EpServiceException - in case of any errors
-	 */
-	void handleShopperChangeAndUpdate(CustomerSession customerSession, String storeCode) throws EpServiceException;
-
-	/**
 	 * Change the Customer associated with the session to a new registered Customer.
 	 * Creates a new Shopper and handles updates (such as merging {@link com.elasticpath.domain.shoppingcart.ShoppingCart}s
 	 * and {@link com.elasticpath.domain.shoppingcart.WishList}s) and updating the {@link CustomerSession}.
@@ -53,15 +35,6 @@ public interface CustomerSessionService extends EpPersistenceService {
 	 * @throws EpServiceException - in case of any errors
 	 */
 	void changeFromAnonymousToRegisteredCustomer(CustomerSession customerSession, Customer customer, String storeCode) throws EpServiceException;
-
-	/**
-	 * Find the customer session with the given guid.
-	 *
-	 * @param guid the customer session guid
-	 * @return the customer session if guid address exists, otherwise null
-	 * @throws EpServiceException - in case of any errors
-	 */
-	CustomerSession findByGuid(String guid) throws EpServiceException;
 
 	/**
 	 * Initializes a {@link CustomerSession} such that it can be used for pricing computations.

@@ -1068,7 +1068,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 			@Override
 			public String getStringValue(final Object entity) {
 				final Product product = (Product) entity;
-				return String.valueOf(product.isHidden());
+				return String.valueOf(!product.isHidden());
 			}
 
 			@Override
@@ -1078,7 +1078,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 				}
 
 				final Product product = (Product) entity;
-				product.setHidden(ConverterUtils.string2Boolean(value));
+				product.setHidden(!ConverterUtils.string2Boolean(value));
 			}
 		});
 	}

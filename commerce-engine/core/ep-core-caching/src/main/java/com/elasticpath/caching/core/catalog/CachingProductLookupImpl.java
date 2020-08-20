@@ -14,13 +14,14 @@ import com.google.common.collect.Lists;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
 import com.elasticpath.cache.CacheLoader;
+import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.service.catalog.ProductLookup;
 
 /**
  * A cached version of the {@link ProductLookup} interface.
  */
-public class CachingProductLookupImpl implements ProductLookup {
+public class CachingProductLookupImpl implements ProductLookup, MutableCachingService<Product> {
 
 	private final CacheLoader<String, Long> productByGuidLoader = new ProductByGuidLoader();
 	private final CacheLoader<Long, Product> productByUidLoader = new ProductByUidLoader();
@@ -50,6 +51,30 @@ public class CachingProductLookupImpl implements ProductLookup {
 		Long productUidPk = getProductUidByGuidCache().get(guid, productByGuidLoader);
 
 		return (P) getProductByUidCache().get(productUidPk);
+	}
+
+	@Override
+	public <P extends Product> List<P> findByGuids(final Collection<String> guids) throws EpServiceException {
+		final Map<String, Long> result = getProductUidByGuidCache().getAll(guids, productByGuidLoader);
+		return findByUids(result.values());
+	}
+
+	@Override
+	public void cache(final Product entity) {
+		getProductByUidCache().put(entity.getUidPk(), entity);
+		getProductUidByGuidCache().put(entity.getGuid(), entity.getUidPk());
+	}
+
+	@Override
+	public void invalidate(final Product entity) {
+		getProductByUidCache().remove(entity.getUidPk());
+		getProductUidByGuidCache().remove(entity.getGuid());
+	}
+
+	@Override
+	public void invalidateAll() {
+		getProductByUidCache().removeAll();
+		getProductUidByGuidCache().removeAll();
 	}
 
 	protected Cache<Long, Product> getProductByUidCache() {
@@ -138,7 +163,13 @@ public class CachingProductLookupImpl implements ProductLookup {
 
 		@Override
 		public Map<String, Long> loadAll(final Iterable<? extends String> keys) {
-			throw new UnsupportedOperationException("Not yet implemented");
+			final List<Product> products = getFallbackLookup().findByGuids(Lists.newArrayList(keys));
+			final Map<String, Long> productMap = new LinkedHashMap<>(products.size() * 2);
+			for (Product product : products) {
+				productMap.put(product.getGuid(), product.getUidPk());
+				getProductByUidCache().put(product.getUidPk(), product);
+			}
+			return productMap;
 		}
 	}
 }

@@ -3,6 +3,7 @@
  */
 package com.elasticpath.domain.attribute.impl;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Transient;
@@ -46,9 +47,27 @@ public class AttributeUsageImpl extends AbstractPersistableImpl implements Attri
 	public static final AttributeUsage SKU_USAGE = create(SKU, "SKU");
 
 	/**
-	 * The customerprofile usage.
+	 * The user profile usage.
 	 */
-	public static final AttributeUsage CUSTOMERPROFILE_USAGE = create(CUSTOMERPROFILE, "CustomerProfile");
+	public static final AttributeUsage USER_PROFILE_USAGE = create(USER_PROFILE, "UserProfile");
+	
+	/**
+	 * The customerprofile usage.
+	 * 
+	 * @deprecated Use {@link #USER_PROFILE_USAGE} instead.
+	 */
+	@Deprecated
+	public static final AttributeUsage CUSTOMERPROFILE_USAGE = USER_PROFILE_USAGE;
+	
+	/**
+	 * The account profile usage.
+	 */
+	public static final AttributeUsage ACCOUNT_PROFILE_USAGE = create(ACCOUNT_PROFILE, "AccountProfile");
+	
+	/**
+	 * An array of customer usages.
+	 */
+	private static final AttributeUsage[] CUSTOMER_ATTRIBUTE_USAGES = {USER_PROFILE_USAGE, ACCOUNT_PROFILE_USAGE};
 
 	private int value;
 
@@ -158,6 +177,12 @@ public class AttributeUsageImpl extends AbstractPersistableImpl implements Attri
 	public void setValue(final int value) {
 		this.value = value;
 	}
+	
+	@Override
+	@Transient
+	public String getName() {
+		return name;
+	}
 
 	/**
 	 * Returns the name of object if defined.
@@ -204,5 +229,15 @@ public class AttributeUsageImpl extends AbstractPersistableImpl implements Attri
 		for (final Map.Entry<String, String> entry : addedTypes.entrySet()) {
 			create(Integer.parseInt(entry.getKey()), entry.getValue());
 		}
+	}
+	
+	public static AttributeUsage[] getCustomerAttributeUsages() {
+		return Arrays.copyOf(CUSTOMER_ATTRIBUTE_USAGES, CUSTOMER_ATTRIBUTE_USAGES.length);
+	}
+	
+	@Override
+	@Transient
+	public String getNameMessageKey() {
+		return "AttributeUsage_" + this.name;
 	}
 }

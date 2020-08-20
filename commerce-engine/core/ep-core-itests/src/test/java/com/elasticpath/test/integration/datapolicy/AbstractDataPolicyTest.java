@@ -19,6 +19,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.datapolicy.ConsentAction;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.datapolicy.DataPoint;
@@ -242,7 +243,7 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 														   final String customerConsentGuid,
 														   final String email,
 														   final ConsentAction consentAction) {
-		final Customer anonymousCustomer = createPersistedCustomer(storeCode, email, true);
+		final Customer anonymousCustomer = createPersistedCustomer(storeCode, email, CustomerType.SINGLE_SESSION_USER);
 		final CustomerConsent customerConsent = createCustomerConsent(customerConsentGuid);
 		customerConsent.setCustomerGuid(anonymousCustomer.getGuid());
 		customerConsent.setConsentDate(new Date());
@@ -284,12 +285,13 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 		return customerConsentService.save(customerConsent);
 	}
 
-	protected Customer createPersistedCustomer(final String storeCode, final String email, final boolean anonymous) {
+	protected Customer createPersistedCustomer(final String storeCode, final String email, final CustomerType customerType) {
 		final Customer customer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
-		customer.setAnonymous(anonymous);
-		if (!anonymous) {
-			customer.setUserId(email);
+		customer.setCustomerType(customerType);
+		if (customerType == CustomerType.REGISTERED_USER) {
 			customer.setEmail(email);
+			customer.setFirstName("Test");
+			customer.setLastName("Test");
 		}
 		customer.setStoreCode(storeCode);
 		return customerService.add(customer);

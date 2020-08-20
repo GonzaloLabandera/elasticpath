@@ -47,7 +47,9 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.service.attribute.AttributeService;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
@@ -107,14 +109,22 @@ public class CustomerDetailsProfileAttributesSection extends AbstractCmClientEdi
 		TableWrapLayout tableWrapLayout = (TableWrapLayout) mainPane.getSwtComposite().getLayout();
 		tableWrapLayout.rightMargin = MAIN_PANEL_RIGHT_MARGIN;
 
-		final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
-		final List<Attribute> attributes = attributeService.getCustomerProfileAttributes();
+		final List<Attribute> attributes = getAttributesByCustomerType(customer.getCustomerType());
 		attributeWidgetMap = new HashMap<>();
 		for (final Attribute attribute : attributes) {
 			final Control control = createAttributeControl(authorization, attribute);
 			if (control != null) {
 				attributeWidgetMap.put(attribute, control);
 			}
+		}
+	}
+
+	private List<Attribute> getAttributesByCustomerType(final CustomerType customerType) {
+		final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
+		if (customerType.equals(CustomerType.ACCOUNT)) {
+			return attributeService.getCustomerProfileAttributes(AttributeUsageImpl.ACCOUNT_PROFILE_USAGE);
+		} else  {
+			return attributeService.getCustomerProfileAttributes(AttributeUsageImpl.USER_PROFILE_USAGE);
 		}
 	}
 

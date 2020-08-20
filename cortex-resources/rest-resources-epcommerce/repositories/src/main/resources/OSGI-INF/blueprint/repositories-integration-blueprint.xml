@@ -189,6 +189,9 @@
 	<reference id="wishListService"
 			   interface="com.elasticpath.service.shoppingcart.WishListService"/>
 
+	<reference id="userAccountAssociationService"
+			   interface="com.elasticpath.service.customer.UserAccountAssociationService"/>
+
 	<reference-list
 			id="customerTagStrategies"
 			availability="optional"
@@ -197,6 +200,16 @@
 				ref="customerTagStrategyRegistry"
 				bind-method="loadStrategy"
 				unbind-method="unloadStrategy"/>
+	</reference-list>
+
+	<reference-list
+			id="accountTagStrategies"
+			availability="optional"
+			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.customer.AccountTagStrategy">
+		<reference-listener
+				ref="customerTagStrategyRegistry"
+				bind-method="loadAccountStrategy"
+				unbind-method="unloadAccountStrategy"/>
 	</reference-list>
 
 	<reference id="modifierService"
@@ -254,8 +267,17 @@
 			   interface="com.elasticpath.service.orderpaymentapi.FilteredPaymentInstrumentService"/>
 
 	<reference id="createCartValidationService"
-			   interface="com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService">
-	</reference>
+			   interface="com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService"/>
+
+	<reference id="settingsReader"
+			   interface="com.elasticpath.settings.SettingsReader"/>
+
+	<reference id="productInventoryShoppingService"
+			 interface="com.elasticpath.sellingchannel.inventory.ProductInventoryShoppingService"/>
+
+	<reference id="productAvailabilityService"
+			 interface="com.elasticpath.service.catalogview.ProductAvailabilityService"/>
+
 	<!-- export services -->
 
 	<service ref="paginatedResultTransformer"
@@ -470,7 +492,6 @@
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ProfileAttributeFieldTransformer"/>
 
 	<service ref="multicartResolutionStrategyListHolder"
-		  interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder"
-		/>
+		  interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder"/>
 
 </blueprint>

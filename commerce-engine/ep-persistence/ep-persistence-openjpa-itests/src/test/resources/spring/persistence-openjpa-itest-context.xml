@@ -60,13 +60,13 @@
 	</bean>
 
 	<bean id="persistenceEngineTarget"
-		  class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl">
+		  class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl" init-method="init">
 		<property name="entityManager" ref="entityManager"/>
 		<property name="sessionFactory" ref="sessionFactory"/>
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="persistenceEngineOperationListeners" ref="persistenceEngineOperationListeners"/>
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
-		<property name="queryReader" ref="queryReader"/>
+		<property name="queryReaderFactory" ref="queryReaderFactory"/>
 	</bean>
 
 	<!-- Has a dependency of an applicationInitialization bean which can do any initialization the application requires -->

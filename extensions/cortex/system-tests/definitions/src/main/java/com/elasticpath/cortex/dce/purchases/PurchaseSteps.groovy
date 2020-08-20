@@ -710,6 +710,15 @@ class PurchaseSteps {
 		Order.submitPurchase()
 	}
 
+	@And('^I (?:create|have) an account order for scope (.+) and user (.+) and account (.+) with following skus?$')
+	static void purchaseAccountSKUsWithDefaultPaymentAndBillingAddress(String scope, String username, String accountSharedId, DataTable dataTable) {
+		LoginSteps.loginAsRegisteredShopperOnScope(username, scope)
+		LoginSteps.addHeaderValue("x-ep-account-shared-id", accountSharedId)
+		CommonMethods.addItemsToCart(dataTable)
+		Order.addOrderPaymentInstrument()
+		Order.submitPurchase()
+	}
+
 	@And('^I (?:create|have) an order with (.+) address with following skus?$')
 	static void purchaseWithDefaulBillingAddress(String countryCode, DataTable dataTable) {
 		CommonMethods.addItemsToCart(dataTable)
@@ -790,4 +799,40 @@ class PurchaseSteps {
 		Order.addDefaultToken()
 	}
 
+	@Then('^there is an element for the newly create order$')
+	static void findElementForSavedPurchaseNumber() {
+		def elementExists = false
+		def resultUri = client.body.self.uri
+		client.findElement {
+			element ->
+				if (element["purchase-number"] == savedPurchaseNumber)
+					elementExists = true
+				resultUri = element.body.self.uri
+		}
+
+		assertThat(elementExists)
+				.as("element with purchase-number = $savedPurchaseNumber not found")
+				.isTrue()
+
+		client.GET(resultUri)
+	}
+
+	@Then('^there is not an element for the newly create order$')
+	static void verifyNoElementForSavedPurchaseNumber() {
+		def elementExists = false
+		def resultUri = client.body.self.uri
+		client.findElement {
+			element ->
+				if (element["purchase-number"] == savedPurchaseNumber)
+					elementExists = true
+				resultUri = element.body.self.uri
+		}
+
+		assertThat(elementExists)
+				.as("element with purchase-number = $savedPurchaseNumber was found")
+				.isFalse()
+
+		client.GET(resultUri)
+	}
+	
 }

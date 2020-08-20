@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-05-default-modifier-values.xml">
+
+	<changeSet id="add-default-value-to-tmodifierfield" author="elasticpath">
+		<comment>[PB-8282] Allow default modifier values for the default cart to be specified</comment>
+		<addColumn tableName="TMODIFIERFIELD">
+			<!-- By default this column will be nullable -->
+			<column name="DEFAULT_CART_VALUE" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

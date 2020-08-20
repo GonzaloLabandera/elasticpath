@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		">
+
+	<!-- Tax Code Service -->
+	<bean id="taxCodeByCodeEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="taxCodeByCodeCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="taxCodeByCodeCache" factory-bean="localCacheFactory" factory-method="createCache" depends-on="taxCodeByCodeEhCache">
+		<constructor-arg value="taxCodeByCodeCache"/>
+	</bean>
+
+	<bean id="cachingTaxCodeService" class="com.elasticpath.caching.core.tax.CachingTaxCodeServiceImpl">
+		<property name="fallbackService" ref="taxCodeService" />
+		<property name="taxCodeByCodeCache" ref="taxCodeByCodeCache"/>
+	</bean>
+
+</beans>

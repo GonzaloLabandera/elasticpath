@@ -274,7 +274,7 @@ public class ChangeSetImportStageImpl implements ImportStage {
 		allObjectDescriptors.addAll(resolveRelatedObjects(dto, importer));
 
 		if (CollectionUtils.isEmpty(allObjectDescriptors)) {
-			LOG.debug("No business object descriptor was returned for DTO instance: " + dto);
+			LOG.warn(new Message("IE-31014", dto.getClass().getSimpleName()));
 		} else {
 			Map<String, String> metadata = new HashMap<>();
 			metadata.put("addedByUserGuid", cmUserGuid);

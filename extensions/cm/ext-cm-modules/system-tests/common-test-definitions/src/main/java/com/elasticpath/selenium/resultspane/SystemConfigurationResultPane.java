@@ -22,11 +22,9 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	private static final String EXPECTED_SETTING_RESULT_CSS = "div[row-id='%s']";
 	private static final String DEFINED_CONTEXT_NAME_ROW_VALUE_CSS = "div[row-id='%s'][widget-type='row'] ";
 	private static final String DEFINED_CONTEXT_NAME_COLUMN_VALUE_CSS = "div[column-id='%s']+ div[column-num='1']";
-	private static final String MAXIMIZE_WINDOW_CSS = "div[pane-location='center-pane-outer'] div[appearance-id='ctabfolder-button']"
-			+ "[widget-id='Maximize'][seeable='true']";
-	private static final String MINIMIZE_EDITOR_PANE_CSS = "div[pane-location='editor-pane'] div[widget-id='Minimize'] > div[style*='minimize.gif']";
-	private static final String RESTORE_WINDOW_CSS = "div[pane-location='left-pane-outer'] div[appearance-id='ctabfolder-button']"
-			+ "[widget-id='Restore'][seeable='true']";
+	private static final String MAXIMIZE_WINDOW_CSS = "div[appearance-id='ctabfolder-button'][widget-id='Maximize'][seeable='true']";
+	private static final String MINIMIZE_EDITOR_PANE_CSS = "div[widget-id='Minimize'] > div[style*='minimize.gif']";
+	private static final String RESTORE_WINDOW_CSS = "div[appearance-id='ctabfolder-button'][widget-id='Restore'][seeable='true']";
 	private static final String DEFINED_VALUES_PARENT_CSS = "div[appearance-id='label-wrapper'][widget-id='Defined Values'][seeable='true'] + div";
 	private static final String NEW_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS
 			+ " div[appearance-id='push-button'][widget-id='New...'][seeable='true']";
@@ -37,6 +35,7 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	private static final String DEFINED_VALUES_TABLE_CSS = DEFINED_VALUES_PARENT_CSS + " div[appearance-id='table'][seeable='true'] ";
 	private static final String DEFAULT_VALUE_TEXTAREA_CSS =
 			"div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages.settingDefDefaultValue'] + div > textarea";
+	private static final String RESULT_PANE_TITLE = "System Configuration";
 
 	/**
 	 * Constructor.
@@ -61,8 +60,8 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	 */
 	public void maximizeSystemConfigurationWindow() {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
-		if (getDriver().findElements(By.cssSelector(MAXIMIZE_WINDOW_CSS)).size() != 0) {
-			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(MAXIMIZE_WINDOW_CSS)));
+		if (getResultPane().findElements(By.cssSelector(MAXIMIZE_WINDOW_CSS)).size() != 0) {
+			click(getResultPane().findElement(By.cssSelector(MAXIMIZE_WINDOW_CSS)));
 		}
 		setWebDriverImplicitWaitToDefault();
 	}
@@ -72,8 +71,8 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	 */
 	public void minimizeSystemConfigurationEditorPane() {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
-		if (getDriver().findElements(By.cssSelector(MINIMIZE_EDITOR_PANE_CSS)).size() != 0) {
-			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(MINIMIZE_EDITOR_PANE_CSS)));
+		if (getResultPane().findElements(By.cssSelector(MINIMIZE_EDITOR_PANE_CSS)).size() != 0) {
+			click(getResultPane().findElement(By.cssSelector(MINIMIZE_EDITOR_PANE_CSS)));
 		}
 		setWebDriverImplicitWaitToDefault();
 	}
@@ -83,8 +82,8 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	 */
 	public void restoreSystemConfigurationWindow() {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
-		if (getDriver().findElements(By.cssSelector(RESTORE_WINDOW_CSS)).size() != 0) {
-			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(RESTORE_WINDOW_CSS)));
+		if (getResultPane().findElements(By.cssSelector(RESTORE_WINDOW_CSS)).size() != 0) {
+			click(getResultPane().findElement(By.cssSelector(RESTORE_WINDOW_CSS)));
 		}
 		setWebDriverImplicitWaitToDefault();
 	}
@@ -151,7 +150,7 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 
 	/**
 	 * Verifies quantity of Defined Values records for selected system setting
-	 *
+	 * <p>
 	 * NOTE: Method is implemented with limitation due to the way Defined Values table behaves
 	 * The method will count only those records whose Context or Value column values contain 'e' character
 	 * For example: truE, falsE, mobEE etc.
@@ -210,7 +209,6 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 		}
 	}
 
-
 	/**
 	 * Selects specific record and then clicks Remove button
 	 */
@@ -222,5 +220,18 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 			click(record);
 			clickRemoveDefinedValueButton();
 		}
+	}
+
+	/**
+	 * @return Configuration Result Pane.
+	 */
+	private WebElement getResultPane() {
+		List<WebElement> paneList = getDriver().findElements(By.cssSelector("div[appearance-id='ctabfolder'][seeable='true']"));
+		for (WebElement pane : paneList) {
+			if (pane.getText().contains(RESULT_PANE_TITLE)) {
+				return pane;
+			}
+		}
+		return null;
 	}
 }

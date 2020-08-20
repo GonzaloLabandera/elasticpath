@@ -64,7 +64,7 @@ Scenario: Import Data Policies with existing Data Policies with different data p
     And In the summary are the unsupported data policy operation error messages of
       | code     | details |
       | IE-31201 | 12347,345   |
-      | IE-30407 | 1,DATA_POLICY   |
+      | IE-30407 | 1,DATAPOLICY   |
 
 Scenario: Import Data Policies with existing Data Policies with different data point attributes because of case sensitivity
     Given the data policy import data has been emptied out
@@ -81,4 +81,4 @@ Scenario: Import Data Policies with existing Data Policies with different data p
     And In the summary are the unsupported data policy operation error messages of
       | code     | details |
       | IE-31201 | 12347,345   |
-      | IE-30407 | 1,DATA_POLICY   |
+      | IE-30407 | 1,DATAPOLICY   |

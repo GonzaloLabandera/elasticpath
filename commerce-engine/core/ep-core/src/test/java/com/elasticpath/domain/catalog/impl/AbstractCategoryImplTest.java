@@ -90,6 +90,10 @@ public class AbstractCategoryImplTest {
 				return null;
 			}
 			@Override
+			public boolean isAvailable(final Date currentDate) {
+				return false;
+			}
+			@Override
 			public boolean isAvailable() {
 				return false;
 			}

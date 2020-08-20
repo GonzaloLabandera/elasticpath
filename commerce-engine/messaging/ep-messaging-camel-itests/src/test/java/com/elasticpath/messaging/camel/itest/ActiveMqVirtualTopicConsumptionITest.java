@@ -3,9 +3,13 @@
  */
 package com.elasticpath.messaging.camel.itest;
 
+import static org.awaitility.Awaitility.await;
+import static org.awaitility.Duration.TEN_SECONDS;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.EndpointInject;
+import org.apache.camel.ServiceStatus;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.Test;
@@ -37,6 +41,8 @@ import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 public class ActiveMqVirtualTopicConsumptionITest {
 
 	private static final long SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION = 10;
+	private static final String ROUTE_ID_ONE = "r1";
+	private static final String ROUTE_ID_TWO = "r2";
 
 	@Autowired
 	@Qualifier("ep-messaging-camel-itest")
@@ -78,9 +84,15 @@ public class ActiveMqVirtualTopicConsumptionITest {
 		final int expectedNumberOfReceivedMessages = 2;
 
 		monitor.expectedMessageCount(expectedNumberOfReceivedMessages);
+		RouteBuilder r1 = new MessageConsumer(consumerEndpointOne, ROUTE_ID_ONE);
+		RouteBuilder r2 = new MessageConsumer(consumerEndpointTwo, ROUTE_ID_TWO);
 
-		context.addRoutes(new MessageConsumer(consumerEndpointOne));
-		context.addRoutes(new MessageConsumer(consumerEndpointTwo));
+		context.addRoutes(r1);
+		context.addRoutes(r2);
+
+		await().atMost(TEN_SECONDS).until(() -> context.getRouteStatus(ROUTE_ID_ONE) == ServiceStatus.Started);
+		await().atMost(TEN_SECONDS).until(() -> context.getRouteStatus(ROUTE_ID_TWO) == ServiceStatus.Started);
+
 
 		context.createProducerTemplate().sendBody(publishingEndpoint, "Message");
 
@@ -93,14 +105,17 @@ public class ActiveMqVirtualTopicConsumptionITest {
 	class MessageConsumer extends RouteBuilder {
 
 		private final Endpoint incomingEndpoint;
+		private final String id;
 
-		MessageConsumer(final Endpoint incomingEndpoint) {
+		MessageConsumer(final Endpoint incomingEndpoint, final String id) {
 			this.incomingEndpoint = incomingEndpoint;
+			this.id = id;
 		}
 
 		@Override
 		public void configure() {
 			from(incomingEndpoint)
+					.routeId(id)
 					.to(monitor);
 		}
 

@@ -56,6 +56,12 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.tests</groupId>
 			<artifactId>fluent-relos-client</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -138,6 +144,16 @@
 			<artifactId>gherkin</artifactId>
 			<version>5.1.0</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

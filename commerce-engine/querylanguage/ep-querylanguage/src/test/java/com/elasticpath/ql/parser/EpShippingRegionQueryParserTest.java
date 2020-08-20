@@ -35,7 +35,7 @@ public class EpShippingRegionQueryParserTest { // NOPMD
 		srConf.initialize();
 		
 		Map<EPQueryType, AbstractEpQLCustomConfiguration> epQLObjectConfiguration = new HashMap<>();
-		epQLObjectConfiguration.put(EPQueryType.SHIPPING_REGION, srConf);
+		epQLObjectConfiguration.put(EPQueryType.SHIPPINGREGION, srConf);
 		
 		EpQueryAssembler epQueryAssembler = new EpQueryAssembler();
 		epQueryAssembler.setEpQLObjectConfiguration(epQLObjectConfiguration);

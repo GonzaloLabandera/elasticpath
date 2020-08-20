@@ -273,8 +273,10 @@
 
    <!-- uniqueKey field can not be configured to use a Points based FieldType, therefore objectUid should be string instead of slong-->
    <field name="objectUid" type="string" indexed="true" stored="true" required="true"/>
-   <field name="userId" type="text" indexed="true" stored="false" required="true"/>
-   <field name="userIdExact" type="code" indexed="true" stored="false" required="true"/>
+   <field name="sharedId" type="text" indexed="true" stored="false" required="true"/>
+   <field name="sharedIdExact" type="code" indexed="true" stored="false" required="true"/>
+   <field name="userName" type="text" indexed="true" stored="false" required="false"/>
+   <field name="userNameExact" type="code" indexed="true" stored="false" required="false"/>
    <field name="customerNumber" type="slong" indexed="true" stored="false"/>
    <field name="firstName" type="text" indexed="true" stored="false"/>
    <field name="firstNameExact" type="code" indexed="true" stored="false"/>
@@ -297,7 +299,20 @@
    
    <!-- Field used for spelling suggestions. -->
    <!-- <field name="spell" type="spell" indexed="true" stored="false" multiValued="true"/>-->
-   
+
+	 <!--account-specific fields-->
+	 <field name="customerType" type="code" indexed="true" stored="false" required="true"/>
+	 <field name="isRootLevel" type="boolean" indexed="true" stored="false" required="false"/>
+	 <field name="businessName" type="text" indexed="true" stored="false" required="false"/>
+	 <field name="businessNameExact" type="code" indexed="true" stored="false" required="false"/>
+	 <field name="businessNumber" type="text" indexed="true" stored="false" required="false"/>
+	 <field name="businessNumberExact" type="code" indexed="true" stored="false" required="false"/>
+	 <field name="apPhone" type="text" indexed="true" stored="false" required="false"/>
+	 <field name="apPhoneExact" type="code" indexed="true" stored="false" required="false"/>
+	 <field name="apFax" type="text" indexed="true" stored="false" required="false"/>
+	 <field name="apFaxExact" type="code" indexed="true" stored="false" required="false"/>
+	 <field name="apTaxExemptionId" type="code" indexed="true" stored="false" required="false"/>
+	 <field name="apTaxExemptionIdExact" type="code" indexed="true" stored="false" required="false"/>
 
    <!-- Dynamic field definitions.  If a field name is not found, dynamicFields
         will be used if the name matches any of the patterns.
@@ -338,14 +353,18 @@
         or to add multiple fields to the same field for easier/faster searching.  -->
    <copyField source="objectUid" dest="customerNumber"/>
    <copyField source="firstName" dest="firstNameExact"/>
-  <copyField source="zipPostal" dest="zipPostalExact"/>
+   <copyField source="zipPostal" dest="zipPostalExact"/>
    <copyField source="lastName" dest="lastNameExact"/>
    <copyField source="email" dest="emailExact"/>
-   <copyField source="userId" dest="userIdExact"/>
+   <copyField source="sharedId" dest="sharedIdExact"/>
+   <copyField source="userName" dest="userNameExact"/>
    <copyField source="phoneNumber" dest="phoneNumberExact"/>
    <copyField source="preferredBillingAddress" dest="preferredBillingAddressExact"/>
-
-
+   <copyField source="businessName" dest="businessNameExact" />
+   <copyField source="businessNumber" dest="businessNumberExact" />
+   <copyField source="apPhone" dest="apPhoneExact" />
+   <copyField source="apFax" dest="apFaxExact" />
+   <copyField source="apTaxExemptionId" dest="apTaxExemptionIdExact" />
 
    <!--<copyField source="firstName" dest="text"/>
    <copyField source="lastName" dest="text"/>

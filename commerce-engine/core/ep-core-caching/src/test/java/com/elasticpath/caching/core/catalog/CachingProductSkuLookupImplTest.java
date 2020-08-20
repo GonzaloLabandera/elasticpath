@@ -8,6 +8,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -20,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -27,6 +30,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
+import com.elasticpath.cache.CacheLoader;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
@@ -281,11 +285,13 @@ public class CachingProductSkuLookupImplTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testFindBySkuCodesLoadsFromFallbackOnCacheMissAndFromProductReadOnCacheHit() throws Exception {
 		// Given
-		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(null);
+		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(product.getUidPk());
 		when(skuCodeToProductCache.get(sku2.getSkuCode())).thenReturn(product.getUidPk());
-		when(fallbackSkuLookup.findBySkuCode(sku.getSkuCode())).thenReturn(sku);
+		when(skuCodeToProductCache.getAll(anyCollection(), any(CacheLoader.class)))
+				.thenReturn(ImmutableMap.of(sku.getSkuCode(), product.getUidPk(), sku2.getSkuCode(), product.getUidPk()));
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(product);
 
 		// When
@@ -294,7 +300,6 @@ public class CachingProductSkuLookupImplTest {
 		// Then
 		assertSame("Sku1 should have been found from the fallback lookup", sku, found.get(0));
 		assertSame("Sku2 should have been found from cache", sku2, found.get(1));
-		verifySkuWasCached();
 	}
 
 	@Test

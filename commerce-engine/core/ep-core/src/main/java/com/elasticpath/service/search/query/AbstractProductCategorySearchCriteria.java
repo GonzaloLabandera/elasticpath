@@ -10,22 +10,20 @@ import java.util.Set;
 import com.elasticpath.service.search.AbstractSearchCriteriaImpl;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
-import com.elasticpath.service.search.StoreAwareSearchCriteria;
 
 /**
  * Abstract class from which {@link ProductCategorySearchCriteria}s should inherit from.
  */
-public abstract class AbstractProductCategorySearchCriteria extends AbstractSearchCriteriaImpl implements 
-		ProductCategorySearchCriteria, StoreAwareSearchCriteria {
-	
+public abstract class AbstractProductCategorySearchCriteria extends AbstractSearchCriteriaImpl implements ProductCategorySearchCriteria {
+
 	private static final long serialVersionUID = -5625885056742648762L;
 
 	private boolean facetingEnabled;
-	
+
 	private boolean displayableOnly;
-	
+
 	private boolean activeOnly;
-	
+
 	private Long storeUid;
 	
 	private String storeCode;

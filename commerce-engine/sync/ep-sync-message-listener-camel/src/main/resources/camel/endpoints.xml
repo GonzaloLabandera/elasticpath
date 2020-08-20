@@ -20,12 +20,9 @@
 		</bean>
 	-->
 
-	<bean id="endpointFactoryBean.ep-camel-datasync.changesets" parent="changeSetEventExternalEndpoint" abstract="true">
+	<bean id="changeSetPublishEndpoint" parent="changeSetEventExternalEndpoint">
 		<property name="camelContextId" value="ep-camel-datasync"/>
-	</bean>
-
-	<bean id="changeSetPublishEndpoint" parent="endpointFactoryBean.ep-camel-datasync.changesets">
-		<property name="context" value="com.elasticpath.tools.sync.dstmessagelistener.publishing.ChangeSetPublisher"/>
+		<property name="context" value="dataSyncWebApp"/>
 	</bean>
 
 	<bean id="deadLetterQueueEndpoint" parent="camelEndpointFactoryBean.ep-camel-datasync">

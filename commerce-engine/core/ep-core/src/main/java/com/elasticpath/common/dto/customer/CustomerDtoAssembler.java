@@ -3,6 +3,11 @@
  */
 package com.elasticpath.common.dto.customer;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.AddressDTO;
 import com.elasticpath.common.dto.assembler.AbstractDtoAssembler;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -11,7 +16,10 @@ import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerGroup;
+import com.elasticpath.domain.customer.CustomerType;
+import com.elasticpath.service.customer.AccountTreeService;
 import com.elasticpath.service.customer.CustomerGroupService;
+import com.elasticpath.service.customer.CustomerService;
 
 /**
  * <b>Does not copy credit card numbers.</b> <br>
@@ -20,9 +28,15 @@ import com.elasticpath.service.customer.CustomerGroupService;
 @SuppressWarnings("PMD.GodClass")
 public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Customer> {
 
+	private static final String EXCEPTION_MESSAGE_PREFIX = "Could not import customer: ";
+
 	private BeanFactory beanFactory;
 
 	private CustomerGroupService customerGroupService;
+
+	private CustomerService customerService;
+
+	private AccountTreeService accountTreeService;
 
 	@Override
 	public Customer getDomainInstance() {
@@ -53,8 +67,13 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		}
 		target.setStatus(source.getStatus());
 		target.setStoreCode(source.getStoreCode());
-		target.setUserId(source.getUserId());
+		target.setSharedId(source.getSharedId());
+		target.setUsername(source.getUsername());
 		target.setFirstTimeBuyer(source.isFirstTimeBuyer());
+
+		target.setCustomerType(source.getCustomerType().getName());
+
+		target.setParentGuid(source.getParentGuid());
 
 		populateDtoAddresses(source, target);
 
@@ -100,6 +119,7 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 	@Override
 	public void assembleDomain(final CustomerDTO source, final Customer target) {
+		ensureCustomerTypeHasNotChanged(source, target);
 
 		// Needed by credit card and preferred* below.
 		populateDomainAddresses(source, target);
@@ -116,8 +136,32 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 		target.setStoreCode(source.getStoreCode());
 
-		target.setUserId(source.getUserId());
+		target.setSharedId(source.getSharedId());
+		target.setUsername(source.getUsername());
 		target.setFirstTimeBuyer(source.isFirstTimeBuyer());
+
+		CustomerType customerType = CustomerType.valueOf(source.getCustomerType());
+		target.setCustomerType(customerType);
+
+		ensureNotAccountCustomerHasNoParent(source, customerType);
+
+		ensureAccountParentGuidHasNotChanged(source, target);
+
+		if (StringUtils.isNotEmpty(source.getParentGuid())) {
+			final Customer parent = customerService.findByGuid(source.getParentGuid());
+
+			if (Objects.isNull(parent)) {
+				throw new EpServiceException(EXCEPTION_MESSAGE_PREFIX + source.getGuid() + " lists parentGuid " + source.getParentGuid()
+						+ " that does not exist.");
+			}
+
+			if (!parent.getCustomerType().equals(CustomerType.ACCOUNT)) {
+				throw new EpServiceException(EXCEPTION_MESSAGE_PREFIX + source.getGuid()
+						+ " provides a parentGuid that references a customer that is not an ACCOUNT.");
+			}
+
+			target.setParentGuid(source.getParentGuid());
+		}
 
 		populateDomainCustomerGroup(source, target);
 
@@ -125,6 +169,25 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 			target.getCustomerProfile().setStringProfileValue(avDto.getKey(), avDto.getValue(), avDto.getCreationDate());
 		}
 
+	}
+
+	private void ensureCustomerTypeHasNotChanged(final CustomerDTO source, final Customer target) {
+		if (target.isPersisted() && !Objects.equals(source.getCustomerType(), target.getCustomerType().getName())) {
+			throw new EpServiceException(EXCEPTION_MESSAGE_PREFIX + "Customer type cannot be changed on an existing customer record.");
+		}
+	}
+
+	private void ensureAccountParentGuidHasNotChanged(final CustomerDTO source, final Customer target) {
+		if (target.isPersisted() && !Objects.equals(source.getParentGuid(), target.getParentGuid())) {
+			throw new EpServiceException(EXCEPTION_MESSAGE_PREFIX + "Parent cannot be changed on an existing customer record.");
+		}
+	}
+
+	private void ensureNotAccountCustomerHasNoParent(final CustomerDTO source, final CustomerType customerType) {
+		if (!customerType.equals(CustomerType.ACCOUNT) && StringUtils.isNotEmpty(source.getParentGuid())) {
+			throw new EpServiceException(EXCEPTION_MESSAGE_PREFIX + source.getGuid() + " Customer record of type " + customerType
+					+ " cannot have a parent.");
+		}
 	}
 
 	private void populateDomainAddresses(final CustomerDTO source, final Customer target) {
@@ -197,4 +260,19 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		return customerGroupService;
 	}
 
+	public CustomerService getCustomerService() {
+		return customerService;
+	}
+
+	public void setCustomerService(final CustomerService customerService) {
+		this.customerService = customerService;
+	}
+
+	public AccountTreeService getAccountTreeService() {
+		return accountTreeService;
+	}
+
+	public void setAccountTreeService(final AccountTreeService accountTreeService) {
+		this.accountTreeService = accountTreeService;
+	}
 }

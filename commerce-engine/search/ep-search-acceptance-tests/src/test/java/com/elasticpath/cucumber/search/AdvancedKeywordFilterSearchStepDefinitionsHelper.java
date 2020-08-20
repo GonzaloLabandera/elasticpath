@@ -64,6 +64,7 @@ import com.elasticpath.test.persister.testscenarios.ShoppingCartSimpleStoreScena
 public class AdvancedKeywordFilterSearchStepDefinitionsHelper {
 
 	private static final int TWENTY = 20;
+	private static final int NUM_RESULTS_PER_PAGE = 50;
 	private Product productA;
 	
 	@Autowired
@@ -215,7 +216,7 @@ public class AdvancedKeywordFilterSearchStepDefinitionsHelper {
 		ShoppingCart shoppingCart = beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		setupShoppingCart(shoppingCart);
 		
-		searchResult = advancedSearchService.search(searchRequest, shoppingCart, 1);
+		searchResult = advancedSearchService.search(searchRequest, shoppingCart, 1, NUM_RESULTS_PER_PAGE);
 	}
 	
 	/**

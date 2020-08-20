@@ -18,14 +18,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
 import com.elasticpath.cucumber.category.CategoryStepDefinitionsHelper;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.impl.AnonymousCustomerCleanupJob;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.jobs.impl.FailedOrdersCleanupJob;
 import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.OrderPaymentInstrument;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.impl.AbandonedCartsCleanupJob;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.orderpaymentapi.CartOrderPaymentInstrumentService;
@@ -38,14 +36,6 @@ import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
  * Clean up test step definitions class.
  */
 public class CleanupStepDefinitions {
-
-	@Autowired
-	@Qualifier("abandonedCartsCleanupJob")
-	private AbandonedCartsCleanupJob abandonedCartsCleanupJob;
-
-	@Autowired
-	@Qualifier("cleanupAnonymousCustomerJob")
-	private AnonymousCustomerCleanupJob anonymousCustomerCleanupJob;
 
 	@Autowired
 	@Qualifier("cleanupFailedOrdersJob")
@@ -100,26 +90,6 @@ public class CleanupStepDefinitions {
 	}
 
 	/**
-	 * Sets the number of days of anonymous customer history to keep before a Quartz job clears it.
-	 *
-	 * @param maxHistory the number of days of anonymous customer history.
-	 */
-	@Given("^the ANONYMOUSCUSTOMERCLEANUP maxHistory is (\\d+) day$")
-	public void setCustomerMaxHistory(final int maxHistory) {
-		anonymousCustomerCleanupJob.setMaxDaysHistoryProvider(new SimpleSettingValueProvider<>(maxHistory));
-	}
-
-	/**
-	 * Sets the number of days of cart history to keep before a Quartz job clears it.
-	 *
-	 * @param maxHistory the number of days of cart history.
-	 */
-	@Given("^the ABANDONEDCARTCLEANUP maxHistory is (\\d+) day$")
-	public void setCartMaxHistory(final int maxHistory) {
-		abandonedCartsCleanupJob.setMaxDaysHistoryProvider(new SimpleSettingValueProvider<>(maxHistory));
-	}
-
-	/**
 	 * Sets the number of days of failed order history to keep before a Quartz job clears it.
 	 *
 	 * @param maxHistory the number of days of failed order history.
@@ -145,33 +115,6 @@ public class CleanupStepDefinitions {
 	@And("^the anonymous customer created a payment instrument in order$")
 	public void createPaymentInstrument() {
 		cartOrderPaymentInstrumentGuid = cleanupStepDefinitionsHelper.createPaymentInstrument();
-	}
-
-	/**
-	 * Runs the cleanup anonymous customer job.
-	 */
-	@When("^the cleanupAnonymousCustomerJob processes$")
-	public void runCleanupAnonymousCustomerJobProcessor() {
-		anonymousCustomerCleanupJob.purgeAnonymousCustomers();
-	}
-
-	/**
-	 * Runs the cleanup abandoned carts job.
-	 */
-	@When("^the cleanupAbandonedCartsJob processes$")
-	public void runCleanupAbandonedCartsJobProcessor() {
-		abandonedCartsCleanupJob.purgeAbandonedShoppingCarts();
-	}
-
-	/**
-	 * Runs the cleanup inactive carts job.
-	 */
-	@When("^the cleanupInactiveCartsJob processes$")
-	public void runCleanupInactiveCartsJobProcessor() {
-		ShoppingCart shoppingCart = shoppingCartService.findByGuid(shoppingCartHolder.get().getGuid());
-		shoppingCart.deactivateCart();
-		shoppingCartService.saveOrUpdate(shoppingCart);
-		abandonedCartsCleanupJob.purgeInactiveShoppingCarts();
 	}
 
 	/**

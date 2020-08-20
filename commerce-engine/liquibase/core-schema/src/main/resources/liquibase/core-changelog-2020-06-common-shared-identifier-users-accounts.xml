@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-06-common-shared-identifier-users-accounts.xml">
+
+	<!-- Add the new columns -->
+	<changeSet id="PB-8250 Shared ID and Username for customers and accounts" author="elasticpath">
+		<comment>Remove USER_ID in favor of SHARED_ID, and add USERNAME to TCUSTOMERAUTHENTICATION</comment>
+
+		<addColumn tableName="TCUSTOMER">
+			<column name="SHARED_ID" type="VARCHAR(255)" />
+		</addColumn>
+		<createIndex tableName="TCUSTOMER" indexName="I_CUSTOMER_SHAREDID">
+			<column name="SHARED_ID" />
+		</createIndex>
+
+		<addColumn tableName="TCUSTOMERAUTHENTICATION">
+			<column name="USERNAME" type="VARCHAR(255)"/>
+		</addColumn>
+		<createIndex tableName="TCUSTOMERAUTHENTICATION" indexName="I_CUSTOMERAUTH_USERNAME">
+			<column name="USERNAME" />
+		</createIndex>
+	</changeSet>
+
+	<!-- Do the data migration if the "migrate-data" context is active. -->
+	<changeSet id="PB-8250 Migrate Data SHARED_ID for customers" author="elasticpath" context="migrate-data">
+		<sql>
+			UPDATE TCUSTOMER tc
+			SET SHARED_ID = CONCAT(CONCAT(STORECODE,':'),USER_ID)
+			WHERE tc.CUSTOMER_TYPE != 'ACCOUNT'
+		</sql>
+	</changeSet>
+
+	<changeSet id="PB-8250 Migrate Data to SHARED_ID for accounts" author="elasticpath" context="migrate-data">
+		<sql>
+			UPDATE TCUSTOMER tc
+			SET SHARED_ID = USER_ID
+			WHERE tc.CUSTOMER_TYPE = 'ACCOUNT'
+		</sql>
+	</changeSet>
+
+	<changeSet id="PB-8250 Migrate Data to USERNAME" author="elasticpath" context="migrate-data">
+		<sql>
+			UPDATE TCUSTOMERAUTHENTICATION ta
+				SET ta.USERNAME = (
+					select USER_ID
+					from TCUSTOMER tc
+					where ta.UIDPK = tc.UIDPK
+			        AND tc.CUSTOMER_TYPE != 'ACCOUNT'
+				)
+				where exists (
+					select *
+					from TCUSTOMER tc
+					where ta.UIDPK = tc.UIDPK
+			        AND tc.CUSTOMER_TYPE != 'ACCOUNT'
+				)
+		</sql>
+	</changeSet>
+
+	<!-- Now that migration is done, add constraints and clean up -->
+	<changeSet id="PB-8250 Add Constraints and Finish Migration" author="elasticpath">
+		<addUniqueConstraint tableName="TCUSTOMER" columnNames="SHARED_ID, CUSTOMER_TYPE" constraintName="TCUSTOMER_SHARED_ID_TYPE_UNIQ" />
+		<addNotNullConstraint tableName="TCUSTOMER" columnName="SHARED_ID"  columnDataType="VARCHAR(255)"/>
+
+		<dropColumn tableName="TCUSTOMER" columnName="USER_ID" />
+	</changeSet>
+
+	<changeSet id="PB-8250 Update TSETTINGVALUE for COMMERCE/SYSTEM/CUSTOMER/identifier from USER_ID to SHARED_ID" author="elasticpath">
+		<update tableName="TSETTINGVALUE">
+			<column name="CONTEXT" value="punchout_shared_id"/>
+			<column name="CONTEXT_VALUE" value="SHARED_ID"/>
+			<where>UIDPK = 119</where>
+		</update>
+	</changeSet>
+</databaseChangeLog>

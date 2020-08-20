@@ -27,5 +27,6 @@ Export-Package: com.elasticpath.cmclient.catalog,
  com.elasticpath.cmclient.catalog.editors.sku,
  com.elasticpath.cmclient.catalog.perspectives,
  com.elasticpath.cmclient.catalog.views,
- com.elasticpath.cmclient.catalog.editors.model
+ com.elasticpath.cmclient.catalog.editors.model,
+ com.elasticpath.cmclient.catalog.editors.attribute
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

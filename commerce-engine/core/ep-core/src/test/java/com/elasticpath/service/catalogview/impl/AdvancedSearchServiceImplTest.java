@@ -39,7 +39,6 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
-import com.elasticpath.service.catalogview.PaginationService;
 import com.elasticpath.service.catalogview.SearchCriteriaFactory;
 import com.elasticpath.service.catalogview.StoreConfig;
 import com.elasticpath.service.catalogview.StoreProductService;
@@ -91,8 +90,6 @@ public class AdvancedSearchServiceImplTest {
 
 	private IndexSearchResult mockIndexSearchResult;
 
-	private PaginationService mockPaginationService;
-
 	private Store store;
 
 	private ShoppingCart mockShoppingCart;
@@ -137,9 +134,6 @@ public class AdvancedSearchServiceImplTest {
 		mockIndexUtility = context.mock(IndexUtility.class);
 		advancedSearchService.setIndexUtility(mockIndexUtility);
 
-		mockPaginationService = context.mock(PaginationService.class);
-		advancedSearchService.setPaginationService(mockPaginationService);
-
 		store = new StoreImpl();
 		Catalog catalog = new CatalogImpl();
 		catalog.setCode(CATALOG_CODE);
@@ -170,9 +164,6 @@ public class AdvancedSearchServiceImplTest {
 
 				allowing(mockShoppingCart).getStore();
 				will(returnValue(store));
-
-				allowing(mockPaginationService).getNumberOfItemsPerPage(STORE_CODE);
-				will(returnValue(NUMBER_OF_ITEMS_PER_PAGE));
 			}
 		});
 
@@ -235,7 +226,7 @@ public class AdvancedSearchServiceImplTest {
 
 			}
 		});
-		SearchResult result = advancedSearchService.search(searchRequest, mockShoppingCart, PAGE_NUMBER);
+		SearchResult result = advancedSearchService.search(searchRequest, mockShoppingCart, PAGE_NUMBER, NUMBER_OF_ITEMS_PER_PAGE);
 		assertNotNull("The search result is not supposed to be null.", result);
 		assertEquals("The result count does not match the expected value", NUMBER_OF_PRODUCTS_FOUND, result.getResultsCount());
 		assertEquals("The products returned in the result should match the expected products", products, result.getProducts());

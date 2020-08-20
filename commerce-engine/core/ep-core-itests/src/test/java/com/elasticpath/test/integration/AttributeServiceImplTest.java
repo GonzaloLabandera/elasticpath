@@ -93,10 +93,10 @@ public class AttributeServiceImplTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testIsAttributeInUseForCustomerAttributes() {
-		Attribute attribute = newAttribute(ATTR_KEY, AttributeUsage.CUSTOMERPROFILE, null, true);
+		Attribute attribute = newAttribute(ATTR_KEY, AttributeUsage.USER_PROFILE, null, true);
 		service.add(attribute);
 		
-		Attribute attribute2 = newAttribute(ATTR_KEY2, AttributeUsage.CUSTOMERPROFILE, null, true);
+		Attribute attribute2 = newAttribute(ATTR_KEY2, AttributeUsage.USER_PROFILE, null, true);
 		service.add(attribute2);
 		
 		
@@ -129,7 +129,7 @@ public class AttributeServiceImplTest extends DbTestCase {
 	public void testFindAllCatalogAndGlobalAttributes() {
 		Catalog catalog = scenario.getCatalog();
 		
-		Attribute attribute1 = newAttribute("key1", AttributeUsage.CUSTOMERPROFILE, null, true);
+		Attribute attribute1 = newAttribute("key1", AttributeUsage.USER_PROFILE, null, true);
 		service.add(attribute1);
 
 		Attribute attribute2 = newAttribute("key2", AttributeUsage.CATEGORY, catalog, false);

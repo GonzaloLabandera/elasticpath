@@ -4,7 +4,6 @@
 package com.elasticpath.email.handler.giftcertificate.producer.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,17 +16,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
-import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderSku;
-import com.elasticpath.domain.order.impl.OrderSkuImpl;
 import com.elasticpath.email.EmailDto;
 import com.elasticpath.email.domain.EmailProperties;
 import com.elasticpath.email.handler.giftcertificate.helper.GiftCertificateEmailPropertyHelper;
 import com.elasticpath.email.producer.spi.composer.EmailComposer;
 import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.elasticpath.service.order.OrderService;
 
 /**
  * Test class for {@link com.elasticpath.email.handler.giftcertificate.producer.impl.GiftCertificateEmailProducer}.
@@ -52,79 +45,27 @@ public class GiftCertificateEmailProducerTest {
 	private EmailComposer emailComposer;
 
 	@Mock
-	private OrderService orderService;
-
-	@Mock
 	private ProductSkuLookup productSkuLookup;
 
 	@InjectMocks
 	private GiftCertificateEmailProducer emailProducer;
 
 	@Test
-	public void verifyExceptionIsThrownWhenNoOrderGuid() throws Exception {
-		final Map<String, Object> emailDataMap = createEmailDataMap(ORDER_GUID, ORDER_SKU_GUID, RECIPIENT_EMAIL_ADDRESS);
-		emailDataMap.put("orderGuid", null);
-
-		assertThatThrownBy(() -> emailProducer.createEmail(GIFT_CERTIFICATE_GUID, emailDataMap))
-				.isInstanceOf(IllegalArgumentException.class);
-	}
-
-	@Test
-	public void verifyExceptionIsThrownWhenNoOrderSkuGuid() throws Exception {
-		final Map<String, Object> emailDataMap = createEmailDataMap(ORDER_GUID, ORDER_SKU_GUID, RECIPIENT_EMAIL_ADDRESS);
-		emailDataMap.put("orderSkuGuid", null);
-
-		givenOrderServiceFindsOrder(mock(Order.class));
-
-		assertThatThrownBy(() -> emailProducer.createEmail(GIFT_CERTIFICATE_GUID, emailDataMap))
-				.isInstanceOf(IllegalArgumentException.class);
-	}
-
-	@Test
-	public void verifyExceptionIsThrownWhenNoOrderMatchingOrderGuid() throws Exception {
-		final Map<String, Object> emailDataMap = createEmailDataMap(ORDER_GUID, ORDER_SKU_GUID, RECIPIENT_EMAIL_ADDRESS);
-
-		givenOrderServiceFindsOrder(null);
-
-		assertThatThrownBy(() -> emailProducer.createEmail(GIFT_CERTIFICATE_GUID, emailDataMap))
-				.isInstanceOf(IllegalArgumentException.class);
-	}
-
-	@Test
-	public void verifyExceptionIsThrownWhenNoOrderSkuMatchingOrderSkuGuid() throws Exception {
-		final Map<String, Object> emailDataMap = createEmailDataMap(ORDER_GUID, ORDER_SKU_GUID, RECIPIENT_EMAIL_ADDRESS);
-
-		final Order order = mock(Order.class);
-
-		givenOrderServiceFindsOrder(order);
-		givenOrderFindsOrderSkuForGuid(order, null);
-
-		assertThatThrownBy(() -> emailProducer.createEmail(GIFT_CERTIFICATE_GUID, emailDataMap))
-				.isInstanceOf(IllegalArgumentException.class);
-	}
-
-	@Test
 	public void testVerifyThatGiftCertificateEmailIsConstructedForOrderAndOrderSku() throws Exception {
 		final String giftCertificateThemeImageFilename = "hello.jpg";
-		final OrderSku orderSku = createOrderSku(giftCertificateThemeImageFilename);
-		final Order order = mock(Order.class);
+		final Map<String, Object> emailData = createEmailDataMap(ORDER_GUID, ORDER_SKU_GUID, null);
 
 		final EmailDto expectedEmail = EmailDto.builder()
 				.withTo(RECIPIENT_EMAIL_ADDRESS)
 				.build();
 
-		givenOrderServiceFindsOrder(order);
-		givenOrderFindsOrderSkuForGuid(order, orderSku);
-
 		final EmailProperties emailProperties = mock(EmailProperties.class);
 
-		when(giftCertificateEmailPropertyHelper.getEmailProperties(order, orderSku, giftCertificateThemeImageFilename))
+		when(productSkuLookup.findImagePathBySkuGuid(ORDER_SKU_GUID)).thenReturn(giftCertificateThemeImageFilename);
+		when(giftCertificateEmailPropertyHelper.getEmailProperties(giftCertificateThemeImageFilename, emailData))
 				.thenReturn(emailProperties);
-
 		when(emailComposer.composeMessage(emailProperties))
 				.thenReturn(expectedEmail);
-
-		final Map<String, Object> emailData = createEmailDataMap(ORDER_GUID, ORDER_SKU_GUID, null);
 
 		final EmailDto actualEmail = emailProducer.createEmail(GIFT_CERTIFICATE_GUID, emailData);
 
@@ -137,8 +78,7 @@ public class GiftCertificateEmailProducerTest {
 	public void testVerifyThatSpecifiedEmailAddressAddsToOriginalRecipient() throws Exception {
 		final String overrideRecipientAddress = "override.recipient@elasticpath.com";
 		final String giftCertificateThemeImageFilename = "hello.jpg";
-		final OrderSku orderSku = createOrderSku(giftCertificateThemeImageFilename);
-		final Order order = mock(Order.class);
+		final Map<String, Object> emailData = createEmailDataMap(ORDER_GUID, ORDER_SKU_GUID, overrideRecipientAddress);
 
 		final EmailDto emailDtoTemplate = EmailDto.builder()
 				.withTo(RECIPIENT_EMAIL_ADDRESS)
@@ -149,18 +89,15 @@ public class GiftCertificateEmailProducerTest {
 				.addTo(overrideRecipientAddress)
 				.build();
 
-		givenOrderServiceFindsOrder(order);
-		givenOrderFindsOrderSkuForGuid(order, orderSku);
-
 		final EmailProperties emailProperties = mock(EmailProperties.class);
 
-		when(giftCertificateEmailPropertyHelper.getEmailProperties(order, orderSku, giftCertificateThemeImageFilename))
+		when(productSkuLookup.findImagePathBySkuGuid(ORDER_SKU_GUID)).thenReturn(giftCertificateThemeImageFilename);
+		when(giftCertificateEmailPropertyHelper.getEmailProperties(giftCertificateThemeImageFilename, emailData))
 				.thenReturn(emailProperties);
-
 		when(emailComposer.composeMessage(emailProperties))
 				.thenReturn(emailDtoTemplate);
 
-		final Map<String, Object> emailData = createEmailDataMap(ORDER_GUID, ORDER_SKU_GUID, overrideRecipientAddress);
+
 
 		final EmailDto actualEmail = emailProducer.createEmail(GIFT_CERTIFICATE_GUID, emailData);
 
@@ -173,6 +110,12 @@ public class GiftCertificateEmailProducerTest {
 		final Map<String, Object> emailDataMap = Maps.newHashMapWithExpectedSize(3);
 		emailDataMap.put("orderGuid", orderGuid);
 		emailDataMap.put("orderSkuGuid", orderSkuGuid);
+		emailDataMap.put("orderLocale", "en");
+		emailDataMap.put("orderStoreCode", "storeCode");
+		emailDataMap.put("shipmentNumber", "12345-1");
+		emailDataMap.put("shipmentType", "ELECTRONIC");
+		emailDataMap.put("orderSkuTotalAmount", "10.00");
+		emailDataMap.put("orderSkuTotalCurrency", "CAD");
 
 		if (recipient != null) {
 			emailDataMap.put(EMAIL_KEY, recipient);
@@ -180,26 +123,4 @@ public class GiftCertificateEmailProducerTest {
 
 		return emailDataMap;
 	}
-
-	private OrderSku createOrderSku(final String giftCertificateThemeImageFilename) {
-		final ProductSku productSku = new ProductSkuImpl();
-		productSku.initialize();
-		productSku.setImage(giftCertificateThemeImageFilename);
-
-		final OrderSku orderSku = new OrderSkuImpl();
-		orderSku.setSkuGuid(productSku.getGuid());
-
-		when(productSkuLookup.findByGuid(productSku.getGuid())).thenReturn(productSku);
-
-		return orderSku;
-	}
-
-	private void givenOrderServiceFindsOrder(final Order order) {
-		when(orderService.findOrderByOrderNumber(ORDER_GUID)).thenReturn(order);
-	}
-
-	private void givenOrderFindsOrderSkuForGuid(final Order order, final OrderSku orderSku) {
-		when(order.getOrderSkuByGuid(ORDER_SKU_GUID)).thenReturn(orderSku);
-	}
-
 }

@@ -31,32 +31,6 @@
 		<property name="cacheRemoveDecorator" ref="cacheRemoveDecorator"/>
 	</bean>
 
-	<bean id="intervalRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.IntervalRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService"/>
-		<property name="timeoutParamKey" value="timeout"/>
-	</bean>
-
-	<bean id="immediateRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ImmediateRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService"/>
-	</bean>
-
-	<bean id="applicationLifetimeRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ApplicationLifetimeRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService"/>
-	</bean>
-
-	<bean id="cachedSettingsReader" class="com.elasticpath.settings.impl.CachedSettingsReaderImpl">
-		<property name="settingsService" ref="settingsService"/>
-		<property name="refreshStrategies">
-			<map>
-				<entry key="interval" value-ref="intervalRefreshStrategy"/>
-				<entry key="immediate" value-ref="immediateRefreshStrategy"/>
-				<entry key="application" value-ref="applicationLifetimeRefreshStrategy"/>
-			</map>
-		</property>
-		<property name="refreshStrategyKey" value="apiRefreshStrategy"/>
-		<property name="defaultRefreshStrategy" ref="immediateRefreshStrategy"/>
-	</bean>
-
 	<bean name="epCustomerViolationsInterpreter"
 		  class="com.elasticpath.rest.resource.integration.epcommerce.common.validator.EpConstraintViolationsInterpreterImpl">
 		<constructor-arg>
@@ -68,14 +42,15 @@
 			</map>
 		</constructor-arg>
 	</bean>
-
+	
+	<!-- Note that this map is used in reverse in ProfileAttributeFieldTransformerImpl, so it is
+	critically important that the entry VALUES as well as the KEYS must be unique. -->
 	<util:map id="profileAttributeToFieldNameMap">
 		<entry key="CP_FIRST_NAME" value="given-name"/>
 		<entry key="CP_LAST_NAME" value="family-name"/>
 		<entry key="CP_EMAIL" value="email"/>
 		<entry key="CP_PREF_LOCALE" value="preferred-locale"/>
 		<entry key="CP_PREF_CURR" value="preferred-currency"/>
-		<entry key="CP_ANONYMOUS_CUST" value="anonymous"/>
 		<entry key="CP_PHONE" value="phone"/>
 		<entry key="CP_FAX" value="fax"/>
 		<entry key="CP_GENDER" value="gender"/>
@@ -85,6 +60,11 @@
 		<entry key="CP_BE_NOTIFIED" value="notification"/>
 		<entry key="CP_BUSINESS_NUMBER" value="business-number"/>
 		<entry key="CP_TAX_EXEMPTION_ID" value="tax-exemption-id"/>
+		<entry key="AP_NAME" value="account-business-name" />
+		<entry key="AP_BUSINESS_NUMBER" value="account-business-number" />
+		<entry key="AP_PHONE" value="account-phone" />
+		<entry key="AP_FAX" value="account-fax" />
+		<entry key="AP_TAX_EXEMPTION_ID" value="account-tax-exemption-id" />
 	</util:map>
 
 	<bean name="profileAttributeFieldTransformer"
@@ -98,7 +78,6 @@
 	id="multiCartResolutionStrategies" value-type="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategy"
 	>
 		<ref bean="b2cMulticartStrategy"/>
-		<ref bean="b2bMulticartStrategy"/>
 	</util:list>
 
 	<bean id="multicartResolutionStrategyListHolder"
@@ -148,6 +127,16 @@
 		<property name="path" value="COMMERCE/SYSTEM/API/enableTrustedTraits"/>
 		<property name="settingsReader" ref="settingsService"/>
 		<property name="settingValueTypeConverter" ref="settingValueTypeConverter"/>
+	</bean>
+
+	<bean id="shoppingCartItemListTypeProvider" class="com.elasticpath.settings.provider.impl.SettingValueProviderImpl">
+		<property name="path" value="COMMERCE/STORE/shoppingCartItemListType"/>
+		<property name="settingsReader" ref="settingsReader"/>
+		<property name="settingValueTypeConverter" ref="settingValueTypeConverter"/>
+	</bean>
+
+	<bean id="multicartItemListTypeLocationProvider" class="com.elasticpath.service.shoppingcart.impl.MulticartItemListTypeLocationProviderImpl	" >
+		<property name="shoppingCartItemListTypeProvider" ref="shoppingCartItemListTypeProvider"/>
 	</bean>
 
 	<context:component-scan base-package="com.elasticpath.rest" scope-resolver="org.springframework.context.annotation.Jsr330ScopeMetadataResolver"/>

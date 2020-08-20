@@ -39,6 +39,7 @@ public class ModifierFieldAdapter extends AbstractDomainAdapterImpl<ModifierFiel
 		cartItemModifierField.setFieldType(ModifierType.valueOfCamelCase(cartItemModifierFieldDTO.getType()));
 		cartItemModifierField.setRequired(cartItemModifierFieldDTO.isRequired());
 		cartItemModifierField.setMaxSize(cartItemModifierFieldDTO.getMaxSize());
+		cartItemModifierField.setDefaultCartValue(cartItemModifierFieldDTO.getDefaultCartValue());
 
 		if (cartItemModifierFieldDTO.getMaxSize() != null && cartItemModifierFieldDTO.getMaxSize().intValue() == 0) {
 			cartItemModifierField.setMaxSize(null);
@@ -134,6 +135,7 @@ public class ModifierFieldAdapter extends AbstractDomainAdapterImpl<ModifierFiel
 		dto.setType(cartItemModifierField.getFieldType().getCamelName());
 		dto.setValues(new ArrayList<>());
 		dto.setModifierFieldOptions(new ArrayList<>());
+		dto.setDefaultCartValue(cartItemModifierField.getDefaultCartValue());
 
 		for (ModifierFieldLdf cartItemModifierFieldLdf : cartItemModifierField.getModifierFieldsLdf()) {
 			DisplayValue displayValue = new DisplayValue();

@@ -146,12 +146,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	 */
 	@Override
 	public void logOrderShipmentReleased(final Order order, final OrderShipment shipment) {
-
-		EventOriginator originator = getEventOriginator(order);
-
-		String detail = format("Order shipment #%1$s is released.", shipment.getShipmentNumber());
-
-		OrderEvent orderEvent = createOrderEvent(detail, TITLE_ORDER_SHIPMENT_RELEASED, originator);
+		OrderEvent orderEvent = createShipmentReleasedOrderEvent(order, shipment);
 
 		order.addOrderEvent(orderEvent);
 	}
@@ -677,5 +672,13 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 		this.paymentInstrumentWorkflow = paymentInstrumentWorkflow;
 	}
 
+	@Override
+	public OrderEvent createShipmentReleasedOrderEvent(final Order order, final OrderShipment shipment) {
+		EventOriginator originator = getEventOriginator(order);
+
+		String detail = format("Order shipment #%1$s is released.", shipment.getShipmentNumber());
+
+		return createOrderEvent(detail, TITLE_ORDER_SHIPMENT_RELEASED, originator);
+	}
 }
 

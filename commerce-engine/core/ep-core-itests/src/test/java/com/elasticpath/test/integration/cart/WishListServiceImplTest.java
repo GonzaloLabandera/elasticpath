@@ -7,8 +7,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Date;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +69,7 @@ public class WishListServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Test method for {@link WishListService#load(long)}.
+	 * Test method for {@link WishListService#get(long)}.
 	 */
 	@DirtiesDatabase
 	@Test
@@ -95,7 +93,7 @@ public class WishListServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Test method for {@link WishListService#findWishListByCustomerGuid(String)}.
+	 * Test method for {@link WishListService#findOrCreateWishListByShopper}.
 	 */
 	@DirtiesDatabase
 	@Test
@@ -122,7 +120,7 @@ public class WishListServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Test method for {@link com.elasticpath.service.shoppingcart.impl.WishListServiceImpl#findWishListByCustomerSessionGuid(java.lang.String)}.
+	 * Test method for {@link com.elasticpath.service.shoppingcart.impl.WishListServiceImpl#findOrCreateWishListByShopper}.
 	 */
 	@DirtiesDatabase
 	@Test
@@ -133,13 +131,9 @@ public class WishListServiceImplTest extends BasicSpringContextTest {
 		shopper = shopperService.save(shopper);
 
 		final CustomerSession custSession = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
-		custSession.setGuid(Utils.uniqueCode("CS-"));
-		custSession.setCreationDate(new Date());
-		custSession.setLastAccessedDate(new Date());
 		custSession.setShopper(shopper);
 		final CustomerSessionService customerSessionService = getBeanFactory().getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE,
 				CustomerSessionService.class);
-		customerSessionService.add(custSession);
 
 		final WishList wishList = createWishList();
 		wishList.setGuid(Utils.uniqueCode("WL-"));

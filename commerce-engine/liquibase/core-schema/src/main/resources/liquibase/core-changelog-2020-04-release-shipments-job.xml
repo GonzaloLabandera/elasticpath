@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-04-release-shipments-job.xml">
+
+	<changeSet id="2020-04-add-batch-size-for-release-shipments-job" author="elasticpath">
+		<comment>[PB-6045] Added batch size for the release-shipments job.</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueComputed="203"/>
+			<column name="PATH" value="COMMERCE/SYSTEM/RELEASESHIPMENTSJOB/batchSize"/>
+			<column name="DEFAULT_VALUE" value="500"/>
+			<column name="VALUE_TYPE" value="Integer"/>
+			<column name="DESCRIPTION" value="The max number of shipments to release per batch"/>
+			<column name="MAX_OVERRIDE_VALUES" value="1"/>
+		</insert>
+	</changeSet>
+</databaseChangeLog>

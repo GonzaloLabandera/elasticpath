@@ -2,13 +2,13 @@
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:util="http://www.springframework.org/schema/util"
 		xmlns:settings="http://www.elasticpath.com/schema/settings"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
             http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 	">
-
-	<import resource="classpath:spring/service/service.xml" />
 
 	<bean id="changeSetEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
@@ -44,6 +44,17 @@
 		</property>
 	</bean>
 
+	<bean id="metaDataMapPopulator" class="com.elasticpath.importexport.common.util.MetaDataMapPopulatorImpl">
+		<property name="changeSetService" ref="changeSetService"/>
+		<property name="changeSetManagementService" ref="changeSetManagementService"/>
+		<property name="metadataMap" ref="persistenceListenerMetadataMap"/>
+	</bean>
+
+	<bean id="cachingImportProcessor" class="com.elasticpath.importexport.importer.importers.impl.CachingImportProcessorImpl" parent="importProcessor">
+		<property name="cachePopulator" ref="delegatingCachePopulator"/>
+		<property name="cachingServices" value="#{mutableCachingServiceMap.values()}"/>
+	</bean>
+
 	<bean id="statusHolder" class="com.elasticpath.importexport.importer.importers.impl.ImportStatusHolder" scope="prototype" />
 
 	<bean id="abstractImporter" class="com.elasticpath.importexport.importer.importers.impl.AbstractImporterImpl"
@@ -51,8 +62,26 @@
 		<property name="statusHolder">
 			<ref bean="statusHolder" />
 		</property>
+		<property name="commonLifecycleListeners">
+			<ref bean="commonLifecycleListeners"/>
+		</property>
 		<property name="commitUnit" value="100" />
 	</bean>
+
+	<util:list id="commonLifecycleListeners">
+		<ref bean="cachingLifecycleListener"/>
+	</util:list>
+
+	<util:list id="commonProductLifecycleListeners">
+		<ref bean="productCachingLifecycleListener"/>
+	</util:list>
+
+	<bean id="cachingLifecycleListener" class="com.elasticpath.importexport.importer.importers.impl.CachingLifecycleListener">
+		<property name="cachingService" ref="delegatingMutableCachingService"/>
+	</bean>
+
+	<bean id="productCachingLifecycleListener" class="com.elasticpath.importexport.importer.importers.impl.ProductCachingLifecycleListener"
+		  parent="cachingLifecycleListener"/>
 
 	<bean id="productImporter" class="com.elasticpath.importexport.importer.importers.impl.ProductImporterImpl"
 		parent="abstractImporter">
@@ -60,10 +89,13 @@
 			<ref bean="productAdapter" />
 		</property>
 		<property name="productLookup">
-			<ref bean="productLookup" />
+			<ref bean="cachingProductLookup" />
 		</property>
 		<property name="schemaPath">
 			<value>schema/schemaProduct.xsd</value>
+		</property>
+		<property name="commonLifecycleListeners">
+			<ref bean="commonProductLifecycleListeners"/>
 		</property>
 	</bean>
 
@@ -173,7 +205,7 @@
 	<bean id="productCategoryImporter" class="com.elasticpath.importexport.importer.importers.impl.ProductCategoryImporterImpl"
 		parent="abstractImporter">
 		<property name="productLookup">
-			<ref bean="productLookup" />
+			<ref bean="cachingProductLookup" />
 		</property>
 		<property name="productCategoryAdapter">
 			<ref bean="productCategoryAdapter" />
@@ -183,6 +215,10 @@
 		</property>
 		<property name="schemaPath">
 			<value>schema/schemaProductCategory.xsd</value>
+		</property>
+		<property name="commitUnit" value="500"/>
+		<property name="indexNotificationService">
+			<ref bean="indexNotificationService"/>
 		</property>
 	</bean>
 
@@ -493,6 +529,12 @@
 		<property name="schemaPath" value="schema/schemaCustomer.xsd" />
 	</bean>
 
+	<bean id="userAccountAssociationImporter" class="com.elasticpath.importexport.importer.importers.impl.UserAccountAssociationImporterImpl" parent="abstractImporter">
+		<property name="userAccountAssociationService" ref="userAccountAssociationService" />
+		<property name="userAccountAssociationAdapter" ref="userAccountAssociationAdapter" />
+		<property name="schemaPath" value="schema/schemaUserAccountAssociation.xsd" />
+	</bean>
+
 	<bean id="cmUserImporter" class="com.elasticpath.importexport.importer.importers.impl.CmUserImporter" parent="abstractImporter">
 		<property name="cmUserService" ref="cmUserService" />
 		<property name="cmUserAdapter" ref="cmUserAdapter"/>
@@ -536,29 +578,29 @@
 
 	<bean id="cachingService" class="com.elasticpath.importexport.common.caching.impl.CachingServiceImpl">
 		<property name="catalogService">
-			<ref bean="catalogService" />
+			<ref bean="cachingCatalogService" />
 		</property>
-		<property name="categoryLookup" ref="categoryLookup"/>
+		<property name="categoryLookup" ref="cachingCategoryLookup"/>
 		<property name="productTypeDao">
-			<ref bean="productTypeDao" />
+			<ref bean="cachingProductTypeDao" />
 		</property>
 		<property name="taxCodeService">
-			<ref bean="taxCodeService" />
+			<ref bean="cachingTaxCodeService" />
 		</property>
 		<property name="brandService">
-			<ref bean="brandService" />
+			<ref bean="cachingBrandService" />
 		</property>
 		<property name="attributeService">
-			<ref bean="attributeService" />
+			<ref bean="cachingAttributeService" />
 		</property>
 		<property name="skuOptionService">
-			<ref bean="skuOptionService" />
+			<ref bean="cachingSkuOptionService" />
 		</property>
 		<property name="productDao">
 			<ref bean="productDao" />
 		</property>
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-		<property name="productLookup" ref="productLookup"/>
+		<property name="productSkuLookup" ref="cachingProductSkuLookup"/>
+		<property name="productLookup" ref="cachingProductLookup"/>
 		<property name="warehouseService">
 			<ref bean="warehouseService" />
 		</property>
@@ -585,16 +627,16 @@
 				<entry key="STORE">
 					<ref bean="storeImporter" />
 				</entry>
-				<entry key="STORE_ASSOCIATION">
+				<entry key="STOREASSOCIATION">
 					<ref bean="storeAssociationImporter" />
 				</entry>
 				<entry key="CUSTOMER">
 					<ref bean="customerImporter"/>
 				</entry>
-				<entry key="CUSTOMER_GROUP">
+				<entry key="CUSTOMERGROUP">
 					<ref bean="customerGroupImporter"/>
 				</entry>
-				<entry key="CUSTOMERPROFILE_ATTRIBUTE">
+				<entry key="CUSTOMERPROFILEATTRIBUTE">
 					<ref bean="customerProfileAttributeImporter"/>
 				</entry>
 				<entry key="PRODUCT">
@@ -660,47 +702,50 @@
 				<entry key="CMUSER">
 					<ref bean="cmUserImporter" />
 				</entry>
-				<entry key="USER_ROLE">
+				<entry key="USERROLE">
 					<ref bean="userRoleImporter" />
 				</entry>
-				<entry key="GIFT_CERTIFICATE">
+				<entry key="GIFTCERTIFICATE">
 					<ref bean="giftCertificateImporter" />
 				</entry>
-				<entry key="SHIPPING_SERVICE_LEVEL">
+				<entry key="SHIPPINGSERVICELEVEL">
 					<ref bean="shippingServiceLevelImporter" />
 				</entry>
-				<entry key="SHIPPING_REGION">
+				<entry key="SHIPPINGREGION">
 					<ref bean="shippingRegionImporter" />
 				</entry>
-                <entry key="SAVED_CONDITION">
+                <entry key="SAVEDCONDITION">
                     <ref bean="savedConditionImporter" />
                 </entry>
-                <entry key="CM_IMPORT_JOB">
+                <entry key="CMIMPORTJOB">
                     <ref bean="cmImportJobImporter" />
                 </entry>
-				<entry key="DATA_POLICY">
+				<entry key="DATAPOLICY">
 					<ref bean="dataPolicyImporter" />
 				</entry>
 				<entry key="PAYMENTPROVIDER">
 					<ref bean="paymentProviderImporter" />
 				</entry>
-				<entry key="CUSTOMER_CONSENT">
+				<entry key="CUSTOMERCONSENT">
 					<ref bean="customerConsentImporter" />
 				</entry>
 				<entry key="FACET">
 					<ref bean="facetImporter"/>
 				</entry>
-				<entry key="SORT_ATTRIBUTE">
+				<entry key="SORTATTRIBUTE">
 					<ref bean="sortAttributeImporter"/>
 				</entry>
-				<entry key="STORE_CUSTOMER_ATTRIBUTE">
+				<entry key="STORECUSTOMERATTRIBUTE">
 					<ref bean="storeCustomerAttributeImporter" />
 				</entry>
-				<entry key="ATTRIBUTE_POLICY">
+				<entry key="ATTRIBUTEPOLICY">
 					<ref bean="attributePolicyImporter" />
 				</entry>
 				<entry key="TAGGROUP">
 					<ref bean="tagGroupImporter"/>
+				</entry>
+				<entry key="USERACCOUNTASSOCIATION">
+					<ref bean="userAccountAssociationImporter" />
 				</entry>
 			</map>
 		</property>
@@ -736,7 +781,7 @@
 	<bean id="exporterFactory" class="com.elasticpath.importexport.exporter.exporters.impl.ExporterFactoryImpl">
 		<property name="exportJobMap">
 			<map>
-				<entry key="CUSTOMERPROFILE_ATTRIBUTE">
+				<entry key="CUSTOMERPROFILEATTRIBUTE">
 					<list>
 						<ref bean="customerProfileAttributeExporter" />
 					</list>
@@ -767,7 +812,7 @@
 						<ref bean="customerExporter"/>
 					</list>
 				</entry>
-				<entry key="CUSTOMER_GROUP">
+				<entry key="CUSTOMERGROUP">
 					<list>
 						<ref bean="customerGroupExporter" />
 					</list>
@@ -777,7 +822,7 @@
 						<ref bean="storeExporter" />
 					</list>
 				</entry>
-				<entry key="STORE_ASSOCIATION">
+				<entry key="STOREASSOCIATION">
 					<list>
 						<ref bean="storeAssociationExporter" />
 					</list>
@@ -883,53 +928,53 @@
 						<ref bean="cmUserExporter" />
 					</list>
 				</entry>
-				<entry key="USER_ROLE">
+				<entry key="USERROLE">
 					<list>
 						<ref bean="userRoleExporter" />
 					</list>
 				</entry>
-				<entry key="GIFT_CERTIFICATE">
+				<entry key="GIFTCERTIFICATE">
 					<list>
 						<ref bean="giftCertificateExporter" />
 					</list>
 				</entry>
-				<entry key="SHIPPING_REGION">
+				<entry key="SHIPPINGREGION">
 					<list>
 						<ref bean="shippingRegionExporter" />
 					</list>
 				</entry>
-				<entry key="SHIPPING_SERVICE_LEVEL">
+				<entry key="SHIPPINGSERVICELEVEL">
 					<list>
 						<ref bean="shippingServiceLevelExporter" />
 					</list>
 				</entry>
-				<entry key="SAVED_CONDITION">
+				<entry key="SAVEDCONDITION">
 					<list>
 						<ref bean="savedConditionExporter" />
 					</list>
 				</entry>
-				<entry key="CM_IMPORT_JOB">
+				<entry key="CMIMPORTJOB">
 					<list>
 						<ref bean="cmImportJobExporter" />
 					</list>
 				</entry>
 
-				<entry key="DATA_POLICY">
+				<entry key="DATAPOLICY">
 					<list>
 						<ref bean="dataPolicyExporter" />
 					</list>
 				</entry>
-				<entry key="CUSTOMER_CONSENT">
+				<entry key="CUSTOMERCONSENT">
 					<list>
 						<ref bean="customerConsentExporter" />
 					</list>
 				</entry>
-				<entry key="STORE_CUSTOMER_ATTRIBUTE">
+				<entry key="STORECUSTOMERATTRIBUTE">
 					<list>
 						<ref bean="storeCustomerAttributeExporter" />
 					</list>
 				</entry>
-				<entry key="ATTRIBUTE_POLICY">
+				<entry key="ATTRIBUTEPOLICY">
 					<list>
 						<ref bean="attributePolicyExporter" />
 					</list>
@@ -939,7 +984,7 @@
 						<ref bean="facetExporter"/>
 					</list>
 				</entry>
-				<entry key="SORT_ATTRIBUTE">
+				<entry key="SORTATTRIBUTE">
 					<list>
 						<ref bean="sortAttributeExporter"/>
 					</list>
@@ -947,6 +992,11 @@
 				<entry key="TAGGROUP">
 					<list>
 						<ref bean="tagGroupExporter"/>
+					</list>
+				</entry>
+				<entry key="USERACCOUNTASSOCIATION">
+					<list>
+						<ref bean="userAccountAssociationExporter"/>
 					</list>
 				</entry>
 			</map>
@@ -1368,6 +1418,16 @@
         <property name="importExportSearcher" ref="importExportSearcher" />
 	</bean>
 
+	<bean id="userAccountAssociationExporter" class="com.elasticpath.importexport.exporter.exporters.impl.UserAccountAssociationExporterImpl"
+		  parent="abstractExporter">
+		<property name="userAccountAssociationService">
+			<ref bean="userAccountAssociationService" />
+		</property>
+		<property name="userAccountAssociationAdapter">
+			<ref bean="userAccountAssociationAdapter" />
+		</property>
+	</bean>
+
 	<bean id="transformerFactory" class="com.elasticpath.importexport.common.transformers.impl.TransformersChainFactoryImpl" />
 
 	<bean id="fileDeliveryMethod" class="com.elasticpath.importexport.exporter.delivery.impl.FileDeliveryMethodImpl" />
@@ -1415,41 +1475,44 @@
 		</property>
 	</bean>
 
+	<bean id="importChangeSetStage" class="com.elasticpath.importexport.importer.controller.impl.ChangeSetImportStageImpl">
+		<property name="id" value="stage1" />
+		<property name="baseAmountService" ref="baseAmountService" />
+		<property name="changeSetService" ref="changeSetService" />
+		<property name="cmUserGuid" value="400" />
+		<property name="timeService" ref="timeService" />
+		<property name="importerFactory" ref="importerFactory" />
+		<property name="persistenceEngine" ref="persistenceEngine" />
+		<property name="savingManager" ref="savingManager" />
+		<property name="validationEventHandler" ref="defaultValidationHandler" />
+		<property name="businessObjectDescriptorLocator" ref="businessObjectDescriptorLocator" />
+		<property name="metadataMap" ref="persistenceListenerMetadataMap" />
+		<property name="relatedObjectsResolvers">
+			<map key-type="java.lang.Class">
+				<entry key="com.elasticpath.importexport.common.dto.products.ProductDTO">
+					<bean class="com.elasticpath.importexport.importer.controller.impl.ProductRelatedObjectsResolverImpl">
+						<property name="changeSetPolicy" ref="changeSetPolicy" />
+						<property name="productLookup" ref="productLookup" />
+						<property name="businessObjectDescriptorLocator" ref="businessObjectDescriptorLocator" />
+					</bean>
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<bean id="importProcessStage" class="com.elasticpath.importexport.importer.controller.impl.ProcessImportStageImpl">
+		<property name="id" value="stage2" />
+		<property name="importProcessor" ref="cachingImportProcessor" />
+		<property name="metadataMap" ref="persistenceListenerMetadataMap" />
+	</bean>
+
+	<util:list id="importStages">
+		<ref bean="importChangeSetStage"/>
+		<ref bean="importProcessStage"/>
+	</util:list>
+
 	<bean id="importController" class="com.elasticpath.importexport.importer.controller.impl.ImportControllerImpl"
 		parent="abstractImportController">
-		<property name="importStages">
-			<list>
-				<bean class="com.elasticpath.importexport.importer.controller.impl.ChangeSetImportStageImpl">
-					<property name="id" value="stage1" />
-					<property name="baseAmountService" ref="baseAmountService" />
-					<property name="changeSetService" ref="changeSetService" />
-					<property name="cmUserGuid" value="400" />
-					<property name="timeService" ref="timeService" />
-					<property name="importerFactory" ref="importerFactory" />
-					<property name="persistenceEngine" ref="persistenceEngine" />
-					<property name="savingManager" ref="savingManager" />
-					<property name="validationEventHandler" ref="defaultValidationHandler" />
-					<property name="businessObjectDescriptorLocator" ref="businessObjectDescriptorLocator" />
-					<property name="metadataMap" ref="persistenceListenerMetadataMap" />
-					<property name="relatedObjectsResolvers">
-						<map key-type="java.lang.Class">
-							<entry key="com.elasticpath.importexport.common.dto.products.ProductDTO">
-								<bean class="com.elasticpath.importexport.importer.controller.impl.ProductRelatedObjectsResolverImpl">
-									<property name="changeSetPolicy" ref="changeSetPolicy" />
-									<property name="productLookup" ref="productLookup" />
-									<property name="businessObjectDescriptorLocator" ref="businessObjectDescriptorLocator" />
-								</bean>
-							</entry>
-						</map>
-					</property>
-				</bean>
-				<bean class="com.elasticpath.importexport.importer.controller.impl.ProcessImportStageImpl">
-					<property name="id" value="stage2" />
-					<property name="importProcessor" ref="importProcessor" />
-					<property name="metadataMap" ref="persistenceListenerMetadataMap" />
-				</bean>
-			</list>
-		</property>
+		<property name="importStages" ref="importStages"/>
 		<property name="metadataMap" ref="persistenceListenerMetadataMap" />
 	</bean>
 
@@ -1590,11 +1653,11 @@
 				<value>CATALOG</value>
 				<value>CATEGORY</value>
 				<value>STORE</value>
-				<value>STORE_ASSOCIATION</value>
-				<value>CUSTOMER_GROUP</value>
-				<value>CUSTOMERPROFILE_ATTRIBUTE</value>
+				<value>STOREASSOCIATION</value>
+				<value>CUSTOMERGROUP</value>
+				<value>CUSTOMERPROFILEATTRIBUTE</value>
 				<value>CUSTOMER</value>
-				<value>GIFT_CERTIFICATE</value>
+				<value>GIFTCERTIFICATE</value>
 				<value>PRODUCT</value>
 				<value>PRODUCTBUNDLE</value>
 				<value>PRODUCTCATEGORYASSOCIATION</value>
@@ -1606,24 +1669,25 @@
 				<value>PRODUCTASSOCIATION</value>
 				<value>CONTENTSPACE</value>
 				<value>DYNAMICCONTENT</value>
-				<value>SAVED_CONDITION</value>
+				<value>SAVEDCONDITION</value>
 				<value>DYNAMICCONTENTDELIVERY</value>
 				<value>ASSETS</value>
 				<value>PRICELISTDESCRIPTOR</value>
 				<value>PRICELISTASSIGNMENT</value>
 				<value>BASEAMOUNT</value>
-				<value>USER_ROLE</value>
+				<value>USERROLE</value>
 				<value>CMUSER</value>
-				<value>SHIPPING_REGION</value>
-				<value>SHIPPING_SERVICE_LEVEL</value>
-				<value>CM_IMPORT_JOB</value>
-				<value>DATA_POLICY</value>
-				<value>CUSTOMER_CONSENT</value>
-				<value>ATTRIBUTE_POLICY</value>
-				<value>STORE_CUSTOMER_ATTRIBUTE</value>
+				<value>SHIPPINGREGION</value>
+				<value>SHIPPINGSERVICELEVEL</value>
+				<value>CMIMPORTJOB</value>
+				<value>DATAPOLICY</value>
+				<value>CUSTOMERCONSENT</value>
+				<value>ATTRIBUTEPOLICY</value>
+				<value>STORECUSTOMERATTRIBUTE</value>
 				<value>FACET</value>
-				<value>SORT_ATTRIBUTE</value>
+				<value>SORTATTRIBUTE</value>
 				<value>TAGGROUP</value>
+				<value>USERACCOUNTASSOCIATION</value>
 			</list>
 		</property>
 	</bean>
@@ -1743,23 +1807,6 @@
 		</property>
 	</bean>
 
-	<!-- Use the Spring PropertiesFactoryBean to get properties from a file on the classpath as a Properties object -->
-	<bean id="applicationProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-		<property name="location" value="${configLocation:classpath:importexporttool.config}" />
-	</bean>
-
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-          <property name="ignoreUnresolvablePlaceholders" value="true"></property>
-    </bean>
-
-	<!-- Initializer which will be called before the persistence engine bean is created. -->
-	<!-- this allows the datasource to be overridden -->
-	<bean id="applicationInitialization" class="com.elasticpath.importexport.client.ImportExportInitialization"
-		init-method="init">
-		<property name="beanFactory" ref="coreBeanFactory" />
-		<property name="appProperties" ref="applicationProperties" />
-	</bean>
-
 	<bean id="searchHostLocatorTemplate" class="com.elasticpath.service.search.impl.SettingsSearchHostLocatorImpl" abstract="true">
 		<!-- Setting for clustered search server deployments. -->
 		<!-- <property name="requiresMaster" value="true" /> -->
@@ -1782,17 +1829,78 @@
 		<property name="persistenceEngine" ref="persistenceEngine" />
 	</bean>
 
-	<beans profile="default">
-		<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-			<property name="locations" value="${configLocation:classpath:importexporttool.config}"></property>
-			<property name="ignoreUnresolvablePlaceholders" value="true"></property>
-		</bean>
+	<!-- caching -->
+	<import resource="classpath:spring/core-caching/cache-manager-non-osgi.xml"/>
+	<import resource="classpath:spring/core-caching/cache-factory.xml"/>
+	<import resource="classpath:spring/core-caching/cache-core.xml"/>
+	<import resource="classpath:spring/core-caching/cache-catalog.xml"/>
+	<import resource="classpath:spring/core-caching/cache-tax.xml"/>
 
-		<bean id="applicationInitialization" class="com.elasticpath.importexport.client.DataSourceProperties" factory-method="getInstance">
-			<property name="properties" ref="applicationProperties"/>
-		</bean>
+	<bean id="ehCacheFactory" class="com.elasticpath.cache.factory.impl.EhcacheCacheFactory">
+		<property name="cacheManager" ref="epEhcacheManager"/>
+	</bean>
 
-		<bean id="dataSource" class="com.elasticpath.importexport.client.JPADataSource"/>
-	</beans>
+	<bean id="localCacheFactory" class="com.elasticpath.importexport.common.caching.impl.CacheMissCachingFactoryImpl">
+		<property name="decorated" ref="ehCacheFactory"/>
+	</bean>
+
+	<bean id="applicationName" class="java.lang.String">
+		<constructor-arg value="ImportExport"/>
+	</bean>
+
+	<alias name="defaultCacheManager" alias="epCoreEhcacheManager"/>
+	<alias name="defaultCacheManager" alias="epEhcacheManager"/>
+
+	<bean id="ehCacheConfigurationLoader" class="com.elasticpath.commons.util.EhcacheConfigurationLoader">
+		<property name="pathname" value="${ep.external.importexport.ehcache.xml.path:classpath:/ehcache-importexport.xml}"/>
+	</bean>
+
+	<bean id="defaultCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" destroy-method="destroy">
+		<property name="cacheManagerName" value="#{applicationName}-CacheManager"/>
+		<property name="shared" value="true"/>
+		<property name="configLocation" value="#{ehCacheConfigurationLoader.resource}"/>
+	</bean>
+
+	<bean id="delegatingMutableCachingService" class="com.elasticpath.caching.core.impl.DelegatingMutableCachingServiceImpl">
+		<property name="cachingServices" ref="mutableCachingServiceMap"/>
+	</bean>
+
+	<util:map id="mutableCachingServiceMap" key-type="java.lang.Class">
+		<entry key="com.elasticpath.domain.attribute.impl.AttributeImpl" value-ref="cachingAttributeService"/>
+		<entry key="com.elasticpath.domain.catalog.impl.BrandImpl" value-ref="cachingBrandService"/>
+		<entry key="com.elasticpath.domain.catalog.impl.CatalogImpl" value-ref="cachingCatalogService"/>
+		<entry key="com.elasticpath.domain.catalog.impl.CategoryImpl" value-ref="cachingCategoryLookup"/>
+		<entry key="com.elasticpath.domain.catalog.impl.ProductTypeImpl" value-ref="cachingProductTypeDao"/>
+		<entry key="com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl" value-ref="cachingSkuOptionService"/>
+		<entry key="com.elasticpath.domain.catalog.impl.ProductImpl" value-ref="cachingProductLookup"/>
+		<entry key="com.elasticpath.domain.catalog.impl.ProductBundleImpl" value-ref="cachingProductLookup"/>
+		<entry key="com.elasticpath.domain.catalog.impl.ProductSkuImpl" value-ref="cachingProductSkuLookup"/>
+		<entry key="com.elasticpath.domain.tax.impl.TaxCodeImpl" value-ref="cachingTaxCodeService"/>
+	</util:map>
+
+	<!-- cache populators -->
+	<bean id="delegatingCachePopulator" class="com.elasticpath.importexport.common.caching.impl.populator.DelegatingCachePopulatorImpl">
+		<property name="cachePopulators" ref="cachePopulators"/>
+	</bean>
+
+	<util:map id="cachePopulators" key-type="java.lang.Class">
+		<entry key="com.elasticpath.importexport.common.dto.products.ProductDTO" value-ref="productCachePopulator"/>
+		<entry key="com.elasticpath.importexport.common.dto.productcategory.ProductCategoriesDTO" value-ref="productCategoryCachePopulator"/>
+	</util:map>
+
+	<bean id="productCachePopulator" class="com.elasticpath.importexport.common.caching.impl.populator.ProductCachePopulatorImpl">
+		<property name="productSkuCachePopulator" ref="productSkuCachePopulator"/>
+		<property name="cachingProductLookup" ref="cachingProductLookup"/>
+	</bean>
+
+	<bean id="productSkuCachePopulator" class="com.elasticpath.importexport.common.caching.impl.populator.ProductSkuCachePopulatorImpl">
+		<property name="cachingProductSkuLookup" ref="cachingProductSkuLookup"/>
+	</bean>
+
+	<bean id="productCategoryCachePopulator" class="com.elasticpath.importexport.common.caching.impl.populator.ProductCategoryCachePopulatorImpl">
+		<property name="queryService" ref="productQueryService"/>
+		<property name="productLoadTuner" ref="productTunerForProductCategory"/>
+		<property name="productMutableCachingService" ref="cachingProductLookup"/>
+	</bean>
 
 </beans>

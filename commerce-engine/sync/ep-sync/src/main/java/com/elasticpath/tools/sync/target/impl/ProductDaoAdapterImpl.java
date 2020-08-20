@@ -6,7 +6,6 @@ package com.elasticpath.tools.sync.target.impl;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.service.catalog.ProductLookup;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.tools.sync.exception.SyncToolConfigurationException;
 import com.elasticpath.tools.sync.exception.SyncToolRuntimeException;
@@ -16,14 +15,13 @@ import com.elasticpath.tools.sync.exception.SyncToolRuntimeException;
  */
 public class ProductDaoAdapterImpl extends AbstractDaoAdapter<Product> {
 
-	private ProductLookup productLookup;
 	private ProductService productService;
 
 	private BeanFactory beanFactory;
 
 	@Override
 	public boolean remove(final String guid) {
-		Product foundByGuid = getProductLookup().findByGuid(guid);
+		Product foundByGuid = get(guid);
 		if (foundByGuid == null) {
 			return false;
 		}
@@ -60,14 +58,6 @@ public class ProductDaoAdapterImpl extends AbstractDaoAdapter<Product> {
 	 */
 	public void setProductService(final ProductService productService) {
 		this.productService = productService;
-	}
-
-	public void setProductLookup(final ProductLookup productLookup) {
-		this.productLookup = productLookup;
-	}
-
-	protected ProductLookup getProductLookup() {
-		return productLookup;
 	}
 
 	/**

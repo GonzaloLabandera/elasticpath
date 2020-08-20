@@ -19,6 +19,7 @@ import com.elasticpath.datapopulation.core.utils.ClasspathResourceResolverUtil;
 
 /**
  * The class representing a set of database connection properties.
+ * All backslash in the url related values of dbConnectionProperties will be replaced to forward slash.
  */
 public class DatabaseConnectionProperties {
 
@@ -26,6 +27,17 @@ public class DatabaseConnectionProperties {
 	 * The property key for database type.
 	 */
 	public static final String DATA_POPULATION_DATABASE_TYPE_KEY = "data.population.database.type";
+
+	/**
+	 * The property key for database population create db url.
+	 */
+	public static final String DATA_POPULATION_CREATEDB_URL = "data.population.createdb.url";
+
+	/**
+	 * The property key for database population url.
+	 */
+	public static final String DATA_POPULATION_URL = "data.population.url";
+
 	private final Properties dbConnectionProperties = new Properties();
 
 	@Autowired
@@ -46,6 +58,32 @@ public class DatabaseConnectionProperties {
 		getDatabaseTypeProperties(dbConnectionProperties);
 		dbConnectionProperties.putAll(getDatabaseConnectionUrls(dbConnectionProperties,
 				findProperty(DATA_POPULATION_DATABASE_TYPE_KEY, dbConnectionProperties)));
+
+		// post action
+		replaceBackSlashInUrlProperties();
+	}
+
+	/**
+	 * Replace backslash to slash in url related value of dbConnectionProperties.
+	 *
+	 * Url related values contains platform sensitive separator.
+	 * For windows platform, it uses back slash as separator of path, which will cause unexpected incorrect escape in post steps.
+	 * So far only two are related to url, they are DATA_POPULATION_CREATEDB_URL and DATA_POPULATION_URL.
+	 *
+	 */
+	private void replaceBackSlashInUrlProperties() {
+		dbConnectionProperties.entrySet().forEach(entry -> {
+					switch (entry.getKey().toString()) {
+						case DATA_POPULATION_CREATEDB_URL:
+						case DATA_POPULATION_URL:
+							entry.setValue(entry.getValue().toString().replace('\\', '/'));
+							break;
+						default:
+							break;
+					}
+
+				}
+		);
 	}
 
 	/**
@@ -131,7 +169,7 @@ public class DatabaseConnectionProperties {
 	}
 
 	public String getDataSourceUrl() {
-		return findProperty("data.population.url", dbConnectionProperties);
+		return findProperty(DATA_POPULATION_URL, dbConnectionProperties);
 	}
 
 	public String getDataSourceUsername() {
@@ -147,7 +185,7 @@ public class DatabaseConnectionProperties {
 	}
 
 	public String getCreateDataSourceUrl() {
-		return findProperty("data.population.createdb.url", dbConnectionProperties);
+		return findProperty(DATA_POPULATION_CREATEDB_URL, dbConnectionProperties);
 	}
 
 	public String getCreateDataSourceUsername() {
@@ -192,5 +230,13 @@ public class DatabaseConnectionProperties {
 			throw new DataPopulationActionException("Cannot find the database property value of " + key);
 		}
 		return propertyValue;
+	}
+
+	public void setDatabaseProperties(final Properties databaseProperties) {
+		this.databaseProperties = databaseProperties;
+	}
+
+	public void setClasspathResolver(final ClasspathResourceResolverUtil classpathResolver) {
+		this.classpathResolver = classpathResolver;
 	}
 }

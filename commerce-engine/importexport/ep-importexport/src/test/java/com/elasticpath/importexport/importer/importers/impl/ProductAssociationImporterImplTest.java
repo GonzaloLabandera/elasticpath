@@ -73,6 +73,7 @@ public class ProductAssociationImporterImplTest {
 		context.checking(new Expectations() {
 			{
 				allowing(mockSavingStrategy).setDomainAdapter(with(aNull(DomainAdapter.class)));
+				allowing(mockSavingStrategy).setCommonLifecycleListeners(new ArrayList<>());
 				allowing(mockSavingStrategy).populateAndSaveObject(with(any(ProductAssociation.class)), with(any(ProductAssociationDTO.class)));
 				allowing(mockSavingStrategy).getSavingManager();
 				allowing(mockSavingStrategy).setCollectionsStrategy(with(any(CollectionsStrategy.class)));

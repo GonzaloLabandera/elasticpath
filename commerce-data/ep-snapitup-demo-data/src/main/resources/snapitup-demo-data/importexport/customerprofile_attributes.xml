@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <customerprofile_attributes>
 <!-- See ep-shared-demo-data for additional definitions -->
-
+	<attribute>
+		<key>CP_PUNCHOUT_CUSTOMER_KEY</key>
+		<name><value language="en">PunchOut Customer Key</value></name>
+		<usage>UserProfile</usage>
+		<type>ShortText</type>
+		<multilanguage>false</multilanguage>
+		<required>false</required>
+		<multivalue>false</multivalue>
+		<global>false</global>
+	</attribute>
 </customerprofile_attributes>

@@ -24,8 +24,6 @@ import com.elasticpath.domain.audit.SingleChangeOperation;
 import com.elasticpath.persistence.api.ChangeType;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.persistence.api.PersistenceSession;
-import com.elasticpath.persistence.api.Transaction;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.service.changeset.ChangeSetService;
 import com.elasticpath.service.misc.TimeService;
@@ -78,15 +76,10 @@ public class AuditDaoImplTest {
 	@Test
 	public void testPersistDataChanged() {
 		final Entity entity = context.mock(Entity.class);
-		final PersistenceSession persistenceSession = context.mock(PersistenceSession.class);
-		final Transaction transaction = context.mock(Transaction.class);
 		final ChangeOperation operation = context.mock(ChangeOperation.class);
 		final DataChanged dataChanged = context.mock(DataChanged.class);
 		context.checking(new Expectations() {
 			{
-				oneOf(persistenceEngine).getPersistenceSession(); will(returnValue(persistenceSession));
-				oneOf(persistenceSession).beginTransaction(); will(returnValue(transaction));
-				
 				oneOf(entity).getUidPk(); will(returnValue(UIDPK));
 				oneOf(entity).getGuid(); will(returnValue(GUID));
 				
@@ -102,7 +95,6 @@ public class AuditDaoImplTest {
 				oneOf(dataChanged).setChangeOperation(operation);
 				
 				oneOf(persistenceEngine).saveOrMerge(dataChanged);
-				oneOf(transaction).commit();
 			}
 		});
 		auditDaoImpl.persistDataChanged(entity, "changedField", ChangeType.UPDATE, "old value", "new value", operation);

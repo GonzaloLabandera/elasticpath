@@ -15,7 +15,7 @@ import com.elasticpath.performancetools.queryanalyzer.parser.chain.impl.EagerRel
 import com.elasticpath.performancetools.queryanalyzer.parser.chain.impl.JpaQueryChain;
 import com.elasticpath.performancetools.queryanalyzer.parser.chain.impl.JpaTraceQueryChain;
 import com.elasticpath.performancetools.queryanalyzer.parser.chain.impl.RelosResourceChain;
-import com.elasticpath.performancetools.queryanalyzer.parser.chain.impl.SqlQueryChain;
+import com.elasticpath.performancetools.queryanalyzer.parser.chain.impl.SqlStatementChain;
 
 /**
  * Parser chain that parses Cortex's log file line.
@@ -48,7 +48,7 @@ public class ParserChain {
 		relosResourceChain
 				.setNextChain(new JpaTraceQueryChain()
 						.setNextChain(new JpaQueryChain()
-								.setNextChain(new SqlQueryChain()
+								.setNextChain(new SqlStatementChain()
 										.setNextChain(new EagerRelationsChain()
 												.setNextChain(new DoNothingChain())))));
 		this.nextChain = relosResourceChain;

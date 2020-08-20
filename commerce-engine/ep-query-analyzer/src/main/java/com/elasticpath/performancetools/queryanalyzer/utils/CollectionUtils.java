@@ -46,8 +46,8 @@ public final class CollectionUtils {
 		if (matcher.find()) {
 			final String name = matcher.group(1);
 
-			totalCallsPerOperation.merge(name, 1, (calls1, calls2) -> calls1 + calls2);
-			totalCalls.merge(name, 1, (calls1, calls2) -> calls1 + calls2);
+			totalCallsPerOperation.merge(name, 1, Integer::sum);
+			totalCalls.merge(name, 1, Integer::sum);
 		}
 	}
 

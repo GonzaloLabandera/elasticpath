@@ -48,7 +48,7 @@ public class UserAuthenticationDetailsServiceImpl implements UserDetailsService 
 	 */
 	User loadUserByUsername(final String scope, final String username) {
 
-		ExecutionResult<Customer> customerLookupResult = customerRepository.findCustomerByUserId(scope, username);
+		ExecutionResult<Customer> customerLookupResult = customerRepository.findCustomerByUsername(username, scope);
 
 		if (!customerLookupResult.isSuccessful()) {
 			throw createUserNotExistsException(username);

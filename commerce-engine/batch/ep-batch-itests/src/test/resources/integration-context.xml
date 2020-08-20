@@ -1,20 +1,35 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
 
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+	">
+
+	<import resource="classpath:spring/dataaccess/openjpaBatch.xml" />
+	<import resource="classpath:spring/service/serviceBatch.xml" />
 	<import resource="classpath:integration-core-context.xml" />
 	<import resource="classpath:ep-test-application.xml" />
-	<import resource="classpath:integration-checkout-context.xml" />
+
+	<!--
+		This may seem counterintuitive because we are not using production settings (i.e. empty list of listeners in batchEntityManagerFactory).
+		In production, the batch server is all about updating and deleting records and doesn't rely on listeners.
+
+		However, in order to run batch tests, the data must be created first and because the last-modified-date field is mandatory, it must be set prior to entity
+		creation. That's where databaseTimestampsEntityListener comes in.
+
+		Consequently, the correct testing of the production code wouldn't be possible because of the way how JPQL DMLs work in the presence of LC listeners
+		but the workaround, implemented in AbstractCleanupCartsJobTest#removeEntityLifecycleListener, solves the problem.
+	-->
+	<util:list id="batchEntityManagerLifecycleListeners">
+		<ref bean="databaseTimestampsEntityListener"/>
+	</util:list>
 
 	<alias name="loggingSearchTermsActivityStrategy" alias="searchTermsActivityStrategy"/>
 
 	<!-- Extension point for plugging in additional test components. -->
 	<!-- This must occur as the last import in the context to facilitate overriding existing beans. -->
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/ep-itest-plugin.xml" />
-
-	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
-	<import resource="classpath:jta-entity-manager.xml"/>
-
-	<bean id="simpleStoreScenario" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean"/>
-
 </beans>

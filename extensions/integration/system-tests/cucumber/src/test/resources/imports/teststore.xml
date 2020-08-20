@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<stores>
+	<store code="teststore" enabled="true">
+		<globalization timeZone="Europe/London" country="CA" sub_country="BC" content_encoding="UTF-8" default_locale="en" default_currency="CAD"/>
+		<url>https://teststore.elasticpath.com/storefront</url>
+		<name>Test Store</name>
+		<state>200</state>
+		<type>B2B</type>
+		<description></description>
+		<catalog>Mobile</catalog>
+		<display_out_of_stock>true</display_out_of_stock>
+		<email_sender_name>CustomerService@elasticpath.com</email_sender_name>
+		<email_sender_address>CustomerService@elasticpath.com</email_sender_address>
+		<store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
+		<credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
+		<store_full_credit_cards>false</store_full_credit_cards>
+		<locales>
+			<locale>en</locale>
+			<locale>fr</locale>
+		</locales>
+		<currencies>
+			<currency>CAD</currency>
+			<currency>USD</currency>
+		</currencies>
+		<warehouses>
+			<warehouse>MOBEE_Warehouse</warehouse>
+		</warehouses>
+		<tax_codes>
+			<guid>500</guid>
+			<guid>501</guid>
+			<guid>502</guid>
+		</tax_codes>
+		<tax_jurisdictions>
+			<jurisdiction>CATaxJurisdiction</jurisdiction>
+			<jurisdiction>GBTaxJurisdiction</jurisdiction>
+			<jurisdiction>USTaxJurisdiction</jurisdiction>
+		</tax_jurisdictions>
+		<payment_provider_configurations/>
+		<credit_card_types>
+			<type>MasterCard</type>
+			<type>Visa</type>
+		</credit_card_types>
+		<cart_types>
+			<cart_type>
+				<name>SHOPPING_CART</name>
+				<guid>5364a6ef-5f8e-4ea0-ac40-54e6fff10ec0</guid>
+				<modifiergroups>
+					<code>multicart</code>
+				</modifiergroups>
+			</cart_type>
+			<cart_type>
+				<name>default</name>
+				<guid>5364a6ef-5f8e-4ea0-ac40-54e6fff10ec0</guid>
+				<modifiergroups>
+					<code>multicart</code>
+				</modifiergroups>
+			</cart_type>
+		</cart_types>
+	</store>
+</stores>

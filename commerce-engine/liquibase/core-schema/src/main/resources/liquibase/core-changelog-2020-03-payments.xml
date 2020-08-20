@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-03-payments.xml">
+
+	<changeSet id="2020-03-payment-configurations-payment-provider-config" author="elasticpath" context="migrate-data">
+		<comment>Fill payment provider config.</comment>
+		<sql>
+			INSERT INTO TPAYMENTPROVIDERCONFIG (UIDPK, GUID, PAYMENT_PROVIDER_PLUGIN_ID, CONFIGURATION_NAME, STATUS, DEFAULT_DISPLAY_NAME)
+			SELECT UIDPK,
+			NAME,
+			CASE
+			WHEN TYPE = 'paymentGatewayCybersource' THEN 'directPostCybersourcePaymentProviderPlugin'
+			WHEN TYPE = 'paymentGatewayGiftCertificate' THEN 'giftCertificatePlugin'
+			ELSE TYPE END AS PAYMENT_PROVIDER_PLUGIN_ID,
+			NAME,
+			'DRAFT',
+			NAME
+			FROM TPAYMENTGATEWAY;
+		</sql>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TPAYMENTPROVIDERCONFIG)"/>
+			<where>ID = 'TPAYMENTPROVIDERCONFIG' AND EXISTS (SELECT 1 FROM TPAYMENTPROVIDERCONFIG)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-payment-provider-config-data" author="elasticpath" context="migrate-data" dbms="mysql,h2">
+		<comment>Fill payment provider config data.</comment>
+		<sql>
+			INSERT INTO TPAYMENTPROVIDERCONFIGDATA (UIDPK, PAYMENTPROVIDERCONFIG_UID, CONFIG_KEY, CONFIG_DATA)
+			SELECT UIDPK,
+			PAYMENTGATEWAY_UID,
+			CASE
+			WHEN PROPKEY = 'merchantID' THEN 'MERCHANT_ID'
+			WHEN PROPKEY = 'keysDirectory' THEN 'CERTIFICATE_FOLDER'
+			WHEN PROPKEY = 'sendToProduction' THEN 'PRODUCTION_MODE'
+			WHEN PROPKEY = 'enableLog' THEN 'LOG_ENABLED'
+			WHEN PROPKEY = 'logMaximumSize' THEN 'LOG_MAX_SIZE'
+			WHEN PROPKEY = 'logDirectory' THEN 'LOG_FOLDER'
+			WHEN PROPKEY = 'developerID' THEN 'DEVELOPER_ID'
+
+			ELSE PROPKEY END AS PROPKEY,
+			CASE
+			WHEN PROPKEY = 'keysDirectory' THEN CONCAT((SELECT case
+			WHEN CONTEXT_VALUE IS NULL OR CONTEXT_VALUE = '' THEN DEFAULT_VALUE
+			ELSE CONTEXT_VALUE
+			END
+			FROM TSETTINGDEFINITION d
+			LEFT JOIN TSETTINGVALUE v ON d.UIDPK = v.SETTING_DEFINITION_UID
+			WHERE PATH = 'COMMERCE/SYSTEM/PAYMENTGATEWAY/certificatesDirectory'), PROPVALUE)
+			ELSE PROPVALUE END AS PROPVALUE
+			FROM TPAYMENTGATEWAYPROPERTIES;
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-configurations-payment-provider-config-data" author="elasticpath" context="migrate-data" dbms="oracle">
+		<comment>Fill payment provider config data.</comment>
+		<sql>
+			INSERT INTO TPAYMENTPROVIDERCONFIGDATA (UIDPK, PAYMENTPROVIDERCONFIG_UID, CONFIG_KEY, CONFIG_DATA)
+			SELECT UIDPK,
+			PAYMENTGATEWAY_UID,
+			CASE
+			WHEN PROPKEY = 'merchantID' THEN 'MERCHANT_ID'
+			WHEN PROPKEY = 'keysDirectory' THEN 'CERTIFICATE_FOLDER'
+			WHEN PROPKEY = 'sendToProduction' THEN 'PRODUCTION_MODE'
+			WHEN PROPKEY = 'enableLog' THEN 'LOG_ENABLED'
+			WHEN PROPKEY = 'logMaximumSize' THEN 'LOG_MAX_SIZE'
+			WHEN PROPKEY = 'logDirectory' THEN 'LOG_FOLDER'
+			WHEN PROPKEY = 'developerID' THEN 'DEVELOPER_ID'
+
+			ELSE PROPKEY END AS PROPKEY,
+			CASE
+			WHEN PROPKEY = 'keysDirectory' THEN CONCAT((SELECT case
+			WHEN v.CONTEXT_VALUE like '' OR v.CONTEXT_VALUE IS NULL
+			THEN to_char(d.DEFAULT_VALUE)
+			ELSE to_char(v.CONTEXT_VALUE)
+			END
+			FROM TSETTINGDEFINITION d
+			LEFT JOIN TSETTINGVALUE v ON d.UIDPK = v.SETTING_DEFINITION_UID
+			WHERE d.PATH = 'COMMERCE/SYSTEM/PAYMENTGATEWAY/certificatesDirectory'), PROPVALUE)
+			ELSE PROPVALUE END AS PROPVALUE
+			FROM TPAYMENTGATEWAYPROPERTIES;
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TPAYMENTPROVIDERCONFIGDATA" author="elasticpath"
+			   context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TPAYMENTPROVIDERCONFIGDATA table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TPAYMENTPROVIDERCONFIGDATA)"/>
+			<where>ID = 'TPAYMENTPROVIDERCONFIGDATA' AND EXISTS (SELECT 1 FROM TPAYMENTPROVIDERCONFIGDATA)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-store-payment-provider-config-data" author="elasticpath" context="migrate-data">
+		<comment>Fill store payment provider config data.</comment>
+		<customChange class="liquibase.ext.elasticpath.migration.payment2020.ConvertStorePaymentGatewayToStorePaymentProviderConfig"/>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSTOREPAYMENTPROVIDERCONFIG)"/>
+			<where>ID = 'TSTOREPAYMENTPROVIDERCONFIG' AND EXISTS (SELECT 1 FROM TSTOREPAYMENTPROVIDERCONFIG)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-payment-instrument" author="elasticpath" context="migrate-data">
+		<comment>Fill payment instrument.</comment>
+		<customChange class="liquibase.ext.elasticpath.migration.payment2020.MigrateSavedPaymentInstruments"/>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TPAYMENTINSTRUMENT)"/>
+			<where>ID = 'TPAYMENTINSTRUMENT' AND EXISTS (SELECT 1 FROM TPAYMENTINSTRUMENT)</where>
+		</update>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TPAYMENTINSTRUMENTDATA)"/>
+			<where>ID = 'TPAYMENTINSTRUMENTDATA' AND EXISTS (SELECT 1 FROM TPAYMENTINSTRUMENTDATA)</where>
+		</update>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TCUSTOMERPAYMENTINSTRUMENT)"/>
+			<where>ID = 'TCUSTOMERPAYMENTINSTRUMENT' AND EXISTS (SELECT 1 FROM TCUSTOMERPAYMENTINSTRUMENT)</where>
+		</update>
+
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TCUSTDEFAULTPAYMENTINSTRUMENT)"/>
+			<where>ID = 'TCUSTDEFAULTPAYMENTINSTRUMENT' AND EXISTS (SELECT 1 FROM TCUSTDEFAULTPAYMENTINSTRUMENT)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-payment-instrument-for-all-authorizations" author="elasticpath" context="migrate-data">
+		<comment>Create instruments for all authorizations.</comment>
+		<createTable tableName="TORDERPAYMENTPAYMENTINSTRUMENT">
+			<column name="PAYMENTINSTRUMENT_UID" type="BIGINT"/>
+			<column name="ORDERPAYMENT_UID" type="BIGINT"/>
+		</createTable>
+		<customChange class="liquibase.ext.elasticpath.migration.payment2020.MigratePaymentInstrumentOnOrders"/>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TPAYMENTINSTRUMENT)"/>
+			<where>ID = 'TPAYMENTINSTRUMENT' AND EXISTS (SELECT 1 FROM TPAYMENTINSTRUMENT)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-insert-all-authorizations" author="elasticpath" context="migrate-data" dbms="mysql">
+		<comment>Insert all authorizations.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			'RESERVE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			PI.GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			NULL AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+			JOIN TPAYMENTPROVIDERCONFIG T on PI.PAYMENTPROVIDERCONFIG_UID = T.UIDPK
+			WHERE P.TRANSACTION_TYPE = 'Authorization' AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND T.PAYMENT_PROVIDER_PLUGIN_ID != 'giftCertificatePlugin'
+			AND P.STATUS IS NOT NULL;
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-configurations-insert-all-authorizations" author="elasticpath" context="migrate-data" dbms="oracle,h2">
+		<comment>Insert all authorizations.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			'RESERVE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			PI.GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			NULL AS PARENT_ORDER_PAYMENT_GUID,
+			1 AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+			JOIN TPAYMENTPROVIDERCONFIG T on PI.PAYMENTPROVIDERCONFIG_UID = T.UIDPK
+			WHERE P.TRANSACTION_TYPE = 'Authorization' AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND T.PAYMENT_PROVIDER_PLUGIN_ID != 'giftCertificatePlugin' AND P.STATUS IS NOT NULL;
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-insert-all-authorizations" author="elasticpath"
+			   context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTS table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTS)"/>
+			<where>ID = 'TORDERPAYMENTS' AND EXISTS (SELECT 1 FROM TORDERPAYMENTS)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-insert-all-GC-authorizations" author="elasticpath" context="migrate-data" dbms="mysql">
+		<comment>Insert all GC authorizations.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			'RESERVE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			PI.GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			NULL AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+			WHERE P.TRANSACTION_TYPE = 'Authorization' AND P.PAYMENT_GATEWAY = 'GIFT_CERTIFICATE';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-configurations-insert-all-GC-authorizations" author="elasticpath" context="migrate-data" dbms="oracle,h2">
+		<comment>Insert all GC authorizations.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			'RESERVE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			PI.GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			NULL AS PARENT_ORDER_PAYMENT_GUID,
+			1 AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+			WHERE P.TRANSACTION_TYPE = 'Authorization' AND P.PAYMENT_GATEWAY = 'GIFT_CERTIFICATE';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-insert-all-GC-authorizations"
+			   author="elasticpath" context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTS table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTS)"/>
+			<where>ID = 'TORDERPAYMENTS' AND EXISTS (SELECT 1 FROM TORDERPAYMENTS)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-create-order-payment-instruments-for-all-authorizations" author="elasticpath" context="migrate-data"
+			   dbms="mysql,h2">
+		<comment>Create order payment instruments for all authorizations.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTINSTRUMENT (UIDPK, GUID, PAYMENT_INSTRUMENT_GUID, LIMIT_AMOUNT, ORDER_NUMBER, CURRENCY_CODE)
+			SELECT PI.UIDPK, UUID(), PI.GUID, 0.00, P.ORDER_NUMBER, P.CURRENCY_CODE
+			FROM TORDERPAYMENTS P
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-create-order-payment-instruments-for-all-authorizations" author="elasticpath" context="migrate-data"
+			   dbms="oracle">
+		<comment>Create order payment instruments for all authorizations.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTINSTRUMENT (UIDPK, GUID, PAYMENT_INSTRUMENT_GUID, LIMIT_AMOUNT, ORDER_NUMBER, CURRENCY_CODE)
+			SELECT PI.UIDPK, SYS_GUID(), PI.GUID, 0.00, P.ORDER_NUMBER, P.CURRENCY_CODE
+			FROM TORDERPAYMENTS P
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTINSTRUMENT" author="elasticpath"
+			   context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTINSTRUMENT table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTINSTRUMENT)"/>
+			<where>ID = 'TORDERPAYMENTINSTRUMENT' AND EXISTS (SELECT 1 FROM TORDERPAYMENTINSTRUMENT)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-match-reverse-authorizations-by-shipment-number-and-amount" author="elasticpath"
+			   context="migrate-data" dbms="mysql">
+		<comment>Match reverse authorizations by shipment number and amount.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CANCEL_RESERVE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			PI.GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT
+			WHERE P.TRANSACTION_TYPE = 'Authorization Reversal'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID &lt;=> P.ORDERSHIPMENT_UID
+			AND RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-configurations-match-reverse-authorizations-by-shipment-number-and-amount" author="elasticpath"
+			   context="migrate-data" dbms="oracle,h2">
+		<comment>Match reverse authorizations by shipment number and amount.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CANCEL_RESERVE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			PI.GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			1 AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE P.TRANSACTION_TYPE = 'Authorization Reversal'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND decode( RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID, P.ORDERSHIPMENT_UID, 1, 0 ) = 1
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-match-reverse-authorizations" author="elasticpath"
+			   context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTS table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTS)"/>
+			<where>ID = 'TORDERPAYMENTS' AND EXISTS (SELECT 1 FROM TORDERPAYMENTS)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-match-captures-by-shipment-number" author="elasticpath" context="migrate-data" dbms="mysql">
+		<comment>Match captures by shipment number.</comment>
+		<createTable tableName="PARENTGUID">
+			<column name="GUID" type="varchar(255)"/>
+			<column name="PARENT_ORDER_PAYMENT_GUID" type="varchar(255)"/>
+		</createTable>
+		<sql>
+			INSERT INTO PARENTGUID SELECT GUID, PARENT_ORDER_PAYMENT_GUID FROM TORDERPAYMENTS WHERE PARENT_ORDER_PAYMENT_GUID IS NOT NULL;
+		</sql>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CHARGE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID
+			JOIN TORDERPAYMENTS T ON T.UIDPK = TP.UIDPK AND T.TYPE = 'RESERVE'
+			LEFT JOIN PARENTGUID G on G.PARENT_ORDER_PAYMENT_GUID = T.GUID
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT
+			WHERE
+			RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID &lt;=> P.ORDERSHIPMENT_UID
+			AND RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization'
+			AND
+			P.TRANSACTION_TYPE = 'Capture'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND G.GUID is NULL;
+		</sql>
+		<dropTable tableName="PARENTGUID"/>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-configurations-match-captures-by-shipment-number" author="elasticpath" context="migrate-data"
+			   dbms="oracle,h2">
+		<comment>Match captures by shipment number.</comment>
+		<createTable tableName="PARENTGUID">
+			<column name="GUID" type="varchar(255)"/>
+			<column name="PARENT_ORDER_PAYMENT_GUID" type="varchar(255)"/>
+		</createTable>
+		<sql>
+			INSERT INTO PARENTGUID SELECT GUID, PARENT_ORDER_PAYMENT_GUID FROM TORDERPAYMENTS WHERE PARENT_ORDER_PAYMENT_GUID IS NOT NULL;
+		</sql>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CHARGE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			1 AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID
+			JOIN TORDERPAYMENTS T ON T.UIDPK = TP.UIDPK AND T.TYPE = 'RESERVE'
+			LEFT JOIN PARENTGUID G on G.PARENT_ORDER_PAYMENT_GUID = T.GUID
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE
+			decode( RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID, P.ORDERSHIPMENT_UID, 1, 0 ) = 1
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization'
+			AND
+			P.TRANSACTION_TYPE = 'Capture'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND G.GUID is NULL;
+		</sql>
+		<dropTable tableName="PARENTGUID"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-match-captures" author="elasticpath"
+			   context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTS table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTS)"/>
+			<where>ID = 'TORDERPAYMENTS' AND EXISTS (SELECT 1 FROM TORDERPAYMENTS)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-match-credits-by-shipment-number" author="elasticpath" context="migrate-data" dbms="mysql">
+		<comment>Match credits by shipment number.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CREDIT' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID
+			JOIN TORDERPAYMENTS T ON T.UIDPK = TP.UIDPK AND T.TYPE = 'CHARGE'
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT
+			WHERE P.TRANSACTION_TYPE = 'Credit'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID &lt;=> P.ORDERSHIPMENT_UID
+			AND RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Capture';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-configurations-match-credits-by-shipment-number" author="elasticpath" context="migrate-data"
+			   dbms="oracle,h2">
+		<comment>Match credits by shipment number.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CREDIT' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			1 AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID
+			JOIN TORDERPAYMENTS T ON T.UIDPK = TP.UIDPK AND T.TYPE = 'CHARGE'
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE P.TRANSACTION_TYPE = 'Credit'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND decode( RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID, P.ORDERSHIPMENT_UID, 1, 0 ) = 1
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Capture';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-match-credits" author="elasticpath"
+			   context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTS table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTS)"/>
+			<where>ID = 'TORDERPAYMENTS' AND EXISTS (SELECT 1 FROM TORDERPAYMENTS)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-match-manual-credits-by-order-number" author="elasticpath" context="migrate-data" dbms="mysql">
+		<comment>Match manual credits by order number.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			'MANUAL_CREDIT' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			T.CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTS T ON T.TYPE = 'CHARGE' AND O.ORDER_NUMBER = T.ORDER_NUMBER
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT
+			WHERE P.TRANSACTION_TYPE = 'Credit' AND P.PAYMENT_GATEWAY = 'RETURN_AND_EXCHANGE'
+			AND RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID &lt;=> P.ORDERSHIPMENT_UID
+			AND RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Capture';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-configurations-match-manual-credits-by-order-number" author="elasticpath" context="migrate-data"
+			   dbms="oracle,h2">
+		<comment>Match manual credits by order number.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			'MANUAL_CREDIT' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			T.CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			1 AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTS T ON T.TYPE = 'CHARGE' AND O.ORDER_NUMBER = T.ORDER_NUMBER
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE P.TRANSACTION_TYPE = 'Credit' AND P.PAYMENT_GATEWAY = 'RETURN_AND_EXCHANGE'
+			AND decode( RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID, P.ORDERSHIPMENT_UID, 1, 0 ) = 1
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Capture';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-match-manual-credits" author="elasticpath"
+			   context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTS table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTS)"/>
+			<where>ID = 'TORDERPAYMENTS' AND EXISTS (SELECT 1 FROM TORDERPAYMENTS)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-preserve-all-GC-codes-as-instrument-data" author="elasticpath" context="migrate-data">
+		<comment>Preserve all GC codes as instrument data.</comment>
+		<sql>
+			INSERT INTO TPAYMENTINSTRUMENTDATA (UIDPK, PAYMENTINSTRUMENT_UID, CONFIG_KEY, CONFIG_DATA)
+			SELECT P.UIDPK, PI.UIDPK, 'GIFT_CERTIFICATE_CODE', P.REFERENCE_ID
+			FROM TPAYMENTINSTRUMENT PI
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.PAYMENTINSTRUMENT_UID = PI.UIDPK
+			JOIN TORDERPAYMENT P ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			WHERE P.TRANSACTION_TYPE = 'Authorization' AND P.PAYMENT_GATEWAY = 'GIFT_CERTIFICATE';
+		</sql>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TPAYMENTINSTRUMENTDATA)"/>
+			<where>ID = 'TPAYMENTINSTRUMENTDATA' AND EXISTS (SELECT 1 FROM TPAYMENTINSTRUMENTDATA)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-insert-all-GC-captures-and-reverse-authorizations-by-authorization-code" author="elasticpath"
+			   context="migrate-data" dbms="mysql">
+		<comment>Insert all GC captures and reverse authorizations by authorization code.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			CASE
+			WHEN P.TRANSACTION_TYPE = 'Capture' THEN 'CHARGE'
+			ELSE 'CANCEL_RESERVE'
+			END AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTS T ON T.TYPE = 'RESERVE'
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID AND TP.UIDPK = T.UIDPK AND P.AUTHORIZATION_CODE =
+			TP.AUTHORIZATION_CODE
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT
+			WHERE P.TRANSACTION_TYPE != 'Authorization' AND P.PAYMENT_GATEWAY = 'GIFT_CERTIFICATE'
+			AND RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID &lt;=> P.ORDERSHIPMENT_UID
+			AND RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-oracle-payment-configurations-insert-all-GC-captures-and-reverse-authorizations-by-authorization-code" author="elasticpath"
+			   context="migrate-data" dbms="oracle,h2">
+		<comment>Insert all GC captures and reverse authorizations by authorization code.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			CASE
+			WHEN P.TRANSACTION_TYPE = 'Capture' THEN 'CHARGE'
+			ELSE 'CANCEL_RESERVE'
+			END AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			1 AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTS T ON T.TYPE = 'RESERVE'
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID AND TP.UIDPK = T.UIDPK AND P.AUTHORIZATION_CODE =
+			TP.AUTHORIZATION_CODE
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE P.TRANSACTION_TYPE != 'Authorization' AND P.PAYMENT_GATEWAY = 'GIFT_CERTIFICATE'
+			AND decode( RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID, P.ORDERSHIPMENT_UID, 1, 0 ) = 1
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-match-GC-captures-and-reverse-authorizations"
+			   author="elasticpath" context="migrate-data">
+		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTS table.</comment>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTS)"/>
+			<where>ID = 'TORDERPAYMENTS' AND EXISTS (SELECT 1 FROM TORDERPAYMENTS)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-change-data-value-column-in-order-payment-data-table" author="elasticpath" context="migrate-data">
+		<modifyDataType columnName="DATA_VALUE"
+						newDataType="varchar(1536)"
+						tableName="TORDERPAYMENTDATA"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-preserve-all-authorization-codes-as-payment-data" author="elasticpath" context="migrate-data">
+		<comment>Preserve all authorization codes as payment data.</comment>
+		<customChange class="liquibase.ext.elasticpath.migration.payment2020.MigrateOrderPaymentData"/>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="LAST_VALUE" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TORDERPAYMENTDATA)"/>
+			<where>ID = 'TORDERPAYMENTDATA' AND EXISTS (SELECT 1 FROM TORDERPAYMENTDATA)</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-drop-table-order-payment-payment-instrument" author="elasticpath" context="migrate-data">
+		<preConditions>
+			<tableExists tableName="TORDERPAYMENTPAYMENTINSTRUMENT"/>
+		</preConditions>
+		<comment>Drop table TORDERPAYMENTPAYMENTINSTRUMENT</comment>
+		<dropTable tableName="TORDERPAYMENTPAYMENTINSTRUMENT"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-drop-table-store-payment-gateway" author="elasticpath" context="migrate-data">
+		<preConditions>
+			<tableExists tableName="TSTOREPAYMENTGATEWAY"/>
+		</preConditions>
+		<comment>Drop table TSTOREPAYMENTGATEWAY</comment>
+		<dropTable tableName="TSTOREPAYMENTGATEWAY"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-drop-table-payment-gateway-properties" author="elasticpath" context="migrate-data">
+		<preConditions>
+			<tableExists tableName="TPAYMENTGATEWAYPROPERTIES"/>
+		</preConditions>
+		<comment>Drop table TPAYMENTGATEWAYPROPERTIES</comment>
+		<dropTable tableName="TPAYMENTGATEWAYPROPERTIES"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-drop-table-payment-gateway" author="elasticpath" context="migrate-data">
+		<preConditions>
+			<tableExists tableName="TPAYMENTGATEWAY"/>
+		</preConditions>
+		<comment>Drop table TPAYMENTGATEWAY</comment>
+		<dropTable tableName="TPAYMENTGATEWAY"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-drop-table-customer-payment-method" author="elasticpath" context="migrate-data">
+		<preConditions>
+			<tableExists tableName="TCUSTOMERPAYMENTMETHOD"/>
+		</preConditions>
+		<comment>Drop table TCUSTOMERPAYMENTMETHOD</comment>
+		<dropTable tableName="TCUSTOMERPAYMENTMETHOD"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-drop-default-payment-method-from-customer-table" author="elasticpath" context="migrate-data">
+		<comment>Drop TCUSTOMER.DEFAULT_PAYMENT_METHOD_UID</comment>
+		<dropColumn tableName="TCUSTOMER" columnName="DEFAULT_PAYMENT_METHOD_UID"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-drop-table-payment-token" author="elasticpath" context="migrate-data">
+		<preConditions>
+			<tableExists tableName="TPAYMENTTOKEN"/>
+		</preConditions>
+		<comment>Drop table TPAYMENTTOKEN</comment>
+		<dropTable tableName="TPAYMENTTOKEN"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-drop-table-order-payment" author="elasticpath" context="migrate-data">
+		<preConditions>
+			<tableExists tableName="TORDERPAYMENT"/>
+		</preConditions>
+		<comment>Drop table TORDERPAYMENT</comment>
+		<dropTable tableName="TORDERPAYMENT"/>
+	</changeSet>
+
+	<changeSet id="2020-03-payment-configurations-rename-table-order-payments" author="elasticpath" context="migrate-data">
+		<renameTable newTableName="TORDERPAYMENT"
+					 oldTableName="TORDERPAYMENTS"/>
+		<delete tableName="JPA_GENERATED_KEYS">
+			<where>ID = 'TORDERPAYMENT'</where>
+		</delete>
+		<update tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TORDERPAYMENT"/>
+			<where>ID = 'TORDERPAYMENTS'</where>
+		</update>
+	</changeSet>
+</databaseChangeLog>

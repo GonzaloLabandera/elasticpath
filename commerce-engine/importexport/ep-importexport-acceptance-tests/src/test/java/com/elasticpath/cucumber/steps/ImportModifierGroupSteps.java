@@ -204,7 +204,7 @@ public class ImportModifierGroupSteps {
 	 *
 	 * @param code the modifierGroup code to verify
 	 */
-	@Then("^the modifier group with code ([\\w]+) is persisted")
+	@Then("^the modifier group with code (.+) is persisted")
 	public void verifyModifierGroupIsPersisted(final String code) {
 		ModifierGroup modifierGroup = modifierService.findModifierGroupByCode(code);
 		assertThat(modifierGroup)

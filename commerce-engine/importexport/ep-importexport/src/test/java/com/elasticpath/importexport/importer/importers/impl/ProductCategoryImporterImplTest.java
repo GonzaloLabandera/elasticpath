@@ -34,6 +34,8 @@ import com.elasticpath.importexport.importer.importers.CollectionsStrategy;
 import com.elasticpath.importexport.importer.importers.SavingStrategy;
 import com.elasticpath.importexport.importer.types.ImportStrategyType;
 import com.elasticpath.service.catalog.ProductLookup;
+import com.elasticpath.service.search.IndexNotificationService;
+import com.elasticpath.service.search.IndexType;
 
 /**
  * Test for <code>ProductCategoryImporterImpl</code>.
@@ -49,6 +51,7 @@ public class ProductCategoryImporterImplTest {
 	private static final String CATEGORY_GUID3 = "categoryGuid3";
 
 	private static final String PRODUCT_CODE = "productCode";
+	public static final long PRODUCT_UIDPK = 1L;
 
 	private ProductCategoryImporterImpl productCategoryImporter;
 
@@ -67,6 +70,8 @@ public class ProductCategoryImporterImplTest {
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	private CachingService cachingService;
+
+	private IndexNotificationService mockIndexNotificationService;
 
 	/**
 	 * Prepare for tests.
@@ -97,6 +102,7 @@ public class ProductCategoryImporterImplTest {
 		productCategoriesDTO = new ProductCategoriesDTO();
 		product = new ProductImpl();
 		product.setCode(PRODUCT_CODE);
+		product.setUidPk(PRODUCT_UIDPK);
 		productCategoryImporter = new ProductCategoryImporterImpl();
 
 		savingStrategy = AbstractSavingStrategy.createStrategy(ImportStrategyType.INSERT, new SavingManager<Product>() {
@@ -108,12 +114,15 @@ public class ProductCategoryImporterImplTest {
 
 			@Override
 			public Product update(final Product persistable) {
-				return null;
+				return persistable;
 			}
 
 		});
 
 		productLookup = context.mock(ProductLookup.class);
+
+		mockIndexNotificationService = context.mock(IndexNotificationService.class);
+
 		context.checking(new Expectations() {
 			{
 				allowing(productLookup).findByGuid(with(aNull(String.class)));
@@ -121,6 +130,7 @@ public class ProductCategoryImporterImplTest {
 			}
 		});
 		productCategoryImporter.setProductLookup(productLookup);
+		productCategoryImporter.setIndexNotificationService(mockIndexNotificationService);
 		
 		cachingService = context.mock(CachingService.class);
 		ProductCategoryAdapter productCategoryAdapter = new ProductCategoryAdapter();
@@ -143,6 +153,16 @@ public class ProductCategoryImporterImplTest {
 	 */
 	@Test
 	public void testExecuteImport() {
+
+		context.checking(new Expectations() {
+			{
+				allowing(productLookup).findByGuid(with(aNull(String.class)));
+				will(returnValue(product));
+
+				oneOf(mockIndexNotificationService).addNotificationForEntityIndexUpdate(IndexType.PRODUCT, PRODUCT_UIDPK);
+			}
+		});
+
 		ImportConfiguration importConfiguration = new ImportConfiguration();
 		importConfiguration.setImporterConfigurationMap(new HashMap<>());
 

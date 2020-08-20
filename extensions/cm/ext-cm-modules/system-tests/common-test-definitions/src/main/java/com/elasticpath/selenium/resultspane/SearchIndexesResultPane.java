@@ -8,7 +8,7 @@ import org.openqa.selenium.WebElement;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 
 public class SearchIndexesResultPane extends AbstractPageObject {
 
@@ -65,7 +65,7 @@ public class SearchIndexesResultPane extends AbstractPageObject {
 	private void clickRebuildIndexButton() {
 		getWaitDriver().waitForButtonToBeEnabled(REBUILD_INDEX_BUTTON_CSS);
 		click(By.cssSelector(REBUILD_INDEX_BUTTON_CSS));
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages.RebuildConfirmTitle");
+		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages.RebuildConfirmTitle");
 	}
 
 	/**

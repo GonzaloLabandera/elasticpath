@@ -27,7 +27,11 @@ public final class Markers {
 	/**
 	 * Marker for finding sql queries.
 	 */
-	public static final String SQL_QUERY_MARKER = "executing prepstmnt ";
+	public static final String SQL_STATEMENT_MARKER = "executing (batch )?prepstmnt ";
+	/** Marker for finding batch prepared statements. */
+	public static final String SQL_BATCH_STATEMENT_MARKER = "executing batch prepstmnt ";
+	/** Marker for finding both regular and batch prepared statements. */
+	public static final String MULTI_LINE_MATCH_SQL_STATEMENT_MARKER = "(?s).*?executing (batch )?prepstmnt.*?";
 	/**
 	 * Marker for finding jpa eager relations.
 	 */

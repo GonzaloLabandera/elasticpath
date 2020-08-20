@@ -117,8 +117,8 @@ public interface DataPointValueService {
 	 * Must return null if request was unsuccessful.
 	 *
 	 * @param storeCode store code
-	 * @param userId    user id
+	 * @param sharedId customer shared ID
 	 * @return pair of customer and list of data points
 	 */
-	Pair<Customer, List<DataPoint>> findAllActiveDataPointsForCustomer(String storeCode, String userId);
+	Pair<Customer, List<DataPoint>> findAllActiveDataPointsForCustomer(String storeCode, String sharedId);
 }

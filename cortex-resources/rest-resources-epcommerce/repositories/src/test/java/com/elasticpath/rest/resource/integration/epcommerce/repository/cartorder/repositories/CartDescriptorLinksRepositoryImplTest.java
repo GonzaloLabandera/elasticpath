@@ -5,6 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE_IDENTIFIER_PART;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.USER_ID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +28,6 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 @RunWith(MockitoJUnitRunner.class)
 public class CartDescriptorLinksRepositoryImplTest {
 
-	private static final String CUSTOMER_GUID = "customer guid";
 	@InjectMocks
 	private CartDescriptorLinksRepositoryImpl<AddToCartFormsIdentifier, CartDescriptorIdentifier> repository;
 
@@ -39,8 +39,8 @@ public class CartDescriptorLinksRepositoryImplTest {
 	@Test
 	public void testGetElements() {
 
-		when(resourceOperationContext.getUserIdentifier()).thenReturn(CUSTOMER_GUID);
-		when(shoppingCartRepository.findAllCarts(CUSTOMER_GUID, SCOPE_IDENTIFIER_PART.getValue())).thenReturn(Observable.just(CART_GUID));
+		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_ID);
+		when(shoppingCartRepository.findAllCarts(USER_ID, null, SCOPE_IDENTIFIER_PART.getValue())).thenReturn(Observable.just(CART_GUID));
 
 		AddToCartFormsIdentifier addToCartsListIdentifier = mock(AddToCartFormsIdentifier.class);
 		when(addToCartsListIdentifier.getCarts()).thenReturn(CartsIdentifier.builder().withScope(SCOPE_IDENTIFIER_PART).build());

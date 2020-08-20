@@ -57,6 +57,7 @@
 		<module>totals</module>
 		<module>unreleased-plans</module>
 		<module>wishlists</module>
+		<module>accounts</module>
 	</modules>
 
 	<dependencies>

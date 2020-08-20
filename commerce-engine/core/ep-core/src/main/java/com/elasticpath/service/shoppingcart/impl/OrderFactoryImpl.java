@@ -88,11 +88,11 @@ public class OrderFactoryImpl implements OrderFactory {
 
 		Order order = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER, Order.class);
 		order.setCreatedDate(getTimeService().getCurrentTime());
-		order.setIpAddress(customerSession.getIpAddress());
 		order.setCurrency(customerSession.getCurrency());
 		order.setLocale(customerSession.getLocale());
 		order.setStore(shoppingCart.getStore());
 		order.setCustomer(customer);
+		order.setAccount(customerSession.getShopper().getAccount());
 
 		if (isOrderExchange) {
 			order.setExchangeOrder(Boolean.TRUE);
@@ -173,6 +173,7 @@ public class OrderFactoryImpl implements OrderFactory {
 			billingAddress.init(shoppingCart.getBillingAddress());
 			order.setBillingAddress(billingAddress);
 		}
+		order.setAccount(customerSession.getShopper().getAccount());
 
 		if (customer.isAnonymous()) {
 			updateAnonymousCustomer(order, customer);
@@ -284,7 +285,7 @@ public class OrderFactoryImpl implements OrderFactory {
 												final Set<OrderSku> physicalSkus,
 												final Set<OrderSku> electronicSkus,
 												final Set<OrderSku> serviceSkus) {
-		final ShipmentTypeShoppingCartVisitor visitor = getBeanFactory().getPrototypeBean(ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR, 
+		final ShipmentTypeShoppingCartVisitor visitor = getBeanFactory().getPrototypeBean(ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR,
 				ShipmentTypeShoppingCartVisitor.class);
 		for (final OrderSku sku : rootItems) {
 			sku.accept(visitor, getProductSkuLookup());
@@ -317,7 +318,7 @@ public class OrderFactoryImpl implements OrderFactory {
 												 final Set<OrderSku> orderSkuSet,
 												 final boolean isExchangeOrder,
 												 final boolean awaitExchangeCompletion) {
-		final PhysicalOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT, 
+		final PhysicalOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT,
 				PhysicalOrderShipment.class);
 		final OrderAddress shippingAddress = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 
@@ -377,7 +378,7 @@ public class OrderFactoryImpl implements OrderFactory {
 													final ShoppingCartPricingSnapshot pricingSnapshot,
 													final Set<OrderSku> orderSkuSet) {
 
-		final ElectronicOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.ELECTRONIC_ORDER_SHIPMENT, 
+		final ElectronicOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.ELECTRONIC_ORDER_SHIPMENT,
 				ElectronicOrderShipment.class);
 		orderShipment.setCreatedDate(getTimeService().getCurrentTime());
 		orderShipment.setStatus(OrderShipmentStatus.RELEASED);
@@ -393,7 +394,7 @@ public class OrderFactoryImpl implements OrderFactory {
 
 
 	private OrderShipment createServiceShipment(final Set<OrderSku> orderSkus) {
-		final ServiceOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.SERVICE_ORDER_SHIPMENT, 
+		final ServiceOrderShipment orderShipment = getBeanFactory().getPrototypeBean(ContextIdNames.SERVICE_ORDER_SHIPMENT,
 				ServiceOrderShipment.class);
 		addOrderSkusToShipment(orderSkus, orderShipment);
 		orderShipment.setCreatedDate(getTimeService().getCurrentTime());

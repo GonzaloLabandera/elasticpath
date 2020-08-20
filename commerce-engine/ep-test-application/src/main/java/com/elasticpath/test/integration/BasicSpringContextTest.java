@@ -3,12 +3,21 @@
  */
 package com.elasticpath.test.integration;
 
+import java.util.List;
+
+import org.apache.camel.CamelContext;
+import org.apache.camel.test.spring.CamelSpringRunner;
+import org.apache.camel.test.spring.CamelTestContextBootstrapper;
+import org.apache.camel.test.spring.UseAdviceWith;
+import org.apache.log4j.Logger;
+import org.junit.Rule;
+import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
@@ -22,7 +31,9 @@ import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 /**
  * Basic Spring Context Test.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(CamelSpringRunner.class)
+@UseAdviceWith
+@BootstrapWith(CamelTestContextBootstrapper.class)
 @ContextConfiguration("/integration-context.xml")
 @SuppressWarnings("PMD.AbstractNaming")
 @TestExecutionListeners({
@@ -36,11 +47,19 @@ import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 @DirtiesContext
 public abstract class BasicSpringContextTest {
 
+	private static final Logger LOGGER = Logger.getLogger(BasicSpringContextTest.class);
+
+	@Rule
+	public CamelContextTestRule resource = new CamelContextTestRule();
+
 	@Autowired
 	private BeanFactory beanFactory;
 
 	@Autowired
 	private TestApplicationContext tac;
+
+	@Autowired
+	private List<CamelContext> camelContexts;
 	
 	/**
 	 * @return the tac
@@ -51,5 +70,35 @@ public abstract class BasicSpringContextTest {
 
 	protected BeanFactory getBeanFactory() {
 		return beanFactory;
+	}
+
+	/**
+	 * Rule class for start and stop camel context programmatically for each test case.
+	 */
+	final class CamelContextTestRule extends ExternalResource {
+
+		CamelContextTestRule() {
+			//empty default constructor
+		}
+
+		@Override
+		protected void after() {
+
+			for (final CamelContext context : camelContexts) {
+				try {
+					context.stop();
+				} catch (Exception ex) {
+					LOGGER.error("Error occurred:", ex);
+				}
+			}
+		}
+
+		@Override
+		protected void before() throws Throwable {
+
+			for (final CamelContext context : camelContexts) {
+				context.start();
+			}
+		}
 	}
 }

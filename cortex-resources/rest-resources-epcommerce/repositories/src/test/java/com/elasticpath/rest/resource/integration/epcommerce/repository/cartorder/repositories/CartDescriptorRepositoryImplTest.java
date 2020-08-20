@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,6 +78,7 @@ public class CartDescriptorRepositoryImplTest {
 		when(multiCartResolutionStrategyHolder.getStrategies()).thenReturn(Collections.singletonList(strategy));
 
 	}
+
 	@Test
 	public void testFindOneWithIdentifierData() {
 		Map<String, CartData> cartDescriptors = new HashMap<>();
@@ -90,9 +90,6 @@ public class CartDescriptorRepositoryImplTest {
 
 		when(shoppingCartRepository.getCartDescriptors(CART_GUID))
 				.thenReturn(cartDescriptors);
-
-		when(shoppingCartRepository.getDefaultShoppingCartGuid())
-				.thenReturn(Single.just("DIFFERENT_GUID"));
 
 		CartDescriptorIdentifier identifier = mock(CartDescriptorIdentifier.class);
 		when(identifier.getCart()).thenReturn(CartIdentifier.builder()
@@ -106,27 +103,6 @@ public class CartDescriptorRepositoryImplTest {
 				.assertValue(entity -> entity.getDynamicProperties().containsKey(TEST_NAME))
 				.assertValue(entity -> entity.getDynamicProperties().containsValue(TEST_VALUE));
 
-	}
-
-	@Test
-	public void testFindOneWithNoIdentifierReturnsDefault() {
-		Map<String, CartData> cartDescriptors = new HashMap<>();
-		when(shoppingCartRepository.getCartDescriptors(CART_GUID))
-				.thenReturn(cartDescriptors);
-
-		when(shoppingCartRepository.getDefaultShoppingCartGuid())
-				.thenReturn(Single.just(CART_GUID));
-
-		CartDescriptorIdentifier identifier = mock(CartDescriptorIdentifier.class);
-		when(identifier.getCart()).thenReturn(CartIdentifier.builder()
-				.withCartId(StringIdentifier.of(CART_GUID))
-				.withCarts(CartsIdentifier.builder().withScope(SCOPE_IDENTIFIER_PART).build())
-				.build());
-
-		repository.findOne(identifier)
-				.test()
-				.assertNoErrors()
-				.assertValue(entity -> entity.getDynamicProperties().containsKey("default"));
 	}
 
 	@Test

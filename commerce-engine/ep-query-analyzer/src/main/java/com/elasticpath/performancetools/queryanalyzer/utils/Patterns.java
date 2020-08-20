@@ -25,7 +25,13 @@ public final class Patterns {
 	/**
 	 * Pattern for extracting db table names.
 	 */
-	public static final Pattern TABLE_PATTERN = Pattern.compile(".*?FROM (\\bT.+?\\b).*?");
+	public static final Pattern QUERY_TABLE_PATTERN = Pattern.compile(".*?FROM (\\b.+?\\b).*?");
+	/** Pattern for extracting update statements. */
+	public static final Pattern UPDATE_TABLE_PATTERN = Pattern.compile("UPDATE\\s+(\\b.+?\\b).*?");
+	/** Pattern for extracting insert statements. */
+	public static final Pattern INSERT_TABLE_PATTERN = Pattern.compile("INSERT INTO\\s+(\\bT.+?\\b).*?");
+	/** Pattern for extracting delete statements. */
+	public static final Pattern DELETE_TABLE_PATTERN = Pattern.compile("DELETE\\s+.*?FROM\\s+(\\bT.+?\\b).*?");
 	/**
 	 * Pattern for extracting JPA entity names.
 	 */
@@ -33,7 +39,7 @@ public final class Patterns {
 	/**
 	 * Pattern for extracting SQL exe times.
 	 */
-	public static final Pattern SQL_QUERY_EXE_TIME_PATTERN = Pattern.compile(">.*?\\[(.+?)\\] spent");
+	public static final Pattern SQL_STATEMENT_EXE_TIME_PATTERN = Pattern.compile(">.*?\\[(.+?)\\] spent");
 	private static final String DATE_PATTERN_STRING = "(\\d{4}-\\d{2}-\\d{2})";
 	private static final String JPA_QUERY_PATTERN_BASE_STRING = "(?s)" + Markers.JPA_QUERY_MARKER + " (.*)" + DATE_PATTERN_STRING;
 	/**
@@ -44,7 +50,7 @@ public final class Patterns {
 	 * Pattern for extracting JPA queries when JPA query line is the last one.
 	 */
 	public static final Pattern JPA_QUERY_PATTERN_DATE_OPTIONAL = Pattern.compile(JPA_QUERY_PATTERN_BASE_STRING + "?");
-	private static final String SQL_PATTERN_BASE_STRING = "(?s)" + Markers.SQL_QUERY_MARKER + "\\d+\\s*(.*)?" + DATE_PATTERN_STRING;
+	private static final String SQL_PATTERN_BASE_STRING = "(?s)" + Markers.SQL_STATEMENT_MARKER + "\\d+\\s*(.*)?" + DATE_PATTERN_STRING;
 	/**
 	 * Pattern for extracting SQL queries when log file contains more lines after SQL query line..
 	 */

@@ -14,13 +14,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 import cucumber.api.DataTable
-import org.apache.http.HttpEntity
 import org.apache.http.HttpHeaders
 import org.apache.http.auth.AUTH
 import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.BasicHttpEntity
 import org.apache.http.entity.ContentType
-import org.apache.http.entity.EntityTemplate
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 
@@ -646,6 +643,15 @@ class CommonMethods {
 			});
 		}
 		threadPool.awaitTermination(numberOfConcurrentSubmissions, TimeUnit.SECONDS)
+	}
+	/**
+	 * Returns true if JSON response contains mapping for specified key.
+	 * 
+	 * @param field - JSON response key
+	 * @return boolean
+	 */
+	static boolean filedExists(String field) {
+		return client.body.containsKey(field)
 	}
 
 	private static void submitPostRequest(String url, String accessToken) {

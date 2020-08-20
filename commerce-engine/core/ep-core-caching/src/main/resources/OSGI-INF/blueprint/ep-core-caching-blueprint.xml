@@ -9,7 +9,6 @@
 	<!-- Imported Services -->
 	<reference id="persistenceEngine" interface="com.elasticpath.persistence.api.PersistenceEngine"/>
 	<reference id="productDao" interface="com.elasticpath.persistence.dao.ProductDao"/>
-	<reference id="productTypeDao" interface="com.elasticpath.persistence.dao.ProductTypeDao"/>
 	<reference id="settingsReader" interface="com.elasticpath.settings.SettingsReader"/>
 
 	<reference id="nonCachingCategoryLookup" interface="com.elasticpath.service.catalog.CategoryLookup"
@@ -53,6 +52,18 @@
 
 
 	<reference id="storeProductService" interface="com.elasticpath.service.catalogview.StoreProductService"
+			   filter="(caching=false)"/>
+
+	<reference id="brandService" interface="com.elasticpath.service.catalog.BrandService"
+			   filter="(caching=false)"/>
+
+	<reference id="catalogService" interface="com.elasticpath.service.catalog.CatalogService"
+			   filter="(caching=false)"/>
+
+	<reference id="productTypeDao" interface="com.elasticpath.persistence.dao.ProductTypeDao"
+			   filter="(caching=false)"/>
+
+	<reference id="taxCodeService" interface="com.elasticpath.service.tax.TaxCodeService"
 			   filter="(caching=false)"/>
 
 	<!-- Exported Services  -->
@@ -203,4 +214,37 @@
 			</entry>
 		</service-properties>
 	</service>
+
+	<service ref="cachingBrandService" interface="com.elasticpath.service.catalog.BrandService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="cachingCatalogService" interface="com.elasticpath.service.catalog.CatalogService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="cachingProductTypeDao" interface="com.elasticpath.persistence.dao.ProductTypeDao" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="cachingTaxCodeService" interface="com.elasticpath.service.tax.TaxCodeService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
 </blueprint>

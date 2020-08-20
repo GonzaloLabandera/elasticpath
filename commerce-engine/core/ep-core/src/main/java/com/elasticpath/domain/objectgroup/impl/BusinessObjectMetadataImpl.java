@@ -4,7 +4,6 @@
 package com.elasticpath.domain.objectgroup.impl;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,7 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
@@ -104,7 +103,7 @@ public class BusinessObjectMetadataImpl extends AbstractPersistableImpl implemen
 
 	
 	@Override
-	@OneToOne(targetEntity = BusinessObjectGroupMemberImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+	@ManyToOne(targetEntity = BusinessObjectGroupMemberImpl.class, fetch = FetchType.EAGER)
 	@JoinColumn(name = "OBJECT_GROUP_MEMBER_UID")
 	@ForeignKey
 	public BusinessObjectGroupMember getBusinessObjectGroupMember() {

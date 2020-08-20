@@ -81,7 +81,10 @@
 	</properties>
 
 	<dependencies>
-
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-test-resources</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.extensions.cm</groupId>
 			<artifactId>ep-cm-common-test-definitions</artifactId>
@@ -134,6 +137,10 @@
 			<version>2.4.15</version>
 		</dependency>
 		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>${epdb.maven.groupId}</groupId>
 			<artifactId>${epdb.maven.artifactId}</artifactId>
 			<version>${epdb.maven.version}</version>
@@ -142,6 +149,30 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-test-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.elasticpath</groupId>
+									<artifactId>ep-test-resources</artifactId>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+									<includes>RepositoryMap.xml</includes>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>com.lazerycode.selenium</groupId>
 				<artifactId>driver-binary-downloader-maven-plugin</artifactId>

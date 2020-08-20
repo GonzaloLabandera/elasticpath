@@ -98,11 +98,14 @@ public class CustomerSteps {
 			customerGroups.add(customerGroupService.findByGroupName(customerGroupName));
 		}
 
+		String customerEmail = customerFirstName + "." + customerLastName + "@email.com";
+
 		final Customer customer = customerBuilder.newInstance()
 				.withGuid(customerGuid)
+				.withUsername(customerGuid)
 				.withFirstName(customerFirstName)
 				.withLastName(customerLastName)
-				.withEmail(customerFirstName + "." + customerLastName + "@email.com")
+				.withEmail(customerEmail)
 				.withStoreCode(storeService.findAllStores().get(0).getCode())
 				.withCustomerGroups(customerGroups.toArray(new CustomerGroup[customerGroups.size()]))
 				.build();

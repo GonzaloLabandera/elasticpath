@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
+
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+	">
+
+	<bean id="purgeAnonymousCustomersBatchProcessor" parent="batchTxProxyTemplate">
+		<property name="target" ref="purgeAnonymousCustomersBatchProcessorTarget"/>
+	</bean>
+
+	<bean id="purgeAnonymousCustomersBatchProcessorTarget" class="com.elasticpath.batch.jobs.impl.customers.PurgeAnonymousCustomersBatchProcessor">
+		<property name="persistenceEngine" ref="batchPersistenceEngine"/>
+	</bean>
+
+	<bean id="purgeAnonymousCustomersBatchJob" class="com.elasticpath.batch.jobs.impl.customers.AnonymousCustomersCleanupJob">
+		<property name="persistenceEngine" ref="batchPersistenceEngine"/>
+		<property name="timeService" ref="timeService"/>
+		<property name="batchProcessor" ref="purgeAnonymousCustomersBatchProcessor" />
+		<property name="configBatchSize">
+			<settings:setting path="COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize"/><!-- default: 1000 -->
+		</property>
+		<property name="maxDaysHistory">
+			<settings:setting path="COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/maxHistory"/><!-- default: 60 -->
+		</property>
+	</bean>
+</beans>

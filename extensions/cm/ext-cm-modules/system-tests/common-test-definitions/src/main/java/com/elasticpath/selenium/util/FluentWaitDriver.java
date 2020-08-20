@@ -20,7 +20,6 @@ import org.openqa.selenium.support.ui.FluentWait;
 
 import com.elasticpath.selenium.framework.pages.WaitDriver;
 import com.elasticpath.selenium.framework.util.PropertyManager;
-import com.elasticpath.selenium.setup.SetUp;
 
 /**
  * WebDriverWait helper method class.
@@ -188,9 +187,9 @@ public class FluentWaitDriver extends WaitDriver {
 	public Boolean waitForElementToBeInvisible(final By findBy) {
 		//As the element is not in DOM, it takes implicit timeout to complete. We are setting it to 1 second to reduce the wait time when element
 		// not in DOM.
-		SetUp.getDriver().manage().timeouts().implicitlyWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS, TimeUnit.SECONDS);
+		webDriver.manage().timeouts().implicitlyWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS, TimeUnit.SECONDS);
 		Boolean until = wait.until(ExpectedConditions.refreshed(ExpectedConditions.invisibilityOfElementLocated(findBy)));
-		SetUp.getDriver().manage().timeouts().implicitlyWait(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
+		webDriver.manage().timeouts().implicitlyWait(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 		return until;
 	}
 

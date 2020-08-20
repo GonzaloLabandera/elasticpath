@@ -6,6 +6,8 @@ package com.elasticpath.importexport.common.types;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.elasticpath.ql.parser.EPQueryType;
+
 /**
  * Job Type determines type of export/import operations. Each Job Type reflects type of complex object to be processed: Product for example. So
  * appropriate classes can be used for execution of the job according to its type.
@@ -13,136 +15,139 @@ import java.util.Map;
 public enum JobType {
 
 	/** Job Type for Product. */
-	PRODUCT("products"),
+	PRODUCT("products", EPQueryType.PRODUCT),
 
 	/** Job Type for ProductBundle. */
-	PRODUCTBUNDLE("bundles"),
+	PRODUCTBUNDLE("bundles", null),
 
 	/** Job Type for Modifier Groups. */
-	MODIFIERGROUP("modifiergroups"),
+	MODIFIERGROUP("modifiergroups", null),
 
 	/** Job type for Modifier Group Filters. **/
-	MODIFIERGROUPFILTER("modifiergroupfilters"),
+	MODIFIERGROUPFILTER("modifiergroupfilters", null),
 
 	/** Job Type for Catalog. */
-	CATALOG("catalogs"),
+	CATALOG("catalogs", EPQueryType.CATALOG),
 
 	/** Job Type for Category. */
-	CATEGORY("categories"),
+	CATEGORY("categories", EPQueryType.CATEGORY),
 
 	/** Job Type for Promotion. */
-	PROMOTION("promotions"),
+	PROMOTION("promotions", EPQueryType.PROMOTION),
 
-	/** Job Type for Promotion. */
-	COUPONSET("coupon_sets"),
+	/** Job Type for Coupon Sets. */
+	COUPONSET("coupon_sets", null),
 
 	/** Job Type for Condition Rules. */
-	CONDITIONRULE("condition_rules"),
+	CONDITIONRULE("condition_rules", null),
 
 	/** Job type for Assets. */
-	ASSETS("assets"),
+	ASSETS("assets", null),
 
 	/** Job type for Inventory. */
-	INVENTORY("inventory"),
+	INVENTORY("inventory", null),
 
 	/** Job type for Pricing. */
-	PRICING("pricing"),
+	PRICING("pricing", null),
 
 	/** Job type for ProductAssociations. */
-	PRODUCTASSOCIATION("productassociations"),
+	PRODUCTASSOCIATION("productassociations", null),
 
 	/** Job type for ProductCategoryAssociations. */
-	PRODUCTCATEGORYASSOCIATION("productcategoryassociations"),
+	PRODUCTCATEGORYASSOCIATION("productcategoryassociations", null),
 
 	/** Job Type for Price List Descriptor. */
-	PRICELISTDESCRIPTOR("price_lists"),
+	PRICELISTDESCRIPTOR("price_lists", EPQueryType.PRICELIST),
 
 	/** Job Type for Base Amount. */
-	BASEAMOUNT("amounts"),
+	BASEAMOUNT("amounts", null),
 
 	/** Job type for SystemConfiguration. */
-	SYSTEMCONFIGURATION("system_configuration"),
+	SYSTEMCONFIGURATION("system_configuration", EPQueryType.CONFIGURATION),
 
 	/** Job type for Dynamic Content. */
-	DYNAMICCONTENT("dynamic_contents"),
+	DYNAMICCONTENT("dynamic_contents", EPQueryType.DYNAMICCONTENT),
 
 	/** Job type for Dynamic Content Delivery. */
-	DYNAMICCONTENTDELIVERY("dynamic_content_deliveries"),
+	DYNAMICCONTENTDELIVERY("dynamic_content_deliveries", EPQueryType.DYNAMICCONTENTDELIVERY),
 
 	/** Job type for PLAs. */
-	PRICELISTASSIGNMENT("price_list_assignments"),
+	PRICELISTASSIGNMENT("price_list_assignments", EPQueryType.PRICELISTASSIGNMENT),
 
 	/** Payment providers. */
-	PAYMENTPROVIDER("payment_providers"),
+	PAYMENTPROVIDER("payment_providers", null),
 
 	/** Warehouses. */
-	WAREHOUSE("warehouses"),
+	WAREHOUSE("warehouses", EPQueryType.WAREHOUSE),
 
 	/** Job type for tax codes. */
-	TAXCODE("tax_codes"),
+	TAXCODE("tax_codes", EPQueryType.TAXCODE),
 
 	/** Job type for tax jurisdictions. */
-	TAXJURISDICTION("tax_jurisdictions"), 
+	TAXJURISDICTION("tax_jurisdictions", EPQueryType.TAXJURISDICTION),
 
 	/** Job type for customer profile attributes. */
-	CUSTOMERPROFILE_ATTRIBUTE("customerprofile_attributes"),
-	
+	CUSTOMERPROFILEATTRIBUTE("customerprofile_attributes", EPQueryType.CUSTOMERPROFILEATTRIBUTE),
+
 	/** Stores. */
-	STORE("stores"), 
+	STORE("stores", EPQueryType.STORE),
 
 	/** Store Associations. */
-	STORE_ASSOCIATION("store_associations"), 
-	
+	STOREASSOCIATION("store_associations", null),
+
 	/** Customers. */
-	CUSTOMER("customers"),
-	
+	CUSTOMER("customers", EPQueryType.CUSTOMER),
+
 	/** Customer Groups. */
-	CUSTOMER_GROUP("customer_groups"),
+	CUSTOMERGROUP("customer_groups", null),
 
 	/** User Roles. */
-	USER_ROLE("user_roles"),
+	USERROLE("user_roles", EPQueryType.USER_ROLE),
 
 	/** Commerce Manager Users. */
-	CMUSER("cmusers"),
+	CMUSER("cmusers", EPQueryType.CMUSER),
 
 	/** Gift certificates. */
-	GIFT_CERTIFICATE("gift_certificates"),
-	
+	GIFTCERTIFICATE("gift_certificates", EPQueryType.GIFTCERTIFICATE),
+
 	/** Job type for Content Spaces. */
-	CONTENTSPACE("contentspaces"),
-	
+	CONTENTSPACE("contentspaces", EPQueryType.CONTENTSPACE),
+
 	/** Job type for Shipping Service Level. */
-	SHIPPING_SERVICE_LEVEL("shipping_service_levels"),
-	
+	SHIPPINGSERVICELEVEL("shipping_service_levels", EPQueryType.SHIPPINGSERVICELEVEL),
+
 	/** Job type for Shipping Regions. */
-	SHIPPING_REGION("shipping_regions"),
-	
+	SHIPPINGREGION("shipping_regions", EPQueryType.SHIPPINGREGION),
+
 	/** Job type for Saved Conditions. */
-	SAVED_CONDITION("saved_conditions"),
-	
+	SAVEDCONDITION("saved_conditions", EPQueryType.SAVEDCONDITION),
+
 	/** Job Type for ImportJob. */
-	CM_IMPORT_JOB("cmimportjobs"),
+	CMIMPORTJOB("cmimportjobs", EPQueryType.CMIMPORTJOB),
 
 	/** Data Policies. */
-	DATA_POLICY("data_policies"),
+	DATAPOLICY("data_policies", null),
 
 	/** Customer Consents. */
-	CUSTOMER_CONSENT("customer_consents"),
+	CUSTOMERCONSENT("customer_consents", null),
 
 	/** Facets. */
-	FACET("facets"),
+	FACET("facets", null),
 
 	/** Sort attributes. */
-	SORT_ATTRIBUTE("sort_attributes"),
+	SORTATTRIBUTE("sort_attributes", EPQueryType.SORTATTRIBUTE),
 
 	/** Store customer attributes. */
-	STORE_CUSTOMER_ATTRIBUTE("store_customer_attributes"),
+	STORECUSTOMERATTRIBUTE("store_customer_attributes", null),
 
 	/** Attribute policies. */
-	ATTRIBUTE_POLICY("attribute_policies"),
-	
+	ATTRIBUTEPOLICY("attribute_policies", null),
+
 	/** Job Type for TagGroup. */
-	TAGGROUP("tag_groups");
+	TAGGROUP("tag_groups", EPQueryType.TAGGROUP),
+
+	/** Job Type for UserAccountAssociation. */
+	USERACCOUNTASSOCIATION("useraccountassociations", null);
 
 	/*
 	 * The map of Job Types available in the system. XML tag name is the key and JobType is the value.
@@ -158,23 +163,30 @@ public enum JobType {
 		}
 	}
 
-	/*
+	/**
 	 * String representation of job type name is used as tag name in XML files produced/processed by jobs.
 	 */
 	private final String tagName;
 
 	/**
+	 * Query type associated to this job type.
+	 */
+	private final EPQueryType epQueryType;
+
+	/**
 	 * Private Constructor.
 	 *
-	 * @param tagName name.
+	 * @param tagName XML tag name
+	 * @param epQueryType associated query type
 	 */
-	JobType(final String tagName) {
+	JobType(final String tagName, final EPQueryType epQueryType) {
 		this.tagName = tagName;
+		this.epQueryType = epQueryType;
 	}
 
 	/**
 	 * Gets the name of XML tag representing Job Type.
-	 * 
+	 *
 	 * @return the tag name
 	 */
 	public String getTagName() {
@@ -182,8 +194,17 @@ public enum JobType {
 	}
 
 	/**
+	 * Associated EPQL query type.
+	 *
+	 * @return EP query type
+	 */
+	public EPQueryType getEpQueryType() {
+		return epQueryType;
+	}
+
+	/**
 	 * Finds JobType in the map by its XML tag name.
-	 * 
+	 *
 	 * @param tagName XML tag name
 	 * @return appropriate JobType if exists
 	 */

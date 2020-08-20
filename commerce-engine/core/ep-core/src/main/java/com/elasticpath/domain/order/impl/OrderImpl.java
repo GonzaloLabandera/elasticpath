@@ -103,11 +103,13 @@ import com.elasticpath.service.order.ReturnAndExchangeService;
 @FetchGroups({
 	@FetchGroup(name = FetchGroupConstants.ORDER_RETURN_INDEX, attributes = {
 			@FetchAttribute(name = "customer"),
+			@FetchAttribute(name = "account"),
 			@FetchAttribute(name = "orderNumber")
 	}),
 	@FetchGroup(name = FetchGroupConstants.ORDER_INDEX, attributes = {
 			@FetchAttribute(name = "orderNumber"),
 			@FetchAttribute(name = "customer"),
+			@FetchAttribute(name = "account"),
 			@FetchAttribute(name = "storeCode"),
 			@FetchAttribute(name = "billingAddress"),
 			@FetchAttribute(name = "createdDate"),
@@ -122,6 +124,7 @@ import com.elasticpath.service.order.ReturnAndExchangeService;
 				@FetchAttribute(name = "shipments"),
 				@FetchAttribute(name = "billingAddress"),
 				@FetchAttribute(name = "customer"),
+				@FetchAttribute(name = "account"),
 				@FetchAttribute(name = "storeCode"),
 				@FetchAttribute(name = "createdDate"),
 				@FetchAttribute(name = "status"),
@@ -172,6 +175,8 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	private String ipAddress;
 
 	private Customer customer;
+
+	private Customer account;
 
 	private OrderAddress orderBillingAddress;
 
@@ -435,6 +440,19 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 		this.customer = customer;
 	}
 
+	@Override
+	public void setAccount(final Customer account) {
+		this.account = account;
+	}
+
+	@Override
+	@ManyToOne(targetEntity = CustomerImpl.class, cascade = { CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@JoinColumn(name = "ACCOUNT_CUSTOMER_UID")
+	@ForeignKey(name = "FK_ORDER_ACCOUNT")
+	public Customer getAccount() {
+		return this.account;
+	}
+
 	/**
 	 * Get the billing address corresponding to this order.
 	 *
@@ -616,7 +634,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 */
 	@Override
 	@OneToMany(targetEntity = OrderEventImpl.class, cascade = CascadeType.ALL)
-	@ElementJoinColumn(name = ORDER_UID, nullable = false, updatable = false)
+	@ElementJoinColumn(name = ORDER_UID)
 	@OrderBy
 	@ElementForeignKey
 	public Set<OrderEvent> getOrderEvents() {
@@ -642,6 +660,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 */
 	@Override
 	public void addOrderEvent(final OrderEvent orderEvent) {
+		orderEvent.setOrderUidPk(getUidPk());
 		getOrderEvents().add(orderEvent);
 	}
 
@@ -1691,4 +1710,11 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 		return Money.valueOf(amount, getCurrency());
 	}
 
+	@Transient
+	@Override
+	public boolean hasGiftCertificateShipment() {
+		return getElectronicShipments().stream()
+				.flatMap(eShipment -> eShipment.getShipmentOrderSkus().stream())
+				.anyMatch(OrderSku::isGiftCertificate);
+	}
 }

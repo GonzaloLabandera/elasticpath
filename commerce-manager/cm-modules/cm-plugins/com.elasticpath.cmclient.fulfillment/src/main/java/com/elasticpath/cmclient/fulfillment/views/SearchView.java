@@ -50,7 +50,9 @@ public class SearchView extends AbstractCmClientView implements SelectionListene
 
 	private static final Logger LOG = Logger.getLogger(SearchView.class);
 
-	private static final int TAB_CUSTOMERS = 1;
+	private static final int TAB_ACCOUNTS = 1;
+
+	private static final int TAB_CUSTOMERS = 2;
 
 	private static final int TAB_ORDERS = 0;
 
@@ -70,8 +72,10 @@ public class SearchView extends AbstractCmClientView implements SelectionListene
 	private final List<ISearchTab> tabs;
 
 	private OrderSearchTab orderSearchTab;
-	
+
 	private CustomerSearchTab customerSearchTab;
+
+	private AccountSearchTab accountSearchTab;
 
 	/** associate separate databinding context with each tab. **/
 	private final Map<ISearchTab, DataBindingContext> bindingContexts = new HashMap<>();
@@ -100,7 +104,10 @@ public class SearchView extends AbstractCmClientView implements SelectionListene
 		orderSearchTab = new OrderSearchTab(tabFolder, TAB_ORDERS); 
 		tabs.add(orderSearchTab);
 
-		customerSearchTab = new CustomerSearchTab(tabFolder, TAB_CUSTOMERS); 
+		accountSearchTab = new AccountSearchTab(tabFolder, TAB_ACCOUNTS);
+		tabs.add(accountSearchTab);
+
+		customerSearchTab = new CustomerSearchTab(tabFolder, TAB_CUSTOMERS);
 		tabs.add(customerSearchTab);
 
 		tabFolder.setSelection(TAB_ORDERS);

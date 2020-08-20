@@ -5,15 +5,15 @@ Feature: Scheduled data point value jobs
   Background:
     Given a customer with billing address of
       | guid    | lastName | firstName | street1       | street2       | city     | country | state    | zip | phone      | creationDate  | lastModifiedDate  |
-      | abc123  | Bird     | Big       | Sesame Street | Robson Street | New York | USA     | New York | zip | 5555555555 | 1 month ago   | 1 month ago       |
+      | abc123  | Bird     | Big       | Sesame Street | Robson Street | New York | US      | NY       | zip | 5555555555 | 1 month ago   | 1 month ago       |
 
     Given a customer with billing address of
       | guid    | lastName | firstName | street1       | street2       | city     | country | state    | zip | phone      | creationDate  | lastModifiedDate |
-      | abc345  | Smith    | John      | Sesame Street | Robson Street | New York | USA     | New York | zip | 5555555555 | 1 month ago   | 1 month ago      |
+      | abc345  | Smith    | John      | Sesame Street | Robson Street | New York | US      | NY       | zip | 5555555555 | 1 month ago   | 1 month ago      |
 
     Given a customer with billing address of
       | guid    | lastName | firstName | street1       | street2       | city     | country | state    | zip | phone      | creationDate  | lastModifiedDate |
-      | abc678  | Smith    | Steve     | Sesame Street | Robson Street | New York | USA     | New York | zip | 5555555555 | 3 days  ago   | 1 day ago        |
+      | abc678  | Smith    | Steve     | Sesame Street | Robson Street | New York | US      | NY       | zip | 5555555555 | 3 days  ago   | 1 day ago        |
 
   Scenario: Expired data point value job should remove
   billing address data point values when retention period has passed.

@@ -22,6 +22,7 @@ import com.elasticpath.commons.util.TestDomainMarshaller;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerGroup;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.importexport.builder.ImportConfigurationBuilder;
 import com.elasticpath.importexport.builder.ImportExportTestDirectoryBuilder;
@@ -97,19 +98,20 @@ public class ImportCustomerSteps {
 
 		final CustomerDTO customerDTO = new CustomerDTO();
 		customerDTO.setGuid(CustomerSteps.generateCustomerGuidFromName(customerFirstName, customerLastName));
-		customerDTO.setUserId(String.format("%s.%s@elasticpath.com", customerFirstName, customerLastName));
+		customerDTO.setSharedId(String.format("%s.%s@elasticpath.com", customerFirstName, customerLastName));
+		customerDTO.setUsername(String.format("%s.%s@elasticpath.com", customerFirstName, customerLastName));
 		customerDTO.setStoreCode(storeService.findAllStores().get(0).getCode());
 		customerDTO.setStatus(Customer.STATUS_ACTIVE);
 		customerDTO.setCreationDate(new Date());
 		customerDTO.setLastEditDate(new Date());
 		customerDTO.setPassword("password123");
+		customerDTO.setSalt("salt");
 
 		final Set<AttributeValueDTO> profileValueDTOs = new HashSet<>();
 		profileValueDTOs.add(createProfileValueDTO(AttributeType.SHORT_TEXT, CustomerImpl.ATT_KEY_CP_FIRST_NAME, customerFirstName));
 		profileValueDTOs.add(createProfileValueDTO(AttributeType.SHORT_TEXT, CustomerImpl.ATT_KEY_CP_LAST_NAME, customerLastName));
 		profileValueDTOs.add(createProfileValueDTO(AttributeType.SHORT_TEXT, CustomerImpl.ATT_KEY_CP_EMAIL,
 				String.format("%s.%s@elasticpath.com", customerFirstName, customerLastName)));
-		profileValueDTOs.add(createProfileValueDTO(AttributeType.BOOLEAN, CustomerImpl.ATT_KEY_CP_ANONYMOUS_CUST, Boolean.toString(false)));
 		customerDTO.setProfileValues(profileValueDTOs);
 
 		final List<String> customerGroupGuids = new ArrayList<>();
@@ -118,6 +120,7 @@ public class ImportCustomerSteps {
 			customerGroupGuids.add(customerGroup.getGuid());
 		}
 		customerDTO.setGroups(customerGroupGuids);
+		customerDTO.setCustomerType(CustomerType.REGISTERED_USER.getName());
 
 		customersDtoForImport.getCustomers().add(customerDTO);
 	}

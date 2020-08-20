@@ -30,7 +30,11 @@ public final class Operation implements Serializable {
 	private final String type;
 	private final String uri;
 	private final List<JPAQuery> jpaQueries = new LinkedList<>();
-	private final Map<String, Integer> totalDBCallsPerTable = new HashMap<>();
+	private final Map<String, Integer> totalDBQueriesPerTable = new HashMap<>();
+	private final Map<String, Integer> totalDBUpdatesPerTable = new HashMap<>();
+	private final Map<String, Integer> totalDBInsertsPerTable = new HashMap<>();
+	private final Map<String, Integer> totalDBDeletesPerTable = new HashMap<>();
+
 	private final Map<String, Integer> totalJPACallsPerEntity = new HashMap<>();
 	private String thread;
 	private transient Date startedAt;
@@ -76,8 +80,20 @@ public final class Operation implements Serializable {
 		return jpaQueries;
 	}
 
-	public Map<String, Integer> getTotalDBCallsPerTable() {
-		return totalDBCallsPerTable;
+	public Map<String, Integer> getTotalDBQueriesPerTable() {
+		return totalDBQueriesPerTable;
+	}
+
+	public Map<String, Integer> getTotalDBUpdatesPerTable() {
+		return totalDBUpdatesPerTable;
+	}
+
+	public Map<String, Integer> getTotalDBInsertsPerTable() {
+		return totalDBInsertsPerTable;
+	}
+
+	public Map<String, Integer> getTotalDBDeletesPerTable() {
+		return totalDBDeletesPerTable;
 	}
 
 	public Map<String, Integer> getTotalJPACallsPerEntity() {

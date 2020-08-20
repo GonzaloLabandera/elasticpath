@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:camel="http://camel.apache.org/schema/spring"
+	   xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<import resource="classpath:spring/dataaccess/importexport-dao.xml" />
+	<import resource="classpath:spring/service/importexport-service.xml" />
+	<import resource="classpath:spring/service/messages.xml" />
+	<import resource="classpath:spring/service/serviceEPQL.xml" />
+	<import resource="classpath:spring/importexport-assemblers.xml" />
+	<import resource="classpath:spring/importexport-adapters.xml" />
+	<import resource="classpath:spring/importexport-domain.xml" />
+
+	<camel:camelContext id="ep-importexport-api" xmlns="http://camel.apache.org/schema/spring"
+						threadNamePattern="Camel (#camelId#) thread ##counter#">
+		<routeBuilder ref="importExportEndpointRouteBuilder"/>
+		<routeBuilder ref="importRouteBuilder"/>
+		<routeBuilder ref="exportRouteBuilder"/>
+	</camel:camelContext>
+
+	<bean id="importExportEndpointRouteBuilder" class="com.elasticpath.importexport.api.routes.ImportExportEndpointRouteBuilder"/>
+
+	<bean id="summaryAggregationStrategy" class="com.elasticpath.importexport.api.aggregations.SummaryAggregationStrategy"/>
+
+	<bean id="importRouteBuilder" class="com.elasticpath.importexport.api.routes.ImportRouteBuilder">
+		<property name="summaryAggregationStrategy" ref="summaryAggregationStrategy"/>
+		<property name="summaryConverter" ref="summaryConverter"/>
+	</bean>
+
+	<bean id="importApiServiceChangeSetStage" class="com.elasticpath.importexport.api.services.impl.ImportAPIServiceImpl" init-method="initialize">
+		<property name="configurationLoader" ref="configurationLoader"/>
+		<property name="importStage" ref="importChangeSetStage"/>
+		<property name="metadataMap" ref="persistenceListenerMetadataMap"/>
+		<property name="metaDataMapPopulator" ref="metaDataMapPopulator"/>
+	</bean>
+
+	<bean id="importApiServiceProcessStage" class="com.elasticpath.importexport.api.services.impl.ImportAPIServiceImpl" init-method="initialize">
+		<property name="configurationLoader" ref="configurationLoader"/>
+		<property name="importStage" ref="importProcessStage"/>
+		<property name="metadataMap" ref="persistenceListenerMetadataMap"/>
+		<property name="metaDataMapPopulator" ref="metaDataMapPopulator"/>
+	</bean>
+
+	<bean id="exportRouteBuilder" class="com.elasticpath.importexport.api.routes.ExportRouteBuilder">
+		<constructor-arg name="apiService" ref="exportApiService"/>
+	</bean>
+
+	<bean id="exportApiService" class="com.elasticpath.importexport.api.services.impl.ExportAPIServiceImpl" init-method="initialize">
+		<property name="exporterFactory" ref="exporterFactory"/>
+		<property name="configurationLoader" ref="configurationLoader"/>
+	</bean>
+
+	<bean id="summaryConverter" class="com.elasticpath.importexport.api.converters.impl.SummaryConverterImpl">
+		<property name="messageResolver" ref="messageResolver"/>
+	</bean>
+
+	<import resource="classpath*:META-INF/conf/ep-importexport-api-plugin.xml" />
+
+</beans>

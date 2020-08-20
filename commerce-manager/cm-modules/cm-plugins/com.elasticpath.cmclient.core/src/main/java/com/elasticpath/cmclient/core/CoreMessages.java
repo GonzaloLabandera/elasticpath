@@ -98,7 +98,7 @@ public final class CoreMessages {
 	// ----------------------------------------------------
 	public String EpLoginDialog_Title;
 
-	public String EpLoginDialog_LoginUserId;
+	public String EpLoginDialog_LoginUsername;
 
 	public String EpLoginDialog_Password;
 
@@ -342,6 +342,12 @@ public final class CoreMessages {
 	public String AttributeType_Date;
 
 	public String AttributeType_DateTime;
+	
+	public String AttributeUsage_CustomerProfile;
+	
+	public String AttributeUsage_UserProfile;
+	
+	public String AttributeUsage_AccountProfile;
 
 	public String CalculationParameter_FixedPrice;
 
@@ -528,7 +534,7 @@ public final class CoreMessages {
 
 	public String UnlockDialog_WindowTitle;
 	public String UnlockDialog_Title;
-	public String UnlockDialog_UserId;
+	public String UnlockDialog_Username;
 	public String UnlockDialog_Password;
 	public String UnlockDialog_OkButton;
 	public String UnlockDialog_CancelButton;

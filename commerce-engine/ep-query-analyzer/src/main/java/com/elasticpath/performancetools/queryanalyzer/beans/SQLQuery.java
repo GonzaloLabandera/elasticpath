@@ -3,18 +3,14 @@
  */
 package com.elasticpath.performancetools.queryanalyzer.beans;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.elasticpath.performancetools.queryanalyzer.utils.Utils;
-
 /**
  * SQL query representation.
  */
-public final class SQLQuery implements Serializable {
+public final class SQLQuery extends DbStatement {
 	/**
 	 * Serial version.
 	 */
@@ -22,15 +18,13 @@ public final class SQLQuery implements Serializable {
 
 	private static final String JOIN_KEYWORD = "JOIN";
 
-	private final String query;
 	private final int numberOfJoins;
-	private long exeTimeMs;
 
 	/**
 	 * Default constructor.
 	 */
 	public SQLQuery() {
-		this.query = "";
+		super();
 		this.numberOfJoins = 0;
 	}
 
@@ -41,13 +35,8 @@ public final class SQLQuery implements Serializable {
 	 * @param exeTimeMs execution time in ms.
 	 */
 	public SQLQuery(final String query, final long exeTimeMs) {
-		this.query = Utils.removeTabAndCRChars(query);
-		this.exeTimeMs = exeTimeMs;
-		this.numberOfJoins = getNumberOfJoins(this.query);
-	}
-
-	public String getQuery() {
-		return query;
+		super(query, exeTimeMs);
+		this.numberOfJoins = getNumberOfJoins(query);
 	}
 
 	private int getNumberOfJoins(final String query) {
@@ -56,14 +45,6 @@ public final class SQLQuery implements Serializable {
 
 	public int getNumberOfJoins() {
 		return numberOfJoins;
-	}
-
-	public long getExeTimeMs() {
-		return exeTimeMs;
-	}
-
-	public void setExeTimeMs(final long exeTimeMs) {
-		this.exeTimeMs = exeTimeMs;
 	}
 
 	@Override

@@ -35,7 +35,7 @@ public class EpGiftCertificateQueryParserTest { // NOPMD
 		giftCertificateConf.initialize();
 		
 		Map<EPQueryType, AbstractEpQLCustomConfiguration> epQLObjectConfiguration = new HashMap<>();
-		epQLObjectConfiguration.put(EPQueryType.GIFT_CERTIFICATE, giftCertificateConf);
+		epQLObjectConfiguration.put(EPQueryType.GIFTCERTIFICATE, giftCertificateConf);
 		
 		EpQueryAssembler epQueryAssembler = new EpQueryAssembler();
 		epQueryAssembler.setEpQLObjectConfiguration(epQLObjectConfiguration);

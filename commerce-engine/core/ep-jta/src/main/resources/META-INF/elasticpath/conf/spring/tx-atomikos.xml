@@ -22,7 +22,19 @@
 	</bean>
 
 	<bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp" depends-on="atomikosUserTransactionService">
-		<property name="transactionTimeout" value="300"/>
+		<!-- This property defines the programmatic transaction timeout.  This timeout is used when calling JpaSessionImpl.beginTransaction().
+		     To override at the timeout at runtime, provide the system property "ep.atomikos.programmatic.transaction.timeout.seconds".  The value
+		     is the number of seconds for the timeout.  For example, "-Dep.atomikos.programmatic.transaction.timeout.seconds=600"
+
+		     NOTES:
+		     1. This timeout value is not used for the implicit spring transactions.  That timeout is configured via the
+		     "com.atomikos.icatch.default_jta_timeout" in transactions.properties.
+
+		     2. If you change this value, you will likely need to override the setting com.atomikos.icatch.max_timeout to allow for an
+		        extended timeout.  This timeout can be provided in a jta.properties file or via a system property.
+
+		 -->
+		<property name="transactionTimeout" value="${ep.atomikos.programmatic.transaction.timeout.seconds:300}"/>
 	</bean>
 
 	<bean id="atomikosJdbcDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"

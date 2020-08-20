@@ -1,10 +1,10 @@
 package com.elasticpath.test.integration.shoppingcart.validation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Currency;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,9 +19,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.impl.ShopperImpl;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -155,8 +153,6 @@ public class AddOrUpdateShoppingItemDtoToCartValidationServiceImplTest extends B
 		TagSet tagSet = new TagSet();
 		tagSet.addTag("SHOPPING_START_TIME", new Tag(System.currentTimeMillis()));
 		customerSession.setCustomerTagSet(tagSet);
-		CustomerSessionMemento customerSessionMemento = new CustomerSessionMementoImpl();
-		customerSession.setCustomerSessionMemento(customerSessionMemento);
 		customerSession.setCurrency(Currency.getInstance("USD"));
 		shopper.updateTransientDataWith(customerSession);
 		context.setShopper(shopper);

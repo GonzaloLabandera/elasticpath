@@ -80,7 +80,7 @@
 			<property name="productSkuAdapter">
 				<ref bean="productSkuAdapter"/>
 			</property>
-			<property name="productSkuLookup" ref="productSkuLookup"/>
+			<property name="productSkuLookup" ref="cachingProductSkuLookup"/>
 			<property name="timeService" ref="timeService"/>
 	</bean>
 	
@@ -318,7 +318,6 @@
 		<property name="assembler" ref="sortAttributeDtoAssembler"/>
 	</bean>
 
-
 	<bean id="storeAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
 		parent="abstractDomainAdapter">
 		<property name="assembler" ref="storeDtoAssembler" />
@@ -332,7 +331,7 @@
 	<bean id="customerAdapter" class="com.elasticpath.importexport.common.adapters.customer.CustomerAdapter"
 		parent="abstractDomainAdapter">
 		<property name="assembler" ref="customerDtoAssembler" />
-		<property name="validator" ref="validator" />
+		<property name="customerConstraintValidationService" ref="customerConstraintValidationService" />
 		<property name="summariser" ref="customerConstraintViolationsSummariser" />
 	</bean>
 
@@ -490,6 +489,11 @@
 
 	<bean id="modifierFieldOptionAdapter" class="com.elasticpath.importexport.common.adapters.modifier.ModifierFieldOptionAdapter"
 		  parent="abstractDomainAdapter">
+	</bean>
+
+	<bean id="userAccountAssociationAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="assembler" ref="userAccountAssociationDtoAssembler" />
 	</bean>
 
 </beans>

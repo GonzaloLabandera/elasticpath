@@ -33,7 +33,7 @@ public class UserRoleExporter extends AbstractExporterImpl<UserRole, UserRoleDTO
 	
 	@Override
 	public JobType getJobType() {
-		return JobType.USER_ROLE;
+		return JobType.USERROLE;
 	}
 
 	@Override

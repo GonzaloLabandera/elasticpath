@@ -6,6 +6,8 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.order.re
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
 import io.reactivex.Observable;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +20,8 @@ import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.rest.definition.orders.OrderEntity;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.identity.Subject;
+import com.elasticpath.rest.identity.attribute.AccountSharedIdSubjectAttribute;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
@@ -29,6 +33,7 @@ public class OrderEntityRepositoryImplTest {
 	private static final String SCOPE = "some store";
 	private static final String USER_ID = "user id";
 	private static final String CART_GUID = "cart guid";
+	private static final String ACCOUNT_SHARED_ID = "account shared id";
 
 	@Mock
 	private ShoppingCartRepository shoppingCartRepository;
@@ -52,10 +57,13 @@ public class OrderEntityRepositoryImplTest {
 	public void findOrdersForStore() {
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_ID);
 
+
 		CartOrder cartOrder = mock(CartOrder.class);
 		when(cartOrder.getGuid()).thenReturn(CART_GUID);
-
-		when(shoppingCartRepository.findAllCarts(USER_ID, SCOPE)).thenReturn(Observable.just(CART_GUID));
+		Subject subject = mock(Subject.class);
+		when(subject.getAttributes()).thenReturn(Collections.singletonList(new AccountSharedIdSubjectAttribute("key", ACCOUNT_SHARED_ID)));
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+		when(shoppingCartRepository.findAllCarts(USER_ID, ACCOUNT_SHARED_ID, SCOPE)).thenReturn(Observable.just(CART_GUID));
 		when(cartOrderService.findByShoppingCartGuid(CART_GUID)).thenReturn(cartOrder);
 
 		repository.findAll(StringIdentifier.of(SCOPE))

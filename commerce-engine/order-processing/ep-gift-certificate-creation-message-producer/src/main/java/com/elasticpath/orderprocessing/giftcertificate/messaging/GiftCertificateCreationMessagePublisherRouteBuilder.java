@@ -7,23 +7,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.Endpoint;
+import org.apache.camel.ExchangeProperty;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.language.Simple;
 import org.apache.camel.spi.DataFormat;
+import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.core.messaging.giftcertificate.GiftCertificateEventType;
 import com.elasticpath.domain.catalog.GiftCertificate;
+import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
-import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePredicate;
 import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.factory.EventMessageFactory;
+import com.elasticpath.money.Money;
 import com.elasticpath.service.order.OrderService;
 
 /**
- * Route that responds to an {@code ORDER_SHIPMENT_CREATED} event message and creates a {@code GIFT_CERTIFICATE_CREATED} message per Gift Certificate.
+ * Route that responds to an {@code ORDER_CREATED} or {@code RESEND_CONFIRMATION} event message and creates
+ * a {@code GIFT_CERTIFICATE_CREATED} message per Gift Certificate.
  */
 public class GiftCertificateCreationMessagePublisherRouteBuilder extends RouteBuilder {
 
@@ -52,46 +56,31 @@ public class GiftCertificateCreationMessagePublisherRouteBuilder extends RouteBu
 
 			.unmarshal(getEventMessageDataFormat())
 
-			.filter().method(getEventMessagePredicateFilter())
-				.log(LoggingLevel.DEBUG, getClass().getName(), "Preparing GIFT_CERTIFICATE_CREATED event messages for Order Shipment [${body.guid}]")
+				.filter().method(getEventMessagePredicateFilter())
+					.log(LoggingLevel.DEBUG, getClass().getName(), "Find order by order number [${body.guid}]")
+					.setProperty("emailAddress").simple("${body.data['emailAddress']}")
 
-				.bean(getOrderShipmentRetriever())
+					//fetch the order
+					.bean(getOrderService(), "findOrderByOrderNumber(${body.guid})")
 
-				.split().simple("${body.shipmentOrderSkus}")
-					.filter().simple("${body.getFieldValue('" + GiftCertificate.KEY_GUID + "')} != null")
+					//split electronic shipments
+					.split().simple("${body.electronicShipments}")
+						.log(LoggingLevel.DEBUG, getClass().getName(),
+								"Preparing GIFT_CERTIFICATE_CREATED event message for Shipment [${body.shipmentNumber}]")
 
-						.bean(getGiftCertificateCreatedEventMessageFactory(), "createEventMessage")
-						.log(LoggingLevel.DEBUG, getClass().getName(), "Publishing GIFT_CERTIFICATE_CREATED event message ${body}")
-						.bean(getEventMessagePublisher());
+						//for each e-shipment, get shipment order SKUs and split them
+						.split().simple("${body.shipmentOrderSkus}")
+							.log(LoggingLevel.DEBUG, getClass().getName(), "Shipment Order Sku ${body}")
+
+							//for each order sku, check if it's GC
+							.filter().simple("${body.isGiftCertificate()}")
+								//if yes, prepare GIFT_CERTIFICATE_CREATED message
+								.bean(getGiftCertificateCreatedEventMessageFactory(), "createEventMessage")
+								.log(LoggingLevel.DEBUG, getClass().getName(), "Publishing GIFT_CERTIFICATE_CREATED event message ${body}")
+								//and publish it
+								.bean(getEventMessagePublisher());
 	}
 
-	/**
-	 * Factory method that returns a new {@link OrderShipmentRetriever} instance.
-	 *
-	 * @return a new {@link OrderShipmentRetriever} instance.
-	 */
-	protected Object getOrderShipmentRetriever() {
-		return new OrderShipmentRetriever();
-	}
-
-	/**
-	 * Retrieves Order Shipments by Shipment Number and Shipment Type.
-	 */
-	protected class OrderShipmentRetriever {
-
-		/**
-		 * Retrieves an Order Shipment by Shipment Number and Shipment Type.
-		 * 
-		 * @param shipmentNumber the shipment number
-		 * @param shipmentType the shipment type
-		 * @return an Order Shipment
-		 */
-		public OrderShipment findOrderShipment(
-				@Simple("${body.guid}") final String shipmentNumber,
-				@Simple("${body.data[shipmentType]}") final String shipmentType) {
-			return getOrderService().findOrderShipment(shipmentNumber, ShipmentType.valueOf(shipmentType));
-		}
-	}
 
 	/**
 	 * Factory method that returns a new GiftCertificateCreatedEventMessageFactory instance.
@@ -108,25 +97,37 @@ public class GiftCertificateCreationMessagePublisherRouteBuilder extends RouteBu
 	protected class GiftCertificateCreatedEventMessageFactory {
 		/**
 		 * Creates a new Event Message with event type {@link GiftCertificateEventType#GIFT_CERTIFICATE_CREATED}.
-		 *
-		 * @param giftCertificateGuid the Gift Certificate GUID
-		 * @param orderGuid the Order guid
-		 * @param shipmentNumber the shipment number
-		 * @param shipmentType the shipment type
-		 * @param orderSkuGuid the Order SKU GUID
+		 * @param emailAddress the email address
+		 * @param orderShipment the order shipment
+		 * @param orderSkuGuid the order sku guid
+		 * @param orderSkuTotal the order sku total
+		 * @param gcFields the order sku fields
 		 * @return a new {@link com.elasticpath.messaging.EventMessage}
 		 */
 		public EventMessage createEventMessage(
-				@Simple("${body.getFieldValue('" + GiftCertificate.KEY_GUID + "')}") final String giftCertificateGuid,
-				@Simple("${body.shipment.order.guid}") final String orderGuid,
-				@Simple("${body.shipment.shipmentNumber}") final String shipmentNumber,
-				@Simple("${body.shipment.orderShipmentType}") final ShipmentType shipmentType,
-				@Simple("${body.guid}") final String orderSkuGuid) {
-			final Map<String, Object> data = new HashMap<>(4);
-			data.put("orderGuid", orderGuid);
-			data.put("shipmentNumber", shipmentNumber);
-			data.put("shipmentType", shipmentType.toString());
+				@ExchangeProperty("emailAddress") final String emailAddress,
+				@Simple("${body.shipment}") final OrderShipment orderShipment,
+				@Simple("${body.guid}") final String orderSkuGuid,
+				@Simple("${body.total}") final Money orderSkuTotal,
+				@Simple("${body.fields}") final Map<String, Object> gcFields) {
+
+			Order order = orderShipment.getOrder();
+
+			final Map<String, Object> data = new HashMap<>(8);
+			data.put("orderLocale", order.getLocale());
+			data.put("orderStoreCode", order.getStoreCode());
+			data.put("shipmentNumber", orderShipment.getShipmentNumber());
+			data.put("shipmentType", orderShipment.getOrderShipmentType().toString());
 			data.put("orderSkuGuid", orderSkuGuid);
+			data.put("orderSkuTotalAmount", orderSkuTotal.getAmount().toString());
+			data.put("orderSkuTotalCurrency", orderSkuTotal.getCurrency());
+			data.put("gcFields", gcFields);
+
+			if (StringUtils.isNotBlank(emailAddress)) {
+				data.put("emailAddress", emailAddress);
+			}
+
+			String giftCertificateGuid = (String) gcFields.get(GiftCertificate.KEY_GUID);
 
 			return getEventMessageFactory().createEventMessage(GiftCertificateEventType.GIFT_CERTIFICATE_CREATED, giftCertificateGuid, data);
 		}

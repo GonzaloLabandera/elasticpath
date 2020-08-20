@@ -29,7 +29,9 @@ public class OrderEventType extends AbstractExtensibleEnum<OrderEventType> imple
 
 	/**
 	 * Signals that an order shipment has been created.
+	 * @deprecated Preserved for compatibility reasons.
 	 */
+	@Deprecated
 	public static final OrderEventType ORDER_SHIPMENT_CREATED = new OrderEventType(ORDER_SHIPMENT_CREATED_ORDINAL, "ORDER_SHIPMENT_CREATED");
 
 	/** Ordinal constant for ORDER_SHIPMENT_SHIPPED. */

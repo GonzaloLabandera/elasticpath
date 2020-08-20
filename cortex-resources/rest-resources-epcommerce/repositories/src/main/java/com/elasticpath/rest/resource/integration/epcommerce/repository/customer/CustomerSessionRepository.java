@@ -46,13 +46,45 @@ public interface CustomerSessionRepository {
 	Single<CustomerSession> findCustomerSessionByGuidAsSingle(String customerGuid);
 
 	/**
+	 * Creates a customer session for a given customer and account.
+	 *
+	 * @param customerGuid the customer guid.
+	 * @param accountSharedId the account shared Id.
+	 * @return a customer session.
+	 */
+	Single<CustomerSession> findCustomerSessionByGuidAndAccountSharedIdAsSingle(String customerGuid, String accountSharedId);
+
+	/**
 	 * Creates a customer session for a given customer.
 	 *
 	 * @param storeCode      the storeCode.
 	 * @param customerUserId the customer guid.
 	 * @return a customer session.
 	 */
-	ExecutionResult<CustomerSession> findCustomerSessionByUserId(String storeCode, String customerUserId);
+	ExecutionResult<CustomerSession> findCustomerSessionBySharedId(String storeCode, String customerUserId);
+
+	/**
+	 * Creates a customer session for a given customer and account.
+	 *
+	 * @param customerGuid the customer guid.
+	 * @param accountSharedId the account shared ID.
+	 * @param storeCode the storeCode.
+	 * @return a customer session.
+	 */
+	ExecutionResult<CustomerSession> findCustomerSessionByCustomerGuidAndAccountSharedId(
+			String customerGuid,
+			String accountSharedId,
+			String storeCode);
+
+	/**
+	 * Creates a customer session for a given customer and account.
+	 *
+	 * @param customerSharedId the customer shared ID.
+	 * @param accountSharedId  the account shared ID.
+	 * @param storeCode  the storeCode.
+	 * @return a customer session.
+	 */
+	ExecutionResult<CustomerSession> findCustomerSessionByUserIdAndAccountSharedId(String customerSharedId, String accountSharedId, String storeCode);
 
 	/**
 	 * Triggers invalidation of CustomerSession instance associated with given customer guid.

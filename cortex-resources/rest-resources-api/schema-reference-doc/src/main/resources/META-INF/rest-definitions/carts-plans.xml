@@ -75,7 +75,11 @@ shopper's cart I.D. See the main Cortex documentation for more information on *d
 
 		<plan>
 			<name>add-item-to-default-cart</name>
-			<description><![CDATA[Add an item to the user's default cart.]]></description>
+			<description><![CDATA[Add an item to the user's default cart. The add to cart form may have some blocking advisors.
+The add to cart form can contain message IDs, such as `item.missing.price`, `item.insufficient.inventory`, or `item.not.in.store.catalog`.
+For more information, see [Structured Messages](../frontend-dev/api/structured-messages.md#business-state-errors) and [Advisors](../frontend-dev/api/advisors.md).
+]]>
+			</description>
 			<step>
 				<description><![CDATA[Item to add-to-cart form]]></description>
 				<start>items.item</start>
@@ -94,7 +98,11 @@ shopper's cart I.D. See the main Cortex documentation for more information on *d
 
 		<plan>
 			<name>add-item-to-specific-cart</name>
-			<description><![CDATA[Add an item to one of the user's carts]]></description>
+			<description><![CDATA[Add an item to one of the user's carts. The add item to specific cart form may have some blocking advisors.
+The add to cart form can contain message IDs, such as `item.missing.price`, `item.insufficient.inventory`, or `item.not.in.store.catalog`.
+For more information, see [Structured Messages](../frontend-dev/api/structured-messages.md#business-state-errors) and [Advisors](../frontend-dev/api/advisors.md).
+]]>
+			</description>
 			<step>
 				<description><![CDATA[Item to list of add-to-cart forms ]]></description>
 				<start>items.item</start>
@@ -120,7 +128,9 @@ shopper's cart I.D. See the main Cortex documentation for more information on *d
 		<plan>
 			<name>read-add-items-to-cart-form</name>
 			<description>
-				<![CDATA[Retrieve the add items to cart form on the cart.]]>
+				<![CDATA[Retrieve the add items to cart form on the cart. This form has a warning message when the cart already has items in it.
+For more information, see `cart.is.not.empty` in the [Structured Messages](../frontend-dev/api/structured-messages.md#warning-messages) topic.
+]]>
 			</description>
 			<step>
 				<description><![CDATA[Retrieve the cart with cart-id default.]]></description>

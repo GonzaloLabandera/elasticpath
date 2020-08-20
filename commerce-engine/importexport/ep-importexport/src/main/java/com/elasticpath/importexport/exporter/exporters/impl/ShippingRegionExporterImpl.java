@@ -69,7 +69,7 @@ public class ShippingRegionExporterImpl extends AbstractExporterImpl<ShippingReg
 		shippingRegionGuids.addAll(
 				getImportExportSearcher().searchGuids(
 						getContext().getSearchConfiguration(),
-						EPQueryType.SHIPPING_REGION));
+						EPQueryType.SHIPPINGREGION));
 		
 		LOG.info("Shipping Region Export \n\t" + shippingRegionGuids.size()
 				+ " Shipping Region GUIDs found for export [" + shippingRegionGuids + "]");
@@ -103,7 +103,7 @@ public class ShippingRegionExporterImpl extends AbstractExporterImpl<ShippingReg
 
 	@Override
 	public JobType getJobType() {
-		return JobType.SHIPPING_REGION;
+		return JobType.SHIPPINGREGION;
 	}
 
 

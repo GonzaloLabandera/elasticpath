@@ -13,11 +13,14 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.spi.DataFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.log4j.Logger;
 
 /**
  * Configures a route to send email messages corresponding to {@link com.elasticpath.email.EmailDto EmailDto} instances.
  */
 public class EmailSendingRouteBuilder extends RouteBuilder {
+
+	private static final Logger LOGGER = Logger.getLogger(EmailSendingRouteBuilder.class);
 
 	private Endpoint incomingEndpoint;
 	private DataFormat emailDataFormat;
@@ -40,7 +43,7 @@ public class EmailSendingRouteBuilder extends RouteBuilder {
 				.redeliveryPolicyRef(getRedeliveryPolicyRef())
 				.handled(true)
 				.useOriginalMessage()
-				.log(LoggingLevel.ERROR, getClass().getName(), "Unable to deliver email. Error ${exception}")
+				.to("log:root?level=ERROR&showAll=true&maxChars=100000")
 				.to(getDeadLetterEndpoint());
 
 		errorHandler(getErrorHandlerBuilder());
@@ -102,6 +105,13 @@ public class EmailSendingRouteBuilder extends RouteBuilder {
 	 * @throws URISyntaxException if mail configurations can not be parsed as a valid endpoint URI
 	 */
 	protected Endpoint getOutgoingEndpoint() throws URISyntaxException {
+		//bypass sending emails to real SMTP server - useful and desired for testing
+		if ("mail-disabled-for-tests".equals(getMailHost())) {
+			LOGGER.warn("The SMTP server is disabled. All emails will be sent to the Camel LOG - ignore this if you are intentionally running tests "
+					+ "with mail sending disabled");
+			return getContext().getEndpoint(postRouteEndpoint);
+		}
+
 		URIBuilder builder = new URIBuilder()
 				.setScheme(getSmtpScheme())
 				.setHost(getMailHost())

@@ -47,7 +47,7 @@ public class QueryBuilder extends DBConnector {
 		}
 		query = "SELECT t." + tableKeyColumn + " FROM " + table + " t";
 		if ("attribute".equals(type)) {
-			query = query + " WHERE t.ATTRIBUTE_USAGE != '4'";
+			query = query + " WHERE t.ATTRIBUTE_USAGE NOT IN ('4', '5')";
 		}
 		try {
 			result = executeQuery(query);

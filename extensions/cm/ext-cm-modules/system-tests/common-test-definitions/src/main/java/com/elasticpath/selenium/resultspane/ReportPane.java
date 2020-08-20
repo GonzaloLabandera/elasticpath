@@ -22,7 +22,7 @@ public class ReportPane extends AbstractPageObject {
 	private int numberOfOrders;
 	private static final int PROMO_ORDER_COLUMN_NUMBER = 2;
 	private static final int ORDER_STATUS_TOTAL_COLUMN_NUMBER = 2;
-	private static final String USERID_TEXT = "User ID: ";
+	private static final String SHAREDID_TEXT = "Shared ID: ";
 
 	/**
 	 * Constructor.
@@ -194,16 +194,16 @@ public class ReportPane extends AbstractPageObject {
 	}
 
 	/**
-	 * Verifies the user id Customer Data report.
+	 * Verifies the shared id Customer Data report.
 	 *
-	 * @param userId customer data report.
+	 * @param sharedId customer shared ID
 	 */
-	public void verifyReportUserId(final String userId) {
-		String userIDValue = USERID_TEXT + userId;
-		Element row = getRowByColumnPartialValue(userId, 1);
+	public void verifyReportSharedId(final String sharedId) {
+		String sharedIdValue = SHAREDID_TEXT + sharedId;
+		Element row = getRowByColumnPartialValue(sharedId, 1);
 		assertThat(row.select("td").get(0).text().replace("\u00a0", ""))
-				.as("User Id in Customer Data Report is not as expected ")
-				.isEqualTo(userIDValue);
+				.as("Shared Id in Customer Data Report is not as expected ")
+				.isEqualTo(sharedIdValue);
 	}
 
 	/**

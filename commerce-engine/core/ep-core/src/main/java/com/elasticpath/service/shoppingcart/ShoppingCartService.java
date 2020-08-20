@@ -99,38 +99,23 @@ public interface ShoppingCartService extends EpPersistenceService {
 	void touch(String shoppingCartGuid) throws EpServiceException;
 
 	/**
-	 * Deletes all empty shopping carts that are associated with the provided list of {@link Shopper} uids.
-	 * @param shopperUids the shopping context uids.
-	 * @return the number of deleted shopping carts
-	 */
-	int deleteDefaultEmptyShoppingCartsByShopperUids(List<Long> shopperUids);
-
-	/**
-	 * Deletes all shopping carts that are associated with the list of {@link Shopper} uids.
+	 * Deletes all shopping carts that are associated with the {@link Shopper} uid.
 	 * Even the ones that are not empty.
 	 * 
-	 * @param shopperUids the shopping context uids.
+	 * @param shopperUid the shopper id.
 	 * @return the number of deleted shopping carts
 	 */
-	int deleteAllShoppingCartsByShopperUids(List<Long> shopperUids);
+	int deleteAllShoppingCartsByShopperUid(Long shopperUid);
 
 	/**
 	 * Returns a list of ShoppingCart GUIDs for the given Customer GUID and Store Code.
 	 *
-	 * @param customerGuid The Customer GUID.
-	 * @param storeCode The Store Code.
+	 * @param customerGuid the customer GUID
+	 * @param accountSharedId the account shared ID, or null if it is not specified
+	 * @param storeCode the store code
 	 * @return The list of ShoppingCart GUIDS or an empty list if there are none.
 	 */
-	List<String> findByCustomerAndStore(String customerGuid, String storeCode);
-
-	/**
-	 * Deletes all inactive shopping carts that are associated with the list of {@link Shopper} uids.
-	 * Even the ones that are not empty.
-	 *
-	 * @param shopperUids the shopping context uids.
-	 * @return the number of deleted shopping carts
-	 */
-	int deleteAllInactiveShoppingCartsByShopperUids(List<Long> shopperUids);
+	List<String> findByCustomerAndStore(String customerGuid, String accountSharedId, String storeCode);
 
 	/**
 	 * Deletes shopping carts given their GUIDs.

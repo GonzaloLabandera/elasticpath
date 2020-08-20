@@ -20,8 +20,8 @@ import com.elasticpath.selenium.domainobjects.containers.CategoryContainer;
 import com.elasticpath.selenium.domainobjects.containers.ProductContainer;
 import com.elasticpath.selenium.editor.CategoryEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.CategoryTypesTab;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.CatalogManagement;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.CreateCategoryWizard;
@@ -47,6 +47,7 @@ public class CategoryTypesTabDefinition {
 	private final ProductContainer productContainer;
 	private SelectAFeaturedProductDialog selectAFeaturedProductDialog;
 	private final AttributeContainer attributeContainer;
+	private final WebDriver driver;
 
 	public CategoryType getCategoryType() {
 		return categoryType;
@@ -66,7 +67,7 @@ public class CategoryTypesTabDefinition {
 									  final CategoryContainer categoryContainer, final ProductContainer productContainer,
 									  final AttributeContainer attributeContainer) {
 		this.productContainer = productContainer;
-		final WebDriver driver = SetUp.getDriver();
+		driver = SeleniumDriverSetup.getDriver();
 		this.categoryTypesTab = new CategoryTypesTab(driver);
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		catalogManagement = new CatalogManagement(driver);
@@ -337,7 +338,7 @@ public class CategoryTypesTabDefinition {
 		categoryTypesTab.selectTab("CategoryTypes");
 		categoryTypesTab.selectCategoryType(this.categoryType.getCategoryTypeName());
 		categoryTypesTab.clickRemoveCategoryTypeButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogCategoryTypesSection_RemoveDialog");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CatalogCategoryTypesSection_RemoveDialog");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}

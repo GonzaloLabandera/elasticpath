@@ -124,7 +124,7 @@ public class ImportCustomerGroupSteps {
 		final ImportConfiguration importConfiguration =
 				ImportConfigurationBuilder.newInstance()
 					.setRetrievalSource(importDirectory.getPath())
-					.addImporterConfiguration(JobType.CUSTOMER_GROUP, ImportStrategyType.INSERT_OR_UPDATE)
+					.addImporterConfiguration(JobType.CUSTOMERGROUP, ImportStrategyType.INSERT_OR_UPDATE)
 					.build();
 
 		importController.loadConfiguration(importConfiguration);

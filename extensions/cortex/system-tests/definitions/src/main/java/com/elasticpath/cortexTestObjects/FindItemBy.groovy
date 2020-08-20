@@ -3,6 +3,8 @@ package com.elasticpath.cortexTestObjects
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
 import static org.assertj.core.api.Assertions.assertThat
 
+import org.junit.Assert
+
 import com.elasticpath.cortex.dce.CommonMethods
 
 /**
@@ -138,15 +140,33 @@ class FindItemBy extends CommonMethods {
 				.searches()
 				.keywordsearchform()
 				.itemkeywordsearchaction(
-				['keywords' : keyword,
-				 'page-size': pageSize]
-		)
+						['keywords' : keyword,
+						 'page-size': pageSize]
+				)
 				.follow()
 				.stopIfFailure()
 	}
 
 	static lookup(def skuCode) {
-		lookupWithoutFollow(skuCode)
+		client.GET("/")
+				.lookups()
+				.itemlookupform()
+				.itemlookupaction([code: skuCode])
+
+		def responseCode = client.response.status
+		if (responseCode > 308) {
+			if (null != client.failureCause) {
+				println("failureCause: " + client.failureCause)
+			}
+
+			def str = ""
+			if (null != client.response.responseData && null != client.response.responseData.str) {
+				str = client.response.responseData.str
+			}
+
+			Assert.fail("expecting lookup response code not greater than 308 but was '" + responseCode + "' - " + str)
+		}
+
 		client.follow()
 				.stopIfFailure()
 	}

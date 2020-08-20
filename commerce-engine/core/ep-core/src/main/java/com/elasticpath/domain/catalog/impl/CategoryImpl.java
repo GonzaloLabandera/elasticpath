@@ -172,23 +172,35 @@ public class CategoryImpl extends AbstractCategoryImpl {
 		this.endDate = endDate;
 	}
 
+
 	/**
-	 * Returns <code>true</code> if the category is available to be displayed.
+	 * Return availability when combining the hidden attribute and enabled period of this <code>Category</code>.
+	 *
+	 * @param currentDate the date to check against availability period
+	 * @return <code>true</code> if the category is available.
+	 */
+	@Override
+	public boolean isAvailable(final Date currentDate) {
+		if (isHidden()) {
+			return false;
+		}
+		if (getStartDate() != null && currentDate.getTime() < getStartDate().getTime()) {
+			return false;
+		} else if (getEndDate() != null && currentDate.getTime() > getEndDate().getTime()) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Returns <code>true</code> if the category is available.
 	 *
 	 * @return <code>true</code> if the category is available.
 	 */
 	@Override
 	@Transient
 	public boolean isAvailable() {
-		final Date currentDate = new Date();
-		if (this.getStartDate() == null || currentDate.getTime() < this.getStartDate().getTime()) {
-			return false;
-		} else if (this.getEndDate() != null && currentDate.getTime() > this.getEndDate().getTime()) {
-			return false;
-		} else if (isHidden()) {
-			return false;
-		}
-		return true;
+		return isAvailable(new Date());
 	}
 
 	/**

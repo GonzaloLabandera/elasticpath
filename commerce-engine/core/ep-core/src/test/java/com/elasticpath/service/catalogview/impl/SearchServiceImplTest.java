@@ -52,7 +52,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.catalog.CategoryService;
-import com.elasticpath.service.catalogview.PaginationService;
 import com.elasticpath.service.catalogview.SearchCriteriaFactory;
 import com.elasticpath.service.catalogview.SfSearchLogService;
 import com.elasticpath.service.catalogview.StoreConfig;
@@ -108,8 +107,6 @@ public class SearchServiceImplTest {
 
 	private IndexSearchResult mockIndexSearchResult;
 
-	private PaginationService mockPaginationService;
-
 	private SettingValueProvider<Boolean> searchCategoriesSettingProvider;
 	private SettingValueProvider<Integer> featuredProductCountSettingValueProvider;
 	private SettingValueProvider<Boolean> attributeFilterEnabledSettingValueProvider;
@@ -164,7 +161,6 @@ public class SearchServiceImplTest {
 		mockCategoryService = context.mock(CategoryService.class);
 		mockSfSearchLogService = context.mock(SfSearchLogService.class);
 		mockTimeService = context.mock(TimeService.class);
-		mockPaginationService = context.mock(PaginationService.class);
 		mockCustomerSession = context.mock(CustomerSession.class);
 		mockPriceListStack = context.mock(PriceListStack.class);
 		mockSearchCriteriaFactory = context.mock(SearchCriteriaFactory.class);
@@ -188,20 +184,12 @@ public class SearchServiceImplTest {
 		searchServiceImpl.setCategoryService(mockCategoryService);
 		searchServiceImpl.setSfSearchLogService(mockSfSearchLogService);
 		searchServiceImpl.setTimeService(mockTimeService);
-		searchServiceImpl.setPaginationService(mockPaginationService);
 		searchServiceImpl.setIndexUtility(new IndexUtilityImpl());
 		searchServiceImpl.setStoreConfig(mockStoreConfig);
 		searchServiceImpl.setSearchCategoriesFirstSettingProvider(searchCategoriesSettingProvider);
 		searchServiceImpl.setSearchCriteriaFactory(mockSearchCriteriaFactory);
 		searchServiceImpl.setAttributeFilterEnabledSettingValueProvider(attributeFilterEnabledSettingValueProvider);
 		searchServiceImpl.setFeaturedProductCountSettingValueProvider(featuredProductCountSettingValueProvider);
-		context.checking(new Expectations() {
-			{
-
-				allowing(mockPaginationService).getNumberOfItemsPerPage(STORE_CODE);
-				will(returnValue(NUM_OF_ITEMS_PER_PAGE));
-			}
-		});
 	}
 
 	@After
@@ -404,7 +392,7 @@ public class SearchServiceImplTest {
 		});
 		// Do the first search.
 		final SearchResult searchResult = this.searchServiceImpl.search(searchRequest, null,
-				mockShoppingCart, 0);
+				mockShoppingCart, 0, NUM_OF_ITEMS_PER_PAGE);
 		assertNotNull(searchResult);
 		assertEquals(products, searchResult.getProducts());
 	}
@@ -493,7 +481,7 @@ public class SearchServiceImplTest {
 			}
 		});
 
-		SearchResult searchResult = searchServiceImpl.search(searchRequest, mockSearchResultHistory, mockShoppingCart, 0);
+		SearchResult searchResult = searchServiceImpl.search(searchRequest, mockSearchResultHistory, mockShoppingCart, 0, NUM_OF_ITEMS_PER_PAGE);
 		assertNotNull(searchResult);
 		assertNotNull(searchResult.getProducts());
 		assertSame(dummySearchResult, searchResult);

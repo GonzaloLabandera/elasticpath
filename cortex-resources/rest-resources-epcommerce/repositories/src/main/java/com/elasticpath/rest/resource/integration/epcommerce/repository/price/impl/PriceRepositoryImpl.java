@@ -3,8 +3,12 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.price.impl;
 
+import static io.reactivex.Single.error;
+
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.inject.Inject;
@@ -14,6 +18,7 @@ import javax.inject.Singleton;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.BiFunction;
@@ -29,12 +34,16 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
+import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.ShopperReference;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
 import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.definition.prices.OfferPriceRangeEntity;
 import com.elasticpath.rest.definition.prices.PriceRangeEntity;
@@ -45,6 +54,8 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.Produ
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTransformer;
+import com.elasticpath.service.catalogview.StoreProductService;
+import com.elasticpath.service.store.StoreService;
 
 /**
  * Repository that consolidates access to price domain concepts.
@@ -73,6 +84,9 @@ public class PriceRepositoryImpl implements PriceRepository {
 	private final StoreProductRepository storeProductRepository;
 	private final MoneyTransformer moneyTransformer;
 	private final BeanFactory coreBeanFactory;
+	private final StoreService storeService;
+
+	private final StoreProductService storeProductService;
 
 	private static final BiFunction<Price, Price, Price> MAX_LIST_PRICE_REDUCER = (price, price2) -> ObjectUtils.compare(price.getListPrice(),
 			price2.getListPrice()) > 0 ? price : price2;
@@ -88,17 +102,19 @@ public class PriceRepositoryImpl implements PriceRepository {
 	/**
 	 * Creates instance with needed services wired in.
 	 *
-	 * @param shoppingItemDtoFactory    shopping item dto factory
-	 * @param storeRepository           store repository
-	 * @param customerSessionRepository customer session repository
-	 * @param priceLookupFacade         price lookup facade
-	 * @param productSkuRepository      product sku repository
-	 * @param storeProductRepository    store product repository
-	 * @param reactiveAdapter           reactive adapter
-	 * @param coreBeanFactory           core bean factory
-	 * @param moneyTransformer          money transformer
+	 * @param shoppingItemDtoFactory    		shopping item dto factory
+	 * @param storeRepository           		store repository
+	 * @param customerSessionRepository 		customer session repository
+	 * @param priceLookupFacade         		price lookup facade
+	 * @param productSkuRepository      		product sku repository
+	 * @param storeProductRepository    		store product repository
+	 * @param reactiveAdapter           		reactive adapter
+	 * @param coreBeanFactory           		core bean factory
+	 * @param storeService						store service
+	 * @param storeProductService				storeProductService
+	 * @param moneyTransformer          		money transformer
 	 */
-	@SuppressWarnings("checkstyle:parameternumber")
+	@SuppressWarnings({"PMD.ExcessiveParameterList", "checkstyle:parameternumber"})
 	@Inject
 	PriceRepositoryImpl(
 			@Named("shoppingItemDtoFactory") final ShoppingItemDtoFactory shoppingItemDtoFactory,
@@ -109,6 +125,8 @@ public class PriceRepositoryImpl implements PriceRepository {
 			@Named("storeProductRepository") final StoreProductRepository storeProductRepository,
 			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter,
 			@Named("coreBeanFactory") final BeanFactory coreBeanFactory,
+			@Named("storeService") final StoreService storeService,
+			@Named("storeProductService") final StoreProductService storeProductService,
 			@Named("moneyTransformer") final MoneyTransformer moneyTransformer) {
 
 		this.shoppingItemDtoFactory = shoppingItemDtoFactory;
@@ -119,6 +137,8 @@ public class PriceRepositoryImpl implements PriceRepository {
 		this.reactiveAdapter = reactiveAdapter;
 		this.coreBeanFactory = coreBeanFactory;
 		this.storeProductRepository = storeProductRepository;
+		this.storeService = storeService;
+		this.storeProductService = storeProductService;
 		this.moneyTransformer = moneyTransformer;
 	}
 
@@ -126,10 +146,9 @@ public class PriceRepositoryImpl implements PriceRepository {
 	@Override
 	@CacheResult(uniqueIdentifier = "getPrice")
 	public Single<Price> getPrice(final String storeCode, final String skuCode) {
-		return customerSessionRepository.findOrCreateCustomerSession()
-				.map(ShopperReference::getShopper)
-				.flatMap(shopper -> Single.just(shoppingItemDtoFactory.createDto(skuCode, SINGLE_QTY))
-						.flatMap(shoppingItemDto -> getPriceFromShoppingItemDto(storeCode, shopper, shoppingItemDto, skuCode)));
+		return getStorePriceForSku(storeCode, skuCode).switchIfEmpty(
+				error(new ResourceOperationFailure(String.format(SKU_PRICE_NOT_FOUND, skuCode), null, ResourceStatus.NOT_FOUND))
+		);
 	}
 
 	@Override
@@ -166,11 +185,27 @@ public class PriceRepositoryImpl implements PriceRepository {
 
 	@CacheResult(uniqueIdentifier = "getPrices")
 	private Observable<Price> getPrices(final String storeCode, final String guid) {
-		return storeProductRepository.findByGuid(guid)
-				.flatMapObservable(product -> Observable.fromIterable(product.getProductSkus().keySet()))
-				.flatMapSingle(sku -> getPrice(storeCode, sku)
-						.doOnError(throwable -> LOG.warn("Unable to get price for store code '{}' and sku '{}'.", storeCode, sku)))
-				.onErrorResumeNext(Observable.empty());
+		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(storeCode, guid)
+				.flatMapObservable(product -> Observable.fromIterable(getAvailableSkus(product).keySet()))
+				.flatMapMaybe(sku -> getStorePriceForSku(storeCode, sku));
+	}
+
+	private Map<String, ProductSku> getAvailableSkus(final Product product) {
+		CustomerSession customerSession = customerSessionRepository.findOrCreateCustomerSession().blockingGet();
+		Store store = storeService.findStoreWithCode(customerSession.getShopper().getStoreCode());
+		StoreProduct storeProduct = storeProductService.getProductForStore(product, store);
+		Map<String, ProductSku> productSkuMap = product.getProductSkus();
+
+		Map<String, ProductSku> activeSkuMap = new HashMap<>();
+
+		for (Map.Entry<String, ProductSku> runner : productSkuMap.entrySet()) {
+			ProductSku sku = runner.getValue();
+			if (storeProduct.isSkuDisplayable(sku.getSkuCode())) {
+				activeSkuMap.put(runner.getKey(), sku);
+			}
+		}
+
+		return activeSkuMap;
 	}
 
 	private PriceRangeEntity buildPriceRangeEntity(final Money minprice, final Money maxprice) {
@@ -184,15 +219,29 @@ public class PriceRepositoryImpl implements PriceRepository {
 		return builder.build();
 	}
 
-	private Single<Price> getPriceFromShoppingItemDto(final String storeCode, final Shopper shopper, final ShoppingItemDto shoppingItemDto,
-													  final String skuCode) {
-		return storeRepository.findStoreAsSingle(storeCode)
-				.flatMap(store -> getPriceFromStore(shopper, shoppingItemDto, store, skuCode));
+	/**
+	 * Get store price for sku.
+	 * @param storeCode the store code.
+	 * @param skuCode the sku code.
+	 * @return the price.
+	 */
+	protected Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
+		return customerSessionRepository.findOrCreateCustomerSession()
+				.map(ShopperReference::getShopper)
+				.flatMapMaybe(shopper -> Single.just(shoppingItemDtoFactory.createDto(skuCode, SINGLE_QTY))
+						.flatMapMaybe(shoppingItemDto -> getPriceFromShoppingItemDto(storeCode, shopper, shoppingItemDto, skuCode)));
 	}
 
-	private Single<Price> getPriceFromStore(final Shopper shopper, final ShoppingItemDto shoppingItemDto, final Store store, final String skuCode) {
-		return reactiveAdapter.fromServiceAsSingle(() ->
-				priceLookupFacade.getShoppingItemDtoPrice(shoppingItemDto, store, shopper), String.format(SKU_PRICE_NOT_FOUND, skuCode));
+	private Maybe<Price> getPriceFromShoppingItemDto(final String storeCode, final Shopper shopper, final ShoppingItemDto shoppingItemDto,
+													 final String skuCode) {
+		return storeRepository.findStoreAsSingle(storeCode)
+				.flatMapMaybe(store -> getPriceFromStore(shopper, shoppingItemDto, store)
+						.doOnComplete(()-> LOG.warn("Unable to get price for store code '{}' and sku '{}'.", storeCode, skuCode))
+				);
+	}
+
+	private Maybe<Price> getPriceFromStore(final Shopper shopper, final ShoppingItemDto shoppingItemDto, final Store store) {
+		return reactiveAdapter.fromServiceAsMaybe(() -> priceLookupFacade.getShoppingItemDtoPrice(shoppingItemDto, store, shopper));
 	}
 
 	@Override
@@ -240,7 +289,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 			assert product != null : "product must not be null";
 			assert product.getGuid() != null : "product guid must not be null.";
 			if (validateMultipleSkus && !product.hasMultipleSkus()) {
-				return Single.error(ResourceOperationFailure.notFound());
+				return error(ResourceOperationFailure.notFound());
 			}
 			return Single.just(product);
 		});
@@ -256,7 +305,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 
 	@Override
 	public Single<Boolean> priceExistsForProduct(final String storeCode, final String productGuid) {
-		return storeProductRepository.findByGuid(productGuid)
+		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(storeCode, productGuid)
 				.flatMapObservable(product -> Observable.fromIterable(product.getProductSkus().keySet()))
 				.flatMapSingle(skuCode -> priceExists(storeCode, skuCode))
 				.reduce((Boolean firstExists, Boolean secondExists) -> firstExists || secondExists)

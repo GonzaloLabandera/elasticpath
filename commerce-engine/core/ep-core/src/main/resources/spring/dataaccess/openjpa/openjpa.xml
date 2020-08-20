@@ -118,7 +118,7 @@
 	</util:map>
 
 	<util:list id="domainEventListenerEventTypes">
-		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_PERSIST"/>
+		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_PERSIST_PERFORMED"/>
 		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_ATTACH"/>
 		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_DELETE"/>
 	</util:list>
@@ -211,11 +211,15 @@
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
 
-	<bean id="auditDao" class="com.elasticpath.service.audit.impl.AuditDaoImpl">
-		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="persistenceEngine" ref="persistenceEngineTarget"/>
-		<property name="changeSetEnabledProvider">
-			<settings:setting path="COMMERCE/SYSTEM/CHANGESETS/enable" systemPropertyOverrideKey="ep.changesets.enabled"/>
+	<bean id="auditDao" parent="txProxyTemplate">
+		<property name="target">
+				<bean class="com.elasticpath.service.audit.impl.AuditDaoImpl" >
+					<property name="beanFactory" ref="coreBeanFactory"/>
+					<property name="persistenceEngine" ref="persistenceEngineTarget"/>
+					<property name="changeSetEnabledProvider">
+						<settings:setting path="COMMERCE/SYSTEM/CHANGESETS/enable" systemPropertyOverrideKey="ep.changesets.enabled"/>
+					</property>
+				</bean>
 		</property>
 	</bean>
 
@@ -246,7 +250,7 @@
 		</property>
 	</bean>
 
-	<bean id="persistenceEngineTarget" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl">
+	<bean id="persistenceEngineTarget" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl" init-method="init">
 
 		<property name="sessionFactory" ref="sessionFactory"/>
 		<property name="entityManager" ref="entityManager"/>
@@ -255,7 +259,7 @@
 		<property name="persistenceEngineOperationListeners" ref="persistenceEngineOperationListeners"/>
 
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
-		<property name="queryReader" ref="queryReader"/>
+		<property name="queryReaderFactory" ref="queryReaderFactory"/>
 	</bean>
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
@@ -286,10 +290,6 @@
 	<bean id="sessionFactory" class="com.elasticpath.persistence.openjpa.impl.JpaSessionFactoryImpl">
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 		<property name="transactionManager" ref="transactionManager"/>
-	</bean>
-
-	<bean id="persistenceSessionFilterSupport" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceSessionFilterSupportImpl">
-		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 	</bean>
 
 	<bean id="dbTxIsolationValidator" class="com.elasticpath.persistence.openjpa.impl.DbTxIsolationValidator"

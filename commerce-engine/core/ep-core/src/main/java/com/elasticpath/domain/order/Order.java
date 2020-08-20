@@ -111,6 +111,20 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	void setCustomer(Customer customer);
 
 	/**
+	 * Get the account corresponding to this order.
+	 *
+	 * @return the account.
+	 */
+	Customer getAccount();
+
+	/**
+	 * Set the account corresponding to this order.
+	 *
+	 * @param account the corresponding account.
+	 */
+	void setAccount(Customer account);
+
+	/**
 	 * Get the billing address corresponding to this order.
 	 *
 	 * @return the order address Uid
@@ -669,5 +683,11 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 * @return total amount for future shipments
 	 */
 	Money sumUpFutureShipmentAmounts();
+
+	/**
+	 * Verifies if order has at least one gift certificate.
+	 * @return true, if gift certificate shipment exists
+	 */
+	boolean hasGiftCertificateShipment();
 
 }

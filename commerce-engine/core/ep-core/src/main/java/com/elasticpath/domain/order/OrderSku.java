@@ -325,4 +325,10 @@ public interface OrderSku extends ShoppingItem, ListenableObject {
 	@Deprecated
 	BigDecimal getInvoiceItemAmount();
 
+	/**
+	 * Verifies if the sku is a gift certificate.
+	 * @return true, if it is
+	 */
+	boolean isGiftCertificate();
+
 }

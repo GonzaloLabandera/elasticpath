@@ -58,7 +58,7 @@ public class ContentSpaceExporterImpl extends AbstractExporterImpl<ContentSpace,
 		contentSpaceGuids.addAll(
 				getImportExportSearcher().searchGuids(
 						getContext().getSearchConfiguration(),
-						EPQueryType.CONTENT_SPACE));
+						EPQueryType.CONTENTSPACE));
 
 		LOG.info("Content Space Export \n\t" + contentSpaceGuids.size() + " Content Space Guids found for export [" + contentSpaceGuids + "]");
 	}

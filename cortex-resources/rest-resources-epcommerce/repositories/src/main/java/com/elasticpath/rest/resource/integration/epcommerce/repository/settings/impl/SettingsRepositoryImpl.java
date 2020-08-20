@@ -35,7 +35,7 @@ public class SettingsRepositoryImpl implements SettingsRepository {
 	 */
 	@Inject
 	public SettingsRepositoryImpl(
-			@Named("cachedSettingsReader") final SettingsReader settingsReader,
+			@Named("settingsReader") final SettingsReader settingsReader,
 			@Named("settingValueTypeConverter") final SettingValueTypeConverter settingValueTypeConverter) {
 		this.settingsReader = settingsReader;
 		this.settingValueTypeConverter = settingValueTypeConverter;

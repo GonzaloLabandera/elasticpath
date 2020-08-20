@@ -104,7 +104,7 @@ public class ImportAttributePolicySteps {
 		final ImportConfiguration importConfiguration =
 				ImportConfigurationBuilder.newInstance()
 						.setRetrievalSource(importDirectory.getPath())
-						.addImporterConfiguration(JobType.ATTRIBUTE_POLICY, ImportStrategyType.INSERT)
+						.addImporterConfiguration(JobType.ATTRIBUTEPOLICY, ImportStrategyType.INSERT)
 						.build();
 
 		importController.loadConfiguration(importConfiguration);

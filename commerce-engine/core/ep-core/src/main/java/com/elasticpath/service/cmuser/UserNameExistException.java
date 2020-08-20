@@ -27,8 +27,8 @@ public class UserNameExistException extends EpServiceException {
 	/**
 	 * Creates a new <code>UserNameExistException</code> object using the given message and cause exception.
 	 *
-	 * @param message the reason for this <code>UserIdExistException</code>.
-	 * @param cause the <code>Throwable</code> that caused this <code>UserIdExistException</code>.
+	 * @param message the reason for this <code>UserNameExistException</code>.
+	 * @param cause the <code>Throwable</code> that caused this <code>UserNameExistException</code>.
 	 */
 	public UserNameExistException(final String message, final Throwable cause) {
 		super(message, cause);

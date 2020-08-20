@@ -32,13 +32,6 @@
 				WHERE sc.guid = ?1
 			</query>
 		</named-query>
-		<named-query name="SHOPPING_CART_DELETE_BY_GUID">
-			<query>
-				DELETE
-				FROM ShoppingCartMementoImpl sc
-				WHERE sc.guid IN (:list)
-			</query>
-		</named-query>
 		<named-query name="DEFAULT_SHOPPING_CART_FIND_BY_SHOPPER_UID">
 			<query>
 				SELECT sc
@@ -71,49 +64,27 @@
 				FROM ShoppingCartMementoImpl sc, ShopperMementoImpl s
 				WHERE sc.shopperUid = s.uidPk
 				AND s.customer.guid = ?1
+				AND s.account is null
 				AND sc.status = 'ACTIVE'
-
 				AND UPPER(s.storeCode) = UPPER(?2)
 			</query>
 		</named-query>
-	<named-query name="DELETE_DEFAULT_EMPTY_SHOPPING_CARTS_BY_SHOPPER_UID">
-			<query>
-				DELETE
-				FROM ShoppingCartMementoImpl sc
-				WHERE sc.allItems IS EMPTY
-				AND sc.default = true
-				AND sc.shopperUid IN (:list)
-			</query>
-		</named-query>
-		<named-query name="DELETE_ALL_SHOPPING_CARTS_BY_SHOPPER_UID">
-			<query>
-				DELETE
-				FROM ShoppingCartMementoImpl sc
-				WHERE sc.shopperUid IN (:list)
-			</query>
-		</named-query>
-	<named-query name="DELETE_ALL_INACTIVE_SHOPPING_CARTS_BY_SHOPPER_UID">
+	<named-query name="ACTIVE_SHOPPING_CART_GUID_FIND_BY_CUSTOMER_AND_ACCOUNT_AND_STORE">
 		<query>
-			DELETE
-			FROM ShoppingCartMementoImpl sc
-			WHERE sc.shopperUid IN (:list)
-			AND sc.status = 'INACTIVE'
+			SELECT sc.guid
+			FROM ShoppingCartMementoImpl sc, ShopperMementoImpl s
+			WHERE sc.shopperUid = s.uidPk
+			AND s.customer.guid = ?1
+			AND s.account.sharedId = ?2
+			AND sc.status = 'ACTIVE'
+			AND UPPER(s.storeCode) = UPPER(?3)
 		</query>
 	</named-query>
-		<named-query name="FIND_SHOPPING_CART_GUIDS_LAST_MODIFIED_BEFORE_DATE">
+		<named-query name="DELETE_SHOPPING_CART_BY_GUIDS">
 			<query>
-				SELECT sc.guid
+				DELETE
 				FROM ShoppingCartMementoImpl sc
-				WHERE sc.lastModifiedDate &lt;= ?1
-				ORDER BY sc.lastModifiedDate
-			</query>
-		</named-query>
-		<named-query name="FIND_INACTIVE_SHOPPING_CART_GUIDS">
-			<query>
-				SELECT sc.guid
-				FROM ShoppingCartMementoImpl sc
-				WHERE sc.status = 'INACTIVE'
-				ORDER BY sc.lastModifiedDate
+				WHERE sc.guid IN (:list)
 			</query>
 		</named-query>
 		<named-query name="FIND_SHOPPING_CART_LAST_MODIFIED_DATE">
@@ -172,21 +143,6 @@
 				WHERE item.skuGuid = ?1
 			</query>
 		</named-query>
-		<named-query name="DELETE_EMPTY_WISHLISTS_BY_SHOPPER_UID">
-			<query>
-				DELETE
-				FROM WishListImpl wl
-				WHERE wl.allItems IS EMPTY
-				AND wl.shopperUid IN (:list)
-			</query>
-		</named-query>
-		<named-query name="DELETE_ALL_WISHLISTS_BY_SHOPPER_UID">
-			<query>
-				DELETE
-				FROM WishListImpl wl
-				WHERE wl.shopperUid IN (:list)
-			</query>
-		</named-query>
 		<named-query name="CART_ITEMS_BY_CART_UID">
 			<query>
 				SELECT item
@@ -194,6 +150,18 @@
 				WHERE item.childItemCartUid = ?1
 			</query>
 		</named-query>
-
+		<named-query name="DISABLE_PARENT_CHILD_CART_ITEM_RELATION_BY_SHOPPER_UID">
+			<query>
+				UPDATE ShoppingItemImpl si SET si.parentItemUid = null
+				WHERE si.childItemCartUid = (select cart.uidPk from ShoppingCartMementoImpl cart where cart.shopperUid = ?1 and cart.status = 'ACTIVE')
+			</query>
+		</named-query>
+		<named-query name="DELETE_SHOPPING_CARTS_BY_SHOPPER_UID">
+			<query>
+				DELETE
+				FROM ShoppingCartMementoImpl sc
+				WHERE sc.shopperUid = ?1
+			</query>
+		</named-query>
 </entity-mappings>
 

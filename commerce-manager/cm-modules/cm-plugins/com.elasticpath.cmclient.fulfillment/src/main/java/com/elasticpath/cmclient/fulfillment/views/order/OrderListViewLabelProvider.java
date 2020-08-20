@@ -3,6 +3,8 @@
  */
 package com.elasticpath.cmclient.fulfillment.views.order;
 
+import java.util.Objects;
+
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -12,8 +14,8 @@ import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.money.MoneyFormatter;
 
 /**
@@ -25,9 +27,10 @@ public class OrderListViewLabelProvider extends LabelProvider implements ITableL
 	private static final int INDEX_ORDERNUMBER = 0;
 	private static final int INDEX_STORE = 1;
 	private static final int INDEX_CUSTOMERNAME = 2;
-	private static final int INDEX_DATE = 3;
-	private static final int INDEX_TOTAL = 4;
-	private static final int INDEX_STATUS = 5;
+	private static final int INDEX_ACCOUNTNAME = 3;
+	private static final int INDEX_DATE = 4;
+	private static final int INDEX_TOTAL = 5;
+	private static final int INDEX_STATUS = 6;
 	
 
 	/**
@@ -65,12 +68,10 @@ public class OrderListViewLabelProvider extends LabelProvider implements ITableL
 			case INDEX_STORE:
 				return order.getStore().getName();
 			case INDEX_CUSTOMERNAME:
-				String customerName = StringUtils.EMPTY;
-				final OrderAddress address = order.getBillingAddress();
-				if (address != null) {
-					customerName = address.getFullName();
-				}
-				return customerName;
+				return order.getCustomer().getFirstName() + " " + order.getCustomer().getLastName();
+			case INDEX_ACCOUNTNAME:
+				final Customer account = order.getAccount();
+				return Objects.isNull(account) ? StringUtils.EMPTY : account.getBusinessName();
 			case INDEX_DATE:
 				return DateTimeUtilFactory.getDateUtil().formatAsDateTime(order.getCreatedDate());
 			case INDEX_TOTAL:

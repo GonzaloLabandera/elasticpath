@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import org.mockito.stubbing.Answer;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.tax.TaxCode;
+import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.plugin.tax.builder.TaxOperationContextBuilder;
 import com.elasticpath.plugin.tax.common.TaxContextIdNames;
 import com.elasticpath.plugin.tax.common.TaxJournalType;
@@ -47,7 +49,8 @@ import com.elasticpath.plugin.tax.domain.impl.TaxableItemImpl;
 import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptor;
 import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptorResult;
 import com.elasticpath.plugin.tax.rate.impl.TaxExclusiveRateApplier;
-import com.elasticpath.plugin.tax.resolver.TaxRateDescriptorResolver;
+import com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver;
+import com.elasticpath.service.tax.TaxJurisdictionService;
 import com.elasticpath.service.tax.calculator.impl.ElasticPathTaxCalculator;
 
 /**
@@ -88,6 +91,10 @@ public class ElasticPathTaxProviderPluginImplTest {
 		final BeanFactory beanFactory = mock(BeanFactory.class);
 		ElasticPathTaxCalculator epTaxCalculator = new ElasticPathTaxCalculator();
 		epTaxCalculator.setBeanFactory(beanFactory);
+		final TaxJurisdictionService taxJurisdictionService = mock(TaxJurisdictionService.class);
+		epTaxCalculator.setTaxJurisdictionService(taxJurisdictionService);
+		final TaxJurisdiction taxJurisdiction = mock(TaxJurisdiction.class);
+		when(taxJurisdictionService.retrieveEnabledInStoreTaxJurisdiction(any(), any())).thenReturn(taxJurisdiction);
 
 		epTaxPlugin.setBeanFactory(beanFactory);
 		epTaxPlugin.setTaxCalculator(epTaxCalculator);
@@ -100,7 +107,7 @@ public class ElasticPathTaxProviderPluginImplTest {
 		gstDescriptionResult.addTaxRateDescriptor(gst);
 
 		TaxRateDescriptorResolver taxRateDescriptorResolver = mock(TaxRateDescriptorResolver.class);
-		when(taxRateDescriptorResolver.findTaxRateDescriptors(isA(TaxableItem.class), isA(TaxableItemContainer.class))).
+		when(taxRateDescriptorResolver.findTaxRateDescriptors(isA(TaxableItem.class), isA(TaxableItemContainer.class), isA(TaxJurisdiction.class))).
 				thenReturn(gstDescriptionResult);
 
 		when(beanFactory.getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER, MutableTaxedItemContainer.class))

@@ -240,12 +240,9 @@ The following settings can be configured:
 
 | **Field** | **Description** |
 | --- | --- |
-| `COMMERCE/STORE/CATALOG/CatalogSitemapPagination` | The maximum number of products listed on a page in the sitemap. |
-| `COMMERCE/STORE/CATALOG/CatalogViewPagination` | The maximum number of items to display per page when browsing the catalog in the store. |
 | `COMMERCE/STORE/CATALOG/featuredProductCountToDisplay` | The number of featured products to display when browsing a catalog with zero or one filter applied. |
 | `COMMERCE/STORE/PRODUCTRECOMMENDATIONS/numberMaxRecommendations` | The maximum number of product recommendations to display. |
-| `COMMERCE/STORE/PRODUCTRECOMMENDATIONS/number OrderHistoryDays` | The number of days of historical order data to use when calculating product recommendations. For example, if the value is 3, product recommendations are calculated based on all the orders created during the past three days. |
-| `COMMERCE/STORE/SEARCH/searchCategoriesFirst` | Specifies whether searches in the store search categories before searching products. If a category match is found, the first matching category page is displayed instead of the search results page. |
+| `COMMERCE/STORE/PRODUCTRECOMMENDATIONS/numberOrderHistoryDays` | The number of days of historical order data to use when calculating product recommendations. For example, if the value is 3, product recommendations are calculated based on all the orders created during the past three days. |
 | `COMMERCE/STORE/SEARCH/showBundlesFirst` | Specifies whether to display product bundles before other products in search results. |
 | Display Out Of Stock Products | Required setting. Specifies whether to display products with 0 items in the inventory in the catalog and catalog searches. |
 | Store Admin Email Address | Required setting. The store administrator&#39;s e-mail address.<br/><br/> Example:  administrator@snapitup.com |

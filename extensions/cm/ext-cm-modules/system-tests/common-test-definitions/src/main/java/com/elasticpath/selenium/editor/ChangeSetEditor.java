@@ -9,16 +9,13 @@ import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.AddEditBrandDialog;
 import com.elasticpath.selenium.dialogs.MoveSelectedObjectsDialog;
 import com.elasticpath.selenium.domainobjects.DST;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 
 /**
  * Change Set Editor.
  */
 public class ChangeSetEditor extends AbstractPageObject {
 
-	/**
-	 * Page Object Id.
-	 */
 	private static final String SUMMARY_TAB_PARENT_CSS = "div[automation-id='SummaryPage'][active-editor='true'][seeable='true'] ";
 	private static final String SUMMARY_GUID_INPUT_CSS = SUMMARY_TAB_PARENT_CSS + " div[automation-id='com.elasticpath.cmclient.changeset"
 			+ ".ChangeSetMessages.ChangeSetEditor_ChangeSet_Guid'] input";
@@ -67,8 +64,7 @@ public class ChangeSetEditor extends AbstractPageObject {
 	public void selectObjectsTab() {
 		String cssSelector = String.format(CHANGE_SET_TAB_CSS, "ObjectsPageTitle");
 		resizeWindow(cssSelector);
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
-		getWaitDriver().waitForElementToBeVisible(By.cssSelector(String.format(CHANGE_SET_OBJECTS_TITLE, "ObjectsFormTitle")));
+		clickTabAndVerify(cssSelector, String.format(CHANGE_SET_OBJECTS_TITLE, "ObjectsFormTitle"));
 	}
 
 	/**
@@ -77,8 +73,7 @@ public class ChangeSetEditor extends AbstractPageObject {
 	public void selectSummaryTab() {
 		String cssSelector = String.format(CHANGE_SET_TAB_CSS, "Summary_Page_Title");
 		resizeWindow(cssSelector);
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
-		getWaitDriver().waitForElementToBeVisible(By.cssSelector(String.format(CHANGE_SET_OBJECTS_TITLE, "Summary_Form_Title")));
+		clickTabAndVerify(cssSelector, String.format(CHANGE_SET_OBJECTS_TITLE, "Summary_Form_Title"));
 	}
 
 	/**
@@ -182,7 +177,7 @@ public class ChangeSetEditor extends AbstractPageObject {
 	 */
 	public MoveSelectedObjectsDialog clickMoveSelectedObjectsButton() {
 		click(MOVE_SELECTED_OBJECTS_BUTTON_CSS);
-		return new MoveSelectedObjectsDialog(SetUp.getDriver());
+		return new MoveSelectedObjectsDialog(SeleniumDriverSetup.getDriver());
 	}
 
 }

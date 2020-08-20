@@ -80,6 +80,8 @@ import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
 @SuppressWarnings({ "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects" })
 public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 
+	private static final int NUMBER_OF_ITEMS_PER_PAGE = 2;
+
 	private BrowsingServiceImpl browsingServiceImpl;
 
 	private CategoryLookup mockCategoryLookup;
@@ -146,14 +148,6 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 		browsingServiceImpl.setIndexSearchService(mockIndexSearchService);
 		browsingServiceImpl.setIndexUtility(new IndexUtilityImpl());
 
-		final SettingValue settingValue = getContext().mock(SettingValue.class);
-		getContext().checking(new Expectations() {
-			{
-				allowing(settingValue).getValue();
-				will(returnValue("50"));
-			}
-		});
-
 		mockCustomerSession = getContext().mock(CustomerSession.class);
 		mockShoppingCart = getContext().mock(ShoppingCart.class);
 		getContext().checking(new Expectations() {
@@ -169,9 +163,6 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 		SettingsService mockSettingsService = getContext().mock(SettingsService.class);
 		getContext().checking(new Expectations() {
 			{
-				allowing(mockSettingsService).getSettingValue("COMMERCE/STORE/CATALOG/catalogViewPagination", storeCode);
-				will(returnValue(settingValue));
-
 				allowing(mockShoppingCart).getStore();
 				will(returnValue(mockedStore));
 
@@ -202,12 +193,7 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 		});
 		browsingServiceImpl.setStoreConfig(mockStoreConfig);
 		browsingServiceImpl.setSettingsService(mockSettingsService);
-		browsingServiceImpl.setPaginationService(new PaginationServiceImpl() {
-			@Override
-			public int getNumberOfItemsPerPage(final String storeCode) {
-				return 2;
-			}
-		});
+		browsingServiceImpl.setPaginationService(new PaginationServiceImpl());
 		browsingServiceImpl.setBeanFactory(getBeanFactory());
 	}
 
@@ -241,7 +227,8 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 
 		getMockedIndexSearchResult();
 
-		final BrowsingResult browsingResult = browsingServiceImpl.browsing(browsingRequest, null, mockShoppingCart, loadProductAssociations, 0);
+		final BrowsingResult browsingResult = browsingServiceImpl.browsing(browsingRequest, null, mockShoppingCart, loadProductAssociations, 0,
+				NUMBER_OF_ITEMS_PER_PAGE);
 		assertNotNull(browsingResult);
 		assertEquals(category, browsingResult.getCategory());
 		assertEquals(products, browsingResult.getProducts());
@@ -281,8 +268,8 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 
 		getMockedIndexSearchResult();
 
-		final BrowsingResult browsingResult =
-			browsingServiceImpl.browsing(browsingRequest, browsingResultHistory, mockShoppingCart, loadProductAssociations, 0);
+		final BrowsingResult browsingResult = browsingServiceImpl.browsing(browsingRequest, browsingResultHistory, mockShoppingCart,
+				loadProductAssociations, 0, NUMBER_OF_ITEMS_PER_PAGE);
 		assertNotNull(browsingResult);
 		assertNotNull(browsingResult.getProducts());
 		assertSame(dummyBrowsingResult, browsingResult);

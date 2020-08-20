@@ -303,7 +303,7 @@ public class ProductAdapter extends AbstractDomainAdapterImpl<Product, ProductDT
 		for (Category category : product.getCategories()) {
 			final Catalog catalog = category.getCatalog();
 			if (catalog != null && !catalog.getSupportedLocales().contains(locale)) {
-				throw new PopulationRuntimeException("IE-10000", locale.toString());
+				throw new PopulationRuntimeException("IE-10000", locale.toString(), catalog.getCode());
 			}
 		}
 	}

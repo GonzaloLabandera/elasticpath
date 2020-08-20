@@ -15,7 +15,6 @@ import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
-import com.elasticpath.test.util.Utils;
 
 /**
  * A builder that builds {@link ShoppingContext}s for testing purposes.
@@ -81,10 +80,7 @@ public class ShoppingContextBuilder implements DomainObjectBuilder<ShoppingConte
 	protected CustomerSession buildCustomerSession() {
 		final CustomerSession customerSession = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_SESSION, CustomerSession.class);
 
-		customerSession.setCreationDate(new Date());
 		customerSession.setCurrency(Currency.getInstance(Locale.US));
-		customerSession.setLastAccessedDate(new Date());
-		customerSession.setGuid(Utils.uniqueCode("session"));
 		customerSession.setLocale(Locale.US);
 		TagSet tagSet = new TagSet();
 		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(new Date().getTime()));

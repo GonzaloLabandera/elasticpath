@@ -44,6 +44,8 @@ public class CustomerAuthenticationImpl extends AbstractLegacyPersistenceImpl im
 
 	private String salt;
 
+	private String username;
+
 	private String clearTextPassword;
 
 	private long uidPk;
@@ -70,6 +72,18 @@ public class CustomerAuthenticationImpl extends AbstractLegacyPersistenceImpl im
 	@Override
 	public void setSalt(final String salt) {
 		this.salt = salt;
+	}
+
+	@Override
+	@Basic
+	@Column(name = "USERNAME")
+	public String getUsername() {
+		return username;
+	}
+
+	@Override
+	public void setUsername(final String username) {
+		this.username = username;
 	}
 
 	@Override

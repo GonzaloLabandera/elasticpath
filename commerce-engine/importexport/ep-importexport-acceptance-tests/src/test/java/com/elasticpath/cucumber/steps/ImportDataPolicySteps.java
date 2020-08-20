@@ -140,7 +140,7 @@ public class ImportDataPolicySteps {
 		final ImportConfiguration importConfiguration =
 				ImportConfigurationBuilder.newInstance()
 						.setRetrievalSource(importDirectory.getPath())
-						.addImporterConfiguration(JobType.DATA_POLICY, ImportStrategyType.INSERT)
+						.addImporterConfiguration(JobType.DATAPOLICY, ImportStrategyType.INSERT)
 						.build();
 
 		importController.loadConfiguration(importConfiguration);

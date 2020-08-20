@@ -11,7 +11,7 @@ import org.apache.lucene.util.Version;
  * Contains all constants used in Lucene index.
  */
 public final class SolrIndexConstants {
-	
+
 	/**
 	 * Use by certain classes to match version compatibility across releases of Lucene.
 	 */
@@ -56,7 +56,7 @@ public final class SolrIndexConstants {
 
 	/** Brand code. */
 	public static final String BRAND_CODE = "brandCode";
-	
+
 	/** Brand code for dismax query search. */
 	public static final String BRAND_CODE_FOR_DISMAX = "brandCodeForDismax";
 
@@ -123,14 +123,17 @@ public final class SolrIndexConstants {
 	/** User Id. */
 	public static final String USER_ID = "userId";
 
-	/** User Id exact. */
-	public static final String USER_ID_EXACT = "userIdExact";
+	/** Shared Id. */
+	public static final String SHARED_ID = "sharedId";
 
-	/** User Id and email in one field. */
-	public static final String USERID_AND_EMAIL = "userIdAndEmail";
+	/** Shared Id exact. */
+	public static final String SHARED_ID_EXACT = "sharedIdExact";
 
-	/** User Id and email exact in one field. */
-	public static final String USERID_AND_EMAIL_EXACT = "userIdAndEmailExact";
+	/** User Name. */
+	public static final String USERNAME = "userName";
+
+	/** User Name exact. */
+	public static final String USERNAME_EXACT = "userNameExact";
 
 	/** Store Code. */
 	public static final String STORE_CODE = "storeCode";
@@ -390,6 +393,42 @@ public final class SolrIndexConstants {
 
 	/** Width of a product sku. */
 	public static final String WIDTH = "width";
+
+	/** Business name of account. */
+	public static final String BUSINESS_NAME = "businessName";
+
+	/** Business name exact. */
+	public static final String BUSINESS_NAME_EXACT = "businessNameExact";
+
+	/** Business number of account. */
+	public static final String BUSINESS_NUMBER = "businessNumber";
+
+	/** Business number exact. */
+	public static final String BUSINESS_NUMBER_EXACT = "businessNumberExact";
+
+	/** Fax number. */
+	public static final String AP_PHONE_NUMBER = "apPhone";
+
+	/** Fax number exact. */
+	public static final String AP_PHONE_NUMBER_EXACT = "apPhoneExact";
+
+	/** Fax number. */
+	public static final String AP_FAX_NUMBER = "apFax";
+
+	/** Fax number exact. */
+	public static final String AP_FAX_NUMBER_EXACT = "apFaxExact";
+
+	/** Tax exemption id. */
+	public static final String AP_TAX_EXEMPTION_ID = "apTaxExemptionId";
+
+	/** Tax exemption id exact. */
+	public static final String AP_TAX_EXEMPTION_ID_EXACT = "apTaxExemptionIdExact";
+
+	/** Customer type. */
+	public static final String CUSTOMER_TYPE = "customerType";
+
+	/** Root level. */
+	public static final String ROOT_LEVEL = "isRootLevel";
 
 	private SolrIndexConstants() {
 		// Do not instantiate this class

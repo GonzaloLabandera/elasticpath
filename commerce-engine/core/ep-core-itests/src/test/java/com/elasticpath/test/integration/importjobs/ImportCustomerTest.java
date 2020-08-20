@@ -5,8 +5,6 @@ package com.elasticpath.test.integration.importjobs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Locale;
@@ -39,7 +37,7 @@ public class ImportCustomerTest extends ImportJobTestCase {
 		Customer customer = customerService.findByGuid("101");
 
 		assertEquals("101", customer.getGuid());
-		assertEquals("john@connor.com", customer.getUserId());
+		assertEquals("john@connor.com", customer.getUsername());
 		assertEquals("John", customer.getFirstName());
 		assertEquals("Connor", customer.getLastName());
 		assertEquals("john@connor.com", customer.getEmail());
@@ -62,7 +60,7 @@ public class ImportCustomerTest extends ImportJobTestCase {
 		// assert existing customer was not changed during update
 		Customer customer = customerService.findByGuid("101");
 		assertEquals("101", customer.getGuid());
-		assertEquals("john@connor.com", customer.getUserId());
+		assertEquals("john@connor.com", customer.getUsername());
 		assertEquals("John", customer.getFirstName());
 		assertEquals("Connor", customer.getLastName());
 		assertEquals("john@connor.com", customer.getEmail());
@@ -75,7 +73,7 @@ public class ImportCustomerTest extends ImportJobTestCase {
 		// assert existing customer has been updated during import
 		Customer customer2 = customerService.findByGuid("102");
 		assertEquals("102", customer2.getGuid());
-		assertEquals("will@smith.com", customer2.getUserId());
+		assertEquals("will@smith.com", customer2.getUsername());
 		assertEquals("Willie", customer2.getFirstName()); // has been modified
 		assertEquals("Smith", customer2.getLastName());
 		assertEquals("willie@smith.com", customer2.getEmail()); // has been modified
@@ -88,7 +86,7 @@ public class ImportCustomerTest extends ImportJobTestCase {
 		// assert new customer has been created during import
 		Customer customer3 = customerService.findByGuid("103");
 		assertEquals("103", customer3.getGuid());
-		assertEquals("george@michael.com", customer3.getUserId());
+		assertEquals("george@michael.com", customer3.getUsername());
 		assertEquals("George", customer3.getFirstName());
 		assertEquals("Michael", customer3.getLastName());
 		assertEquals("george@michael.com", customer3.getEmail());
@@ -111,7 +109,7 @@ public class ImportCustomerTest extends ImportJobTestCase {
 
 		Customer customer = customerService.findByGuid("101");
 		assertEquals("101", customer.getGuid());
-		assertEquals("john@connor.com", customer.getUserId());
+		assertEquals("john@connor.com", customer.getUsername());
 		assertEquals("John", customer.getFirstName());
 		assertEquals("Connor", customer.getLastName());
 		assertEquals("john@connor.net", customer.getEmail()); // has been modified
@@ -120,18 +118,5 @@ public class ImportCustomerTest extends ImportJobTestCase {
 		assertEquals(1, customer.getStatus());
 		assertEquals(string2Date("Fri Mar 16 15:49:37 2007", locale), customer.getCreationDate());
 		assertEquals("8888888888", customer.getPhoneNumber()); // has been modified
-	}
-
-	/**
-	 * Test input Customer delete.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testImportCustomerDelete() throws Exception {
-		executeImportJob(createInsertCustomerImportJob());
-		executeImportJob(createDeleteCustomerImportJob());
-
-		assertNull(customerService.findByGuid("101"));
-		assertNotNull(customerService.findByGuid("102"));
 	}
 }

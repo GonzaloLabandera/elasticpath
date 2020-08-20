@@ -35,8 +35,8 @@ public class ExternalPluginLoaderImpl implements ExternalPluginLoader {
 	private static final String JAR_PATH_PREFIX = "jar:";
 	private static final String JAR_PATH_SUFFIX = "!/";
 
-	private static final String WEB_INF_DIR = File.separatorChar + "WEB-INF";
-	private static final String CLASSES_DIR = File.separatorChar + "classes";
+	private static final String WEB_INF_DIR = "/WEB-INF";
+	private static final String CLASSES_DIR = "/classes";
 
 	@Autowired
 	private ApplicationContext applicationContext;

@@ -180,11 +180,11 @@
 		</query>
 	</named-query>
 
-	<named-query name="CUSTOMER_FIND_BY_USER_ID_AND_STORE_CODE">
+	<named-query name="CUSTOMER_FIND_BY_SHARED_ID_AND_STORE_CODE">
 		<query>
 			SELECT c
 			FROM CustomerImpl c
-			WHERE c.userId = ?1
+			WHERE c.sharedId = ?1
 			AND c.storeCode = ?2
 		</query>
 	</named-query>
@@ -204,20 +204,6 @@
 			DELETE FROM CustomerConsentImpl cc1
 			WHERE cc1.customerGuid = ?1
 			AND cc1.dataPolicy.guid = ?2
-		</query>
-	</named-query>
-
-	<named-query name="CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS">
-		<query>
-			DELETE FROM CustomerConsentHistoryImpl cc1
-			WHERE cc1.customerGuid in (SELECT cust.guid FROM CustomerImpl cust WHERE cust.uidPk IN (:list))
-		</query>
-	</named-query>
-
-	<named-query name="CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS_LATEST">
-		<query>
-			DELETE FROM CustomerConsentImpl cc1
-			WHERE cc1.customerGuid in (SELECT cust.guid FROM CustomerImpl cust WHERE cust.uidPk IN (:list))
 		</query>
 	</named-query>
 
@@ -250,14 +236,14 @@
 		</query>
 	</named-query>
 
-	<named-query name="CUSTOMER_AND_DATA_POINT_BY_STORE_AND_USER_ID">
+	<named-query name="CUSTOMER_AND_DATA_POINT_BY_STORE_AND_SHARED_ID">
 		<query>
 			SELECT cust, dp
 			FROM  CustomerConsentImpl consent, CustomerImpl cust
 			JOIN consent.dataPolicy policy
 			JOIN policy.dataPoints dp
 			WHERE consent.customerGuid = cust.guid
-			AND cust.userId = ?1
+			AND cust.sharedId = ?1
 			AND cust.storeCode = ?2
 		</query>
 	</named-query>

@@ -46,6 +46,7 @@ import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.ValidationErrorLocation;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
+import com.elasticpath.cmclient.core.conversion.EpMonetoryValueConverter;
 import com.elasticpath.cmclient.core.conversion.EpStringToBigDecimalConverter;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
@@ -325,7 +326,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 				if (pricingSnapshot.getDiscount() == null || pricingSnapshot.getDiscount().getAmount() == null) {
 					return ""; //$NON-NLS-1$
 				}
-				return pricingSnapshot.getDiscount().getAmount().toString();
+				return new EpMonetoryValueConverter(orderSku.getCurrency()).asString(pricingSnapshot.getDiscount().getAmount());
 			}
 
 			@Override
@@ -365,7 +366,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 				if (unitPrice == null) {
 					return ""; //$NON-NLS-1$
 				}
-				return unitPrice.toString();
+				return new EpMonetoryValueConverter(orderSku.getCurrency()).asString(unitPrice);
 			}
 
 		};
@@ -382,7 +383,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 				if (listUnitPrice == null) {
 					return ""; //$NON-NLS-1$
 				}
-				return listUnitPrice.getAmount().toString();
+				return new EpMonetoryValueConverter(orderSku.getCurrency()).asString(listUnitPrice.getAmount());
 			}
 		};
 	}

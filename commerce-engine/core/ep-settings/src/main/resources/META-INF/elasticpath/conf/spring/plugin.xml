@@ -12,6 +12,8 @@
 
 	<context:annotation-config />
 
+	<import resource="settings-service.xml"/>
+
 	<bean id="settingFactoryBean" abstract="true" class="com.elasticpath.settings.beanframework.SettingFactoryBean" />
 
 	<util:map id="settingValueProviderTypeConverterMap" key-type="java.lang.String" value-type="com.elasticpath.converter.StringToTypeConverter">
@@ -28,47 +30,4 @@
 	<bean id="settingValueTypeConverter" class="com.elasticpath.settings.provider.converter.impl.SettingValueTypeConverterImpl">
 		<property name="stringToTypeConverterMap" ref="settingValueProviderTypeConverterMap"/>
 	</bean>
-
-	<bean id="settingValueFactory" class="com.elasticpath.settings.impl.SettingValueFactoryWithDefinitionImpl"/>
-
-	<bean id="settingsDao" parent="txProxyTemplate">
-		<property name="target" ref="settingsDaoTarget"/>
-	</bean>
-
-	<bean id="settingsDaoTargetTemplate" class="com.elasticpath.settings.dao.impl.SettingsDaoImpl"
-			abstract="true">
-		<property name="persistenceEngine" ref="persistenceEngine"/>
-	</bean>
-
-	<bean id="settingsDaoTarget" parent="settingsDaoTargetTemplate"/>
-
-	<bean id="settingsService" parent="txProxyTemplate">
-		<property name="target" ref="settingsServiceTarget"/>
-	</bean>
-
-	<bean id="settingsServiceTargetTemplate" class="com.elasticpath.settings.impl.SettingsServiceImpl"
-			abstract="true">
-		<property name="settingsDao" ref="settingsDao"/>
-		<property name="settingValueFactory" ref="settingValueFactory"/>
-		<property name="systemPropertyOverrides" ref="settingsSystemPropertyOverrides"/>
-	</bean>
-
-	<!-- Potentital settings overrides via JVM system properties -->
-	<util:map id="settingsSystemPropertyOverrides" key-type="java.lang.String">
-		<entry key="ep.asset.location" value="COMMERCE/SYSTEM/ASSETS/assetLocation"/>
-		<entry key="ep.changesets.enabled" value="COMMERCE/SYSTEM/CHANGESETS/enable"/>
-		<entry key="ep.smtp.host" value="COMMERCE/SYSTEM/EMAIL/mailHost"/>
-		<entry key="ep.smtp.port" value="COMMERCE/SYSTEM/EMAIL/mailPort"/>
-		<entry key="ep.smtp.scheme" value="COMMERCE/SYSTEM/EMAIL/smtpScheme"/>
-		<entry key="ep.smtp.username" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationUser"/>
-		<entry key="ep.smtp.password" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationPassword"/>
-		<entry key="ep.search.default.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
-		<entry key="ep.search.master.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
-	</util:map>
-
-	<bean id="settingsServiceTarget" parent="settingsServiceTargetTemplate"/>
-
-	<!--  Default binding. Can be overridden by including a similar line in an xml file read after this one. -->
-	<bean parent="settingsService" id="settingsReader" />
-
 </beans>

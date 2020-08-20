@@ -19,6 +19,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.elasticpath.commons.util.impl.LocaleUtils;
 import com.elasticpath.domain.search.SortAttributeGroup;
 import com.elasticpath.domain.search.SortValue;
 import com.elasticpath.repository.PaginationRepository;
@@ -135,7 +136,8 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 	}
 
 	private void populateSorting(final Map<String, String> searchId, final OfferSearchData offerSearchData) {
-		String localeCode = SubjectUtil.getLocale(resourceOperationContext.getSubject()).getLanguage();
+		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
+		String localeCode = LocaleUtils.getCommerceLocalCode(locale);
 		searchRepository.getSortValueByGuidAndLocaleCode(searchId.get(SORT), localeCode)
 				.subscribe(sortValue -> setOfferSearchData(offerSearchData, sortValue));
 	}
@@ -159,7 +161,7 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 				case FacetConstants.PRICE:
 					return StandardSortBy.PRICE;
 				case FacetConstants.FEATURED:
-					return StandardSortBy.FEATURED_ANYWHERE;
+					return StandardSortBy.FEATURED_CATEGORY;
 				case FacetConstants.SALES_COUNT:
 					return StandardSortBy.TOP_SELLER;
 				default:

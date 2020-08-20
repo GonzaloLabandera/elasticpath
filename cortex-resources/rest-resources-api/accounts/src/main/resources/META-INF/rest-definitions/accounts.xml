@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<!--
+	  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+	  -->
+
+	<!-- This resource family definition should be used as a starting point -->
+	<family>
+		<name>accounts</name>
+		<description><![CDATA[
+**Entry Point:** `/accounts/{base.scope}/{account-id}`
+
+The accounts resource provides a list of accounts a user is associated to, and allows them to drill down into specific accounts to retrieve information and edit them if they
+have the required permissions..
+        ]]>
+		</description>
+
+		<uri-part>
+			<name>account-id</name>
+			<description><![CDATA[The account ID.]]></description>
+			<string/>
+		</uri-part>
+
+		<!-- resource for a list of accounts -->
+		<resource>
+			<name>accounts</name>
+			<description><![CDATA[List of accounts.]]></description>
+			<uri>{base.family}/{base.scope}</uri>
+			<list-of>account</list-of>
+		</resource>
+
+		<!-- resource for an account entity -->
+		<resource>
+			<name>account</name>
+			<description><![CDATA[Resource for an account.]]></description>
+			<uri>{accounts}/{account-id}</uri>
+			<entity>account</entity>
+		</resource>
+
+		<!-- resource for account identifier -->
+		<resource>
+			<name>shared-account-id</name>
+			<description><![CDATA[An Account's identifier.]]></description>
+			<uri>{account}/identifier</uri>
+			<entity>shared-id</entity>
+		</resource>
+
+		<!-- resource for account attributes -->
+		<resource>
+			<name>account-attributes</name>
+			<description><![CDATA[An Account's attributes.]]></description>
+			<uri>{account}/attributes</uri>
+			<entity>account-attributes</entity>
+		</resource>
+
+		<!-- Link accounts list to the user's profile -->
+		<relationship>
+			<name>accounts-from-profile</name>
+			<description><![CDATA[Link from profile resource to accounts list.]]></description>
+			<rel>accounts</rel>
+			<from>profiles.profile</from>
+			<to>accounts</to>
+		</relationship>
+
+		<!-- Link account attributes to accounts -->
+		<relationship>
+			<name>account-attributes-from-account</name>
+			<description><![CDATA[Link from account entity resource to the account's attributes.]]></description>
+			<rel>attributes</rel>
+			<from>account</from>
+			<to>account-attributes</to>
+		</relationship>
+
+		<relationship>
+			<name>account-attributes-to-account</name>
+			<description><![CDATA[Link to account entity resource from the account's attributes.]]></description>
+			<rel>account</rel>
+			<from>account-attributes</from>
+			<to>account</to>
+		</relationship>
+
+		<!-- Link account identifier to accounts -->
+		<relationship>
+			<name>shared-identifier-from-account</name>
+			<description><![CDATA[Link from account entity resource to the account's identifier.]]></description>
+			<rel>identifier</rel>
+			<from>account</from>
+			<to>shared-account-id</to>
+		</relationship>
+
+		<relationship>
+			<name>shared-identifier-to-account</name>
+			<description><![CDATA[Link to account entity resource from the account's identifier.]]></description>
+			<rel>account</rel>
+			<from>shared-account-id</from>
+			<to>account</to>
+		</relationship>
+
+		<!-- account entity -->
+		<entity>
+			<name>account</name>
+			<description><![CDATA[An account.]]></description>
+			<dynamic/>
+			<entity-type>accounts.account</entity-type>
+		</entity>
+
+		<!-- account identifier entity-->
+		<entity>
+			<name>shared-id</name>
+			<description><![CDATA[An Account identifier.]]></description>
+			<property>
+				<name>shared-id</name>
+				<description><![CDATA[This Account's shared-id.]]></description>
+				<string/>
+			</property>
+			<entity-type>accounts.account.shared-account-id</entity-type>
+		</entity>
+
+		<!-- account attributes entity -->
+		<entity>
+			<name>account-attributes</name>
+			<description><![CDATA[Attributes for an account.]]></description>
+			<dynamic/>
+			<entity-type>account.attributes</entity-type>
+		</entity>
+	</family>
+</definitions>

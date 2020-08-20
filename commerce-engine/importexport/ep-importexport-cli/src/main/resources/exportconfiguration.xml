@@ -56,6 +56,8 @@
    <exporter type="ATTRIBUTE_POLICY"/>
    
    <exporter type="TAGGROUP"/>
+
+  <exporter type="USERACCOUNTASSOCIATION"/>
  
   </exporters>
   <packager type="NONE"/>

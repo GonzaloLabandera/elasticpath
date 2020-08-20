@@ -11,13 +11,11 @@ import javax.validation.Valid;
 import com.elasticpath.commons.exception.EpBindException;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
-import com.elasticpath.validation.constraints.AttributeRequired;
 
 /**
  * This interface represents a group of <code>AttributeValue</code> of Customer Profile type attribute.
  * It is aggregated into <code>Customer</code>.
  */
-@AttributeRequired
 public interface CustomerProfile {
 
 	/**
@@ -91,7 +89,9 @@ public interface CustomerProfile {
 
 	/**
 	 * Returns the Attributes supported by this CustomerProfile object.
+	 *
+	 * @param customerType the customer type
 	 * @return an unmodifiable list of attributes
 	 */
-	Collection<Attribute> getProfileAttributes();
+	Collection<Attribute> getProfileAttributes(CustomerType customerType);
 }

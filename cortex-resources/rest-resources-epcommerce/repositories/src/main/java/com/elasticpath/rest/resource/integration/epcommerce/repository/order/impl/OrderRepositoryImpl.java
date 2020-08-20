@@ -20,6 +20,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.OrderStatus;
@@ -31,6 +32,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.order.Ord
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.order.OrderService;
+import com.elasticpath.service.search.query.AccountSearchCriteria;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
 import com.elasticpath.service.search.query.SortOrder;
@@ -89,6 +91,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 	public Observable<String> findOrderIdsByCustomerGuid(final String storeCode, final String customerGuid) {
 		CustomerSearchCriteria customerSearchCriteria = createCustomerSearchCriteria(customerGuid);
 		OrderSearchCriteria orderSearchCriteria = createOrderSearchCriteria(customerSearchCriteria, storeCode);
+		orderSearchCriteria.setExcludeAccountOrders(true);
 		Collection<String> orderGuidList = orderService.findOrderNumbersBySearchCriteria(orderSearchCriteria, 0, Integer.MAX_VALUE);
 
 		return Observable.fromIterable(orderGuidList);
@@ -147,6 +150,30 @@ public class OrderRepositoryImpl implements OrderRepository {
 				.flatMap(order -> findProductSku(order, guidPathFromRootItem));
 	}
 
+	@Override
+	@CacheResult
+	public Observable<String> findOrderIdsByAccountGuid(final String storeCode,
+														final String accountGuid,
+														final int firstResult,
+														final int maxResults) {
+		AccountSearchCriteria accountSearchCriteria = createAccountSearchCriteria(accountGuid);
+		OrderSearchCriteria orderSearchCriteria = createOrderSearchCriteria(accountSearchCriteria, storeCode);
+		Collection<String> orderGuidList = orderService.findOrderNumbersBySearchCriteria(orderSearchCriteria, firstResult, maxResults);
+		return Observable.fromIterable(orderGuidList);
+	}
+
+	@Override
+	public long getAccountPurchasesSize(final String storeCode, final String accountGuid) {
+		AccountSearchCriteria accountSearchCriteria = createAccountSearchCriteria(accountGuid);
+		OrderSearchCriteria orderSearchCriteria = createOrderSearchCriteria(accountSearchCriteria, storeCode);
+		return orderService.getOrderCountBySearchCriteria(orderSearchCriteria);
+	}
+
+	@Override
+	public Customer getCustomerByOrderNumber(final String orderNumber) {
+		return orderService.getCustomerByOrderNumber(orderNumber);
+	}
+
 	private Single<ProductSku> findProductSku(final Order order, final List<String> guidPathFromRootItem) {
 		return productSkuRepository.getProductSkuWithAttributesByGuid(findShoppingItem(order, guidPathFromRootItem).getSkuGuid())
 				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(LINE_ITEM_NOT_FOUND)));
@@ -162,11 +189,22 @@ public class OrderRepositoryImpl implements OrderRepository {
 	}
 
 	private OrderSearchCriteria createOrderSearchCriteria(final CustomerSearchCriteria customerSearchCriteria, final String validatedStoreCode) {
+		OrderSearchCriteria orderSearchCriteria = createDefaultOrderSearchCriteria(validatedStoreCode);
+		orderSearchCriteria.setCustomerSearchCriteria(customerSearchCriteria);
+		return orderSearchCriteria;
+	}
+
+	private OrderSearchCriteria createOrderSearchCriteria(final AccountSearchCriteria accountSearchCriteria, final String validatedStoreCode) {
+		OrderSearchCriteria orderSearchCriteria = createDefaultOrderSearchCriteria(validatedStoreCode);
+		orderSearchCriteria.setAccountSearchCriteria(accountSearchCriteria);
+		return orderSearchCriteria;
+	}
+
+	private OrderSearchCriteria createDefaultOrderSearchCriteria(final String validatedStoreCode) {
 		OrderSearchCriteria orderSearchCriteria = coreBeanFactory.getPrototypeBean(ContextIdNames.ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class);
 		orderSearchCriteria.setExcludedOrderStatus(OrderStatus.FAILED);
 		Set<String> storeCodes = Collections.singleton(validatedStoreCode);
 		orderSearchCriteria.setStoreCodes(storeCodes);
-		orderSearchCriteria.setCustomerSearchCriteria(customerSearchCriteria);
 		orderSearchCriteria.setSortingType(StandardSortBy.DATE);
 		orderSearchCriteria.setSortingOrder(SortOrder.DESCENDING);
 		return orderSearchCriteria;
@@ -177,5 +215,12 @@ public class OrderRepositoryImpl implements OrderRepository {
 				CustomerSearchCriteria.class);
 		customerSearchCriteria.setGuid(customerGuid);
 		return customerSearchCriteria;
+	}
+
+	private AccountSearchCriteria createAccountSearchCriteria(final String accountGuid) {
+		AccountSearchCriteria accountSearchCriteria = coreBeanFactory.getPrototypeBean(ContextIdNames.ACCOUNT_SEARCH_CRITERIA,
+				AccountSearchCriteria.class);
+		accountSearchCriteria.setGuid(accountGuid);
+		return accountSearchCriteria;
 	}
 }

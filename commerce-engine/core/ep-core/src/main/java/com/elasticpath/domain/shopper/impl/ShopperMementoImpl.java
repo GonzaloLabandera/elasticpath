@@ -21,7 +21,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
@@ -29,7 +28,6 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.persistence.api.AbstractEntityImpl;
-import com.elasticpath.persistence.openjpa.PersistenceInterceptor;
 
 /**
  * The default implementation of {@link ShopperMemento}.
@@ -41,7 +39,7 @@ import com.elasticpath.persistence.openjpa.PersistenceInterceptor;
 @DiscriminatorValue("SHOPPER")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DataCache(enabled = false)
-public class ShopperMementoImpl extends AbstractEntityImpl implements ShopperMemento, PersistenceInterceptor {
+public class ShopperMementoImpl extends AbstractEntityImpl implements ShopperMemento {
 	private static final long serialVersionUID = 9101723347142279556L;
 
 	/**
@@ -53,10 +51,12 @@ public class ShopperMementoImpl extends AbstractEntityImpl implements ShopperMem
 
 	private Customer customer;
 
+	private Customer account;
+
 	private String storeCode;
 
 	private String guid;
-	
+
 	@Override
 	@ManyToOne(targetEntity = CustomerImpl.class, fetch = FetchType.EAGER, cascade = { CascadeType.MERGE, CascadeType.REFRESH })
 	@JoinColumn(name = "CUSTOMER_GUID", referencedColumnName = "GUID")
@@ -68,6 +68,19 @@ public class ShopperMementoImpl extends AbstractEntityImpl implements ShopperMem
 	@Override
 	public void setCustomer(final Customer customer) {
 		this.customer = customer;
+	}
+
+	@Override
+	@ManyToOne(targetEntity = CustomerImpl.class, fetch = FetchType.EAGER, cascade = { CascadeType.MERGE, CascadeType.REFRESH })
+	@JoinColumn(name = "ACCOUNT_CUSTOMER_UID", referencedColumnName = "UIDPK")
+	@ForeignKey(name = "FK_SHOPPER_ACCOUNT")
+	public Customer getAccount() {
+		return this.account;
+	}
+
+	@Override
+	public void setAccount(final Customer account) {
+		this.account = account;
 	}
 
 	@Override
@@ -85,7 +98,7 @@ public class ShopperMementoImpl extends AbstractEntityImpl implements ShopperMem
 	@Id
 	@Column(name = "UIDPK")
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = TABLE_NAME)
-	@TableGenerator(name = TABLE_NAME, table = "JPA_GENERATED_KEYS", pkColumnName = "ID", 
+	@TableGenerator(name = TABLE_NAME, table = "JPA_GENERATED_KEYS", pkColumnName = "ID",
 			valueColumnName = "LAST_VALUE", pkColumnValue = TABLE_NAME,  allocationSize = HIGH_CONCURRENCY_ALLOCATION_SIZE)
 	public long getUidPk() {
 		return this.uidPk;
@@ -106,13 +119,6 @@ public class ShopperMementoImpl extends AbstractEntityImpl implements ShopperMem
 	@Override
 	public void setGuid(final String guid) { // NOPMD
 		this.guid = guid;
-	}	
-	
-	@Override
-	public void executeBeforePersistAction() {
-		// don't persist an Anonymous {@link Customer} which is a customer with no userId
-		if (getCustomer() != null && StringUtils.isEmpty(getCustomer().getUserId())) {
-			setCustomer(null);
-		}
 	}
+
 }

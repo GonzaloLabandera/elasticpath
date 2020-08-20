@@ -33,7 +33,7 @@ public final class TaxContextIdNames {
 	/** bean id for implementation of {@link com.elasticpath.plugin.tax.rate.impl.TaxExclusiveRateApplier}. */
 	public static final String TAX_EXCLUSIVE_RATE_APPLIER = "taxExclusiveRateApplier";
 	
-	/** bean id for implementation of {@link com.elasticpath.plugin.tax.resolver.TaxRateDescriptorResolver}. */
+	/** bean id for implementation of {@link com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver}. */
 	public static final String TAX_RATE_DESCRIPTOR_RESOLVER = "taxRateDescriptorResolver";
 
 	/** bean id for implementation of {@link com.elasticpath.plugin.tax.resolver.TaxDocumentResolver}. */

@@ -39,22 +39,6 @@ public interface CartOrderDao {
 	CartOrder saveOrUpdate(CartOrder cartOrder);
 
 	/**
-	 * Removes the cart order related to the shopping cart with the given GUID.
-	 *
-	 * @param shoppingCartGuid the shopping cart GUID
-	 */
-	void removeByShoppingCartGuid(String shoppingCartGuid);
-
-	/**
-	 * Removes the cart orders corresponding to the associated shopping cart GUIDs.
-	 *
-	 * @param shoppingCartGuids the shopping cart GUIDs
-	 * @return the the number of cart orders that were removed
-	 */
-	int removeByShoppingCartGuids(List<String> shoppingCartGuids);
-
-
-	/**
 	 * Find the GUIDs of all the cart orders owned by a customer in a certain store, given customer's GUID and store code.
 	 * @param storeCode the store code
 	 * @param customerGuid the customer GUID

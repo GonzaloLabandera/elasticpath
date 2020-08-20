@@ -33,6 +33,7 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
+import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -67,7 +68,7 @@ public class StoreCustomerAttributePoliciesSectionPart extends AbstractCmClientE
 
 	private static final int PERMISSIONS_COLUMN_WIDTH = 250;
 
-	private static final String POLICY_PERMISSION_KEY_PREFIX = "PolicyPermission_";
+	private static final String POLICY_PERMISSION_KEY_PREFIX = "PolicyPermission_"; //$NON-NLS-1$
 
 	private final String tableName;
 
@@ -99,7 +100,7 @@ public class StoreCustomerAttributePoliciesSectionPart extends AbstractCmClientE
 	public StoreCustomerAttributePoliciesSectionPart(final FormPage formPage, final AbstractCmClientFormEditor editor, final boolean editable) {
 		super(formPage, editor, ExpandableComposite.NO_TITLE);
 		setEditable(editable);
-		this.tableName = "Store Customer Attribute Policies";
+		this.tableName = "Store Customer Attribute Policies"; //$NON-NLS-1$
 
 		final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
 		attributesMap = attributeService.getCustomerProfileAttributesMap();
@@ -287,7 +288,7 @@ public class StoreCustomerAttributePoliciesSectionPart extends AbstractCmClientE
 				case PERMISSIONS_COLUMN:
 					return getPermissionsText(attribute.getPolicyKey());
 				default:
-					return "";
+					return ""; //$NON-NLS-1$
 			}
 		}
 	}
@@ -296,11 +297,16 @@ public class StoreCustomerAttributePoliciesSectionPart extends AbstractCmClientE
 		return StringUtils.join(policiesMap.get(policyKey).stream()
 				.map(AttributePolicy::getPolicyPermission)
 				.map(permission -> AdminStoresMessages.get().getMessage(POLICY_PERMISSION_KEY_PREFIX + permission))
-				.collect(Collectors.toList()), ", ");
+				.collect(Collectors.toList()), ", "); //$NON-NLS-1$
 	}
 
 	private String getAttributeName(final String attributeKey) {
-		return attributesMap.get(attributeKey).getDisplayName(CorePlugin.getDefault().getDefaultLocale());
+		Attribute attribute = attributesMap.get(attributeKey);
+		
+		String attributeName = attribute.getDisplayName(CorePlugin.getDefault().getDefaultLocale());
+		String attributeUsage = CoreMessages.get().getMessage(attribute.getAttributeUsage().getNameMessageKey());
+		
+		return String.format("%s (%s)", attributeName, attributeUsage); //$NON-NLS-1$
 	}
 
 	private void setEditAttributeButtonsEnabled(final boolean enabled) {

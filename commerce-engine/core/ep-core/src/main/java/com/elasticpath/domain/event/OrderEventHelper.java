@@ -4,6 +4,7 @@
 package com.elasticpath.domain.event;
 
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.order.OrderEvent;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
@@ -220,5 +221,14 @@ public interface OrderEventHelper {
 	 * @param orderExchange the orderExchange
 	 */
 	void logOrderExchangeCompleted(Order order, OrderReturn orderExchange);
+
+	/**
+	 * Create shipment released audit order event.
+	 *
+	 * @param order the order
+	 * @param shipment the shipment
+	 * @return created {@link OrderEvent}
+	 */
+	OrderEvent createShipmentReleasedOrderEvent(Order order, OrderShipment shipment);
 
 }

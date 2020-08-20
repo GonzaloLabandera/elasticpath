@@ -1,6 +1,6 @@
 package com.elasticpath.cucumber.definitions;
 
-import static com.elasticpath.selenium.framework.util.SeleniumDriverSetup.getDriver;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -28,8 +28,8 @@ import com.elasticpath.selenium.domainobjects.Store;
 import com.elasticpath.selenium.editor.store.StoreEditor;
 import com.elasticpath.selenium.editor.store.tabs.ProfileAttributePolicyTab;
 import com.elasticpath.selenium.editor.store.tabs.SortingTab;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.DBConnector;
@@ -63,12 +63,13 @@ public class StoresDefinition {
 	private SortAttribute sortAttribute;
 	private final SortingTab sortingTab;
 	private final PaymentConfiguration paymentConfiguration;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public StoresDefinition(final Store store, final Catalog catalog, final PaymentConfiguration paymentConfiguration) {
-		final WebDriver driver = SetUp.getDriver();
+		driver = SeleniumDriverSetup.getDriver();
 
 		configurationActionToolbar = new ConfigurationActionToolbar(driver);
 		this.storeCode = "";
@@ -184,6 +185,7 @@ public class StoresDefinition {
 
 	/**
 	 * Edit the given store code.
+	 *
 	 * @param storeCode store code
 	 */
 	@When("^I edit the existing store (.+)$")
@@ -497,7 +499,7 @@ public class StoresDefinition {
 				+ "]";
 
 		facetStr = facetStr.replace("'", "\"");
-		String query = "UPDATE TFACET SET RANGE_FACET_VALUES = '" + facetStr +"' WHERE FACET_NAME = 'Price' AND STORECODE = 'MOBEE'";
+		String query = "UPDATE TFACET SET RANGE_FACET_VALUES = '" + facetStr + "' WHERE FACET_NAME = 'Price' AND STORECODE = 'MOBEE'";
 
 		dbConnector.executeUpdateQuery(query);
 		dbConnector.closeAll();
@@ -525,7 +527,7 @@ public class StoresDefinition {
 				break;
 		}
 
-		assertThat(new ConfirmDialog(getDriver()).isDialogDisplayed(automationId))
+		assertThat(new ConfirmDialog(driver).isDialogDisplayed(automationId))
 				.as("Dialog was not visible")
 				.isTrue();
 	}
@@ -620,6 +622,7 @@ public class StoresDefinition {
 
 	/**
 	 * Verifies store warning message shows.
+	 *
 	 * @param errorMessage string
 	 */
 	@Then("^the following store warning message is displayed: (.+)$")
@@ -627,7 +630,7 @@ public class StoresDefinition {
 		storeEditor.verifyErrorMessageDisplayed(errorMessage);
 	}
 
-	private void filterFacetTableByName(final String facetName){
+	private void filterFacetTableByName(final String facetName) {
 		configurationActionToolbar.clickReloadActiveEditor();
 		storeEditor.filterFacetTableByName(facetName);
 	}

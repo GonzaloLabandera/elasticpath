@@ -56,12 +56,12 @@ public class SkuOptionValueAdapter extends AbstractDomainAdapterImpl<SkuOptionVa
 				try {
 					Locale locale = LocaleUtils.toLocale(displayValue.getLanguage());
 					if (!LocaleUtils.isAvailableLocale(locale)) {
-						throw new PopulationRollbackException("IE-10000", displayValue.getLanguage());
+						throw new PopulationRollbackException("IE-10011", displayValue.getLanguage());
 					}
 					checkLocaleSupportedByCatalog(locale, skuOptionValue);
 					skuOptionValue.setDisplayName(locale, displayValue.getValue());
 				} catch (IllegalArgumentException exception) {
-					throw new PopulationRollbackException("IE-10000", exception, displayValue.getLanguage());
+					throw new PopulationRollbackException("IE-10011", exception, displayValue.getLanguage());
 				}
 			}
 		}
@@ -75,7 +75,7 @@ public class SkuOptionValueAdapter extends AbstractDomainAdapterImpl<SkuOptionVa
 		if (skuOption != null) {
 			final Catalog catalog = skuOption.getCatalog();
 			if (catalog != null && !catalog.getSupportedLocales().contains(locale)) {
-				throw new PopulationRollbackException("IE-10000", locale.toString());
+				throw new PopulationRollbackException("IE-10000", locale.toString(), catalog.getCode());
 			}
 		}
 	}

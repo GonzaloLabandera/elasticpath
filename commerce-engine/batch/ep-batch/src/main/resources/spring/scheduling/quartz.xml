@@ -37,8 +37,8 @@
 	</bean>
 	
 	<bean id="releaseShipmentsJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="orderService"/>
-		<property name="targetMethod" value="updateOrderShipmentStatus"/>
+		<property name="targetObject" ref="releasePhysicalShipmentsJob"/>
+		<property name="targetMethod" value="execute"/>
 		<property name="concurrent" value="false"/>
 	</bean>
 
@@ -116,54 +116,10 @@
 
 	<bean id="cleanupOrderLocksJobTarget" parent="cleanupOrderLocksJobTargetTemplate"/>
 
-	<!--
-	 	Job to purge the session history. This will remove all customer session records that have a last accessed date older 
-	 	than the number of days specified by a system setting 'COMMERCE/STORE/SESSIONCLEANUP/maxHistory'.
-	 	
-	 	It will then remove all the orphaned Shoppers and only delete the ones that do not have Customers associated with it
-	 	or if it does, the only the ones that have Customers with empty ShoppingCarts and Wishlists.  When shoppers are deleted,
-	 	it cascade deletes ShoppingCarts and Wishlists.
-	 	
-	 	It will cap how many CustomerSessions and Shoppers it deletes in 1 pass.  That is defined in the system setting
-	 	'"COMMERCE/SYSTEM/SESSIONCLEANUP/batchSize'
-	-->
-	<bean id="cleanupSessionsJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="cleanupSessionsJobTarget"/>
-		<property name="targetMethod" value="purgeSessionHistory"/>
-		<property name="concurrent" value="false"/>
-	</bean>
-
-	<bean id="cleanupSessionsJobTargetTemplate" class="com.elasticpath.domain.customer.impl.SessionCleanupJob" abstract="true">
-		<property name="timeService" ref="timeService"/>
-		<property name="customerSessionCleanupService" ref="customerSessionCleanupService" />
-		<property name="shopperCleanupService" ref="shopperCleanupService"/>
-		<property name="wishlistService" ref="wishListService"/>
-		<property name="shoppingCartService" ref="shoppingCartService"/>
-		<property name="batchSizeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SESSIONCLEANUP/batchSize"/>
-		</property>
-		<property name="maxDaysHistoryProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SESSIONCLEANUP/maxHistory"/>
-		</property>
-	</bean>
-
-	<bean id="cleanupSessionsJobTarget" parent="cleanupSessionsJobTargetTemplate"/>
-
-	<bean id="cleanupSessionsTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-		<property name="jobDetail" ref="cleanupSessionsJob" />
-		<!-- run every hour at 15 minutes past the hour -->
-		<property name="cronExpression" value="0 15 * * * ?"/>
-	</bean>
-    
 	<!-- Cleanup for OAuth2 tokens -->
 	<bean id="cleanupExpiredOAuth2TokensJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject">
-            <bean class="com.elasticpath.service.auth.impl.ExpiredOAuth2TokenRemovalJob">
-               <property name="timeService" ref="timeService"/>
-               <property name="oAuth2AccessTokenService" ref="oAuth2AccessTokenService"/>
-            </bean>
-		</property>
-		<property name="targetMethod" value="cleanUpExpiredOAuth2Tokens"/>
+		<property name="targetObject" ref="expiredOAuth2TokensCleanupJob"/>
+		<property name="targetMethod" value="execute"/>
 		<property name="concurrent" value="false"/>
 	</bean>
 
@@ -172,7 +128,7 @@
         <!-- run every day at midnight -->
 		<property name="cronExpression" value="0 0 0 * * ?"/>
 	</bean>
-	
+
 	<!-- Inventory Journal rollup -->
 	<bean id="inventoryJournalRollupJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject">
@@ -200,23 +156,9 @@
     -->
     <bean id="cleanupAbandonedCartsJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject" ref="abandonedCartsCleanupJob"/>
-        <property name="targetMethod" value="purgeAbandonedShoppingCarts"/>
+        <property name="targetMethod" value="execute"/>
         <property name="concurrent" value="false"/>
     </bean>
-
-	<bean id="abandonedCartsCleanupJobTemplate" class="com.elasticpath.domain.shoppingcart.impl.AbandonedCartsCleanupJob"
-		abstract="true">
-		<property name="shoppingCartCleanupService" ref="shoppingCartCleanupService"/>
-		<property name="timeService" ref="timeService"/>
-		<property name="batchSizeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/batchSize"/>
-		</property>
-		<property name="maxDaysHistoryProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/maxHistory"/>
-		</property>
-	</bean>
-
-	<bean id="abandonedCartsCleanupJob" parent="abandonedCartsCleanupJobTemplate"/>
 
     <bean id="cleanupAbandonedCartsTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="cleanupAbandonedCartsJob" />
@@ -237,8 +179,8 @@
         'COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/batchSize'
     -->
 	<bean id="cleanupInactiveCartsJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="abandonedCartsCleanupJob"/>
-		<property name="targetMethod" value="purgeInactiveShoppingCarts"/>
+		<property name="targetObject" ref="inactiveCartsCleanupJob"/>
+		<property name="targetMethod" value="execute"/>
 		<property name="concurrent" value="false"/>
 	</bean>
     
@@ -246,27 +188,13 @@
         Job to purge anonymous customers. This will remove all anonymous customer records that have a last modified date older 
         than the number of days specified by a system setting 'COMMERCE/STORE/ANONYMOUSCUSTOMERCLEANUP/maxHistory'.
         
-        It will cap how many anonymous customers it deletes in 1 pass.  That is defined in the system setting
-        '"COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize'
+        The purge will be done in batches, specified by a system setting '"COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize'
     -->
     <bean id="cleanupAnonymousCustomerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <property name="targetObject" ref="cleanupAnonymousCustomerJobTarget"/>
-        <property name="targetMethod" value="purgeAnonymousCustomers"/>
+        <property name="targetObject" ref="purgeAnonymousCustomersBatchJob"/>
+        <property name="targetMethod" value="execute"/>
         <property name="concurrent" value="false"/>
     </bean>
-
-	<bean id="cleanupAnonymousCustomerJobTargetTemplate" class="com.elasticpath.domain.customer.impl.AnonymousCustomerCleanupJob" abstract="true">
-		<property name="anonymousCustomerCleanupService" ref="anonymousCustomerCleanupService"/>
-		<property name="timeService" ref="timeService"/>
-		<property name="batchSizeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize"/>
-		</property>
-		<property name="maxDaysHistoryProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/maxHistory"/>
-		</property>
-	</bean>
-
-	<bean id="cleanupAnonymousCustomerJobTarget" parent="cleanupAnonymousCustomerJobTargetTemplate"/>
 
     <bean id="cleanupAnonymousCustomersTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="cleanupAnonymousCustomerJob" />

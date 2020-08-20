@@ -86,6 +86,7 @@ public class IndexBuildServiceImplTest {
 	private IndexBuildPolicy mockIndexBuildPolicy;
 
 	private IndexBuildPolicyContextFactory mockIndexBuildPolicyFactory;
+	private IndexBuildStatusUpdater indexBuildStatusUpdater;
 
 	/**
 	 * Setup test.
@@ -94,19 +95,19 @@ public class IndexBuildServiceImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		indexBuildService = new IndexBuildServiceImpl();
+		indexBuildStatusUpdater = new IndexBuildStatusUpdater();
+		mockIndexBuildStatusDao = context.mock(IndexBuildStatusDao.class);
+		indexBuildStatusUpdater.setIndexBuildStatusDao(mockIndexBuildStatusDao);
 
-		indexBuildService.setIndexBuildStatusUpdater(new IndexBuildStatusUpdater());
+		indexBuildService = new IndexBuildServiceImpl();
+		indexBuildService.setIndexBuildStatusUpdater(indexBuildStatusUpdater);
+
 		indexBuilder = mockIndexBuilder();
 		final IndexBuilderFactoryImpl factoryImpl = new IndexBuilderFactoryImpl();
 		final Map<String, IndexBuilder> builderMap = new HashMap<>();
 		builderMap.put(indexType.getIndexName(), indexBuilder);
 		factoryImpl.setIndexBuilderMap(builderMap);
 		indexBuildService.setIndexBuilderFactory(factoryImpl);
-
-		mockIndexBuildStatusDao = context.mock(IndexBuildStatusDao.class);
-
-		indexBuildService.setIndexBuildStatusDao(mockIndexBuildStatusDao);
 
 		mockSolrManager = context.mock(SolrManager.class);
 		indexBuildService.setSolrManager(mockSolrManager);
@@ -125,7 +126,7 @@ public class IndexBuildServiceImplTest {
 		mockIndexBuildPolicy = context.mock(IndexBuildPolicy.class);
 		indexBuildService.setIndexBuildPolicy(mockIndexBuildPolicy);
 		mockIndexNotificationProcessor = context.mock(IndexNotificationProcessor.class);
-		
+
 		indexBuildService.setIndexingStatistics(new IndexingStatsImpl());
 
 		mockIndexBuildPolicyFactory = context.mock(IndexBuildPolicyContextFactory.class);
@@ -331,6 +332,8 @@ public class IndexBuildServiceImplTest {
 	 */
 	@Test
 	public void testRebuildIndexWhenStatusInProgress() throws Exception {
+		IndexBuildStatusUpdater mockIndexBuildStatusUpdater = context.mock(IndexBuildStatusUpdater.class);
+		indexBuildService.setIndexBuildStatusUpdater(mockIndexBuildStatusUpdater);
 
 		final TestSolrDocumentPublisher publisher = new TestSolrDocumentPublisher();
 		final IndexBuildStatus buildIndexStatus = new IndexBuildStatusImpl();
@@ -340,19 +343,19 @@ public class IndexBuildServiceImplTest {
 		buildIndexStatus.setIndexStatus(IndexStatus.REBUILD_IN_PROGRESS);
 		context.checking(new Expectations() {
 			{
-				oneOf(mockIndexBuildStatusDao).get(indexType);
+				allowing(mockIndexBuildStatusUpdater).getInitialIndexStatus(indexType);
 				will(returnValue(buildIndexStatus));
-				allowing(mockIndexBuildStatusDao).saveOrUpdate(with(any(IndexBuildStatus.class)));
-				will(returnValue(buildIndexStatus));
+				allowing(mockIndexBuildStatusUpdater).wasRebuildInProgress(indexType);
+				will(returnValue(true));
+				allowing(mockIndexBuildStatusUpdater).enqueue(with(any(IndexBuildStatus.class)));
 
 				oneOf(mockIndexNotificationProcessor).removeStoredNotifications();
-
-				oneOf(mockIndexNotificationProcessor).findAllNewNotifications(indexType);
+				allowing(mockIndexNotificationProcessor).findAllNewNotifications(indexType);
 				will(returnValue(Collections.emptyList()));
 
-				oneOf(mockSolrServer).deleteByQuery("*:*");
+				allowing(mockSolrServer).deleteByQuery("*:*");
 
-				oneOf(mockSolrManager).getServer(with(any(IndexType.class)));
+				allowing(mockSolrManager).getServer(with(any(IndexType.class)));
 				will(returnValue(mockSolrServer));
 				atLeast(1).of(mockSolrManager).getDocumentPublisher(with(any(IndexType.class)));
 				will(returnValue(publisher));

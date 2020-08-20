@@ -14,7 +14,6 @@ import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.domain.tax.TaxRegion;
 import com.elasticpath.plugin.tax.common.TaxCalculationConstants;
 import com.elasticpath.plugin.tax.common.TaxContextIdNames;
-import com.elasticpath.plugin.tax.domain.TaxAddress;
 import com.elasticpath.plugin.tax.domain.TaxableItem;
 import com.elasticpath.plugin.tax.domain.TaxableItemContainer;
 import com.elasticpath.plugin.tax.rate.TaxRateDescriptor;
@@ -24,8 +23,7 @@ import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptorResult;
 import com.elasticpath.plugin.tax.rate.dto.NoTaxRateDescriptor;
 import com.elasticpath.plugin.tax.rate.dto.NoTaxRateDescriptorResult;
 import com.elasticpath.plugin.tax.rate.impl.TaxRateApplier;
-import com.elasticpath.plugin.tax.resolver.TaxRateDescriptorResolver;
-import com.elasticpath.service.tax.TaxJurisdictionService;
+import com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver;
 
 /**
  * Default implementation of a {@link TaxRateDescriptorResolver} to retrieve tax rates and tax jurisdiction from EP persistence.
@@ -37,13 +35,11 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 
 	private BeanFactory beanFactory;
 
-	private TaxJurisdictionService taxJurisdictionService;
-
 	@Override
-	public TaxRateDescriptorResult findTaxRateDescriptors(final TaxableItem taxableItem, final TaxableItemContainer container) {
+	public TaxRateDescriptorResult findTaxRateDescriptors(final TaxableItem taxableItem,
+														  final TaxableItemContainer container,
+														  final TaxJurisdiction taxJurisdiction) {
 
-		final TaxJurisdiction taxJurisdiction = findTaxJurisdictionByStoreAndAddress(container.getStoreCode(),
-				container.getDestinationAddress());
 		if (taxJurisdiction == null) {
 			LOG.debug("Could not find a tax jurisdiction for the given container: " + container);
 			return new NoTaxRateDescriptorResult();
@@ -149,20 +145,6 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 	}
 
 	/**
-	 * Retrieves a tax jurisdiction for the specified address and store.
-	 *
-	 * @param storeCode the store to use
-	 * @param address   the address to use
-	 * @return an instance of a {@link TaxJurisdiction} or null if none found
-	 */
-	protected TaxJurisdiction findTaxJurisdictionByStoreAndAddress(final String storeCode, final TaxAddress address) {
-		if (storeCode != null && address != null) {
-			return this.getTaxJurisdictionService().retrieveEnabledInStoreTaxJurisdiction(storeCode, address);
-		}
-		return null;
-	}
-
-	/**
 	 * Gets the tax rate for a given tax code in the given tax region, expressed as a decimal (e.g. a 7.5% tax represented as
 	 * 0.0750).
 	 *
@@ -182,10 +164,8 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 	}
 
 	@Override
-	public TaxRateDescriptorResult findTaxJurisdiction(final TaxableItemContainer container) {
+	public TaxRateDescriptorResult findTaxRateDescriptorResult(final TaxableItemContainer container, final TaxJurisdiction taxJurisdiction) {
 
-		final TaxJurisdiction taxJurisdiction = findTaxJurisdictionByStoreAndAddress(container.getStoreCode(),
-				container.getDestinationAddress());
 		if (taxJurisdiction == null) {
 			LOG.debug("Could not find a tax jurisdiction for the given container: " + container);
 			return new NoTaxRateDescriptorResult();
@@ -198,14 +178,6 @@ public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver 
 		result.addTaxRateDescriptor(new NoTaxRateDescriptor(taxJurisdiction.getRegionCode(), null));
 
 		return result;
-	}
-
-	public TaxJurisdictionService getTaxJurisdictionService() {
-		return taxJurisdictionService;
-	}
-
-	public void setTaxJurisdictionService(final TaxJurisdictionService taxJurisdictionService) {
-		this.taxJurisdictionService = taxJurisdictionService;
 	}
 
 	public BeanFactory getBeanFactory() {

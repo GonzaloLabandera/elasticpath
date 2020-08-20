@@ -392,7 +392,7 @@ public class OfferSearchResultPaginationRepositoryTest {
 	public void testGetSortTypeReturnsCorrectSortByForFeatured() {
 		InnerTestGetSortBy innerTestGetSortBy = new InnerTestGetSortBy();
 		SortBy result = innerTestGetSortBy.getSortType("Featured", SortAttributeGroup.FIELD_TYPE);
-		assertThat(result).isEqualTo(StandardSortBy.FEATURED_ANYWHERE);
+		assertThat(result).isEqualTo(StandardSortBy.FEATURED_CATEGORY);
 	}
 
 	@Test
@@ -409,7 +409,7 @@ public class OfferSearchResultPaginationRepositoryTest {
 
 		//no-op
 	}
-	
+
 	private void shouldFindSubject() {
 		Subject subject = TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(
 				STORE_CODE, USERID, Locale.ENGLISH, Currency.getInstance("CAD"));

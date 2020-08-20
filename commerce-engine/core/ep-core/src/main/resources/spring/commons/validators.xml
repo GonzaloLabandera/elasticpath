@@ -26,7 +26,7 @@
 		- If you want a singleton validator, be sure to understand the consequences.
 		-->
 
-	<bean class="com.elasticpath.validation.validators.impl.AttributeRequiredValidatorForCustomerProfile" scope="prototype"/>
+	<bean class="com.elasticpath.validation.validators.impl.AttributeRequiredValidatorForCustomer" scope="prototype"/>
 
 	<bean class="com.elasticpath.validation.validators.impl.CountryValidatorForString" scope="prototype">
 		<property name="geography" ref="geography"/>
@@ -34,6 +34,10 @@
 
 	<bean class="com.elasticpath.validation.validators.impl.CountryValidatorForAddress" scope="prototype">
 		<property name="geography" ref="geography"/>
+	</bean>
+
+	<bean class="com.elasticpath.validation.validators.impl.RegisteredCustomerUsernameUniqueByStoreValidator" scope="prototype">
+		<property name="customerService" ref="customerService"/>
 	</bean>
 
 	<bean class="com.elasticpath.validation.validators.impl.ShortTextValueSizeValidator" scope="prototype">

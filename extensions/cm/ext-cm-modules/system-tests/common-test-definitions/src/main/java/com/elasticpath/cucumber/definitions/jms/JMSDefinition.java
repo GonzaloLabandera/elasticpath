@@ -4,7 +4,7 @@ import cucumber.api.java.en.Then;
 
 import com.elasticpath.jms.cucumber.definitions.RawJsonDefinitions;
 import com.elasticpath.selenium.editor.ChangeSetEditor;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 
 /**
  * JMS steps.
@@ -20,7 +20,7 @@ public class JMSDefinition {
 	 */
 	public JMSDefinition(final RawJsonDefinitions rawJsonDefinitions) {
 		this.rawJsonDefinitions = rawJsonDefinitions;
-		this.changeSetEditor = new ChangeSetEditor(SetUp.getDriver());
+		this.changeSetEditor = new ChangeSetEditor(SeleniumDriverSetup.getDriver());
 	}
 
 	/**

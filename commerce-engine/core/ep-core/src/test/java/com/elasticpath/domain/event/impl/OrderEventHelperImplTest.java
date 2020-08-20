@@ -32,6 +32,7 @@ import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderEvent;
+import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.order.impl.OrderEventImpl;
 import com.elasticpath.domain.order.impl.OrderImpl;
@@ -228,6 +229,26 @@ public class OrderEventHelperImplTest {
 		assertEquals("Unexpected event note", "Order is released for fulfilment.", orderReleasedEvent.getNote());
 	}
 
+	@Test
+	public void shouldLogOrderShipmentReleased() {
+		final Order order = createBlankOrderWithLocale();
+		final OrderShipment shipment = createOrderShipment();
+		order.setModifiedBy(scapegoat);
+
+		orderEventHelper.logOrderShipmentReleased(order, shipment);
+
+		final OrderEvent orderReleasedEvent = getSingleOrderEventFromOrder(order);
+
+		assertEquals("Unexpected event title", "Order Shipment Released", orderReleasedEvent.getTitle());
+		assertEquals("Unexpected event note", "Order shipment #" + shipment.getShipmentNumber() + " is released.", orderReleasedEvent.getNote());
+	}
+
+	private OrderShipment createOrderShipment() {
+		OrderShipment orderShipment = new PhysicalOrderShipmentImpl();
+		orderShipment.setShipmentNumber("000001-1");
+
+		return orderShipment;
+	}
 	private Order createBlankOrderWithLocale() {
 		Order order = new OrderImpl();
 		order.setLocale(Locale.CANADA);

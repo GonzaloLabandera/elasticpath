@@ -16,33 +16,6 @@
 	<import resource="classpath:integration-checkout-context.xml"/>
     <import resource="classpath:ep-test-application.xml" />
 
-	<bean id="abandonedCartsCleanupJobTemplate" class="com.elasticpath.domain.shoppingcart.impl.AbandonedCartsCleanupJob"
-		  abstract="true">
-		<property name="shoppingCartCleanupService" ref="shoppingCartCleanupService"/>
-		<property name="timeService" ref="timeService"/>
-		<property name="batchSizeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/batchSize"/>
-		</property>
-		<property name="maxDaysHistoryProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/maxHistory"/>
-		</property>
-	</bean>
-
-	<bean id="abandonedCartsCleanupJob" parent="abandonedCartsCleanupJobTemplate"/>
-
-	<bean id="cleanupAnonymousCustomerJobTargetTemplate" class="com.elasticpath.domain.customer.impl.AnonymousCustomerCleanupJob" abstract="true">
-		<property name="anonymousCustomerCleanupService" ref="anonymousCustomerCleanupService"/>
-		<property name="timeService" ref="timeService"/>
-		<property name="batchSizeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize"/>
-		</property>
-		<property name="maxDaysHistoryProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/maxHistory"/>
-		</property>
-	</bean>
-
-	<bean id="cleanupAnonymousCustomerJob" parent="cleanupAnonymousCustomerJobTargetTemplate"/>
-
 	<bean id="cleanupFailedOrdersJobTargetTemplate" class="com.elasticpath.domain.order.jobs.impl.FailedOrdersCleanupJob" abstract="true">
 		<property name="timeService" ref="timeService"/>
 		<property name="orderService" ref="orderService"/>

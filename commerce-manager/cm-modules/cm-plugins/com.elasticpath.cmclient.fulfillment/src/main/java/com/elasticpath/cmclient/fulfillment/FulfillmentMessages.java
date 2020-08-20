@@ -66,6 +66,8 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ProfileRegistrationSection_TypeRegistered;
 
+	public String ProfileRegistrationSection_TypeAccount;
+
 	public String ProfileRegistrationSection_TypeGuest;
 
 	public String ProfileAttributesSection_Title;
@@ -82,13 +84,27 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String CustomerDetails_FirstNameLabel;
 
+	public String AccountDetails_RootAccountsOnly;
+
+	public String AccountDetails_SharedId;
+
+	public String AccountDetails_BusinessName;
+
+	public String AccountDetails_BusinessNumber;
+
+	public String AccountDetails_Phone;
+
+	public String AccountDetails_Fax;
+
+	public String AccountDetails_ZipPostalCode;
+
 	public String CustomerDetails_LastNameLabel;
 
 	public String AddressDialog_Organization;
 
 	public String CustomerDetails_CustomerIdLabel;
 
-	public String CustomerDetails_UserIdLabel;
+	public String CustomerDetails_SharedIdLabel;
 
 	public String CustomerDetails_Anonymous;
 
@@ -232,11 +248,21 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ProfileBasicSection_Title;
 
-	public String ProfileBasicSection_UserId;
+	public String ProfileBasicSection_SharedId;
 
 	public String ProfileBasicSection_Status;
 
+	public String ProfileBasicSection_FirstName;
+
+	public String ProfileBasicSection_LastName;
+
+	public String ProfileBasicSection_Username;
+
 	public String ProfileBasicSection_Email;
+
+	public String ProfileBasicSection_BusinessNumber;
+
+	public String ProfileBasicSection_BusinessName;
 
 	public String ProfileBasicSection_PhoneNum;
 
@@ -269,6 +295,8 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String ProfileRegistrationSection_RecNewsletter;
 
 	public String ProfileRegistrationSection_BusinessNumber;
+
+	public String ProfileRegistrationSection_ParentHierarchy;
 
 	public String ProfileRegistrationSection_TaxExemptionId;
 
@@ -380,9 +408,13 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String OrderSummaryCustomerInformationSection_PhoneNumber;
 
+	public String OrderSummaryCustomerInformationSection_AccountName;
+
 	public String OrderSummaryCustomerInformationSection_Email;
 
 	public String OrderSummaryCustomerInformationSection_EditCustomerBtn;
+
+	public String OrderSummaryCustomerInformationSection_EditAccountBtn;
 
 	public String OrderSummaryBillingAddressSection_Description;
 
@@ -810,7 +842,15 @@ public final class FulfillmentMessages extends BaseMessages {
 	// Views package
 	// ----------------------------------------------------
 
+	public String SearchView_OrderDetails;
+
+	public String SearchView_UserDetails;
+
+	public String SearchView_AccountDetails;
+
 	public String SearchView_CustomersTab;
+
+	public String SearchView_AccountsTab;
 
 	public String SearchView_OrdersTab;
 
@@ -818,7 +858,11 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String SearchView_ClearButton;
 
-	public String SearchView_EmailUserId;
+	public String SearchView_SharedId;
+
+	public String SearchView_Email;
+
+	public String SearchView_Username;
 
 	public String SearchView_PostalCode;
 
@@ -837,6 +881,8 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String SearchView_AllStore;
 
 	public String CustomerSearchTab_SearchTermsGroup;
+
+	public String AccountsSearchTab_SearchTermsGroup;
 
 	public String ShipmentSection_SubSectionItem;
 
@@ -882,15 +928,28 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String CustomerSearchResultsView_FirstName;
 
-	public String CustomerSearchResultsView_EmailUserId;
+	public String CustomerSearchResultsView_SharedId;
+
+	public String CustomerSearchResultsView_Email;
+
+	public String CustomerSearchResultsView_Username;
 
 	public String CustomerSearchResultsView_DefaultBillingAddress;
 
 	public String CustomerSearchResultsView_TelephoneNum;
 
-	public String CustomerSearchResultsView_UserId;
-
 	public String CustomerSearchResultsView_StoreRegistered;
+
+	// ----------------------------------------------------
+	// Account Views package
+	// ----------------------------------------------------
+	public String AccountSearchResultsView_SharedId;
+
+	public String AccountSearchResultsView_BusinessName;
+
+	public String AccountSearchResultsView_BusinessNumber;
+
+	public String AccountSearchResultsView_DefaultBillingAddress;
 
 	// ----------------------------------------------------
 	// Order search results Views
@@ -901,6 +960,8 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String OrderSearchResultsView_Store;
 
 	public String OrderSearchResultsView_CustomerName;
+
+	public String OrderSearchResultsView_AccountName;
 
 	public String OrderSearchResultsView_Date;
 
@@ -1424,6 +1485,90 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String DataPointValueCreated_Label;
 
 	public String DataPointValueLastUpdated_Label;
+	
+	// ----------------------------------------------------
+	// Account Associates.
+	// ----------------------------------------------------
+	
+	public String AssociatesPage_Title;
+	
+	public String AssociatesPage_FormTitle;
+	
+	public String AssociatesPage_Name;
+	
+	public String AssociatesPage_Email;
+	
+	public String AssociatesPage_Roles;
+	
+	public String AssociatesPage_Add;
+	
+	public String AssociatesPage_Edit;
+	
+	public String AssociatesPage_Remove;
+	
+	public String AssociatesPage_OpenCustomerProfile;
+	
+	public String AssociatesPage_UserFullName;
+	
+	public String AssociatesPage_UserEmail;
+	
+	public String AssociatesPage_Role;
+	
+	public String AssociatesDialog_AddAssociateTitle;
+	
+	public String AssociatesDialog_EditAssociateTitle;
+	
+	public String AssociatesPageDialog_RemoveConfirm;
+	
+	public String AssociatesPageDialog_RemoveMessage;
+	
+	public String AssociatesDialog_NoCustomerFoundError;
+	
+	public String AssociatesDialog_DuplicateCustomerError;
+
+	// ----------------------------------------------------
+	// Create Account Wizard
+	// ----------------------------------------------------
+
+	public String CreateAccountWizard_AddAccount_Label;
+
+	public String CreateAccountWizard_AddNewAccount_Title;
+
+	public String CreateAccountWizard_AddChildAccount_Title;
+
+	public String CreateAccountWizard_AccountDetails_Title;
+
+	public String CreateAccountWizard_AccountAttributes_Title;
+
+	public String CreateAccountWizard_BusinessName;
+
+	public String CreateAccountWizard_BusinessNumber;
+
+	public String CreateAccountWizard_PhoneNumber;
+
+	public String CreateAccountWizard_FaxNumber;
+
+	public String CreateAccountWizard_Status;
+
+	// ----------------------------------------------------
+	// Child Accounts tab.
+	// ----------------------------------------------------
+
+	public String AccountChildAccounts_Title;
+
+	public String AccountChildAccounts_ColumnName;
+
+	public String AccountChildAccounts_ColumnStatus;
+
+	public String AccountChildAccountsPage_Add;
+
+	public String AccountChildAccountsPage_Open;
+
+	public String AccountChildAccounts_ColumnStatusActive;
+
+	public String AccountChildAccounts_ColumnStatusDisabled;
+
+	public String AccountChildAccounts_ColumnStatusPendingApproval;
 
 	/**
 	 * Build string for amount and currency displaying.

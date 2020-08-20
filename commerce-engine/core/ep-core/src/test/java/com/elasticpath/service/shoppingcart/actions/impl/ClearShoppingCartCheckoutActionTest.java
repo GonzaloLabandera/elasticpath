@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
@@ -25,8 +24,6 @@ import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContex
 @RunWith(MockitoJUnitRunner.class)
 public class ClearShoppingCartCheckoutActionTest {
 
-	@Mock
-	private CartOrderService cartOrderService;
 	@Mock
 	private ShoppingCartService shoppingCartService;
 
@@ -47,7 +44,6 @@ public class ClearShoppingCartCheckoutActionTest {
 		fixture.execute(checkoutContext);
 
 		verify(oldShoppingCart).deactivateCart();
-		verify(cartOrderService).removeIfExistsByShoppingCart(oldShoppingCart);
 		verify(shoppingCartService, never()).saveOrUpdate(oldShoppingCart);
 	}
 
@@ -62,7 +58,6 @@ public class ClearShoppingCartCheckoutActionTest {
 
 		verify(oldShoppingCart).deactivateCart();
 		verify(shoppingCartService).disconnectCartFromShopperAndCustomerSession(oldShoppingCart, checkoutContext);
-		verify(cartOrderService).removeIfExistsByShoppingCart(oldShoppingCart);
 	}
 
 	private void shouldHaveCheckoutContextAsOrderExchange() {

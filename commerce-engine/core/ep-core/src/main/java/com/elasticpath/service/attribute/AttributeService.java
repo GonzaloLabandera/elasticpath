@@ -12,6 +12,7 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.exception.DuplicateKeyException;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeUsage;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.persistence.support.DistinctAttributeValueCriterion;
 import com.elasticpath.service.EpPersistenceService;
 import com.elasticpath.service.attribute.impl.AttributeValueInfo;
@@ -215,16 +216,46 @@ public interface AttributeService extends EpPersistenceService {
 	 * Returns a map of all system attributes.
 	 *
 	 * @return a map of all system attributes
+	 * @deprecated Customer profile attributes now come in two flavours - USER and ACCOUNT. Update your usage of this method to use 
+	 * the new {@link #getCustomerProfileAttributesMap(AttributeUsage)} method instead.
 	 */
+	@Deprecated
 	Map<String, Attribute> getCustomerProfileAttributesMap();
 
 	/**
 	 * Returns a list of all system attributes.
 	 *
 	 * @return a list of all system attributes
+	 * @deprecated Customer profile attributes now come in two flavours - USER and ACCOUNT. Use the new 
+	 * {@link #getCustomerProfileAttributes(AttributeUsage...) method instead. Passing in multiple usages (i.e. USER and ACCOUNT) will return a 
+	 * combined list.
 	 */
+	@Deprecated
 	List<Attribute> getCustomerProfileAttributes();
+	
+	/**
+	 * Returns a map of customer profile attributes.
+	 * @param attributeUsages the attribute usages
+	 *
+	 * @return a map of customer profile attributes
+	 */
+	Map<String, Attribute> getCustomerProfileAttributesMap(AttributeUsage... attributeUsages);
+	
+	/**
+	 * Returns a map of customer profile attributes associated with the given customer type.
+	 * @param customerType the customer type
+	 * @return a map of customer profile attributes
+	 */
+	Map<String, Attribute> getCustomerProfileAttributesMapByCustomerType(CustomerType customerType);
 
+	/**
+	 * Returns a list of CustomerProfileAttributes by usage.
+	 * @param attributeUsages the attribute usages 
+	 * 
+	 * @return a list of all system attributes
+	 */
+	List<Attribute> getCustomerProfileAttributes(AttributeUsage... attributeUsages);
+	
 	/**
 	 * Returns a list of attributes exclude customer profile attribute.
 	 *
@@ -317,6 +348,16 @@ public interface AttributeService extends EpPersistenceService {
 	 * Get the set of customer profile attribute keys.
 	 *
 	 * @return the list of attribute keys
+	 * @deprecated Use {@link #getCustomerProfileAttributeKeys(AttributeUsage)} instead.
 	 */
+	@Deprecated
 	Set<String> getCustomerProfileAttributeKeys();
+	
+	/**
+	 * Get the set of customer profile attribute keys by usage.
+	 * @param attributeUsage the attributeUsage
+	 *
+	 * @return the list of attribute keys
+	 */
+	Set<String> getCustomerProfileAttributeKeys(AttributeUsage attributeUsage);
 }

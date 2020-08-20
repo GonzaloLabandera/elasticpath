@@ -16,7 +16,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * Query statistics representation.
  */
-@SuppressWarnings("PMD.UnusedPrivateField")
+@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.TooManyFields"})
 public final class QueryStatistics implements Serializable {
 	/**Serial version.*/
 	public static final long serialVersionUID = 1L;
@@ -26,7 +26,11 @@ public final class QueryStatistics implements Serializable {
 	private static final int SECONDS_TOP_BOUNDARY = 59;
 	private static final int ONE_MINUTE_SECONDS = 60;
 
-	private Integer overallDBCalls;
+	private Integer totalNumberOfStatements;
+	private Integer overallDBQueries;
+	private Integer overallDBUpdates;
+	private Integer overallDBInserts;
+	private Integer overallDBDeletes;
 	private Integer overallJPACalls;
 	private Integer overallDbExeTimeMs;
 
@@ -42,7 +46,11 @@ public final class QueryStatistics implements Serializable {
 
 	private transient Long totalExeTime;
 
-	private final Map<String, Integer> totalDBCallsPerTable = new LinkedHashMap<>();
+	private final Map<String, Integer> totalDBQueriesPerTable = new LinkedHashMap<>();
+	private final Map<String, Integer> totalDBUpdatesPerTable = new LinkedHashMap<>();
+	private final Map<String, Integer> totalDBInsertsPerTable = new LinkedHashMap<>();
+	private final Map<String, Integer> totalDBDeletesPerTable = new LinkedHashMap<>();
+
 	private final Map<String, Integer> totalJPACallsPerEntity = new LinkedHashMap<>();
 
 	private final Map<String, Integer> totalDBCallsPerOperation = new LinkedHashMap<>();
@@ -96,8 +104,17 @@ public final class QueryStatistics implements Serializable {
 		this.operationsWithJPADesc.add(operationWithJPA);
 	}
 
-	public Map<String, Integer> getTotalDBCallsPerTable() {
-		return totalDBCallsPerTable;
+	public Map<String, Integer> getTotalDBQueriesPerTable() {
+		return totalDBQueriesPerTable;
+	}
+	public Map<String, Integer> getTotalDBUpdatesPerTable() {
+		return totalDBUpdatesPerTable;
+	}
+	public Map<String, Integer> getTotalDBInsertsPerTable() {
+		return totalDBInsertsPerTable;
+	}
+	public Map<String, Integer> getTotalDBDeletesPerTable() {
+		return totalDBDeletesPerTable;
 	}
 
 	public Map<String, Integer> getTotalJPACallsPerEntity() {
@@ -116,12 +133,36 @@ public final class QueryStatistics implements Serializable {
 		return totalDBCallExeTimePerOperationMs;
 	}
 
-	public Integer getOverallDBCalls() {
-		return overallDBCalls;
+	public Integer getOverallDBQueries() {
+		return overallDBQueries;
 	}
 
-	public void setOverallDBCalls(final Integer overallDBCalls) {
-		this.overallDBCalls = overallDBCalls;
+	public void setOverallDBQueries(final Integer overallDBQueries) {
+		this.overallDBQueries = overallDBQueries;
+	}
+
+	public Integer getOverallDBUpdates() {
+		return overallDBUpdates;
+	}
+
+	public void setOverallDBUpdates(final Integer overallDBUpdates) {
+		this.overallDBUpdates = overallDBUpdates;
+	}
+
+	public Integer getOverallDBInserts() {
+		return overallDBInserts;
+	}
+
+	public void setOverallDBInserts(final Integer overallDBInserts) {
+		this.overallDBInserts = overallDBInserts;
+	}
+
+	public Integer getOverallDBDeletes() {
+		return overallDBDeletes;
+	}
+
+	public void setOverallDBDeletes(final Integer overallDBDeletes) {
+		this.overallDBDeletes = overallDBDeletes;
 	}
 
 	public Integer getOverallJPACalls() {
@@ -152,6 +193,11 @@ public final class QueryStatistics implements Serializable {
 	public void setTotalExecutionTime(final Long totalExecutionTime) {
 		totalExeTime = totalExecutionTime;
 	}
+
+	public Integer getTotalNumberOfStatements() {
+		return overallDBQueries + overallDBUpdates + overallDBInserts + overallDBDeletes;
+	}
+
 
 	/**
 	 * Return formatted total execution time spent in execution of operations,

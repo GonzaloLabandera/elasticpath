@@ -50,7 +50,7 @@ class DatabaseAnalyzerClient {
 	 */
 	int getOverallDBCalls() {
 		ensureState()
-		return stats.getOverallDBCalls() != 0 ? stats.getOverallDBCalls() : -1
+		return stats.getOverallDBQueries() != 0 ? stats.getOverallDBQueries() : -1
 	}
 
 	/**
@@ -62,7 +62,7 @@ class DatabaseAnalyzerClient {
 	 */
 	int getDBCallsByTableName(String table) {
 		ensureState()
-		return stats.getTotalDBCallsPerTable().getOrDefault(table, -1)
+		return stats.getTotalDBQueriesPerTable().getOrDefault(table, -1)
 	}
 
 	def ensureState() {

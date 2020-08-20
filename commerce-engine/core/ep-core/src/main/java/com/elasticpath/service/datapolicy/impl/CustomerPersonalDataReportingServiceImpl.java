@@ -28,10 +28,10 @@ public class CustomerPersonalDataReportingServiceImpl extends AbstractEpPersiste
 	private DataPointValueService dataPointValueService;
 
 	@Override
-	public Collection<Object[]> getData(final String storeCode, final String userId) {
+	public Collection<Object[]> getData(final String storeCode, final String sharedId) {
 		Pair<Customer, List<DataPoint>> customerDataPoints;
 
-		customerDataPoints = dataPointValueService.findAllActiveDataPointsForCustomer(storeCode, userId);
+		customerDataPoints = dataPointValueService.findAllActiveDataPointsForCustomer(storeCode, sharedId);
 
 		if (customerDataPoints == null) {
 			return Collections.emptyList();

@@ -5,14 +5,16 @@ package com.elasticpath.service.search.solr.query;
 
 import static com.elasticpath.service.search.solr.SolrIndexConstants.CREATE_TIME;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.CUSTOMER_NUMBER;
+import static com.elasticpath.service.search.solr.SolrIndexConstants.CUSTOMER_TYPE;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.EMAIL_EXACT;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.FIRST_NAME_EXACT;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.LAST_NAME_EXACT;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.OBJECT_UID;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.PHONE_NUMBER_EXACT;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.PREFERRED_BILLING_ADDRESS_EXACT;
+import static com.elasticpath.service.search.solr.SolrIndexConstants.SHARED_ID_EXACT;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.STORE_CODE;
-import static com.elasticpath.service.search.solr.SolrIndexConstants.USER_ID_EXACT;
+import static com.elasticpath.service.search.solr.SolrIndexConstants.USERNAME_EXACT;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.ZIP_POSTAL_CODE_EXACT;
 
 import java.util.Collection;
@@ -26,6 +28,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermRangeQuery;
 import org.springframework.util.CollectionUtils;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.EpEmptySearchCriteriaException;
@@ -48,30 +51,11 @@ public class CustomerQueryComposerImpl extends AbstractQueryComposerImpl {
 		setAnalyzer(new CustomerQueryAnalyzerImpl());
 		final CustomerSearchCriteria criteria = (CustomerSearchCriteria) searchCriteria;
 		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
-		final BooleanQuery.Builder emailQueryBuilder = new BooleanQuery.Builder();
-		final BooleanQuery.Builder userIdQueryBuilder = new BooleanQuery.Builder();
-		boolean hasUserIdCriteria = addToQuery(searchConfig, userIdQueryBuilder, USER_ID_EXACT, criteria.getUserId(), Occur.SHOULD, true);
-		boolean hasEmailCriteria = addToQuery(searchConfig, emailQueryBuilder, EMAIL_EXACT, criteria.getEmail(), Occur.SHOULD, true);
-		boolean hasSomeCriteria = hasUserIdCriteria || hasEmailCriteria;
-		if (hasSomeCriteria) {
-			if (criteria.isUserIdAndEmailMutualSearch()) {
-				BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
-				if (hasEmailCriteria) {
-					innerQueryBuilder.add(emailQueryBuilder.build(), Occur.SHOULD);
-				}
-				if (hasUserIdCriteria) {
-					innerQueryBuilder.add(userIdQueryBuilder.build(), Occur.SHOULD);
-				}
-				booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
-			} else {
-				if (hasEmailCriteria) {
-					booleanQueryBuilder.add(emailQueryBuilder.build(), Occur.MUST);
-				}
-				if (hasUserIdCriteria) {
-					booleanQueryBuilder.add(userIdQueryBuilder.build(), Occur.MUST);
-				}
-			}
-		}
+		boolean hasSomeCriteria = false;
+
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, SHARED_ID_EXACT, criteria.getSharedId(), Occur.MUST, false);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, EMAIL_EXACT, criteria.getEmail(), Occur.MUST, true);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, USERNAME_EXACT, criteria.getUsername(), Occur.MUST, true);
 		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, FIRST_NAME_EXACT, criteria.getFirstName(), Occur.MUST, true);
 		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, LAST_NAME_EXACT, criteria.getLastName(), Occur.MUST, true);
 		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, ZIP_POSTAL_CODE_EXACT, criteria.getZipOrPostalCode(), Occur.MUST, true);
@@ -80,14 +64,44 @@ public class CustomerQueryComposerImpl extends AbstractQueryComposerImpl {
 		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, STORE_CODE, criteria.getStoreCodes(), Occur.MUST);
 		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, OBJECT_UID, criteria.getFilteredUids(), Occur.MUST_NOT);
 		hasSomeCriteria |= addTermForCreateDate(criteria, booleanQueryBuilder, searchConfig);
+		addCustomerType(hasSomeCriteria, searchConfig, booleanQueryBuilder);
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 		return booleanQueryBuilder.build();
 	}
 
-	private boolean addToQuery(final SearchConfig conf, final BooleanQuery.Builder queryBuilder, final String field,
-							   final String value, final Occur occur, final boolean wildcards) {
+	private void addCustomerType(final boolean hasSomeCriteria, final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder) {
+		if (hasSomeCriteria) {
+			final BooleanQuery.Builder singleSessionQueryBuilder = new BooleanQuery.Builder();
+			addToQuery(searchConfig, singleSessionQueryBuilder, CUSTOMER_TYPE, CustomerType.SINGLE_SESSION_USER.getName(), Occur.SHOULD, false);
+
+			final BooleanQuery.Builder registeredQueryBuilder = new BooleanQuery.Builder();
+			addToQuery(searchConfig, registeredQueryBuilder, CUSTOMER_TYPE, CustomerType.REGISTERED_USER.getName(), Occur.SHOULD, false);
+
+			final BooleanQuery.Builder typeBuilder = new BooleanQuery.Builder();
+			typeBuilder.add(singleSessionQueryBuilder.build(), Occur.SHOULD);
+			typeBuilder.add(registeredQueryBuilder.build(), Occur.SHOULD);
+
+			booleanQueryBuilder.add(typeBuilder.build(), Occur.MUST);
+		}
+	}
+
+	/**
+	 * Attempts to add a term query to the given boolean query with the given field and value. The
+	 * whole field is added to the query. Returns a value to indicate whether the addition was
+	 * successful or a non-fatal error occurred.
+	 *
+	 * @param conf         the search configuration to use.
+	 * @param queryBuilder the query to add a term query to.
+	 * @param field        the field to add a term for.
+	 * @param value        the actual value to search for.
+	 * @param occur        the occurrence value of the added query.
+	 * @param wildcards    whether to add the wildcards to the value.
+	 * @return whether the addition was successful or a non-fatal error occurred.
+	 */
+	protected boolean addToQuery(final SearchConfig conf, final BooleanQuery.Builder queryBuilder, final String field,
+								 final String value, final Occur occur, final boolean wildcards) {
 		if (StringUtils.isBlank(field) || StringUtils.isBlank(value) || queryBuilder == null || conf == null) {
 			return false;
 		}
@@ -132,7 +146,13 @@ public class CustomerQueryComposerImpl extends AbstractQueryComposerImpl {
 		}
 	}
 
-	private String resolveSortField(final SearchCriteria searchCriteria) {
+	/**
+	 * Resolves sort fields based on user profile attributes.
+	 *
+	 * @param searchCriteria the given search criteria.
+	 * @return the sort field index constant.
+	 */
+	protected String resolveSortField(final SearchCriteria searchCriteria) {
 		switch (searchCriteria.getSortingType().getOrdinal()) {
 			case StandardSortBy.CUSTOMER_ID_ORDINAL:
 				return CUSTOMER_NUMBER;
@@ -146,8 +166,10 @@ public class CustomerQueryComposerImpl extends AbstractQueryComposerImpl {
 				return LAST_NAME_EXACT;
 			case StandardSortBy.PHONE_ORDINAL:
 				return PHONE_NUMBER_EXACT;
-			case StandardSortBy.USER_ID_ORDINAL:
-				return USER_ID_EXACT;
+			case StandardSortBy.SHARED_ID_ORDINAL:
+				return SHARED_ID_EXACT;
+			case StandardSortBy.USERNAME_ORDINAL:
+				return USERNAME_EXACT;
 			case StandardSortBy.STORE_CODE_ORDINAL:
 				return STORE_CODE;
 			default:

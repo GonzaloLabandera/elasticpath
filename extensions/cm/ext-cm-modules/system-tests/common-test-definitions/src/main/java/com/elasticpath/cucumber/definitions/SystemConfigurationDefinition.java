@@ -5,10 +5,11 @@ import java.util.Map;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.AddEditConfigurationValueDialog;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.SystemConfigurationResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 
 /**
@@ -18,14 +19,16 @@ public class SystemConfigurationDefinition {
 	private SystemConfigurationResultPane systemConfigurationResultPane;
 	private AddEditConfigurationValueDialog addEditConfigurationValueDialog;
 	private ConfigurationActionToolbar configurationActionToolbar;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public SystemConfigurationDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
-		systemConfigurationResultPane = new SystemConfigurationResultPane(SetUp.getDriver());
-		addEditConfigurationValueDialog = new AddEditConfigurationValueDialog(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		configurationActionToolbar = new ConfigurationActionToolbar(driver);
+		systemConfigurationResultPane = new SystemConfigurationResultPane(driver);
+		addEditConfigurationValueDialog = new AddEditConfigurationValueDialog(driver);
 	}
 
 	/**
@@ -79,7 +82,8 @@ public class SystemConfigurationDefinition {
 	 */
 	@When("^I add new defined values record for system setting with following data$")
 	public void addNewDefinedValueForSetting(final Map<String, String> recordValues) {
-		ensureSystemSettingIsNotThere(recordValues.get("setting"));
+		systemConfigurationResultPane.maximizeSystemConfigurationWindow();
+	    ensureSystemSettingIsNotThere(recordValues.get("setting"));
 		systemConfigurationResultPane.selectSettingName(recordValues.get("setting"));
 		addEditConfigurationValueDialog = systemConfigurationResultPane.clickNewDefinedValueButton();
 		if (!"null".equalsIgnoreCase(recordValues.get("context"))) {
@@ -87,6 +91,7 @@ public class SystemConfigurationDefinition {
 		}
 		addEditConfigurationValueDialog.enterTextareaValue(recordValues.get("value"));
 		configurationActionToolbar = addEditConfigurationValueDialog.clickSaveButton();
+		systemConfigurationResultPane.restoreSystemConfigurationWindow();
 	}
 
 	/**
@@ -116,6 +121,7 @@ public class SystemConfigurationDefinition {
 	 */
 	@When("^I remove defined values record for system setting with following data$")
 	public void removeDefinedValueRecord(final Map<String, String> recordValues) {
+		systemConfigurationResultPane.maximizeSystemConfigurationWindow();
 		systemConfigurationResultPane.selectSettingName(recordValues.get("setting"));
 		systemConfigurationResultPane.removeDefinedValueRecord(recordValues.get("context"), recordValues.get("value"));
 	}
@@ -127,7 +133,6 @@ public class SystemConfigurationDefinition {
 	 */
 	@When("^I ensure table values for the following system setting (.+) do not exist$")
 	public void ensureSystemSettingIsNotThere(final String setting) {
-		systemConfigurationResultPane.minimizeSystemConfigurationEditorPane();
 		systemConfigurationResultPane.selectSettingName(setting);
 		systemConfigurationResultPane.clearDefinedValueTable();
 	}

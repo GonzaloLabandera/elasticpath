@@ -312,12 +312,12 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 					this.order = getOrderService().get(order.getUidPk());
 					OrderEventCmHelper.initForOrderAuditing(order);
 					getOrderLockService().releaseOrderLock(orderLock, LoginManager.getCmUser());
-					openEditorDate = getOrderService().get(order.getUidPk()).getLastModifiedDate();
 
 					// rebuild the order shipment addresses
 					this.previousOrderShipmentAddresses = buildOrderShipmentAddress();
 
 					this.orderLock = null;
+					openEditorDate = getOrderService().get(order.getUidPk()).getLastModifiedDate();
 				} catch (final InvalidUnlockerException e) {
 					showOrderLockedMessage(FulfillmentMessages.get().OrderEditor_UnlockOrderErrorTytle,
 						NLS.bind(FulfillmentMessages.get().OrderEditor_UnlockOrderFailedMessage,

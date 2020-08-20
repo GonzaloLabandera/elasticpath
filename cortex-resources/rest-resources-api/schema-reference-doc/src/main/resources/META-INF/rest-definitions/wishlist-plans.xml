@@ -110,7 +110,16 @@ A link to the list of wishlist items, a link to the wishlist, a link to the item
 			<description><![CDATA[Moves a line item from the wishlist to the cart. You must specify the quantity in the request body.
 
 Once POSTed, the item deletes from the wishlist and adds to the cart. Then Cortex returns a redirect link to the newly added cart line item.
-You can also get to the movetocart form by following the link in a wishlist line item. The movetocart form contains an action link to move the item to the cart. Note that the action link will only be present if the wishlist line item is purchasable. If the wishlist line item is not purchasable, the action link will not appear on the form. Only purchasable items can be moved from wishlists into a cart.]]></description>
+You can also get to the move to cart form by following the link in a wishlist line item. The movetocart form contains an action link to move the item to the cart.
+Note: The action link will only be present if the wishlist line item is purchasable.
+If the wishlist line item is not purchasable, the action link will not appear on the form.
+Only purchasable items can be moved from wishlists into a cart.
+
+The move to cart form may have some blocking advisors.
+The add to cart form can contain message IDs, such as `item.missing.price`, `item.insufficient.inventory`, or `item.not.in.store.catalog`.
+For more information, see [Structured Messages](../frontend-dev/api/structured-messages.md#business-state-errors) and [Advisors](../frontend-dev/api/advisors.md).
+]]>
+			</description>
 			<step>
 				<description><![CDATA[Start at a wish list line item]]></description>
 				<start>wishlist-line-item</start>

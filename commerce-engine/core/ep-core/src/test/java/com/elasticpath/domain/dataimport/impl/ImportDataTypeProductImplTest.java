@@ -1072,15 +1072,15 @@ public class ImportDataTypeProductImplTest {
 	 */
 	@Test
 	public void testGetImportFieldOfHidden() {
-		final String value = "false";
+		final String value = "true";
 
 		ImportField importField = productImportType.getImportField(ImportDataTypeProductImpl.PREFIX_OF_FIELD_NAME + "storeVisible");
 		assertFalse(importField.isRequired());
 		assertEquals(value, importField.getStringValue(product));
 
-		final String newValue = "true";
+		final String newValue = "false";
 		importField.setStringValue(product, newValue, importGuidHelper);
-		assertEquals(newValue, String.valueOf(product.isHidden()));
+		assertEquals(newValue, String.valueOf(!product.isHidden()));
 	}
 
 	/**

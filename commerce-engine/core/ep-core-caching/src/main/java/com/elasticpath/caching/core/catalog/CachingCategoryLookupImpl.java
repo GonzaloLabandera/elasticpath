@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 
 import com.elasticpath.cache.Cache;
 import com.elasticpath.cache.CacheLoader;
+import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.commons.util.CategoryGuidUtil;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -23,7 +24,7 @@ import com.elasticpath.service.catalog.CategoryLookup;
 /**
  * A Caching implementation of the {@link com.elasticpath.service.catalog.CategoryLookup} interface.
  */
-public class CachingCategoryLookupImpl implements CategoryLookup {
+public class CachingCategoryLookupImpl implements CategoryLookup, MutableCachingService<Category> {
 	private final CacheLoader<Long, Category> categoriesByUidLoader = new CategoriesByUidpkLoader();
 	private final CacheLoader<String, Long> categoryUidByGuidLoader = new CategoryUidPkByGuidLoader();
 	private final CacheLoader<String, Long> categoryUidByCompoundGuidLoader = new CategoryUidPkByCompoundGuidLoader();
@@ -100,6 +101,31 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 		}
 
 		return findByGuid(child.getParentGuid());
+	}
+
+	@Override
+	public void cache(final Category entity) {
+		getCategoryByUidCache().put(entity.getUidPk(), entity);
+		getCategoryUidByGuidCache().put(entity.getGuid(), entity.getUidPk());
+		getCategoryUidByCompoundGuidCache().put(entity.getCompoundGuid(), entity.getUidPk());
+		// clears the category from child caches to have it be repopulated on the next request instead of having to perform a lookup here
+		getChildCategoryCache().removeAll();
+	}
+
+	@Override
+	public void invalidate(final Category entity) {
+		getCategoryByUidCache().remove(entity.getUidPk());
+		getCategoryUidByGuidCache().remove(entity.getGuid());
+		getCategoryUidByCompoundGuidCache().remove(entity.getCompoundGuid());
+		getChildCategoryCache().remove(entity.getUidPk());
+	}
+
+	@Override
+	public void invalidateAll() {
+		getCategoryByUidCache().removeAll();
+		getCategoryUidByGuidCache().removeAll();
+		getCategoryUidByCompoundGuidCache().removeAll();
+		getChildCategoryCache().removeAll();
 	}
 
 	protected Cache<Long, Category> getCategoryByUidCache() {

@@ -5,6 +5,7 @@ package com.elasticpath.service.customer.impl;
 
 import static java.util.Arrays.asList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -13,13 +14,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import com.google.common.collect.ImmutableMap;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,24 +26,21 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.exception.UserIdExistException;
-import com.elasticpath.commons.exception.UserIdNonExistException;
+import com.elasticpath.commons.exception.SharedIdNonExistException;
 import com.elasticpath.commons.exception.UserStatusInactiveException;
 import com.elasticpath.core.messaging.customer.CustomerEventType;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerDeleted;
 import com.elasticpath.domain.customer.CustomerGroup;
-import com.elasticpath.domain.customer.CustomerMessageIds;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
-import com.elasticpath.service.auth.UserIdentityService;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.dao.CustomerAddressDao;
@@ -54,10 +49,10 @@ import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
-import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.validation.ConstraintViolationTransformer;
+import com.elasticpath.validation.service.CustomerConstraintValidationService;
 
 /**
  * The default implementation of <code>CustomerService</code>.
@@ -65,13 +60,9 @@ import com.elasticpath.validation.ConstraintViolationTransformer;
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength", "PMD.NPathComplexity"})
 public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implements CustomerService {
 
-	private static final String STRUCTURED_ERROR_MESSAGE_DATA_FIELD_UNDEFINED = "undefined";
-
 	private static final String USER_ACCOUNT_NOT_ACTIVE = "purchase.user.account.not.active";
 
 	private CustomerGroupService customerGroupService;
-
-	private UserIdentityService userIdentityService;
 
 	private TimeService timeService;
 
@@ -80,8 +71,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	private static final String LIST_PLACEHOLDER = "list";
 
 	private IndexNotificationService indexNotificationService;
-
-	private ShopperCleanupService shopperCleanupService;
 
 	private CustomerAddressDao customerAddressDao;
 
@@ -97,12 +86,22 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	private Validator validator;
 
+	private CustomerConstraintValidationService customerConstraintValidationService;
+
 	// Turn off line too long PMD warning
 	private ConstraintViolationTransformer constraintViolationTransformer; //NOPMD
 
 
 	public void setValidator(final Validator validator) {
 		this.validator = validator;
+	}
+
+	public void setCustomerConstraintValidationService(final CustomerConstraintValidationService customerConstraintValidationService) {
+		this.customerConstraintValidationService = customerConstraintValidationService;
+	}
+
+	protected CustomerConstraintValidationService getCustomerConstraintValidationService() {
+		return customerConstraintValidationService;
 	}
 
 	public void setConstraintViolationTransformer(
@@ -115,57 +114,30 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	 *
 	 * @param customer the customer to add
 	 * @return the persisted instance of customer
-	 * @throws UserIdExistException - if trying to add an customer using an user Id.
 	 */
 	@Override
-	public Customer add(final Customer customer) throws UserIdExistException {
+	public Customer add(final Customer customer) {
 		return addByAuthenticate(customer, false);
 	}
 
 	/**
 	 * Adds the given customer, special treatment for already authenticated user.
 	 *
-	 * @param customer        the customer to add
-	 * @param isAuthenticated true if the Customer is already authenticated via external source
+	 * @param customer          the customer to add
+	 * @param shouldSetPassword true if password needs to be set
 	 * @return the persisted instance of customer
-	 * @throws UserIdExistException - if trying to add an customer using an user Id.
+	 * @throws EpValidationException - if there is a validation error.
 	 */
 	@Override
-	public Customer addByAuthenticate(final Customer customer, final boolean isAuthenticated) throws UserIdExistException {
+	public Customer addByAuthenticate(final Customer customer, final boolean shouldSetPassword) {
 		sanityCheck();
 
-		final String storeCode = customer.getStoreCode();
-		if (StringUtils.isBlank(storeCode)) {
-			throw new EpServiceException("Customer has no store attached.");
-		}
+		validateStore(customer);
 
-		final boolean anyCustomerWithUserIdExists =
-				findCustomerGuidsByUserIdInStoreOrAssociatedStores(customer.getUserId(), customer.getStoreCode())
-						.stream().findAny().isPresent();
-
-		if (anyCustomerWithUserIdExists) {
-			String errorMessage = "Customer with the given user Id already exists";
-			throw new UserIdExistException(
-					errorMessage,
-					asList(
-							new StructuredErrorMessage(
-									CustomerMessageIds.USERID_ALREADY_EXISTS,
-									errorMessage,
-									ImmutableMap.of("user-id", customer.getUserId() == null
-											? STRUCTURED_ERROR_MESSAGE_DATA_FIELD_UNDEFINED : customer.getUserId())
-							)
-					)
-			);
-		}
-
-		final String validStoreCode = storeService.findValidStoreCode(storeCode);
-		customer.setStoreCode(validStoreCode);
+		final Set<ConstraintViolation<Customer>> customerViolations = validatePasswordAndUsername(customer, shouldSetPassword);
+		checkConstraintViolations(customerViolations);
 
 		defaultCustomerGroupCheck(customer);
-
-		if (!customer.isAnonymous() && !isAuthenticated) {
-			userIdentityService.add(customer.getUserId(), customer.getClearTextPassword());
-		}
 
 		final Date now = timeService.getCurrentTime();
 		// update customer object
@@ -175,60 +147,52 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		getPersistenceEngine().save(customer);
 
 		// send confirmation email and update index
-		if (!customer.isAnonymous()) {
-			sendCustomerEvent(CustomerEventType.CUSTOMER_REGISTERED, customer.getGuid(), null);
-			indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
-		}
+		sendCustomerEventAndUpdateIndex(customer);
 
 		return customer;
 	}
 
 	/**
-	 * Updates the given customer.
-	 *
-	 * @param customer the customer to update
-	 * @return the new customer object from the persistence layer
-	 * @throws UserIdExistException  - if the customer's new user Id is already in use by another existing customer.
-	 * @throws EpValidationException - if there is a validation error.
+	 * Send appropriate customer event message and add search index notification record.
+	 * @param customer the customer
 	 */
+	protected void sendCustomerEventAndUpdateIndex(final Customer customer) {
+		if (customer.getCustomerType() == CustomerType.REGISTERED_USER) {
+			sendCustomerEvent(CustomerEventType.CUSTOMER_REGISTERED, customer.getGuid(), null);
+		}
+		if (customer.getCustomerType() == CustomerType.ACCOUNT) {
+			sendCustomerEvent(CustomerEventType.ACCOUNT_CREATED, customer.getGuid(), null);
+		}
+		if (customer.getCustomerType() == CustomerType.REGISTERED_USER || customer.getCustomerType() == CustomerType.ACCOUNT) {
+			indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
+		}
+	}
+
+	private void validateStore(final Customer customer) {
+		if (customer.getCustomerType() != CustomerType.ACCOUNT) {
+			final String storeCode = customer.getStoreCode();
+			if (StringUtils.isBlank(storeCode)) {
+				throw new EpServiceException("Customer has no store attached.");
+			}
+			final String validStoreCode = storeService.findValidStoreCode(storeCode);
+			customer.setStoreCode(validStoreCode);
+		}
+	}
+
 	@Override
-	public Customer update(final Customer customer) throws UserIdExistException {
+	public Customer update(final Customer customer) {
+		return update(customer, false);
+	}
+
+	@Override
+	public Customer update(final Customer customer, final boolean shouldSetPassword) {
 		sanityCheck();
 
-		final boolean anotherCustomerWithUserIdExists =
-				findCustomerGuidsByUserIdInStoreOrAssociatedStores(customer.getUserId(), customer.getStoreCode())
-						.stream().anyMatch(guid -> !guid.equals(customer.getGuid()));
+		final Set<ConstraintViolation<Customer>> customerViolations = validatePasswordAndUsername(customer, shouldSetPassword);
 
-		if (anotherCustomerWithUserIdExists) {
-			String errorMessage = "Customer with the given user Id already exists";
-			throw new UserIdExistException(
-					errorMessage,
-					asList(
-							new StructuredErrorMessage(
-									CustomerMessageIds.USERID_ALREADY_EXISTS,
-									errorMessage,
-									ImmutableMap.of("user-id", customer.getUserId() == null
-											? STRUCTURED_ERROR_MESSAGE_DATA_FIELD_UNDEFINED : customer.getUserId())
-							)
-					)
-			);
-		}
+		customerViolations.addAll(customerConstraintValidationService.validate(customer));
 
-		Set<ConstraintViolation<Customer>> customerViolations;
-
-		// Validate and convert errors into commerce message list. For anonymous users, only validate username and email properties.
-		if (customer.isAnonymous()) {
-			customerViolations = Stream.concat(
-					validator.validateProperty(customer, "username", Customer.class).stream(),
-					validator.validateProperty(customer, "email", Customer.class).stream()).collect(Collectors.toSet());
-		} else {
-			customerViolations = validator.validate(customer);
-		}
-
-		if (CollectionUtils.isNotEmpty(customerViolations)) {
-			List<StructuredErrorMessage> structuredErrorMessageList = constraintViolationTransformer.transform(customerViolations);
-			throw new EpValidationException("Customer validation failure.", structuredErrorMessageList);
-		}
+		checkConstraintViolations(customerViolations);
 
 		defaultCustomerAddressesCheck(customer);
 		defaultCustomerGroupCheck(customer);
@@ -243,8 +207,26 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		return persistedCustomer;
 	}
 
+	private Set<ConstraintViolation<Customer>> validatePasswordAndUsername(final Customer customer, final boolean shouldSetPassword) {
+		if (CustomerType.REGISTERED_USER == customer.getCustomerType()) {
+			return shouldSetPassword
+					? customerConstraintValidationService.validateUserRegistrationConstraints(customer)
+					: new HashSet<>();
+		}
+		return new HashSet<>();
+	}
+
+	private void checkConstraintViolations(final Set<ConstraintViolation<Customer>> customerViolations) {
+		if (CollectionUtils.isNotEmpty(customerViolations)) {
+			final List<StructuredErrorMessage> structuredErrorMessageList = constraintViolationTransformer.transform(customerViolations);
+			throw new EpValidationException("Customer validation failure.", structuredErrorMessageList);
+		}
+	}
+
 	private boolean isNotSearchable(final Customer customer) {
-		return customer.isAnonymous() && StringUtils.isEmpty(customer.getFirstName()) && StringUtils.isEmpty(customer.getLastName());
+		return customer.getCustomerType() == CustomerType.SINGLE_SESSION_USER
+				&& StringUtils.isEmpty(customer.getFirstName())
+				&& StringUtils.isEmpty(customer.getLastName());
 	}
 
 	/**
@@ -298,22 +280,9 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	 * @param customer the customer to remove
 	 * @throws EpServiceException - in case of any errors
 	 */
-	@Override
 	public void remove(final Customer customer) throws EpServiceException {
-		sanityCheck();
 
-		userIdentityService.remove(customer.getUserId());
-		shopperCleanupService.removeShoppersByCustomer(customer);
 		orderPaymentApiCleanupService.removeByCustomer(customer);
-		getPersistenceEngine().delete(customer);
-		addCustomerDeletedForAuditing(customer.getUidPk());
-	}
-
-	private void addCustomerDeletedForAuditing(final long uid) {
-		final CustomerDeleted customerDeleted = getPrototypeBean(ContextIdNames.CUSTOMER_DELETED, CustomerDeleted.class);
-		customerDeleted.setCustomerUid(uid);
-		customerDeleted.setDeletedDate(new Date());
-		getPersistenceEngine().save(customerDeleted);
 	}
 
 	/**
@@ -375,8 +344,8 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 			customer = getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		} else {
 			customer = getPersistentBeanFinder()
-				.withLoadTuners(loadTuner)
-				.get(ContextIdNames.CUSTOMER, customerUid);
+					.withLoadTuners(loadTuner)
+					.get(ContextIdNames.CUSTOMER, customerUid);
 		}
 		return customer;
 	}
@@ -407,8 +376,102 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	@Override
+	public Customer findCustomerByUserName(final String username, final String storeCode) {
+		sanityCheck();
+		if (username == null || storeCode == null) {
+			throw new EpServiceException("Cannot retrieve customer without username or store");
+		}
+
+		Store store = storeService.findStoreWithCode(storeCode);
+		if (store == null) {
+			throw new EpServiceException("Store with code " + storeCode + " not found.");
+		}
+
+		Set<Long> storeUids = getAssociatedStoreUids(store);
+		final List<Customer> customers =
+				getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_USERNAME_IN_STORES", LIST_PLACEHOLDER, storeUids, username);
+
+		return getCustomerForStoreOrNewest(customers, store);
+	}
+
+	@Override
+	public boolean isCustomerByUserNameExists(final Customer customer) {
+		sanityCheck();
+		if (customer.getUsername() == null || customer.getStoreCode() == null) {
+			throw new EpServiceException("Cannot retrieve customer without username or store");
+		}
+
+		Store store = storeService.findStoreWithCode(customer.getStoreCode());
+		if (store == null) {
+			throw new EpServiceException("Store with code " + customer.getStoreCode() + " not found.");
+		}
+
+		Set<Long> storeUids = getAssociatedStoreUids(store);
+
+		return getPersistenceEngine().
+				retrieveByNamedQueryWithList("CUSTOMER_GUID_FIND_BY_USERNAME_IN_STORES",
+						LIST_PLACEHOLDER,
+						storeUids,
+						customer.getUsername(),
+						customer.getGuid()).size() > 0;
+	}
+
+	@Override
 	public boolean isCustomerGuidExists(final String guid) {
+		sanityCheck();
 		return !getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_EXISTS_BY_GUID", guid).isEmpty();
+	}
+
+	@Override
+	public CustomerType getCustomerTypeByGuid(final String guid) {
+		List<CustomerType> customerTypes = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_TYPE_SELECT_BY_GUID", guid);
+		if (customerTypes.isEmpty()) {
+			return null;
+		}
+		if (customerTypes.size() > 1) {
+			throw new EpServiceException("Inconsistent data -- duplicate guid:" + guid);
+		}
+		return customerTypes.get(0);
+	}
+
+	@Override
+	public boolean isRegisteredCustomerExistsBySharedIdAndCustomerType(final Customer customer) {
+		return getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_GUID_FIND_BY_SHAREDID_AND_CUSTOMER_TYPE",
+				customer.getSharedId(),
+				customer.getCustomerType(),
+				customer.getGuid()).size() > 0;
+	}
+
+	@Override
+	public boolean isCustomerExistsBySharedIdAndStoreCode(final String sharedId, final String storeCode) {
+		return (findBySharedId(sharedId, storeCode) != null);
+	}
+
+	@Override
+	public Long getCustomerCountByProfileAttributeKeyAndValue(final String profileAttributeKey, final String profileAttributeValue) {
+		sanityCheck();
+		List<Long> results = getPersistenceEngine().
+				retrieveByNamedQuery("CUSTOMER_COUNT_BY_PROFILEVALUE", profileAttributeKey, profileAttributeValue);
+		return results.get(0);
+	}
+
+	@Override
+	public String findCustomerGuidBySharedId(final String sharedId, final String storeCode) {
+		Customer customer = findBySharedId(sharedId, storeCode);
+		return (customer == null ? null : customer.getGuid());
+	}
+
+	@Override
+	public String findCustomerGuidByProfileAttributeKeyAndValue(final String profileAttributeKey, final String profileAttributeValue) {
+		sanityCheck();
+		List<String> results = getPersistenceEngine().
+				retrieveByNamedQuery("CUSTOMER_GUID_BY_PROFILEVALUE", profileAttributeKey, profileAttributeValue);
+
+		if (results.isEmpty()) {
+			return null;
+		}
+
+		return results.get(0);
 	}
 
 	/**
@@ -423,20 +486,32 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		return get(uid);
 	}
 
+	@Override
+	public Customer findBySharedId(final String sharedId) throws EpServiceException {
+		sanityCheck();
+		if (sharedId == null) {
+			throw new EpServiceException("Cannot retrieve customer without sharedId");
+		}
+
+		final List<Customer> customers = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_FIND_BY_SHAREDID", sharedId);
+		return customers.isEmpty() ? null : customers.get(0);
+
+	}
+
 	/**
-	 * Find the customer with the given userId associated with the store. If it cannot find the customer in the given store, returns oldest record
+	 * Find the customer with the given sharedId associated with the store. If it cannot find the customer in the given store, returns oldest record
 	 * from the store's associated stores.
 	 *
-	 * @param userId    the customer userId
+	 * @param sharedId  the customer sharedId
 	 * @param storeCode the store to search in
-	 * @return the customers with the given userId.
+	 * @return the customers with the given sharedId.
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
-	public Customer findByUserId(final String userId, final String storeCode) throws EpServiceException {
+	public Customer findBySharedId(final String sharedId, final String storeCode) throws EpServiceException {
 		sanityCheck();
-		if (userId == null || storeCode == null) {
-			throw new EpServiceException("Cannot retrieve customer without userId or store");
+		if (sharedId == null || storeCode == null) {
+			throw new EpServiceException("Cannot retrieve customer without sharedId and store");
 		}
 
 		Store store = storeService.findStoreWithCode(storeCode);
@@ -444,16 +519,37 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 			throw new EpServiceException("Store with code " + storeCode + " not found.");
 		}
 
+		Set<Long> storeUids = getAssociatedStoreUids(store);
+
+		final List<Customer> allResults = getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_SHAREDID_IN_STORES",
+				LIST_PLACEHOLDER,
+				storeUids,
+				sharedId);
+
+		return getCustomerForStoreOrNewest(allResults, store);
+	}
+
+	@Override
+	public List<Customer> findCustomersByProfileAttributeKeyAndValue(final String profileAttributeKey, final String profileAttributeValue) {
+		sanityCheck();
+		if (profileAttributeKey == null || profileAttributeValue == null) {
+			throw new EpServiceException("Cannot retrieve customer without profile value key or profile value text");
+		}
+
+		return getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_FIND_BY_PROFILEVALUE", profileAttributeKey, profileAttributeValue);
+	}
+
+	/**
+	 * Retrieves associated storeUids for a given store.
+	 *
+	 * @param store store
+	 * @return associated store uids.
+	 */
+	private Set<Long> getAssociatedStoreUids(final Store store) {
 		Set<Long> storeUids = new HashSet<>();
 		storeUids.add(store.getUidPk());
 		storeUids.addAll(store.getAssociatedStoreUids());
-
-		final List<Customer> allResults = getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_USERID_IN_STORES",
-				LIST_PLACEHOLDER,
-				storeUids,
-				userId);
-
-		return getCustomerForStoreOrNewest(allResults, store);
+		return storeUids;
 	}
 
 	/**
@@ -482,11 +578,11 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	@Override
-	public void resetPassword(final String userId, final String storeCode) throws UserIdNonExistException {
-		Customer customer = findByUserId(userId, storeCode);
+	public void resetPassword(final String sharedId, final String storeCode) throws SharedIdNonExistException {
+		Customer customer = findBySharedId(sharedId, storeCode);
 
 		if (customer == null) {
-			throw new UserIdNonExistException("The given user id doesn't exist: " + userId + " In store: " + storeCode);
+			throw new SharedIdNonExistException("The given shared id doesn't exist: " + sharedId + " In store: " + storeCode);
 		}
 
 		// Needed in order to get Spring to create another transactional context
@@ -497,7 +593,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	public Customer auditableResetPassword(final Customer customer) {
 		final String newPassword = customer.resetPassword();
 
-		userIdentityService.setPassword(customer.getUserId(), customer.getClearTextPassword());
 		final Customer updatedCustomer = update(customer);
 
 		final Map<String, Object> data = new HashMap<>();
@@ -511,7 +606,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	public Customer setPassword(final Customer customer, final String newPassword) {
 		customer.setClearTextPassword(newPassword);
 
-		userIdentityService.setPassword(customer.getUserId(), newPassword);
 		return update(customer);
 	}
 
@@ -577,25 +671,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	/**
-	 * Looks up customer guids by user id within a store and its associated stores.
-	 *
-	 * @param userId  the user id
-	 * @param storeCode the store code
-	 * @return a set of customer guids
-	 * @throws EpServiceException - in case of any errors
-	 */
-	protected Set<String> findCustomerGuidsByUserIdInStoreOrAssociatedStores(
-			final String userId, final String storeCode) throws EpServiceException {
-
-		List<String> results = getPersistenceEngine().retrieveByNamedQuery(
-				"CUSTOMER_GUIDS_BY_USERID_IN_STORE_AND_ASSOCIATED_STORES",
-				userId,
-				storeCode);
-
-		return new HashSet<>(results);
-	}
-
-	/**
 	 * Returns all customer uids as a list.
 	 *
 	 * @return all customer uids as a list
@@ -640,18 +715,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	/**
-	 * Retrieves list of customer uids where the deleted date is later than the specified date.
-	 *
-	 * @param date date to compare with the deleted date
-	 * @return list of customer uids whose deleted date is later than the specified date
-	 */
-	@Override
-	public List<Long> findUidsByDeletedDate(final Date date) {
-		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_UIDS_SELECT_BY_DELETED_DATE", date);
-	}
-
-	/**
 	 * Retrieves a collection of Customer accounts associated with the specified CustomerGroup.
 	 *
 	 * @param groupName the customer group
@@ -661,16 +724,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	public List<Customer> findCustomersByCustomerGroup(final String groupName) {
 		sanityCheck();
 		return getPersistenceEngine().retrieveByNamedQuery("FIND_CUSTOMERS_BY_CUSTOMER_GROUP", groupName);
-	}
-
-	/**
-	 * Set the userIdentityService instance.
-	 *
-	 * @param userIdentityService the userIdentityService instance.
-	 */
-	@Override
-	public void setUserIdentityService(final UserIdentityService userIdentityService) {
-		this.userIdentityService = userIdentityService;
 	}
 
 	/**
@@ -698,14 +751,14 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		if (customer.isPersisted()) {
 			final int status = this.findCustomerStatusByUid(customer.getUidPk());
 			if (status != Customer.STATUS_ACTIVE) {
-				String errorMessage = "Customer account " + customer.getUserId() + " is not active.";
+				String errorMessage = "Customer account " + customer.getSharedId() + " is not active.";
 				throw new UserStatusInactiveException(
 						errorMessage,
 						asList(
 								new StructuredErrorMessage(
 										USER_ACCOUNT_NOT_ACTIVE,
 										errorMessage,
-										ImmutableMap.of("user-id", String.valueOf(customer.getUserId()))
+										ImmutableMap.of("shared-id", String.valueOf(customer.getSharedId()))
 								)
 						)
 				);
@@ -842,13 +895,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		this.customerAddressDao = customerAddressDao;
 	}
 
-	/**
-	 * @param shopperCleanupService the shopperCleanupService to set
-	 */
-	public void setShopperCleanupService(final ShopperCleanupService shopperCleanupService) {
-		this.shopperCleanupService = shopperCleanupService;
-	}
-
 	@Override
 	public Date getCustomerLastModifiedDate(final String customerGuid) {
 		final List<Date> dates = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_LAST_MODIFIED_DATE", customerGuid);
@@ -856,6 +902,19 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 			return null;
 		}
 		return dates.get(0);
+	}
+
+	@Override
+	public Customer removeAllAddresses(final Customer customer) {
+
+		customer.setPreferredShippingAddress(null);
+		customer.setPreferredBillingAddress(null);
+
+		customer.getAddresses().forEach(getPersistenceEngine()::delete);
+		getPersistenceEngine().flush();
+
+		customer.setAddresses(new ArrayList<>());
+		return customer;
 	}
 
 	public void setSettingsReader(final SettingsReader settingsReader) {

@@ -20,6 +20,7 @@ import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilder;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup.ConjunctionType;
 import com.elasticpath.persistence.support.OrderCriterion;
+import com.elasticpath.service.search.query.AccountSearchCriteria;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.EpInvalidOrderCriterionResultTypeException;
 import com.elasticpath.service.search.query.OrderReturnSearchCriteria;
@@ -36,6 +37,7 @@ public class OrderCriterionImpl implements OrderCriterion {
 	private static final String ORDER_STATUS = "o.status";
 	private static final String ORDER_NUMBER = "o.orderNumber";
 	private static final String CP_SHORT_TEXT_VALUE = "cp.shortTextValue";
+	private static final String ACCOUNT_PROFILE_VALUE_MAP = "oa.profileValueMap";
 
 	@Override
 	public CriteriaQuery getOrderCustomerCriteria(final String propertyName, final String criteriaValue, final boolean isExactMatch) {
@@ -87,6 +89,7 @@ public class OrderCriterionImpl implements OrderCriterion {
 		final CustomerSearchCriteria customerSearchCriteria = orderSearchCriteria.getCustomerSearchCriteria();
 		final OrderShipmentStatus shipmentStatus = orderSearchCriteria.getShipmentStatus();
 		final String skuCode = orderSearchCriteria.getSkuCode();
+		final AccountSearchCriteria accountSearchCriteria = orderSearchCriteria.getAccountSearchCriteria();
 
 		if (shipmentStatus != null || StringUtils.isNotEmpty(skuCode)) {
 			queryBuilder.appendInnerJoin("o.shipments", "os");
@@ -102,6 +105,12 @@ public class OrderCriterionImpl implements OrderCriterion {
 		appendEqualsClause(whereGroup, "os.status", orderSearchCriteria.getShipmentStatus());
 
 		addCustomerClauses(queryBuilder, customerSearchCriteria, whereGroup);
+
+		if (orderSearchCriteria.isExcludeAccountOrders()) {
+			whereGroup.appendWhereEmpty("o.account");
+		}
+
+		addAccountClauses(queryBuilder, accountSearchCriteria, whereGroup);
 
 		appendLikeClause(whereGroup, "UPPER(o.billingAddress.zipOrPostalCode)", StringUtils.upperCase(orderSearchCriteria.getShipmentZipcode()));
 
@@ -128,7 +137,12 @@ public class OrderCriterionImpl implements OrderCriterion {
 			Long customerNumber = LongValidator.getInstance().validate(customerSearchCriteria.getCustomerNumber());
 			appendEqualsClause(whereGroup, "o.customer.uidPk", customerNumber);
 			appendEqualsClause(whereGroup, "o.customer.guid", customerSearchCriteria.getGuid());
-			appendLikeClause(whereGroup, "UPPER(o.customer.userId)", StringUtils.upperCase(customerSearchCriteria.getUserId()));
+			appendEqualsClause(whereGroup, "o.customer.sharedId", customerSearchCriteria.getSharedId());
+
+			if (StringUtils.isNotEmpty(customerSearchCriteria.getEmail())) {
+				queryBuilder.appendLeftJoin("o.customer.profileValueMap", "eml");
+				addEmailClause(customerSearchCriteria.getEmail().toUpperCase(), whereGroup);
+			}
 
 			if (StringUtils.isNotEmpty(customerSearchCriteria.getFirstName())) {
 				queryBuilder.appendLeftJoin("o.customer.profileValueMap", "cpf");
@@ -143,6 +157,76 @@ public class OrderCriterionImpl implements OrderCriterion {
 			appendLikeClause(whereGroup, "o.billingAddress.phoneNumber", customerSearchCriteria.getPhoneNumber());
 
 		}
+	}
+
+	private void addAccountClauses(final JpqlQueryBuilder queryBuilder, final AccountSearchCriteria accountSearchCriteria,
+								   final JpqlQueryBuilderWhereGroup whereGroup) {
+
+		if (accountSearchCriteria != null) {
+			queryBuilder.appendInnerJoin("o.account", "oa");
+			appendEqualsClause(whereGroup, "oa.guid", accountSearchCriteria.getGuid());
+			appendEqualsClause(whereGroup, "oa.sharedId", accountSearchCriteria.getSharedId());
+
+			if (StringUtils.isNotEmpty(accountSearchCriteria.getBusinessName())) {
+				queryBuilder.appendLeftJoin(ACCOUNT_PROFILE_VALUE_MAP, "apb");
+				addAccountBusinessNameClause(accountSearchCriteria.getBusinessName().toUpperCase(), whereGroup);
+			}
+
+			if (StringUtils.isNotEmpty(accountSearchCriteria.getBusinessNumber())) {
+				queryBuilder.appendLeftJoin(ACCOUNT_PROFILE_VALUE_MAP, "apn");
+				addAccountBusinessNumberClause(accountSearchCriteria.getBusinessNumber().toUpperCase(), whereGroup);
+			}
+
+			if (StringUtils.isNotEmpty(accountSearchCriteria.getFaxNumber())) {
+				queryBuilder.appendLeftJoin(ACCOUNT_PROFILE_VALUE_MAP, "apf");
+				addAccountFaxNumberClause(accountSearchCriteria.getFaxNumber().toUpperCase(), whereGroup);
+			}
+
+			if (StringUtils.isNotEmpty(accountSearchCriteria.getPhoneNumber())) {
+				queryBuilder.appendLeftJoin(ACCOUNT_PROFILE_VALUE_MAP, "app");
+				addAccountPhoneNumberClause(accountSearchCriteria.getPhoneNumber().toUpperCase(), whereGroup);
+			}
+
+			if (StringUtils.isNotEmpty(accountSearchCriteria.getTaxExemptionId())) {
+				queryBuilder.appendLeftJoin(ACCOUNT_PROFILE_VALUE_MAP, "apx");
+				addAccountTaxExemptIdClause(accountSearchCriteria.getTaxExemptionId().toUpperCase(), whereGroup);
+			}
+		}
+	}
+
+	private void addAccountBusinessNameClause(final String businessName, final JpqlQueryBuilderWhereGroup whereGroup) {
+		whereGroup.appendWhereEquals("apb.localizedAttributeKey", CustomerImpl.ATT_KEY_AP_NAME);
+		final JpqlQueryBuilderWhereGroup where = new JpqlQueryBuilderWhereGroup(ConjunctionType.OR);
+		where.appendLikeWithWildcards("UPPER(apb.shortTextValue)", businessName);
+		whereGroup.appendWhereGroup(where);
+	}
+
+	private void addAccountBusinessNumberClause(final String businessNumber, final JpqlQueryBuilderWhereGroup whereGroup) {
+		whereGroup.appendWhereEquals("apn.localizedAttributeKey", CustomerImpl.ATT_KEY_AP_BUSINESS_NUMBER);
+		final JpqlQueryBuilderWhereGroup where = new JpqlQueryBuilderWhereGroup(ConjunctionType.OR);
+		where.appendLikeWithWildcards("UPPER(apn.shortTextValue)", businessNumber);
+		whereGroup.appendWhereGroup(where);
+	}
+
+	private void addAccountFaxNumberClause(final String faxNumber, final JpqlQueryBuilderWhereGroup whereGroup) {
+		whereGroup.appendWhereEquals("apf.localizedAttributeKey", CustomerImpl.ATT_KEY_AP_FAX);
+		final JpqlQueryBuilderWhereGroup where = new JpqlQueryBuilderWhereGroup(ConjunctionType.OR);
+		where.appendLikeWithWildcards("UPPER(apf.shortTextValue)", faxNumber);
+		whereGroup.appendWhereGroup(where);
+	}
+
+	private void addAccountPhoneNumberClause(final String phoneNumber, final JpqlQueryBuilderWhereGroup whereGroup) {
+		whereGroup.appendWhereEquals("app.localizedAttributeKey", CustomerImpl.ATT_KEY_AP_PHONE);
+		final JpqlQueryBuilderWhereGroup where = new JpqlQueryBuilderWhereGroup(ConjunctionType.OR);
+		where.appendLikeWithWildcards("UPPER(app.shortTextValue)", phoneNumber);
+		whereGroup.appendWhereGroup(where);
+	}
+
+	private void addAccountTaxExemptIdClause(final String taxId, final JpqlQueryBuilderWhereGroup whereGroup) {
+		whereGroup.appendWhereEquals("apx.localizedAttributeKey", CustomerImpl.ATT_KEY_AP_TAX_EXEMPTION_ID);
+		final JpqlQueryBuilderWhereGroup where = new JpqlQueryBuilderWhereGroup(ConjunctionType.OR);
+		where.appendLikeWithWildcards("UPPER(apx.shortTextValue)", taxId);
+		whereGroup.appendWhereGroup(where);
 	}
 
 	private void addStoreCodeClauses(final OrderSearchCriteria orderSearchCriteria, final JpqlQueryBuilderWhereGroup whereGroup) {
@@ -171,6 +255,11 @@ public class OrderCriterionImpl implements OrderCriterion {
 		whereGroup.appendWhereGroup(lastNameWhere);
 	}
 
+	private void addEmailClause(final String email, final JpqlQueryBuilderWhereGroup whereGroup) {
+		whereGroup.appendWhereEquals("eml.localizedAttributeKey", CustomerImpl.ATT_KEY_CP_EMAIL);
+		whereGroup.appendWhereEquals("UPPER(eml.shortTextValue)", email);
+	}
+
 	/**
 	 * Add the order by clauses based on the search criteria.
 	 *
@@ -187,7 +276,7 @@ public class OrderCriterionImpl implements OrderCriterion {
 				queryBuilder.appendOrderBy(ORDER_STATUS, ascending);
 				break;
 			case StandardSortBy.CUSTOMER_ID_ORDINAL:
-				queryBuilder.appendOrderBy("o.customer.userId", ascending);
+				queryBuilder.appendOrderBy("o.customer.sharedId", ascending);
 				break;
 			case StandardSortBy.CUSTOMER_NAME_ORDINAL:
 				queryBuilder.appendOrderBy("o.billingAddress.firstName", ascending);

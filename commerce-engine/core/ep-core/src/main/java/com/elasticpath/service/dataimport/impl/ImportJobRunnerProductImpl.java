@@ -26,12 +26,16 @@ import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceSession;
 import com.elasticpath.persistence.openjpa.PersistenceInterceptor;
+import com.elasticpath.service.search.IndexNotificationService;
+import com.elasticpath.service.search.IndexType;
 
 /**
  * An import runner to import products.
  */
 public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
 	private static final Logger LOG = Logger.getLogger(ImportJobRunnerProductImpl.class);
+
+	private IndexNotificationService indexNotificationService;
 	
 	/**
 	 * Find the entity with the given guid.
@@ -79,7 +83,22 @@ public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
 		}
 		((Product) entity).setLastModifiedDate(getTimeService().getCurrentTime());
 	}
-	
+
+	/**
+	 * Generate index notification to ensure the Product is re-indexed.
+	 * @param session session.
+	 * @param entity entity for save.
+	 * @return the saved entity
+	 */
+	@Override
+	protected Entity saveEntityHelper(final PersistenceSession session, final Entity entity) {
+		Entity savedEntity = super.saveEntityHelper(session, entity);
+
+		indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.PRODUCT, entity.getUidPk());
+
+		return savedEntity;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation, when the import type is {@link AbstractImportTypeImpl.DELETE}
@@ -114,7 +133,16 @@ public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
 		}
 	}
 
-	private void removeCategoryFromProduct(final PersistenceSession session, final Product product, final String[] nextLine) {
+	/**
+	 * Removes a {@code Category} from a {@code Product} in the case that the current {@code ImportJob} is of type DELETE and
+	 * generates a product {@code IndexNotification} for the Product.
+	 * If the Category is the Product's default Category then no action will be taken and a warning will be logged.
+	 * This method is marked as package protected to allow for more targeted unit testing.
+	 * @param session the persistence session
+	 * @param product the product
+	 * @param nextLine the import line representing the category to be removed
+	 */
+	protected void removeCategoryFromProduct(final PersistenceSession session, final Product product, final String[] nextLine) {
 		ProductCategoryImportBean productCategoryAssociation = (ProductCategoryImportBean) getImportDataType().createValueObject();
 		updateContent(nextLine, productCategoryAssociation);
 		Category categoryToRemove = productCategoryAssociation.getCategory();
@@ -127,6 +155,7 @@ public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
 		}
 		product.removeCategory(categoryToRemove);
 		session.save(product);
+		indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.PRODUCT, product.getUidPk());
 	}
 	
 	/**
@@ -165,5 +194,13 @@ public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
 					}
 				}
 		}
+	}
+
+	/**
+	 *
+	 * @param indexNotificationService the index notification service
+	 */
+	public void setIndexNotificationService(final IndexNotificationService indexNotificationService) {
+		this.indexNotificationService = indexNotificationService;
 	}
 }

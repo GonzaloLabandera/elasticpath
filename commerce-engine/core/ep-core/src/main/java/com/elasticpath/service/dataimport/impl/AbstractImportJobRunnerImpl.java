@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.persistence.FlushModeType;
-
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -52,7 +50,6 @@ import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceSession;
 import com.elasticpath.persistence.api.Query;
 import com.elasticpath.persistence.api.Transaction;
-import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.service.changeset.ChangeSetService;
 import com.elasticpath.service.dataimport.ImportGuidHelper;
 import com.elasticpath.service.dataimport.ImportJobRunner;
@@ -71,7 +68,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 
 	private static final String CAN_NOT_FIND_MESSAGE = "Cannot find entity with the given guid:";
 
-	private static final String CAN_NOT_UPDATE_MESSAGE = "Cannot update entity because it was not exist";
+	private static final String CAN_NOT_UPDATE_MESSAGE = "Cannot update entity because it does not exist";
 
 	private static final Logger LOG = Logger.getLogger(AbstractImportJobRunnerImpl.class);
 
@@ -438,8 +435,6 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 				preCommitUnitTransactionCreate();
 				transaction = session.beginTransaction();
 
-				changeFlushModeIfRequired(FlushModeType.COMMIT);
-
 				// Tell the persistence engine to batch mode for this transaction
 				if (getPersistenceEngine().isCacheEnabled()) {
 					getPersistenceEngine().setLargeTransaction(true);
@@ -452,8 +447,6 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 					importOneRow(nextLine, session);
 				}
 
-				changeFlushModeIfRequired(FlushModeType.AUTO);
-
 				transaction.commit();
 				postCommitUnitTransactionCommit();
 
@@ -465,17 +458,9 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 			} catch (Exception e) {
 
 				ImportBadRow badRow = logBadRow(request.getImportSource(), nextLine, rowNumber, startRowNumber, endRowNumber, e);
-				if (transaction != null) {
-					try {
-						transaction.rollback();
-					} catch (Exception ee) {
-						// should log and handle errors as normal below.
-						LOG.error("Exception during commit or rollback.", ee);
-					}
-					// Tell the sub-class that the commit unit has been rolled
-					// back
-					postCommitUnitTransactionRollback();
-				}
+				// Tell the sub-class that the commit unit has been rolled back
+				postCommitUnitTransactionRollback();
+
 				// Forward to the import area end
 				rowNumber = endRowNumber - 1;
 				importJobStatusHandler.reportBadRows(importJobProcessId, badRow);
@@ -1262,9 +1247,4 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 		return environmentInfoService;
 	}
 
-	private void changeFlushModeIfRequired(final FlushModeType flushMode) {
-		if (isChangeSetEnabled()) {
-			((JpaPersistenceEngine) getPersistenceEngine()).getEntityManager().setFlushMode(flushMode);
-		}
-	}
 }

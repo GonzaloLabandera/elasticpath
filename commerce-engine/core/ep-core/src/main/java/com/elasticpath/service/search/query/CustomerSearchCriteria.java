@@ -34,15 +34,15 @@ public class CustomerSearchCriteria extends AbstractSearchCriteriaImpl {
 
 	private String phoneNumber;
 
-	private String userId;
+	private String sharedId;
+
+	private String username;
 
 	private Date fromDate;
 
 	private String zipOrPostalCode;
 
 	private Collection<String> storeCodes;
-
-	private boolean userIdAndEmailMutualSearch;
 	
 	private String guid;
 	
@@ -137,21 +137,59 @@ public class CustomerSearchCriteria extends AbstractSearchCriteriaImpl {
 	}
 
 	/**
-	 * Returns the user Id.
-	 * 
+	 * Returns the user Id. This is deprecated. Use getSharedId
+	 *
 	 * @return the user Id
 	 */
+	@Deprecated
 	public String getUserId() {
-		return userId;
+		return getSharedId();
 	}
 
 	/**
-	 * Sets the user Id.
-	 * 
+	 * Sets the user Id. This is deprecated. Use setSharedId
+	 *
 	 * @param userId the user Id
 	 */
+	@Deprecated
 	public void setUserId(final String userId) {
-		this.userId = userId;
+		setSharedId(userId);
+	}
+
+	/**
+	 * Returns the shared Id.
+	 * 
+	 * @return the shared Id
+	 */
+	public String getSharedId() {
+		return sharedId;
+	}
+
+	/**
+	 * Sets the shared Id.
+	 * 
+	 * @param sharedId the shared Id
+	 */
+	public void setSharedId(final String sharedId) {
+		this.sharedId = sharedId;
+	}
+
+	/**
+	 * Returns the user name.
+	 *
+	 * @return the user name
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * Sets the user name.
+	 *
+	 * @param username the user name
+	 */
+	public void setUsername(final String username) {
+		this.username = username;
 	}
 
 	/**
@@ -212,29 +250,16 @@ public class CustomerSearchCriteria extends AbstractSearchCriteriaImpl {
 	 * Optimizes a search criteria by removing unnecessary information.
 	 */
 	@Override
-	@SuppressWarnings("PMD.NPathComplexity")
 	public void optimize() {
-		if (!isStringValid(firstName)) {
-			firstName = null;
-		}
-		if (!isStringValid(lastName)) {
-			lastName = null;
-		}
-		if (!isStringValid(customerNumber)) {
-			customerNumber = null;
-		}
-		if (!isStringValid(email)) {
-			email = null;
-		}
-		if (!isStringValid(phoneNumber)) {
-			phoneNumber = null;
-		}
-		if (!isStringValid(userId)) {
-			userId = null;
-		}
-		if (!isStringValid(zipOrPostalCode)) {
-			zipOrPostalCode = null;
-		}
+		lastName = getNullIfStringInvalid(lastName);
+		customerNumber = getNullIfStringInvalid(customerNumber);
+		email = getNullIfStringInvalid(email);
+		phoneNumber = getNullIfStringInvalid(phoneNumber);
+		sharedId = getNullIfStringInvalid(sharedId);
+		username = getNullIfStringInvalid(username);
+		zipOrPostalCode = getNullIfStringInvalid(zipOrPostalCode);
+		guid = getNullIfStringInvalid(guid);
+
 		if (CollectionUtils.isNotEmpty(storeCodes)) {
 			Set<String> tempStoreCodes = new HashSet<>();
 			for (String storeCode : storeCodes) {
@@ -246,11 +271,15 @@ public class CustomerSearchCriteria extends AbstractSearchCriteriaImpl {
 		} else {
 			storeCodes = null;
 		}
-		if (!isStringValid(guid)) {
-			guid = null;
-		}
 	}
-	
+
+	private String getNullIfStringInvalid(final String str) {
+		if (!isStringValid(str)) {
+			return null;
+		}
+		return str;
+	}
+
 	@Override
 	@SuppressWarnings("PMD.CloneMethodMustImplementCloneable")
 	public SearchCriteria clone() throws CloneNotSupportedException {
@@ -278,30 +307,13 @@ public class CustomerSearchCriteria extends AbstractSearchCriteriaImpl {
 	}
 
 	/**
-	 * Gets the boolean value for enabling/disabling mutual term search on both userId and email fields.
-	 * 
-	 * @return true if this mode is enabled
-	 */
-	public boolean isUserIdAndEmailMutualSearch() {
-		return userIdAndEmailMutualSearch;
-	}
-	
-	/**
-	 * Sets the boolean value for enabling/disabling mutual term search on both userId and email fields.
-	 * 
-	 * @param mutualSearch specifies whether the mutual search for email and user id should be enabled
-	 */
-	public void setUserIdAndEmailMutualSearch(final boolean mutualSearch) {
-		this.userIdAndEmailMutualSearch = mutualSearch;
-	}
-	
-	/**
 	 * Clears this <code>CustomerSearchCriteria</code> and resets all criteria to their default values.
 	 */
 	public void clear() {
 		this.email = null;
 		this.customerNumber = null;
-		this.userId = null;
+		this.sharedId = null;
+		this.username = null;
 		this.firstName = null;
 		this.lastName = null;
 		this.zipOrPostalCode = null;

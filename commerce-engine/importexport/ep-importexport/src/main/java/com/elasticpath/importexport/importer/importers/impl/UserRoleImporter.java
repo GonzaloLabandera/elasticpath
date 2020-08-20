@@ -20,7 +20,7 @@ public class UserRoleImporter extends AbstractImporterImpl<UserRole, UserRoleDTO
 	
 	@Override
 	protected CollectionsStrategy<UserRole, UserRoleDTO> getCollectionsStrategy() {
-		return new UserRoleCollectionsStrategy(getContext().getImportConfiguration().getImporterConfiguration(JobType.USER_ROLE));
+		return new UserRoleCollectionsStrategy(getContext().getImportConfiguration().getImporterConfiguration(JobType.USERROLE));
 	}
 
 	@Override

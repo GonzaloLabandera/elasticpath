@@ -49,7 +49,7 @@ public class FormEntityToCustomerEnhancerImplTest {
 		verify(customer).setLastName(LAST_NAME);
 		verify(customer).setFirstName(FIST_NAME);
 		verify(customer).setClearTextPassword("password");
-		verify(customer).setUserId(USERNAME);
+		verify(customer).setUsername(USERNAME);
 		verify(customer).setEmail(USERNAME);
 	}
 

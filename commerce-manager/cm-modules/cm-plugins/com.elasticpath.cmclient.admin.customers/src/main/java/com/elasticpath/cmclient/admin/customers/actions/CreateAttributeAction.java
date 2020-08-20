@@ -37,7 +37,7 @@ public class CreateAttributeAction extends Action {
 	@Override
 	public void run() {
 		Attribute attributeToAdd = BeanLocator.getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
-		attributeToAdd.setAttributeUsage(AttributeUsageImpl.CUSTOMERPROFILE_USAGE);
+		attributeToAdd.setAttributeUsage(AttributeUsageImpl.USER_PROFILE_USAGE);
 		attributeToAdd.setAttributeType(AttributeType.SHORT_TEXT);
 		boolean dialogOk = AttributeDialog.openCreateDialog(listView.getSite().getShell(), attributeToAdd);
 		if (dialogOk) {

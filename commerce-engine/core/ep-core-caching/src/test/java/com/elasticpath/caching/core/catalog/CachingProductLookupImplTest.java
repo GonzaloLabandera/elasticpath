@@ -117,4 +117,19 @@ public class CachingProductLookupImplTest {
 		verify(productGuidToUidPkCache).get(eq(product.getGuid()), any(CacheLoader.class));
 		verify(productByUidCache).get(null);
 	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testFindByGuidsDelegatesToMultiKeyCacheWithFallbackLoader() {
+		final List<String> productGuids = Arrays.asList(product.getGuid(), product2.getGuid());
+		final List<Long> productUids = Arrays.asList(product.getUidPk(), product2.getUidPk());
+		when(productGuidToUidPkCache.getAll(eq(productGuids), any(CacheLoader.class)))
+				.thenReturn(ImmutableMap.of(product.getGuid(), product.getUidPk(), product2.getGuid(), product2.getUidPk()));
+		when(productByUidCache.getAll(eq(productUids), any(CacheLoader.class)))
+				.thenReturn(ImmutableMap.of(product.getUidPk(), product, product2.getUidPk(), product2));
+
+		List<Product> found = cachingProductLookup.findByGuids(productGuids);
+
+		assertEquals("Cached products should have been returned", Arrays.asList(product, product2), found);
+	}
 }

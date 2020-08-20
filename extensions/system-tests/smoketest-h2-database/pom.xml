@@ -15,7 +15,7 @@
 
 	<properties>
 		<epdb.jdbc.driver>org.h2.Driver</epdb.jdbc.driver>
-		<h2.version>1.3.172</h2.version>
+		<h2.version>1.4.200</h2.version>
 		<data.population.cli.directory>${project.build.directory}/ext-data-population-cli-${project.version}</data.population.cli.directory>
 		<ep.activemq.configUri>broker:(tcp://localhost:61619)?useJmx=true&amp;persistent=false</ep.activemq.configUri>
 	</properties>

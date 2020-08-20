@@ -25,6 +25,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.transform
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.service.catalog.ProductLookup;
+import com.elasticpath.service.search.solr.IndexUtility;
 
 /**
  * Repository class for general search.
@@ -43,6 +44,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	private final ProductLookup productLookup;
 	private final BeanFactory coreBeanFactory;
 	private final ReactiveAdapter reactiveAdapter;
+	private final IndexUtility indexUtility;
 
 	/**
 	 * Default constructor.
@@ -52,6 +54,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	 * @param categoryService the category service.
 	 * @param productLookup the product lookup.
 	 * @param reactiveAdapter reactive adapter.
+	 * @param indexUtility the index utility.
 	 */
 	@Inject
 	CategoryRepositoryImpl(
@@ -60,7 +63,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 			@Named("coreBeanFactory") final BeanFactory coreBeanFactory,
 			@Named("categoryService") final CategoryService categoryService,
 			@Named("productLookup") final ProductLookup productLookup,
-			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
+			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter,
+			@Named("indexUtility") final IndexUtility indexUtility) {
 
 		this.categoryLookup = categoryLookup;
 		this.categoryService = categoryService;
@@ -68,7 +72,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 		this.storeRepository = storeRepository;
 		this.productLookup = productLookup;
 		this.reactiveAdapter = reactiveAdapter;
-
+		this.indexUtility = indexUtility;
 	}
 
 	@Override
@@ -99,19 +103,12 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
 	@Override
 	public Observable<Category> findChildren(final String storeCode, final String parentCategoryCode) {
-
-
-
+		Comparator<Category> comparator = coreBeanFactory.getPrototypeBean(ContextIdNames.ORDERING_COMPARATOR, Comparator.class);
 		return findByStoreAndCategoryCode(storeCode, parentCategoryCode)
 				.flatMap(this::getChildren)
 				.flatMapObservable(Observable::fromIterable)
-				.filter(category -> !category.isLinked() || category.isIncluded())
-				.sorted(getComparatorBean());
-	}
-
-	@SuppressWarnings("unchecked")
-	private Comparator<Category> getComparatorBean() {
-		return coreBeanFactory.getPrototypeBean(ContextIdNames.ORDERING_COMPARATOR, Comparator.class);
+				.filter(Category::isAvailable)
+				.sorted(comparator);
 	}
 
 	@Override
@@ -129,6 +126,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	@CacheResult
 	public Observable<Product> getFeaturedProducts(final long categoryUid) {
 		List<Long> uids = categoryService.findFeaturedProductUidList(categoryUid);
-		return Observable.fromIterable(productLookup.findByUids(uids));
+		List<Product> productList = productLookup.findByUids(uids);
+		List<Product> sortedProductList = indexUtility.sortDomainList(uids, productList);
+		return Observable.fromIterable(sortedProductList);
 	}
 }

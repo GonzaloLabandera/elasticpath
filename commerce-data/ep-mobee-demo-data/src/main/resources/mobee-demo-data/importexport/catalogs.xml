@@ -12,7 +12,7 @@
     <attributes>
         <attribute>
             <key>B00001</key>
-            <name><value language="en">Length</value></name>
+            <name><value language="en_CA">Length</value></name>
             <usage>Product</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -22,7 +22,7 @@
         </attribute>
         <attribute>
             <key>B00003</key>
-            <name><value language="en">Language</value></name>
+            <name><value language="en_CA">Language</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -32,7 +32,7 @@
         </attribute>
         <attribute>
             <key>B00002</key>
-            <name><value language="en">Summary</value></name>
+            <name><value language="en_CA">Summary</value></name>
             <usage>Product</usage>
             <type>LongText</type>
             <multilanguage>false</multilanguage>

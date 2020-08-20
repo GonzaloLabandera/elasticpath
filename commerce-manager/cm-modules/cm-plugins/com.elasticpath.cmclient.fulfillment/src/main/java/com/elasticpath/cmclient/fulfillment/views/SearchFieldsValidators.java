@@ -33,7 +33,7 @@ class SearchFieldsValidators {
 	/**
 	 * Email/userId pattern validator.
 	 */
-	protected static final IValidator EMAIL_PATTERN_USERID_VALIDATOR = new IValidator() {
+	protected static final IValidator EMAIL_PATTERN_VALIDATOR = new IValidator() {
 		@Override
 		public IStatus validate(final Object value) {
 			final IStatus validationSpecialCharacters = NO_SPECIAL_CHARACTERS_EXCEPT_AT_SIGN.validate(value);

@@ -30,11 +30,11 @@ public class AdvancedSearchServiceImpl extends AbstractSearchServiceImpl impleme
 
 	@Override
 	public SearchResult search(final AdvancedSearchRequest searchRequest, final ShoppingCart shoppingCart,
-								final int pageNumber) {
+								final int pageNumber, final int pageSize) {
 
 		SearchResult result = (SearchResult) createCatalogViewResult();
 		result.setCatalogViewRequest(searchRequest);
-		searchForProducts(searchRequest, shoppingCart, pageNumber, result);
+		searchForProducts(searchRequest, shoppingCart, pageNumber, pageSize, result);
 
 		return result;
 	}

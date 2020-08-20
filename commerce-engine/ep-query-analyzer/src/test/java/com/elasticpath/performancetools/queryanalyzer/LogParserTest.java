@@ -14,8 +14,6 @@ import java.io.ObjectInputStream;
 
 import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import com.elasticpath.performancetools.queryanalyzer.beans.QueryStatistics;
 import com.elasticpath.performancetools.queryanalyzer.utils.SystemProperties;
@@ -23,7 +21,6 @@ import com.elasticpath.performancetools.queryanalyzer.utils.SystemProperties;
 /**
  * Test class for {@link LogParser}.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class LogParserTest {
 
 

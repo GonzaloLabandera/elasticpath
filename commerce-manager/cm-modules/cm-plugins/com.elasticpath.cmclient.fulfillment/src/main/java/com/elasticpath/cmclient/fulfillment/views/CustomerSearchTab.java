@@ -45,7 +45,11 @@ public class CustomerSearchTab implements ISearchTab {
 
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
-	private Text emailUserIdText;
+	private Text sharedIdText;
+
+	private Text emailText;
+
+	private Text usernameText;
 
 	private Text firstNameText;
 
@@ -108,8 +112,6 @@ public class CustomerSearchTab implements ISearchTab {
 		
 		// Create customer group
 		this.createSortingGroup(customersTab);
-		
-		searchCriteria.setUserIdAndEmailMutualSearch(true);
 	}
 
 	/**
@@ -138,9 +140,17 @@ public class CustomerSearchTab implements ISearchTab {
 		searchTermsGroup = parentComposite.addGroup(FulfillmentMessages.get().CustomerSearchTab_SearchTermsGroup, 1, false, data);
 
 
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_EmailUserId, null);
+		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_SharedId, null);
 
-		this.emailUserIdText = searchTermsGroup.addTextField(epState, data);
+		this.sharedIdText = searchTermsGroup.addTextField(epState, data);
+
+		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_Email, null);
+
+		this.emailText = searchTermsGroup.addTextField(epState, data);
+
+		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_Username, null);
+
+		this.usernameText = searchTermsGroup.addTextField(epState, data);
 
 		searchTermsGroup.addLabelBold(FulfillmentMessages.get().CustomerDetails_FirstNameLabel, null);
 
@@ -163,8 +173,9 @@ public class CustomerSearchTab implements ISearchTab {
 	private void createSortingGroup(final IEpLayoutComposite parentComposite) {
 		this.sortingControl = new EpSortingCompositeControl(parentComposite, searchCriteria);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_DefaultBillingAddress, StandardSortBy.ADDRESS);
-		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_UserId, StandardSortBy.USER_ID, true);
-		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_EmailUserId, StandardSortBy.EMAIL);
+		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_SharedId, StandardSortBy.SHARED_ID, true);
+		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_Email, StandardSortBy.EMAIL);
+		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_Username, StandardSortBy.USERNAME);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_FirstName, StandardSortBy.FIRST_NAME);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_LastName, StandardSortBy.LAST_NAME);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_TelephoneNum, StandardSortBy.PHONE);
@@ -175,7 +186,9 @@ public class CustomerSearchTab implements ISearchTab {
 	 */
 	private void clearFields() {
 		this.sortingControl.clear();
-		this.emailUserIdText.setText(EMPTY_STRING);
+		this.sharedIdText.setText(EMPTY_STRING);
+		this.emailText.setText(EMPTY_STRING);
+		this.usernameText.setText(EMPTY_STRING);
 		this.firstNameText.setText(EMPTY_STRING);
 		this.lastNameText.setText(EMPTY_STRING);
 		this.zipPostalCodeText.setText(EMPTY_STRING);
@@ -189,8 +202,8 @@ public class CustomerSearchTab implements ISearchTab {
 	 */
 	@Override
 	public void setFocus() {
-		if (this.emailUserIdText != null) {
-			this.emailUserIdText.setFocus();
+		if (this.sharedIdText != null) {
+			this.sharedIdText.setFocus();
 		}
 	}
 
@@ -209,11 +222,13 @@ public class CustomerSearchTab implements ISearchTab {
 	}
 	private boolean hasSearchTerms() {
 
-		return hasSearchTermsFor(getTextValueFromTextWidget(emailUserIdText)) || hasSearchTermsForCustomer();
+		return hasSearchTermsFor(getTextValueFromTextWidget(sharedIdText)) || hasSearchTermsForCustomer();
 	}
 
 	private boolean hasSearchTermsForCustomer() {
-		return hasSearchTermsFor(getTextValueFromTextWidget(emailUserIdText))
+		return hasSearchTermsFor(getTextValueFromTextWidget(sharedIdText))
+				|| hasSearchTermsFor(getTextValueFromTextWidget(emailText))
+				|| hasSearchTermsFor(getTextValueFromTextWidget(usernameText))
 				|| hasSearchTermsFor(getTextValueFromTextWidget(firstNameText)) || hasSearchTermsFor(getTextValueFromTextWidget(lastNameText))
 				|| hasSearchTermsFor(getTextValueFromTextWidget(zipPostalCodeText))
 				|| hasSearchTermsFor(getTextValueFromTextWidget(phoneNumberText));
@@ -253,12 +268,12 @@ public class CustomerSearchTab implements ISearchTab {
 		SafeSearchCodes storeCodes = new SafeSearchCodesImpl();
 		
 		if (select == 0) {
-			storeCodes.extractAndAdd(stores, "code"); //$NON-NLS-1$     
+			getModel().setStoreCodes(null);
 		} else {
 			//FIXME: select or select - 1
 			storeCodes.extractAndAdd(stores.get(select), "code");  //$NON-NLS-1$
+			getModel().setStoreCodes(storeCodes.asSet());
 		}
-		getModel().setStoreCodes(storeCodes.asSet());
 	}
 
 	@Override
@@ -275,10 +290,12 @@ public class CustomerSearchTab implements ISearchTab {
 		setSearchStoreCodeList(0);
 		storeCombo.select(0);
 		
-		bindingProvider.bind(context, this.emailUserIdText, this.getModel(),
-				"userId", null, null, false); //$NON-NLS-1$
-		bindingProvider.bind(context, this.emailUserIdText, this.getModel(),
-				"email", SearchFieldsValidators.EMAIL_PATTERN_USERID_VALIDATOR, null, false); //$NON-NLS-1$
+		bindingProvider.bind(context, this.sharedIdText, this.getModel(),
+				"sharedId", null, null, false); //$NON-NLS-1$
+		bindingProvider.bind(context, this.emailText, this.getModel(),
+				"email", SearchFieldsValidators.EMAIL_PATTERN_VALIDATOR, null, false);
+		bindingProvider.bind(context, this.usernameText, this.getModel(),
+				"username", null, null, false); //$NON-NLS-1$
 		bindingProvider.bind(context, this.firstNameText, this.getModel(),
 				"firstName", null, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.lastNameText, this.getModel(),
@@ -336,7 +353,9 @@ public class CustomerSearchTab implements ISearchTab {
 	 */
 	@Override
 	public void setSelectionListener(final SelectionListener listener) {
-		this.emailUserIdText.addSelectionListener(listener);
+		this.sharedIdText.addSelectionListener(listener);
+		this.emailText.addSelectionListener(listener);
+		this.usernameText.addSelectionListener(listener);
 		this.firstNameText.addSelectionListener(listener);
 		this.lastNameText.addSelectionListener(listener);
 		this.zipPostalCodeText.addSelectionListener(listener);

@@ -9,9 +9,9 @@ package com.elasticpath.domain.customer;
  */
 public final class CustomerMessageIds {
 	/**
-	 * User id already exists error where user id is already defined.
+	 * User id already exists error where shared id is already defined.
 	 */
-	public static final String USERID_ALREADY_EXISTS = "profile.userid.already.exists";
+	public static final String SHAREDID_ALREADY_EXISTS = "profile.sharedId.already.exists";
 
 	private CustomerMessageIds() {
 		// private constructor to ensure class can't be instantiated

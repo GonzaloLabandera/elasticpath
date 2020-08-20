@@ -37,7 +37,9 @@ import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
+import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.service.attribute.AttributeService;
 
 /**
@@ -60,6 +62,8 @@ public class AttributeDialog extends AbstractEpDialog {
 	private Text attributeNameField;
 
 	private CCombo typeCombo;
+	
+	private CCombo usageCombo;
 
 	private Button requiredCheckBox;
 
@@ -139,6 +143,10 @@ public class AttributeDialog extends AbstractEpDialog {
 
 		mainComposite.addLabelBoldRequired(AdminCustomersMessages.get().AttributeType, EpState.EDITABLE, labelData);
 		typeCombo = mainComposite.addComboBox(EpState.EDITABLE, fieldData2);
+		
+		//AdminCustomersMessages.get().AttributeUsage
+		mainComposite.addLabelBoldRequired("Usage", EpState.EDITABLE, labelData); //$NON-NLS-1$
+		usageCombo = mainComposite.addComboBox(EpState.EDITABLE, fieldData2);
 
 		mainComposite.addLabelBold(AdminCustomersMessages.get().Required, labelData);
 		requiredCheckBox = mainComposite.addCheckBoxButton("", EpState.EDITABLE, null); //$NON-NLS-1$
@@ -168,10 +176,15 @@ public class AttributeDialog extends AbstractEpDialog {
 
 		typeCombo.setItems(getAttributeTypeStrings());
 		typeCombo.select(getSelectedAttributeTypeIndex());
+		
+		usageCombo.setItems(getAttributeUsageStrings());
+		usageCombo.select(getSelectedAttributeUsageIndex());
+		
 		if (isEditAttribute()) {
 			attributeKeyField.setEnabled(false);
 			attributeKeyField.setText(attribute.getKey());
 			typeCombo.setEnabled(false);
+			usageCombo.setEnabled(false);
 			requiredCheckBox.setEnabled(false);
 			requiredCheckBox.setSelection(attribute.isRequired());
 		}
@@ -192,6 +205,17 @@ public class AttributeDialog extends AbstractEpDialog {
 			}
 		};
 		binder.bind(context, typeCombo, null, null, attributeTypeUpdateStrategy, true);
+		
+		final ObservableUpdateValueStrategy attributeUsageUpdateStrategy = new ObservableUpdateValueStrategy() {
+			@Override
+			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
+				AttributeUsage selectedAttributeUsage = AttributeUsageImpl.getCustomerAttributeUsages()[usageCombo.getSelectionIndex()];
+				attribute.setAttributeUsage(selectedAttributeUsage);
+				return Status.OK_STATUS;
+			}
+		};
+		binder.bind(context, usageCombo, null, null, attributeUsageUpdateStrategy, true);
+		
 		binder.bind(context, requiredCheckBox, attribute, "required"); //$NON-NLS-1$
 		EpDialogSupport.create(this, context);
 	}
@@ -249,5 +273,22 @@ public class AttributeDialog extends AbstractEpDialog {
 	private int getSelectedAttributeTypeIndex() {
 		List<AttributeType> attributeTypes = Arrays.asList(AttributeType.getCustomerAttributeTypes());
 		return attributeTypes.indexOf(attribute.getAttributeType());
+	}
+	
+	private String[] getAttributeUsageStrings() {
+		AttributeUsage[] attributeUsagesArray = AttributeUsageImpl.getCustomerAttributeUsages();
+		
+		String[] attributeUsagesStrings = new String[attributeUsagesArray.length];
+		
+		for (int i = 0; i < attributeUsagesArray.length; i++) {
+			attributeUsagesStrings[i] = CoreMessages.get().getMessage(attributeUsagesArray[i].getNameMessageKey());
+		}
+		return attributeUsagesStrings;
+	}
+
+	private int getSelectedAttributeUsageIndex() {
+		List<AttributeUsage> attributeUsages = Arrays.asList(AttributeUsageImpl.getCustomerAttributeUsages());
+		
+		return attributeUsages.indexOf(attribute.getAttributeUsage());
 	}
 }

@@ -3,10 +3,13 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -18,6 +21,9 @@ import io.reactivex.Single;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -46,15 +52,22 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 
 	@Inject
 	private ShoppingCartService shoppingCartService;
-	@Inject private CartDirectorService cartDirectorService;
-	@Inject private CustomerSessionRepository customerSessionRepository;
-	@Inject private ShoppingItemDtoFactory shoppingItemDtoFactory;
-	@Inject private ReactiveAdapter reactiveAdapter;
-	@Inject private ProductSkuRepository productSkuRepository;
+	@Inject
+	private CartDirectorService cartDirectorService;
+	@Inject
+	private CustomerSessionRepository customerSessionRepository;
+	@Inject
+	private ShoppingItemDtoFactory shoppingItemDtoFactory;
+	@Inject
+	private ReactiveAdapter reactiveAdapter;
+	@Inject
+	private ProductSkuRepository productSkuRepository;
 
 
-	@Inject private MultiCartResolutionStrategyHolder cartResolutionStrategiesHolder;
-	@Inject private ResourceOperationContext resourceOperationContext;
+	@Inject
+	private MultiCartResolutionStrategyHolder cartResolutionStrategiesHolder;
+	@Inject
+	private ResourceOperationContext resourceOperationContext;
 
 
 	@Override
@@ -72,8 +85,26 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	@Override
 	public Map<String, CartData> getCartDescriptors(final String cartGuid) {
 		Single<ShoppingCart> cartByGuid = getCartByGuid(cartGuid);
-		return cartByGuid.map(ShoppingCart::getCartData).blockingGet();
+		Collection<CartType> shoppingCartTypes = cartByGuid.blockingGet().getStore().getShoppingCartTypes();
+		List<ModifierGroup> modifierGroups =
+				shoppingCartTypes.stream().flatMap(cartType -> cartType.getModifiers().stream()).collect(Collectors.toList());
+		Map<String, CartData> cartDataMap = cartByGuid.map(ShoppingCart::getCartData).blockingGet();
+		Map<String, CartData> cartDescriptorMap = new HashMap<>();
+
+		List<ModifierField> modifierFields =
+				modifierGroups.stream().flatMap(modifierGroup -> modifierGroup.getModifierFields().stream()).collect(Collectors.toList());
+
+		modifierFields.forEach(modifierField -> {
+			if (cartDataMap.containsKey(modifierField.getCode())) {
+				cartDescriptorMap.put(modifierField.getCode(), cartDataMap.get(modifierField.getCode()));
+			} else {
+				cartDescriptorMap.put(modifierField.getCode(), new CartData(modifierField.getCode(), null));
+			}
+		});
+
+		return cartDescriptorMap;
 	}
+
 
 	@Override
 	public Single<ShoppingCart> getShoppingCartForCustomer(final String customerGuid) {
@@ -101,26 +132,26 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 
 
 	@CacheResult(uniqueIdentifier = "getStoreForCartGuid")
-	private Single<String>  getStoreForCartGuid(final String cartGuid) {
+	private Single<String> getStoreForCartGuid(final String cartGuid) {
 		return reactiveAdapter.fromServiceAsSingle(()
 				-> shoppingCartService.findStoreCodeByCartGuid(cartGuid), "STORE NOT FOUND");
 	}
 
 	@Override
 	@CacheResult(uniqueIdentifier = "findAllCarts")
-	public Observable<String> findAllCarts(final String customerGuid, final String storeCode) {
+	public Observable<String> findAllCarts(final String customerGuid, final String accountSharedId, final String storeCode) {
 		MultiCartResolutionStrategy strategy = getStrategy();
-		return strategy.findAllCarts(customerGuid, storeCode, resourceOperationContext.getSubject());
+		return strategy.findAllCarts(customerGuid, accountSharedId, storeCode, resourceOperationContext.getSubject());
 
 	}
 
 	private MultiCartResolutionStrategy getStrategy() {
 		MultiCartResolutionStrategy strategy = null;
-			for (MultiCartResolutionStrategy cartResolutionStrategy : this.cartResolutionStrategiesHolder.getStrategies()) {
-				if (cartResolutionStrategy.isApplicable(resourceOperationContext.getSubject())) {
-					strategy = cartResolutionStrategy;
-				}
+		for (MultiCartResolutionStrategy cartResolutionStrategy : this.cartResolutionStrategiesHolder.getStrategies()) {
+			if (cartResolutionStrategy.isApplicable(resourceOperationContext.getSubject())) {
+				strategy = cartResolutionStrategy;
 			}
+		}
 		assert strategy != null;
 		return strategy;
 	}
@@ -129,6 +160,7 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	public Single<String> findStoreForCartGuid(final String cartGuid) {
 		return getStoreForCartGuid(cartGuid);
 	}
+
 	@Override
 	public Completable removeCart(final String shoppingCartGuid) {
 		return reactiveAdapter.fromServiceAsCompletable(() ->
@@ -235,6 +267,7 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 
 	/**
 	 * Used for testing.
+	 *
 	 * @param reactiveAdapter the reactive adapter.
 	 */
 	protected void setReactiveAdapter(final ReactiveAdapter reactiveAdapter) {

@@ -294,10 +294,10 @@
 
 	<promotion type="Cart">
 		<store_code>MOBEE</store_code>
-		<name>ExpiredCartPromoMobee</name>
+		<name>FutureCartPromoMobee</name>
 		<displayName>
-			<value language="en">Expired Cart Promotion Mobee</value>
-			<value language="en_CA">Expired Cart Promo</value>
+			<value language="en">Future Cart Promotion Mobee</value>
+			<value language="en_CA">Future Cart Promo</value>
 		</displayName>
 		<code>a10edbb4-0f9c-4b2c-baf6-f5d9b895354e</code>
 		<description></description>
@@ -317,13 +317,13 @@
 		</actions>
 		<selling_context>
 			<guid>12ff39e2-4cce-4466-b8f4-18da7c9e0eba</guid>
-			<name>ExpiredCartPromoMobee</name>
+			<name>FutureCartPromoMobee</name>
 			<priority>0</priority>
 			<conditions>
 				<condition>
 					<guid>a6f0155f-3031-41e9-bbe9-50d87b2de47e</guid>
 					<name>1940056754222916</name>
-					<condition_string> { AND { SHOPPING_START_TIME.greaterThan (1549062900000L) }  { SHOPPING_START_TIME.lessThan (1551395700000L) }  } </condition_string>
+					<condition_string> { AND { SHOPPING_START_TIME.greaterThan (4102444800000L) }  { SHOPPING_START_TIME.lessThan (4105123200000L) }  } </condition_string>
 					<dictionary_guid>TIME</dictionary_guid>
 				</condition>
 			</conditions>

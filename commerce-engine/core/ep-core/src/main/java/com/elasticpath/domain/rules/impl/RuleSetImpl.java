@@ -214,11 +214,11 @@ public class RuleSetImpl extends AbstractEntityImpl implements RuleSet {
 	 * @return the rules to compile into a running code base.
 	 */
 	protected Set<Rule> filterOutInactiveRules(final Set<Rule> rules) {
-		final Predicate<Rule> isRuleEnabled = rule -> rule.isEnabled();
-		final Predicate<Rule> isRuleNotExpired = rule -> rule.getEndDate() == null || rule.getEndDate().after(new Date());
+		final Predicate<Rule> isRuleEnabled = Rule::isEnabled;
+		final Predicate<Rule> isRuleExpired = Rule::isExpired;
 
 		return rules.stream()
-				.filter(isRuleEnabled.and(isRuleNotExpired))
+				.filter(isRuleEnabled.and(isRuleExpired.negate()))
 				.collect(Collectors.toSet());
 	}
 

@@ -35,7 +35,7 @@ public class UnlockDialog extends EpLoginDialog {
 	}
 
 	@Override
-	protected EpState getUserIdState() {
+	protected EpState getUsernameState() {
 		return EpState.DISABLED;
 	}
 

@@ -11,3 +11,8 @@ Feature: Lookup for an Offer
     Given I am logged in as a public shopper
     When I lookup an offer with code DOES_NOT_EXIST_CODE
     Then lookup fails with status not found
+
+  Scenario: Lookup a disabled offer should return Not Found
+    Given I am logged in as a public shopper
+    When I lookup an offer with code futureProduct
+    Then lookup fails with status not found

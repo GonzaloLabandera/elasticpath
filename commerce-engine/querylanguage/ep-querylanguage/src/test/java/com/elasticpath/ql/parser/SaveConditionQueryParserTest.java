@@ -35,7 +35,7 @@ public class SaveConditionQueryParserTest { // NOPMD
 		tcConf.initialize();
 		
 		Map<EPQueryType, AbstractEpQLCustomConfiguration> epQLObjectConfiguration = new HashMap<>();
-		epQLObjectConfiguration.put(EPQueryType.SAVED_CONDITION, tcConf);
+		epQLObjectConfiguration.put(EPQueryType.SAVEDCONDITION, tcConf);
 		
 		EpQueryAssembler epQueryAssembler = new EpQueryAssembler();
 		epQueryAssembler.setEpQLObjectConfiguration(epQLObjectConfiguration);

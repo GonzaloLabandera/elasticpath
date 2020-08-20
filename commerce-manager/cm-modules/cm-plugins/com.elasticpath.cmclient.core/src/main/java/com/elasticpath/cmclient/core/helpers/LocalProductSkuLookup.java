@@ -69,6 +69,11 @@ public class LocalProductSkuLookup implements ProductSkuLookup {
 		throw new UnsupportedOperationException(NOT_YET_IMPLEMENTED);
 	}
 
+	@Override
+	public String findImagePathBySkuGuid(final String skuGuid) {
+		throw new UnsupportedOperationException(NOT_YET_IMPLEMENTED);
+	}
+
 	protected ProductSkuLookup getRemoteProductSkuLookup() {
 		return BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class);
 	}

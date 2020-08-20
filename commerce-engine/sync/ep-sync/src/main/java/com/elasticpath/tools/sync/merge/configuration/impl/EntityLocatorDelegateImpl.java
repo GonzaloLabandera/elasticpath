@@ -41,8 +41,10 @@ public class EntityLocatorDelegateImpl extends AbstractEntityLocator {
 	 */
 	@Override
 	public Persistable locatePersistence(final String guid, final Class<?> clazz) {
-		LOG.debug("Trying to sanity check class of guid: " + guid);
 		sanityCheck(clazz);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Locate persistence for " + clazz.getSimpleName() + " with guid " + guid);
+		}
 		for (final EntityLocator locator : entityLocators) {
 			if (locator.isResponsibleFor(clazz)) {
 				return locator.locatePersistence(guid, clazz);
@@ -60,8 +62,10 @@ public class EntityLocatorDelegateImpl extends AbstractEntityLocator {
 	 */
 	@Override
 	public Persistable locatePersistenceForSorting(final String guid, final Class<?> clazz) {
-		LOG.debug("Trying to sanity check class of guid: " + guid);
 		sanityCheck(clazz);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Locate persistence for " + clazz.getSimpleName() + " with guid " + guid);
+		}
 		for (final EntityLocator locator : entityLocators) {
 			if (locator.isResponsibleFor(clazz)) {
 				return locator.locatePersistenceForSorting(guid, clazz);
@@ -82,8 +86,10 @@ public class EntityLocatorDelegateImpl extends AbstractEntityLocator {
 
 	@Override
 	public boolean entityExists(final String guid, final Class<?> clazz) {
-		LOG.debug("Trying to sanity check class of guid: " + guid);
 		sanityCheck(clazz);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Checking entity existence for " + clazz.getSimpleName() + " with guid " + guid);
+		}
 		for (final EntityLocator locator : entityLocators) {
 			if (locator.isResponsibleFor(clazz)) {
 				return locator.entityExists(guid, clazz);

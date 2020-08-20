@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-increase-timportfault-table-args-column-size.xml">
+
+	<changeSet id="2020-07-increase-timportfault-table-args-column-size" author="elasticpath" failOnError="true">
+		<comment>[SUP-559] Increase TIMPORTFAULT table's ARGS column value limit from 255 chars to 1024 chars.</comment>
+		<modifyDataType tableName="TIMPORTFAULT" columnName="ARGS" newDataType="VARCHAR(1024)"></modifyDataType>
+	</changeSet>
+</databaseChangeLog>

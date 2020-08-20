@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <customers>
-<customer guid="14564519-48b2-4b3d-816c-b2b1177c2c88" user_id="system.test.user@elasticpath.com" store_code="SMOKETEST">
+<customer store_code="SMOKETEST" shared_id="SMOKETEST:system.test.user@elasticpath.com" guid="14564519-48b2-4b3d-816c-b2b1177c2c88">
+	<customer_type>REGISTERED_USER</customer_type>
     <status>1</status>
     <creationDate>2013-10-21T17:08:42.365-07:00</creationDate>
     <last_edited>2013-10-22T11:56:21.969-07:00</last_edited>
+	<username>system.test.user@elasticpath.com</username>
     <password>b42b3f23d7d06123a8a4133a142b55204d8b1138ce3ad5c47d6c5b68912cf2a6</password>
     <salt>0d2317a6feb791c5097a877783bffafed7e3146221ff8bffd02e68319475954f</salt>
     <groups>
@@ -15,7 +17,6 @@
         <profile_value key="CP_LAST_NAME" type="AttributeType_ShortText">user</profile_value>
         <profile_value key="CP_FIRST_NAME" type="AttributeType_ShortText">system</profile_value>
         <profile_value key="CP_EMAIL" type="AttributeType_ShortText">system.test.user@elasticpath.com</profile_value>
-        <profile_value key="CP_ANONYMOUS_CUST" type="AttributeType_Boolean">false</profile_value>
     </customer_profile>
 </customer>
 </customers>

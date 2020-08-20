@@ -8,8 +8,9 @@
 			<description>
 				<![CDATA[
 Retrieves the cart's order. An order may have Needinfos. Needinfos identify a condition that must be satisfied before a transaction can complete.
-Needinfos link to a selector where the customer can select the missing condition. Once the Needinfos are
-satisfied the order can be submitted to a purchase.
+Needinfos link to a selector where the customer can select the missing condition. After the Needinfos are
+satisfied, the order can be submitted to a purchase.
+For a list of messages that can appear on the order, see `needinfo-messages` in the [Structured Messages](../frontend-dev/api/structured-messages.md#needinfo-messages) topic.
 				]]>
 			</description>
 			<step>
@@ -61,31 +62,6 @@ satisfied the order can be submitted to a purchase.
 				<to>emails.add-email-form</to>
 				<via-link>createemailaction</via-link>
 				<result>emails.email</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-email-needinfo-from-order</name>
-			<description><![CDATA[Read the order's email needinfo. When an email needinfo appears on
-			the order, it means the customer's email has not been selected for the purchase. Likely,
-			this customer does not have an account. Follow the workflow to read the email needinfo.]]></description>
-			<step>
-				<description><![CDATA[Read order email needinfo from order.]]></description>
-				<start>order</start>
-				<follow-link>needinfo</follow-link>
-				<result>email-info</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-email-needinfo-from-purchaseform</name>
-			<description><![CDATA[Read order email needinfo. When an email needinfo appears on the
-			purchase form, it means the customer's email has not been selected for the purchase. Likely, this customer does not have an account. Follow the workflow to read the email needinfo.]]></description>
-			<step>
-				<description><![CDATA[Read order email needinfo from purchaseform.]]></description>
-				<start>purchases.create-purchase-form</start>
-				<follow-link>needinfo</follow-link>
-				<result>email-info</result>
 			</step>
 		</plan>
 		
@@ -175,30 +151,6 @@ and then create a choice to select the billing address to use for the purchase.
 				<to>addresses.address-form</to>
 				<via-link>createaddressaction</via-link>
 				<result>addresses.address</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-billingaddress-needinfo-from-order</name>
-			<description><![CDATA[When a billingaddress needinfo appears on the order, it means
-			the billingaddress has not been selected for the purchase.
-			Follow the workflow to read the billingaddress needinfo.]]></description>
-			<step>
-				<description><![CDATA[Read billingaddress needinfo from order.]]></description>
-				<start>order</start>
-				<follow-link>needinfo</follow-link>
-				<result>billingaddress-info</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-billingaddress-needinfo-from-purchaseform</name>
-			<description><![CDATA[Read billingaddress needinfo.]]></description>
-			<step>
-				<description><![CDATA[Read billingaddress needinfo from purchaseform.]]></description>
-				<start>purchases.create-purchase-form</start>
-				<follow-link>needinfo</follow-link>
-				<result>billingaddress-info</result>
 			</step>
 		</plan>
 		

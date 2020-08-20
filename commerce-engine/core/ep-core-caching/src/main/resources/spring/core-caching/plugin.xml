@@ -14,5 +14,7 @@
 	<import resource="cache-core.xml"/>
 	<import resource="cache-catalog.xml"/>
 	<import resource="cache-pricing.xml"/>
+	<import resource="cache-tax.xml"/>
+	<import resource="cache-rules.xml"/>
 	<import resource="cache-spring-overrides.xml"/>
 </beans>

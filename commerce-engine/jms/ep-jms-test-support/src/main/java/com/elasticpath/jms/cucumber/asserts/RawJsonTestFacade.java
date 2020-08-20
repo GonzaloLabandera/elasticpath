@@ -106,10 +106,10 @@ public final class RawJsonTestFacade {
 
 	/**
 	 * Returns list of JsonObject based on path and value
-	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_SHIPMENT_CREATED"},"guid":"80008-1","data":{...
-	 * to select message with eventType name = ORDER_SHIPMENT_CREATED use:
+	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_CREATED"},"guid":"20001","data":{...
+	 * to select message with eventType name = ORDER_CREATED use:
 	 * path  eventType.name
-	 * value ORDER_SHIPMENT_CREATED
+	 * value ORDER_CREATED
 	 *
 	 * @param jsonObjectList list of messages
 	 * @param path           path to key
@@ -135,10 +135,10 @@ public final class RawJsonTestFacade {
 
 	/**
 	 * Returns JsonObject based on path and value
-	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_SHIPMENT_CREATED"},"guid":"80008-1","data":{...
-	 * to select message with guid = 80008-1 use:
+	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_CREATED"},"guid":"20001","data":{...
+	 * to select message with guid = 20001 use:
 	 * path  guid
-	 * value 80008-1
+	 * value 20001
 	 *
 	 * @param jsonObjectList list of messages
 	 * @param path           path to key
@@ -169,7 +169,7 @@ public final class RawJsonTestFacade {
 
 	/**
 	 * Returns map based on path.
-	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_SHIPMENT_CREATED"},"guid":"80008-1","data":{...
+	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_CREATED"},"guid":"20001","data":{...
 	 * to get map of eventType use:
 	 * path  eventType
 	 *
@@ -190,7 +190,7 @@ public final class RawJsonTestFacade {
 
 	/**
 	 * Returns list of map based on path.
-	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_SHIPMENT_CREATED"},"guid":"80008-1","data":{...
+	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_CREATED"},"guid":"20001","data":{...
 	 * ..."addresses":[{"addressUsage":"BILLING","street1":"123 Black Sea Rd.","street2":"100","city":"Blaine","region":"WA","country":"US",
 	 * "zipPostalCode":"98230"},{"addressUsage":"SHIPPING","firstName":"User","lastName":"Test"...
 	 * to get addresses list from a message use:
@@ -213,7 +213,7 @@ public final class RawJsonTestFacade {
 
 	/**
 	 * Returns map based on path.
-	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_SHIPMENT_CREATED"},"guid":"80008-1","data":{...
+	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_CREATED"},"guid":"20001","data":{...
 	 * ..."addresses":[{"addressUsage":"BILLING","street1":"123 Black Sea Rd.","street2":"100","city":"Blaine","region":"WA","country":"US",
 	 * "zipPostalCode":"98230"},{"addressUsage":"SHIPPING","firstName":"User","lastName":"Test"...
 	 * to get address addressUsage = SHIPPING  from address map list use:

@@ -41,13 +41,10 @@
 		<property name="customerProfileAttributes" ref="customerProfileAttributes"/>
 	</bean>
 	<bean id="customerAuthentication" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl"/>
-	<bean id="customerDeleted" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerDeletedImpl"/>
 	<bean id="customerSession" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerSessionImpl">
-		<property name="customerSessionMemento" ref="customerSessionMemento"/>
 		<property name="priceListStackInvalidationDeterminer" ref="priceListStackInvalidator"/>
 		<property name="promoInvalidationDeterminer" ref="promoInvalidator"/>
 	</bean>
-	<bean id="customerSessionMemento" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl"/>
 	<bean id="customerGroup" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerGroupImpl"/>
 	<bean id="customerRole" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerRoleImpl"/>
 	<bean id="customerAddress" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerAddressImpl"/>
@@ -205,6 +202,7 @@
 	<bean id="appliedCoupon" scope="prototype" class="com.elasticpath.domain.rules.impl.AppliedCouponImpl"/>
 	<bean id="productSearchCriteria" scope="prototype" class="com.elasticpath.service.search.query.ProductSearchCriteria"/>
 	<bean id="categorySearchCriteria" scope="prototype" class="com.elasticpath.service.search.query.CategorySearchCriteria"/>
+	<bean id="accountSearchCriteria" scope="prototype" class="com.elasticpath.service.search.query.AccountSearchCriteria"/>
 	<bean id="customerSearchCriteria" scope="prototype" class="com.elasticpath.service.search.query.CustomerSearchCriteria"/>
 	<bean id="orderSearchCriteria" scope="prototype" class="com.elasticpath.service.search.query.OrderSearchCriteria"/>
 	<bean id="orderReturnSearchCriteria" scope="prototype" class="com.elasticpath.service.search.query.OrderReturnSearchCriteria"/>
@@ -390,5 +388,8 @@
 	<!-- Tag Localization for Import/Export -->
 	<bean id="tagDefinitionLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.TagDefinitionLocalizedPropertyValueImpl"/>
 	<bean id="tagGroupLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.TagGroupLocalizedPropertyValueImpl"/>
+
+<!--	UserAccountAssociation-->
+	<bean id="userAccountAssociation" scope="prototype" class="com.elasticpath.domain.customer.impl.UserAccountAssociationImpl"/>
 
 </beans>

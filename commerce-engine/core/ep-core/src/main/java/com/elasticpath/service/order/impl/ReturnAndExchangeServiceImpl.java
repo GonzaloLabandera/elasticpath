@@ -385,7 +385,6 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 		final Store store = getStoreService().findStoreWithCode(order.getStoreCode());
 
 		shoppingCart.setCustomerSession(customerSession);
-		customerSession.setShoppingCart(shoppingCart);
 		customerSession.setCurrency(order.getCurrency());
 		customerSession.setLocale(order.getLocale());
 

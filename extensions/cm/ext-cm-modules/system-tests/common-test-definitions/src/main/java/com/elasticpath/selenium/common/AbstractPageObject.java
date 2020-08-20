@@ -1082,6 +1082,27 @@ public abstract class AbstractPageObject extends AbstractPage {
 	}
 
 	/**
+	 * Clicks the tab and verifies expected element exists in the selected tab.
+	 *
+	 * @param tabCssSelection          the tab css
+	 * @param selectionVerificationCss the css of expected element in the tab
+	 */
+	public void clickTabAndVerify(final String tabCssSelection, final String selectionVerificationCss) {
+		sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(tabCssSelection)));
+
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		int i = 0;
+		while (!isElementPresent(By.cssSelector(selectionVerificationCss)) && i < 5) {
+			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(tabCssSelection)));
+			sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
+			i++;
+		}
+		setWebDriverImplicitWaitToDefault();
+		getWaitDriver().waitForElementToBeVisible(By.cssSelector(selectionVerificationCss));
+	}
+
+	/**
 	 * Returns the checkbox state.
 	 *
 	 * @param checkboxRowCssSelector the checkbox row css
@@ -1259,7 +1280,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
 		retryFunction((WebDriver driver) -> {
 			Actions actions = new Actions(getDriver());
-			actions.contextClick().build().perform();
+			actions.contextClick(getSelectedElement()).perform();
 			return driver.findElement(bySelector);
 		}, POLLING_INTERVAL, WEBDRIVER_DEFAULT_TIMEOUT);
 		setWebDriverImplicitWaitToDefault();

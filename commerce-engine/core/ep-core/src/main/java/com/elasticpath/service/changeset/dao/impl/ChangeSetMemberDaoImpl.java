@@ -12,6 +12,7 @@ import com.elasticpath.domain.changeset.ChangeSetMember;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
 import com.elasticpath.domain.objectgroup.BusinessObjectMetadata;
+import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.changeset.ChangeSetLoadTuner;
@@ -197,7 +198,8 @@ public class ChangeSetMemberDaoImpl implements ChangeSetMemberDao {
 
 	@Override
 	public Collection<BusinessObjectMetadata> findBusinessObjectMetadataByGroupIdAndMetadataKey(final String changeSetGuid, final String key) {
-		return persistenceEngine.retrieveByNamedQuery("FIND_OBJECT_METADATA_BY_GROUPID_AND_KEY", changeSetGuid, key);
+		return persistenceEngine.retrieveByNamedQuery("FIND_OBJECT_METADATA_BY_GROUPID_AND_KEY", FlushMode.AUTO, true, new Object[] {changeSetGuid,
+                key});
 	}
 
 }

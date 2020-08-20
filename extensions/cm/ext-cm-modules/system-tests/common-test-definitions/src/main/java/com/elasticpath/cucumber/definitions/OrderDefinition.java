@@ -5,7 +5,6 @@
 package com.elasticpath.cucumber.definitions;
 
 import static com.elasticpath.selenium.dialogs.PaymentProcessingErrorDialog.OK_BUTTON_CSS;
-import static com.elasticpath.selenium.setup.SetUp.getDriver;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -18,6 +17,7 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.log4j.Logger;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.cortexTestObjects.Purchase;
 import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
@@ -37,7 +37,8 @@ import com.elasticpath.selenium.domainobjects.ShipmentTableRecord;
 import com.elasticpath.selenium.editor.CustomerEditor;
 import com.elasticpath.selenium.editor.OrderEditor;
 import com.elasticpath.selenium.editor.RmaEditor;
-import com.elasticpath.selenium.navigations.CustomerService;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.navigations.CustomerServiceNavigation;
 import com.elasticpath.selenium.navigations.ShippingReceiving;
 import com.elasticpath.selenium.resultspane.OrderSearchResultPane;
 import com.elasticpath.selenium.resultspane.RmaSearchResultPane;
@@ -60,6 +61,7 @@ import com.elasticpath.selenium.wizards.PaymentAuthorizationWizard;
 public class OrderDefinition {
 
 	private static final String CUSTOMERNAME_COLUUMNNAME = "Customer Name";
+	private static final String ACCOUNTNAME_COLUUMNNAME = "Account Name";
 	private static final String ORDER_NUMBER_COLUMNNAME = "Order #";
 	private static final String ORDER_STORE_COLUUMNNAME = "Store";
 	private static final String ORDER_PHONE_FIELD = "phone";
@@ -74,7 +76,7 @@ public class OrderDefinition {
 
 	private static final Logger LOGGER = Logger.getLogger(OrderDefinition.class);
 
-	private final CustomerService customerService;
+	private final CustomerServiceNavigation customerServiceNavigation;
 	private final ActivityToolbar activityToolbar;
 	private final ShippingReceivingActionToolbar shippingReceivingActionToolbar;
 	private final CustomerServiceActionToolbar customerServiceActionToolbar;
@@ -96,6 +98,7 @@ public class OrderDefinition {
 	private CreateExchangeWizard createExchangeWizard;
 	private PaymentProcessingErrorDialog paymentProcessingErrorDialog;
 	private CompleteExchangeWizard completeExchangeWizard;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -103,10 +106,11 @@ public class OrderDefinition {
 	 * @param product Product.
 	 */
 	public OrderDefinition(final Product product, final PaymentConfiguration paymentConfiguration) {
-		activityToolbar = new ActivityToolbar((getDriver()));
-		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(getDriver());
-		customerService = new CustomerService(getDriver());
-		customerServiceActionToolbar = new CustomerServiceActionToolbar(getDriver());
+		this.driver = SeleniumDriverSetup.getDriver();
+		activityToolbar = new ActivityToolbar(driver);
+		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(driver);
+		customerServiceNavigation = new CustomerServiceNavigation(driver);
+		customerServiceActionToolbar = new CustomerServiceActionToolbar(driver);
 		this.product = product;
 		this.paymentConfiguration = paymentConfiguration;
 	}
@@ -120,13 +124,13 @@ public class OrderDefinition {
 	public void searchOrderByNumber(final String orderNum) {
 		assertThat(null == orderNum || orderNum.isEmpty()).as("OrderNumber is null or empty because order was not created successfully")
 				.isFalse();
-		customerService.enterOrderNumber(orderNum);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.enterOrderNumber(orderNum);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 
 		int index = 0;
 		while (!orderSearchResultPane.isOrderInList(orderNum, "Order #") && index < Constants.UUID_END_INDEX) {
 			orderSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			customerService.clickOrderSearch();
+			customerServiceNavigation.clickOrderSearch();
 			index++;
 		}
 	}
@@ -138,8 +142,8 @@ public class OrderDefinition {
 	 */
 	@When("^I search for orders by email (.+)$")
 	public void searchOrderByEmail(final String email) {
-		customerService.enterEmailUserID(email);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.enterEmail(email);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -148,9 +152,9 @@ public class OrderDefinition {
 	@When("^I search for the latest orders by email$")
 	public void searchLatestByEmail() {
 		searchAndOpenLatestOrderEditor();
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterEmailUserID(orderEditor.getCustomerEmail());
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterEmail(orderEditor.getCustomerEmail());
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -179,6 +183,16 @@ public class OrderDefinition {
 	@Then("^I should see customer name (.+) in search results pane$")
 	public void verifyCustomerNameInSearchResultsPane(final String customerName) {
 		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(customerName, CUSTOMERNAME_COLUUMNNAME);
+	}
+
+	/**
+	 * Verify account name in search results pane.
+	 *
+	 * @param accountName the account name.
+	 */
+	@Then("^I should see account name (.+) in search results pane$")
+	public void verifyAccountNameInSearchResultsPane(final String accountName) {
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(accountName, ACCOUNTNAME_COLUUMNNAME);
 	}
 
 	/**
@@ -427,6 +441,7 @@ public class OrderDefinition {
 
 	/**
 	 * Verify payment plugin error message.
+	 *
 	 * @param paymentError expected error
 	 */
 	@Then("^Refund should respond with payment error (.*)$")
@@ -436,6 +451,7 @@ public class OrderDefinition {
 
 	/**
 	 * Verify exact payment plugin error message.
+	 *
 	 * @param paymentError expected error
 	 */
 	@Then("^Refund should respond with exact payment error (.*)$")
@@ -498,7 +514,7 @@ public class OrderDefinition {
 	 */
 	@When("^I clear the input fields in customers tab$")
 	public void clearInputFieldsInCustomersTab() {
-		customerService.clearInputFieldsInCustomersTab();
+		customerServiceNavigation.clearInputFieldsInCustomersTab();
 	}
 
 	/**
@@ -506,7 +522,7 @@ public class OrderDefinition {
 	 */
 	@When("^I clear the input field in orders tabs$")
 	public void clearInputFieldsInOrdersTab() {
-		customerService.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
 	}
 
 	/**
@@ -515,8 +531,8 @@ public class OrderDefinition {
 	@When("^I (?:search|can search) and open order editor for the latest order$")
 	public void searchAndOpenLatestOrderEditor() {
 		activityToolbar.clickCustomerServiceButton();
-		customerService.enterOrderNumber(getLatestOrderNumber());
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(getLatestOrderNumber(), ORDER_NUMBER_COLUMNNAME);
 	}
 
@@ -526,8 +542,8 @@ public class OrderDefinition {
 	@When("^I (?:search|can search) and open order editor for the latest exchange order$")
 	public void searchAndOpenLatestExchangeOrderEditor() {
 		activityToolbar.clickCustomerServiceButton();
-		customerService.enterOrderNumber(createExchangeWizard.getExchangeOrderNumber());
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.enterOrderNumber(createExchangeWizard.getExchangeOrderNumber());
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(createExchangeWizard.getExchangeOrderNumber(), ORDER_NUMBER_COLUMNNAME);
 	}
 
@@ -665,7 +681,7 @@ public class OrderDefinition {
 	 * Click cancel button.
 	 */
 	@When("^I click cancel in exchange window$")
-	public void clickCancel(){
+	public void clickCancel() {
 		completeExchangeWizard.clickCancelInDialog();
 	}
 
@@ -675,7 +691,7 @@ public class OrderDefinition {
 	 * @param errorMessage String
 	 */
 	@Then("Error message (.*) appears")
-	public void hasError(final String errorMessage){
+	public void hasError(final String errorMessage) {
 		paymentProcessingErrorDialog.verifyErrorMessageDisplayedInPaymentProcessingErrorDialog(errorMessage);
 		paymentProcessingErrorDialog.clickButton(OK_BUTTON_CSS, "OK");
 		shippingReceivingActionToolbar.clickReloadActiveEditor();
@@ -1236,9 +1252,9 @@ public class OrderDefinition {
 	 */
 	@When("^I search for orders by First Name (.+)$")
 	public void searchOrderByFirstName(final String firstName) {
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterFirstName(firstName);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterFirstName(firstName);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -1248,9 +1264,21 @@ public class OrderDefinition {
 	 */
 	@When("^I search for orders by Last Name (.+)$")
 	public void searchOrderByLastName(final String lastName) {
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterLastName(lastName);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterLastName(lastName);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
+	}
+
+	/**
+	 * Search order by Business Name.
+	 *
+	 * @param businessName the account name.
+	 */
+	@When("^I search for orders by Business Name (.+)$")
+	public void searchOrderByAccountName(final String businessName) {
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterBusinessName(businessName);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -1260,10 +1288,10 @@ public class OrderDefinition {
 	 */
 	@When("^I search for latest orders by Postal Code (.+)$")
 	public void searchOrderByPostalCode(final String postalCode) {
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterOrderNumber(getLatestOrderNumber());
-		customerService.enterPostalCode(postalCode);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
+		customerServiceNavigation.enterPostalCode(postalCode);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -1273,9 +1301,9 @@ public class OrderDefinition {
 	 */
 	@When("^I search for orders by Phone Number (.+)$")
 	public void searchOrderByPhoneNumber(final String phoneNumber) {
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterPhoneNumber(phoneNumber);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterPhoneNumber(phoneNumber);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -1285,10 +1313,10 @@ public class OrderDefinition {
 	 */
 	@When("^I search for latest order by Store (.+)$")
 	public void searchOrderByStore(final String storeName) {
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterOrderNumber(getLatestOrderNumber());
-		customerService.selectStore(storeName);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
+		customerServiceNavigation.selectStore(storeName);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -1299,12 +1327,12 @@ public class OrderDefinition {
 	@When("^I search for latest order by Order Status (.+)$")
 	public void searchLatestOrderByStatus(final String orderStatus) {
 		closeOrderSearchResultPaneIfOpen();
-		customerService.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
 
-		customerService.enterOrderNumber(getLatestOrderNumber());
+		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
 
-		customerService.selectStatus(orderStatus);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.selectStatus(orderStatus);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -1364,10 +1392,10 @@ public class OrderDefinition {
 	@When("^I search for latest order by Order Shipment Status (.+)$")
 	public void searchOrderByShipmentStatus(final String orderShipmentStatus) {
 		closeOrderSearchResultPaneIfOpen();
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterOrderNumber(getLatestOrderNumber());
-		customerService.selectShipmentStatus(orderShipmentStatus);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
+		customerServiceNavigation.selectShipmentStatus(orderShipmentStatus);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -1378,10 +1406,10 @@ public class OrderDefinition {
 	@When("^I search for latest order by SKU Code (.+)$")
 	public void searchOrderBySkuCode(final String skuCode) {
 		closeOrderSearchResultPaneIfOpen();
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterOrderNumber(getLatestOrderNumber());
-		customerService.enterSkuCode(skuCode);
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
+		customerServiceNavigation.enterSkuCode(skuCode);
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**
@@ -1390,11 +1418,11 @@ public class OrderDefinition {
 	@When("^I search for order by Dates between current date and next date$")
 	public void searchOrderByDateRange() {
 		closeOrderSearchResultPaneIfOpen();
-		customerService.clearInputFieldsInOrdersTab();
-		customerService.enterOrderNumber(getLatestOrderNumber());
-		customerService.enterFromDate();
-		customerService.enterToDate();
-		orderSearchResultPane = customerService.clickOrderSearch();
+		customerServiceNavigation.clearInputFieldsInOrdersTab();
+		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
+		customerServiceNavigation.enterFromDate();
+		customerServiceNavigation.enterToDate();
+		orderSearchResultPane = customerServiceNavigation.clickOrderSearch();
 	}
 
 	/**

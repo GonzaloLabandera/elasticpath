@@ -38,7 +38,8 @@ public class OfferComponentLinksRepositoryImpl<I extends OfferComponentsIdentifi
 	public Observable<ResourceIdentifier> getElements(final OfferComponentsIdentifier identifier) {
 		final Map<String, String> offerIdMap = identifier.getOffer().getOfferId().getValue();
 		final String productCode = offerIdMap.get(SearchRepositoryImpl.PRODUCT_GUID_KEY);
-		return storeProductRepository.findByGuid(productCode)
+		final String scope = identifier.getOffer().getScope().getValue();
+		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(scope, productCode)
 				.flatMap(itemRepository::asProductBundle)
 				.flatMapObservable(productBundle -> Observable.fromIterable(productBundle.getConstituents()))
 				.map(BundleConstituent::getConstituent)

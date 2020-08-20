@@ -79,10 +79,10 @@ public class BrandAdapter extends AbstractDomainAdapterImpl<Brand, BrandDTO> {
 					checkLocaleSupportedByCatalog(locale, target);
 					localizedProperties.setValue(Brand.LOCALIZED_PROPERTY_DISPLAY_NAME, locale, displayValue.getValue());
 				} else {
-					throw new PopulationRollbackException("IE-10000", displayValue.getLanguage());
+					throw new PopulationRollbackException("IE-10011", displayValue.getLanguage());
 				}
 			} catch (IllegalArgumentException exception) {
-				throw new PopulationRollbackException("IE-10000", exception, displayValue.getLanguage());
+				throw new PopulationRollbackException("IE-10011", exception, displayValue.getLanguage());
 			}
 		}
 	}
@@ -93,7 +93,7 @@ public class BrandAdapter extends AbstractDomainAdapterImpl<Brand, BrandDTO> {
 	private void checkLocaleSupportedByCatalog(final Locale locale, final Brand brand) {
 		Catalog catalog = brand.getCatalog();
 		if (catalog != null && !catalog.getSupportedLocales().contains(locale)) {
-			throw new PopulationRollbackException("IE-10000", locale.toString());
+			throw new PopulationRollbackException("IE-10000", locale.toString(), catalog.getCode());
 		}
 	}
 

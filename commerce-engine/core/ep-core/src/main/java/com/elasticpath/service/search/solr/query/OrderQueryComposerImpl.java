@@ -31,7 +31,13 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
  */
 @Deprecated
 public class OrderQueryComposerImpl extends AbstractQueryComposerImpl {
-	
+
+	/** User Id and email in one field. */
+	private static final String USERID_AND_EMAIL = "userIdAndEmail";
+
+	/** User Id and email exact in one field. */
+	private static final String USERID_AND_EMAIL_EXACT = "userIdAndEmailExact";
+
 	@Override
 	protected boolean isValidSearchCriteria(final SearchCriteria searchCriteria) {
 		return searchCriteria instanceof OrderSearchCriteria;
@@ -143,15 +149,15 @@ public class OrderQueryComposerImpl extends AbstractQueryComposerImpl {
 		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.LAST_NAME, customerSearchCriteria
 				.getLastName(), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		
-		BooleanQuery.Builder userIdEmailQueryBuilder = new BooleanQuery.Builder();
+		BooleanQuery.Builder sharedIdEmailQueryBuilder = new BooleanQuery.Builder();
 		boolean hasUserCriteria = false;
-		hasUserCriteria |= addWholeFieldToQuery(SolrIndexConstants.USERID_AND_EMAIL, customerSearchCriteria.getUserId(), null,
-				searchConfig, userIdEmailQueryBuilder, Occur.SHOULD, true);
-		hasUserCriteria |= addWholeFieldToQuery(SolrIndexConstants.USERID_AND_EMAIL, customerSearchCriteria.getEmail(), null,
-				searchConfig, userIdEmailQueryBuilder, Occur.SHOULD, true);
+		hasUserCriteria |= addWholeFieldToQuery(USERID_AND_EMAIL, customerSearchCriteria.getSharedId(), null,
+				searchConfig, sharedIdEmailQueryBuilder, Occur.SHOULD, true);
+		hasUserCriteria |= addWholeFieldToQuery(USERID_AND_EMAIL, customerSearchCriteria.getEmail(), null,
+				searchConfig, sharedIdEmailQueryBuilder, Occur.SHOULD, true);
 		hasSomeCriteria |= hasUserCriteria;
 		if (hasUserCriteria) {
-			booleanQueryBuilder.add(userIdEmailQueryBuilder.build(), Occur.MUST);
+			booleanQueryBuilder.add(sharedIdEmailQueryBuilder.build(), Occur.MUST);
 		}
 		
 		hasSomeCriteria |= addFuzzyInvariableCustomerTerms(orderSearchCriteria, booleanQueryBuilder, searchConfig);
@@ -170,15 +176,15 @@ public class OrderQueryComposerImpl extends AbstractQueryComposerImpl {
 				.getLastName(), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		
 		
-		BooleanQuery.Builder userIdEmailQueryBuilder = new BooleanQuery.Builder();
+		BooleanQuery.Builder sharedIdEmailQueryBuilder = new BooleanQuery.Builder();
 		boolean hasUserCriteria = false;
-		hasUserCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.USERID_AND_EMAIL, customerSearchCriteria.getUserId(), null,
-				searchConfig, userIdEmailQueryBuilder, Occur.SHOULD, true);
-		hasUserCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.USERID_AND_EMAIL, customerSearchCriteria.getEmail(), null,
-				searchConfig, userIdEmailQueryBuilder, Occur.SHOULD, true);
+		hasUserCriteria |= addWholeFuzzyFieldToQuery(USERID_AND_EMAIL, customerSearchCriteria.getSharedId(), null,
+				searchConfig, sharedIdEmailQueryBuilder, Occur.SHOULD, true);
+		hasUserCriteria |= addWholeFuzzyFieldToQuery(USERID_AND_EMAIL, customerSearchCriteria.getEmail(), null,
+				searchConfig, sharedIdEmailQueryBuilder, Occur.SHOULD, true);
 		hasSomeCriteria |= hasUserCriteria;
 		if (hasUserCriteria) {
-			booleanQueryBuilder.add(userIdEmailQueryBuilder.build(), Occur.MUST);
+			booleanQueryBuilder.add(sharedIdEmailQueryBuilder.build(), Occur.MUST);
 		}
 
 
@@ -223,7 +229,7 @@ public class OrderQueryComposerImpl extends AbstractQueryComposerImpl {
 		final SortOrder sortOrder = searchCriteria.getSortingOrder();
 		switch (searchCriteria.getSortingType().getOrdinal()) {
 		case StandardSortBy.CUSTOMER_NAME_ORDINAL:
-			sortFieldMap.put(SolrIndexConstants.USERID_AND_EMAIL_EXACT, sortOrder);
+			sortFieldMap.put(USERID_AND_EMAIL_EXACT, sortOrder);
 			break;
 		case StandardSortBy.DATE_ORDINAL:
 			sortFieldMap.put(SolrIndexConstants.CREATE_TIME, sortOrder);

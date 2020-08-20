@@ -7,14 +7,15 @@ import java.util.List;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateShippingServiceLevelDialog;
 import com.elasticpath.selenium.dialogs.EditShippingServiceLevelDialog;
 import com.elasticpath.selenium.domainobjects.ShippingServiceLevel;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.PromotionsShipping;
 import com.elasticpath.selenium.resultspane.ShippingServiceLevelSearchResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.Utility;
 
@@ -30,12 +31,14 @@ public class ShippingServiceLevelDefinition {
 	private CreateShippingServiceLevelDialog createShippingServiceLevelDialog;
 	private EditShippingServiceLevelDialog editShippingServiceLevelDialog;
 	private ShippingServiceLevel shippingServiceLevel;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public ShippingServiceLevelDefinition() {
-		promotionsShipping = new PromotionsShipping(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		promotionsShipping = new PromotionsShipping(driver);
 	}
 
 	/**
@@ -97,7 +100,7 @@ public class ShippingServiceLevelDefinition {
 	 */
 	private void createShippingServiceLevelHelper() {
 		promotionsShipping.clickShippingServiceLevelTab();
-		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(SetUp.getDriver());
+		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(driver);
 		shippingServiceLevelSearchResultPane.clickCreateServiceLevelResultsTab();
 		createShippingServiceLevelDialog = shippingServiceLevelSearchResultPane.clickCreateServiceLevelButton();
 		createShippingServiceLevelDialog.selectStore(shippingServiceLevel.getStore());
@@ -115,7 +118,7 @@ public class ShippingServiceLevelDefinition {
 	@When("^I attempt to create a new shipping service level with the same code$")
 	public void attemptToCreateShippingServiceLevelWithSameCode() {
 		promotionsShipping.clickShippingServiceLevelTab();
-		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(SetUp.getDriver());
+		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(driver);
 		shippingServiceLevelSearchResultPane.clickCreateServiceLevelResultsTab();
 		createShippingServiceLevelDialog = shippingServiceLevelSearchResultPane.clickCreateServiceLevelButton();
 		createShippingServiceLevelDialog.enterUniqueCode(shippingServiceLevel.getShippingServiceLevelCode());
@@ -175,7 +178,7 @@ public class ShippingServiceLevelDefinition {
 	public void deleteNewShippingServiceLevel(final List<String> searchFilters) {
 		isShippingServiceLevelInList(shippingServiceLevel.getShippingServiceLevelCode(), searchFilters.get(1), searchFilters.get(0));
 		shippingServiceLevelSearchResultPane.clickDeleteServiceLevelButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("ShippingLevelsMessages.ConfirmDeleteShippingLevel");
+		new ConfirmDialog(driver).clickOKButton("ShippingLevelsMessages.ConfirmDeleteShippingLevel");
 	}
 
 	/**

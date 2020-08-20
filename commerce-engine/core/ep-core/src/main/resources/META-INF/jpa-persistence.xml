@@ -81,10 +81,9 @@
 		<class>com.elasticpath.domain.customer.impl.AbstractAddressImpl</class>
 		<class>com.elasticpath.domain.customer.impl.CustomerAddressImpl</class>
 		<class>com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl</class>
-		<class>com.elasticpath.domain.customer.impl.CustomerDeletedImpl</class>
 		<class>com.elasticpath.domain.customer.impl.CustomerGroupImpl</class>
 		<class>com.elasticpath.domain.customer.impl.CustomerRoleImpl</class>
-		<class>com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl</class>
+		<class>com.elasticpath.domain.customer.impl.UserAccountAssociationImpl</class>
 		<class>com.elasticpath.domain.dataimport.impl.ImportJobImpl</class>
 		<class>com.elasticpath.domain.dataimport.impl.ImportMappingImpl</class>
 		<class>com.elasticpath.domain.dataimport.impl.ImportBadRowImpl</class>

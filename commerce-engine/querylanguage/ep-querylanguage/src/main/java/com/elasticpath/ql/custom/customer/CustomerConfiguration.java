@@ -15,6 +15,6 @@ public class CustomerConfiguration extends AbstractEpQLCustomConfiguration {
 
 	@Override
 	public void initialize() {
-		addSortField(SolrIndexConstants.USER_ID, EpQLSortOrder.ASC);
+		addSortField(SolrIndexConstants.SHARED_ID, EpQLSortOrder.ASC);
 	}
 }

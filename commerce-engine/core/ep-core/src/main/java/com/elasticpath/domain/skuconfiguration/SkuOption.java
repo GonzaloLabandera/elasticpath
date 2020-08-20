@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
 
-import com.elasticpath.domain.catalog.Catalog;
+import com.elasticpath.domain.catalog.CatalogObject;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.persistence.api.Entity;
 
@@ -15,7 +15,7 @@ import com.elasticpath.persistence.api.Entity;
  * Represents a SKU option that can be configured.
  */
 @SuppressWarnings("PMD.CloneMethodMustImplementCloneable")
-public interface SkuOption extends Entity, Cloneable {
+public interface SkuOption extends Entity, Cloneable, CatalogObject {
 
 	/**
 	 * The key for the frequency sku option key.
@@ -103,18 +103,6 @@ public interface SkuOption extends Entity, Cloneable {
 	 * @return the corresponding <code>SkuOptionValue</code> of the given value code
 	 */
 	SkuOptionValue getOptionValue(String valueCode);
-
-	/**
-	 * Get the catalog that this sku option belongs to.
-	 * @return the catalog
-	 */
-	Catalog getCatalog();
-
-	/**
-	 * Set the catalog that this sku option belongs to.
-	 * @param catalog the catalog to set
-	 */
-	void setCatalog(Catalog catalog);
 
 	/**
 	 * Get the max ordering of the optionValues.

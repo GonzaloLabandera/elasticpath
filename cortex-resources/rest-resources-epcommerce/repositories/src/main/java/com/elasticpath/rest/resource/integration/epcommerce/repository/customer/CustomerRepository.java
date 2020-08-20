@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer;
 
+import java.util.List;
+
 import io.reactivex.Completable;
 import io.reactivex.Single;
 
@@ -25,13 +27,13 @@ public interface CustomerRepository {
 
 	/**
 	 * Finds customer by username and store code.
-	 * Do not use this unless you don't have the user's GUID.
+	 * If search is by accountSharedId storeCode is passed as null.
 	 *
 	 * @param storeCode store code.
-	 * @param userId    user Id.
+	 * @param sharedId  shared Id.
 	 * @return Customer.
 	 */
-	ExecutionResult<Customer> findCustomerByUserId(String storeCode, String userId);
+	ExecutionResult<Customer> findCustomerBySharedId(String storeCode, String sharedId);
 
 	/**
 	 * Finds customer by user guid and store code.
@@ -42,12 +44,70 @@ public interface CustomerRepository {
 	ExecutionResult<Customer> findCustomerByGuid(String guid);
 
 	/**
+	 * Finds customers by profile attribute key value pair.
+	 *
+	 * @param profileAttributeKey profile attribute key
+	 * @param profileAttributeValue profile attribute value
+	 *
+	 * @return list of customers matching given criteria
+	 */
+	ExecutionResult<List<Customer>> findCustomersByProfileAttributeKeyAndValue(String profileAttributeKey, String profileAttributeValue);
+
+	/**
 	 * Checks whether a customer exists with the given guid.
 	 *
 	 * @param guid the guid
 	 * @return success if customer exists
 	 */
 	ExecutionResult<Void> isCustomerGuidExists(String guid);
+
+	/**
+	 * Returns the number of customers with given profile attribute key value pair.
+	 *
+	 * @param profileAttributeKey profile attribute key
+	 * @param profileAttributeValue profile attribute value
+	 *
+	 * @return count of customers matching given criteria
+	 */
+	ExecutionResult<Long> getCustomerCountByProfileAttributeKeyAndValue(String profileAttributeKey, String profileAttributeValue);
+
+	/**
+	 * Checks whether a customer exists with given shared ID and store code.
+	 * @param storeCode the store code
+	 * @param sharedId  the customer shared ID
+	 * @return success if customer exists.
+	 */
+	ExecutionResult<Void> isCustomerExistsBySharedIdAndStoreCode(String storeCode, String sharedId);
+
+	/**
+	 * Finds customer's guid by shared id and store code.
+	 *
+	 * @param storeCode the store Code
+	 * @param sharedId the customer shared ID
+	 * @param customerIdentifierKey customerIdentifierKey added to fix CacheResult annotation conflict with
+	 *                              findCustomerGuidByProfileAttributeKeyAndValue
+	 *
+	 * @return Customer's guid.
+	 */
+	ExecutionResult<String> findCustomerGuidBySharedId(String storeCode, String sharedId, String customerIdentifierKey);
+
+	/**
+	 * Finds customer's guid by profile attribute key value pair.
+	 *
+	 * @param profileAttributeKey profile attribute key
+	 * @param profileAttributeValue profile attribute value
+	 *
+	 * @return customer's guid
+	 */
+	ExecutionResult<String> findCustomerGuidByProfileAttributeKeyAndValue(String profileAttributeKey, String profileAttributeValue);
+	/**
+	 * Finds customer by username and store code.
+	 *
+	 * @param username the username
+	 * @param storeCode the store code
+	 * @return Customer.
+	 */
+	ExecutionResult<Customer> findCustomerByUsername(String username, String storeCode);
 
 	/**
 	 * Gets the customer.
@@ -126,4 +186,5 @@ public interface CustomerRepository {
 	 * @return customer address
 	 */
 	Single<CustomerAddress> createAddressForCustomer(Customer customer, CustomerAddress customerAddress);
+
 }

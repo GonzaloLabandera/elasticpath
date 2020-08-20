@@ -1623,4 +1623,84 @@
     <list_price>12.00</list_price>
     <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
 </base_amount>
+<base_amount>
+	<guid>AA848AF4-2E4B-BA11-3A5E-DE26195CC8E0</guid>
+	<object_guid>physicalProduct</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>12.50</list_price>
+	<price_list_guid>f2b16c04-e1a4-4bd5-be79-d05796ceb1f9</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>AA848AF5-2E4B-BA12-3A5D-DE26195CC8E0</guid>
+	<object_guid>physicalFreeProduct</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>0.00</list_price>
+	<price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>B035BBC6-851C-46CD-9468-7D9A3431E03E</guid>
+	<object_guid>physicalPreOrderProduct</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>25.00</list_price>
+	<price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>E7A34A6E-F8E6-4164-9BD7-93F0A7E2121B</guid>
+	<object_guid>physicalBackOrderProduct</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>25.00</list_price>
+	<price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>B45448BE-F3F7-4D24-EE22-E2C4E3C4E9C7</guid>
+	<object_guid>bundleWithMultiplePhysicalItems</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>99.00</list_price>
+	<price_list_guid>f2b16c04-e1a4-4bd5-be79-d05796ceb1f9</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>FDE9847E-58E4-3A64-A9F9-B0F1CCA8569B</guid>
+	<object_guid>bundleWithMultiplePhysicalItems</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>99.99</list_price>
+	<price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>992276C3-4EBC-5DB6-9EE7-F63F3E71367A</guid>
+	<object_guid>digitalItemFromBundleWithPhysicalAndDigitalComponents</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>15.00</list_price>
+	<price_list_guid>f2b16c04-e1a4-4bd5-be79-d05796ceb1f9</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>C0306FCB-4398-9798-8119-E42C7A28B4DF</guid>
+	<object_guid>handsfree_shippable</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>89.00</list_price>
+	<price_list_guid>f2b16c04-e1a4-4bd5-be79-d05796ceb1f9</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>89CB42B3-6294-862C-0FDB-1D6FC1ABD1D1</guid>
+	<object_guid>handsfree_sony9191</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>20.99</list_price>
+	<price_list_guid>f2b16c04-e1a4-4bd5-be79-d05796ceb1f9</price_list_guid>
+</base_amount>
+<base_amount>
+	<guid>F0CC6248-D984-5C59-571E-334502F14574</guid>
+	<object_guid>physicalItemFromBundleWithPhysicalAndDigitalComponents</object_guid>
+	<object_type>PRODUCT</object_type>
+	<quantity>1.00</quantity>
+	<list_price>15.00</list_price>
+	<price_list_guid>f2b16c04-e1a4-4bd5-be79-d05796ceb1f9</price_list_guid>
+</base_amount>
 </amounts>

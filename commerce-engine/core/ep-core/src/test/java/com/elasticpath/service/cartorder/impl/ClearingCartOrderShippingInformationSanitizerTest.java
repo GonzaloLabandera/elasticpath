@@ -82,7 +82,8 @@ public class ClearingCartOrderShippingInformationSanitizerTest {
 	private static final String STORE_CODE = "storeCode";
 
 	private static final Currency CURRENCY = Currency.getInstance(Locale.getDefault());
-	public static final String USER_ID = "userId";
+
+	private static final String SHARED_ID = "sharedId";
 
 	@Mock
 	private BeanFactory beanFactory;
@@ -261,7 +262,7 @@ public class ClearingCartOrderShippingInformationSanitizerTest {
 
 	private void givenNoCustomerSessionExists() {
 		Customer customer = new CustomerImpl();
-		customer.setUserId(USER_ID);
+		customer.setSharedId(SHARED_ID);
 
 		Store store = new StoreImpl();
 		store.setDefaultLocale(Locale.getDefault());

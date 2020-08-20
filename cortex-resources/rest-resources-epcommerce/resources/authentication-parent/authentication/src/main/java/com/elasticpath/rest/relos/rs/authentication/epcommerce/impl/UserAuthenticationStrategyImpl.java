@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.ResourceTypeFactory;
 import com.elasticpath.rest.chain.Assign;
 import com.elasticpath.rest.chain.Ensure;
@@ -146,7 +147,7 @@ public class UserAuthenticationStrategyImpl implements UserAuthenticationStrateg
 
 	private Customer createAnonymousCustomer(final String storeCode) {
 		Customer customer = customerRepository.createNewCustomerEntity();
-		customer.setAnonymous(true);
+		customer.setCustomerType(CustomerType.SINGLE_SESSION_USER);
 		customer.setStoreCode(storeCode);
 
 		return customer;

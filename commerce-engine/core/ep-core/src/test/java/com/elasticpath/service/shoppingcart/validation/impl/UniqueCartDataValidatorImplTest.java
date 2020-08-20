@@ -32,9 +32,11 @@ public class UniqueCartDataValidatorImplTest {
 
 	private static final String STORECODE = "storeCode";
 	private static final String CUSTOMER_GUID = "customerGUID";
+	private static final String ACCOUNT_SHARED_ID = "accountSharedId";
 	private static final String NAME = "name";
 	private static final String VALUE = "a";
 	private static final String OTHERCARTGUID = "OTHERCARTGUID";
+	private static final String CURRENTCARTGUID = "cartGUID";
 
 	@InjectMocks
 	private UniqueCartDataValidatorImpl validator;
@@ -54,6 +56,8 @@ public class UniqueCartDataValidatorImplTest {
 	@Mock
 	private Customer customer;
 
+	@Mock
+	private Customer account;
 
 	@Before
 	public void setUp() {
@@ -61,8 +65,11 @@ public class UniqueCartDataValidatorImplTest {
 		when(context.getShoppingCart()).thenReturn(shoppingCart);
 		when(shoppingCart.getShopper()).thenReturn(shopper);
 		when(shopper.getCustomer()).thenReturn(customer);
+		when(shopper.getAccount()).thenReturn(account);
 		when(customer.getGuid()).thenReturn(CUSTOMER_GUID);
+		when(account.getSharedId()).thenReturn(ACCOUNT_SHARED_ID);
 		when(shopper.getStoreCode()).thenReturn(STORECODE);
+		when(shoppingCart.getGuid()).thenReturn(CURRENTCARTGUID);
 	}
 
 	@Test
@@ -74,7 +81,7 @@ public class UniqueCartDataValidatorImplTest {
 		when(shoppingCart.getCartData()).thenReturn(Collections.singletonMap(NAME, cartData));
 
 		List<String> otherCartGuids = Collections.singletonList(OTHERCARTGUID);
-		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, STORECODE))
+		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(otherCartGuids);
 
 		List<CartData> otherCartDataList = Collections.singletonList(otherCartData);
@@ -102,7 +109,7 @@ public class UniqueCartDataValidatorImplTest {
 		when(shoppingCart.getCartData()).thenReturn(Collections.singletonMap(NAME, cartData));
 
 		List<String> otherCartGuids = Collections.singletonList(OTHERCARTGUID);
-		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, STORECODE))
+		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(otherCartGuids);
 
 		List<CartData> otherCartDataList = Collections.singletonList(otherCartData);
@@ -127,11 +134,11 @@ public class UniqueCartDataValidatorImplTest {
 
 		when(shoppingCart.getCartData()).thenReturn(Collections.singletonMap(NAME, cartData));
 
-		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, STORECODE))
+		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(Collections.singletonList(OTHERCARTGUID));
 
 		List<String> otherCartGuids = Collections.singletonList(OTHERCARTGUID);
-		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, STORECODE))
+		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(otherCartGuids);
 
 		List<CartData> otherCartDataList = Collections.emptyList();
@@ -151,7 +158,7 @@ public class UniqueCartDataValidatorImplTest {
 
 		when(shoppingCart.getCartData()).thenReturn(Collections.singletonMap(NAME, cartData));
 
-		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, STORECODE))
+		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(Collections.emptyList());
 
 		Collection<StructuredErrorMessage> result = validator.validate(context);

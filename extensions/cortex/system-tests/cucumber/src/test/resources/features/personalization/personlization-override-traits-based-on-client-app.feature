@@ -54,6 +54,6 @@ Feature: Test overriding traits from a client application
     And I add Alien to my default cart with quantity 1
     And I go to my default cart
     And the list of applied promotions is empty
-    When I append to the overwritten personalization header the key SHOPPING_CONTEXT_DATE_OVERRIDE and value 2019-02-10T00:00:00
+    When I append to the overwritten personalization header the key SHOPPING_CONTEXT_DATE_OVERRIDE and value 2100-01-10T00:00:00
     And I go to my default cart
-    Then the list of applied promotions contains promotion ExpiredCartPromoMobee
+    Then the list of applied promotions contains promotion FutureCartPromoMobee

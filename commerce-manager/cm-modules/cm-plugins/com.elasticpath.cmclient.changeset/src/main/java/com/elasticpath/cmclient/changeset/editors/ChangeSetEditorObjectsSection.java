@@ -133,7 +133,7 @@ public class ChangeSetEditorObjectsSection extends AbstractPolicyAwareEditorPage
 
 		final IEpLayoutData paginationData = mainComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
 
-		final SortingField defaultSortingField = ChangeSetMemberSortingField.OBJECT_NAME;
+		final SortingField defaultSortingField = ChangeSetMemberSortingField.OBJECT_ID;
 		final SortingDirection defaultSortingDirection = SortingDirection.ASCENDING;
 		final Paginator<ChangeSetMember> paginator = createPaginator(defaultSortingField, defaultSortingDirection);
 

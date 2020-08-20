@@ -66,7 +66,7 @@ public class PublishChangeSetActionDelegate extends AbstractChangeStateActionDel
 
 	private SettingsReader getSettingReader() {
 		if (settingsReader == null) {
-			settingsReader = BeanLocator.getSingletonBean(ContextIdNames.CACHED_SETTINGS_READER, SettingsReader.class);
+			settingsReader = BeanLocator.getSingletonBean(ContextIdNames.SETTINGS_READER, SettingsReader.class);
 		}
 		return settingsReader;
 	}

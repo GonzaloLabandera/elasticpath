@@ -41,6 +41,9 @@ public class ModifierFieldDTO implements Dto {
 	@XmlElement(name = "value", required = true)
 	private List<DisplayValue> values;
 
+	@XmlElement(name = "defaultCartValue", required = false)
+	private String defaultCartValue;
+
 	@XmlElementWrapper(name = "options")
 	@XmlElement(name = "option", required = false)
 	private List<ModifierFieldOptionDTO> cartItemModifierFieldOptions;
@@ -169,6 +172,24 @@ public class ModifierFieldDTO implements Dto {
 	 */
 	public void setModifierFieldOptions(final List<ModifierFieldOptionDTO> cartItemModifierFieldOptions) {
 		this.cartItemModifierFieldOptions = cartItemModifierFieldOptions;
+	}
+
+	/**
+	 * Gets the default cart value.
+	 *
+	 * @return the default cart value
+	 */
+	public String getDefaultCartValue() {
+		return defaultCartValue;
+	}
+
+	/**
+	 * Sets the default cart value.
+	 *
+	 * @param defaultCartValue the default cart value
+	 */
+	public void setDefaultCartValue(final String defaultCartValue) {
+		this.defaultCartValue = defaultCartValue;
 	}
 
 	@Override

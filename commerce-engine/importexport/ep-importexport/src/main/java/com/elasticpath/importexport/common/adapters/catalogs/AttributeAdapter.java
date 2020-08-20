@@ -109,12 +109,12 @@ public class AttributeAdapter extends AbstractDomainAdapterImpl<Attribute, Attri
 				try {
 					Locale locale = LocaleUtils.toLocale(displayValue.getLanguage());
 					if (!LocaleUtils.isAvailableLocale(locale)) {
-						throw new PopulationRollbackException("IE-10000", displayValue.getLanguage());
+						throw new PopulationRollbackException("IE-10011", displayValue.getLanguage());
 					}
 					checkLocaleSupportedByCatalog(locale, attribute);
 					attribute.setDisplayName(displayValue.getValue(), locale);
 				} catch (IllegalArgumentException exception) {
-					throw new PopulationRollbackException("IE-10000", exception, displayValue.getLanguage());
+					throw new PopulationRollbackException("IE-10011", exception, displayValue.getLanguage());
 				}
 			}
 		}
@@ -123,7 +123,7 @@ public class AttributeAdapter extends AbstractDomainAdapterImpl<Attribute, Attri
 	private void checkLocaleSupportedByCatalog(final Locale locale, final Attribute attribute) {
 		Catalog catalog = attribute.getCatalog();
 		if (catalog != null && !catalog.getSupportedLocales().contains(locale)) {
-			throw new PopulationRollbackException("IE-10000", locale.toString());
+			throw new PopulationRollbackException("IE-10000", locale.toString(), catalog.getCode());
 		}
 	}
 

@@ -27,9 +27,10 @@ public interface SearchService {
 	 * @param previousSearchResultHistory the previous search results, give <code>null</code> if you don't have it
 	 * @param shoppingCart the shopping cart, give <code>null</code> if you don't have it
 	 * @param pageNumber the current page number
+	 * @param pageSize the number of results per page
 	 * @return a <code>SearchResult</code> instance
 	 */
 	SearchResult search(SearchRequest searchRequest, CatalogViewResultHistory previousSearchResultHistory, ShoppingCart shoppingCart,
-						int pageNumber);
+						int pageNumber, int pageSize);
 
 }

@@ -28,6 +28,7 @@ import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.service.shoppingcart.MulticartItemListTypeLocationProvider;
 import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
 import com.elasticpath.validation.impl.ConstraintViolationTransformerImpl;
 import com.elasticpath.validation.service.impl.ModifierFieldValidationServiceImpl;
@@ -57,11 +58,16 @@ public class CartTypeModifierValidatorTest {
 	private Store store;
 
 	@Mock
+	private MulticartItemListTypeLocationProvider multicartItemListTypeLocationProvider;
+
+	@Mock
 	private CartType cartType;
 	@Mock
 	private ModifierField referentField;
-	public static final String NAME = "name";
-	public static final String FIELD_CHARACTER = "a";
+	private static final String NAME = "name";
+	private static final String FIELD_CHARACTER = "a";
+	private static final String STORE_CODE = "store";
+	private static final String CART_TYPE_NAME = "SHOPPING_CART";
 
 	@Before
 	public void setUp() {
@@ -69,7 +75,10 @@ public class CartTypeModifierValidatorTest {
 		when(context.getShoppingCart()).thenReturn(shoppingCart);
 		when(shoppingCart.getStore()).thenReturn(store);
 		when(store.getShoppingCartTypes()).thenReturn(Collections.singletonList(cartType));
+		when(store.getCode()).thenReturn(STORE_CODE);
 		when(cartType.getModifiers()).thenReturn(Collections.singletonList(modifierGroup));
+		when(cartType.getName()).thenReturn(CART_TYPE_NAME);
+		when(multicartItemListTypeLocationProvider.getMulticartItemListTypeForStore(STORE_CODE)).thenReturn(CART_TYPE_NAME);
 
 		validationService.setConstraintViolationTransformer(constraintViolationTransformer);
 

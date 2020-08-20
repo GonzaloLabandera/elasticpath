@@ -4,7 +4,6 @@
 package com.elasticpath.domain.audit.impl;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,7 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
@@ -22,7 +21,6 @@ import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
 import com.elasticpath.domain.audit.ChangeTransaction;
 import com.elasticpath.domain.audit.ChangeTransactionMetadata;
-import com.elasticpath.domain.objectgroup.impl.BusinessObjectGroupMemberImpl;
 import com.elasticpath.persistence.api.AbstractPersistableImpl;
 
 /**
@@ -52,7 +50,7 @@ public class ChangeTransactionMetadataImpl extends AbstractPersistableImpl imple
 	private ChangeTransaction changeTransaction;
 
 	@Override
-	@OneToOne(targetEntity = BusinessObjectGroupMemberImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+	@ManyToOne(targetEntity = ChangeTransactionImpl.class, fetch = FetchType.EAGER)
 	@JoinColumn(name = "CHANGE_TRANSACTION_UID")
 	@ForeignKey
 	public ChangeTransaction getChangeTransaction() {

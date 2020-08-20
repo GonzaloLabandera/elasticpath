@@ -72,6 +72,7 @@ public class ProductImporterImplTest {
 		context.checking(new Expectations() {
 			{
 				allowing(mockSavingStrategy).setDomainAdapter(with(aNull(DomainAdapter.class)));
+				allowing(mockSavingStrategy).setCommonLifecycleListeners(with(new ArrayList<>()));
 				allowing(mockSavingStrategy).setLifecycleListener(with(any(LifecycleListener.class)));
 				allowing(mockSavingStrategy).populateAndSaveObject(with(any(Product.class)), with(any(ProductDTO.class)));
 				allowing(mockSavingStrategy).getSavingManager();

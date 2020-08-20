@@ -21,7 +21,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.Action;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressConstants;
 
@@ -35,7 +38,6 @@ import com.elasticpath.cmclient.core.service.CatalogEventService;
 import com.elasticpath.cmclient.core.wizard.AbstractEpWizard;
 import com.elasticpath.cmclient.jobs.JobsImageRegistry;
 import com.elasticpath.cmclient.jobs.JobsMessages;
-import com.elasticpath.cmclient.jobs.JobsPlugin;
 import com.elasticpath.cmclient.jobs.dialogs.ImportCompletionDialog;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
@@ -249,7 +251,8 @@ public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 				showResults(status, this);
 
 				if (ObjectUtils.equals(status.getState(), ImportJobState.VALIDATION_FAILED)) {
-					return new Status(IStatus.ERROR, JobsPlugin.PLUGIN_ID, 1, "Remote Validation Failed", null); //$NON-NLS-1$
+                    openErrorDialog(getRemoteValidationErrorMessage());
+					return Status.CANCEL_STATUS; //$NON-NLS-1$
 				} else if (ObjectUtils.equals(status.getState(), ImportJobState.FAILED)) {
 					StringBuilder builder = new StringBuilder();
 					for (ImportBadRow badRow : status.getBadRows()) {
@@ -259,7 +262,8 @@ public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 								.append('\n');
 						}
 					}
-					return new Status(IStatus.ERROR, JobsPlugin.PLUGIN_ID, 1, builder.toString(), null);
+					openErrorDialog(builder.toString());
+					return Status.CANCEL_STATUS;
 				}
 				return Status.OK_STATUS;
 			} catch (Exception exception) {
@@ -269,6 +273,24 @@ public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 				monitor.done();
 			}
 		}
+
+		private void openErrorDialog(final String message) {
+            display.asyncExec(() -> {
+                MessageBox messageBox = new MessageBox(new Shell(PlatformUI.getWorkbench().getDisplay()), SWT.ICON_ERROR);
+                messageBox.setText("ERROR");
+                messageBox.setMessage(message);
+                messageBox.open();
+            });
+        }
+
+        private String getRemoteValidationErrorMessage() {
+            MutableObject<String> message = new MutableObject<>(CoreMessages.EMPTY_STRING);
+            display.syncExec(() -> {
+                String errorMessage = JobsMessages.get().RunWizard_ErrorRemoteValidationFailed;
+                message.setValue(errorMessage);
+            });
+            return message.getValue();
+        }
 
 		private String getSubTaskCurrentRowName(final ImportJobStatus status, final int currentRow) {
 			MutableObject<String> message = new MutableObject<>(CoreMessages.EMPTY_STRING);

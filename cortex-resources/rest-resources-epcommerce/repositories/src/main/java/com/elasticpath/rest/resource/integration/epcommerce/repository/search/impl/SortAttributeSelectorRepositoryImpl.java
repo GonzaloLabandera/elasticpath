@@ -6,6 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.search.i
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.SORT;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -13,6 +14,7 @@ import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.elasticpath.commons.util.impl.LocaleUtils;
 import com.elasticpath.repository.SelectorRepository;
 import com.elasticpath.rest.definition.offersearches.OfferSearchResultIdentifier;
 import com.elasticpath.rest.definition.offersearches.SortAttributeIdentifier;
@@ -45,7 +47,8 @@ public class SortAttributeSelectorRepositoryImpl<SI extends SortAttributeSelecto
 
 	@Override
 	public Observable<SelectorChoice> getChoices(final SortAttributeSelectorIdentifier sortAttributeSelectorIdentifier) {
-		String localeCode = SubjectUtil.getLocale(resourceOperationContext.getSubject()).getLanguage();
+		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
+		String localeCode = LocaleUtils.getCommerceLocalCode(locale);
 		OfferSearchResultIdentifier offerSearchResult = sortAttributeSelectorIdentifier.getOfferSearchResult();
 		Map<String, String> searchId = offerSearchResult.getSearchId().getValue();
 		String scope = offerSearchResult.getScope().getValue();

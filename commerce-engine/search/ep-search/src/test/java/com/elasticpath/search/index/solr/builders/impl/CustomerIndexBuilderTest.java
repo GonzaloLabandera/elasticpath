@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl;
 import com.elasticpath.search.index.solr.document.impl.CustomerSolrInputDocumentCreator;
@@ -70,17 +71,6 @@ public class CustomerIndexBuilderTest {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.service.index.impl.CustomerIndexBuildServiceImpl.findDeletedUids(Date)'.
-	 */
-	@Test
-	public void testFindDeletedUids() {
-		final ArrayList<Long> uidList = new ArrayList<>();
-		when(mockCustomerService.findUidsByDeletedDate(any(Date.class))).thenReturn(uidList);
-		assertThat(this.customerIndexBuilder.findDeletedUids(new Date())).isEqualTo(uidList);
-		verify(mockCustomerService).findUidsByDeletedDate(any(Date.class));
-	}
-
-	/**
 	 * Test method for 'com.elasticpath.service.index.impl.CustomerIndexBuildServiceImpl.findAddedOrModifiedUids(Date)'.
 	 */
 	@Test
@@ -103,12 +93,12 @@ public class CustomerIndexBuilderTest {
 	}
 
 	/**
-	 * Test that when the customer with the given UID has no userId, createDocument returns null.
+	 * Test that when the customer with the given UID has no sharedId, createDocument returns null.
 	 */
 	@Test
-	public void testCreateDocumentWhenCustomerHasNoUserIdReturnsNull() {
+	public void testCreateDocumentWhenCustomerHasNoSharedIdReturnsNull() {
 		final Customer mockCustomer = mock(Customer.class);
-		when(mockCustomer.getUserId()).thenReturn(null);
+		when(mockCustomer.getSharedId()).thenReturn(null);
 		customerDocumentBuilder.setEntity(mockCustomer);
 		assertThat((Object) customerDocumentBuilder.createDocument()).isNull();
 	}
@@ -122,7 +112,8 @@ public class CustomerIndexBuilderTest {
 		final long uidPk = 2343L;
 		final String storeCode = "dsfsdf";
 		final Date date = new Date();
-		final String userId = "some id";
+		final String sharedId = "some id";
+		final CustomerType customerType = CustomerType.REGISTERED_USER;
 
 		final Customer mockCustomer = mock(Customer.class);
 		when(mockCustomer.getUidPk()).thenReturn(uidPk);
@@ -130,8 +121,10 @@ public class CustomerIndexBuilderTest {
 		when(mockCustomer.getStoreCode()).thenReturn(storeCode);
 		when(mockCustomer.getAddresses()).thenReturn(new ArrayList<>());
 		when(mockCustomer.getCreationDate()).thenReturn(date);
-		when(mockCustomer.getUserId()).thenReturn(userId);
+		when(mockCustomer.getSharedId()).thenReturn(sharedId);
+		when(mockCustomer.getCustomerType()).thenReturn(customerType);
 
+		when(mockCustomer.getUsername()).thenReturn(null);
 		when(mockCustomer.getFirstName()).thenReturn(null);
 		when(mockCustomer.getLastName()).thenReturn(null);
 		when(mockCustomer.getEmail()).thenReturn(null);
@@ -146,7 +139,8 @@ public class CustomerIndexBuilderTest {
 		SoftAssertions softly = new SoftAssertions();
 
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(Long.toString(mockCustomer.getUidPk()));
-		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_ID)).isEqualTo(userId);
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.SHARED_ID)).isEqualTo(sharedId);
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_NAME)).isNull();
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.FIRST_NAME)).isNull();
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.LAST_NAME)).isNull();
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.EMAIL)).isNull();
@@ -167,24 +161,27 @@ public class CustomerIndexBuilderTest {
 		final String firstName = "Jimijimi";
 		final String lastName = "LaibaLaiba";
 		final String email = "jimi.laiba@elasticpath.com";
-		final String userId = "jimi.laiba@elasticpath.com";
+		final String sharedId = "jimi.laiba@elasticpath.com";
+		final String username = "someusername";
 		final String phoneNumber = "012-345-6789";
 		final Date createDate = new Date();
 		final String storeCode = "sdfsdf";
+		final CustomerType customerType = CustomerType.REGISTERED_USER;
 
 		final Customer mockCustomer = mock(Customer.class);
 		when(mockCustomer.getUidPk()).thenReturn(uidPk);
 		when(mockCustomer.getFirstName()).thenReturn(firstName);
 		when(mockCustomer.getLastName()).thenReturn(lastName);
 		when(mockCustomer.getEmail()).thenReturn(email);
-		when(mockCustomer.getUserId()).thenReturn(userId);
+		when(mockCustomer.getSharedId()).thenReturn(sharedId);
+		when(mockCustomer.getUsername()).thenReturn(username);
 		when(mockCustomer.getPhoneNumber()).thenReturn(phoneNumber);
 		when(mockCustomer.getCreationDate()).thenReturn(createDate);
 		when(mockCustomer.getAddresses()).thenReturn(new ArrayList<>());
 		when(mockCustomer.getPreferredBillingAddress()).thenReturn(new CustomerAddressImpl());
 
 		when(mockCustomer.getStoreCode()).thenReturn(storeCode);
-
+		when(mockCustomer.getCustomerType()).thenReturn(customerType);
 		customerDocumentBuilder.setEntity(mockCustomer);
 
 		final SolrInputDocument document = customerDocumentBuilder.createDocument();
@@ -193,7 +190,8 @@ public class CustomerIndexBuilderTest {
 		SoftAssertions softly = new SoftAssertions();
 
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(Long.toString(uidPk));
-		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_ID)).isEqualTo(analyzer.analyze(userId));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.SHARED_ID)).isEqualTo(analyzer.analyze(sharedId));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_NAME)).isEqualTo(analyzer.analyze(username));
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.FIRST_NAME)).isEqualTo(analyzer.analyze(firstName));
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.LAST_NAME)).isEqualTo(analyzer.analyze(lastName));
 		softly.assertThat(document.getFieldValue(SolrIndexConstants.EMAIL)).isEqualTo(analyzer.analyze(email));

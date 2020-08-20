@@ -30,24 +30,6 @@
 				AND cart.status = 'ACTIVE'
 			</query>
         </named-query>
-        <named-query name="DELETE_CART_ORDER_BY_SHOPPING_CART_GUID">
-			<query>
-				DELETE FROM CartOrderImpl co
-				WHERE co.shoppingCartGuidInternal = ?1
-			</query>
-        </named-query>
-         <named-query name="DELETE_CART_ORDERS_BY_SHOPPING_CART_GUIDS">
-			<query>
-				DELETE FROM CartOrderImpl co
-				WHERE co.shoppingCartGuidInternal IN (:list)
-			</query>
-        </named-query>
-        <named-query name="DELETE_ALL_CART_ORDERS_BY_SHOPPER_UID">
-            <query>DELETE FROM CartOrderImpl co WHERE co.shoppingCartGuidInternal IN (SELECT sc.guid FROM ShoppingCartMementoImpl sc WHERE sc.shopperUid in (:list))</query>
-        </named-query>
-  		 <named-query name="DELETE_ALL_INACTIVE_CART_ORDERS_BY_SHOPPER_UID">
-            <query>DELETE FROM CartOrderImpl co WHERE co.shoppingCartGuidInternal IN (SELECT sc.guid FROM ShoppingCartMementoImpl sc WHERE sc.shopperUid in (:list) AND sc.status = 'INACTIVE')</query>
-        </named-query>
         <named-query name="CART_ORDER_LAST_MODIFIED_DATE">
 			<query>
 				SELECT cart.lastModifiedDate

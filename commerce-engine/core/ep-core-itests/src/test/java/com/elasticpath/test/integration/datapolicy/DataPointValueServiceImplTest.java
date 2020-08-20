@@ -26,6 +26,7 @@ import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.domain.datapolicy.impl.DataPointImpl;
@@ -65,7 +66,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 	@Before
 	public void setUp() throws Exception {
 		scenario = getTac().useScenario(SimpleStoreScenario.class);
-		customer = createPersistedCustomer(scenario.getStore().getCode(), "customer@xxx.com", false);
+		customer = createPersistedCustomer(scenario.getStore().getCode(), "customer@xxx.com", CustomerType.REGISTERED_USER);
 		customer.setFirstName(CUSTOMER_FIRST_NAME);
 		customer.setLastName(CUSTOMER_LAST_NAME);
 

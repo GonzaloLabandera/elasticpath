@@ -16,6 +16,7 @@ import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
+import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.DirectedSortingFieldException;
 import com.elasticpath.service.changeset.ChangeSetMemberSortingField;
@@ -186,8 +187,10 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 	@Override
 	public Collection<String> findGroupIdsByDescriptor(final BusinessObjectDescriptor objectDescriptor) {
 		return persistenceEngine.retrieveByNamedQuery("FIND_GROUP_IDS_BY_OBJ_TYPE_AND_ID",
+				FlushMode.AUTO, true,
+				new Object [] {
 				objectDescriptor.getObjectType(),
-				objectDescriptor.getObjectIdentifier());
+				objectDescriptor.getObjectIdentifier()});
 	}
 
 	@Override
@@ -213,8 +216,9 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 	@Override
 	public BusinessObjectGroupMember findGroupMemberByObjectDescriptor(final BusinessObjectDescriptor objectDescriptor) {
 		List<BusinessObjectGroupMember> result = persistenceEngine.retrieveByNamedQuery("FIND_OBJECT_MEMBER_BY_OBJ_TYPE_AND_ID",
-				objectDescriptor.getObjectType(),
-				objectDescriptor.getObjectIdentifier());
+				FlushMode.AUTO, true,
+				new Object[] {objectDescriptor.getObjectType(),
+				objectDescriptor.getObjectIdentifier()});
 		if (CollectionUtils.isNotEmpty(result)) {
 			return result.get(0);
 		}

@@ -3,6 +3,9 @@
  */
 package com.elasticpath.importexport.importer.importers.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import com.elasticpath.common.dto.Dto;
@@ -31,6 +34,8 @@ public abstract class AbstractSavingStrategy<DOMAIN extends Persistable, DTO ext
 	private SavingManager<DOMAIN> savingManager;
 
 	private LifecycleListener lifecycleListener;
+
+	private List<LifecycleListener> commonLifecycleListeners = new ArrayList<>();
 
 	private CollectionsStrategy<DOMAIN, DTO> collectionsStrategy;
 
@@ -64,6 +69,7 @@ public abstract class AbstractSavingStrategy<DOMAIN extends Persistable, DTO ext
 		}
 		savingStrategy.setSavingManager(savingManager);
 		savingStrategy.setLifecycleListener(DEFAULT_LIFECYCLE_LISTENER);
+		savingStrategy.setCommonLifecycleListeners(new ArrayList<>());
 		savingStrategy.setCollectionsStrategy(AbstractSavingStrategy.<DOMAIN, DTO>getDefaultCollectionsStrategy());
 		return savingStrategy;
 	}
@@ -83,13 +89,17 @@ public abstract class AbstractSavingStrategy<DOMAIN extends Persistable, DTO ext
 			return null;
 		}
 
-		DOMAIN objectToImport = createDomainObject(savedObject);
+		final DOMAIN objectToImport = createDomainObject(savedObject);
+
+		if (objectToImport != null) {
+			getAllLifecycleListeners().forEach(listener -> listener.beforePopulate(objectToImport));
+		}
 
 		prepareCollections(importDtoObject, objectToImport);
 
-		objectToImport = getDomainAdapter().buildDomain(importDtoObject, objectToImport);
+		final DOMAIN populatedObjectToImport = getDomainAdapter().buildDomain(importDtoObject, objectToImport);
 
-		return saveDomainObject(objectToImport);
+		return saveDomainObject(populatedObjectToImport);
 	}
 
 	private void prepareCollections(final DTO importDtoObject, final DOMAIN importObject) {
@@ -120,9 +130,9 @@ public abstract class AbstractSavingStrategy<DOMAIN extends Persistable, DTO ext
 			throw new ImportRuntimeException("IE-30551");
 		}
 		LOG.debug("Saving domain object: " + importObject);
-		lifecycleListener.beforeSave(importObject);
+		getAllLifecycleListeners().forEach(listener -> listener.beforeSave(importObject));
 		DOMAIN resultObject = saveObject(importObject);
-		lifecycleListener.afterSave(resultObject);
+		getAllLifecycleListeners().forEach(listener -> listener.afterSave(importObject));
 
 		return resultObject;
 	}
@@ -201,6 +211,22 @@ public abstract class AbstractSavingStrategy<DOMAIN extends Persistable, DTO ext
 		if (lifecycleListener == null) {
 			this.lifecycleListener = DEFAULT_LIFECYCLE_LISTENER;
 		}
+	}
+
+	@Override
+	public List<LifecycleListener> getCommonLifecycleListeners() {
+		return commonLifecycleListeners;
+	}
+
+	@Override
+	public void setCommonLifecycleListeners(final List<LifecycleListener> commonLifecycleListeners) {
+		this.commonLifecycleListeners = commonLifecycleListeners;
+	}
+
+	private List<LifecycleListener> getAllLifecycleListeners() {
+		final List<LifecycleListener> listeners = new ArrayList<>(commonLifecycleListeners);
+		listeners.add(getLifecycleListener());
+		return listeners;
 	}
 
 	/**

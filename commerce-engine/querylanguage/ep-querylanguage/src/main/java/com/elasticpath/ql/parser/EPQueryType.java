@@ -48,7 +48,7 @@ public enum EPQueryType {
 	CUSTOMER("Customer", TargetLanguage.LUCENE),
 
 	/** Query type for customer profile attributes. */
-	CUSTOMERPROFILE_ATTRIBUTE("CustomerProfileAttribute", TargetLanguage.JPQL),
+	CUSTOMERPROFILEATTRIBUTE("CustomerProfileAttribute", TargetLanguage.JPQL),
 
 	/** Query type for UserRoles. */
 	USER_ROLE("UserRole", TargetLanguage.JPQL),
@@ -57,28 +57,28 @@ public enum EPQueryType {
 	CMUSER("CmUser", TargetLanguage.JPQL),
 	
 	/** Query type for Gift Certificates. */
-	GIFT_CERTIFICATE("GiftCertificate", TargetLanguage.JPQL),
+	GIFTCERTIFICATE("GiftCertificate", TargetLanguage.JPQL),
 	
 	/** Query type for Content Space. */
-	CONTENT_SPACE("ContentSpace", TargetLanguage.JPQL),
+	CONTENTSPACE("ContentSpace", TargetLanguage.JPQL),
 	
 	/** Query type for ShippingServiceLevels. */
-	SHIPPING_SERVICE_LEVEL("ShippingServiceLevel", TargetLanguage.JPQL),
+	SHIPPINGSERVICELEVEL("ShippingServiceLevel", TargetLanguage.JPQL),
 	
 	/** Query type for ShippingRegion. */
-	SHIPPING_REGION("ShippingRegion", TargetLanguage.JPQL),
+	SHIPPINGREGION("ShippingRegion", TargetLanguage.JPQL),
 	
 	/** Query type for TagCondition. */
-	SAVED_CONDITION("SavedCondition", TargetLanguage.JPQL),
+	SAVEDCONDITION("SavedCondition", TargetLanguage.JPQL),
 	
 	/** Query type for Import Job. */
-	CM_IMPORT_JOB("CmImportJob", TargetLanguage.JPQL),
+	CMIMPORTJOB("CmImportJob", TargetLanguage.JPQL),
 
 	/** Query type for Facet Job. */
 	FACET("Facet", TargetLanguage.JPQL),
 	
 	/** Query type for SortAttribute Job. */
-	SORT_ATTRIBUTE("SortAttribute", TargetLanguage.JPQL),
+	SORTATTRIBUTE("SortAttribute", TargetLanguage.JPQL),
 
 	/** Query type for TagGroup Job. */
 	TAGGROUP("TagGroup", TargetLanguage.JPQL);

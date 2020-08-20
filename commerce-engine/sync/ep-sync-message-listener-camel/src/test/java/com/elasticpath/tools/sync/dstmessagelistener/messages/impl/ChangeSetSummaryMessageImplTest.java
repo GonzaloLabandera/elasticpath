@@ -86,8 +86,9 @@ public class ChangeSetSummaryMessageImplTest {
 				new ChangeSetSummaryMessageImpl(changeSet, summary, successResults, failureResults);
 
 		assertThat(summaryMessage.getPublishSummary())
-				.contains("3Successfully Processed Object Types Summary: <br/>JobEntryImpl: 2<br/><br/><br/>");
-		assertThat(summaryMessage.getPublishSummary()).contains("FAILED Objects<br/>JobEntryImpl: 1<br/>");
+				.contains("Total Number of Objects: 3<br/><br/>"
+						+ "Successful Objects:<br/>JobEntryImpl: 2<br/><br/>"
+						+ "Failed Objects:<br/>JobEntryImpl: 1<br/>");
 	}
 
 	@Test
@@ -102,7 +103,8 @@ public class ChangeSetSummaryMessageImplTest {
 				new ChangeSetSummaryMessageImpl(changeSet, summary, successResults, failureResults);
 
 		assertThat(summaryMessage.getPublishSummary())
-				.contains("2Successfully Processed Object Types Summary: <br/>JobEntryImpl: 2<br/>");
+				.contains("Total Number of Objects: 2<br/><br/>"
+						+ "Successful Objects:<br/>JobEntryImpl: 2<br/>");
 	}
 
 }

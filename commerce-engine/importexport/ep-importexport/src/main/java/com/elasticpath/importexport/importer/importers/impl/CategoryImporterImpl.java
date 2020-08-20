@@ -71,6 +71,7 @@ public class CategoryImporterImpl extends AbstractImporterImpl<Category, Categor
 
 		linkedCategorySavingStrategy = AbstractSavingStrategy.createStrategy(ImportStrategyType.INSERT_OR_UPDATE, categorySavingManager);
 		linkedCategorySavingStrategy.setDomainAdapter(linkedCategoryAdapter);
+		linkedCategorySavingStrategy.setCommonLifecycleListeners(getCommonLifecycleListeners());
 	}
 
 	@SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts") // To use nested if stmt in setParentCategory method
@@ -178,6 +179,11 @@ public class CategoryImporterImpl extends AbstractImporterImpl<Category, Categor
 	@Override
 	public String getImportedObjectName() {
 		return CategoryDTO.ROOT_ELEMENT;
+	}
+
+	@Override
+	public int getObjectsQty(final CategoryDTO dto) {
+		return 1;
 	}
 
 	@Override

@@ -197,6 +197,38 @@
 		<reference-listener ref="attributeServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
 	</reference>
 
+	<reference id="cachingBrandService"
+			   availability="optional"
+			   interface="com.elasticpath.service.catalog.BrandService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="brandServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
+	<reference id="cachingCatalogService"
+			   availability="optional"
+			   interface="com.elasticpath.service.catalog.CatalogService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="catalogServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
+	<reference id="cachingProductTypeDao"
+			   availability="optional"
+			   interface="com.elasticpath.persistence.dao.ProductTypeDao"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="productTypeDaoProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
+	<reference id="cachingTaxCodeService"
+			   availability="optional"
+			   interface="com.elasticpath.service.tax.TaxCodeService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="taxCodeServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
 	<!-- export services -->
 	<service ref="nonCachingStoreService"
 			 interface="com.elasticpath.service.store.StoreService" ranking="100">
@@ -258,6 +290,38 @@
 		</service-properties>
 	</service>
 
+	<service ref="brandService" interface="com.elasticpath.service.catalog.BrandService">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="catalogService" interface="com.elasticpath.service.catalog.CatalogService">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="taxCodeService" interface="com.elasticpath.service.tax.TaxCodeService">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="productTypeDao" interface="com.elasticpath.persistence.dao.ProductTypeDao">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
 	<service ref="customerService"
 			 interface="com.elasticpath.service.customer.CustomerService"/>
 
@@ -275,7 +339,7 @@
 	<service ref="settingsService"
 			 interface="com.elasticpath.settings.SettingsService"/>
 
-	<service ref="cachedSettingsReader"
+	<service ref="settingsReader"
 			 interface="com.elasticpath.settings.SettingsReader"/>
 
 	<service ref="settingValueTypeConverter"
@@ -301,6 +365,9 @@
 
 	<service ref="customerSessionService"
 			 interface="com.elasticpath.service.customer.CustomerSessionService"/>
+
+	<service ref="userAccountAssociationService"
+			   interface="com.elasticpath.service.customer.UserAccountAssociationService"/>
 
 	<service ref="coreBeanFactory"
 			 interface="com.elasticpath.commons.beanframework.BeanFactory">
@@ -447,9 +514,6 @@
 
 	<service ref="persistenceEngine"
 			 interface="com.elasticpath.persistence.api.PersistenceEngine"/>
-
-	<service ref="persistenceSessionFilterSupport"
-			 interface="com.elasticpath.persistence.api.PersistenceSessionFilterSupport"/>
 
 	<service ref="productAssociationService"
 			 interface="com.elasticpath.service.catalog.ProductAssociationService"/>
@@ -598,5 +662,11 @@
 
 	<service ref="orderPaymentService"
 			 interface="com.elasticpath.service.orderpaymentapi.OrderPaymentService"/>
+
+	<service ref="productAvailabilityService"
+			 interface="com.elasticpath.service.catalogview.ProductAvailabilityService"/>
+
+	<service ref="productInventoryShoppingService"
+			 interface="com.elasticpath.sellingchannel.inventory.ProductInventoryShoppingService"/>
 
 </blueprint>

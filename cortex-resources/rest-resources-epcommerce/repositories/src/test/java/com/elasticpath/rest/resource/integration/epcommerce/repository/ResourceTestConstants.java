@@ -83,6 +83,10 @@ public final class ResourceTestConstants {
 	 */
 	public static final String USER_ID = "userId";
 	/**
+	 * Test data for account shared id.
+	 */
+	public static final String ACCOUNT_SHARED_ID = "accountSharedId";
+	/**
 	 * Test data for promotion id.
 	 */
 	public static final String PROMOTION_ID = "promotionId";

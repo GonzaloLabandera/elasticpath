@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -29,6 +30,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
+import com.elasticpath.service.shoppingcart.MulticartItemListTypeLocationProvider;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService;
 import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
@@ -57,6 +59,8 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 	private ExceptionTransformer exceptionTransformer;
 	@Inject
 	private ResourceOperationContext resourceOperationContext;
+	@Inject
+	private MulticartItemListTypeLocationProvider multicartItemListTypeLocationProvider;
 
 
 	@Override
@@ -144,17 +148,20 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 	@Override
 	public boolean hasMulticartEnabled(final String storeCode) {
 		return getStoreService().getCartTypeNamesForStore(storeCode)
-				.stream().anyMatch(storeCartTypeName -> getValidCartTypeForStrategy().equals(storeCartTypeName));
+				.stream().anyMatch(storeCartTypeName -> getValidCartTypeForStrategy(storeCode).equals(storeCartTypeName));
 
 	}
 
 
-
 	/**
-	 * returns the cart type associated with the strategy.
+	 * 	returns the cart type associated with the strategy.
+	 *
+	 * @param storeCode the store code
 	 * @return the cart type name.
 	 */
-	protected abstract String getValidCartTypeForStrategy();
+	protected String getValidCartTypeForStrategy(final String storeCode) {
+		return multicartItemListTypeLocationProvider.getMulticartItemListTypeForStore(storeCode);
+	}
 
 
 	protected ShoppingCartService getShoppingCartService() {
@@ -213,11 +220,31 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 		this.exceptionTransformer = exceptionTransformer;
 	}
 
+	public void setMulticartItemListTypeLocationProvider(final MulticartItemListTypeLocationProvider multicartItemListTypeLocationProvider) {
+		this.multicartItemListTypeLocationProvider = multicartItemListTypeLocationProvider;
+	}
+
 	public ResourceOperationContext getResourceOperationContext() {
 		return resourceOperationContext;
 	}
 
 	public void setResourceOperationContext(final ResourceOperationContext resourceOperationContext) {
 		this.resourceOperationContext = resourceOperationContext;
+	}
+
+	/**
+	 * Get list of modifier fields with default cart values.
+	 *
+	 * @param cart the shopping cart
+	 * @return list of modifier fields with default values
+	 */
+	protected List<ModifierField> getModifierFieldsWithDefaultValues(final ShoppingCart cart) {
+		List<ModifierGroup> modifierGroups = cart.getStore().getShoppingCartTypes().stream()
+				.flatMap(cartType -> cartType.getModifiers().stream())
+				.collect(Collectors.toList());
+		return modifierGroups.stream()
+				.flatMap(modifierGroup -> modifierGroup.getModifierFields().stream())
+				.filter(modifierField -> modifierField.getDefaultCartValue() != null)
+				.collect(Collectors.toList());
 	}
 }

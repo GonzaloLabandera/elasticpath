@@ -8,15 +8,14 @@ import java.util.Date;
 import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.commons.exception.UserIdExistException;
-import com.elasticpath.commons.exception.UserIdNonExistException;
+import com.elasticpath.commons.exception.SharedIdNonExistException;
 import com.elasticpath.commons.exception.UserStatusInactiveException;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.service.EpPersistenceService;
-import com.elasticpath.service.auth.UserIdentityService;
 
 /**
  * Provide customer-related business service.
@@ -31,7 +30,6 @@ public interface CustomerService extends EpPersistenceService {
 	 *
 	 * @param customer the customer to add
 	 * @return the persisted instance of customer
-	 * @throws UserIdExistException - if trying to add an customer using an existing user id.
 	 *
 	 * @ws.property
 	 * @ws.param ori-type="com.elasticpath.domain.customer.Customer"
@@ -40,24 +38,25 @@ public interface CustomerService extends EpPersistenceService {
 	 * @ws.return ori-type="com.elasticpath.domain.customer.Customer"
 	 * 	ws-type="com.elasticpath.connect.domain.customer.CustomerWsImpl"
 	 */
-	Customer add(Customer customer) throws UserIdExistException;
+	Customer add(Customer customer);
 
 	/**
 	 * Updates the given customer.
 	 *
 	 * @param customer the customer to update
 	 * @return the new persisted instance of customer object
-	 * @throws UserIdExistException - if trying to add an customer using an existing user Id.
 	 */
-	Customer update(Customer customer) throws UserIdExistException;
+	Customer update(Customer customer);
 
 	/**
-	 * Delete the customer.
+	 * Updates the given customer.
 	 *
-	 * @param customer the customer to remove
-	 * @throws EpServiceException - in case of any errors
+	 * @param customer the customer to update
+	 * @param shouldSetPassword true if the update should also set the password
+	 * @return the new customer object from the persistence layer
 	 */
-	void remove(Customer customer) throws EpServiceException;
+	Customer update(Customer customer, boolean shouldSetPassword);
+
 
 	/**
 	 * List all customers stored in the database.
@@ -117,6 +116,31 @@ public interface CustomerService extends EpPersistenceService {
 	Customer findByGuid(String guid, FetchGroupLoadTuner loadTuner) throws EpServiceException;
 
 	/**
+	 * Retrieve the customers with the given profileAttributeKey and profileAttributeValue combination.
+	 *
+	 * @param profileAttributeKey profile attribute key
+	 * @param profileAttributeValue profile attribute value
+	 * @return customers with the given profile attribute key value pair
+	 */
+	List<Customer> findCustomersByProfileAttributeKeyAndValue(String profileAttributeKey, String profileAttributeValue);
+
+	/**
+	 * Retrieve customer by username and storeCode.
+	 * @param username username of the Customer
+	 * @param storeCode of the store for this customer
+	 * @return the customer with the given username and storeCode
+	 */
+	Customer findCustomerByUserName(String username, String storeCode);
+
+	/**
+	 * Checks whether a customer exists with the given username and storeCode.
+	 *
+	 * @param customer the Customer
+	 * @return true if customer exists
+	 */
+	boolean isCustomerByUserNameExists(Customer customer);
+
+	/**
 	 * Checks whether a customer exists with the given guid.
 	 *
 	 * @param guid the guid
@@ -125,13 +149,66 @@ public interface CustomerService extends EpPersistenceService {
 	boolean isCustomerGuidExists(String guid);
 
 	/**
+	 * Retrieve the customer type by customer guid.
+	 *
+	 * @param guid the customer guid
+	 * @return the customer type
+	 */
+	CustomerType getCustomerTypeByGuid(String guid);
+
+	/**
+	 * Checks whether a registered customer exists with the given sharedId and store code.
+	 *
+	 * @param customer the customer
+	 * @return true if customer exists
+	 */
+	boolean isRegisteredCustomerExistsBySharedIdAndCustomerType(Customer customer);
+
+	/**
+	 * Checks whether a customer exists with the given sharedId and store code.
+	 *
+	 * @param sharedId the sharedId
+	 * @param storeCode the store code
+	 * @return true if customer exists
+	 */
+	boolean isCustomerExistsBySharedIdAndStoreCode(String sharedId, String storeCode);
+
+	/**
+	 * Checks whether customer exists with profile attribute key value pair.
+	 *
+	 * @param profileAttributeKey profile attribute key
+	 * @param profileAttributeValue profile attribute value
+	 *
+	 * @return number of customers matching given criteria
+	 */
+	Long getCustomerCountByProfileAttributeKeyAndValue(String profileAttributeKey, String profileAttributeValue);
+
+	/**
+	 * Finds customer's guid by shared id and store code.
+	 *
+	 * @param sharedId customer shared ID
+	 * @param storeCode the store Code
+	 * @return Customer's guid.
+	 */
+	String findCustomerGuidBySharedId(String sharedId, String storeCode);
+
+	/**
+	 * Finds customer's guid based on attribute value for the passed attribute key.
+	 *
+	 * @param profileAttributeKey profile attribute key
+	 * @param profileAttributeValue profile attribute value
+	 * @return Customer's guid.
+	 */
+	String findCustomerGuidByProfileAttributeKeyAndValue(String profileAttributeKey, String profileAttributeValue);
+
+	/**
 	 * Resets the customer's password for the specified email.
 	 *
-	 * @param userId The user Id of the customer whose password is to be reset
+	 * @param sharedId The shared Id of the customer whose password is to be reset
 	 * @param storeCode of the store for this customer
-	 * @throws UserIdNonExistException if the user Id isn't found
+	 * @throws SharedIdNonExistException if the shared Id isn't found
 	 */
-	void resetPassword(String userId, String storeCode) throws UserIdNonExistException;
+	void resetPassword(String sharedId, String storeCode) throws SharedIdNonExistException;
 
 	/**
 	 * Resets the given customer's password.
@@ -203,14 +280,6 @@ public interface CustomerService extends EpPersistenceService {
 	List<Long> findSearchableUidsByModifiedDate(Date date);
 
 	/**
-	 * Retrieves list of customer uids where the deleted date is later than the specified date.
-	 *
-	 * @param date date to compare with the deleted date
-	 * @return list of customer uids whose deleted date is later than the specified date
-	 */
-	List<Long> findUidsByDeletedDate(Date date);
-
-	/**
 	 * Adds a customer to the default customer group (ensuring that they have the default role).
 	 * @param customer the customer upon which to set the default group
 	 * @throws EpServiceException in case of any errors.
@@ -218,22 +287,24 @@ public interface CustomerService extends EpPersistenceService {
 	void setCustomerDefaultGroup(Customer customer);
 
 	/**
-	 * Find the customer with the given userId address.
-	 * If it cannot find the customer in the given store, also look within the store's associated stores.
+	 * Find the account with the given shared ID.
 	 *
-	 * @param userId the customer userId address
-	 * @param storeCode the store to search in
-	 * @return the customers with the given userId address.
+	 * @param sharedId the account shared ID
+	 * @return the account with the given shared ID
 	 * @throws EpServiceException - in case of any errors
 	 */
-	Customer findByUserId(String userId, String storeCode) throws EpServiceException;
+	Customer findBySharedId(String sharedId) throws EpServiceException;
 
 	/**
-	 * Set the userIdentityService instance.
+	 * Find the customer with the given shared ID.
+	 * If it cannot find the customer in the given store, also look within the store's associated stores.
 	 *
-	 * @param userIdentityService the userIdentityService instance.
+	 * @param sharedId the customer shared ID
+	 * @param storeCode the store to search in
+	 * @return the customers with the given shared ID
+	 * @throws EpServiceException - in case of any errors
 	 */
-	void setUserIdentityService(UserIdentityService userIdentityService);
+	Customer findBySharedId(String sharedId, String storeCode) throws EpServiceException;
 
 	/**
 	 * Adds the given customer.
@@ -241,9 +312,8 @@ public interface CustomerService extends EpPersistenceService {
 	 * @param customer the customer to add
 	 * @param isAuthenticated true if the Customer is already authenticated via external source
 	 * @return the persisted instance of customer
-	 * @throws UserIdExistException - if trying to add an customer using an existing user id.
 	 */
-	Customer addByAuthenticate(Customer customer, boolean isAuthenticated) throws UserIdExistException;
+	Customer addByAuthenticate(Customer customer, boolean isAuthenticated);
 
 	/**
 	 * See CustomerAddressDao for details.
@@ -330,5 +400,12 @@ public interface CustomerService extends EpPersistenceService {
 	 * @return the customer last modified date
 	 */
 	Date getCustomerLastModifiedDate(String customerGuid);
-	
+
+	/**
+	 * Remove all addresses from the customer.
+	 *
+	 * @param customer the customer
+	 * @return customer without addresses.
+	 */
+	Customer removeAllAddresses(Customer customer);
 }

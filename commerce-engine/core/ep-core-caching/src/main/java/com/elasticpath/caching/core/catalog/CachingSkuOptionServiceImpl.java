@@ -13,6 +13,7 @@ import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
+import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
@@ -24,7 +25,8 @@ import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 /**
  * Caching version of the sku option service.
  */
-public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl implements SkuOptionService {
+@SuppressWarnings("PMD.TooManyMethods")
+public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl implements SkuOptionService, MutableCachingService<SkuOption> {
 
 	private SkuOptionService fallbackSkuOptionService;
 	private ProductTypeDao productTypeDao;
@@ -184,9 +186,9 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 		SkuOption skuOption = findByKey(optionKey);
 
 		return skuOption.getOptionValues().stream()
-			.filter(skuOptionValue ->  skuOptionValue.getOptionValueKey().equals(optionValueKey))
-			.findFirst()
-			.get();
+				.filter(skuOptionValue ->  skuOptionValue.getOptionValueKey().equals(optionValueKey))
+				.findFirst()
+				.get();
 	}
 
 	@Override
@@ -194,9 +196,9 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 		SkuOption skuOption = findByKey(optionKey);
 
 		return skuOption.getOptionValues().stream()
-			.filter(skuOptionValue ->  skuOptionValue.getUidPk() == skuOptionValueUid)
-			.findFirst()
-			.get();
+				.filter(skuOptionValue ->  skuOptionValue.getUidPk() == skuOptionValueUid)
+				.findFirst()
+				.get();
 	}
 
 
@@ -240,5 +242,20 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 
 		//don't wait for GC - SKU options may contain thousands of SKU values or there could be thousands of options (or any combination)
 		skuOptionToCacheKeyMap.clear();
+	}
+
+	@Override
+	public void cache(final SkuOption entity) {
+		skuOptionsCache.put(SkuOptionCacheKey.of(entity.getOptionKey()), entity);
+	}
+
+	@Override
+	public void invalidate(final SkuOption entity) {
+		skuOptionsCache.remove(SkuOptionCacheKey.of(entity.getOptionKey()));
+	}
+
+	@Override
+	public void invalidateAll() {
+		skuOptionsCache.removeAll();
 	}
 }

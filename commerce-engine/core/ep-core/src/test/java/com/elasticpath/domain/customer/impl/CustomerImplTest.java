@@ -27,6 +27,7 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerGroup;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.service.security.SaltFactory;
 import com.elasticpath.test.factory.CustomerBuilder;
 
@@ -76,6 +77,25 @@ public class CustomerImplTest {
 		List<CustomerGroup> customerGroupList = new ArrayList<>();
 		customerGroupList.add(customerGroupImpl);
 		customerImpl.setCustomerGroups(customerGroupList);
+		customerImpl.setCustomerType(CustomerType.REGISTERED_USER);
+	}
+
+	/**
+	 * Test method for 'com.elasticpath.domain.impl.CustomerImpl.getSharedId()'.
+	 */
+	@Test
+	public void testGetSharedId() {
+		assertThat(customerImpl.getSharedId()).isNotNull();
+	}
+
+	/**
+	 * Test method for 'com.elasticpath.domain.impl.CustomerImpl.getSharedId(String)'.
+	 */
+	@Test
+	public void testSetSharedId() {
+		final String sharedId = "aaaa";
+		customerImpl.setSharedId(sharedId);
+		assertThat(customerImpl.getSharedId()).isEqualTo(sharedId);
 	}
 
 	/**
@@ -96,6 +116,23 @@ public class CustomerImplTest {
 		assertThat(customerImpl.getUserId()).isEqualTo(userId);
 	}
 
+	/**
+	 * Test method for 'com.elasticpath.domain.impl.CustomerImpl.getUsername()'.
+	 */
+	@Test
+	public void testGetUsername() {
+		assertThat(customerImpl.getUsername()).isNull();
+	}
+
+	/**
+	 * Test method for 'com.elasticpath.domain.impl.CustomerImpl.getUsername(String)'.
+	 */
+	@Test
+	public void testSetUsername() {
+		final String username = "aaaa";
+		customerImpl.setUsername(username);
+		assertThat(customerImpl.getUsername()).isEqualTo(username);
+	}
 
 	/**
 	 * Test method for 'getLocale()'.
@@ -493,16 +530,26 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void verifyRoleMapperReturnsCorrectRolesOnCustomer() {
-		customerImpl.setAnonymous(true);
+		customerImpl.setCustomerType(CustomerType.SINGLE_SESSION_USER);
 		CustomerRoleMapper roleMapper = customerImpl.getCustomerRoleMapper();
 		assertThat(roleMapper).isNotNull();
 		assertThat(roleMapper.hasRole(PUBLIC))
 			.as("Customer should have role %s", PUBLIC)
 			.isTrue();
 
-		customerImpl.setAnonymous(false);
+		customerImpl.setCustomerType(CustomerType.REGISTERED_USER);
 		assertThat(roleMapper.hasRole(REGISTERED))
 			.as("Customer should have role %s", REGISTERED)
 			.isTrue();
+	}
+
+	/**
+	 * Test method for setCustomerType.
+	 */
+	@Test
+	public void testSetCustomerType() {
+		final CustomerType registered = CustomerType.REGISTERED_USER;
+		this.customerImpl.setCustomerType(registered);
+		assertThat(this.customerImpl.getCustomerType()).isEqualTo(registered);
 	}
 }

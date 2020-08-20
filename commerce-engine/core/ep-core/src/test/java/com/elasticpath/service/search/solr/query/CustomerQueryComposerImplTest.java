@@ -94,34 +94,32 @@ public class CustomerQueryComposerImplTest extends QueryComposerTestCase {
 		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
 	}
 
-	
 	/**
-	 * Test method for {@link CustomerSearchCriteria#isUserIdAndEmailMutualSearch()}.
+	 * Test method for {@link CustomerSearchCriteria#setSharedId(String)}.
 	 */
 	@Test
-	public void testUserIdAndEmailMutualSearch() {
-		final String email = "email";
-		final String userId = "userId";
-		searchCriteria.setUserIdAndEmailMutualSearch(true);
-		searchCriteria.setUserId(userId);
-		searchCriteria.setEmail(email);
-		
+	public void testSharedId() {
+		final String sharedId = "sharedId";
+		searchCriteria.setSharedId(sharedId);
+
 		Query query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
-		assertQueryContains(query, SolrIndexConstants.USER_ID_EXACT, escapeAndAddWildcards(userId));
+		assertQueryContains(query, SolrIndexConstants.SHARED_ID_EXACT, sharedId);
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
-		assertQueryContains(query, SolrIndexConstants.USER_ID_EXACT, escapeAndAddWildcards(userId));
+		assertQueryContains(query, SolrIndexConstants.SHARED_ID_EXACT, sharedId);
+	}
 
-		searchCriteria.setUserIdAndEmailMutualSearch(false);
-		
-		query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
-		assertQueryContains(query, SolrIndexConstants.USER_ID_EXACT, escapeAndAddWildcards(userId));
+	/**
+	 * Test method for {@link CustomerSearchCriteria#setUsername(String)}.
+	 */
+	@Test
+	public void testUsername() {
+		final String username = "username";
+		searchCriteria.setUsername(username);
+
+		Query query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
+		assertQueryContains(query, SolrIndexConstants.USERNAME_EXACT, escapeAndAddWildcards(username));
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
-		assertQueryContains(query, SolrIndexConstants.USER_ID_EXACT, escapeAndAddWildcards(userId));
-
+		assertQueryContains(query, SolrIndexConstants.USERNAME_EXACT, escapeAndAddWildcards(username));
 	}
 
 	/**

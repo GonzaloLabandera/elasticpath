@@ -59,7 +59,7 @@ public class CartEntityRepositoryImplTest {
 	@Test
 	public void findAll() {
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_ID);
-		when(shoppingCartRepository.findAllCarts(any(), any()))
+		when(shoppingCartRepository.findAllCarts(any(), any(), any()))
 				.thenReturn(Observable.just(CART_ID));
 
 		repository.findAll(SCOPE_IDENTIFIER_PART)

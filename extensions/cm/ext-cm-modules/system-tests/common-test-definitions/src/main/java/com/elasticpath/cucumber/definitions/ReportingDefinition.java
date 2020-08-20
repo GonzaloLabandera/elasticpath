@@ -7,9 +7,9 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.domainobjects.Report;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.Reporting;
 import com.elasticpath.selenium.resultspane.ReportPane;
-import com.elasticpath.selenium.setup.SetUp;
 
 /**
  * Reporting steps.
@@ -25,7 +25,7 @@ public class ReportingDefinition {
 	 * Constructor.
 	 */
 	public ReportingDefinition() {
-		reporting = new Reporting(SetUp.getDriver());
+		reporting = new Reporting(SeleniumDriverSetup.getDriver());
 		navigationDefinition = new NavigationDefinition();
 	}
 
@@ -220,40 +220,40 @@ public class ReportingDefinition {
 	}
 
 	/**
-	 * Enters 'user id' Customer data report.
+	 * Enters 'shared id' Customer data report.
 	 *
-	 * @param userId customer data report.
+	 * @param sharedId customer shared ID
 	 */
 	@And("^I run Customer Personal Data report for customer (.+)$")
-	public void enterUserId(final String userId) {
-		reporting.enterUserId(userId);
+	public void enteSharedId(final String sharedId) {
+		reporting.enterSharedId(sharedId);
 		clickRunReportButton();
 	}
 
 	/**
-	 * Enters empty value in user id Customer data report.
+	 * Enters empty value in shared id Customer data report.
 	 */
-	@And("^I enter empty value in User ID$")
-	public void enterEmptyUserId() {
-		reporting.enterUserId(" ");
+	@And("^I enter empty value in Shared ID$")
+	public void enterEmptySharedId() {
+		reporting.enterSharedId(" ");
 	}
 
 	/**
-	 * Verify Validations displayed for User ID.
+	 * Verify Validations displayed for Shared ID.
 	 */
-	@And("^I can see validation error messages for User ID$")
-	public void verifyUserIdValidation() {
-		reporting.verifyUserIdValidation();
+	@And("^I can see validation error messages for Shared ID$")
+	public void verifySharedIdValidation() {
+		reporting.verifySharedIdValidation();
 	}
 
 	/**
-	 * Verify 'user id' Customer data report.
+	 * Verify 'shared id' Customer data report.
 	 *
-	 * @param userId customer data report.
+	 * @param sharedId customer shared ID
 	 */
-	@And("^the User ID (.+) is in the Customer Personal Data report$")
-	public void verifyReportUserId(final String userId) {
-		reportPane.verifyReportUserId(userId);
+	@And("^the Shared ID (.+) is in the Customer Personal Data report$")
+	public void verifyReportSharedId(final String sharedId) {
+		reportPane.verifyReportSharedId(sharedId);
 
 	}
 

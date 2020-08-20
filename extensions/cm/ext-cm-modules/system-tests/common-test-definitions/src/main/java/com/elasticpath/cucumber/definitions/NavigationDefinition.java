@@ -3,7 +3,7 @@ package com.elasticpath.cucumber.definitions;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 
 /**
@@ -16,7 +16,7 @@ public class NavigationDefinition {
 	 * Constructor.
 	 */
 	public NavigationDefinition() {
-		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		activityToolbar = new ActivityToolbar(SeleniumDriverSetup.getDriver());
 	}
 
 	/**

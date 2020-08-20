@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-05-accountmanagement-customertype.xml">
+
+	<changeSet id="2020-05-add-accountmanagement-customertype" author="elasticpath">
+		<comment>Add 'CUSTOMER_TYPE' column to TCUSTOMER</comment>
+		<addColumn tableName="TCUSTOMER">
+			<column name="CUSTOMER_TYPE" type="varchar(64)"/>
+		</addColumn>
+
+		<!-- We need to remove the foreign key constraint before we can delete the attribute -->
+		<dropForeignKeyConstraint baseTableName="TCUSTOMERPROFILEVALUE" constraintName="TCUSTOMERPROFILEVALUE_FK_1"/>
+
+		<delete tableName="TATTRIBUTE">
+			<where>ATTRIBUTE_KEY='CP_ANONYMOUS_CUST'</where>
+		</delete>
+	</changeSet>
+
+	<changeSet id="2020-05-update-accountmanagement-customertype" author="elasticpath">
+		<comment>[PB-8253] Populate CUSTOMER_TYPE</comment>
+		<customChange class="liquibase.ext.elasticpath.PopulateCustomerType"/>
+		<addNotNullConstraint tableName="TCUSTOMER" columnName="CUSTOMER_TYPE" columnDataType="VARCHAR(64)" />
+
+		<delete tableName="TCUSTOMERPROFILEVALUE">
+			<where>LOCALIZED_ATTRIBUTE_KEY='CP_ANONYMOUS_CUST'</where>
+		</delete>
+
+		<!-- Put back the foreign key constraint -->
+		<addForeignKeyConstraint baseTableName="TCUSTOMERPROFILEVALUE" baseColumnNames="ATTRIBUTE_UID" constraintName="TCUSTOMERPROFILEVALUE_FK_1"
+								 referencedTableName="TATTRIBUTE" referencedColumnNames="UIDPK" />
+
+	</changeSet>
+
+</databaseChangeLog>

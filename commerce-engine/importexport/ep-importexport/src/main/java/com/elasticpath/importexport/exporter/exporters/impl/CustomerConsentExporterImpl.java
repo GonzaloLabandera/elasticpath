@@ -34,7 +34,7 @@ public class CustomerConsentExporterImpl extends AbstractExporterImpl<CustomerCo
 
 	@Override
 	public JobType getJobType() {
-		return JobType.CUSTOMER_CONSENT;
+		return JobType.CUSTOMERCONSENT;
 	}
 
 	@Override

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<customers>
+	<customer guid="customerGuid1">
+		<status>0</status>
+		<first_time_buyer>false</first_time_buyer>
+		<addresses/>
+		<payment_methods/>
+		<groups/>
+		<customer_profile/>
+	</customer>
+	<customer guid="customerGuid2">
+		<status>0</status>
+		<first_time_buyer>false</first_time_buyer>
+		<addresses/>
+		<payment_methods/>
+		<groups/>
+		<customer_profile/>
+	</customer>
+</customers>

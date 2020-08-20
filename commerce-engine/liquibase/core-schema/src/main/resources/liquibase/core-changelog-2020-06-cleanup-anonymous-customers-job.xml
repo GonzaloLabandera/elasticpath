@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-06-cleanup-anonymous-customers-job.xml">
+
+	<changeSet id="2020-06-cleanup-anonymous-customers-job-recreate-FKs-with-cascade-delete" author="elasticpath" failOnError="true">
+		<comment>[PERF-253] Drop and create FKs with CASCADE deletion</comment>
+
+		<!-- ############ Tables with FKs on TCUSTOMER.GUID ############ -->
+
+		<!-- Set cascade deletion for TOAUTHACCESSTOKEN -->
+		<addForeignKeyConstraint constraintName="FK_OAUTH_CUSTOMER" 	   onDelete="CASCADE"
+								 baseTableName="TOAUTHACCESSTOKEN" referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_GUID"   referencedColumnNames="GUID"/>
+		<!-- Set cascade deletion for TSHOPPER -->
+		<dropForeignKeyConstraint constraintName="FK_CUSTOMER" baseTableName="TSHOPPER" />
+		<addForeignKeyConstraint constraintName="FK_SHOP_CUSTOMER" 		onDelete="CASCADE"
+								 baseTableName="TSHOPPER" 			referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_GUID" 	referencedColumnNames="GUID" />
+		<!-- Set cascade deletion for TCUSTOMERCONSENT -->
+		<dropForeignKeyConstraint constraintName="TCUSTOMERCONSENT_IBFK_2" baseTableName="TCUSTOMERCONSENT" />
+		<addForeignKeyConstraint constraintName="FK_CONSENT_CUSTOMER" 		onDelete="CASCADE"
+								 baseTableName="TCUSTOMERCONSENT" 	referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_GUID" 	referencedColumnNames="GUID" />
+		<!-- Set cascade deletion for TCUSTOMERCONSENTHISTORY -->
+		<dropForeignKeyConstraint constraintName="TCUSTOMERCONSENTHISTORY_IBFK_2" baseTableName="TCUSTOMERCONSENTHISTORY" />
+		<addForeignKeyConstraint constraintName="FK_CONS_HIST_CUSTOMER" 				onDelete="CASCADE"
+								 baseTableName="TCUSTOMERCONSENTHISTORY" 	referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_GUID" 			referencedColumnNames="GUID" />
+
+		<!-- ############ Tables with FKs on TSHOPPER.UIDPK ############ -->
+
+		<!-- Set cascade deletion for TCUSTOMERSESSION -->
+		<dropForeignKeyConstraint constraintName="TCUSTOMERSESSION_FK_1" baseTableName="TCUSTOMERSESSION" />
+		<addForeignKeyConstraint constraintName="FK_CUST_SESSION_SHOPPER" 		onDelete="CASCADE"
+								 baseTableName="TCUSTOMERSESSION" 	referencedTableName="TSHOPPER"
+								 baseColumnNames="SHOPPER_UID" 		referencedColumnNames="UIDPK" />
+		<!-- Set cascade deletion for TSHOPPINGCART -->
+		<dropForeignKeyConstraint constraintName="TSHOPPINGCART_FK_SHOPPER" baseTableName="TSHOPPINGCART" />
+		<addForeignKeyConstraint constraintName="FK_CART_SHOPPER" 	onDelete="CASCADE"
+								 baseTableName="TSHOPPINGCART" 	referencedTableName="TSHOPPER"
+								 baseColumnNames="SHOPPER_UID" 	referencedColumnNames="UIDPK" />
+		<!-- Set cascade deletion for TWISHLIST -->
+		<dropForeignKeyConstraint constraintName="FK_WISHLIST_SHOPPER" baseTableName="TWISHLIST" />
+		<addForeignKeyConstraint constraintName="FK_WISHLIST_SHOPPER" 	onDelete="CASCADE"
+								 baseTableName="TWISHLIST" 	referencedTableName="TSHOPPER"
+								 baseColumnNames="SHOPPER_UID" 	referencedColumnNames="UIDPK" />
+
+		<!-- ############ Tables with FKs on TCUSTOMER.UIDPK ############ -->
+
+		<!-- Set cascade deletion for TCUSTOMERPROFILEVALUE -->
+		<dropForeignKeyConstraint constraintName="TCUSTOMERPROFILEVALUE_FK_2" baseTableName="TCUSTOMERPROFILEVALUE" />
+		<addForeignKeyConstraint constraintName="FK_PROFILE_CUSTOMER" 			onDelete="CASCADE"
+								 baseTableName="TCUSTOMERPROFILEVALUE" 	referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_UID" 		referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TCUSTOMERGROUPX -->
+		<dropForeignKeyConstraint constraintName="TCUSTOMERGROUPX_FK_2" baseTableName="TCUSTOMERGROUPX" />
+		<addForeignKeyConstraint constraintName="FK_GROUPX_CUSTOMER" 		onDelete="CASCADE"
+								 baseTableName="TCUSTOMERGROUPX" 	referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_UID" 	referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TADDRESS -->
+		<dropForeignKeyConstraint constraintName="TADDRESS_FK_1" baseTableName="TADDRESS" />
+		<addForeignKeyConstraint constraintName="TADDRESS_FK_1" 	onDelete="CASCADE"
+								 baseTableName="TADDRESS" 	referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_UID" 	referencedColumnNames="UIDPK" />
+		<!-- Set cascade deletion for TGIFTCERTIFICATE -->
+		<dropForeignKeyConstraint constraintName="TGIFTCERTIFICATE_FK_1" baseTableName="TGIFTCERTIFICATE" />
+		<addForeignKeyConstraint constraintName="TGIFTCERTIFICATE_FK_1" 	onDelete="CASCADE"
+								 baseTableName="TGIFTCERTIFICATE" 	referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_UID" 	referencedColumnNames="UIDPK" />
+
+		<!-- redundant index - UIDPK is a PK -->
+		<dropIndex tableName="TCUSTOMER" indexName="I_C_USERID"/>
+		<!-- create composite index that will be used for searching expired anonymous customers without orders -->
+		<dropIndex tableName="TCUSTOMER" indexName="I_CUST_EDIT_DATE"/>
+		<createIndex tableName="TCUSTOMER" indexName="I_TYPE_LAST_EDIT">
+			<!-- the order of fields is important -->
+			<column name="CUSTOMER_TYPE" />
+			<column name="LAST_EDIT_DATE" />
+		</createIndex>
+	</changeSet>
+</databaseChangeLog>

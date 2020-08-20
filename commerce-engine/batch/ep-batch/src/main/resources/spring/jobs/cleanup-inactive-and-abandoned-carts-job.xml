@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
+
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+	">
+
+	<bean id="purgeCartsBatchProcessor" parent="batchTxProxyTemplate">
+		<property name="target" ref="purgeCartsBatchProcessorTarget"/>
+	</bean>
+
+	<bean id="purgeCartsBatchProcessorTarget" class="com.elasticpath.batch.jobs.impl.carts.PurgeCartsBatchProcessor">
+		<property name="persistenceEngine" ref="batchPersistenceEngine"/>
+	</bean>
+
+	<bean id="abstractPurgeCartsBatchJob" class="com.elasticpath.batch.jobs.AbstractBatchJob" abstract="true">
+		<property name="persistenceEngine" ref="batchPersistenceEngine"/>
+		<property name="batchProcessor" ref="purgeCartsBatchProcessor" />
+		<property name="configBatchSize">
+			<settings:setting path="COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/batchSize"/><!-- default: 1000 -->
+		</property>
+	</bean>
+
+	<!-- purge inactive carts job -->
+	<bean id="inactiveCartsCleanupJob" class="com.elasticpath.batch.jobs.impl.carts.InactiveCartsCleanupJob" parent="abstractPurgeCartsBatchJob"/>
+
+	<!-- purge abandoned carts job -->
+	<bean id="abandonedCartsCleanupJob" class="com.elasticpath.batch.jobs.impl.carts.AbandonedCartsCleanupJob" parent="abstractPurgeCartsBatchJob">
+		<property name="timeService" ref="timeService"/>
+		<property name="maxDaysHistory">
+			<settings:setting path="COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/maxHistory"/><!-- default: 60 -->
+		</property>
+	</bean>
+</beans>

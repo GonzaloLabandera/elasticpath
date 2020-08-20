@@ -26,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.identity.TestRoleConstants;
@@ -153,7 +154,7 @@ public class UserAuthenticationStrategyImplTest {
 
 	private Customer createCustomer() {
 		Customer customer = mock(Customer.class);
-		Mockito.doNothing().when(customer).setAnonymous(true);
+		Mockito.doNothing().when(customer).setCustomerType(CustomerType.SINGLE_SESSION_USER);
 		when(customer.getGuid()).thenReturn(USER_ID);
 		when(customer.getStoreCode()).thenReturn(SCOPE);
 

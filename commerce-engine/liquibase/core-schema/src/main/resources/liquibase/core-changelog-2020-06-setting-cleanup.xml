@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-06-setting-cleanup.xml">
+
+	<changeSet id="2020-06-remove-unused-setting-definitions" author="elasticpath">
+		<comment>Remove unused setting definitions</comment>
+
+		<!-- Remove COMMERCE/STORE/CATALOG/catalogViewPagination -->
+		<delete tableName="TSETTINGMETADATA">
+			<where>SETTING_DEFINITION_UID = (SELECT UIDPK FROM TSETTINGDEFINITION WHERE PATH = 'COMMERCE/STORE/CATALOG/catalogViewPagination')</where>
+		</delete>
+
+		<delete tableName="TSETTINGVALUE">
+			<where>SETTING_DEFINITION_UID = (SELECT UIDPK FROM TSETTINGDEFINITION WHERE PATH = 'COMMERCE/STORE/CATALOG/catalogViewPagination')</where>
+		</delete>
+
+		<delete tableName="TSETTINGDEFINITION">
+			<where>PATH = 'COMMERCE/STORE/CATALOG/catalogViewPagination'</where>
+		</delete>
+
+		<!-- Remove COMMERCE/STORE/CATALOG/CatalogSitemapPagination -->
+		<delete tableName="TSETTINGMETADATA">
+			<where>SETTING_DEFINITION_UID = (SELECT UIDPK FROM TSETTINGDEFINITION WHERE PATH = 'COMMERCE/STORE/CATALOG/CatalogSitemapPagination')</where>
+		</delete>
+
+		<delete tableName="TSETTINGVALUE">
+			<where>SETTING_DEFINITION_UID = (SELECT UIDPK FROM TSETTINGDEFINITION WHERE PATH = 'COMMERCE/STORE/CATALOG/CatalogSitemapPagination')</where>
+		</delete>
+
+		<delete tableName="TSETTINGDEFINITION">
+			<where>PATH = 'COMMERCE/STORE/CATALOG/CatalogSitemapPagination'</where>
+		</delete>
+
+		<!-- Remove COMMERCE/STORE/SEARCH/searchCategoriesFirst -->
+		<delete tableName="TSETTINGMETADATA">
+			<where>SETTING_DEFINITION_UID = (SELECT UIDPK FROM TSETTINGDEFINITION WHERE PATH = 'COMMERCE/STORE/SEARCH/searchCategoriesFirst')</where>
+		</delete>
+
+		<delete tableName="TSETTINGVALUE">
+			<where>SETTING_DEFINITION_UID = (SELECT UIDPK FROM TSETTINGDEFINITION WHERE PATH = 'COMMERCE/STORE/SEARCH/searchCategoriesFirst')</where>
+		</delete>
+
+		<delete tableName="TSETTINGDEFINITION">
+			<where>PATH = 'COMMERCE/STORE/SEARCH/searchCategoriesFirst'</where>
+		</delete>
+	</changeSet>
+
+</databaseChangeLog>

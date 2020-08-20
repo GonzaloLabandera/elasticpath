@@ -6,7 +6,7 @@
 <Context>
 	<Resources
 			cachingAllowed="true"
-			cacheMaxSize="${ep.tomcat.maxcachesize}"
+			cacheMaxSize="@cargo.ep.tomcat.maxcachesize@"
 	/>
 	<Resource auth="Container" name="mail/Session" type="javax.mail.Session"/>
 	<Resource

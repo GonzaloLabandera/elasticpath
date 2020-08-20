@@ -76,23 +76,6 @@ public interface CartOrderService {
 	 */
 	boolean createOrderIfPossible(ShoppingCart shoppingCart);
 
-
-	/**
-	 * Removes the cart order related to the given shopping cart. It does not fail
-	 * if no such cart order exists.
-	 *
-	 * @param shoppingCart the shopping cart
-	 */
-	void removeIfExistsByShoppingCart(ShoppingCart shoppingCart);
-
-	/**
-	 * Remove the cart orders corresponding to the associated shopping cart GUIDs.
-	 *
-	 * @param shoppingCartGuids the shopping cart GUIDs
-	 * @return the number of cart orders deleted
-	 */
-	int removeIfExistsByShoppingCartGuids(List<String> shoppingCartGuids);
-
 	/**
 	 * Find the GUIDs of all the cart orders owned by a customer in a certain store, given customer's GUID and store code.
 	 *

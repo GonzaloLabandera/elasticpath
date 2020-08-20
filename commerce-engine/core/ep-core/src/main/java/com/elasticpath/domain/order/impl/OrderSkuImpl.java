@@ -49,6 +49,7 @@ import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
 import com.elasticpath.domain.RecalculableObject;
 import com.elasticpath.domain.catalog.DigitalAsset;
+import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.impl.DigitalAssetImpl;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.impl.AbstractItemData;
@@ -1004,6 +1005,12 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 	@Transient
 	public TaxPriceCalculator getTaxPriceCalculator() {
 		return new PriceCalculatorImpl(true);
+	}
+
+	@Transient
+	@Override
+	public boolean isGiftCertificate() {
+		return getFieldValue(GiftCertificate.KEY_GUID) != null;
 	}
 
 	/**

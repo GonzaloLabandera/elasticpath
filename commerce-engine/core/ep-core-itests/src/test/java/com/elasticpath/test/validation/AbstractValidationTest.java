@@ -19,6 +19,7 @@ import org.springframework.util.ReflectionUtils.MethodCallback;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
 import com.elasticpath.test.integration.BasicSpringContextTest;
+import com.elasticpath.validation.service.CustomerConstraintValidationService;
 
 /**
  * Abstract test for validation test scenarios.
@@ -28,6 +29,7 @@ public abstract class AbstractValidationTest extends BasicSpringContextTest {
 	/** Whitespace characters. */
 	protected static char[] WHITESPACE = {' ', '\t'};
 	private Validator validator;
+	private CustomerConstraintValidationService customerConstraintValidationService;
 
 
 	public Validator getValidator() {
@@ -35,6 +37,15 @@ public abstract class AbstractValidationTest extends BasicSpringContextTest {
 			validator = getBeanFactory().getSingletonBean("validator", Validator.class);
 		}
 		return validator;
+	}
+
+	public CustomerConstraintValidationService getCustomerConstraintValidationService() {
+		if (customerConstraintValidationService == null) {
+			customerConstraintValidationService = getBeanFactory().getSingletonBean(
+					"customerConstraintValidationService",
+					CustomerConstraintValidationService.class);
+		}
+		return customerConstraintValidationService;
 	}
 
 	/**

@@ -55,8 +55,8 @@ public abstract class AbstractCartIntegrationTestParent extends DbTestCase {
 	protected ShoppingCart createShoppingCart(final CustomerSession customerSession) {
 		final ShoppingCart shoppingCart = getBeanFactory().getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class);
 		shoppingCart.setStore(getScenario().getStore());
+		shoppingCart.setShopper(customerSession.getShopper());
 		shoppingCart.setCustomerSession(customerSession);
-		customerSession.setShoppingCart(shoppingCart);
 		shoppingCart.setDefault(true);
 		return shoppingCart;
 	}
@@ -79,5 +79,15 @@ public abstract class AbstractCartIntegrationTestParent extends DbTestCase {
 				taxCode.getCode(),
 				AvailabilityCriteria.ALWAYS_AVAILABLE,
 				orderLimit);
+	}
+
+	protected Product persistNonShippableProductWithSku() {
+		return getPersisterFactory().getCatalogTestPersister().persistNonShippablePersistedProductWithSku(
+				getScenario().getCatalog(),
+				getScenario().getCategory(),
+				getScenario().getWarehouse(),
+				BigDecimal.TEN,
+				"productName",
+				"skuCode");
 	}
 }

@@ -669,7 +669,6 @@
 		class="com.elasticpath.search.index.solr.document.impl.RuleSolrInputDocumentCreator"
 		scope="prototype">
 		<property name="analyzer" ref="analyzer" />
-		<property name="conditionDSLBuilder" ref="tagConditionDSLBuilder" />
 		<property name="pipelinePerformance">
 			<!-- pass in a black hole PipelinePerformance for integration tests.. -->
 			<bean
@@ -683,6 +682,14 @@
 	<bean id="indexBuildStatusUpdater" init-method="initialize"
 		destroy-method="shutdown" class="com.elasticpath.search.index.pipeline.impl.IndexBuildStatusUpdater">
 		<property name="indexBuildStatusDao" ref="indexBuildStatusDao" />
+		<property name="indexBuildStatusFactory">
+			<bean
+					class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+				<property name="targetBeanName">
+					<idref bean="indexBuildStatus" />
+				</property>
+			</bean>
+		</property>
 	</bean>
 
 </beans>

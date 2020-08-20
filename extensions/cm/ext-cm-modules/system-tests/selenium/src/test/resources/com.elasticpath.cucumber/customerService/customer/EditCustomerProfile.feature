@@ -1,6 +1,59 @@
 @regressionTest @customerService @customer
 Feature: Add address and update name
 
+  Scenario: Correct set of fields and tabs are displayed for account customer
+    Given I sign in to CM as admin user
+    When I search and open account editor for shared ID SomeBusiness@abc.com
+    Then I should see following fields in the Basic Profile section:
+      | Shared ID       |
+      | Status          |
+      | Business Name   |
+      | Business Number |
+      | Phone Number    |
+      | Fax Number      |
+    And I should see following fields in the Registration Information section:
+      | Customer Type    |
+      | Parent Hierarchy |
+    And I should see following tabs:
+      | Customer Profile  |
+      | Addresses         |
+      | Child Accounts    |
+      | Associates        |
+      | Orders            |
+      | Customer Segments |
+
+  Scenario: Correct set of fields and tabs are displayed for registered user
+    Given I sign in to CM as admin user
+    When I search and open customer editor for shared ID MOBEE:harry.potter@elasticpath.com
+    Then I should see following fields in the Basic Profile section:
+      | Shared ID     |
+      | Status        |
+      | Username      |
+      | First Name    |
+      | Last Name     |
+      | Email Address |
+      | Phone Number  |
+      | Fax Number    |
+      | Company       |
+    And I should see following fields in the Registration Information section:
+      | Customer Type      |
+      | Date Registered    |
+      | Store Registered   |
+      | Preferred Language |
+      | Preferred Currency |
+      | Date of Birth      |
+      | Gender             |
+      | Receive HTML Email |
+      | Receive Newsletter |
+      | Business Number    |
+      | Tax Exemption Id   |
+    And I should see following tabs:
+      | Customer Profile       |
+      | Addresses              |
+      | Orders                 |
+      | Customer Segments      |
+      | Customer Data Policies |
+
   Scenario Outline: Update customer name
     Given I have an order for scope <scope> with following skus
       | skuCode      | quantity |

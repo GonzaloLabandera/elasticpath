@@ -33,8 +33,4 @@
 	<bean id="cachingStoreRetrieveStrategy" class="com.elasticpath.caching.core.EhCacheStoreRetrieveStrategyImpl">
 		<property name="storeCache" ref="storeCache" />
 	</bean>
-
-
-
-
 </beans>

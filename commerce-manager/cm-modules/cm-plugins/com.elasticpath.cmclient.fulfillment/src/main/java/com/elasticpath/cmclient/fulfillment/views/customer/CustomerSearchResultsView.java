@@ -50,7 +50,7 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 	// table column constants
 	private static final int COLUMN_IMAGE = 0;
 
-	private static final int COLUMN_USERID = 1;
+	private static final int COLUMN_SHAREDID = 1;
 
 	private static final int COLUMN_STORE_REGISTERED = 2;
 
@@ -60,9 +60,11 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 
 	private static final int COLUMN_EMAIL = 5;
 
-	private static final int COLUMN_ADDRESS = 6;
+	private static final int COLUMN_USERNAME = 6;
 
-	private static final int COLUMN_TELEPHONE = 7;
+	private static final int COLUMN_ADDRESS = 7;
+
+	private static final int COLUMN_TELEPHONE = 8;
 
 	private static final String CUSTOMER_SEARCH_RESULT_TABLE = "Customer Search Result Table";
 
@@ -82,7 +84,7 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 		CustomerSearchResultsView.this.updateNavigationComponents();
 	}
 
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -143,12 +145,14 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 				case COLUMN_ADDRESS:
 					result = this.formAddressString(customer.getPreferredBillingAddress());
 					break;
-				case COLUMN_USERID:
-					result = String.valueOf(customer.getUserId());
+				case COLUMN_SHAREDID:
+					result = customer.getSharedId();
 					break;
 				case COLUMN_STORE_REGISTERED:
-					final Store customerStore = getStoreService().findStoreWithCode(customer.getStoreCode());
-					result = customerStore.getName();
+					if (customer.getStoreCode() != null) {
+						final Store customerStore = getStoreService().findStoreWithCode(customer.getStoreCode());
+						result = customerStore.getName();
+					}
 					break;
 				case COLUMN_EMAIL:
 					result = customer.getEmail();
@@ -159,6 +163,9 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 				case COLUMN_LASTNAME:
 					result = customer.getLastName();
 					break;
+				case COLUMN_USERNAME:
+					result = customer.getUsername();
+					break;
 				case COLUMN_TELEPHONE:
 					result = customer.getPhoneNumber();
 				break;
@@ -167,7 +174,7 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 			return result;
 		}
 
-		private String formAddressString(final CustomerAddress address) {			
+		private String formAddressString(final CustomerAddress address) {
 			if (address != null) {
 				return address.toPlainString();
 			}
@@ -225,25 +232,27 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 
 	@Override
 	protected void initializeTable(final IEpTableViewer epTableViewer) {
-		final int[] widths = new int[] { 21, 200, 135, 90, 90, 130, 270, 90 };
+		final int[] widths = new int[] { 21, 200, 135, 90, 90, 130, 130, 270, 90 };
 		final String[] columnNames = new String[] {
 				StringUtils.EMPTY,
-				FulfillmentMessages.get().CustomerSearchResultsView_UserId,
+				FulfillmentMessages.get().CustomerSearchResultsView_SharedId,
 				FulfillmentMessages.get().CustomerSearchResultsView_StoreRegistered,
 				FulfillmentMessages.get().CustomerSearchResultsView_FirstName,
 				FulfillmentMessages.get().CustomerSearchResultsView_LastName,
-				FulfillmentMessages.get().CustomerSearchResultsView_EmailUserId,
+				FulfillmentMessages.get().CustomerSearchResultsView_Email,
+				FulfillmentMessages.get().CustomerSearchResultsView_Username,
 				FulfillmentMessages.get().CustomerSearchResultsView_DefaultBillingAddress,
 				FulfillmentMessages.get().CustomerSearchResultsView_TelephoneNum
-				
+
 		};
 		final SortBy[] sortTypes = new SortBy[] {
 				null,
-				StandardSortBy.USER_ID,
+				StandardSortBy.SHARED_ID,
 				StandardSortBy.STORE_CODE,
 				StandardSortBy.FIRST_NAME,
 				StandardSortBy.LAST_NAME,
 				StandardSortBy.EMAIL,
+				StandardSortBy.USERNAME,
 				StandardSortBy.ADDRESS,
 				StandardSortBy.PHONE
 		};
@@ -251,7 +260,7 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 			IEpTableColumn addTableColumn = epTableViewer.addTableColumn(columnNames[i], widths[i]);
 			registerTableColumn(addTableColumn, sortTypes[i]);
 		}
-		
+
 		getSite().setSelectionProvider(epTableViewer.getSwtTableViewer());
 	}
 
@@ -304,15 +313,15 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 		customerSearchRequestJob.executeSearchFromIndex(null, getResultsStartIndex());
 		refreshViewerInput();
 	}
-	
+
 	@Override
 	protected void navigateTo(final int pageNumber) {
 		getViewer().setInput(EMPTY_ARRAY);
-		
+
 		customerSearchRequestJob.executeSearchFromIndex(null, getStartIndexByPageNumber(pageNumber, getResultsPaging()));
 		refreshViewerInput();
 	}
-	
+
 	@Override
 	public AbstractSearchRequestJob < ? extends Persistable > getSearchRequestJob() {
 		return customerSearchRequestJob;

@@ -128,8 +128,8 @@ public class CustomerConsentImporterImplTest {
 
 		List<LoggingEvent> loggingEvent = captorLoggingEvent.getAllValues();
 
-		assertThat(CustomerConsentDTO.ROOT_ELEMENT)
-				.isEqualTo(customerConsentImporterImpl.getImportedObjectName());
+		assertThat(customerConsentImporterImpl.getImportedObjectName())
+				.isEqualTo(CustomerConsentDTO.ROOT_ELEMENT);
 		assertThat(customerConsentImporterImpl.getSavingStrategy())
 				.isNotNull();
 		assertThat(status)
@@ -159,10 +159,10 @@ public class CustomerConsentImporterImplTest {
 
 		assertThat(status)
 				.isFalse();
-		assertThat("IE-31300 [CUSTOMER_CONSENT_GUID]")
-				.isEqualTo(loggingEvent.getMessage().toString());
-		assertThat(Level.WARN)
-				.isEqualTo(loggingEvent.getLevel());
+		assertThat(loggingEvent.getMessage().toString())
+				.isEqualTo("Message[jobType=<null>,code=IE-31300,params={CUSTOMER_CONSENT_GUID},exception=<null>]");
+		assertThat(loggingEvent.getLevel())
+				.isEqualTo(Level.WARN);
 	}
 
 	/**
@@ -186,10 +186,10 @@ public class CustomerConsentImporterImplTest {
 
 		assertThat(status)
 				.isFalse();
-		assertThat("IE-31302 [CUSTOMER_CONSENT_GUID, DATA_POLICY_GUID]")
-				.isEqualTo(loggingEvent.getMessage().toString());
-		assertThat(Level.WARN)
-				.isEqualTo(loggingEvent.getLevel());
+		assertThat(loggingEvent.getMessage().toString())
+				.isEqualTo("Message[jobType=<null>,code=IE-31302,params={CUSTOMER_CONSENT_GUID,DATA_POLICY_GUID},exception=<null>]");
+		assertThat(loggingEvent.getLevel())
+				.isEqualTo(Level.WARN);
 	}
 
 	/**
@@ -212,10 +212,10 @@ public class CustomerConsentImporterImplTest {
 
 		assertThat(status)
 				.isFalse();
-		assertThat("IE-31301 [CUSTOMER_CONSENT_GUID, CUSTOMER_GUID]")
-				.isEqualTo(loggingEvent.getMessage().toString());
-		assertThat(Level.WARN)
-				.isEqualTo(loggingEvent.getLevel());
+		assertThat(loggingEvent.getMessage().toString())
+				.isEqualTo("Message[jobType=<null>,code=IE-31301,params={CUSTOMER_CONSENT_GUID,CUSTOMER_GUID},exception=<null>]");
+		assertThat(loggingEvent.getLevel())
+				.isEqualTo(Level.WARN);
 	}
 
 	/**
@@ -227,8 +227,8 @@ public class CustomerConsentImporterImplTest {
 
 		when(customerConsentService.findByGuid(CUSTOMER_CONSENT_GUID)).thenReturn(customerConsent);
 
-		assertThat(customerConsent)
-				.isEqualTo(customerConsentImporterImpl.findPersistentObject(createCustomerConsentDTO()));
+		assertThat(customerConsentImporterImpl.findPersistentObject(createCustomerConsentDTO()))
+				.isEqualTo(customerConsent);
 	}
 
 
@@ -237,8 +237,8 @@ public class CustomerConsentImporterImplTest {
 	 */
 	@Test
 	public void testGetDomainAdapter() {
-		assertThat(customerConsentAdapter)
-				.isEqualTo(customerConsentImporterImpl.getDomainAdapter());
+		assertThat(customerConsentImporterImpl.getDomainAdapter())
+				.isEqualTo(customerConsentAdapter);
 	}
 
 	/**
@@ -250,8 +250,8 @@ public class CustomerConsentImporterImplTest {
 	public void testGetDtoGuidCustomerConsentDTO() {
 		final CustomerConsentDTO dto = createCustomerConsentDTO();
 
-		assertThat(CUSTOMER_CONSENT_GUID)
-				.isEqualTo(customerConsentImporterImpl.getDtoGuid(dto));
+		assertThat(customerConsentImporterImpl.getDtoGuid(dto))
+				.isEqualTo(CUSTOMER_CONSENT_GUID);
 	}
 
 	/**
@@ -259,8 +259,8 @@ public class CustomerConsentImporterImplTest {
 	 */
 	@Test
 	public void testGetImportedObjectName() {
-		assertThat(CustomerConsentDTO.ROOT_ELEMENT)
-				.isEqualTo(customerConsentImporterImpl.getImportedObjectName());
+		assertThat(customerConsentImporterImpl.getImportedObjectName())
+				.isEqualTo(CustomerConsentDTO.ROOT_ELEMENT);
 	}
 
 	/**
@@ -268,8 +268,8 @@ public class CustomerConsentImporterImplTest {
 	 */
 	@Test
 	public void testDtoClass() {
-		assertThat(CustomerConsentDTO.class)
-				.isEqualTo(customerConsentImporterImpl.getDtoClass());
+		assertThat(customerConsentImporterImpl.getDtoClass())
+				.isEqualTo(CustomerConsentDTO.class);
 	}
 
 	/**

@@ -36,16 +36,8 @@ public final class ShoppingCartMergerForShopperUpdates implements CustomerSessio
 			return;
 		}
 
-		// Keep anonymous cart if a guest checkout is causing the shopper update.
-		if (isGuestPerformingCheckOut(customerSession)) {
-			keepAnonymousCart(currentShopper, invalidShopper.getCurrentShoppingCart());
-		} else {
-			final ShoppingCart anonymousCart = invalidShopper.getCurrentShoppingCart();
-
-			mergeCartIntoCustomerSession(anonymousCart, customerSession);
-
-			shoppingCartService.remove(anonymousCart);
-		}
+		final ShoppingCart anonymousCart = invalidShopper.getCurrentShoppingCart();
+		mergeCartIntoCustomerSession(anonymousCart, customerSession);
 	}
 
 	private void mergeCartIntoCustomerSession(final ShoppingCart cart, final CustomerSession customerSession) {
@@ -57,10 +49,6 @@ public final class ShoppingCartMergerForShopperUpdates implements CustomerSessio
 		attachCartToShopperAndPersist(currentShopper, mergedShoppingCart);
 	}
 
-	private boolean isGuestPerformingCheckOut(final CustomerSession customerSession) {
-		return customerSession.isCheckoutSignIn();
-	}
-
 	private void copyTransientData(final Shopper currentShopper, final Shopper invalidShopper) {
 		final ShoppingCart shoppingCart = invalidShopper.getCurrentShoppingCart();
 		currentShopper.setCurrentShoppingCart(shoppingCart);
@@ -69,26 +57,11 @@ public final class ShoppingCartMergerForShopperUpdates implements CustomerSessio
 		}
 	}
 
-	private void keepAnonymousCart(final Shopper currentShopper, final ShoppingCart keptCart) {
-
-		// Remove any old shopping carts that have previously been persisted using the current shopping context
-		// and replace it with the current shopping cart.
-		removeExistingShoppingCart(currentShopper);
-
-		attachCartToShopperAndPersist(currentShopper, keptCart);
-	}
-
-	private void removeExistingShoppingCart(final Shopper shopper) {
-		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateByShopper(shopper);
-		shoppingCartService.remove(shoppingCart);
-	}
-
 	private void attachCartToShopperAndPersist(final Shopper shopper, final ShoppingCart shoppingCart) {
 		shoppingCart.setShopper(shopper);
 		shoppingCartService.saveOrUpdate(shoppingCart);
 
 		shopper.setCurrentShoppingCart(shoppingCart);
 	}
-
 }
 

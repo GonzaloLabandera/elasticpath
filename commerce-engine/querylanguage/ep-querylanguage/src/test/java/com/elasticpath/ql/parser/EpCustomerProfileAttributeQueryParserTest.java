@@ -35,7 +35,7 @@ public class EpCustomerProfileAttributeQueryParserTest { // NOPMD
 		customerProfileAttributesConf.initialize();
 		
 		Map<EPQueryType, AbstractEpQLCustomConfiguration> epQLObjectConfiguration = new HashMap<>();
-		epQLObjectConfiguration.put(EPQueryType.CUSTOMERPROFILE_ATTRIBUTE, customerProfileAttributesConf);
+		epQLObjectConfiguration.put(EPQueryType.CUSTOMERPROFILEATTRIBUTE, customerProfileAttributesConf);
 		
 		EpQueryAssembler epQueryAssembler = new EpQueryAssembler();
 		epQueryAssembler.setEpQLObjectConfiguration(epQLObjectConfiguration);

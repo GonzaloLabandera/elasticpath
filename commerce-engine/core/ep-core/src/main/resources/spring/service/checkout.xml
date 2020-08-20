@@ -197,7 +197,6 @@
 
 	<bean id="clearShoppingCartCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.ClearShoppingCartCheckoutAction">
 		<property name="shoppingCartService" ref="shoppingCartService"/>
-		<property name="cartOrderService" ref="cartOrderService"/>
 		<property name="cartOrderPaymentInstrumentService" ref="cartOrderPaymentInstrumentService"/>
 	</bean>
 

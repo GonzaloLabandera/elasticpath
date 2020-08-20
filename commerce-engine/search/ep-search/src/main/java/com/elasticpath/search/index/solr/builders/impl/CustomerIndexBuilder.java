@@ -4,6 +4,7 @@
 package com.elasticpath.search.index.solr.builders.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class CustomerIndexBuilder extends AbstractIndexBuilder {
 	 */
 	@Override
 	public List<Long> findDeletedUids(final Date lastBuildDate) {
-		return customerService.findUidsByDeletedDate(lastBuildDate);
+		return Collections.emptyList();
 	}
 
 	/**

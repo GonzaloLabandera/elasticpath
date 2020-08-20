@@ -31,11 +31,12 @@ public interface MultiCartResolutionStrategy {
 	/**
 	 * Find all cart guids for the customer.
 	 * @param customerGuid the customer guid.
-	 * @param storeCode the storecode.
+	 * @param accountSharedId the account shared ID.
+	 * @param storeCode the store code.
 	 * @param subject the subject.
 	 * @return the list of carts.
 	 */
-	Observable<String> findAllCarts(String customerGuid, String storeCode, Subject subject);
+	Observable<String> findAllCarts(String customerGuid, String accountSharedId, String storeCode, Subject subject);
 
 
 	/**
@@ -49,7 +50,7 @@ public interface MultiCartResolutionStrategy {
 	 * Does the strategy support creating new carts.
 	 * @param subject the subject.
 	 * @param shopper the shopper.
-	 * @param storeCode the storeCode.
+	 * @param storeCode the store code.
 	 * @return true if the strategy supports creating new carts.
 	 */
 	boolean supportsCreate(Subject subject, Shopper shopper, String storeCode);
@@ -63,7 +64,7 @@ public interface MultiCartResolutionStrategy {
 
 	/**
 	 * Get the modifier fields.
-	 * @param storeCode the storecode.
+	 * @param storeCode the store code.
 	 * @return the modifier fields.
 	 */
 	List<ModifierField> getModifierFields(String storeCode);
@@ -97,7 +98,7 @@ public interface MultiCartResolutionStrategy {
 
 	/**
 	 * Checks whether the given store supports multicart.
-	 * @param storeCode the storecode.
+	 * @param storeCode the store code.
 	 * @return true if  multicart enabled for store, false otherwise.
 	 */
 	boolean hasMulticartEnabled(String storeCode);

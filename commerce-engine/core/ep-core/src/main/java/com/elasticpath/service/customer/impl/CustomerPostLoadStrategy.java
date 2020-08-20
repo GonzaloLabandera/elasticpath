@@ -3,6 +3,9 @@
  */
 package com.elasticpath.service.customer.impl;
 
+import java.util.Map;
+
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.persistence.api.support.PersistablePostLoadStrategy;
 import com.elasticpath.service.attribute.AttributeService;
@@ -21,8 +24,8 @@ public class CustomerPostLoadStrategy implements PersistablePostLoadStrategy<Cus
 
 	@Override
 	public void process(final CustomerImpl customer) {
-		customer.setCustomerProfileAttributes(
-				getAttributeService().getCustomerProfileAttributesMap());
+		final Map<String, Attribute> attributes = getAttributeService().getCustomerProfileAttributesMapByCustomerType(customer.getCustomerType());
+		customer.setCustomerProfileAttributes(attributes);
 	}
 
 	public void setAttributeService(final AttributeService attributeService) {

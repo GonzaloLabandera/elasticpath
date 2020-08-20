@@ -39,10 +39,6 @@
 			<artifactId>catalog-update-event-processor-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-jta</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-core</artifactId>
 		</dependency>

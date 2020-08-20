@@ -173,37 +173,20 @@ public class LinkedCategoryImplTest extends AbstractEPTestCase {
 	}
 
 	/**
-	 * Test for isAvailable().
+	 * Test for isAvailable(), builds on conditions in CategoryImplTest.
 	 */
 	@Test
 	public void testIsAvaliable() {
-		final long timeUnit = 20000;
-		Date beforeNow = new Date();
-		beforeNow.setTime(beforeNow.getTime() - timeUnit);
+		masterCategoryImpl.setHidden(true);
+		linkedCategoryImpl.setIncluded(true);
+		assertFalse(linkedCategoryImpl.isAvailable());
 
-		Date muchBeforeNow = new Date();
-		beforeNow.setTime(beforeNow.getTime() - timeUnit * 2);
+		masterCategoryImpl.setHidden(false);
+		linkedCategoryImpl.setIncluded(true);
+		assertTrue(linkedCategoryImpl.isAvailable());
 
-		Date afterNow = new Date();
-		afterNow.setTime(afterNow.getTime() + timeUnit);
-
-		masterCategoryImpl.setStartDate(beforeNow);
-		assertTrue(masterCategoryImpl.isAvailable());
-		assertSame(masterCategoryImpl.isAvailable(), linkedCategoryImpl.isAvailable());
-
-		masterCategoryImpl.setStartDate(afterNow);
-		assertFalse(masterCategoryImpl.isAvailable());
-		assertSame(masterCategoryImpl.isAvailable(), linkedCategoryImpl.isAvailable());
-
-		masterCategoryImpl.setStartDate(beforeNow);
-		masterCategoryImpl.setEndDate(afterNow);
-		assertTrue(masterCategoryImpl.isAvailable());
-		assertSame(masterCategoryImpl.isAvailable(), linkedCategoryImpl.isAvailable());
-
-		masterCategoryImpl.setStartDate(muchBeforeNow);
-		masterCategoryImpl.setEndDate(beforeNow);
-		assertFalse(masterCategoryImpl.isAvailable());
-		assertSame(masterCategoryImpl.isAvailable(), linkedCategoryImpl.isAvailable());
+		linkedCategoryImpl.setIncluded(false);
+		assertFalse(linkedCategoryImpl.isAvailable());
 	}
 
 	/**

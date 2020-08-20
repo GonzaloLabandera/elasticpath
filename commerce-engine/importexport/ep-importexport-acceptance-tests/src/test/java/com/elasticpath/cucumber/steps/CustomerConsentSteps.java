@@ -24,6 +24,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.builder.datapolicy.CustomerConsentBuilder;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.datapolicy.ConsentAction;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.datapolicy.DataPolicy;
@@ -124,7 +125,7 @@ public class CustomerConsentSteps {
 		final Customer anonymousCustomer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
 		anonymousCustomer.setGuid(CustomerSteps.generateCustomerGuidFromName(customerFirstName, customerLastName));
 		anonymousCustomer.setStoreCode(storeService.findAllStores().get(0).getCode());
-		anonymousCustomer.setAnonymous(true);
+		anonymousCustomer.setCustomerType(CustomerType.SINGLE_SESSION_USER);
 		generatedCustomer = customerService.add(anonymousCustomer);
 
 		assertThat(generatedCustomer)

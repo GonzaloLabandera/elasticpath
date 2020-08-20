@@ -18,18 +18,13 @@
 	<!-- Local Spring files -->
 	<import resource="spring/models/domainModelBatch.xml" />
 	<import resource="spring/dataaccess/daoBatch.xml" />
+	<import resource="spring/dataaccess/openjpaBatch.xml" />
 	<import resource="spring/service/serviceBatch.xml" />
 	<import resource="spring/scheduling/quartz.xml" />
 
 	<!-- Plugin config -->
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
 
-
-	<!-- XA config -->
-	<beans profile="default">
-		<!-- Catalog Batch config -->
-		<import resource="classpath*:META-INF/elasticpath/conf/spring/catalog-batch.xml"/>
-		<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
-	</beans>
-
+	<!-- Catalog Syndication stuff-->
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/catalog-batch.xml"/>
 </beans>

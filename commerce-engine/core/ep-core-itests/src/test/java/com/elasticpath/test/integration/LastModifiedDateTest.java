@@ -34,7 +34,6 @@ import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.event.EventOriginatorType;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderEvent;
-import com.elasticpath.domain.order.impl.OrderEventImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.persistence.api.Persistable;
@@ -123,7 +122,7 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 		attribute.setKey("TEST_ATTRIBUTE");
 		attribute.setAttributeType(AttributeType.BOOLEAN);
 		attribute.setDisplayName("TestName", Locale.ENGLISH);
-		attribute.setAttributeUsage(AttributeUsageImpl.CUSTOMERPROFILE_USAGE);
+		attribute.setAttributeUsage(AttributeUsageImpl.USER_PROFILE_USAGE);
 		attribute.setGlobal(false);
 		
 		AttributeImpl persistedAttribute = saveDomainModelObject(attribute);
@@ -154,11 +153,13 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testOrderEventLastModifiedDate() throws InterruptedException {
+		Order order = orderService.add(createOrder());
+
 		OrderEvent orderEvent = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER_EVENT, OrderEvent.class);
 		orderEvent.setCreatedDate(new Date());
 		orderEvent.setOriginatorType(EventOriginatorType.CMUSER);
 		orderEvent.setTitle("TestTitle");
-		
+		orderEvent.setOrderUidPk(order.getUidPk());
 		OrderEvent persistedOrderEvent = saveDomainModelObject(orderEvent);
 		
 		final Date lastModifiedDateBeforeSave = persistedOrderEvent.getLastModifiedDate();
@@ -179,10 +180,7 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testOrderLastModifiedDate() throws InterruptedException {
-		Order order = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER, Order.class);
-		order.setLocale(Locale.US);
-		order.setCreatedDate(new Date());
-		order.setStoreCode(storeScenario.getStore().getCode());
+		Order order = createOrder();
 
 		assertNull(order.getLastModifiedDate());
 		
@@ -333,7 +331,16 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 		transaction = persistenceSession.beginTransaction();
 		T persistedObj = persistenceEngine.saveOrUpdate(object);
 		transaction.commit();
-		
+
 		return persistedObj;
+	}
+
+	private Order createOrder() {
+		Order order = getBeanFactory().getPrototypeBean(ContextIdNames.ORDER, Order.class);
+		order.setLocale(Locale.US);
+		order.setCreatedDate(new Date());
+		order.setStoreCode(storeScenario.getStore().getCode());
+
+		return order;
 	}
 }

@@ -4,7 +4,6 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer.impl;
 
 import java.util.Currency;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +50,7 @@ import com.elasticpath.tags.TagSet;
  */
 @Singleton
 @Named("customerSessionRepository")
+@SuppressWarnings({"PMD.GodClass"})
 public class CustomerSessionRepositoryImpl implements CustomerSessionRepository {
 	private static final Logger LOG = LoggerFactory.getLogger(CustomerSessionRepositoryImpl.class);
 
@@ -103,18 +103,35 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 	@Override
 	public Single<CustomerSession> findOrCreateCustomerSession() {
 		String userGuid = resourceOperationContext.getUserIdentifier();
+		String accountSharedId = SubjectUtil.getAccountSharedId(resourceOperationContext.getSubject());
+		if (accountSharedId != null) {
+			return findCustomerSessionByGuidAndAccountSharedIdAsSingle(userGuid, accountSharedId);
+		}
 		return findCustomerSessionByGuidAsSingle(userGuid);
 	}
 
 	@Override
 	public Single<CustomerSession> createCustomerSessionAsSingle() {
-			String userGuid = resourceOperationContext.getUserIdentifier();
-			return  Single.just(createCustomerSessionByGuidAndContext(userGuid));
+		String userGuid = resourceOperationContext.getUserIdentifier();
+		String accountSharedId = SubjectUtil.getAccountSharedId(resourceOperationContext.getSubject());
+		if (accountSharedId != null) {
+			createCustomerSessionByGuidAccountSharedIdAndContext(userGuid, accountSharedId);
+		}
+		return  Single.just(createCustomerSessionByGuidAndContext(userGuid));
 	}
 
 	private CustomerSession createCustomerSessionByGuidAndContext(final String userGuid) {
 
-		Shopper shopper = createShopperByCustomerGuid(userGuid);
+		return createCustomerSessionByGuidAccountSharedIdAndContext(userGuid, null);
+	}
+
+	private CustomerSession createCustomerSessionByGuidAccountSharedIdAndContext(final String userGuid, final String accountSharedId) {
+		Shopper shopper;
+		if (accountSharedId == null) {
+			shopper = createShopperByCustomerGuid(userGuid);
+		} else {
+			shopper = createShopperByCustomerGuidAndAccountSharedId(userGuid, accountSharedId);
+		}
 
 		final Subject subject = resourceOperationContext.getSubject();
 		Locale  locale = SubjectUtil.getLocale(subject);
@@ -142,6 +159,13 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 		return reactiveAdapter.fromRepositoryAsSingle(() -> findCustomerSessionByGuid(customerGuid));
 	}
 
+	@Override
+	public Single<CustomerSession> findCustomerSessionByGuidAndAccountSharedIdAsSingle(final String customerGuid, final String accountSharedId) {
+		String storeCode = getStoreCodeFromResourceOperationContext();
+		return reactiveAdapter.fromRepositoryAsSingle(() ->
+				findCustomerSessionByCustomerGuidAndAccountSharedId(customerGuid, accountSharedId, storeCode));
+	}
+
 	private Shopper getShopperByCustomerGuid(final String customerGuid) {
 		final Subject subject = resourceOperationContext.getSubject();
 		Shopper shopper;
@@ -162,21 +186,33 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 
 
 	private Shopper createShopperByCustomerGuid(final String customerGuid) {
-		final Customer customer = customerService.findByGuid(customerGuid);
+		return createShopperByCustomerGuidAndAccountSharedId(customerGuid, null);
+	}
 
-		//use the storecode from the store being accessed, not necessarily the one associated with the customer.
-		ScopePrincipal scopePrincipal =
-				PrincipalsUtil.getFirstPrincipalByType(resourceOperationContext.getSubject().getPrincipals(), ScopePrincipal.class);
-		String storeCode = scopePrincipal.getValue();
+	private Shopper createShopperByCustomerGuidAndAccountSharedId(final String customerGuid, final String accountSharedId) {
+		final Customer customer = customerService.findByGuid(customerGuid);
+		String storeCode = getStoreCodeFromResourceOperationContext();
 
 		final Shopper shopper = shopperService.createAndSaveShopper(storeCode);
 		ShopperMemento shopperMemento =  shopper.getShopperMemento();
 		shopperMemento.setCustomer(customer);
 		shopperMemento.setStoreCode(storeCode);
+
+		if (accountSharedId != null) {
+			final Customer account = customerService.findBySharedId(accountSharedId);
+			shopperMemento.setAccount(account);
+		}
+
 		shopperService.save(shopper);
 		return shopper;
 	}
 
+	// Returns the storecode from the store being accessed, not necessarily the one associated with the customer.
+	private String getStoreCodeFromResourceOperationContext() {
+		ScopePrincipal scopePrincipal =
+				PrincipalsUtil.getFirstPrincipalByType(resourceOperationContext.getSubject().getPrincipals(), ScopePrincipal.class);
+		return scopePrincipal.getValue();
+	}
 
 	@Override
 	@CacheRemove(typesToInvalidate = CustomerSession.class)
@@ -209,13 +245,13 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 
 	@Override
 	@CacheResult
-	public ExecutionResult<CustomerSession> findCustomerSessionByUserId(final String storeCode, final String customerUserId) {
+	public ExecutionResult<CustomerSession> findCustomerSessionBySharedId(final String storeCode, final String customerSharedId) {
 		return new ExecutionResultChain() {
 			@Override
 			public ExecutionResult<?> build() {
-				Shopper shopper = shopperService.findByCustomerUserIdAndStoreCode(customerUserId, storeCode);
+				Shopper shopper = shopperService.findByCustomerSharedIdAndStoreCode(customerSharedId, storeCode);
 				if (shopper == null) {
-					shopper = Assign.ifSuccessful(findOrCreateShopperWithoutException(customerUserId, storeCode));
+					shopper = Assign.ifSuccessful(findOrCreateShopperWithoutException(customerSharedId, storeCode));
 				}
 
 				Ensure.notNull(shopper, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
@@ -225,20 +261,92 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 		}.execute();
 	}
 
-	private ExecutionResult<Shopper> findOrCreateShopperWithoutException(final String customerUserId, final String storeCode) {
+	@Override
+	public ExecutionResult<CustomerSession> findCustomerSessionByCustomerGuidAndAccountSharedId(
+			final String customerGuid,
+			final String accountSharedId,
+			final String storeCode) {
 		try {
 
-			final Customer customer = customerService.findByUserId(customerUserId, storeCode);
+			Shopper shopper = shopperService.findByCustomerGuidAndAccountSharedIdAndStore(customerGuid, accountSharedId, storeCode);
+			if (shopper == null) {
+				final Customer customer = customerService.findByGuid(customerGuid);
+				if (customer == null) {
+					return ExecutionResultFactory.createNotFound(
+							String.format("Customer not found for given customer guid id %s", customerGuid));
+				}
+
+				ExecutionResult<Shopper> shopperExecutionResult = createShopperByCustomerAndAccountAndStoreCode(customer, accountSharedId, storeCode);
+				if (shopperExecutionResult.isFailure()) {
+					return ExecutionResultFactory.createNotFound(CUSTOMER_WAS_NOT_FOUND);
+				}
+				shopper = shopperExecutionResult.getData();
+			}
+
+			return createCustomerSession(storeCode, shopper);
+		} catch (Exception e) {
+			LOG.error(String.format("Error when finding shopper by guid %s", customerGuid), e);
+			return ExecutionResultFactory.createServerError("Server error when finding shopper by guid");
+		}
+	}
+
+	@Override
+	public ExecutionResult<CustomerSession> findCustomerSessionByUserIdAndAccountSharedId(
+			final String customerSharedId,
+			final String accountSharedId,
+			final String storeCode) {
+
+		Shopper shopper = shopperService.findByCustomerSharedIdAndAccountSharedIdAndStore(customerSharedId, accountSharedId, storeCode);
+		if (shopper == null) {
+			final Customer customer = customerService.findBySharedId(customerSharedId, storeCode);
+			if (customer == null) {
+				return ExecutionResultFactory.createNotFound(
+						String.format("Customer not found for given customer shared id %s", customerSharedId));
+			}
+
+			ExecutionResult<Shopper> shopperExecutionResult = createShopperByCustomerAndAccountAndStoreCode(customer, accountSharedId, storeCode);
+			if (shopperExecutionResult.isFailure()) {
+				return ExecutionResultFactory.createNotFound(CUSTOMER_WAS_NOT_FOUND);
+			}
+			shopper = shopperExecutionResult.getData();
+		}
+
+		return createCustomerSession(storeCode, shopper);
+	}
+
+
+	private ExecutionResult<Shopper> createShopperByCustomerAndAccountAndStoreCode(
+			final Customer customer,
+			final String accountSharedId,
+			final String storeCode) {
+
+		final Customer account = customerService.findBySharedId(accountSharedId);
+		if (account == null) {
+			return ExecutionResultFactory.createNotFound(
+					String.format("Account not found for given account shared ID %s and store code %s", accountSharedId, storeCode));
+		}
+
+		Shopper shopper = shopperService.findOrCreateShopper(customer, account, storeCode);
+		if (shopper == null) {
+			return ExecutionResultFactory.createNotFound(CUSTOMER_WAS_NOT_FOUND);
+		}
+		return ExecutionResultFactory.createReadOK(shopper);
+	}
+
+	private ExecutionResult<Shopper> findOrCreateShopperWithoutException(final String customerSharedId, final String storeCode) {
+		try {
+
+			final Customer customer = customerService.findBySharedId(customerSharedId, storeCode);
 
 			if (customer == null) {
 				return ExecutionResultFactory.createNotFound(
-						String.format("Customer not found for given customer user id %s and store %s", customerUserId, storeCode));
+						String.format("Customer not found for given customer shared id %s and store %s", customerSharedId, storeCode));
 			}
 			final Shopper shopper = shopperService.findOrCreateShopper(customer, customer.getStoreCode());
 
 			return ExecutionResultFactory.createReadOK(shopper);
 		} catch (Exception e) {
-			LOG.error(String.format("Error when finding/creating shopper for store %s and customer user ID %s", storeCode, customerUserId), e);
+			LOG.error(String.format("Error when finding/creating shopper for store %s and customer shared ID %s", storeCode, customerSharedId), e);
 			return ExecutionResultFactory.createServerError("Server error when finding/creating shopper by customer ID");
 		}
 	}
@@ -254,7 +362,7 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 					Locale locale = findLocaleForCurrentOperation(store);
 					Currency currency = findCurrencyForCurrentOperation(store);
 					CustomerSession customerSession = createCustomerSession(shopper, locale);
-					TagSet tagSet = tagSetFactory.createTagSet(shopper.getCustomer());
+					final TagSet tagSet = tagSetFactory.createTagSet(shopper);
 					customerSession = configurePersonalisedPricing(customerSession, store, currency, tagSet);
 					result = ExecutionResultFactory.createReadOK(customerSession);
 				} catch (Exception e) {
@@ -300,9 +408,6 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 	 */
 	CustomerSession createCustomerSession(final Shopper shopper, final Locale locale) {
 		CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
-		Date now = new Date();
-		customerSession.setCreationDate(now);
-		customerSession.setLastAccessedDate(now);
 		customerSession.setLocale(locale);
 		return customerSession;
 	}

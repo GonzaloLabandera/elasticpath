@@ -114,7 +114,7 @@ public class SeoAdapter extends AbstractDomainAdapterImpl<ObjectWithLocaleDepend
 			if (ldfObject instanceof Category) {
 				Catalog catalog = ((Category) ldfObject).getCatalog();
 				if (catalog != null && !catalog.getSupportedLocales().contains(locale)) {
-					throw new PopulationRuntimeException("IE-10000", locale.toString());
+					throw new PopulationRuntimeException("IE-10000", locale.toString(), catalog.getCode());
 				}
 			}
 		}

@@ -120,6 +120,7 @@
 		  class="com.elasticpath.service.dataimport.impl.ImportJobRunnerProductImpl"
 		  scope="prototype" parent="abstractImportJobRunner" init-method="init">
 		<property name="timeService" ref="timeService" />
+		<property name="indexNotificationService" ref="indexNotificationService" />
 	</bean>
 
 	<bean id="importJobRunnerProductAssociation"

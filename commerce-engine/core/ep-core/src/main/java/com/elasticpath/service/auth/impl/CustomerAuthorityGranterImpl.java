@@ -45,11 +45,11 @@ public class CustomerAuthorityGranterImpl implements AuthorityGranter {
 	@Override
 	public Set<String> grant(final Principal principal) {
 		Set<String> rtnSet = new HashSet<>();
-		String userId = principal.getName();
-		Customer customer = customerService.findByUserId(userId, storeConfig.getStoreCode());
+		String sharedId = principal.getName();
+		Customer customer = customerService.findBySharedId(sharedId, storeConfig.getStoreCode());
 		if (customer == null) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("No customer found with name " + userId);
+				LOG.debug("No customer found with name " + sharedId);
 			}
 		} else {
 			Collection<? extends GrantedAuthority> authorities = customer.getAuthorities();

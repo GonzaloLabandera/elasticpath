@@ -35,4 +35,27 @@
 	<include file="liquibase/core-changelog-2019-12.xml"/>
 	<include file="liquibase/core-changelog-2019-12-datapolicy.xml"/>
 	<include file="liquibase/core-changelog-2020-01-payments.xml"/>
+	<include file="liquibase/core-changelog-2020-02-changeset-settings.xml"/>
+	<include file="liquibase/core-changelog-2020-03-email-settings.xml"/>
+	<include file="liquibase/core-changelog-2020-03-payments.xml"/>
+	<include file="liquibase/core-changelog-2020-04-release-shipments-job.xml"/>
+	<include file="liquibase/core-changelog-2020-05-multicart-item-list-type-location-provider.xml" />
+	<include file="liquibase/core-changelog-2020-05-default-modifier-values.xml"/>
+	<include file="liquibase/core-changelog-2020-04-authentication-config.xml"/>
+	<include file="liquibase/core-changelog-2020-06-setting-cleanup.xml"/>
+	<include file="liquibase/core-changelog-2020-05-accountmanagement-customertype.xml"/>
+    <include file="liquibase/core-changelog-2020-05-cart-cleanup-jobs.xml"/>
+    <include file="liquibase/core-changelog-2020-06-account-profile-attributes.xml" />
+	<include file="liquibase/core-changelog-2020-06-add-accountmanagement-user-associations.xml" />
+	<include file="liquibase/core-changelog-2020-06-accountmanagement-customer-storecode.xml"/>
+	<include file="liquibase/core-changelog-2020-06-cleanup-anonymous-customers-job.xml"/>
+	<include file="liquibase/core-changelog-2020-07-remove-tcustomerdeleted-table.xml"/>
+	<include file="liquibase/core-changelog-2020-06-common-shared-identifier-users-accounts.xml" />
+	<include file="liquibase/core-changelog-2020-07-remove-customer-session-artifacts.xml"/>
+	<include file="liquibase/core-changelog-2020-07-add-setting-for-oauth-token-cleanup.xml"/>
+	<include file="liquibase/core-changelog-2020-07-increase-timportfault-table-args-column-size.xml"/>
+	<include file="liquibase/core-changelog-2020-07-add-parent-relationship-tcustomer.xml"/>
+	<include file="liquibase/core-changelog-2020-07-link-shopper-orders-accounts.xml" />
+	<include file="liquibase/core-changelog-2020-08-index-customer-auth-uid.xml"/>
+	<include file="liquibase/core-changelog-2020-08-add-selling-context-conditions-for-accounts.xml"/>
 </databaseChangeLog>

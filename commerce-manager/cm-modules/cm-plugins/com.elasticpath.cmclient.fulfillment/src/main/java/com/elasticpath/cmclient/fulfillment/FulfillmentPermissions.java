@@ -62,4 +62,9 @@ public class FulfillmentPermissions {
 	 * Permission to manage customer personal details.
 	 */
 	public static final String DATA_POLICIES_MANAGE = "ADMIN_DATA_POLICIES_MANAGE";  //$NON-NLS-1$
+
+	/**
+	 * Permission to create/edit accounts.
+	 */
+	public static final String CREATE_EDIT_ACCOUNTS = "CREATE_EDIT_ACCOUNTS";
 }

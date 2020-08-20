@@ -41,7 +41,8 @@ public class ReadOfferPrototype implements OfferResource.Read {
 	public Completable onRead() {
 		final Map<String, String> offerIdMap = identifier.getOfferId().getValue();
 		final String productCode = offerIdMap.get(SearchRepositoryImpl.PRODUCT_GUID_KEY);
-		return storeProductRepository.findByGuid(productCode)
+		final String scope = identifier.getScope().getValue();
+		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(scope, productCode)
 				.ignoreElement();
 	}
 }

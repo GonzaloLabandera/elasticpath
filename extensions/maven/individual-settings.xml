@@ -30,6 +30,7 @@
 		<activeProfile>ep-developer</activeProfile>
 		<activeProfile>tomcat-developer</activeProfile>
 		<activeProfile>mysql-dev-db</activeProfile>
+		<!-- <activeProfile>h2-dev-db</activeProfile> -->
 		<!-- <activeProfile>oracle-dev-db</activeProfile> -->
 		<activeProfile>with-oauth2-resource</activeProfile>
 		<activeProfile>activemq-dev-jms</activeProfile>
@@ -47,6 +48,18 @@
 				<epdb.reset_user>root</epdb.reset_user>
 				<epdb.reset_password>YOUR_ROOT_PASSWORD</epdb.reset_password>
 				<ep.database.timezone>UTC</ep.database.timezone>
+			</properties>
+		</profile>
+
+		<!-- H2 developer configuration -->
+		<!-- This overrides the h2-dev-db profile in elasticpath grandparent POM -->
+		<!-- When use this profile, make sure run it with option of non-xa spring profile, e.g. -Dspring.profiles.active=non-xa -->
+		<profile>
+			<id>h2-dev-db</id>
+			<properties>
+				<data.population.environment>local</data.population.environment>
+				<epdb.reset_user>sa</epdb.reset_user>
+				<epdb.reset_password/>
 			</properties>
 		</profile>
 

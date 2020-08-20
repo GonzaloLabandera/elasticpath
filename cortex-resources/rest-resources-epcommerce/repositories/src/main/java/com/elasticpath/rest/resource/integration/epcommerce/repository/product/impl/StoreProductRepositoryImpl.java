@@ -4,6 +4,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.product.impl;
 
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -27,6 +28,9 @@ import com.elasticpath.service.catalogview.StoreProductService;
 @Singleton
 @Named("storeProductRepository")
 public class StoreProductRepositoryImpl implements StoreProductRepository {
+
+	private static final String ERROR_STORE_PRODUCT_NOT_FOUND = "Offer with GUID %s was not found in store %s.";
+
 	private final StoreRepository storeRepository;
 	private final ProductLookup coreProductLookup;
 	private final StoreProductService coreStoreProductService;
@@ -59,7 +63,9 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 
 	@Override
 	public Single<StoreProduct> findDisplayableStoreProductWithAttributesByProductGuid(final String storeCode, final String productGuid) {
-		return findByGuid(productGuid).flatMap(product -> findDisplayableStoreProductWithAttributesForProduct(storeCode, product));
+		return reactiveAdapter.fromServiceAsSingle(() -> (Product) coreProductLookup.findByGuid(productGuid),
+				String.format(ERROR_STORE_PRODUCT_NOT_FOUND, productGuid, storeCode))
+				.flatMap(product -> findDisplayableStoreProductWithAttributesForProduct(storeCode, product));
 	}
 
 	@Override
@@ -69,24 +75,30 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 	}
 
 	@Override
+	public List<StoreProduct> findByUids(final String storeCode, final List<Long> productUids) {
+		return storeRepository.findStoreAsSingle(storeCode)
+				.flatMap(store -> reactiveAdapter.fromService(() -> coreProductLookup.findByUids(productUids))
+						.concatMapIterable(products -> products)
+						.map(product -> Optional.ofNullable(findDisplayableStoreProduct(product, store)))
+						.filter(Optional::isPresent)
+						.map(Optional::get)
+						.toList())
+				.blockingGet();
+	}
+
 	@CacheResult
-	public Single<Product> findByGuid(final String productGuid) {
-		return reactiveAdapter.fromServiceAsSingle(() -> coreProductLookup.findByGuid(productGuid), "Offer not found");
-	}
-
-	@Override
-	public List<Product> findByUids(final List<Long> productUids) {
-		return coreProductLookup.findByUids(productUids);
-	}
-
 	private Single<StoreProduct> findDisplayableStoreProductWithAttributesForProduct(final String storeCode, final Product product) {
 		return storeRepository.findStoreAsSingle(storeCode)
-				.flatMap(store -> reactiveAdapter
-						.fromServiceAsSingle(() -> getProductForStore(product, store), "Offer not found in store"));
+				.flatMap(store -> reactiveAdapter.fromServiceAsSingle(() -> findDisplayableStoreProduct(product, store),
+						String.format(ERROR_STORE_PRODUCT_NOT_FOUND, product.getGuid(), storeCode)));
 	}
 
-	@CacheResult
-	private StoreProduct getProductForStore(final Product product, final Store store) {
-		return coreStoreProductService.getProductForStore(product, store);
+	private StoreProduct findDisplayableStoreProduct(final Product product, final Store store) {
+		final StoreProduct storeProduct = coreStoreProductService.getProductForStore(product, store);
+		if (storeProduct != null && storeProduct.isProductDisplayable()) {
+			return storeProduct;
+		}
+		return null;
 	}
+
 }

@@ -31,6 +31,7 @@ public class JpaQueryChain extends AbstractParserChain {
 
 		if (isApplicableTo(line.getValue())) {
 			final StringBuilder queryBuffer = new StringBuilder(line.getValue());
+
 			line.setValue(Utils.processMultiLineQueries(reader, queryBuffer));
 
 			Matcher matcher = getJPAQueryPattern(line.getValue()).matcher(queryBuffer.toString());

@@ -3,8 +3,6 @@
  */
 package com.elasticpath.service.shopper.dao;
 
-import java.util.List;
-
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.shopper.ShopperMemento;
 
@@ -38,13 +36,6 @@ public interface ShopperDao {
 	void remove(ShopperMemento shopperMemento);
 
 	/**
-	 * Remove the {@link ShopperMemento} if it is not referenced by any {@link com.elasticpath.domain.customer.CustomerSession}s.
-	 *
-	 * @param shopperMemento the {@link ShopperMemento}.
-	 */
-	void removeIfOrphaned(ShopperMemento shopperMemento);
-
-	/**
 	 * Finds the ShopperMemento based on customer and store code.
 	 *
 	 * @param customer the {@link Customer} that this Shopper belongs to.
@@ -63,6 +54,33 @@ public interface ShopperDao {
 	ShopperMemento findByCustomerGuidAndStoreCode(String customerGuid, String storeCode);
 
 	/**
+	 * Finds the ShopperMemento by customer, account, and store.
+	 * @param customer The customer.
+	 * @param account The account.
+	 * @param storeCode The store code.
+	 * @return The ShopperMememnto or null if none found.
+	 */
+	ShopperMemento findByCustomerAccountAndStore(Customer customer, Customer account, String storeCode);
+
+	/**
+	 * Finds a ShopperMemento by Customer guid, account ID, and store code.
+	 * @param customerGuid The Customer Guid.
+	 * @param accountSharedId The Account Shared ID.
+	 * @param storeCode The Store Code.
+	 * @return The ShopperMemento or null if none found.
+	 */
+	ShopperMemento findByCustomerGuidAccountSharedIdAndStore(String customerGuid, String accountSharedId, String storeCode);
+
+	/**
+	 * Finds a ShopperMemento by customer user ID, Account Shared ID, and store code.
+	 * @param customerSharedId The customer ID.
+	 * @param accountSharedId The Account Shared ID.
+	 * @param storeCode The store code.
+	 * @return ShopperMemento or null if none found.
+	 */
+	ShopperMemento findByCustomerSharedIdAndAccountSharedIdAndStore(String customerSharedId, String accountSharedId, String storeCode);
+
+	/**
 	 * Finds the ShopperMemento based on customer guid.
 	 *
 	 * @param customerGuid the customer guid  that this Shopper belongs to.
@@ -73,42 +91,9 @@ public interface ShopperDao {
 	/**
 	 * Finds the ShopperMemento based on customer id and store code.
 	 *
-	 * @param customerUserId the customer id that this Shopper belongs to.
+	 * @param customerSharedId the customer id that this Shopper belongs to.
 	 * @param storeCode the storeCode of the Store this Shopper belongs to.
 	 * @return ShopperMemento if found, otherwise null.
 	 */
-	ShopperMemento findByCustomerUserIdAndStoreCode(String customerUserId, String storeCode);
-
-	/**
-	 * Deletes all {@link com.elasticpath.domain.shopper.Shopper}s whose UidPks are in the provided list
-	 *  and that don't have any wishlists or shopping carts attached to them.
-	 *
-	 * @param shopperUids the list of {@link com.elasticpath.domain.shopper.Shopper}s to delete.
-	 * @return the number of deleted {@link com.elasticpath.domain.shopper.Shopper}s.
-	 */
-	int removeNonDependantShoppersByUidList(List<Long> shopperUids);
-
-	/**
-	 * Deletes all {@link com.elasticpath.domain.shopper.Shopper}s whose UidPks are in the provided list.
-	 *
-	 * @param shopperUids the list of {@link com.elasticpath.domain.shopper.Shopper}s to delete.
-	 * @return the number of deleted {@link com.elasticpath.domain.shopper.Shopper}s.
-	 */
-	int removeShoppersByUidList(List<Long> shopperUids);
-
-	/**
-	 * Returns a list of {@link ShopperMemento}s that are no longer referenced by any
-	 * {@link com.elasticpath.domain.customer.CustomerSession}s.
-	 *
-	 * @param maxResults the maximum number of results to return.
-	 * @return a list (not null).
-	 */
-	List<ShopperMemento> findShoppersOrphanedFromCustomerSessions(int maxResults);
-
-	/**
-	 * Returns a list of  {@link ShopperMemento} UIDS that have the specified customer.
-	 * @param customer the customer.
-	 * @return a list of shopper uids.
-	 */
-	List<Long> findUidsByCustomer(Customer customer);
+	ShopperMemento findByCustomerSharedIdAndStore(String customerSharedId, String storeCode);
 }

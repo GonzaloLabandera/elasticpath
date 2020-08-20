@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<exportconfiguration>
+
+	<exporters>
+		<exporter type="PRODUCT">
+			<include type="PRODUCTASSOCIATION">
+				<option key="DIRECT_ONLY" value="true"/>
+			</include>
+			<include type="INVENTORY"/>
+			<include type="PRICING"/>
+		</exporter>
+		<exporter type="CONTENTSPACE"/>
+		<exporter type="DYNAMICCONTENT"/>
+		<exporter type="DYNAMICCONTENTDELIVERY"/>
+		<exporter type="PROMOTION">
+			<include type="CONDITIONRULE"/>
+			<include type="COUPONSET"/>
+		</exporter>
+		<exporter type="SYSTEMCONFIGURATION"/>
+		<exporter type="PRICELISTDESCRIPTOR">
+			<include type="BASEAMOUNT"/>
+		</exporter>
+		<exporter type="PRICELISTASSIGNMENT"/>
+		<exporter type="TAXJURISDICTION"/>
+		<exporter type="TAXCODE"/>
+		<exporter type="PAYMENTPROVIDER"/>
+		<exporter type="WAREHOUSE"/>
+		<exporter type="CUSTOMER"/>
+		<exporter type="CUSTOMERPROFILE_ATTRIBUTE"/>
+		<exporter type="CUSTOMER_GROUP"/>
+		<exporter type="STORE"/>
+		<exporter type="STORE_ASSOCIATION"/>
+		<exporter type="CMUSER"/>
+		<exporter type="USER_ROLE"/>
+		<exporter type="GIFT_CERTIFICATE"/>
+		<exporter type="SHIPPING_REGION"/>
+		<exporter type="SHIPPING_SERVICE_LEVEL"/>
+		<exporter type="SAVED_CONDITION"/>
+		<exporter type="CM_IMPORT_JOB"/>
+		<exporter type="DATA_POLICY"/>
+		<exporter type="CUSTOMER_CONSENT"/>
+		<exporter type="FACET"/>
+		<exporter type="SORT_ATTRIBUTE"/>
+		<exporter type="STORE_CUSTOMER_ATTRIBUTE"/>
+		<exporter type="ATTRIBUTE_POLICY"/>
+		<exporter type="TAGGROUP"/>
+		<exporter type="MODIFIERGROUP"/>
+		<exporter type="MODIFIERGROUPFILTER"/>
+		<exporter type="USERACCOUNTASSOCIATION"/>
+	</exporters>
+	<packager type="NONE"/>
+	<delivery>
+		<method>FILE</method>
+		<target>target/exported/data</target>
+	</delivery>
+</exportconfiguration>

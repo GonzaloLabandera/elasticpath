@@ -16,7 +16,7 @@ import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.EditAttributeDialog;
 import com.elasticpath.selenium.domainobjects.Attribute;
 import com.elasticpath.selenium.editor.catalog.CatalogEditor;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.util.Utility;
 
 /**
@@ -27,9 +27,10 @@ public class AttributeTabDefinition {
 	private final CatalogEditor catalogEditor;
 	private AddAttributeDialog addAttributeDialog;
 	private EditAttributeDialog editAttributeDialog;
+	private final WebDriver driver;
 
 	public AttributeTabDefinition(final Attribute attribute) {
-		final WebDriver driver = SetUp.getDriver();
+		driver = SeleniumDriverSetup.getDriver();
 		catalogEditor = new CatalogEditor(driver);
 		this.attribute = attribute;
 	}
@@ -133,7 +134,7 @@ public class AttributeTabDefinition {
 	public void deleteNewAttribute() {
 		catalogEditor.verifyCatalogAttributeValue(attribute.getKey());
 		catalogEditor.clickRemoveAttributeButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogAttributesSection_RemoveDialog_title");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CatalogAttributesSection_RemoveDialog_title");
 	}
 
 	/**

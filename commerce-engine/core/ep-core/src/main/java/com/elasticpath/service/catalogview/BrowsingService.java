@@ -27,9 +27,10 @@ public interface BrowsingService {
 	 * @param shoppingCart the shopping cart, give <code>null</code> if you don't have it
 	 * @param loadProductAssociations true if product associations should be loaded for each product
 	 * @param pageNumber the current page number
+	 * @param pageSize the number of results per page
 	 * @return a <code>BrowsingResult</code> instance
 	 */
 	BrowsingResult browsing(BrowsingRequest browsingRequest, CatalogViewResultHistory previousBrowsingResultHistory, ShoppingCart shoppingCart,
-			boolean loadProductAssociations, int pageNumber);
+			boolean loadProductAssociations, int pageNumber, int pageSize);
 
 }

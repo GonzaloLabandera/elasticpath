@@ -28,6 +28,7 @@ import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerProfile;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
@@ -130,7 +131,7 @@ public class ProfileEntityRepositoryImplTest {
 		when(customerRepository.updateCustomer(customer))
 				.thenReturn(Completable.complete());
 
-		when(attributeService.getCustomerProfileAttributesMap())
+		when(attributeService.getCustomerProfileAttributesMap(AttributeUsageImpl.USER_PROFILE_USAGE))
 				.thenReturn(attributeMap);
 
 		when(customer.getCustomerProfile())

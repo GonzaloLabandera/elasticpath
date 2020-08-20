@@ -193,7 +193,7 @@ public class StoreCustomerAttributeExporterTest {
 	 */
 	@Test
 	public void testGetJobType() {
-		assertThat(JobType.STORE_CUSTOMER_ATTRIBUTE)
+		assertThat(JobType.STORECUSTOMERATTRIBUTE)
 				.as("Incorrect job type returned.")
 				.isEqualTo(storeCustomerAttributeExporter.getJobType());
 	}

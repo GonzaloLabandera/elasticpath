@@ -3,11 +3,15 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.repositories;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.ACCOUNT_SHARED_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE_IDENTIFIER_PART;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.USER_ID;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.Collections;
 
 import io.reactivex.Observable;
 import org.junit.Before;
@@ -22,6 +26,8 @@ import com.elasticpath.rest.definition.carts.AddToSpecificCartFormIdentifier;
 import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
+import com.elasticpath.rest.identity.Subject;
+import com.elasticpath.rest.identity.attribute.AccountSharedIdSubjectAttribute;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 
@@ -52,7 +58,10 @@ public class AddToCartFormsElementLinksRepositoryImplTest {
 	public void testFindElements() {
 
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_ID);
-		when(shoppingCartRepository.findAllCarts(USER_ID, SCOPE)).thenReturn(Observable.just(CART_GUID));
+		Subject subject = mock(Subject.class);
+		when(subject.getAttributes()).thenReturn(Collections.singletonList(new AccountSharedIdSubjectAttribute("key", ACCOUNT_SHARED_ID)));
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+		when(shoppingCartRepository.findAllCarts(USER_ID, ACCOUNT_SHARED_ID, SCOPE)).thenReturn(Observable.just(CART_GUID));
 
 		Observable<AddToSpecificCartFormIdentifier> result = repository.getElements(AddToCartFormsIdentifier.builder()
 				.withItem(ItemIdentifier.builder()

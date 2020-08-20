@@ -21,7 +21,7 @@ Feature: Edit System Configuration
 
     Examples:
       | SYSTEM_SETTING                            | value |
-      | COMMERCE/SYSTEM/SESSIONCLEANUP/maxHistory | 61    |
+      | COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/maxHistory | 61    |
 
   Scenario: Rebuild Search Index
     When I go to Search Indexes

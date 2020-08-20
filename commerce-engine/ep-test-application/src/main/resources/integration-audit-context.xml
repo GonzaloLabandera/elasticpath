@@ -11,6 +11,7 @@
 		">
 
 	<util:list id="entityManagerLifecycleListeners">
+		<ref bean="domainEventListener"/>
 		<ref bean="databaseTimestampsEntityListener"/>
 		<ref bean="objectDeletedEntityListener"/>
 		<ref bean="changeSetPersistenceListener"/>

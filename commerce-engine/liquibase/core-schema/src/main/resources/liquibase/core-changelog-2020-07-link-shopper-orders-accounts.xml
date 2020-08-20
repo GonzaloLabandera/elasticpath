@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-link-shopper-orders-accounts.xml">
+	<changeSet id="PB-8335-link-shopper-with-accounts" author="elasticpath">
+		<comment>Link TSHOPPER with accounts.</comment>
+		<!-- Create a new nullable column to hold the guid with a foreign key constraint against TCUSTOMER -->
+		<addColumn tableName="TSHOPPER">
+			<column name="ACCOUNT_CUSTOMER_UID" type="BIGINT">
+				<constraints foreignKeyName="FK_SHOPPER_ACCOUNT" references="TCUSTOMER(UIDPK)"/>
+			</column>
+		</addColumn>
+		<createIndex tableName="TSHOPPER" indexName="I_SHOPPER_ACC_GUID">
+			<column name="ACCOUNT_CUSTOMER_UID" />
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="PB-8335-link-order-with-accounts" author="elasticpath">
+		<comment>Link TORDER with accounts.</comment>
+		<!-- Create a new nullable column to hold the guid with a foreign key constraint against TCUSTOMER -->
+		<addColumn tableName="TORDER">
+			<column name="ACCOUNT_CUSTOMER_UID" type="BIGINT">
+				<constraints foreignKeyName="FK_ORDER_ACCOUNT" references="TCUSTOMER(UIDPK)"/>
+			</column>
+		</addColumn>
+		<createIndex tableName="TORDER" indexName="I_ORDER_ACCOUNT_UID">
+			<column name="ACCOUNT_CUSTOMER_UID" />
+		</createIndex>
+	</changeSet>
+</databaseChangeLog>

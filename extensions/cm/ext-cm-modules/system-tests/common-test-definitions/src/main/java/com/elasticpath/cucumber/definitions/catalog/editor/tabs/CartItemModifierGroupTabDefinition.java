@@ -23,7 +23,7 @@ import com.elasticpath.selenium.domainobjects.containers.CartModifierGroupContai
 import com.elasticpath.selenium.editor.catalog.CatalogEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.CartItemModifierGroupsTab;
 import com.elasticpath.selenium.editor.catalog.tabs.ProductTypeTab;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.AddEditProductTypeWizard;
@@ -51,6 +51,7 @@ public class CartItemModifierGroupTabDefinition {
 	private AddEditCartItemModifierGroupFieldDialog fieldDialog;
 	private AddEditCartItemModifierFieldOptionDialog addEditModifierFieldOptionDialog;
 	private final CartModifierGroupContainer cartModifierGroupContainer;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -61,7 +62,7 @@ public class CartItemModifierGroupTabDefinition {
 	 */
 	public CartItemModifierGroupTabDefinition(final CartItemModifierGroup cartItemModifierGroup, final CartItemModiferGroupField
 			cartItemModiferGroupField, final CartModifierGroupContainer cartModifierGroupContainer) {
-		final WebDriver driver = SetUp.getDriver();
+		driver = SeleniumDriverSetup.getDriver();
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		this.cartItemModifierGroupsTab = new CartItemModifierGroupsTab(driver);
 		this.catalogEditor = new CatalogEditor(driver);
@@ -242,7 +243,7 @@ public class CartItemModifierGroupTabDefinition {
 		cartItemModifierGroupsTab.selectTab("CartItemModifierGroups");
 		cartItemModifierGroupsTab.selectGroup(this.cartItemModifierGroup.getGroupCode());
 		cartItemModifierGroupsTab.clickRemoveGroupButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogCartItemModifierGroupsSection_RemoveDialog");
+		new ConfirmDialog(driver).clickOKButton("CatalogCartItemModifierGroupsSection_RemoveDialog");
 	}
 
 	/**

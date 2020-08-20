@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -228,13 +229,24 @@ public class ImportPaymentProviderSteps {
 	}
 
 	private List<DisplayValue> convertToListOfDisplayValues(final String source) {
-		return Stream.of(source.split(";")).map(this::convertToDisplayValue).collect(Collectors.toList());
-
+		return Stream.of(source.split(";"))
+				.map(this::convertToDisplayValue)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
 	}
 
-	private DisplayValue convertToDisplayValue(final String source) {
+	/**
+	 * Converts localized name to {@link DisplayValue}.
+	 *
+	 * @param source is localized name with corresponding locale.
+	 * @return localized name converted to {@link DisplayValue}.
+	 */
+	private Optional<DisplayValue> convertToDisplayValue(final String source) {
 		final String[] strings = source.split(":");
-		return new DisplayValue(strings[0], strings[1]);
+		return strings.length == 2
+				? Optional.of(new DisplayValue(strings[0], strings[1]))
+				: Optional.empty();
 	}
 
 	private PaymentLocalizedProperties convertToPaymentLocalizedProperties(final List<DisplayValue> localizedNames) {

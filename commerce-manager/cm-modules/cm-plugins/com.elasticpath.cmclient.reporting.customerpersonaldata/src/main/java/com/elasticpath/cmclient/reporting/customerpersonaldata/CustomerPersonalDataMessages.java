@@ -24,7 +24,7 @@ public final class CustomerPersonalDataMessages {
 	//Report parameters
 	public String selectStore;
 	public String store;
-	public String userId;
+	public String sharedId;
 
 	/**
 	 * Gets the NLS localize message class.

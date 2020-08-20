@@ -109,7 +109,7 @@
 	<bean id="epQueryAssembler" class="com.elasticpath.ql.parser.EpQueryAssembler">
 		<property name="epQLObjectConfiguration">
 			<map>
-			    <!-- Note: each entry key must match an enum in EPQueryType. For example, CONTENT_SPACE. -->
+			    <!-- Note: each entry key must match an enum in EPQueryType. For example, CONTENTSPACE. -->
 	 			<entry key="PRODUCT">
 		 			<ref bean="productConfiguration"/>
 		 		</entry>
@@ -131,7 +131,7 @@
                 <entry key="CUSTOMER">
                     <ref bean="customerConfiguration"/>
                 </entry>
-                <entry key="CUSTOMERPROFILE_ATTRIBUTE">
+                <entry key="CUSTOMERPROFILEATTRIBUTE">
                     <ref bean="customerProfileAttributeConfiguration"/>
                 </entry>
 				<entry key="PRICELISTASSIGNMENT">
@@ -143,7 +143,7 @@
                 <entry key="DYNAMICCONTENTDELIVERY">
                     <ref bean="dynamicContentDeliveryConfiguration"/>
                 </entry>
-                <entry key="CONTENT_SPACE">
+                <entry key="CONTENTSPACE">
                     <ref bean="contentSpaceConfiguration"/>
                 </entry>
                 <entry key="TAXCODE">
@@ -155,16 +155,16 @@
                 <entry key="TAXJURISDICTION">
                     <ref bean="taxJurisdictionConfiguration"/>
                 </entry>
-                <entry key="GIFT_CERTIFICATE">
+                <entry key="GIFTCERTIFICATE">
                     <ref bean="giftCertificateConfiguration"/>
                 </entry>
-                <entry key="SHIPPING_REGION">
+                <entry key="SHIPPINGREGION">
                     <ref bean="shippingRegionConfiguration"/>
                 </entry>
-                <entry key="SHIPPING_SERVICE_LEVEL">
+                <entry key="SHIPPINGSERVICELEVEL">
                     <ref bean="shippingServiceLevelConfiguration"/>
                 </entry>
-                <entry key="SAVED_CONDITION">
+                <entry key="SAVEDCONDITION">
                     <ref bean="savedConditionConfiguration"/>
                 </entry>
                 <entry key="USER_ROLE">
@@ -176,7 +176,7 @@
                 <entry key="CMUSER">
                     <ref bean="cmUserConfiguration"/>
                 </entry>
-                <entry key="CM_IMPORT_JOB">
+                <entry key="CMIMPORTJOB">
                     <ref bean="cmImportJobConfiguration"/>
                 </entry>
 

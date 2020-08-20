@@ -397,7 +397,7 @@ public interface PersistenceEngine {
 	/**
 	 * Execute dynamic update/delete query with list parameter and optional other parameters.
 	 *
-	 * @param query he query to be executed.
+	 * @param query the query to be executed.
 	 * @param listParameterName the name of the parameter for the list values
 	 * @param values the collection of values
 	 * @param parameters the parameters to be used with the given query

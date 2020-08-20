@@ -30,8 +30,8 @@
                 <property name="category">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="userId" id="752">
-            <text-property name="promptText">userId</text-property>
+        <scalar-parameter name="sharedId" id="752">
+            <text-property name="promptText">sharedId</text-property>
             <property name="valueType">static</property>
             <property name="isRequired">true</property>
             <property name="dataType">string</property>
@@ -189,7 +189,7 @@ currentRow = null;]]></method>
                     <text id="745">
                         <property name="style">table-header-line-2-cell</property>
                         <property name="contentType">html</property>
-                        <text-property name="content"><![CDATA[<b>User ID:</b> <VALUE-OF>params["userId"]</VALUE-OF>]]></text-property>
+                        <text-property name="content"><![CDATA[<b>Shared ID:</b> <VALUE-OF>params["sharedId"]</VALUE-OF>]]></text-property>
                     </text>
                 </cell>
             </row>

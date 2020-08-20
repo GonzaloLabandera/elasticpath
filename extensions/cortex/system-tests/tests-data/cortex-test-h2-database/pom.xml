@@ -14,7 +14,6 @@
 	<description>A H2 compatible database built from the data in the cortex-data artifact.</description>
 
 	<properties>
-		<com.h2database.version>1.3.172</com.h2database.version>
 		<data.population.cli.directory>${project.build.directory}/ext-data-population-cli-${project.version}</data.population.cli.directory>
 		<ep.activemq.configUri>broker:(tcp://localhost:61618)?useJmx=true&amp;persistent=false</ep.activemq.configUri>
 	</properties>

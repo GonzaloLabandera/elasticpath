@@ -66,7 +66,7 @@ public class ApplicationLockManager {
 
 
 	private void initializeSettingsReader() {
-		settingsReader = BeanLocator.getSingletonBean(ContextIdNames.CACHED_SETTINGS_READER, SettingsReader.class);
+		settingsReader = BeanLocator.getSingletonBean(ContextIdNames.SETTINGS_READER, SettingsReader.class);
 	}
 
 	/**
@@ -96,7 +96,9 @@ public class ApplicationLockManager {
 						LOG.debug("Timed out for session " + session.getId());
 						final Display display = LifeCycleUtil.getSessionDisplay(session);
 						sessionIdsToRemove.add(sessionEntry.getKey());
-						display.asyncExec(() -> lockSession(sessionEntry, display));
+						if (!display.isDisposed()) {
+							display.asyncExec(() -> lockSession(sessionEntry, display));
+						}
 					}
 				}
 				removeSessionsFromSessionMap(sessionIdsToRemove);

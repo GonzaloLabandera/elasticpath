@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
@@ -337,18 +337,38 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Creates a Customer and two ShoppingCarts and asserts that the cart GUIDs can be retrieved.
+	 * Creates a Customer and ShoppingCarts and asserts that the cart GUIDs can be retrieved.
 	 */
 	@DirtiesDatabase
 	@Test
 	public void testFindShoppingCartGuidsByCustomerAndStore() {
 		final Customer savedCustomer = createSavedCustomer();
-		final ShoppingCart savedShoppingCart1 = createSavedShoppingCart(savedCustomer);
-		final ShoppingCart savedShoppingCart2 = createSavedShoppingCart(savedCustomer);
+		final Customer savedAccount = createSavedAccount();
+		final ShoppingCart savedShoppingCart1 = createSavedShoppingCart(savedCustomer, null);
+		final ShoppingCart savedShoppingCart2 = createSavedShoppingCart(savedCustomer, null);
+		final ShoppingCart savedShoppingCart3 = createSavedShoppingCart(savedCustomer, savedAccount);
 
-		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), scenario.getStore().getCode());
+		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), null, scenario.getStore().getCode());
 		assertThat(guids)
 			.containsExactlyInAnyOrder(savedShoppingCart1.getGuid(), savedShoppingCart2.getGuid());
+	}
+
+	/**
+	 * Creates a Customer and ShoppingCarts and asserts that the cart GUIDs can be retrieved.
+	 */
+	@DirtiesDatabase
+	@Test
+	public void testFindShoppingCartGuidsByCustomerAndAccountAndStore() {
+		final Customer savedCustomer = createSavedCustomer();
+		final Customer savedAccount = createSavedAccount();
+		final ShoppingCart savedShoppingCart1 = createSavedShoppingCart(savedCustomer, savedAccount);
+		final ShoppingCart savedShoppingCart2 = createSavedShoppingCart(savedCustomer, savedAccount);
+		final ShoppingCart savedShoppingCart3 = createSavedShoppingCart(savedCustomer, null);
+
+		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), savedAccount.getSharedId(),
+				scenario.getStore().getCode());
+		assertThat(guids)
+				.containsExactlyInAnyOrder(savedShoppingCart1.getGuid(), savedShoppingCart2.getGuid());
 	}
 
 	/**
@@ -359,11 +379,11 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testFindNoShoppingCartGuids() {
 		final Customer savedCustomer = createSavedCustomer();
-		createSavedShoppingCart(savedCustomer);
-		createSavedShoppingCart(savedCustomer);
+		createSavedShoppingCart(savedCustomer, null);
+		createSavedShoppingCart(savedCustomer, null);
 
 		// Store doesn't exist.
-		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), "BAD_STORE_CODE");
+		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), null,"BAD_STORE_CODE");
 		assertThat(guids).isEmpty();
 	}
 
@@ -399,14 +419,13 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	 */
 	@DirtiesDatabase
 	@Test
-	public void ensureDeleteAllShoppingCartsByShopperUidsCorrectlyHandlesAssociatedCartOrders() {
+	public void ensureDeleteAllShoppingCartsByShopperUidCorrectlyHandlesAssociatedCartOrders() {
 		final Customer savedCustomer = createSavedCustomer();
-		ShoppingCart cartWithCartOrderToDelete = createSavedShoppingCart(savedCustomer);
-		ShoppingCart cartWithoutCartOrderToKeep = createSavedShoppingCart(savedCustomer);
-		ShoppingCart cartWithCartOrderToKeep = createSavedShoppingCart(savedCustomer);
+		ShoppingCart cartWithCartOrderToDelete = createSavedShoppingCart(savedCustomer, null);
+		ShoppingCart cartWithoutCartOrderToKeep = createSavedShoppingCart(savedCustomer, null);
+		ShoppingCart cartWithCartOrderToKeep = createSavedShoppingCart(savedCustomer, null);
 
-		List<Long> shopperUidsForDeletion = ImmutableList.of(cartWithCartOrderToDelete.getShopper().getUidPk());
-		shoppingCartService.deleteAllShoppingCartsByShopperUids(shopperUidsForDeletion);
+		shoppingCartService.deleteAllShoppingCartsByShopperUid(cartWithCartOrderToDelete.getShopper().getUidPk());
 
 		assertThat(shoppingCartService.shoppingCartExists(cartWithCartOrderToDelete.getGuid())).isFalse();
 		assertThat(cartOrderService.findByShoppingCartGuid(cartWithCartOrderToDelete.getGuid())).isNull();
@@ -417,19 +436,27 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 
 	private Customer createSavedCustomer() {
 		final Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
-		String email = "a@b.com";
-		customer.setUserId(email);
-		customer.setEmail(email);
+		customer.setCustomerType(CustomerType.REGISTERED_USER);
+		customer.setEmail("a@b.com");
+		customer.setFirstName("Test");
+		customer.setLastName("Test");
 		customer.setStoreCode(scenario.getStore().getCode());
-		customer.setAnonymous(false);
 		return customerService.add(customer);
 	}
 
-	private ShoppingCart createSavedShoppingCart(final Customer savedCustomer) {
+	private Customer createSavedAccount() {
+		final Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
+		customer.setCustomerType(CustomerType.ACCOUNT);
+		customer.setBusinessName("Test");
+		return customerService.add(customer);
+	}
+
+	private ShoppingCart createSavedShoppingCart(final Customer savedCustomer, final Customer savedAccount) {
 		final Shopper savedShopper = shopperService.createAndSaveShopper(scenario.getStore().getCode());
 		final CustomerSession customerSession = customerSessionService.createWithShopper(savedShopper);
 		customerSession.setCurrency(Currency.getInstance("USD"));
 		savedShopper.setCustomer(savedCustomer);
+		savedShopper.setAccount(savedAccount);
 		shopperService.save(savedShopper);
 
 		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);

@@ -40,7 +40,7 @@ public class EpCmImportJobQueryParserTest {
 		Map<EPQueryType, AbstractEpQLCustomConfiguration> epQLObjectConfiguration
 			= new HashMap<>();
 
-		epQLObjectConfiguration.put(EPQueryType.CM_IMPORT_JOB, configuration);
+		epQLObjectConfiguration.put(EPQueryType.CMIMPORTJOB, configuration);
 
 		EpQueryAssembler epQueryAssembler = new EpQueryAssembler();
 		epQueryAssembler.setEpQLObjectConfiguration(epQLObjectConfiguration);

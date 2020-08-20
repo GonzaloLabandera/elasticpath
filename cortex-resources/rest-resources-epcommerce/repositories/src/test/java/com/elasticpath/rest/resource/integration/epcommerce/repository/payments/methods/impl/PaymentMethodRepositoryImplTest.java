@@ -138,7 +138,7 @@ public class PaymentMethodRepositoryImplTest {
 		String providerConfigGuid = "PROVIDER_CONFIG_GUID_2";
 		Locale locale = Locale.CANADA;
 		Currency currency = Currency.getInstance(locale);
-		String userId = "USER_ID";
+		String userId = "SHARED_ID";
 
 		StorePaymentProviderConfig testStorePaymentProviderConfig2 = createTestStorePaymentProviderConfig(storeConfigGuid, providerConfigGuid);
 

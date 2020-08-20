@@ -51,7 +51,7 @@ public class CustomerStepDefinitions {
 	@Given("^(?:the customer's|my) email address (.+) has been used to register (?:my|their) user account$")
 	public void setCustomerUserIdAndEmail(final String customerEmailAddress) {
 		customerBuilderHolder.set(customerBuilderHolder.get()
-				.withUserId(customerEmailAddress)
+				.withSharedId(customerEmailAddress)
 				.withEmail(customerEmailAddress));
 	}
 
@@ -71,8 +71,9 @@ public class CustomerStepDefinitions {
 		emailSendingCommandHolder.set(() -> {
 			final Customer customer = buildCustomer();
 			final Customer persistedAnonymousCustomer = customerService.addByAuthenticate(customer, false);
-			persistedAnonymousCustomer.setUserId(emailAddress);
+			persistedAnonymousCustomer.setSharedId(emailAddress);
 			persistedAnonymousCustomer.setEmail(emailAddress);
+			persistedAnonymousCustomer.setUsername(emailAddress);
 			customerHolder.set(customerRegistrationService.registerCustomer(persistedAnonymousCustomer));
 		});
 	}

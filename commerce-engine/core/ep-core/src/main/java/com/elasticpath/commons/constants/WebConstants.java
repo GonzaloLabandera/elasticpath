@@ -381,24 +381,19 @@ public final class WebConstants {
 	public static final String CREATE_USER = "createUser";
 
 	/**
-	 * CMUSER ID.
+	 * CMUSER username.
 	 */
-	public static final String CMUSER_ID = "username";
+	public static final String CMUSER_USERNAME = "username";
 
 	/**
-	 * User GUID.
+	 * CMUSER GUID.
 	 */
-	public static final String USER_GUID = "userGuid";
+	public static final String CMUSER_GUID = "userGuid";
 
 	/**
-	 * CMUSER PASSWORD.
+	 * CMUSER password.
 	 */
 	public static final String CMUSER_PASSWORD = "password";
-
-	/**
-	 * CUSTOMER UID.
-	 */
-	public static final String CUSTOMER_UID = "custusername";
 
 	/**
 	 * Constant for checkout results.

@@ -32,6 +32,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.event.EventOriginator;
@@ -103,6 +104,7 @@ public class OrderFactoryImplTest {
 	private OrderFactoryImpl orderFactory;
 	private CustomerSession customerSession;
 	private Store store;
+	private Customer mockAccount;
 
 	/**
 	 * Setup required for each test.
@@ -152,7 +154,7 @@ public class OrderFactoryImplTest {
 	@Test
 	public void testUpdateAnonymousCustomer() {
 		final Customer customer = createCustomer();
-		customer.setAnonymous(true);
+		customer.setCustomerType(CustomerType.SINGLE_SESSION_USER);
 
 		final ShoppingCart shoppingCart = createShoppingCart();
 		final ShoppingCartTaxSnapshot pricingSnapshot = createShoppingCart();
@@ -176,7 +178,7 @@ public class OrderFactoryImplTest {
 	@Test
 	public void testUpdateAnonymousCustomerWithNullBillingAddress() {
 		final Customer customer = createCustomer();
-		customer.setAnonymous(true);
+		customer.setCustomerType(CustomerType.SINGLE_SESSION_USER);
 
 		final ShoppingCart shoppingCart = createShoppingCart();
 		final ShoppingCartTaxSnapshot pricingSnapshot = createShoppingCart();
@@ -192,22 +194,20 @@ public class OrderFactoryImplTest {
 		verify(customerService, never()).updateCustomerFromAddress(any(), any());
 	}
 
-	@SuppressWarnings("PMD.AvoidUsingHardCodedIP")
 	@Test
-	public void verifyOrderIsCreatedWithIpAddress() throws Exception {
-		when(customerSession.getLocale()).thenReturn(Locale.CANADA);
-
+	public void verifyOrderIsCreatedWithAccount() throws Exception {
 		final ShoppingCart shoppingCart = createShoppingCart();
 		final Customer customer = createCustomer();
+		createShoppingCart();
 
-		final String expectedIpAddress = "1.2.3.4";
+		customer.setCustomerType(CustomerType.REGISTERED_USER);
+		Order order = setupOrder();
 
-		setupOrder();
+		mockAccount = mock(Customer.class);
+		Shopper shopper = customerSession.getShopper();
+		shopper.setAccount(mockAccount);
 
-		when(cartOrderService.getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid())).thenReturn(CART_ORDER_GUID);
-		when(customerSession.getIpAddress()).thenReturn(expectedIpAddress);
-
-		final Order populatedOrder = orderFactory.createAndPersistNewEmptyOrder(
+		final Order persistedOrder = orderFactory.createAndPersistNewEmptyOrder(
 				customer,
 				customerSession,
 				shoppingCart,
@@ -215,13 +215,30 @@ public class OrderFactoryImplTest {
 				false
 		);
 
-		assertEquals("IP Address incorrectly set on Order", expectedIpAddress, populatedOrder.getIpAddress());
+		assertEquals("Account is not set on persisted order.", persistedOrder.getAccount(), mockAccount);
+
+		final ShoppingCartTaxSnapshot taxSnapshot = mock(ShoppingCartTaxSnapshot.class);
+
+		final ShoppingCartPricingSnapshot pricingSnapshot = mock(ShoppingCartPricingSnapshot.class);
+		when(taxSnapshot.getShoppingCartPricingSnapshot()).thenReturn(pricingSnapshot);
+
+		final PromotionRecordContainer promotionRecordContainer = mock(PromotionRecordContainer.class);
+		when(pricingSnapshot.getPromotionRecordContainer()).thenReturn(promotionRecordContainer);
+
+		final Order filledInOrder = orderFactory.fillInNewOrderFromShoppingCart(
+				order,
+				customer,
+				customerSession,
+				shoppingCart,
+				taxSnapshot);
+
+		assertEquals("Account is not set on filled in order.", filledInOrder.getAccount(), mockAccount);
 	}
 
 	@Test
 	public void verifyOrderIsCreatedWithAppliedRules() throws Exception {
 		final Customer customer = createCustomer();
-		customer.setAnonymous(true);
+		customer.setCustomerType(CustomerType.SINGLE_SESSION_USER);
 
 		final ShoppingCart shoppingCart = createShoppingCart();
 		final ShoppingCartTaxSnapshot taxSnapshot = mock(ShoppingCartTaxSnapshot.class);

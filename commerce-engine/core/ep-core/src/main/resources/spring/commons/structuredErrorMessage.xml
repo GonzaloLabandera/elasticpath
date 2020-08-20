@@ -45,6 +45,8 @@
 			   value="field.invalid.size"/>
 		<entry key="{com.elasticpath.validation.validators.impl.RegisteredCustomerPasswordNotBlankWithSizeValidator.blank.message}"
 			   value="field.required"/>
+		<entry key="{com.elasticpath.validation.validators.impl.RegisteredCustomerUsernameUniqueByStoreValidator.message}"
+			   value="username.not.unique"/>
 	</util:map>
 
 	<bean id="constraintViolationTransformer" class="com.elasticpath.validation.impl.ConstraintViolationTransformerImpl">

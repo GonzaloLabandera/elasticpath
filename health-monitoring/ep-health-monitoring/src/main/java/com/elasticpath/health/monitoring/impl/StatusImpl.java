@@ -64,7 +64,7 @@ public class StatusImpl implements Status {
 			return false;
 		}
 
-		return !EqualsBuilder.reflectionEquals(this, obj);
+		return EqualsBuilder.reflectionEquals(this, obj);
 	}
 
 	@Override

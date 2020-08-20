@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<products>
+	<product>
+		<code>tt0114369</code>
+		<name>
+			<value language="en">se7en</value>
+			<value language="en_US">tt0114369</value>
+			<value language="fr">tt0114369</value>
+			<value language="fr_CA"></value>
+		</name>
+		<type>Movies_MultiSku</type>
+		<taxcode>GOODS</taxcode>
+		<brand>WarnerBros</brand>
+		<availability>
+			<storevisible>true</storevisible>
+			<notsoldseperately>false</notsoldseperately>
+			<enabledate>2011-12-20T13:45:23-08:00</enabledate>
+			<minorderqty>1</minorderqty>
+			<availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+			<orderlimit>0</orderlimit>
+		</availability>
+		<attributes>
+			<attribute key="A00002">
+				<value>Wed Dec 20 00:00:00 1995</value>
+			</attribute>
+			<attribute key="A00004">
+				<value>English</value>
+				<value>French</value>
+			</attribute>
+			<attribute key="A00007">
+				<value>127</value>
+			</attribute>
+			<attribute key="A00008">
+				<value>00AD89FE-A8F3-4BF9-84EB-07CB19ED51E4.jpg</value>
+			</attribute>
+			<attribute key="A00009">
+				<value>8.70</value>
+			</attribute>
+		</attributes>
+		<skus>
+			<sku guid="596F6790-F907-D51C-BDA6-C22DD252332E">
+				<code>tt0114369_hdb</code>
+				<skuoptions>
+					<skuoption code="VideoQuality">
+						<skuoptionvalue>HD</skuoptionvalue>
+					</skuoption>
+					<skuoption code="PurchaseType">
+						<skuoptionvalue>Buy</skuoptionvalue>
+					</skuoption>
+				</skuoptions>
+				<availability>
+					<enabledate>2011-12-11T00:00:00-08:00</enabledate>
+				</availability>
+				<shippable enabled="false"/>
+				<digitalasset enabled="true"/>
+				<attributes/>
+			</sku>
+			<sku guid="E2409E29-AF5A-36FA-5AD5-F649722FD595">
+				<code>tt0114369_sdb</code>
+				<skuoptions>
+					<skuoption code="VideoQuality">
+						<skuoptionvalue>SD</skuoptionvalue>
+					</skuoption>
+					<skuoption code="PurchaseType">
+						<skuoptionvalue>Buy</skuoptionvalue>
+					</skuoption>
+				</skuoptions>
+				<availability>
+					<enabledate>2011-12-04T00:00:00-08:00</enabledate>
+				</availability>
+				<shippable enabled="false"/>
+				<digitalasset enabled="true"/>
+				<attributes/>
+			</sku>
+			<sku guid="51538620-E181-0D09-FDEA-18EC35843CCE">
+				<code>tt0114369_sdr</code>
+				<skuoptions>
+					<skuoption code="VideoQuality">
+						<skuoptionvalue>SD</skuoptionvalue>
+					</skuoption>
+					<skuoption code="PurchaseType">
+						<skuoptionvalue>Rent</skuoptionvalue>
+					</skuoption>
+				</skuoptions>
+				<availability>
+					<enabledate>2011-12-05T00:00:00-08:00</enabledate>
+				</availability>
+				<shippable enabled="false"/>
+				<digitalasset enabled="true"/>
+				<attributes/>
+			</sku>
+		</skus>
+		<seo>
+			<url>
+				<value language="fr_CA"></value>
+				<value language="fr"></value>
+				<value language="en"></value>
+				<value language="en_US"></value>
+			</url>
+			<title>
+				<value language="fr_CA"></value>
+				<value language="fr"></value>
+				<value language="en"></value>
+				<value language="en_US"></value>
+			</title>
+			<keywords>
+				<value language="fr_CA"></value>
+				<value language="fr"></value>
+				<value language="en"></value>
+				<value language="en_US"></value>
+			</keywords>
+			<description>
+				<value language="fr_CA"></value>
+				<value language="fr"></value>
+				<value language="en"></value>
+				<value language="en_US"></value>
+			</description>
+		</seo>
+	</product>
+</products>

@@ -16,7 +16,6 @@ import com.elasticpath.domain.audit.SingleChangeOperation;
 import com.elasticpath.persistence.api.ChangeType;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.persistence.api.Transaction;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.service.audit.AuditDao;
 import com.elasticpath.service.changeset.ChangeSetService;
@@ -38,9 +37,6 @@ public class AuditDaoImpl implements AuditDao {
 	public void persistDataChanged(final Persistable object, final String fieldName, final ChangeType changeType,
 			final String oldValue, final String newValue, final ChangeOperation operation) {
 
-		// Start a separate transaction for writing data changed records
-		Transaction transaction = getPersistenceEngine().getPersistenceSession().beginTransaction();
-
 		DataChanged dataChanged = getBeanFactory().getPrototypeBean(ContextIdNames.DATA_CHANGED, DataChanged.class);
 		dataChanged.setObjectName(object.getClass().getName());
 		dataChanged.setObjectUid(object.getUidPk());
@@ -54,7 +50,6 @@ public class AuditDaoImpl implements AuditDao {
 		dataChanged.setFieldOldValue(oldValue);
 
 		getPersistenceEngine().saveOrMerge(dataChanged);
-		transaction.commit();
 	}
 
 	@Override

@@ -198,30 +198,9 @@
 
 	<bean id="searchConfigFactory" parent="searchConfigFactoryTemplate"/>
 
-	<bean id="intervalRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.IntervalRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService"/>
-		<property name="timeoutParamKey" value="timeout"/>
-	</bean>
 
-	<bean id="immediateRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ImmediateRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService"/>
-	</bean>
-
-	<bean id="applicationLifetimeRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ApplicationLifetimeRefreshStrategyImpl">
-		<property name="settingsReader" ref="settingsService"/>
-	</bean>
-
-	<bean id="cachedSettingsReader" class="com.elasticpath.settings.impl.CachedSettingsReaderImpl">
-		<property name="settingsService" ref="settingsService"/>
-		<property name="refreshStrategies">
-			<map>
-				<entry key="interval" value-ref="intervalRefreshStrategy"/>
-				<entry key="immediate" value-ref="immediateRefreshStrategy"/>
-				<entry key="application" value-ref="applicationLifetimeRefreshStrategy"/>
-			</map>
-		</property>
+	<bean id="settingsReader" parent="cachedSettingsReaderTemplate">
 		<property name="refreshStrategyKey" value="adminRefreshStrategy"/>
-		<property name="defaultRefreshStrategy" ref="immediateRefreshStrategy"/>
 	</bean>
 
 	<bean id="cmChangeSetHelper" class="com.elasticpath.cmclient.core.helpers.ChangeSetHelper">

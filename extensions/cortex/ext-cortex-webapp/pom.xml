@@ -567,6 +567,11 @@
 			<artifactId>ep-resource-lookups</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-accounts</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Pin tomcat version used in plugin -->
 		<dependency>
@@ -802,12 +807,25 @@
 							<includeArtifactIds>
 								<!-- dependant: ep-rest-spi -->
 								spring-security-oauth2-bundle,
+							</includeArtifactIds>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-cortex-deps-OSGi-bundles</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+							<excludeTransitive>true</excludeTransitive>
+							<includeScope>provided</includeScope>
+							<includeArtifactIds>
 								<!-- dependant: ep-rs-authentication-epcommerce -->
 								javax.json
 							</includeArtifactIds>
 						</configuration>
 					</execution>
-
 					<!-- Blueprint / Spring - not in scope"provided" as they are needed by the webapp also-->
 					<execution>
 						<id>copy-blueprint-osgi-bundles</id>
@@ -1124,6 +1142,7 @@
 												<version>${felix.shell.remote.version}</version>
 											</artifactItem>
 										</artifactItems>
+
 									</configuration>
 								</execution>
 							</executions>

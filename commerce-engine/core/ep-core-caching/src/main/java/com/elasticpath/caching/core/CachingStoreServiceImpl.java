@@ -5,6 +5,7 @@ package com.elasticpath.caching.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -25,7 +26,6 @@ public class CachingStoreServiceImpl implements StoreService {
 	private StoreRetrieveStrategy storeCache;
 	private StoreService fallbackStoreService;
 	private Cache<String, Collection<String>> storeCartTypeCache;
-
 
 	/**
 	 * When caching is involved, ignore the load tuner and cache the whole thing.
@@ -133,7 +133,9 @@ public class CachingStoreServiceImpl implements StoreService {
 		Store store = getStoreCache().retrieveStore(storeCode);
 		if (store == null) {
 			store = getFallbackStoreService().findStoreWithCode(storeCode);
-			store = cacheStore(store);
+			if (store != null) {
+				store = cacheStore(store);
+			}
 		}
 		return store;
 	}
@@ -234,6 +236,11 @@ public class CachingStoreServiceImpl implements StoreService {
 	@Override
 	public Object getObject(final long uid, final Collection<String> fieldsToLoad) throws EpServiceException {
 		return getStore(uid);
+	}
+
+	@Override
+	public Date calculateCurrentPickDelayTimestamp(final String storeCode) {
+		return getFallbackStoreService().calculateCurrentPickDelayTimestamp(storeCode);
 	}
 
 	public Cache<String, Collection<String>> getStoreCartTypeCache() {

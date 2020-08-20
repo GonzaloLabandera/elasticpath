@@ -145,7 +145,7 @@ public class PaymentConfigurationsEditDialog extends AbstractPaymentConfiguratio
 					.map(keys -> keys.stream()
 							.collect(LinkedHashMap::new,
 									(map, key) -> map.put(StringUtils.defaultIfBlank(key.getDescription(), key.getKey()),
-											selectedConfig.getPaymentConfigurationData().get(key.getKey())),
+											StringUtils.defaultString(selectedConfig.getPaymentConfigurationData().get(key.getKey()))),
 									Map::putAll))
 					.ifPresent(this::setPaymentConfigurationProperties);
 		}

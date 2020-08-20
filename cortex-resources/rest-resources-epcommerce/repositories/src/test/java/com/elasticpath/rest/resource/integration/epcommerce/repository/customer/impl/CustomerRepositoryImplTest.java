@@ -25,8 +25,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -55,7 +55,7 @@ public class CustomerRepositoryImplTest {
 
 	private static final String THE_RESULT_SHOULD_BE_SUCCESSFUL = "The result should be successful";
 	private static final String THE_RESULT_SHOULD_BE_A_FAILURE = "The result should be a failure";
-	private static final String USER_ID = "userId";
+	private static final String SHARED_ID = "sharedId";
 	private static final String SCOPE = "scope";
 	private static final String CUSTOMER_GUID = "customer_guid";
 	private static final String EP_PERSISTENCE_EXCEPTION = "ep persistence exception";
@@ -99,37 +99,37 @@ public class CustomerRepositoryImplTest {
 	}
 
 	@Test
-	public void testFindCustomerByUserIdWithAppropriateParameters() {
+	public void testFindCustomerBySharedIdWithAppropriateParameters() {
 		Customer expectedCustomer = new CustomerImpl();
 
-		when(mockCustomerSessionRepository.findCustomerSessionByUserId(SCOPE, USER_ID))
+		when(mockCustomerSessionRepository.findCustomerSessionBySharedId(SCOPE, SHARED_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
 		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(expectedCustomer);
 
-		ExecutionResult<Customer> result = customerRepository.findCustomerByUserId(SCOPE, USER_ID);
+		ExecutionResult<Customer> result = customerRepository.findCustomerBySharedId(SCOPE, SHARED_ID);
 
 		assertTrue(THE_RESULT_SHOULD_BE_SUCCESSFUL, result.isSuccessful());
 		assertEquals("The returned customer should be the same as expected", expectedCustomer, result.getData());
 	}
 
 	@Test
-	public void testFindCustomerByUserIdWhenCustomerNotFound() {
-		when(mockCustomerSessionRepository.findCustomerSessionByUserId(SCOPE, USER_ID))
+	public void testFindCustomerBySharedIdWhenCustomerNotFound() {
+		when(mockCustomerSessionRepository.findCustomerSessionBySharedId(SCOPE, SHARED_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
 		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(null);
 
-		ExecutionResult<Customer> result = customerRepository.findCustomerByUserId(SCOPE, USER_ID);
+		ExecutionResult<Customer> result = customerRepository.findCustomerBySharedId(SCOPE, SHARED_ID);
 
 		assertTrue(THE_RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
 		assertEquals("The status returned should be NOT_FOUND", ResourceStatus.NOT_FOUND, result.getResourceStatus());
 	}
 
 	@Test
-	public void testFindCustomerByUserIdWhenExceptionThrown() {
-		when(mockCustomerSessionRepository.findCustomerSessionByUserId(SCOPE, USER_ID))
+	public void testFindCustomerBySharedIdWhenExceptionThrown() {
+		when(mockCustomerSessionRepository.findCustomerSessionBySharedId(SCOPE, SHARED_ID))
 				.thenThrow(new EpPersistenceException(EP_PERSISTENCE_EXCEPTION));
 
-		ExecutionResult<Customer> result = customerRepository.findCustomerByUserId(SCOPE, USER_ID);
+		ExecutionResult<Customer> result = customerRepository.findCustomerBySharedId(SCOPE, SHARED_ID);
 		assertServerError(result);
 
 	}
@@ -170,11 +170,11 @@ public class CustomerRepositoryImplTest {
 	}
 
 	@Test
-	public void testUpdateCustomerWithExistingUserId() {
+	public void testUpdateCustomerWithExistingSharedId() {
 
-		UserIdExistException userIdExistException = mock(UserIdExistException.class);
-		when(exceptionTransformer.getResourceOperationFailure(userIdExistException)).thenReturn(ResourceOperationFailure.stateFailure("error"));
-		when(mockCustomerService.update(mockCustomer)).thenThrow(userIdExistException);
+		EpValidationException epValidationException = mock(EpValidationException.class);
+		when(exceptionTransformer.getResourceOperationFailure(epValidationException)).thenReturn(ResourceOperationFailure.stateFailure("error"));
+		when(mockCustomerService.update(mockCustomer)).thenThrow(epValidationException);
 
 		customerRepository.updateCustomer(mockCustomer)
 				.test()

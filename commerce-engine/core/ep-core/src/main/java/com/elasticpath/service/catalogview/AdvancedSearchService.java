@@ -20,9 +20,10 @@ public interface AdvancedSearchService {
 	 * @param advancedSearchRequest the advanced search request
 	 * @param shoppingCart the shopping cart
 	 * @param pageNumber the page number for the search results
+	 * @param pageSize the number of results per page
 	 *
 	 * @return the search result
 	 */
-	SearchResult search(AdvancedSearchRequest advancedSearchRequest, ShoppingCart shoppingCart, int pageNumber);
+	SearchResult search(AdvancedSearchRequest advancedSearchRequest, ShoppingCart shoppingCart, int pageNumber, int pageSize);
 
 }

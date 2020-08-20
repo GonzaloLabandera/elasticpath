@@ -105,23 +105,6 @@ public interface WishListService {
 	void remove(WishList wishList);
 
 	/**
-	 * Delete all Empty WishLists that are associated with the list of Shoppers.
-	 *
-	 * @param shopperUids the uids of the associated Shoppers.
-	 * @return the number of deleted WishLists
-	 */
-	int deleteEmptyWishListsByShopperUids(List<Long> shopperUids);
-
-	/**
-	 * Delete all WishLists that are associated with the list of Shoppers.
-	 * Even the ones that are not empty.
-	 *
-	 * @param shopperUids the uids of the associated Shoppers.
-	 * @return the number of deleted WishLists
-	 */
-	int deleteAllWishListsByShopperUids(List<Long> shopperUids);
-
-	/**
 	 * Shares a Wish List with one or many recipients.
 	 *
 	 * @param wishListMessage the wishListMessage to send, includes the list of recipients

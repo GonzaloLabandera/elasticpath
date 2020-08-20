@@ -61,7 +61,9 @@ public class OrderEventImpl extends AbstractPersistableImpl implements OrderEven
 	private String title;
 	
 	private Date lastModifiedDate;
-	
+
+	private Long orderUidPk;
+
 	/**
 	 * Get the event originator type.
 	 * 
@@ -217,4 +219,14 @@ public class OrderEventImpl extends AbstractPersistableImpl implements OrderEven
 		this.uidPk = uidPk;
 	}
 
+	@Basic(optional = false)
+	@Column(name = "ORDER_UID")
+	protected Long getOrderUidPk() {
+		return orderUidPk;
+	}
+
+	@Override
+	public void setOrderUidPk(final Long orderUidPk) {
+		this.orderUidPk = orderUidPk;
+	}
 }

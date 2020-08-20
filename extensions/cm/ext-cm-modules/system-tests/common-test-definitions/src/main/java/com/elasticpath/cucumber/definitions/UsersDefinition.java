@@ -10,6 +10,7 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.ChangePasswordDialog;
 import com.elasticpath.selenium.dialogs.ChangeTimezoneDialog;
@@ -18,9 +19,9 @@ import com.elasticpath.selenium.dialogs.CreateUserDialog;
 import com.elasticpath.selenium.dialogs.ExpiredPasswordDialog;
 import com.elasticpath.selenium.dialogs.SignInDialog;
 import com.elasticpath.selenium.dialogs.UserMenuDialog;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.UserSearch;
 import com.elasticpath.selenium.resultspane.UsersResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Constants;
@@ -48,15 +49,17 @@ public class UsersDefinition {
 	private ChangeTimezoneDialog changeTimezoneDialog;
 	private static final String PASSWORD = "Password";
 	private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(UsersDefinition.class);
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public UsersDefinition() {
-		this.userSearch = new UserSearch(SetUp.getDriver());
-		this.usersResultPane = new UsersResultPane(SetUp.getDriver());
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
-		signInDialog = new SignInDialog(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		this.userSearch = new UserSearch(driver);
+		this.usersResultPane = new UsersResultPane(driver);
+		configurationActionToolbar = new ConfigurationActionToolbar(driver);
+		signInDialog = new SignInDialog(driver);
 	}
 
 	public String getNewUserName() {
@@ -94,7 +97,7 @@ public class UsersDefinition {
 	 */
 	@And("^I create a user with following values")
 	public void createUser(final Map<String, String> userMap) {
-		new ActivityToolbar(SetUp.getDriver()).clickConfigurationButton();
+		new ActivityToolbar(driver).clickConfigurationButton();
 		clickUsers();
 		clickUserSearch();
 		clickCreateUser();
@@ -137,7 +140,7 @@ public class UsersDefinition {
 	 */
 	@Then("^(?:I can|I) search for user with the username (.+)$")
 	public void searchUserByUserName(final String userName) {
-		new ActivityToolbar(SetUp.getDriver()).clickConfigurationButton();
+		new ActivityToolbar(driver).clickConfigurationButton();
 		clickUsers();
 		userSearch.enterUserName(userName);
 		usersResultPane.verifyUserExistsInList(userName);
@@ -150,7 +153,7 @@ public class UsersDefinition {
 	 */
 	@Then("^(?:I can|I) search for user with the firstName (.+)$")
 	public void searchUserByFirstName(final String firstName) {
-		new ActivityToolbar(SetUp.getDriver()).clickConfigurationButton();
+		new ActivityToolbar(driver).clickConfigurationButton();
 		clickUsers();
 		userSearch.enterFirstName(firstName);
 		usersResultPane.verifyUserExistsInList(firstName);
@@ -228,7 +231,7 @@ public class UsersDefinition {
 	@And("^I (?:can change|change) the password from (.+) to (.+)")
 	public void changePassword(final String oldPassword, final String newPassword) {
 		enterNewPassword(oldPassword, newPassword);
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CoreMessages.ChangePasswordDialog_Confirmation_Dialog");
+		new ConfirmDialog(driver).clickOKButton("CoreMessages.ChangePasswordDialog_Confirmation_Dialog");
 	}
 
 	/**
@@ -241,7 +244,7 @@ public class UsersDefinition {
 	public void changeFirstName(final String userName, final String newFirstName) {
 		firstNameChanged = newFirstName;
 		usersResultPane.openEditUserWizard(userName);
-		final EditUser editUserWizard = new EditUser(SetUp.getDriver());
+		final EditUser editUserWizard = new EditUser(driver);
 		editUserWizard.enterFirstName(newFirstName);
 		editUserWizard.clickFinish();
 	}
@@ -288,8 +291,8 @@ public class UsersDefinition {
 	 */
 	@And("^I (?:can sign|sign) in as the new user with password (.+)")
 	public void signInWithNewUser(final String password) {
-		new SignInDialog(SetUp.getDriver()).performSignIn(newUserName, password);
-		new ActivityToolbar(SetUp.getDriver()).clickCatalogManagementButton();
+		new SignInDialog(driver).performSignIn(newUserName, password);
+		new ActivityToolbar(driver).clickCatalogManagementButton();
 	}
 
 	/**
@@ -328,7 +331,7 @@ public class UsersDefinition {
 	 */
 	@And("^I am prompted to change my password")
 	public void verifyPasswordExpiredFormIsDisplayed() {
-		new ExpiredPasswordDialog(SetUp.getDriver());
+		new ExpiredPasswordDialog(driver);
 	}
 
 	/**
@@ -464,7 +467,7 @@ public class UsersDefinition {
 	 * Opens Cm user menu.
 	 */
 	private void openCmUserMenu(){
-		new ActivityToolbar(SetUp.getDriver()).clickUserMenu();
-		userMenuDialog = new UserMenuDialog(SetUp.getDriver());
+		new ActivityToolbar(driver).clickUserMenu();
+		userMenuDialog = new UserMenuDialog(driver);
 	}
 }

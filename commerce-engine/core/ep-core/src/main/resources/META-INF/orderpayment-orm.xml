@@ -62,18 +62,6 @@
 			WHERE copi.cartOrderUid = ?1
 		</query>
 	</named-query>
-
-	<named-query name="DELETE_ALL_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPER_UID_LIST">
-		<query>
-			DELETE FROM CartOrderPaymentInstrumentImpl copi
-			WHERE copi.cartOrderUid IN (
-			SELECT co.uidPk
-			FROM ShoppingCartMementoImpl sc, CartOrderImpl co
-			WHERE sc.shopperUid IN (:list) AND co.shoppingCartGuidInternal = sc.guid
-			)
-		</query>
-	</named-query>
-
 	<named-query name="DELETE_ALL_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPING_CART_GUID">
 		<query>
 			DELETE FROM CartOrderPaymentInstrumentImpl copi
@@ -81,17 +69,6 @@
 			SELECT co.uidPk
 			FROM CartOrderImpl co
 			WHERE co.shoppingCartGuidInternal = ?1
-			)
-		</query>
-	</named-query>
-
-	<named-query name="DELETE_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPING_CART_GUIDS">
-		<query>
-			DELETE FROM CartOrderPaymentInstrumentImpl copi
-			WHERE copi.cartOrderUid IN (
-			SELECT co.uidPk
-			FROM CartOrderImpl co
-			WHERE co.shoppingCartGuidInternal IN (:list)
 			)
 		</query>
 	</named-query>
@@ -229,13 +206,6 @@
 		<query>
 			DELETE FROM CustomerPaymentInstrumentImpl cpi
 			WHERE cpi.customerUid = ?1
-		</query>
-	</named-query>
-
-	<named-query name="DELETE_ALL_CUSTOMER_PAYMENT_INSTRUMENTS_BY_CUSTOMER_UID_LIST">
-		<query>
-			DELETE FROM CustomerPaymentInstrumentImpl cpi
-			WHERE cpi.customerUid IN (:list)
 		</query>
 	</named-query>
 

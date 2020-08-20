@@ -13,6 +13,7 @@ import java.util.Locale;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.common.dto.DisplayValue;
@@ -62,7 +63,7 @@ public class AttributeValuesAdapter extends AbstractDomainAdapterImpl<Collection
 
 		final ListMultimap<Locale, String> attributesMap = ArrayListMultimap.create();
 		for (final DisplayValue displayValue : attributesDTO.getValues()) {
-			final Locale locale = LocalizedAttributeKeyUtils.convertLocaleStringToLocale(displayValue.getLanguage());
+			final Locale locale = LocaleUtils.toLocale(displayValue.getLanguage());
 
 			attributesMap.put(locale, displayValue.getValue());
 		}
@@ -119,7 +120,7 @@ public class AttributeValuesAdapter extends AbstractDomainAdapterImpl<Collection
 	 */
 	private boolean isLocaleSupportedByCatalog(final Catalog catalog, final Locale locale) {
 		if (catalog != null && !catalog.getSupportedLocales().contains(locale)) {
-			LOG.warn(new Message("IE-10000", locale.toString()));
+			LOG.warn(new Message("IE-10000", locale.toString(), catalog.getCode()));
 			return false;
 		}
 		return true;
@@ -141,7 +142,10 @@ public class AttributeValuesAdapter extends AbstractDomainAdapterImpl<Collection
 
 			if (attribute.isLocaleDependant()) {
 				final String localizedKey = attributeValue.getLocalizedAttributeKey();
-				language = LocalizedAttributeKeyUtils.getLanguageTagFromLocalizedKeyName(localizedKey);
+				Locale locale = LocalizedAttributeKeyUtils.getLocaleFromLocalizedKeyName(localizedKey);
+				if (locale != null) {
+					language = locale.toString();
+				}
 			}
 
 			String stringValue = null;

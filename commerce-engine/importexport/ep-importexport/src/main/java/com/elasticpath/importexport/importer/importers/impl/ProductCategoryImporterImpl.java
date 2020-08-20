@@ -24,7 +24,10 @@ import com.elasticpath.importexport.importer.importers.SavingStrategy;
 import com.elasticpath.importexport.importer.types.CollectionStrategyType;
 import com.elasticpath.importexport.importer.types.DependentElementType;
 import com.elasticpath.importexport.importer.types.ImportStrategyType;
+import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.service.catalog.ProductLookup;
+import com.elasticpath.service.search.IndexNotificationService;
+import com.elasticpath.service.search.IndexType;
 
 /**
  * Product category importer implementation.
@@ -37,12 +40,24 @@ public class ProductCategoryImporterImpl extends AbstractImporterImpl<Product, P
 
 	private ProductLoadTuner productLoadTuner;
 
+	private IndexNotificationService indexNotificationService;
+
 	@Override
 	public void initialize(final ImportContext context, final SavingStrategy<Product, ProductCategoriesDTO> savingStrategy) {
 		super.initialize(
 				context,
 				AbstractSavingStrategy.<Product, ProductCategoriesDTO>createStrategy(ImportStrategyType.UPDATE,
 						savingStrategy.getSavingManager()));
+
+		getSavingStrategy().setLifecycleListener(new DefaultLifecycleListener() {
+			/**
+			 * Notify the Search Server that the product has been updated.
+			 */
+			@Override
+			public void afterSave(final Persistable persistable) {
+				indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.PRODUCT, persistable.getUidPk());
+			}
+		});
 	}
 
 	@Override
@@ -197,5 +212,13 @@ public class ProductCategoryImporterImpl extends AbstractImporterImpl<Product, P
 		public boolean isForPersistentObjectsOnly() {
 			return true;
 		}
+	}
+
+	/**
+	 *
+	 * @param indexNotificationService the index notification service
+	 */
+	public void setIndexNotificationService(final IndexNotificationService indexNotificationService) {
+		this.indexNotificationService = indexNotificationService;
 	}
 }

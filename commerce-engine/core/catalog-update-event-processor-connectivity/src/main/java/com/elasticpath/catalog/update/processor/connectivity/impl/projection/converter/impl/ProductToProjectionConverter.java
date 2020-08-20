@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.apache.log4j.Logger;
+
 import com.elasticpath.catalog.CatalogReaderCapability;
 import com.elasticpath.catalog.entity.AvailabilityRules;
 import com.elasticpath.catalog.entity.ProjectionProperties;
@@ -85,6 +87,7 @@ import com.elasticpath.settings.SettingsReader;
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessiveParameterList"})
 public class ProductToProjectionConverter implements Converter<Product, Offer> {
 
+	private static final Logger LOGGER = Logger.getLogger(ProductToProjectionConverter.class);
 	private static final int NONE_QUANTITY = 0;
 	private static final int ITEM_QUANTITY = 1;
 	private static final String GMT = "GMT";
@@ -132,9 +135,16 @@ public class ProductToProjectionConverter implements Converter<Product, Offer> {
 	@Override
 	public Offer convert(final Product product, final Store store, final Catalog catalog) {
 		final List<Category> categoriesList = extractNotDeletedCategories(product, store);
-		final StoreProduct storeProduct = storeProductService.getProductForStore(product, store);
+		if (categoriesList.isEmpty()) {
+			LOGGER.warn("Creating DELETED projection record for product " + product.getCode() + " because it is not assigned to any categories found"
+					+ " in the projections.");
+			return createTombstoneOffer(product, store);
+		}
 
-		if (categoriesList.isEmpty() || !storeProduct.canSyndicate()) {
+		final StoreProduct storeProduct = storeProductService.getProductForStore(product, store);
+		if (!storeProduct.canSyndicate()) {
+			LOGGER.debug("Creating DELETED projection record for product " + product.getCode()
+					+ " because it does not meet syndication requirements.");
 			return createTombstoneOffer(product, store);
 		}
 

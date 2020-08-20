@@ -73,8 +73,6 @@ public class ModifierGroupAdapter extends AbstractDomainAdapterImpl<ModifierGrou
 	private void populateModifierFieldDomain(final ModifierGroupDTO dto, final ModifierGroup modifierGroup) {
 		for (ModifierFieldDTO modifierFieldDTO : dto.getModifierFields()) {
 
-			LOG.info("Processing modifierFieldDTO with code: " + modifierFieldDTO.getCode());
-
 			ModifierField modifierField = modifierGroup.getModifierFieldByCode(modifierFieldDTO.getCode());
 
 			if (modifierField == null) {

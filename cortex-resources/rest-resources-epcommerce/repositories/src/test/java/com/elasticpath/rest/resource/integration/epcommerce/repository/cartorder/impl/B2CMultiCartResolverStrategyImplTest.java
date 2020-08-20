@@ -5,7 +5,10 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -29,17 +32,19 @@ import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
+import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
+import com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.identity.Subject;
-import com.elasticpath.rest.identity.attribute.KeyValueSubjectAttribute;
-import com.elasticpath.rest.identity.attribute.SubjectAttribute;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartPostProcessor;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
+import com.elasticpath.service.shoppingcart.MulticartItemListTypeLocationProvider;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService;
 import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
@@ -52,6 +57,7 @@ import com.elasticpath.service.store.StoreService;
 public class B2CMultiCartResolverStrategyImplTest {
 
 	private static final String CUSTOMER_GUID = "customerGuid";
+	private static final String ACCOUNT_SHARED_ID = "accountSharedId";
 	private static final String STORE_CODE = "storeCode";
 
 
@@ -84,9 +90,19 @@ public class B2CMultiCartResolverStrategyImplTest {
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
 
+	@Mock
+	private MulticartItemListTypeLocationProvider multicartItemListTypeLocationProvider;
+
+	@Mock
+	private ModifierField modifierField;
+
+	private ShoppingCartImpl cart;
+
 	@Before
 	public void setUp() {
-		strategy = new B2CMultiCartResolutionStrategyImpl();
+		strategy = spy(new B2CMultiCartResolutionStrategyImpl());
+		doReturn(Collections.singletonList(modifierField)).when(strategy).getModifierFieldsWithDefaultValues(any(ShoppingCart.class));
+
 		strategy.setReactiveAdapter(reactiveAdapterImpl);
 		strategy.setReactiveAdapter(reactiveAdapterImpl);
 		strategy.setCartPostProcessor(cartPostProcessor);
@@ -96,24 +112,26 @@ public class B2CMultiCartResolverStrategyImplTest {
 		strategy.setShoppingCartService(shoppingCartService);
 		strategy.setStoreService(storeService);
 		strategy.setResourceOperationContext(resourceOperationContext);
+		strategy.setMulticartItemListTypeLocationProvider(multicartItemListTypeLocationProvider);
+		when(storeService.getCartTypeNamesForStore(STORE_CODE))
+				.thenReturn(Collections.singletonList("SHOPPING_CART"));
+		when(multicartItemListTypeLocationProvider.getMulticartItemListTypeForStore(STORE_CODE)).thenReturn("SHOPPING_CART");
+
 	}
 
 
 	@Test
 	public void testGetValidCartTypeForStrategy() {
-		assertThat(strategy.getValidCartTypeForStrategy()).isEqualTo("default");
+		assertThat(strategy.getValidCartTypeForStrategy(STORE_CODE)).isEqualTo("SHOPPING_CART");
 	}
 
 
 	@Test
 	public void testIsApplicable() {
-
-		SubjectAttribute attribute = new KeyValueSubjectAttribute(ShoppingCartResourceConstants.SUBJECT_ATTRIBUTE_USER_ID,
-				"test", ShoppingCartResourceConstants.METADATA);
-		when(subject.getAttributes()).thenReturn(Collections.singletonList(attribute));
 		boolean applicable = strategy.isApplicable(subject);
-		assertThat(applicable).isFalse();
+		assertThat(applicable).isTrue();
 	}
+
 	@Test
 	public void testIsApplicableWhenSubjectHasNoMetadata() {
 		boolean applicable = strategy.isApplicable(subject);
@@ -125,13 +143,13 @@ public class B2CMultiCartResolverStrategyImplTest {
 		boolean applicable = strategy.isApplicable(null);
 		assertThat(applicable).isTrue();
 	}
+
 	@Test
 	public void testSupportsCreateWithRegistedCustomer() {
 		Shopper mockShopper = mock(Shopper.class);
 		Customer mockCustomer = mock(Customer.class);
 		when(mockShopper.getCustomer()).thenReturn(mockCustomer);
 		when(mockCustomer.isRegistered()).thenReturn(true);
-		mockCartType(strategy.getValidCartTypeForStrategy());
 
 		boolean result = strategy.supportsCreate(subject, mockShopper, STORE_CODE);
 		assertThat(result).isTrue();
@@ -144,7 +162,6 @@ public class B2CMultiCartResolverStrategyImplTest {
 		Customer mockCustomer = mock(Customer.class);
 		when(mockShopper.getCustomer()).thenReturn(mockCustomer);
 		when(mockCustomer.isRegistered()).thenReturn(false);
-		mockCartType(strategy.getValidCartTypeForStrategy());
 
 		boolean result = strategy.supportsCreate(subject, mockShopper, STORE_CODE);
 		assertThat(result).isFalse();
@@ -154,7 +171,8 @@ public class B2CMultiCartResolverStrategyImplTest {
 	@Test
 	public void testSupportsCreateWithInvalidCartType() {
 		Shopper mockShopper = mock(Shopper.class);
-		mockCartType("invalid");
+		when(storeService.getCartTypeNamesForStore(STORE_CODE))
+				.thenReturn(Collections.singletonList("Invalid"));
 
 		boolean result = strategy.supportsCreate(subject, mockShopper, STORE_CODE);
 		assertThat(result).isFalse();
@@ -169,12 +187,6 @@ public class B2CMultiCartResolverStrategyImplTest {
 		assertThat(result).isFalse();
 	}
 
-
-	private void mockCartType(final String cartTypeName) {
-		when(storeService.getCartTypeNamesForStore(STORE_CODE))
-				.thenReturn(Collections.singletonList(cartTypeName));
-	}
-
 	@Test
 	public void testValidateCreate() {
 
@@ -186,8 +198,8 @@ public class B2CMultiCartResolverStrategyImplTest {
 		when(createShoppingCartValidationService.validate(mockContext))
 				.thenReturn(Collections.emptyList());
 
-			//will throw exception to fail test if validation fails.
-			strategy.validateCreate(mockCart);
+		//will throw exception to fail test if validation fails.
+		strategy.validateCreate(mockCart);
 
 	}
 
@@ -207,12 +219,13 @@ public class B2CMultiCartResolverStrategyImplTest {
 		strategy.validateCreate(mockCart);
 
 	}
+
 	@Test
 	public void testFindAllCarts() {
-		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, STORE_CODE.toUpperCase(Locale.getDefault())))
+		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORE_CODE.toUpperCase(Locale.getDefault())))
 				.thenReturn(Collections.singletonList(CART_GUID));
 
-		strategy.findAllCarts(CUSTOMER_GUID, STORE_CODE, null)
+		strategy.findAllCarts(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORE_CODE, null)
 				.test()
 				.assertNoErrors()
 				.assertValueCount(1)
@@ -253,6 +266,25 @@ public class B2CMultiCartResolverStrategyImplTest {
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(store);
 
 		assertThat(strategy.getModifierFields(STORE_CODE)).containsExactly(modifierField);
+	}
+
+	@Test
+	public void testDefaultModifierFields() {
+		when(modifierField.getCode()).thenReturn("name");
+		when(modifierField.getDefaultCartValue()).thenReturn("default_value");
+
+		CustomerSession customerSession = mock(CustomerSession.class);
+
+		cart = new ShoppingCartImpl();
+		ShoppingCartMemento memento = new ShoppingCartMementoImpl();
+		memento.setDefault(true);
+		cart.setShoppingCartMemento(memento);
+		cart.setCartDataFieldValue("name", null);
+
+		when(shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession)).thenReturn(cart);
+		when(shoppingCartService.saveIfNotPersisted(cart)).thenReturn(cart);
+
+		assertThat(strategy.getDefaultCart(customerSession).blockingGet().getCartData().get("name").getValue()).isEqualTo("default_value");
 	}
 
 	/**

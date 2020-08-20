@@ -113,7 +113,7 @@ public class ImportCustomerConsentSteps {
 		final ImportConfiguration importConfiguration =
 				ImportConfigurationBuilder.newInstance()
 						.setRetrievalSource(importDirectory.getPath())
-						.addImporterConfiguration(JobType.CUSTOMER_CONSENT, ImportStrategyType.INSERT)
+						.addImporterConfiguration(JobType.CUSTOMERCONSENT, ImportStrategyType.INSERT)
 						.build();
 
 		importController.loadConfiguration(importConfiguration);

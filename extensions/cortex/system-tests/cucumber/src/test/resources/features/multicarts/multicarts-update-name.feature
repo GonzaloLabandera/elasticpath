@@ -20,8 +20,8 @@ Feature: Registered shoppers can update created carts
     And I update my cart with name family to friends
     Then the HTTP status code is 400
     And I should see validation error message with message type, message id, and debug message
-      | messageType | messageId                  | debugMessage               |
-      | error       | cart.descriptor.not-unique | cart.descriptor.not-unique |
+      | messageType | messageId                  | debugMessage                                                       |
+      | error       | cart.descriptor.not-unique | Cart descriptor values are already in use by another shopping cart |
 
   Scenario: Update cart name to one that is being used by another shopper
     When I create a new shopping cart with name family
@@ -29,3 +29,9 @@ Feature: Registered shoppers can update created carts
     And I create a new shopping cart with name friends
     And I update my cart with name friends to family
     Then the cart has name family
+
+  Scenario: Default cart's modifiers can updated
+    When I go to my default cart
+    And the default cart has name default
+    And I update my default cart name to newName
+    Then the default cart has name newName

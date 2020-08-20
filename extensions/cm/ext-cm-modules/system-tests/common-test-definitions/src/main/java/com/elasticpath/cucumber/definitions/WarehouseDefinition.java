@@ -5,12 +5,13 @@ import java.util.Map;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.CreateEditWarehouseDialog;
 import com.elasticpath.selenium.editor.store.StoreEditor;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
 import com.elasticpath.selenium.resultspane.WarehousesPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.toolbars.ShippingReceivingActionToolbar;
@@ -28,14 +29,16 @@ public class WarehouseDefinition {
 	private StoreEditor storeEditor;
 	private final ActivityToolbar activityToolbar;
 	private final ShippingReceivingActionToolbar shippingReceivingActionToolbar;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public WarehouseDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
-		activityToolbar = new ActivityToolbar((SetUp.getDriver()));
-		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		configurationActionToolbar = new ConfigurationActionToolbar(driver);
+		activityToolbar = new ActivityToolbar((driver));
+		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(driver);
 	}
 
 	/**

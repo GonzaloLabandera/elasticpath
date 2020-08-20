@@ -8,12 +8,13 @@ import java.util.Map;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.editor.CartPromotionEditor;
 import com.elasticpath.selenium.editor.CatalogPromotionEditor;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.PromotionsShipping;
 import com.elasticpath.selenium.resultspane.PromotionSearchResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.PromotionsShippingActionToolbar;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.Utility;
@@ -39,14 +40,16 @@ public class PromotionsDefinition {
 	private static String cartCouponCode = "";
 	private static String cartCouponEmail = "";
 	private static String cartCouponType = "coupon type";
+	private final WebDriver driver;
 
 
 	/**
 	 * Constructor.
 	 */
 	public PromotionsDefinition() {
-		promotionsShipping = new PromotionsShipping(SetUp.getDriver());
-		promotionsShippingActionToolbar = new PromotionsShippingActionToolbar(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		promotionsShipping = new PromotionsShipping(driver);
+		promotionsShippingActionToolbar = new PromotionsShippingActionToolbar(driver);
 	}
 
 	/**
@@ -64,8 +67,20 @@ public class PromotionsDefinition {
 	 */
 	@Then("^Promotion Search Results should contain following promotions?$")
 	public void verifyPromotionSearchResult(final List<String> promotionList) {
+		boolean promoExists;
 		for (String promotionName : promotionList) {
-			promotionSearchResultPane.verifyPromotionExists(promotionName);
+			promoExists = promotionSearchResultPane.isPromotionExists(promotionName);
+			if (!promoExists) {
+				clickPromotionSearchButton();
+				promoExists = promotionSearchResultPane.isPromotionExists(promotionName);
+
+				//since test promos are on the first page of the result pane,
+				//click search promo button to get on the first page, so if the test fails, the page source of cm will be captured
+				clickPromotionSearchButton();
+			}
+			assertThat(promoExists)
+					.as("Expected Promotion does not exist in search result - " + promotionName)
+					.isTrue();
 		}
 	}
 

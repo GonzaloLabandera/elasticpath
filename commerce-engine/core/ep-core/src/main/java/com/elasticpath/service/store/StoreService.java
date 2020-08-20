@@ -5,6 +5,7 @@ package com.elasticpath.service.store;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -219,4 +220,11 @@ public interface StoreService extends EpPersistenceService {
 	 */
 	Collection<String> getCartTypeNamesForStore(String storeCode);
 
+	/**
+	 * Returns the calculated timestamp for a given store.
+	 *
+	 * @param storeCode the store code
+	 * @return the pick delay timestamp
+	 */
+	Date calculateCurrentPickDelayTimestamp(String storeCode);
 }

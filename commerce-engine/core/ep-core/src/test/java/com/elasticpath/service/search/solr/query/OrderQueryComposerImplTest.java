@@ -37,7 +37,6 @@ public class OrderQueryComposerImplTest extends QueryComposerTestCase {
 
 	private CustomerSearchCriteria customerSearchCriteria;
 
-
 	/**
 	 * Prepare for tests.
 	 * 
@@ -213,24 +212,6 @@ public class OrderQueryComposerImplTest extends QueryComposerTestCase {
 		assertQueryContains(query, SolrIndexConstants.LAST_NAME, lastName.split(WHITESPACE_REGEX));
 		query = orderQueryComposerImpl.composeFuzzyQuery(orderSearchCriteria, getSearchConfig());
 		assertQueryContainsFuzzy(query, SolrIndexConstants.LAST_NAME, lastName.split(WHITESPACE_REGEX));
-	}
-
-	/**
-	 * Test method for {@link CustomerSearchCriteria#setEmail(String)}.
-	 */
-	@Test
-	public void testUserIdAndEmail() {
-		final String email = "email";
-		customerSearchCriteria.setEmail(email);
-		String userId = "userId1";
-		customerSearchCriteria.setUserId(userId);
-
-		Query query = orderQueryComposerImpl.composeQuery(orderSearchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.USERID_AND_EMAIL, email);
-		assertQueryContains(query, SolrIndexConstants.USERID_AND_EMAIL, userId);
-		query = orderQueryComposerImpl.composeFuzzyQuery(orderSearchCriteria, getSearchConfig());
-		assertQueryContainsFuzzy(query, SolrIndexConstants.USERID_AND_EMAIL, userId);
-		assertQueryContainsFuzzy(query, SolrIndexConstants.USERID_AND_EMAIL, email);
 	}
 
 	/**

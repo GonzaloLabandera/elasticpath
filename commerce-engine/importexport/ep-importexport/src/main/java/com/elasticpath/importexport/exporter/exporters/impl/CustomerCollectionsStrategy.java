@@ -41,14 +41,13 @@ public class CustomerCollectionsStrategy implements CollectionsStrategy<Customer
 	public void prepareCollections(final Customer customer, final CustomerDTO dto) {
 
 		if (clearAddresses) {
-			customer.getAddresses().clear();
+			customerService.removeAllAddresses(customer);
 		}
 
 		if (clearGroups) {
 			customer.getCustomerGroups().clear();
 		}
 
-		customerService.update(customer);
 	}
 
 	@Override

@@ -6,7 +6,8 @@ package com.elasticpath.importexport.common.util;
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.elasticpath.importexport.common.types.JobType;
 
@@ -206,13 +207,11 @@ public class Message {
 
 	@Override
 	public String toString() {
-		final StringBuilder builder = new StringBuilder(code);
-		if (jobType != null) {
-			builder.append(' ').append(jobType);
-		}
-		if (!ArrayUtils.isEmpty(params)) {
-			builder.append(' ').append(Arrays.toString(params));
-		}
-		return builder.toString();
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("jobType", jobType)
+				.append("code", code)
+				.append("params", params, true)
+				.append("exception", exception)
+				.build();
 	}
 }

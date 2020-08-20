@@ -10,7 +10,7 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<files>
 		<file>
-			<source>${project.build.directory}/ep-core-cucumber-itests-db.h2.db</source>
+			<source>${project.build.directory}/ep-core-cucumber-itests-db.mv.db</source>
 			<outputDirectory></outputDirectory>
 		</file>
 	</files>

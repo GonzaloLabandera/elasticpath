@@ -32,8 +32,8 @@ if [ "$DATA_POPULATION_DEBUG" = "true" ]; then
 fi
 
 # Setup Java memory parms
-JAVA_MEMORY_HEAPSIZE="-Xmx1536m"
-JAVA_MEMORY_MAXPERMSIZE="-XX:MaxPermSize=786m"
+JAVA_MEMORY_HEAPSIZE="-Xmx2G"
+JAVA_INITIAL_MEMORY_HEAPSIZE="-Xms2G"
 
 # This classpath is updated below once the configuration directory has been determined
 DP_CLASSPATH="$DATA_POPULATION_HOME/lib/*"

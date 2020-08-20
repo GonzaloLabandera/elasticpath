@@ -21,7 +21,6 @@ import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartResourceConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 
@@ -90,14 +89,8 @@ implements Repository<CartDescriptorEntity, CartDescriptorIdentifier> {
 
 		CartDescriptorEntity.Builder identifierBuilder = CartDescriptorEntity.builder();
 
-		cartDescriptors.values().stream()
-				.filter(data -> !ShoppingCartResourceConstants.SUBJECT_ATTRIBUTE_IDENTIFIERS.contains(data.getKey()))
+		cartDescriptors.values()
 				.forEach(value -> identifierBuilder.addingProperty(value.getKey(), value.getValue()));
-
-		if (shoppingCartRepository.getDefaultShoppingCartGuid().blockingGet()
-				.equals(identifier.getCart().getCartId().getValue())) {
-			identifierBuilder.addingProperty("default", "true");
-		}
 
 		return identifierBuilder.build();
 	}

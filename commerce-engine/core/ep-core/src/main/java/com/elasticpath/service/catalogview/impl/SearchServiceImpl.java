@@ -42,30 +42,12 @@ public class SearchServiceImpl extends AbstractSearchServiceImpl implements Sear
 
 	private SettingValueProvider<Boolean> searchCategoriesFirstSettingProvider;
 
-	/**
-	 * <p>Perform searching based on the given search request and returns the search result.</p>
-	 * 
-	 * <p>By giving the previous search result history, you may get response quicker. If you don't
-	 * have it, give a <code>null</code>. It doesn't affect search result.</p>
-	 * 
-	 * <p>By giving a shopping cart, promotion rules will be applied to the returned products.</p>
-	 * 
-	 * <p>By giving the product load tuner, you can fine control what data to be loaded for each
-	 * product. It is used to improve performance.</p>
-	 * 
-	 * @param searchRequest the search request
-	 * @param previousSearchResultHistory the previous search results, give <code>null</code> if
-	 *            you don't have it
-	 * @param shoppingCart the shopping cart, give <code>null</code> if you don't have it
-	 * @param pageNumber the current page number
-	 * @return a <code>SearchResult</code> instance
-	 */
 	@Override
 	public SearchResult search(final SearchRequest searchRequest, final CatalogViewResultHistory previousSearchResultHistory,
-							   final ShoppingCart shoppingCart, final int pageNumber) {
+							   final ShoppingCart shoppingCart, final int pageNumber, final int pageSize) {
 		// perform the initial search
 		SearchResult result = performSearch(searchRequest, previousSearchResultHistory, shoppingCart,
-				pageNumber);
+				pageNumber, pageSize);
 
 		if (isResultInvalidSize(result)) {
 			//generate suggestions
@@ -74,7 +56,7 @@ public class SearchServiceImpl extends AbstractSearchServiceImpl implements Sear
 			if (suggestions.size() == 1) {
 				SearchRequest newRequest = createSearchRequestWithSuggestedKeywords(searchRequest, suggestions);
 				//use the suggestion to run the search, but only return the new result if it produces more result
-				final SearchResult newResult = performSearch(newRequest, previousSearchResultHistory, shoppingCart, pageNumber);
+				final SearchResult newResult = performSearch(newRequest, previousSearchResultHistory, shoppingCart, pageNumber, pageSize);
 				if (newResult.getResultsCount() > result.getResultsCount()) {
 					logSearch(searchRequest, result); //log the search before we replace it
 					result = newResult;
@@ -128,10 +110,11 @@ public class SearchServiceImpl extends AbstractSearchServiceImpl implements Sear
 	 * @param history the history
 	 * @param shoppingCart the shopping cart
 	 * @param pageNumber the page number
+	 * @param pageSize the number of results per page
 	 * @return the search result
 	 */
 	SearchResult performSearch(final SearchRequest request, final CatalogViewResultHistory history,
-								final ShoppingCart shoppingCart, final int pageNumber) {
+								final ShoppingCart shoppingCart, final int pageNumber, final int pageSize) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Searching for items");
 		}
@@ -160,7 +143,7 @@ public class SearchServiceImpl extends AbstractSearchServiceImpl implements Sear
 
 		// nothing? search products
 		if (!result.isCategoryMatch() && result.getProducts() == null) {
-			searchForProducts(request, shoppingCart, pageNumber, result);
+			searchForProducts(request, shoppingCart, pageNumber, pageSize, result);
 		}
 
 		return result;

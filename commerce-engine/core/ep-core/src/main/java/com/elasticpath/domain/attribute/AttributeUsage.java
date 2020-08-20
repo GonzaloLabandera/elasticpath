@@ -19,8 +19,18 @@ public interface AttributeUsage {
 	/** Sku attribute usage id. */
 	int SKU = 3;
 
-	/** Customer Profile attribute usage id. */
-	int CUSTOMERPROFILE = 4;
+	/** User Profile attribute usage id. */
+	int USER_PROFILE = 4;
+	
+	/** 
+	 * Customer Profile attribute usage id. 
+	 * @deprecated Use {@link #USER_PROFILE} instead. 
+	 */
+	@Deprecated
+	int CUSTOMERPROFILE = USER_PROFILE;
+	
+	/** Account Profile attribute usage id. */
+	int ACCOUNT_PROFILE = 5;
 	/**
 	 * Returns the attribute usage value.
 	 *
@@ -34,6 +44,13 @@ public interface AttributeUsage {
 	 * @param value the attribute usage value
 	 */
 	void setValue(int value);
+	
+	/**
+	 * Returns the attribute usage name.
+	 *
+	 * @return the attribute usage name
+	 */
+	String getName();
 
 	/**
 	 * Interface for adding types.
@@ -58,4 +75,11 @@ public interface AttributeUsage {
 	 * @return an <code>AttributeUsage</code> of the given id
 	 */
 	AttributeUsage getAttributeUsageById(int usageId);
+	
+	/**
+	 * Returns the attribute usage name message key.
+	 *
+	 * @return the attribute usage name message key.
+	 */
+	String getNameMessageKey();
 }

@@ -5,6 +5,7 @@ import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.resultspane.PromotionSearchResultPane;
 import com.elasticpath.selenium.resultspane.ShippingServiceLevelSearchResultPane;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Promotions Shipping.
@@ -38,6 +39,7 @@ public class PromotionsShipping extends AbstractNavigation {
 	 */
 	public PromotionSearchResultPane clickPromotionSearchButton() {
 		clickButtonAndWaitForPaneToOpen(SEARCH_BUTTON_CSS, "Search", PromotionSearchResultPane.getPromotionSearchResultParentCss());
+		sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
 		return new PromotionSearchResultPane(getDriver());
 	}
 

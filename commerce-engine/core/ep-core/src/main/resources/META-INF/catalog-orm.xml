@@ -1628,4 +1628,13 @@
 			</query>
 		</named-query>
 
+		<named-query name="PRODUCT_SKU_IMAGE_BY_GUID">
+			<query>
+				SELECT sku.imageInternal, p.image
+				FROM ProductSkuImpl sku
+				JOIN sku.productInternal p
+				WHERE sku.guid = ?1
+			</query>
+		</named-query>
+
 </entity-mappings>

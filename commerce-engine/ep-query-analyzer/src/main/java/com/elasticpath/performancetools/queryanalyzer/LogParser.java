@@ -11,6 +11,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -19,10 +20,12 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.elasticpath.performancetools.queryanalyzer.beans.DbStatement;
 import com.elasticpath.performancetools.queryanalyzer.beans.JPAQuery;
 import com.elasticpath.performancetools.queryanalyzer.beans.Operation;
 import com.elasticpath.performancetools.queryanalyzer.beans.QueryStatistics;
@@ -120,7 +123,26 @@ public enum LogParser {
 		final File logFolder = logFileToParse.getParentFile();
 
 		//there could be more than one log file with db statistics - we need them all
-		return logFolder.listFiles((file, fileName) -> fileName.startsWith(logFileNamePrefix));
+		File[] logs = logFolder.listFiles((file, fileName) -> fileName.startsWith(logFileNamePrefix));
+		Arrays.sort(logs, new Comparator<File>() {
+			@Override
+			public int compare(final File fileOne, final File fileTwo) {
+				int number1 = extractNumber(fileOne.getName());
+				int number2 = extractNumber(fileTwo.getName());
+				return number2 - number1;
+			}
+
+			private int extractNumber(final String name) {
+				try {
+					String number = FilenameUtils.getName(name);
+					return Integer.parseInt(number);
+				} catch (Exception e) {
+					return  0;
+				}
+			}
+		});
+
+		return logs;
 	}
 
 	private BufferedReader getBufferedReader(final File logFileToParse) throws Exception {
@@ -131,10 +153,13 @@ public enum LogParser {
 	 * Generates db statistics and saves to JSON format.
 	 *
 	 * @param statistics the {@link QueryStatistics} instance.
-	 * @throws Exception an exception.
 	 */
-	public void generateStatistics(final QueryStatistics statistics) throws Exception {
-		final Map<String, Integer> totalDBCallsPerTable = statistics.getTotalDBCallsPerTable();
+	public void generateStatistics(final QueryStatistics statistics) {
+		final Map<String, Integer> totalDBQueriesPerTable = statistics.getTotalDBQueriesPerTable();
+		final Map<String, Integer> totalDBUpdatesPerTable = statistics.getTotalDBUpdatesPerTable();
+		final Map<String, Integer> totalDBInsertsPerTable = statistics.getTotalDBInsertsPerTable();
+		final Map<String, Integer> totalDBDeletesPerTable = statistics.getTotalDBDeletesPerTable();
+
 		final Map<String, Integer> totalJPACallsPerEntity = statistics.getTotalJPACallsPerEntity();
 
 		final Map<String, Integer> totalDBCallsPerOperation = statistics.getTotalDBCallsPerOperation();
@@ -158,10 +183,14 @@ public enum LogParser {
 					statistics.addOperationWithJPA(operation);
 				}
 
-				totalOperationsPerDuration.merge(operation.getTotalOpDurationMs(), 1, (op1, op2) -> op1 + op2);
+				totalOperationsPerDuration.merge(operation.getTotalOpDurationMs(), 1, Integer::sum);
 				totalExecutionTime.add(operation.getTotalOpDurationMs());
 
-				final Map<String, Integer> totalDBCallsPerTablePerOperation = operation.getTotalDBCallsPerTable();
+				final Map<String, Integer> totalDBQueriesPerTablePerOperation = operation.getTotalDBQueriesPerTable();
+				final Map<String, Integer> totalDBUpdatesPerTablePerOperation = operation.getTotalDBUpdatesPerTable();
+				final Map<String, Integer> totalDBInsertsPerTablePerOperation = operation.getTotalDBInsertsPerTable();
+				final Map<String, Integer> totalDBDeletesPerTablePerOperation = operation.getTotalDBDeletesPerTable();
+
 				final Map<String, Integer> totalJPACallsPerEntityPerOperation = operation.getTotalJPACallsPerEntity();
 
 				String operationURI = operation.getUri();
@@ -172,14 +201,35 @@ public enum LogParser {
 							totalJPACallsPerEntityPerOperation,
 							totalJPACallsPerEntity);
 					for (SQLQuery sqlQuery : jpaQuery.getSqlQueries()) {
-						CollectionUtils.updateTotalCallsPerOperation(Patterns.TABLE_PATTERN.matcher(sqlQuery.getQuery()),
-								totalDBCallsPerTablePerOperation,
-								totalDBCallsPerTable);
+						CollectionUtils.updateTotalCallsPerOperation(Patterns.QUERY_TABLE_PATTERN.matcher(sqlQuery.getStatement()),
+								totalDBQueriesPerTablePerOperation,
+								totalDBQueriesPerTable);
 						totalDBCallExeTime += sqlQuery.getExeTimeMs();
 					}
+
+					for (DbStatement update : jpaQuery.getSqlUpdates()) {
+						CollectionUtils.updateTotalCallsPerOperation(Patterns.UPDATE_TABLE_PATTERN.matcher(update.getStatement()),
+								totalDBUpdatesPerTablePerOperation,
+								totalDBUpdatesPerTable);
+						totalDBCallExeTime += update.getExeTimeMs();
+					}
+
+					for (DbStatement insert : jpaQuery.getSqlInserts()) {
+						CollectionUtils.updateTotalCallsPerOperation(Patterns.INSERT_TABLE_PATTERN.matcher(insert.getStatement()),
+								totalDBInsertsPerTablePerOperation,
+								totalDBInsertsPerTable);
+						totalDBCallExeTime += insert.getExeTimeMs();
+					}
+					for (DbStatement delete : jpaQuery.getSqlDeletes()) {
+						CollectionUtils.updateTotalCallsPerOperation(Patterns.DELETE_TABLE_PATTERN.matcher(delete.getStatement()),
+								totalDBDeletesPerTablePerOperation,
+								totalDBDeletesPerTable);
+						totalDBCallExeTime += delete.getExeTimeMs();
+					}
+
 				}
 
-				int sum = totalDBCallsPerTablePerOperation.values().stream().mapToInt(Integer::intValue).sum();
+				int sum = totalDBQueriesPerTablePerOperation.values().stream().mapToInt(Integer::intValue).sum();
 
 				if (sum > 0) {
 					totalDBCallsPerOperation.put(operationURI, sum);
@@ -194,37 +244,45 @@ public enum LogParser {
 			}
 		}
 
-		sortResults(totalDBCallsPerTable, totalJPACallsPerEntity, totalDBCallsPerOperation,
+		sortResults(totalDBQueriesPerTable, totalJPACallsPerEntity, totalDBCallsPerOperation,
 				totalJPACallsPerOperation, totalDBCallExeTimePerOperation);
 
-		populateStatistics(statistics, totalDBCallsPerTable, totalJPACallsPerEntity,
-				totalDBCallExeTimePerOperation, totalExecutionTime.longValue());
+		populateStatistics(statistics, totalDBQueriesPerTable, totalDBUpdatesPerTable, totalDBInsertsPerTable,
+				totalDBDeletesPerTable, totalJPACallsPerEntity,	totalDBCallExeTimePerOperation, totalExecutionTime.longValue());
 
 		serializeStatisticsToJSON(statistics);
 	}
 
-	private void sortResults(final Map<String, Integer> totalDBCallsPerTable,
+	private void sortResults(final Map<String, Integer> totalDBQueriesPerTable,
 							 final Map<String, Integer> totalJPACallsPerEntity,
 							 final Map<String, Integer> totalDBCallsPerOperation,
 							 final Map<String, Integer> totalJPACallsPerOperation,
 							 final Map<String, Integer> totalDBCallExeTimePerOperation) {
 
-		final Comparator<Map.Entry<String, Integer>> mapEntryComparator = Map.Entry.comparingByValue();
+		final Comparator<Map.Entry<String, Integer>> mapEntryComparator = Map.Entry.comparingByValue((Comparator.reverseOrder()));
 
 		CollectionUtils.sortMapEntries(totalDBCallsPerOperation, mapEntryComparator);
 		CollectionUtils.sortMapEntries(totalJPACallsPerOperation, mapEntryComparator);
 		CollectionUtils.sortMapEntries(totalDBCallExeTimePerOperation, mapEntryComparator);
 
-		CollectionUtils.sortMapEntries(totalDBCallsPerTable, mapEntryComparator);
+		CollectionUtils.sortMapEntries(totalDBQueriesPerTable, mapEntryComparator);
 		CollectionUtils.sortMapEntries(totalJPACallsPerEntity, mapEntryComparator);
 	}
 
+	@SuppressWarnings("checkstyle:parameternumber")
 	private void populateStatistics(final QueryStatistics statistics,
-									final Map<String, Integer> totalDBCallsPerTable,
+									final Map<String, Integer> totalDBQueriesPerTable,
+									final Map<String, Integer> totalDBUpdatesPerTable,
+									final Map<String, Integer> totalDBInsertsPerTable,
+									final Map<String, Integer> totalDBDeletesPerTable,
 									final Map<String, Integer> totalJPACallsPerEntity,
 									final Map<String, Integer> totalDBCallExeTimePerOperation,
 									final long totalExecutionTime) {
-		statistics.setOverallDBCalls(totalDBCallsPerTable.values().stream().mapToInt(Integer::intValue).sum());
+		statistics.setOverallDBQueries(totalDBQueriesPerTable.values().stream().mapToInt(Integer::intValue).sum());
+		statistics.setOverallDBUpdates(totalDBUpdatesPerTable.values().stream().mapToInt(Integer::intValue).sum());
+		statistics.setOverallDBInserts(totalDBInsertsPerTable.values().stream().mapToInt(Integer::intValue).sum());
+		statistics.setOverallDBDeletes(totalDBDeletesPerTable.values().stream().mapToInt(Integer::intValue).sum());
+
 		statistics.setOverallJPACalls(totalJPACallsPerEntity.values().stream().mapToInt(Integer::intValue).sum());
 		statistics.setOverallDbExeTimeMs(totalDBCallExeTimePerOperation.values().stream().mapToInt(Integer::intValue).sum());
 

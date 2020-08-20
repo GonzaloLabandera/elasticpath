@@ -13,7 +13,11 @@
 
 	<import resource="dataaccess/importexport-dao.xml" />
 
+	<import resource="classpath:spring/service/service.xml" />
+
 	<import resource="service/importexport-service.xml" />
+
+	<import resource="importexport-filebasedconfig.xml" />
 
 	<import resource="service/messages.xml" />
 

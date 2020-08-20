@@ -97,28 +97,4 @@ public class WishListDaoImpl implements WishListDao {
 	public void setPersistenceEngine(final PersistenceEngine persistenceEngine) {
 		this.persistenceEngine = persistenceEngine;
 	}
-
-	@Override
-	public int deleteEmptyWishListsByShopperUids(final List<Long> shopperUids) {
-		if (shopperUids == null) {
-			throw new EpServiceException("shopperUids must not be null");
-		}
-		if (shopperUids.isEmpty()) {
-			return 0;
-		}
-
-		return persistenceEngine.executeNamedQueryWithList("DELETE_EMPTY_WISHLISTS_BY_SHOPPER_UID", "list", shopperUids);
-	}
-
-	@Override
-	public int deleteAllWishListsByShopperUids(final List<Long> shopperUids) {
-		if (shopperUids == null) {
-			throw new EpServiceException("shopperUids must not be null");
-		}
-		if (shopperUids.isEmpty()) {
-			return 0;
-		}
-
-		return persistenceEngine.executeNamedQueryWithList("DELETE_ALL_WISHLISTS_BY_SHOPPER_UID", "list", shopperUids);
-	}
 }

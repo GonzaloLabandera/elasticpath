@@ -47,7 +47,7 @@ public class CustomerGroupImporter extends AbstractImporterImpl<CustomerGroup, C
 	@Override
 	protected CollectionsStrategy<CustomerGroup, CustomerGroupDTO> getCollectionsStrategy() {
 		return new CustomerGroupCollectionsStrategy(
-				getContext().getImportConfiguration().getImporterConfiguration(JobType.CUSTOMER_GROUP), customerGroupService);
+				getContext().getImportConfiguration().getImporterConfiguration(JobType.CUSTOMERGROUP), customerGroupService);
 	}
 
 	@Override

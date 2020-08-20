@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<useraccountassociations>
+	<useraccountassociation>
+		<guid>2ff75be7-8c6a-4a68-9a5e-f9d68e42fe1a</guid>
+		<account_guid>50203697-bf26-40ce-9f53-ed19337639ef</account_guid>
+		<user_guid>usertestguid</user_guid>
+		<role>BUYER</role>
+	</useraccountassociation>
+	<useraccountassociation>
+		<guid>89900ace-3c3b-4da1-b9c7-12af9cf7aab9</guid>
+		<account_guid>e1d89fff-b408-434a-9e3d-06eece97a829</account_guid>
+		<user_guid>usertestguid</user_guid>
+		<role>BUYER</role>
+	</useraccountassociation>
+	<useraccountassociation>
+		<guid>37c38419-1304-4da9-a37e-afcdb9ad01bd</guid>
+		<account_guid>50203697-bf26-40ce-9f53-ed19337639ef</account_guid>
+		<user_guid>usertest2guid</user_guid>
+		<role>BUYER</role>
+	</useraccountassociation>
+	<useraccountassociation>
+		<guid>0baa3fa8-87d1-418c-869a-230353178734</guid>
+		<account_guid>e1d89fff-b408-434a-9e3d-06eece97a829</account_guid>
+		<user_guid>usertest2guid</user_guid>
+		<role>BUYER</role>
+	</useraccountassociation>
+</useraccountassociations>
+

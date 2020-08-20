@@ -4,8 +4,9 @@
 package com.elasticpath.service.shopper.dao.impl;
 
 import java.util.List;
+import java.util.Objects;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.customer.Customer;
@@ -21,6 +22,9 @@ public class ShopperDaoImpl implements ShopperDao {
 
 	private PersistenceEngine persistenceEngine;
 
+	/** Format string for missing field error. */
+	public static final String FIELD_MISSING_ERROR = "%s must be supplied.";
+
 	@Override
 	public ShopperMemento get(final long uid) throws EpServiceException {
 		return getPersistenceEngine().load(ShopperMementoImpl.class, uid);
@@ -32,13 +36,6 @@ public class ShopperDaoImpl implements ShopperDao {
 			this.getPersistenceEngine().delete(shopperMemento);
 		}
 	}
-	
-	@Override
-	public void removeIfOrphaned(final ShopperMemento shopperMemento) {
-		if (shopperMemento != null) {
-			persistenceEngine.executeNamedQuery("REMOVE_SHOPPERS_IF_ORPHANED", shopperMemento.getUidPk());
-		}
-	}
 
 	@Override
 	public ShopperMemento saveOrUpdate(final ShopperMemento shopperMemento) {
@@ -47,96 +44,64 @@ public class ShopperDaoImpl implements ShopperDao {
 
 	@Override
 	public ShopperMemento findByCustomerAndStoreCode(final Customer customer, final String storeCode) {
-		if (customer == null) {
-			throw new EpServiceException("customer must be supplied.");
-		}
-
 		return findByCustomerGuidAndStoreCode(customer.getGuid(), storeCode);
 	}
-	
+
+	@Override
+	public ShopperMemento findByCustomerAccountAndStore(final Customer customer, final Customer account, final String storeCode) {
+		return findByCustomerGuidAccountSharedIdAndStore(customer.getGuid(), account.getSharedId(), storeCode);
+	}
+
 	@Override
 	public ShopperMemento findByCustomerGuid(final String customerGuid) {
-		if (StringUtils.isBlank(customerGuid)) {
-			throw new EpServiceException("customer Guid must be supplied.");
-		}
-
 		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery("FIND_SHOPPER_BY_CUSTOMER_GUID", customerGuid);
 
-		if (results.isEmpty()) {
-			return null;
-		}
-		return results.get(0);
+		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
 	}
 
 	@Override
 	public ShopperMemento findByCustomerGuidAndStoreCode(final String customerGuid, final String storeCode) {
-		if (StringUtils.isBlank(customerGuid)) {
-			throw new EpServiceException("customerGuid must be supplied.");
-		}
-
-		if (StringUtils.isBlank(storeCode)) {
-			throw new EpServiceException("storeCode must be supplied.");
-		}
-
 		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery("FIND_SHOPPER_BY_CUSTOMER_GUID_AND_STORECODE",
 																									customerGuid, storeCode);
-
-		if (results.isEmpty()) {
-			return null;
-		}
-		return results.get(0);
+		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
 	}
 
 	@Override
-	public ShopperMemento findByCustomerUserIdAndStoreCode(final String customerUserId, final String storeCode) {
-		if (StringUtils.isBlank(customerUserId)) {
-			throw new EpServiceException("customerUserId must be supplied.");
-		}
+	public ShopperMemento findByCustomerGuidAccountSharedIdAndStore(final String customerGuid, final String accountSharedId,
+																	final String storeCode) {
+		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery(
+				"FIND_SHOPPER_BY_CUSTOMER_GUID_ACCOUNT_ID_AND_STORECODE",
+				customerGuid, accountSharedId, storeCode);
 
-		if (StringUtils.isBlank(storeCode)) {
-			throw new EpServiceException("storeCode must be supplied.");
-		}
-
-		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery("FIND_SHOPPER_BY_CUSTOMER_USERID_AND_STORECODE",
-																											customerUserId, storeCode);
-
-		if (results.isEmpty()) {
-			return null;
-		}
-		return results.get(0);
-	}
-
-    @Override
-	public int removeNonDependantShoppersByUidList(final List<Long> shopperUids) {
-		if (shopperUids == null) {
-			throw new EpServiceException("value must be supplied.");
-		}
-		if (shopperUids.isEmpty()) {
-			return 0;
-		}
-		return this.persistenceEngine.executeNamedQueryWithList("DELETE_NON_DEPENDANT_SHOPPER_BY_UID_LIST", "list", shopperUids);
+		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
 	}
 
 	@Override
-	public int removeShoppersByUidList(final List<Long> shopperUids) {
-		if (shopperUids == null) {
-			throw new EpServiceException("value must be supplied.");
-		}
-		return this.persistenceEngine.executeNamedQuery("DELETE_SHOPPER_BY_UID_LIST", shopperUids);
-	}
+	public ShopperMemento findByCustomerSharedIdAndStore(final String customerSharedId, final String storeCode) {
+		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery(
+				"FIND_SHOPPER_BY_CUSTOMER_SHAREDID_AND_STORECODE",
+				customerSharedId,
+				storeCode);
 
+		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
+	}
 
 	@Override
-	public List<ShopperMemento> findShoppersOrphanedFromCustomerSessions(final int maxResults) {
-		return persistenceEngine.<ShopperMemento>retrieveByNamedQuery("GET_SHOPPERS_ORPHANED_BY_CUSTOMER_SESSION", 0, maxResults);
+	public ShopperMemento findByCustomerSharedIdAndAccountSharedIdAndStore(final String customerSharedId, final String accountSharedId,
+																		final String storeCode) {
+		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery(
+				"FIND_SHOPPER_BY_CUSTOMER_ID_ACCOUNT_ID_AND_STORECODE",
+				customerSharedId, accountSharedId, storeCode);
+		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
 	}
+
 
 	// Getters / Setters
 	// ------------------
 
 	/**
 	 * Get the persistence Engine.
-	 * 
+	 *
 	 * @return the persistence engine
 	 */
 	public PersistenceEngine getPersistenceEngine() {
@@ -145,15 +110,10 @@ public class ShopperDaoImpl implements ShopperDao {
 
 	/**
 	 * Set the persistence Engine.
-	 * 
+	 *
 	 * @param persistenceEngine the persistence engine
 	 */
 	public void setPersistenceEngine(final PersistenceEngine persistenceEngine) {
 		this.persistenceEngine = persistenceEngine;
-	}
-
-	@Override
-	public List<Long> findUidsByCustomer(final Customer customer) {
-		return persistenceEngine.<Long>retrieveByNamedQuery("FIND_SHOPPER_UID_BY_CUSTOMER_GUID", customer.getGuid());
 	}
 }

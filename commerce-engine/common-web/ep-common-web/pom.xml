@@ -62,6 +62,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.owasp.antisamy</groupId>
+			<artifactId>antisamy</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.jmock</groupId>
 			<artifactId>jmock</artifactId>
 		</dependency>

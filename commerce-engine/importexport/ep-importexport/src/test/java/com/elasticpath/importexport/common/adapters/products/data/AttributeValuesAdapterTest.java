@@ -20,6 +20,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.lang3.LocaleUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,10 +62,10 @@ public class AttributeValuesAdapterTest {
 	@InjectMocks
 	private AttributeValuesAdapter adapterUnderTest;
 
-	private static final String[] SAMPLE_LANGUAGE_TAGS = new String[]{
-			"sr-Latn-RS",
-			"en-CA",
-			"fr-CA",
+	private static final String[] SAMPLE_LOCALE_STRINGS = new String[]{
+			"sr_RS_Latn",
+			"en_CA",
+			"fr_CA",
 			"fr",
 			"en"
 	};
@@ -81,7 +82,7 @@ public class AttributeValuesAdapterTest {
 		final Attribute attribute = createAttribute(attributeName);
 		givenAttributeIsLocaleDependent(attribute);
 
-		final Collection<AttributeValue> attributeValues = createAttributeValuesForLanguageTags(attribute, attributeName, SAMPLE_LANGUAGE_TAGS);
+		final Collection<AttributeValue> attributeValues = createAttributeValuesForLocaleStrings(attribute, attributeName, SAMPLE_LOCALE_STRINGS);
 
 		final AttributeValuesDTO dto = new AttributeValuesDTO();
 
@@ -89,11 +90,34 @@ public class AttributeValuesAdapterTest {
 
 		final List<DisplayValue> displayValues = dto.getValues();
 
-		for (final String languageTag : SAMPLE_LANGUAGE_TAGS) {
+		for (final String localeString : SAMPLE_LOCALE_STRINGS) {
 			assertThat(displayValues.stream())
 					.as("No display language found for supported language tag")
-					.anyMatch(displayValue -> languageTag.equals(displayValue.getLanguage()));
+					.anyMatch(displayValue -> localeString.equals(displayValue.getLanguage()));
 		}
+
+		verifyZeroInteractions(attributeValueGroup);
+		verifyZeroInteractions(cachingService);
+		verifyZeroInteractions(attributeValueFactory);
+		verifyZeroInteractions(validatorUtils);
+	}
+
+	@Test
+	public void verifyLocaleDependentAttributeValuesWithoutLocalizedKeysAddedToDto() {
+		final String attributeName = "attribute_name";
+
+		final Attribute attribute = createAttribute(attributeName);
+		givenAttributeIsLocaleDependent(attribute);
+
+		final Collection<AttributeValue> attributeValues = createAttributeValuesForLocaleStrings(attribute, attributeName);
+
+		final AttributeValuesDTO dto = new AttributeValuesDTO();
+
+		adapterUnderTest.populateDTO(attributeValues, dto);
+
+		final List<DisplayValue> displayValues = dto.getValues();
+
+		assertThat(displayValues.iterator().next().getLanguage()).isNull();
 
 		verifyZeroInteractions(attributeValueGroup);
 		verifyZeroInteractions(cachingService);
@@ -108,7 +132,7 @@ public class AttributeValuesAdapterTest {
 
 		givenAttributeIsNotLocaleDependent(attribute);
 
-		final Collection<AttributeValue> attributeValues = createAttributeValuesForLanguageTags(attribute, attributeName);
+		final Collection<AttributeValue> attributeValues = createAttributeValuesForLocaleStrings(attribute, attributeName);
 
 		final AttributeValuesDTO dto = new AttributeValuesDTO();
 
@@ -148,7 +172,7 @@ public class AttributeValuesAdapterTest {
 			final Attribute attribute = createAttribute(key);
 			givenAttributeIsNotLocaleDependent(attribute);
 
-			final Collection<AttributeValue> attributeValues = createAttributeValuesForLanguageTags(attribute, key);
+			final Collection<AttributeValue> attributeValues = createAttributeValuesForLocaleStrings(attribute, key);
 
 			final AttributeValuesDTO dto = new AttributeValuesDTO();
 
@@ -209,11 +233,11 @@ public class AttributeValuesAdapterTest {
 	}
 
 	@Test
-	public void verifyLocalisedAttributeValueDomainObjsAreCreatedUsingLanguageTag() {
+	public void verifyLocalisedAttributeValueDomainObjsAreCreatedUsingLocaleString() {
 		final AttributeValuesDTO dto = new AttributeValuesDTO();
 
 		final String attributeKey = "attribute.name";
-		final int numOfTestLocaleStrings = SAMPLE_LANGUAGE_TAGS.length;
+		final int numOfTestLocaleStrings = SAMPLE_LOCALE_STRINGS.length;
 
 		dto.setKey(attributeKey);
 
@@ -222,15 +246,15 @@ public class AttributeValuesAdapterTest {
 		final Collection<String> expectedLocalisedAttributeKeys = new ArrayList<>();
 		final Attribute attribute = createAttribute(attributeKey);
 
-		for (final String languageTag : SAMPLE_LANGUAGE_TAGS) {
-			final Locale locale = Locale.forLanguageTag(languageTag);
+		for (final String localeString : SAMPLE_LOCALE_STRINGS) {
+			final Locale locale = LocaleUtils.toLocale(localeString);
 
 			catalogSupportedLocales.add(locale);
 
-			final String localisedAttributeKey = attributeKey + "_" + locale;
+			final String localisedAttributeKey = attributeKey + "_" + locale.toString();
 			expectedLocalisedAttributeKeys.add(localisedAttributeKey);
 
-			displayValues.add(new DisplayValue(languageTag, languageTag + ".value"));
+			displayValues.add(new DisplayValue(localeString, localeString + ".value"));
 
 			when(attributeValueGroup.getAttributeValue(attributeKey, locale)).thenReturn(null);
 			when(attributeValueFactory.createAttributeValue(attribute, localisedAttributeKey))
@@ -267,7 +291,7 @@ public class AttributeValuesAdapterTest {
 
 		final List<DisplayValue> displayValues = new ArrayList<>();
 		final Attribute attribute = createAttribute(attributeKey);
-		final String testLocaleString = "en-CA";
+		final String testLocaleString = "en_CA";
 
 		displayValues.add(new DisplayValue(testLocaleString, testLocaleString + ".value"));
 
@@ -299,16 +323,16 @@ public class AttributeValuesAdapterTest {
 		return attribute;
 	}
 
-	private Collection<AttributeValue> createAttributeValuesForLanguageTags(final Attribute attribute, final String attributeName,
-																			final String... localeLanguageTags) {
-		if (localeLanguageTags.length == 0) {
+	private Collection<AttributeValue> createAttributeValuesForLocaleStrings(final Attribute attribute, final String attributeName,
+																			 final String... localeStrings) {
+		if (localeStrings.length == 0) {
 			return Collections.singleton(createAttributeMock(attribute, attributeName, null));
 		}
 
 		final Collection<AttributeValue> attributeValues = new ArrayList<>();
 
-		for (final String localeLanguageTag : localeLanguageTags) {
-			final AttributeValue attributeValue = createAttributeMock(attribute, attributeName, localeLanguageTag);
+		for (final String localeString : localeStrings) {
+			final AttributeValue attributeValue = createAttributeMock(attribute, attributeName, localeString);
 
 			attributeValues.add(attributeValue);
 		}
@@ -316,11 +340,13 @@ public class AttributeValuesAdapterTest {
 		return attributeValues;
 	}
 
-	private AttributeValue createAttributeMock(final Attribute attribute, final String attributeName, final String localeLanguageTag) {
+	private AttributeValue createAttributeMock(final Attribute attribute, final String attributeName, final String localeString) {
 		final AttributeValue attributeValue = Mockito.mock(AttributeValue.class, "AttrVal." + UUID.randomUUID());
 
-		if (localeLanguageTag != null) {
-			when(attributeValue.getLocalizedAttributeKey()).thenReturn(attributeName + "_" + localeLanguageTag);
+		if (localeString == null) {
+			when(attributeValue.getLocalizedAttributeKey()).thenReturn(attributeName);
+		} else {
+			when(attributeValue.getLocalizedAttributeKey()).thenReturn(attributeName + "_" + localeString);
 		}
 
 		final String stringValue = UUID.randomUUID().toString();

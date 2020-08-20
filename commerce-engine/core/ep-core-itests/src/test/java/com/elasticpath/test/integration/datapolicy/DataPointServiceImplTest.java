@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.datapolicy.ConsentAction;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.datapolicy.DataPoint;
@@ -170,7 +171,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 	@Test
 	@DirtiesDatabase
 	public void verifyFindUniqueForDataPolicyReturnsDataPointWhenFound() {
-		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, true);
+		Customer customer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.SINGLE_SESSION_USER);
 		Date customerConsentDate = new Date();
 
 		DataPoint dataPoint1 = createAndSaveDataPoint(DATA_POINT_NAME, DATA_POINT_KEY_1, DATA_POINT_LOCATION, true);
@@ -261,7 +262,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 
 		dataPolicyService.update(dataPolicy);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 		CustomerConsent customerConsent = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy, ConsentAction.REVOKED);
 		customerConsent.setCustomerGuid(registeredCustomer.getGuid());
 		customerConsentService.save(customerConsent);
@@ -287,7 +288,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 
 		dataPolicyService.update(dataPolicy);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 		CustomerConsent customerConsent = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy, ConsentAction.GRANTED);
 		customerConsent.setCustomerGuid(registeredCustomer.getGuid());
 		customerConsentService.save(customerConsent);
@@ -316,7 +317,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
 		CustomerConsent customerConsent2 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.REVOKED);
@@ -349,7 +350,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
 		CustomerConsent customerConsent2 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.GRANTED);
@@ -388,7 +389,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
 		CustomerConsent customerConsent2 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.GRANTED);
@@ -420,7 +421,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
 		CustomerConsent customerConsent2 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.REVOKED);
@@ -460,7 +461,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
@@ -498,7 +499,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
@@ -536,8 +537,8 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
-		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
+		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.REGISTERED_USER);
 
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
@@ -591,8 +592,8 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
-		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
+		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.REGISTERED_USER);
 
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
@@ -646,8 +647,8 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
-		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
+		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.REGISTERED_USER);
 
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
@@ -698,8 +699,8 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
-		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
+		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.REGISTERED_USER);
 
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
@@ -764,7 +765,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
@@ -792,7 +793,7 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicyService.update(dataPolicy1);
 		dataPolicyService.update(dataPolicy2);
 
-		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
 
 		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
 		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());

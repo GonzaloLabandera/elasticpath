@@ -94,7 +94,7 @@ public class ImportSortAttributeSteps {
 
 		ImportConfiguration importConfiguration = ImportConfigurationBuilder.newInstance()
 				.setRetrievalSource(importDirectory.getPath())
-				.addImporterConfiguration(JobType.SORT_ATTRIBUTE, ImportStrategyType.INSERT_OR_UPDATE)
+				.addImporterConfiguration(JobType.SORTATTRIBUTE, ImportStrategyType.INSERT_OR_UPDATE)
 				.build();
 
 		importController.loadConfiguration(importConfiguration);

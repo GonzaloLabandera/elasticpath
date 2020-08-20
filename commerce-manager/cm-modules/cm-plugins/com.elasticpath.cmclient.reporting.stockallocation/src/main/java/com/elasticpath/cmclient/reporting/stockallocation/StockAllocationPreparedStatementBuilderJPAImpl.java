@@ -33,7 +33,7 @@ public class StockAllocationPreparedStatementBuilderJPAImpl implements StockAllo
 	/** Criteria sql for orders that have SKU's on pre-order or back-order. */
 	private static final String ORDERS_UNALLOCATED_INVENTORY
 		= "SELECT o.orderNumber, o.createdDate, osk, "  //$NON-NLS-1$
-		+ "CURRENT_DATE, c.uidPk, o.billingAddress.firstName, o.billingAddress.lastName, c.userId " //$NON-NLS-1$
+		+ "CURRENT_DATE, c.uidPk, o.billingAddress.firstName, o.billingAddress.lastName, c.sharedId " //$NON-NLS-1$
 		+ "FROM OrderImpl AS o, StoreImpl as s "  //$NON-NLS-1$
 		+ "INNER JOIN o.customer AS c " //$NON-NLS-1$
 		+ "INNER JOIN o.shipments AS pos " //$NON-NLS-1$
@@ -47,7 +47,7 @@ public class StockAllocationPreparedStatementBuilderJPAImpl implements StockAllo
 	/** Criteria sql for orders that have SKU's on pre-order or back-order with warehouse restriction. */
 	private static final String ORDERS_UNALLOCATED_INVENTORY_WITH_WAREHOUSE
 		= "SELECT o.orderNumber, o.createdDate, osk , "  //$NON-NLS-1$
-		+ "i.restockDate, c.uidPk, o.billingAddress.firstName, o.billingAddress.lastName, c.userId " //$NON-NLS-1$
+		+ "i.restockDate, c.uidPk, o.billingAddress.firstName, o.billingAddress.lastName, c.sharedId " //$NON-NLS-1$
 		+ "FROM OrderImpl AS o, InventoryImpl as i, StoreImpl as s "  //$NON-NLS-1$
 		+ "INNER JOIN o.customer AS c " //$NON-NLS-1$
 		+ "INNER JOIN o.shipments AS pos " //$NON-NLS-1$

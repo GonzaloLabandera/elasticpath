@@ -14,10 +14,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -41,16 +39,15 @@ import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.exception.UserIdExistException;
-import com.elasticpath.commons.exception.UserIdNonExistException;
+import com.elasticpath.commons.exception.SharedIdNonExistException;
 import com.elasticpath.commons.exception.UserStatusInactiveException;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerDeleted;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerMessageIds;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventMessage;
@@ -61,16 +58,14 @@ import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
-import com.elasticpath.service.auth.UserIdentityService;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
-import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.validation.ConstraintViolationTransformer;
+import com.elasticpath.validation.service.CustomerConstraintValidationService;
 
 /**
  * Test <code>CustomerServiceImpl</code>.
@@ -80,19 +75,19 @@ import com.elasticpath.validation.ConstraintViolationTransformer;
 public class CustomerServiceImplTest {
 
 	private static final String NEW_PASSWORD = "newPassword";
-	private static final String USER_ID = "User Id";
+	private static final String SHARED_ID = "Shared Id";
 	private static final String USER_GUID = "User Guid";
-	private static final String ANOTHER_USER_GUID = "Another User Guid";
 	private static final String USER_FIRST_NAME = "UserFirstname";
 	private static final String USER_LAST_NAME = "UserLastName";
 	private static final String USER_PHONE_NUMBER = "12345";
 	private static final String TEST_STORE_CODE = "SAMPLE_STORECODE";
 	private static final String STRUCTURED_ERROR_MESSAGES = "structuredErrorMessages";
-	private static final String USER_ID_FIELD = "user-id";
-	private static final String ID_EXISTS_ERROR_MESSAGE = "Customer with the given user Id already exists";
+	private static final String SHARED_ID_FIELD = "shared-id";
+	private static final String ID_EXISTS_ERROR_MESSAGE = "Customer with the given shared Id already exists";
 	private static final long USER_UIDPK = 1L;
 	private static final String LIST = "list";
-	private static final String CANNOT_RETRIEVE_CUSTOMER_WITHOUT_USER_ID_OR_STORE = "Cannot retrieve customer without userId or store";
+	private static final String CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID_AND_STORE = "Cannot retrieve customer without sharedId and store";
+	private static final String CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID = "Cannot retrieve customer without sharedId";
 	private static final String ADDRESS_FIRST_NAME = "AddressFirstname";
 	private static final String ADDRESS_LAST_NAME = "AddressLastName";
 	private static final String ADDRESS_PHONE_NUMBER = "OneTwoThreeFourFive";
@@ -106,15 +101,9 @@ public class CustomerServiceImplTest {
 	@Mock
 	private CustomerGroupService customerGroupService;
 	@Mock
-	private UserIdentityService userIdentityService;
-	@Mock
 	private TimeService timeService;
 	@Mock
 	private IndexNotificationService indexNotificationService;
-	@Mock
-	private ShopperCleanupService shopperCleanupService;
-	@Mock
-	private OrderPaymentApiCleanupService orderPaymentApiCleanupService;
 	@Mock
 	private PersistenceEngine persistenceEngine;
 	@Mock
@@ -127,6 +116,8 @@ public class CustomerServiceImplTest {
 	private EventMessagePublisher eventMessagePublisher;
 	@Mock
 	private Validator validator;
+	@Mock
+	private CustomerConstraintValidationService customerConstraintValidationService;
 	@Mock
 	private ConstraintViolationTransformer constraintViolationTransformer;
 	@Mock
@@ -146,9 +137,10 @@ public class CustomerServiceImplTest {
 		when(store.getUidPk()).thenReturn(1L);
 
 		when(customer.getGuid()).thenReturn(USER_GUID);
-		when(customer.getUserId()).thenReturn(USER_ID);
+		when(customer.getSharedId()).thenReturn(SHARED_ID);
 		when(customer.getStoreCode()).thenReturn(TEST_STORE_CODE);
 		when(customer.getUidPk()).thenReturn(USER_UIDPK);
+
 
 		Mockito.<Class<Customer>>when(elasticPath.getBeanImplClass(ContextIdNames.CUSTOMER)).thenReturn(Customer.class);
 		when(elasticPath.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class)).thenReturn(customer);
@@ -159,13 +151,13 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void addNonAnonymousCustomerDelegatesAndReturnsNewCustomer() {
+		when(customer.getCustomerType()).thenReturn(CustomerType.REGISTERED_USER);
 		when(storeService.findValidStoreCode(TEST_STORE_CODE)).thenReturn(TEST_STORE_CODE);
 		when(eventMessageFactory.createEventMessage(any(EventType.class), any(String.class), eq(null))).thenReturn(mock(EventMessage.class));
 
 		assertThat(customerServiceImpl.add(customer)).isEqualTo(customer);
 
 		verify(persistenceEngine).save(customer);
-		verify(userIdentityService).add(customer.getUserId(), customer.getClearTextPassword());
 		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
 		verify(storeService).findValidStoreCode(TEST_STORE_CODE);
 		verify(eventMessagePublisher).publish(any(EventMessage.class));
@@ -177,12 +169,11 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void addAnonymousCustomerDelegatesAndReturnsCustomer() {
-		when(customer.isAnonymous()).thenReturn(true);
+        when(customer.getCustomerType()).thenReturn(CustomerType.SINGLE_SESSION_USER);
 
 		assertThat(customerServiceImpl.add(customer)).isEqualTo(customer);
 
 		verify(persistenceEngine).save(customer);
-		verifyZeroInteractions(userIdentityService, eventMessagePublisher, indexNotificationService);
 		verify(storeService).findValidStoreCode(TEST_STORE_CODE);
 	}
 
@@ -199,37 +190,19 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Adding a customer with a user id that already exists throws a UserIdExistException with attached message and structured error message.
-	 */
-	@Test
-	public void verifyErrorMessageReceivedWhenUserIdExists() {
-		doReturn(Collections.singleton(ANOTHER_USER_GUID))
-				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
-
-		assertThatThrownBy(() -> customerServiceImpl.add(customer))
-				.isInstanceOf(UserIdExistException.class)
-				.hasMessage(ID_EXISTS_ERROR_MESSAGE)
-				.hasFieldOrPropertyWithValue(STRUCTURED_ERROR_MESSAGES, Collections.singletonList(createStructuredErrorMessageForId()));
-	}
-
-	/**
 	 * Updating an anonymous customer with valid properties updates and returns the customer.
 	 */
 	@Test
 	public void updateAnonymousCustomerUpdatesAndReturnsCustomer() {
-		when(customer.isAnonymous()).thenReturn(true);
-		doReturn(Collections.singleton(USER_GUID))
-				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
+		when(customer.getCustomerType()).thenReturn(CustomerType.SINGLE_SESSION_USER);
 		when(persistenceEngine.update(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.update(customer)).isEqualTo(customer);
 
 		verify(customer).setPreferredBillingAddress(null);
 		verify(customer).setPreferredShippingAddress(null);
-		verify(validator).validateProperty(customer, "username", Customer.class);
-		verify(validator).validateProperty(customer, "email", Customer.class);
-		verifyZeroInteractions(userIdentityService, eventMessagePublisher, indexNotificationService);
-		verify(persistenceEngine).update(customer);
+		verify(customerConstraintValidationService).validate(customer);
+	 	verify(persistenceEngine).update(customer);
 	}
 
 	/**
@@ -237,31 +210,14 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void updateNonAnonymousCustomerUpdatesAndReturnsCustomer() {
-		when(customer.isAnonymous()).thenReturn(false);
-		doReturn(Collections.singleton(USER_GUID))
-				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
+		when(customer.getCustomerType()).thenReturn(CustomerType.REGISTERED_USER);
 		when(persistenceEngine.update(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.update(customer)).isEqualTo(customer);
 
-		verify(validator).validate(customer);
+		verify(customerConstraintValidationService).validate(customer);
 		verify(persistenceEngine).update(customer);
 		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
-	}
-
-	/**
-	 * Updating a customer with a user id that already exists in the customer's store throws a
-	 * UserIdExistException with a corresponding message and error message.
-	 */
-	@Test
-	public void updatingWithExistingUserIdInStoreThrowsException() {
-		doReturn(new HashSet<>(Arrays.asList(USER_GUID, ANOTHER_USER_GUID)))
-				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
-
-		assertThatThrownBy(() -> customerServiceImpl.update(customer))
-				.isInstanceOf(UserIdExistException.class)
-				.hasMessage(ID_EXISTS_ERROR_MESSAGE)
-				.hasFieldOrPropertyWithValue(STRUCTURED_ERROR_MESSAGES, Collections.singletonList(createStructuredErrorMessageForId()));
 	}
 
 	/**
@@ -275,10 +231,8 @@ public class CustomerServiceImplTest {
 		final Set<ConstraintViolation<Customer>> constraintViolations = new HashSet<>();
 		constraintViolations.add(constraintViolation);
 
-		when(customer.isAnonymous()).thenReturn(false);
-		doReturn(Collections.singleton(USER_GUID))
-				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
-		when(validator.validate(customer)).thenReturn((constraintViolations));
+		when(customerConstraintValidationService.validate(customer)).thenReturn((constraintViolations));
+
 		when(constraintViolationTransformer.transform(constraintViolations))
 				.thenReturn(Collections.singletonList(createStructuredErrorMessageForId()));
 
@@ -286,25 +240,6 @@ public class CustomerServiceImplTest {
 				.isInstanceOf(EpValidationException.class)
 				.hasMessageContaining("Customer validation failure.")
 				.hasFieldOrPropertyWithValue(STRUCTURED_ERROR_MESSAGES, Collections.singletonList(createStructuredErrorMessageForId()));
-	}
-
-	/**
-	 * Removing a customer removes the customer and the customer's corresponding identity.
-	 */
-	@Test
-	public void verifyRemove() {
-		CustomerDeleted customerDeleted = mock(CustomerDeleted.class);
-		when(elasticPath.getPrototypeBean(ContextIdNames.CUSTOMER_DELETED, CustomerDeleted.class)).thenReturn(customerDeleted);
-
-		customerServiceImpl.remove(customer);
-
-		verify(userIdentityService).remove(USER_ID);
-		verify(shopperCleanupService).removeShoppersByCustomer(customer);
-		verify(orderPaymentApiCleanupService).removeByCustomer(customer);
-		verify(persistenceEngine).delete(customer);
-		verify(customerDeleted).setCustomerUid(USER_UIDPK);
-		verify(customerDeleted).setDeletedDate(any(Date.class));
-		verify(persistenceEngine).save(customerDeleted);
 	}
 
 	/**
@@ -411,7 +346,6 @@ public class CustomerServiceImplTest {
 		assertThat(customerServiceImpl.setPassword(customer, NEW_PASSWORD)).isEqualTo(customer);
 
 		verify(customer).setClearTextPassword(NEW_PASSWORD);
-		verify(userIdentityService).setPassword(USER_ID, NEW_PASSWORD);
 		verify(customerServiceImpl).update(customer);
 	}
 
@@ -431,14 +365,15 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Reset password throws UserIdNonExistException with appropriate message when customer does not exist for the input USERID in the given store.
+	 * Reset password throws SharedIdNonExistException with appropriate message when customer does not exist for the input shared ID in the given
+	 * store.
 	 */
 	@Test
 	public void resetPasswordThrowsExceptionWhenCustomerDoesNotExist() {
-		assertThatThrownBy(() -> customerServiceImpl.resetPassword(USER_ID, TEST_STORE_CODE))
-				.isInstanceOf(UserIdNonExistException.class)
-				.hasMessage("The given user id doesn't exist: " + USER_ID + " In store: " + TEST_STORE_CODE);
-		verify(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE);
+		assertThatThrownBy(() -> customerServiceImpl.resetPassword(SHARED_ID, TEST_STORE_CODE))
+				.isInstanceOf(SharedIdNonExistException.class)
+				.hasMessage("The given shared id doesn't exist: " + SHARED_ID + " In store: " + TEST_STORE_CODE);
+		verify(customerServiceImpl).findBySharedId(SHARED_ID, TEST_STORE_CODE);
 	}
 
 	/**
@@ -447,11 +382,11 @@ public class CustomerServiceImplTest {
 	@Test
 	public void resetPasswordFindsCustomerAndResetsPassword() {
 		when(elasticPath.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class)).thenReturn(customerServiceImpl);
-		doReturn(customer).when(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE);
+		doReturn(customer).when(customerServiceImpl).findBySharedId(SHARED_ID, TEST_STORE_CODE);
 		doReturn(customer).when(customerServiceImpl).auditableResetPassword(customer);
 
-		customerServiceImpl.resetPassword(USER_ID, TEST_STORE_CODE);
-		verify(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE);
+		customerServiceImpl.resetPassword(SHARED_ID, TEST_STORE_CODE);
+		verify(customerServiceImpl).findBySharedId(SHARED_ID, TEST_STORE_CODE);
 		verify(customerServiceImpl).auditableResetPassword(customer);
 	}
 
@@ -464,12 +399,10 @@ public class CustomerServiceImplTest {
 		final String password = "Password";
 
 		when(customer.resetPassword()).thenReturn(password);
-		when(customer.getClearTextPassword()).thenReturn(password);
 		doReturn(customer).when(customerServiceImpl).update(customer);
 
 		assertThat(customerServiceImpl.auditableResetPassword(customer)).isEqualTo(customer);
 
-		verify(userIdentityService).setPassword(USER_ID, password);
 		verify(customerServiceImpl).update(customer);
 		verify(eventMessagePublisher).publish(any());
 	}
@@ -664,57 +597,66 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Finding by user id with a null user id throws an EpServiceException with an appropriate message.
+	 * Finding by shared id with a null shared id throws an EpServiceException with an appropriate message.
 	 */
 	@Test
-	public void findByUserIdWithNullUserIdThrowsException() {
-		assertThatThrownBy(() -> customerServiceImpl.findByUserId(null, TEST_STORE_CODE))
+	public void findBySharedIdWithNullSharedIdThrowsException() {
+		assertThatThrownBy(() -> customerServiceImpl.findBySharedId(null))
 				.isInstanceOf(EpServiceException.class)
-				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_USER_ID_OR_STORE);
+				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID);
 	}
 
 	/**
-	 * Finding by user id with a null store code throws an EpServiceException with an appropriate message.
+	 * Finding by shared id with a null shared id throws an EpServiceException with an appropriate message.
 	 */
 	@Test
-	public void findByUserIdWithNullStoreCodeThrowsException() {
-		assertThatThrownBy(() -> customerServiceImpl.findByUserId(USER_ID, null))
-				.isInstanceOf(EpServiceException.class)
-				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_USER_ID_OR_STORE);
+	public void findBySharedId() {
+		when(persistenceEngine.retrieveByNamedQuery("CUSTOMER_FIND_BY_SHAREDID", SHARED_ID)).thenReturn(Collections.singletonList(customer));
+		assertThat(customerServiceImpl.findBySharedId(SHARED_ID)).isEqualTo(customer);
 	}
 
 	/**
-	 * Finding by user id with an invalid store code throws an EpServiceException with an appropriate message.
+	 * Finding by shared id with a null shared id and valid store code throws an EpServiceException with an appropriate message.
 	 */
 	@Test
-	public void findByUserIdWithInvalidStoreCodeThrowsException() {
+	public void findBySharedIdWithStoreCodeAndNullSharedIdThrowsException() {
+		assertThatThrownBy(() -> customerServiceImpl.findBySharedId(null, TEST_STORE_CODE))
+				.isInstanceOf(EpServiceException.class)
+				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID_AND_STORE);
+	}
+
+	/**
+	 * Finding by shared id with an invalid store code throws an EpServiceException with an appropriate message.
+	 */
+	@Test
+	public void findBySharedIdWithInvalidStoreCodeThrowsException() {
 		when(storeService.findStoreWithCode(TEST_STORE_CODE)).thenReturn(null);
-		assertThatThrownBy(() -> customerServiceImpl.findByUserId(USER_ID, TEST_STORE_CODE))
+		assertThatThrownBy(() -> customerServiceImpl.findBySharedId(SHARED_ID, TEST_STORE_CODE))
 				.isInstanceOf(EpServiceException.class)
 				.hasMessage("Store with code " + TEST_STORE_CODE + " not found.");
 	}
 
 	/**
-	 * Finding by user id returns the corresponding customer when the input user id corresponds to a customer in the given store.
+	 * Finding by shared id returns the corresponding customer when the input shared id corresponds to a customer in the given store.
 	 */
 	@Test
-	public void findByUserIdWithValidUserIdReturnsCorrespondingCustomer() {
+	public void findBySharedIdWithValidSharedIdReturnsCorrespondingCustomer() {
 		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
 				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.singletonList(customer));
 
-		assertThat(customerServiceImpl.findByUserId(USER_ID, TEST_STORE_CODE)).isEqualTo(customer);
+		assertThat(customerServiceImpl.findBySharedId(SHARED_ID, TEST_STORE_CODE)).isEqualTo(customer);
 		verify(storeService).findStoreWithCode(TEST_STORE_CODE);
 	}
 
 	/**
-	 * Finding by user id returns null when the input user id does not correspond to a customer in the given store.
+	 * Finding by shared id returns null when the input shared id does not correspond to a customer in the given store.
 	 */
 	@Test
-	public void findByUserIdReturnsNullWhenNoStoreCorrespondsToTheGivenStoreCode() {
+	public void findBySharedIdReturnsNullWhenNoStoreCorrespondsToTheGivenStoreCode() {
 		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
 				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.emptyList());
 
-		assertThat(customerServiceImpl.findByUserId(USER_ID, TEST_STORE_CODE)).isEqualTo(null);
+		assertThat(customerServiceImpl.findBySharedId(SHARED_ID, TEST_STORE_CODE)).isEqualTo(null);
 		verify(storeService).findStoreWithCode(TEST_STORE_CODE);
 	}
 
@@ -726,12 +668,12 @@ public class CustomerServiceImplTest {
 		when(customer.isPersisted()).thenReturn(true);
 		doReturn(Customer.STATUS_DISABLED).when(customerServiceImpl).findCustomerStatusByUid(USER_UIDPK);
 
-		String errorMessage = "Customer account " + USER_ID + " is not active.";
+		String errorMessage = "Customer account " + SHARED_ID + " is not active.";
 
 		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage(
 				"purchase.user.account.not.active",
 				errorMessage,
-				ImmutableMap.of(USER_ID_FIELD, USER_ID));
+				ImmutableMap.of(SHARED_ID_FIELD, SHARED_ID));
 
 		assertThatThrownBy(() -> customerServiceImpl.verifyCustomer(customer))
 				.isInstanceOf(UserStatusInactiveException.class)
@@ -810,13 +752,13 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Helper method returning a new <code>StructuredErrorMessage</code> indicating the user Id already exists.
+	 * Helper method returning a new <code>StructuredErrorMessage</code> indicating the shared Id already exists.
 	 */
 	private StructuredErrorMessage createStructuredErrorMessageForId() {
 		return new StructuredErrorMessage(
-				CustomerMessageIds.USERID_ALREADY_EXISTS,
+				CustomerMessageIds.SHAREDID_ALREADY_EXISTS,
 				ID_EXISTS_ERROR_MESSAGE,
-				ImmutableMap.of(USER_ID_FIELD, USER_ID));
+				ImmutableMap.of(SHARED_ID_FIELD, SHARED_ID));
 	}
 
 	/**

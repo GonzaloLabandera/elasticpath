@@ -6,7 +6,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.CM;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.util.Constants;
 
 /**
@@ -17,14 +16,15 @@ public class SignInDialog extends AbstractDialog {
 	/**
 	 * CSS selector used to identify the dialog.
 	 */
-	public static final String USERNAME_INPUT_CSS = "div[widget-id='User ID'] input";
+	public static final String USERNAME_INPUT_CSS = "div[widget-id='Username'] input";
 	private static final String PASSWORD_INPUT_CSS = "div[widget-id='Password'] input";
 	private static final String SIGN_IN_BUTTON_CSS = "div[widget-id='Sign In']";
-	private static final String ERROR_MSG_XPATH = "//div[text()= 'Authentication failed. Check your user ID and password, then try again"
+	private static final String ERROR_MSG_XPATH = "//div[text()= 'Authentication failed. Check your username and password, then try again"
 			+ ".'][contains(@style, 'overflow: hidden')]";
 	private static final String POST_LOGIN_WINDOW_CSS = "[window-id=post-login-window]";
 	private static final String DISABLED_USER_DIALOG_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages"
 			+ ".EpLoginDialog_ErrorTitle_ServerCommunication']";
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -33,6 +33,7 @@ public class SignInDialog extends AbstractDialog {
 	 */
 	public SignInDialog(final WebDriver driver) {
 		super(driver);
+		this.driver = driver;
 	}
 
 	/**
@@ -41,7 +42,7 @@ public class SignInDialog extends AbstractDialog {
 	 * @param username the username.
 	 */
 	public void enterUsername(final String username) {
-		if(!getWaitDriver().waitForWindowToMaximize()){
+		if (!getWaitDriver().waitForWindowToMaximize()) {
 			getDriver().manage().window().fullscreen();
 		}
 		assertThat(getWaitDriver().waitForWindowToMaximize())
@@ -105,7 +106,7 @@ public class SignInDialog extends AbstractDialog {
 	 * @param password the password.
 	 */
 	public void performSignInWithInvalidCredentials(final String username, final String password) {
-		new CM(SetUp.getDriver()).openCM();
+		new CM(driver).openCM();
 		signIn(username, password);
 	}
 
@@ -128,7 +129,7 @@ public class SignInDialog extends AbstractDialog {
 	 * @param password the password.
 	 */
 	public void initialSignIn(final String username, final String password) {
-		new CM(SetUp.getDriver()).openCM();
+		new CM(driver).openCM();
 		performSignIn(username, password);
 	}
 
@@ -178,7 +179,7 @@ public class SignInDialog extends AbstractDialog {
 			count++;
 		}
 		assertThat(isElementPresent(By.cssSelector(DISABLED_USER_DIALOG_CSS))).as("User is Disabled dialog is not present.").isTrue();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("com.elasticpath.cmclient.core.CoreMessages"
+		new ConfirmDialog(driver).clickOKButton("com.elasticpath.cmclient.core.CoreMessages"
 				+ ".EpLoginDialog_ErrorTitle_ServerCommunication");
 	}
 

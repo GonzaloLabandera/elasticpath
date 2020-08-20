@@ -7,9 +7,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
@@ -68,17 +66,13 @@ public final class TestCustomerSessionFactoryForTestApplication {
 	 */
 	public CustomerSession createNewCustomerSessionWithContext(final Shopper shopper) {
 		final CustomerSession customerSession = new CustomerSessionImpl();
-		final CustomerSessionMemento customerSessionMemento = new CustomerSessionMementoImpl();
 
-		customerSession.setCustomerSessionMemento(customerSessionMemento);
 		customerSession.setShopper(shopper);
 		customerSession.setLocale(Locale.CANADA);
 		TagSet tagSet = new TagSet();
 		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(new Date().getTime()));
 		customerSession.setCustomerTagSet(tagSet);
 		shopper.updateTransientDataWith(customerSession);
-
-		customerSession.setGuid(TestGuidUtility.getGuid());
 
 		return customerSession;
 	}

@@ -42,7 +42,7 @@ public class OrderPaymentInstrumentFormEntityRepositoryTest {
 	private static final String SCOPE = "MOBEE";
 	private static final String ORDER_ID = "ORDER_ID";
 	private static final String PAYMENT_METHOD_ID = "PAYMENT_METHOD_ID";
-	private static final String USER_ID = "USER_ID";
+	private static final String USER_ID = "SHARED_ID";
 	private static final ImmutableList<String> TEST_ATTRIBUTE_DATA = ImmutableList.of("field");
 
 	@Mock

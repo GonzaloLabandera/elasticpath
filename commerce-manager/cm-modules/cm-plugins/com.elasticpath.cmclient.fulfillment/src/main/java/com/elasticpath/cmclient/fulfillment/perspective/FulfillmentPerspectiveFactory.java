@@ -9,6 +9,7 @@ import org.eclipse.ui.IPerspectiveFactory;
 
 import com.elasticpath.cmclient.core.ui.PerspectiveDefaults;
 import com.elasticpath.cmclient.fulfillment.views.SearchView;
+import com.elasticpath.cmclient.fulfillment.views.customer.AccountSearchResultsView;
 import com.elasticpath.cmclient.fulfillment.views.customer.CustomerSearchResultsView;
 import com.elasticpath.cmclient.fulfillment.views.order.OrderSearchResultsView;
 import com.elasticpath.cmclient.jobs.views.CustomerJobListView;
@@ -42,6 +43,9 @@ public class FulfillmentPerspectiveFactory implements IPerspectiveFactory {
 
 		folder.addPlaceholder(CustomerSearchResultsView.VIEW_ID);
 		layout.getViewLayout(CustomerSearchResultsView.VIEW_ID).setMoveable(false);
+
+		folder.addPlaceholder(AccountSearchResultsView.VIEW_ID);
+		layout.getViewLayout(AccountSearchResultsView.VIEW_ID).setMoveable(false);
 
 		folder.addPlaceholder(OrderSearchResultsView.VIEW_ID);
 		layout.getViewLayout(OrderSearchResultsView.VIEW_ID).setMoveable(false);

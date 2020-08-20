@@ -86,7 +86,7 @@
     
     
 	
-	<bean id="productBundleDaoAdapter" class="com.elasticpath.tools.sync.merge.configuration.impl.ProductBundleDaoAdapterImpl" parent="abstractDaoAdapter">
+	<bean id="productBundleDaoAdapter" class="com.elasticpath.tools.sync.target.impl.ProductBundleDaoAdapterImpl" parent="abstractDaoAdapter">
         <property name="productBundleService" ref="productBundleService"/>
 		<property name="productLookup" ref="productLookup"/>
         <property name="beanFactory" ref="coreBeanFactory"/>
@@ -97,12 +97,12 @@
 		</property>
     </bean>
 
-	<bean id="cartItemModifierGroupDaoAdapter" class="com.elasticpath.tools.sync.merge.configuration.impl.ModifierGroupDaoAdapterImpl">
+	<bean id="cartItemModifierGroupDaoAdapter" class="com.elasticpath.tools.sync.target.impl.ModifierGroupDaoAdapterImpl">
 		<property name="modifierService" ref="modifierService"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
 
-	<bean id="modifierGroupDaoAdapter" class="com.elasticpath.tools.sync.merge.configuration.impl.ModifierGroupDaoAdapterImpl">
+	<bean id="modifierGroupDaoAdapter" class="com.elasticpath.tools.sync.target.impl.ModifierGroupDaoAdapterImpl">
 		<property name="modifierService" ref="modifierService"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
@@ -228,7 +228,6 @@
 	
 	<!-- !!!! DOCsync-serviceXML2 -->
 	<bean id="productDaoAdapter" class="com.elasticpath.tools.sync.target.impl.ProductDaoAdapterImpl" parent="abstractDaoAdapter">
-		<property name="productLookup" ref="productLookup"/>
 		<property name="productService" ref="productService"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="associatedTypes">

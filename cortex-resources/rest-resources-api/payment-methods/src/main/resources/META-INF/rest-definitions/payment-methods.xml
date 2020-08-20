@@ -8,12 +8,10 @@
 	<family>
 		<name>paymentmethods</name>
 		<description>
-			<![CDATA[
-			The Payment Methods resource is the payment mechanism selected to create the customer's payment instrument, such as a credit card or PayPal.
-
-			To submit a payment, create one or more payment instruments. Each payment instrument must correspond to a chosen payment method.
-
-			]]>
+<![CDATA[
+The payment mechanism selected to create the customer's payment instrument, such as a credit card or PayPal.
+To submit a payment, create one or more payment instruments. Each payment instrument must correspond to a chosen payment method.
+]]>
 		</description>
 
 		<uri-part>

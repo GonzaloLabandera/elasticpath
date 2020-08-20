@@ -165,6 +165,9 @@ public final class Utils {
 			queryBuffer.append(line).append('\n');
 		}
 
+		if (line == null) { //we probably reached the end of file
+			line = "";
+		}
 		return line;
 	}
 

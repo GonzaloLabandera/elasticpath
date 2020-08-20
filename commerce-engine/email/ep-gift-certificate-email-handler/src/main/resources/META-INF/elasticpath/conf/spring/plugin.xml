@@ -23,7 +23,6 @@
 		  abstract="true">
 		<property name="emailComposer" ref="emailComposer"/>
 		<property name="giftCertificateEmailPropertyHelper" ref="emailPropertyHelperGiftCertificate"/>
-		<property name="orderService" ref="orderService"/>
 		<property name="productSkuLookup" ref="productSkuLookup" />
 	</bean>
 
@@ -52,7 +51,6 @@
 	<bean id="emailPropertyHelperGiftCertificate" class="com.elasticpath.email.handler.giftcertificate.helper.impl.GiftCertificateEmailPropertyHelperImpl">
 		<property name="moneyFormatter" ref="moneyFormatter" />
 		<property name="beanFactory" ref="coreBeanFactory" />
-		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
 	</bean>
 
 </beans>

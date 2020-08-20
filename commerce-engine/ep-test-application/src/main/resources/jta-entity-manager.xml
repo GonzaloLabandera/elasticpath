@@ -2,21 +2,6 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="preEntityManagerInitializationList">
-		<property name="jpaProperties">
-			<map>
-				<entry key="javax.persistence.transactionType" value="JTA"/>
-				<entry key="openjpa.TransactionMode" value="managed"/>
-				<entry key="openjpa.ConnectionFactoryMode" value="managed"/>
-				<entry key="openjpa.ConnectionFactory" value-ref="atomikosJdbcDataSource"/>
-				<entry key="openjpa.ConnectionFactory2" value-ref="dataSource"/>
-				<entry key="openjpa.ManagedRuntime"
-					   value="invocation(TransactionManagerMethod=com.atomikos.icatch.jta.TransactionManagerImp.getTransactionManager)"/>
-				<entry key="openjpa.MetaDataRepository" value="Preload=true"/>
-				<entry key="openjpa.Compatibility" value="QuotedNumbersInQueries=true"/>
-				<entry key="openjpa.ConnectionFactoryProperties" value="PrettyPrint=true, PrettyPrintLineLength=80, PrintParameters=true"/>
-			</map>
-		</property>
-	</bean>
+	<bean id="testEntityManagerFactory" parent="entityManagerFactory" depends-on="preEntityManagerInitializationList"/>
 
 </beans>

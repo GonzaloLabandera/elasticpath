@@ -54,13 +54,14 @@ public interface SearchRepository {
 	 * @return the paginated item search results
 	 */
 
-	Single<PaginatedResult> searchForProductIds(ProductCategorySearchCriteria productSearchCriteria, int startPageNumber, int numberOfResultsPerPage);
+	Single<PaginatedResult> searchForProductIds(ProductCategorySearchCriteria productSearchCriteria, int startPageNumber,
+												int numberOfResultsPerPage);
 
 	/**
 	 * Returns a list objects containing the facet field and facet type.
 	 *
-	 * @param productSearchCriteria search criteria
-	 * @param startPageNumber starting page number of the request
+	 * @param productSearchCriteria  search criteria
+	 * @param startPageNumber        starting page number of the request
 	 * @param numberOfResultsPerPage the number of results per page.
 	 * @return list of facet fields
 	 */
@@ -69,7 +70,7 @@ public interface SearchRepository {
 	/**
 	 * Returns a list of facet values.
 	 *
-	 * @param facetGuid facet guid
+	 * @param facetGuid             facet guid
 	 * @param productSearchCriteria search criteria
 	 * @return list of facet values
 	 */
@@ -93,9 +94,10 @@ public interface SearchRepository {
 
 	/**
 	 * Get the search criteria given the search details.
+	 *
 	 * @param offerSearchData offer search data containing search
-	 * @param locale locale
-	 * @param currency currency
+	 * @param locale          locale
+	 * @param currency        currency
 	 * @return a search criteria
 	 */
 	Single<ProductCategorySearchCriteria> getSearchCriteria(OfferSearchData offerSearchData, Locale locale, Currency currency);

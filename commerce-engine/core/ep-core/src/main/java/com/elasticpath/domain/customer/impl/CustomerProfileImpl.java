@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -18,10 +19,12 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import com.elasticpath.commons.exception.EpBindException;
 import com.elasticpath.commons.util.impl.LocaleUtils;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.AttributeValue;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.attribute.impl.CustomerProfileValueImpl;
 import com.elasticpath.domain.customer.CustomerProfile;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.impl.AbstractLegacyPersistenceImpl;
 
 /**
@@ -128,9 +131,18 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 	 * @return an unmodifiable list of attributes
 	 */
 	@Override
-	public Collection<Attribute> getProfileAttributes() {
+	public Collection<Attribute> getProfileAttributes(final CustomerType customerType) {
 		if (getCustomerProfileAttributeMap() != null) {
-			return Collections.unmodifiableCollection(getCustomerProfileAttributeMap().values());
+			return Collections.unmodifiableCollection(
+					getCustomerProfileAttributeMap().values().stream()
+					.filter(attribute -> {
+						if (customerType == CustomerType.ACCOUNT) {
+							return attribute.getAttributeUsage().getValue() == AttributeUsage.ACCOUNT_PROFILE;
+						} else {
+							return attribute.getAttributeUsage().getValue() == AttributeUsage.USER_PROFILE;
+						}
+					})
+					.collect(Collectors.toList()));
 		}
 
 		return Collections.emptyList();

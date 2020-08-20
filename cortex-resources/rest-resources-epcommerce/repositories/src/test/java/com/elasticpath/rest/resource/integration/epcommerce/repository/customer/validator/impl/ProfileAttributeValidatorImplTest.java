@@ -6,6 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.customer
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.base.ScopeIdentifierPart;
@@ -100,7 +102,7 @@ public class ProfileAttributeValidatorImplTest {
 
 		attributes.put(ATTR_KEY, attribute);
 
-		when(attributeService.getCustomerProfileAttributesMap())
+		when(attributeService.getCustomerProfileAttributesMap(AttributeUsageImpl.USER_PROFILE_USAGE))
 				.thenReturn(attributes);
 	}
 
@@ -134,7 +136,7 @@ public class ProfileAttributeValidatorImplTest {
 	public void testValidationNoErrorMessages() {
 		when(customerProfileAttributeService.getCustomerEditableAttributeKeys(profileIdentifier.getScope().getValue()))
 				.thenReturn(Sets.newHashSet(ATTR_KEY));
-		when(customerProfileAttributeService.validateAttributes(anyMap(), anyString()))
+		when(customerProfileAttributeService.validateAttributes(anyMap(), anyString(), eq(AttributeUsageImpl.USER_PROFILE_USAGE)))
 				.thenReturn(Collections.emptyList());
 		when(structuredErrorMessageTransformer.transform(anyCollection(), anyString()))
 				.thenReturn(Collections.emptyList());
@@ -151,7 +153,7 @@ public class ProfileAttributeValidatorImplTest {
 		List<StructuredErrorMessage> messages = Lists.newArrayList();
 		messages.add(new StructuredErrorMessage(ERROR, ERROR, null));
 
-		when(customerProfileAttributeService.validateAttributes(anyMap(), anyString()))
+		when(customerProfileAttributeService.validateAttributes(anyMap(), anyString(), eq(AttributeUsageImpl.USER_PROFILE_USAGE)))
 				.thenReturn(messages);
 		when(structuredErrorMessageTransformer.transform(messages, PROFILE_ID))
 				.thenReturn(Lists.newArrayList(Message.builder().build()));

@@ -108,4 +108,22 @@ public class ProductLookupImplTest {
 		assertEquals("Reader should ask the persistence engine for the corresponding products",
 				Collections.singletonList(product), found);
 	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testFindByGuids() {
+		context.checking(new Expectations() {
+			{
+				QueryResultImpl<Product> result = new QueryResultImpl<>();
+				result.setResults(Collections.singletonList(product));
+				allowing(queryService).query(with(any(QueryCriteria.class)));
+				will(returnValue(result));
+			}
+		});
+
+		final List<Product> found = lookup.findByGuids(Collections.singletonList(PRODUCT_CODE));
+
+		assertEquals("Reader should ask the persistence engine for the corresponding products",
+				Collections.singletonList(product), found);
+	}
 }

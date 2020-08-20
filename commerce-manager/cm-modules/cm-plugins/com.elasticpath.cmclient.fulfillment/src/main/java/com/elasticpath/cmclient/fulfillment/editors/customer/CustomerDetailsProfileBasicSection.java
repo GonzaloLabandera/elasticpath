@@ -30,6 +30,7 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPlugin;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 
 /**
  * UI representation of the customer details profile basic section.
@@ -42,9 +43,11 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 
 	private static final String NA_STRING = "N/A"; //$NON-NLS-1$
 
-	private Text userIdText;
+	private Text sharedIdText;
 
 	private CCombo statusCombo;
+
+	private Text usernameText;
 
 	private Text firstNameText;
 
@@ -58,6 +61,10 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 
 	private Text companyText;
 
+	private Text businessNameText;
+
+	private Text businessNumberText;
+
 	private final Customer customer;
 
 	private IEpLayoutComposite mainPane;
@@ -68,7 +75,7 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param editor the editor containing this Section Constructor to create a new Section in an editor's FormPage.
 	 * @param formPage the formpage
 	 */
@@ -101,35 +108,53 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 		final IEpLayoutData labelData = this.mainPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData fieldData = this.mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING, true, false);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_UserId, labelData);
-		this.userIdText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
+		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_SharedId, labelData);
+		this.sharedIdText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
 
 		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_Status, labelData);
 		this.statusCombo = this.mainPane.addComboBox(authorization, fieldData);
 
-		addLabel(mainPane, FulfillmentMessages.get().CustomerDetails_FirstNameLabel, authorization, labelData, customer.isFirstNameRequired());
-		this.firstNameText = this.mainPane.addTextField(authorization, fieldData);
+		if (customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
 
-		addLabel(mainPane, FulfillmentMessages.get().CustomerDetails_LastNameLabel, authorization, labelData, customer.isLastNameRequired());
-		this.lastNameText = this.mainPane.addTextField(authorization, fieldData);
+			this.mainPane.addLabelBoldRequired(FulfillmentMessages.get().ProfileBasicSection_BusinessName, authorization, labelData);
+			this.businessNameText = this.mainPane.addTextField(authorization, fieldData);
 
-		addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_Email, authorization, labelData, customer.isEmailRequired());
-		this.emailText = this.mainPane.addTextField(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_BusinessNumber, labelData);
+			this.businessNumberText = this.mainPane.addTextField(authorization, fieldData);
 
-		addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_PhoneNum, authorization, labelData, customer.isPhoneNumberRequired());
-		this.phoneNumberText = this.mainPane.addTextField(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_PhoneNum, labelData);
+			this.phoneNumberText = this.mainPane.addTextField(authorization, fieldData);
 
-		addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_FaxNum, authorization, labelData, customer.isFaxNumberRequired());
-		this.faxNumberText = this.mainPane.addTextField(authorization, fieldData);
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_FaxNum, labelData);
+			this.faxNumberText = this.mainPane.addTextField(authorization, fieldData);
+		} else {
+			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_Username, labelData);
+			this.usernameText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
 
-		addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_Company, authorization, labelData, customer.isCompanyRequired());
-		this.companyText = this.mainPane.addTextField(authorization, fieldData);
+			addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_FirstName, authorization, labelData, customer.isFirstNameRequired());
+			this.firstNameText = this.mainPane.addTextField(authorization, fieldData);
+
+			addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_LastName, authorization, labelData, customer.isLastNameRequired());
+			this.lastNameText = this.mainPane.addTextField(authorization, fieldData);
+
+			addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_Email, authorization, labelData, customer.isEmailRequired());
+			this.emailText = this.mainPane.addTextField(authorization, fieldData);
+
+			addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_PhoneNum, authorization, labelData, customer.isPhoneNumberRequired());
+			this.phoneNumberText = this.mainPane.addTextField(authorization, fieldData);
+
+			addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_FaxNum, authorization, labelData, customer.isFaxNumberRequired());
+			this.faxNumberText = this.mainPane.addTextField(authorization, fieldData);
+
+			addLabel(mainPane, FulfillmentMessages.get().ProfileBasicSection_Company, authorization, labelData, customer.isCompanyRequired());
+			this.companyText = this.mainPane.addTextField(authorization, fieldData);
+		}
 	}
 
 	/**
 	 * Creates either required or optional label depending on attribute's required-ness flag.
 	 */
-	private void addLabel(final IEpLayoutComposite composite, final String labelText, final EpState epState, 
+	private void addLabel(final IEpLayoutComposite composite, final String labelText, final EpState epState,
 			final IEpLayoutData data, final boolean required) {
 		if (required) {
 			composite.addLabelBoldRequired(labelText, epState, data);
@@ -140,23 +165,29 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 
 	@Override
 	protected void populateControls() {
-		this.userIdText.setText(this.customer.getUserId());
+		this.sharedIdText.setText(this.customer.getSharedId());
 		this.statusCombo.setItems(STATUS_STRINGS);
-
 		this.statusCombo.setText(this.resolveStatusText(this.customer.getStatus()));
-		this.firstNameText.setText(this.checkString(this.customer.getFirstName()));
-		this.lastNameText.setText(this.checkString(this.customer.getLastName()));
-		this.emailText.setText(this.checkString(this.customer.getEmail()));
-		this.phoneNumberText.setText(this.checkString(this.customer.getPhoneNumber()));
 
-		this.faxNumberText.setText(this.checkString(customer.getFaxNumber()));
-
-		if (this.customer.getCompany() == null) {
-			if (!authorized) {
-				companyText.setText(NA_STRING);
-			}
+		if (customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			this.businessNameText.setText(this.checkString(this.customer.getBusinessName()));
+			this.businessNumberText.setText(this.checkString(this.customer.getAccountBusinessNumber()));
+			this.phoneNumberText.setText(this.checkString(this.customer.getAccountPhoneNumber()));
+			this.faxNumberText.setText(this.checkString(customer.getAccountFaxNumber()));
 		} else {
-			this.companyText.setText(this.checkString(this.customer.getCompany()));
+			this.usernameText.setText(this.checkString(this.customer.getUsername()));
+			this.firstNameText.setText(this.checkString(this.customer.getFirstName()));
+			this.lastNameText.setText(this.checkString(this.customer.getLastName()));
+			this.emailText.setText(this.checkString(this.customer.getEmail()));
+			this.phoneNumberText.setText(this.checkString(this.customer.getPhoneNumber()));
+			this.faxNumberText.setText(this.checkString(customer.getFaxNumber()));
+			if (this.customer.getCompany() == null) {
+				if (!authorized) {
+					companyText.setText(NA_STRING);
+				}
+			} else {
+				this.companyText.setText(this.checkString(this.customer.getCompany()));
+			}
 		}
 
 		// Set the modification listener *after* setting the control values
@@ -198,48 +229,86 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 		}, true);
 		// ---- DOCbindCustomerDetails
 
-		//No way currently to specify "requiredness" flag for arbitrary validator. So, need to provide if-else logic here. 
-		if (customer.isFirstNameRequired()) {
-			bindingProvider.bind(bindingContext, this.firstNameText, this.customer, "firstName", //$NON-NLS-1$ 
-					EpValidatorFactory.STRING_255_REQUIRED, null, true);
+		if (customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			bindingProvider.bind(bindingContext, this.businessNameText, EpValidatorFactory.STRING_255_REQUIRED, null,
+					new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					customer.setBusinessName(String.valueOf(value));
+					return Status.OK_STATUS;
+				}
+			}, true);
+
+			bindingProvider.bind(bindingContext, this.businessNumberText, EpValidatorFactory.MAX_LENGTH_255, null,
+					new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					customer.setAccountBusinessNumber(String.valueOf(value));
+					return Status.OK_STATUS;
+				}
+			}, true);
+
+			bindingProvider.bind(bindingContext, this.phoneNumberText, EpValidatorFactory.PHONE_IGNORE_SPACES, null,
+					new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					customer.setAccountPhoneNumber(String.valueOf(value));
+					return Status.OK_STATUS;
+				}
+			}, true);
+
+			bindingProvider.bind(bindingContext, this.faxNumberText, EpValidatorFactory.FAX_IGNORE_SPACES, null,
+					new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					customer.setAccountFaxNumber(String.valueOf(value));
+					return Status.OK_STATUS;
+				}
+			}, true);
 		} else {
-			bindingProvider.bind(bindingContext, this.firstNameText, this.customer, "firstName", //$NON-NLS-1$ 
-					EpValidatorFactory.MAX_LENGTH_255, null, true);
-		}
-		if (customer.isLastNameRequired()) {
-			bindingProvider.bind(bindingContext, this.lastNameText, this.customer, "lastName", //$NON-NLS-1$ 
-					EpValidatorFactory.STRING_255_REQUIRED, null, true);
-		} else {
-			bindingProvider.bind(bindingContext, this.lastNameText, this.customer, "lastName", //$NON-NLS-1$ 
-					EpValidatorFactory.MAX_LENGTH_255, null, true);
-		}
-		if (customer.isEmailRequired()) {
-			bindingProvider.bind(bindingContext, this.emailText, this.customer, "email", //$NON-NLS-1$ 
-					EpValidatorFactory.EMAIL_REQUIRED, null, true);
-		} else {
-			bindingProvider.bind(bindingContext, this.emailText, this.customer, "email", //$NON-NLS-1$ 
-					EpValidatorFactory.EMAIL, null, true);
-		}
-		if (customer.isPhoneNumberRequired()) {
-			bindingProvider.bind(bindingContext, this.phoneNumberText, this.customer, "phoneNumber", //$NON-NLS-1$ 
-					EpValidatorFactory.PHONE_REQUIRED, null, true);
-		} else {
-			bindingProvider.bind(bindingContext, this.phoneNumberText, this.customer, "phoneNumber", //$NON-NLS-1$ 
-					EpValidatorFactory.PHONE_IGNORE_SPACES, null, true);
-		}
-		if (customer.isFaxNumberRequired()) {
-			bindingProvider.bind(bindingContext, this.faxNumberText, customer, "faxNumber", //$NON-NLS-1$ 
-					EpValidatorFactory.FAX_REQUIRED, null, true);
-		} else {
-			bindingProvider.bind(bindingContext, this.faxNumberText, customer, "faxNumber", //$NON-NLS-1$ 
-					EpValidatorFactory.FAX_IGNORE_SPACES, null, true);
-		}
-		if (customer.isCompanyRequired()) {
-			bindingProvider.bind(bindingContext, this.companyText, this.customer, "company", //$NON-NLS-1$ 
-					EpValidatorFactory.STRING_255_REQUIRED, null, true);
-		} else {
-			bindingProvider.bind(bindingContext, this.companyText, this.customer, "company", //$NON-NLS-1$ 
-					EpValidatorFactory.MAX_LENGTH_255, null, true);
+			//No way currently to specify "requiredness" flag for arbitrary validator. So, need to provide if-else logic here.
+			if (customer.isFirstNameRequired()) {
+				bindingProvider.bind(bindingContext, this.firstNameText, this.customer, "firstName", //$NON-NLS-1$
+						EpValidatorFactory.STRING_255_REQUIRED, null, true);
+			} else {
+				bindingProvider.bind(bindingContext, this.firstNameText, this.customer, "firstName", //$NON-NLS-1$
+						EpValidatorFactory.MAX_LENGTH_255, null, true);
+			}
+			if (customer.isLastNameRequired()) {
+				bindingProvider.bind(bindingContext, this.lastNameText, this.customer, "lastName", //$NON-NLS-1$
+						EpValidatorFactory.STRING_255_REQUIRED, null, true);
+			} else {
+				bindingProvider.bind(bindingContext, this.lastNameText, this.customer, "lastName", //$NON-NLS-1$
+						EpValidatorFactory.MAX_LENGTH_255, null, true);
+			}
+			if (customer.isEmailRequired()) {
+				bindingProvider.bind(bindingContext, this.emailText, this.customer, "email", //$NON-NLS-1$
+						EpValidatorFactory.EMAIL_REQUIRED, null, true);
+			} else {
+				bindingProvider.bind(bindingContext, this.emailText, this.customer, "email", //$NON-NLS-1$
+						EpValidatorFactory.EMAIL, null, true);
+			}
+			if (customer.isPhoneNumberRequired()) {
+				bindingProvider.bind(bindingContext, this.phoneNumberText, this.customer, "phoneNumber", //$NON-NLS-1$
+						EpValidatorFactory.PHONE_REQUIRED, null, true);
+			} else {
+				bindingProvider.bind(bindingContext, this.phoneNumberText, this.customer, "phoneNumber", //$NON-NLS-1$
+						EpValidatorFactory.PHONE_IGNORE_SPACES, null, true);
+			}
+			if (customer.isFaxNumberRequired()) {
+				bindingProvider.bind(bindingContext, this.faxNumberText, customer, "faxNumber", //$NON-NLS-1$
+						EpValidatorFactory.FAX_REQUIRED, null, true);
+			} else {
+				bindingProvider.bind(bindingContext, this.faxNumberText, customer, "faxNumber", //$NON-NLS-1$
+						EpValidatorFactory.FAX_IGNORE_SPACES, null, true);
+			}
+			if (customer.isCompanyRequired()) {
+				bindingProvider.bind(bindingContext, this.companyText, this.customer, "company", //$NON-NLS-1$
+						EpValidatorFactory.STRING_255_REQUIRED, null, true);
+			} else {
+				bindingProvider.bind(bindingContext, this.companyText, this.customer, "company", //$NON-NLS-1$
+						EpValidatorFactory.MAX_LENGTH_255, null, true);
+			}
 		}
 	}
 

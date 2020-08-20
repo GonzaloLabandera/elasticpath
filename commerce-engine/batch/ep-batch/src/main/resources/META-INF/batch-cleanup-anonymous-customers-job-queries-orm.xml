@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+-->
+	<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+		<named-query name="FIND_EXPIRED_ANONYMOUS_CUSTOMERS_UIDS_WITHOUT_ORDERS">
+			<query>
+				SELECT c.uidPk
+				FROM CustomerImpl c
+				WHERE c.lastEditDate &lt; ?1
+				AND c.customerType = 'SINGLE_SESSION_USER'
+				AND NOT EXISTS (SELECT 1 FROM OrderImpl ord WHERE ord.customer.uidPk = c.uidPk)
+			</query>
+		</named-query>
+		<named-query name="SHOPPING_CART_UIDS_BY_CUSTOMER_UIDS">
+			<query>
+				SELECT cart.uidPk
+				FROM ShoppingCartMementoImpl cart
+				WHERE cart.shopperUid IN (
+					SELECT shopper.uidPk
+					FROM ShopperMementoImpl shopper
+					WHERE shopper.customer.uidPk IN (:list)
+				)
+			</query>
+		</named-query>
+		<named-query name="DELETE_CUSTOMERS_BY_UIDS">
+			<query>
+				DELETE FROM CustomerImpl c WHERE c.uidPk IN (:list)
+			</query>
+		</named-query>
+</entity-mappings>

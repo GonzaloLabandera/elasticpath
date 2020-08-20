@@ -67,7 +67,7 @@ public class GiftCertificateExporterTest {
 		final List<String> foundGuids = Arrays.asList("GUID1", "GUID3", "GUID2");
 		context.checking(new Expectations() {
 			{
-				allowing(importExportSearcher).searchGuids(searchConfiguration, EPQueryType.GIFT_CERTIFICATE);
+				allowing(importExportSearcher).searchGuids(searchConfiguration, EPQueryType.GIFTCERTIFICATE);
 				will(returnValue(foundGuids));
 			}
 		});
@@ -106,6 +106,6 @@ public class GiftCertificateExporterTest {
 	/** Ensures the proper {@link JobType} is returned. */
 	@Test
 	public void testJobType() {
-		assertEquals(JobType.GIFT_CERTIFICATE, giftCertificateExporter.getJobType());
+		assertEquals(JobType.GIFTCERTIFICATE, giftCertificateExporter.getJobType());
 	}
 }

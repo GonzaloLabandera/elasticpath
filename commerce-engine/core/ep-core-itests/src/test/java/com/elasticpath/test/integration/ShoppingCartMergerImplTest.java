@@ -24,9 +24,7 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.domain.rules.CouponConfig;
 import com.elasticpath.domain.rules.CouponUsageType;
 import com.elasticpath.domain.rules.Rule;
@@ -176,9 +174,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 	private CustomerSession createCustomerSession() {
 		final CustomerSession customerSession = new CustomerSessionImpl();
-		CustomerSessionMemento cMemento = new CustomerSessionMementoImpl();
-		cMemento.setCurrency(TestDataPersisterFactory.DEFAULT_CURRENCY);
-		customerSession.setCustomerSessionMemento(cMemento);
+		customerSession.setCurrency(TestDataPersisterFactory.DEFAULT_CURRENCY);
 		TagSet tagSet = new TagSet();
 		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(new Date().getTime()));
 		customerSession.setCustomerTagSet(tagSet);

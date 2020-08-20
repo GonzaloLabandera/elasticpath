@@ -17,18 +17,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.or.ObjectRenderer;
 import org.apache.log4j.spi.LoggerRepository;
 import org.apache.log4j.spi.RendererSupport;
 
-import com.elasticpath.commons.ThreadLocalMap;
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.enums.OperationEnum;
-import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.importexport.common.ImportExportContextIdNames;
 import com.elasticpath.importexport.common.exception.ConfigurationException;
 import com.elasticpath.importexport.common.exception.runtime.ImportRuntimeException;
@@ -36,10 +31,9 @@ import com.elasticpath.importexport.common.summary.Summary;
 import com.elasticpath.importexport.common.summary.impl.SimpleSummaryLayout;
 import com.elasticpath.importexport.common.util.Message;
 import com.elasticpath.importexport.common.util.MessageResolver;
+import com.elasticpath.importexport.common.util.MetaDataMapPopulator;
 import com.elasticpath.importexport.exporter.controller.ExportController;
 import com.elasticpath.importexport.importer.controller.ImportController;
-import com.elasticpath.service.changeset.ChangeSetManagementService;
-import com.elasticpath.service.changeset.ChangeSetService;
 
 /**
  * The client that is responsible for working with import-export operations.
@@ -157,66 +151,8 @@ public class Index {
 		}
 	}
 
-	private void processChangeSet() throws ConfigurationException {
-		ChangeSetService changeSetService = getBeanFactory().getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
-
-		ThreadLocalMap<String, Object> metadataMap = getThreadLocalMapBean();
-		if (changeSetGuid == null) {
-			importOnly(metadataMap);
-		} else {
-			if (!changeSetService.isChangeSetEnabled()) {
-				LOG.warn(new Message("IE-30506"));
-				importOnly(metadataMap);
-				return;
-			}
-			ChangeSetManagementService changeSetManagementService = getBeanFactory().getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE,
-					ChangeSetManagementService.class);
-			ChangeSet changeSet = changeSetManagementService.get(changeSetGuid, null);
-			if (changeSet == null) {
-				throw new ConfigurationException(String.format("Change set %s does not exist.", changeSetGuid));
-			} else if (!changeSetManagementService.isChangeAllowed(changeSetGuid)) {
-				throw new ConfigurationException(String.format(
-						"Change set %s does not allow changes. It is probably locked, publishing or finalized.", changeSetGuid));
-			}
-
-			metadataMap.put("changeSetGuid", changeSetGuid);
-			setChangeSetProcessingMode(metadataMap, stage);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private ThreadLocalMap<String, Object> getThreadLocalMapBean() {
-		return getBeanFactory().getSingletonBean("persistenceListenerMetadataMap", ThreadLocalMap.class);
-	}
-
-	private void setChangeSetProcessingMode(final ThreadLocalMap<String, Object> metadataMap, final String stageArg) throws ConfigurationException {
-		if (StringUtils.isBlank(stageArg)) {
-			addToChangeSetAndImport(metadataMap);
-		} else if ("stage1".equals(stageArg)) {
-			addToChangeSetOnly(metadataMap);
-		} else if ("stage2".equals(stageArg)) {
-			importOnly(metadataMap);
-		} else {
-			throw new ConfigurationException(stageArg + " is not a valid argument. Accepted stages: stage1, stage2");
-		}
-	}
-
-	private void addToChangeSetAndImport(
-			final ThreadLocalMap<String, Object> metadatMap) {
-		metadatMap.put("changeSetOperation", OperationEnum.OPERATIONAL);
-		metadatMap.put("importOperation", OperationEnum.OPERATIONAL);
-	}
-
-	private void addToChangeSetOnly(
-			final ThreadLocalMap<String, Object> metadataMap) {
-		metadataMap.put("changeSetOperation", OperationEnum.OPERATIONAL);
-		metadataMap.put("importOperation", OperationEnum.NONOPERATIONAL);
-	}
-
-	private void importOnly(
-			final ThreadLocalMap<String, Object> metadataMap) {
-		metadataMap.put("changeSetOperation", OperationEnum.NONOPERATIONAL);
-		metadataMap.put("importOperation", OperationEnum.OPERATIONAL);
+	private MetaDataMapPopulator getMetaDataMapPopulator() {
+		return getBeanFactory().getSingletonBean("metaDataMapPopulator", MetaDataMapPopulator.class);
 	}
 
 	private static String getConfigurationFileName(final CommandLine cmd, final String defaultConfiguration) {
@@ -239,7 +175,7 @@ public class Index {
 		ImportController controller = getBeanFactory().getSingletonBean(ImportExportContextIdNames.IMPORT_CONTROLLER, ImportController.class);
 
 		try (FileInputStream configStream = new FileInputStream(configFileName)) {
-			processChangeSet();
+			getMetaDataMapPopulator().configureMetadataMapForImport(changeSetGuid, stage);
 
 			controller.loadConfiguration(configStream);
 			LOG.debug("Import Controller Prepared.");

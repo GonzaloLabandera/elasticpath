@@ -132,4 +132,17 @@ public final class QueryUtil {
 	public static OpenJPAQuery createDynamicJPQLQuery(final EntityManager entityManager, final String dynamicJPQLQuery) {
 		return OpenJPAPersistence.cast(entityManager.createQuery(dynamicJPQLQuery));
 	}
+
+	/**
+	 * Create a new instance of {@link OpenJPAQuery} from a given native SQL string.
+	 *
+	 * @param entityManager the {@link EntityManager}
+	 * @param dynamicSQLQuery the dynamic SQL query string
+	 * @param <T> the entity type
+	 * @return a new {@link OpenJPAQuery}
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> OpenJPAQuery<T> createDynamicSQLQuery(final EntityManager entityManager, final String dynamicSQLQuery) {
+		return OpenJPAPersistence.cast(entityManager.createNativeQuery(dynamicSQLQuery));
+	}
 }

@@ -3,6 +3,8 @@
  */
 package com.elasticpath.importexport.importer.importers;
 
+import java.util.List;
+
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
 import com.elasticpath.importexport.importer.importers.impl.LifecycleListener;
@@ -90,6 +92,22 @@ public interface SavingStrategy<DOMAIN extends Persistable, DTO extends Dto> {
 	 * @see LifecycleListener
 	 */
 	void setLifecycleListener(LifecycleListener lifecycleListener);
+
+	/**
+	 * Gets the common lifecycleListeners.
+	 *
+	 * @return the common lifecycleListeners
+	 * @see LifecycleListener
+	 */
+	List<LifecycleListener> getCommonLifecycleListeners();
+
+	/**
+	 * Sets the common lifecycleListeners.
+	 *
+	 * @param commonLifecycleListeners the common lifecycleListeners to set
+	 * @see LifecycleListener
+	 */
+	void setCommonLifecycleListeners(List<LifecycleListener> commonLifecycleListeners);
 
 	/**
 	 * Gets the collections strategy.

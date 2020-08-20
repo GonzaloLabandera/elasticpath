@@ -42,8 +42,8 @@ public class AttributeUsageImplTest {
 	@Test
 	public void testGetAttributeUsageMap() {
 		Map<String, String> usages = AttributeUsageImpl.getAttributeUsageMapInternal();
-		final int expectedSize = 4;
-		assertEquals("Currently only 4 types of usages.", expectedSize, usages.size());
+		final int expectedSize = 5;
+		assertEquals("Currently only " + expectedSize + " types of usages.", expectedSize, usages.size());
 		assertEquals("Sanity check", "Category", usages.get(String.valueOf(AttributeUsage.CATEGORY)));
 	}
 }

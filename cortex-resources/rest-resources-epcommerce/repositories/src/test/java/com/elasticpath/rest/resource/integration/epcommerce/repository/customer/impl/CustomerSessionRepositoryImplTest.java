@@ -47,6 +47,8 @@ import com.elasticpath.tags.TagSet;
 public class CustomerSessionRepositoryImplTest {
 	private static final String RESULT_SHOULD_BE_A_FAILURE = "Result should be a failure";
 	private static final String USER_GUID = "userGuid";
+	private static final String CUSTOMER_SHARED_ID = "customerSharedId";
+	private static final String ACCOUNT_SHARED_ID = "accountId";
 	private static final String STORE_CODE = "StoreCode";
 	private static final String TAG_KEY = "tag";
 	private static final Locale LOCALE = Locale.CANADA;
@@ -60,9 +62,15 @@ public class CustomerSessionRepositoryImplTest {
 	@Mock
 	private Shopper mockShopper;
 	@Mock
+	private Shopper mockShopperWithAccount;
+	@Mock
 	private CustomerSession mockCustomerSession;
 	@Mock
+	private CustomerSession mockCustomerWithAccountSession;
+	@Mock
 	private Customer mockCustomer;
+	@Mock
+	private Customer mockAccount;
 	@Mock
 	private ShopperService shopperService;
 	@Mock
@@ -120,6 +128,19 @@ public class CustomerSessionRepositoryImplTest {
 
 		assertEquals(ASSERT_DESCRIPTION, tag, sessionTagSet.getTagValue(TAG_KEY));
 		verify(sessionPriceListLifecycle).refreshPriceListStack(mockCustomerSession, mockStore);
+
+		setupSubjectWithAccount();
+		when(shopperService.findByCustomerGuidAndAccountSharedIdAndStore(USER_GUID, ACCOUNT_SHARED_ID, STORE_CODE))
+				.thenReturn(mockShopperWithAccount);
+		when(customerSessionService.initializeCustomerSessionForPricing(mockCustomerWithAccountSession, STORE_CODE, CURRENCY))
+				.thenReturn(mockCustomerWithAccountSession);
+		customerSessionRepository.findOrCreateCustomerSession()
+				.test()
+				.assertNoErrors()
+				.assertValue(mockCustomerWithAccountSession);
+
+		assertEquals(ASSERT_DESCRIPTION, tag, sessionTagSet.getTagValue(TAG_KEY));
+		verify(sessionPriceListLifecycle).refreshPriceListStack(mockCustomerWithAccountSession, mockStore);
 	}
 
 	@Test
@@ -134,13 +155,12 @@ public class CustomerSessionRepositoryImplTest {
 		when(shopperService.findByCustomerGuid(USER_GUID)).thenReturn(mockShopper);
 		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
 		when(mockShopper.getStoreCode()).thenReturn(STORE_CODE);
-		when(mockShopper.getCustomer()).thenReturn(mockCustomer);
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
 		when(mockStore.getDefaultLocale()).thenReturn(LOCALE);
 		when(mockStore.getDefaultCurrency()).thenReturn(CURRENCY);
 		when(customerSessionService.initializeCustomerSessionForPricing(mockCustomerSession, STORE_CODE, CURRENCY))
 				.thenReturn(mockCustomerSession);
-		when(tagSetFactory.createTagSet(mockCustomer)).thenReturn(tagSet);
+		when(tagSetFactory.createTagSet(mockShopper)).thenReturn(tagSet);
 
 		customerSessionRepository.findOrCreateCustomerSession()
 				.test()
@@ -152,10 +172,19 @@ public class CustomerSessionRepositoryImplTest {
 	}
 
 	@Test
-	public void testFindOrCreateCustomerSessionWhenCustomerNotFound() {
+	public void testFindOrCreateCustomerSessionWhenShopperNotFound() {
 		setupSubject();
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
 
+		when(customerService.findByGuid(USER_GUID)).thenReturn(mockCustomer);
+
+		customerSessionRepository.findOrCreateCustomerSession()
+				.test()
+				.assertError(ResourceOperationFailure.notFound("Customer was not found."))
+				.assertNoValues();
+
+		setupSubjectWithAccount();
+		mockCreateCustomerSessionWithShopper();
 		when(customerService.findByGuid(USER_GUID)).thenReturn(mockCustomer);
 
 		customerSessionRepository.findOrCreateCustomerSession()
@@ -175,6 +204,12 @@ public class CustomerSessionRepositoryImplTest {
 				.test()
 				.assertError(ResourceOperationFailure.serverError("Server error when finding shopper by guid"))
 				.assertNoValues();
+
+		setupSubjectWithAccount();
+		customerSessionRepository.findOrCreateCustomerSession()
+				.test()
+				.assertError(ResourceOperationFailure.serverError("Server error when finding shopper by guid"))
+				.assertNoValues();
 	}
 
 	@Test
@@ -187,13 +222,109 @@ public class CustomerSessionRepositoryImplTest {
 
 		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
 		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
+
+		setupSubjectWithAccount();
+		result = customerSessionRepository.findCustomerSessionByCustomerGuidAndAccountSharedId(mockCustomer.getGuid(), ACCOUNT_SHARED_ID, STORE_CODE);
+		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
+		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
+	}
+
+	@Test
+	public void testFindCustomerSessionByUserIdAndAccountSharedIdWithResult() {
+		setupSubjectWithAccount();
+		Tag tag = new Tag();
+		TagSet tagSet = new TagSet();
+		tagSet.addTag(TAG_KEY, tag);
+
+		mockCreateCustomerSessionWithShopper();
+		when(mockCustomer.getSharedId()).thenReturn(CUSTOMER_SHARED_ID);
+		when(customerService.findBySharedId(mockCustomer.getSharedId(), STORE_CODE)).thenReturn(mockCustomer);
+		when(customerService.findBySharedId(ACCOUNT_SHARED_ID)).thenReturn(mockAccount);
+		when(tagSetFactory.createTagSet(any())).thenReturn(tagSet);
+		when(mockStore.getCode()).thenReturn(STORE_CODE);
+		when(customerSessionService.initializeCustomerSessionForPricing(mockCustomerWithAccountSession, STORE_CODE, CURRENCY))
+				.thenReturn(mockCustomerWithAccountSession);
+
+		when(shopperService.findOrCreateShopper(mockCustomer, mockAccount, STORE_CODE)).thenReturn(mockShopperWithAccount);
+		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
+		ExecutionResult<CustomerSession> result =
+				customerSessionRepository.findCustomerSessionByUserIdAndAccountSharedId(
+						mockCustomer.getSharedId(),
+						ACCOUNT_SHARED_ID,
+						STORE_CODE);
+
+		assertEquals(result.getData(), mockCustomerWithAccountSession);
+	}
+
+	@Test
+	public void testFindCustomerSessionByUserIdAndAccountSharedIdWithCustomerNotFound() {
+		setupSubjectWithAccount();
+		Tag tag = new Tag();
+		TagSet tagSet = new TagSet();
+		tagSet.addTag(TAG_KEY, tag);
+
+		mockCreateCustomerSessionWithShopper();
+		when(mockCustomer.getSharedId()).thenReturn(CUSTOMER_SHARED_ID);
+		when(customerService.findBySharedId(mockCustomer.getSharedId(), STORE_CODE)).thenReturn(null);
+
+		ExecutionResult<CustomerSession> result =
+				customerSessionRepository.findCustomerSessionByUserIdAndAccountSharedId(
+						mockCustomer.getSharedId(),
+						ACCOUNT_SHARED_ID,
+						STORE_CODE);
+
+		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
+		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
+	}
+
+	@Test
+	public void testFindCustomerSessionByUserIdAndAccountSharedIdWithAccountNotFound() {
+		setupSubjectWithAccount();
+		Tag tag = new Tag();
+		TagSet tagSet = new TagSet();
+		tagSet.addTag(TAG_KEY, tag);
+
+		mockCreateCustomerSessionWithShopper();
+		when(mockCustomer.getSharedId()).thenReturn(CUSTOMER_SHARED_ID);
+		when(customerService.findBySharedId(mockCustomer.getSharedId(), STORE_CODE)).thenReturn(mockCustomer);
+		when(customerService.findBySharedId(ACCOUNT_SHARED_ID)).thenReturn(null);
+		ExecutionResult<CustomerSession> result =
+				customerSessionRepository.findCustomerSessionByUserIdAndAccountSharedId(
+						mockCustomer.getSharedId(),
+						ACCOUNT_SHARED_ID,
+						STORE_CODE);
+
+		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
+		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
+	}
+
+	@Test
+	public void testFindCustomerSessionByUserIdAndAccountSharedIdWithShopperNull() {
+		setupSubjectWithAccount();
+		Tag tag = new Tag();
+		TagSet tagSet = new TagSet();
+		tagSet.addTag(TAG_KEY, tag);
+
+		mockCreateCustomerSessionWithShopper();
+		when(mockCustomer.getSharedId()).thenReturn(CUSTOMER_SHARED_ID);
+		when(customerService.findBySharedId(mockCustomer.getSharedId(), STORE_CODE)).thenReturn(mockCustomer);
+		when(customerService.findBySharedId(ACCOUNT_SHARED_ID)).thenReturn(mockAccount);
+		when(shopperService.findOrCreateShopper(mockCustomer, mockAccount, STORE_CODE)).thenReturn(null);
+
+		ExecutionResult<CustomerSession> result =
+				customerSessionRepository.findCustomerSessionByUserIdAndAccountSharedId(
+						mockCustomer.getSharedId(),
+						ACCOUNT_SHARED_ID,
+						STORE_CODE);
+
+		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
+		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
 	}
 
 	@Test
 	public void testCreateCustomerSessionWhenExceptionIsThrownExpectedResultIsFailure() {
 		setupSubject();
 		when(shopperService.findByCustomerGuidAndStoreCode(USER_GUID, STORE_CODE)).thenReturn(mockShopper);
-		when(mockShopper.getCustomer()).thenReturn(mockCustomer);
 		when(mockCustomer.getGuid()).thenReturn(USER_GUID);
 		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
@@ -251,13 +382,23 @@ public class CustomerSessionRepositoryImplTest {
 		sessionTagSet = new TagSet();
 
 		when(customerService.findByGuid(USER_GUID)).thenReturn(mockCustomer);
+		when(customerService.findBySharedId(ACCOUNT_SHARED_ID)).thenReturn(mockAccount);
 		when(customerSessionService.createWithShopper(mockShopper)).thenReturn(mockCustomerSession);
+		when(customerSessionService.createWithShopper(mockShopperWithAccount)).thenReturn(mockCustomerWithAccountSession);
 		when(mockCustomerSession.getCustomerTagSet()).thenReturn(sessionTagSet);
+		when(mockCustomerWithAccountSession.getCustomerTagSet()).thenReturn(sessionTagSet);
 	}
 
 	private void setupSubject() {
 		Subject subject = TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(
 				STORE_CODE, USER_GUID, LOCALE, CURRENCY);
+
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+	}
+
+	private void setupSubjectWithAccount() {
+		Subject subject = TestSubjectFactory.createWithScopeAndGuidAndAccountIdAndLocaleAndCurrency(
+				STORE_CODE, USER_GUID, ACCOUNT_SHARED_ID, LOCALE, CURRENCY);
 
 		when(resourceOperationContext.getSubject()).thenReturn(subject);
 	}

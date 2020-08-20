@@ -64,12 +64,12 @@ public class DomainEventListenerTest {
 	 */
 	@Test
 	public void testThatEventMessageFactoryCallCreateEventMessageAfterPersistEvent() {
-		final LifecycleEvent event = new LifecycleEvent(entity, LifecycleEvent.AFTER_PERSIST);
+		final LifecycleEvent event = new LifecycleEvent(entity, LifecycleEvent.AFTER_PERSIST_PERFORMED);
 
 		when(eventTypeFactory.getEventType(any(), any())).thenReturn(SKU_OPTION_CREATED);
 		when(eventMessageFactory.createEventMessage(SKU_OPTION_CREATED, SOME_GUID)).thenReturn(eventMessage);
 
-		domainEventListener.afterPersist(event);
+		domainEventListener.afterPersistPerformed(event);
 
 		verify(eventMessageFactory).createEventMessage(SKU_OPTION_CREATED, SOME_GUID);
 		verify(eventMessagePublisher).publish(eventMessage);

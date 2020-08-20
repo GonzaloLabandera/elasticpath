@@ -209,16 +209,6 @@ public class WishListServiceImpl implements WishListService {
 	}
 
 	@Override
-	public int deleteEmptyWishListsByShopperUids(final List<Long> shopperUids) {
-		return wishListDao.deleteEmptyWishListsByShopperUids(shopperUids);
-	}
-
-	@Override
-	public int deleteAllWishListsByShopperUids(final List<Long> shopperUids) {
-		return wishListDao.deleteAllWishListsByShopperUids(shopperUids);
-	}
-
-	@Override
 	public void shareWishList(final WishListMessage wishListMessage, final WishList wishList, final String storeCode, final Locale locale) {
 		final Map<String, Object> wishListMessageData = Maps.newHashMap();
 		wishListMessageData.put(LOCALE_KEY, locale.toString());

@@ -555,7 +555,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		final List<Attribute> attributeList = new ArrayList<>();
 		Attribute attribute = new AttributeImpl();
 		AttributeUsage attributeUsage = new AttributeUsageImpl();
-		attributeUsage.setValue(AttributeUsage.CUSTOMERPROFILE);
+		attributeUsage.setValue(AttributeUsage.USER_PROFILE);
 		attribute.setAttributeUsage(attributeUsage);
 		attribute.setKey(CustomerImpl.ATT_KEY_CP_EMAIL);
 		attributeList.add(attribute);
@@ -563,11 +563,11 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		context.checking(new Expectations() {
 			{
 				oneOf(mockPersistenceEngine).retrieveByNamedQuery(ATTRIBUTE_FIND_BY_USAGE,
-						AttributeUsage.CUSTOMERPROFILE);
+						AttributeUsage.USER_PROFILE);
 				will(returnValue(attributeList));
 			}
 		});
 		assertEquals(CustomerImpl.ATT_KEY_CP_EMAIL,
-				attributeService.getCustomerProfileAttributeKeys().iterator().next());
+				attributeService.getCustomerProfileAttributeKeys(AttributeUsageImpl.USER_PROFILE_USAGE).iterator().next());
 	}
 }

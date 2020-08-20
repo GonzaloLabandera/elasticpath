@@ -99,6 +99,11 @@
     <importer type="CUSTOMER">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>
     </importer>
+
+    <importer type="USERACCOUNTASSOCIATION">
+	  <importstrategy>INSERT_OR_UPDATE</importstrategy>
+    </importer>
+
     <importer type="PROMOTION">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>
     </importer>

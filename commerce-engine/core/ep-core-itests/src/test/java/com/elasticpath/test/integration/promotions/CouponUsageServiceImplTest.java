@@ -837,10 +837,8 @@ public class CouponUsageServiceImplTest extends BasicSpringContextTest {
 		
 		Coupon coupon1 = couponTestPersister.createAndPersistCoupon(config, couponCode2, true);
 		Coupon coupon2 = couponTestPersister.createAndPersistCoupon(config, couponCode, false);
-		
-		CouponUsage couponUsage1 = couponTestPersister.createAndPersistCouponUsage(coupon1, "test@test.com");
-		CouponUsage couponUsage2 = couponTestPersister.createAndPersistCouponUsage(coupon2, "test1@test.com");
-		
+        CouponUsage couponUsage1 = couponTestPersister.createAndPersistCouponUsage(coupon1, "test@test.com", 0, true, true);
+        CouponUsage couponUsage2 = couponTestPersister.createAndPersistCouponUsage(coupon2, "test1@test1.com", 0, true, false);
 		DirectedSortingField[] orderingFields = { new DirectedSortingField(
 				CouponUsageModelDtoSortingField.STATUS,
 				SortingDirection.DESCENDING) };

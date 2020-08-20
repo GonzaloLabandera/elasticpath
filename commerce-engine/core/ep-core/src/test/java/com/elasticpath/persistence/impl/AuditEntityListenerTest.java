@@ -16,19 +16,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.apache.openjpa.ee.ManagedRuntime;
 import org.apache.openjpa.kernel.Broker;
 import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.meta.ValueMetaData;
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -41,11 +38,10 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.persistence.api.ChangeType;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.persistence.api.PersistenceSession;
-import com.elasticpath.persistence.api.Transaction;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl;
 import com.elasticpath.persistence.openjpa.impl.QueryReader;
+import com.elasticpath.persistence.openjpa.impl.QueryReaderFactory;
 import com.elasticpath.service.audit.AuditDao;
 
 /**
@@ -68,6 +64,8 @@ public class AuditEntityListenerTest {
 
 	@Mock
 	private QueryReader queryReader;
+	@Mock
+	private QueryReaderFactory queryReaderFactory;
 
 	@Mock
 	private JpaPersistenceEngine mockJpaPersistenceEngine;
@@ -115,7 +113,7 @@ public class AuditEntityListenerTest {
 		auditEntityListener.setBeanFactory(beanFactory);
 		auditEntityListener.setMetadataMap(metadataMap);
 
-		realJpaPersistenceEngine.setQueryReader(queryReader);
+		realJpaPersistenceEngine.setQueryReaderFactory(queryReaderFactory);
 
 		when(beanFactory.getSingletonBean(ContextIdNames.AUDIT_DAO, AuditDao.class)).thenReturn(auditDao);
 	}
@@ -317,11 +315,14 @@ public class AuditEntityListenerTest {
 		final EntityManager entityManager = mock(EntityManager.class);
 		realJpaPersistenceEngine.setEntityManager(entityManager);
 
+		when(queryReaderFactory.createQueryReader(entityManager)).thenReturn(queryReader);
 		when(entity.getUidPk()).thenReturn(UIDPK);
 		doReturn(oldEntity).when(queryReader).load(entity.getClass(), UIDPK);
 		when(oldEntity.getField()).thenReturn(oldCollection);
 		when(removedMember.getGuid()).thenReturn("OLDGUID");
 		when(newMember.getGuid()).thenReturn("NEWGUID");
+
+		realJpaPersistenceEngine.init();
 
 		auditEntityListener.recordCollectionChanged(entity, fieldName, newCollection, ChangeType.UPDATE);
 
@@ -353,12 +354,14 @@ public class AuditEntityListenerTest {
 		final EntityManager entityManager = mock(EntityManager.class);
 		realJpaPersistenceEngine.setEntityManager(entityManager);
 
+		when(queryReaderFactory.createQueryReader(entityManager)).thenReturn(queryReader);
 		when(entity.getUidPk()).thenReturn(UIDPK);
 
 		doReturn(oldEntity).when(queryReader).load(entity.getClass(), UIDPK);
 
 		when(oldEntity.getField()).thenReturn(oldField);
 
+		realJpaPersistenceEngine.init();
 		auditEntityListener.recordFieldChanged(entity, "updateField", field, ChangeType.UPDATE);
 
 		verify(entity).getUidPk();
@@ -490,6 +493,7 @@ public class AuditEntityListenerTest {
 		final EntityManager entityManager = mock(EntityManager.class);
 		realJpaPersistenceEngine.setEntityManager(entityManager);
 
+		when(queryReaderFactory.createQueryReader(entityManager)).thenReturn(queryReader);
 		when(entity.getUidPk()).thenReturn(UIDPK);
 		doReturn(oldEntity).when(queryReader).load(entity.getClass(), UIDPK);
 		when(oldEntity.getField()).thenReturn(oldMap);
@@ -499,6 +503,7 @@ public class AuditEntityListenerTest {
 		when(newMember.getGuid()).thenReturn("NEWGUID");
 		when(adoptedMember.getGuid()).thenReturn("ADOPTEE");
 
+		realJpaPersistenceEngine.init();
 		auditEntityListener.recordMapChanged(entity, fieldName, newMap, ChangeType.UPDATE);
 
 		verify(entity).getUidPk();
@@ -522,10 +527,7 @@ public class AuditEntityListenerTest {
 
 		final Entity entity = new ProductSkuImpl();  //Any entity object
 		final Object transactionKey = new Object();
-		final Transaction transaction = mock(Transaction.class);
 		final ChangeTransaction changeTransaction = mock(ChangeTransaction.class);
-		final PersistenceSession persistenceSession = mock(PersistenceSession.class);
-
 
 		List<String> auditableClasses = new ArrayList<>();
 		auditableClasses.add("com.elasticpath.domain.catalog.impl.ProductSkuImpl");
@@ -534,10 +536,6 @@ public class AuditEntityListenerTest {
 		final Broker broker = mock(Broker.class);
 		final ManagedRuntime managedRuntime = mock(ManagedRuntime.class);
 
-		when(mockJpaPersistenceEngine.getPersistenceSession()).thenReturn(persistenceSession);
-		when(persistenceSession.beginTransaction()).thenReturn(transaction);
-		when(openJPAEntityManager.getFlushMode()).thenReturn(FlushModeType.AUTO);
-
 		when(auditDao.persistChangeSetTransaction(String.valueOf(transactionKey.hashCode()), entity, metadataMap)).thenReturn(changeTransaction);
 
 		when(mockJpaPersistenceEngine.getBroker()).thenReturn(broker);
@@ -545,13 +543,7 @@ public class AuditEntityListenerTest {
 		when(managedRuntime.getTransactionKey()).thenReturn(transactionKey);
 		auditEntityListener.beginSingleOperation(entity, ChangeType.CREATE);
 
-		verify(mockJpaPersistenceEngine).getPersistenceSession();
-		verify(persistenceSession).beginTransaction();
-		verify(openJPAEntityManager).getFlushMode();
-		verify(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
 		verify(auditDao).persistChangeSetTransaction(String.valueOf(transactionKey.hashCode()), entity, metadataMap);
 		verify(auditDao).persistSingleChangeOperation(entity, ChangeType.CREATE, changeTransaction, 1);
-		verify(transaction).commit();
-		verify(openJPAEntityManager).setFlushMode(FlushModeType.AUTO);
 	}
 }

@@ -4,9 +4,7 @@
 package com.elasticpath.test.factory;
 
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
-import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.domain.shopper.Shopper;
 
 /**
@@ -60,13 +58,9 @@ public final class TestCustomerSessionFactory {
 	 */
 	public CustomerSession createNewCustomerSessionWithContext(final Shopper shopper) {
 		final CustomerSession customerSession = new CustomerSessionImpl();
-		final CustomerSessionMemento customerSessionMemento = new CustomerSessionMementoImpl();
 
-		customerSession.setCustomerSessionMemento(customerSessionMemento);
 		customerSession.setShopper(shopper);
 		shopper.updateTransientDataWith(customerSession);
-
-		customerSession.setGuid(TestGuidUtility.getGuid());
 
 		return customerSession;
 	}

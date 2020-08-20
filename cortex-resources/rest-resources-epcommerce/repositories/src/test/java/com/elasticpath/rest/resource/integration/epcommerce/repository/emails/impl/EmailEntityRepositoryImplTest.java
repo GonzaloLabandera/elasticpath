@@ -3,20 +3,16 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.emails.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import io.reactivex.Completable;
-import io.reactivex.Single;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -38,7 +34,6 @@ public class EmailEntityRepositoryImplTest {
 	private static final String SCOPE = "SCOPE";
 	private static final String EXISTING_EMAIL = "Godzilla@lizard.com";
 	private static final String NEW_EMAIL = "Rex@lizard.com";
-	private static final String USER_ID = "Godzilla";
 	private static final String USER_GUID = "abc-123-def-456";
 	private static final String CUSTOMER_WAS_NOT_FOUND = "Customer was not found.";
 
@@ -58,9 +53,8 @@ public class EmailEntityRepositoryImplTest {
 	public void initialize() {
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
 		when(customerRepository.getCustomer(USER_GUID)).thenReturn(Single.just(customer));
-		when(customer.getEmail()).thenReturn(EXISTING_EMAIL);
-		when(customer.getUserId()).thenReturn(USER_ID);
 		when(customerRepository.updateCustomer(customer)).thenReturn(Completable.complete());
+		when(customer.getEmail()).thenReturn(EXISTING_EMAIL);
 		emailEntityRepository.setResourceOperationContext(resourceOperationContext);
 		emailEntityRepository.setCustomerRepository(customerRepository);
 	}
@@ -125,28 +119,6 @@ public class EmailEntityRepositoryImplTest {
 				.test()
 				.assertNoErrors()
 				.assertValue(createSubmitResult(NEW_EMAIL));
-	}
-
-	@Test
-	public void creatingValidEmailSetsEmailOnlyWhenUserIdUnlinked() {
-		when(customer.getEmail()).thenReturn(EXISTING_EMAIL);
-		when(customer.getUserId()).thenReturn(USER_ID);
-		emailEntityRepository.submit(createEmailEntity(NEW_EMAIL), StringIdentifier.of(SCOPE))
-				.test()
-				.assertNoErrors();
-		verify(customer).setEmail(NEW_EMAIL);
-		verify(customer, never()).setUserId(any());
-	}
-
-	@Test
-	public void creatingValidEmailSetsEmailAndUserIdWhenUserIdLinked() {
-		when(customer.getEmail()).thenReturn(EXISTING_EMAIL);
-		when(customer.getUserId()).thenReturn(EXISTING_EMAIL);
-		emailEntityRepository.submit(createEmailEntity(NEW_EMAIL), StringIdentifier.of(SCOPE))
-				.test()
-				.assertNoErrors();
-		verify(customer).setEmail(NEW_EMAIL);
-		verify(customer).setUserId(NEW_EMAIL);
 	}
 
 	@Test

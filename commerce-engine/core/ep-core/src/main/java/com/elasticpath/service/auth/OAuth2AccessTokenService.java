@@ -3,8 +3,6 @@
  */
 package com.elasticpath.service.auth;
 
-import java.util.Date;
-
 import com.elasticpath.domain.auth.OAuth2AccessTokenMemento;
 
 /**
@@ -30,12 +28,4 @@ public interface OAuth2AccessTokenService {
 	 * @param tokenId - the ID of the oauth2 token.
 	 */
 	void remove(String tokenId);
-
-
-	/**
-	 * Removes tokens which have expiration dates older than removalDate.
-	 *
-	 * @param removalDate the date.
-	 */
-	void removeTokensByDate(Date removalDate);
 }

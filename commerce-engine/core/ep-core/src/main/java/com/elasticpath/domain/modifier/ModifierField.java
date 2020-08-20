@@ -143,5 +143,19 @@ public interface ModifierField extends Entity, Comparable<ModifierField> {
 	 * @return the ModifierFieldOption
 	 */
 	ModifierFieldOption findModifierFieldOptionByValue(String value);
+
+	/**
+	 * Sets default cart value.
+	 *
+	 * @param defaultCartValue the default cart value
+	 */
+	void setDefaultCartValue(String defaultCartValue);
+
+	/**
+	 * Gets default cart value.
+	 *
+	 * @return the default cart value.
+	 */
+	String getDefaultCartValue();
 }
 

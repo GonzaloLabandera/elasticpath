@@ -23,34 +23,6 @@ import com.elasticpath.tags.TagSet;
 public interface CustomerSessionTransientData extends Serializable, TagSetListener {
 
 	/**
-	 * Returns true if the customer is signed in.
-	 *
-	 * @return true if the customer is signed in.
-	 */
-	boolean isSignedIn();
-
-	/**
-	 * Set the signed in flag.
-	 *
-	 * @param signedIn signed in flag
-	 */
-	void setSignedIn(boolean signedIn);
-
-	/**
-	 * Get sign in during checkout requested.
-	 *
-	 * @return true if sign in during checkout was requested, false otherwise
-	 */
-	boolean isCheckoutSignIn();
-
-	/**
-	 * Sets whether checkout caused a sign in.
-	 *
-	 * @param checkoutSignIn true if sign in was requested on checkout, otherwise false
-	 */
-	void setCheckoutSignIn(boolean checkoutSignIn);
-
-	/**
 	 * Get the locale of the customer corresponding to the shopping cart.
 	 *
 	 * @return the <code>Locale</code>

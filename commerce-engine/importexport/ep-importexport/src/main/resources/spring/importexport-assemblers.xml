@@ -15,6 +15,7 @@
 		<property name="storeService" ref="storeService"/>
 		<property name="modifierService" ref="modifierService"/>
 		<property name="storePaymentProviderConfigService" ref="storePaymentProviderConfigService"/>
+		<property name="reservedCartModifierKeys" ref="reservedCartModifierKeyList"/>
 	</bean>
 
 	<bean id="storeAssociationDtoAssembler" class="com.elasticpath.importexport.common.assembler.store.StoreAssociationDtoAssembler">
@@ -23,6 +24,10 @@
 		<property name="storeAssociationService" ref="storeAssociationService"/>
 	</bean>
 
-	<bean id="paymentProviderDtoAssembler" class="com.elasticpath.importexport.common.assembler.paymentprovider.PaymentProviderDTOAssembler"/>
+	<bean id="userAccountAssociationDtoAssembler" class="com.elasticpath.common.dto.customer.UserAccountAssociationDtoAssembler">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="customerService" ref="customerService"/>
+	</bean>
 
+	<bean id="paymentProviderDtoAssembler" class="com.elasticpath.importexport.common.assembler.paymentprovider.PaymentProviderDTOAssembler"/>
 </beans>

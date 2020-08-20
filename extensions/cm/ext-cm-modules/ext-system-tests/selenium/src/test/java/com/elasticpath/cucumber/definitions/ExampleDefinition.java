@@ -7,6 +7,7 @@ import com.elasticpath.selenium.example.ExampleCatalogManagement;
 import com.elasticpath.selenium.example.ExampleProductListingPane;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 
@@ -17,13 +18,15 @@ public class ExampleDefinition {
 
 	private final ExampleCatalogManagement exampleCatalogManagement;
 	private final ExampleProductListingPane exampleProductListingPane;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public ExampleDefinition() {
-		exampleCatalogManagement = new ExampleCatalogManagement(SeleniumDriverSetup.getDriver());
-		exampleProductListingPane = new ExampleProductListingPane(SeleniumDriverSetup.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		exampleCatalogManagement = new ExampleCatalogManagement(driver);
+		exampleProductListingPane = new ExampleProductListingPane(driver);
 	}
 
 	/**

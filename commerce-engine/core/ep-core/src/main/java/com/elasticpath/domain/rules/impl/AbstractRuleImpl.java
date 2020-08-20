@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -43,7 +44,6 @@ import org.apache.openjpa.persistence.jdbc.FetchMode;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
@@ -62,11 +62,7 @@ import com.elasticpath.domain.sellingcontext.impl.SellingContextImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.persistence.support.FetchGroupConstants;
-import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.domain.ConditionalExpression;
-import com.elasticpath.tags.domain.LogicalOperator;
-import com.elasticpath.tags.domain.TagDictionary;
-import com.elasticpath.tags.service.ConditionDSLBuilder;
 
 /**
  * Represents a rule that can be applied by the rules engine.
@@ -85,10 +81,9 @@ import com.elasticpath.tags.service.ConditionDSLBuilder;
 @DataCache(enabled = false)
 public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implements Rule {
 
-	private static final String LESS_THAN = "lessThan";
-	private static final String GREATER_THAN = "greaterThan";
-
 	private static final Pattern CHARS_NOT_ALLOWED = Pattern.compile("\"|[^ -\\xff]");
+	private static final Pattern END_DATE_PATTERN = Pattern.compile("\\.lessThan\\s*\\((\\d+)L\\)");
+	private static final Pattern START_DATE_PATTERN = Pattern.compile("\\.greaterThan\\s*\\((\\d+)L\\)");
 
 	/**
 	 * Serial version id.
@@ -150,9 +145,6 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 	private LocalizedProperties localizedProperties;
 
 	private Map<String, LocalizedPropertyValue> localizedPropertiesMap = new HashMap<>();
-
-	private Pair<Date, Date> sellingContextDates;
-
 
 	/**
 	 * Get the starting date that this rule can be applied.
@@ -374,7 +366,7 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 			actions.remove(ruleElement);
 		}
 	}
-	
+
 	/**
 	 * Adds a rule element to the set of rule elements.
 	 *
@@ -389,7 +381,7 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 		addToTransientBucket(ruleElement);
 		getRuleElements().add(ruleElement);
 	}
-	
+
 	/**
 	 * Removes the given <code>RuleElement</code> from the set of rule elements.
 	 *
@@ -457,7 +449,7 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 			this.name = CHARS_NOT_ALLOWED.matcher(name).replaceAll("").trim();
 		}
 	}
-	
+
 	/**
 	 * Return the rule code.
 	 *
@@ -562,94 +554,71 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 	}
 
 	@Override
+	@Transient
 	public boolean isWithinDateRange(final Date date) {
-		Date startDate = getStartDate();
-		if (startDate == null) {
-			startDate = getStartDateFromSellingContext();
-		}
-
-		Date endDate = getEndDate();
-		if (endDate == null) {
-			endDate = getEndDateFromSellingContext();
-		}
-
-		return (startDate == null || date.after(startDate)) && (endDate == null || date.before(endDate));
+		Date effectiveStartDate = getEffectiveStartDate();
+		Date effectiveEndDate = getEffectiveEndDate();
+		return (effectiveStartDate == null || date.after(effectiveStartDate))
+				&& (effectiveEndDate == null || date.before(effectiveEndDate));
 	}
 
 	@Override
+	@Transient
 	public boolean isWithinDateRange() {
 		return isWithinDateRange(new Date());
 	}
-	
+
+	@Override
+	@Transient
+	public boolean isExpired(final Date date) {
+		Date effectiveEndDate = getEffectiveEndDate();
+		return effectiveEndDate != null && effectiveEndDate.before(date);
+	}
+
+	@Override
+	@Transient
+	public boolean isExpired() {
+		return isExpired(new Date());
+	}
+
 	/**
 	 * Get the starting date from selling context
 	 * that this rule can be applied.
 	 * @return the start date
 	 */
+	@Transient
+	protected Date getStartDateFromSellingContext() {
+		return getDateValueFromSellingContextUsingRegex(START_DATE_PATTERN);
+	}
+
 	@Override
 	@Transient
-	public Date getStartDateFromSellingContext() {
-		if (sellingContextDates == null) {
-			extractSellingContextDates();
+	public Date getEffectiveStartDate() {
+		Date startDate = getStartDate();
+		if (startDate == null) {
+			startDate = getStartDateFromSellingContext();
 		}
-		return sellingContextDates.getFirst();
+		return startDate;
 	}
 
 	/**
 	 * Get the end date from selling context. After the end date, the rule will no longer be applied.
 	 * @return the end date
 	 */
+	@Transient
+	protected Date getEndDateFromSellingContext() {
+		return getDateValueFromSellingContextUsingRegex(END_DATE_PATTERN);
+	}
+
 	@Override
 	@Transient
-	public Date getEndDateFromSellingContext() {
-		if (sellingContextDates == null) {
-			extractSellingContextDates();
+	public Date getEffectiveEndDate() {
+		Date endDate = getEndDate();
+		if (endDate == null) {
+			endDate = getEndDateFromSellingContext();
 		}
-		return sellingContextDates.getSecond();
+		return endDate;
 	}
-
-	/**
-	 * Extract Start date and End date from {@link LogicalOperator}.
-	 */
-	private void extractSellingContextDates() {
-		Date sellingContextStartDate = null;
-		Date sellingContextEndDate = null;
-		if (this.getSellingContext() != null) {
-			final ConditionalExpression expression = this.getSellingContext().getCondition(TagDictionary.DICTIONARY_TIME_GUID);
-			if (expression != null) {
-
-				final LogicalOperator logicalOperator =
-					getConditionDSLBuilder().getLogicalOperationTree(expression.getConditionString());
-
-				final Set<Condition> conditions =
-					logicalOperator.getConditions();
-
-				for (Condition condition : conditions) {
-					String operator = condition.getOperator();
-
-					Date conditionDate = new Date();
-					conditionDate.setTime((Long) condition.getTagValue());
-
-					if (GREATER_THAN.equals(operator)) {
-						sellingContextStartDate = conditionDate;
-					}
-
-					if (LESS_THAN.equals(operator)) {
-						sellingContextEndDate = conditionDate;
-					}
-				}
-			}
-		}
-		this.sellingContextDates = new Pair<>(sellingContextStartDate, sellingContextEndDate);
-	}
-
-	@Transient
-	private ConditionDSLBuilder getConditionDSLBuilder() {
-		return getSingletonBean(ContextIdNames.TAG_CONDITION_DSL_BUILDER, ConditionDSLBuilder.class);
-	}
-
-
-
 
 	/**
 	 * Returns <code>true</code> if this rule is enabled, <code>false</code> if it is disabled.
@@ -941,6 +910,26 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 			displayName = getLocalizedProperties().getValue(Rule.LOCALIZED_PROPERTY_DISPLAY_NAME, locale);
 		}
 		return displayName;
+	}
+
+	/**
+	 * Get a date value from the selling context using the passed regular expression pattern.
+	 * @param regexPattern the regular expression pattern
+	 * @return the date value
+	 */
+	protected Date getDateValueFromSellingContextUsingRegex(final Pattern regexPattern) {
+		// We avoid using ConditionDSLBuilder because it has terrible performance
+		if (this.getSellingContext() != null) {
+			final ConditionalExpression expression = getSellingContext().getTimeCondition();
+			if (expression != null) {
+				Matcher regexMatcher = regexPattern.matcher(expression.getConditionString());
+				if (regexMatcher.find()) {
+					Long unixTimestamp = Long.valueOf(regexMatcher.group(1));
+					return new Date(unixTimestamp);
+				}
+			}
+		}
+		return null;
 	}
 
 }

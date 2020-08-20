@@ -45,6 +45,10 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-caching</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>shipping-calculation-epcommerce</artifactId>
 		</dependency>
 		<dependency>
@@ -101,11 +105,6 @@
 		<dependency>
 			<groupId>stax</groupId>
 			<artifactId>stax-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>xmlunit</groupId>
@@ -593,6 +592,7 @@
 									<exclude name="**/CustomersDTO.java" />
 									<exclude name="**/AttributePoliciesDTO.java" />
 									<exclude name="**/CustomerProfileAttributesDTO.java" />
+									<exclude name="**/UserAccountAssociationsDTO.java" />
 									<classpath refid="maven.compile.classpath" />
 								</schemagen>
 
@@ -606,6 +606,7 @@
 									<exclude name="**/CustomersDTO.java" />
 									<exclude name="**/StoreCustomerAttributesDTO.java" />
 									<exclude name="**/CustomerProfileAttributesDTO.java" />
+									<exclude name="**/UserAccountAssociationsDTO.java" />
 									<classpath refid="maven.compile.classpath" />
 								</schemagen>
 
@@ -632,6 +633,20 @@
 										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/tag"/>
 									</src>
 									<classpath refid="maven.compile.classpath"/>
+								</schemagen>
+
+								<schemagen destdir="target/classes/schema">
+									<schema namespace="" file="schemaUserAccountAssociation.xsd" />
+									<src>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general" />
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/customer" />
+									</src>
+									<exclude name="**/AttributePoliciesDTO.java" />
+									<exclude name="**/CustomerGroupsDTO.java" />
+									<exclude name="**/CustomersDTO.java" />
+									<exclude name="**/StoreCustomerAttributesDTO.java" />
+									<exclude name="**/CustomerProfileAttributesDTO.java" />
+									<classpath refid="maven.compile.classpath" />
 								</schemagen>
 							</target>
 						</configuration>

@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
+
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+	">
+
+	<bean id="purgeExpiredOAuth2TokensBatchProcessor" parent="batchTxProxyTemplate">
+		<property name="target" ref="purgeExpiredOAuth2TokensBatchProcessorTarget"/>
+	</bean>
+
+	<bean id="purgeExpiredOAuth2TokensBatchProcessorTarget" class="com.elasticpath.batch.jobs.impl.tokens.PurgeExpiredOAuth2TokensBatchProcessor">
+		<property name="persistenceEngine" ref="batchPersistenceEngine"/>
+	</bean>
+
+	<bean id="expiredOAuth2TokensCleanupJob" class="com.elasticpath.batch.jobs.impl.tokens.ExpiredOAuth2TokensCleanupJob">
+		<property name="persistenceEngine" ref="batchPersistenceEngine"/>
+		<property name="timeService" ref="timeService"/>
+		<property name="batchProcessor" ref="purgeExpiredOAuth2TokensBatchProcessor" />
+		<property name="configBatchSize">
+			<settings:setting path="COMMERCE/SYSTEM/EXPIREDOAUTHTOKENCLEANUP/batchSize"/><!-- default: 1000 -->
+		</property>
+	</bean>
+
+</beans>

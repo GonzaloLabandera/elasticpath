@@ -7,13 +7,14 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.log4j.Logger;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.cortex.dce.payment.PaymentMethodsSteps;
 import com.elasticpath.selenium.dialogs.CreatePaymentConfigurationDialog;
 import com.elasticpath.selenium.dialogs.EditPaymentConfigurationDialog;
 import com.elasticpath.selenium.domainobjects.PaymentConfiguration;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.PaymentConfigurationsResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.DBConnector;
@@ -35,13 +36,15 @@ public class PaymentConfigurationDefinition {
 	private PaymentConfigurationsResultPane paymentConfigurationsResultPane;
 	private CreatePaymentConfigurationDialog createPaymentConfigurationDialog;
 	private EditPaymentConfigurationDialog editPaymentConfigurationDialog;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
 	 */
 	public PaymentConfigurationDefinition(final PaymentConfiguration paymentConfiguration) {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
-		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		configurationActionToolbar = new ConfigurationActionToolbar(driver);
+		activityToolbar = new ActivityToolbar(driver);
 		this.paymentConfiguration = paymentConfiguration;
 	}
 

@@ -42,9 +42,12 @@ import javax.persistence.Transient;
 import com.google.common.base.Objects;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.ElementDependent;
+import org.apache.openjpa.persistence.Externalizer;
+import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.FetchAttribute;
 import org.apache.openjpa.persistence.FetchGroup;
 import org.apache.openjpa.persistence.FetchGroups;
+import org.apache.openjpa.persistence.Persistent;
 import org.apache.openjpa.persistence.jdbc.ElementForeignKey;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
@@ -60,6 +63,7 @@ import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerProfile;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.impl.AbstractLegacyEntityImpl;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 
@@ -71,9 +75,10 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 @FetchGroups({
 		@FetchGroup(name = FetchGroupConstants.CUSTOMER,
 				attributes = { @FetchAttribute(name = "profileValueMap"),
-						@FetchAttribute(name = "userId") }),
+						@FetchAttribute(name = "sharedId") }),
 		@FetchGroup(name = FetchGroupConstants.ORDER_SEARCH,
-				attributes = { @FetchAttribute(name = "userId") })
+				attributes = { @FetchAttribute(name = "profileValueMap"),
+						@FetchAttribute(name = "sharedId") })
 })
 @DataCache(enabled = false)
 @SuppressWarnings({
@@ -114,11 +119,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	 * System attribute key.
 	 */
 	public static final String ATT_KEY_CP_PREF_CURR = "CP_PREF_CURR";
-
-	/**
-	 * System attribute key.
-	 */
-	public static final String ATT_KEY_CP_ANONYMOUS_CUST = "CP_ANONYMOUS_CUST";
 
 	/**
 	 * System attribute key.
@@ -165,11 +165,36 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	 */
 	public static final String ATT_KEY_CP_TAX_EXEMPTION_ID = "CP_TAX_EXEMPTION_ID";
 
+	/**
+	 * System attribute key.
+	 */
+	public static final String ATT_KEY_AP_NAME = "AP_NAME";
+
+	/**
+	 * System attribute key.
+	 */
+	public static final String ATT_KEY_AP_BUSINESS_NUMBER = "AP_BUSINESS_NUMBER";
+
+	/**
+	 * System attribute key.
+	 */
+	public static final String ATT_KEY_AP_PHONE = "AP_PHONE";
+
+	/**
+	 * System attribute key.
+	 */
+	public static final String ATT_KEY_AP_FAX = "AP_FAX";
+
+	/**
+	 * System attribute key.
+	 */
+	public static final String ATT_KEY_AP_TAX_EXEMPTION_ID = "AP_TAX_EXEMPTION_ID";
+
 	private static final String CUSTOMER_UID = "CUSTOMER_UID";
 
 	private List<CustomerAddress> addresses = new ArrayList<>();
 
-	private String userId;
+	private String sharedId;
 
 	private Date creationDate;
 
@@ -195,11 +220,15 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	private boolean firstTimeBuyer = true;
 
+	private CustomerType customerType;
+
+	private String parentGuid;
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		if (getUserId() == null) {
-			setUserId(UUID.randomUUID().toString());
+		if (getSharedId() == null) {
+			setSharedId(UUID.randomUUID().toString());
 		}
 		if (getCreationDate() == null) {
 			setCreationDate(new Date());
@@ -211,14 +240,32 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	@Basic(optional = false)
-	@Column(name = "USER_ID", nullable = false)
-	public String getUserId() {
-		return userId;
+	@Column(name = "SHARED_ID", nullable = false)
+	public String getSharedId() {
+		return sharedId;
 	}
 
 	@Override
+	public void setSharedId(final String sharedId) {
+		this.sharedId = sharedId;
+	}
+
+	@Override
+	@Transient
+	public String getUserId() {
+		return getSharedId();
+	}
+
+	@Override
+	@Transient
 	public void setUserId(final String userId) {
-		this.userId = userId;
+		setSharedId(userId);
+	}
+
+	@Override
+	public void setUsername(final String username) {
+			initCustomerAuthentication();
+			getCustomerAuthentication().setUsername(username);
 	}
 
 	@Override
@@ -233,10 +280,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 		return getCustomerProfile().isProfileValueRequired(ATT_KEY_CP_EMAIL);
 	}
 
-	/**
-	 * {@inheritDoc} <br>
-	 * Sets the userId as the email if userId is null.
-	 */
 	@Override
 	public void setEmail(final String email) {
 		getCustomerProfile().setStringProfileValue(ATT_KEY_CP_EMAIL, email);
@@ -455,6 +498,15 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	}
 
 	@Override
+	@Transient
+	public String getPasswordSalt() {
+		if (getCustomerAuthentication() == null) {
+			return null;
+		}
+		return getCustomerAuthentication().getSalt();
+	}
+
+	@Override
 	public void setClearTextPassword(final String clearTextPassword) {
 		initCustomerAuthentication();
 		getCustomerAuthentication().setClearTextPassword(clearTextPassword);
@@ -480,20 +532,22 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	@Override
 	@Transient
 	public boolean isAnonymous() {
-		Boolean anonymous = (Boolean) getCustomerProfile().getProfileValue(ATT_KEY_CP_ANONYMOUS_CUST);
-
-		return Optional.ofNullable(anonymous).orElse(false);
+		return getCustomerType().equals(CustomerType.SINGLE_SESSION_USER);
 	}
 
 	@Override
 	@Transient
 	public boolean isRegistered() {
-		return isPersisted() && !isAnonymous();
+		return getCustomerType().equals(CustomerType.REGISTERED_USER);
 	}
 
 	@Override
 	public void setAnonymous(final boolean anonymous) {
-		getCustomerProfile().setProfileValue(ATT_KEY_CP_ANONYMOUS_CUST, anonymous);
+		if (anonymous) {
+			setCustomerType(CustomerType.SINGLE_SESSION_USER);
+		} else {
+			setCustomerType(CustomerType.REGISTERED_USER);
+		}
 	}
 
 	@Override
@@ -713,7 +767,10 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	@Override
 	@Transient
 	public String getUsername() {
-		return getUserId();
+		if (getCustomerAuthentication() == null) {
+			return null;
+		}
+		return getCustomerAuthentication().getUsername();
 	}
 
 	@Override
@@ -769,12 +826,14 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	 *
 	 * @param attributes the attribute metadata
 	 */
+	@Override
 	public void setCustomerProfileAttributes(final Map<String, Attribute> attributes) {
 		((CustomerProfileImpl) getCustomerProfile()).setCustomerProfileAttributeMap(attributes);
 	}
 
 	@Override
-	@OneToOne(targetEntity = CustomerAuthenticationImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+	@OneToOne(targetEntity = CustomerAuthenticationImpl.class, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH,
+			CascadeType.DETACH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "AUTHENTICATION_UID")
 	public CustomerAuthentication getCustomerAuthentication() {
 		return customerAuthentication;
@@ -845,7 +904,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	@Basic
-	@Column(name = "STORECODE", nullable = false)
+	@Column(name = "STORECODE")
 	public String getStoreCode() {
 		return storeCode;
 	}
@@ -941,5 +1000,84 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 		this.firstTimeBuyer = firstTimeBuyer;
 	}
 
+	@Override
+	@Persistent
+	@Column(name = "CUSTOMER_TYPE")
+	@Externalizer("getName")
+	@Factory("valueOf")
+	public CustomerType getCustomerType() {
+		return customerType;
+	}
 
+	@Override
+	public void setCustomerType(final CustomerType customerType) {
+		this.customerType = customerType;
+	}
+
+	@Override
+	@Transient
+	public String getBusinessName() {
+		return getCustomerProfile().getStringProfileValue(ATT_KEY_AP_NAME);
+	}
+
+	@Override
+	public void setBusinessName(final String businessName) {
+		getCustomerProfile().setStringProfileValue(ATT_KEY_AP_NAME, businessName);
+	}
+
+	@Override
+	@Transient
+	public String getAccountBusinessNumber() {
+		return getCustomerProfile().getStringProfileValue(ATT_KEY_AP_BUSINESS_NUMBER);
+	}
+
+	@Override
+	public void setAccountBusinessNumber(final String businessNumber) {
+		getCustomerProfile().setStringProfileValue(ATT_KEY_AP_BUSINESS_NUMBER, businessNumber);
+	}
+
+	@Override
+	@Transient
+	public String getAccountPhoneNumber() {
+		return getCustomerProfile().getStringProfileValue(ATT_KEY_AP_PHONE);
+	}
+
+	@Override
+	public void setAccountPhoneNumber(final String phoneNumber) {
+		getCustomerProfile().setStringProfileValue(ATT_KEY_AP_PHONE, phoneNumber);
+	}
+
+	@Override
+	@Transient
+	public String getAccountFaxNumber() {
+		return getCustomerProfile().getStringProfileValue(ATT_KEY_AP_FAX);
+	}
+
+	@Override
+	public void setAccountFaxNumber(final String faxNumber) {
+		getCustomerProfile().setStringProfileValue(ATT_KEY_AP_FAX, faxNumber);
+	}
+
+	@Override
+	@Transient
+	public String getAccountTaxExemptionId() {
+		return getCustomerProfile().getStringProfileValue(ATT_KEY_AP_TAX_EXEMPTION_ID);
+	}
+
+	@Override
+	public void setAccountTaxExemptionId(final String taxExemptionId) {
+		getCustomerProfile().setStringProfileValue(ATT_KEY_AP_TAX_EXEMPTION_ID, taxExemptionId);
+	}
+
+	@Override
+	@Basic
+	@Column(name = "PARENT_CUSTOMER_GUID")
+	public String getParentGuid() {
+		return this.parentGuid;
+	}
+
+	@Override
+	public void setParentGuid(final String parentGuid) {
+		this.parentGuid = parentGuid;
+	}
 }

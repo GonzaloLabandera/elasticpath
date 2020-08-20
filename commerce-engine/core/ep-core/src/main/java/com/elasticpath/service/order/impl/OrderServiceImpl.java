@@ -14,6 +14,7 @@ import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_API
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_API_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SEARCH_CRITERIA;
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SERVICE;
+import static com.elasticpath.persistence.api.PersistenceConstants.LIST_PARAMETER_NAME;
 import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SKU;
 import static com.elasticpath.persistence.support.FetchFieldConstants.SHIPMENT_ORDER_SKUS_INTERNAL;
 
@@ -46,6 +47,7 @@ import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.core.messaging.order.OrderEventType;
 import com.elasticpath.domain.catalog.InventoryAudit;
 import com.elasticpath.domain.cmuser.CmUser;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.event.EventOriginatorType;
@@ -113,9 +115,6 @@ import com.elasticpath.service.tax.TaxOperationService;
  */
 @SuppressWarnings({"PMD.ExcessiveClassLength", "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.GodClass"})
 public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implements OrderService {
-
-	private static final long MINUTE_IN_MS = 60L * 1000L; // 60 sec * 1000 msec
-	private static final String LIST_PARAMETER_NAME = "list";
 
 	private static final Logger LOG = Logger.getLogger(OrderServiceImpl.class);
 
@@ -371,6 +370,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 		FetchGroupLoadTuner loadTuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_SEARCH);
+		loadTuner.addFetchGroup(FetchGroupConstants.ATTRIBUTE_VALUES);
 
 		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
 
@@ -586,38 +586,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	}
 
 	@Override
-	public void updateOrderShipmentStatus() {
-		final long startTime = System.currentTimeMillis();
-		LOG.debug("Start release shipments quartz job at: " + new Date(startTime));
-
-		sanityCheck();
-
-		List<OrderStatus> orderStatusList = new ArrayList<>();
-		orderStatusList.add(OrderStatus.IN_PROGRESS);
-		orderStatusList.add(OrderStatus.PARTIALLY_SHIPPED);
-
-		Map<String, Object> parameters = new HashMap<>();
-		parameters.put("listOrderStatus", orderStatusList);
-		parameters.put("shipmentStatus", OrderShipmentStatus.INVENTORY_ASSIGNED);
-
-		final List<Order> results = getPersistenceEngine().retrieveByNamedQuery("ORDERS_BY_ORDER_STATUS_AND_SHIPMENT_STATUS", parameters);
-
-		for (final Order order : results) {
-			releaseReleasableShipments(order);
-		}
-
-		LOG.debug("Release shipments quartz job completed in (ms): " + (System.currentTimeMillis() - startTime));
-	}
-
-	@Override
 	public void releaseReleasableShipments(final Order order) {
-		final long currentTime = timeService.getCurrentTime().getTime();
 		final EventOriginator systemEventOriginator = getSystemEventOriginator();
 
 		final List<PhysicalOrderShipment> shipments = order.getPhysicalShipments();
-		final Store store = getStore(order);
-		final long pickTimeStamp = currentTime - store.getWarehouse().getPickDelay() * MINUTE_IN_MS;
-		final Date pickDate = new Date(pickTimeStamp);
+		final Date pickDate = storeService.calculateCurrentPickDelayTimestamp(order.getStoreCode());
 
 		for (final OrderShipment shipment : shipments) {
 			if (shipment.getCreatedDate().before(pickDate)
@@ -1175,6 +1148,22 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			throw new EpServiceException("Inconsistent data -- duplicate order numbers exist -- " + orderNumber);
 		}
 		return order;
+	}
+
+	@Override
+	public Customer getCustomerByOrderNumber(final String orderNumber) {
+		sanityCheck();
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
+
+		List<Customer> results = getPersistenceEngineWithDefaultLoadTuner().retrieveByNamedQuery("CUSTOMER_BY_ORDERNUMBER", orderNumber);
+
+		Customer customer = null;
+		if (results.size() == 1) {
+			customer = results.get(0);
+		} else if (results.size() > 1) {
+			throw new EpServiceException("Inconsistent data -- duplicate order numbers exist -- " + orderNumber);
+		}
+		return customer;
 	}
 
 	/**

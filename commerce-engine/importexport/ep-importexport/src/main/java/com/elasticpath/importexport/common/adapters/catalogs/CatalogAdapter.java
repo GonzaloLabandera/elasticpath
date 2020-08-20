@@ -26,7 +26,7 @@ import com.elasticpath.importexport.common.util.Message;
  */
 public class CatalogAdapter extends AbstractDomainAdapterImpl<Catalog, CatalogDTO> {
 
-	private static final String UNSUPPORTED_LOCALE_MESSAGE = "IE-10000";
+	private static final String UNSUPPORTED_LOCALE_MESSAGE = "IE-10011";
 	private static final Logger LOG = Logger.getLogger(CatalogAdapter.class);
 
 	@Override

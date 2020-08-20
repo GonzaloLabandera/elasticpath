@@ -278,27 +278,6 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Assert that a CartOrder can be removed and its address and shopping cart are not removed.
-	 */
-	@Test
-	public void testRemoveCartOrder() {
-		createAndSaveCartOrder();
-		ShoppingCart shoppingCart = loadShoppingCart();
-		assertThat(shoppingCart).isNotNull();
-
-		cartOrderService.removeIfExistsByShoppingCart(shoppingCart);
-		assertThat(cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid)).isNull();
-
-		assertThat(loadShoppingCart()).isNotNull();
-		assertThat(addressDao.findByGuid(billingAddressGuid))
-			.as("Billing address should not have been deleted")
-			.isNotNull();
-		assertThat(addressDao.findByGuid(shippingAddressGuid))
-			.as("Shipping address should not have been deleted")
-			.isNotNull();
-	}
-
-	/**
 	 * Assert that an Address can be removed and the CartOrder and ShoppingCart remain.
 	 */
 	@Test
@@ -336,29 +315,6 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		createAndSaveCartOrder();
 		CartOrder cartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid);
 		cartOrder.setShoppingCartGuid(null);
-	}
-
-	/**
-	 * Asserts that a removed cart order will not exist.
-	 */
-	@Test
-	public void testRemoveCartOrderByShoppingCartGuid() {
-		createAndSaveCartOrder();
-		ShoppingCart shoppingCart = loadShoppingCart();
-		assertThat(shoppingCart).isNotNull();
-		cartOrderService.removeIfExistsByShoppingCart(shoppingCart);
-		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
-		assertThat(cartOrder).isNull();
-	}
-
-	/**
-	 * Asserts that the {@link CartOrderService#removeIfExistsByShoppingCart(ShoppingCart)} will not fail on a non-existing cart order.
-	 */
-	@Test
-	public void testRemoveNonExistingCartOrderByShoppingCartGuid() {
-		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
-		assertThat(cartOrder).isNull();
-		cartOrderService.removeIfExistsByShoppingCart(cart);
 	}
 
 	/**

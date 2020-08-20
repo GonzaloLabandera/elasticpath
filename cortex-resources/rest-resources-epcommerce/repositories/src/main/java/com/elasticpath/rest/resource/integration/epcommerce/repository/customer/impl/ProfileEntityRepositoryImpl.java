@@ -20,6 +20,7 @@ import org.osgi.service.component.annotations.Reference;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.cache.CacheResult;
@@ -81,7 +82,7 @@ public class ProfileEntityRepositoryImpl<E extends ProfileEntity, I extends Prof
 	 * @return the updated customer
 	 */
 	protected Customer updateCustomerData(final ProfileEntity profileEntity, final ProfileIdentifier profileIdentifier, final Customer customer) {
-		final Map<String, Attribute> attributeMap = attributeService.getCustomerProfileAttributesMap();
+		final Map<String, Attribute> attributeMap = attributeService.getCustomerProfileAttributesMap(AttributeUsageImpl.USER_PROFILE_USAGE);
 
 		// replace map keys with internal keys
 		Map<String, String> dynamicProperties = Maps.newHashMap();

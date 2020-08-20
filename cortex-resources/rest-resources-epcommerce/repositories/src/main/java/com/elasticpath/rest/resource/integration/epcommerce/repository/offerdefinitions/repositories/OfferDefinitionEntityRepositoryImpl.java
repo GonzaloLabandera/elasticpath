@@ -33,8 +33,9 @@ public class OfferDefinitionEntityRepositoryImpl<E extends OfferDefinitionEntity
 	public Single<OfferDefinitionEntity> findOne(final OfferDefinitionIdentifier identifier) {
 		final Map<String, String> offerIdMap = identifier.getOfferId().getValue();
 		final String productCode = offerIdMap.get(SearchRepositoryImpl.PRODUCT_GUID_KEY);
-		return storeProductRepository.findByGuid(productCode)
-				.map(product -> conversionService.convert(product, OfferDefinitionEntity.class));
+		final String scope = identifier.getScope().getValue();
+		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(scope, productCode)
+				.map(product -> conversionService.convert(product.getWrappedProduct(), OfferDefinitionEntity.class));
 	}
 
 	@Reference

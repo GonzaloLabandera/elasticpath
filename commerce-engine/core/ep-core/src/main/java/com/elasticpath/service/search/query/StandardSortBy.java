@@ -104,10 +104,16 @@ public class StandardSortBy extends AbstractExtensibleEnum<SortBy> implements So
 	public static final int CREATED_DATE_ORDINAL = 43;
 	/** Ordinal constant for STATE. */
 	public static final int STATE_ORDINAL = 44;
-	/** Ordinal constant for USER ID. */
-	public static final int USER_ID_ORDINAL = 45;
+	/** Ordinal constant for SHARED ID. */
+	public static final int SHARED_ID_ORDINAL = 45;
 	/** Ordinal constant for ATTRIBUTE. */
 	public static final int ATTRIBUTE_ORDINAL = 46;
+	/** Ordinal constant for USERNAME. */
+	public static final int USERNAME_ORDINAL = 47;
+	/** Ordinal constant for BUSINESS_NAME. */
+	public static final int BUSINESS_NAME_ORDINAL = 48;
+	/** Ordinal constant for BUSINESS_NUMBER. */
+	public static final int BUSINESS_NUMBER_ORDINAL = 49;
 
 	/** Sorts via highest match (relevance). */
 	public static final SortBy RELEVANCE = new StandardSortBy(RELEVANCE_ORDINAL, "RELEVANCE", "relevance");
@@ -252,11 +258,20 @@ public class StandardSortBy extends AbstractExtensibleEnum<SortBy> implements So
 	/** State Code Name. */
 	public static final SortBy STATE = new StandardSortBy(STATE_ORDINAL, "STATE", "stateCodeName");
 
-	/** User Id. */
-	public static final SortBy USER_ID = new StandardSortBy(USER_ID_ORDINAL, "USER_ID", "userId");
+	/** Shared Id. */
+	public static final SortBy SHARED_ID = new StandardSortBy(SHARED_ID_ORDINAL, "SHARED_ID", "sharedId");
 
 	/** Attribute. */
 	public static final SortBy ATTRIBUTE = new StandardSortBy(ATTRIBUTE_ORDINAL, "ATTRIBUTE", "attribute");
+
+	/** User Name. */
+	public static final SortBy USERNAME = new StandardSortBy(USERNAME_ORDINAL, "USERNAME", "username");
+
+	/** Business name. */
+	public static final SortBy BUSINESS_NAME = new StandardSortBy(BUSINESS_NAME_ORDINAL, "BUSINESS_NAME", "businessName");
+
+	/** Business number. */
+	public static final SortBy BUSINESS_NUMBER = new StandardSortBy(BUSINESS_NUMBER_ORDINAL, "BUSINESS_NUMBER", "businessNumber");
 
 	private String sortString;
 

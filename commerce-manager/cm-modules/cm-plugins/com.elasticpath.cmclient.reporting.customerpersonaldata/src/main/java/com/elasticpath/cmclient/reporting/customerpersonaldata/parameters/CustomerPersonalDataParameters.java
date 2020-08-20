@@ -19,7 +19,7 @@ public class CustomerPersonalDataParameters implements ReportParameters {
 	private String store;
 	private Date startDate;
 	private Date endDate;
-	private String userId;
+	private String sharedId;
 	private DateFormat dateFormat;
 
 	public String getStore() {
@@ -45,12 +45,13 @@ public class CustomerPersonalDataParameters implements ReportParameters {
 	public void setEndDate(final Date endDate) {
 		this.endDate = endDate;
 	}
-	public String getUserId() {
-		return userId;
+
+	public String getSharedId() {
+		return sharedId;
 	}
 
-	public void setUserId(final String userId) {
-		this.userId = userId;
+	public void setSharedId(final String sharedId) {
+		this.sharedId = sharedId;
 	}
 
 	public long getStoreUidPk() {

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.FlushModeType;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -17,8 +16,6 @@ import org.apache.log4j.Logger;
 import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.event.AbstractLifecycleListener;
 import org.apache.openjpa.event.LifecycleEvent;
-import org.apache.openjpa.persistence.OpenJPAEntityManager;
-import org.apache.openjpa.persistence.OpenJPAPersistence;
 
 import com.elasticpath.commons.ThreadLocalMap;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -27,7 +24,6 @@ import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
 import com.elasticpath.domain.objectgroup.BusinessObjectMetadata;
 import com.elasticpath.persistence.api.ChangeType;
-import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.service.changeset.ChangeSetMemberAction;
 import com.elasticpath.service.changeset.ChangeSetPolicy;
 import com.elasticpath.service.changeset.ChangeSetService;
@@ -49,7 +45,6 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 
 	private ChangeSetMemberDao changeSetMemberDao;
 	private BusinessObjectGroupDao businessObjectGroupDao;
-	private JpaPersistenceEngine persistenceEngine;
 	private ThreadLocalMap<String, Object> metadataMap;
 	private TimeService timeService;
 	private ChangeSetService changeSetService;
@@ -82,6 +77,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 		if (actionMetadata == null) {
 			// no cached meta data exists for the object descriptor
 			actionMetadata = createAndPopulateMetadata(KEY_ACTION, changeType, objectDescriptor);
+			getActionMetadataMap().put(objectDescriptor, actionMetadata);
 			actionChanged = true;
 		} else {
 			// see if the cached meta data action needs updating based on the new action
@@ -104,7 +100,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 		}
 
 		if (actionChanged) {
-			getChangeSetMemberDao().addOrUpdateObjectMetadata(actionMetadata);
+			getActionMetadataMap().put(objectDescriptor, getChangeSetMemberDao().addOrUpdateObjectMetadata(actionMetadata));
 		}
 	}
 
@@ -115,6 +111,12 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	protected void addObjectToChangeSet(final BusinessObjectDescriptor objectDescriptor) {
 		if (objectDescriptor != null && getMetadataMap().containsKey("addToChangeSetFlag")) {
+
+			if (getActionMetadataMap().containsKey(objectDescriptor)) {
+				// already processed, no need to reprocess this objectDescriptor for this thread/transaction
+				// does this cause us not to properly store the action metadata?
+				return;
+			}
 
 			Map<String, String> changeSetMetaDataMap = new HashMap<>();
 
@@ -184,28 +186,6 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	boolean isListenerActive() {
 		return StringUtils.isNotEmpty(getChangeSetGuid())
 			&& ObjectUtils.equals("stage2", getMetadataMap().get("activeImportStage"));
-	}
-
-	/**
-	 * Lazy loads to avoid cycles in the spring bean creation graph.
-	 *
-	 * @return the JPA Persistence Engine
-	 */
-	protected JpaPersistenceEngine getPersistenceEngine() {
-		if (persistenceEngine == null) {
-			persistenceEngine = getBeanFactory().getSingletonBean(ContextIdNames.PERSISTENCE_ENGINE, JpaPersistenceEngine.class);
-		}
-
-		return persistenceEngine;
-	}
-
-	/**
-	 * Get the OpenJPA Entity Manager.
-	 *
-	 * @return an <code>OpenJPAEntityManager</code> instance
-	 */
-	protected OpenJPAEntityManager getOpenJPAEntityManager() {
-		return OpenJPAPersistence.cast(getPersistenceEngine().getEntityManager());
 	}
 
 	/**
@@ -338,23 +318,11 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	protected void processChangeSetData(final BusinessObjectDescriptor objectDescriptor, final ChangeType changeType) {
 		if (objectDescriptor != null) {
-			// switch off temporarily the auto commit only if necessary, e.g. csv import process doesn't use AUTO,
-			// in order to avoid issues with committing data before everything has been put together
-			FlushModeType currentFlushMode = getOpenJPAEntityManager().getFlushMode();
-			boolean resetFlushMode = false;
-			if (currentFlushMode != FlushModeType.COMMIT) {
-				getOpenJPAEntityManager().setFlushMode(FlushModeType.COMMIT);
-				resetFlushMode = true;
-			}
 
 			// in case that step is enabled - add the object to the change set
 			addObjectToChangeSet(objectDescriptor);
 			addOrUpdateMetadata(objectDescriptor, changeType);
 
-			// enable again the auto commit if necessary
-			if (resetFlushMode) {
-				getOpenJPAEntityManager().setFlushMode(currentFlushMode);
-			}
 		}
 	}
 

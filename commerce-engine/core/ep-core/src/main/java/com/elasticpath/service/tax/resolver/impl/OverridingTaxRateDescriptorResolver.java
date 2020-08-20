@@ -12,6 +12,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.order.TaxJournalRecord;
+import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.plugin.tax.common.TaxContextIdNames;
 import com.elasticpath.plugin.tax.domain.TaxDocumentId;
 import com.elasticpath.plugin.tax.domain.TaxOperationContext;
@@ -23,9 +24,9 @@ import com.elasticpath.plugin.tax.rate.TaxRateDescriptorResult;
 import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptor;
 import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptorResult;
 import com.elasticpath.plugin.tax.rate.impl.TaxRateApplier;
-import com.elasticpath.plugin.tax.resolver.TaxRateDescriptorResolver;
 import com.elasticpath.service.tax.TaxDocumentService;
 import com.elasticpath.service.tax.impl.OverridingTaxRateDescriptorResult;
+import com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver;
 
 /**
  * A {@link TaxRateDescriptorResolver} implementation that retrieves the tax rates for a {@link TaxableItem}
@@ -44,8 +45,10 @@ public class OverridingTaxRateDescriptorResolver implements TaxRateDescriptorRes
 	private BeanFactory beanFactory;
 
 	@Override
-	public TaxRateDescriptorResult findTaxRateDescriptors(final TaxableItem taxableItem, final TaxableItemContainer container) {
-		TaxRateDescriptorResult taxRateDescriptorResult = delegate.findTaxRateDescriptors(taxableItem, container);
+	public TaxRateDescriptorResult findTaxRateDescriptors(final TaxableItem taxableItem,
+														  final TaxableItemContainer container,
+														  final TaxJurisdiction taxJurisdiction) {
+		TaxRateDescriptorResult taxRateDescriptorResult = delegate.findTaxRateDescriptors(taxableItem, container, taxJurisdiction);
 
 		final TaxOperationContext taxOperationContext = container.getTaxOperationContext();
 
@@ -106,8 +109,8 @@ public class OverridingTaxRateDescriptorResolver implements TaxRateDescriptorRes
 	}
 
 	@Override
-	public TaxRateDescriptorResult findTaxJurisdiction(final TaxableItemContainer container) {
-		return delegate.findTaxJurisdiction(container);
+	public TaxRateDescriptorResult findTaxRateDescriptorResult(final TaxableItemContainer container, final TaxJurisdiction taxJurisdiction) {
+		return delegate.findTaxRateDescriptorResult(container, taxJurisdiction);
 	}
 
 	private TaxRateApplier createNewTaxRateApplier(final boolean isTaxInclusive) {

@@ -7,7 +7,7 @@ import cucumber.api.java.en.Then;
 import com.elasticpath.selenium.dialogs.SignInDialog;
 import com.elasticpath.selenium.domainobjects.DST;
 import com.elasticpath.selenium.framework.util.PropertyManager;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 
 /**
  * Sign In steps.
@@ -21,7 +21,7 @@ public class SignInDefinition {
 	 * Constructor.
 	 */
 	public SignInDefinition() {
-		signInDialog = new SignInDialog(SetUp.getDriver());
+		signInDialog = new SignInDialog(SeleniumDriverSetup.getDriver());
 		adminID = PropertyManager.getInstance().getProperty("admin.id");
 		adminPassword = PropertyManager.getInstance().getProperty("cm.password");
 	}

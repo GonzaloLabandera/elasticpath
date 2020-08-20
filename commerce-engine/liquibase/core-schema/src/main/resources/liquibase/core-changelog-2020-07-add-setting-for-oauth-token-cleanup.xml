@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-remove-tcustomerdeleted-table.xml">
+
+	<changeSet id="2020-07-add-setting-for-oauth-token-cleanup" author="elasticpath" failOnError="true">
+		<comment>[SUP-521] Improve cleanupExpiredOAuth2Tokens batch job.</comment>
+
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="205" />
+			<column name="PATH" value="COMMERCE/SYSTEM/EXPIREDOAUTHTOKENCLEANUP/batchSize" />
+			<column name="VALUE_TYPE" value="Integer" />
+			<column name="MAX_OVERRIDE_VALUES" value="1" />
+			<column name="DEFAULT_VALUE" value="1000" />
+			<column name="DESCRIPTION" value="The maximum number of expired tokens to cleanup in one transaction." />
+		</insert>
+	</changeSet>
+</databaseChangeLog>

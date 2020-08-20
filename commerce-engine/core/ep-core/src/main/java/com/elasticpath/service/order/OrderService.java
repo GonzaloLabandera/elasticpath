@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.elasticpath.domain.cmuser.CmUser;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
@@ -196,11 +197,6 @@ public interface OrderService extends EpPersistenceService {
 						   EventOriginator eventOriginator);
 
 	/**
-	 * Called by quartz job to release order shipments after a preconfigured period after order has been placed.
-	 */
-	void updateOrderShipmentStatus();
-
-	/**
 	 * <p>Releases all shipments within the given order that are in a releasable state.</p>
 	 * <p>A Shipment is considered releasable if
 	 * <ul>
@@ -363,6 +359,14 @@ public interface OrderService extends EpPersistenceService {
 	 * @return the updated order
 	 */
 	Order cancelOrder(Order order);
+
+	/**
+	 * Get customer by order number.
+	 *
+	 * @param orderNumber the order number
+	 * @return the customer
+	 */
+	Customer getCustomerByOrderNumber(String orderNumber);
 
 	/**
 	 * Put a hold on an order.

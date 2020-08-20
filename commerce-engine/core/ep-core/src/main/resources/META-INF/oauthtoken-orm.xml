@@ -17,11 +17,4 @@
 			</query>
 		</named-query>
 
-		<named-query name="REMOVE_OAUTHACCESSTOKEN_BY_DATE">
-			<query>
-				DELETE FROM OAuth2AccessTokenMementoImpl AS access
-				WHERE access.expiryDate &lt; ?1
-			</query>
-		</named-query>
-
 </entity-mappings>

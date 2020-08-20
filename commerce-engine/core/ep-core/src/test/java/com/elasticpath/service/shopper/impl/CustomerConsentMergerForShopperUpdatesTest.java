@@ -16,6 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
 
@@ -47,7 +48,7 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 	@Test
 	public void testCustomerConsentMergeWhenTransitioningFromAnonymousToRegistered() {
 		final String anonymousCustomerGuid = MYSTERY_MAN + CUSTOMER;
-		Shopper anonymousShopper = createShopper(anonymousCustomerGuid, true);
+		Shopper anonymousShopper = createShopper(anonymousCustomerGuid, CustomerType.SINGLE_SESSION_USER);
 
 		Shopper registeredShopper = createRegisteredCustomerWithConsents();
 
@@ -61,7 +62,7 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 	@Test
 	public void testCustomerConsentMergeWhenTransitioningFromAnonymousToRegisteredWithoutExistingConsents() {
 		final String anonymousCustomerGuid = MYSTERY_MAN + CUSTOMER;
-		Shopper anonymousShopper = createShopper(anonymousCustomerGuid, true);
+		Shopper anonymousShopper = createShopper(anonymousCustomerGuid, CustomerType.SINGLE_SESSION_USER);
 
 		Shopper registeredShopper = createRegisteredCustomerWithoutConsents();
 
@@ -75,7 +76,7 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 	@Test
 	public void testNoCustomerConsentMergeWhenInvalidShopperHasNoCustomerConsents() {
 		final String anonymousCustomerGuid = MYSTERY_MAN + CUSTOMER;
-		Shopper anonymousShopper = createShopper(anonymousCustomerGuid, true);
+		Shopper anonymousShopper = createShopper(anonymousCustomerGuid, CustomerType.SINGLE_SESSION_USER);
 
 		Shopper registeredShopper = createRegisteredCustomerWithConsents();
 		when(customerSession.getShopper()).thenReturn(registeredShopper);
@@ -88,7 +89,7 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 	@Test
 	public void testNoCustomerConsentMergeWhenSwithingFromRegisteredToRegisteredCustomer() {
 		final String originalRegisteredCustomerGuid = REGULAR_JANE + CUSTOMER;
-		Shopper anonymousShopper = createShopper(originalRegisteredCustomerGuid, false);
+		Shopper anonymousShopper = createShopper(originalRegisteredCustomerGuid, CustomerType.REGISTERED_USER);
 
 		Shopper registeredShopper = createRegisteredCustomerWithConsents();
 
@@ -98,12 +99,12 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 	}
 
 
-	private Shopper createShopper(final String customerGuid, final boolean anonymous) {
+	private Shopper createShopper(final String customerGuid, final CustomerType customerType) {
 		final Shopper shopper = mock(Shopper.class, customerGuid + "Shopper");
 		final Customer customer = mock(Customer.class, customerGuid + CUSTOMER);
 
 		when(shopper.getCustomer()).thenReturn(customer);
-		when(customer.isAnonymous()).thenReturn(anonymous);
+		when(customer.getCustomerType()).thenReturn(customerType);
 		when(customer.getGuid()).thenReturn(customerGuid);
 
 		return shopper;
@@ -111,12 +112,12 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 
 	private Shopper createRegisteredCustomerWithConsents() {
 		final String registeredCustomerGuid = REGULAR_JOE + CUSTOMER;
-		return createShopper(registeredCustomerGuid, false);
+		return createShopper(registeredCustomerGuid, CustomerType.REGISTERED_USER);
 	}
 
 	private Shopper createRegisteredCustomerWithoutConsents() {
 		final String registeredCustomerGuid = REGULAR_JOE + CUSTOMER;
-		return createShopper(registeredCustomerGuid, false);
+		return createShopper(registeredCustomerGuid, CustomerType.REGISTERED_USER);
 	}
 
 }

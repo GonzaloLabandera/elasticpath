@@ -6,6 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.offer.im
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -24,6 +25,7 @@ import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
+import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
 import com.elasticpath.rest.definition.base.ScopeIdentifierPart;
 import com.elasticpath.rest.definition.items.ItemIdIdentifierPart;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
@@ -31,6 +33,7 @@ import com.elasticpath.rest.definition.offers.OfferComponentsIdentifier;
 import com.elasticpath.rest.definition.offers.OfferIdIdentifierPart;
 import com.elasticpath.rest.definition.offers.OfferIdentifier;
 import com.elasticpath.rest.id.ResourceIdentifier;
+import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl.SearchRepositoryImpl;
@@ -38,10 +41,14 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.search.im
 @RunWith(MockitoJUnitRunner.class)
 public class OfferComponentLinksRepositoryImplTest {
 
+	private static final StringIdentifier SCOPE = ScopeIdentifierPart.of("hello");
+
 	@Mock
 	private StoreProductRepository storeProductRepository;
+
 	@Mock
 	private ItemRepository itemRepository;
+
 	@InjectMocks
 	private OfferComponentLinksRepositoryImpl<OfferComponentsIdentifier, ResourceIdentifier> offerComponentLinksRepository;
 
@@ -55,13 +62,14 @@ public class OfferComponentLinksRepositoryImplTest {
 		when(constituent.getConstituent()).thenReturn(constituentItem);
 		ProductBundleImpl productBundle = Mockito.mock(ProductBundleImpl.class);
 		when(productBundle.getConstituents()).thenReturn(Collections.singletonList(constituent));
-		when(storeProductRepository.findByGuid(anyString())).thenReturn(Single.just(productBundle));
+		when(storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(eq(SCOPE.getValue()), anyString()))
+				.thenReturn(Single.just(new StoreProductImpl(productBundle)));
 		when(itemRepository.asProductBundle(any())).thenReturn(Single.just(productBundle));
 		offerComponentLinksRepository.getElements(OfferComponentsIdentifier.builder()
-					.withOffer(OfferIdentifier.builder()
-							.withOfferId(OfferIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id"))
-							.withScope(ScopeIdentifierPart.of("hello")).build())
-					.build())
+				.withOffer(OfferIdentifier.builder()
+						.withOfferId(OfferIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id"))
+						.withScope(SCOPE).build())
+				.build())
 				.map(identifier -> ((OfferIdentifier) identifier).getOfferId().getValue().get(SearchRepositoryImpl.PRODUCT_GUID_KEY))
 				.test()
 				.assertValue("guid");
@@ -76,13 +84,14 @@ public class OfferComponentLinksRepositoryImplTest {
 		when(constituent.getConstituent()).thenReturn(constituentItem);
 		ProductBundleImpl productBundle = Mockito.mock(ProductBundleImpl.class);
 		when(productBundle.getConstituents()).thenReturn(Collections.singletonList(constituent));
-		when(storeProductRepository.findByGuid(anyString())).thenReturn(Single.just(productBundle));
+		when(storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(eq(SCOPE.getValue()), anyString()))
+				.thenReturn(Single.just(new StoreProductImpl(productBundle)));
 		when(itemRepository.asProductBundle(any())).thenReturn(Single.just(productBundle));
 		offerComponentLinksRepository.getElements(OfferComponentsIdentifier.builder()
-					.withOffer(OfferIdentifier.builder()
-							.withOfferId(ItemIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id"))
-							.withScope(ScopeIdentifierPart.of("hello")).build())
-					.build())
+				.withOffer(OfferIdentifier.builder()
+						.withOfferId(ItemIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id"))
+						.withScope(SCOPE).build())
+				.build())
 				.map(identifier -> ((ItemIdentifier) identifier).getItemId().getValue().get(ItemRepository.SKU_CODE_KEY))
 				.test()
 				.assertValue("sku");

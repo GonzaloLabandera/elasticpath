@@ -6,6 +6,7 @@ package com.elasticpath.commons.util;
 import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -34,6 +35,10 @@ public class EhcacheConfigurationLoader {
 			return null;
 		}
 
+		if (pathname.startsWith("classpath:")) {
+			return getClasspathResource(pathname);
+		}
+
 		String path = pathname
 				.replace("file://", "")
 				.replace("${user.home}", System.getProperty("user.home"));
@@ -43,6 +48,14 @@ public class EhcacheConfigurationLoader {
 			throw new EpSystemException("EhCache configuration file not found: " + pathname);
 		}
 		return new FileSystemResource(file);
+	}
+
+	private Resource getClasspathResource(final String pathname) {
+		final ClassPathResource classPathResource = new ClassPathResource(pathname.replace("classpath:", ""));
+		if (!classPathResource.exists()) {
+			throw new EpSystemException("EhCache configuration file not found: " + pathname);
+		}
+		return classPathResource;
 	}
 
 	public void setPathname(final String pathname) {

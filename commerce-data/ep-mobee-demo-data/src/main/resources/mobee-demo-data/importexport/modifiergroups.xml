@@ -296,6 +296,7 @@
 				<displayname>
 					<value language="en">Name</value>
 				</displayname>
+				<defaultCartValue>default</defaultCartValue>
 				<options/>
 			</modifierfield>
 		</modifierfields>

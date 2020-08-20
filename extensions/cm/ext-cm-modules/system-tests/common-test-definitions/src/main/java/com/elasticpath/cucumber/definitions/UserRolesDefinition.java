@@ -11,8 +11,8 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.domainobjects.KeyValue;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.UserRolesResultPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.Utility;
@@ -34,7 +34,7 @@ public class UserRolesDefinition {
 	 * Constructor.
 	 */
 	public UserRolesDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
+		configurationActionToolbar = new ConfigurationActionToolbar(SeleniumDriverSetup.getDriver());
 	}
 
 	/**

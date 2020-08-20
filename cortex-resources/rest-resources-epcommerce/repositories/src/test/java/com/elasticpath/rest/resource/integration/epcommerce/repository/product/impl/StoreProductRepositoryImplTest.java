@@ -3,13 +3,11 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.product.impl;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -39,16 +37,15 @@ import com.elasticpath.service.catalogview.StoreProductService;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class StoreProductRepositoryImplTest {
-	private static final String PRODUCT_GUID_1 = "product_code_1";
-	private static final String SCOPE = "scope";
-	private static final long PRODUCT_UID_1 = 1L;
-	private static final String ERROR_STORE_PRODUCT_NOT_FOUND = "Offer not found in store";
-	private static final String ERROR_PRODUCT_NOT_FOUND = "Offer not found";
+	private static final String SCOPE = "MOBEE";
+	private static final long PRODUCT_UID = 1L;
+	private static final String PRODUCT_GUID = "product_code_1";
+	private static final String ERROR_STORE_PRODUCT_NOT_FOUND = "Offer with GUID " + PRODUCT_GUID + " was not found in store " + SCOPE + ".";
 	private static final String SKU_GUID = "sku guid";
 
-	private final Product product1 = new ProductImpl();
-	private final Store store = new StoreImpl();
-	private final StoreProduct storeProduct = new StoreProductImpl(product1);
+	private Product product;
+	private Store store;
+	private StoreProduct storeProduct;
 
 	@Mock
 	private ProductLookup mockProductLookup;
@@ -70,141 +67,97 @@ public class StoreProductRepositoryImplTest {
 
 	@Before
 	public void initialize() {
+		product = new ProductImpl();
+		product.setUidPk(PRODUCT_UID);
+		product.setGuid(PRODUCT_GUID);
+		when(mockProductLookup.findByGuid(product.getGuid())).thenReturn(product);
+		when(mockProductLookup.findByUids(singletonList(PRODUCT_UID))).thenReturn(singletonList(product));
+
+		when(mockProductSku.getProduct()).thenReturn(product);
+		when(mockProductSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID)).thenReturn(Single.just(mockProductSku));
+
+		store = new StoreImpl();
+		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
+
+		storeProduct = new StoreProductImpl(product);
+		((StoreProductImpl) storeProduct).setProductDisplayable(true);
+		when(mockStoreProductService.getProductForStore(product, store)).thenReturn(storeProduct);
+
 		storeProductRepository = new StoreProductRepositoryImpl(mockStoreRepository, mockProductLookup, mockStoreProductService,
 				mockProductSkuRepository, reactiveAdapter);
 	}
 
 	@Test
 	public void testFindStoreProduct() {
-		product1.setGuid(PRODUCT_GUID_1);
-		((StoreProductImpl) storeProduct).setProductDisplayable(true);
-
-		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
-		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(product1);
-		when(mockStoreProductService.getProductForStore(product1, store)).thenReturn(storeProduct);
-
-		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, product1.getGuid())
+		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, product.getGuid())
 				.test()
 				.assertNoErrors()
-				.assertValue(storeProduct1 -> storeProduct1.getWrappedProduct().equals(product1));
-
-		verify(mockStoreProductService).getProductForStore(product1, store);
+				.assertValue(storeProduct1 -> storeProduct1.getWrappedProduct().equals(product));
 	}
 
 	@Test
-	public void testFindAStoreThenMissProductCacheThenMissStoreCacheThenIsDisplayable() {
-		((StoreProductImpl) storeProduct).setProductDisplayable(true);
-
-		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
-		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(product1);
-		when(mockStoreProductService.getProductForStore(product1, store)).thenReturn(storeProduct);
-
-		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, PRODUCT_GUID_1)
-				.test()
-				.assertValue(storeProduct1 -> storeProduct1.getWrappedProduct().equals(product1));
-
-		verify(mockStoreRepository).findStoreAsSingle(SCOPE);
-		verify(mockProductLookup).findByGuid(PRODUCT_GUID_1);
-		verify(mockStoreProductService).getProductForStore(product1, store);
-	}
-
-	@Test
-	public void testFindAStoreThenMissProductCacheThenMissStoreCacheThenIsNotDisplayable() {
+	public void testFindNotDisplayableStoreProduct() {
 		((StoreProductImpl) storeProduct).setProductDisplayable(false);
 
-		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
-		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(product1);
-		when(mockStoreProductService.getProductForStore(product1, store)).thenReturn(storeProduct);
-
-		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, PRODUCT_GUID_1)
+		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, product.getGuid())
 				.test()
-				.assertNoErrors();
-
-		verify(mockStoreRepository).findStoreAsSingle(SCOPE);
-		verify(mockProductLookup).findByGuid(PRODUCT_GUID_1);
-		verify(mockStoreProductService).getProductForStore(product1, store);
+				.assertErrorMessage(ERROR_STORE_PRODUCT_NOT_FOUND);
 	}
 
 	@Test
-	public void testFindStoreThenMissProductCacheThenNullStoreCache() {
-		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
-		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(product1);
-		when(mockStoreProductService.getProductForStore(product1, store)).thenReturn(null);
+	public void testFindMissingStoreProduct() {
+		when(mockStoreProductService.getProductForStore(product, store)).thenReturn(null);
 
-		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, PRODUCT_GUID_1)
+		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, product.getGuid())
+				.test()
+				.assertErrorMessage(ERROR_STORE_PRODUCT_NOT_FOUND);
+	}
+
+	@Test
+	public void testFindMissingProduct() {
+		when(mockProductLookup.findByGuid(product.getGuid())).thenReturn(null);
+
+		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, product.getGuid())
 				.test()
 				.assertErrorMessage(ERROR_STORE_PRODUCT_NOT_FOUND);
 
-		verify(mockStoreRepository).findStoreAsSingle(SCOPE);
-		verify(mockProductLookup).findByGuid(PRODUCT_GUID_1);
-		verify(mockStoreProductService).getProductForStore(product1, store);
-	}
-
-	@Test
-	public void testFindStoreThenNullProductCache() {
-		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(null);
-
-		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, PRODUCT_GUID_1)
-				.test()
-				.assertErrorMessage(ERROR_PRODUCT_NOT_FOUND);
-
-		verify(mockProductLookup).findByGuid(PRODUCT_GUID_1);
 		verifyZeroInteractions(mockStoreRepository);
 		verifyZeroInteractions(mockStoreProductService);
 	}
 
 	@Test
-	public void testNotFindStore() {
-		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(product1);
+	public void testFindProductInMissingStore() {
 		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.error(ResourceOperationFailure.notFound()));
 
-		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, PRODUCT_GUID_1)
+		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(SCOPE, product.getGuid())
 				.test()
 				.assertError(ResourceOperationFailure.class);
 
-		verify(mockProductLookup).findByGuid(PRODUCT_GUID_1);
-		verify(mockStoreRepository).findStoreAsSingle(SCOPE);
 		verifyZeroInteractions(mockStoreProductService);
 	}
 
 	@Test
-	public void testFindProductByGuidWhereCacheMiss() {
-		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(product1);
+	public void testFindByUids() {
+		List<StoreProduct> products = storeProductRepository.findByUids(SCOPE, singletonList(PRODUCT_UID));
 
-		Product result = storeProductRepository.findByGuid(PRODUCT_GUID_1).blockingGet();
-
-		assertEquals(product1, result);
-		verify(mockProductLookup).findByGuid(PRODUCT_GUID_1);
+		assertEquals(product, products.get(0).getWrappedProduct());
+		assertEquals(1, products.size());
 	}
 
 	@Test
-	public void testFindByUids() {
-		List<Long> uids = new ArrayList<>();
-		uids.add(PRODUCT_UID_1);
+	public void testFindByUidsWhereProductIsNotDisplayable() {
+		((StoreProductImpl) storeProduct).setProductDisplayable(false);
 
-		when(mockProductLookup.findByUids(uids)).thenReturn(Collections.singletonList(product1));
+		List<StoreProduct> products = storeProductRepository.findByUids(SCOPE, singletonList(PRODUCT_UID));
 
-		List<Product> products = storeProductRepository.findByUids(uids);
-
-		assertEquals(product1, products.get(0));
-		assertEquals(1, products.size());
-		verify(mockProductLookup).findByUids(uids);
+		assertEquals(0, products.size());
 	}
 
 	@Test
 	public void testFindBySkuGuidWhenProductSkuIsFound() {
-		when(mockProductSku.getProduct()).thenReturn(product1);
-		when(mockProductSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID)).thenReturn(Single.just(mockProductSku));
-		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
-		when(mockStoreProductService.getProductForStore(product1, store)).thenReturn(storeProduct);
-
 		storeProductRepository.findDisplayableStoreProductWithAttributesBySkuGuid(SCOPE, SKU_GUID)
 				.test()
 				.assertNoErrors();
-
-		verify(mockProductSkuRepository).getProductSkuWithAttributesByGuid(SKU_GUID);
-		verify(mockStoreRepository).findStoreAsSingle(SCOPE);
-		verify(mockStoreProductService).getProductForStore(product1, store);
 	}
 
 	@Test
@@ -216,7 +169,6 @@ public class StoreProductRepositoryImplTest {
 				.test()
 				.assertError(ResourceOperationFailure.notFound());
 
-		verify(mockProductSkuRepository).getProductSkuWithAttributesByGuid(SKU_GUID);
 		verifyZeroInteractions(mockStoreRepository);
 		verifyZeroInteractions(mockStoreProductService);
 	}

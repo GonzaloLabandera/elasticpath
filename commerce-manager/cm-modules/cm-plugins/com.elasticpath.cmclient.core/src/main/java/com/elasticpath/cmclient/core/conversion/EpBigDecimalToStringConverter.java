@@ -18,11 +18,11 @@ public class EpBigDecimalToStringConverter extends Converter {
 	public EpBigDecimalToStringConverter() {
 		super(BigDecimal.class, String.class);
 	}
-	
-	
+
+
 	/**
 	 * Converts from BigDecimal to String.
-	 * 
+	 *
 	 * @param fromObject object to convert
 	 * @return resulting object
 	 */
@@ -30,7 +30,7 @@ public class EpBigDecimalToStringConverter extends Converter {
 		if (!(fromObject instanceof BigDecimal)) {
 			throw new IllegalArgumentException("The argument to convert is not BigDecimal"); //$NON-NLS-1$
 		}
-		
+
 		return ((BigDecimal) fromObject).toPlainString();
 	}
 

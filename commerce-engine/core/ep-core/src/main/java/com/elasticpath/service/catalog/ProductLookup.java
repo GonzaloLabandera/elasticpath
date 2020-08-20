@@ -43,4 +43,14 @@ public interface ProductLookup {
 	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
 	<P extends Product> P findByGuid(String guid) throws EpServiceException;
+
+	/**
+	 * Finds the products with the given guids, and returns them.
+	 *
+	 * @param guids the products' guids
+	 * @param <P>   the genericized Product sub-class that this finder will return
+	 * @return the products that match the given guids, otherwise an empty list
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
+	 */
+	<P extends Product> List<P> findByGuids(Collection<String> guids) throws EpServiceException;
 }

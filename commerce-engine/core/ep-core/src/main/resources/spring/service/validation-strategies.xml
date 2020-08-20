@@ -60,6 +60,7 @@
 	</bean>
 
 	<bean id="cartTypeModifierValidator" class="com.elasticpath.service.shoppingcart.validation.impl.CartTypeModifierValidatorImpl">
+		<property name="multicartItemListTypeLocationProvider" ref="multicartItemListTypeLocationProvider"/>
 		<property name="modifierFieldValidationService" ref="modifierFieldValidationService"/>
 	</bean>
 
@@ -82,6 +83,10 @@
 
 	<bean id="cartItemModifierShoppingItemValidator" class="com.elasticpath.service.shoppingcart.validation.impl.CartItemModifierShoppingItemValidatorImpl">
 		<property name="modifierFieldValidationService" ref="modifierFieldValidationService"/>
+	</bean>
+
+	<bean id="modifierShoppingCartValidator" class="com.elasticpath.service.shoppingcart.validation.impl.ModifierShoppingCartValidatorImpl">
+		<property name="multicartItemListTypeLocationProvider" ref="multicartItemListTypeLocationProvider"/>
 	</bean>
 
 	<bean id="bundleMinSelectionRulesShoppingItemValidator" class="com.elasticpath.service.shoppingcart.validation.impl.BundleMinSelectionRulesShoppingItemValidatorImpl">
@@ -241,5 +246,6 @@
 		<ref bean="billingAddressShoppingCartValidator"/>
 		<ref bean="shippingAddressShoppingCartValidator"/>
 		<ref bean="paymentMethodShoppingCartValidator"/>
+		<ref bean="modifierShoppingCartValidator"/>
 	</extensibleList:create>
 </beans>

@@ -77,21 +77,21 @@ public class CustomerSearchCriteriaTest {
 	}
 	
 	/**
-	 * Test method for 'com.eemailicpath.domain.search.impl.CustomerSearchCriteriaImpl.getUserId()'.
+	 * Test method for 'com.eemailicpath.domain.search.impl.CustomerSearchCriteriaImpl.getSharedId()'.
 	 */
 	@Test
-	public void testGetUserId() {
-		assertNull(this.customerSearchCriteria.getUserId());
+	public void testGetSharedId() {
+		assertNull(this.customerSearchCriteria.getSharedId());
 	}
 
 	/**
-	 * Test method for 'com.eemailicpath.domain.search.impl.CustomerSearchCriteriaImpl.setUserId(String)'.
+	 * Test method for 'com.eemailicpath.domain.search.impl.CustomerSearchCriteriaImpl.setSharedId(String)'.
 	 */
 	@Test
-	public void testSetUserId() {
-		final String userId = "userId";
-		this.customerSearchCriteria.setUserId(userId);
-		assertEquals(userId, this.customerSearchCriteria.getUserId());
+	public void testSetSharedId() {
+		final String sharedId = "sharedId";
+		this.customerSearchCriteria.setSharedId(sharedId);
+		assertEquals(sharedId, this.customerSearchCriteria.getSharedId());
 	}
 
 	/**

@@ -21,11 +21,8 @@ import static com.elasticpath.domain.order.OrderShipmentStatus.SHIPPED;
 import static com.elasticpath.domain.order.OrderStatus.CANCELLED;
 import static com.elasticpath.domain.order.OrderStatus.COMPLETED;
 import static com.elasticpath.domain.order.OrderStatus.FAILED;
-import static com.elasticpath.domain.order.OrderStatus.IN_PROGRESS;
-import static com.elasticpath.domain.order.OrderStatus.PARTIALLY_SHIPPED;
 import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SKU;
 import static com.elasticpath.persistence.support.FetchFieldConstants.SHIPMENT_ORDER_SKUS_INTERNAL;
-import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
@@ -52,7 +49,6 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -141,10 +137,7 @@ public class OrderServiceImplTest {
 
 	private static final String ORDER_NUMBER = "order_1";
 
-	private static final long MINUTE_IN_MILLIS = 60000;
-
 	private Store store;
-	private Store store2;
 	private Order order;
 	private Order order2;
 
@@ -228,11 +221,8 @@ public class OrderServiceImplTest {
 		store.setCode("store");
 		store.setWarehouses(singletonList(warehouse));
 
-		store2 = new StoreImpl();
-		store2.setCode("store2");
-
 		when(mockStoreService.findStoreWithCode(store.getCode())).thenReturn(store);
-		when(mockStoreService.findStoreWithCode(store2.getCode())).thenReturn(store2);
+		when(mockStoreService.calculateCurrentPickDelayTimestamp(store.getCode())).thenReturn(new Date());
 
 		order = new OrderImpl();
 		order.setUidPk(1L);
@@ -661,76 +651,6 @@ public class OrderServiceImplTest {
 		assertThat(thrown).isNotNull();
 	}
 
-	/**
-	 * test the quartz job method to update shipment status.
-	 */
-	@Test
-	public void testUpdateOrderShipmentStatus() {
-		when(beanFactory.getSingletonBean(ORDER_SERVICE, OrderService.class)).thenReturn(orderServiceImpl);
-
-		final int pickDelayOrder1 = 4;
-		final int pickDelayOrder2 = 8;
-		Date now = new Date(currentTimeMillis());
-
-		final Order order = new OrderImpl();
-		order.setUidPk(1);
-		Warehouse warehouse1 = new WarehouseImpl();
-		warehouse1.setPickDelay(pickDelayOrder1);
-		store.setWarehouses(singletonList(warehouse1));
-		order.setStoreCode(store.getCode());
-		order.setCurrency(CAD);
-
-		final Order secondOrder = new OrderImpl();
-		secondOrder.setUidPk(2);
-		Warehouse warehouse2 = new WarehouseImpl();
-		warehouse2.setPickDelay(pickDelayOrder2);
-
-		store2.setWarehouses(singletonList(warehouse2));
-		secondOrder.setStoreCode(store2.getCode());
-		order.setCurrency(CAD);
-		secondOrder.setCurrency(CAD);
-
-		final OrderShipment order2Shipment = this.getMockPhysicalOrderShipment();
-		order2Shipment.setCreatedDate(now);
-		order2Shipment.setStatus(INVENTORY_ASSIGNED);
-		// set created date an hour earlier than the actual pick delay gets active
-		Date order2CreationDate = new Date(currentTimeMillis() - (pickDelayOrder2 - 1) * MINUTE_IN_MILLIS);
-		order2Shipment.setCreatedDate(order2CreationDate);
-		secondOrder.addShipment(order2Shipment);
-
-		final OrderShipment newShipment = this.getMockPhysicalOrderShipment();
-		newShipment.setCreatedDate(now);
-		newShipment.setStatus(INVENTORY_ASSIGNED);
-
-		// set created date an hour later than the actual pick delay gets active
-		Date order1CreationDate = new Date(currentTimeMillis() - (pickDelayOrder1 + 1) * MINUTE_IN_MILLIS);
-		final OrderShipment oldShipment = this.getMockPhysicalOrderShipment();
-		oldShipment.setStatus(INVENTORY_ASSIGNED);
-		oldShipment.setCreatedDate(order1CreationDate);
-
-		order.addShipment(oldShipment);
-		order.addShipment(newShipment);
-		final List<Order> orderList = new LinkedList<>();
-		orderList.add(order);
-		orderList.add(secondOrder);
-
-		final Map<String, Object> parameters = new HashMap<>();
-		parameters.put("listOrderStatus", asList(IN_PROGRESS, PARTIALLY_SHIPPED));
-		parameters.put("shipmentStatus", INVENTORY_ASSIGNED);
-
-		// expectations
-		when(persistenceEngine.retrieveByNamedQuery("ORDERS_BY_ORDER_STATUS_AND_SHIPMENT_STATUS", parameters))
-				.thenAnswer(answer -> orderList);
-		when(persistenceEngine.get(OrderImpl.class, 1L)).thenAnswer(answer -> order);
-		when(persistenceEngine.merge(any(Persistable.class))).thenReturn(order);
-
-		this.orderServiceImpl.updateOrderShipmentStatus();
-
-		assertThat(oldShipment.getShipmentStatus()).isEqualTo(RELEASED);
-		assertThat(newShipment.getShipmentStatus()).isEqualTo(INVENTORY_ASSIGNED);
-		assertThat(order2Shipment.getShipmentStatus()).isEqualTo(INVENTORY_ASSIGNED);
-
-	}
 
 	@Test
 	public void testCancelOrder() {

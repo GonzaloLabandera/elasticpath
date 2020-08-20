@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -10,9 +12,11 @@ import javax.inject.Singleton;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
@@ -40,6 +44,7 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
  */
 @Singleton
 @Named("customerRepository")
+@SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class CustomerRepositoryImpl implements CustomerRepository {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CustomerRepositoryImpl.class);
@@ -92,12 +97,20 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	}
 
 	@Override
-	@CacheResult
-	public ExecutionResult<Customer> findCustomerByUserId(final String storeCode, final String userId) {
+	@CacheResult(uniqueIdentifier = "findCustomerBySharedId")
+	public ExecutionResult<Customer> findCustomerBySharedId(final String storeCode, final String sharedId) {
 		return new ExecutionResultChain() {
 			@Override
 			public ExecutionResult<?> build() {
-				final CustomerSession customerSessionResult = Assign.ifSuccessful(findCustomerSessionByUserIdWithoutException(storeCode, userId));
+				// If storeCode is null, then the search is for account
+				if (storeCode == null) {
+					Customer customer  = customerService.findBySharedId(sharedId);
+					Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
+
+					return ExecutionResultFactory.createReadOK(customer);
+				}
+
+				final CustomerSession customerSessionResult = Assign.ifSuccessful(findCustomerSessionBySharedIdWithoutException(storeCode, sharedId));
 				final Customer customer = customerSessionResult.getShopper().getCustomer();
 				Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
 				customer.setStoreCode(storeCode);
@@ -107,12 +120,12 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 		}.execute();
 	}
 
-	private ExecutionResult<CustomerSession> findCustomerSessionByUserIdWithoutException(final String storeCode, final String userId) {
+	private ExecutionResult<CustomerSession> findCustomerSessionBySharedIdWithoutException(final String storeCode, final String sharedId) {
 		try {
-			return customerSessionRepository.findCustomerSessionByUserId(storeCode, userId);
+			return customerSessionRepository.findCustomerSessionBySharedId(storeCode, sharedId);
 		} catch (final Exception e) {
-			LOG.error(String.format("Error when finding customer session by store code %s and user ID %s", storeCode, userId), e);
-			return ExecutionResultFactory.createServerError("Server error when finding customer session by user ID");
+			LOG.error(String.format("Error when finding customer session by store code %s and shared ID %s", storeCode, sharedId), e);
+			return ExecutionResultFactory.createServerError("Server error when finding customer session by shared ID");
 		}
 	}
 
@@ -133,6 +146,26 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 	@Override
 	@CacheResult
+	public ExecutionResult<List<Customer>> findCustomersByProfileAttributeKeyAndValue(final String profileAttributeKey,
+																					  final String profileAttributeValue) {
+		return new ExecutionResultChain() {
+			@Override
+			public ExecutionResult<?> build() {
+				try {
+					List<Customer> customers =
+							customerService.findCustomersByProfileAttributeKeyAndValue(profileAttributeKey, profileAttributeValue);
+
+					return ExecutionResultFactory.createReadOK(customers);
+				} catch (EpServiceException e) {
+					LOG.error("Error finding customer by profile value text", e);
+					return ExecutionResultFactory.createServerError("Server error when finding customer");
+				}
+			}
+		}.execute();
+	}
+
+	@Override
+	@CacheResult
 	public ExecutionResult<Void> isCustomerGuidExists(final String guid) {
 		return new ExecutionResultChain() {
 			@Override
@@ -146,6 +179,67 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 		}.execute();
 	}
 
+	@Override
+	@CacheResult
+	public ExecutionResult<Long> getCustomerCountByProfileAttributeKeyAndValue(final String profileAttributeKey, final String profileAttributeValue) {
+		return new ExecutionResultChain() {
+			@Override
+			public ExecutionResult<?> build() {
+				final Long customerCount = customerService.getCustomerCountByProfileAttributeKeyAndValue(profileAttributeKey, profileAttributeValue);
+				if (customerCount == 0) {
+					return ExecutionResultFactory.createNotFound();
+				}
+				return ExecutionResultFactory.createReadOK(customerCount);
+			}
+		}.execute();
+	}
+
+	@Override
+	@CacheResult
+	public ExecutionResult<Void> isCustomerExistsBySharedIdAndStoreCode(final String storeCode, final String sharedId) {
+		return new ExecutionResultChain() {
+			@Override
+			public ExecutionResult<?> build() {
+				final boolean customerExists = customerService.isCustomerExistsBySharedIdAndStoreCode(sharedId, storeCode);
+				if (!customerExists) {
+					return ExecutionResultFactory.createNotFound();
+				}
+				return ExecutionResultFactory.createReadOK(null);
+			}
+		}.execute();
+	}
+
+	@Override
+	@CacheResult
+	public ExecutionResult<String> findCustomerGuidBySharedId(final String storeCode, final String sharedId, final String customerIdentifierKey) {
+		return new ExecutionResultChain() {
+			@Override
+			public ExecutionResult<?> build() {
+				final String customerGuid = customerService.findCustomerGuidBySharedId(sharedId, storeCode);
+				if (StringUtils.isEmpty(customerGuid)) {
+					return ExecutionResultFactory.createNotFound();
+				}
+				return ExecutionResultFactory.createReadOK(customerGuid);
+			}
+		}.execute();
+	}
+
+	@Override
+	@CacheResult
+	public ExecutionResult<String> findCustomerGuidByProfileAttributeKeyAndValue(final String profileAttributeKey,
+																				 final String profileAttributeValue) {
+		return new ExecutionResultChain() {
+			@Override
+			public ExecutionResult<?> build() {
+				final String customerGuid = customerService.findCustomerGuidByProfileAttributeKeyAndValue(profileAttributeKey, profileAttributeValue);
+				if (StringUtils.isEmpty(customerGuid)) {
+					return ExecutionResultFactory.createNotFound();
+				}
+				return ExecutionResultFactory.createReadOK(customerGuid);
+			}
+		}.execute();
+	}
+
 	private ExecutionResult<CustomerSession> findByCustomerSessionByGuidWithoutException(final String guid) {
 		try {
 			return customerSessionRepository.findCustomerSessionByGuid(guid);
@@ -154,6 +248,45 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 			return ExecutionResultFactory.createServerError("Server error when finding customer session by guid");
 		}
 	}
+
+	@Override
+	@CacheResult(uniqueIdentifier = "findCustomerByUsername")
+	public ExecutionResult<Customer> findCustomerByUsername(final String username, final String storeCode) {
+		return new ExecutionResultChain() {
+			@Override
+			public ExecutionResult<?> build() {
+				final Customer customer = Assign.ifSuccessful(findCustomerByUserNameWithoutException(username, storeCode));
+				Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
+
+				final CustomerSession customerSessionResult =
+						Assign.ifSuccessful(findCustomerSessionBySharedIdWithoutException(storeCode, customer.getSharedId()));
+
+				// Customer object obtained using shopper data entry(created if not exists).
+				final Customer sessionCustomer = customerSessionResult.getShopper().getCustomer();
+				Ensure.notNull(sessionCustomer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
+				sessionCustomer.setStoreCode(storeCode);
+
+				return ExecutionResultFactory.createReadOK(sessionCustomer);
+
+			}
+		}.execute();
+
+	}
+
+	private ExecutionResult<Customer> findCustomerByUserNameWithoutException(final String username, final String storeCode) {
+		Customer customer = null;
+		try {
+			customer =  customerService.findCustomerByUserName(username, storeCode);
+		} catch (final Exception e) {
+			LOG.error(String.format("Error when finding customer by store code %s and user name %s", storeCode, username), e);
+			return ExecutionResultFactory.createServerError("Server error when finding customer by user name");
+		}
+
+		return ExecutionResultFactory.createReadOK(customer);
+	}
+
+
+
 
 	@Override
 	@CacheResult

@@ -6,11 +6,12 @@ import java.util.Map;
 
 import cucumber.api.java.After;
 import cucumber.api.java.en.When;
+import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.AddEditTaxDialog;
 import com.elasticpath.selenium.dialogs.CreateEditTaxJurisdictionDialog;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.TaxJurisdictionsPane;
-import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 
@@ -25,12 +26,14 @@ public class TaxJurisdictionDefinition {
 	private AddEditTaxDialog addEditTaxDialog;
 	private static String uniqueTaxDisplayName = "";
 	private String taxJurisdictionCountry = "";
+	private final WebDriver driver;
 
 	/**
 	 * Constructor for Tax Jurisdiction.
 	 */
 	public TaxJurisdictionDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
+		driver = SeleniumDriverSetup.getDriver();
+		configurationActionToolbar = new ConfigurationActionToolbar(driver);
 	}
 
 	/**
@@ -143,7 +146,7 @@ public class TaxJurisdictionDefinition {
 				.as("It's not possible to delete a Tax jurisdiction. A tax jurisdiction country was not assigned")
 				.isNotBlank();
 		//any dialog which inherits Abstract dialog can be used here
-		createEditTaxJurisdictionDialog = new CreateEditTaxJurisdictionDialog(SetUp.getDriver(), "Create");
+		createEditTaxJurisdictionDialog = new CreateEditTaxJurisdictionDialog(driver, "Create");
 		createEditTaxJurisdictionDialog.closeDialogIfOpened();
 		configurationActionToolbar.clickTaxJurisdiction();
 		deleteTaxJurisdictionCountry(this.taxJurisdictionCountry);

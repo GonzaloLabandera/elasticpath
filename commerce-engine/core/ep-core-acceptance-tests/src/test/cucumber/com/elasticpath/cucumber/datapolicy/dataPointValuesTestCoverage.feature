@@ -6,7 +6,7 @@ Feature: Scheduled data point value jobs for data points shared by data policies
   Background:
     Given a customer with billing address of
       | guid    | lastName | firstName | street1       | street2       | city     | country | state    | zip | phone      | creationDate  | lastModifiedDate  |
-      | abc123  | Bird     | Big       | Sesame Street | Robson Street | New York | USA     | New York | zip | 5555555555 | 1 month ago   | 1 month ago       |
+      | abc123  | Bird     | Big       | Sesame Street | Robson Street | New York | US      | NY       | zip | 5555555555 | 1 month ago   | 1 month ago       |
 
   Scenario: Expired data point value job should NOT remove billing address data point values if longest retention period is not expired
     Given the existing data policies of

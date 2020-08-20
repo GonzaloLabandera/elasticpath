@@ -13,6 +13,7 @@ import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.elasticpath.commons.util.impl.LocaleUtils;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.offersearches.OfferSearchResultIdentifier;
 import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
@@ -41,7 +42,7 @@ public class OfferSearchResultToSortAttributeSelectorRepositoryImpl<I extends Of
 		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
 		Currency currency = SubjectUtil.getCurrency(resourceOperationContext.getSubject());
 
-		String localeCode = locale.toString();
+		String localeCode = LocaleUtils.getCommerceLocalCode(locale);
 		String scope = identifier.getScope().getValue();
 
 		Map<String, String> searchId = identifier.getSearchId().getValue();

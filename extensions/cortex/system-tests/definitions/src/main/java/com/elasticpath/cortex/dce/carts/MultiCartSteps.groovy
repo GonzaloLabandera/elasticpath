@@ -49,6 +49,26 @@ class MultiCartSteps {
 		client.descriptor()
 				.stopIfFailure()
 	}
+	
+	@Then('^the default cart has name (.+)$')
+	static void verifyDefaultCartName(String cartName) {
+		client.GET("/")
+			.defaultcart()
+			.descriptor()
+			.stopIfFailure()
+		assertThat(client.body.name).isEqualTo(cartName)
+	}
+	
+	@When('^I update my default cart name to (.+)$')
+	static void updateDefaultCartName(String newName) {
+		client.GET("/")
+				.defaultcart()
+				.stopIfFailure()
+		MultiCart.updateName(newName)
+		assertThat(client.response.status)
+				.as("The response status is not as expected")
+				.isEqualTo(204)
+	}
 
 	@When('^I go to my carts$')
 	static void getCarts() {

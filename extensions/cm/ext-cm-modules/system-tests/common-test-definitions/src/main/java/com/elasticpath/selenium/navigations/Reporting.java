@@ -30,9 +30,9 @@ public class Reporting extends AbstractNavigation {
 	private static final String RUN_REPORT_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.reporting.ReportingMessages.runReport']";
 	private static final String ORDER_STATUS_CHECKBOX_ROW_CSS = ACTIVE_LEFT_PANE + "div[widget-id='%s']";
 	private static final String ORDER_STATUS_CHECKBOX_CSS = ORDER_STATUS_CHECKBOX_ROW_CSS + " > div";
-	private static final String USER_ID_CSS = "div[automation-id*='userId'][widget-type='Text'] > input";
+	private static final String SHARED_ID_CSS = "div[automation-id*='sharedId'][widget-type='Text'] > input";
 	private static final String CURRENCY_COMBO_CSS = "div[automation-id*='currency'][widget-type='CCombo']";
-	private static final String USER_ID_FIELD_VALIDATIONS_CSS =  "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.EpValidatorFactory_ValueRequired']";
+	private static final String SHARED_ID_FIELD_VALIDATIONS_CSS =  "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.EpValidatorFactory_ValueRequired']";
 
 
 	/**
@@ -163,21 +163,21 @@ public class Reporting extends AbstractNavigation {
 	}
 
 	/**
-	 * Input User id.
+	 * Input Shared id.
 	 *
-	 * @param userId customer data report.
+	 * @param sharedId customer data report.
 	 */
-	public void enterUserId(final String userId) {
-		clearAndType(USER_ID_CSS, userId);
+	public void enterSharedId(final String sharedId) {
+		clearAndType(SHARED_ID_CSS, sharedId);
 	}
 
 	/**
-	 * Verify Validations displayed for User ID.
+	 * Verify Validations displayed for Shared ID.
 	 */
-	public void verifyUserIdValidation() {
+	public void verifySharedIdValidation() {
 		setWebDriverImplicitWait(IMPLICIT_WAIT_FOR_ELEMENT_FIVE_SECONDS);
-		assertThat(isElementPresent(By.cssSelector(USER_ID_FIELD_VALIDATIONS_CSS)))
-				.as("Unable to find Use ID validation message")
+		assertThat(isElementPresent(By.cssSelector(SHARED_ID_FIELD_VALIDATIONS_CSS)))
+				.as("Unable to find Shared ID validation message")
 				.isTrue();
 		setWebDriverImplicitWaitToDefault();
 	}

@@ -12,14 +12,14 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import com.elasticpath.validation.validators.impl.AttributeRequiredValidatorForCustomerProfile;
+import com.elasticpath.validation.validators.impl.AttributeRequiredValidatorForCustomer;
 
 /**
  * A constraint that should check that required system attributes are actually defined and non-blank.
  */
 @Target({ ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE })
 @Retention(RUNTIME)
-@Constraint(validatedBy = AttributeRequiredValidatorForCustomerProfile.class)
+@Constraint(validatedBy = AttributeRequiredValidatorForCustomer.class)
 @Documented
 public @interface AttributeRequired {
 	/**

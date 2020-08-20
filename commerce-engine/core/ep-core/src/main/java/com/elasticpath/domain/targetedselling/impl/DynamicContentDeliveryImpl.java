@@ -94,7 +94,7 @@ public class DynamicContentDeliveryImpl extends AbstractEntityImpl implements Dy
 	private String guid;
 
 	@Override
-	@OneToOne(targetEntity = SellingContextImpl.class)
+	@OneToOne(targetEntity = SellingContextImpl.class, cascade = CascadeType.ALL)
 	@JoinColumn(name = SELLING_CONTEXT_GUID, referencedColumnName = GUID_COLUMN)
 	@ForeignKey
 	@Dependent

@@ -44,6 +44,10 @@ public class OrderSearchCriteria extends AbstractSearchCriteriaImpl {
 
 	private Set<String> storeCodes;
 
+	private AccountSearchCriteria accountSearchCriteria;
+
+	private boolean excludeAccountOrders;
+
 	/**
 	 * Get the order status that will be included.
 	 * 
@@ -240,6 +244,42 @@ public class OrderSearchCriteria extends AbstractSearchCriteriaImpl {
 	 */
 	public void setStoreCodes(final Set<String> storeCodes) {
 		this.storeCodes = storeCodes;
+	}
+
+	/**
+	 * Get the Account Search Criteria.
+	 *
+	 * @return the account search Criteria
+	 */
+	public AccountSearchCriteria getAccountSearchCriteria() {
+		return accountSearchCriteria;
+	}
+
+	/**
+	 * Set the Account Search Criteria.
+	 *
+	 * @param accountSearchCriteria the account search criteria
+	 */
+	public void setAccountSearchCriteria(final AccountSearchCriteria accountSearchCriteria) {
+		this.accountSearchCriteria = accountSearchCriteria;
+	}
+
+	/**
+	 * Get exclude account orders flag.
+	 *
+	 * @return true to exclude orders passed for an account
+	 */
+	public boolean isExcludeAccountOrders() {
+		return excludeAccountOrders;
+	}
+
+	/**
+	 * Set exclude account orders flag.
+	 *
+	 * @param excludeAccountOrders true to exclude orders passed for an account
+	 */
+	public void setExcludeAccountOrders(final boolean excludeAccountOrders) {
+		this.excludeAccountOrders = excludeAccountOrders;
 	}
 
 	/**

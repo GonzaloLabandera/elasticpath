@@ -32,8 +32,8 @@ Feature: Registered shoppers can create named carts
     And I create a new shopping cart with name personal
     Then the HTTP status code is 400
     And I should see validation error message with message type, message id, and debug message
-      | messageType | messageId                  | debugMessage               |
-      | error       | cart.descriptor.not-unique | cart.descriptor.not-unique |
+      | messageType | messageId                  | debugMessage                                                       |
+      | error       | cart.descriptor.not-unique | Cart descriptor values are already in use by another shopping cart |
 
   Scenario: Create cart with the same name being used by another shopper
     When I create a new shopping cart with name personal

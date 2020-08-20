@@ -61,7 +61,7 @@ public class AttributePolicyExporter
 
 	@Override
 	public JobType getJobType() {
-		return JobType.ATTRIBUTE_POLICY;
+		return JobType.ATTRIBUTEPOLICY;
 	}
 
 	/**

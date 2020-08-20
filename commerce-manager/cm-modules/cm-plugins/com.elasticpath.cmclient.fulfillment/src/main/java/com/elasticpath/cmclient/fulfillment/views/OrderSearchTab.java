@@ -62,21 +62,31 @@ public class OrderSearchTab implements ISearchTab {
 
 	private Text orderNumberText;
 
-	private Text emailUserIdText;
+	private Text userSharedIdText;
 
-	private Text firstNameText;
+	private Text userEmailText;
 
-	private Text lastNameText;
+	private Text userFirstNameText;
 
-	private Text zipPostalCodeText;
+	private Text userLastNameText;
 
-	private Text phoneNumberText;
+	private Text userPhoneNumberText;
+
+	private Text accountSharedIdText;
+
+	private Text accountBusinessNameText;
+
+	private Text accountBusinessNumberText;
+
+	private Text accountPhoneNumberText;
 
 	private Text containsSkuText;
 
 	private ImageHyperlink containsSkuLink;
 
 	private Text rmaText;
+
+	private Text zipPostalCodeText;
 
 	private IEpDateTimePicker fromDatePicker;
 
@@ -92,7 +102,11 @@ public class OrderSearchTab implements ISearchTab {
 
 	private final EpState epState = EpState.EDITABLE;
 
-	private IEpLayoutComposite searchTermsGroup;
+	private IEpLayoutComposite orderDetailsGroup;
+
+	private IEpLayoutComposite userDetailsGroup;
+
+	private IEpLayoutComposite accountDetailsGroup;
 
 	private IEpLayoutComposite searchTermsAdvancedGroup;
 
@@ -107,10 +121,10 @@ public class OrderSearchTab implements ISearchTab {
 	private EpSortingCompositeControl sortingControl;
 
 	private List<OrderStatus> orderStatusValues;
-	
+
 	/**
 	 * Construct the customer search tab.
-	 * 
+	 *
 	 * @param tabFolder the tabFolder
 	 * @param tabIndex the tab index
 	 */
@@ -118,10 +132,16 @@ public class OrderSearchTab implements ISearchTab {
 		final IEpLayoutComposite compositeTab = tabFolder.addTabItem(FulfillmentMessages.get().SearchView_OrdersTab,
 				CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_ORDER), tabIndex, 1, false);
 
-		// Create search group
-		this.createSearchTermsGroup(compositeTab);
+		// Create order details search group
+		this.createOrderDetailsGroup(compositeTab);
 
-//		// Create optional filters group
+		//create user details search group
+		this.createUserDetailsGroup(compositeTab);
+
+		//create account details search group
+		this.createAccountDetailsGroup(compositeTab);
+
+		// Create optional filters group
 		this.createFiltersGroup(compositeTab);
 
 		// Create advanced filters group
@@ -142,7 +162,7 @@ public class OrderSearchTab implements ISearchTab {
 
 	/**
 	 * Creates the filters group.
-	 * 
+	 *
 	 * @param parentComposite the parent EP composite
 	 */
 	private void createFiltersGroup(final IEpLayoutComposite parentComposite) {
@@ -190,36 +210,77 @@ public class OrderSearchTab implements ISearchTab {
 	private String[] getOrderStatusNames() {
 		orderStatusValues = new ArrayList<>(OrderStatus.values());
 		orderStatusValues.remove(OrderStatus.FAILED);
-		
+
 		final String[] orderStatusNames = new String[orderStatusValues.size() + 1];
 		orderStatusNames[0] = FulfillmentMessages.get().SearchView_Status_Any;
-		
+
 		int count = 1;
 		for (OrderStatus orderStatus : orderStatusValues) {
 			orderStatusNames[count++] = FulfillmentMessages.get().getLocalizedName(orderStatus);
 		}
-		
+
 		return orderStatusNames;
 	}
 
 	/**
 	 * Creates the customer search terms group.
 	 */
-	private void createSearchTermsGroup(final IEpLayoutComposite parentComposite) {
+	private void createOrderDetailsGroup(final IEpLayoutComposite parentComposite) {
 		final IEpLayoutData data = parentComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 2, 1);
-		searchTermsGroup = parentComposite.addGroup(FulfillmentMessages.get().SearchView_SearchTermsGroup, 2, false, data);
+		orderDetailsGroup = parentComposite.addGroup(FulfillmentMessages.get().SearchView_OrderDetails, 2, false, data);
 
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_OrderNumber, data);
-		this.orderNumberText = searchTermsGroup.addTextField(epState, data);
+		orderDetailsGroup.addLabelBold(FulfillmentMessages.get().SearchView_OrderNumber, data);
+		this.orderNumberText = orderDetailsGroup.addTextField(epState, data);
 
-		createSearchTermsGroupCustomer(data, searchTermsGroup);
+		orderDetailsGroup.addLabelBold(FulfillmentMessages.get().SearchView_FromDate, data);
+		this.fromDatePicker = orderDetailsGroup.addDateTimeComponent(IEpDateTimePicker.STYLE_DATE_AND_TIME, epState, data);
 
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_FromDate, data);
-		this.fromDatePicker = searchTermsGroup.addDateTimeComponent(IEpDateTimePicker.STYLE_DATE_AND_TIME, epState, data);
+		orderDetailsGroup.addLabelBold(FulfillmentMessages.get().SearchView_ToDate, data);
+		this.toDatePicker = orderDetailsGroup.addDateTimeComponent(IEpDateTimePicker.STYLE_DATE_AND_TIME, epState, data);
 
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_ToDate, data);
-		this.toDatePicker = searchTermsGroup.addDateTimeComponent(IEpDateTimePicker.STYLE_DATE_AND_TIME, epState, data);
+	}
 
+	/**
+	 * Creates the user details search group.
+	 */
+	private void createUserDetailsGroup(final IEpLayoutComposite parentComposite) {
+		final IEpLayoutData data = parentComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 2, 1);
+		userDetailsGroup = parentComposite.addGroup(FulfillmentMessages.get().SearchView_UserDetails, 2, false, data);
+
+		userDetailsGroup.addLabelBold(FulfillmentMessages.get().SearchView_SharedId, data);
+		this.userSharedIdText = userDetailsGroup.addTextField(epState, data);
+
+		userDetailsGroup.addLabelBold(FulfillmentMessages.get().CustomerDetails_FirstNameLabel, data);
+		this.userFirstNameText = userDetailsGroup.addTextField(epState, data);
+
+		userDetailsGroup.addLabelBold(FulfillmentMessages.get().CustomerDetails_LastNameLabel, data);
+		this.userLastNameText = userDetailsGroup.addTextField(epState, data);
+
+		userDetailsGroup.addLabelBold(FulfillmentMessages.get().SearchView_Email, data);
+		this.userEmailText = userDetailsGroup.addTextField(epState, data);
+
+		userDetailsGroup.addLabelBold(FulfillmentMessages.get().SearchView_PhoneNumber, data);
+		this.userPhoneNumberText = userDetailsGroup.addTextField(epState, data);
+	}
+
+	/**
+	 * Creates account details search group.
+	 */
+	private void createAccountDetailsGroup(final IEpLayoutComposite parentComposite) {
+		final IEpLayoutData data = parentComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 2, 1);
+		accountDetailsGroup = parentComposite.addGroup(FulfillmentMessages.get().SearchView_AccountDetails, 2, false, data);
+
+		accountDetailsGroup.addLabelBold(FulfillmentMessages.get().SearchView_SharedId, data);
+		this.accountSharedIdText = accountDetailsGroup.addTextField(epState, data);
+
+		accountDetailsGroup.addLabelBold(FulfillmentMessages.get().AccountDetails_BusinessName, data);
+		this.accountBusinessNameText = accountDetailsGroup.addTextField(epState, data);
+
+		accountDetailsGroup.addLabelBold(FulfillmentMessages.get().AccountDetails_BusinessNumber, data);
+		this.accountBusinessNumberText = accountDetailsGroup.addTextField(epState, data);
+
+		accountDetailsGroup.addLabelBold(FulfillmentMessages.get().AccountDetails_Phone, data);
+		this.accountPhoneNumberText = accountDetailsGroup.addTextField(epState, data);
 	}
 
 	private void createSearchTermsAdvanced(final IEpLayoutComposite parentComposite) {
@@ -250,23 +311,9 @@ public class OrderSearchTab implements ISearchTab {
 
 		searchTermsAdvancedGroup.addLabelBold(FulfillmentMessages.get().SearchView_RMA, data);
 		this.rmaText = searchTermsAdvancedGroup.addTextField(epState, fieldData);
-	}
 
-	private void createSearchTermsGroupCustomer(final IEpLayoutData data, final IEpLayoutComposite searchTermsGroup) {
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_EmailUserId, data);
-		this.emailUserIdText = searchTermsGroup.addTextField(epState, data);
-
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().CustomerDetails_FirstNameLabel, data);
-		this.firstNameText = searchTermsGroup.addTextField(epState, data);
-
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().CustomerDetails_LastNameLabel, data);
-		this.lastNameText = searchTermsGroup.addTextField(epState, data);
-
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_PostalCode, data);
-		this.zipPostalCodeText = searchTermsGroup.addTextField(epState, data);
-
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_PhoneNumber, data);
-		this.phoneNumberText = searchTermsGroup.addTextField(epState, data);
+		searchTermsAdvancedGroup.addLabelBold(FulfillmentMessages.get().SearchView_PostalCode, data);
+		this.zipPostalCodeText = searchTermsAdvancedGroup.addTextField(epState, data);
 	}
 
 	private void createSortingGroup(final IEpLayoutComposite parentComposite) {
@@ -281,15 +328,23 @@ public class OrderSearchTab implements ISearchTab {
 
 	private void clearFields() {
 		this.orderNumberText.setText(EMPTY_STRING);
-		this.emailUserIdText.setText(EMPTY_STRING);
-		this.firstNameText.setText(EMPTY_STRING);
-		this.lastNameText.setText(EMPTY_STRING);
-		this.zipPostalCodeText.setText(EMPTY_STRING);
-		this.phoneNumberText.setText(EMPTY_STRING);
-		this.containsSkuText.setText(EMPTY_STRING);
-		this.rmaText.setText(EMPTY_STRING);
 		this.fromDatePicker.setDate(null);
 		this.toDatePicker.setDate(null);
+
+		this.userSharedIdText.setText(EMPTY_STRING);
+		this.userEmailText.setText(EMPTY_STRING);
+		this.userFirstNameText.setText(EMPTY_STRING);
+		this.userLastNameText.setText(EMPTY_STRING);
+		this.userPhoneNumberText.setText(EMPTY_STRING);
+
+		this.accountSharedIdText.setText(EMPTY_STRING);
+		this.accountBusinessNameText.setText(EMPTY_STRING);
+		this.accountBusinessNumberText.setText(EMPTY_STRING);
+		this.accountPhoneNumberText.setText(EMPTY_STRING);
+
+		this.containsSkuText.setText(EMPTY_STRING);
+		this.rmaText.setText(EMPTY_STRING);
+		this.zipPostalCodeText.setText(EMPTY_STRING);
 
 		this.orderStatusCombo.select(0);
 		this.shipmentStatusCombo.select(0);
@@ -371,7 +426,7 @@ public class OrderSearchTab implements ISearchTab {
 		this.setSearchStoreCodeList(0);
 
 		getModel().setExcludedOrderStatus(OrderStatus.FAILED);
-		
+
 		final ObservableUpdateValueStrategy orderStatusUpdateStrategy = new ObservableUpdateValueStrategy() {
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
@@ -404,6 +459,8 @@ public class OrderSearchTab implements ISearchTab {
 				EpValidatorFactory.LONG_IGNORE_SPACE, null, false);
 		bindingProvider.bind(context, this.containsSkuText, this.getModel(), "skuCode", EpValidatorFactory.MAX_LENGTH_255, null, false); //$NON-NLS-1$
 		bindingProvider.bind(context, this.rmaText, this.getModel(), "rmaCode", EpValidatorFactory.MAX_LENGTH_255, null, false); //$NON-NLS-1$
+		bindingProvider.bind(context, this.zipPostalCodeText, this.getModel(),
+				"shipmentZipcode", null, null, true); //$NON-NLS-1$
 
 		IValidator fromDateValidator = new CompoundValidator(new IValidator[] { EpValidatorFactory.DATE_TIME, value -> {
 			IStatus startDateStatus = Status.OK_STATUS;
@@ -416,7 +473,7 @@ public class OrderSearchTab implements ISearchTab {
 			return startDateStatus;
 		}});
 		fromDatePicker.bind(context, fromDateValidator, getModel(), "orderFromDate"); //$NON-NLS-1$
-		
+
 		IValidator toDateValidator = new CompoundValidator(new IValidator[] { EpValidatorFactory.DATE_TIME, value -> {
 			IStatus toDateStatus = Status.OK_STATUS;
 			Date endDate = toDatePicker.getDate();
@@ -429,19 +486,17 @@ public class OrderSearchTab implements ISearchTab {
 		}});
 		toDatePicker.bind(context, toDateValidator, getModel(), "orderToDate"); //$NON-NLS-1$
 
-		bindingProvider.bind(context, this.emailUserIdText, this.getModel().getCustomerSearchCriteria(), "userId", null, null, true); //$NON-NLS-1$
-		bindingProvider.bind(context, this.emailUserIdText, this.getModel().getCustomerSearchCriteria(),
-				"email", SearchFieldsValidators.EMAIL_PATTERN_USERID_VALIDATOR, null, true); //$NON-NLS-1$
-		bindingProvider.bind(context, this.firstNameText, this.getModel().getCustomerSearchCriteria(),
+		bindingProvider.bind(context, this.userSharedIdText, this.getModel().getCustomerSearchCriteria(), "sharedId", null, null, true); //$NON-NLS-1$
+		bindingProvider.bind(context, this.userEmailText, this.getModel().getCustomerSearchCriteria(),
+				"email", SearchFieldsValidators.EMAIL_PATTERN_VALIDATOR, null, true); //$NON-NLS-1$
+		bindingProvider.bind(context, this.userFirstNameText, this.getModel().getCustomerSearchCriteria(),
 				"firstName", null, null, true); //$NON-NLS-1$
-		bindingProvider.bind(context, this.lastNameText, this.getModel().getCustomerSearchCriteria(),
+		bindingProvider.bind(context, this.userLastNameText, this.getModel().getCustomerSearchCriteria(),
 				"lastName", null, null, true); //$NON-NLS-1$
-		bindingProvider.bind(context, this.zipPostalCodeText, this.getModel(),
-				"shipmentZipcode", null, null, true); //$NON-NLS-1$
-		bindingProvider.bind(context, this.phoneNumberText, this.getModel().getCustomerSearchCriteria(),
+		bindingProvider.bind(context, this.userPhoneNumberText, this.getModel().getCustomerSearchCriteria(),
 				"phoneNumber", null, null, true); //$NON-NLS-1$
 	}
-	
+
 	@Override
 	public String getResultViewId() {
 		return OrderSearchResultsView.VIEW_ID;
@@ -454,7 +509,9 @@ public class OrderSearchTab implements ISearchTab {
 
 	@Override
 	public void setControlModificationListener(final ControlModificationListener listener) {
-		searchTermsGroup.setControlModificationListener(listener);
+		orderDetailsGroup.setControlModificationListener(listener);
+		userDetailsGroup.setControlModificationListener(listener);
+		accountDetailsGroup.setControlModificationListener(listener);
 		searchTermsAdvancedGroup.setControlModificationListener(listener);
 	}
 
@@ -466,11 +523,18 @@ public class OrderSearchTab implements ISearchTab {
 		this.orderNumberText.addSelectionListener(listener);
 		this.containsSkuText.addSelectionListener(listener);
 		this.rmaText.addSelectionListener(listener);
-		this.emailUserIdText.addSelectionListener(listener);
-		this.firstNameText.addSelectionListener(listener);
-		this.lastNameText.addSelectionListener(listener);
 		this.zipPostalCodeText.addSelectionListener(listener);
-		this.phoneNumberText.addSelectionListener(listener);
+
+		this.userSharedIdText.addSelectionListener(listener);
+		this.userEmailText.addSelectionListener(listener);
+		this.userFirstNameText.addSelectionListener(listener);
+		this.userLastNameText.addSelectionListener(listener);
+		this.userPhoneNumberText.addSelectionListener(listener);
+
+		this.accountSharedIdText.addSelectionListener(listener);
+		this.accountBusinessNameText.addSelectionListener(listener);
+		this.accountBusinessNumberText.addSelectionListener(listener);
+		this.accountPhoneNumberText.addSelectionListener(listener);
 
 	}
 
@@ -509,6 +573,6 @@ public class OrderSearchTab implements ISearchTab {
 
 	@Override
 	public boolean isWidgetDisposed() {
-		return searchTermsGroup.getSwtComposite().isDisposed();
+		return orderDetailsGroup.getSwtComposite().isDisposed();
 	}
 }

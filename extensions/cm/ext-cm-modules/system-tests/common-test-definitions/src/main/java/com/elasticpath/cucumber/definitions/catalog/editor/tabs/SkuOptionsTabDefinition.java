@@ -15,7 +15,7 @@ import com.elasticpath.selenium.domainobjects.Product;
 import com.elasticpath.selenium.domainobjects.SkuOption;
 import com.elasticpath.selenium.domainobjects.containers.SkuOptionContainer;
 import com.elasticpath.selenium.editor.catalog.tabs.SkuOptionsTab;
-import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.toolbars.AbstractToolbar;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.util.Utility;
@@ -32,6 +32,7 @@ public class SkuOptionsTabDefinition {
 	private AddEditSkuOptionValueDialog addEditSkuOptionValueDialog;
 	private AddEditSkuOptionDialog addEditSkuOptionDialog;
 	private final SkuOptionContainer skuOptionContainer;
+	private final WebDriver driver;
 
 	/**
 	 * Constructor.
@@ -41,7 +42,7 @@ public class SkuOptionsTabDefinition {
 	 * @param skuOptionContainer variable for the skuOptionContainer.
 	 */
 	public SkuOptionsTabDefinition(final Product product, final SkuOption skuOption, final SkuOptionContainer skuOptionContainer) {
-		final WebDriver driver = SetUp.getDriver();
+		driver = SeleniumDriverSetup.getDriver();
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		this.skuOptionsTab = new SkuOptionsTab(driver);
 		this.product = product;
@@ -295,7 +296,7 @@ public class SkuOptionsTabDefinition {
 		skuOptionsTab.selectTab("SkuOptions");
 		skuOptionsTab.selectSkuOption(addEditSkuOptionDialog.getCode());
 		skuOptionsTab.clickRemoveSkuOptionButton();
-		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogSkuOptionsSection_RemoveSelectionDialog");
+		new ConfirmDialog(driver).clickOKButton("CatalogMessages.CatalogSkuOptionsSection_RemoveSelectionDialog");
 		saveSkuOptionChanges();
 	}
 

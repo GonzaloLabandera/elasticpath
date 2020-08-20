@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-remove-customer-session-artifacts.xml">
+
+	<changeSet id="2020-07-cleanup-customer-session-artifacts" author="elasticpath" failOnError="true">
+		<comment>[PERF-332] Deleted customer session cleanup job settings, TCUSTOMERSESSION table and JPA generated keys entry</comment>
+
+		<delete tableName="TSETTINGDEFINITION">
+			<where>PATH = 'COMMERCE/SYSTEM/SESSIONCLEANUP/maxHistory'</where>
+		</delete>
+		<delete tableName="TSETTINGDEFINITION">
+			<where>PATH = 'COMMERCE/SYSTEM/SESSIONCLEANUP/batchSize'</where>
+		</delete>
+
+		<delete tableName="JPA_GENERATED_KEYS">
+			<where>ID = 'TCUSTOMERSESSION'</where>
+		</delete>
+
+		<dropTable tableName="TCUSTOMERSESSION"/>
+	</changeSet>
+</databaseChangeLog>

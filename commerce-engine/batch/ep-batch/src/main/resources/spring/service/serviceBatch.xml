@@ -7,9 +7,12 @@
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:settings="http://www.elasticpath.com/schema/settings"
+		xmlns:util="http://www.springframework.org/schema/util"
+
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 			http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 	">
 
 	<!-- pulled from openjpa-osgi-wrapper.jar -
@@ -20,9 +23,11 @@
 	<!-- pulled from ep-core.jar -->
 	<import resource="classpath:spring/service/service.xml" />
 
-	<bean id="applicationName" class="java.lang.String">
+	<bean id="batchApplicationName" class="java.lang.String">
 		<constructor-arg value="Batch Server"/>
 	</bean>
+	<!-- required to avoid collision with other cache managers when multiple apps are deployed under the same JVM -->
+	<alias name="batchApplicationName" alias="applicationName"/>
 
 	<alias name="settingsService" alias="settingsReader"/>
 
@@ -126,4 +131,5 @@
 
 	<bean id="searchConfigFactory" parent="searchConfigFactoryTemplate"/>
 
+	<import resource="../jobs/batch-jobs.xml"/>
 </beans>

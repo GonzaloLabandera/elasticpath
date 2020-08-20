@@ -119,6 +119,16 @@ public class ShopperImpl implements Shopper {
 	}
 
 	@Override
+	public Customer getAccount() {
+		return shopperMemento.getAccount();
+	}
+
+	@Override
+	public void setAccount(final Customer account) {
+		shopperMemento.setAccount(account);
+	}
+
+	@Override
 	public void setSignedIn(final boolean signedIn) {
 		customerSignedIn = signedIn;
 	}

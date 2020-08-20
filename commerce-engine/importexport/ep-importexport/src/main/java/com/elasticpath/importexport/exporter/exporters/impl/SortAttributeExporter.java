@@ -91,7 +91,7 @@ public class SortAttributeExporter extends AbstractExporterImpl<SortAttribute, S
 
 	@Override
 	public JobType getJobType() {
-		return JobType.SORT_ATTRIBUTE;
+		return JobType.SORTATTRIBUTE;
 	}
 
 	@Override

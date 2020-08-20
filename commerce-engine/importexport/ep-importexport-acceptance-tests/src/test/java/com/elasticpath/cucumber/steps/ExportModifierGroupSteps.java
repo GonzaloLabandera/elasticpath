@@ -106,7 +106,7 @@ public class ExportModifierGroupSteps {
 		final ExportConfiguration exportConfiguration =
 				ExportConfigurationBuilder.newInstance()
 						.setDeliveryTarget(exportDirectory.getPath())
-						.setExporterTypes(Collections.singletonList(RequiredJobType.MODIFIER_GROUP))
+						.setExporterTypes(Collections.singletonList(RequiredJobType.MODIFIERGROUP))
 						.build();
 
 		final SearchConfiguration searchConfiguration = new SearchConfiguration();
@@ -131,7 +131,7 @@ public class ExportModifierGroupSteps {
 		final ExportConfiguration exportConfiguration =
 				ExportConfigurationBuilder.newInstance()
 						.setDeliveryTarget(exportDirectory.getPath())
-						.setExporterTypes(Collections.singletonList(RequiredJobType.MODIFIER_GROUP_FILTERS))
+						.setExporterTypes(Collections.singletonList(RequiredJobType.MODIFIERGROUPFILTER))
 						.build();
 
 		final SearchConfiguration searchConfiguration = new SearchConfiguration();

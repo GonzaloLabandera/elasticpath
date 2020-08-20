@@ -20,6 +20,8 @@
 	<modules>
 		<module>ep-importexport</module>
 		<module>ep-importexport-cli</module>
+		<module>ep-importexport-api</module>
+		<module>ep-importexport-api-models</module>
 		<module>ep-importexport-acceptance-tests</module>
 	</modules>
 </project>

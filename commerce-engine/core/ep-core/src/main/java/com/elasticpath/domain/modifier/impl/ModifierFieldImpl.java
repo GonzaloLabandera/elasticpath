@@ -66,6 +66,8 @@ public class ModifierFieldImpl extends AbstractLegacyEntityImpl implements Modif
 
 	private Set<ModifierFieldOption> modifierFieldOptions = new HashSet<>();
 
+	private String defaultCartValue;
+
 	@Override
 	@Id
 	@Column(name = "UIDPK")
@@ -138,6 +140,18 @@ public class ModifierFieldImpl extends AbstractLegacyEntityImpl implements Modif
 	@Override
 	public void setMaxSize(final Integer maxSize) {
 		this.maxSize = maxSize;
+	}
+
+	@Override
+	@Basic
+	@Column(name = "DEFAULT_CART_VALUE")
+	public String getDefaultCartValue() {
+		return defaultCartValue;
+	}
+
+	@Override
+	public void setDefaultCartValue(final String defaultCartValue) {
+		this.defaultCartValue = defaultCartValue;
 	}
 
 	@Override
@@ -274,7 +288,7 @@ public class ModifierFieldImpl extends AbstractLegacyEntityImpl implements Modif
 
 	/*
 	 * Sorting on ordering is natural sorting for ModifierField.
-     */
+	 */
 	@Override
 	public int compareTo(final ModifierField obj) {
 		return this.ordering - obj.getOrdering();

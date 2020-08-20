@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.AccountTagStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerTagStrategy;
 
 /**
@@ -20,6 +21,7 @@ class CustomerTagStrategyRegistry {
 
 	private final Collection<CustomerTagStrategy> tagStrategies = new CopyOnWriteArrayList<>();
 
+	private final Collection<AccountTagStrategy> accountTagStrategies = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Called by blueprint to load a strategy instance.
@@ -29,6 +31,17 @@ class CustomerTagStrategyRegistry {
 	public void loadStrategy(final CustomerTagStrategy strategy) {
 		if (strategy != null) {
 			tagStrategies.add(strategy);
+		}
+	}
+
+	/**
+	 * Called by blueprint to load a strategy instance.
+	 *
+	 * @param strategy the strategy to load
+	 */
+	public void loadAccountStrategy(final AccountTagStrategy strategy) {
+		if (strategy != null) {
+			accountTagStrategies.add(strategy);
 		}
 	}
 
@@ -43,7 +56,22 @@ class CustomerTagStrategyRegistry {
 		}
 	}
 
+	/**
+	 * Called by blueprint to unload a strategy instance.
+	 *
+	 * @param strategy the strategy to unload
+	 */
+	public void unloadAccountStrategy(final AccountTagStrategy strategy) {
+		if (strategy != null) {
+			accountTagStrategies.remove(strategy);
+		}
+	}
+
 	Collection<CustomerTagStrategy> getStrategies() {
 		return tagStrategies;
+	}
+
+	Collection<AccountTagStrategy> getAccountStrategies() {
+		return accountTagStrategies;
 	}
 }

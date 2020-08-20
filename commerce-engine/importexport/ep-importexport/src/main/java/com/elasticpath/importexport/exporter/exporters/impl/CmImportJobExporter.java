@@ -40,7 +40,7 @@ public class CmImportJobExporter extends AbstractExporterImpl<ImportJob, CmImpor
 
 	@Override
 	public JobType getJobType() {
-		return JobType.CM_IMPORT_JOB;
+		return JobType.CMIMPORTJOB;
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class CmImportJobExporter extends AbstractExporterImpl<ImportJob, CmImpor
 	@Override
 	protected void initializeExporter(final ExportContext context) throws ConfigurationException {
 		cmImportJobGuids = new HashSet<>(
-			getImportExportSearcher().searchGuids(getContext().getSearchConfiguration(), EPQueryType.CM_IMPORT_JOB));
+			getImportExportSearcher().searchGuids(getContext().getSearchConfiguration(), EPQueryType.CMIMPORTJOB));
 	}
 
 	@Override
