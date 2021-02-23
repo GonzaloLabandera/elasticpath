@@ -27,7 +27,7 @@ import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 
 /**
@@ -62,7 +62,7 @@ public class CheckoutServiceImplTest {
 	public void testCheckoutRollbackMechanism() {
 
 		final CheckoutResults checkoutResults = mock(CheckoutResults.class);
-		doThrow(new EpSystemException("testing exception handling.")).when(action2).execute(any(CheckoutActionContext.class));
+		doThrow(new EpSystemException("testing exception handling.")).when(action2).execute(any(PreCaptureCheckoutActionContext.class));
 
 		CheckoutServiceImpl service = new CheckoutServiceImpl();
 		List<ReversibleCheckoutAction> actionList = new ArrayList<>();
@@ -78,10 +78,10 @@ public class CheckoutServiceImplTest {
 		}
 
 		InOrder inOrder = Mockito.inOrder(action1, action2);
-		inOrder.verify(action1).execute(any(CheckoutActionContext.class));
-		inOrder.verify(action2).execute(any(CheckoutActionContext.class));
-		inOrder.verify(action2).rollback(any(CheckoutActionContext.class));
-		inOrder.verify(action1).rollback(any(CheckoutActionContext.class));
+		inOrder.verify(action1).execute(any(PreCaptureCheckoutActionContext.class));
+		inOrder.verify(action2).execute(any(PreCaptureCheckoutActionContext.class));
+		inOrder.verify(action2).rollback(any(PreCaptureCheckoutActionContext.class));
+		inOrder.verify(action1).rollback(any(PreCaptureCheckoutActionContext.class));
 		inOrder.verifyNoMoreInteractions();
 		verifyZeroInteractions(action3);
 		verify(checkoutResults).setOrder(null);
@@ -95,8 +95,8 @@ public class CheckoutServiceImplTest {
 	public void testCheckoutRollbackMechanismWithRollbackException() {
 
 		final CheckoutResults checkoutResults = mock(CheckoutResults.class);
-		doThrow(new EpSystemException("testing exception handling.")).when(action2).execute(any(CheckoutActionContext.class));
-		doThrow(new EpSystemException("testing exception handling.")).when(action2).rollback(any(CheckoutActionContext.class));
+		doThrow(new EpSystemException("testing exception handling.")).when(action2).execute(any(PreCaptureCheckoutActionContext.class));
+		doThrow(new EpSystemException("testing exception handling.")).when(action2).rollback(any(PreCaptureCheckoutActionContext.class));
 
 		CheckoutServiceImpl service = new CheckoutServiceImpl();
 		List<ReversibleCheckoutAction> actionList = new ArrayList<>();
@@ -111,10 +111,10 @@ public class CheckoutServiceImplTest {
 		}
 
 		InOrder inOrder = Mockito.inOrder(action1, action2);
-		inOrder.verify(action1).execute(any(CheckoutActionContext.class));
-		inOrder.verify(action2).execute(any(CheckoutActionContext.class));
-		inOrder.verify(action2).rollback(any(CheckoutActionContext.class));
-		inOrder.verify(action1).rollback(any(CheckoutActionContext.class));
+		inOrder.verify(action1).execute(any(PreCaptureCheckoutActionContext.class));
+		inOrder.verify(action2).execute(any(PreCaptureCheckoutActionContext.class));
+		inOrder.verify(action2).rollback(any(PreCaptureCheckoutActionContext.class));
+		inOrder.verify(action1).rollback(any(PreCaptureCheckoutActionContext.class));
 		inOrder.verifyNoMoreInteractions();
 		verify(checkoutResults).setOrder(null);
 	}
@@ -128,7 +128,7 @@ public class CheckoutServiceImplTest {
 		final boolean awaitExchangeCompletion = true;
 		final OrderReturn exchange = mock(OrderReturn.class);
 
-		final CheckoutActionContext actionContext = new CheckoutServiceImpl().createActionContext(
+		final PreCaptureCheckoutActionContext actionContext = new CheckoutServiceImpl().createActionContext(
 				shoppingCart,
 				null, customerSession,
 				isOrderExchange,

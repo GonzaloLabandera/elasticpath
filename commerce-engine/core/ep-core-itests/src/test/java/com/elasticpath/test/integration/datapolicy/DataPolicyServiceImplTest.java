@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -21,6 +22,7 @@ import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.domain.datapolicy.DataPolicy;
 import com.elasticpath.domain.datapolicy.DataPolicyDescription;
 import com.elasticpath.domain.datapolicy.DataPolicyState;
+import com.elasticpath.settings.refreshstrategy.impl.ApplicationLifetimeRefreshStrategyImpl;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.persister.SettingsTestPersister;
 
@@ -419,5 +421,14 @@ public class DataPolicyServiceImplTest extends AbstractDataPolicyTest {
 		dataPolicy.getDataPoints().add(dataPoint);
 		assertThatThrownBy(() -> dataPolicyService.update(dataPolicy))
 				.isInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	//
+	// Destroy cache to invalidate DataPolicyService.COMMERCE_STORE_ENABLE_DATA_POLICIES cached values. This setting uses
+	// applicationRefreshStrategy, hence cache values are not updated/changed until application is restarted even after a database update.
+	//
+	@After
+	public void clearApplicationLifetimeRefreshStrategyImpl() {
+		ApplicationLifetimeRefreshStrategyImpl.clearCache();
 	}
 }

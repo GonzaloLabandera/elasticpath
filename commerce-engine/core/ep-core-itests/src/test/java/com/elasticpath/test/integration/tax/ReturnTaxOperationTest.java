@@ -14,6 +14,7 @@ import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
@@ -101,7 +102,7 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		// checkout
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -152,7 +153,7 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		// checkout
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -217,7 +218,7 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		// checkout
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);

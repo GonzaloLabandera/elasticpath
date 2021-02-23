@@ -13,7 +13,6 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.service.EpPersistenceService;
-import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
 
 /**
  * Provide customer-session related business service.
@@ -45,6 +44,13 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @throws EpServiceException if the cart cannot be removed.
 	 */
 	void remove(ShoppingCart shoppingCart) throws EpServiceException;
+
+	/**
+	 * Gets the descriptors for a given cart.
+	 * @param cartGuid the cart.
+	 * @return the map of cartData descriptors. map.
+	 */
+	Map<String, CartData> getCartDescriptors(String cartGuid);
 
 	/**
 	 * This method retrieves the shopping cart corresponding to the given guid.<br/>
@@ -159,17 +165,6 @@ public interface ShoppingCartService extends EpPersistenceService {
 	boolean isPersisted(ShoppingCart shoppingCart);
 
 	/**
-	 * During the final checkout phase, in {@link com.elasticpath.service.shoppingcart.actions.impl.ClearShoppingCartCheckoutAction},
-	 * it is required to disconnect the old cart from the shopper in order to avoid excessive db calls in case of
-	 * large carts. The disconnection is done by deactivating the old cart first (setting cart's state to 0), saving the old cart
-	 * and creating a new cart that is connected to the shopper and customer's session.
-	 *
-	 * @param oldCart the cart {@link ShoppingCart} to be disconnected from the shopper
-	 * @param context the final checkout action context  {@link FinalizeCheckoutActionContext}
-	 */
-	void disconnectCartFromShopperAndCustomerSession(ShoppingCart oldCart, FinalizeCheckoutActionContext context);
-
-	/**
 	 * Finds the default (active) shopping cart guid for the given Customer Session.
 	 * @param customerSession the customer session.
 	 * @return the shopping cart guid of the default cart.
@@ -190,4 +185,13 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @return the list of maps of cartdatas.
 	 */
 	Map<String, List<CartData>> findCartDataForCarts(List<String> cartGuids);
+
+	/**
+	 * Change cart's state so it is no longer associated
+	 * with the shopper. All deactivated carts and respective orders
+	 * will be removed in a batch job.
+	 *
+	 * @param shoppingCart the shopping cart
+	 */
+	void deactivateCart(ShoppingCart shoppingCart);
 }

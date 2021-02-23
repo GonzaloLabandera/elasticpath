@@ -5,8 +5,11 @@ package com.elasticpath.cache.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import net.sf.ehcache.Element;
+
+import com.elasticpath.cache.CacheResult;
 
 /**
  * A wrapper which provides a {@link com.elasticpath.cache.Cache} interface for ehcache.
@@ -14,13 +17,13 @@ import net.sf.ehcache.Element;
  * @param <K> The class implemented by the cache keys
  * @param <V> The class implemented by the cache values
  */
-public class EhcacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K, V> {
+public class EhcacheCacheAdapter<K, V> extends AbstractCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K, V> {
 	private final net.sf.ehcache.Cache cache;
 
 	/**
 	 * Constructs the adapter.
 	 *
-	 * @param cache the underlying JCache
+	 * @param cache the underlying EhCache
 	 */
 	public EhcacheCacheAdapter(final net.sf.ehcache.Cache cache) {
 		this.cache = cache;
@@ -28,12 +31,12 @@ public class EhcacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public V get(final K key) {
+	public CacheResult<V> get(final K key) {
 		final Element element = cache.get(key);
-		if (element == null) {
-			return null;
+		if (Objects.isNull(element)) {
+			return CacheResult.notPresent();
 		}
-		return (V) element.getObjectValue();
+		return CacheResult.create((V) element.getObjectValue());
 	}
 
 	@Override
@@ -70,17 +73,17 @@ public class EhcacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public V getByPartialKey(final K partialKey) {
+	public CacheResult<V> getByPartialKey(final K partialKey) {
 		for (Object key : cache.getKeys()) {
 			if (key.equals(partialKey)) {
 				Element element = cache.get(key);
-				if (element != null) {
-					return (V) element.getObjectValue();
+				if (Objects.nonNull(element)) {
+					return CacheResult.create((V) element.getObjectValue());
 				}
 			}
 		}
 
-		return null;
+		return CacheResult.notPresent();
 	}
 
 	@Override
@@ -98,7 +101,7 @@ public class EhcacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K,
 		}
 
 		return result.isEmpty()
-			? null
-			: result;
+				? null
+				: result;
 	}
 }

@@ -5,18 +5,13 @@ package com.elasticpath.importexport.client;
 
 import java.util.Properties;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.pool.PooledConnectionFactory;
-
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.persistence.api.PersistenceSessionFactory;
 
 /**
  * Initialize the import/export client. This will be called by spring as a dependency
  * of the persistence engine to ensure the datasource is changed before anything
- * can use the persistence engine. Initialize {@link PooledConnectionFactory} that
- * needed to create pool of connections for ActiveMQ.
+ * can use the persistence engine.
  */
 public class ImportExportInitialization {
 
@@ -34,19 +29,6 @@ public class ImportExportInitialization {
 
 		sessionFactory.setConnectionFactoryName(null);
 		sessionFactory.setConnectionDriverName(JPADataSource.class.getName());
-
-		final ActiveMQConnectionFactory jmsConnectionFactory = getBeanFactory().getSingletonBean(ContextIdNames.JMS_CONNECTION_FACTORY,
-				ActiveMQConnectionFactory.class);
-		jmsConnectionFactory.setBrokerURL(dataSourceProperties.getJmsUrl());
-
-		final PooledConnectionFactory pooledConnectionFactory = getBeanFactory().getSingletonBean(ContextIdNames.POOLED_CONNECTION_FACTORY,
-				PooledConnectionFactory.class);
-		pooledConnectionFactory.setConnectionFactory(jmsConnectionFactory);
-		pooledConnectionFactory.setMaxConnections(Integer.parseInt(dataSourceProperties.getJmsMaxConnections()));
-		pooledConnectionFactory.setMaximumActiveSessionPerConnection(Integer.parseInt(dataSourceProperties.getJmsMaxConnections()));
-		pooledConnectionFactory.setIdleTimeout(Integer.parseInt(dataSourceProperties.getJmsIdleTimeout()));
-
-		pooledConnectionFactory.start();
 	}
 
 	/**
@@ -85,6 +67,4 @@ public class ImportExportInitialization {
 	public void setAppProperties(final Properties appProperties) {
 		this.appProperties = appProperties;
 	}
-
-
 }

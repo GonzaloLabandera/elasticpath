@@ -56,9 +56,7 @@ public interface Address extends Persistable, DatabaseLastModifiedDate, Database
 	 * @return the last name
 	 * @domainmodel.property
 	 */
-	@NotNull
-	@NotBlank
-	@Size(min = 1, max = MEDIUM_MAXLENGTH)
+	@Size(max = MEDIUM_MAXLENGTH)
 	String getLastName();
 
 	/**
@@ -74,9 +72,7 @@ public interface Address extends Persistable, DatabaseLastModifiedDate, Database
 	 * @return the first name
 	 * @domainmodel.property
 	 */
-	@NotNull
-	@NotBlank
-	@Size(min = 1, max = MEDIUM_MAXLENGTH)
+	@Size(max = MEDIUM_MAXLENGTH)
 	String getFirstName();
 
 	/**

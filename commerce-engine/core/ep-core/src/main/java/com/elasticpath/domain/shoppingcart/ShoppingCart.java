@@ -17,7 +17,9 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.StoreObject;
 import com.elasticpath.domain.customer.Address;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.impl.CartData;
@@ -560,4 +562,17 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 */
 	CartData createCartData(String name, String value);
 
+	/**
+	 * Gets Modifier fields associated with this store.
+	 *
+	 * @return list of modifier fields
+	 */
+	List<ModifierField> getModifierFields();
+
+	/**
+	 * Gets account if it presents, user in other case.
+	 *
+	 * @return a {@link Customer}.
+	 */
+	Customer getCustomer();
 }

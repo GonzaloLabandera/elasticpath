@@ -8,14 +8,16 @@ import com.elasticpath.tags.domain.TagDefinition;
 /**
  * A custom string class that's metaclass will be changing in the run-time.
  */
-public class BuilderString {
+class BuilderString {
+	private LogicalTreeBuilder logicalTreeBuilder;
 	private TagDefinition key;
 	private String keyString;
-	
+
 	/**
 	 * Default constructor which sets the active key name.
 	 */
-	public BuilderString(TagDefinition key, String keyString) {
+	BuilderString(final LogicalTreeBuilder logicalTreeBuilder, final TagDefinition key, final String keyString) {
+		this.logicalTreeBuilder = logicalTreeBuilder;
 		this.key = key;
 		this.keyString = keyString;
 	}
@@ -23,7 +25,7 @@ public class BuilderString {
 	/**
 	 * Delegates any method invocation to the LogicalTreeBuilder#addCondition.
 	 */
-	def methodMissing(String name, args) {
-		LogicalTreeBuilder.getInstance().addCondition(this.key, this.keyString, args, name);
+	def methodMissing(final String name, final args) {
+		logicalTreeBuilder.addCondition(this.key, this.keyString, args, name);
 	}
 }

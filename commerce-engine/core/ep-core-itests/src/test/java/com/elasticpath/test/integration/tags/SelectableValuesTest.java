@@ -32,25 +32,6 @@ public class SelectableValuesTest extends BasicSpringContextTest {
 	private TagValueTypeService tagValueTypeService;
     
     /**
-     * Tests gender selectable values.
-     * 
-     * @throws Exception a data access exception
-     */
-    @Test
-    public void testGenderSelectableValuesProvider() throws Exception {
-    	TagValueType tagValueType = tagValueTypeService.findByGuid("gender");
-    	List<SelectableValue<String>> list = selectableTagValueService.getSelectableValues(tagValueType, Locale.getDefault(), null);
-    	assertNotNull(list);
-    	assertEquals(2, list.size());
-
-    	// Test order and value
-		SelectableValue<?> male = list.get(0);
-    	assertEquals("M", String.valueOf(male.getValue()));
-		SelectableValue<?> female = list.get(1);
-    	assertEquals("F", String.valueOf(female.getValue()));
-    }
-
-    /**
      * Tests selectable values services for 
      * tag value type, that not provide selectable values. 
      * 

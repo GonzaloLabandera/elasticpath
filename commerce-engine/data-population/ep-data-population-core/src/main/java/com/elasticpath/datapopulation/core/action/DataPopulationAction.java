@@ -16,4 +16,12 @@ public interface DataPopulationAction {
 	 * @param context the context
 	 */
 	void execute(DataPopulationContext context);
+
+	/**
+	 * Get a description of the action that will be performed.
+	 *
+	 * @param context the context
+	 * @return description of the action that will be performed
+	 */
+	String getDescription(DataPopulationContext context);
 }

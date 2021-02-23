@@ -4,13 +4,14 @@
 package com.elasticpath.cmclient.fulfillment.wizards.reauth;
 
 import java.util.Collection;
+import java.util.Optional;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -21,6 +22,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.cmclient.core.ui.framework.AbstractCmClientFormSectionPart;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
@@ -37,7 +39,7 @@ import com.elasticpath.service.orderpaymentapi.management.PaymentStatistic;
  */
 public class ReAuthSummaryPage extends AbstractEPWizardPage<ReAuthorizationItem> {
 
-	private Label resultLabel;
+	private static final String INTERNAL_MESSAGE = "InternalMessage";
 	private AuthResultSection resultSection;
 	private Label adviceLabel;
 
@@ -59,9 +61,6 @@ public class ReAuthSummaryPage extends AbstractEPWizardPage<ReAuthorizationItem>
 	@Override
 	protected void createEpPageContent(final IEpLayoutComposite pageComposite) {
 		setControl(pageComposite.getSwtComposite());
-
-		resultLabel = pageComposite.addLabel("",
-				pageComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL));
 
 		final IManagedForm managedForm = EpControlFactory.getInstance().createManagedForm(pageComposite.getSwtComposite());
 		final TableWrapLayout layout = new TableWrapLayout();
@@ -88,25 +87,34 @@ public class ReAuthSummaryPage extends AbstractEPWizardPage<ReAuthorizationItem>
 
 	@Override
 	public boolean beforeFromPrev(final PageChangingEvent event) {
-		resultSection.setData(getWizard().getPaymentTransactions());
-
-		if (getWizard().isOperationSuccessful()) {
+		final Collection<PaymentStatistic> paymentTransactions = getWizard().getPaymentTransactions();
+		resultSection.setData(paymentTransactions);
+		resultSection.getSection().setText(FulfillmentMessages.get().ReAuthWizard_NewAuthorizations_TableTitle);
+		if (getWizard().isOperationSuccessful() && checkFailedTransactions(paymentTransactions)) {
+			setMessage(FulfillmentMessages.get().ReAuthWizard_DecreaseAmountError_Message);
+			adviceLabel.setVisible(false);
+		} else if (getWizard().isOperationSuccessful()) {
 			setMessage(FulfillmentMessages.get().ReAuthWizard_Successful_SectionTitle);
-			resultSection.getSection().setText(FulfillmentMessages.get().ReAuthWizard_NewAuthorizations_TableTitle);
-			resultLabel.setText(NLS.bind(FulfillmentMessages.get().ReAuthWizard_Successful_Message,
-					getMoneyFormatter().formatCurrency(getModel().getNewAuthorizedAmount(), getModel().getOrder().getLocale())));
 			adviceLabel.setVisible(false);
 		} else {
-			setMessage(FulfillmentMessages.get().ReAuthWizard_Failed_SectionTitle);
-			resultSection.getSection().setText(FulfillmentMessages.get().ReAuthWizard_NewAuthorizations_TableTitle);
-			resultLabel.setText(NLS.bind(FulfillmentMessages.get().ReAuthWizard_Error_Reason,
-					FulfillmentMessages.get().getErrorMessage(getModel().getPaymentsException())));
+			setMessage(getExceptionMessage());
 			adviceLabel.setVisible(true);
 		}
 
 		this.getControl().pack();
 		this.getShell().pack();
 		return super.beforeFromPrev(event);
+	}
+
+	private boolean checkFailedTransactions(final Collection<PaymentStatistic> paymentTransactions) {
+		return paymentTransactions.stream().anyMatch(transaction -> !transaction.isSuccessful());
+	}
+
+	private String getExceptionMessage() {
+		final Optional<StructuredErrorMessage> message = getModel().getPaymentsException().getStructuredErrorMessages().stream().findFirst();
+		return message.isPresent()
+				? message.get().getData().get(INTERNAL_MESSAGE)
+				: StringUtils.EMPTY;
 	}
 
 	@Override
@@ -200,7 +208,7 @@ public class ReAuthSummaryPage extends AbstractEPWizardPage<ReAuthorizationItem>
 					case COLUMN_INDEX_STATUS:
 						return paymentStatistic.isSuccessful()
 								? FulfillmentMessages.get().PaymentStatus_Approved
-								: FulfillmentMessages.get().PaymentStatus_Not_Processed;
+								: FulfillmentMessages.get().PaymentStatus_Failed;
 					default:
 						return null;
 				}

@@ -18,7 +18,9 @@ Feature: Export store
       | store code               | TestStoreCode                   |
       | currency                 | USD                             |
       | payment provider configs | 23456,23457                     |
-    When exporting store with store code TestStoreCode the importexport tool
+	  | authenticated role       | BUYER                           |
+	  | unauthenticated role     | SINGLE_SESSION_BUYER            |
+	When exporting store with store code TestStoreCode the importexport tool
     And the exported store data is parsed
     Then the exported store records should equal
       | timezone                 | GMT -8:00 Pacific Standard Time |
@@ -28,5 +30,7 @@ Feature: Export store
       | store code               | TestStoreCode                   |
       | currency                 | USD                             |
       | payment provider configs | 23456,23457                     |
-    And the exported manifest file should have an entry for stores
+	  | authenticated role       | BUYER                           |
+	  | unauthenticated role     | SINGLE_SESSION_BUYER            |
+	  And the exported manifest file should have an entry for stores
 

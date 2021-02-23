@@ -20,8 +20,8 @@ Feature: Report for B2B Buyer using system Data Policy Segments
 
   Scenario Outline: Ensure data is reported for the customer which is defined in system configuration
     When I login using jwt authorization with the following details
-      | roles         | BUYER   |
-      | user_id       | <USER>  |
+      | subject      | <subject> |
+	  | issuer       | <issuer>  |
     And I create a saved Smart Path Config payment instrument from order supplying the following fields:
       | display-name | saved one |
     # Purchase item using named cart
@@ -38,8 +38,8 @@ Feature: Report for B2B Buyer using system Data Policy Segments
       | Customer first name   | Customer last name   |
       | <CUSTOMER_FIRST_NAME> | <CUSTOMER_LAST_NAME> |
     Examples:
-      | USER         | USER_SHARED_ID                 | CUSTOMER_FIRST_NAME | CUSTOMER_LAST_NAME |
-      | usertestguid | MOBEE:usertest@elasticpath.com | test                | user               |
+      | subject                        | USER_SHARED_ID                 | CUSTOMER_FIRST_NAME | CUSTOMER_LAST_NAME | issuer             |
+      | MOBEE:usertest@elasticpath.com | MOBEE:usertest@elasticpath.com | test                | user               | punchout_shared_id |
 
   Scenario Outline: View Disabled Data Policy specified in System settings
     When I Disabled newly created Data Policy
@@ -55,9 +55,9 @@ Feature: Report for B2B Buyer using system Data Policy Segments
 
   Scenario Outline: Delete Customer Data Points in Data Policies that are coming from System settings
     When I login using jwt authorization with the following details
-      | roles         | BUYER  |
-      | user_id       | <USER> |
-    And I create a saved Smart Path Config payment instrument from order supplying the following fields:
+      | subject      | <subject> |
+	  | issuer       | <issuer>  |
+	  And I create a saved Smart Path Config payment instrument from order supplying the following fields:
       | display-name | saved one |
     # Purchase item using named cart
     And I create a new shopping cart with name family
@@ -78,5 +78,5 @@ Feature: Report for B2B Buyer using system Data Policy Segments
       | Customer last name  |
 
     Examples:
-      | USER         | USER_SHARED_ID                 |
-      | usertestguid | MOBEE:usertest@elasticpath.com |
+      | subject                        | USER_SHARED_ID                 | issuer             |
+      | MOBEE:usertest@elasticpath.com | MOBEE:usertest@elasticpath.com | punchout_shared_id |

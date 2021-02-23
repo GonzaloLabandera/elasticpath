@@ -5,11 +5,9 @@ package com.elasticpath.service.tax.impl;
 
 import java.util.Objects;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.plugin.tax.TaxProviderPluginInvoker;
 import com.elasticpath.plugin.tax.calculator.TaxCalculator;
 import com.elasticpath.plugin.tax.capability.TaxCalculationCapability;
-import com.elasticpath.plugin.tax.common.TaxContextIdNames;
 import com.elasticpath.plugin.tax.domain.TaxableItemContainer;
 import com.elasticpath.plugin.tax.domain.TaxedItemContainer;
 import com.elasticpath.plugin.tax.rate.TaxRateDescriptor;
@@ -27,9 +25,17 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 	 */
 	public static final String PROVIDER_NAME = "ElasticPath";
 
-	private BeanFactory beanFactory;
+	private final TaxOperationResolvers taxOperationResolvers = new TaxOperationResolvers();
+
 	private TaxCalculator taxCalculator;
-	private TaxOperationResolvers taxOperationResolvers;
+	private TaxRateDescriptorResolver taxRateDescriptorResolver;
+
+	/**
+	 * This method is called by Spring and used to store an instance of {@link TaxRateDescriptorResolver} into {@link TaxRateDescriptorResolver}.
+	 */
+	public void init() {
+		taxOperationResolvers.putResolver(TaxRateDescriptorResolver.class, taxRateDescriptorResolver);
+	}
 
 	@Override
 	public String getName() {
@@ -43,16 +49,7 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 
 
 	private TaxOperationResolvers getTaxOperationResolvers() {
-		synchronized (ElasticPathTaxProviderPluginImpl.class) {
-			if (taxOperationResolvers == null) {
-				taxOperationResolvers = new TaxOperationResolvers();
-
-				TaxRateDescriptorResolver taxRateDescriptorResolver =
-						getBeanFactory().getPrototypeBean(TaxContextIdNames.TAX_RATE_DESCRIPTOR_RESOLVER, TaxRateDescriptorResolver.class);
-				taxOperationResolvers.putResolver(TaxRateDescriptorResolver.class, taxRateDescriptorResolver);
-			}
-			return taxOperationResolvers;
-		}
+		return taxOperationResolvers;
 	}
 
 	public TaxCalculator getTaxCalculator() {
@@ -63,12 +60,8 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 		this.taxCalculator = taxCalculator;
 	}
 
-	public BeanFactory getBeanFactory() {
-		return beanFactory;
-	}
-
-	public void setBeanFactory(final BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
+	public void setTaxRateDescriptorResolver(final TaxRateDescriptorResolver taxRateDescriptorResolver) {
+		this.taxRateDescriptorResolver = taxRateDescriptorResolver;
 	}
 
 	@Override

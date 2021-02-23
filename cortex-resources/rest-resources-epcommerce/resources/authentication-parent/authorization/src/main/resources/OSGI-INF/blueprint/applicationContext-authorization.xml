@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context-4.0.xsd
+			http://www.springframework.org/schema/util
+			http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<util:list id="accountOverrideResourceNames">
+		<value>accounts.account</value>
+		<value>accounts.account-attributes</value>
+		<value>accounts.shared-account-id</value>
+		<value>accounts.associates</value>
+		<value>accounts.associate</value>
+		<value>accounts.associatedetails</value>
+		<value>accounts.add-associate-form</value>
+		<value>addresses.account-addresses</value>
+		<value>addresses.account-address</value>
+		<value>addresses.account-address-form</value>
+		<value>addresses.account-billing-addresses</value>
+		<value>addresses.account-billing-address-selector-choice</value>
+		<value>addresses.account-billing-address-selector</value>
+		<value>addresses.account-default-billing-address</value>
+		<value>addresses.account-default-shipping-address</value>
+		<value>addresses.account-shipping-addresses</value>
+		<value>addresses.account-shipping-address</value>
+		<value>addresses.account-shipping-address-selector</value>
+		<value>addresses.account-shipping-address-selector-choice</value>
+		<value>purchases.account-purchase</value>
+		<value>paymentmethods.account-payment-methods</value>
+		<value>paymentmethods.account-payment-method</value>
+		<value>paymentinstruments.account-payment-instruments</value>
+		<value>paymentinstruments.account-payment-instrument</value>
+		<value>paymentinstruments.account-payment-instrument-form</value>
+		<value>paymentinstruments.account-default-payment-instrument-selector</value>
+		<value>paymentinstruments.account-default-payment-instrument-selector-choice</value>
+		<value>paymentinstructions.account-request-instructions-form</value>
+		<value>paymentinstructions.account-payment-instructions</value>
+	</util:list>
+
+	<bean id="accountPrincipalOverrideStrategy"
+		  class="com.elasticpath.rest.resource.authorization.strategy.impl.AccountResourcePrincipalOverrideStrategyImpl">
+		<property name="resourceNames" ref="accountOverrideResourceNames"/>
+		<property name="shiroRolesDeterminationService" ref="shiroRolesDeterminationService"/>
+		<property name="resourceIdentifierReader" ref="resourceIdentifierReader"/>
+	</bean>
+
+	<bean id="principalsOverride" class="com.elasticpath.rest.resource.authorization.PrincipalsOverrideImpl">
+		<property name="principalOverrideStrategyList" ref="principalOverrideStrategyList" />
+	</bean>
+
+	<context:component-scan base-package="com.elasticpath.rest.resource.authorization"
+							scope-resolver="org.springframework.context.annotation.Jsr330ScopeMetadataResolver"/>
+</beans>

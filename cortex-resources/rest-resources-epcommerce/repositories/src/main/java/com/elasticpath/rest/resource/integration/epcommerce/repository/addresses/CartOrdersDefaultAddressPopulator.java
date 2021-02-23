@@ -25,6 +25,19 @@ public interface CartOrdersDefaultAddressPopulator {
 	 * @return Completable with the deferred execution of the update operation.
 	 */
 	Completable updateAllCartOrdersAddresses(Customer customer, CustomerAddress address, String scope,
-			boolean updateBillingAddress, boolean updateShippingAddress);
+											 boolean updateBillingAddress, boolean updateShippingAddress);
 
+	/**
+	 * Update all of the account's cart orders default billing and shipping addreses with the address
+	 * if not already set, and boolean is true for type of address.
+	 *
+	 * @param account               account to retrieve cart orders for.
+	 * @param address               address to use to populate
+	 * @param scope                 scope to look up cart orders.
+	 * @param updateBillingAddress  true if billing address on cart order should be updated.
+	 * @param updateShippingAddress true if shipping address on cart order should be updated.
+	 * @return Completable with the deferred execution of the update operation.
+	 */
+	Completable updateAccountCartOrdersAddresses(Customer account, CustomerAddress address, String scope,
+												 boolean updateBillingAddress, boolean updateShippingAddress);
 }

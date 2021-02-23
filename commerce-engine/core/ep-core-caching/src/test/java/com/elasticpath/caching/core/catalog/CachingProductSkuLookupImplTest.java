@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
@@ -30,7 +31,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
-import com.elasticpath.cache.CacheLoader;
+import com.elasticpath.cache.CacheResult;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
@@ -83,7 +84,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByUidLoadsFromFallbackOnCacheMiss() throws Exception {
 		// Given
-		when(uidToProductCache.get(sku.getUidPk())).thenReturn(null);
+		when(uidToProductCache.get(sku.getUidPk())).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.findByUid(sku.getUidPk())).thenReturn(sku);
 
 		// When
@@ -97,7 +98,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByUidLoadsFromCacheOnCacheHit() throws Exception {
 		// Given
-		when(uidToProductCache.get(sku.getUidPk())).thenReturn(product.getUidPk());
+		when(uidToProductCache.get(sku.getUidPk())).thenReturn(CacheResult.create(product.getUidPk()));
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(product);
 
 		// When
@@ -112,7 +113,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByUidReturnsNullOnCacheHitButProductLookupFailure() throws Exception {
 		// Given
-		when(uidToProductCache.get(sku.getUidPk())).thenReturn(product.getUidPk());
+		when(uidToProductCache.get(sku.getUidPk())).thenReturn(CacheResult.create(product.getUidPk()));
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(null);
 
 		// When
@@ -127,7 +128,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByUidReturnsNullOnCacheMissAndFallbackReaderFailure() throws Exception {
 		// Given
-		when(uidToProductCache.get(sku.getUidPk())).thenReturn(null);
+		when(uidToProductCache.get(sku.getUidPk())).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.findByUid(sku.getUidPk())).thenReturn(null);
 
 		// When
@@ -141,8 +142,8 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByUidsLoadsFromFallbackOnCacheMissAndFromProductReadOnCacheHit() throws Exception {
 		// Given
-		when(uidToProductCache.get(sku.getUidPk())).thenReturn(null);
-		when(uidToProductCache.get(sku2.getUidPk())).thenReturn(product.getUidPk());
+		when(uidToProductCache.get(sku.getUidPk())).thenReturn(CacheResult.notPresent());
+		when(uidToProductCache.get(sku2.getUidPk())).thenReturn(CacheResult.create(product.getUidPk()));
 		when(fallbackSkuLookup.findByUid(sku.getUidPk())).thenReturn(sku);
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(product);
 
@@ -158,8 +159,8 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByUidsReturnsEmptyListIfFindFails() throws Exception {
 		// Given
-		when(uidToProductCache.get(sku.getUidPk())).thenReturn(null);
-		when(uidToProductCache.get(sku2.getUidPk())).thenReturn(null);
+		when(uidToProductCache.get(sku.getUidPk())).thenReturn(CacheResult.notPresent());
+		when(uidToProductCache.get(sku2.getUidPk())).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.findByUid(sku.getUidPk())).thenReturn(null);
 		when(fallbackSkuLookup.findByUid(sku2.getUidPk())).thenReturn(null);
 
@@ -173,7 +174,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByGuidLoadsFromFallbackOnCacheMiss() throws Exception {
 		// Given
-		when(guidToProductCache.get(sku.getGuid())).thenReturn(null);
+		when(guidToProductCache.get(sku.getGuid())).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.findByGuid(sku.getGuid())).thenReturn(sku);
 
 		// When
@@ -187,7 +188,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByGuidLoadsFromCacheOnCacheHit() throws Exception {
 		// Given
-		when(guidToProductCache.get(sku.getGuid())).thenReturn(product.getUidPk());
+		when(guidToProductCache.get(sku.getGuid())).thenReturn(CacheResult.create(product.getUidPk()));
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(product);
 
 		// When
@@ -202,7 +203,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByGuidReturnsNullOnCacheHitButProductLookupFailure() throws Exception {
 		// Given
-		when(guidToProductCache.get(sku.getGuid())).thenReturn(product.getUidPk());
+		when(guidToProductCache.get(sku.getGuid())).thenReturn(CacheResult.create(product.getUidPk()));
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(null);
 
 		// When
@@ -216,7 +217,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindByGuidReturnsNullOnCacheMissAndFallbackReaderFailure() throws Exception {
 		// Given
-		when(guidToProductCache.get(sku.getGuid())).thenReturn(null);
+		when(guidToProductCache.get(sku.getGuid())).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.findByGuid(sku.getGuid())).thenReturn(null);
 
 		// When
@@ -230,7 +231,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindBySkuCodeLoadsFromFallbackOnCacheMiss() throws Exception {
 		// Given
-		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(null);
+		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.findBySkuCode(sku.getSkuCode())).thenReturn(sku);
 
 		// When
@@ -244,7 +245,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindBySkuCodeLoadsFromCacheOnCacheHit() throws Exception {
 		// Given
-		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(product.getUidPk());
+		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(CacheResult.create(product.getUidPk()));
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(product);
 
 		// When
@@ -259,7 +260,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindBySkuCodeReturnsNullOnCacheHitButProductLookupFailure() throws Exception {
 		// Given
-		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(product.getUidPk());
+		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(CacheResult.create(product.getUidPk()));
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(null);
 
 		// When
@@ -273,7 +274,7 @@ public class CachingProductSkuLookupImplTest {
 	@Test
 	public void testFindBySkuCodeReturnsNullOnCacheMissAndFallbackReaderFailure() throws Exception {
 		// Given
-		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(null);
+		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.findByUid(sku.getUidPk())).thenReturn(null);
 
 		// When
@@ -288,9 +289,9 @@ public class CachingProductSkuLookupImplTest {
 	@SuppressWarnings("unchecked")
 	public void testFindBySkuCodesLoadsFromFallbackOnCacheMissAndFromProductReadOnCacheHit() throws Exception {
 		// Given
-		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(product.getUidPk());
-		when(skuCodeToProductCache.get(sku2.getSkuCode())).thenReturn(product.getUidPk());
-		when(skuCodeToProductCache.getAll(anyCollection(), any(CacheLoader.class)))
+		when(skuCodeToProductCache.get(sku.getSkuCode())).thenReturn(CacheResult.create(product.getUidPk()));
+		when(skuCodeToProductCache.get(sku2.getSkuCode())).thenReturn(CacheResult.create(product.getUidPk()));
+		when(skuCodeToProductCache.getAll(anyCollection(), any(Function.class)))
 				.thenReturn(ImmutableMap.of(sku.getSkuCode(), product.getUidPk(), sku2.getSkuCode(), product.getUidPk()));
 		when(productLookup.findByUid(product.getUidPk())).thenReturn(product);
 
@@ -319,7 +320,7 @@ public class CachingProductSkuLookupImplTest {
 
 	@Test
 	public void shouldReturnTrueOnCacheHitWhenGettingSkuExistenceStatusHitAndSkuCodeExists() {
-		when(skuCodeToExistenceStatusCache.get(SKU_CODE)).thenReturn(Boolean.TRUE);
+		when(skuCodeToExistenceStatusCache.get(SKU_CODE)).thenReturn(CacheResult.create(Boolean.TRUE));
 
 		Boolean actualResult = productSkuLookup.isProductSkuExist(SKU_CODE);
 
@@ -329,7 +330,7 @@ public class CachingProductSkuLookupImplTest {
 
 	@Test
 	public void shouldReturnFalseOnCacheHitWhenGettingSkuExistenceStatusAndSkuCodeDoesNotExist() {
-		when(skuCodeToExistenceStatusCache.get(SKU_CODE)).thenReturn(Boolean.FALSE);
+		when(skuCodeToExistenceStatusCache.get(SKU_CODE)).thenReturn(CacheResult.create(Boolean.FALSE));
 
 		Boolean actualResult = productSkuLookup.isProductSkuExist(SKU_CODE);
 
@@ -339,7 +340,7 @@ public class CachingProductSkuLookupImplTest {
 
 	@Test
 	public void shouldLoadFromFallbackOnCacheMissWhenGettingSkuExistenceStatus() {
-		when(skuCodeToExistenceStatusCache.get(SKU_CODE)).thenReturn(null);
+		when(skuCodeToExistenceStatusCache.get(SKU_CODE)).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.isProductSkuExist(SKU_CODE)).thenReturn(Boolean.TRUE);
 
 		Boolean actualResult = productSkuLookup.isProductSkuExist(SKU_CODE);
@@ -351,7 +352,7 @@ public class CachingProductSkuLookupImplTest {
 
 	@Test (expected = EpServiceException.class)
 	public void shouldThrowExceptionOnCacheMissWhenGettingSkuExistenceStatusAndProductSkuLookupFails() {
-		when(skuCodeToExistenceStatusCache.get(SKU_CODE)).thenReturn(null);
+		when(skuCodeToExistenceStatusCache.get(SKU_CODE)).thenReturn(CacheResult.notPresent());
 		when(fallbackSkuLookup.isProductSkuExist(SKU_CODE)).thenThrow(new EpServiceException("Exception"));
 
 		productSkuLookup.isProductSkuExist(SKU_CODE);

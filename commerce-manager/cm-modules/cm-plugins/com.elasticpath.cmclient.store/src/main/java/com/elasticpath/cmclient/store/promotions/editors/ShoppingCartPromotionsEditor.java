@@ -8,10 +8,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
@@ -57,7 +57,7 @@ import com.elasticpath.tags.domain.TagDictionary;
 /**
  * Implements a multi-page editor for displaying and editing promotions.
  */
-@SuppressWarnings({ "PMD.GodClass" })
+@SuppressWarnings({"PMD.GodClass"})
 public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor implements Authorizable {
 
 	/**
@@ -168,9 +168,9 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 			}
 			monitor.worked(1);
 
-			if (!checkSellingContext()) {
-				throw new CancelSaveException("Failed to check Shopper."); //$NON-NLS-1$
-			}
+			tryCleanEmptyContext();
+			validateContext();
+
 			monitor.worked(1);
 
 			// validates the rule on the client side.
@@ -262,7 +262,7 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 	 * Product/Category/SKU; false otherwise.
 	 *
 	 * @return true if all rule elements with Product/Category/SKU values have valid values (i.e. valid means the user has selected a specific
-	 *         Product/Category/SKU; false otherwise.
+	 * Product/Category/SKU; false otherwise.
 	 */
 	private boolean checkProductCategorySkuSelected() {
 		// Iterate through the Rule's rule-elements
@@ -307,8 +307,6 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 		return !productIsNull && !categoryIsNull && !skuIsNull;
 	}
 
-
-
 	@Override
 	public void reloadModel() {
 		this.setInput(getEditorInput());
@@ -338,10 +336,10 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 	@Override
 	protected String getSaveOnCloseMessage() {
 		return
-			NLS.bind(PromotionsMessages.get().PromotionEditor_OnSavePrompt,
-			getEditorName());
+				NLS.bind(PromotionsMessages.get().PromotionEditor_OnSavePrompt,
+						getEditorName());
 	}
-		
+
 	@Override
 	public void applyStatePolicy(final StatePolicy statePolicy) {
 		statePolicy.init(getModel());
@@ -352,7 +350,7 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 	public String getTargetIdentifier() {
 		return "shoppingCartPromotionEditor"; //$NON-NLS-1$
 	}
-	
+
 	@Override
 	protected String getEditorName() {
 		String name = ""; //$NON-NLS-1$
@@ -374,33 +372,35 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 		super.dispose();
 	}
 
-	private boolean checkSellingContext() {
-		Rule model = this.getModel();
-		SellingContext sellingContext = model.getSellingContext();
-		if (sellingContext == null) {
-			return true;
-		}
-		ConditionalExpression timeCE = sellingContext.getCondition(TagDictionary.DICTIONARY_TIME_GUID);
-		ConditionalExpression shopperCE = sellingContext.getCondition(TagDictionary.DICTIONARY_PROMOTIONS_SHOPPER_GUID);
+	private void validateContext() {
+		final Optional<SellingContext> sellingContext = Optional.ofNullable(this.getModel()).map(Rule::getSellingContext);
 
-		if (shopperCE == null && timeCE == null) {
-			model.setSellingContext(null);
-			this.sellingContextForDelete = sellingContext;
-		}
+		final boolean isTimeCEValid = sellingContext
+				.map(context -> context.getCondition(TagDictionary.DICTIONARY_TIME_GUID))
+				.map(ConditionalExpression::getConditionString).map(this::isConditionLengthValid).orElse(true);
+		final boolean isShopperCEValid = sellingContext
+				.map(context -> context.getCondition(TagDictionary.DICTIONARY_PROMOTIONS_SHOPPER_GUID))
+				.map(ConditionalExpression::getConditionString).map(this::isConditionLengthValid).orElse(true);
 
-		if (!(isConditionalExpressionValid(shopperCE)
-				&& isConditionalExpressionValid(timeCE))) {
+		if (!(isTimeCEValid && isShopperCEValid)) {
 			showErrorDialog(TargetedSellingMessages.get().TotalLengthOfConditionsReached);
-			return false;
+
+			throw new CancelSaveException("Failed to check Shopper."); //$NON-NLS-1$
 		}
-		return true;
 	}
 
-	private boolean isConditionalExpressionValid(final ConditionalExpression conditionalExpression) {
-		if (conditionalExpression != null) {
-			return isConditionLengthValid(conditionalExpression.getConditionString());
+	private void tryCleanEmptyContext() {
+		final Optional<SellingContext> sellingContext = Optional.ofNullable(this.getModel()).map(Rule::getSellingContext);
+
+		final Optional<ConditionalExpression> timeCE = sellingContext
+				.map(context -> context.getCondition(TagDictionary.DICTIONARY_TIME_GUID));
+		final Optional<ConditionalExpression> shopperCE = sellingContext
+				.map(context -> context.getCondition(TagDictionary.DICTIONARY_PROMOTIONS_SHOPPER_GUID));
+
+		if (!shopperCE.isPresent() && !timeCE.isPresent()) {
+			Optional.ofNullable(this.getModel()).ifPresent(model -> model.setSellingContext(null));
+			this.sellingContextForDelete = sellingContext.orElse(null);
 		}
-		return true;
 	}
 
 	private boolean isConditionLengthValid(final String conditionString) {
@@ -422,10 +422,10 @@ public class ShoppingCartPromotionsEditor extends AbstractPolicyAwareFormEditor 
 
 		couponModel = new CouponConfigPageModel(retriveCouponConfig(rule.getCode()), new CouponCollectionModel());
 	}
-	
+
 	/**
 	 * Gets the coupon config model.
-	 * 
+	 *
 	 * @return the coupon config model.
 	 */
 	public CouponConfigPageModel getCouponConfigPageModel() {

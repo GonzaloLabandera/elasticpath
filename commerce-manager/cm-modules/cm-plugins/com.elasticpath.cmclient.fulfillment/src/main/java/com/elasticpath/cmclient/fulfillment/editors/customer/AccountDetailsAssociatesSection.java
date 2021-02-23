@@ -48,6 +48,7 @@ import com.elasticpath.cmclient.fulfillment.editors.customer.dialogs.AccountAddA
 import com.elasticpath.cmclient.fulfillment.editors.customer.dialogs.AccountRemoveAssociationDialog;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.UserAccountAssociation;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.UserAccountAssociationService;
@@ -297,7 +298,9 @@ public class AccountDetailsAssociatesSection extends AbstractCmClientEditorPageS
 
 					// TODO create a new query to do here - only existing bulk Customer lookup here is by UID and we have only GUIDs.
 					Customer associate = customerService.findByGuid(userAccountAssociation.getUserGuid());
-					rows.add(new AccountDetailsAssociatesRow(associate, userAccountAssociation));
+					if (!associate.getCustomerType().equals(CustomerType.SINGLE_SESSION_USER)) {
+						rows.add(new AccountDetailsAssociatesRow(associate, userAccountAssociation));
+					}
 				}
 
 				Object[] result = rows.toArray(new Object[rows.size()]);
@@ -365,7 +368,7 @@ public class AccountDetailsAssociatesSection extends AbstractCmClientEditorPageS
 			case 1:
 				return row.getCustomer().getEmail();
 			case 2:
-				return row.getAssociation().getAccountRole().getName();
+				return row.getAssociation().getAccountRole();
 			default:
 				return ""; //$NON-NLS-1$
 			}

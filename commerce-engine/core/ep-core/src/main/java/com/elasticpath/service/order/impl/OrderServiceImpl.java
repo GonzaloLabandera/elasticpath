@@ -3,6 +3,7 @@
  */
 package com.elasticpath.service.order.impl;
 
+import static com.elasticpath.commons.constants.ContextIdNames.ACCOUNT_SEARCH_CRITERIA;
 import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SEARCH_CRITERIA;
 import static com.elasticpath.commons.constants.ContextIdNames.EVENT_ORIGINATOR_HELPER;
 import static com.elasticpath.commons.constants.ContextIdNames.FETCH_GROUP_LOAD_TUNER;
@@ -28,10 +29,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
 import org.apache.commons.collections.CollectionUtils;
@@ -102,6 +105,7 @@ import com.elasticpath.service.order.ReleaseShipmentFailedException;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentApiService;
 import com.elasticpath.service.rules.RuleService;
+import com.elasticpath.service.search.query.AccountSearchCriteria;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
 import com.elasticpath.service.store.StoreService;
@@ -117,6 +121,15 @@ import com.elasticpath.service.tax.TaxOperationService;
 public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implements OrderService {
 
 	private static final Logger LOG = Logger.getLogger(OrderServiceImpl.class);
+	/**
+	 * Key represented in order event data section, which refers to id of cm user who modifies the order.
+	 */
+	private static final String CM_USERNAME = "cm_username";
+	/**
+	 * The statuses that an order must have to trigger post capture checkout actions.
+	 */
+	private static final Set<OrderStatus> POST_CAPTURE_STATUSES = ImmutableSet.of(
+			OrderStatus.ONHOLD, OrderStatus.CREATED, OrderStatus.AWAITING_EXCHANGE);
 
 	private TimeService timeService;
 
@@ -277,6 +290,20 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 		OrderSearchCriteria orderSearchCriteria = getPrototypeBean(ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class);
 		orderSearchCriteria.setCustomerSearchCriteria(customerSearchCriteria);
+		orderSearchCriteria.setExcludedOrderStatus(OrderStatus.FAILED);
+		orderSearchCriteria.setExcludeAccountOrders(true);
+
+		return findOrdersBySearchCriteria(orderSearchCriteria, 0, Integer.MAX_VALUE, defaultLoadTuner);
+	}
+
+	@Override
+	public List<Order> findOrderByAccountGuid(final String accountGuid, final boolean isExactMatch) {
+		AccountSearchCriteria accountSearchCriteria = getPrototypeBean(ACCOUNT_SEARCH_CRITERIA, AccountSearchCriteria.class);
+		accountSearchCriteria.setGuid(accountGuid);
+		accountSearchCriteria.setFuzzySearchDisabled(isExactMatch);
+
+		OrderSearchCriteria orderSearchCriteria = getPrototypeBean(ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class);
+		orderSearchCriteria.setAccountSearchCriteria(accountSearchCriteria);
 		orderSearchCriteria.setExcludedOrderStatus(OrderStatus.FAILED);
 
 		return findOrdersBySearchCriteria(orderSearchCriteria, 0, Integer.MAX_VALUE, defaultLoadTuner);
@@ -1186,6 +1213,40 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		return update(order);
 	}
 
+	@Override
+	public Order triggerPostCaptureCheckout(final Order order) {
+		if (!canTransitionToPostCapture(order)) {
+			throw new EpServiceException("Cannot trigger post capture checkout actions for order with status [" + order.getStatus() + "].");
+		}
+		if (!order.getStatus().equals(OrderStatus.AWAITING_EXCHANGE)) {
+			order.setStatusCreated();
+		}
+		getOrderEventHelper().logOrderAccepted(order);
+		EventOriginator eventOriginator = order.getModifiedBy();
+		sendOrderEvent(OrderEventType.ORDER_ACCEPTED,
+				order.getOrderNumber(),
+				Maps.newHashMap(populateEventOriginatorData(eventOriginator)));
+
+		return update(order);
+	}
+
+	private boolean canTransitionToPostCapture(final Order order) {
+		return POST_CAPTURE_STATUSES.contains(order.getStatus());
+	}
+
+	/**
+	 * Populates event originator to map.
+	 *
+	 * @param eventOriginator the event originator.
+	 * @return the data contains cm user id.
+	 */
+	private Map<String, Object> populateEventOriginatorData(final EventOriginator eventOriginator) {
+		if (eventOriginator.getCmUser() == null) {
+			return Collections.emptyMap();
+		}
+		return ImmutableMap.of(CM_USERNAME, eventOriginator.getCmUser().getUserName());
+	}
+
 	@Deprecated
 	@Override
 	public Order releaseHoldOnOrder(final Order order) {
@@ -1214,9 +1275,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 		releaseReleasableShipments(order);
 
+		Order returnOrder = update(order);
+
 		sendOrderEvent(OrderEventType.ORDER_RELEASED, order.getOrderNumber(), null);
 
-		return update(order);
+		return returnOrder;
 	}
 
 	/**
@@ -1347,17 +1410,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	}
 
 	@Override
-	public List<Long> getFailedOrderUids(final Date toDate, final int maxResults) {
-		return getPersistenceEngine().retrieveByNamedQuery("ORDER_UID_FOR_FAILED_ORDERS_BEFORE_DATE", new Object[]{toDate}, 0, maxResults);
-	}
-
-	@Override
-	public void deleteOrders(final List<Long> orderUids) {
-		getOrderPaymentApiCleanupService().removeByOrderUidList(orderUids);
-		getPersistenceEngine().executeNamedQueryWithList("DELETE_ORDER_BY_ORDER_UID_LIST", LIST_PARAMETER_NAME, orderUids);
-	}
-
-	@Override
 	public String findLatestOrderGuidByCartOrderGuid(final String cartOrderGuid) {
 		List<String> results = getPersistenceEngine().retrieveByNamedQuery("FIND_ORDER_GUIDS_BY_CART_ORDER_GUID",
 				new Object[]{cartOrderGuid}, 0, 1);
@@ -1399,6 +1451,20 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 	}
 
+	@Override
+	public String getAccountGuidAssociatedWithOrderNumber(final String orderNumber) {
+		if (StringUtils.isBlank(orderNumber)) {
+			throw new EpServiceException("orderGuid cannot be null or empty.");
+		}
+		List<String> results = getPersistenceEngine().retrieveByNamedQuery("FIND_ACCOUNT_GUID_BY_ORDER_NUMBER", orderNumber);
+		if (results.isEmpty()) {
+			return null;
+		} else if (results.size() > 1) {
+			throw new EpServiceException("Inconsistent Data - multiple account guids found for given order number.");
+		}
+		return results.get(0);
+	}
+
 	/**
 	 * Extracts the shipments whose payments must be captured during checkout.
 	 *
@@ -1414,6 +1480,22 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public void resendOrderConfirmationEvent(final String orderNumber) {
 		sendOrderEvent(OrderEventType.RESEND_ORDER_CONFIRMATION, orderNumber, null);
+	}
+
+	@Override
+	public void sendOrderHoldNotificationEvent(final String storeCode) {
+		if (StringUtils.isBlank(storeCode)) {
+			throw new EpServiceException("storeCode cannot be null or empty.");
+		}
+		final Long orderHoldCount = getPersistenceEngine()
+				.<Long>retrieveByNamedQuery("COUNT_HELD_ORDERS_FOR_STORE", storeCode).get(0);
+		if (orderHoldCount != 0L) {
+			final Map<String, Object> additionalData = new HashMap<>();
+			additionalData.put("held_order_count", orderHoldCount);
+			additionalData.put("context", storeCode);
+
+			sendOrderEvent(OrderEventType.ORDER_ON_HOLD, null, additionalData);
+		}
 	}
 
 	/**

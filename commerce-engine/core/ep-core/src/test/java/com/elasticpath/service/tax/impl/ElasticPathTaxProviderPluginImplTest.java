@@ -9,7 +9,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.StringWriter;
@@ -24,7 +23,11 @@ import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.WriterAppender;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -49,13 +52,14 @@ import com.elasticpath.plugin.tax.domain.impl.TaxableItemImpl;
 import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptor;
 import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptorResult;
 import com.elasticpath.plugin.tax.rate.impl.TaxExclusiveRateApplier;
-import com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver;
 import com.elasticpath.service.tax.TaxJurisdictionService;
 import com.elasticpath.service.tax.calculator.impl.ElasticPathTaxCalculator;
+import com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver;
 
 /**
  * Tests the tax calculator provided by Elastic Path, {@link com.elasticpath.service.tax.calculator.impl.ElasticPathTaxCalculator }.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ElasticPathTaxProviderPluginImplTest {
 
 	private static final String LINE_ITEM_1 = "LineItem-1";
@@ -68,13 +72,23 @@ public class ElasticPathTaxProviderPluginImplTest {
 	private static final double EXPECTED_TOTAL_TAX = 75.00;
 	private static final double EXPECTED_SHIPPING_TAX = 1.50;
 
-	private final ElasticPathTaxProviderPluginImpl epTaxPlugin = new ElasticPathTaxProviderPluginImpl();
-
 	private final MutableTaxableItemContainer container = new MutableTaxableItemContainer();
 	private final List<TaxableItem> itemList = new ArrayList<>();
 	private final MutableTaxRateDescriptor gst = new MutableTaxRateDescriptor();
 	private final MutableTaxRateDescriptorResult gstDescriptionResult = new MutableTaxRateDescriptorResult();
 
+	@Mock
+	private TaxRateDescriptorResolver taxRateDescriptorResolver;
+	@InjectMocks
+	private ElasticPathTaxProviderPluginImpl epTaxPlugin;
+
+	@Mock
+	private BeanFactory beanFactory;
+	@Mock
+	private TaxJurisdictionService taxJurisdictionService;
+	@Mock
+	private TaxJurisdiction taxJurisdiction;
+	private final ElasticPathTaxCalculator epTaxCalculator = new ElasticPathTaxCalculator();
 	/**
 	 * Sets up the container.
 	 */
@@ -88,15 +102,8 @@ public class ElasticPathTaxProviderPluginImplTest {
 		itemList.add(taxableItem);
 		itemList.add(shipping);
 
-		final BeanFactory beanFactory = mock(BeanFactory.class);
-		ElasticPathTaxCalculator epTaxCalculator = new ElasticPathTaxCalculator();
 		epTaxCalculator.setBeanFactory(beanFactory);
-		final TaxJurisdictionService taxJurisdictionService = mock(TaxJurisdictionService.class);
 		epTaxCalculator.setTaxJurisdictionService(taxJurisdictionService);
-		final TaxJurisdiction taxJurisdiction = mock(TaxJurisdiction.class);
-		when(taxJurisdictionService.retrieveEnabledInStoreTaxJurisdiction(any(), any())).thenReturn(taxJurisdiction);
-
-		epTaxPlugin.setBeanFactory(beanFactory);
 		epTaxPlugin.setTaxCalculator(epTaxCalculator);
 
 		gst.setTaxJurisdiction("CA");
@@ -105,10 +112,7 @@ public class ElasticPathTaxProviderPluginImplTest {
 		gst.setValue(new BigDecimal(GST_VALUE));
 		gstDescriptionResult.setTaxInclusive(false);
 		gstDescriptionResult.addTaxRateDescriptor(gst);
-
-		TaxRateDescriptorResolver taxRateDescriptorResolver = mock(TaxRateDescriptorResolver.class);
-		when(taxRateDescriptorResolver.findTaxRateDescriptors(isA(TaxableItem.class), isA(TaxableItemContainer.class), isA(TaxJurisdiction.class))).
-				thenReturn(gstDescriptionResult);
+		epTaxPlugin.init();
 
 		when(beanFactory.getPrototypeBean(TaxContextIdNames.MUTABLE_TAXED_ITEM_CONTAINER, MutableTaxedItemContainer.class))
 			.thenReturn(new MutableTaxedItemContainer());
@@ -119,9 +123,9 @@ public class ElasticPathTaxProviderPluginImplTest {
 				return new MutableTaxedItem();
 			}
 		});
-
-		when(beanFactory.getPrototypeBean(TaxContextIdNames.TAX_RATE_DESCRIPTOR_RESOLVER, TaxRateDescriptorResolver.class))
-				.thenReturn(taxRateDescriptorResolver);
+		when(taxRateDescriptorResolver.findTaxRateDescriptors(isA(TaxableItem.class), isA(TaxableItemContainer.class), isA(TaxJurisdiction.class))).
+				thenReturn(gstDescriptionResult);
+		when(taxJurisdictionService.retrieveEnabledInStoreTaxJurisdiction(any(), any())).thenReturn(taxJurisdiction);
 	}
 
 	@Test

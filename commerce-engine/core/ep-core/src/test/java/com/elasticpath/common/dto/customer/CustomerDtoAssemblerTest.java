@@ -77,8 +77,6 @@ public class CustomerDtoAssemblerTest {
 
 	private static final String COMPANY_NAME = "COMPANY";
 
-	private static final char GENDER = 'M';
-
 	private static final String EMAIL_ADDRESS = "customer@elasticpath.com";
 
 	private static final String SHARED_ID = "SHARED_ID";
@@ -604,7 +602,6 @@ public class CustomerDtoAssemblerTest {
 			.withCustomerType(CustomerType.REGISTERED_USER)
 			.withDateOfBirth(DATE_OF_BIRTH)
 			.withPhoneNumber(PHONE_NUMBER)
-			.withGender(GENDER)
 			.withCompany(COMPANY_NAME)
 			.withToBeNotified(true)
 			.withHtmlEmailPreferred(true)
@@ -679,9 +676,6 @@ public class CustomerDtoAssemblerTest {
 				PREFERRED_CURRENCY.toString()));
 		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_PHONE, AttributeType.SHORT_TEXT.toString(), PHONE_NUMBER));
 		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_FAX, AttributeType.SHORT_TEXT.toString(), FAX_NUMBER));
-		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_GENDER,
-				AttributeType.SHORT_TEXT.toString(),
-				String.valueOf(GENDER)));
 		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_COMPANY, AttributeType.SHORT_TEXT.toString(), COMPANY_NAME));
 		attributeValueDTOs.add(createAttributeValueDto(CustomerImpl.ATT_KEY_CP_DOB,
 				AttributeType.DATE.toString(),

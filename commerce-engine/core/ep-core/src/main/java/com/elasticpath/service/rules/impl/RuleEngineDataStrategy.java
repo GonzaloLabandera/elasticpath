@@ -5,15 +5,20 @@ package com.elasticpath.service.rules.impl;
 
 import java.util.List;
 
+import com.elasticpath.service.rules.SellingContextRuleSummary;
+
 /**
  * Retrieval strategy for data required by the rule engine.
  */
 public interface RuleEngineDataStrategy {
 
 	/**
+	 * Finds active rules in context to scenario and store/catalog code.
+	 *
 	 * @param scenario rule scenario
-	 * @param storeCode store code
+	 * @param code store/catalog code
 	 * @return list of entries with rule id and its selling context
 	 */
-	List<Object[]> findActiveRuleIdSellingContextByScenarioAndStore(int scenario, String storeCode);
+	List<SellingContextRuleSummary> findActiveRuleIdSellingContext(int scenario, String code);
+
 }

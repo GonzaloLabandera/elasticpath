@@ -370,10 +370,10 @@ public class ImportJobRunnerProductAssociationImpl extends AbstractImportJobRunn
 		importBadRow.setRowNumber(rowNumber);
 		importBadRow.setRow(nextLine[0]);
 
-		final ImportFault importFault = getImportFaultError();
-		importFault.setCode("import.csvFile.badRow.duplicateRow");
-		importFault.setArgs(new String[] { "Row number", Integer.toString(rowNumber), nextLine[0] });
-
+		final ImportFault importFault = createImportFault(
+				ImportFault.ERROR,
+				"import.csvFile.badRow.duplicateRow",
+				new String[] { "Row number", Integer.toString(rowNumber), nextLine[0] });
 		importBadRow.addImportFault(importFault);
 
 		this.getImportJobStatusHandler().reportBadRows(this.getImportJobProcessId(), importBadRow);

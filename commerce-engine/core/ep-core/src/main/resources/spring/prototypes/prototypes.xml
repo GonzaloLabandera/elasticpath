@@ -87,6 +87,7 @@
 	<bean id="orderEvent" scope="prototype" class="com.elasticpath.domain.order.impl.OrderEventImpl"/>
 	<bean id="orderReturn" scope="prototype" class="com.elasticpath.domain.order.impl.OrderReturnImpl"/>
 	<bean id="orderReturnSku" scope="prototype" class="com.elasticpath.domain.order.impl.OrderReturnSkuImpl"/>
+	<bean id="orderHold" scope="prototype" class="com.elasticpath.domain.order.impl.OrderHoldImpl"/>
 	<bean id="inventory" scope="prototype" class="com.elasticpath.inventory.domain.impl.InventoryImpl"/>
 	<bean id="inventoryDto" scope="prototype" class="com.elasticpath.inventory.impl.InventoryDtoImpl"/>
 	<bean id="inventoryAudit" scope="prototype" class="com.elasticpath.domain.catalog.impl.InventoryAuditImpl"/>
@@ -389,7 +390,9 @@
 	<bean id="tagDefinitionLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.TagDefinitionLocalizedPropertyValueImpl"/>
 	<bean id="tagGroupLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.TagGroupLocalizedPropertyValueImpl"/>
 
-<!--	UserAccountAssociation-->
+	<!-- UserAccountAssociation -->
 	<bean id="userAccountAssociation" scope="prototype" class="com.elasticpath.domain.customer.impl.UserAccountAssociationImpl"/>
 
+	<!-- Outbox -->
+	<bean id="outboxMessage" scope="prototype" class="com.elasticpath.domain.messaging.impl.OutboxMessageImpl"/>
 </beans>

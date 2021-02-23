@@ -59,4 +59,16 @@ class DefaultAddressSelectionSteps {
 				.as("The region is not as expected")
 				.isEqualTo(region)
 	}
+
+	@When('^I get the default account billing address$')
+	static void getAccountBillingAddress() {
+		client.addresses()
+			.billingaddresses()
+	}
+
+	@When('^I get the default account shipping address$')
+	static void getAccountShippingAddress() {
+		client.addresses()
+				.shippingaddresses()
+	}
 }

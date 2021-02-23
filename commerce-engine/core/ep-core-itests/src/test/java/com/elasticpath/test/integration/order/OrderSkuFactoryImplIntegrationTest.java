@@ -153,7 +153,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(skuNetItem);
 		rootShoppingItem.addChildItem(skuShoeItem);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle01 = orderSkus.iterator().next();
 
 		assertEquals(3, skuBundle01.getBundleItems(productSkuLookup).size());
@@ -184,7 +184,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(skuNetItem);
 		rootShoppingItem.addChildItem(skuShoeItem);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle02 = orderSkus.iterator().next();
 
 		assertEquals(3, skuBundle02.getBundleItems(productSkuLookup).size());
@@ -215,7 +215,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(skuNetItem);
 		rootShoppingItem.addChildItem(skuFreeItem);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle03 = orderSkus.iterator().next();
 
 		assertEquals(3, skuBundle03.getBundleItems(productSkuLookup).size());
@@ -250,7 +250,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(skuFreeItem2);
 		rootShoppingItem.addChildItem(skuFreeItem3);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle04 = orderSkus.iterator().next();
 
 		assertEquals(4, skuBundle04.getBundleItems(productSkuLookup).size());
@@ -272,7 +272,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		rootShoppingItem.addChildItem(skuBallItem);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle05 = orderSkus.iterator().next();
 
 		assertEquals(1, skuBundle05.getBundleItems(productSkuLookup).size());
@@ -301,7 +301,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(skuNetItem);
 		rootShoppingItem.addChildItem(skuShoeItem);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle06 = orderSkus.iterator().next();
 
 		assertEquals(5, skuBundle06.getBundleItems(productSkuLookup).size());
@@ -350,7 +350,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(skuNetItem);
 		rootShoppingItem.addChildItem(skuShoeItem);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle07 = orderSkus.iterator().next();
 
 		assertEquals(3, skuBundle07.getBundleItems(productSkuLookup).size());
@@ -399,7 +399,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(nestedShoppingItem1);
 		rootShoppingItem.addChildItem(nestedShoppingItem2);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle07 = orderSkus.iterator().next();
 		
 		assertEquals(2, skuBundle07.getBundleItems(productSkuLookup).size());
@@ -444,7 +444,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(nestedShoppingItem1);
 		rootShoppingItem.addChildItem(nestedShoppingItem2);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle07 = orderSkus.iterator().next();
 		
 		assertEquals(2, skuBundle07.getBundleItems(productSkuLookup).size());
@@ -479,7 +479,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(skuNetItem);
 		rootShoppingItem.addChildItem(skuShoeItem);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle08 = orderSkus.iterator().next();
 
 		assertEquals(6, skuBundle08.getBundleItems(productSkuLookup).size());
@@ -513,7 +513,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(skuNetItem);
 		rootShoppingItem.addChildItem(skuShoeItem);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle09 = orderSkus.iterator().next();
 
 		assertEquals(6, skuBundle09.getBundleItems(productSkuLookup).size());
@@ -555,7 +555,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		rootShoppingItem.addChildItem(pd31Item);
 		rootShoppingItem.addChildItem(pd32Item);
 
-		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
+		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US, 0L);
 		OrderSku skuBundle11 = orderSkus.iterator().next();
 
 		assertEquals(8, skuBundle11.getBundleItems(productSkuLookup).size());

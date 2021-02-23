@@ -3,12 +3,7 @@
  */
 package com.elasticpath.persistence.impl;
 
-import static com.elasticpath.commons.exception.EventMessagePublishingException.JMS_SERVER_IS_UNAVAILABLE_MESSAGE;
-
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 import org.apache.openjpa.enhance.PersistenceCapable;
@@ -16,46 +11,51 @@ import org.apache.openjpa.event.AbstractLifecycleListener;
 import org.apache.openjpa.event.LifecycleEvent;
 import org.apache.openjpa.event.LifecycleEventManager;
 import org.apache.openjpa.event.PostPersistListener;
+import org.apache.openjpa.event.TransactionEvent;
+import org.apache.openjpa.event.TransactionListener;
 import org.apache.openjpa.event.UpdateListener;
-import org.apache.openjpa.meta.ClassMetaData;
-import org.apache.openjpa.meta.FieldMetaData;
-import org.apache.openjpa.persistence.JPAFacadeHelper;
-import org.apache.openjpa.persistence.OpenJPAPersistence;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.exception.EventMessagePublishingException;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.messaging.EventMessage;
-import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
+import com.elasticpath.persistence.openjpa.support.JPAUtil;
+import com.elasticpath.service.messaging.OutboxMessageService;
+import com.elasticpath.settings.SettingsReader;
 
 /**
  * Lifecycle event listener which sends domain events for supported entities.
  */
 public class DomainEventListener extends AbstractLifecycleListener
-		implements PostPersistListener, UpdateListener, LifecycleEventManager.ListenerAdapter {
+		implements PostPersistListener, UpdateListener, LifecycleEventManager.ListenerAdapter, TransactionListener {
 
-	private static final Logger LOGGER = Logger.getLogger(DomainEventListener.class);
+	private static final Logger LOG = Logger.getLogger(DomainEventListener.class);
 
 	private BeanFactory beanFactory;
 	private volatile JpaPersistenceEngine persistenceEngine;
-	private EventMessagePublisher eventMessagePublisher;
 	private EventMessageFactory eventMessageFactory;
 	private EventTypeFactory eventTypeFactory;
-	private  Set<Integer> eventTypes;
+	private Set<Integer> eventTypes;
+	private String domainEventChannelSettingPath;
+	private LifecycleEventFilter lifecycleEventFilter;
 
 	@Override
-	public void afterPersistPerformed(final LifecycleEvent event) {
-		handleEvent(event, EventTypeFactory.EventAction.CREATED);
+	public void afterPersist(final LifecycleEvent event) {
+		handleEvent(event, EventActionEnum.CREATED);
+	}
+
+	@Override
+	public void afterPersistPerformed(final LifecycleEvent lifecycleEvent) {
+		//no-op
 	}
 
 	@Override
 	public void afterDelete(final LifecycleEvent event) {
-		handleEvent(event, EventTypeFactory.EventAction.DELETED);
+		handleEvent(event, EventActionEnum.DELETED);
 	}
 
 	@Override
@@ -65,25 +65,72 @@ public class DomainEventListener extends AbstractLifecycleListener
 
 	@Override
 	public void beforeUpdate(final LifecycleEvent event) {
-		handleEvent(event, EventTypeFactory.EventAction.UPDATED);
+		handleEvent(event, EventActionEnum.UPDATED);
 	}
 
 	@Override
 	public void afterAttach(final LifecycleEvent event) {
-		handleEvent(event, EventTypeFactory.EventAction.UPDATED);
+		handleEvent(event, EventActionEnum.UPDATED);
 	}
 
-	private void handleEvent(final LifecycleEvent event, final EventTypeFactory.EventAction eventAction) {
+	@Override
+	public void afterBegin(final TransactionEvent transactionEvent) {
+		lifecycleEventFilter.beginTransaction();
+	}
+
+	@Override
+	public void beforeCommit(final TransactionEvent transactionEvent) {
+		//no-op
+	}
+
+	@Override
+	public void afterCommit(final TransactionEvent transactionEvent) {
+		lifecycleEventFilter.endTransaction();
+	}
+
+	@Override
+	public void afterRollback(final TransactionEvent transactionEvent) {
+		lifecycleEventFilter.endTransaction();
+	}
+
+	@Override
+	public void afterStateTransitions(final TransactionEvent transactionEvent) {
+		//no-op
+	}
+
+	@Override
+	public void afterCommitComplete(final TransactionEvent transactionEvent) {
+		//no-op
+	}
+
+	@Override
+	public void afterRollbackComplete(final TransactionEvent transactionEvent) {
+		//no-op
+	}
+
+	@Override
+	public void beforeFlush(final TransactionEvent transactionEvent) {
+		//no-op
+	}
+
+	@Override
+	public void afterFlush(final TransactionEvent transactionEvent) {
+		//no-op
+	}
+
+	@SuppressWarnings({"unchecked"})
+	private void handleEvent(final LifecycleEvent event, final EventActionEnum eventAction) {
+		final String entityGuid = getGuid(event);
 		if (eventTypeFactory.isSupported(event.getSource().getClass(), eventAction)
-				&& isDirty(((PersistenceCapable) event.getSource()))) {
+				&& !lifecycleEventFilter.isDuplicate(eventAction, (Class<PersistenceCapable>) event.getSource().getClass(), entityGuid)
+				&& JPAUtil.isDirty((PersistenceCapable) event.getSource(), getPersistenceEngine())) {
 			EventType eventType = eventTypeFactory.getEventType(event.getSource().getClass(), eventAction);
-			final String domainGuid = getGuid(event);
 
-			sendCatalogEvent(eventType, domainGuid);
+			recordDomainEvent(eventType, entityGuid);
 
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Domain event message sent: "
-						+ eventAction + " " + event.getSource().getClass() + " with GUID " + domainGuid);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Domain event message recorded: "
+						+ eventAction + " " + event.getSource().getClass() + " with GUID " + entityGuid);
 			}
 		}
 	}
@@ -91,27 +138,11 @@ public class DomainEventListener extends AbstractLifecycleListener
 	private String getGuid(final LifecycleEvent event) {
 		if (event.getSource() instanceof Category) {
 			return ((Category) event.getSource()).getCompoundGuid();
-		} else {
+		} else if (event.getSource() instanceof Entity) {
 			return ((Entity) event.getSource()).getGuid();
+		} else {
+			return "";
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private boolean isDirty(final PersistenceCapable persistenceCapable) {
-		if (persistenceCapable.pcIsDirty()) {
-			return true;
-		}
-
-		EntityManager entityManager = getPersistenceEngine().getEntityManager();
-		ClassMetaData metaData = JPAFacadeHelper.getMetaData(entityManager, persistenceCapable.getClass());
-
-		Set<Class<?>> collect = (Set<Class<?>>) OpenJPAPersistence.cast(entityManager).getDirtyObjects().stream()
-				.map(Object::getClass)
-				.collect(Collectors.toSet());
-
-		return Stream.of(metaData.getDeclaredFields())
-				.map(FieldMetaData::getRelationType)
-				.anyMatch(collect::contains);
 	}
 
 	/**
@@ -130,6 +161,28 @@ public class DomainEventListener extends AbstractLifecycleListener
 		return persistenceEngine;
 	}
 
+	/**
+	 * Records a domain event message in the Outbox table.
+	 *
+	 * @param eventType  the type of Catalog Event to trigger.
+	 * @param entityGuid the guid of the domain object associated with the event.
+	 */
+	private void recordDomainEvent(final EventType eventType, final String entityGuid) {
+		// OutboxMessageService and SettingsReader cannot be injected through Spring because this would create a circular dependency
+		OutboxMessageService outboxMessageService = beanFactory.getSingletonBean(ContextIdNames.OUTBOX_MESSAGE_SERVICE,
+				OutboxMessageService.class);
+		SettingsReader settingsReader = beanFactory.getSingletonBean(ContextIdNames.SETTINGS_READER, SettingsReader.class);
+
+		String camelUri = settingsReader.getSettingValue(domainEventChannelSettingPath).getValue();
+		EventMessage eventMessage = eventMessageFactory.createEventMessage(eventType, entityGuid);
+		outboxMessageService.add(camelUri, eventMessage);
+	}
+
+	@Override
+	public boolean respondsTo(final int eventType) {
+		return eventTypes.contains(eventType);
+	}
+
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -142,35 +195,19 @@ public class DomainEventListener extends AbstractLifecycleListener
 		this.eventMessageFactory = eventMessageFactory;
 	}
 
-	public void setEventMessagePublisher(final EventMessagePublisher eventMessagePublisher) {
-		this.eventMessagePublisher = eventMessagePublisher;
-	}
-
-	/**
-	 * Sends a domain event message.
-	 *
-	 * @param eventType        the type of Catalog Event to trigger.
-	 * @param domainObjectGuid the guid of the domain object associated with the event.
-	 */
-	private void sendCatalogEvent(final EventType eventType, final String domainObjectGuid) {
-		final EventMessage domainObjectCreatedEventMessage = eventMessageFactory.createEventMessage(eventType, domainObjectGuid);
-
-		try {
-			eventMessagePublisher.publish(domainObjectCreatedEventMessage);
-		} catch (Exception publishingException) {
-			final EventMessagePublishingException exception = new EventMessagePublishingException(JMS_SERVER_IS_UNAVAILABLE_MESSAGE);
-			exception.initCause(publishingException);
-
-			throw exception;
-		}
-	}
-
-	@Override
-	public boolean respondsTo(final int eventType) {
-		return eventTypes.contains(eventType);
-	}
-
 	public void setEventTypes(final Set<Integer> eventTypes) {
 		this.eventTypes = eventTypes;
+  }
+
+	public void setDomainEventChannelSettingPath(final String domainEventChannelSettingPath) {
+		this.domainEventChannelSettingPath = domainEventChannelSettingPath;
+	}
+
+	protected LifecycleEventFilter getLifecycleEventFilter() {
+		return lifecycleEventFilter;
+	}
+
+	public void setLifecycleEventFilter(final LifecycleEventFilter lifecycleEventFilter) {
+		this.lifecycleEventFilter = lifecycleEventFilter;
 	}
 }

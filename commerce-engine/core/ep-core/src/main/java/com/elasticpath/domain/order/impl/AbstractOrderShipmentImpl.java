@@ -407,7 +407,7 @@ public abstract class AbstractOrderShipmentImpl extends AbstractListenableValueO
 	 */
 
 	// ---- DOCsetItemSubtotal
-	protected void setItemSubtotal(final BigDecimal itemSubtotal) {
+	public void setItemSubtotal(final BigDecimal itemSubtotal) {
 		BigDecimal oldItemSubtotal = this.itemSubtotal;
 		this.itemSubtotal = itemSubtotal;
 		firePropertyChange("itemSubtotal", oldItemSubtotal, itemSubtotal); //$NON-NLS-1$
@@ -558,8 +558,7 @@ public abstract class AbstractOrderShipmentImpl extends AbstractListenableValueO
 	 */
 	@Transient
 	protected boolean isRecalculationEnabled() {
-		return recalculationEnabled && getOrder() != null && getShipmentOrderSkus() != null
-			&& !OrderShipmentStatus.FAILED_ORDER.equals(getStatus());
+		return recalculationEnabled && getOrder() != null && getShipmentOrderSkus() != null;
 	}
 
 	/**

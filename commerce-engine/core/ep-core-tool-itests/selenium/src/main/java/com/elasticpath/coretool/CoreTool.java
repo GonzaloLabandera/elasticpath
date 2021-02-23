@@ -81,6 +81,15 @@ public class CoreTool {
 	}
 
 	/**
+	 * Updates setting metadata value
+	 * @param metadataName the metadata name
+	 * @param value the metadata value
+	 */
+	public void updateSettingMetadataValue(String settingName, String metadataName, String value) {
+		runEpCoreTool("set-settings-metadata " + settingName + "@" + metadataName + "=" + value);
+	}
+
+	/**
 	 * Gets the process exit value.
 	 *
 	 * @return process exit value

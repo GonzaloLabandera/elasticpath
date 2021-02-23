@@ -199,9 +199,7 @@ public class ProductAssociationImporterImpl extends AbstractImporterImpl<Product
 				return;
 			}
 
-			ProductAssociationSearchCriteria criteria = new ProductAssociationSearchCriteria();
-			criteria.setSourceProductCode(dto.getSourceProductCode());
-			List<ProductAssociation> productAssociations = productAssociationService.findByCriteria(criteria, loadTuner);
+			final List<ProductAssociation> productAssociations = productAssociationService.getAllAssociations(dto.getSourceProductCode(), loadTuner);
 
 			processedProductCodesSet.add(dto.getSourceProductCode());
 			for (ProductAssociation productAssociation : productAssociations) {

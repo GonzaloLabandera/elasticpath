@@ -67,17 +67,6 @@
 	</attribute>
 
 	<attribute>
-		<key>CP_GENDER</key>
-		<name><value language="en">Gender</value></name>
-		<usage>UserProfile</usage>
-		<type>ShortText</type>
-		<multilanguage>false</multilanguage>
-		<required>false</required>
-		<multivalue>false</multivalue>
-		<global>false</global>
-	</attribute>
-
-	<attribute>
 		<key>CP_HTML_EMAIL</key>
 		<name><value language="en">HTML emails</value></name>
 		<usage>UserProfile</usage>

@@ -60,7 +60,7 @@ public class PurchaseEntityConverter implements Converter<Order, PurchaseEntity>
 		statusMap.put(OrderStatus.AWAITING_EXCHANGE, PurchaseStatus.IN_PROGRESS);
 		statusMap.put(OrderStatus.FAILED, PurchaseStatus.IN_PROGRESS);
 		statusMap.put(OrderStatus.IN_PROGRESS, PurchaseStatus.IN_PROGRESS);
-		statusMap.put(OrderStatus.ONHOLD, PurchaseStatus.IN_PROGRESS);
+		statusMap.put(OrderStatus.ONHOLD, PurchaseStatus.ON_HOLD);
 		statusMap.put(OrderStatus.PARTIALLY_SHIPPED, PurchaseStatus.IN_PROGRESS);
 		statusMap.put(OrderStatus.COMPLETED, PurchaseStatus.COMPLETED);
 		statusMap.put(OrderStatus.CANCELLED, PurchaseStatus.CANCELED);

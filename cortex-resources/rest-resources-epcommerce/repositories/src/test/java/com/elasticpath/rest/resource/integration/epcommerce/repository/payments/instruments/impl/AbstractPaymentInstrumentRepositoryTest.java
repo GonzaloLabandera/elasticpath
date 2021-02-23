@@ -5,6 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.payments
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +38,11 @@ import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.CustomerPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
 import com.elasticpath.domain.orderpaymentapi.impl.PICRequestContext;
+import com.elasticpath.rest.definition.accounts.AccountIdentifier;
+import com.elasticpath.rest.definition.accounts.AccountsIdentifier;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentsIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentForFormEntity;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentFormIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentIdentifier;
@@ -76,6 +81,7 @@ public abstract class AbstractPaymentInstrumentRepositoryTest {
 	static final IdentifierPart<String> SCOPE = StringIdentifier.of("MOBEE");
 	static final IdentifierPart<String> CART_ORDER_ID = StringIdentifier.of("CART_ORDER_ID");
 	static final IdentifierPart<String> CUSTOMER_ID = StringIdentifier.of("CUSTOMER_ID");
+	static final IdentifierPart<String> ACCOUNT_ID = StringIdentifier.of("ACCOUNT_ID");
 	static final IdentifierPart<String> PAYMENT_CONFIGURATION_ID = StringIdentifier.of("PAYMENT_CONFIGURATION_ID");
 	static final IdentifierPart<String> STORE_PAYMENT_CONFIGURATION_ID = StringIdentifier.of("STORE_PAYMENT_CONFIGURATION_ID");
 
@@ -115,6 +121,9 @@ public abstract class AbstractPaymentInstrumentRepositoryTest {
 	@Mock
 	BeanFactory beanFactory;
 
+	@Mock
+	Customer account;
+
 	Customer customer;
 	CustomerPaymentInstrument customerPaymentInstrument;
 	CartOrder cartOrder;
@@ -127,13 +136,13 @@ public abstract class AbstractPaymentInstrumentRepositoryTest {
 		customerPaymentInstrument = mock(CustomerPaymentInstrument.class);
 		cartOrderPaymentInstrument = mock(CartOrderPaymentInstrument.class);
 
-		when(resourceOperationContext.getUserIdentifier()).thenReturn(CUSTOMER_ID.getValue());
+		lenient().when(resourceOperationContext.getUserIdentifier()).thenReturn(CUSTOMER_ID.getValue());
 		when(resourceOperationContext.getResourceIdentifier()).thenReturn(Optional.of(createOrderPIFormIdentifier()));
-		when(resourceOperationContext.getSubject())
+		lenient().when(resourceOperationContext.getSubject())
 				.thenReturn(TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(SCOPE.getValue(),
 						CUSTOMER_ID.getValue(), LOCALE, CURRENCY));
 
-		when(customerRepository.getCustomer(CUSTOMER_ID.getValue())).thenReturn(Single.just(customer));
+		lenient().when(customerRepository.getCustomer(CUSTOMER_ID.getValue())).thenReturn(Single.just(customer));
 
 		when(customerPaymentInstrument.getGuid()).thenReturn(CUSTOMER_PAYMENT_INSTRUMENT_ID);
 		when(beanFactory.getPrototypeBean(CUSTOMER_PAYMENT_INSTRUMENT, CustomerPaymentInstrument.class)).thenReturn(customerPaymentInstrument);
@@ -149,7 +158,7 @@ public abstract class AbstractPaymentInstrumentRepositoryTest {
 		when(storePaymentProviderConfigRepository.findByGuid(STORE_PAYMENT_CONFIGURATION_ID.getValue()))
 				.thenReturn(Single.just(storePaymentProviderConfig));
 
-		when(customerDefaultPaymentInstrumentRepository.hasDefaultPaymentInstrument(customer)).thenReturn(Single.just(true));
+		lenient().when(customerDefaultPaymentInstrumentRepository.hasDefaultPaymentInstrument(customer)).thenReturn(Single.just(true));
 
 		when(customerPaymentInstrumentRepository.saveOrUpdate(customerPaymentInstrument)).thenReturn(Single.just(customerPaymentInstrument));
 		when(customerDefaultPaymentInstrumentRepository.saveAsDefault(customerPaymentInstrument)).thenReturn(Completable.complete());
@@ -200,9 +209,20 @@ public abstract class AbstractPaymentInstrumentRepositoryTest {
 				.build();
 	}
 
+	static PaymentInstrumentForFormEntity createAccountPIFormEntity(final boolean defaultOnProfile, final boolean billingAddressRequired) {
+		return createProfilePIFormEntity(defaultOnProfile, billingAddressRequired);
+	}
+
 	static SubmitResult<PaymentInstrumentIdentifier> getExpectedProfilePISubmitResult() {
 		return SubmitResult.<PaymentInstrumentIdentifier>builder()
 				.withIdentifier(buildExpectedPIIdentifier())
+				.withStatus(SubmitStatus.CREATED)
+				.build();
+	}
+
+	static SubmitResult<AccountPaymentInstrumentIdentifier> getExpectedAccountPISubmitResult() {
+		return SubmitResult.<AccountPaymentInstrumentIdentifier>builder()
+				.withIdentifier(buildExpectedAccountPIIdentifier())
 				.withStatus(SubmitStatus.CREATED)
 				.build();
 	}
@@ -213,6 +233,20 @@ public abstract class AbstractPaymentInstrumentRepositoryTest {
 				.withPaymentInstruments(PaymentInstrumentsIdentifier.builder()
 						.withScope(SCOPE)
 						.build())
+				.build();
+	}
+
+	private static AccountPaymentInstrumentIdentifier buildExpectedAccountPIIdentifier() {
+		return AccountPaymentInstrumentIdentifier.builder()
+				.withAccountPaymentInstrumentId(StringIdentifier.of(CUSTOMER_PAYMENT_INSTRUMENT_ID))
+				.withAccountPaymentInstruments(AccountPaymentInstrumentsIdentifier.builder()
+						.withAccount(AccountIdentifier.builder()
+								.withAccountId(ACCOUNT_ID)
+								.withAccounts(AccountsIdentifier.builder()
+										.withScope(SCOPE)
+										.build())
+								.build())
+					.build())
 				.build();
 	}
 

@@ -229,13 +229,13 @@ public class ModifyReservationProcessorImpl extends AbstractProcessor implements
 		newLedger.addAll(paymentEvents);
 
 		boolean isModifyReservationSuccessful = isModifyReservationSuccessful(modifyRequest, newLedger);
-
-		if (paymentEvents.isEmpty() && !isModifyReservationSuccessful) {
+		if (isModifyReservationSuccessful) {
+			return new PaymentAPIResponse(paymentEvents, true);
+		} else {
 			return new PaymentAPIResponse(paymentEvents,
 					"Increase amount modification failed.",
-					"Increase amount modification failed due the modify process has thrown exception.");
-		} else {
-			return new PaymentAPIResponse(paymentEvents, isModifyReservationSuccessful);
+					"Elastic Path attempted to replace the existing reservation with a new, higher amount, but was unsuccessful.\n"
+							+ "Therefore, the order modification cannot be completed.");
 		}
 	}
 

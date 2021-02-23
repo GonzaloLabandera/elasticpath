@@ -15,6 +15,7 @@ import cucumber.api.DataTable
 import cucumber.api.java.en.Given
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import org.apache.commons.lang.StringUtils
 
 class JWTAuthorizationSteps {
 
@@ -24,7 +25,6 @@ class JWTAuthorizationSteps {
 	private static final String DEFAULT_ISSUER = "am"
 	private static final String DEFAULT_USER_ID = "usertestguid"
 	private static final String CLAIM_SCOPE = "scope"
-	private static final String CLAIM_ROLES = "roles"
 	private static final String CLAIM_PROFILE = "profile"
 	private static final String CLAIM_METADATA = "metadata"
 
@@ -38,27 +38,72 @@ class JWTAuthorizationSteps {
 	private static final String INVALID_PRIVATE_KEY = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCSGeKU62wRhqdS6FVjdF6P8KlitatY7VzoBvI9n/xctUC7oRQw9N6f3g+tPunAgCT/HUW/9gk1hfjCN+MJ3c4iZJZkg/S8XLLfjrFDDUMILlSZizpV0vTi/OGcHC68C3eiqIF1q/zlho4LkowK3/dIHRcUIFr/YUj0RGsxmSYmV3fNVtN/lyE5uTnFrgyt3iZ4CDCihlTh+mjNJgdVAbK6wOFCDOYpUDhkQ9jbm7VXraiPvH3u0CyOKunz5vf55IJXi6xfzGGal56VACKSJTaNS61NPpbCo56jVR/s20HLCyMlqXibfaErkvcytZ4EDawqtoMmiiWtiFpq+9bZljQPAgMBAAECggEASljNysZ6efix0SjVuwSO0mS/bbHQ/jHb418VinKNc4fw5wozQi5505SnGZw4S3NqYEA/LE5BpXEFg5/48x5iNXJGbeQQeIIbrFPqtJpdEB6zgmctSltNruzMyio1Rg/301g4eO8KhKqSQiVTCn2qUpIrGlzUsbyJ6XOfsN+kYEHBqo+iFYd97lGGhboDK8lhAgKIHJVX6LVi+lLDovGtdQJEF1fESmahH6yfQ+4p4Fqi1dSKTMiE+LJuybgouKJh9TCvTffMC0IBWEDlcnqtLQErhM/Wc90qDDPrCq+1P6coxi8+MgHfj4JucBAIq/Ehdu7TrOfE9cxku9b4DyIloQKBgQDBvAnXzykUn4LqntQYUe7FJrx+YN0TgYLW32uLHvGmQT2ndlO7SaHZTP+F/b5bCyVU7qSsUM1NMTDW+g9WyjbOwtRV6vxieSQ2paByCQKPe/s4bEId7Kv6GCA5SnEmuwYOdABxP/+GfWLH+lPp1LxEUUgWhyI5bpaKh9VZnlpXNwKBgQDBDrI6DocMBTzEHIu+LqwVtklsWUrlbm2AVkuMs6pSNwoGrPFn5eBcvVmr69bzyZqeFZ85rjOeNsT9X8JVI902XuLPy8pQ72LxlP4omHyawey9PAfK1bmDN/9Pzv3rG1jDWNjRTr/oWErCfcVCDkvx3cIqo/RaAMHc18bMhn1F6QKBgQCAil3RhY7RMyCuwOEincIZpyDrjSNB3O1N2gFF1ispTyI0KStXGXy8a/0iDwCs8ZE8b/ZsqlP9QoUQLevdft+sgdJWi0oXoB7p7yysXNQJFY7SmemoZy6YCkffG0hGFVLoZgkhGwBUYH8ZBjuE6vRbM77ry49mobxaf9OL2ahBMwKBgB9cWctgjMOBHkvlLzYnssCcKfU11BrNA3Czk/Y5QVO1qSVIdraf+wBVqflpiDN17m37qS/fgncTApD+Oz1FZCvu4f1LZ4QaPwJrZ5YEn0ksc16SH9ntOgN81zaJs2m7uYGSLzZhCn+dyBcsAx0l4WRa163BkHIGaXeMfbi/qB3xAoGAD0KUxQZ3ZVVT0ZHLOp17wj48z3YEJz6LDxXmF4OT78Rpob11fLBUsQr2wdFe/ahziEaK70h3LT7V+KxYgSnwxyTpNLMyMJBjIyBIbn/Nodd3eTz2teFFT9e1KflTc4rPL9RBZAtTRE/VagByOB7T/3ppZfHVFFhJjmGW88uK0oA="
 
 	private static final Map<String, String> privateKeyMap =
-			["am": PRIMARY_JWT_PRIVATE_KEY,
-			 "punchout_attrval": SECOND_JWT_PRIVATE_KEY,
-			 "punchout_shared_id" : SECOND_JWT_PRIVATE_KEY,
-			 "invalid": INVALID_PRIVATE_KEY]
+			["am"                : PRIMARY_JWT_PRIVATE_KEY,
+			 "punchout_attrval"  : SECOND_JWT_PRIVATE_KEY,
+			 "punchout_shared_id": SECOND_JWT_PRIVATE_KEY,
+			 "invalid"           : INVALID_PRIVATE_KEY]
 
 	@Given('^I login using jwt authorization with the following details$')
 	static void setHeaderValue(final DataTable tokenDetails) {
 		Map<String, String> jwtTokenMap = tokenDetails.asMap(String.class, String.class)
-		String roleString = jwtTokenMap.get(CLAIM_ROLES)
 		String accountSharedId = jwtTokenMap.get("account_shared_id")
 		String scope = jwtTokenMap.getOrDefault("scope", DEFAULT_SCOPE)
-		String userId = jwtTokenMap.getOrDefault("user_id", DEFAULT_USER_ID)
+		String userId = replaceEmptyWithNull(jwtTokenMap.getOrDefault("user_id", null))
 		String issuer = jwtTokenMap.getOrDefault("issuer", DEFAULT_ISSUER)
+		String subject = replaceEmptyWithNull(jwtTokenMap.getOrDefault("subject", null))
+		subject = (subject == null && userId == null) ? DEFAULT_USER_ID : subject
+
 		int expirationInSeconds = jwtTokenMap.get("expiration_in_seconds") == null ? 300 : Integer.parseInt(jwtTokenMap.get("expiration_in_seconds"))
 
-		String metadata = getMetadata(userId)
-		String token = createToken(roleString, userId, scope, accountSharedId, metadata, expirationInSeconds, issuer)
+		String token = generateTokenWithMetadata(userId, subject, scope, accountSharedId, expirationInSeconds, issuer)
 
 		Map<String, String> headers = new HashMap<String, String>()
 		headers.put("Authorization", "Bearer " + token)
 		client.setHeaders(headers)
+	}
+
+	@Given('^I login using jwt authorization with metadata and the following details inside$')
+	static void setHeaderForTokenWithMetadata(final DataTable tokenDetails) {
+		Map<String, String> jwtTokenMap = tokenDetails.asMap(String.class, String.class)
+		String accountSharedId = jwtTokenMap.get("account_shared_id")
+		String scope = jwtTokenMap.getOrDefault("scope", DEFAULT_SCOPE)
+		String userId = jwtTokenMap.get("user_id")
+		String issuer = jwtTokenMap.getOrDefault("issuer", DEFAULT_ISSUER)
+		int expirationInSeconds = jwtTokenMap.get("expiration_in_seconds") == null ? 300 : Integer.parseInt(jwtTokenMap.get("expiration_in_seconds"))
+
+		String metadataUserId = jwtTokenMap.getOrDefault("metadata_user_id", StringUtils.EMPTY)
+		String firstName = jwtTokenMap.getOrDefault("metadata_first_name", StringUtils.EMPTY)
+		String lastName = jwtTokenMap.getOrDefault("metadata_last_name", StringUtils.EMPTY)
+		String username = jwtTokenMap.getOrDefault("metadata_username", StringUtils.EMPTY)
+		String userEmail = jwtTokenMap.getOrDefault("metadata_user_email", StringUtils.EMPTY)
+		String userCompany = jwtTokenMap.getOrDefault("metadata_user_company", StringUtils.EMPTY)
+
+		String token = generateTokenWithMetadata(metadataUserId, firstName, lastName, username, userEmail, userCompany, userId,
+				scope, accountSharedId, expirationInSeconds, issuer)
+
+		Map<String, String> headers = new HashMap<String, String>()
+		headers.put("Authorization", "Bearer " + token)
+		client.setHeaders(headers)
+	}
+
+	private static String replaceEmptyWithNull(final String value) {
+		return StringUtils.isEmpty(value) ? null : value
+	}
+
+	private static String generateTokenWithMetadata(final String metadataUserId, final String userId, final String scope,
+													final String accountSharedId, final int expirationInSeconds, final String issuer) {
+		String metadata = getMetadata(metadataUserId)
+
+		return createToken(userId, scope, accountSharedId, metadata, expirationInSeconds, issuer)
+	}
+
+	private static String generateTokenWithMetadata(final String metadataUserId, final String firstName, final String lastName,
+													final String username, final String userEmail, final String userCompany,
+													final String userId, final String scope,
+													final String accountSharedId, final int expirationInSeconds, final String issuer) {
+		String metadata = getMetadata(metadataUserId, firstName, lastName, username, userEmail, userCompany)
+
+		return createToken(userId, scope, accountSharedId, metadata, expirationInSeconds, issuer)
 	}
 
 	//inspiration from https://github.elasticpath.net/commerce/enterprise-account-management/blob/master/app-auth/src/main/java/com/elasticpath/eam/appauth/service/impl/AppTokenServiceImpl.java
@@ -74,10 +119,8 @@ class JWTAuthorizationSteps {
 	}
 
 
-	static String createToken(final String roleString, final String userId, final String scope, final String accountGuid,
+	static String createToken(final String userId, final String scope, final String accountGuid,
 							  final String metadata, final int expirationInSeconds, final String issuer) {
-		List<String> roles = roleString.split(",").collect {a -> a.trim().toUpperCase()}
-
 		Instant now = Instant.now()
 		Date expiration = Date.from(now.plus(expirationInSeconds, ChronoUnit.SECONDS))
 		Date issuedAt = Date.from(now)
@@ -89,7 +132,6 @@ class JWTAuthorizationSteps {
 				.setExpiration(expiration)
 				.setIssuedAt(issuedAt)
 				.claim(CLAIM_SCOPE, scope) // Multiple scopes are encoded into a single space delimited string
-				.claim(CLAIM_ROLES, roles) // Roles are represented by a json list
 				.claim(CLAIM_PROFILE, accountGuid)
 				.claim(CLAIM_METADATA, metadata)
 				.signWith(getPrivateKey(issuer))
@@ -97,8 +139,27 @@ class JWTAuthorizationSteps {
 	}
 
 	static String getMetadata(final String userId) {
+		if (StringUtils.isEmpty(userId)) {
+			return null
+		}
 		String json = Json.createObjectBuilder()
 				.add("user-id", userId)
+				.build()
+				.toString()
+
+		return Base64.getEncoder().encodeToString(json.getBytes())
+	}
+
+	static String getMetadata(final String userId, final String firstName, final String lastName, final String username,
+							  final String userEmail, final String userCompany) {
+
+		String json = Json.createObjectBuilder()
+				.add("user-id", userId)
+				.add("first-name", firstName)
+				.add("last-name", lastName)
+				.add("user-name", username)
+				.add("user-email", userEmail)
+				.add("user-company", userCompany)
 				.build()
 				.toString()
 

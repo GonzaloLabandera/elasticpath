@@ -22,7 +22,7 @@ public class BulkSetSettingParser extends CliDB implements CliParser {
 
 	@Override
 	public void execute(final String param) {
-		AbstractBulkSetSetting logic = new AbstractBulkSetSetting(getUrl(), getUsername(), getPassword(), getDriverClass(), getMinIdle(),
+		final AbstractBulkSetSetting logic = new AbstractBulkSetSetting(getUrl(), getUsername(), getPassword(), getDriverClass(), getMinIdle(),
 				getMaxIdle()) {
 			@Override
 			protected LoggerFacade getLogger() {
@@ -31,9 +31,9 @@ public class BulkSetSettingParser extends CliDB implements CliParser {
 		};
 
 		// Use the properties config file parser used by the CliDB
-		Properties configProperties = LoadPropertiesHelper.loadProperties(param);
+		final Properties configProperties = LoadPropertiesHelper.loadProperties(param);
 
-		Set<EpSetting> settings = new HashSet<>();
+		final Set<EpSetting> settings = new HashSet<>(configProperties.size());
 		for (Entry<Object, Object> setting : configProperties.entrySet()) {
 			settings.add(logic.parseSettingString((String) setting.getKey(), (String) setting.getValue()));
 		}

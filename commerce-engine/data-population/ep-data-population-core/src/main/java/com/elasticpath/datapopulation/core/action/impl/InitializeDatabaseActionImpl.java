@@ -53,7 +53,7 @@ public class InitializeDatabaseActionImpl implements DataPopulationAction {
 
 	@Override
 	public void execute(final DataPopulationContext context) {
-		LOG.info("Database initialization: validating the sql files are ready for consumption");
+		LOG.debug("Database initialization: validating the sql files are ready for consumption");
 
 		// Load filtering properties from file
 		if (filterProperties == null) {
@@ -91,8 +91,13 @@ public class InitializeDatabaseActionImpl implements DataPopulationAction {
 		actionConfiguration.setUsingCreatedConnection(true);
 		context.setActionConfiguration(actionConfiguration);
 
-		LOG.info("Initializing the database using SQL file '" + filteredSqlFile);
+		LOG.debug("Initializing the database using SQL file '" + filteredSqlFile);
 		sqlAction.execute(context);
+	}
+
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		return "Initializing database using SQL file '" + filteredSqlFile.getPath() + "'";
 	}
 
 	/**

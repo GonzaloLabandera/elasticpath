@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer;
 
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.rest.command.ExecutionResult;
 
 /**
@@ -19,7 +20,7 @@ public interface CustomerIdentifierStrategy {
 	 *
 	 * @return true if customer exists for the given parameters.
 	 */
-	ExecutionResult<Void> isCustomerExists(String userId, String storeCode, String customerIdentifierKey);
+	ExecutionResult<Boolean> isCustomerExists(String userId, String storeCode, String customerIdentifierKey);
 
 	/**
 	 * Derives the customer's guid as per given parameters.
@@ -38,4 +39,12 @@ public interface CustomerIdentifierStrategy {
 	 * @return customer identifier key.
 	 */
 	String getCustomerIdentificationKeyField();
+
+	/**
+	 * Returns the user id obtained from the customer.
+	 *
+	 * @param customer customer
+	 * @return the user id.
+	 */
+	ExecutionResult<String> deriveUserIdFromCustomer(Customer customer);
 }

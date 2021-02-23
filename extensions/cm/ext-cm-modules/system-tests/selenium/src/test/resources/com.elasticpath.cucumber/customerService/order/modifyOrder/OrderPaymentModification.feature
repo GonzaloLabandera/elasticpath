@@ -255,6 +255,102 @@ Feature: Order Payments Modification
       | CONFIGURATION_NAME   | PAYMENT_INSTRUMENT_NAME | NEW_TOTAL | ORIGINAL_TOTAL |
       | Cancel Reserve FAILS | my visa                 | $121.50   | $131.50        |
 
+  Scenario Outline: Decreasing order total with Modify Reserve unsupported and Reserve FAILS should see Reserve FAILED
+    Given I go to Payment Configurations
+    And I create a new Payment Configuration with following details
+      | PROVIDER           | Smart Path Modify Unsupported |
+      | METHOD             | CARD                          |
+      | CONFIGURATION_NAME | <CONFIGURATION_NAME>          |
+      | DISPLAY_NAME       | <CONFIGURATION_NAME>          |
+    And I configure the payment configuration properties
+      | RESERVE | FAILS_2ND_TIME |
+    And I save the payment configuration
+    And I activate the newly created payment configuration
+    And I select and save the newly created payment configuration for store MOBEE
+    And I have created payment instrument with the newly created payment configuration on my profile:
+      | display-name | <PAYMENT_INSTRUMENT_NAME> |
+    And I make a purchase with newly created payment instrument for scope mobee with following skus
+      | skuCode      | quantity |
+      | physical_sku | 1        |
+    And I search and open order editor for the latest order
+    When I modify order shipment line item discount to 1
+    And I set order shipment line item discount to 10, save the order and reserve a new amount
+    Then I see new reservations
+      | Payment source | <PAYMENT_INSTRUMENT_NAME> |
+      | Status         | Failed                    |
+    And I can finish Payment Reservation
+    And I should see following order payment transaction in the Payment History
+      | Method                      | <CONFIGURATION_NAME>      |
+      | Type                        | Reserve                   |
+      | Details                     | <PAYMENT_INSTRUMENT_NAME> |
+      | Status                      | Failed                    |
+      | Amount                      | <NEW_TOTAL>               |
+      | Original payment instrument | Yes                       |
+    And I should see following order payment transaction in the Payment History
+      | Method                      | <CONFIGURATION_NAME>      |
+      | Type                        | Reserve                   |
+      | Details                     | <PAYMENT_INSTRUMENT_NAME> |
+      | Status                      | Approved                  |
+      | Amount                      | <ORIGINAL_TOTAL>          |
+      | Original payment instrument | Yes                       |
+    When I complete the shipment for shipment ID 1
+    Then I should see following order payment transaction in the Payment History
+      | Method                      | <CONFIGURATION_NAME>      |
+      | Type                        | Charge                    |
+      | Details                     | <PAYMENT_INSTRUMENT_NAME> |
+      | Status                      | Approved                  |
+      | Amount                      | <NEW_TOTAL>               |
+      | Original payment instrument | Yes                       |
+
+    Examples:
+      | CONFIGURATION_NAME | PAYMENT_INSTRUMENT_NAME | NEW_TOTAL | ORIGINAL_TOTAL |
+      | Reserve FAILS 2ND  | my visa                 | $121.50   | $131.50        |
+
+
+  Scenario Outline: Increasing order total with Modify Reserve unsupported and Reserve FAILS should see Reserve FAILED
+    Given I go to Payment Configurations
+    And I create a new Payment Configuration with following details
+      | PROVIDER           | Smart Path Modify Unsupported |
+      | METHOD             | CARD                          |
+      | CONFIGURATION_NAME | <CONFIGURATION_NAME>          |
+      | DISPLAY_NAME       | <CONFIGURATION_NAME>          |
+    And I configure the payment configuration properties
+      | RESERVE | FAILS_2ND_TIME |
+    And I save the payment configuration
+    And I activate the newly created payment configuration
+    And I select and save the newly created payment configuration for store MOBEE
+    And I have created payment instrument with the newly created payment configuration on my profile:
+      | display-name | <PAYMENT_INSTRUMENT_NAME> |
+    And I make a purchase with newly created payment instrument for scope mobee with following skus
+      | skuCode      | quantity |
+      | physical_sku | 1        |
+    And I search and open order editor for the latest order
+    When I modify order shipment line item quantity to 2
+    When I enter 3 for order shipment quantity
+    Then I cannot complete Payment Reservation with error message Elastic Path attempted to replace the existing reservation with a new, higher amount, but was unsuccessful.
+    And I see new reservations
+      | Payment source | <PAYMENT_INSTRUMENT_NAME> |
+      | Status         | Failed                    |
+    And I cancel Payment Reservation
+    And I should see following order payment transaction in the Payment History
+      | Method                      | <CONFIGURATION_NAME>      |
+      | Type                        | Reserve                   |
+      | Details                     | <PAYMENT_INSTRUMENT_NAME> |
+      | Status                      | Failed                    |
+      | Amount                      | <NEW_TOTAL>               |
+      | Original payment instrument | Yes                       |
+    And I should see following order payment transaction in the Payment History
+      | Method                      | <CONFIGURATION_NAME>      |
+      | Type                        | Reserve                   |
+      | Details                     | <PAYMENT_INSTRUMENT_NAME> |
+      | Status                      | Approved                  |
+      | Amount                      | <ORIGINAL_TOTAL>          |
+      | Original payment instrument | Yes                       |
+
+    Examples:
+      | CONFIGURATION_NAME | PAYMENT_INSTRUMENT_NAME | NEW_TOTAL | ORIGINAL_TOTAL |
+      | Reserve FAILS 2ND  | my visa                 | $25.00    | $131.50        |
+
   Scenario Outline: Modify Reserve Fails is not recorded when modify fails increasing order total
     Given I go to Configuration
     And I go to Payment Configurations
@@ -303,7 +399,11 @@ Feature: Order Payments Modification
       | skuCode      | quantity |
       | physical_sku | 1        |
     And I search and open order editor for the latest order
-    When I modify order shipment line item discount to 10
+    When I set order shipment line item discount to 10, save the order and reserve a new amount
+    Then I see new reservations
+      | Payment source | <PAYMENT_INSTRUMENT_NAME> |
+      | Status         | Failed                    |
+    And I can finish Payment Reservation
     And I click on Show Skipped Payment Events
     Then I should see following order payment transaction in the Payment History with skipped events
       | Method  | <PAYMENT_METHOD>          |

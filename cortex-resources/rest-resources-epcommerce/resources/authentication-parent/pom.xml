@@ -31,6 +31,7 @@
 
 	<modules>
 		<module>authentication</module>
+		<module>authorization</module>
 		<module>spring-oauth2</module>
 		<module>oauth2-tokenstore-epcommerce</module>
 		<module>oauth2-tokenstore-memory</module>

@@ -16,7 +16,6 @@
 		<epdb.maven.artifactId>h2</epdb.maven.artifactId>
 		<epdb.maven.version>${com.h2database.version}</epdb.maven.version>
 		<ep.activemq.configUri>broker:(tcp://localhost:61621)?useJmx=true&amp;persistent=false</ep.activemq.configUri>
-		<ep.spring.profile>${spring.non.jta.profile}</ep.spring.profile>
 	</properties>
 
 	<profiles>
@@ -126,7 +125,6 @@
 											<outputDirectory>${project.build.directory}</outputDirectory>
 										</artifactItem>
 									</artifactItems>
-									<excludes>**/ep-jta-*.jar</excludes>
 								</configuration>
 							</execution>
 							<execution>
@@ -154,7 +152,7 @@
 					<plugin>
 						<groupId>org.apache.activemq.tooling</groupId>
 						<artifactId>activemq-maven-plugin</artifactId>
-						<version>${org.apache.activemq.tooling.version}</version>
+						<version>${org.apache.activemq.version}</version>
 						<executions>
 							<execution>
 								<id>activemq-embedded-tcp</id>

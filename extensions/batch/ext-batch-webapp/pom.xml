@@ -56,9 +56,9 @@
 					<configuration>
 						<path>${ep.batch.context}</path>
 						<port>${ep.batch.tomcat.port.http}</port>
-						<contextFile>${project.build.directory}/${build.finalName}/META-INF/context.xml</contextFile>
+						<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
 						<systemProperties>
-							<ep.search.default.url>${ep.search.url}</ep.search.default.url>
+							<ep.search.replica.url>${ep.search.url}</ep.search.replica.url>
 							<epdb.username>${epdb.username}</epdb.username>
 							<epdb.password>${epdb.password}</epdb.password>
 							<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
@@ -66,16 +66,12 @@
 							<epdb.url>${epdb.url}</epdb.url>
 							<epdb.ro.url>${epdb.ro.url}</epdb.ro.url>
 							<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
-							<epdb.data.source.xa.factory>${epdb.data.source.xa.factory}</epdb.data.source.xa.factory>
-							<epdb.data.source.xa.type>${epdb.data.source.xa.type}</epdb.data.source.xa.type>
 							<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
 							<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
 							<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
 							<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
 							<ep.jms.type>${ep.jms.type}</ep.jms.type>
 							<ep.jms.url>${ep.jms.url}</ep.jms.url>
-							<ep.jms.xa.factory>${ep.jms.xa.factory}</ep.jms.xa.factory>
-							<ep.jms.xa.type>${ep.jms.xa.type}</ep.jms.xa.type>
 							<ep.catalog.batch.database.drop.script>${ep.catalog.batch.database.drop.script}</ep.catalog.batch.database.drop.script>
 							<ep.catalog.batch.database.create.script>${ep.catalog.batch.database.create.script}</ep.catalog.batch.database.create.script>
 							<ep.catalog.batch.script.separator>${ep.catalog.batch.script.separator}</ep.catalog.batch.script.separator>
@@ -155,8 +151,8 @@
 				</plugin>
 				<plugin>
 					<groupId>com.google.code.maven-replacer-plugin</groupId>
-					<artifactId>replacer</artifactId>
-					<version>{maven-replacer-plugin.version}</version>
+					<artifactId>maven-replacer-plugin</artifactId>
+					<version>${maven-replacer-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

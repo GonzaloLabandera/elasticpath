@@ -107,17 +107,18 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 		if (accountSharedId != null) {
 			return findCustomerSessionByGuidAndAccountSharedIdAsSingle(userGuid, accountSharedId);
 		}
-		return findCustomerSessionByGuidAsSingle(userGuid);
+		String storeCode = SubjectUtil.getScope(resourceOperationContext.getSubject());
+		return findCustomerSessionByGuidAndStoreCodeAsSingle(userGuid, storeCode);
 	}
 
 	@Override
 	public Single<CustomerSession> createCustomerSessionAsSingle() {
-		String userGuid = resourceOperationContext.getUserIdentifier();
-		String accountSharedId = SubjectUtil.getAccountSharedId(resourceOperationContext.getSubject());
+		final String userGuid = resourceOperationContext.getUserIdentifier();
+		final String accountSharedId = SubjectUtil.getAccountSharedId(resourceOperationContext.getSubject());
 		if (accountSharedId != null) {
-			createCustomerSessionByGuidAccountSharedIdAndContext(userGuid, accountSharedId);
+			return Single.just(createCustomerSessionByGuidAccountSharedIdAndContext(userGuid, accountSharedId));
 		}
-		return  Single.just(createCustomerSessionByGuidAndContext(userGuid));
+		return Single.just(createCustomerSessionByGuidAndContext(userGuid));
 	}
 
 	private CustomerSession createCustomerSessionByGuidAndContext(final String userGuid) {
@@ -140,23 +141,23 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 	}
 
 	@Override
-	@CacheResult
-	public ExecutionResult<CustomerSession> findCustomerSessionByGuid(final String customerGuid) {
+	@CacheResult(uniqueIdentifier = "getCustomerSessionByGuidAndScope")
+	public ExecutionResult<CustomerSession> findCustomerSessionByGuidAndStoreCode(final String customerGuid, final String storeCode) {
 		return new ExecutionResultChain() {
 			@Override
 			public ExecutionResult<?> build() {
-				final Shopper shopper = getShopperByCustomerGuid(customerGuid);
+				final Shopper shopper = getShopperByCustomerGuid(customerGuid, storeCode);
 
 				Ensure.notNull(shopper, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
 
-				return createCustomerSession(getStoreCodeFromSubjectIfPossible(shopper), shopper);
+				return createCustomerSession(storeCode, shopper);
 			}
 		}.execute();
 	}
 
 	@Override
-	public Single<CustomerSession> findCustomerSessionByGuidAsSingle(final String customerGuid) {
-		return reactiveAdapter.fromRepositoryAsSingle(() -> findCustomerSessionByGuid(customerGuid));
+	public Single<CustomerSession> findCustomerSessionByGuidAndStoreCodeAsSingle(final String customerGuid, final String storeCode) {
+		return reactiveAdapter.fromRepositoryAsSingle(() -> findCustomerSessionByGuidAndStoreCode(customerGuid, storeCode));
 	}
 
 	@Override
@@ -166,16 +167,9 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 				findCustomerSessionByCustomerGuidAndAccountSharedId(customerGuid, accountSharedId, storeCode));
 	}
 
-	private Shopper getShopperByCustomerGuid(final String customerGuid) {
-		final Subject subject = resourceOperationContext.getSubject();
-		Shopper shopper;
+	private Shopper getShopperByCustomerGuid(final String customerGuid, final String storeCode) {
 
-		if (subject == null) {
-			shopper = shopperService.findByCustomerGuid(customerGuid);
-		} else {
-			final String storeCode = SubjectUtil.getScope(subject);
-			shopper = shopperService.findByCustomerGuidAndStoreCode(customerGuid, storeCode);
-		}
+		Shopper shopper = shopperService.findByCustomerGuidAndStoreCode(customerGuid, storeCode);
 
 		if (shopper == null) {
 			shopper = Assign.ifSuccessful(findByCustomerGuidWithoutException(customerGuid));
@@ -221,11 +215,6 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 		return Completable.complete();
 	}
 
-	private String getStoreCodeFromSubjectIfPossible(final Shopper shopper) {
-		final Subject subject = resourceOperationContext.getSubject();
-		return subject == null ? shopper.getStoreCode() : SubjectUtil.getScope(subject);
-	}
-
 	private ExecutionResult<Shopper> findByCustomerGuidWithoutException(final String customerGuid) {
 		try {
 			final Customer customer = customerService.findByGuid(customerGuid);
@@ -244,7 +233,7 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 	}
 
 	@Override
-	@CacheResult
+	@CacheResult(uniqueIdentifier = "getCustomerSessionBySharedId")
 	public ExecutionResult<CustomerSession> findCustomerSessionBySharedId(final String storeCode, final String customerSharedId) {
 		return new ExecutionResultChain() {
 			@Override
@@ -342,7 +331,7 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 				return ExecutionResultFactory.createNotFound(
 						String.format("Customer not found for given customer shared id %s and store %s", customerSharedId, storeCode));
 			}
-			final Shopper shopper = shopperService.findOrCreateShopper(customer, customer.getStoreCode());
+			final Shopper shopper = shopperService.findOrCreateShopper(customer, storeCode);
 
 			return ExecutionResultFactory.createReadOK(shopper);
 		} catch (Exception e) {

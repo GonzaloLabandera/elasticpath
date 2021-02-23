@@ -249,7 +249,7 @@ public class ApportioningCalculatorImpl implements ApportioningCalculator {
 
 			//On Order exchange wizard tax calculation may be invoked 
 			//on item without unit price
-			if (!item.hasPrice()) {
+			if (!itemPricingSnapshot.hasPrice()) {
 				continue;
 			}
 			String guid = item.getGuid();

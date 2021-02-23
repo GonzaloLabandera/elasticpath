@@ -44,7 +44,7 @@ public class CachingProductTypeDaoImpl extends AbstractDaoImpl implements Produc
 
 	@Override
 	public ProductType findProductTypeWithAttributes(final String name) {
-		return getProductTypeByNameCache().get(name, getProductTypeByNameCacheLoader());
+		return getProductTypeByNameCache().get(name, productTypeByNameCacheLoader::load);
 	}
 
 	@Override

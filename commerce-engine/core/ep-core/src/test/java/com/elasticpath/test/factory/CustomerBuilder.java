@@ -199,12 +199,6 @@ class CustomerImplBuilderBase<GeneratorT extends CustomerImplBuilderBase<Generat
 		return (GeneratorT) this;
 	}
 
-	public GeneratorT withGender(final char aValue) {
-		instance.setGender(aValue);
-
-		return (GeneratorT) this;
-	}
-
 	public GeneratorT withCompany(final String aValue) {
 		instance.setCompany(aValue);
 

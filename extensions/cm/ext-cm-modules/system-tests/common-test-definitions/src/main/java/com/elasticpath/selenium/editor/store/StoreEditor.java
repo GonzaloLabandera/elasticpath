@@ -36,6 +36,10 @@ public class StoreEditor extends AbstractPageObject {
 	private static final String STORE_URL_VALUE_CSS = STORE_EDITOR_PARENT_CSS + ".StoreUrl'] > input";
 	private static final String STORE_TIMEZONE_COMBO_CSS = STORE_EDITOR_PARENT_CSS + ".StoreTimeZone'][widget-id='Operational "
 			+ "Timezone'][widget-type='CCombo']";
+	private static final String STORE_REGISTERED_USER_ROLE_COMBO_CSS = STORE_EDITOR_PARENT_CSS
+			+ ".RegisteredUserRole'][widget-id='Default Registered Shopper Role'][widget-type='CCombo']";
+	private static final String STORE_UNREGISTERED_USER_ROLE_COMBO_CSS = STORE_EDITOR_PARENT_CSS
+			+ ".SingleSessionUserRole'][widget-id='Default Single-Session Shopper Role'][widget-type='CCombo']";
 	private static final String STORE_COUNTRY_COMBO_CSS = STORE_EDITOR_PARENT_CSS + ".StoreCountry'][widget-id='Store "
 			+ "Country'][widget-type='CCombo']";
 	private static final String STORE_SUB_COUNTRY_COMBO_CSS = STORE_EDITOR_PARENT_CSS + ".StoreSubCountry'][widget-id='Store "
@@ -184,6 +188,29 @@ public class StoreEditor extends AbstractPageObject {
 				.as("Unable to find timezone - " + timezone)
 				.isTrue();
 	}
+
+	/**
+	 * Select registered user role.
+	 *
+	 * @param role String
+	 */
+	public void selectRegisteredUser(final String role) {
+		assertThat(selectComboBoxItem(STORE_REGISTERED_USER_ROLE_COMBO_CSS, role))
+				.as("Unable to find shopper role - " + role)
+				.isTrue();
+	}
+
+	/**
+	 * Select unregistered user role.
+	 *
+	 * @param role String
+	 */
+	public void selectUnregisteredUser(final String role) {
+		assertThat(selectComboBoxItem(STORE_UNREGISTERED_USER_ROLE_COMBO_CSS, role))
+				.as("Unable to find shopper role - " + role)
+				.isTrue();
+	}
+
 
 	/**
 	 * Select store country.

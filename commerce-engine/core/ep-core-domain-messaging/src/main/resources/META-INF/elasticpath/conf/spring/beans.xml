@@ -3,39 +3,12 @@
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:context="http://www.springframework.org/schema/context"
-		xmlns:util="http://www.springframework.org/schema/util"
-		xmlns:camel="http://camel.apache.org/schema/spring"
 		xsi:schemaLocation="
 				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
-				http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
 		">
 
 	<context:annotation-config/>
-
-	<camel:camelContext id="ep-domain-messaging" xmlns="http://camel.apache.org/schema/spring"
-						threadNamePattern="Camel (#camelId#) thread ##counter#">
-		<routeBuilder ref="domainEventBuilder"/>
-		<endpoint id="domainEventInternalEndpoint" uri="direct:ep.domain"/>
-	</camel:camelContext>
-
-	<bean name="ep-domain-messaging:beanPostProcessor" class="com.elasticpath.messaging.impl.FastCamelBeanPostProcessor">
-		<property name="annotatedClassList" ref="camelAnnotatedClassList"/>
-		<property name="camelId" value="ep-domain-messaging"/>
-	</bean>
-
-	<!-- This explicitly creates a Camel Proxy (http://camel.apache.org/using-camelproxy.html). -->
-	<!-- This works around a known defect; see https://issues.apache.org/jira/browse/CAMEL-5956. -->
-	<!-- Once that defect is resolved, this bean can be substituted by an XML declaration as per the documentation. -->
-	<bean id="domainEventMessagePublisher" class="org.apache.camel.component.bean.PojoProxyHelper" factory-method="createProxy">
-		<constructor-arg ref="domainEventInternalEndpoint"/>
-		<constructor-arg>
-			<util:list>
-				<value>com.elasticpath.messaging.EventMessagePublisher</value>
-			</util:list>
-		</constructor-arg>
-	</bean>
 
 	<!-- This is marked abstract; child beans should supply a value for the 'camelContextId' field.
 
@@ -50,17 +23,6 @@
 	<bean id="domainEventExternalEndpoint" class="com.elasticpath.messaging.camel.SettingValueBackedCamelEndpointFactoryBean" abstract="true">
 		<property name="path" value="COMMERCE/SYSTEM/MESSAGING/DOMAIN/channelUri"/>
 		<property name="settingsReader" ref="settingsReader"/>
-	</bean>
-
-	<bean id="epDomainMessagingDomainEventExternalEndpoint" parent="domainEventExternalEndpoint">
-		<property name="camelContextId" value="ep-domain-messaging"/>
-		<property name="context" value="domainProjectionBuilderHandler"/>
-	</bean>
-
-	<bean id="domainEventBuilder" class="com.elasticpath.messaging.camel.EventRouteBuilder">
-		<property name="incomingEndpoint" ref="domainEventInternalEndpoint"/>
-		<property name="outgoingEndpoint" ref="epDomainMessagingDomainEventExternalEndpoint"/>
-		<property name="eventMessageDataFormat" ref="eventMessageDataFormat"/>
 	</bean>
 
 	<bean id="domainEventTypeProvider" class="com.elasticpath.messaging.spi.impl.EventTypeProviderImpl">

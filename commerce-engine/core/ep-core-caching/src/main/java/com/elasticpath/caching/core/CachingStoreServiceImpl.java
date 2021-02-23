@@ -30,13 +30,13 @@ public class CachingStoreServiceImpl implements StoreService {
 	/**
 	 * When caching is involved, ignore the load tuner and cache the whole thing.
 	 *
-	 * @param storeUid the <code>Store</code> UID
+	 * @param storeUid  the <code>Store</code> UID
 	 * @param loadTuner the load tuner to be ignored
 	 * @return the store
 	 * @throws EpServiceException in case of error
 	 */
 	@Override
-	public Store getTunedStore(final long storeUid,  final FetchGroupLoadTuner loadTuner) throws EpServiceException {
+	public Store getTunedStore(final long storeUid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		return getStore(storeUid);
 	}
 
@@ -94,13 +94,7 @@ public class CachingStoreServiceImpl implements StoreService {
 
 	@Override
 	public Collection<String> getCartTypeNamesForStore(final String storeCode) {
-
-		Collection<String> result = getStoreCartTypeCache().get(storeCode);
-		if (result == null) {
-			result = getFallbackStoreService().getCartTypeNamesForStore(storeCode);
-			getStoreCartTypeCache().put(storeCode, result);
-		}
-		return result;
+		return storeCartTypeCache.get(storeCode, key -> getFallbackStoreService().getCartTypeNamesForStore(storeCode));
 	}
 
 	@Override

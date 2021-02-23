@@ -81,7 +81,7 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 
 	private static final String FK_COLUMN_NAME = "SHOPPING_CART_UID";
 	private Map<String, CartData> cartData = new HashMap<>();
-	private boolean defaultCart;
+	private Boolean defaultCart;
 
 
 	/**
@@ -247,21 +247,29 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 		this.status = status;
 	}
 
-
-
-	@Basic(optional = false)
+	@Basic
 	@Column(name = "DEFAULTCART")
-	@Override
-	public boolean isDefault() {
+	protected Boolean isDefaultInternal() {
 		return defaultCart;
+	}
+
+	protected void setDefaultInternal(final Boolean defaultCart) {
+		this.defaultCart = defaultCart;
+	}
+
+	@Override
+	@Transient
+	public boolean isDefault() {
+		return isDefaultInternal() != null && isDefaultInternal();
 	}
 
 	@Override
 	public void setDefault(final boolean defaultCart) {
-		this.defaultCart = defaultCart;
+		if (defaultCart) {
+			setDefaultInternal(true);
+		} else {
+			setDefaultInternal(null);
+		}
 	}
-
-
-
 
 }

@@ -5,6 +5,7 @@ package com.elasticpath.cmclient.admin.stores.editors;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.customer.AttributePolicy;
 import com.elasticpath.domain.customer.PolicyKey;
 import com.elasticpath.service.attribute.AttributeService;
@@ -84,7 +86,9 @@ public class StoreCustomerAttributePoliciesSectionPart extends AbstractCmClientE
 
 	private EpState rolePermission = EpState.EDITABLE;
 
-	private final Map<String, Attribute> attributesMap;
+	private final Map<String, Attribute> userAttributes;
+
+	private final Map<String, Attribute> accountAttributes;
 
 	private final Map<PolicyKey, List<AttributePolicy>> policiesMap;
 
@@ -103,7 +107,9 @@ public class StoreCustomerAttributePoliciesSectionPart extends AbstractCmClientE
 		this.tableName = "Store Customer Attribute Policies"; //$NON-NLS-1$
 
 		final AttributeService attributeService = BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_SERVICE, AttributeService.class);
-		attributesMap = attributeService.getCustomerProfileAttributesMap();
+
+		userAttributes = attributeService.getCustomerProfileAttributesMap(AttributeUsageImpl.USER_PROFILE_USAGE);
+		accountAttributes = attributeService.getCustomerProfileAttributesMap(AttributeUsageImpl.ACCOUNT_PROFILE_USAGE);
 
 		final AttributePolicyService attributePolicyService =
 				BeanLocator.getSingletonBean(ContextIdNames.ATTRIBUTE_POLICY_SERVICE, AttributePolicyService.class);
@@ -301,10 +307,14 @@ public class StoreCustomerAttributePoliciesSectionPart extends AbstractCmClientE
 	}
 
 	private String getAttributeName(final String attributeKey) {
-		Attribute attribute = attributesMap.get(attributeKey);
+		final Optional<Attribute> attribute = Optional.ofNullable(userAttributes.get(attributeKey))
+				.map(Optional::of)
+				.orElse(Optional.ofNullable(accountAttributes.get(attributeKey)));
 		
-		String attributeName = attribute.getDisplayName(CorePlugin.getDefault().getDefaultLocale());
-		String attributeUsage = CoreMessages.get().getMessage(attribute.getAttributeUsage().getNameMessageKey());
+		final String attributeName = attribute.map(value -> value.getDisplayName(CorePlugin.getDefault().getDefaultLocale()))
+				.orElse(StringUtils.EMPTY);
+		final String attributeUsage = attribute.map(value -> CoreMessages.get().getMessage(value.getAttributeUsage().getNameMessageKey()))
+				.orElse(StringUtils.EMPTY);
 		
 		return String.format("%s (%s)", attributeName, attributeUsage); //$NON-NLS-1$
 	}

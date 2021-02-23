@@ -28,7 +28,8 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.service.shoppingcart.OrderFactory;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContextImpl;
 
 /**
  * Test class for {@link com.elasticpath.service.shoppingcart.actions.impl.CreateNewOrderCheckoutAction}.
@@ -75,7 +76,7 @@ public class CreateNewOrderCheckoutActionTest {
 		when(orderFactory.createAndPersistNewEmptyOrder(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(order);
 		when(orderFactory.fillInNewOrderFromShoppingCart(any(), any(), any(), any(), any())).thenReturn(order);
 
-		final CheckoutActionContext checkoutActionContext = new CheckoutActionContextImpl(
+		final PreCaptureCheckoutActionContext checkoutActionContext = new PreCaptureCheckoutActionContextImpl(
 				shoppingCart,
 				taxSnapshot,
 				customerSession,
@@ -112,7 +113,7 @@ public class CreateNewOrderCheckoutActionTest {
 		when(orderFactory.createAndPersistNewEmptyOrder(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(order);
 		when(orderFactory.fillInNewExchangeOrderFromShoppingCart(any(), any(), any(), any(), any(), anyBoolean(), any())).thenReturn(order);
 
-		final CheckoutActionContext checkoutActionContext = new CheckoutActionContextImpl(
+		final PreCaptureCheckoutActionContext checkoutActionContext = new PreCaptureCheckoutActionContextImpl(
 				shoppingCart,
 				taxSnapshot,
 				customerSession,

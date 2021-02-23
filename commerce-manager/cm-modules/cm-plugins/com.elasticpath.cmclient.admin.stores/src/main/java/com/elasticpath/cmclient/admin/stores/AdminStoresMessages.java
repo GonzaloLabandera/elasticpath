@@ -50,6 +50,10 @@ public final class AdminStoresMessages {
 
 	public String StoreSubCountry;
 
+	public String RegisteredUserRole;
+
+	public String SingleSessionUserRole;
+
 	public String EnableDataPolicies;
 
 	public String DefaultLanguage;

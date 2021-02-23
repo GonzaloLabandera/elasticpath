@@ -8,6 +8,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
+import org.apache.openjpa.event.TransactionListener;
 import org.apache.openjpa.persistence.OpenJPAEntityManagerFactorySPI;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.springframework.core.io.ResourceLoader;
@@ -28,6 +29,7 @@ public class ConfigurableLocalContainerEntityManagerFactoryBean extends LocalCon
 
 	private DefaultPersistenceUnitManager persistenceUnitManager;
 	private List<Object> lifecycleListeners;
+	private List<TransactionListener> transactionListeners;
 	private boolean propertiesSet;
 	private EntityManagerFactory fallbackEntityManagerFactory;
 	private HDSSupportSwitch hdsSupportSwitch;
@@ -109,6 +111,19 @@ public class ConfigurableLocalContainerEntityManagerFactoryBean extends LocalCon
 		this.lifecycleListeners = lifecycleListeners;
 	}
 
+	public List<TransactionListener> getTransactionListeners() {
+		return transactionListeners;
+	}
+
+	/**
+	 * Sets the transaction listeners that will be added to each EntityManager created by the factory created by this factory.
+	 *
+	 * @param transactionListeners the transaction listeners that will be added to EntityManagers on creation
+	 */
+	public void setTransactionListeners(final List<TransactionListener> transactionListeners) {
+		this.transactionListeners = transactionListeners;
+	}
+
 	@Override
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
 		if (!propertiesSet) {
@@ -126,6 +141,9 @@ public class ConfigurableLocalContainerEntityManagerFactoryBean extends LocalCon
 		OpenJPAEntityManagerFactorySPI spi = (OpenJPAEntityManagerFactorySPI) OpenJPAPersistence.cast(emf);
 		for (Object listener : getLifecycleListeners()) {
 			spi.addLifecycleListener(listener, (Class []) null);
+		}
+		for (TransactionListener listener : getTransactionListeners()) {
+			spi.addTransactionListener(listener);
 		}
 
 		return emf;

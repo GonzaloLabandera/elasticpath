@@ -32,7 +32,7 @@ Feature: Add To Cart is disabled for certain items
   Scenario Outline: Can't add an item not available
     Given that <LINK> is the url of <TEST>
     When I POST request body {"quantity":"1"} to <LINK>
-    Then the operation is identified as conflict
+    Then the operation is identified as bad request
     And the response message is <DEBUG_MESSAGE>
 
     Examples:

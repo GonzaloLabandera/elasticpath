@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:camel="http://camel.apache.org/schema/spring"
+		xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+		">
+
+	<camel:camelContext id="ep-order-hold-resolution-message-consumer" xmlns="http://camel.apache.org/schema/spring"
+						threadNamePattern="Camel (#camelId#) thread ##counter#">
+		<routeBuilder ref="orderHoldResolutionRouteBuilder"/>
+	</camel:camelContext>
+
+	<bean id="orderHoldResolutionRouteBuilderTemplate"
+		  class="com.elasticpath.orderprocessing.orderhold.messaging.OrderHoldResolutionRouteBuilder"
+		  abstract="true">
+		<property name="routeId" value="orderHoldResolutionRouteBuilderTemplate"/>
+		<property name="incomingEndpoint">
+			<bean parent="orderEventExternalEndpoint">
+				<property name="camelContextId" value="ep-order-hold-resolution-message-consumer"/>
+				<property name="context" value="orderHoldResolutionMessageConsumer"/>
+			</bean>
+		</property>
+		<property name="errorEndpoint">
+			<bean parent="domainDeadLetterEventExternalEndpoint">
+				<property name="camelContextId" value="ep-order-hold-resolution-message-consumer"/>
+				<property name="context" value="orderHoldResolutionMessageConsumer"/>
+			</bean>
+		</property>
+		<property name="eventMessageDataFormat" ref="eventMessageDataFormat"/>
+		<property name="holdResolutionEventPredicate" ref="orderHoldResolutionEventTypePredicate"/>
+		<property name="holdResolutionMessageTransformer" ref="holdResolutionMessageTransformer"/>
+		<property name="holdResolutionMessageProcessor" ref="holdResolutionMessageProcessor"/>
+	</bean>
+
+	<bean id="orderHoldResolutionRouteBuilder" parent="orderHoldResolutionRouteBuilderTemplate"/>
+
+	<bean id="holdResolutionMessageTransformer" class="com.elasticpath.orderprocessing.orderhold.messaging.impl.HoldResolutionMessageTransformerImpl">
+		<property name="orderService" ref="orderService"/>
+		<property name="orderHoldService" ref="orderHoldService"/>
+		<property name="cmUserService" ref="cmUserService"/>
+	</bean>
+
+	<bean id="holdResolutionMessageProcessor" class="com.elasticpath.orderprocessing.orderhold.messaging.impl.HoldResolutionMessageProcessorImpl">
+		<property name="orderService" ref="orderService"/>
+		<property name="orderHoldService" ref="orderHoldService"/>
+		<property name="cmUserService" ref="cmUserService"/>
+		<property name="orderLockService" ref="orderLockService"/>
+		<property name="eventOriginatorHelper" ref="eventOriginatorHelper" />
+		<property name="timeService" ref="timeService" />
+	</bean>
+
+</beans>

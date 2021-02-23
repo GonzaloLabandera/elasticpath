@@ -1,7 +1,0 @@
-# Template for jms.properties used by Docker entrypoint script
-
-data.population.jms.url={{EP_JMS_URL}}
-data.population.jms.externalEndpoint.uri={{EP_JMS_ENDPOINT_URI}}
-data.population.jms.maxConnections={{EP_JMS_CONNECTIONS}}
-data.population.jms.maximumActiveSessionPerConnection={{EP_JMS_MAX_SESSIONS}}
-data.population.jms.idleTimeout={{EP_JMS_TIMEOUT}}

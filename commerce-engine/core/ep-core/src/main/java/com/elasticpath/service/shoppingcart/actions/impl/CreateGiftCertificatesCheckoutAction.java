@@ -5,8 +5,10 @@ package com.elasticpath.service.shoppingcart.actions.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.elasticpath.base.exception.EpSystemException;
+import com.elasticpath.core.messaging.giftcertificate.GiftCertificateEventType;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
@@ -14,50 +16,88 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shoppingcart.PriceCalculator;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.messaging.EventMessage;
+import com.elasticpath.messaging.EventMessagePublisher;
+import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.service.catalog.GiftCertificateService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.shoppingcart.GiftCertificateFactory;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
-import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.ReversiblePostCaptureCheckoutAction;
+import com.elasticpath.service.store.StoreService;
 
 /**
  * CheckoutAction to create gift certificates that were purchased
  * in an order and store necessary values from the certificates on the
  * order skus.
  */
-public class CreateGiftCertificatesCheckoutAction implements ReversibleCheckoutAction {
+public class CreateGiftCertificatesCheckoutAction implements ReversiblePostCaptureCheckoutAction {
 
 	private GiftCertificateService giftCertificateService;
 
 	private GiftCertificateFactory giftCertificateFactory;
 
+	private EventMessageFactory eventMessageFactory;
+
+	private EventMessagePublisher eventMessagePublisher;
+
 	private ProductSkuLookup productSkuLookup;
 
 	private PricingSnapshotService pricingSnapshotService;
 
+	private StoreService storeService;
+
+	private OrderService orderService;
+
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PostCaptureCheckoutActionContext context) throws EpSystemException {
 		final Customer customer = context.getCustomer();
-		final ShoppingCart shoppingCart = context.getShoppingCart();
-		Map<OrderSku, GiftCertificate> giftCertificateMap;
-		giftCertificateMap = createAndPersistGiftCertificates(context.getOrder(), customer, shoppingCart.getStore());
+		final Store store = storeService.findStoreWithCode(context.getOrder().getStoreCode());
+		final Map<OrderSku, GiftCertificate> giftCertificateMap = createAndPersistGiftCertificates(context.getOrder(), customer, store);
 		updateOrderSkus(context.getOrder(), giftCertificateMap);
+
+		orderService.update(context.getOrder());
+
+		sendGiftCertificateCreatedEvent(context.getOrder(), giftCertificateMap.keySet());
+	}
+
+	private void sendGiftCertificateCreatedEvent(final Order order, final Set<OrderSku> orderSkus) {
+		orderSkus.forEach(orderSku -> {
+			final Map<String, String> gcFields = orderSku.getFields();
+			final PriceCalculator priceCalculator = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku).getPriceCalc();
+			final Map<String, Object> data = new HashMap<>(8);
+			data.put("orderLocale", order.getLocale());
+			data.put("orderStoreCode", order.getStoreCode());
+			data.put("shipmentNumber", orderSku.getShipment().getShipmentNumber());
+			data.put("shipmentType", orderSku.getShipment().getOrderShipmentType().toString());
+			data.put("orderSkuGuid", orderSku.getGuid());
+			data.put("orderSkuTotalAmount", priceCalculator.withCartDiscounts().getAmount().toString());
+			data.put("orderSkuTotalCurrency", priceCalculator.getMoney().getCurrency());
+			data.put("gcFields", gcFields);
+
+			final String giftCertificateGuid = gcFields.get(GiftCertificate.KEY_GUID);
+
+			final EventMessage giftCertificateCreatedEventMessage = getEventMessageFactory()
+					.createEventMessage(GiftCertificateEventType.GIFT_CERTIFICATE_CREATED, giftCertificateGuid, data);
+			getEventMessagePublisher().publish(giftCertificateCreatedEventMessage);
+		});
 	}
 
 	@Override
-	public void rollback(final CheckoutActionContext context) throws EpSystemException {
-		for (final OrderSku orderSku : context.getOrder().getOrderSkus()) {
+	public void rollback(final PostCaptureCheckoutActionContext context) throws EpSystemException {
+		for (final OrderSku orderSku : context.getOrder().getRootShoppingItems()) {
 			if (isGiftCertificateLineItem(orderSku)) {
 				rollbackGiftCertificate(orderSku);
 			}
 		}
 	}
-	
+
 	/**
 	 * Removes the given GiftCertificate from the DB and also resets the KEY_CODE and KEY_SENDER_EMAIL to null.
 	 * @param orderSku The GiftCertificate to rollback.
@@ -75,11 +115,11 @@ public class CreateGiftCertificatesCheckoutAction implements ReversibleCheckoutA
 		orderSku.setFieldValue(GiftCertificate.KEY_CODE, null);
 		orderSku.setFieldValue(GiftCertificate.KEY_SENDER_EMAIL, null);
 	}
-	
+
 	/**
 	 * Records any data necessary from the gift certificates on the order skus. For example
 	 * the key and sender email.
-	 * 
+	 *
 	 * @param order order to get the skus from
 	 * @param giftCertificateMap map the order sku to the gift certificate created from it
 	 */
@@ -106,7 +146,7 @@ public class CreateGiftCertificatesCheckoutAction implements ReversibleCheckoutA
 	 * @param store the store in which the gift certificates were purchased
 	 * @return a map of {@code OrderSku}s to created {@code GiftCertificate}s
 	 */
-	protected Map<OrderSku, GiftCertificate> createAndPersistGiftCertificates(final Order completedOrder, 
+	protected Map<OrderSku, GiftCertificate> createAndPersistGiftCertificates(final Order completedOrder,
 			final Customer customer, final Store store) {
 		final Map<OrderSku, GiftCertificate> giftCertificateMap = new HashMap<>();
 		for (final OrderShipment orderShipment : completedOrder.getAllShipments()) {
@@ -152,7 +192,7 @@ public class CreateGiftCertificatesCheckoutAction implements ReversibleCheckoutA
 
 	/**
 	 * Inject giftCertificateFactory.
-	 * 
+	 *
 	 * @param giftCertificateFactory the giftCertificateFactory to set
 	 */
 	public void setGiftCertificateFactory(final GiftCertificateFactory giftCertificateFactory) {
@@ -161,7 +201,7 @@ public class CreateGiftCertificatesCheckoutAction implements ReversibleCheckoutA
 
 	/**
 	 * Inject giftCertificateService.
-	 * 
+	 *
 	 * @param giftCertificateService the giftCertificateService to set
 	 */
 	public void setGiftCertificateService(final GiftCertificateService giftCertificateService) {
@@ -184,4 +224,35 @@ public class CreateGiftCertificatesCheckoutAction implements ReversibleCheckoutA
 		this.pricingSnapshotService = pricingSnapshotService;
 	}
 
+	public StoreService getStoreService() {
+		return storeService;
+	}
+
+	public void setStoreService(final StoreService storeService) {
+		this.storeService = storeService;
+	}
+
+	public void setEventMessageFactory(final EventMessageFactory eventMessageFactory) {
+		this.eventMessageFactory = eventMessageFactory;
+	}
+
+	protected EventMessageFactory getEventMessageFactory() {
+		return eventMessageFactory;
+	}
+
+	public void setEventMessagePublisher(final EventMessagePublisher eventMessagePublisher) {
+		this.eventMessagePublisher = eventMessagePublisher;
+	}
+
+	protected EventMessagePublisher getEventMessagePublisher() {
+		return eventMessagePublisher;
+	}
+
+	public OrderService getOrderService() {
+		return orderService;
+	}
+
+	public void setOrderService(final OrderService orderService) {
+		this.orderService = orderService;
+	}
 }

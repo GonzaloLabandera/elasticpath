@@ -22,9 +22,9 @@
 	<import resource="spring/service/serviceBatch.xml" />
 	<import resource="spring/scheduling/quartz.xml" />
 
+	<!-- Catalog Syndication module -->
+	<import resource="classpath:META-INF/elasticpath/conf/spring/catalog-batch.xml"/>
+
 	<!-- Plugin config -->
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
-
-	<!-- Catalog Syndication stuff-->
-	<import resource="classpath*:META-INF/elasticpath/conf/spring/catalog-batch.xml"/>
 </beans>

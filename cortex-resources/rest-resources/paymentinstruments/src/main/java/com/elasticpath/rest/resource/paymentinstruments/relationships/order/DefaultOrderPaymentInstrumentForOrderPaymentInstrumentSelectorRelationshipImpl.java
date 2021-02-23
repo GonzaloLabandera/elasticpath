@@ -42,7 +42,7 @@ public class DefaultOrderPaymentInstrumentForOrderPaymentInstrumentSelectorRelat
 
 	@Override
 	public Observable<PaymentInstrumentIdentifier> onLinkTo() {
-		return repository.getDefaultPaymentInstrumentIdentifier(PaymentInstrumentsIdentifier.builder().withScope(scope).build());
+		return repository.getContextAwareDefaultPaymentInstrumentIdentifier(PaymentInstrumentsIdentifier.builder().withScope(scope).build());
 	}
 
 }

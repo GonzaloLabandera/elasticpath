@@ -161,7 +161,7 @@ public class OrderStepDefinitionsHelper {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		Collection<OrderSku> orderSkus = orderSkuFactory.createOrderSkus(shoppingItems, taxSnapshot, order.getLocale());
+		Collection<OrderSku> orderSkus = orderSkuFactory.createOrderSkus(shoppingItems, taxSnapshot, order.getLocale(), order.getUidPk());
 
 		PhysicalOrderShipment phShipment = order.getPhysicalShipments().get(0);
 
@@ -370,6 +370,7 @@ public class OrderStepDefinitionsHelper {
 					final ShoppingItemTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForOrderSku(orderSku, pricingSnapshot);
 					movedOrderSku.copyFrom(orderSku, productSkuLookup, taxSnapshot, true);
 					movedOrderSku.setQuantity(dto.getQuantity());
+					movedOrderSku.setOrderUidPk(order.getUidPk());
 					newPhysicalShipment.addShipmentOrderSku(movedOrderSku);
 
 					if (orderSku.getQuantity() - dto.getQuantity() <= 0) {

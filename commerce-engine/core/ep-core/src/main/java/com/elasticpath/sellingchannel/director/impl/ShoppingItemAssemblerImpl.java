@@ -3,7 +3,6 @@
  */
 package com.elasticpath.sellingchannel.director.impl;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -77,7 +76,7 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 			if (thisShoppingItemDto != null && thisShoppingItemDto.isSelected()) {
 				ProductSku sku = retrieveSkuForShoppingItem(bundleItem, thisShoppingItemDto);
 				ShoppingItem shoppingItem = getShoppingItemFactory().createShoppingItem(sku, null, bundleItem.getQuantity() * parentShipQuantity,
-						constituentIndex, Collections.emptyMap());
+						constituentIndex, thisShoppingItemDto.getItemFields());
 				shoppingItem.setBundleConstituent(true);
 				shoppingItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 				parent.addChildItem(shoppingItem);

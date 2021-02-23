@@ -9,13 +9,15 @@ import java.util.List;
 
 import javax.cache.Cache;
 
+import com.elasticpath.cache.CacheResult;
+
 /**
  * A wrapper which provides a {@link com.elasticpath.cache.Cache} interface for a JCache (JSR-107) compliant cache.
  *
  * @param <K> The class implemented by the cache keys
  * @param <V> The class implemented by the cache values
  */
-public class JCacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K, V> {
+public class JCacheCacheAdapter<K, V> extends AbstractCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K, V> {
 	private final Cache<K, V> cache;
 
 	/**
@@ -28,8 +30,8 @@ public class JCacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K, 
 	}
 
 	@Override
-	public V get(final K key) {
-		return cache.get(key);
+	public CacheResult<V> get(final K key) {
+		return CacheResult.create(cache.get(key));
 	}
 
 	@Override
@@ -63,15 +65,15 @@ public class JCacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K, 
 	}
 
 	@Override
-	public V getByPartialKey(final K partialKey) {
+	public CacheResult<V> getByPartialKey(final K partialKey) {
 		for (Iterator<Cache.Entry<K, V>> iterator = cache.iterator(); iterator.hasNext();) {
 			Cache.Entry<K, V> entry = iterator.next();
 			if (entry.getKey().equals(partialKey)) {
-				return entry.getValue();
+				return CacheResult.create(entry.getValue());
 			}
 		}
 
-		return null;
+		return CacheResult.notPresent();
 	}
 
 	@Override

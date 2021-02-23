@@ -59,9 +59,9 @@ public class MergeCustomerRoleTransitionEventHandler implements ScopedEventEntit
 														final String recipientCustomerGuid) {
 		return new ExecutionResultChain() {
 			public ExecutionResult<?> build() {
-				Customer recipientCustomer = Assign.ifSuccessful(customerRepository.findCustomerByGuid(recipientCustomerGuid));
+				Customer recipientCustomer = Assign.ifSuccessful(customerRepository.findCustomerByGuidAndStoreCode(recipientCustomerGuid, storeCode));
 				CustomerSession customerSession =
-						Assign.ifSuccessful(customerSessionRepository.findCustomerSessionByGuid(donorCustomerGuid));
+						Assign.ifSuccessful(customerSessionRepository.findCustomerSessionByGuidAndStoreCode(donorCustomerGuid, storeCode));
 
 				return customerRepository.mergeCustomer(customerSession, recipientCustomer, storeCode);
 			}

@@ -16,19 +16,6 @@
 	<import resource="classpath:integration-checkout-context.xml"/>
     <import resource="classpath:ep-test-application.xml" />
 
-	<bean id="cleanupFailedOrdersJobTargetTemplate" class="com.elasticpath.domain.order.jobs.impl.FailedOrdersCleanupJob" abstract="true">
-		<property name="timeService" ref="timeService"/>
-		<property name="orderService" ref="orderService"/>
-		<property name="batchSizeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/FAILEDORDERCLEANUP/batchSize"/>
-		</property>
-		<property name="maxDaysHistoryProvider">
-			<settings:setting path="COMMERCE/SYSTEM/FAILEDORDERCLEANUP/maxHistory"/>
-		</property>
-	</bean>
-
-	<bean id="cleanupFailedOrdersJob" parent="cleanupFailedOrdersJobTargetTemplate"/>
-
 	<bean id="productRecommendationService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.catalog.impl.ProductRecommendationServiceImpl">

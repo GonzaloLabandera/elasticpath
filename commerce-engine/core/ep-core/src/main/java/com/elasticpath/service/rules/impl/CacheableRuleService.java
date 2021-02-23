@@ -24,16 +24,16 @@ import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.rules.DuplicatePromoCodeException;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.RuleSetService;
+import com.elasticpath.service.rules.SellingContextRuleSummary;
 
 /**
  * This class implements the decorator pattern and it is intended for subclassing by
  * caching implementations.
- *
+ * <p>
  * It extends {@link RuleService} and delegates all non-overridden calls to the
  * non-caching implementation.
- *
+ * <p>
  * It is the responsibility of the sub-class to inject required decorated, non-caching, {@link RuleServiceImpl}.
- *
  */
 public interface CacheableRuleService extends RuleService {
 
@@ -219,13 +219,23 @@ public interface CacheableRuleService extends RuleService {
 
 	@Override
 	default List<Object[]> getPromotionUsageData(Collection<Long> storeUids, Currency currency, Date startDate, Date endDate,
-			Boolean withCouponCodesOnly) {
+												 Boolean withCouponCodesOnly) {
 		return getDecorated().getPromotionUsageData(storeUids, currency, startDate, endDate, withCouponCodesOnly);
 	}
 
 	@Override
-	default List<Object[]> findActiveRuleIdSellingContextByScenarioAndStore(int scenario, String storeCode) {
+	default List<SellingContextRuleSummary> findActiveRuleIdSellingContextByScenarioAndStore(int scenario, String storeCode) {
 		return getDecorated().findActiveRuleIdSellingContextByScenarioAndStore(scenario, storeCode);
+	}
+
+	@Override
+	default List<SellingContextRuleSummary> findActiveRuleIdSellingContextByScenarioAndCatalog(int scenario, String catalogCode) {
+		return getDecorated().findActiveRuleIdSellingContextByScenarioAndCatalog(scenario, catalogCode);
+	}
+
+	@Override
+	default List<SellingContextRuleSummary> findAllActiveRuleIdSellingContext() {
+		return getDecorated().findAllActiveRuleIdSellingContext();
 	}
 
 	@Override
@@ -250,12 +260,14 @@ public interface CacheableRuleService extends RuleService {
 
 	/**
 	 * Set a {@link RuleService} to decorate.
+	 *
 	 * @param decorated {@link RuleService}.
 	 */
 	void setDecorated(RuleService decorated);
 
 	/**
 	 * Get decorated {@link RuleService}.
+	 *
 	 * @return Decorated {@link RuleService}.
 	 */
 	RuleService getDecorated();

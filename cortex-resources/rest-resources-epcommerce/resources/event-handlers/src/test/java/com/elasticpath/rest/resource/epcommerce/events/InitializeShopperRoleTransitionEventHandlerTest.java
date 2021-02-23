@@ -8,10 +8,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.Callable;
 
+import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import io.reactivex.Single;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -23,6 +22,8 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitializeShopperRoleTransitionEventHandlerTest {
+
+	private static final String STORE_CODE = "mobee";
 
 	@InjectMocks
 	private InitializeShopperRoleTransitionEventHandler handler;
@@ -37,7 +38,7 @@ public class InitializeShopperRoleTransitionEventHandlerTest {
 	public void testHandleEvent() throws Exception {
 		final String newUserGuid = "newUser";
 
-		when(shoppingCartRepository.getShoppingCartForCustomer(newUserGuid))
+		when(shoppingCartRepository.getShoppingCartForCustomer(newUserGuid, STORE_CODE))
 				.thenReturn(Single.defer(doInitShoppingCart));
 
 		RoleTransitionEvent event = ResourceTypeFactory.createResourceEntity(RoleTransitionEvent.class)
@@ -46,7 +47,7 @@ public class InitializeShopperRoleTransitionEventHandlerTest {
 				.setNewUserGuid(newUserGuid)
 				.setNewRole("newRole");
 
-		handler.handleEvent("mobee", event);
+		handler.handleEvent(STORE_CODE, event);
 
 		verify(doInitShoppingCart).call();
 	}

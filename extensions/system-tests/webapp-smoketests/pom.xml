@@ -26,11 +26,8 @@
 		<cargo.timeout>600000</cargo.timeout>
 		<ping.timeout>600000</ping.timeout>
 		<cargo.plugin.version>1.6.8</cargo.plugin.version>
-		<spring.non.jta.profile>NonJtaProfile</spring.non.jta.profile>
 		<ep.catalog.batch.database.drop.script>CLASSPATH:org/springframework/batch/core/schema-drop-h2.sql</ep.catalog.batch.database.drop.script>
 		<ep.catalog.batch.database.create.script>CLASSPATH:org/springframework/batch/core/schema-h2.sql</ep.catalog.batch.database.create.script>
-		<ep.catalog.batch.non.jta.datasource>dataSource</ep.catalog.batch.non.jta.datasource>
-
 	</properties>
 
 	<profiles>
@@ -183,7 +180,7 @@
 								</goals>
 								<configuration>
 									<settings>
-										<setting>COMMERCE/SYSTEM/SEARCH/searchHost@default=http://localhost:${cargo.port.http}${ep.search.contextUrl}</setting>
+										<setting>COMMERCE/SYSTEM/SEARCH/searchHost@replica=http://localhost:${cargo.port.http}${ep.search.contextUrl}</setting>
 										<setting>COMMERCE/SYSTEM/ASSETS/assetLocation=${assetsLocation}</setting>
 									</settings>
 								</configuration>
@@ -205,7 +202,7 @@
 					<plugin>
 						<groupId>org.apache.activemq.tooling</groupId>
 						<artifactId>activemq-maven-plugin</artifactId>
-						<version>${org.apache.activemq.tooling.version}</version>
+						<version>${org.apache.activemq.version}</version>
 						<executions>
 							<execution>
 								<id>activemq-embedded-tcp</id>
@@ -231,7 +228,7 @@
 					<plugin>
 						<groupId>org.codehaus.cargo</groupId>
 						<artifactId>cargo-maven2-plugin</artifactId>
-						<version>${cargo.plugin.version}</version>
+
 						<executions>
 							<execution>
 								<id>start-container</id>
@@ -498,7 +495,7 @@
 				<plugin>
 					<groupId>org.codehaus.cargo</groupId>
 					<artifactId>cargo-maven2-plugin</artifactId>
-					<version>${cargo.plugin.version}</version>
+
 					<configuration>
 						<!-- This project is not designed to run cargo standalone, use tomcat:run-war in the war project you want. -->
 						<wait>${cargo.wait}</wait>
@@ -627,17 +624,10 @@
 								<cargo.ep.jms.factory>${ep.jms.factory}</cargo.ep.jms.factory>
 								<cargo.ep.jms.url>${ep.jms.url}</cargo.ep.jms.url>
 								<cargo.start.jvmargs>
-									-Dspring.profiles.active=${spring.non.jta.profile}
-									-Dep.spring.profile=${spring.non.jta.profile}
 									-Dep.tomcat.maxcachesize=${ep.tomcat.maxcachesize}
-									-Dep.catalog.batch.datasource=${ep.catalog.batch.non.jta.datasource}
 									-Dep.catalog.batch.database.drop.script=${ep.catalog.batch.database.drop.script}
 									-Dep.catalog.batch.database.create.script=${ep.catalog.batch.database.create.script}
 									-Dep.jms.factory=org.apache.activemq.jndi.JNDIReferenceFactory
-									-Dep.jms.xa.factory=org.apache.activemq.jndi.JNDIReferenceFactory
-									-Dep.jms.xa.type=org.apache.activemq.ActiveMQXAConnectionFactory
-									-Depdb.data.source.xa.factory=org.apache.tomcat.jdbc.pool.DataSourceFactory
-									-Depdb.data.source.xa.type=com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
 									-Depdb.synctarget.removeabandonedtimeout=500
 									-Depdb.synctarget.jdbc.driver=org.h2.Driver
 									-Depdb.synctarget.username=sa

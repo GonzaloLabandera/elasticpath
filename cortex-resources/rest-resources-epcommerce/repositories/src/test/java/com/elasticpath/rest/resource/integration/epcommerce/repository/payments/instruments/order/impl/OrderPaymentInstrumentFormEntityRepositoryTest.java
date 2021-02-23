@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentCreationFieldsDTO;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentForFormEntity;
@@ -28,6 +29,7 @@ import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrument
 import com.elasticpath.rest.definition.paymentmethods.OrderPaymentMethodIdentifier;
 import com.elasticpath.rest.definition.paymentmethods.OrderPaymentMethodsIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.payments.config.StorePaymentProviderConfigRepository;
@@ -75,6 +77,11 @@ public class OrderPaymentInstrumentFormEntityRepositoryTest {
 		when(instrumentRepository.getPaymentInstrumentCreationFieldsForProviderConfigGuid(PAYMENT_METHOD_ID)).thenReturn(Single.just(fields));
 		when(customerRepository.getCustomer(USER_ID)).thenReturn(Single.just(customer));
 		when(storePaymentProviderConfigRepository.requiresBillingAddress(PAYMENT_METHOD_ID)).thenReturn(Single.just(false));
+
+		final Subject subject = mock(Subject.class);
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+		when(customerRepository.getCustomer(USER_ID)).thenReturn(Single.just(customer));
+		when(customerRepository.getCustomerGuid(USER_ID, subject)).thenReturn(USER_ID);
 	}
 
 	private OrderPaymentInstrumentFormIdentifier createTestIdentifier() {
@@ -93,7 +100,7 @@ public class OrderPaymentInstrumentFormEntityRepositoryTest {
 
 	@Test
 	public void findOneReturnsPaymentInstrumentFormFieldsWithSaveWhenCustomerIsRegisteredAndFieldsAreSaveable() {
-		when(customer.isRegistered()).thenReturn(true);
+		when(customer.getCustomerType()).thenReturn(CustomerType.REGISTERED_USER);
 		when(fields.isSaveable()).thenReturn(true);
 
 		final OrderPaymentInstrumentForFormEntity expectedEntity = buildOrderPaymentInstrumentForFormEntity(
@@ -107,7 +114,7 @@ public class OrderPaymentInstrumentFormEntityRepositoryTest {
 
 	@Test
 	public void findOneReturnsPaymentInstrumentFormFieldsWithoutSaveWhenCustomerIsRegisteredAndFieldsAreNotSaveable() {
-		when(customer.isRegistered()).thenReturn(true);
+		when(customer.getCustomerType()).thenReturn(CustomerType.REGISTERED_USER);
 		when(fields.isSaveable()).thenReturn(false);
 
 		final OrderPaymentInstrumentForFormEntity expectedEntity = buildOrderPaymentInstrumentForFormEntity(
@@ -121,7 +128,7 @@ public class OrderPaymentInstrumentFormEntityRepositoryTest {
 
 	@Test
 	public void findOneReturnsPaymentInstrumentFormFieldsWithoutSaveWhenCustomerIsNotRegistered() {
-		when(customer.isRegistered()).thenReturn(false);
+		when(customer.getCustomerType()).thenReturn(CustomerType.SINGLE_SESSION_USER);
 
 		final OrderPaymentInstrumentForFormEntity expectedEntity = buildOrderPaymentInstrumentForFormEntity(
 				BigDecimal.ZERO, TEST_ATTRIBUTE_DATA, false, false);

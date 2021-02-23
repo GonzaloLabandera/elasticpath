@@ -114,6 +114,12 @@ public class StoreDTO implements Dto {
 	@XmlElement(name = "cart_type")
 	private List<CartTypeDTO> shoppingCartTypes = new ArrayList<>();
 
+	@XmlElement(name = "b2c_authenticated_role", required = true)
+	private String authenticatedB2CRole;
+
+	@XmlElement(name = "b2c_single_session_role", required = true)
+	private String singleSessionB2CRole;
+
 	public String getCode() {
 		return code;
 	}
@@ -296,5 +302,21 @@ public class StoreDTO implements Dto {
 
 	public void setShoppingCartTypes(final List<CartTypeDTO> shoppingCartTypes) {
 		this.shoppingCartTypes = shoppingCartTypes;
+	}
+
+	public String getAuthenticatedB2CRole() {
+		return authenticatedB2CRole;
+	}
+
+	public void setAuthenticatedB2CRole(final String authenticatedB2CRole) {
+		this.authenticatedB2CRole = authenticatedB2CRole;
+	}
+
+	public String getSingleSessionB2CRole() {
+		return singleSessionB2CRole;
+	}
+
+	public void setSingleSessionB2CRole(final String singleSessionB2CRole) {
+		this.singleSessionB2CRole = singleSessionB2CRole;
 	}
 }

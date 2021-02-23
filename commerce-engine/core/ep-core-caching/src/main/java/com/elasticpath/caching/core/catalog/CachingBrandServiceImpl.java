@@ -98,7 +98,7 @@ public class CachingBrandServiceImpl extends AbstractEpPersistenceServiceImpl im
 
 	@Override
 	public Brand findByCode(final String code) throws EpServiceException {
-		return getBrandByCodeCache().get(code, getBrandByCodeCacheLoader());
+		return getBrandByCodeCache().get(code, brandByCodeCacheLoader::load);
 	}
 
 	@Override

@@ -51,7 +51,6 @@
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
-					<version>3.5.0</version>
 					<extensions>true</extensions>
 					<configuration>
 						<rebuildBundle>true</rebuildBundle>
@@ -73,7 +72,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-invoker-plugin</artifactId>
-				<version>${maven.invoker.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>build-cm-tycho-projects</id>

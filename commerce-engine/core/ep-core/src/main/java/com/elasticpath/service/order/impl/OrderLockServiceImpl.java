@@ -14,6 +14,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderLock;
+import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.InvalidUnlockerException;
@@ -30,6 +31,8 @@ public class OrderLockServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	private TimeService timeService;
 
 	private OrderService orderService;
+
+	private CmUserService cmUserService;
 
 	// for messaging purpose only
 	private int orderIsLockedOrModified = VALIDATED_SUCCESSFULLY;
@@ -166,6 +169,18 @@ public class OrderLockServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	}
 
 	@Override
+	public OrderLock writeOrderLock(final String orderUid, final long cmUserId) {
+		CmUser cmUser = cmUserService.get(cmUserId);
+
+		final OrderLock orderLock = getPrototypeBean(ContextIdNames.ORDER_LOCK, OrderLock.class);
+		orderLock.setOrder(orderService.findOrderByOrderNumber(orderUid));
+		orderLock.setCmUser(cmUser);
+		orderLock.setCreatedDate(getTimeService().getCurrentTime().getTime());
+
+		return add(orderLock);
+	}
+
+	@Override
 	public void remove(final OrderLock orderLock) throws EpServiceException {
 		sanityCheck();
 		getPersistenceEngine().delete(orderLock);		
@@ -184,4 +199,11 @@ public class OrderLockServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		this.orderService = orderService;
 	}
 
+	protected CmUserService getCmUserService() {
+		return cmUserService;
+	}
+
+	public void setCmUserService(final CmUserService cmUserService) {
+		this.cmUserService = cmUserService;
+	}
 }

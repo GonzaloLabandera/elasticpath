@@ -1,4 +1,4 @@
-Elastic Path Commerce 8.1.0 (build 8.1.0.20200819170938-69430b)
+Elastic Path Commerce 8.2.0 (build 8.2.0.20210223101810-8fd03)
 ------------------------------------------------
 This package contains the following source code folders and resources for Elastic Path Commerce.
 
@@ -14,7 +14,7 @@ Health Monitor              health-monitoring
 Sample Commerce Data        commerce-data
 Elastic Path License        LICENSE.txt
 
-Refer to the Starting Construction Guide for instructions on using this distribution package - https://developers.elasticpath.com/commerce/construction-home
+For help with this distribution package, see Getting Started in https://documentation.elasticpath.com/commerce/docs/getting-started/index.html.
 
 Thank you!
 The Elastic Path Team
@@ -26,4 +26,4 @@ The source distribution relies on additional Elastic Path projects that are avai
 
 Project name        Version                            References
 ------------        -------                            ----------
-Cortex/Helix        1.44.0.9a0eb55dc1                  <api-platform.version> property in pom.xml and bill-of-materials/pom.xml
+Cortex/Helix        1.45.0.1eb89ea7a5                  <api-platform.version> property in pom.xml and bill-of-materials/pom.xml

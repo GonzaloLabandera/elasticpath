@@ -14,11 +14,8 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.openjpa.persistence.Externalizer;
-import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.Persistent;
 
-import com.elasticpath.domain.customer.AccountRole;
 import com.elasticpath.domain.customer.UserAccountAssociation;
 import com.elasticpath.persistence.api.AbstractEntityImpl;
 
@@ -44,7 +41,7 @@ public class UserAccountAssociationImpl extends AbstractEntityImpl implements Us
 
 	private String accountGuid;
 
-	private AccountRole role;
+	private String role;
 
 	@Id
 	@Column(name = "UIDPK")
@@ -93,13 +90,11 @@ public class UserAccountAssociationImpl extends AbstractEntityImpl implements Us
 
 	@Persistent(optional = false)
 	@Column(name = "ROLE")
-	@Factory("valueOf")
-	@Externalizer("getName")
-	public AccountRole getAccountRole() {
+	public String getAccountRole() {
 		return this.role;
 	}
 
-	public void setAccountRole(final AccountRole accountRole) {
+	public void setAccountRole(final String accountRole) {
 		this.role = accountRole;
 	}
 

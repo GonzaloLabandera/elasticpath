@@ -33,6 +33,11 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	private static final String REMOVE_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS
 			+ " div[appearance-id='push-button'][widget-id='Remove'][seeable='true']";
 	private static final String DEFINED_VALUES_TABLE_CSS = DEFINED_VALUES_PARENT_CSS + " div[appearance-id='table'][seeable='true'] ";
+	private static final String SETTING_DEFINITION_METADATA_CSS = "div[appearance-id='label-wrapper'][widget-id='Setting Definition Metadata'][seeable='true']";
+	private static final String SETTING_DEFINITION_METADATA_PARENT_CSS = SETTING_DEFINITION_METADATA_CSS + " + div";
+	private static final String REMOVE_SETTING_METADATA_BUTTON_CSS = SETTING_DEFINITION_METADATA_PARENT_CSS
+			+ " div[appearance-id='push-button'][widget-id='Remove'][seeable='true']";
+	private static final String SETTING_METADATA_TABLE_CSS = SETTING_DEFINITION_METADATA_PARENT_CSS + " div[appearance-id='table'][seeable='true'] ";
 	private static final String DEFAULT_VALUE_TEXTAREA_CSS =
 			"div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages.settingDefDefaultValue'] + div > textarea";
 	private static final String RESULT_PANE_TITLE = "System Configuration";
@@ -112,6 +117,13 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Click Remove button to delete selected setting metadata value
+	 */
+	public void clickRemoveSettingMetadataButton() {
+		click(getWaitDriver().waitForElementToBeVisible(By.cssSelector(REMOVE_SETTING_METADATA_BUTTON_CSS)));
+	}
+
+	/**
 	 * Verifies and Select if setting name shows in filter.
 	 *
 	 * @param settingName String
@@ -179,6 +191,36 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Selects specific setting metadata record and then clicks Remove button
+	 */
+	public void removeSettingMetadataRecord(final String key) {
+		selectSettingMetadata(key);
+		clickRemoveSettingMetadataButton();
+	}
+
+	/**
+	 * Selects Setting Metadata record based on key
+	 *
+	 * @param key a key of the setting metadata record
+	 */
+	public void selectSettingMetadata(final String key) {
+		click(getWaitDriver().waitForElementToBeVisible(By.cssSelector(SETTING_DEFINITION_METADATA_CSS)));
+		try {
+			List<WebElement> allRecords = getWaitDriver().waitForElementToBeVisible(
+					By.cssSelector(SETTING_METADATA_TABLE_CSS)).findElements(By.cssSelector("div[widget-id][widget-type='row']"));
+
+			for (WebElement record : allRecords) {
+				if (key.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='0']")).getText())) {
+					click(record);
+					break;
+				}
+			}
+		} catch (Exception e) {
+			fail("No Setting Metadata records found!");
+		}
+	}
+
+	/**
 	 * Selects Defined Values record based on Context and Value pair
 	 * If Context value = null then record is selected based only on value column
 	 *
@@ -195,12 +237,12 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 					if (value.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='1']")).getText())) {
 						click(record);
 						break;
-					} else {    // both context and value provided
-						if (context.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='0']")).getText())
-								&& value.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='1']")).getText())) {
-							click(record);
-							break;
-						}
+					}
+				} else {    // both context and value provided
+					if (context.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='0']")).getText())
+							&& value.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='1']")).getText())) {
+						click(record);
+						break;
 					}
 				}
 			}

@@ -9,7 +9,9 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.rest.command.ExecutionResult;
+import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerIdentifierStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 
@@ -35,7 +37,7 @@ public class CustomerIdentifierBySharedIdStrategyImpl implements CustomerIdentif
 	}
 
 	@Override
-	public ExecutionResult<Void> isCustomerExists(final String sharedId, final String storeCode, final String customerIdentifierKey) {
+	public ExecutionResult<Boolean> isCustomerExists(final String sharedId, final String storeCode, final String customerIdentifierKey) {
 		return customerRepository.isCustomerExistsBySharedIdAndStoreCode(storeCode, sharedId);
 	}
 
@@ -47,5 +49,10 @@ public class CustomerIdentifierBySharedIdStrategyImpl implements CustomerIdentif
 	@Override
 	public String getCustomerIdentificationKeyField() {
 		return customerIdentificationKeyField;
+	}
+
+	@Override
+	public ExecutionResult<String> deriveUserIdFromCustomer(final Customer customer) {
+		return ExecutionResultFactory.createReadOK(customer.getSharedId());
 	}
 }

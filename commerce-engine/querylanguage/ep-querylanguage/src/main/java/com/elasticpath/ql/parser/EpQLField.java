@@ -50,8 +50,8 @@ public enum EpQLField {
 	/** ProductStartDate field. */
 	PRODUCT_START_DATE("ProductStartDate"),
 
-	/** Last time when product was modified. */
-	PRODUCT_LAST_MODIFIED_DATE("LastModifiedDate"),
+	/** Last time entity was modified. */
+	LAST_MODIFIED_DATE("LastModifiedDate"),
 
 	/** StoreCode field. */
 	STORE_CODE("StoreCode"),
@@ -83,9 +83,14 @@ public enum EpQLField {
 	/** Tax jurisdiction region field. */
 	TAX_JURISDICTION_REGION("TaxJurisdictionRegion"),
 	
-	/** CM User Role  field. */
-	CMUSER_ROLE("Role");
+	/** CM User Role field. */
+	CMUSER_ROLE("Role"),
 
+	/** Customer type field. */
+	CUSTOMER_TYPE("CustomerType"),
+
+	/** Shared ID field. */
+	SHARED_ID("SharedID");
 
 	private String fieldName;
 

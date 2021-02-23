@@ -112,21 +112,6 @@
 				AND warehouse.uidPk = ?2
 			</query>
 		</named-query>
-		<named-query name="ORDER_UID_FOR_FAILED_ORDERS_BEFORE_DATE">
-			<query>
-				SELECT o.uidPk
-				FROM OrderImpl AS o
-				WHERE o.status = 'FAILED'
-				AND o.createdDate &lt;= ?1
-				ORDER BY o.createdDate
-			</query>
-		</named-query>
-		<named-query name="DELETE_ORDER_BY_ORDER_UID_LIST">
-			<query>DELETE
-				FROM OrderImpl o
-				WHERE o.uidPk IN (:list)
-			</query>
-		</named-query>
 		<named-query name="FIND_ORDER_GUIDS_BY_CART_ORDER_GUID">
 			<query>
 				SELECT o.orderNumber
@@ -143,7 +128,22 @@
 				AND UPPER(o.storeCode) = UPPER(?2)
 			</query>
 		</named-query>
-		
+		<named-query name="FIND_ACCOUNT_GUID_BY_ORDER_NUMBER">
+			<query>
+				SELECT o.account.guid
+				FROM OrderImpl AS o
+				WHERE o.orderNumber = ?1
+			</query>
+		</named-query>
+		<named-query name="COUNT_HELD_ORDERS_FOR_STORE">
+			<query>
+				SELECT COUNT(o.uidPk)
+				FROM OrderImpl AS o
+				WHERE o.status = 'ONHOLD'
+				AND UPPER(o.storeCode) = UPPER(?1)
+			</query>
+		</named-query>
+
     <!-- Named queries for AbstractOrderShipmentImpl -->
         <named-query name="ABSTRACT_ORDER_SHIPMENT_BY_SHIPMENT_NUMBER">
             <query>

@@ -69,17 +69,8 @@ public class CachingSortAttributeServiceImpl implements SortAttributeService {
 
 	@Override
 	public SortValue findSortValueByGuidAndLocaleCode(final String guid, final String localeCode) {
-
-		final String key = new StringBuilder(guid).append(":").append(localeCode).toString();
-		SortValue sortValue = findByStoreCodeAndLocaleCodeCache.get(key);
-		if (sortValue != null) {
-			return sortValue;
-		}
-
-		sortValue = fallbackService.findSortValueByGuidAndLocaleCode(guid, localeCode);
-		findByStoreCodeAndLocaleCodeCache.put(key, sortValue);
-
-		return sortValue;
+		final String key = guid + ":" + localeCode;
+		return findByStoreCodeAndLocaleCodeCache.get(key, cacheKey -> fallbackService.findSortValueByGuidAndLocaleCode(guid, localeCode));
 	}
 
 	@Override
@@ -89,14 +80,12 @@ public class CachingSortAttributeServiceImpl implements SortAttributeService {
 
 	@Override
 	public SortAttribute getDefaultSortAttributeForStore(final String storeCode) {
-		SortAttribute sortAttribute = defaultSortAttributeForStoreCache.get(storeCode);
-		if (sortAttribute != null) {
-			return sortAttribute;
-		}
-		sortAttribute = fallbackService.getDefaultSortAttributeForStore(storeCode);
-		defaultSortAttributeForStoreCache.put(storeCode, sortAttribute);
+		return defaultSortAttributeForStoreCache.get(storeCode, cacheKey -> fallbackService.getDefaultSortAttributeForStore(storeCode));
+	}
 
-		return sortAttribute;
+	@Override
+	public void removeAllLocalizedName(final SortAttribute sortAttribute) {
+		fallbackService.removeAllLocalizedName(sortAttribute);
 	}
 
 	@Override

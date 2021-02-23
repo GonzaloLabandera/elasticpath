@@ -39,7 +39,7 @@ public class ActiveRuleImpl implements ActiveRule {
 	public void setRuleId(final long ruleId) {
 		this.ruleId = ruleId;
 	}
-	
-	
+
+
 
 }

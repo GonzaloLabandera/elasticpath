@@ -34,15 +34,6 @@
 		</property>
 	</bean>
 
-	<!-- Other JPA properties such as excluding unlisted classes or Jta/NonJta data source can be overridden as follows -->
-	<!--
-	<bean id="overridingPersistenceUnitPostProcessor" parent="defaultOverridingPersistenceUnitPostProcessor">
-		<property name="excludeUnlistedClasses" value="false"/>
-		<property name="jtaDataSource" ref="jtaDataSource"/>
-		<property name="nonJtaDataSource" ref="nonJtaDataSource"/>
-	</bean>
-	-->
-
 	<!-- Load our custom enums proactively so the extra enum values are available
 	now, and to the JPA entities in the particular since they still refer to
 	the OOTB enums so won't be able to load or save the extra enums until our

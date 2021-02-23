@@ -1,7 +1,6 @@
 /*
  * Copyright © 2020 Elastic Path Software Inc. All rights reserved.
  */
-
 package com.elasticpath.rest.resource.accounts.relationships;
 
 import javax.inject.Inject;

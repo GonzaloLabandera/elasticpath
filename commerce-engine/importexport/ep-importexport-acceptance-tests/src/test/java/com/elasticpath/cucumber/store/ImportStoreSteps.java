@@ -273,6 +273,9 @@ public class ImportStoreSteps {
 		storeDTO.setSupportedCurrencies(separateStringToListOfObjects(properties.get("currencies"), SEPARATOR, Currency::getInstance));
 		storeDTO.setTaxCodeGuids(separateStringToListOfStrings(properties.get("tax_codes"), SEPARATOR));
 		storeDTO.setCreditCardTypes(separateStringToListOfStrings(properties.get("credit_card_types"), SEPARATOR));
+		storeDTO.setAuthenticatedB2CRole(properties.get("authenticated role"));
+		storeDTO.setSingleSessionB2CRole(properties.get("unauthenticated role"));
+
 		if (properties.containsKey("payment_provider_configurations")) {
 			storeDTO.setPaymentProviderConfigGuids(separateStringToListOfStrings(properties.get("payment_provider_configurations"), SEPARATOR));
 		}

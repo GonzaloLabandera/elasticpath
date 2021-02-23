@@ -93,6 +93,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 		Order order = shipment.getOrder();
 		Store store = getStoreService().findStoreWithCode(order.getStoreCode());
 		OrderSku orderSku = extractOrderSku(productSku, order, store, cmUser);
+		orderSku.setOrderUidPk(order.getUidPk());
 		shipment.addShipmentOrderSku(orderSku);
 		handleQuantityAllocationWhenAddItem(orderSku, productSku, order, store);
 		shipment.getOrder().setModifiedBy(getEventOriginator(cmUser));
@@ -132,6 +133,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 		final ShoppingItemTaxSnapshot taxSnapshot = getTaxSnapshotService().getTaxSnapshotForOrderSku(orderSku, pricingSnapshot);
 		newOrderSku.copyFrom(orderSku, getProductSkuLookup(), taxSnapshot);
 		newOrderSku.setQuantity(quantityToMove);
+		newOrderSku.setOrderUidPk(fromOrderShipment.getOrder().getUidPk());
 		final int quantityLeftInOldOrderSku = orderSku.getQuantity() - quantityToMove;
 
 		boolean existOrderSku = false;
@@ -187,6 +189,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 		newOrderSku.copyFrom(orderSku, getProductSkuLookup(), taxSnapshot);
 		newOrderSku.setQuantity(quantityToMove);
+		newOrderSku.setOrderUidPk(fromOrderShipment.getOrder().getUidPk());
 
 		final int quantityLeftInOldOrderSku = orderSku.getQuantity() - quantityToMove;
 

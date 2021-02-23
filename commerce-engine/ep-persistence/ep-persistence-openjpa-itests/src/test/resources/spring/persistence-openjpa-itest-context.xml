@@ -24,6 +24,7 @@
 		  abstract="true">
 		<property name="persistenceUnitManager" ref="basePersistenceUnitManager"/>
 		<property name="lifecycleListeners" ref="entityManagerLifecycleListeners"/>
+		<property name="transactionListeners" ref="entityManagerTransactionListeners"/>
 		<property name="hdsSupportSwitch" ref="hdsSupportSwitch"/>
 	</bean>
 
@@ -42,6 +43,7 @@
 	</bean>
 
 	<util:list id="entityManagerLifecycleListeners"/>
+	<util:list id="entityManagerTransactionListeners"/>
 	<util:list id="persistenceEngineOperationListeners"/>
 	<util:list id="persistenceMappingExcludedFiles"/>
 	<util:list id="persistenceMappingExcludedClasses"/>

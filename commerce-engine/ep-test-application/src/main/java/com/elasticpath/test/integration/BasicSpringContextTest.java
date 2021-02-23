@@ -58,9 +58,9 @@ public abstract class BasicSpringContextTest {
 	@Autowired
 	private TestApplicationContext tac;
 
-	@Autowired
+	@Autowired(required = false)
 	private List<CamelContext> camelContexts;
-	
+
 	/**
 	 * @return the tac
 	 */
@@ -83,21 +83,23 @@ public abstract class BasicSpringContextTest {
 
 		@Override
 		protected void after() {
-
-			for (final CamelContext context : camelContexts) {
-				try {
-					context.stop();
-				} catch (Exception ex) {
-					LOGGER.error("Error occurred:", ex);
+			if (camelContexts != null) {
+				for (final CamelContext context : camelContexts) {
+					try {
+						context.stop();
+					} catch (Exception ex) {
+						LOGGER.error("Error occurred:", ex);
+					}
 				}
 			}
 		}
 
 		@Override
 		protected void before() throws Throwable {
-
-			for (final CamelContext context : camelContexts) {
-				context.start();
+			if (camelContexts != null) {
+				for (final CamelContext context : camelContexts) {
+					context.start();
+				}
 			}
 		}
 	}

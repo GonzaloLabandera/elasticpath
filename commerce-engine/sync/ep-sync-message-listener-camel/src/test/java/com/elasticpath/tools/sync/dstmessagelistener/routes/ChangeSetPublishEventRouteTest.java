@@ -43,7 +43,7 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.core.messaging.changeset.ChangeSetEventType;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePredicate;
-import com.elasticpath.messaging.camel.jackson.EventMessageObjectMapper;
+import com.elasticpath.messaging.camel.jackson.EventMessageObjectMapperImpl;
 import com.elasticpath.messaging.error.handling.policy.impl.RecoverableRetryErrorHandlingPolicy;
 import com.elasticpath.messaging.factory.impl.EventMessageFactoryImpl;
 import com.elasticpath.messaging.impl.EventMessageImpl;
@@ -139,7 +139,7 @@ public class ChangeSetPublishEventRouteTest extends CamelTestSupport {
 
 		when(changeSetPublisher.publish(eq(ChangeSetUserConstants.CHANGE_SET_GUID))).thenReturn(changeSetSummaryMessage);
 
-		final EventMessageObjectMapper objectMapper = new EventMessageObjectMapper();
+		final EventMessageObjectMapperImpl objectMapper = new EventMessageObjectMapperImpl();
 		objectMapper.setEventMessageFactory(new EventMessageFactoryImpl());
 		objectMapper.init();
 
@@ -282,7 +282,7 @@ public class ChangeSetPublishEventRouteTest extends CamelTestSupport {
 	}
 
 	private String getJson(final EventMessage eventMessage) throws JsonProcessingException {
-		final EventMessageObjectMapper eventMessageObjectMapper = new EventMessageObjectMapper();
+		final EventMessageObjectMapperImpl eventMessageObjectMapper = new EventMessageObjectMapperImpl();
 		eventMessageObjectMapper.init();
 		return eventMessageObjectMapper.writeValueAsString(eventMessage);
 	}

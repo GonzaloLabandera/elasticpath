@@ -16,5 +16,5 @@ public interface ReversibleCheckoutAction extends CheckoutAction {
 	 * @param context object containing data required for execution
 	 * @throws EpSystemException exception object which could be thrown by execution
 	 */
-	void rollback(CheckoutActionContext context) throws EpSystemException;
+	void rollback(PreCaptureCheckoutActionContext context) throws EpSystemException;
 }

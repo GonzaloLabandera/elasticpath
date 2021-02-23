@@ -100,7 +100,7 @@
 					<plugin>
 						<groupId>org.codehaus.cargo</groupId>
 						<artifactId>cargo-maven2-plugin</artifactId>
-						<version>${cargo.plugin.version}</version>
+
 						<executions>
 							<execution>
 								<id>start-dce-container</id>
@@ -335,7 +335,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>${maven-failsafe-plugin.version}</version>
 				<configuration>
 					<encoding>${charset.encoding}</encoding>
 					<argLine>-Dfile.encoding=${charset.encoding}</argLine>

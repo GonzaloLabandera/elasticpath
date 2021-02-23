@@ -1,5 +1,6 @@
 package com.elasticpath.cortex.dce.validation
 
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static org.assertj.core.api.Assertions.assertThat
 import static org.assertj.core.api.Assertions.fail

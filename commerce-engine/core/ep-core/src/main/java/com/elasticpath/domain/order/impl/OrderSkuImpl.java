@@ -167,6 +167,8 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 
 	private Set<ShoppingItemRecurringPrice> recurringPrices = new HashSet<>();
 
+	private long orderUidPk;
+
 	/**
 	 * Internal accessor used by JPA.
 	 *
@@ -988,6 +990,17 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 			recurringPrices = new HashSet<>();
 		}
 		return recurringPrices;
+	}
+
+	@Basic
+	@Column(name = "ORDER_UID")
+	protected long getOrderUidPk() {
+		return orderUidPk;
+	}
+
+	@Override
+	public void setOrderUidPk(final long orderUidPk) {
+		this.orderUidPk = orderUidPk;
 	}
 
 	@Override

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+   Instructions for Maven Minimal on how to build Elastic Path Commerce.
+-->
+<mvnmin>
+
+	<!--
+	These projects will not be invoked by mvnmin.
+	These likely cause mvnmin all to fail
+	-->
+	<ignored-modules>
+		<!-- Catalog syndication, likely should be added into the main reactor -->
+		<module>com.elasticpath.extensions:ext-catalog-syndication-test</module>
+		<module>com.elasticpath.extensions:ext-catalog-syndication-system-tests-parent</module>
+		<module>com.elasticpath.extensions:ext-catalog-syndication-parent</module>
+		<module>com.elasticpath.extensions:ext-syndication-test-definitions</module>
+		<module>com.elasticpath.extensions:ext-catalog</module>
+
+		<!-- Disabled CM Client Reporting modules -->
+		<module>com.elasticpath.cmclient:com.elasticpath.cmclient.reporting.stockallocation</module>
+		<module>com.elasticpath.cmclient:com.elasticpath.cmclient.reporting.registration</module>
+		<module>com.elasticpath.cmclient:com.elasticpath.cmclient.reporting.promotiondetails</module>
+		<module>com.elasticpath.cmclient:com.elasticpath.cmclient.reporting.giftcertificatesummary</module>
+		<module>com.elasticpath.cmclient:com.elasticpath.cmclient.reporting.lowstock</module>
+		<module>com.elasticpath.cmclient:com.elasticpath.cmclient.reporting.giftcertificatedetails</module>
+
+		<!-- Remote testing projects (needs a deployment) -->
+		<module>com.elasticpath:ep-core-tool-itests-parent</module>
+		<module>com.elasticpath:ep-core-tool-selenium-test</module>
+		<module>com.elasticpath.extensions:ext-cortex-cucumber-tests</module>
+		<module>com.elasticpath.extensions:ext-system-tests</module>
+
+		<!-- CM-related tests, and the ext-cm-webapp-runner -->
+		<module>com.elasticpath.extensions.cm:ep-cm-selenium-test</module>
+		<module>com.elasticpath.extensions.cm:ep-cm-selenium-test-parent</module>
+		<module>com.elasticpath.extensions.cm:ext-ep-cm-selenium-test</module>
+		<module>com.elasticpath.extensions.cm:ext-ep-cm-selenium-test-parent</module>
+		<module>com.elasticpath.extensions.cm:ext-cm-webapp-runner</module>
+
+		<!-- The deployment package module -->
+		<module>com.elasticpath.extensions:ext-deployment-package</module>
+	</ignored-modules>
+
+	<!--
+		Conditional Build Glue:
+		If a project is activated that matches the module regex, mvnmin will activate the associated projects.
+	-->
+	<build-ifs>
+		<build-if description="Push ep-core/ext-core into ext-commerce-engine-wrapper and cm-libs.">
+			<match regex="com\.elasticpath:ep-core"/>
+			<match regex="com\.elasticpath\.extensions:ext-core"/>
+			<module>com.elasticpath.extensions:ext-commerce-engine-wrapper</module>
+			<module>com.elasticpath.cmclient:cm-libs</module>
+		</build-if>
+
+		<build-if description="Build extension Cortex repositories if we're building ootb repositories">
+			<match regex="com\.elasticpath\.rest\.integration\.epcommerce:ep-rest-repositories-epcommerce"/>
+			<module>com.elasticpath.extensions.rest.repositories:ext-cortex-repositories</module>
+		</build-if>
+
+		<build-if description="If we're building cm-libs we need to push that into the OOTB CM, so extensions can pick it up">
+			<match regex="com\.elasticpath\.cmclient:cm-libs"/>
+			<module>com.elasticpath.cmclient:cm-p2-repository</module>
+		</build-if>
+
+		<build-if description="Build the p2 repositories to pass updates to the cm webapp">
+			<match regex="com\.elasticpath\.cmclient:.*"/>
+			<module>com.elasticpath.cmclient:cm-p2-repository</module>
+		</build-if>
+
+		<build-if description="Build the ext-p2-repo and cm feature if the base p2 repo is activated">
+			<match regex="com\.elasticpath\.cmclient:cm-p2-repository"/>
+			<module>com.elasticpath.extensions:ext-cm-repository</module>
+			<module>com.elasticpath.cmclient:com.elasticpath.cmclient.platform.feature</module>
+		</build-if>
+
+		<build-if description="Build the ext-cm-webapp if the ext-cm-repository is activated">
+			<match regex="com\.elasticpath\.extensions:ext-cm-repository"/>
+			<module>com.elasticpath.extensions.cm:ext-cm-webapp</module>
+		</build-if>
+	</build-ifs>
+
+	<!--
+		Reactor Overrides
+		Define sub-reactors that mvnmin can then target in a finer-grained way, than vanilla maven.
+
+		The ordering of the reactors is important, this is the order mvnmin will invoke the reactors.
+
+		The <reactor> element's attributes are:
+			name=<reactor name>                     - an arbitrary name for a Reactor, used during mvnmin output
+			pom=<relative path to poml.xml>         - path the pom.xml which the maven build will be started with
+			single-thread=<true|false>              - force a reactor to run single-threaded, regardless of command line arguments
+			skip-if=<cmd line argument regex>       - a regex that will cause the reactor to be skipped, if present on the command line
+                The reactor's nested elements are:
+			<pattern>module regex pattern</pattern>  - a regex to match module names for this reactor
+			                                          A reactor may define multiple patterns, as needed, so that all required projects 
+                                                                  are associated with it.
+
+	-->
+	<reactors>
+		<reactor name="Commerce Manager modules" pom="commerce-manager/cm-modules/pom.xml" single-thread="true" skip-if="-P\!cm">
+			<pattern>com\.elasticpath\.cmclient:(?!translations|cm-parent|cm-libs|com.elasticpath.cmclient.libs|com.elasticpath.cmclient.testlibs).*</pattern>
+		</reactor>
+
+		<reactor name="Commerce Manager translation modules" pom="commerce-manager/cm-modules/translations/pom.xml"
+				 single-thread="true" skip-if="-P\!cm">
+			<description>
+				This is currently not run as part of any reactor perhaps we need to enable/disable these with a
+				profile "-Pcm-translations" part of the larger -Pcm profile
+			</description>
+			<pattern>com\.elasticpath\.cmclient:translations</pattern>
+			<pattern>com\.elasticpath\.cmclient\.translations:.*</pattern>
+		</reactor>
+
+		<reactor name="Extensions Commerce Manager glue" pom="extensions/cm/pom.xml" skip-if="-P\!cm">
+			<description>
+				This reactor is special.  It hijacks some jobs that normally run as part of the implicit reactor 0
+				and runs them separately.  It runs them once the previous commerce manager reactor finishes running.
+				This allows the top-level reactor to run concurrently (-T1C), but still force the CM pieces to build
+				in order - with extension modules coming last.
+			</description>
+			<pattern>com\.elasticpath\.extensions:ext-cm-repository</pattern>
+			<pattern>com\.elasticpath\.extensions\.cm:ext-cm-libs</pattern>
+			<pattern>com\.elasticpath\.extensions\.cm:ep-cm-selenium-test-parent</pattern>
+		</reactor>
+
+		<reactor name="Extensions Commerce Manager modules" pom="extensions/cm/ext-cm-modules/pom.xml" single-thread="true" skip-if="-P\!cm">
+			<pattern>com\.elasticpath\.extensions\.cm:(?!ext-ep-cm-selenium-test|ext-cm-webapp-runner|ep-cm-selenium-test|ext-cm-parent).*</pattern>
+			<pattern>=com\.elasticpath\.extensions:ext-cm-webapp</pattern>
+		</reactor>
+
+		<reactor name="Smoke Test" pom="pom.xml" skip-if="-P\!cm">
+			<pattern>com\.elasticpath\.extensions:webapp-smoketests</pattern>
+		</reactor>
+	</reactors>
+</mvnmin>

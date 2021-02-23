@@ -263,6 +263,16 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 	}
 
 	@Override
+	public List<ProductAssociation> getAllAssociations(final String sourceProductCode, final LoadTuner loadTuner) {
+		ProductAssociationSearchCriteria criteria = new ProductAssociationSearchCriteria();
+		criteria.setSourceProductCode(sourceProductCode);
+		criteria.setHidden(null);
+		criteria.setNotSoldSeparately(null);
+
+		return findByCriteria(criteria, loadTuner);
+	}
+
+	@Override
 	public Set<ProductAssociation> getAssociations(final ProductAssociationSearchCriteria criteria) {
 		Set<ProductAssociation> associationSet = new LinkedHashSet<>();
 		associationSet.addAll(this.findByCriteria(criteria));

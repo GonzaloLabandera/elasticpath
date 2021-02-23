@@ -639,7 +639,11 @@ public class OrderPaymentApiServiceImpl implements OrderPaymentApiService {
 	 */
 	@Override
 	public PaymentEvent buildPaymentEvent(final OrderPayment orderPayment, final Order order) {
+		OrderPaymentInstrumentDTO orderPaymentInstrumentDTO = null;
 		final OrderPaymentInstrument instrument = orderPaymentInstrumentService.findByOrderPayment(orderPayment);
+		if (instrument != null) {
+			orderPaymentInstrumentDTO = buildOrderPaymentInstrumentDTO(instrument, order);
+		}
 
 		return PaymentEventBuilder.aPaymentEvent()
 				.withAmount(createMoneyDTO(orderPayment.getAmount(), orderPayment.getCurrency().getCurrencyCode()))
@@ -652,7 +656,7 @@ public class OrderPaymentApiServiceImpl implements OrderPaymentApiService {
 				.withOriginalPaymentInstrument(true)
 				.withGuid(orderPayment.getGuid())
 				.withReferenceId(orderPayment.getOrderNumber())
-				.withOrderPaymentInstrumentDTO(buildOrderPaymentInstrumentDTO(instrument, order))
+				.withOrderPaymentInstrumentDTO(orderPaymentInstrumentDTO)
 				.build(beanFactory);
 	}
 

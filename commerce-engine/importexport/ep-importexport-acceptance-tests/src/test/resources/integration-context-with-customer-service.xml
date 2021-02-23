@@ -40,7 +40,6 @@
 	<mockito:mock id="epQLSearchEngine" class="com.elasticpath.search.searchengine.EpQLSearchEngine"/>
 	<mockito:mock id="eventMessageFactory" class="com.elasticpath.messaging.factory.EventMessageFactory"/>
 	<mockito:mock id="customerEventMessagePublisher" class="com.elasticpath.messaging.EventMessagePublisher"/>
-	<mockito:mock id="domainEventMessagePublisher" class="com.elasticpath.messaging.EventMessagePublisher"/>
 	<mockito:mock id="catalogEventMessagePublisher" class="com.elasticpath.messaging.EventMessagePublisher"/>
 
 
@@ -49,21 +48,8 @@
 		<property name="uri" value="direct:/dev/null" />
 	</bean>
 
-	<bean id="xaDataSource" class="org.h2.jdbcx.JdbcDataSource">
-		<property name="URL" value="jdbc:h2:mem:test_database"/>
-		<property name="user" value="sa"/>
-		<property name="password" value="sa"/>
-	</bean>
-
-	<bean id="xaJmsConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory"/>
-
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
-	</bean>
-
-	<bean id="epDomainMessagingDomainEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
-		<property name="uri" value="direct:/dev/null" />
-		<property name="camelContextId" value="ep-domain-messaging"/>
 	</bean>
 
 	<bean id="domainDeadLetterEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">

@@ -72,12 +72,12 @@ public interface UserAccountAssociation extends Persistable {
 	 *
 	 * @return the account role
 	 */
-	AccountRole getAccountRole();
+	String getAccountRole();
 
 	/**
 	 * Set the Account Role.
 	 *
 	 * @param accountRole the account role
 	 */
-	void setAccountRole(AccountRole accountRole);
+	void setAccountRole(String accountRole);
 }

@@ -3,10 +3,12 @@
  */
 package com.elasticpath.domain.search;
 
+import com.elasticpath.persistence.api.Persistable;
+
 /**
  * Localized name of sort attribute.
  */
-public interface SortLocalizedName {
+public interface SortLocalizedName extends Persistable {
 
 	/**
 	 * Get the locale code.

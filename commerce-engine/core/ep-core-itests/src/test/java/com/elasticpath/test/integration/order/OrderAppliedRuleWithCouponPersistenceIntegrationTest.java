@@ -70,7 +70,7 @@ public class OrderAppliedRuleWithCouponPersistenceIntegrationTest extends BasicS
 	@Test
 	public void testPersistOrderWithAppliedRuleWithCoupon() {
 		final int usageCount = 12;
-		
+
 		// must start with an order for this to work
 		Catalog catalog = getTac().getPersistersFactory().getCatalogTestPersister().persistDefaultMasterCatalog();
 		Warehouse warehouse = getTac().getPersistersFactory().getStoreTestPersister().persistDefaultWarehouse();
@@ -90,10 +90,10 @@ public class OrderAppliedRuleWithCouponPersistenceIntegrationTest extends BasicS
 		Set<AppliedRule> appliedRules = new HashSet<>();
 		appliedRules.add(appliedRule);
 		order.setAppliedRules(appliedRules);
-		
+
 		//throws exception if error
 		persistOrder(order);
-		
+
 		assertNotNull(order.getAppliedRules());
 		AppliedRule savedAppliedRule = order.getAppliedRules().iterator().next();
 		assertNotNull(savedAppliedRule.getAppliedCoupons());

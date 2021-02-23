@@ -5,11 +5,9 @@
 package com.elasticpath.catalog.update.processor.connectivity.impl;
 
 import static com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.OPTION_IDENTITY_TYPE;
-import static com.elasticpath.catalog.update.processor.connectivity.impl.SkuOptionUpdateProcessorImplIntegrationTest.JMS_BROKER_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Duration.TEN_SECONDS;
-import static org.awaitility.Duration.TWO_SECONDS;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -17,17 +15,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.elasticpath.catalog.messages.RelayOutboxMessagesThreadExecutor;
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionHistoryEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionHistoryId;
@@ -41,20 +40,16 @@ import com.elasticpath.domain.misc.impl.SkuOptionLocalizedPropertyValueImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.Persistable;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
 import com.elasticpath.test.util.Utils;
 
 /**
  * Integration tests for {@link SkuOptionUpdateProcessorImpl}.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DirtiesDatabase
-public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTestSupport {
-
-	public static final String JMS_BROKER_URL = "tcp://localhost:61619";
+public class SkuOptionUpdateProcessorImplIntegrationTest extends DbTestCase {
 
 	private static final Logger LOGGER = Logger.getLogger(SkuOptionUpdateProcessorImplIntegrationTest.class);
 
@@ -73,6 +68,9 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 
 	@Autowired
 	private CatalogProjectionHistoryRepository historyRepository;
+
+	@Autowired
+	private RelayOutboxMessagesThreadExecutor relayOutboxMessagesThreadExecutor;
 
 	@Autowired
 	@Qualifier(CATALOG_MESSAGING_CAMEL_CONTEXT)
@@ -94,6 +92,12 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 						.process(exchange -> LOGGER.info("Catalog endpoint exchange: " + exchange.getIn().getBody()));
 			}
 		});
+		relayOutboxMessagesThreadExecutor.start();
+	}
+
+	@After
+	public void tearDown() {
+		relayOutboxMessagesThreadExecutor.stop();
 	}
 
 	@Test
@@ -117,7 +121,7 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	public void shouldAppendedProjectionWhenEventIsUpdatedAndNoCorrespondingProjectionExists() {
 		final SkuOption skuOption = createAndPersistSkuOption();
 
-		await().atMost(TWO_SECONDS).until(() -> isProjectionExists(OPTION_IDENTITY_TYPE, skuOption.getOptionKey(), store.getCode()));
+		await().atMost(TEN_SECONDS).until(() -> isProjectionExists(OPTION_IDENTITY_TYPE, skuOption.getOptionKey(), store.getCode()));
 
 		catalogProjectionRepository.deleteAll();
 
@@ -133,7 +137,7 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	public void shouldUnchangedProjectionWhenEventIsUpdatedAndSameProjectionIsExist() {
 		final SkuOption skuOption = createAndPersistSkuOption();
 
-		await().atMost(TWO_SECONDS).until(() -> isProjectionExists(OPTION_IDENTITY_TYPE, skuOption.getOptionKey(), store.getCode()));
+		await().atMost(TEN_SECONDS).until(() -> isProjectionExists(OPTION_IDENTITY_TYPE, skuOption.getOptionKey(), store.getCode()));
 
 		final List<ProjectionEntity> savedProjections
 				= catalogProjectionRepository.extractProjectionsByTypeAndCode(OPTION_IDENTITY_TYPE,
@@ -156,7 +160,7 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	public void shouldAddedNewProjectionWhenEventIsUpdatedAndSameProjectionNotExist() {
 		final SkuOption skuOption = createAndPersistSkuOption();
 
-		await().atMost(TWO_SECONDS).until(() -> isProjectionExists(OPTION_IDENTITY_TYPE, skuOption.getOptionKey(), store.getCode()));
+		await().atMost(TEN_SECONDS).until(() -> isProjectionExists(OPTION_IDENTITY_TYPE, skuOption.getOptionKey(), store.getCode()));
 
 		skuOption.setDisplayName(NEW_SKU_DISPLAY_NAME, Locale.ENGLISH);
 		SkuOptionLocalizedPropertyValueImpl value = new SkuOptionLocalizedPropertyValueImpl();
@@ -184,7 +188,7 @@ public class SkuOptionUpdateProcessorImplIntegrationTest extends XaTransactionTe
 	public void shouldAppendedProjectionWhenEventIsDeleted() {
 		final SkuOption skuOption = createAndPersistSkuOption();
 
-		await().atMost(TWO_SECONDS).until(() -> isProjectionExists(OPTION_IDENTITY_TYPE, skuOption.getOptionKey(), store.getCode()));
+		await().atMost(TEN_SECONDS).until(() -> isProjectionExists(OPTION_IDENTITY_TYPE, skuOption.getOptionKey(), store.getCode()));
 
 		List<ProjectionEntity> notDeletedProjections
 				= catalogProjectionRepository.findNotDeletedProjectionEntities(OPTION_IDENTITY_TYPE,

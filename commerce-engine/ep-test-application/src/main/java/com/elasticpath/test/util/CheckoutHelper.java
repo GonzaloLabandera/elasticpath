@@ -17,24 +17,32 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.misc.CheckoutResults;
+import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shipping.Region;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
+import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.shipping.ShippingOptionResult;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutService;
+import com.elasticpath.service.shoppingcart.actions.impl.PostCaptureCheckoutActionContextImpl;
+import com.elasticpath.settings.refreshstrategy.impl.IntervalRefreshStrategyImpl;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.persister.PaymentInstrumentPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
@@ -45,6 +53,9 @@ import com.elasticpath.test.persister.TestApplicationContext;
  */
 public class CheckoutHelper {
 
+	private static final String HOLD_ALL_ORDERS_SETTING_PATH = "COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore";
+	private static final String HOLD_ALL_ORDERS_RESOLVE_PERMISSION_PATH = "COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStoreResolvePermission";
+	private static final String RESOLVE_GENERIC_HOLD_PERMISSION = "RESOLVE_GENERIC_HOLD";
 	private static final int FIRST_INDEX = 0;
 
 	private final CheckoutService checkoutService;
@@ -61,12 +72,21 @@ public class CheckoutHelper {
 
 	private final PaymentInstrumentPersister paymentInstrumentPersister;
 
+	private final PostCaptureCheckoutService postCaptureCheckoutService;
+
+	private final EventOriginatorHelper eventOriginatorHelper;
+
+	private final OrderService orderService;
+
+	private final TestApplicationContext tac;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param tac {@link TestApplicationContext}.
 	 */
 	public CheckoutHelper(final TestApplicationContext tac) {
+		this.tac = tac;
 		checkoutService = tac.getBeanFactory().getSingletonBean(ContextIdNames.CHECKOUT_SERVICE, CheckoutService.class);
 		shippingOptionService = tac.getBeanFactory().getSingletonBean(SHIPPING_OPTION_SERVICE, ShippingOptionService.class);
 		pricingSnapshotService = tac.getBeanFactory().getSingletonBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
@@ -75,6 +95,10 @@ public class CheckoutHelper {
 		shippingServiceLevelService = tac.getBeanFactory().getSingletonBean(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE,
 				ShippingServiceLevelService.class);
 		paymentInstrumentPersister = tac.getPersistersFactory().getPaymentInstrumentPersister();
+		postCaptureCheckoutService = tac.getBeanFactory().getSingletonBean(ContextIdNames.POST_CAPTURE_CHECKOUT_SERVICE,
+				PostCaptureCheckoutService.class);
+		orderService = tac.getBeanFactory().getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
+		eventOriginatorHelper = tac.getBeanFactory().getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 	}
 
 	/**
@@ -104,7 +128,9 @@ public class CheckoutHelper {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		return checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, false);
+		CheckoutResults checkoutResults = checkoutCartWithoutHolds(shoppingCart, taxSnapshot, customerSession, false);
+		checkoutResults.setOrder(finalizeOrder(checkoutResults.getOrder()));
+		return checkoutResults;
 	}
 
 	/**
@@ -147,7 +173,9 @@ public class CheckoutHelper {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		return checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, false);
+		CheckoutResults checkoutResults = checkoutCartWithoutHolds(shoppingCart, taxSnapshot, customerSession, false);
+		checkoutResults.setOrder(finalizeOrder(checkoutResults.getOrder()));
+		return checkoutResults;
 	}
 
 	private List<ShippingOption> getShippingOptionsFromCart(final ShoppingCart storeShoppingCart) {
@@ -200,5 +228,187 @@ public class CheckoutHelper {
 		customerAddressMatchingShippingServiceLevel.setCountry(countryCodeFromFirstRegion);
 		customerAddressMatchingShippingServiceLevel.setSubCountry(firstSubCountryFromFirstRegion);
 		return customerAddressMatchingShippingServiceLevel;
+	}
+
+	/**
+	 * Disables order holds and checkout the order but does not finalize, which means the order will not be released.
+	 *
+	 * @param shoppingCart - the cart to checkout
+	 * @param taxSnapshot - the tax snapshot for the cart
+	 * @param customerSession - the customers current session
+	 * @param throwExceptions - if any encountered exceptions should be rethrown
+	 * @return the CheckoutResults container
+	 */
+	public CheckoutResults checkoutCartWithoutHolds(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot,
+			CustomerSession customerSession, boolean throwExceptions) {
+
+		CheckoutResults checkoutResult = checkoutService.checkout(
+				shoppingCart, taxSnapshot, customerSession, throwExceptions);
+
+		return checkoutResult;
+	}
+
+	/**
+	 * Enables order holds and checkout the order but does not finalize, which means the order will not be released.
+	 *
+	 * @param shoppingCart - the cart to checkout
+	 * @param taxSnapshot - the tax snapshot for the cart
+	 * @param customerSession - the customers current session
+	 * @param throwExceptions - if any encountered exceptions should be rethrown
+	 * @return the CheckoutResults container
+	 */
+	public CheckoutResults checkoutCartWithHold(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot,
+			CustomerSession customerSession, boolean throwExceptions) {
+
+		enableOrderHoldStrategies(shoppingCart.getStore().getCode());
+		CheckoutResults checkoutResult = checkoutService.checkout(
+				shoppingCart, taxSnapshot, customerSession, throwExceptions);
+
+		return checkoutResult;
+	}
+
+	/**
+	 * Runs the post capture checkout actions so that the order can be released and finalized.
+	 *
+	 * @param submittedOrder - the order that has been submitted and accepted
+	 * @return the finalized order
+	 */
+	public Order finalizeOrder(Order submittedOrder) {
+		return postCaptureCheckout(submittedOrder);
+	}
+
+	/**
+	 * A convenience method that obtains the order from the CheckoutResults and invokes {@link #finalizeOrder(Order)}
+	 * @param results the checkout results used to obtain the order
+	 * @return the finalized order
+	 */
+	public Order finalizeOrder(CheckoutResults results) {
+		return finalizeOrder(results.getOrder());
+	}
+
+	/**
+	 * Runs the checkout and post capture checkout services against the order and bypasses all order hold processing.
+	 *
+	 * @param shoppingCart - the cart to checkout
+	 * @param taxSnapshot - the tax snapshot for the cart
+	 * @param customerSession - the customers current session
+	 *
+	 * @return the finalized order
+	 */
+	public Order checkoutCartAndFinalizeOrderWithoutHolds(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot,
+			CustomerSession customerSession) {
+		return checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, false);
+	}
+
+	/**
+	 * Runs the checkout and post capture checkout services against the order.
+	 *
+	 * @param shoppingCart - the cart to checkout
+	 * @param taxSnapshot - the tax snapshot for the cart
+	 * @param customerSession - the customers current session
+	 * @param throwExceptions - if any encountered exceptions should be rethrown
+	 *
+	 * @return the finalized order
+	 */
+	public Order checkoutCartAndFinalizeOrder(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot,
+			CustomerSession customerSession, boolean throwExceptions) {
+
+		CheckoutResults checkoutResult = checkoutService.checkout(
+				shoppingCart, taxSnapshot, customerSession, throwExceptions);
+		Order postCaptureOrder =  orderService.findOrderByOrderNumber(checkoutResult.getOrder().getOrderNumber());
+		postCaptureOrder.setModifiedBy(eventOriginatorHelper.getSystemOriginator());
+		return postCaptureCheckout(postCaptureOrder);
+	}
+
+	/**
+	 * Runs the checkout and post capture checkout services against the order and bypasses all order hold processing.
+	 *
+	 * @param shoppingCart - the cart to checkout
+	 * @param taxSnapshot - the tax snapshot for the cart
+	 * @param customerSession - the customers current session
+	 * @param throwExceptions - if any encountered exceptions should be rethrown
+	 *
+	 * @return the finalized order
+	 */
+	public Order checkoutCartAndFinalizeOrderWithoutHolds(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot,
+			CustomerSession customerSession, boolean throwExceptions) {
+
+		return checkoutCartAndFinalizeOrder(shoppingCart, taxSnapshot,
+				customerSession, throwExceptions);
+	}
+
+	/**
+	 * Builds a PostCaptureCheckoutActionContext and invokes PostCaptureCheckoutService.checkout() on the order.
+	 * @param order the order to invoke post capture actions against
+	 * @return the resulting order
+	 */
+	public Order postCaptureCheckout(Order order) {
+		PostCaptureCheckoutActionContext context = new PostCaptureCheckoutActionContextImpl(order);
+		postCaptureCheckoutService.completeCheckout(context);
+		Order postCaptureOrder =  orderService.findOrderByOrderNumber(order.getOrderNumber());
+		postCaptureOrder.setModifiedBy(eventOriginatorHelper.getCustomerOriginator(order.getCustomer()));
+		return postCaptureOrder;
+	}
+
+	/**
+	 * Persists a setting that disables all order hold strategies.
+	 *
+	 * @param storeCode the store to disable order hold strategies within
+	 */
+	public void disableOrderHoldStrategies(final String storeCode) {
+		setOrderHoldStrategy(storeCode, Boolean.FALSE);
+	}
+
+	/**
+	 * Persists a setting that enables all order hold strategies.
+	 *
+	 * @param storeCode the store to disable order hold strategies within
+	 */
+	public void enableOrderHoldStrategies(final String storeCode) {
+		setOrderHoldStrategy(storeCode, Boolean.TRUE);
+		setOrderHoldResolvePermission(storeCode, RESOLVE_GENERIC_HOLD_PERMISSION);
+		IntervalRefreshStrategyImpl.clearCache();
+	}
+
+	protected void setOrderHoldResolvePermission(final String storeCode, final String permission) {
+		try {
+			tac.getPersistersFactory().getSettingsTestPersister().persistSettings(
+					HOLD_ALL_ORDERS_RESOLVE_PERMISSION_PATH,
+					"RESOLVE_GENERIC_HOLD",
+					"String",
+					-1,
+					storeCode,
+					permission,
+					"permission to resolve generic holds on orders for a store"
+			);
+		} catch (EpServiceException e) {
+			//this usually means the setting has already been persisted - try to update instead
+			tac.getPersistersFactory().getSettingsTestPersister().updateSettingValue(
+					HOLD_ALL_ORDERS_RESOLVE_PERMISSION_PATH,
+					storeCode,
+					permission
+			);
+		}
+	}
+
+	protected void setOrderHoldStrategy(final String storeCode, final Boolean enableHoldStrategies) {
+		try {
+			tac.getPersistersFactory().getSettingsTestPersister().persistSettings(
+					HOLD_ALL_ORDERS_SETTING_PATH,
+					"false",
+					"Boolean",
+					-1,
+					storeCode,
+					enableHoldStrategies.toString(),
+					"Hold all orders for a store"
+			);
+		} catch (EpServiceException e) {
+			//this usually means the setting has already been persisted - try to update instead
+			tac.getPersistersFactory().getSettingsTestPersister().updateSettingValue(
+					HOLD_ALL_ORDERS_SETTING_PATH,
+					storeCode,
+					enableHoldStrategies.toString()
+			);
+		}
 	}
 }

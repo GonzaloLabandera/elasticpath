@@ -3,7 +3,10 @@
  */
 package com.elasticpath.email.handler.order.helper;
 
+import java.util.List;
+
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.order.OrderHold;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.email.domain.EmailProperties;
 
@@ -38,4 +41,22 @@ public interface OrderEmailPropertyHelper {
 	 */
 	EmailProperties getFailedShipmentPaymentEmailProperties(OrderShipment shipment, String errorMessage);
 
+	/**
+	 * Constructs properties for order hold notification.
+	 *
+	 * @param storeCode the store the notification is for
+	 * @param heldOrderCount the count of held orders that need action
+	 * @return EmailProperties
+	 */
+	EmailProperties getHoldNotificationEmailProperties(String storeCode, String heldOrderCount);
+
+	/**
+	 * Gets the {@link com.elasticpath.email.domain.EmailProperties} instance with set properties for sending an order cancellation
+	 * email due to an order hold is unresolvable.
+	 *
+	 * @param order the order
+	 * @param orderHolds the holds associated wth the order
+	 * @return {@link com.elasticpath.email.domain.EmailProperties}
+	 */
+	EmailProperties getOrderRejectedEmailProperties(Order order, List<OrderHold> orderHolds);
 }

@@ -8,7 +8,7 @@
 
 	<bean id="eventMessageFactory" class="com.elasticpath.messaging.factory.impl.EventMessageFactoryImpl"/>
 
-	<bean id="eventMessageObjectMapper" class="com.elasticpath.messaging.camel.jackson.EventMessageObjectMapper" init-method="init">
+	<bean id="eventMessageObjectMapper" class="com.elasticpath.messaging.camel.jackson.EventMessageObjectMapperImpl" init-method="init">
 		<property name="eventMessageFactory" ref="eventMessageFactory"/>
 	</bean>
 

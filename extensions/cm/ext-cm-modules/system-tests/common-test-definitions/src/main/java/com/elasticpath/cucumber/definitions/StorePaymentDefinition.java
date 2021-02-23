@@ -25,13 +25,13 @@ public class StorePaymentDefinition {
 
 	@Then("^I can see the newly created payment configuration in Cortex order payment methods for store (.+)$")
 	public void verifyPaymentInCortex(final String store) {
-		LoginSteps.loginAsPublocUserWithScope(store);
+		LoginSteps.loginAsPublicUserWithScope(store);
 		Order.getPaymentConfigurationWithName(paymentConfiguration.getConfigurationName());
 	}
 
 	@Then("^the (?:inactive||unassociated with store) payment configuration is not visible in store (.+)$")
 	public void verifyOrderPaymentMethodNotExists(final String store) {
-		LoginSteps.loginAsPublocUserWithScope(store);
+		LoginSteps.loginAsPublicUserWithScope(store);
 		Order.paymentmethodsresource();
 		PaymentMethodsSteps.verifyPaymentMethodsNotExist(paymentConfiguration.getConfigurationName());
 	}

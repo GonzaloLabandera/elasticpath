@@ -416,6 +416,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.eclipse.gemini.blueprint</groupId>
 			<artifactId>gemini-blueprint-core</artifactId>
 			<exclusions>
@@ -481,11 +486,6 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -568,38 +568,6 @@
 				<artifactId>maven-replacer-plugin</artifactId>
 			</plugin>
 
-			<!--
-			 - Workaround for a shortcoming in the Groovy compiler.
-			 - The Groovy stub generator sets the modified date of all generated files to the
-			 - 1st of January 1970 in order to prevent the Java compiler from overwriting the
-			 - groovy .class files with new ones based on the stub.
-			 - However, adding @SuppressWarnings annotations to all generated code in the
-			 - maven-replacer-plugin above overrides that and sets the modified date to the
-			 - current time.
-			 - Here we put the modified time back to 1970 to make the Groovy compiler happy
-			 - again.
-			 -
-			 - See http://jira.codehaus.org/browse/MGROOVY-187 for the original Groovy defect.
-			 -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>touch-modified-groovy-stubs</id>
-						<phase>process-sources</phase>
-						<configuration>
-							<target>
-								<touch datetime="1970-01-01T00:00:00 GMT" pattern="yyyy-MM-dd'T'HH:mm:ss z">
-									<fileset dir="target/generated-sources/groovy-stubs" />
-								</touch>
-							</target>
-						</configuration>
-						<goals><goal>run</goal></goals>
-					</execution>
-				</executions>
-			</plugin>
-
 			<plugin>
 				<groupId>org.apache.openjpa</groupId>
 				<artifactId>openjpa-maven-plugin</artifactId>
@@ -659,16 +627,28 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.codehaus.gmaven</groupId>
-				<artifactId>gmaven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generateStubs</goal>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration combine.self="override">
+					<compilerArgs>
+						<arg>-Xlint:all</arg>
+					</compilerArgs>
+					<compilerId>groovy-eclipse-compiler</compilerId>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-eclipse-compiler</artifactId>
+						<version>${groovy.eclipse.compiler.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-eclipse-batch</artifactId>
+						<version>${groovy.eclipse.batch.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 
 			<plugin>

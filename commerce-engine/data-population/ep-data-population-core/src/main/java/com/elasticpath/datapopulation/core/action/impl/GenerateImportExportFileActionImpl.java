@@ -35,10 +35,6 @@ public class GenerateImportExportFileActionImpl implements DataPopulationAction 
 	@Qualifier("filteredPropertiesForImportExport")
 	private Properties filterProperties;
 
-	@Autowired
-	@Qualifier("jmsProperties")
-	private Properties jmsProperties;
-
 	private File output;
 
 	@Autowired
@@ -64,17 +60,22 @@ public class GenerateImportExportFileActionImpl implements DataPopulationAction 
 		}
 
 		try {
-			filterService.filter(input, getOutput(), filterProperties, jmsProperties);
+			filterService.filter(input, getOutput(), filterProperties);
 		} catch (final IOException e) {
 			throw new DataPopulationActionException("Unable to filter Import/Export file. Input: " + input + "; output: " + getOutput()
 					+ ". " + DpUtils.getNestedExceptionMessage(e), e);
 		}
 
-		LOG.info("Import/Export configuration file generated at: " + getOutput());
+		LOG.debug("Import/Export configuration file generated at: " + getOutput());
 
 		//This property must be set for ImportExportChange to locate the correct filepath.
 		//This configLocation property is read by the importexportservice.xml when starting the application context.
 		System.setProperty("configLocation", "file:///" + getOutput().getAbsolutePath());
+	}
+
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		return "Generating '" + getOutput().getPath() + "'";
 	}
 
 	/**

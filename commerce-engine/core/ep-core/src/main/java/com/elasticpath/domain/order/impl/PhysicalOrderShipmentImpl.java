@@ -396,23 +396,21 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 	@Override
 	@Transient
 	public boolean isCancellable() {
-		boolean cancellable = true;
-
+		boolean cancellable;
 		switch (getShipmentStatus().getOrdinal()) {
-		case OrderShipmentStatus.CANCELLED_ORDINAL:
-		case OrderShipmentStatus.SHIPPED_ORDINAL:
-			cancellable = false;
-			break;
-		case OrderShipmentStatus.AWAITING_INVENTORY_ORDINAL:
-		case OrderShipmentStatus.INVENTORY_ASSIGNED_ORDINAL:
-		case OrderShipmentStatus.ONHOLD_ORDINAL:
-		case OrderShipmentStatus.RELEASED_ORDINAL:
-			cancellable = true;
-			break;
-
-		default:
-			throw new EpSystemException("Error: unhandled shipment status: " + getShipmentStatus());
-
+			case OrderShipmentStatus.CANCELLED_ORDINAL:
+			case OrderShipmentStatus.SHIPPED_ORDINAL:
+			case OrderShipmentStatus.FAILED_ORDER_ORDINAL:
+				cancellable = false;
+				break;
+			case OrderShipmentStatus.AWAITING_INVENTORY_ORDINAL:
+			case OrderShipmentStatus.INVENTORY_ASSIGNED_ORDINAL:
+			case OrderShipmentStatus.ONHOLD_ORDINAL:
+			case OrderShipmentStatus.RELEASED_ORDINAL:
+				cancellable = true;
+				break;
+			default:
+				throw new EpSystemException("Error: unhandled shipment status: " + getShipmentStatus());
 		}
 		if (LOG.isDebugEnabled() && !cancellable) {
 			LOG.debug("Cannot cancel orderShipment because it is already " + getShipmentStatus());

@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>addresses</name>
+
+
+		<uri-part>
+			<name>account-address-id</name>
+			<description><![CDATA[The account address ID.]]></description>
+			<string/>
+		</uri-part>
+
+		<resource>
+			<name>account-addresses</name>
+			<description><![CDATA[The list of addresses for the account customer]]></description>
+			<uri>{addresses.addresses}/accounts/{accounts.account-id}</uri>
+			<list-of>account-address</list-of>
+		</resource>
+
+		<resource>
+			<name>account-address</name>
+			<description><![CDATA[The address for the account customer]]></description>
+			<uri>{account-addresses}/{account-address-id}</uri>
+			<entity>address</entity>
+		</resource>
+
+		<resource>
+			<name>account-billing-addresses</name>
+			<description><![CDATA[The billing addresses for the account customer]]></description>
+			<uri>{account-addresses}/billing</uri>
+			<list-of>account-address</list-of>
+		</resource>
+
+		<resource>
+			<name>account-default-billing-address</name>
+			<description><![CDATA[The default billing address for the account customer]]></description>
+			<uri>{account-billing-addresses}/default</uri>
+			<alias>account-address</alias>
+		</resource>
+
+		<resource>
+			<name>account-shipping-addresses</name>
+			<description><![CDATA[The shipping addresses for the account customer]]></description>
+			<uri>{account-addresses}/shipping</uri>
+			<list-of>account-address</list-of>
+		</resource>
+
+		<resource>
+			<name>account-default-shipping-address</name>
+			<description><![CDATA[The default shipping address for the account customer]]></description>
+			<uri>{account-shipping-addresses}/default</uri>
+			<alias>account-address</alias>
+		</resource>
+
+		<relationship>
+			<name>account-addresses-from-account</name>
+			<description><![CDATA[Read the list of the account's addresses.]]></description>
+			<rel>addresses</rel>
+			<from>accounts.account</from>
+			<to>account-addresses</to>
+		</relationship>
+
+		<relationship>
+			<name>account-from-account-addresses</name>
+			<description><![CDATA[Read the account that the account addresses belong to.]]></description>
+			<rel>account</rel>
+			<rev>account-addresses</rev>
+			<from>account-addresses</from>
+			<to>accounts.account</to>
+		</relationship>
+
+		<relationship>
+			<name>account-from-account-address</name>
+			<description><![CDATA[Read the account that the account address belongs to.]]></description>
+			<rel>account</rel>
+			<from>account-address</from>
+			<to>accounts.account</to>
+		</relationship>
+
+		<relationship>
+			<name>account-addresses-from-account-address</name>
+			<description><![CDATA[Link to the list of account addresses from the account address.]]></description>
+			<rel>list</rel>
+			<from>account-address</from>
+			<to>account-addresses</to>
+		</relationship>
+
+		<relationship>
+			<name>default-account-billing-address-from-account-billing-addresses</name>
+			<description><![CDATA[Read the default account billing address from the list of account billing addresses.]]></description>
+			<rel>default</rel>
+			<from>account-billing-addresses</from>
+			<to>account-default-billing-address</to>
+		</relationship>
+
+		<relationship>
+			<name>account-from-account-billing-addresses</name>
+			<description><![CDATA[Read the account linked to the account billing addresses.]]></description>
+			<rel>account</rel>
+			<from>account-billing-addresses</from>
+			<to>accounts.account</to>
+		</relationship>
+
+		<relationship>
+			<name>account-shipping-addresses-from-account-addresses</name>
+			<description><![CDATA[Read account shipping addresses from the list of account addresses.]]></description>
+			<rel>shippingaddresses</rel>
+			<rev>account-addresses</rev>
+			<from>account-addresses</from>
+			<to>account-shipping-addresses</to>
+		</relationship>
+
+		<relationship>
+			<name>account-shipping-addresses-to-account-addresses</name>
+			<description><![CDATA[Link account shipping addresses to the list of account addresses.]]></description>
+			<rel>accountaddresses</rel>
+			<rev>shippingaddresses</rev>
+			<from>account-shipping-addresses</from>
+			<to>account-addresses</to>
+		</relationship>
+
+		<relationship>
+			<name>default-account-shipping-address-from-account-shipping-addresses</name>
+			<description><![CDATA[Read the default account shipping address from the list of account shipping addresses.]]></description>
+			<rel>default</rel>
+			<from>account-shipping-addresses</from>
+			<to>account-default-shipping-address</to>
+		</relationship>
+
+		<relationship>
+			<name>account-from-account-shipping-addresses</name>
+			<description><![CDATA[Read the account linked to the account shipping addresses.]]></description>
+			<rel>account</rel>
+			<from>account-shipping-addresses</from>
+			<to>accounts.account</to>
+		</relationship>
+
+		<relationship>
+			<name>account-billing-addresses-from-account-addresses</name>
+			<description><![CDATA[Read account billing addresses from the list of account addresses.]]></description>
+			<rel>billingaddresses</rel>
+			<rev>account-addresses</rev>
+			<from>account-addresses</from>
+			<to>account-billing-addresses</to>
+		</relationship>
+
+	</family>
+</definitions>

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -230,21 +229,5 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 
 	public void setResourceOperationContext(final ResourceOperationContext resourceOperationContext) {
 		this.resourceOperationContext = resourceOperationContext;
-	}
-
-	/**
-	 * Get list of modifier fields with default cart values.
-	 *
-	 * @param cart the shopping cart
-	 * @return list of modifier fields with default values
-	 */
-	protected List<ModifierField> getModifierFieldsWithDefaultValues(final ShoppingCart cart) {
-		List<ModifierGroup> modifierGroups = cart.getStore().getShoppingCartTypes().stream()
-				.flatMap(cartType -> cartType.getModifiers().stream())
-				.collect(Collectors.toList());
-		return modifierGroups.stream()
-				.flatMap(modifierGroup -> modifierGroup.getModifierFields().stream())
-				.filter(modifierField -> modifierField.getDefaultCartValue() != null)
-				.collect(Collectors.toList());
 	}
 }

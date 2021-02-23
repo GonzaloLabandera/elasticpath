@@ -56,7 +56,7 @@ class LoginSteps {
 	}
 
 	@Given('^I am logged into scope (.+) as a public shopper$')
-	static void loginAsPublocUserWithScope(String scope) {
+	static void loginAsPublicUserWithScope(String scope) {
 		client.authAsAPublicUser(scope)
 				.stopIfFailure()
 	}

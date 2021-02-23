@@ -446,11 +446,6 @@ implements TaxCalculationResult {
 			return;
 		}
 		for (ShoppingItem lineItem : lineItems) {
-			// On Order exchange wizard tax calculation may be invoked
-			// on item without unit price
-			if (!lineItem.hasPrice()) {
-				continue;
-			}
 			Money taxAmount = getLineItemTax(lineItem.getGuid());
 			if (taxAmount == null) {
 				throw new IllegalArgumentException("LineItem tax not present in TaxCalculationResult for LineItem with guid " + lineItem.getGuid());

@@ -190,6 +190,14 @@
 				  activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.customerService"
 				  key="CREATE_EDIT_ACCOUNTS"
 				  name="%createEditAccounts.name"/>
+         <permission
+               activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.customerService"
+               key="ASSIGN_CUSTOMER_SEGMENTS"
+               name="%assignCustomerSegments.name"/>
+		  <permission
+			  activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.customerService"
+			  key="RESOLVE_GENERIC_HOLD"
+			  name="%resolveGenericOrderHoldPermission.name"/>
       </permissions>
       <activity
             id="com.elasticpath.cmclient.fulfillment.authorizations.activity.customerService"

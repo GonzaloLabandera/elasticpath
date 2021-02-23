@@ -79,7 +79,7 @@ public class CouponUsageControllerTest {
 		verify(coupon).setCouponConfig(couponConfig);
 		verify(couponUsage).setCustomerEmailAddress("test@test.com"); //$NON-NLS-1$
 		verify(couponUsage).setUseCount(0);
-		verify(couponUsage).setActiveInCart(true);
+		verify(couponUsage).setAutoApplyToCarts(true);
 		verify(couponUsage).setCoupon(addedCoupon);
 		verify(couponService).add(coupon);
 		verify(couponUsageService).add(couponUsage);
@@ -139,10 +139,10 @@ public class CouponUsageControllerTest {
 		verify(coupon).setCouponConfig(couponConfig);
 		verify(couponUsage).setCoupon(addedCoupon);
 		verify(couponUsage).setUseCount(0);
-		verify(couponUsage).setActiveInCart(true);
+		verify(couponUsage).setAutoApplyToCarts(true);
 		verify(couponUsage2).setCoupon(addedCoupon);
 		verify(couponUsage2).setUseCount(0);
-		verify(couponUsage2).setActiveInCart(true);
+		verify(couponUsage2).setAutoApplyToCarts(true);
 
 		verify(couponService).add(coupon);
 		verify(couponUsageService).add(couponUsage);

@@ -13,6 +13,12 @@
 			<column name="DESCRIPTION" value="Sample Message Channel Endpoint URI for use within Messaging integration tests" />
 			<column name="MAX_OVERRIDE_VALUES" value="-1" />
 		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399998" />
+			<column name="SETTING_DEFINITION_UID" value="2000" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
 		<insert tableName="TSETTINGVALUE">
 			<column name="UIDPK" value="1"/>
 			<column name="SETTING_DEFINITION_UID" value="2000"/>
@@ -39,6 +45,12 @@
 			<column name="VALUE_TYPE" value="String" />
 			<column name="DESCRIPTION" value="Sample Message Channel Endpoint URI for use within Virtual Topic integration tests" />
 			<column name="MAX_OVERRIDE_VALUES" value="-1" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399999" />
+			<column name="SETTING_DEFINITION_UID" value="2001" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
 		</insert>
 		<insert tableName="TSETTINGVALUE">
 			<column name="UIDPK" value="3"/>

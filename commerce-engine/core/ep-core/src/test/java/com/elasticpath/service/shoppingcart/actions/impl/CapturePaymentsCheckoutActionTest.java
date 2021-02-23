@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -19,7 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
 
 /**
  * Unit test for {@link CapturePaymentsCheckoutAction}.
@@ -38,7 +39,7 @@ public class CapturePaymentsCheckoutActionTest {
 	@Test
 	public void verifyCaptureNotTriggeredWhenOnHold() {
 		final Order order = mock(Order.class);
-		final CheckoutActionContext checkoutActionContext = mock(CheckoutActionContext.class);
+		final PostCaptureCheckoutActionContext checkoutActionContext = mock(PostCaptureCheckoutActionContext.class);
 		given(checkoutActionContext.getOrder()).willReturn(order);
 
 		when(order.getStatus()).thenReturn(OrderStatus.ONHOLD);
@@ -52,7 +53,7 @@ public class CapturePaymentsCheckoutActionTest {
 	public void verifyCaptureTriggeredWhenCreated() {
 		final Order order = mock(Order.class);
 		final Order updatedOrder = mock(Order.class);
-		final CheckoutActionContext checkoutActionContext = mock(CheckoutActionContext.class);
+		final PostCaptureCheckoutActionContext checkoutActionContext = mock(PostCaptureCheckoutActionContext.class);
 		given(checkoutActionContext.getOrder()).willReturn(order);
 
 		when(order.getStatus()).thenReturn(OrderStatus.CREATED);

@@ -271,14 +271,6 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLa
 	void accept(ShoppingCartVisitor visitor, ProductSkuLookup productSkuLookup);
 
 	/**
-	 * Returns {@code true} if this shopping item has a price; otherwise {@code false}.  Note that a price of $0.00 is a valid price and would result
-	 * in a return value of {code true}.
-	 *
-	 * @return {@code true} if this shopping item has a price
-	 */
-	boolean hasPrice();
-
-	/**
 	 * Setter for child item's shopping cart uid.
 	 * @param childItemCartUid the cart uid.
 	 */

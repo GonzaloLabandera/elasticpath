@@ -6,25 +6,32 @@ package com.elasticpath.service.shoppingcart.actions.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.core.messaging.order.OrderEventType;
+import com.elasticpath.domain.order.Order;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.factory.EventMessageFactory;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureOrderFailureCheckoutAction;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 
 /**
  * Checkout action to create and publish an {@link OrderEventType} {@link EventMessage}.
  */
-public class CreateNewOrderEventCheckoutAction implements ReversibleCheckoutAction {
+public class CreateNewOrderEventCheckoutAction implements ReversibleCheckoutAction, PostCaptureOrderFailureCheckoutAction {
 
 	private EventMessageFactory eventMessageFactory;
 
 	private EventMessagePublisher eventMessagePublisher;
 
+	private static final Logger LOG = Logger.getLogger(CreateNewOrderEventCheckoutAction.class);
+
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		try {
 			Map<String, Object> data = null;
 			if (context.getOrder().hasGiftCertificateShipment()) {
@@ -43,8 +50,20 @@ public class CreateNewOrderEventCheckoutAction implements ReversibleCheckoutActi
 	}
 
 	@Override
-	public void rollback(final CheckoutActionContext context) throws EpSystemException {
+	public void rollback(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		// NO OP
+	}
+
+	@Override
+	public void postCaptureRollback(final PostCaptureCheckoutActionContext context, final Exception causeForFailure) {
+		final Order order = context.getOrder();
+
+		if (order == null) {
+			LOG.error("Order not found in post capture checkout action context");
+		} else {
+			order.failOrder();
+			LOG.error("Order marked as failed " + order, causeForFailure);
+		}
 	}
 
 	public void setEventMessageFactory(final EventMessageFactory eventMessageFactory) {
@@ -62,5 +81,4 @@ public class CreateNewOrderEventCheckoutAction implements ReversibleCheckoutActi
 	protected EventMessagePublisher getEventMessagePublisher() {
 		return eventMessagePublisher;
 	}
-
 }

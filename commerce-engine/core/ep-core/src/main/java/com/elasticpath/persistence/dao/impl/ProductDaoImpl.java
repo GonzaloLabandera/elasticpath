@@ -633,7 +633,7 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 			return false;
 		}
 
-		final List<String> productGuids = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_GUID_SELECT_BY_GUID", guid);
+		final List<String> productGuids = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_CODE_SELECT_BY_CODE", guid);
 
 		return !productGuids.isEmpty();
 	}

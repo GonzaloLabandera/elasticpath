@@ -794,20 +794,19 @@ public class ProductImpl extends AbstractLegacyEntityImpl implements Product, Pr
 	/**
 	 * Retrieve a product's display name for the given locale, optionally
 	 * falling back to the Product's Catalog's default locale if the name
-	 * is not available in the given locale.
+	 * is not available in the given locale. Returns product code if the
+	 * display name is empty in the locale dependant fields.
 	 *
-	 * @param locale the locale in which to return the display name
+	 * @param locale   the locale in which to return the display name
 	 * @param fallback true if should fall back to this Product's Master Catalog's
-	 * default locale if the DisplayName is not available in the given locale
+	 *                 default locale if the DisplayName is not available in the given locale
 	 * @return the product's display name
 	 */
 	public String getDisplayName(final Locale locale, final boolean fallback) {
-		String displayName = null;
-		LocaleDependantFields ldf = this.getLocaleDependantFields(locale, fallback);
-		if (ldf != null) {
-			displayName = ldf.getDisplayName();
-		}
-		return displayName;
+		final LocaleDependantFields ldf = this.getLocaleDependantFields(locale, fallback);
+		return StringUtils.isEmpty(ldf.getDisplayName())
+				? this.getCode()
+				: ldf.getDisplayName();
 	}
 
 	/**

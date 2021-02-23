@@ -7,7 +7,6 @@ package com.elasticpath.service.customer;
 import java.util.Collection;
 import java.util.List;
 
-import com.elasticpath.domain.customer.AccountRole;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.UserAccountAssociation;
 import com.elasticpath.service.EpPersistenceService;
@@ -26,12 +25,30 @@ public interface UserAccountAssociationService extends EpPersistenceService {
 	UserAccountAssociation add(UserAccountAssociation userAccountAssociation);
 
 	/**
+	 * Updates the UserAccountAssociation for userGuid, accountGuid with given role.
+	 *
+	 * @param userGuid                   The user guid of the associate.
+	 * @param accountGuid                The account guid of the association.
+	 * @param role                       The role the user has in this association.
+	 * @return the persisted instance of UserAccountAssociation
+	 */
+	UserAccountAssociation update(String userGuid, String accountGuid, String role);
+
+	/**
 	 * Updates the given UserAccountAssociation.
 	 *
 	 * @param userAccountAssociation the userAccountAssociation to be updated
 	 * @return the persisted instance of UserAccountAssociation
 	 */
 	UserAccountAssociation update(UserAccountAssociation userAccountAssociation);
+
+	/**
+	 * Delete the UserAccountAssociation for the given userGuid and accountGuid.
+	 *
+	 * @param userGuid                   The user guid of the associate.
+	 * @param accountGuid                The account guid of the association.
+	 */
+	void remove(String userGuid, String accountGuid);
 
 	/**
 	 * Delete the UserAccountAssociation.
@@ -70,15 +87,16 @@ public interface UserAccountAssociationService extends EpPersistenceService {
 	/**
 	 * Find all customers associated to an account.
 	 *
-	 * @param userGuid The user to find associations for.
+	 * @param accountGuid The account to find associations for.
 	 * @return The associations for the account.
 	 * @throws IllegalArgumentException if the supplied customer is not of type ACCOUNT.
 	 */
-	Collection<UserAccountAssociation> findAssociationsForAccount(String userGuid) throws IllegalArgumentException;
+	Collection<UserAccountAssociation> findAssociationsForAccount(String accountGuid) throws IllegalArgumentException;
 
 	/**
 	 * Retrieves the user account association record for the passed user and account.
-	 * @param userGuid The user to find the association for.
+	 *
+	 * @param userGuid    The user to find the association for.
 	 * @param accountGuid THe account to find the association for.
 	 * @return the association record or null if none is found.
 	 * @throws IllegalArgumentException if the supplied customer is not of type ACCOUNT.
@@ -94,16 +112,16 @@ public interface UserAccountAssociationService extends EpPersistenceService {
 	 * @return The persisted UserAccountAssociation
 	 * @throws IllegalArgumentException if the user is not REGISTERED_CUSTOMER or the account is not ACCOUT.
 	 */
-	UserAccountAssociation associateUserToAccount(Customer user, Customer account, AccountRole role)
+	UserAccountAssociation associateUserToAccount(Customer user, Customer account, String role)
 			throws IllegalArgumentException;
 
 	/**
 	 * Create and persist a new UserAccountAssociation.
 	 *
-	 * @param userAccountAssociationGuid        The UserAccountAssociation guid
-	 * @param userGuid    The user to associate.
-	 * @param accountGuid The account to associate the user to.
-	 * @param role        The role the user has in this association.
+	 * @param userAccountAssociationGuid The UserAccountAssociation guid
+	 * @param userGuid                   The user to associate.
+	 * @param accountGuid                The account to associate the user to.
+	 * @param role                       The role the user has in this association.
 	 * @return The persisted UserAccountAssociation
 	 * @throws IllegalArgumentException if the user is not REGISTERED_CUSTOMER or the account is not ACCOUNT.
 	 */
@@ -154,11 +172,11 @@ public interface UserAccountAssociationService extends EpPersistenceService {
 	 * @return the UserAccountAssociation
 	 */
 	UserAccountAssociation findByGuid(String guid);
-	
+
 	/**
 	 * Returns true if there is an existing User Association for the given Account, User, and Role.
-	 * 
-	 * @param accountCustomerGuid the account GUID
+	 *
+	 * @param accountCustomerGuid    the account GUID
 	 * @param associatedCustomerGuid the user GUID
 	 * @return true if there is an existing User Association for the given Account, User, and Role.
 	 */

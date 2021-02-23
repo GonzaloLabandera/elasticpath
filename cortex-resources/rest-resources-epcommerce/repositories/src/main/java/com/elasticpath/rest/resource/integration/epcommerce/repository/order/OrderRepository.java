@@ -102,6 +102,15 @@ public interface OrderRepository {
 	long getAccountPurchasesSize(String storeCode, String accountGuid);
 
 	/**
+	 * Obtains account guid associated with a given order number.
+	 *
+	 * @param orderNumber the order number.
+	 *
+	 * @return account guid.
+	 */
+	Maybe<String> getAccountGuidAssociatedWithOrderNumber(String orderNumber);
+
+	/**
 	 * Get the customer by the order number.
 	 *
 	 * @param orderNumber the order number

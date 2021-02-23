@@ -3,13 +3,10 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -21,9 +18,6 @@ import io.reactivex.Single;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.modifier.ModifierField;
-import com.elasticpath.domain.modifier.ModifierGroup;
-import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -84,31 +78,12 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 
 	@Override
 	public Map<String, CartData> getCartDescriptors(final String cartGuid) {
-		Single<ShoppingCart> cartByGuid = getCartByGuid(cartGuid);
-		Collection<CartType> shoppingCartTypes = cartByGuid.blockingGet().getStore().getShoppingCartTypes();
-		List<ModifierGroup> modifierGroups =
-				shoppingCartTypes.stream().flatMap(cartType -> cartType.getModifiers().stream()).collect(Collectors.toList());
-		Map<String, CartData> cartDataMap = cartByGuid.map(ShoppingCart::getCartData).blockingGet();
-		Map<String, CartData> cartDescriptorMap = new HashMap<>();
-
-		List<ModifierField> modifierFields =
-				modifierGroups.stream().flatMap(modifierGroup -> modifierGroup.getModifierFields().stream()).collect(Collectors.toList());
-
-		modifierFields.forEach(modifierField -> {
-			if (cartDataMap.containsKey(modifierField.getCode())) {
-				cartDescriptorMap.put(modifierField.getCode(), cartDataMap.get(modifierField.getCode()));
-			} else {
-				cartDescriptorMap.put(modifierField.getCode(), new CartData(modifierField.getCode(), null));
-			}
-		});
-
-		return cartDescriptorMap;
+		return shoppingCartService.getCartDescriptors(cartGuid);
 	}
 
-
 	@Override
-	public Single<ShoppingCart> getShoppingCartForCustomer(final String customerGuid) {
-		return customerSessionRepository.findCustomerSessionByGuidAsSingle(customerGuid)
+	public Single<ShoppingCart> getShoppingCartForCustomer(final String customerGuid, final String storeCode) {
+		return customerSessionRepository.findCustomerSessionByGuidAndStoreCodeAsSingle(customerGuid, storeCode)
 				.flatMap(this.getStrategy()::getDefaultCart);
 	}
 
@@ -124,12 +99,6 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	public Single<Boolean> verifyShoppingCartExistsForStore(final String cartGuid, final String storeCode) {
 		return reactiveAdapter.fromServiceAsSingle(() -> shoppingCartService.shoppingCartExistsForStore(cartGuid, storeCode));
 	}
-
-
-	private Single<ShoppingCart> getCartByGuid(final String cartGuid) {
-		return reactiveAdapter.fromServiceAsSingle(() -> shoppingCartService.findByGuid(cartGuid));
-	}
-
 
 	@CacheResult(uniqueIdentifier = "getStoreForCartGuid")
 	private Single<String> getStoreForCartGuid(final String cartGuid) {
@@ -258,12 +227,6 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	public Completable removeAllItemsFromCart(final ShoppingCart cart) {
 		return reactiveAdapter.fromServiceAsCompletable(() -> cartDirectorService.clearItems(cart));
 	}
-
-	@Override
-	public void reApplyCatalogPromotions(final ShoppingCart cart) {
-		cartDirectorService.reApplyCatalogPromotions(cart);
-	}
-
 
 	/**
 	 * Used for testing.

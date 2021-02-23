@@ -1,9 +1,12 @@
 package com.elasticpath.selenium.wizards;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 /**
  * Create Catalog Promotion Wizard.
@@ -24,7 +27,15 @@ public class CreateCatalogPromotionWizard extends AbstractWizard {
 	private static final String DISCOUNT_ICON_CSS
 			= CREATE_CATALOG_PROMOTION_PARENT_CSS + "div[widget-id='The discount applied is'][widget-type='ImageHyperlink']";
 	private static final String DISCOUNT_VALUE_INPUT_CSS = CREATE_CATALOG_PROMOTION_PARENT_CSS + "div[widget-id*='Get'] > input";
-
+	private static final String SHOPPER_CONDITIONS_RADIO_BUTTON_CSS = CREATE_CATALOG_PROMOTION_PARENT_CSS
+			+ "div[widget-id='Only Shoppers who match the following conditions'] > div[style*='.png']";
+	private static final String COMMON_STRING = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages";
+	private static final String ADD_SHOPPER_STATEMENT_BLOCK_CSS = COMMON_STRING + ".ConditionBuilder_AddConditionButton']";
+	private static final String ADD_STATEMENT_CSS = "div[automation-id='com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages"
+			+ ".ConditionBuilder_Add_Rule_label']";
+	private static final String STATEMENT_MENU_CSS = "div[appearance-id='menu'] div[widget-id='%s']";
+	private static final String CONDITION_COMBO_BOX_CSS = "div[widget-id='Create Catalog Promotion'] "
+			+ "div[appearance-id='ccombo'][seeable='true']";
 
 	/**
 	 * Constructor.
@@ -118,4 +129,47 @@ public class CreateCatalogPromotionWizard extends AbstractWizard {
 		clearAndType(DISCOUNT_VALUE_INPUT_CSS, discountValue);
 	}
 
+	/**
+	 * Selects shopper conditions Radio button.
+	 */
+	public void clickShopperConditionsRadioButton() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SHOPPER_CONDITIONS_RADIO_BUTTON_CSS)));
+	}
+
+	/**
+	 * Clicks button to create new Statement Block
+	 */
+	public void createNewStatementBlock() {
+		clickButton(ADD_SHOPPER_STATEMENT_BLOCK_CSS, "add statement block");
+	}
+
+	/**
+	 * Clicks button to create new statement within statement block
+	 */
+	public void addNewStatement() {
+		click(ADD_STATEMENT_CSS);
+	}
+
+	/**
+	 * Creates new statement with conditions
+	 *
+	 * @param mainMenuValue  first combo (main menu) value to select
+	 * @param subMenuValue   second combo (sub menu) value to select
+	 * @param conditionRule  condition
+	 * @param conditionValue condition value
+	 */
+	public void selectStatementConditions(final String mainMenuValue, final String subMenuValue, final String conditionRule,
+			final String conditionValue) {
+		WebElement mainMenu = getDriver().findElement(By.cssSelector(String.format(STATEMENT_MENU_CSS, mainMenuValue)));
+		Actions action = new Actions(getDriver());
+		action.moveToElement(mainMenu).build().perform();
+		getDriver().findElement(By.cssSelector(String.format(STATEMENT_MENU_CSS, subMenuValue))).click();
+		getDriver().findElement(By.cssSelector(CONDITION_COMBO_BOX_CSS)).click();
+		if (!selectComboBoxItem(CONDITION_COMBO_BOX_CSS + "[style*='z-index: 4']", conditionRule)) {
+			fail("Unable to select condition: " + conditionRule);
+		}
+		if (!selectComboBoxItem(CONDITION_COMBO_BOX_CSS + "[style*='z-index: 3']", conditionValue)) {
+			fail("Unable to select value: " + conditionValue);
+		}
+	}
 }

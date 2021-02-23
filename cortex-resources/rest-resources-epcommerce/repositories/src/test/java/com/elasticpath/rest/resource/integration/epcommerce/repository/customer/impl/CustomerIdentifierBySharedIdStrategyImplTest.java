@@ -44,7 +44,7 @@ public class CustomerIdentifierBySharedIdStrategyImplTest {
 		when(customerRepository.isCustomerExistsBySharedIdAndStoreCode(VALID_STORE_CODE, VALID_SHARED_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(null));
 
-		ExecutionResult<Void> executionResult =
+		ExecutionResult<Boolean> executionResult =
 				customerIdentifierByUserIdStrategy.isCustomerExists(VALID_SHARED_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isSuccessful());
 	}
@@ -57,7 +57,7 @@ public class CustomerIdentifierBySharedIdStrategyImplTest {
 		when(customerRepository.isCustomerExistsBySharedIdAndStoreCode(VALID_STORE_CODE, INVALID_SHARED_ID))
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
-		ExecutionResult<Void> executionResult =
+		ExecutionResult<Boolean> executionResult =
 				customerIdentifierByUserIdStrategy.isCustomerExists(INVALID_SHARED_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertFalse(executionResult.isSuccessful());
 	}

@@ -23,7 +23,6 @@ Feature: Profile
       | preferred-currency    |
       | phone                 |
       | fax                   |
-      | gender                |
       | company               |
       | date-of-birth         |
       | html-email            |

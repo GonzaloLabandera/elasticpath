@@ -11,7 +11,7 @@ import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentCreationFieldsDTO;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentForFormEntity;
@@ -40,10 +40,11 @@ public class OrderPaymentInstrumentFormEntityRepositoryImpl
 	@Override
 	public Single<OrderPaymentInstrumentForFormEntity> findOne(final OrderPaymentInstrumentFormIdentifier identifier) {
 		final String providerConfigGuid = identifier.getOrderPaymentMethod().getPaymentMethodId().getValue();
-		final String customerGuid = resourceOperationContext.getUserIdentifier();
+		final String customerGuid = customerRepository.getCustomerGuid(resourceOperationContext.getUserIdentifier(),
+				resourceOperationContext.getSubject());
 
 		return customerRepository.getCustomer(customerGuid)
-				.map(Customer::isRegistered)
+				.map(customer -> !CustomerType.SINGLE_SESSION_USER.equals(customer.getCustomerType()))
 				.flatMap(isRegistered -> repository.getPaymentInstrumentCreationFieldsForProviderConfigGuid(providerConfigGuid)
 						.flatMap(fields -> buildOrderPaymentInstrumentForm(providerConfigGuid, isRegistered, fields)));
 	}

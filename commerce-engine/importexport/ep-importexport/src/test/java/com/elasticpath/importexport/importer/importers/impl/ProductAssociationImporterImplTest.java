@@ -43,6 +43,8 @@ import com.elasticpath.service.search.query.ProductAssociationSearchCriteria;
  */
 public class ProductAssociationImporterImplTest {
 
+	private static final String SOURCE_PRODUCT = "sourceProduct";
+	private static final String CATALOG_CODE = "catalogCode";
 	private ProductAssociationImporterImpl productAssociationImporter;
 	
 	@Rule
@@ -132,11 +134,11 @@ public class ProductAssociationImporterImplTest {
 		assertFalse(collectionsStrategy.isForPersistentObjectsOnly());
 		
 		Catalog catalog = new CatalogImpl();
-		catalog.setCode("ctalogCode");
+		catalog.setCode(CATALOG_CODE);
 		Product sourceProduct = new ProductImpl();
-		sourceProduct.setCode("sourceProduct");
+		sourceProduct.setCode(SOURCE_PRODUCT);
 		Product targetProduct = new ProductImpl();
-		sourceProduct.setCode("targetProduct");
+		targetProduct.setCode("targetProduct");
 		ProductAssociation productAssociation = new ProductAssociationImpl();
 		productAssociation.setUidPk(1L);
 		productAssociation.setSourceProduct(sourceProduct);
@@ -145,8 +147,8 @@ public class ProductAssociationImporterImplTest {
 		productAssociation.setCatalog(catalog);
 		
 		ProductAssociationDTO productAssociationDTO = new ProductAssociationDTO();
-		productAssociationDTO.setCatalogCode("catalogCode");
-		productAssociationDTO.setSourceProductCode("sourceProduct");
+		productAssociationDTO.setCatalogCode(CATALOG_CODE);
+		productAssociationDTO.setSourceProductCode(SOURCE_PRODUCT);
 		productAssociationDTO.setTargetProductCode("sometargetProduct");
 		
 		final ProductAssociation productAssociationForDelete = new ProductAssociationImpl();
@@ -161,8 +163,8 @@ public class ProductAssociationImporterImplTest {
 		prAssociationList.add(productAssociationForDelete);
 		context.checking(new Expectations() {
 			{
-				oneOf(mockProductAssociationService).findByCriteria(
-						with(any(ProductAssociationSearchCriteria.class)),
+				oneOf(mockProductAssociationService).getAllAssociations(
+						with(equal(SOURCE_PRODUCT)),
 						with(aNull(LoadTuner.class)));
 				will(returnValue(prAssociationList));
 				oneOf(mockProductAssociationService).remove(with(productAssociationForDelete));

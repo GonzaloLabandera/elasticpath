@@ -4,7 +4,6 @@
 package com.elasticpath.catalog.update.processor.connectivity.impl;
 
 import static com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.CATEGORY_IDENTITY_TYPE;
-import static com.elasticpath.catalog.update.processor.connectivity.impl.CategoryUpdateProcessorImplIntegrationTest.JMS_BROKER_URL;
 import static com.elasticpath.core.messaging.domain.DomainEventType.CATEGORY_DELETED;
 import static com.elasticpath.core.messaging.domain.DomainEventType.CATEGORY_LINK_DELETED;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +23,7 @@ import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.log4j.Logger;
 import org.assertj.core.util.Lists;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.elasticpath.catalog.entity.AbstractProjection;
 import com.elasticpath.catalog.entity.Projection;
+import com.elasticpath.catalog.messages.RelayOutboxMessagesThreadExecutor;
 import com.elasticpath.catalog.plugin.converter.impl.EntityToCategoryConverter;
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionHistoryEntity;
@@ -53,19 +54,15 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.persistence.api.Persistable;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
 
 /**
  * Integration tests for {@link CategoryUpdateProcessorImpl}.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DirtiesDatabase
-public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTestSupport {
-
-	public static final String JMS_BROKER_URL = "tcp://localhost:61624";
+public class CategoryUpdateProcessorImplIntegrationTest extends DbTestCase {
 
 	private static final Logger LOGGER = Logger.getLogger(CategoryUpdateProcessorImplIntegrationTest.class);
 
@@ -108,6 +105,9 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	private EventMessageFactory eventMessageFactory;
 
 	@Autowired
+	private RelayOutboxMessagesThreadExecutor relayOutboxMessagesThreadExecutor;
+
+	@Autowired
 	@Qualifier(CATALOG_MESSAGING_CAMEL_CONTEXT)
 	private CamelContext catalogCamelContext;
 
@@ -120,6 +120,12 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 						.process(exchange -> LOGGER.info("Catalog endpoint exchange: " + exchange.getIn().getBody()));
 			}
 		});
+		relayOutboxMessagesThreadExecutor.start();
+	}
+
+	@After
+	public void tearDown() {
+		relayOutboxMessagesThreadExecutor.stop();
 	}
 
 	@Test
@@ -713,7 +719,6 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 
 		await().atMost(TEN_SECONDS).until(catalogNotifyBuilderForUpdateCategory::matches);
 
-
 		final com.elasticpath.catalog.entity.category.Category updatedProjection = findCategoryProjectionByStoreAndCode(store1, category);
 		assertThat(updatedProjection).extracting(Projection::getDisableDateTime).isNotNull();
 	}
@@ -722,7 +727,7 @@ public class CategoryUpdateProcessorImplIntegrationTest extends XaTransactionTes
 	public void testThatLinkedChildrenCategoryUpdatedIfParentWasExcludedOrIncluded() throws DefaultValueRemovalForbiddenException {
 		final int expectedNumberOfCategoryCreatedEvents = 4;
 		final int expectedNumberOfCategoryUpdatedEventsAfterExclude = 3;
-		final int expectedNumberOfCategoryUpdatedEventsAfterInclude = 2;
+		final int expectedNumberOfCategoryUpdatedEventsAfterInclude = 1;
 
 		final Catalog catalog = createCatalog();
 		createAndPersistStore(catalog);

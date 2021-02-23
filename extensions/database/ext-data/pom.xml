@@ -19,6 +19,35 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.10</version>
+				<dependencies>
+					<!-- Explicit declaration of dependencies used in following unpack goal.
+					     It is for keeping build plan rigor in parallelism build.
+					     So maven reactor can wait until all of the dependent be built successfully then start this goal. -->
+					<dependency>
+						<groupId>com.elasticpath.data</groupId>
+						<artifactId>ep-shared-demo-data</artifactId>
+						<type>zip</type>
+						<version>${ep.commerce.data.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.elasticpath.data</groupId>
+						<artifactId>ep-mobee-demo-data</artifactId>
+						<type>zip</type>
+						<version>${ep.commerce.data.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.elasticpath.data</groupId>
+						<artifactId>ep-snapitup-demo-data</artifactId>
+						<type>zip</type>
+						<version>${ep.commerce.data.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.elasticpath.data</groupId>
+						<artifactId>ep-sample-data</artifactId>
+						<type>zip</type>
+						<version>${ep.commerce.data.version}</version>
+					</dependency>
+				</dependencies>
                 <executions>
                     <execution>
                         <id>unpack-dependencies</id>

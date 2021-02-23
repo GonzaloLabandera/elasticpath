@@ -12,4 +12,6 @@
 	<import resource="cleanup-inactive-and-abandoned-carts-job.xml"/>
 	<import resource="cleanup-anonymous-customers-job.xml"/>
 	<import resource="cleanup-expired-oauthtoken-job.xml"/>
+	<import resource="cleanup-expired-failed-orders-job.xml"/>
+	<import resource="relay-outbox-messages-job.xml"/>
 </beans>

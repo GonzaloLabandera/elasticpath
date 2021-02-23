@@ -3,10 +3,10 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.destinationinfo;
 
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil.createShipmentDetailsId;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,7 @@ import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
 import com.elasticpath.rest.definition.addresses.AddressesIdentifier;
+import com.elasticpath.rest.definition.addresses.ContextAwareAddressIdentifier;
 import com.elasticpath.rest.definition.shipmentdetails.DestinationInfoIdentifier;
 import com.elasticpath.rest.definition.shipmentdetails.DestinationInfoSelectorChoiceIdentifier;
 import com.elasticpath.rest.definition.shipmentdetails.DestinationInfoSelectorIdentifier;
@@ -53,10 +54,10 @@ public class DestinationInfoSelectorRepositoryImplTest {
 			.withScope(StringIdentifier.of(SCOPE))
 			.build();
 
-	private final AddressIdentifier addressIdentifier = AddressIdentifier.builder()
+	private final ContextAwareAddressIdentifier addressIdentifier =  new ContextAwareAddressIdentifier(AddressIdentifier.builder()
 			.withAddressId(StringIdentifier.of(ADDRESS_ID))
 			.withAddresses(addressesIdentifier)
-			.build();
+			.build());
 
 	private final DestinationInfoIdentifier destinationInfoIdentifier = DestinationInfoIdentifier.builder()
 			.withShipmentDetailsId(CompositeIdentifier.of(createShipmentDetailsId(ORDER_ID, ShipmentDetailsConstants.SHIPMENT_TYPE)))
@@ -69,7 +70,7 @@ public class DestinationInfoSelectorRepositoryImplTest {
 
 	private final DestinationInfoSelectorChoiceIdentifier selectorChoiceIdentifier = DestinationInfoSelectorChoiceIdentifier.builder()
 			.withDestinationInfoSelector(selectorIdentifier)
-			.withAddress(addressIdentifier)
+			.withAddress(addressIdentifier.getAddressIdentifier())
 			.build();
 
 	@Mock
@@ -79,14 +80,14 @@ public class DestinationInfoSelectorRepositoryImplTest {
 	private DestinationInfoSelectorRepositoryImpl<DestinationInfoSelectorIdentifier, DestinationInfoSelectorChoiceIdentifier> repository;
 
 	@Mock
-	private Repository<AddressEntity, AddressIdentifier> addressRepository;
+	private Repository<AddressEntity, ContextAwareAddressIdentifier> addressRepository;
 
 	@Mock
 	private DestinationInfoService destinationInfoService;
 
 	@Test
 	public void verifyGetChoiceReturnsChoosableChoiceWhenSelectedAddressDoesNotExist() {
-		when(addressRepository.findOne(addressIdentifier)).thenReturn(Single.just(addressEntity));
+		when(addressRepository.findOne(any(ContextAwareAddressIdentifier.class))).thenReturn(Single.just(addressEntity));
 		when(destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)).thenReturn(Maybe.empty());
 
 		repository.getChoice(selectorChoiceIdentifier)
@@ -97,7 +98,7 @@ public class DestinationInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoiceReturnsChoosableChoiceWhenAddressIsNotSelected() {
-		when(addressRepository.findOne(addressIdentifier)).thenReturn(Single.just(addressEntity));
+		when(addressRepository.findOne(any(ContextAwareAddressIdentifier.class))).thenReturn(Single.just(addressEntity));
 		when(destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)).thenReturn(Maybe.just(NOT_SELECTED_ID));
 
 		repository.getChoice(selectorChoiceIdentifier)
@@ -108,7 +109,7 @@ public class DestinationInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoiceReturnsChosenChoiceWhenAddressIsSelected() {
-		when(addressRepository.findOne(addressIdentifier)).thenReturn(Single.just(addressEntity));
+		when(addressRepository.findOne(any(ContextAwareAddressIdentifier.class))).thenReturn(Single.just(addressEntity));
 		when(destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)).thenReturn(Maybe.just(SELECTED_ID));
 
 		repository.getChoice(selectorChoiceIdentifier)
@@ -119,7 +120,7 @@ public class DestinationInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoiceReturnsErrorWhenThereAreNoShippableItems() {
-		when(addressRepository.findOne(addressIdentifier)).thenReturn(Single.just(addressEntity));
+		when(addressRepository.findOne(any(ContextAwareAddressIdentifier.class))).thenReturn(Single.just(addressEntity));
 		when(destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID))
 				.thenReturn(Maybe.error(ResourceOperationFailure.notFound(ShipmentDetailsServiceImpl.COULD_NOT_FIND_SHIPMENT)));
 
@@ -130,7 +131,7 @@ public class DestinationInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoiceReturnsNotFoundWhenAddressCannotBeFound() {
-		when(addressRepository.findOne(addressIdentifier))
+		when(addressRepository.findOne(any(ContextAwareAddressIdentifier.class)))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(AddressEntityRepositoryImpl.ADDRESS_NOT_FOUND)));
 
 		repository.getChoice(selectorChoiceIdentifier)
@@ -140,12 +141,12 @@ public class DestinationInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoicesReturnsListOfChoosableChoicesWhenSelectedAddressDoesNotExist() {
-		List<AddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
+		List<ContextAwareAddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
 		for (int i = 0; i < NUM_OF_ADDRESSES; i++) {
-			addressIdentifiers.add(AddressIdentifier.builder()
+			addressIdentifiers.add(new ContextAwareAddressIdentifier(AddressIdentifier.builder()
 					.withAddresses(addressesIdentifier)
 					.withAddressId(StringIdentifier.of(String.valueOf(i)))
-					.build());
+					.build()));
 		}
 
 		when(destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)).thenReturn(Maybe.empty());
@@ -161,12 +162,12 @@ public class DestinationInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoicesReturnsListOfChoicesWhenSelectedAddressExists() {
-		List<AddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
+		List<ContextAwareAddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
 
-		addressIdentifiers.add(AddressIdentifier.builder()
+		addressIdentifiers.add(new ContextAwareAddressIdentifier(AddressIdentifier.builder()
 				.withAddresses(addressesIdentifier)
 				.withAddressId(StringIdentifier.of(NOT_SELECTED_ID))
-				.build());
+				.build()));
 
 		addressIdentifiers.add(addressIdentifier);
 
@@ -183,12 +184,12 @@ public class DestinationInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoicesReturnsErrorWhenNoShippableItemExists() {
-		List<AddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
+		List<ContextAwareAddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
 
-		addressIdentifiers.add(AddressIdentifier.builder()
+		addressIdentifiers.add(new ContextAwareAddressIdentifier(AddressIdentifier.builder()
 				.withAddresses(addressesIdentifier)
 				.withAddressId(StringIdentifier.of(NOT_SELECTED_ID))
-				.build());
+				.build()));
 
 		addressIdentifiers.add(addressIdentifier);
 

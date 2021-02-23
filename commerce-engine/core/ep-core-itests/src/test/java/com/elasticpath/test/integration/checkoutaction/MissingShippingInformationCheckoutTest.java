@@ -6,16 +6,16 @@ package com.elasticpath.test.integration.checkoutaction;
 
 import static com.elasticpath.commons.constants.ContextIdNames.CART_ORDER_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART_SERVICE;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.util.Currency;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
@@ -29,6 +29,8 @@ import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.factory.TestShoppingCartFactoryForTestApplication;
 import com.elasticpath.domain.misc.CheckoutResults;
+import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -45,6 +47,7 @@ import com.elasticpath.service.shoppingcart.actions.exception.CheckoutValidation
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
+import com.elasticpath.test.util.CheckoutHelper;
 import com.elasticpath.test.util.Utils;
 
 /**
@@ -73,6 +76,7 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 	private TaxSnapshotService taxSnapshotService;
 
 	private SimpleStoreScenario scenario;
+	private CheckoutHelper checkoutHelper;
 
 	private ShoppingCart shoppingCart;
 
@@ -96,6 +100,8 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 				.build();
 		shopperService.save(shoppingContext.getShopper());
 		shoppingCart = createEmptyShoppingCartWithScenarioStore();
+
+		checkoutHelper = new CheckoutHelper(getTac());
 	}
 
 	/**
@@ -110,12 +116,12 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults checkoutResult = checkoutService.checkout(shoppingCart,
+		Order order = checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart,
 				taxSnapshot,
 				shoppingContext.getCustomerSession(),
 				false);
 
-		assertFalse("Order should succeed.", checkoutResult.isOrderFailed());
+		assertEquals("Order should succeed.", order.getStatus(), OrderStatus.IN_PROGRESS);
 	}
 
 	/**

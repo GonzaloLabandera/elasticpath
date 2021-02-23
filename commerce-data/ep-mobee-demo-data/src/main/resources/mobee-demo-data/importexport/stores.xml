@@ -18,7 +18,9 @@
     <store_admin_email>admin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en_CA</locale>
     </locales>
     <currencies>
@@ -68,7 +70,9 @@
     <store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>fr_CA</locale>
         <locale>en</locale>
     </locales>
@@ -129,7 +133,9 @@
     <store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en_CA</locale>
     </locales>
     <currencies>
@@ -182,7 +188,9 @@
     <store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>fr</locale>
         <locale>fr_CA</locale>
         <locale>en</locale>
@@ -236,6 +244,7 @@
         <payment_provider_configuration_guid>cancel-reserve-fail-config</payment_provider_configuration_guid>
         <payment_provider_configuration_guid>email-required-payment-provider-config</payment_provider_configuration_guid>
         <payment_provider_configuration_guid>single-reserve-per-pi-happy-path-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>reserve-fails-payment-provider-config</payment_provider_configuration_guid>
     </payment_provider_configurations>
 </store>
 
@@ -253,7 +262,9 @@
     <store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>fr_CA</locale>
         <locale>en</locale>
         <locale>fr</locale>
@@ -312,7 +323,9 @@
     <store_admin_email>admin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en_CA</locale>
     </locales>
     <currencies>
@@ -365,7 +378,9 @@
     <store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en</locale>
     </locales>
     <currencies>
@@ -418,7 +433,9 @@
     <store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>zh</locale>
         <locale>en</locale>
         <locale>fr</locale>
@@ -474,7 +491,9 @@
     <store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>false</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en</locale>
     </locales>
     <currencies>
@@ -529,7 +548,9 @@
     <store_admin_email>SyndicationBilingualStore.com</store_admin_email>
     <credit_card_cvv2_enabled>false</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en</locale>
         <locale>fr</locale>
     </locales>
@@ -578,7 +599,9 @@
     <store_admin_email>SyndicationSingleLanguageStore.com</store_admin_email>
     <credit_card_cvv2_enabled>false</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>fr</locale>
     </locales>
     <currencies>
@@ -625,7 +648,9 @@
     <store_admin_email>SyndicationVirtualCatalogStore.com</store_admin_email>
     <credit_card_cvv2_enabled>false</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en</locale>
     </locales>
     <currencies>

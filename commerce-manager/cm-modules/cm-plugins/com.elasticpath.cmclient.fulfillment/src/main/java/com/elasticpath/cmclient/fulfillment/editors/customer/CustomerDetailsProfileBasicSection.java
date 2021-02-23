@@ -3,6 +3,7 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.customer;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -166,15 +167,19 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 	@Override
 	protected void populateControls() {
 		this.sharedIdText.setText(this.customer.getSharedId());
-		this.statusCombo.setItems(STATUS_STRINGS);
-		this.statusCombo.setText(this.resolveStatusText(this.customer.getStatus()));
 
 		if (customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			final String[] extendedStatusStrings =
+					ArrayUtils.insert(1, STATUS_STRINGS, FulfillmentMessages.get().CustomerDetailsStatus_Suspended);
+			this.statusCombo.setItems(extendedStatusStrings);
+			this.statusCombo.setText(this.resolveStatusText(this.customer.getStatus()));
 			this.businessNameText.setText(this.checkString(this.customer.getBusinessName()));
 			this.businessNumberText.setText(this.checkString(this.customer.getAccountBusinessNumber()));
 			this.phoneNumberText.setText(this.checkString(this.customer.getAccountPhoneNumber()));
 			this.faxNumberText.setText(this.checkString(customer.getAccountFaxNumber()));
 		} else {
+			this.statusCombo.setItems(STATUS_STRINGS);
+			this.statusCombo.setText(this.resolveStatusText(this.customer.getStatus()));
 			this.usernameText.setText(this.checkString(this.customer.getUsername()));
 			this.firstNameText.setText(this.checkString(this.customer.getFirstName()));
 			this.lastNameText.setText(this.checkString(this.customer.getLastName()));
@@ -207,29 +212,30 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 		final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
 
 		// ---- DOCbindCustomerDetails
-		bindingProvider.bind(bindingContext, this.statusCombo, null, null, new ObservableUpdateValueStrategy() {
-			@Override
-			protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-				int status;
-				final int selectionIndex = (Integer) value;
-				switch (selectionIndex) {
-				case 0:
-					status = Customer.STATUS_ACTIVE;
-					break;
-				case 1:
-					status = Customer.STATUS_DISABLED;
-					break;
-				default:
-					return new Status(IStatus.WARNING, FulfillmentPlugin.PLUGIN_ID, "Can not set the customer status."); //$NON-NLS-1$
-				}
-				customer.setStatus(status);
-				return Status.OK_STATUS;
-			}
-
-		}, true);
-		// ---- DOCbindCustomerDetails
-
 		if (customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			bindingProvider.bind(bindingContext, this.statusCombo, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					int status;
+					final int selectionIndex = (Integer) value;
+					switch (selectionIndex) {
+						case 0:
+							status = Customer.STATUS_ACTIVE;
+							break;
+						case 1:
+							status = Customer.STATUS_SUSPENDED;
+							break;
+						case 2:
+							status = Customer.STATUS_DISABLED;
+							break;
+						default:
+							return new Status(IStatus.WARNING, FulfillmentPlugin.PLUGIN_ID, "Can not set the customer status."); //$NON-NLS-1$
+					}
+					customer.setStatus(status);
+					return Status.OK_STATUS;
+				}
+
+			}, true);
 			bindingProvider.bind(bindingContext, this.businessNameText, EpValidatorFactory.STRING_255_REQUIRED, null,
 					new ObservableUpdateValueStrategy() {
 				@Override
@@ -266,6 +272,26 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 				}
 			}, true);
 		} else {
+			bindingProvider.bind(bindingContext, this.statusCombo, null, null, new ObservableUpdateValueStrategy() {
+				@Override
+				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
+					int status;
+					final int selectionIndex = (Integer) value;
+					switch (selectionIndex) {
+						case 0:
+							status = Customer.STATUS_ACTIVE;
+							break;
+						case 1:
+							status = Customer.STATUS_DISABLED;
+							break;
+						default:
+							return new Status(IStatus.WARNING, FulfillmentPlugin.PLUGIN_ID, "Can not set the customer status."); //$NON-NLS-1$
+					}
+					customer.setStatus(status);
+					return Status.OK_STATUS;
+				}
+
+			}, true);
 			//No way currently to specify "requiredness" flag for arbitrary validator. So, need to provide if-else logic here.
 			if (customer.isFirstNameRequired()) {
 				bindingProvider.bind(bindingContext, this.firstNameText, this.customer, "firstName", //$NON-NLS-1$
@@ -317,6 +343,9 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 		switch (status) {
 		case Customer.STATUS_ACTIVE:
 			statusText = FulfillmentMessages.get().CustomerDetailsStatus_Active;
+			break;
+		case Customer.STATUS_SUSPENDED:
+			statusText = FulfillmentMessages.get().CustomerDetailsStatus_Suspended;
 			break;
 		case Customer.STATUS_DISABLED:
 			statusText = FulfillmentMessages.get().CustomerDetailsStatus_Disabled;

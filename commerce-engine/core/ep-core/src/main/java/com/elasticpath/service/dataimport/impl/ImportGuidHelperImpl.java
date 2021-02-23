@@ -104,7 +104,7 @@ public class ImportGuidHelperImpl extends AbstractEpPersistenceServiceImpl imple
 	 */
 	@Override
 	public boolean isProductGuidExist(final String guid) throws EpServiceException {
-		final List<String> products = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_GUID_SELECT_BY_GUID", guid);
+		final List<String> products = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_CODE_SELECT_BY_CODE", guid);
 		final int size = products.size();
 		if (size > 1) {
 			throw new EpServiceException(DUPLICATE_GUID_ERR_MSG + guid);

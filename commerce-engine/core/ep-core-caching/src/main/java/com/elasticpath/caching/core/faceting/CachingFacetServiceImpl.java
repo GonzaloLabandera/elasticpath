@@ -20,28 +20,14 @@ public class CachingFacetServiceImpl implements CacheableFacetService {
 	private Cache<String, List<Facet>> searchableFacetsCache;
 	private FacetService decorated;
 
-
 	@Override
 	public List<Facet> findAllSearchableFacets(final String storeCode) {
-
-		List<Facet> facets = this.searchableFacetsCache.get(storeCode);
-		if (facets != null) {
-			return facets;
-		}
-		List<Facet> allSearchableFacets = getDecorated().findAllSearchableFacets(storeCode);
-		searchableFacetsCache.put(storeCode, allSearchableFacets);
-		return allSearchableFacets;
+		return searchableFacetsCache.get(storeCode, cacheKey -> getDecorated().findAllSearchableFacets(storeCode));
 	}
 
 	@Override
 	public Facet findByGuid(final String facetGuid) {
-		if (findByGuidCache.get(facetGuid) != null) {
-			return findByGuidCache.get(facetGuid);
-		}
-		Facet facet = getDecorated().findByGuid(facetGuid);
-		findByGuidCache.put(facetGuid, facet);
-
-		return facet;
+		return findByGuidCache.get(facetGuid, cacheKey -> getDecorated().findByGuid(facetGuid));
 	}
 
 	@Override

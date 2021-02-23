@@ -94,7 +94,6 @@ public interface CouponUsageService {
 	 */
 	CouponUsage findByCouponCodeAndEmail(String couponCode, String customerEmailAddress);
 
-
 	/**
 	 * Find the usage - taking into consideration coupon type.
 	 * @param couponConfig CouponConfig.
@@ -208,9 +207,10 @@ public interface CouponUsageService {
 	 * @param coupon coupon
 	 * @param storeCode store code
 	 * @param customerEmailAddress customer email address
+	 * @param couponUsage coupon usage
 	 * @return the validation result
 	 */
-	CouponUsageValidationResultEnum validateCouponRuleAndUsage(Coupon coupon, String storeCode, String customerEmailAddress);
+	CouponUsageValidationResultEnum validateCouponRuleAndUsage(Coupon coupon, String storeCode, String customerEmailAddress, CouponUsage couponUsage);
 
 	/**
 	 * Validate coupon rule and coupon usage, throws StructuredErrorMessageException on validation errors.
@@ -221,4 +221,12 @@ public interface CouponUsageService {
 	 * @param customerEmailAddress customer email address
 	 */
 	void ensureValidCouponRuleAndUsage(Coupon coupon, String couponCode, String storeCode, String customerEmailAddress);
+
+	/**
+	 * Disables auto-applying of the coupon to the cart.
+	 *
+	 * @param couponCode    the coupon code.
+	 * @param customerEmail the customer email.
+	 */
+	void disableAutoApplyToCarts(String couponCode, String customerEmail);
 }

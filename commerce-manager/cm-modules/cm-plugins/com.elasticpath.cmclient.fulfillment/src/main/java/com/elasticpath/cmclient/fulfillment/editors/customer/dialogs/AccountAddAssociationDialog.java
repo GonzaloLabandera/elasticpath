@@ -23,19 +23,19 @@ import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
+import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
-import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPlugin;
 import com.elasticpath.cmclient.fulfillment.editors.customer.AccountDetailsAssociatesSection.AccountDetailsAssociatesRow;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.AccountRole;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.UserAccountAssociation;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.UserAccountAssociationService;
+import com.elasticpath.service.permissions.RoleToPermissionsMappingService;
 
 /**
  * Account Add Association Dialog.
@@ -60,9 +60,7 @@ public class AccountAddAssociationDialog extends AbstractEpDialog {
 
 	private transient CCombo roleCombo;
 	
-	private transient AccountRole selectedAccountRole;
-	
-	private final transient String[] accountRoleOptions = { AccountRole.BUYER.getName() };
+	private transient String selectedShopperRole;
 
 	private final DataBindingContext bindingContext;
 
@@ -70,7 +68,7 @@ public class AccountAddAssociationDialog extends AbstractEpDialog {
 
 	/**
 	 * Constructs the dialog.
-	 * 
+	 *
 	 * @param parentShell the parent Shell
 	 * @param account the account
 	 * @param selectedRow the selected row
@@ -107,9 +105,10 @@ public class AccountAddAssociationDialog extends AbstractEpDialog {
 		if (isAdd) {
 			return;
 		}
-		
+
 		userFullNameTextField.setText(selectedRow.getCustomer().getFullName());
 		userEmailTextField.setText(selectedRow.getCustomer().getEmail());
+		roleCombo.setText(selectedRow.getAssociation().getAccountRole());
 	}
 
 	@Override
@@ -117,24 +116,24 @@ public class AccountAddAssociationDialog extends AbstractEpDialog {
 
 		final IEpLayoutData labelData = dialogComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
 		final IEpLayoutData fieldData = dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING, true, false);
-		
+
 		EpState customerInfoState;
 		if (isAdd) {
 			customerInfoState = EpState.EDITABLE;
 		} else {
 			customerInfoState = EpState.READ_ONLY;
-	
+
 			dialogComposite.addLabelBoldRequired(FulfillmentMessages.get().AssociatesPage_UserFullName, null, labelData);
 			userFullNameTextField = dialogComposite.addTextField(customerInfoState, fieldData);
 		}
-		
+
 		dialogComposite.addLabelBoldRequired(FulfillmentMessages.get().AssociatesPage_UserEmail, null, labelData);
 		userEmailTextField = dialogComposite.addTextField(customerInfoState, fieldData);
-		
+
 		dialogComposite.addLabelBoldRequired(FulfillmentMessages.get().AssociatesPage_Role, null, labelData);
 		roleCombo = dialogComposite.addComboBox(null, fieldData);
-		
-		roleCombo.setItems(accountRoleOptions);
+
+		roleCombo.setItems(getRoleToPermissions().getDefinedRoleKeys().toArray(new String[0]));
 		roleCombo.select(0);
 	}
 
@@ -145,7 +144,7 @@ public class AccountAddAssociationDialog extends AbstractEpDialog {
 		final ObservableUpdateValueStrategy roleUpdateStrategy = new ObservableUpdateValueStrategy() {
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
-				selectedAccountRole = AccountRole.valueOf(accountRoleOptions[(Integer) newValue]);
+				selectedShopperRole = roleCombo.getText();
 				return Status.OK_STATUS;
 			}
 		};
@@ -170,20 +169,20 @@ public class AccountAddAssociationDialog extends AbstractEpDialog {
 				// if the association has not been created, we do not want to close the AccountAddAssociationDialog
 				return;
 			}
-			
+
 		} else {
 			UserAccountAssociation association = (UserAccountAssociation) userAccountAssociationService
 					.getObject(selectedRow.getAssociation().getUidPk());
-			
-			association.setAccountRole(selectedAccountRole);
+
+			association.setAccountRole(selectedShopperRole);
 			userAccountAssociationService.update(association);
 		}
-		
+
 		super.okPressed();
 	}
 
 	private boolean createNewAssociation() {
-		
+
 		String userEmail = userEmailTextField.getText();
 		List<Customer> customers = getCustomerService().findCustomersByProfileAttributeKeyAndValue(CustomerImpl.ATT_KEY_CP_EMAIL, userEmail);
 
@@ -203,13 +202,13 @@ public class AccountAddAssociationDialog extends AbstractEpDialog {
 			ErrorDialog.openError(new Shell(Display.getCurrent()), FulfillmentMessages.get().Error_Title, null, status);
 			return false;
 		}
-		
+
 		UserAccountAssociation userAccountAssociation = BeanLocator.getPrototypeBean(ContextIdNames.USER_ACCOUNT_ASSOCIATION,
 				UserAccountAssociation.class);
-		
+
 		userAccountAssociation.setAccountGuid(account.getGuid());
 		userAccountAssociation.setUserGuid(newCustomerToAssociate.getGuid());
-		userAccountAssociation.setAccountRole(selectedAccountRole);
+		userAccountAssociation.setAccountRole(selectedShopperRole);
 
 		userAccountAssociationService.add(userAccountAssociation);
 		
@@ -250,5 +249,9 @@ public class AccountAddAssociationDialog extends AbstractEpDialog {
 		}
 		
 		return customerService;
+	}
+
+	private RoleToPermissionsMappingService getRoleToPermissions() {
+		return BeanLocator.getSingletonBean(ContextIdNames.ROLE_TO_PERMISSION_MAPPING_SERVICE, RoleToPermissionsMappingService.class);
 	}
 }

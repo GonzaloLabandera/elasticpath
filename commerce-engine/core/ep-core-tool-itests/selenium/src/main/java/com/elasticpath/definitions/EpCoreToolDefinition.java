@@ -188,6 +188,27 @@ public class EpCoreToolDefinition {
 	}
 
 	/**
+	 * Updates the setting metadata value.
+	 *
+	 * @param metadataName the metadata name
+	 * @param value       the metadata value
+	 */
+	@When("^I run the ep core tool to set metadata of (.+) setting from (.+) to (.+)$")
+	public void updateSettingMetadataValue(final String settingName, final String metadataName, final String value) {
+		coreTool.updateSettingMetadataValue(settingName, metadataName, value);
+		systemConfigurationResultPane.sleep(Constants.SLEEP_FIVE_SECONDS_IN_MILLIS);
+	}
+
+	/**
+	 * Closes the pane
+	 * @param paneName the pane name
+	 */
+	@When("^I close the (.+) pane")
+	public void reloadPane(final String paneName) {
+		systemConfigurationResultPane.closePane("System Configuration");
+	}
+
+	/**
 	 * Verifies defined value count.
 	 *
 	 * @param definedValueCount the defined value count
@@ -199,6 +220,22 @@ public class EpCoreToolDefinition {
 			assertThat(driver.findElements(By.cssSelector("div[widget-id='true'][widget-type='row']")).size())
 					.as("Defined value record count is not as expected")
 					.isEqualTo(definedValueCount);
+		}
+		systemConfigurationResultPane.setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
+	 * Verifies setting definition metadata value count.
+	 *
+	 * @param settingDefinitionMetadataCount the defined value count
+	 */
+	@When("^there should be (\\d+) Setting Definition Metadata record$")
+	public void verifySettingDefinitionMetadataCount(final int settingDefinitionMetadataCount) {
+		systemConfigurationResultPane.setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_FIVE_SECONDS);
+		if (searchIndexesResultPane.isElementPresent(By.cssSelector("div[widget-id='true'][widget-type='row']"))) {
+			assertThat(driver.findElements(By.cssSelector("div[widget-id='true'][widget-type='row']")).size())
+					.as("Defined value record count is not as expected")
+					.isEqualTo(settingDefinitionMetadataCount);
 		}
 		systemConfigurationResultPane.setWebDriverImplicitWaitToDefault();
 	}
@@ -219,7 +256,7 @@ public class EpCoreToolDefinition {
 	 */
 	@After("@resetPassword")
 	public void restPassword() {
-		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET PASSWORD='3d4f2bf07dc1be38b20cd6e46949a1071f9d0e3d' WHERE USER_NAME='cs_brand'");
+		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET PASSWORD='$2a$10$Lc.0V6Pnf63eXIqwW/6Lp.PXwa0rsbvTtLimxZPmVe4fQ.qKMDnfW' WHERE USER_NAME='cs_brand'");
 	}
 
 	/**
@@ -229,6 +266,15 @@ public class EpCoreToolDefinition {
 	public void removeSettingsValue() {
 		systemConfigurationResultPane.selectSettingName("COMMERCE/SYSTEM/EMAIL/emailTextTemplateEnabled");
 		systemConfigurationResultPane.removeDefinedValueRecord("null", "true");
+	}
+
+	/**
+	 * Resets setting metadata value.
+	 */
+	@After("@resetSettingMetadata")
+	public void removeSettingsMetadata() {
+		systemConfigurationResultPane.selectSettingName("COMMERCE/SYSTEM/PROMOTIONS/catalogPromotionsEnabled");
+		systemConfigurationResultPane.removeSettingMetadataRecord("some_metadata");
 	}
 
 	/**

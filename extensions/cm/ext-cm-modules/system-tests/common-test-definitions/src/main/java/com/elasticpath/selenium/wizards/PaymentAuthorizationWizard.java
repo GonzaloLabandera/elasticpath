@@ -2,15 +2,22 @@ package com.elasticpath.selenium.wizards;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Payment Authorization Wizard.
  */
 public class PaymentAuthorizationWizard extends AbstractWizard {
 
-	private static final String PAYMENT_AUTHORIZATION_PARENT_CSS = "div[widget-id='Payment Authorization'][widget-type='Shell'] ";
+	private static final String PAYMENT_AUTHORIZATION_PARENT_CSS = "div[widget-id='Payment Reservation'][widget-type='Shell'] ";
 	private static final String PAYMENT_SOURCE_COMBO_CSS = PAYMENT_AUTHORIZATION_PARENT_CSS + "div[widget-id='Payment "
 			+ "source'][widget-type='CCombo']";
 	private static final String AUTHORIZE_BUTTON = PAYMENT_AUTHORIZATION_PARENT_CSS + "div[automation-id='com.elasticpath.cmclient.fulfillment"
@@ -19,6 +26,11 @@ public class PaymentAuthorizationWizard extends AbstractWizard {
 			+ ".FulfillmentMessages.ReAuthWizard_Done_Button']";
 	private static final String CANCEL_REAUTHORIZATION_OK_BUTTON = "div[automation-id='com.elasticpath.cmclient.fulfillment"
 			+ ".FulfillmentMessages.CaptureWizard_Cancel_Title'] div[widget-id='OK']";
+	private static final String RESERVATIONS_TABLE_CSS = "div[widget-id='Auth Summary Page Table'][widget-type='Table'][seeable='true']";
+	private static final String RESERVATIONS_TABLE_ROW_CSS = RESERVATIONS_TABLE_CSS + " div[widget-type='table_row']";
+	private static final String PAYMENT_SOURCE_COLUMN_NAME = "Payment source";
+	private static final String STATUS_COLUMN_NAME = "Status";
+	private static final String COLUMN_NUM_CSS = "div[column-num='%d']";
 
 	/**
 	 * Constructor.
@@ -112,4 +124,33 @@ public class PaymentAuthorizationWizard extends AbstractWizard {
 		setWebDriverImplicitWaitToDefault();
 	}
 
+	/**
+	 * Verifies payment reservations.
+	 *
+	 * @param expectedReservations the expected reservations.
+	 */
+	public void verifyReservations(final Map<String, String> expectedReservations) {
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
+		final List<WebElement> reservations = getDriver().findElements(By.cssSelector(RESERVATIONS_TABLE_ROW_CSS));
+		for (WebElement reservation : reservations) {
+			final String paymentSource = getReservationColumnValue(reservation, 0);
+			final String status = getReservationColumnValue(reservation, 2);
+			final boolean paymentSourceMatch = !expectedReservations.containsKey(PAYMENT_SOURCE_COLUMN_NAME)
+					|| expectedReservations.get(PAYMENT_SOURCE_COLUMN_NAME).equals(paymentSource);
+			final boolean statusMatch = !expectedReservations.containsKey(STATUS_COLUMN_NAME)
+					|| expectedReservations.get(STATUS_COLUMN_NAME).equals(status);
+			assertThat(paymentSourceMatch && statusMatch)
+					.as("Could not find expected payment reservation")
+					.isTrue();
+		}
+	}
+
+	private String getReservationColumnValue(final WebElement paymentTransaction, final int columnNumber) {
+		setWebDriverImplicitWait(0);
+		final List<WebElement> cellElement = paymentTransaction.findElements(By.cssSelector(String.format(COLUMN_NUM_CSS, columnNumber)));
+		setWebDriverImplicitWaitToDefault();
+		return cellElement.isEmpty()
+				? StringUtils.EMPTY
+				: cellElement.get(0).getText();
+	}
 }

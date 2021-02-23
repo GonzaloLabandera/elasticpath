@@ -38,17 +38,29 @@
                     AND co.shoppingCartGuidInternal = cart.guid
             </query>
         </named-query>
-        <named-query name="CART_ORDER_GUIDS_BY_CUSTOMER_GUID">
+		<named-query name="CART_ORDER_GUIDS_BY_CUSTOMER_GUID">
 			<query>
 				SELECT co.guid
 				FROM CartOrderImpl AS co, ShoppingCartMementoImpl AS cart, ShopperMementoImpl AS shopper
 				WHERE co.shoppingCartGuidInternal = cart.guid
-            		AND shopper.uidPk = cart.shopperUid 
-            		AND UPPER(cart.storeCode) = UPPER(?1)
-            		AND cart.status = 'ACTIVE'
-            		AND shopper.customer.guid = ?2
-            </query>
-        </named-query>
+					AND shopper.uidPk = cart.shopperUid
+					AND UPPER(cart.storeCode) = UPPER(?1)
+					AND cart.status = 'ACTIVE'
+					AND shopper.customer.guid = ?2
+					AND shopper.account is NULL
+			</query>
+		</named-query>
+		<named-query name="CART_ORDER_GUIDS_BY_ACCOUNT_GUID">
+			<query>
+				SELECT co.guid
+				FROM CartOrderImpl AS co, ShoppingCartMementoImpl AS cart, ShopperMementoImpl AS shopper
+				WHERE co.shoppingCartGuidInternal = cart.guid
+					AND shopper.uidPk = cart.shopperUid
+					AND UPPER(cart.storeCode) = UPPER(?1)
+					AND cart.status = 'ACTIVE'
+					AND shopper.account.guid = ?2
+			</query>
+		</named-query>
 		<named-query name="CART_ORDER_GUID_BY_SHOPPING_CART_GUID">
 			<query>
 				SELECT co.guid

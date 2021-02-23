@@ -3,6 +3,7 @@
  */
 package com.elasticpath.settings.impl;
 
+import static com.elasticpath.settings.impl.CachedSettingsReaderImpl.getSettingData;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,8 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static com.elasticpath.settings.impl.CachedSettingsReaderImpl.getSettingData;
-
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
 import com.elasticpath.settings.domain.SettingMetadata;
@@ -67,10 +68,10 @@ public class CachedSettingsReaderImplTest {
 		final Map<String, SettingRefreshStrategy> refreshStrategies = new HashMap<>();
 		refreshStrategies.put("immediate", refreshStrategy);
 		cachedSettingsReader.setRefreshStrategies(refreshStrategies);
-		cachedSettingsReader.setRefreshStrategyKey("apiRefreshStrategy");
+		cachedSettingsReader.setRefreshStrategyKey("refreshStrategy");
 		final SettingMetadata strategyMetadata = mock(SettingMetadata.class);
 		final Map<String, SettingMetadata> metadata = new HashMap<>();
-		metadata.put("apiRefreshStrategy", strategyMetadata);
+		metadata.put("refreshStrategy", strategyMetadata);
 
 		when(definition.getMetadata()).thenReturn(metadata);
 		when(strategyMetadata.getValue()).thenReturn("immediate");
@@ -191,4 +192,15 @@ public class CachedSettingsReaderImplTest {
 			.isEmpty();
 	}
 
+	/**
+	 * Test method for {@link CachedSettingsReaderImpl#retrieveSettingData(String)}.
+	 * Tests that EpSystemException exception is thrown if refreshStrategy is not set in corresponding metadata when settingValue is retrieved.
+	 */
+	@Test(expected = EpSystemException.class)
+	public void testSettingWithoutRefreshStrategyThrowsException() {
+		when(reader.getSettingDefinition(same(SETTING_PATH))).thenReturn(definition);
+		when(definition.getMetadata()).thenReturn(Collections.emptyMap());
+		
+		cachedSettingsReader.getSettingValue(SETTING_PATH, "SNAPITUP");
+	}
 }

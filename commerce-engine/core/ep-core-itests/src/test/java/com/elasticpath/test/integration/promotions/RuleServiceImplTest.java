@@ -23,6 +23,7 @@ import com.elasticpath.domain.rules.RuleParameter;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
 import com.elasticpath.domain.sellingcontext.SellingContext;
+import com.elasticpath.service.rules.SellingContextRuleSummary;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.PromotionConfigureService;
 import com.elasticpath.service.rules.RuleService;
@@ -117,16 +118,22 @@ public class RuleServiceImplTest extends BasicSpringContextTest {
 		Rule inactiveRuleInStoreOne = createRule(RULE_CODE_THREE, storeOne, false);
 		ruleService.add(inactiveRuleInStoreOne);
 
-		List<Object[]> results = ruleService.findActiveRuleIdSellingContextByScenarioAndStore(RuleScenarios.CART_SCENARIO, STORE_CODE_ONE);
+		List<SellingContextRuleSummary> results = ruleService.findActiveRuleIdSellingContextByScenarioAndStore(RuleScenarios.CART_SCENARIO, STORE_CODE_ONE);
 
 		assertThat(results)
 				.size()
 				.as("One result should have been found")
 				.isEqualTo(1);
 
-		assertThat(results.get(0))
-				.as("The result should contain the expected rule id and selling context")
-				.contains(activeRuleInStoreOne.getUidPk(), activeRuleInStoreOne.getSellingContext());
+		SellingContextRuleSummary resultContextDTO = results.get(0);
+
+		assertThat(resultContextDTO.getRuleUidPk())
+				.as("The result should contain the expected rule id")
+				.isEqualTo(activeRuleInStoreOne.getUidPk());
+
+		assertThat(resultContextDTO.getSellingContext())
+				.as("The result should contain the expected selling context")
+				.isEqualTo(activeRuleInStoreOne.getSellingContext());
 	}
 
 	/**

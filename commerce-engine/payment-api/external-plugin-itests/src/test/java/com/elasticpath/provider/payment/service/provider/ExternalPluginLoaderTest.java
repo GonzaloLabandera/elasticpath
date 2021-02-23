@@ -22,7 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.commons.handlers.libjar.LibJarURLStreamHandlerService;
 import com.elasticpath.plugin.payment.provider.AbstractPaymentProviderPlugin;
 import com.elasticpath.plugin.payment.provider.PaymentProviderPlugin;
 import com.elasticpath.plugin.payment.provider.PluginConfigurationKey;
@@ -39,15 +38,10 @@ public class ExternalPluginLoaderTest extends BasicSpringContextTest {
 
 	@BeforeClass
 	public static void setUpLibJarHandler() {
-		URL.setURLStreamHandlerFactory(protocol -> {
-			if (LibJarURLStreamHandlerService.LIB_JAR_PROTOCOL.equals(protocol)) {
-				return new LibJarURLStreamHandler();
-			}
-			return null;
-		});
+        LibJarHandlerInitializer.initialize();
 	}
 
-	@After
+    @After
 	public void tearDown() {
 		PaymentProviderPluginForIntegrationTesting.resetCapabilities();
 	}

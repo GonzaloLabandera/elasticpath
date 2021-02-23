@@ -5,8 +5,8 @@ package com.elasticpath.test.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.base.GloballyIdentifiable;
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -391,23 +390,25 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Test that a salt is persisted when a customer password is set.
+	 * Test {@link CustomerService#findIndexableUidsPaginated(Date, int, int)'.
 	 */
-	@DirtiesDatabase
 	@Test
-	public void testPasswordSalt() {
+	public void testFindIndexableUidsPaginated() {
+		Date lastModifiedDate = new Date();
+
+		// Persist a customer
 		Customer customer = createCustomer();
-		customer.setClearTextPassword(PASSWORD);
-		customer.setUsername(customer.getSharedId());
-		customer = service.update(customer);
+		customer.setLastEditDate(lastModifiedDate);
+		service.add(customer);
 
-		Customer loadedCustomer = service.load(customer.getUidPk());
+		final ArrayList<Long> uidList = new ArrayList<>();
+		uidList.add(customer.getUidPk());
 
-		assertThat(loadedCustomer.getCustomerAuthentication().getSalt()).isNotEmpty();
+		assertThat(service.findIndexableUidsPaginated(lastModifiedDate, 0, Integer.MAX_VALUE)).isEqualTo(uidList);
 	}
 
 	/**
-	 * Test that the same clear text password generates a unique encoded password each time (due to random salting).
+	 * Test that the same clear text password generates a unique encoded password each time (due to random BCrypt not generating the same value).
 	 */
 	@DirtiesDatabase
 	@Test
@@ -426,20 +427,6 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		assertThat(customer.getPassword())
 			.as("The encoded password should be different")
 			.isNotEqualTo(password);
-	}
-
-	@Test
-	@DirtiesDatabase
-	public void ensureFilterSearchableFiltersOutAnonymousCustomers() {
-		Customer signedInCustomer = createPersistedCustomer(TEST_SHAREDID_1, TEST_EMAIL_1, scenario.getStore());
-		Customer anonymousCustomer = createPersistedAnonymousCustomer(scenario.getStore());
-
-		Collection<Long> filteredUids = service.filterSearchable(ImmutableList.of(signedInCustomer.getUidPk(), anonymousCustomer.getUidPk()));
-		Set<Long> filteredUidSet = new HashSet<>(filteredUids);
-
-		assertThat(filteredUidSet)
-			.as("The filtered set should not include the anonymous customer uid")
-			.containsOnly(signedInCustomer.getUidPk());
 	}
 
 	@Test(expected= EpValidationException.class)

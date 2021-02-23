@@ -3,23 +3,19 @@
  */
 package com.elasticpath.catalog.plugin.repository;
 
-import static com.elasticpath.catalog.plugin.repository.CatalogSyndicationBatchJobsExtensionIntegrationTest.JMS_BROKER_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 
 import org.junit.Test;
 
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
+import com.elasticpath.test.db.DbTestCase;
 
 /**
  * Test for extending catalog syndication batch jobs.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
-public class CatalogSyndicationBatchJobsExtensionIntegrationTest extends XaTransactionTestSupport {
+public class CatalogSyndicationBatchJobsExtensionIntegrationTest extends DbTestCase {
 
-	static final String JMS_BROKER_URL = "tcp://localhost:61617";
 	private static final String CATALOG_SYNDICATION_BATCH_JOBS = "catalogSyndicationBatchJobs";
 
 	@Test

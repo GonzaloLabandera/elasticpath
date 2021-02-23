@@ -231,4 +231,11 @@ public interface OrderEventHelper {
 	 */
 	OrderEvent createShipmentReleasedOrderEvent(Order order, OrderShipment shipment);
 
+	
+	/**
+	 * Log the event when the order is accepted.
+	 * @param order the order.
+	 */
+	void logOrderAccepted(Order order);
+
 }

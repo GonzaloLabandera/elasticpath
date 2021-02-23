@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EpBindException;
 import com.elasticpath.commons.exception.EpUnsupportedOperationException;
+import com.elasticpath.commons.util.CatalogCodeUtil;
+import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.dataimport.ImportDataType;
 import com.elasticpath.domain.dataimport.ImportField;
@@ -50,6 +53,9 @@ public abstract class AbstractImportDataTypeImpl extends AbstractEpDomainImpl im
 	private Locale requiredLocale;
 
 	private static final String SEPARATOR = " - ";
+	
+	private Utility utilityBean;
+	private CatalogCodeUtil catalogCodeUtilBean;
 
 	/**
 	 * The default constructor.
@@ -285,4 +291,42 @@ public abstract class AbstractImportDataTypeImpl extends AbstractEpDomainImpl im
 	public List<ImportType> getSupportedImportTypes() {
 		return AbstractImportTypeImpl.getAllImportTypes();
 	}
+
+	/**
+	 * Gets the utility bean.
+	 *
+	 * @return the utility bean
+	 */
+	protected Utility getUtilityBean() {
+		if (utilityBean == null) {
+			utilityBean = getSingletonBean(ContextIdNames.UTILITY, Utility.class);
+		}
+		return utilityBean;
+	}
+
+	protected void setUtilityBean(final Utility utilityBean) {
+		this.utilityBean = utilityBean;
+	}
+
+	/**
+	 * Gets the catalog code util bean.
+	 *
+	 * @return the catalog code bean
+	 */
+	protected CatalogCodeUtil getCatalogCodeUtilBean() {
+		if (catalogCodeUtilBean == null) {
+			catalogCodeUtilBean = getSingletonBean(ContextIdNames.CATALOG_CODE_UTIL, CatalogCodeUtil.class);
+		}
+		return catalogCodeUtilBean;
+	}
+
+	/**
+	 * Sets the catalog code util bean.
+	 *
+	 * @param catalogCodeUtilBean the catalog code bean
+	 */
+	protected void setCatalogCodeUtilBean(final CatalogCodeUtil catalogCodeUtilBean) {
+		this.catalogCodeUtilBean = catalogCodeUtilBean;
+	}
+
 }

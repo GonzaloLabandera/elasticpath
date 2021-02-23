@@ -86,6 +86,15 @@ public interface CartOrderService {
 	List<String> findCartOrderGuidsByCustomerGuid(String storeCode, String customerGuid);
 
 	/**
+	 * Find the GUIDs of all the cart orders owned by an account in a certain store, given customer's GUID and store code.
+	 *
+	 * @param storeCode the store code
+	 * @param accountGuid the account GUID
+	 * @return the list of cart order GUIDs
+	 */
+	List<String> findCartOrderGuidsByAccountGuid(String storeCode, String accountGuid);
+
+	/**
 	 * Gets the last modified date for a CartOrder given its GUID.
 	 *
 	 * @param cartOrderGuid the cart order GUID

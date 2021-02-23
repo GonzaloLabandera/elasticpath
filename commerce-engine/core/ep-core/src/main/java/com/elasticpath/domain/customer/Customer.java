@@ -47,15 +47,6 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	/** The minimum length of a password. */
 	int MINIMUM_PASSWORD_LENGTH = 8;
 
-	/** The gender - female. */
-	char GENDER_FEMALE = 'F';
-
-	/** The gender - male. */
-	char GENDER_MALE = 'M';
-
-	/** The gender - not-selected. */
-	char GENDER_NOT_SELECTED = '-';
-
 	/** The status - Active. */
 	int STATUS_ACTIVE = 1;
 
@@ -64,6 +55,9 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 
 	/** The status - Pending Approval. */
 	int STATUS_PENDING_APPROVAL = 3;
+
+	/** The status - Suspended. */
+	int STATUS_SUSPENDED = 4;
 
 	/**
 	 * Gets the user identifier for this <code>Customer</code>.
@@ -413,20 +407,6 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	void setPhoneNumber(String phoneNumber);
 
 	/**
-	 * Gets the gender of this <code>Customer</code>.
-	 *
-	 * @return the customer's gender ('F' for female, or 'M' for male).
-	 */
-	char getGender();
-
-	/**
-	 * Sets the gender of this <code>Customer</code>.
-	 *
-	 * @param gender the customer's gender ('F' for female, or 'M' for male).
-	 */
-	void setGender(char gender);
-
-	/**
 	 * Gets the company associated with this <code>Customer</code>.
 	 *
 	 * @return the company.
@@ -622,13 +602,6 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * @return true if phone number is required, false if not required.
 	 */
 	boolean isPhoneNumberRequired();
-
-	/**
-	 * Gets the <code>Customer</code>'s gender required-ness flag.
-	 *
-	 * @return true if gender is required, false if not required.
-	 */
-	boolean isGenderRequired();
 
 	/**
 	 * Gets the <code>Customer</code>'s company required-ness flag.

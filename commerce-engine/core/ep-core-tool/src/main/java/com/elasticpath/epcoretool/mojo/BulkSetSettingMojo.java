@@ -18,7 +18,7 @@ import com.elasticpath.epcoretool.logic.dto.EpSetting;
 /**
  * Updates the setting value in the Elastic Path database. If a value already exists, it will be removed before being re-added.
  */
-@Mojo(name = "bulk-set-settings")
+@Mojo(name = "bulk-set-settings", threadSafe = true)
 public class BulkSetSettingMojo extends AbstractEpCoreMojo {
 
 	@Parameter(alias = "settings", required = true)

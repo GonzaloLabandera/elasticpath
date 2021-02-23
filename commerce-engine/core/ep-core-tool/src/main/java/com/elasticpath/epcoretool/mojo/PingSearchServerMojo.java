@@ -13,7 +13,7 @@ import com.elasticpath.epcoretool.logic.AbstractPingSearchServer;
 /**
  * Interact with the search server, optionally checking different queries or polling for it to be fully functioning.
  */
-@Mojo(name = "ping-search")
+@Mojo(name = "ping-search", threadSafe = true)
 public class PingSearchServerMojo extends AbstractEpCoreMojo {
 
 	@Override

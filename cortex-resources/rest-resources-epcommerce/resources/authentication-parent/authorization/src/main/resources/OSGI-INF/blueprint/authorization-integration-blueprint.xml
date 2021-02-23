@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+<blueprint
+		xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+	<reference id="userAccountAssociationService"
+			   interface="com.elasticpath.service.customer.UserAccountAssociationService"/>
+
+	<reference id="roleToPermissionMappingService"
+			   interface="com.elasticpath.service.permissions.RoleToPermissionsMappingService"/>
+
+	<reference id="shiroRolesDeterminationService"
+			   interface="com.elasticpath.service.auth.ShiroRolesDeterminationService"/>
+
+	<reference id="resourceIdentifierReader"
+			   interface="com.elasticpath.rest.id.reader.ResourceIdentifierReader" />
+
+	<reference-list id="principalOverrideStrategyList"
+					interface="com.elasticpath.rest.resource.authorization.strategy.PrincipalOverrideStrategy"
+					availability="optional"/>
+
+	<service ref="accountPrincipalOverrideStrategy"
+			 interface="com.elasticpath.rest.resource.authorization.strategy.PrincipalOverrideStrategy"/>
+
+	<service ref="principalsOverride"
+			 interface="com.elasticpath.rest.authorization.PrincipalsOverride" />
+</blueprint>

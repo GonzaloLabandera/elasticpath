@@ -131,6 +131,8 @@ public class ExportStoreSteps {
 		storeDTO.setGlobalization(globalizationDTO);
 		storeDTO.setCode(storeMap.get("store code"));
 		storeDTO.setName(storeMap.get("store name"));
+		storeDTO.setAuthenticatedB2CRole(storeMap.get("authenticated role"));
+		storeDTO.setSingleSessionB2CRole(storeMap.get("unauthenticated role"));
 
 		@SuppressWarnings("UnstableApiUsage") final List<String> paymentProviderConfigGuids = Splitter.on(",")
 				.omitEmptyStrings()
@@ -143,7 +145,7 @@ public class ExportStoreSteps {
 
 		assertThat(exportedStoreDTO).isEqualToComparingOnlyGivenFields(storeDTO,
 				"code", "name", "globalization.country", "globalization.defaultCurrency", "globalization.subCountry",
-				"globalization.timeZone", "paymentProviderPluginConfigGuids");
+				"globalization.timeZone", "paymentProviderPluginConfigGuids", "authenticatedB2CRole", "singleSessionB2CRole");
 	}
 
 	private StoreDTO findStoreDTOByStoreCode(

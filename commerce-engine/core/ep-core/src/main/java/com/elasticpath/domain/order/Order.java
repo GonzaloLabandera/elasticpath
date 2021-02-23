@@ -24,6 +24,7 @@ import com.elasticpath.plugin.tax.domain.TaxExemption;
 /**
  * <code>Order</code> represents a customer's order.
  */
+@SuppressWarnings({ "PMD.ExcessivePublicCount"})
 public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 
 	/**
@@ -529,6 +530,11 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 * This method should be called by the OrderService only.
 	 */
 	void cancelOrder();
+
+	/**
+	 * Sets the order status to CREATED.
+	 */
+	void setStatusCreated();
 
 	/**
 	 * Sets the order status to FAILED.

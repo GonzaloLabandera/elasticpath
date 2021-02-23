@@ -34,6 +34,14 @@
 			<artifactId>ep-resource-orders-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-accounts-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-accounts</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.elasticpath.rest</groupId>
 			<artifactId>ep-rs-annotated-dispatch</artifactId>
 		</dependency>

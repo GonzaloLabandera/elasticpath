@@ -504,7 +504,7 @@ public class ShoppingCartImplJunit4Test {
 				oneOf(customer).isAnonymous(); will(returnValue(false));
 
 				oneOf(couponService).findByCouponCode(code); will(returnValue(coupon));
-				oneOf(couponUsageService).validateCouponRuleAndUsage(coupon, STORECODE, email);
+				oneOf(couponUsageService).validateCouponRuleAndUsage(coupon, STORECODE, email, null);
 				will(returnValue(CouponUsageValidationResultEnum.SUCCESS));
 				oneOf(ruleService).getLimitedUseRule(code); will(returnValue(rule));
 				oneOf(rule).hasLimitedUseCondition(); will(returnValue(true));
@@ -556,7 +556,7 @@ public class ShoppingCartImplJunit4Test {
 				oneOf(customer).isAnonymous(); will(returnValue(true));
 
 				oneOf(couponService).findByCouponCode(code); will(returnValue(coupon));
-				oneOf(couponUsageService).validateCouponRuleAndUsage(coupon, STORECODE, null);
+				oneOf(couponUsageService).validateCouponRuleAndUsage(coupon, STORECODE, null, null);
 				will(returnValue(CouponUsageValidationResultEnum.SUCCESS));
 				oneOf(ruleService).getLimitedUseRule(code); will(returnValue(rule));
 				oneOf(rule).hasLimitedUseCondition(); will(returnValue(true));

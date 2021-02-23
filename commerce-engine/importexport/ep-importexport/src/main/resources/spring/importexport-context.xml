@@ -60,8 +60,6 @@
 
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
 
-	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
-
 	<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory"/>
 
 	<bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" destroy-method="stop"/>
@@ -89,37 +87,9 @@
 		<property name="uri" value="direct:/dev/null" />
 	</bean>
 
+	<bean id="detachmentStrategy" class="com.elasticpath.persistence.openjpa.strategies.impl.NonDetachingDetachmentStrategyImpl"/>
+
 	<import resource="classpath*:META-INF/conf/ep-core-plugin.xml" />
 	<import resource="classpath*:META-INF/conf/ep-importexport-plugin.xml" />
 
-	<beans profile="default">
-		<bean id="xaJmsConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory">
-			<property name="brokerURL" value="${jms.url}"/>
-		</bean>
-
-		<bean id="xaDataSource" class="${db.connection.xaDriver_class}">
-			<property name="URL" value="${db.connection.url}"/>
-			<property name="user" value="${db.connection.username}"/>
-			<property name="password" value="${db.connection.password}"/>
-		</bean>
-
-		<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="elasticPath,coreBeanFactory">
-			<property name="dataSource" ref="atomikosJdbcDataSource"/>
-			<property name="jpaProperties">
-				<map>
-					<entry key="javax.persistence.transactionType" value="JTA"/>
-					<entry key="openjpa.TransactionMode" value="managed"/>
-					<entry key="openjpa.ConnectionFactoryMode" value="managed"/>
-					<entry key="openjpa.ConnectionFactory" value-ref="atomikosJdbcDataSource"/>
-					<entry key="openjpa.ConnectionFactory2" value-ref="dataSource"/>
-					<entry key="openjpa.ManagedRuntime"
-						   value="invocation(TransactionManagerMethod=com.atomikos.icatch.jta.TransactionManagerImp.getTransactionManager)"/>
-					<entry key="openjpa.MetaDataRepository" value="Preload=true"/>
-					<entry key="openjpa.Compatibility"
-						   value="QuotedNumbersInQueries=true,convertPositionalParametersToNamed=true,ignoreDetachedStateFieldForProxySerialization=true"/>
-					<entry key="openjpa.ConnectionFactoryProperties" value="PrettyPrint=true, PrettyPrintLineLength=80, PrintParameters=true"/>
-				</map>
-			</property>
-		</bean>
-	</beans>
 </beans>

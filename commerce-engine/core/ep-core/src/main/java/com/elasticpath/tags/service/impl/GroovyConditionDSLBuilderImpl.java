@@ -4,6 +4,8 @@
 
 package com.elasticpath.tags.service.impl;
 
+import static java.lang.String.format;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +13,9 @@ import java.util.Map;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
 import com.elasticpath.tags.domain.Condition;
@@ -29,6 +33,7 @@ import com.elasticpath.validation.domain.ValidationResult;
  * Builds Groovy implementation of {@link ConditionDSLBuilder}.
  */
 public class GroovyConditionDSLBuilderImpl implements ConditionDSLBuilder {
+	private static final Logger LOG = Logger.getLogger(GroovyConditionDSLBuilderImpl.class);
 
 	private static final String TAG_DEFINITIONS_MAP_VARIABLE_NAME = "tagDefinitionsMap";
 
@@ -68,34 +73,61 @@ public class GroovyConditionDSLBuilderImpl implements ConditionDSLBuilder {
 			return null;
 		}
 
+		final String script = "import groovy.transform.Field\n"
+				+ "import com.elasticpath.tags.builder.*\n"
+				+ "import com.elasticpath.tags.domain.*\n"
+
+				+ "@Field LogicalTreeBuilder logicalTreeBuilder = new LogicalTreeBuilder()\n"
+
+				+ "def propertyMissing(String name) {\n"
+				+ "	   new BuilderString(logicalTreeBuilder, tagDefinitionsMap.get(name), name)\n"
+				+ "}\n"
+
+				+ "def methodMissing(String name, args) { \n"
+				+ "    LogicalOperatorType operatorType = Enum.valueOf(LogicalOperatorType.class, name)\n"
+				+ "    logicalTreeBuilder.addLogicalOperator(operatorType, args)\n"
+				+ "}\n"
+
+				+ "def getCondition() {\n"
+				+ "    def dslClosure = "
+				+ dslString
+				+ "\n  dslClosure.call()"
+				+ "\n}\n"
+
+				+ "getCondition()";
+
 		Script compiledScript = null;
 		try {
-			compiledScript = initializeGroovyShellWithTagDefinitions().parse(
-					"import com.elasticpath.tags.builder.*\n"
-							+ "import com.elasticpath.tags.domain.*\n"
+			if (LOG.isTraceEnabled()) {
+				LOG.trace(format("Compiling Groovy script: %s", dslString));
+			}
 
-							+ "def propertyMissing(String name) {\n"
-							+ "	   new BuilderString(tagDefinitionsMap.get(name), name)\n"
-							+ "}\n"
+			compiledScript = initializeGroovyShellWithTagDefinitions().parse(script);
 
-							+ "def methodMissing(String name, args) { \n"
-							+ "    def LogicalOperatorType operatorType = Enum.valueOf(LogicalOperatorType.class, name)\n"
-							+ "    LogicalTreeBuilder.getInstance().addLogicalOperator(operatorType, args)\n"
-							+ "}\n"
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Groovy script compiled.");
+			}
 
-							+ "def getCondition() {\n"
-							+ "    def dslClosure = "
-							+      dslString
-							+ "\n  dslClosure.call()"
-							+ "\n}\n"
+			final LogicalOperator result = (LogicalOperator) compiledScript.run();
 
-							+ "getCondition()"
-			);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(format("Groovy script (%s) run: %s", dslString, result));
+			}
 
-			return (LogicalOperator) compiledScript.run();
+			return result;
 		} finally {
 			if (compiledScript != null) {
-				InvokerHelper.removeClass(compiledScript.getClass());
+				final Class<? extends Script> scriptClass = compiledScript.getClass();
+
+				if (LOG.isTraceEnabled()) {
+					LOG.trace(format("Removing compiled Groovy script class (%s): %s", scriptClass, dslString));
+				}
+
+				InvokerHelper.removeClass(scriptClass);
+
+				if (LOG.isTraceEnabled()) {
+					LOG.trace(format("Removed compiled Groovy script class (%s): %s", scriptClass, dslString));
+				}
 			}
 		}
 	}

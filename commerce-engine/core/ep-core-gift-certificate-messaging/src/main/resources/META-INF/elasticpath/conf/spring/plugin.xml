@@ -75,7 +75,6 @@
 	<bean id="giftCertificatePropertyAndOrderCreatedEventTypePredicate" class="com.elasticpath.messaging.predicate.impl.PropertyAndCompatibleEventTypePredicate">
 		<property name="compatibleEventTypes">
 			<util:list>
-				<util:constant static-field="com.elasticpath.core.messaging.order.OrderEventType.ORDER_CREATED"/>
 				<util:constant static-field="com.elasticpath.core.messaging.order.OrderEventType.RESEND_ORDER_CONFIRMATION" />
 				<util:constant static-field="com.elasticpath.core.messaging.giftcertificate.GiftCertificateEventType.RESEND_GIFT_CERTIFICATE"/>
 			</util:list>

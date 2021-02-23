@@ -202,14 +202,12 @@ public class OrderSearchTab implements ISearchTab {
 	}
 
 	/**
-	 * Gets the order status names - removes the "FAILED" status as we don't want these
-	 * showing up in the CM Client just yet.
+	 * Gets the order status names.
 	 *
 	 * @return the order status names
 	 */
 	private String[] getOrderStatusNames() {
 		orderStatusValues = new ArrayList<>(OrderStatus.values());
-		orderStatusValues.remove(OrderStatus.FAILED);
 
 		final String[] orderStatusNames = new String[orderStatusValues.size() + 1];
 		orderStatusNames[0] = FulfillmentMessages.get().SearchView_Status_Any;
@@ -424,8 +422,6 @@ public class OrderSearchTab implements ISearchTab {
 		};
 		bindingProvider.bind(context, storeCombo, null, null, storeUpdateStrategy, false);
 		this.setSearchStoreCodeList(0);
-
-		getModel().setExcludedOrderStatus(OrderStatus.FAILED);
 
 		final ObservableUpdateValueStrategy orderStatusUpdateStrategy = new ObservableUpdateValueStrategy() {
 			@Override

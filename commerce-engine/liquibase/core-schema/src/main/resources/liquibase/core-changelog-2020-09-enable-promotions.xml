@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-enable-promotions.xml">
+
+
+
+	<changeSet id="catalog-promotion-enable-setting" author="elasticpath" >
+		<comment>If true allows catalog promotions to be created and evaluated during price lookups.</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="220" />
+			<column name="PATH" value="COMMERCE/SYSTEM/PROMOTIONS/catalogPromotionsEnabled" />
+			<column name="VALUE_TYPE" value="Boolean" />
+			<column name="MAX_OVERRIDE_VALUES" value="1" />
+			<column name="DEFAULT_VALUE" value="true" />
+			<column name="DESCRIPTION"
+					value="If true allows catalog promotions to be created and evaluated during price lookups." />
+		</insert>
+
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1700"/>
+			<column name="SETTING_DEFINITION_UID" valueNumeric="220"/>
+			<column name="METADATA_KEY" value="apiRefreshStrategy"/>
+			<column name="VALUE" value="application"/>
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

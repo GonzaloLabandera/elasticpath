@@ -7,18 +7,18 @@ import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
-import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.ReversiblePostCaptureCheckoutAction;
 
 /**
  * Checkout Action that initiates the fulfilment process for the order being checked out.
  */
-public class InitiateFulfilmentCheckoutAction implements ReversibleCheckoutAction {
+public class InitiateFulfilmentCheckoutAction implements ReversiblePostCaptureCheckoutAction {
 
 	private OrderService orderService;
 
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PostCaptureCheckoutActionContext context) throws EpSystemException {
 		final Order order = context.getOrder();
 		if (isOrderInAFulfillableState(order)) {
 			final Order updatedOrder = getOrderService().releaseOrder(order);
@@ -39,7 +39,7 @@ public class InitiateFulfilmentCheckoutAction implements ReversibleCheckoutActio
 	}
 
 	@Override
-	public void rollback(final CheckoutActionContext context) throws EpSystemException {
+	public void rollback(final PostCaptureCheckoutActionContext context) throws EpSystemException {
 		// no-op
 	}
 

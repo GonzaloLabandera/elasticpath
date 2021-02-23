@@ -167,18 +167,6 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	}
 
 	@Override
-	public ShoppingCart refresh(final ShoppingCart shoppingCart) {
-		getCartDirector().refresh(shoppingCart);
-
-		return saveShoppingCart(shoppingCart);
-	}
-
-	@Override
-	public void reApplyCatalogPromotions(final ShoppingCart shoppingCart) {
-		getCartDirector().refresh(shoppingCart);
-	}
-
-	@Override
 	public ShoppingItem addSkuToWishList(final String skuCode, final Shopper shopper, final Store store) {
 		ShoppingItem item = getCartDirector().createShoppingItem(skuCode, store, 1);
 

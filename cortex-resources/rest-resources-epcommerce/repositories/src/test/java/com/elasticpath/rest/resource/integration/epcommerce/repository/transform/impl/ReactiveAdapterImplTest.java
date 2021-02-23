@@ -223,7 +223,7 @@ public class ReactiveAdapterImplTest {
 				.test()
 				.assertError(ResourceOperationFailure.notFound(notFound));
 	}
-	
+
 	@Test
 	public void fromRepositoryShouldDeferExecution() throws Exception {
 		reactiveAdapter.fromRepository(() -> ExecutionResultFactory

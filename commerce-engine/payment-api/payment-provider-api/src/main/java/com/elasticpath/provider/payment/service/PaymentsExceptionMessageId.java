@@ -6,7 +6,7 @@ package com.elasticpath.provider.payment.service;
 /**
  * Business state message id for payment module errors.
  *
- * @see <a href="https://developers.elasticpath.com/commerce/7.5/Cortex-API-Front-End-Development/API-Reference/Business-State-Errors">
+ * @see <a href="https://documentation.elasticpath.com/commerce/docs/cortex/frontend-dev/api/structured-messages.html#business-state-errors">
  * Business State Errors
  * </a>
  */

@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.AccountRole;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.UserAccountAssociation;
@@ -46,7 +45,7 @@ public class UserAccountAssociationServiceTest extends DbTestCase {
 
 	private static final String CUSTOMER_NAME2 = "testcustomer2@UserAccountAssociationService.com";
 
-	private static final AccountRole ACCOUNT_ROLE = AccountRole.BUYER;
+	private static final String BUYER_ROLE = "BUYER";
 
 	@Before
 	public void initialize() {
@@ -61,12 +60,12 @@ public class UserAccountAssociationServiceTest extends DbTestCase {
 	public void testAssociateUserToAccount() {
 		//associate user to account
 		UserAccountAssociation userAccountAssociation = doInTransaction(status -> userAccountAssociationService.associateUserToAccount(buyer,
-				account, ACCOUNT_ROLE));
+				account, BUYER_ROLE));
 		assertThat(userAccountAssociation)
 				.as("user account association does not contain expected fields")
 				.hasFieldOrPropertyWithValue("userGuid", buyer.getGuid())
 				.hasFieldOrPropertyWithValue("accountGuid", account.getGuid())
-				.hasFieldOrPropertyWithValue("role", ACCOUNT_ROLE);
+				.hasFieldOrPropertyWithValue("role", BUYER_ROLE);
 
 		//verify association can be found by account
 		assertThat(userAccountAssociationService.findAssociationsForAccount(account))
@@ -93,7 +92,7 @@ public class UserAccountAssociationServiceTest extends DbTestCase {
 	public void testIsExistingUserAssociation() {
 		
 		// associate user to account
-		doInTransaction(status -> userAccountAssociationService.associateUserToAccount(buyer, account, ACCOUNT_ROLE));
+		doInTransaction(status -> userAccountAssociationService.associateUserToAccount(buyer, account, BUYER_ROLE));
 
 		boolean isExistingAssociation = userAccountAssociationService.isExistingUserAssociation(account.getGuid(), buyer.getGuid());
 
@@ -108,7 +107,7 @@ public class UserAccountAssociationServiceTest extends DbTestCase {
 		Customer accountWithInvalidType = createCustomer(store.getCode(), "account2@elasticpath.com", CustomerType.REGISTERED_USER);
 
 		assertThatThrownBy(() -> doInTransaction(status -> userAccountAssociationService.associateUserToAccount(buyer.getGuid(),
-				accountWithInvalidType.getGuid(), ACCOUNT_ROLE.getName())))
+				accountWithInvalidType.getGuid(), BUYER_ROLE)))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageStartingWith("Invalid UserAccountAssociation: The supplied Account guid is not a customer of type ACCOUNT");
 	}
@@ -118,11 +117,11 @@ public class UserAccountAssociationServiceTest extends DbTestCase {
 	public void testAssociateDuplicateValidation() {
 		//associate user to account
 		UserAccountAssociation userAccountAssociation = doInTransaction(status -> userAccountAssociationService.associateUserToAccount(buyer,
-				account, ACCOUNT_ROLE));
+				account, BUYER_ROLE));
 
 		//attempt to recreate the same association
 		assertThatThrownBy(() -> doInTransaction(status -> userAccountAssociationService.associateUserToAccount(buyer,
-				account, ACCOUNT_ROLE)))
+				account, BUYER_ROLE)))
 				.isInstanceOf(DataIntegrityViolationException.class);
 	}
 
@@ -131,7 +130,7 @@ public class UserAccountAssociationServiceTest extends DbTestCase {
 	public void testFindAssociationByGuid() {
 		//associate user to account
 		UserAccountAssociation userAccountAssociation = doInTransaction(status -> userAccountAssociationService.associateUserToAccount(buyer,
-				account, ACCOUNT_ROLE));
+				account, BUYER_ROLE));
 
 		//Assert that the association can be found by guid
 		assertThat(userAccountAssociationService.findByGuid(userAccountAssociation.getGuid()))

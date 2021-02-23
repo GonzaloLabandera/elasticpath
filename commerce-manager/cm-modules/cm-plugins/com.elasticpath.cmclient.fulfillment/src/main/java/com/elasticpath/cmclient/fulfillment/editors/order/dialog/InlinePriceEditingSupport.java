@@ -56,6 +56,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
+import com.elasticpath.tags.TagSet;
 
 /**
  * Inline editing support for item price.
@@ -232,7 +233,7 @@ public class InlinePriceEditingSupport extends AbstractInlineEditingSupport {
 			priceListStack = checkPriceListStackAuthorization(priceListStack);
 
 			List<DisplayPriceDTO> applicablePricesForCurrentOrderSku = priceLookupFacade.getPricesForOrderSku(productSku,
-					priceListStack, quantity, shipment.getOrder().getStore());
+					priceListStack, quantity, shipment.getOrder().getStore(), new TagSet());
 
 			LOG.info("Found " + applicablePricesForCurrentOrderSku.size() + " prices"); //$NON-NLS-1$ //$NON-NLS-2$
 

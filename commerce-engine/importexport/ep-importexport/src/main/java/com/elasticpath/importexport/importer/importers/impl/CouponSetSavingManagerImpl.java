@@ -110,7 +110,7 @@ class CouponSetSavingManagerImpl implements SavingManager<CouponSet> {
 		if (couponUsage == null) {
 			couponUsage = couponUsageService.add(usage);
 		} else {
-			couponUsage.setActiveInCart(usage.isActiveInCart());
+			couponUsage.setAutoApplyToCarts(usage.isAutoApplyToCarts());
 			couponUsage.setCoupon(usage.getCoupon());
 			couponUsage.setCustomerEmailAddress(usage.getCustomerEmailAddress());
 			couponUsage.setUseCount(usage.getUseCount());

@@ -6,8 +6,8 @@
 		<creationDate>2017-03-07T00:25:21-08:00</creationDate>
 		<last_edited>2017-03-06T16:28:12-08:00</last_edited>
 		<username>generic1@abc.com</username>
-		<password>315eca1eef426b95f918d432a8189aef95ed203a4bd34a8eccdfaa8ee5e5cac0</password>
-		<salt>8be3d11e03760c72034e14954278433b812491e988534a0364ba48761d5d7e42</salt>
+		<password>$2a$08$wzWbPTI70/uA9LB/qAa9Q.YTut3tWOfZU9BC68oECDQESOsEz0V.K</password>
+		<salt/>
 		<first_time_buyer>true</first_time_buyer>
 		<addresses/>
 		<groups>
@@ -26,8 +26,8 @@
 		<creationDate>2017-03-07T21:06:38-08:00</creationDate>
 		<last_edited>2017-03-07T13:17:40-08:00</last_edited>
 		<username>segment1@abc.com</username>
-		<password>baa43cf01b7a962bda240007cdace545e2c9669b776ee9b2f490aac1d473ad47</password>
-		<salt>6b49d9f5e2e0449b4493bf4ed2135b786a09592127f73823ffe0c69ec5620e89</salt>
+		<password>$2a$08$wzWbPTI70/uA9LB/qAa9Q.YTut3tWOfZU9BC68oECDQESOsEz0V.K</password>
+		<salt/>
 		<first_time_buyer>true</first_time_buyer>
 		<addresses/>
 		<groups>
@@ -47,8 +47,8 @@
 		<creationDate>2017-03-07T21:23:30-08:00</creationDate>
 		<last_edited>2017-03-07T13:24:18-08:00</last_edited>
 		<username>segment2@abc.com</username>
-		<password>80b849ee6e3709b3b1fe034808e2c6ad295c2c706b34fa9aea79de1c6dcf4843</password>
-		<salt>9c30d21fd113c569289ca4e552b88325cf2fabde8944e73828a465da718016b2</salt>
+		<password>$2a$08$wzWbPTI70/uA9LB/qAa9Q.YTut3tWOfZU9BC68oECDQESOsEz0V.K</password>
+		<salt/>
 		<first_time_buyer>true</first_time_buyer>
 		<addresses/>
 		<groups>
@@ -68,8 +68,8 @@
 		<creationDate>2017-03-07T21:23:30-08:00</creationDate>
 		<last_edited>2017-03-07T13:24:18-08:00</last_edited>
 		<username>Segment_disabled@abc.com</username>
-		<password>80b849ee6e3709b3b1fe034808e2c6ad295c2c706b34fa9aea79de1c6dcf4843</password>
-		<salt>9c30d21fd113c569289ca4e552b88325cf2fabde8944e73828a465da718016b2</salt>
+		<password>$2a$08$wzWbPTI70/uA9LB/qAa9Q.YTut3tWOfZU9BC68oECDQESOsEz0V.K</password>
+		<salt/>
 		<first_time_buyer>true</first_time_buyer>
 		<addresses/>
 		<groups>

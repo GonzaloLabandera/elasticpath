@@ -26,7 +26,7 @@ public class DiscountApportioningCalculatorImpl extends ApportioningCalculatorIm
 	@Override
 	public Map<String, BigDecimal> apportionDiscountToShoppingItems(
 			final Money discount, final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap) {
-		final Collection<ShoppingItem> discountableShoppingItems = getDiscountableShoppingItems(shoppingItemPricingSnapshotMap.keySet());
+		final Collection<ShoppingItem> discountableShoppingItems = getDiscountableShoppingItems(shoppingItemPricingSnapshotMap);
 		verifySkus(discountableShoppingItems);
 
 		final Map<String, BigDecimal> sortedPriceMap = createSortedPriceMap(shoppingItemPricingSnapshotMap);
@@ -76,15 +76,19 @@ public class DiscountApportioningCalculatorImpl extends ApportioningCalculatorIm
 	/**
 	 * From the supplied collections of ShoppingItems finds the subset which may have apportioning applied to
 	 * them, and returns them in a new collection.
-	 * @param shoppingItems items
+	 * @param shoppingItemPricingSnapshotMap items
 	 * @return discountable shopping items
 	 */
-	Collection<ShoppingItem> getDiscountableShoppingItems(final Collection<? extends ShoppingItem> shoppingItems) {
+	Collection<ShoppingItem> getDiscountableShoppingItems(
+			final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap) {
 		final Collection<ShoppingItem> discountableShoppingItems = new ArrayList<>();
-		for (ShoppingItem shoppingItem : shoppingItems) {
+		for (Map.Entry<? extends ShoppingItem, ShoppingItemPricingSnapshot> entry : shoppingItemPricingSnapshotMap.entrySet()) {
+			ShoppingItem shoppingItem = entry.getKey();
+			ShoppingItemPricingSnapshot shoppingItemPricingSnapshot = entry.getValue();
+
 			//On Order exchange wizard tax calculation may be invoked 
 			//on item without unit price
-			if (!shoppingItem.hasPrice() || !shoppingItem.isDiscountable(getProductSkuLookup())) {
+			if (!shoppingItemPricingSnapshot.hasPrice() || !shoppingItem.isDiscountable(getProductSkuLookup())) {
 				continue;
 			}
 			discountableShoppingItems.add(shoppingItem);

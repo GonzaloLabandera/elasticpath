@@ -3,6 +3,8 @@
  */
 package com.elasticpath.domain.customer;
 
+import java.util.Collection;
+
 import com.elasticpath.commons.util.extenum.AbstractExtensibleEnum;
 
 /**
@@ -73,5 +75,14 @@ public class CustomerType extends AbstractExtensibleEnum<CustomerType> {
 	 */
 	public static CustomerType valueOf(final String name) {
 		return valueOf(name, CustomerType.class);
+	}
+
+	/**
+	 * Return the values.
+	 *
+	 * @return the collection of values
+	 */
+	public static Collection<CustomerType> values() {
+		return values(CustomerType.class);
 	}
 }

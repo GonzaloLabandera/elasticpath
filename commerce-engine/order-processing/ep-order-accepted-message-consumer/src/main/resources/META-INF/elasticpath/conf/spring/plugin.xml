@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:camel="http://camel.apache.org/schema/spring"
+		xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+		">
+
+	<camel:camelContext id="ep-order-accepted-message-consumer" xmlns="http://camel.apache.org/schema/spring"
+						threadNamePattern="Camel (#camelId#) thread ##counter#">
+		<routeBuilder ref="orderAcceptedRouteBuilder"/>
+	</camel:camelContext>
+
+	<bean id="orderAcceptedRouteBuilderTemplate"
+		  class="com.elasticpath.orderprocessing.orderaccepted.messaging.OrderAcceptedRouteBuilder"
+		  abstract="true">
+		<property name="routeId" value="orderAcceptedRouteBuilderTemplate"/>
+		<property name="incomingEndpoint">
+			<bean parent="orderEventExternalEndpoint">
+				<property name="camelContextId" value="ep-order-accepted-message-consumer"/>
+				<property name="context" value="orderAcceptedMessageConsumer"/>
+			</bean>
+		</property>
+		<property name="eventMessageDataFormat" ref="eventMessageDataFormat"/>
+		<property name="orderAcceptedOrderEventPredicate" ref="orderAcceptedEventTypePredicate"/>
+		<property name="orderToPostCaptureCheckoutActionContextTransformer" ref="orderToPostCaptureCheckoutActionContextTransformer"/>
+		<property name="postCaptureCheckoutService" ref="postCaptureCheckoutService" />
+	</bean>
+
+	<bean id="orderAcceptedRouteBuilder" parent="orderAcceptedRouteBuilderTemplate"/>
+
+	<bean id="orderToPostCaptureCheckoutActionContextTransformer"
+		  class="com.elasticpath.orderprocessing.orderaccepted.messaging.impl.OrderToPostCaptureCheckoutActionContextTransformerImpl">
+		<property name="eventOriginatorHelper" ref="eventOriginatorHelper"/>
+		<property name="orderService" ref="orderService"/>
+		<property name="cmUserService" ref="cmUserService"/>
+	</bean>
+
+</beans>

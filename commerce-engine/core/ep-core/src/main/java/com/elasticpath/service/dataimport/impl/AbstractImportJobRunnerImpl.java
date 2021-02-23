@@ -5,6 +5,7 @@ package com.elasticpath.service.dataimport.impl;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,7 +21,9 @@ import org.apache.log4j.Logger;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.ImportConstants;
+import com.elasticpath.commons.enums.InvalidCatalogCodeMessage;
 import com.elasticpath.commons.exception.EpBindException;
+import com.elasticpath.commons.exception.EpInvalidCatalogCodeException;
 import com.elasticpath.commons.exception.EpInvalidGuidBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.commons.exception.EpProductInUseException;
@@ -190,12 +193,12 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 
 	/**
 	 * Validates one row.
-	 * @param nextLine the row to validate
+	 * @param row the row to validate
 	 * @param rowNumber the row number being validated
 	 * @param importBadRows the list of bad rows to which this row should be added if it's bad
 	 * @return true if the row is valid
 	 */
-	boolean validateOneRow(final String[] nextLine, final int rowNumber, final List<ImportBadRow> importBadRows) {
+	boolean validateOneRow(final String[] row, final int rowNumber, final List<ImportBadRow> importBadRows) {
 		final List<ImportFault> faults = new ArrayList<>();
 		Entity entity = null;
 
@@ -211,51 +214,110 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 			final ImportField importField = entry.getKey();
 			final Integer colNum = entry.getValue();
 			try {
-				checkField(nextLine[colNum], persistenceObject, importField);
+				checkField(row[colNum], persistenceObject, importField);
+
+			} catch (EpInvalidCatalogCodeException e) {
+				for (InvalidCatalogCodeMessage message : e.getErrorReasonList()) {
+					final ImportFault importFault = createImportFault(
+							ImportFault.ERROR,
+							message.getMessageCode(),
+							createImportFaultArgs(importField, colNum, row, message));
+					faults.add(importFault);
+				}
 			} catch (EpInvalidGuidBindException e) {
-				final ImportFault importFault = getImportFaultWarning();
-				importFault.setCode("import.csvFile.badRow.wrongGuid");
-				importFault.setArgs(new Object[] { importField.getName(), importField.getType(), String.valueOf(colNum.intValue()),
-						nextLine[colNum.intValue()] });
+				final ImportFault importFault = createImportFault(
+						ImportFault.WARNING,
+						"import.csvFile.badRow.wrongGuid",
+						createImportFaultArgs(importField, colNum, row));
 				faults.add(importFault);
 			} catch (EpNonNullBindException e) {
-				final ImportFault importFault = getImportFaultError();
-				importFault.setCode("import.csvFile.badRow.notNull");
-				importFault.setArgs(new Object[] { importField.getName(), importField.getType(), String.valueOf(colNum.intValue()),
-						nextLine[colNum.intValue()] });
+				final ImportFault importFault = createImportFault(
+						ImportFault.ERROR,
+						"import.csvFile.badRow.notNull",
+						createImportFaultArgs(importField, colNum, row));
 				faults.add(importFault);
 			} catch (EpTooLongBindException e) {
-				final ImportFault importFault = getImportFaultError();
-				importFault.setCode("import.csvFile.badRow.tooLong");
-				importFault.setArgs(new Object[] { importField.getName(), importField.getType(), String.valueOf(colNum.intValue()),
-						nextLine[colNum.intValue()] });
+				final ImportFault importFault = createImportFault(
+						ImportFault.ERROR,
+						"import.csvFile.badRow.tooLong",
+						createImportFaultArgs(importField, colNum, row));
 				faults.add(importFault);
 			} catch (EpBindException e) {
-				final ImportFault importFault = getImportFaultError();
-				importFault.setCode("import.csvFile.badRow.bindError");
-				importFault.setArgs(new Object[] { importField.getName(), importField.getType(), String.valueOf(colNum.intValue()),
-						nextLine[colNum.intValue()] });
+				final ImportFault importFault = createImportFault(
+						ImportFault.ERROR,
+						"import.csvFile.badRow.bindError",
+						createImportFaultArgs(importField, colNum, row));
 				faults.add(importFault);
 			} catch (IllegalArgumentException e) {
-				final ImportFault importFault = getImportFaultError();
-				importFault.setCode("import.csvFile.badRow.badValue");
-				importFault.setArgs(new Object[] { importField.getName(), importField.getType(), String.valueOf(colNum.intValue()),
-						nextLine[colNum.intValue()] });
+				final ImportFault importFault = createImportFault(
+						ImportFault.ERROR,
+						"import.csvFile.badRow.badValue",
+						createImportFaultArgs(importField, colNum, row));
 				faults.add(importFault);
 			}
 		}
 
-		validateChangeSetStatus(nextLine, rowNumber, faults, persistenceObject);
+		validateChangeSetStatus(row, rowNumber, faults, persistenceObject);
 
 		if (!faults.isEmpty()) {
 			final ImportBadRow importBadRow = getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			importBadRow.setRowNumber(rowNumber);
-			importBadRow.setRow(nextLine[0]);
+			importBadRow.setRow(row[0]);
 			importBadRow.addImportFaults(faults);
 			importBadRows.add(importBadRow);
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Creates an {@code ImportFault} with the given data.
+	 * @param faultLevel the fault level
+	 * @param faultCode the fault code
+	 * @param faultArgs the fault arguments
+	 * @return the created ImportFault
+	 */
+	protected ImportFault createImportFault(final int faultLevel, final String faultCode, final Object[] faultArgs) {
+		final ImportFault fault = getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
+		fault.setLevel(faultLevel);
+		fault.setCode(faultCode);
+		fault.setArgs(faultArgs);
+		return fault;
+	}
+
+	/**
+	 * Creates a List of {@code Object[]} with the arguments for the ImportFault being processed.
+	 *
+	 * @param importField the <code>ImportField</code>
+	 * @param colNum the column number of the row being processed
+	 * @param row being processed
+	 * @param message a instance of <code>InvalidCatalogCodeMessage</code> containing the parameters with the extra args
+	 * @return list of Object[] with the arguments
+	 */
+	protected Object[] createImportFaultArgs(final ImportField importField, final Integer colNum, final String[] row,
+			final InvalidCatalogCodeMessage message) {
+
+		Object[] args = createImportFaultArgs(importField, colNum, row);
+		List<Object> list = Arrays.asList(args);
+		list.addAll(message.getParameters());
+		return list.toArray();
+	}
+
+	/**
+	 * Creates a List of {@code Object[]} with the arguments for the ImportFault being processed.
+	 *
+	 * @param importField the <code>ImportField</code>
+	 * @param colNum the column number of the row being processed
+	 * @param row being processed
+	 * @return list of Object[] with the arguments
+	 */
+	protected Object[] createImportFaultArgs(final ImportField importField, final Integer colNum, final String[] row) {
+		List<Object> args = new ArrayList<>();
+		args.add(importField.getName());
+		args.add(importField.getType());
+		args.add(String.valueOf(colNum.intValue()));
+		args.add(row[colNum.intValue()]);
+		return args.toArray();
 	}
 
 	/**
@@ -279,9 +341,10 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 			// verify the change set status of the object in case change sets are enabled
 			if (!checkChangeSetStatus(persistenceObject, getRequest().getChangeSetGuid())) {
 				// report error
-				final ImportFault importFault = getImportFaultError();
-				importFault.setCode("import.csvFile.badRow.unavailableForChangeSet");
-				importFault.setArgs(new Object[] { rowNumber, getRequest().getChangeSetGuid() });
+				ImportFault importFault = createImportFault(
+						ImportFault.ERROR,
+						"import.csvFile.badRow.unavailableForChangeSet",
+						new Object[]{rowNumber, getRequest().getChangeSetGuid()});
 				faults.add(importFault);
 			}
 		}
@@ -440,12 +503,12 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 					getPersistenceEngine().setLargeTransaction(true);
 				}
 
-				for (int i = 0; i < rows.size(); i++) {
-					nextLine = rows.get(i);
+			  	for (String[] row : rows) {
+					nextLine = row;
 					rowNumber++;
 					importJobStatusHandler.reportCurrentRow(importJobProcessId, rowNumber);
 					importOneRow(nextLine, session);
-				}
+			  	}
 
 				transaction.commit();
 				postCommitUnitTransactionCommit();
@@ -458,9 +521,17 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 			} catch (Exception e) {
 
 				ImportBadRow badRow = logBadRow(request.getImportSource(), nextLine, rowNumber, startRowNumber, endRowNumber, e);
-				// Tell the sub-class that the commit unit has been rolled back
-				postCommitUnitTransactionRollback();
-
+				if (transaction != null) {
+					try {
+						transaction.rollback();
+					} catch (Exception ee) {
+						// should log and handle errors as normal below.
+						LOG.error("Exception during commit or rollback.", ee);
+					}
+					// Tell the sub-class that the commit unit has been rolled
+					// back
+					postCommitUnitTransactionRollback();
+				}
 				// Forward to the import area end
 				rowNumber = endRowNumber - 1;
 				importJobStatusHandler.reportBadRows(importJobProcessId, badRow);

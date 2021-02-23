@@ -64,7 +64,7 @@ public class CouponAutoApplyRoleTransitionEventHandler implements ScopedEventEnt
 		 * Do not use {@link ShoppingCartRepository#getDefaultShoppingCart()} because of this reason.
 		 * You must pass customer guid explicitly but not reach Resource Operation Context for it.
 		 */
-		return shoppingCartRepository.getShoppingCartForCustomer(customerGuid)
+		return shoppingCartRepository.getShoppingCartForCustomer(customerGuid, storeCode)
 				.flatMapCompletable(shoppingCart -> getCartOrder(shoppingCart)
 						.flatMapCompletable(cartOrder -> {
 							String customerEmailAddress = shoppingCart.getShopper().getCustomer().getEmail();

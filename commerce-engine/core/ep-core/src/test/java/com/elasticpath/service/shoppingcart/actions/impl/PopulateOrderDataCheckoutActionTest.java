@@ -11,11 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -32,6 +32,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.impl.CartItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContextImpl;
 
 public class PopulateOrderDataCheckoutActionTest {
 	@Rule
@@ -49,7 +50,7 @@ public class PopulateOrderDataCheckoutActionTest {
 	private final PromotionRecordContainer promotionRecordContainer = context.mock(PromotionRecordContainer.class);
 
 	private PopulateOrderDataCheckoutAction checkoutAction;
-	private CheckoutActionContextImpl checkoutContext;
+	private PreCaptureCheckoutActionContextImpl checkoutContext;
 
 	@Before
 	public void setUp() throws Exception {
@@ -63,9 +64,6 @@ public class PopulateOrderDataCheckoutActionTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(customer).getGender();
-				will(returnValue('F'));
-
 				allowing(shoppingCart).getShopper();
 				will(returnValue(shopper));
 
@@ -82,9 +80,9 @@ public class PopulateOrderDataCheckoutActionTest {
 
 		final boolean isOrderExchange = false;
 		final boolean awaitExchangeCompletion = false;
-		checkoutContext = new CheckoutActionContextImpl(shoppingCart,
-				taxSnapshot,
-				null, isOrderExchange, awaitExchangeCompletion, exchange, null);
+		checkoutContext = new PreCaptureCheckoutActionContextImpl(shoppingCart,
+														taxSnapshot,
+														null, isOrderExchange, awaitExchangeCompletion, exchange, null);
 		checkoutContext.setOrder(order);
 
 		checkoutAction = new PopulateOrderDataCheckoutAction();
@@ -100,7 +98,6 @@ public class PopulateOrderDataCheckoutActionTest {
 
 		// Then
 		Map<String, String> orderData = order.getFieldValues();
-		assertEquals("Simple properties should be copied into OrderData", "F", orderData.get("gender"));
 		assertEquals("Indexed properties should be copied into OrderData", sku.getGuid(), orderData.get("skuGuid"));
 		assertEquals("Mapped properties should be copied into OrderData", "BAR", orderData.get("foo"));
 	}
@@ -175,7 +172,6 @@ public class PopulateOrderDataCheckoutActionTest {
 
 	private Map<String, String> createSampleOrderDataProperties() {
 		Map<String, String> orderDataProperties = new HashMap<>();
-		orderDataProperties.put("gender", "shoppingCart.shopper.customer.gender");           // Simple Property
 		orderDataProperties.put("skuGuid", "shoppingCart.rootShoppingItems[0].skuGuid");      // Indexed Property
 		orderDataProperties.put("foo", "shoppingCart.shopper.cache.item(FOO)");           // Mapped Property
 

@@ -65,6 +65,15 @@ public interface CartOrderRepository {
 	Observable<String> findCartOrderGuidsByCustomer(String storeCode, String customerGuid);
 
 	/**
+	 * Find cart order GUIDS by account GUID.
+	 *
+	 * @param storeCode    the store code
+	 * @param accountGuid the customer GUID
+	 * @return Observable with the order guids
+	 */
+	Observable<String> findCartOrderGuidsByAccount(String storeCode, String accountGuid);
+
+	/**
 	 * Gets the billing address for the given {@link CartOrder}.
 	 *
 	 * @param cartOrder the cart order

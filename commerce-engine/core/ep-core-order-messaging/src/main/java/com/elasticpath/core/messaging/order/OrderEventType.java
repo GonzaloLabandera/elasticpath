@@ -116,6 +116,38 @@ public class OrderEventType extends AbstractExtensibleEnum<OrderEventType> imple
 	 */
 	public static final OrderEventType ORDER_COMPLETED = new OrderEventType(ORDER_COMPLETED_ORDINAL, "ORDER_COMPLETED");
 
+	/** Ordinal constant for ORDER_ACCEPTED. */
+	public static final int ORDER_ACCEPTED_ORDINAL = 12;
+
+	/**
+	 * Signals that an order has been accepted for fulfilment.
+	 */
+	public static final OrderEventType ORDER_ACCEPTED = new OrderEventType(ORDER_ACCEPTED_ORDINAL, "ORDER_ACCEPTED");
+
+	/** Ordinal constant for ORDER_HOLDS_RESOLVED. */
+	public static final int ORDER_HOLDS_RESOLVED_ORDINAL = 13;
+
+	/**
+	 * Signals that an order has been resolved from hold.
+	 */
+	public static final OrderEventType ORDER_HOLDS_RESOLVED = new OrderEventType(ORDER_HOLDS_RESOLVED_ORDINAL, "ORDER_HOLDS_RESOLVED");
+
+	/** Ordinal constant for ORDER_FAILED. */
+	public static final int ORDER_FAILED_ORDINAL = 14;
+
+	/**
+	 * Signals that an order has failed to process successfully during checkout.
+	 */
+	public static final OrderEventType ORDER_FAILED = new OrderEventType(ORDER_FAILED_ORDINAL, "ORDER_FAILED");
+
+	/** Ordinal constant for ORDER_ON_HOLD. */
+	public static final int ORDER_ON_HOLD_ORDINAL = 15;
+
+	/**
+	 * Signals that there are orders that are on hold awaiting resolution.
+	 */
+	public static final OrderEventType ORDER_ON_HOLD = new OrderEventType(ORDER_ON_HOLD_ORDINAL, "ORDER_ON_HOLD");
+
 	/**
 	 * Create an enum value for a enum type. Name is case-insensitive and will be stored in upper-case.
 	 * 

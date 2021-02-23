@@ -3,6 +3,7 @@
  */
 package com.elasticpath.service.order.impl;
 
+import static com.elasticpath.commons.constants.ContextIdNames.ACCOUNT_SEARCH_CRITERIA;
 import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SEARCH_CRITERIA;
 import static com.elasticpath.commons.constants.ContextIdNames.EVENT_ORIGINATOR;
 import static com.elasticpath.commons.constants.ContextIdNames.EVENT_ORIGINATOR_HELPER;
@@ -10,7 +11,6 @@ import static com.elasticpath.commons.constants.ContextIdNames.FETCH_GROUP_LOAD_
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER;
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER_CRITERION;
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER_EVENT_HELPER;
-import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_API_CLEANUP_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_API_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SEARCH_CRITERIA;
 import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SERVICE;
@@ -45,6 +45,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,13 +55,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import org.apache.openjpa.lib.jdbc.ReportingSQLException;
-import org.apache.openjpa.persistence.PersistenceException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
+import org.apache.openjpa.lib.jdbc.ReportingSQLException;
+import org.apache.openjpa.persistence.PersistenceException;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -111,8 +114,8 @@ import com.elasticpath.service.order.CompleteShipmentFailedException;
 import com.elasticpath.service.order.IncorrectRefundAmountException;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.order.ReleaseShipmentFailedException;
-import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentApiService;
+import com.elasticpath.service.search.query.AccountSearchCriteria;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
 import com.elasticpath.service.store.StoreService;
@@ -129,6 +132,7 @@ import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
 public class OrderServiceImplTest {
 
 	private static final String GUID_VALUE = "guidValue";
+	private static final String ORDERS_SHOULD_COME_FROM_RETRIVIAL_CALL_STRING = "The orders should come from the retrieve call";
 
 	public static final Currency CAD = Currency.getInstance("CAD");
 	private static final String SHIPMENT_NUMBER = "1-1";
@@ -153,8 +157,6 @@ public class OrderServiceImplTest {
 	private TimeService mockTimeService;
 	@Mock
 	private OrderPaymentApiService mockOrderPaymentApiService;
-	@Mock
-	private OrderPaymentApiCleanupService mockPaymentInstrumentCleanupService;
 	@Mock
 	private StoreService mockStoreService;
 	@Mock
@@ -194,8 +196,6 @@ public class OrderServiceImplTest {
 
 		when(beanFactory.getSingletonBean(ORDER_PAYMENT_API_SERVICE, OrderPaymentApiService.class))
 				.thenReturn(mockOrderPaymentApiService);
-		when(beanFactory.getSingletonBean(ORDER_PAYMENT_API_CLEANUP_SERVICE, OrderPaymentApiCleanupService.class))
-				.thenReturn(mockPaymentInstrumentCleanupService);
 
 		elasticPath.setBeanFactory(beanFactory);
 		when(beanFactory.getBeanImplClass(ORDER)).thenAnswer(answer -> OrderImpl.class);
@@ -316,7 +316,7 @@ public class OrderServiceImplTest {
 		when(persistenceEngine.retrieve(anyString(), any(Object[].class), anyInt(), anyInt())).thenReturn(singletonList(order));
 
 		assertThat(orderServiceImpl.findOrderByCustomerGuid(GUID_VALUE, true))
-				.as("The orders should come from the retrieve call")
+				.as(ORDERS_SHOULD_COME_FROM_RETRIVIAL_CALL_STRING)
 				.isEqualTo(singletonList(order));
 		assertStoreIsPopulated(store, order);
 		assertThat(customerSearchCriteria.getGuid())
@@ -333,9 +333,43 @@ public class OrderServiceImplTest {
 				.isTrue();
 
 		assertThat(orderServiceImpl.findOrderByCustomerGuid(GUID_VALUE, false))
-				.as("The orders should come from the retrieve call")
+				.as(ORDERS_SHOULD_COME_FROM_RETRIVIAL_CALL_STRING)
 				.isEqualTo(singletonList(order));
 		assertThat(customerSearchCriteria.isFuzzySearchDisabled())
+				.as("The customer search criteria should enable fuzzy match")
+				.isFalse();
+	}
+
+	@Test
+	public void testFindOrderByAccountGuid() {
+		// expectations
+		OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
+		when(beanFactory.getPrototypeBean(ORDER_SEARCH_CRITERIA, OrderSearchCriteria.class)).thenReturn(orderSearchCriteria);
+		AccountSearchCriteria accountSearchCriteria = new AccountSearchCriteria();
+		when(beanFactory.getPrototypeBean(ACCOUNT_SEARCH_CRITERIA, AccountSearchCriteria.class)).thenReturn(accountSearchCriteria);
+		when(persistenceEngine.retrieve(anyString(), any(Object[].class), anyInt(), anyInt())).thenReturn(singletonList(order));
+
+		assertThat(orderServiceImpl.findOrderByAccountGuid(GUID_VALUE, true))
+				.as(ORDERS_SHOULD_COME_FROM_RETRIVIAL_CALL_STRING)
+				.isEqualTo(singletonList(order));
+		assertStoreIsPopulated(store, order);
+		assertThat(accountSearchCriteria.getGuid())
+				.as("The account search criteria should include the guid")
+				.isEqualTo(GUID_VALUE);
+		assertThat(orderSearchCriteria.getAccountSearchCriteria())
+				.as("The order criteria should include the customer criteria")
+				.isEqualTo(accountSearchCriteria);
+		assertThat(orderSearchCriteria.getExcludedOrderStatus())
+				.as("The order criteria should exclude failed orders")
+				.isEqualTo(FAILED);
+		assertThat(accountSearchCriteria.isFuzzySearchDisabled())
+				.as("The account search criteria should disable fuzzy match")
+				.isTrue();
+
+		assertThat(orderServiceImpl.findOrderByAccountGuid(GUID_VALUE, false))
+				.as(ORDERS_SHOULD_COME_FROM_RETRIVIAL_CALL_STRING)
+				.isEqualTo(singletonList(order));
+		assertThat(accountSearchCriteria.isFuzzySearchDisabled())
 				.as("The customer search criteria should enable fuzzy match")
 				.isFalse();
 	}
@@ -347,7 +381,7 @@ public class OrderServiceImplTest {
 
 		final boolean retrieveFullInfo = true;
 		assertThat(orderServiceImpl.findOrdersByCustomerGuidAndStoreCode(GUID_VALUE, store.getCode(), retrieveFullInfo))
-				.as("The orders should come from the retrieve call")
+				.as(ORDERS_SHOULD_COME_FROM_RETRIVIAL_CALL_STRING)
 				.isEqualTo(singletonList(order));
 		assertStoreIsPopulated(store, order);
 		verify(persistenceEngine).retrieveByNamedQuery("ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE", GUID_VALUE, store.getCode());
@@ -704,16 +738,6 @@ public class OrderServiceImplTest {
 		assertThatThrownBy(() -> orderServiceImpl.cancelOrder(order)).isInstanceOf(EpServiceException.class);
 	}
 
-	@Test
-	public void verifyHoldOrderSendsEventMessage() {
-		ignorePersistence();
-		EventMessage eventMessage = mock(EventMessage.class);
-		when(eventMessageFactory.createEventMessage(OrderEventType.ORDER_HELD, ORDER_NUMBER, null)).thenReturn(eventMessage);
-
-		orderServiceImpl.holdOrder(order);
-		verify(eventMessagePublisher).publish(eventMessage);
-	}
-
 	/**
 	 * Test that when a capture fails we deal with it nicely.
 	 */
@@ -1063,6 +1087,22 @@ public class OrderServiceImplTest {
 		verify(mockOrderPaymentApiService, never()).shipmentCompleted(physicalShipment);
 	}
 
+	@Test(expected = EpServiceException.class)
+	public void testNullGetAccountGuidAssociatedWithOrderNumber() {
+		orderServiceImpl.getAccountGuidAssociatedWithOrderNumber(null);
+	}
+
+	@Test
+	public void testGetAccountGuidAssociatedWithOrderNumber() {
+		when(persistenceEngine.retrieveByNamedQuery(anyString(), anyString())).thenReturn(emptyList());
+		assertThat(orderServiceImpl.getAccountGuidAssociatedWithOrderNumber(ORDER_NUMBER)).isEqualTo(null);
+
+		when(persistenceEngine.retrieveByNamedQuery(anyString(), anyString())).thenReturn(Collections.nCopies(2, GUID_VALUE));
+		assertThatThrownBy(() -> orderServiceImpl.getAccountGuidAssociatedWithOrderNumber(ORDER_NUMBER)).isInstanceOf(EpServiceException.class);
+
+		when(persistenceEngine.retrieveByNamedQuery(anyString(), anyString())).thenReturn(singletonList(GUID_VALUE));
+		assertThat(orderServiceImpl.getAccountGuidAssociatedWithOrderNumber(ORDER_NUMBER)).isEqualTo(GUID_VALUE);
+	}
 
 	@Test
 	public void verifyReleaseDoesntCapturePaymentsForElectronicItemsWhenOrderIsNotOnHold() {
@@ -1078,16 +1118,6 @@ public class OrderServiceImplTest {
 
 		// Then there should be no call to orderPaymentApiService.shipmentCompleted
 		verify(mockOrderPaymentApiService, never()).shipmentCompleted(electronicShipment);
-	}
-
-	@Test
-	public void deleteOrders() {
-		final List<Long> orderUidList = new ArrayList<>();
-		orderUidList.add(2L);
-
-		orderServiceImpl.deleteOrders(orderUidList);
-
-		verify(mockPaymentInstrumentCleanupService).removeByOrderUidList(orderUidList);
 	}
 
 	@Test(expected = DuplicateOrderException.class)

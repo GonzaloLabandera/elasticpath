@@ -312,7 +312,7 @@ public class FileFilterer {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, getFileEncoding()));
 			 BufferedOutputStream tempOut = new BufferedOutputStream(new FileOutputStream(tempFile))) {
 
-			LOG.info("writing to temp file: " + tempFile.getAbsolutePath());
+			LOG.debug("writing to temp file: " + tempFile.getAbsolutePath());
 			filter(reader, tempOut, lineFilterer);
 
 			if (DpResourceUtils.isNotStandardIn(input)) {

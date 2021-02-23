@@ -8,9 +8,11 @@ import java.util.Map;
 
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
+import net.sf.ehcache.CacheManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,6 +26,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.impl.MessageSourceCacheImpl;
 import com.elasticpath.domain.cmuser.CmUser;
+import com.elasticpath.domain.impl.ElasticPathImpl;
 import com.elasticpath.domain.testcontext.ShoppingTestData;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -31,6 +34,8 @@ import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.rules.impl.DBCompilingRuleEngineImpl;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
+import com.elasticpath.settings.refreshstrategy.impl.ApplicationLifetimeRefreshStrategyImpl;
+import com.elasticpath.settings.refreshstrategy.impl.IntervalRefreshStrategyImpl;
 import com.elasticpath.test.common.exception.TestApplicationException;
 import com.elasticpath.test.persister.testscenarios.AbstractScenario;
 
@@ -227,5 +232,38 @@ public class TestApplicationContext {
 
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+	}
+
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	public void resetAll() {
+		LOG.info(">>>>>>>>>>>> Reseting test configuration ....");
+
+		LOG.debug("Reseting all Ehcache caches... ");
+		Map<String, EhCacheManagerFactoryBean> ehCacheManagerBeans = appCtx.getBeansOfType(EhCacheManagerFactoryBean.class);
+
+		LOG.info("Found " + ehCacheManagerBeans.size() + " Ehcache managers");
+		ehCacheManagerBeans.values().forEach(
+				ehCacheManagerBean -> {
+					CacheManager cacheManager = ehCacheManagerBean.getObject();
+					cacheManager.clearAll();
+				}
+		);
+
+		LOG.debug("Reseting ApplicationLifetimeRefreshStrategyImpl cache... ");
+		ApplicationLifetimeRefreshStrategyImpl.clearCache();
+
+		LOG.debug("Reseting IntervalRefreshStrategyImpl cache... ");
+		IntervalRefreshStrategyImpl.clearCache();
+
+		LOG.debug("Reseting ShoppingTestData.. ");
+		ShoppingTestData.reset();
+
+		LOG.debug("Reseting ElasticPathImpl.. ");
+
+		//do not extract ((ElasticPathImpl) ElasticPathImpl.getInstance()) into a var - it will break the tests
+		((ElasticPathImpl) ElasticPathImpl.getInstance()).destroy();
+		((ElasticPathImpl) ElasticPathImpl.getInstance()).setBeanFactory(getBeanFactory());
+
+		LOG.info(">>>>>>>>>>>> Reseting test configuration - DONE");
 	}
 }

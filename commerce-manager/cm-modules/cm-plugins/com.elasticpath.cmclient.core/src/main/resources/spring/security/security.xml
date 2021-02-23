@@ -15,11 +15,10 @@
 
 	<bean id="cmAuthenticationManager" class="com.elasticpath.cmclient.core.security.CmAuthenticationManager">
 		<property name="authenticationManager" ref="authenticationManager"/>
-	</bean>
-
-	<bean id="cmSpringSecurityListener" class="com.elasticpath.cmclient.core.security.SpringSecurityListener">
 		<property name="cmUserService" ref="cmUserService"/>
 	</bean>
+
+	<bean id="cmSpringSecurityListener" class="com.elasticpath.cmclient.core.security.SpringSecurityListener"/>
 
 	<bean id="accessDeniedHandler" class="org.springframework.security.web.access.AccessDeniedHandlerImpl"/>
 

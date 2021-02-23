@@ -183,11 +183,11 @@
 		<property name="targetMethod" value="execute"/>
 		<property name="concurrent" value="false"/>
 	</bean>
-    
-     <!-- 
-        Job to purge anonymous customers. This will remove all anonymous customer records that have a last modified date older 
+
+     <!--
+        Job to purge anonymous customers. This will remove all anonymous customer records that have a last modified date older
         than the number of days specified by a system setting 'COMMERCE/STORE/ANONYMOUSCUSTOMERCLEANUP/maxHistory'.
-        
+
         The purge will be done in batches, specified by a system setting '"COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize'
     -->
     <bean id="cleanupAnonymousCustomerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
@@ -209,25 +209,11 @@
         It will cap how many orders it deletes in 1 pass.  That is defined in the system setting
         'COMMERCE/SYSTEM/FAILEDORDERCLEANUP/batchSize'
     -->
-    <bean id="cleanupFailedOrdersJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <property name="targetObject" ref="cleanupFailedOrdersJobTarget"/>
-        <property name="targetMethod" value="removeFailedOrders"/>
-        <property name="concurrent" value="false"/>
-    </bean>
-
-	<bean id="cleanupFailedOrdersJobTargetTemplate" class="com.elasticpath.domain.order.jobs.impl.FailedOrdersCleanupJob" abstract="true">
-		<property name="timeService" ref="timeService"/>
-		<property name="orderService" ref="orderService" />
-		<property name="batchSizeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/FAILEDORDERCLEANUP/batchSize" />
-		</property>
-		<property name="maxDaysHistoryProvider">
-			<settings:setting path="COMMERCE/SYSTEM/FAILEDORDERCLEANUP/maxHistory" />
-		</property>
+	<bean id="cleanupFailedOrdersJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="expiredFailedOrdersCleanupJob"/>
+		<property name="targetMethod" value="execute"/>
+		<property name="concurrent" value="false"/>
 	</bean>
-
-	<bean id="cleanupFailedOrdersJobTarget" parent="cleanupFailedOrdersJobTargetTemplate"/>
-
     <bean id="cleanupFailedOrdersTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="cleanupFailedOrdersJob" />
         <!-- run every hour at 45 minutes past the hour  -->
@@ -281,6 +267,46 @@
 		<property name="targetObject" ref="dataPointRevokedConsentsJobProcessor"/>
 		<property name="targetMethod" value="process"/>
 		<property name="concurrent" value="false"/>
+	</bean>
+
+	<!--OrderHoldNotificationJob definition-->
+	<bean id="orderHoldNotificationJobTemplate" class="com.elasticpath.domain.order.jobs.impl.OrderHoldNotificationJobImpl" abstract="true">
+		<property name="orderService" ref="orderService"/>
+		<property name="settingsReader" ref="settingsReader"/>
+	</bean>
+
+	<bean id="orderHoldNotificationJobTarget" parent="orderHoldNotificationJobTemplate"/>
+
+	<bean id="orderHoldNotificationJobProcessorTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="orderHoldNotificationJob"/>
+		<property name="cronExpression">
+			<bean parent="settingFactoryBean">
+				<property name="path" value="COMMERCE/SYSTEM/ONHOLD/holdNotificationInterval"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="orderHoldNotificationJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="orderHoldNotificationJobTarget"/>
+		<property name="targetMethod" value="publishHoldNotificationEvent"/>
+		<property name="concurrent" value="false"/>
+	</bean>
+
+	<!--
+	Job to relay outbox records to JMS. This will retrieve events from the OutboxMessage table, send them to JMS and remove them from the table.
+	It will cap how many records it processes in each run.
+	-->
+	<bean id="relayOutboxMessagesJobInvoker" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="relayOutboxMessagesJob"/>
+		<property name="targetMethod" value="execute"/>
+		<property name="concurrent" value="false"/>
+	</bean>
+
+	<bean id="relayOutboxMessagesTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="relayOutboxMessagesJobInvoker" />
+		<!-- run every second  -->
+		<property name="cronExpression" value="* * * * * ?"/>
+		<property name="startDelay" value="30000"/>
 	</bean>
 
 </beans>

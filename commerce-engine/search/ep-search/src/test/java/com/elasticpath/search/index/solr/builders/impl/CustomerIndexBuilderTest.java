@@ -4,9 +4,7 @@
 package com.elasticpath.search.index.solr.builders.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -68,28 +66,6 @@ public class CustomerIndexBuilderTest {
 	@Test
 	public void testGetName() {
 		assertThat(this.customerIndexBuilder.getName()).isNotNull();
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.service.index.impl.CustomerIndexBuildServiceImpl.findAddedOrModifiedUids(Date)'.
-	 */
-	@Test
-	public void testFindAddedOrModifiedUids() {
-		final ArrayList<Long> uidList = new ArrayList<>();
-		when(mockCustomerService.findSearchableUidsByModifiedDate(any(Date.class))).thenReturn(uidList);
-		assertThat(this.customerIndexBuilder.findAddedOrModifiedUids(new Date())).isEqualTo(uidList);
-		verify(mockCustomerService).findSearchableUidsByModifiedDate(any(Date.class));
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.service.index.impl.CustomerIndexBuildServiceImpl.findAllUids()'.
-	 */
-	@Test
-	public void testFindAllUids() {
-		final ArrayList<Long> uidList = new ArrayList<>();
-		when(mockCustomerService.findSearchableUidsByModifiedDate(any(Date.class))).thenReturn(uidList);
-		assertThat(this.customerIndexBuilder.findAddedOrModifiedUids(new Date())).isEqualTo(uidList);
-		verify(mockCustomerService).findSearchableUidsByModifiedDate(any(Date.class));
 	}
 
 	/**

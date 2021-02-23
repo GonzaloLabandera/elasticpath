@@ -16,8 +16,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
 import com.elasticpath.domain.event.OrderEventHelper;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContextImpl;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
 
@@ -80,8 +81,8 @@ public class LogShoppingContextDateOverriddenActionTest {
 	private void createCheckoutContext(final boolean withOverrideTag) {
 		CustomerSessionImpl customerSession = new CustomerSessionImpl();
 		customerSession.setCustomerTagSet(createTagSet(withOverrideTag));
-		CheckoutActionContext checkoutActionContext = new CheckoutActionContextImpl(
-				null, null, customerSession, false, false, null, null
+		PreCaptureCheckoutActionContext checkoutActionContext = new PreCaptureCheckoutActionContextImpl(
+			null, null, customerSession, false, false, null, null
 		);
 		checkoutActionContext.setOrder(order);
 		checkoutContext = new FinalizeCheckoutActionContextImpl(checkoutActionContext);

@@ -141,6 +141,9 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		target.getSupportedCurrencies().addAll(source.getSupportedCurrencies());
 		Collections.sort(target.getSupportedCurrencies(), (object1, object2) -> object1.getCurrencyCode().compareTo(object2.getCurrencyCode()));
 
+		target.setSingleSessionB2CRole(source.getB2CSingleSessionRole());
+		target.setAuthenticatedB2CRole(source.getB2CAuthenticatedRole());
+
 		for (Warehouse warehouse : source.getWarehouses()) {
 			target.getWarehouses().add(warehouse.getCode());
 		}
@@ -201,6 +204,8 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		target.setStoreState(StoreState.valueOf(source.getStoreState()));
 		target.setStoreType(source.getStoreType());
 		target.setDescription(source.getDescription());
+		target.setB2CAuthenticatedRole(source.getAuthenticatedB2CRole());
+		target.setB2CSingleSessionRole(source.getSingleSessionB2CRole());
 
 		Catalog catalog = catalogService.findByCode(source.getCatalogCode());
 

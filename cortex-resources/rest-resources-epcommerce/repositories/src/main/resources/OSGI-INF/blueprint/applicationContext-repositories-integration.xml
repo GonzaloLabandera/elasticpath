@@ -53,7 +53,6 @@
 		<entry key="CP_PREF_CURR" value="preferred-currency"/>
 		<entry key="CP_PHONE" value="phone"/>
 		<entry key="CP_FAX" value="fax"/>
-		<entry key="CP_GENDER" value="gender"/>
 		<entry key="CP_COMPANY" value="company"/>
 		<entry key="CP_DOB" value="date-of-birth"/>
 		<entry key="CP_HTML_EMAIL" value="html-email"/>
@@ -137,6 +136,17 @@
 
 	<bean id="multicartItemListTypeLocationProvider" class="com.elasticpath.service.shoppingcart.impl.MulticartItemListTypeLocationProviderImpl	" >
 		<property name="shoppingCartItemListTypeProvider" ref="shoppingCartItemListTypeProvider"/>
+	</bean>
+
+	<util:map id="accountStatusIdToAccountStatusMap">
+		<entry key="1" value="ACTIVE"/>
+		<entry key="2" value="DISABLED"/>
+		<entry key="4" value="SUSPENDED"/>
+	</util:map>
+
+	<bean id="accountStatusIdToAccountStatusMapHolder"
+		  class="com.elasticpath.rest.resource.integration.epcommerce.repository.accounts.repositories.AccountStatusIdToAccountStatusMapHolderImpl" >
+		<property name="accountStatusIdToAccountStatusMap" ref="accountStatusIdToAccountStatusMap" />
 	</bean>
 
 	<context:component-scan base-package="com.elasticpath.rest" scope-resolver="org.springframework.context.annotation.Jsr330ScopeMetadataResolver"/>

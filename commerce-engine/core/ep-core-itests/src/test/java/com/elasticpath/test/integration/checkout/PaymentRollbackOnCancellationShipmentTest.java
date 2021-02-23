@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -20,7 +21,6 @@ import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.builder.shopper.ShoppingContext;
 import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderStatus;
@@ -39,6 +39,7 @@ import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
+import com.elasticpath.test.util.CheckoutHelper;
 
 /**
  * Test payment transaction rollbacks on a failed cancellation shipment.
@@ -78,6 +79,8 @@ public class PaymentRollbackOnCancellationShipmentTest extends BasicSpringContex
 	@Autowired
 	private OrderPaymentService orderPaymentService;
 
+	private CheckoutHelper checkoutHelper;
+
 	/**
 	 * Set up common elements of the test.
 	 */
@@ -97,6 +100,8 @@ public class PaymentRollbackOnCancellationShipmentTest extends BasicSpringContex
 
 		checkoutTestCartBuilder.withScenario(scenario)
 				.withCustomerSession(shoppingContext.getCustomerSession());
+
+		checkoutHelper = new CheckoutHelper(getTac());
 	}
 
 	/**
@@ -110,10 +115,9 @@ public class PaymentRollbackOnCancellationShipmentTest extends BasicSpringContex
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults results = checkoutService.checkout(
+		Order order = checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(
 				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
 
-		Order order = results.getOrder();
 		try {
 			completePhysicalShipmentsForOrder(order);
 			fail("The finalize shipment capability should have thrown an exception.");

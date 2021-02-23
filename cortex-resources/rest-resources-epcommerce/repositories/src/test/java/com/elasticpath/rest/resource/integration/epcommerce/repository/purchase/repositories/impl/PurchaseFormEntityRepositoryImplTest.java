@@ -97,6 +97,15 @@ public class PurchaseFormEntityRepositoryImplTest {
 	}
 
 	@Test
+	public void createPurchaseWithFailure3() {
+		when(resourceOperationContext.getResourceIdentifier()).thenReturn(Optional.empty());
+
+		entityRepository.submit(null, SCOPE)
+				.test()
+				.assertError(ResourceOperationFailure.serverError(PurchaseEntityRepositoryImpl.NOT_PURCHASABLE));
+	}
+
+	@Test
 	public void createPurchaseWithSuccess() {
 		PurchaseFormEntity entity = performCreateOperationSetupWhere(false);
 

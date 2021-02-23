@@ -9,11 +9,14 @@ import static java.util.Collections.singletonList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.google.common.collect.ImmutableMap;
 import cucumber.api.DataTable;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
@@ -38,6 +41,9 @@ import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutService;
+import com.elasticpath.service.shoppingcart.actions.impl.PostCaptureCheckoutActionContextImpl;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.persister.OrderTestPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
@@ -82,6 +88,9 @@ public class ShoppingCartStepDefinitionsHelper {
 	private CheckoutService checkoutService;
 
 	@Autowired
+	private PostCaptureCheckoutService postCaptureCheckoutService;
+
+	@Autowired
 	private ShoppingContextBuilder shoppingContextBuilder;
 
 	@Autowired
@@ -92,6 +101,7 @@ public class ShoppingCartStepDefinitionsHelper {
 
 	@Autowired
 	private TaxSnapshotService taxSnapshotService;
+
 
 	/**
 	 * Retrieves the shopping cart of the test context.
@@ -217,10 +227,26 @@ public class ShoppingCartStepDefinitionsHelper {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		final CheckoutResults checkoutResults = checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
-		orderHolder.set(checkoutResults.getOrder());
+		final Order order = checkout(shoppingCart, shoppingContext, taxSnapshot);
+		orderHolder.set(order);
 
 		shoppingCart.clearItems();
+	}
+
+	/**
+	 * Checks out an order from the shopping cart.
+	 *
+	 * @param shoppingCart    the shopping cart
+	 * @param shoppingContext the shopping context
+	 * @param taxSnapshot     the shopping cart tax snapshot
+	 * @return the order.
+	 */
+	private Order checkout(final ShoppingCart shoppingCart, final ShoppingContext shoppingContext, final ShoppingCartTaxSnapshot taxSnapshot) {
+		final CheckoutResults checkoutResults = checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+		final Order order = checkoutResults.getOrder();
+		final PostCaptureCheckoutActionContext postCaptureCheckoutActionContext = new PostCaptureCheckoutActionContextImpl(order);
+		postCaptureCheckoutService.completeCheckout(postCaptureCheckoutActionContext);
+		return order;
 	}
 
 	private List<ShoppingItem> addShoppingItems(final ShoppingCart shoppingCart, final List<ShoppingItemDto> itemDtos) {

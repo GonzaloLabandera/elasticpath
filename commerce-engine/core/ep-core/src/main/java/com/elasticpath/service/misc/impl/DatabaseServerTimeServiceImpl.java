@@ -54,12 +54,12 @@ public class DatabaseServerTimeServiceImpl implements TimeService {
 	 */
 	protected Date executeTimeQuery() {
 		final PersistenceSession session = getPersistenceEngine().getPersistenceSession();
-		final Query<Date> query = session.createSQLQuery(TIME_RETRIEVE_QUERY);
+		final Query<Date> query = session.createSQLQuery(getTimeRetrieveQuery());
 
 		final List<Date> results = query.list();
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Got " + results.size() + " rows for time query: " + TIME_RETRIEVE_QUERY);
+			LOG.debug("Got " + results.size() + " rows for time query: " + getTimeRetrieveQuery());
 		}
 
 		if (results.isEmpty()) {
@@ -76,5 +76,9 @@ public class DatabaseServerTimeServiceImpl implements TimeService {
 
 	public void setPersistenceEngine(final PersistenceEngine persistenceEngine) {
 		this.persistenceEngine = persistenceEngine;
+	}
+
+	protected String getTimeRetrieveQuery() {
+		return TIME_RETRIEVE_QUERY;
 	}
 }

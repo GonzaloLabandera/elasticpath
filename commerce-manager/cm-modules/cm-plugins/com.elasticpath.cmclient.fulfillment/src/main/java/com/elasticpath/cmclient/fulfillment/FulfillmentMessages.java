@@ -58,12 +58,6 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ProfileRegistrationSection_Yes;
 
-	public String ProfileRegistrationSection_Male;
-
-	public String ProfileRegistrationSection_Female;
-
-	public String ProfileRegistrationSection_Gender_Not_Available;
-
 	public String ProfileRegistrationSection_TypeRegistered;
 
 	public String ProfileRegistrationSection_TypeAccount;
@@ -79,6 +73,8 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String CustomerDetailsStatus_Active;
 
 	public String CustomerDetailsStatus_Disabled;
+
+	public String CustomerDetailsStatus_Suspended;
 
 	public String CustomerDetailsStatus_Default;
 
@@ -287,8 +283,6 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String ProfileRegistrationSection_CurrencyPref;
 
 	public String ProfileRegistrationSection_BirthDate;
-
-	public String ProfileRegistrationSection_Gender;
 
 	public String ProfileRegistrationSection_RecHttpMail;
 
@@ -1274,7 +1268,7 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String ReAuthWizard_OriginalPaymentSource;
 
-	public String ReAuthWizard_Error_Reason;
+	public String ReAuthWizard_DecreaseAmountError_Message;
 
 	public String ReAuthWizard_AdviceOnError_Note;
 
@@ -1283,10 +1277,6 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String ReAuthWizard_GatewayError_Text;
 
 	public String ReAuthWizard_Successful_SectionTitle;
-
-	public String ReAuthWizard_Failed_SectionTitle;
-
-	public String ReAuthWizard_Successful_Message;
 
 	// ----------------------------------------------------
 	// PaymentSummaryControl
@@ -1569,6 +1559,38 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String AccountChildAccounts_ColumnStatusDisabled;
 
 	public String AccountChildAccounts_ColumnStatusPendingApproval;
+
+	public String OrderHoldPage_Title;
+
+	public String OrderHoldPage_Form_Title;
+
+	public String OrderHoldView_Button;
+
+	public String OrderHoldDialog_DialogLabelComment;
+
+	public String OrderHoldDialog_ViewCommentMessage;
+
+	public String OrderHoldDialog_ViewDialogWindowTitle;
+
+	public String OrderHoldList_MarkResolvedButton;
+
+	public String OrderHoldList_MarkUnresolvableButton;
+
+	public String OrderHoldList_ViewButton;
+
+	public String OrderHoldDialog_ResolveHoldWindowTitle;
+
+	public String OrderHoldDialog_ResolveHoldMessage;
+
+	public String OrderHoldDialog_UnresolvableHoldWindowTitle;
+
+	public String OrderHoldDialog_UnresolvableHoldMessage;
+
+	public String OrderHoldTable_RuleColumn;
+
+	public String OrderHoldTable_StatusColumn;
+
+	public String OrderHoldTable_ResolvedByColumn;
 
 	/**
 	 * Build string for amount and currency displaying.

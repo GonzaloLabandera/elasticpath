@@ -443,13 +443,13 @@ public class ChargeProcessorImplTest extends AbstractProcessorImplTestBase {
 		assertThat(response.getEvents())
 				.extracting(PaymentEvent::getAmount)
 				.extracting(MoneyDTO::getAmount)
-				.containsExactly(TEN, TEN, TEN);
+				.containsExactly(TEN, TEN, TEN, TEN);
 		assertThat(response.getEvents())
 				.extracting(PaymentEvent::getPaymentType)
-				.containsExactly(CANCEL_RESERVE, RESERVE, CHARGE);
+				.containsExactly(CHARGE, CANCEL_RESERVE, RESERVE, CHARGE);
 		assertThat(response.getEvents())
 				.extracting(PaymentEvent::getPaymentStatus)
-				.containsExactly(APPROVED, APPROVED, FAILED);
+				.containsExactly(FAILED, APPROVED, APPROVED, FAILED);
 	}
 
 	@Test

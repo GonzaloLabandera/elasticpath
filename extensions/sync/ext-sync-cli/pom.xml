@@ -12,9 +12,6 @@
 	<packaging>pom</packaging>
 
 	<name>Extension Data Sync Tool CLI</name>
-	<properties>
-		<ep.spring.profile>non-xa</ep.spring.profile>
-	</properties>
 
 	<dependencies>
 		<dependency>

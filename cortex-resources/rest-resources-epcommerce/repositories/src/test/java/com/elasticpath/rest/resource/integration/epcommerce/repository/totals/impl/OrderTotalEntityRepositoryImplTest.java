@@ -27,7 +27,7 @@ import com.elasticpath.rest.definition.carts.LineItemsIdentifier;
 import com.elasticpath.rest.definition.totals.CartLineItemTotalIdentifier;
 import com.elasticpath.rest.definition.totals.TotalEntity;
 import com.elasticpath.rest.id.type.StringIdentifier;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.TotalsCalculator;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.CartTotalsCalculator;
 
 /**
  * Test for {@link OrderTotalEntityRepositoryImpl}.
@@ -41,7 +41,7 @@ public class OrderTotalEntityRepositoryImplTest {
 	private static final Money TEN_CAD = Money.valueOf(BigDecimal.TEN, Currency.getInstance("CAD"));
 
 	@Mock
-	private TotalsCalculator totalsCalculator;
+	private CartTotalsCalculator cartTotalsCalculator;
 
 	@Mock
 	private ConversionService conversionService;
@@ -52,7 +52,7 @@ public class OrderTotalEntityRepositoryImplTest {
 	@Test
 	public void shouldGetTotal() {
 		TotalEntity totalEntity = createTotalEntity();
-		when(totalsCalculator.calculateTotalForLineItem(SCOPE, CART_ID, LINE_ITEM_1_ID)).thenReturn(Single.just(TEN_CAD));
+		when(cartTotalsCalculator.calculateTotalForShoppingItem(SCOPE, CART_ID, LINE_ITEM_1_ID)).thenReturn(Single.just(TEN_CAD));
 		when(conversionService.convert(TEN_CAD, TotalEntity.class)).thenReturn(totalEntity);
 
 		cartLineItemTotalEntityRepository.findOne(createCartLineItemTotalIdentifier())
@@ -63,7 +63,7 @@ public class OrderTotalEntityRepositoryImplTest {
 
 	@Test
 	public void shouldNotGetTotal() {
-		when(totalsCalculator.calculateTotalForLineItem(SCOPE, CART_ID, LINE_ITEM_1_ID))
+		when(cartTotalsCalculator.calculateTotalForShoppingItem(SCOPE, CART_ID, LINE_ITEM_1_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.badRequestBody()));
 		cartLineItemTotalEntityRepository.findOne(createCartLineItemTotalIdentifier())
 				.test()

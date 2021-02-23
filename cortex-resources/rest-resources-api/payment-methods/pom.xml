@@ -33,6 +33,11 @@
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-addresses-api</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-accounts-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

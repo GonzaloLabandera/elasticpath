@@ -30,7 +30,7 @@ public class OracleInsertSetGenerator extends InsertSetGenerator {
 	 */
 	@Override
 	public int getPriority() {
-		return super.getPriority() + 1;
+		return super.getPriority() + 2;
 	}
 
 	@Override
@@ -45,16 +45,19 @@ public class OracleInsertSetGenerator extends InsertSetGenerator {
 
 			final ArrayList<Sql> result = new ArrayList<>();
 			int index = 0;
+			int total = 0;
 			for (InsertStatement sttmnt : statement.getStatements()) {
 				index++;
+				total++;
 				generateOracleHeader(sql, statement, database);
 				myGenerator.generateValues(sql, sttmnt, database);
 				if (index > statement.getBatchThreshold()) {
 					result.add(completeOracleStatement(statement, sql));
 
 					index = 0;
-					sql = new StringBuffer("INSERT ALL ");
-					generateOracleHeader(sql, statement, database);
+					sql = total == statement.getStatements().size()
+							? new StringBuffer()
+							: new StringBuffer("INSERT ALL ");
 				}
 			}
 			result.add(completeOracleStatement(statement, sql));

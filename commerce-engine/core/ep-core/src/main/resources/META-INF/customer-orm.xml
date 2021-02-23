@@ -106,32 +106,22 @@
         <named-query name="CUSTOMER_SELECT_ALL">
 			<query>
 				SELECT c
-				FROM CustomerImpl c
-			</query>
-        </named-query>
-        <named-query name="CUSTOMER_UIDS_ALL">
-			<query>
-				SELECT c.uidPk
 				FROM CustomerImpl as c
 			</query>
         </named-query>
-        <named-query name="CUSTOMER_UIDS_FILTER_NON_ANONYMOUS">
-        	<query>
-				SELECT c.uidPk
-				FROM CustomerImpl as c
-				WHERE ((c.customerType &lt;&gt; 'SINGLE_SESSION_USER')
-				OR c.uidPk IN (SELECT o.customer.uidPk from OrderImpl o))
-				AND c.uidPk IN (:list)
-			</query>
-        </named-query>
-        <named-query name="SEARCHABLE_CUSTOMER_UIDS_SELECT_BY_MODIFIED_DATE">
+		<named-query name="FIND_UIDS_OF_INDEXABLE_CUSTOMERS">
 			<query>
-				SELECT DISTINCT(c.uidPk)
+				SELECT c.uidPk
 				FROM CustomerImpl c
-				WHERE c.customerType = 'REGISTERED_USER'
-				AND c.lastEditDate &gt;= ?1
+				WHERE c.lastEditDate >= ?1
+				AND (c.customerType = 'ACCOUNT'
+					OR c.customerType = 'REGISTERED_USER'
+					OR (c.customerType = 'SINGLE_SESSION_USER'
+						AND c.uidPk IN (SELECT o.customerUID FROM OrderImpl o)
+					)
+				) ORDER BY c.uidPk ASC
 			</query>
-        </named-query>
+		</named-query>
         <named-query name="CUSTOMER_STATUS_BY_UID">
 			<query>
 				SELECT c.status
@@ -153,6 +143,13 @@
 				SELECT c
 				FROM CustomerImpl c
 				where c.sharedId = ?1
+			</query>
+		</named-query>
+		<named-query name="CUSTOMER_GUID_SELECT_BY_SHAREDID">
+			<query>
+				SELECT c.guid
+				FROM CustomerImpl as c
+				WHERE c.sharedId = ?1
 			</query>
 		</named-query>
 		<named-query name="CUSTOMER_GUID_FIND_BY_SHAREDID_AND_CUSTOMER_TYPE">
@@ -250,7 +247,7 @@
 			WHERE ua.uidPk IN (:list)
 		</query>
 	</named-query>
-	
+
 	<named-query name="USER_ACCOUNT_EXISTS_BY_ACCOUNT_AND_USER">
 		<query>
 			SELECT COUNT(ua.uidPk)

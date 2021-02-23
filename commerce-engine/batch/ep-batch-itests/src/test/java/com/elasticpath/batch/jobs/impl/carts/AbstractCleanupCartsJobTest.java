@@ -377,7 +377,7 @@ public abstract class AbstractCleanupCartsJobTest<ENT> extends DbTestCase {
 		shoppingCartMemento.setShopper(shopper);
 		shoppingCartMemento.setStoreCode(store.getCode());
 		shoppingCartMemento.setLastModifiedDate(new Date());
-		shoppingCartMemento.setDefault(true);
+		shoppingCartMemento.setDefault(false);
 
 		persistCartData(shoppingCartMemento);
 

@@ -15,7 +15,6 @@
 
 	<properties>
 		<data.population.cli.directory>${project.build.directory}/ext-data-population-cli-${project.version}</data.population.cli.directory>
-		<ep.activemq.configUri>broker:(tcp://localhost:61618)?useJmx=true&amp;persistent=false</ep.activemq.configUri>
 	</properties>
 
 	<dependencies>
@@ -42,9 +41,7 @@
 		<profile>
 			<id>create-test-database</id>
 			<activation>
-				<property>
-				<name>!skipAllTests</name>
-			</property>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -147,31 +144,6 @@
 						</configuration>
 					</plugin>
 					<plugin>
-						<groupId>org.apache.activemq.tooling</groupId>
-						<artifactId>activemq-maven-plugin</artifactId>
-						<version>${org.apache.activemq.tooling.version}</version>
-						<executions>
-							<execution>
-								<id>activemq-embedded-tcp</id>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<phase>process-classes</phase>
-								<configuration>
-									<fork>true</fork>
-									<configUri>${ep.activemq.configUri}</configUri>
-								</configuration>
-							</execution>
-							<execution>
-								<id>stop-embedded-tcp</id>
-								<goals>
-									<goal>stop</goal>
-								</goals>
-								<phase>verify</phase>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
 						<!-- We need to run data population as an external process. If run as a maven plugin
 		                     the database is not closed before it is zipped -->
 						<artifactId>maven-antrun-plugin</artifactId>
@@ -196,7 +168,7 @@
 											<os family="windows" />
 										</condition>
 										<exec executable="${shell.executable}" dir="${data.population.cli.directory}" failonerror="true">
-											<env key="PROFILE" value="non-xa"/>
+											<env key="PROFILE" value="disable-domain-events"/>
 											<arg value="${shell.argument}" />
 											<arg value="${shell.script}" />
 											<arg value="--dataDirectory" />

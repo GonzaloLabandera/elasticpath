@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
   logicalFilePath="mobee-demo-data/liquibase-changelog.xml">
 
-	<changeSet id="import-demo-mobee-data" author="elasticpath" context="mobee-data">
+	<changeSet id="import-demo-mobee-data${importexport.test-data.qualifier}" author="elasticpath" context="mobee-data">
 
 		<validCheckSum>ANY</validCheckSum>
 
@@ -482,5 +482,30 @@
 			<column name="CREATED_BY_USER_GUID" value="300"/>
 			<column name="STATE_CODE" value="OPEN"/>
 		</insert>
+	</changeSet>
+	
+	<changeSet id="2020-09-remove-gender-from-mobee-data" author="elasticpath" >
+		<comment>[PB-8390] Remove gender driven PLAs</comment>
+	
+		<delete tableName="TPRICELISTASSIGNMENT">
+			<where>GUID = 'dbdc017a-aa0f-432a-87a9-4d0c3b9ba054'</where>
+		</delete>
+		
+		<delete tableName="TBASEAMOUNT">
+			<where>PRICE_LIST_GUID = '0593e983-b24c-47c5-b7de-5e2b867af04d'</where>
+		</delete>
+
+		<delete tableName="TPRICELIST">
+			<where>GUID = '0593e983-b24c-47c5-b7de-5e2b867af04d'</where>
+		</delete>
+		
+		<delete tableName="TTAGCONDITION">
+			<where>GUID = 'a9a23c5a-e9df-4814-8a56-34af56495154'</where>
+		</delete>
+		
+		<delete tableName="TSELLINGCONTEXTCONDITION">
+			<where>CONDITION_GUID = 'a9a23c5a-e9df-4814-8a56-34af56495154'</where>
+		</delete>
+
 	</changeSet>
 </databaseChangeLog>

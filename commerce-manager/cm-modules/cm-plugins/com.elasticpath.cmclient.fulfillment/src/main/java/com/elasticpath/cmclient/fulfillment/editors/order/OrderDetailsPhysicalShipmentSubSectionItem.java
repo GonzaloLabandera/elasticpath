@@ -946,6 +946,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 		final OrderSku orderSku = getOrderSkuBean();
 
 		copyFromProductSkuToOrderSku(sku, orderSku, selectedPrice); //here we setup the price
+		orderSku.setOrderUidPk(orderShipment.getOrder().getUidPk());
 		orderShipment.addShipmentOrderSku(orderSku);
 		orderShipment.getOrder().setModifiedBy(getEventOriginator());
 		handleQuantityAllocationWhenAddItem(orderSku);

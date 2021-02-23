@@ -30,7 +30,7 @@ import com.elasticpath.tags.service.SelectableTagValueServiceLocator;
 public class SelectableTagValueServiceFacadeTest  {
 	private final Locale locale = Locale.getDefault();
 
-	private TagValueType genderTagValueType;
+	private TagValueType exampleTagValueType;
 	
 	private TagValueType withoutSelectableValuesTagValueType;
 	
@@ -42,8 +42,8 @@ public class SelectableTagValueServiceFacadeTest  {
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	@SuppressWarnings("unchecked")
-	private final SelectableTagValueProvider<SelectableValue<String>> selectableGenderTagValueProvider =
-			context.mock(SelectableTagValueProvider.class, "selectableGenderTagValueService");
+	private final SelectableTagValueProvider<SelectableValue<String>> selectableExampleTagValueProvider =
+			context.mock(SelectableTagValueProvider.class, "selectableExampleTagValueService");
 
 	/**
 	 * Initializing test.
@@ -59,28 +59,28 @@ public class SelectableTagValueServiceFacadeTest  {
 	 */
 	@Test
 	public void testFacadeCanRetreiveValue() {
-		genderTagValueType = context.mock(TagValueType.class, "genderTagValueType");
+		exampleTagValueType = context.mock(TagValueType.class, "exampleTagValueType");
 
-		final SelectableValue<String> male = new SelectableValueImpl<>("M", "Male");
-		final SelectableValue<String> female = new SelectableValueImpl<>("F", "Female");
+		final SelectableValue<String> optionA = new SelectableValueImpl<>("A", "Option A");
+		final SelectableValue<String> optionB = new SelectableValueImpl<>("B", "Option B");
 
-		final Collection<SelectableValue<String>> genders = new ArrayList<>();
-		genders.add(male);
-		genders.add(female);
+		final Collection<SelectableValue<String>> options = new ArrayList<>();
+		options.add(optionA);
+		options.add(optionB);
 
 		context.checking(new Expectations() {
 			{
-				allowing(selectableGenderTagValueProvider).getSelectableValues(locale, genderTagValueType, null);
-				will(returnValue(genders));
+				allowing(selectableExampleTagValueProvider).getSelectableValues(locale, exampleTagValueType, null);
+				will(returnValue(options));
 
-				allowing(selectableTagValueServiceLocator).getSelectableTagValueProvider(genderTagValueType);
-				will(returnValue(selectableGenderTagValueProvider));
+				allowing(selectableTagValueServiceLocator).getSelectableTagValueProvider(exampleTagValueType);
+				will(returnValue(selectableExampleTagValueProvider));
 			}
 		});
 
-		final List<SelectableValue<String>> list = selectableTagValueServiceFacadeImpl.getSelectableValues(genderTagValueType, locale, null);
+		final List<SelectableValue<String>> list = selectableTagValueServiceFacadeImpl.getSelectableValues(exampleTagValueType, locale, null);
 
-		assertEquals("List does not contain expected selectable values", genders, list);
+		assertEquals("List does not contain expected selectable values", options, list);
 	}
 
 	/**

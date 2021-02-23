@@ -5,7 +5,7 @@ package com.elasticpath.tags.service.impl;
 
 /**
  * 
- * Internal retrieve selectable gender values.
+ * Internal retrieve selectable value options.
  *
  */
 public class InternalSelectableStringTagValueProviderImpl extends AbstractInternalSelectableTagValueProvider<String> {

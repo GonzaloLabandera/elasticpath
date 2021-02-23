@@ -150,9 +150,12 @@ public abstract class DbTestCase extends BasicSpringContextTest {
 		Catalog catalog = createCatalog();
 		Locale defaultLocale = Locale.getDefault();
 		Currency defaultCurrency = Currency.getInstance(Locale.CANADA);
+		String registeredRole = "BUYER";
+		String unregisteredRole = "SINGLE_SESSION_BUYER";
 
 		return createStore(country, name, storeType, subCountry, url, timeZone, code,
-				emailSenderName, emailSenderAddress, storeAdminEmailAddress, catalog, defaultLocale, defaultCurrency);
+				emailSenderName, emailSenderAddress, storeAdminEmailAddress, catalog,
+				defaultLocale, defaultCurrency, registeredRole, unregisteredRole);
 	}
 
 	/**
@@ -171,11 +174,14 @@ public abstract class DbTestCase extends BasicSpringContextTest {
 	 * @param catalog The store default catalog.
 	 * @param defaultLocale The default locale.
 	 * @param defaultCurrency The default currency of the store.
+	 * @param role The B2C registered role.
+	 * @param unregisteredRole The B2C unregistered role.
 	 * @return The newly persisted store.
 	 */
 	public Store createStore(final String country, final String name, final StoreType storeType,
-			final String subCountry, final String url, final TimeZone timeZone, final String code, final String emailSenderName, final String emailSenderAddress, final String storeAdminEmailAddress,
-			final Catalog catalog, final Locale defaultLocale, final Currency defaultCurrency) {
+							 final String subCountry, final String url, final TimeZone timeZone, final String code, final String emailSenderName, final String emailSenderAddress, final String storeAdminEmailAddress,
+							 final Catalog catalog, final Locale defaultLocale, final Currency defaultCurrency, final String role,
+							 String unregisteredRole) {
 
 		final Store store = getBeanFactory().getPrototypeBean(ContextIdNames.STORE, Store.class);
 		store.setCountry(country);
@@ -191,6 +197,8 @@ public abstract class DbTestCase extends BasicSpringContextTest {
 		store.setCatalog(catalog);
 		store.setDefaultLocale(defaultLocale);
 		store.setDefaultCurrency(defaultCurrency);
+		store.setB2CAuthenticatedRole(role);
+		store.setB2CSingleSessionRole(unregisteredRole);
 
 		return store;
 	}

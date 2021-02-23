@@ -19,6 +19,19 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 public interface OrderSkuFactory {
 
 	/**
+	 * Used by {@link OrderFactory} during checkout.
+	 *
+	 * @param cartItems collection of shopping items
+	 * @param taxSnapshot the tax-aware pricing snapshot for the cart containing the shopping items
+	 * @param locale the locale in which the OrderSku is being purchased
+	 * @param orderId the order id
+	 * @return collection of OrderSkus
+	 */
+	Collection<OrderSku> createOrderSkus(Collection<ShoppingItem> cartItems, ShoppingCartTaxSnapshot taxSnapshot, Locale locale, long orderId);
+
+	/**
+	 * Used by {@link com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl} to calculate apportioned leaf items.
+	 *
 	 * @param cartItems collection of shopping items
 	 * @param taxSnapshot the tax-aware pricing snapshot for the cart containing the shopping items
 	 * @param locale the locale in which the OrderSku is being purchased

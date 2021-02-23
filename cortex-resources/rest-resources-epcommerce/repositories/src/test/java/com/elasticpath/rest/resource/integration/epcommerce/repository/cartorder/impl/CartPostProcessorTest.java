@@ -9,16 +9,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
@@ -71,18 +67,6 @@ public class CartPostProcessorTest {
 		cartPostProcessor.postProcessCart(cart, shopper, customerSession);
 
 		verify(cartOrderService).createOrderIfPossible(cart);
-	}
-
-	@Test
-	public void shouldNotCreateIfOrderExistsAndExceptionIsThrown() throws Exception {
-
-		when(cartOrderService.createOrderIfPossible(cart))
-				.thenThrow(new DataIntegrityViolationException("Cart order exists"));
-
-		cartPostProcessor.postProcessCart(cart, shopper, customerSession);
-
-		verify(cart).getGuid();
-
 	}
 
 }

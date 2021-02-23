@@ -96,6 +96,7 @@ public class CustomerSessionTagSetFactoryTest {
 
 		assertNotNull(actual);
 		assertSame(tagSet, actual);
+
 		verify(tagStrategy, times(2)).populate(any(Customer.class), any(TagSet.class));
 		verify(accountTagStrategy, times(2)).populate(any(Customer.class), any(TagSet.class));
 	}

@@ -80,7 +80,7 @@ public class OrderCriterionImplTest {
 	public void testGetOrderSearchCriteria() {
 		final OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
 		Set<String> storeCodes = new HashSet<>();
-		final String emptySearch = "SELECT o FROM OrderImpl AS o";
+		final String emptySearch = "SELECT DISTINCT o FROM OrderImpl AS o";
 
 		CriteriaQuery result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ENTITY);
 		assertThat(result.getQuery()).isEqualTo(emptySearch + " ORDER BY o.orderNumber DESC");
@@ -228,7 +228,7 @@ public class OrderCriterionImplTest {
 	public void testGetSearchCriteriaForOrderNumber() {
 		final OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
 		Set<String> storeCodes = new HashSet<>();
-		final String emptySearch = "SELECT o.orderNumber FROM OrderImpl AS o";
+		final String emptySearch = "SELECT DISTINCT o.orderNumber FROM OrderImpl AS o";
 		CriteriaQuery result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
 		assertThat(result.getQuery()).isEqualTo(emptySearch + " ORDER BY o.orderNumber DESC");
 
@@ -290,7 +290,7 @@ public class OrderCriterionImplTest {
 		orderSearchCriteria.setCustomerSearchCriteria(customerSearchCriteria);
 		Set<String> storeCodes = new HashSet<>();
 
-		final String emptySearch = "SELECT o.orderNumber FROM OrderImpl AS o";
+		final String emptySearch = "SELECT DISTINCT o.orderNumber FROM OrderImpl AS o";
 		CriteriaQuery result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
 		assertThat(result.getQuery()).isEqualTo(emptySearch + " LEFT JOIN o.customer.profileValueMap AS cpf "
 			+ "LEFT JOIN o.customer.profileValueMap AS cpl "

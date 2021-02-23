@@ -49,16 +49,7 @@ public class FilterDataActionImpl implements DataPopulationAction {
 
 	@Override
 	public void execute(final DataPopulationContext context) {
-		File outputDirectory = null;
-		final Object wrapper = context.getActionConfiguration();
-		if (wrapper instanceof FilterActionConfiguration) {
-			FilterActionConfiguration filterOutputWrapper = (FilterActionConfiguration) wrapper;
-			outputDirectory = filterOutputWrapper.getFilterOutputDirectory();
-		}
-
-		if (outputDirectory == null) { // Fallback to the temporary folder
-			outputDirectory = tempOutputDirectory;
-		}
+		File outputDirectory = getOutputDirectory(context);
 
 		// Set the Import/Export system properties that are required since we can't pass them directly
 		// due to the CustomChange interface Liquibase designed
@@ -70,6 +61,26 @@ public class FilterDataActionImpl implements DataPopulationAction {
 			throw new DataPopulationActionException("Error: Unable to filter the data directory to '"
 					+ outputDirectory.getAbsolutePath() + "'. " + DpUtils.getNestedExceptionMessage(ex), ex);
 		}
+	}
+
+	private File getOutputDirectory(final DataPopulationContext context) {
+		File outputDirectory = null;
+		final Object wrapper = context.getActionConfiguration();
+		if (wrapper instanceof FilterActionConfiguration) {
+			FilterActionConfiguration filterOutputWrapper = (FilterActionConfiguration) wrapper;
+			outputDirectory = filterOutputWrapper.getFilterOutputDirectory();
+		}
+
+		if (outputDirectory == null) { // Fallback to the temporary folder
+			outputDirectory = tempOutputDirectory;
+		}
+		return outputDirectory;
+	}
+
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		File outputDirectory = getOutputDirectory(context);
+		return "Filter placeholders from '" + inputDirectory + "' to '" + outputDirectory.getPath() + "'.";
 	}
 
 	/**
@@ -106,7 +117,7 @@ public class FilterDataActionImpl implements DataPopulationAction {
 		}
 
 		// Filter the data with the assembled information
-		LOG.info("Filtering input directory '" + inputDirectory + "' to output directory '" + outputDirectory + "'. Filter Properties size: "
+		LOG.debug("Filtering input directory '" + inputDirectory + "' to output directory '" + outputDirectory + "'. Filter Properties size: "
 				+ DpUtils.size(filterProperties) + "; Dynamic Properties size: " + DpUtils.size(dynamicProperties));
 		try {
 			filterService.filterDirectory(inputDirectory, outputDirectory, filterProperties, dynamicProperties);

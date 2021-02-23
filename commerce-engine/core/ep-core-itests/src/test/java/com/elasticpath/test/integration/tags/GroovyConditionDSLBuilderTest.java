@@ -10,6 +10,11 @@ import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -119,25 +124,58 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 
 	/**
 	 * Test getting LogicalOperator Tree by seeding only one condition.
-	 * 
+	 *
 	 * { AND { refererUrl.includes 'google' } }
 	 */
 	@Test
-	public void testConditionalExpressionBySeedingOnlyOneCondition() {		
+	public void testConditionalExpressionBySeedingOnlyOneCondition() {
 		StringBuilder conditionalExpression = new StringBuilder("{ ");
 		conditionalExpression.append(LogicalOperatorType.AND);
-		
+
 		// refererUrl contains google
 		conditionalExpression.append("\n{ refererUrl.");
 		conditionalExpression.append("includes");
 		conditionalExpression.append(" 'google' }\n}");
-		
+
 		LogicalOperator rootNode = groovyDSLBuilder.getLogicalOperationTree(conditionalExpression.toString());
 		
 		assertNotNull(rootNode);
 		assertEquals(1, rootNode.getConditions().size());
 	}
-	
+
+	/**
+	 * Test getting LogicalOperator Tree by seeding only one condition in several parallel threads.
+	 *
+	 * { AND { refererUrl.includes 'google' } }
+	 */
+	@Test
+	public void testConditionalExpressionBySeedingOnlyOneConditionMultithreaded() throws ExecutionException, InterruptedException {
+		final int threads = 5;
+		final ExecutorService service = Executors.newFixedThreadPool(threads);
+		final List<Future<LogicalOperator>> rootNodes = new ArrayList<>(threads);
+		final String conditionalExpression = "{ " + LogicalOperatorType.AND
+				+ "\n{ refererUrl."
+				+ "includes"
+				+ " 'google' }\n}";
+
+		//CountDownLatch is used to make sure that all threads will start simultaneously.
+		final CountDownLatch latch = new CountDownLatch(1);
+		for (int i = 0; i < threads; i++) {
+			rootNodes.add(service.submit(() -> {
+				//makes thread stay on hold and wait until all of them are submitted.
+				latch.await();
+				return groovyDSLBuilder.getLogicalOperationTree(conditionalExpression);
+			}));
+		}
+		//releases the latch after all threads are submitted.
+		latch.countDown();
+
+		for (Future<LogicalOperator> rootNode : rootNodes) {
+			assertNotNull(rootNode.get());
+			assertEquals(1, rootNode.get().getConditions().size());
+		}
+	}
+
 	/**
 	 * Test getting LogicalOperator Tree by seeding a simple AND operation.
 	 */

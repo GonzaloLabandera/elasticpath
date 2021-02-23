@@ -13,17 +13,15 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
+import java.util.function.Function;
 
 import com.google.common.collect.ImmutableMap;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.elasticpath.cache.Cache;
-import com.elasticpath.cache.CacheLoader;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.service.catalog.ProductLookup;
@@ -60,7 +58,7 @@ public class CachingProductLookupImplTest {
 	@SuppressWarnings("unchecked")
 	public void testFindByUidDelegatesToCacheWithFallbackLoader() {
 		// Given
-		when(productByUidCache.get(eq(product.getUidPk()), any(CacheLoader.class))).thenReturn(product);
+		when(productByUidCache.get(eq(product.getUidPk()), any(Function.class))).thenReturn(product);
 
 		// When
 		Product found = cachingProductLookup.findByUid(product.getUidPk());
@@ -73,7 +71,7 @@ public class CachingProductLookupImplTest {
 	public void testFindByUidsDelegatesToMultiKeyCacheWithFallbackLoader() {
 		// Given
 		final List<Long> productUids = Arrays.asList(product.getUidPk(), product2.getUidPk());
-		when(productByUidCache.getAll(eq(productUids), any(CacheLoader.class))).thenReturn(
+		when(productByUidCache.getAll(eq(productUids), any(Function.class))).thenReturn(
 				ImmutableMap.of(
 						product.getUidPk(), product,
 						product2.getUidPk(), product2
@@ -90,32 +88,32 @@ public class CachingProductLookupImplTest {
 	@SuppressWarnings("unchecked")
 	public void testFindByGuidOnCacheHitReturnsCachedProduct() {
 		// Given
-		when(productGuidToUidPkCache.get(eq(product.getGuid()), any(CacheLoader.class))).thenReturn(product.getUidPk());
-		when(productByUidCache.get(eq(product.getUidPk()))).thenReturn(product);
+		when(productGuidToUidPkCache.get(eq(product.getGuid()), any(Function.class))).thenReturn(product.getUidPk());
+		when(productByUidCache.get(eq(product.getUidPk()), any(Function.class))).thenReturn(product);
 
 		// When
 		Product found = cachingProductLookup.findByGuid(product.getGuid());
 
 		assertSame("Cached product should have been returned", product, found);
 
-		verify(productGuidToUidPkCache).get(eq(product.getGuid()), any(CacheLoader.class));
-		verify(productByUidCache).get(eq(product.getUidPk()));
+		verify(productGuidToUidPkCache).get(eq(product.getGuid()), any(Function.class));
+		verify(productByUidCache).get(eq(product.getUidPk()), any(Function.class));
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testFindByGuidOnCacheMissReturnsNull() {
 		// when syncing deleted products, product GUID exists but not the product
-		when(productGuidToUidPkCache.get(eq(product.getGuid()), any(CacheLoader.class))).thenReturn(null);
-		when(productByUidCache.get(null)).thenReturn(null);
+		when(productGuidToUidPkCache.get(eq(product.getGuid()), any(Function.class))).thenReturn(product.getUidPk());
+		when(productByUidCache.get(eq(product.getUidPk()), any(Function.class))).thenReturn(null);
 
 		// When
 		Product found = cachingProductLookup.findByGuid(product.getGuid());
 
 		assertNull("Cached product should have been null", found);
 
-		verify(productGuidToUidPkCache).get(eq(product.getGuid()), any(CacheLoader.class));
-		verify(productByUidCache).get(null);
+		verify(productGuidToUidPkCache).get(eq(product.getGuid()), any(Function.class));
+		verify(productByUidCache).get(eq(product.getUidPk()), any(Function.class));
 	}
 
 	@Test
@@ -123,9 +121,9 @@ public class CachingProductLookupImplTest {
 	public void testFindByGuidsDelegatesToMultiKeyCacheWithFallbackLoader() {
 		final List<String> productGuids = Arrays.asList(product.getGuid(), product2.getGuid());
 		final List<Long> productUids = Arrays.asList(product.getUidPk(), product2.getUidPk());
-		when(productGuidToUidPkCache.getAll(eq(productGuids), any(CacheLoader.class)))
+		when(productGuidToUidPkCache.getAll(eq(productGuids), any(Function.class)))
 				.thenReturn(ImmutableMap.of(product.getGuid(), product.getUidPk(), product2.getGuid(), product2.getUidPk()));
-		when(productByUidCache.getAll(eq(productUids), any(CacheLoader.class)))
+		when(productByUidCache.getAll(eq(productUids), any(Function.class)))
 				.thenReturn(ImmutableMap.of(product.getUidPk(), product, product2.getUidPk(), product2));
 
 		List<Product> found = cachingProductLookup.findByGuids(productGuids);

@@ -15,8 +15,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContextImpl;
 
 /**
  * Test for {@link ClearShoppingCartCheckoutAction}.
@@ -43,7 +44,6 @@ public class ClearShoppingCartCheckoutActionTest {
 
 		fixture.execute(checkoutContext);
 
-		verify(oldShoppingCart).deactivateCart();
 		verify(shoppingCartService, never()).saveOrUpdate(oldShoppingCart);
 	}
 
@@ -55,9 +55,6 @@ public class ClearShoppingCartCheckoutActionTest {
 		shouldHaveDefaultCheckoutContext();
 
 		fixture.execute(checkoutContext);
-
-		verify(oldShoppingCart).deactivateCart();
-		verify(shoppingCartService).disconnectCartFromShopperAndCustomerSession(oldShoppingCart, checkoutContext);
 	}
 
 	private void shouldHaveCheckoutContextAsOrderExchange() {
@@ -69,8 +66,9 @@ public class ClearShoppingCartCheckoutActionTest {
 	}
 
 	private void createCheckoutContext(final boolean isOrderExchange) {
-		CheckoutActionContext checkoutActionContext = new CheckoutActionContextImpl(oldShoppingCart,
-				null, null, isOrderExchange, false, null, null);
+		PreCaptureCheckoutActionContext checkoutActionContext = new PreCaptureCheckoutActionContextImpl(oldShoppingCart,
+																					null,
+																					null, false, isOrderExchange, null, null);
 		checkoutContext = new FinalizeCheckoutActionContextImpl(checkoutActionContext);
 	}
 }

@@ -4,6 +4,7 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.order;
 
+import java.util.Optional;
 import java.util.Set;
 
 import io.reactivex.Completable;
@@ -29,6 +30,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponEntityBuilder;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponRepository;
+import com.elasticpath.service.rules.CouponUsageService;
 
 /**
  * Repository for the coupon entity which is retrieved for each coupon applied to order.
@@ -48,6 +50,7 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 	private CartOrderRepository cartOrderRepository;
 	private ShoppingCartRepository shoppingCartRepository;
 	private CouponRepository couponRepository;
+	private CouponUsageService couponUsageService;
 	private CouponEntityBuilder builder;
 
 	@Override
@@ -77,15 +80,25 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 
 	@Override
 	public Completable delete(final OrderCouponIdentifier identifier) {
-		String couponId = identifier.getCouponId().getValue();
-		String storeCode = identifier.getOrder().getScope().getValue();
-		String cartOrderGuid = identifier.getOrder().getOrderId().getValue();
+		final String couponId = identifier.getCouponId().getValue();
+		final String storeCode = identifier.getOrder().getScope().getValue();
+		final String cartOrderGuid = identifier.getOrder().getOrderId().getValue();
 
 		return cartOrderRepository.findByGuid(storeCode, cartOrderGuid)
 				.flatMap(cartOrder -> Single.just(cartOrder.removeCoupon(couponId)) //Save cart order after coupons have been removed
-						.flatMap(removed -> removed ? cartOrderRepository.saveCartOrder(cartOrder)
+						.flatMap(removed -> removed
+								? disableAutoApplyCouponToCartsAndSaveCartOrder(couponId, cartOrder)
 								: Single.error(ResourceOperationFailure.notFound(COUPON_IS_NOT_FOUND))))
 				.ignoreElement();
+	}
+
+	private Single<CartOrder> disableAutoApplyCouponToCartsAndSaveCartOrder(final String couponId, final CartOrder cartOrder) {
+		return shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid())
+				.map(shoppingCart -> Optional.ofNullable(shoppingCart.getShopper().getCustomer().getEmail()))
+				.flatMap(customerEmail -> {
+					customerEmail.ifPresent(email -> couponUsageService.disableAutoApplyToCarts(couponId, email));
+					return cartOrderRepository.saveCartOrder(cartOrder);
+				});
 	}
 
 	/**
@@ -203,6 +216,11 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 	@Reference
 	public void setCouponRepository(final CouponRepository couponRepository) {
 		this.couponRepository = couponRepository;
+	}
+
+	@Reference
+	public void setCouponUsageService(final CouponUsageService couponUsageService) {
+		this.couponUsageService = couponUsageService;
 	}
 
 	@Reference

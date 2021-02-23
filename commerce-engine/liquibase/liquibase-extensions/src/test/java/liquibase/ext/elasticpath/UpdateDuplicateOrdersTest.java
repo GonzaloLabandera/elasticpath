@@ -59,130 +59,84 @@ public class UpdateDuplicateOrdersTest {
 	private ResultSet getOrderInfoResultSet;
 
 	@Mock
-	private PreparedStatement highestPreparedStatement;
-
-	@Mock
-	private ResultSet highestResultSet;
-
-	@Mock
-	private PreparedStatement lowestPreparedStatement;
-
-	@Mock
-	private ResultSet lowestResultSet;
-
-	@Mock
 	private PreparedStatement updateOrderPreparedStatement;
 
-	private static final String SELECT_DUPLICATE_ORDERS_STATEMENT =
-			"SELECT CART_ORDER_GUID FROM TORDER WHERE UIDPK BETWEEN %s AND %s GROUP BY CART_ORDER_GUID HAVING COUNT(*) > 1";
+	private static final String SELECT_DUPLICATE_ORDER_GUIDS =
+			"SELECT CART_ORDER_GUID FROM TORDER GROUP BY CART_ORDER_GUID HAVING COUNT(*) > 1";
 
 	@Before
 	public void init() throws SQLException {
 		when(database.getConnection()).thenReturn(connection);
-		when(preparedStatement.executeQuery()).thenReturn(resultSet);
 	}
 
 	@Test
 	public void testUpdateMultipleDuplicateOrders() throws DatabaseException, SQLException, CustomChangeException {
-		final long low = 1;
-		final long high = 11;
 		final int numberOfDuplicateCartOrderGuids = 5;
+		final int batchSize = 10;
 		final String uidpk = "uidpk";
 		final String orderNumber = "order_number";
 		final String cartOrderGuid = "cart_order_guid";
 
-		setupNonEmptyTableResponse();
-		setupLowestAndHighestResponse(low, high);
-		setupMultipleDuplicateCartOrdersResponse(low, high, numberOfDuplicateCartOrderGuids, cartOrderGuid);
+		setupMultipleDuplicateCartOrderGuidsResponse(numberOfDuplicateCartOrderGuids, cartOrderGuid, batchSize);
 		setupMultipleOrderResponseForCartOrderGuids(uidpk, orderNumber, cartOrderGuid, numberOfDuplicateCartOrderGuids);
 		setupSingleBatchAddAndClear();
 
-		updateDuplicateOrders.setBatchSize(10);
-		updateDuplicateOrders.setBatchOverlap(0);
+		updateDuplicateOrders.setBatchSize(batchSize);
 		updateDuplicateOrders.execute(database);
 
-		verifyEmptyTableCheck();
-		verifyHighAndLowQuery();
-		verifyGetDuplicateOrderIdsCallWithRange(1, 1, 11);
 		verifyUpdateWasMadeForOrders(numberOfDuplicateCartOrderGuids, uidpk, orderNumber, cartOrderGuid);
 		verify(updateOrderPreparedStatement, times(numberOfDuplicateCartOrderGuids)).addBatch();
-		verify(updateOrderPreparedStatement, times(2)).executeBatch();
-		verify(updateOrderPreparedStatement, times(2)).clearBatch();
+		verify(updateOrderPreparedStatement, times(1)).executeBatch();
+		verify(updateOrderPreparedStatement, times(1)).clearBatch();
+	}
+
+	@Test
+	public void testUpdateMultipleDuplicateOrdersSizeGreaterThanBatchSize() throws DatabaseException, SQLException, CustomChangeException {
+		final int numberOfDuplicateCartOrderGuids = 15;
+		final int batchSize = 10;
+		final String uidpk = "uidpk";
+		final String orderNumber = "order_number";
+		final String cartOrderGuid = "cart_order_guid";
+
+		setupMultipleDuplicateCartOrderGuidsResponse(numberOfDuplicateCartOrderGuids, cartOrderGuid, batchSize);
+		setupMultipleOrderResponseForCartOrderGuids(uidpk, orderNumber, cartOrderGuid, batchSize);
+		setupSingleBatchAddAndClear();
+
+		updateDuplicateOrders.setBatchSize(batchSize);
+		updateDuplicateOrders.execute(database);
+
+		verifyUpdateWasMadeForOrders(batchSize, uidpk, orderNumber, cartOrderGuid);
+		verify(updateOrderPreparedStatement, times(batchSize)).addBatch();
+		verify(updateOrderPreparedStatement, times(1)).executeBatch();
+		verify(updateOrderPreparedStatement, times(1)).clearBatch();
 	}
 
 	@Test
 	public void testUpdateSingleDuplicateOrder() throws DatabaseException, SQLException, CustomChangeException {
-		final long low = 1;
-		final long high = 11;
 		final String uidpk = "uidpk";
 		final String orderNumber = "order_number";
 		final String cartOrderGuid = "cart_order_guid";
-		setupNonEmptyTableResponse();
-		setupLowestAndHighestResponse(low, high);
-		setupSingleDuplicateOrdersResponse(low, high, cartOrderGuid);
+		setupSingleDuplicateOrdersResponse(cartOrderGuid);
 		setupSingleOrderResponseForCartOrderGuid(uidpk, orderNumber, cartOrderGuid);
 		setupSingleBatchAddAndClear();
 
 		updateDuplicateOrders.setBatchSize(10);
-		updateDuplicateOrders.setBatchOverlap(0);
 		updateDuplicateOrders.execute(database);
 
-		verifyEmptyTableCheck();
-		verifyHighAndLowQuery();
-		verifyGetDuplicateOrderIdsCallWithRange(1, 1, 11);
 		verifySingleOrderWasUpdated(cartOrderGuid, uidpk, orderNumber);
 		verifySingleDuplicateOrdersCallInfo(cartOrderGuid);
-		verifyNoMoreInteractions(connection);
+		verifyNoMoreInteractions(getOrderInfoPreparedStatement);
 	}
 
 	@Test
 	public void testBatchQueriesWithNoDuplicates() throws DatabaseException, SQLException, CustomChangeException {
-		final long low = 1;
-		final long high = 50;
-		setupNonEmptyTableResponse();
-		setupLowestAndHighestResponse(low, high);
-		setupNoDuplicateOrdersResponseForAnyRange();
+		setupNoDuplicateOrdersResponse();
 
 		updateDuplicateOrders.setBatchSize(10);
-		updateDuplicateOrders.setBatchOverlap(1);
 		updateDuplicateOrders.execute(database);
 
-		verifyEmptyTableCheck();
-		verifyHighAndLowQuery();
-		verifyGetDuplicateOrderIdsCallWithRange(5, 1, 12);
-		verifyGetDuplicateOrderIdsCallWithRange(5, 11, 22);
-		verifyGetDuplicateOrderIdsCallWithRange(5, 21, 32);
-		verifyGetDuplicateOrderIdsCallWithRange(5, 31, 42);
-		verifyGetDuplicateOrderIdsCallWithRange(5, 41, 52);
-		verifyNoMoreInteractions(connection);
-	}
-
-	@Test
-	public void testNoUpdatesAreMadeWithNoDuplicates() throws DatabaseException, SQLException, CustomChangeException {
-		final long low = 1;
-		final long high = 11;
-		setupNonEmptyTableResponse();
-		setupLowestAndHighestResponse(low, high);
-		setupNoDuplicateOrdersResponse(low, high);
-
-		updateDuplicateOrders.setBatchOverlap(0);
-		updateDuplicateOrders.setBatchSize(10);
-		updateDuplicateOrders.execute(database);
-
-		verifyEmptyTableCheck();
-		verifyHighAndLowQuery();
-		verifyGetDuplicateOrderIdsCallWithRange(1, low, high);
-		verifyNoMoreInteractions(connection);
-	}
-
-	@Test
-	public void testNothingHappensWithAnEmptyDatabase() throws DatabaseException, SQLException, CustomChangeException {
-		setupEmptyTableResponse();
-
-		updateDuplicateOrders.execute(database);
-
-		verifyEmptyTableCheck();
-		verifyNoMoreInteractions(connection);
+		verify(connection, times(1)).prepareStatement(SELECT_DUPLICATE_ORDER_GUIDS);
+		verifyNoMoreInteractions(getOrderInfoPreparedStatement);
 	}
 
 	private void verifyUpdateWasMadeForOrders(final int times, final String uidPkPrefix, final String orderNumberPrefix,
@@ -193,13 +147,16 @@ public class UpdateDuplicateOrdersTest {
 		}
 	}
 
-	private void setupMultipleDuplicateCartOrdersResponse(final long low, final long high, final int numberOfDuplicates,
-			final String cartOrderGuidPrefix) throws SQLException,
-			DatabaseException {
-		when(connection.prepareStatement(String.format(SELECT_DUPLICATE_ORDERS_STATEMENT, low, high)))
+	private void setupMultipleDuplicateCartOrderGuidsResponse(final int numberOfDuplicates, final String cartOrderGuidPrefix,
+			final int batchSize) throws SQLException, DatabaseException {
+
+		when(connection.prepareStatement(String.format(SELECT_DUPLICATE_ORDER_GUIDS)))
 				.thenReturn(getDuplicateCartOrderGuidsPreparedStatement);
+		//doNothing().when(getDuplicateCartOrderGuidsPreparedStatement).setMaxRows(anyInt());
 		when(getDuplicateCartOrderGuidsPreparedStatement.executeQuery()).thenReturn(getDuplicateCartOrderGuidsResultSet);
-		when(getDuplicateCartOrderGuidsResultSet.next()).thenAnswer(answerTrueNTimes(numberOfDuplicates));
+
+		int numberOfDuplicateGuidsAsPerBatchSize = (numberOfDuplicates > batchSize) ? batchSize : numberOfDuplicates;
+		when(getDuplicateCartOrderGuidsResultSet.next()).thenAnswer(answerTrueNTimes(numberOfDuplicateGuidsAsPerBatchSize));
 		when(getDuplicateCartOrderGuidsResultSet.getString(1)).thenAnswer(new Answer<String>() {
 			private int count = 0;
 
@@ -235,19 +192,6 @@ public class UpdateDuplicateOrdersTest {
 		when(getOrderInfoResultSet.getString(3)).thenReturn(cartOrderGuid);
 	}
 
-	private void verifyGetDuplicateOrderIdsCallWithRange(final int invocations, final long low, final long high)
-			throws DatabaseException, SQLException {
-		verify(connection).prepareStatement(String.format(SELECT_DUPLICATE_ORDERS_STATEMENT, low, high));
-		verify(getDuplicateCartOrderGuidsPreparedStatement, times(invocations)).executeQuery();
-		verify(getDuplicateCartOrderGuidsPreparedStatement, times(invocations)).close();
-	}
-
-	private void verifyEmptyTableCheck() throws DatabaseException, SQLException {
-		verify(connection).prepareStatement("SELECT COUNT(*) FROM TORDER");
-		verify(preparedStatement).executeQuery();
-		verify(preparedStatement).close();
-	}
-
 	private void verifySingleDuplicateOrdersCallInfo(final String cartOrderGuid) throws DatabaseException, SQLException {
 		verify(connection)
 				.prepareStatement("SELECT UIDPK,ORDER_NUMBER,CART_ORDER_GUID FROM TORDER WHERE CART_ORDER_GUID IN ('" + cartOrderGuid + "')");
@@ -264,81 +208,21 @@ public class UpdateDuplicateOrdersTest {
 		verify(connection).prepareStatement("UPDATE TORDER SET CART_ORDER_GUID = ? WHERE (UIDPK = ?)");
 	}
 
-	private void verifyHighAndLowQuery() throws SQLException, DatabaseException {
-		verify(connection).prepareStatement("SELECT MIN(UIDPK) AS UIDPK FROM TORDER");
-		verify(connection).prepareStatement("SELECT MAX(UIDPK) AS UIDPK FROM TORDER");
-
-		verify(highestPreparedStatement).executeQuery();
-		verify(lowestPreparedStatement).executeQuery();
-
-		verify(lowestResultSet).next();
-		verify(highestResultSet).next();
-
-		verify(lowestResultSet).getLong("UIDPK");
-		verify(highestResultSet).getLong("UIDPK");
-
-		verify(lowestResultSet).close();
-		verify(highestResultSet).close();
-
-		verify(highestPreparedStatement).close();
-		verify(lowestPreparedStatement).close();
-
-		verifyNoMoreInteractions(lowestResultSet);
-		verifyNoMoreInteractions(highestResultSet);
-		verifyNoMoreInteractions(lowestPreparedStatement);
-		verifyNoMoreInteractions(highestPreparedStatement);
-	}
-
-	private void setupSingleDuplicateOrdersResponse(final long low, final long high, final String cartOrderGuid) throws SQLException,
+	private void setupSingleDuplicateOrdersResponse(final String cartOrderGuid) throws SQLException,
 			DatabaseException {
-		when(connection.prepareStatement(String.format(SELECT_DUPLICATE_ORDERS_STATEMENT, low, high)))
+		when(connection.prepareStatement(contains(SELECT_DUPLICATE_ORDER_GUIDS)))
 				.thenReturn(getDuplicateCartOrderGuidsPreparedStatement);
 		when(getDuplicateCartOrderGuidsPreparedStatement.executeQuery()).thenReturn(getDuplicateCartOrderGuidsResultSet);
 		when(getDuplicateCartOrderGuidsResultSet.next()).thenReturn(true).thenReturn(false);
 		when(getDuplicateCartOrderGuidsResultSet.getString(1)).thenReturn(cartOrderGuid);
 	}
 
-	private void setupNoDuplicateOrdersResponse(final long low, final long high) throws SQLException, DatabaseException {
-		when(connection.prepareStatement(String.format(SELECT_DUPLICATE_ORDERS_STATEMENT, low, high)))
-				.thenReturn(getDuplicateCartOrderGuidsPreparedStatement);
-		when(getDuplicateCartOrderGuidsPreparedStatement.executeQuery()).thenReturn(getDuplicateCartOrderGuidsResultSet);
-		when(getDuplicateCartOrderGuidsResultSet.next()).thenReturn(false);
-	}
-
-	private void setupNoDuplicateOrdersResponseForAnyRange() throws SQLException, DatabaseException {
+	private void setupNoDuplicateOrdersResponse() throws SQLException, DatabaseException {
 		when(connection.prepareStatement(
-				contains("SELECT CART_ORDER_GUID FROM TORDER WHERE UIDPK BETWEEN")))
+				contains(SELECT_DUPLICATE_ORDER_GUIDS)))
 				.thenReturn(getDuplicateCartOrderGuidsPreparedStatement);
 		when(getDuplicateCartOrderGuidsPreparedStatement.executeQuery()).thenReturn(getDuplicateCartOrderGuidsResultSet);
 		when(getDuplicateCartOrderGuidsResultSet.next()).thenReturn(false);
-	}
-
-	private void setupLowestAndHighestResponse(final long lowest, final long highest) throws DatabaseException, SQLException {
-		when(connection.prepareStatement("SELECT MIN(UIDPK) AS UIDPK FROM TORDER")).thenReturn(lowestPreparedStatement);
-		when(connection.prepareStatement("SELECT MAX(UIDPK) AS UIDPK FROM TORDER")).thenReturn(highestPreparedStatement);
-		when(lowestPreparedStatement.executeQuery()).thenReturn(lowestResultSet);
-		when(highestPreparedStatement.executeQuery()).thenReturn(highestResultSet);
-
-		when(lowestResultSet.next()).thenReturn(true);
-		when(lowestResultSet.getLong("UIDPK")).thenReturn(lowest);
-		when(highestResultSet.next()).thenReturn(true);
-		when(highestResultSet.getLong("UIDPK")).thenReturn(highest);
-	}
-
-	private void setupEmptyTableResponse() throws SQLException, DatabaseException {
-		setupTableResponse();
-		when(resultSet.next()).thenReturn(false);
-		when(resultSet.getInt(1)).thenReturn(0);
-	}
-
-	private void setupNonEmptyTableResponse() throws SQLException, DatabaseException {
-		setupTableResponse();
-		when(resultSet.next()).thenReturn(true);
-		when(resultSet.getInt(1)).thenReturn(1);
-	}
-
-	private void setupTableResponse() throws DatabaseException {
-		when(connection.prepareStatement("SELECT COUNT(*) FROM TORDER")).thenReturn(preparedStatement);
 	}
 
 	private Answer<Boolean> answerTrueNTimes(final int times) {

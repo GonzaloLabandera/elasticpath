@@ -16,20 +16,14 @@
 	<version>0.0.0-SNAPSHOT</version>
 	<description>Builds the Pom-first maven modules, then invokes the manifest-first tycho modules. </description>
 
-	<properties>
-		<maven.invoker.plugin.version>3.0.1</maven.invoker.plugin.version>
-	</properties>
-
 	<modules>
 		<module>cm-libs</module>
-		<module>com.elasticpath.cmclient.docs</module>
 	</modules>
 
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-invoker-plugin</artifactId>
-				<version>${maven.invoker.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>build-cm-tycho-projects</id>

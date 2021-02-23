@@ -11,6 +11,70 @@
 	<artifactId>ep-core-acceptance-tests</artifactId>
 	<name>EP Core Acceptance Tests</name>
 
+	<properties>
+		<failsafe.fork.count>1</failsafe.fork.count>
+		<failsafe.includes.include>com.elasticpath.cucumber.*IT</failsafe.includes.include>
+	</properties>
+
+	<profiles>
+		<profile>
+			<!-- enable execution of cucumber (features/scenarios) testing in parallel -->
+			<id>enable-executing-cucumber-testing-in-parallel</id>
+			<properties>
+					<generated.runner.directory>${project.build.directory}/parallel/runners</generated.runner.directory>
+					<failsafe.fork.count>1C</failsafe.fork.count>
+					<failsafe.includes.include>parallel.runners.*IT</failsafe.includes.include>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.trivago.rta</groupId>
+						<artifactId>cucable-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>generate-test-resources</id>
+								<phase>generate-test-resources</phase>
+								<goals>
+									<goal>parallel</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<!-- Required properties -->
+							<sourceRunnerTemplateFile>${project.basedir}/src/test/resources/parallel/CucumberRunnerTemplate.txt</sourceRunnerTemplateFile>
+							<sourceFeatures>${project.basedir}/src/test/cucumber/com/elasticpath/cucumber</sourceFeatures>
+							<generatedFeatureDirectory>${project.build.directory}/parallel/features</generatedFeatureDirectory>
+							<generatedRunnerDirectory>${generated.runner.directory}</generatedRunnerDirectory>
+
+							<!-- Optional properties -->
+							<numberOfTestRuns>1</numberOfTestRuns>
+							<logLevel>compact</logLevel>
+							<desiredNumberOfFeaturesPerRunner>1</desiredNumberOfFeaturesPerRunner>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>add-test-source</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<sources>
+								<source>${generated.runner.directory}</source>
+							</sources>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<dependencies>
 		<dependency>
 			<groupId>io.cucumber</groupId>
@@ -138,11 +202,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<argLine>-Dorg.apache.camel.jmx.disabled=true</argLine>
-					<forkCount>0.5C</forkCount>
-					<skip>${skipCucumberTests}</skip>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -151,6 +210,14 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<argLine>-Dorg.apache.camel.jmx.disabled=true</argLine>
+					<forkCount>${failsafe.fork.count}</forkCount>
+					<skip>${skipCucumberTests}</skip>
+					<includes>
+						<include>${failsafe.includes.include}</include>
+					</includes>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.google.code.maven-replacer-plugin</groupId>
@@ -161,6 +228,10 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<!-- generated runners -->
+					<excludes>**/Runner*IT.java</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

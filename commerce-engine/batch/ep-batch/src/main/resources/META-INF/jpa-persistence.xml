@@ -7,5 +7,7 @@
 		<mapping-file>META-INF/batch-cleanup-inactive-and-abandoned-carts-job-queries-orm.xml</mapping-file>
 		<mapping-file>META-INF/batch-cleanup-anonymous-customers-job-queries-orm.xml</mapping-file>
 		<mapping-file>META-INF/batch-cleanup-expired-oauthtoken-job-orm.xml</mapping-file>
+		<mapping-file>META-INF/batch-cleanup-expired-failed-orders-job-queries-orm.xml</mapping-file>
+		<mapping-file>META-INF/relay-outbox-message-job-queries-orm.xml</mapping-file>
 	</persistence-unit>
 </persistence>

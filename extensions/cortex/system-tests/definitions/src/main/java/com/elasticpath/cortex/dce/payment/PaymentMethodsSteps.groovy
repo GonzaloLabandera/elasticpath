@@ -31,9 +31,20 @@ class PaymentMethodsSteps {
 		verifyPaymentMethodsNotExist(paymentMethodName)
 	}
 
+	@Then('^I should not see (.+) payment method in the account')
+	static void verifyAccountPaymentMethodNotExists(def paymentMethodName) {
+		verifyPaymentMethodsNotExist(paymentMethodName)
+	}
+
 	@Then('^I should see the following payment methods in my profile$')
 	static void verifyProfilePaymentMethodsExist(DataTable paymentMethods) {
 		Profile.paymentmethods()
+		verifyPaymentMethodsExist(paymentMethods)
+	}
+
+	@Then('^I should see the following payment methods in the account')
+	static void verifyAccountPaymentMethodsExist(DataTable paymentMethods) {
+		client.paymentmethods()
 		verifyPaymentMethodsExist(paymentMethods)
 	}
 

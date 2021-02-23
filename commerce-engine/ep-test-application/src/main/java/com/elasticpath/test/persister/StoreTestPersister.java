@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -332,6 +331,24 @@ public class StoreTestPersister {
 	}
 
 	/**
+	 * Persist an account with the given email.
+	 *
+	 * @param guid              account guid.
+	 * @return persisted account
+	 */
+	public Customer persistAccount(final String guid) {
+		final Customer customer = beanFactory.getPrototypeBean(CUSTOMER, Customer.class);
+		customer.setCustomerType(CustomerType.ACCOUNT);
+		customer.setFirstName("TestAccount");
+		customer.setLastName("TestAccount");
+		customer.setCreationDate(new Date());
+		customer.setLastEditDate(new Date());
+		customer.setGuid(StringUtils.isNotEmpty(guid) ? guid : new RandomGuidImpl().toString());
+
+		return customerService.add(customer);
+	}
+
+	/**
 	 * Creates Customer Address without saving it into database.
 	 *
 	 * @param lastName  the last name
@@ -603,7 +620,8 @@ public class StoreTestPersister {
 		return persistStore(catalog, warehouse, storeCode, currencyCode, USA, USA,
 				Collections.singletonList(TestDataPersisterFactory.DEFAULT_LOCALE), "Email Sender", "tests@beanFactory.com",
 				Utils.uniqueCode("storename"),
-				TimeZone.getDefault(), "storeurl", "email@test.com", "", "UTF-8", true, true, true, true);
+				TimeZone.getDefault(), "storeurl", "email@test.com", "", "UTF-8", true, true, true, true, "BUYER",
+				"SINGLE_SESSION_BUYER");
 	}
 
 	/**
@@ -622,7 +640,8 @@ public class StoreTestPersister {
 		return persistStore(catalog, warehouse, storeCode, currencyCode, USA, USA,
 				Collections.singletonList(TestDataPersisterFactory.DEFAULT_LOCALE),
 				"Email Sender", "tests@beanFactory.com", storeName, TimeZone.getDefault(),
-				"storeurl", "email@test.com", "", "UTF-8", true, true, true, true);
+				"storeurl", "email@test.com", "", "UTF-8", true, true, true, true, "BUYER",
+				"SINGLE_SESSION_BUYER");
 
 	}
 
@@ -659,6 +678,8 @@ public class StoreTestPersister {
 	 * @param displayOutOfStock                 the display out of stock flag
 	 * @param savingCreditCardWithOrdersEnabled the saving credit card with orders enabled flag
 	 * @param enabled                           the store enabled flag
+	 * @param registeredUserRole                the B2C registered role
+	 * @param unregisteredUserRole              the B2C unregistered role
 	 * @return the persisted store
 	 */
 	public Store persistStore(final Catalog catalog, final Warehouse warehouse, final String storeCode,
@@ -667,7 +688,7 @@ public class StoreTestPersister {
 							  final String emailSenderAddress, final String storeName, final TimeZone timeZone, final String storeUrl,
 							  final String adminEmailAddress, final String description, final String contentEncoding,
 							  final boolean creditCardCvv2Enabled, final boolean displayOutOfStock, final boolean savingCreditCardWithOrdersEnabled,
-							  final boolean enabled) {
+							  final boolean enabled, final String registeredUserRole, final String unregisteredUserRole) {
 
 		final Store store = beanFactory.getPrototypeBean(STORE, Store.class);
 		store.setCatalog(catalog);
@@ -693,6 +714,8 @@ public class StoreTestPersister {
 		store.setStoreFullCreditCardsEnabled(savingCreditCardWithOrdersEnabled);
 		store.setEnabled(enabled);
 		store.setStoreState(StoreState.OPEN);
+		store.setB2CAuthenticatedRole(registeredUserRole);
+		store.setB2CSingleSessionRole(unregisteredUserRole);
 
 		final Collection<Currency> supportedCurrencies = new ArrayList<>();
 		supportedCurrencies.add(Currency.getInstance(currencyCode));

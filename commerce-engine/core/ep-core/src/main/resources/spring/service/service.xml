@@ -30,17 +30,18 @@
 
 	<bean id="versionLogger" class="com.elasticpath.commons.util.impl.VersionLogger" init-method="init"/>
 
-	<!-- Password encoding. Use SHA-256 as the default. -->
     <bean id="sha1PasswordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"/>
-    <bean id="sha256PasswordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
-    	<constructor-arg value="256"/>
-    </bean>
-	<alias alias="passwordEncoder" name="sha256PasswordEncoder"/>
 
-	<!-- CM Users for now will remain with SHA-1 -->
-	<alias alias="cmPasswordEncoder" name="sha1PasswordEncoder"/>
+	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder">
+		<constructor-arg name="strength" value="8"/>
+	</bean>
 
-		<bean id="txProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<!-- CM Users use BCrypt for password encoding -->
+	<bean id="cmPasswordEncoder" class="com.elasticpath.commons.security.impl.CmPasswordEncoder">
+		<constructor-arg name="strength" value="10"/>
+	</bean>
+
+	<bean id="txProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="transactionAttributes">
 			<props>
@@ -56,8 +57,10 @@
 				<prop key="process*">PROPAGATION_REQUIRED</prop>
 				<prop key="exist*">PROPAGATION_REQUIRED</prop>
 				<prop key="adjust*">PROPAGATION_REQUIRED</prop>
+				<prop key="associate*">PROPAGATION_REQUIRED</prop>
 				<!-- May be moved into a different child wrapper to be more specific to the services that require it. -->
 				<!-- Special calls -->
+				<prop key="triggerPostCaptureCheckout">PROPAGATION_REQUIRED</prop>
 				<prop key="auditableReset*">PROPAGATION_REQUIRES_NEW</prop>
 				<prop key="auditableProcess*">PROPAGATION_REQUIRED</prop>
 				<prop key="cancelOrder">PROPAGATION_NEVER</prop>
@@ -78,6 +81,9 @@
 				<prop key="writeOrderLock">PROPAGATION_REQUIRES_NEW</prop>
 				<prop key="releaseOrderLock">PROPAGATION_REQUIRED</prop>
 				<prop key="forceReleaseOrderLock">PROPAGATION_REQUIRES_NEW</prop>
+				<prop key="touch">PROPAGATION_REQUIRED</prop>
+				<prop key="disableAutoApplyToCarts">PROPAGATION_REQUIRED</prop>
+				<prop key="deactivateCart">PROPAGATION_REQUIRED</prop>
 				<!-- AuditDao specific calls -->
 				<prop key="persistChangeSetTransaction">PROPAGATION_REQUIRED</prop>
 				<prop key="persistDataChanged">PROPAGATION_REQUIRED</prop>
@@ -133,7 +139,6 @@
 
 				<!--  Custom Tx Attributes  -->
 				<prop key="findByGuid">PROPAGATION_REQUIRED</prop>  <!-- Yes, findByGuid() can update -->
-				<prop key="createOrderIfPossible">PROPAGATION_REQUIRED</prop>
 
 				<!-- Lowest Common Denominator -->
 				<prop key="*">PROPAGATION_SUPPORTS,readOnly</prop>
@@ -158,7 +163,6 @@
 		<property name="timeService" ref="timeService" />
 		<property name="storeService" ref="storeService" />
 		<property name="fetchPlanHelper" ref="fetchPlanHelper" />
-		<property name="indexNotificationService" ref="indexNotificationService" />
 		<property name="customerAddressDao" ref="customerAddressDao" />
 		<property name="settingsReader" ref="settingsReader" />
 		<property name="eventMessageFactory" ref="eventMessageFactory" />
@@ -620,6 +624,21 @@
 
 	<bean id="orderServiceTarget" parent="orderServiceTargetTemplate"/>
 
+	<bean id="orderHoldService" parent="txProxyTemplate">
+		<property name="target" ref="orderHoldServiceTarget"/>
+	</bean>
+
+	<bean id="orderHoldServiceTargetTemplate" abstract="true"
+		  class="com.elasticpath.service.order.impl.OrderHoldServiceImpl">
+		<property name="eventMessageFactory" ref="eventMessageFactory" />
+		<property name="eventMessagePublisher" ref="orderEventMessagePublisher" />
+		<property name="orderEventHelper" ref="orderEventHelper" />
+		<property name="orderService" ref="orderService" />
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+	</bean>
+
+	<bean id="orderHoldServiceTarget" parent="orderHoldServiceTargetTemplate"/>
+
 	<bean id="orderLockService" parent="txProxyTemplate">
 		<property name="target" ref="orderLockServiceTarget"/>
 	</bean>
@@ -629,6 +648,7 @@
 		<property name="elasticPath" ref="elasticPath"/>
 		<property name="timeService" ref="timeService"/>
 		<property name="orderService" ref="orderService"/>
+		<property name="cmUserService" ref="cmUserService"/>
 	</bean>
 
 	<bean id="orderLockServiceTarget" parent="orderLockServiceTargetTemplate"/>
@@ -670,7 +690,7 @@
 		</property>
 	</bean>
 
-	<bean id="attributeService" parent="txProxyTemplate">
+	<bean id="nonCachingAttributeService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.attribute.impl.AttributeServiceImpl">
 				<property name="persistenceEngine" ref="persistenceEngine"/>
@@ -918,9 +938,9 @@
 		<property name="taxDocumentService" ref="taxDocumentService" />
 	</bean>
 
-	<bean id="elasticPathTaxProvider" class="com.elasticpath.service.tax.impl.ElasticPathTaxProviderPluginImpl">
+	<bean id="elasticPathTaxProvider" class="com.elasticpath.service.tax.impl.ElasticPathTaxProviderPluginImpl" init-method="init">
 		<property name="taxCalculator" ref="elasticPathTaxCalculator"/>
-		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="taxRateDescriptorResolver" ref="taxRateDescriptorResolver"/>
 	</bean>
 
 	<bean id="warehouseService" parent="txProxyTemplate">
@@ -1111,6 +1131,9 @@
 		<property name="pricedEntityFactory" ref="pricedEntityFactory" />
 		<property name="bundleIdentifier" ref="bundleIdentifier" />
 		<property name="beanFactory" ref="coreBeanFactory" />
+		<property name="catalogPromotionsEnabledProvider">
+			<settings:setting path="COMMERCE/SYSTEM/PROMOTIONS/catalogPromotionsEnabled"/>
+		</property>
 	</bean>
 
 
@@ -1738,144 +1761,9 @@
 
 	<import resource="classpath:spring/commons/serviceChangeset.xml"/>
 
-	<!-- tagging framework start -->
-
-	<bean id="conditionEvaluationService" class="com.elasticpath.tags.service.impl.JavaConditionEvaluatorServiceImpl">
-		<property name="conditionDSLBuilder" ref="tagConditionDSLBuilder"/>
-		<property name="conditionOperatorEvaluators">
-			<set>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.EqualToOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.NotEqualToOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.EqualsIgnoreCaseOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.LessThanOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.LessThanOrEqualToOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.GreaterThanOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.GreaterThanOrEqualToOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.IncludesOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.NotIncludesOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.IncludesIgnoreCaseOperatorEvaluatorImpl"/>
-				<bean class="com.elasticpath.tags.service.impl.conditionoperators.ContainsOperatorEvaluatorImpl"/>
-			</set>
-		</property>
-		<property name="decomposedConditionSynchronizedCacheSupport">
-			<bean class="com.elasticpath.service.caching.impl.SynchronizedCacheSupportImpl">
-				<property name="evaluationCache">
-					<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-						<property name="cache" ref="decomposedConditionCache"/>
-					</bean>
-				</property>
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="tagDictionaryService"  parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.tags.service.impl.TagDictionaryServiceImpl">
-				<property name="tagDictionaryDao" ref="tagDictionaryDao" />
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="tagGroupService"  parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.tags.service.impl.TagGroupServiceImpl">
-				<property name="tagGroupDao" ref="tagGroupDao" />
-				<property name="tagGroupFactory" ref="tagGroupFactory" />
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="tagValueTypeService" parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.tags.service.impl.TagValueTypeServiceImpl">
-				<property name="tagValueTypeDao" ref="tagValueTypeDao" />
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="tagDefinitionService"  parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.tags.service.impl.TagDefinitionServiceImpl">
-				<property name="tagDefinitionDao" ref="tagDefinitionDao" />
-				<property name="tagDefinitionFactory" ref="tagDefinitionFactory" />
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="nonCachedTagDefinitionReader" parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.tags.service.impl.TagDefinitionReaderImpl">
-				<property name="tagDefinitionDao" ref="tagDefinitionDao" />
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="cachedTagDefinitionReader" class="com.elasticpath.tags.service.impl.CachedTagDefinitionReaderImpl">
-		<property name="tagDefinitionReader" ref="nonCachedTagDefinitionReader" />
-		<property name="tagDefinitionNameToTagDefinitionGuidCache">
-			<bean class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-				<property name="name" value="tagDefinitionGuidCache" />
-				<property name="cacheManager" ref="epCoreEhcacheManager"/>
-				<property name="timeToLive" value="600"/>
-				<property name="timeToIdle" value="600"/>
-			</bean>
-		</property>
-		<property name="tagDefinitionGuidToTagDefinitionCache">
-			<bean class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-				<property name="name" value="tagDefinitionCache" />
-				<property name="cacheManager" ref="epCoreEhcacheManager"/>
-				<property name="timeToLive" value="600"/>
-				<property name="timeToIdle" value="600"/>
-			</bean>
-		</property>
-	</bean>
-
-	<!-- Remember: <alias name="FromBean" alias="ToBean"/> -->
-	<alias name="nonCachedTagDefinitionReader" alias="tagDefinitionReader"/>
-
-	<bean id="tagConditionService" parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.tags.service.impl.TagConditionServiceImpl">
-				<property name="tagConditionDao" ref="tagConditionDao" />
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="tagOperatorService" class="com.elasticpath.tags.service.impl.TagOperatorServiceImpl">
-		<property name="tagOperatorDao" ref="tagOperatorDao" />
-	</bean>
-
-	<bean id="conditionValidationFacade" class="com.elasticpath.tags.service.impl.ConditionValidationFacadeImpl">
-		<property name="validationService" ref="declarativeValidationService" />
-	</bean>
-
-	<util:map id="tagValueTypeConverterMap">
-		<entry key="java.math.BigDecimal" value-ref="stringToBigDecimalConverter"/>
-		<entry key="java.lang.Integer" value-ref="stringToIntegerConverter"/>
-		<entry key="java.lang.Float" value-ref="stringToFloatConverter"/>
-		<entry key="java.lang.Long" value-ref="stringToLongConverter"/>
-		<entry key="java.lang.Boolean" value-ref="stringToBooleanConverter"/>
-		<entry key="java.lang.String" value-ref="stringToStringConverter"/>
-	</util:map>
-
-	<bean id="tagTypeValueConverter" class="com.elasticpath.tags.service.impl.TagTypeValueConverterImpl">
-		<property name="typeConverterMap" ref="tagValueTypeConverterMap" />
-	</bean>
-
-	<bean id="tagFactory" class="com.elasticpath.tags.service.impl.TagFactoryImpl" >
-		<property name="tagTypeValueConverter" ref="tagTypeValueConverter" />
-		<property name="tagDefinitionReader" ref="tagDefinitionReader" />
-	</bean>
-
-	<bean id="tagGroupFactory" class="com.elasticpath.tags.service.impl.TagGroupFactoryImpl" />
-
-	<bean id="tagDefinitionFactory" class="com.elasticpath.tags.service.impl.TagDefinitionFactoryImpl" />
-
-	<!-- tagging framework end -->
-
-
 	<bean id="userAccountAssociationServiceTargetTemplate" class="com.elasticpath.service.customer.impl.UserAccountAssociationServiceImpl">
 		<property name="customerService" ref="customerService" />
+		<property name="roleToPermissionMappingService" ref="roleToPermissionMappingService" />
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 		<property name="elasticPath" ref="elasticPath"/>
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
@@ -1942,15 +1830,10 @@
 
 	<bean id="epRuleEngine" class="com.elasticpath.service.rules.impl.DBReadingRuleEngineImpl">
 		<property name="ruleService" ref="ruleService"/>
-		<property name="dataStrategy" ref="ruleEngineDataStrategy"/>
 		<property name="promotionRuleDelegate" ref="promotionRuleDelegate"/>
-		<property name="conditionEvaluatorService" ref="conditionEvaluationService"/>
+		<property name="ruleEngineSessionFactory" ref="ruleEngineSessionFactory"/>
+		<property name="ruleEngineRuleStrategy" ref="ruleEngineRuleStrategy"/>
 		<property name="beanFactory" ref="coreBeanFactory" />
-		<property name="statefulSessionConfiguration">
-			<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-				<property name="cache" ref="ruleSessionConfigurationCache"/>
-			</bean>
-		</property>
 	</bean>
 
 	<alias name="dbRuleEngineDataStrategy" alias="ruleEngineDataStrategy"/>
@@ -2156,6 +2039,7 @@
 		<property name="catalogService" ref="catalogService"/>
 		<property name="categoryLoadTunerAll" ref="CATEGORY_LOAD_TUNER_ALL"/>
 		<property name="categoryLoadTunerDefault" ref="CATEGORY_LOAD_TUNER_DEFAULT"/>
+		<property name="categoryLoadTunerDefaultPlusAttributes" ref="CATEGORY_LOAD_TUNER_DEFAULT_PLUS_ATTRIBUTES"/>
 		<property name="categoryLoadTunerMinimal" ref="CATEGORY_LOAD_TUNER_MINIMAL"/>
 		<property name="categoryGuidUtil" ref="categoryGuidUtil"/>
 		<property name="productDao" ref="productDao"/>
@@ -2229,10 +2113,6 @@
 			<key><util:constant static-field="com.elasticpath.domain.customer.impl.CustomerImpl.ATT_KEY_CP_PREF_LOCALE"/></key>
 			<bean class="com.elasticpath.service.customer.impl.LocaleValueRestrictorImpl"/>
 		</entry>
-		<entry>
-			<key><util:constant static-field="com.elasticpath.domain.customer.impl.CustomerImpl.ATT_KEY_CP_GENDER"/></key>
-			<bean class="com.elasticpath.service.customer.impl.GenderValueRestrictorImpl"/>
-		</entry>
 	</util:map>
 
 	<bean id="targetCustomerProfileAttributeValueRestrictors"
@@ -2290,10 +2170,10 @@
 	</bean>
 
 	<bean id="attributeServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
-		<property name="fallbackImplementation" ref="attributeService"/>
+		<property name="fallbackImplementation" ref="nonCachingAttributeService"/>
 	</bean>
 
-	<bean id="cachedAttributeService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+	<bean id="attributeService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
 		<property name="proxyInterface" value="com.elasticpath.service.attribute.AttributeService"/>
 		<property name="proxy" ref="attributeServiceProxy"/>
 	</bean>
@@ -2597,6 +2477,13 @@
             </bean>
         </property>
     </bean>
+
+	<bean id="shiroRolesDeterminationService" class="com.elasticpath.service.auth.impl.ShiroRolesDeterminationServiceImpl">
+		<property name="storeService" ref="storeService"/>
+		<property name="userAccountAssociationService" ref="userAccountAssociationService"/>
+		<property name="roleToPermissionsMappingService" ref="roleToPermissionMappingService"/>
+		<property name="accountTreeService" ref="accountTreeService"/>
+	</bean>
 
 	<!--  note that this bean is also defined in serviceConnect.xml -->
 	<bean id="importService" parent="txProxyTemplate">
@@ -2913,5 +2800,123 @@
 		<ref bean="user-name"/>
 		<ref bean="user-email"/>
 	</extensibleList:create>
+
+	<bean id="outboxMessageService" parent="txProxyTemplate">
+		<property name="target">
+			<bean parent="outboxMessageServiceTarget"/>
+		</property>
+	</bean>
+
+	<bean id="outboxMessageServiceTargetTemplate" abstract="true" class="com.elasticpath.service.messaging.impl.OutboxMessageServiceImpl">
+		<property name="eventMessageObjectMapper" ref="eventMessageObjectMapper"/>
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+		<property name="elasticPath" ref="elasticPath"/>
+		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
+	</bean>
+
+	<bean id="outboxMessageServiceTarget" parent="outboxMessageServiceTargetTemplate"/>
+
+	<bean id="publicPermission" class="java.lang.String">
+		<constructor-arg value="PUBLIC" />
+	</bean>
+
+	<bean id="registeredPermission" class="java.lang.String">
+		<constructor-arg value="REGISTERED" />
+	</bean>
+
+	<bean id="readCustomCartsPermission" class="java.lang.String">
+		<constructor-arg value="READ_CUSTOM_CARTS" />
+	</bean>
+
+	<bean id="checkoutWithoutApprovalPermission" class="java.lang.String">
+		<constructor-arg value="CHECKOUT_WITHOUT_APPROVAL" />
+	</bean>
+
+	<bean id="modifyCartsPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_CARTS" />
+	</bean>
+
+	<bean id="viewPricesPermission" class="java.lang.String">
+		<constructor-arg value="READ_PRICES" />
+	</bean>
+
+	<bean id="modifyAccountsPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_ACCOUNTS" />
+	</bean>
+
+	<bean id="modifyAccountAddressesPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_ACCOUNT_ADDRESSES" />
+	</bean>
+
+	<bean id="modifyAccountPaymentInstrumentsPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_ACCOUNT_PAYMENT_INSTRUMENTS" />
+	</bean>
+
+	<bean id="modifyAccountAssociatesPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_ACCOUNT_ASSOCIATES" />
+	</bean>
+
+	<!-- Create lists of permissions that a role maps to -->
+	<extensibleList:create id="buyerRolePermissions" overridableId="buyerRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="registeredPermission" />
+		<ref bean="viewPricesPermission" />
+		<ref bean="modifyCartsPermission" />
+		<ref bean="readCustomCartsPermission" />
+		<ref bean="checkoutWithoutApprovalPermission" />
+	</extensibleList:create>
+
+	<extensibleList:create id="buyerAdminRolePermissions" overridableId="buyerAdminRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="registeredPermission" />
+		<ref bean="viewPricesPermission" />
+		<ref bean="modifyCartsPermission" />
+		<ref bean="readCustomCartsPermission" />
+		<ref bean="checkoutWithoutApprovalPermission" />
+		<ref bean="modifyAccountsPermission" />
+		<ref bean="modifyAccountAddressesPermission" />
+		<ref bean="modifyAccountPaymentInstrumentsPermission" />
+		<ref bean="modifyAccountAssociatesPermission" />
+	</extensibleList:create>
+
+	<extensibleList:create id="singleSessionBuyerRolePermissions" overridableId="singleSessionBuyerRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="viewPricesPermission" />
+		<ref bean="modifyCartsPermission" />
+		<ref bean="checkoutWithoutApprovalPermission" />
+	</extensibleList:create>
+
+	<extensibleList:create id="catalogBrowserRolePermissions" overridableId="catalogBrowserRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="registeredPermission" />
+		<ref bean="viewPricesPermission" />
+	</extensibleList:create>
+
+	<extensibleList:create id="limitedCatalogBrowserRolePermissions" overridableId="limitedCatalogBrowserRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="registeredPermission" />
+	</extensibleList:create>
+
+	<!-- Map the permission sets to role names -->
+	<util:map id="roleToPermissionsMap" map-class="java.util.LinkedHashMap" key-type="java.lang.String" value-type="java.util.List">
+		<entry key="SINGLE_SESSION_BUYER" value-ref="singleSessionBuyerRolePermissionsList" />
+		<entry key="LIMITED_CATALOG_BROWSER" value-ref="limitedCatalogBrowserRolePermissionsList" />
+		<entry key="CATALOG_BROWSER" value-ref="catalogBrowserRolePermissionsList" />
+		<entry key="BUYER" value-ref="buyerRolePermissionsList" />
+		<entry key="BUYER_ADMIN" value-ref="buyerAdminRolePermissionsList" />
+	</util:map>
+
+	<bean id="roleToPermissionMappingService" class="com.elasticpath.service.permissions.impl.RoleToPermissionsMappingServiceImpl" >
+		<property name="roleToPermissionsMap" ref="roleToPermissionsMap" />
+	</bean>
+
+	<bean id="roleValidator" class="com.elasticpath.service.permissions.impl.RoleValidatorImpl" >
+		<constructor-arg ref="validUserRoles"/>
+	</bean>
+
+	<util:set id="validUserRoles" value-type="java.lang.String">
+		<value>PUBLIC</value>
+		<value>REGISTERED</value>
+	</util:set>
 
 </beans>

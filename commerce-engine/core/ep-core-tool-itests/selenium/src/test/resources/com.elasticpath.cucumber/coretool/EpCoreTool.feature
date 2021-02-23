@@ -9,6 +9,7 @@ Feature: EP core tool
     When I run the ep core tool to rebuild the indexes
     Then the status of all indexes should be Rebuild
 
+
   @resetPassword
   Scenario Outline: Update cm user password
     Given I sign in to CM as <cm_user> with password 111111
@@ -34,6 +35,23 @@ Feature: EP core tool
     Examples:
       | config_name                                    |
       | COMMERCE/SYSTEM/EMAIL/emailTextTemplateEnabled |
+
+  @resetSettingMetadata
+  Scenario Outline: Update System Configuration settings metadata value
+    Given I sign in to CM as admin user
+    And I go to Configuration
+    And I go to System Configuration
+    When I search and select the system configuration <config_name>
+    Then there should be 1 Setting Definition Metadata record
+    And I run the ep core tool to set metadata of <config_name> setting from <metadata_name> to <metadata_value>
+    And I close the System Configuration pane
+    And I go to System Configuration
+    And I select the system configuration <config_name>
+    Then there should be 2 Setting Definition Metadata record
+
+    Examples:
+      | config_name                                         | metadata_name | metadata_value      |
+      | COMMERCE/SYSTEM/PROMOTIONS/catalogPromotionsEnabled | some_metadata | some_metadata_value |
 
   @resetProdName
   Scenario: Rebuild specific search index

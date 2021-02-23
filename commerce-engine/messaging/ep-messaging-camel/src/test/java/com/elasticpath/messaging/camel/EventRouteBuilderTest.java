@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventType;
-import com.elasticpath.messaging.camel.jackson.EventMessageObjectMapper;
+import com.elasticpath.messaging.camel.jackson.EventMessageObjectMapperImpl;
 import com.elasticpath.messaging.camel.test.support.AbstractCamelRouteBuilderTest;
 import com.elasticpath.messaging.camel.test.support.TransactionPolicyRegistryManager;
 import com.elasticpath.messaging.factory.impl.EventMessageFactoryImpl;
@@ -24,7 +24,7 @@ import com.elasticpath.messaging.factory.impl.EventMessageFactoryImpl;
 /**
  * Test for {@link EventRouteBuilder}.
  */
-public class EventRouteBuilderTest extends AbstractCamelRouteBuilderTest<EventMessage, EventMessageObjectMapper> {
+public class EventRouteBuilderTest extends AbstractCamelRouteBuilderTest<EventMessage, EventMessageObjectMapperImpl> {
 
 	private static final Logger LOG = Logger.getLogger(EventRouteBuilderTest.class);
 
@@ -62,7 +62,7 @@ public class EventRouteBuilderTest extends AbstractCamelRouteBuilderTest<EventMe
 
 		eventRouteBuilder.setIncomingEndpoint(getSourceEndpoint());
 		eventRouteBuilder.setOutgoingEndpoint(mockOutgoingEndpoint);
-		eventRouteBuilder.setEventMessageDataFormat(givenJacksonDataFormat(EventMessage.class, EventMessageObjectMapper.class));
+		eventRouteBuilder.setEventMessageDataFormat(givenJacksonDataFormat(EventMessage.class, EventMessageObjectMapperImpl.class));
 
 		eventType = (EventType) () -> "eventType";
 
@@ -78,12 +78,12 @@ public class EventRouteBuilderTest extends AbstractCamelRouteBuilderTest<EventMe
 	public void testDefaultOrderEventEnqueue() throws Exception {
 		final EventMessage eventMessage = createTestOrderEventMessage();
 
-		sendMessage(eventMessage, EventMessageObjectMapper.class);
+		sendMessage(eventMessage, EventMessageObjectMapperImpl.class);
 
 		mockOutgoingEndpoint.expectedMessageCount(1);
 		mockOutgoingEndpoint.expectedMessagesMatches(exchange -> {
 			try { // Horrible try/catch because of checked exception.
-				String expectedJson = getJson(eventMessage, EventMessageObjectMapper.class);
+				String expectedJson = getJson(eventMessage, EventMessageObjectMapperImpl.class);
 				Assertions.assertThat(exchange.getIn().getBody(String.class)).isEqualTo(expectedJson);
 				return true;
 			} catch (JsonProcessingException | IllegalAccessException | InstantiationException e) {
@@ -100,13 +100,13 @@ public class EventRouteBuilderTest extends AbstractCamelRouteBuilderTest<EventMe
 	}
 
 	@Override
-	protected EventMessageObjectMapper configureObjectMapper(final EventMessageObjectMapper objectMapper) {
+	protected EventMessageObjectMapperImpl configureObjectMapper(final EventMessageObjectMapperImpl objectMapper) {
 		objectMapper.init();
 		return super.configureObjectMapper(objectMapper);
 	}
 
 	@Override
-	protected void sendMessage(final EventMessage message, final Class<EventMessageObjectMapper> objectMapperClass) throws Exception {
+	protected void sendMessage(final EventMessage message, final Class<EventMessageObjectMapperImpl> objectMapperClass) throws Exception {
 		final NotifyBuilder notifyBuilder = new NotifyBuilder(context())
 				.from(getSourceEndpoint().getEndpointUri())
 				.whenDone(1)

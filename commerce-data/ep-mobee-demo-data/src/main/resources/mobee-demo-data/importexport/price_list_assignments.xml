@@ -215,27 +215,6 @@
     </selling_context>
 </price_list_assignment>
 <price_list_assignment>
-    <guid>dbdc017a-aa0f-432a-87a9-4d0c3b9ba054</guid>
-    <name>Alternative Pricing for Mobee Based on Gender</name>
-    <priority>4</priority>
-    <catalog_guid>Mobile</catalog_guid>
-    <price_list_guid>0593e983-b24c-47c5-b7de-5e2b867af04d</price_list_guid>
-    <selling_context>
-        <guid>bf9c0ec6-8442-43c8-b647-11da4c26baa6</guid>
-        <name>SELLING_CONTEXT_NAME_null</name>
-        <description>SELLING_CONTEXT_DESCR_null</description>
-        <priority>0</priority>
-        <conditions>
-            <condition>
-                <guid>a9a23c5a-e9df-4814-8a56-34af56495154</guid>
-                <name>8069497707733</name>
-                <condition_string> { AND { AND { CUSTOMER_GENDER.equalTo 'F' }  }  } </condition_string>
-                <dictionary_guid>PLA_SHOPPER</dictionary_guid>
-            </condition>
-        </conditions>
-    </selling_context>
-</price_list_assignment>
-<price_list_assignment>
     <guid>92d23c24-59ec-4af8-8dee-e8d9adbaf1c2</guid>
     <name>Alternative Pricing for Mobee Based on First Time Buyer</name>
     <priority>4</priority>

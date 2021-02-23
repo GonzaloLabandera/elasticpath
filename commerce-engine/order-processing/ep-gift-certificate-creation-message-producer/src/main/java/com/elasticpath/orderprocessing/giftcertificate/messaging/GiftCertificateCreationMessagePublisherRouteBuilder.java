@@ -26,7 +26,7 @@ import com.elasticpath.money.Money;
 import com.elasticpath.service.order.OrderService;
 
 /**
- * Route that responds to an {@code ORDER_CREATED} or {@code RESEND_CONFIRMATION} event message and creates
+ * Route that responds to an {@code RESEND_CONFIRMATION} event message and creates
  * a {@code GIFT_CERTIFICATE_CREATED} message per Gift Certificate.
  */
 public class GiftCertificateCreationMessagePublisherRouteBuilder extends RouteBuilder {

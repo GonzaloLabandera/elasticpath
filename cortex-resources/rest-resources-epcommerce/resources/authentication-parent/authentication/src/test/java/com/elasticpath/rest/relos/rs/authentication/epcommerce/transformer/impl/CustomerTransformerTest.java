@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -33,7 +32,6 @@ public class CustomerTransformerTest {
 	private static final String USER_ID = "jeanluc.picard@starfleetacademy.edu";
 	private static final String CUSTOMER_GUID = "499A4471-06CE-CB60-BFBE-511F8D96C21E";
 	private static final String ENCODED_PASSWORD = "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8";
-	private static final String SALT = "7e48b1de633bfdbab38f783cbda591834bb63503912d206d3da104f88dbff9c7";
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private Customer customer;
@@ -55,7 +53,6 @@ public class CustomerTransformerTest {
 		assertFalse("The account locked should match which is expected of a customer in status active", user.isAccountLocked());
 		assertFalse("The account expired should match", user.isAccountExpired());
 		assertEquals("The guid should match", CUSTOMER_GUID, user.getUserId());
-		assertEquals("The salt should match", SALT, user.getSalt());
 		assertTrue("Account should be enabled", user.isAccountEnabled());
 		assertFalse("Account should not be expired", user.isAccountExpired());
 		assertEquals("The passwords should match", ENCODED_PASSWORD, user.getPassword());
@@ -70,9 +67,6 @@ public class CustomerTransformerTest {
 
 		when(customer.getCustomerAuthentication().getPassword())
 			.thenReturn(ENCODED_PASSWORD);
-
-		when(customer.getCustomerAuthentication().getSalt())
-			.thenReturn(SALT);
 
 		when(customer.getCustomerRoleMapper().getAllRoles())
 			.thenReturn(roleNames);

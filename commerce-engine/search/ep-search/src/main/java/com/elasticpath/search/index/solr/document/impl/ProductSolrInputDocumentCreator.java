@@ -60,6 +60,7 @@ import com.elasticpath.service.search.index.Analyzer;
 import com.elasticpath.service.search.solr.IndexUtility;
 import com.elasticpath.service.search.solr.SolrIndexConstants;
 import com.elasticpath.service.store.StoreService;
+import com.elasticpath.tags.TagSet;
 
 /**
  * Creates a {@link SolrInputDocument} for an {@link IndexProduct}.
@@ -633,7 +634,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		singleStack.addPriceList(priceListDescriptor.getGuid());
 		singleStack.setCurrency(Currency.getInstance(priceListDescriptor.getCurrencyCode()));
 
-		return getPromotedPriceLookupService().getProductPrice(product, singleStack, store, baseAmountDataSourceFactory);
+		return getPromotedPriceLookupService().getProductPrice(product, singleStack, store, baseAmountDataSourceFactory, new TagSet());
 	}
 
 	/**

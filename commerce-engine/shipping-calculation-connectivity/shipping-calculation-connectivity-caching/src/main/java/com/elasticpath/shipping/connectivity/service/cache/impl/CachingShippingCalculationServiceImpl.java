@@ -7,12 +7,12 @@ import static java.lang.String.format;
 import static java.lang.System.identityHashCode;
 
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.apache.log4j.Logger;
 
 import com.elasticpath.cache.Cache;
+import com.elasticpath.cache.CacheResult;
 import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
 import com.elasticpath.shipping.connectivity.dto.ShippableItemContainer;
 import com.elasticpath.shipping.connectivity.dto.ShippingAddress;
@@ -50,7 +50,7 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 
 		final ShippingCalculationResultCacheKey unpricedCacheKey = createUnpricedCacheKey(shippableItemContainer);
 
-		final Optional<ShippingCalculationResult> cachedResult = getCachedShippingCalculationResult(unpricedCacheKey);
+		final CacheResult<ShippingCalculationResult> cachedResult = getCachedShippingCalculationResult(unpricedCacheKey);
 		if (cachedResult.isPresent()) {
 			result = cachedResult.get();
 		} else {
@@ -78,7 +78,7 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 
 		final ShippingCalculationResultCacheKey cacheKey = createPricedCacheKey(pricedShippableItemContainer);
 
-		final Optional<ShippingCalculationResult> cachedResult = getCachedShippingCalculationResult(cacheKey);
+		final CacheResult<ShippingCalculationResult> cachedResult = getCachedShippingCalculationResult(cacheKey);
 		if (cachedResult.isPresent()) {
 			result = cachedResult.get();
 		} else {
@@ -110,7 +110,7 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 				.withLocale(locale)
 				.build();
 
-		final Optional<ShippingCalculationResult> cachedResult = getCachedShippingCalculationResult(cacheKey);
+		final CacheResult<ShippingCalculationResult> cachedResult = getCachedShippingCalculationResult(cacheKey);
 		if (cachedResult.isPresent()) {
 			result = cachedResult.get();
 		} else {
@@ -139,7 +139,7 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 				.withLocale(locale)
 				.build();
 
-		final Optional<ShippingCalculationResult> cachedResult = getCachedShippingCalculationResult(cacheKey);
+		final CacheResult<ShippingCalculationResult> cachedResult = getCachedShippingCalculationResult(cacheKey);
 		if (cachedResult.isPresent()) {
 			result = cachedResult.get();
 		} else {
@@ -159,8 +159,8 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 	 * @param cacheKey the cache key
 	 * @return cached shipping calculation result
 	 */
-	protected Optional<ShippingCalculationResult> getCachedShippingCalculationResult(final ShippingCalculationResultCacheKey cacheKey) {
-		final Optional<ShippingCalculationResult> result = Optional.ofNullable(getCache().get(cacheKey));
+	protected CacheResult<ShippingCalculationResult> getCachedShippingCalculationResult(final ShippingCalculationResultCacheKey cacheKey) {
+		final CacheResult<ShippingCalculationResult> result = getCache().get(cacheKey);
 
 		if (LOG.isDebugEnabled()) {
 			if (result.isPresent()) {

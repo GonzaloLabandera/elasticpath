@@ -49,32 +49,6 @@
 		factory="${ep.jms.factory}"
 		brokerURL="failover:${ep.jms.url}"
 		/>
-	<Resource name="jdbc/epjndi-xa"
-			  auth="Container"
-			  scope="Shareable"
-			  type="${epdb.data.source.xa.type}"
-			  maxActive="100"
-			  maxIdle="30"
-			  maxWait="10000"
-			  removeAbandoned="true"
-			  user="${epdb.synctarget.username}"
-			  password="${epdb.synctarget.password}"
-			  driverClassName="${epdb.synctarget.jdbc.driver}"
-			  factory="${epdb.data.source.xa.factory}"
-			  pinGlobalTxToPhysicalConnection="true"
-			  url="${epdb.synctarget.url}"
-	/>
-	<Resource name="jms/JMSConnectionFactory-xa"
-			  auth="Container"
-			  type="${ep.jms.xa.type}"
-			  maxConnections="25"
-			  maximumActiveSessionPerConnection="25"
-			  idleTimeout="10000"
-			  description="XA JMS Connection Factory"
-			  factory="${ep.jms.xa.factory}"
-			  brokerURL="failover:${ep.synctarget.jms.url}"
-	/>
-
 
 </Context>
 

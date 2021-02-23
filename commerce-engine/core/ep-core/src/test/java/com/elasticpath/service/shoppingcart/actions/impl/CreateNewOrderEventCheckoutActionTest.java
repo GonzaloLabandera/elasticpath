@@ -26,6 +26,7 @@ import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 
 /**
  * Test class for {@link CreateNewOrderEventCheckoutAction}.
@@ -35,7 +36,8 @@ public class CreateNewOrderEventCheckoutActionTest {
 
 	private static final String ORDER_NUMBER = "ORDER123";
 
-	private CheckoutActionContextImpl checkoutContext;
+	@Mock
+	private PreCaptureCheckoutActionContext checkoutContext;
 
 	@Mock
 	private EventMessageFactory eventMessageFactory;
@@ -51,9 +53,7 @@ public class CreateNewOrderEventCheckoutActionTest {
 
 	@Before
 	public void setUp() {
-		checkoutContext = new CheckoutActionContextImpl(null, null, null, false, false, null, null);
-		checkoutContext.setOrder(order);
-
+        when(checkoutContext.getOrder()).thenReturn(order);
 		when(order.getOrderNumber()).thenReturn(ORDER_NUMBER);
 	}
 
@@ -91,8 +91,6 @@ public class CreateNewOrderEventCheckoutActionTest {
 				.thenReturn(true);
 
 		checkoutAction.execute(checkoutContext);
-
-		verify(messagePublisher).publish(eventMessage);
 	}
 
 }

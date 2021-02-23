@@ -155,7 +155,7 @@ public class ImportExportDTOExtensionTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(importerFactory).createImporter(exporter.getJobType(), importContext, null);
+				allowing(importerFactory).createImporter(exporter.getJobType().getTagName(), importContext, null);
 				will(returnValue(importer));
 			}
 		});
@@ -243,7 +243,7 @@ public class ImportExportDTOExtensionTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(importerFactory).createImporter(exporter.getJobType(), importContext, null);
+				allowing(importerFactory).createImporter(exporter.getJobType().getTagName(), importContext, null);
 				will(returnValue(importer));
 			}
 		});
@@ -307,7 +307,7 @@ public class ImportExportDTOExtensionTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(importerFactory).createImporter(exporter.getJobType(), importContext, null);
+				allowing(importerFactory).createImporter(exporter.getJobType().getTagName(), importContext, null);
 				will(returnValue(importer));
 			}
 		});

@@ -19,8 +19,8 @@ public class SettingsSearchHostLocatorImplTest {
 	private static final String HTTP_MASTER_URL = "http://masterurl";
 	private static final String HTTP_DEFAULT_URL = "http://defaulturl";
 
-	private SettingValueProvider<String> defaultSearchHostLocationProvider;
-	private SettingValueProvider<String> masterSearchHostLocationProvider;
+	private SettingValueProvider<String> replicaSearchHostLocationProvider;
+	private SettingValueProvider<String> primarySearchHostLocationProvider;
 
 	private SettingsSearchHostLocatorImpl locator;
 
@@ -29,12 +29,12 @@ public class SettingsSearchHostLocatorImplTest {
 	 */
 	@Before
 	public void setUp() {
-		defaultSearchHostLocationProvider = new SimpleSettingValueProvider<>(HTTP_DEFAULT_URL);
-		masterSearchHostLocationProvider = new SimpleSettingValueProvider<>(HTTP_MASTER_URL);
+		replicaSearchHostLocationProvider = new SimpleSettingValueProvider<>(HTTP_DEFAULT_URL);
+		primarySearchHostLocationProvider = new SimpleSettingValueProvider<>(HTTP_MASTER_URL);
 
 		locator = new SettingsSearchHostLocatorImpl();
-		locator.setDefaultSearchHostLocationProvider(defaultSearchHostLocationProvider);
-		locator.setMasterSearchHostLocationProvider(masterSearchHostLocationProvider);
+		locator.setReplicaSearchHostLocationProvider(replicaSearchHostLocationProvider);
+		locator.setPrimarySearchHostLocationProvider(primarySearchHostLocationProvider);
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class SettingsSearchHostLocatorImplTest {
 	 */
 	@Test
 	public void testReturnMasterHostUrl() {
-		locator.setRequiresMaster(true);
+		locator.setRequiresMaster("true");
 		assertEquals("The URL should be the value returned by the settings reader for the master context", HTTP_MASTER_URL,
 				locator.getSearchHostLocation());
 	}
@@ -52,7 +52,7 @@ public class SettingsSearchHostLocatorImplTest {
 	 */
 	@Test
 	public void testReturnDefaultHostUrl() {
-		locator.setRequiresMaster(false);
+		locator.setRequiresMaster("false");
 		assertEquals("The URL should be the value returned by the settings reader for the default contect", HTTP_DEFAULT_URL,
 				locator.getSearchHostLocation());
 	}

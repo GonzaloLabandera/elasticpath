@@ -4,22 +4,18 @@
 package com.elasticpath.caching.core.pricing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Currency;
+import java.util.function.Function;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableList;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -29,7 +25,6 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.pricing.BaseAmount;
 import com.elasticpath.domain.pricing.PriceListStack;
 import com.elasticpath.domain.pricing.impl.PriceListStackImpl;
-import com.elasticpath.service.pricing.BaseAmountFinder;
 import com.elasticpath.service.pricing.datasource.BaseAmountDataSource;
 
 /**
@@ -42,9 +37,6 @@ public class CachingBaseAmountFinderImplTest {
 	private static final String PLGUID1 = "PLGUID1";
 	private static final String PLGUID2 = "PLGUID2";
 	private static final Currency CURRENCY = Currency.getInstance("CAD");
-
-	@Mock
-	private BaseAmountFinder fallBackFinder;
 
 	@Mock
 	private Cache<PricingCacheKey, Collection<BaseAmount>> cache;
@@ -72,39 +64,19 @@ public class CachingBaseAmountFinderImplTest {
 		priceListStack.addPriceList(PLGUID2);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testGetBaseAmountsLoadsFromFallbackOnCacheMiss() {
-
+	public void testGetBaseAmountsLoadsFromCache() {
 		// Given
 		Collection<BaseAmount> expectedBaseAmounts = ImmutableList.of(baseAmount);
 		PricingCacheKey pricingCacheKey = new PricingCacheKey(priceListStack, SKUCODE);
-		when(cache.get(pricingCacheKey)).thenReturn(null);
-		when(fallBackFinder.getBaseAmounts(sku, priceListStack, baseAmountDataSource)).thenReturn(expectedBaseAmounts);
+		when(cache.get(eq(pricingCacheKey), any(Function.class))).thenReturn(expectedBaseAmounts);
 
 		// When
 		final Collection<BaseAmount> result = cachingBaseAmountFinder.getBaseAmounts(sku, priceListStack, baseAmountDataSource);
 
 		// Then
 		assertThat(result).isSameAs(expectedBaseAmounts);
-		verify(cache).put(pricingCacheKey, expectedBaseAmounts);
-
-	}
-
-	@Test
-	public void testGetBaseAmountsLoadsFromCacheOnCacheHit() {
-		// Given
-		Collection<BaseAmount> expectedBaseAmounts = ImmutableList.of(baseAmount);
-		PricingCacheKey pricingCacheKey = new PricingCacheKey(priceListStack, SKUCODE);
-		when(cache.get(pricingCacheKey)).thenReturn(expectedBaseAmounts);
-
-		// When
-		final Collection<BaseAmount> result = cachingBaseAmountFinder.getBaseAmounts(sku, priceListStack, baseAmountDataSource);
-
-		// Then
-		assertThat(result).isSameAs(expectedBaseAmounts);
-		verify(cache, never()).put(eq(pricingCacheKey), anyCollection());
-		verifyNoMoreInteractions(fallBackFinder);
-
 	}
 
 }

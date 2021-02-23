@@ -64,4 +64,11 @@ public interface ShoppingItemPricingSnapshot {
 	 */
 	PriceCalculator getPriceCalc();
 
+	/**
+	 * Returns {@code true} if this pricing snapshot has a price; otherwise {@code false}. Note that a price of $0.00 is a valid price and would
+	 * result in a return value of {code true}.
+	 *
+	 * @return {@code true} if this pricing snapshot has a price
+	 */
+	boolean hasPrice();
 }

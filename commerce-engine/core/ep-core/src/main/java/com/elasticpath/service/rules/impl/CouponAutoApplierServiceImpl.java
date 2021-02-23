@@ -52,20 +52,26 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 	 */
 	protected Set<String> getValidCustomerEligibleCouponCodes(final Store store, final String customerEmailAddress) {
 		// user specific coupons are only applicable if the user has an email address
-		Set<String> userSpecificCoupons = new HashSet<>();
+		final Set<String> userSpecificCoupons = new HashSet<>();
 		if (!StringUtils.isEmpty(customerEmailAddress)) {
 			final Collection<CouponUsage> eligibleUsages =
 					getCouponUsageService().findEligibleUsagesByEmailAddress(customerEmailAddress, store.getUidPk());
 			for (CouponUsage usage : eligibleUsages) {
 				final String couponCode = usage.getCoupon().getCouponCode();
-				Coupon coupon = couponService.findByCouponCode(couponCode);
-				if (usage.isActiveInCart() && getCouponUsageService().validateCouponRuleAndUsage(
-						coupon, store.getCode(), customerEmailAddress).isSuccess()) {
+				if (shouldBeAdded(couponCode, usage, store, customerEmailAddress)) {
 					userSpecificCoupons.add(couponCode);
 				}
 			}
 		}
 		return userSpecificCoupons;
+	}
+
+	private boolean shouldBeAdded(final String couponCode, final CouponUsage usage, final Store store, final String customerEmailAddress) {
+		final Coupon coupon = couponService.findByCouponCode(couponCode);
+		final CouponUsageType usageType = coupon.getCouponConfig().getUsageType();
+		return usageType == CouponUsageType.LIMIT_PER_SPECIFIED_USER
+				&& usage.isAutoApplyToCarts()
+				&& getCouponUsageService().validateCouponRuleAndUsage(coupon, store.getCode(), customerEmailAddress, usage).isSuccess();
 	}
 
 	/**
@@ -80,7 +86,7 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 		final Set<String> couponsToRemove = new HashSet<>();
 		for (String couponCode : coupons) {
 			Coupon coupon = couponService.findByCouponCode(couponCode);
-			if (!getCouponUsageService().validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress).isSuccess()) {
+			if (!getCouponUsageService().validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress, null).isSuccess()) {
 				couponsToRemove.add(couponCode);
 			}
 		}

@@ -6,6 +6,7 @@ package com.elasticpath.datapopulation.core.action;
 import java.util.List;
 
 import com.elasticpath.datapopulation.core.context.DataPopulationContext;
+import com.elasticpath.datapopulation.core.utils.DataPopulationReactorLogger;
 
 /**
  * The executor which contains the list of actions to execute. Follows the composite pattern.
@@ -21,8 +22,15 @@ public class CompositeDataPopulationAction implements DataPopulationAction {
 	 */
 	public void execute(final DataPopulationContext dataPopulationContext) {
 		for (DataPopulationAction action : getDataPopulationActions()) {
+			DataPopulationReactorLogger.logExecuteAction(dataPopulationContext, action);
 			action.execute(dataPopulationContext);
 		}
+	}
+
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		// Composite actions should not return a description
+		return null;
 	}
 
 	//Getters and Setters

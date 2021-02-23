@@ -142,8 +142,8 @@ public class PromotionRuleImpl extends AbstractRuleImpl {
 			if (getRuleSet().getScenario() == RuleScenarios.CART_SCENARIO) {
 				code.append("\t\tcart: ShoppingCart ( ) \n");
 				code.append("\t\tdiscountItemContainer: DiscountItemContainer ( ) \n");
-				code.append("exists ActiveRule ( ruleId == ").append(getUidPk()).append(')');
-		}
+			}
+
 			if (getRuleSet().getScenario() == RuleScenarios.CATALOG_BROWSE_SCENARIO) {
 				code.append("\t\tproduct: Product ( )\n\n");
 				code.append("\t\tprices: Map ( )\n\n");
@@ -151,6 +151,9 @@ public class PromotionRuleImpl extends AbstractRuleImpl {
 				//"Enable Date/Time" and "Expiration Date/Time" for catalogue promotion only.
 				code.append("\t\teval ( delegate.checkDateRange(\"").append(startDate).append("\",\"").append(endDate).append("\") )\n");
 			}
+
+			code.append("\t\texists ActiveRule ( ruleId == ").append(getUidPk()).append(")\n");
+
 			code.append("\t\teval ( delegate.checkEnabled(\"").append(this.isEnabled()).append("\") )\n");
 	
 			// Conditions and eligibilities

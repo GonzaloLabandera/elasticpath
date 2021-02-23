@@ -25,7 +25,6 @@ import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.CustomerPaymentInstrument;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.store.Store;
@@ -50,9 +49,6 @@ public class PaymentMethodShoppingCartValidatorTest {
 
 	@Mock
 	private CartOrder cartOrder;
-
-	@Mock
-	private Shopper shopper;
 
 	@Mock
 	private Customer customer;
@@ -83,8 +79,7 @@ public class PaymentMethodShoppingCartValidatorTest {
 		given(context.getShoppingCart()).willReturn(shoppingCart);
 		given(context.getShoppingCart().getStore()).willReturn(store);
 		given(store.getCode()).willReturn(STORECODE);
-		given(shoppingCart.getShopper()).willReturn(shopper);
-		given(shoppingCart.getShopper().getCustomer()).willReturn(customer);
+		given(shoppingCart.getCustomer()).willReturn(customer);
 	}
 
 	@Test

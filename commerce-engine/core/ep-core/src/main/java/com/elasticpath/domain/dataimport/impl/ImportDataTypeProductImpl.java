@@ -16,14 +16,15 @@ import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.GlobalConstants;
+import com.elasticpath.commons.enums.InvalidCatalogCodeMessage;
 import com.elasticpath.commons.exception.EpBindException;
+import com.elasticpath.commons.exception.EpInvalidCatalogCodeException;
 import com.elasticpath.commons.exception.EpInvalidGuidBindException;
 import com.elasticpath.commons.exception.EpInvalidValueBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.commons.exception.EpProductInUseException;
 import com.elasticpath.commons.exception.EpTooLongBindException;
 import com.elasticpath.commons.exception.EpUnsupportedOperationException;
-import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.attribute.Attribute;
@@ -75,15 +76,13 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 
 	private String typeName;
 
-	private String guidFieldName;
+	private String productCodeFieldName;
 
 	private static final String IMPORT_JOB_RUNNER_BEAN_NAME = "importJobRunnerProduct";
 
 	private static final String MSG_EXPECTING_A_PRODUCT = "Expecting a product.";
 
 	private ValidatorUtils validatorUtils;
-
-	private Utility utilityBean;
 
 	@Override
 	public void init(final Object object) {
@@ -100,7 +99,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 		// Notice : the sequence of a field get created will be applied to the sequence that the field get displayed in the
 		// import mapping page.
 		// General
-		createImportFieldGuid();
+		createImportFieldCode();
 		createImportFieldDefaultCategory();
 		createImportFieldStartDate();
 		createImportFieldEndDate();
@@ -313,16 +312,16 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 		});
 	}
 
-	private void createImportFieldGuid() {
+	private void createImportFieldCode() {
 		final String importFieldName = PREFIX_OF_FIELD_NAME + "productCode";
-		guidFieldName = importFieldName;
+		productCodeFieldName = importFieldName;
 		addImportField(importFieldName, new AbstractCatalogImportFieldImpl(importFieldName, String.class.toString(), true, true) {
 
 			private static final long serialVersionUID = 5000000001L;
 
 			@Override
 			public String getStringValue(final Object product) {
-				return ((Product) product).getGuid();
+				return ((Product) product).getCode();
 			}
 
 			@Override
@@ -331,15 +330,16 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 					throw new EpNonNullBindException(super.getName());
 				}
 
-				if (!getUtilityBean().isValidGuidStr(value)) {
-					throw new EpInvalidGuidBindException(super.getName());
+				List<InvalidCatalogCodeMessage> messages = getCatalogCodeUtilBean().isValidProductCode(value);
+				if (!messages.isEmpty()) {
+					throw new EpInvalidCatalogCodeException(super.getName(), messages);
 				}
 
 				// Prevent changing the product guid in case-insensitive databases. The product guid is used in the productCategory hashCode so
 				// modifying the guid will result in an inconsistent hashSet of productCategories, resulting in duplicate productCategory references.
 				// For case-sensitive databases this is not a problem since an existing product will only be found if the guid matches exactly.
-				if (StringUtils.isBlank(((Product) product).getGuid())) {
-					((Product) product).setGuid(value);
+				if (StringUtils.isBlank(((Product) product).getCode())) {
+					((Product) product).setCode(value);
 				}
 			}
 
@@ -408,6 +408,11 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 		public void setStringValue(final Object product, final String value, final ImportGuidHelper service) {
 			if (checkNullValue(value)) {
 				throw new EpNonNullBindException(super.getName());
+			}
+
+			List<InvalidCatalogCodeMessage> messages = getCatalogCodeUtilBean().isValidCategoryCode(value);
+			if (!messages.isEmpty()) {
+				throw new EpInvalidCatalogCodeException(super.getName(), messages);
 			}
 
 			final Category defaultCategory = getCategory(service, value);
@@ -606,7 +611,7 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 
 	@Override
 	public String getGuidFieldName() {
-		return guidFieldName;
+		return productCodeFieldName;
 	}
 
 	@Override
@@ -647,8 +652,9 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 					throw new EpNonNullBindException(super.getName());
 				}
 
-				if (!getUtilityBean().isValidGuidStr(value)) {
-					throw new EpInvalidValueBindException(super.getName());
+				List<InvalidCatalogCodeMessage> messages = getCatalogCodeUtilBean().isValidSkuCode(value);
+				if (!messages.isEmpty()) {
+					throw new EpInvalidCatalogCodeException(super.getName(), messages);
 				}
 
 				final Product product = (Product) entity;
@@ -1404,19 +1410,4 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 		this.validatorUtils = validatorUtils;
 	}
 
-	/**
-	 * Gets the utility bean.
-	 *
-	 * @return the utility bean
-	 */
-	protected Utility getUtilityBean() {
-		if (utilityBean == null) {
-			utilityBean = getSingletonBean(ContextIdNames.UTILITY, Utility.class);
-		}
-		return utilityBean;
-	}
-
-	protected void setUtilityBean(final Utility utilityBean) {
-		this.utilityBean = utilityBean;
-	}
 }

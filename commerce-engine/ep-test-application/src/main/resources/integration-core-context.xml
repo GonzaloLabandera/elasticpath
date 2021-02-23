@@ -395,19 +395,14 @@
 
 	<bean id="epRuleEngine" class="com.elasticpath.service.rules.impl.DBCompilingRuleEngineImpl">
 		<property name="ruleSetService" ref="ruleSetService" />
+		<property name="ruleEngineRuleStrategy" ref="ruleEngineRuleStrategy"/>
+		<property name="ruleEngineSessionFactory" ref="ruleEngineSessionFactory"/>
 		<property name="propertiesDao" ref="propertiesDao" />
 		<property name="storeService" ref="nonCachingStoreService" />
 		<property name="ruleService" ref="ruleService" />
-		<property name="dataStrategy" ref="dbRuleEngineDataStrategy" />
 		<property name="timeService" ref="timeService" />
 		<property name="promotionRuleDelegate" ref="promotionRuleDelegate" />
-		<property name="conditionEvaluatorService" ref="conditionEvaluationService"/>
 		<property name="beanFactory" ref="coreBeanFactory" />
-		<property name="statefulSessionConfiguration">
-			<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-				<property name="cache" ref="ruleSessionConfigurationCache"/>
-			</bean>
-		</property>
 	</bean>
 
 	<bean id="ruleParameter" class="com.elasticpath.domain.rules.impl.RuleParameterImpl" scope="prototype" />
@@ -428,10 +423,6 @@
 	<bean id="searchConfigFactory" class="com.elasticpath.service.search.impl.DefaultSearchConfigFactoryImpl">
 		<property name="beanFactory" ref="coreBeanFactory" />
 		<property name="searchHostLocator" ref="searchHostLocator" />
-	</bean>
-
-	<bean id="settingsReader" parent="cachedSettingsReaderTemplate">
-		<property name="refreshStrategyKey" value="sfRefreshStrategy"/>
 	</bean>
 
 	<bean id="contentWrapperLoader" class="com.elasticpath.domain.contentspace.impl.TestContentSpaceMediator$CustomContentWrapperLoaderImpl" />
@@ -502,14 +493,6 @@
 	<bean id="selectableTagValueServiceLocator" class="com.elasticpath.tags.service.impl.SelectableTagValueServiceLocatorImpl">
 		<property name="valueProviders">
 			<map>
-				<entry>
-					<key>
-						<value>gender</value>
-					</key>
-					<bean class="com.elasticpath.tags.service.impl.InternalSelectableStringTagValueProviderImpl">
-						<property name="orderingComparator" ref="orderingComparator"/>
-					</bean>
-				</entry>
 			</map>
 		</property>
 	</bean>

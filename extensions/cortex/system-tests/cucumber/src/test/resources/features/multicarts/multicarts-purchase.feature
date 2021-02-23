@@ -12,7 +12,8 @@ Feature: Registered shoppers can complete purchase of named carts
     When I add alien_sku to cart family with quantity 1
     And the order for cart family is submitted
     Then the HTTP status is OK
-    And cart family total-quantity is 0
+    And I do not have carts with the following names:
+      | family |
 
   Scenario: Purchase of named cart does not affect other named carts
     When I create a new shopping cart with name friends

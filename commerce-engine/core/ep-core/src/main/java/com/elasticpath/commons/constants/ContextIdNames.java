@@ -487,7 +487,7 @@ public final class ContextIdNames {
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	/** bean id for implementation of com.elasticpath.service.CustomerService. */
 	public static final String CUSTOMER_SERVICE = "customerService";
-	
+
 	/** bean id for implementation of com.elasticpath.service.customer.UserAccountAssociationService. */
 	public static final String USER_ACCOUNT_ASSOCIATION_SERVICE = "userAccountAssociationService";
 
@@ -569,9 +569,6 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.service.AttributeService. */
 	public static final String ATTRIBUTE_SERVICE = "attributeService";
 
-	/** bean id for caching implementation of com.elasticpath.service.AttributeService. */
-	public static final String CACHING_ATTRIBUTE_SERVICE = "cachingAttributeService";
-
 	/** bean id for implementation of com.elasticpath.service.CategoryTypeService. */
 	public static final String CATEGORY_TYPE_SERVICE = "categoryTypeService";
 
@@ -607,6 +604,9 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.service.order.OrderReturnSku. */
 	public static final String ORDER_RETURN_SKU = "orderReturnSku";
+
+	/** bean id for implementation of com.elasticpath.domain.order.OrderHold. */
+	public static final String ORDER_HOLD = "orderHold";
 
 	/** bean id for implementation of com.elasticpath.service.GiftCertificateService. */
 	public static final String GIFT_CERTIFICATE_SERVICE = "giftCertificateService";
@@ -728,13 +728,16 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.commons.util.MessageSourceCache. */
 	public static final String MESSAGE_SOURCE_CACHE = "messageSourceCache";
 
+	/** bean id for implementation of com.elasticpath.commons.util.CatalogCodeUtil. */
+	public static final String CATALOG_CODE_UTIL = "catalogCodeUtil";
+
 	/** bean id for implementation of com.elasticpath.commons.util.PasswordGenerator. */
 	public static final String PASSWORD_GENERATOR = "passwordGenerator";
 
 	/** bean id for implementation of org.springframework.security.authentication.encoding.PasswordEncoder. */
 	public static final String PASSWORDENCODER = "passwordEncoder";
 
-	/** bean id for CM User implementation of org.springframework.security.authentication.encoding.PasswordEncoder. */
+	/** bean id for CM User implementation of org.springframework.security.crypto.password.PasswordEncoder. */
 	public static final String CM_PASSWORDENCODER = "cmPasswordEncoder";
 
 	/** bean id for implementation of com.elasticpath.commons.security.PasswordPolicy. */
@@ -1577,7 +1580,7 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.service.catalog.impl.ProductQueryService}. */
 	public static final String PRODUCT_QUERY_SERVICE = "productQueryService";
 
-	/** bean id for {@link com.com.elasticpath.validation.service.impl.ValidatorUtilsImpl}. */
+	/** bean id for {@link com.elasticpath.validation.service.impl.ValidatorUtilsImpl}. */
 	public static final String VALIDATOR_UTILS = "validatorUtils";
 
 	/** bean id for {@link com.elasticpath.domain.shipping.evaluator.impl.ShoppingCartShipmentTypeEvaluator}. */
@@ -1827,8 +1830,25 @@ public final class ContextIdNames {
 	/** bean id for implementation of org.apache.activemq.pool.PooledConnectionFactory. */
 	public static final String POOLED_CONNECTION_FACTORY = "pooledConnectionFactory";
 
-	/** bean id for implementation of com.elasticpath.domain.customer.impl.UserAccountAssociationImpl. */
+	/** bean id for implementation of com.elasticpath.domain.customer.UserAccountAssociation. */
 	public static final String USER_ACCOUNT_ASSOCIATION = "userAccountAssociation";
+
+	/**bean id for implementation of com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutServiceImpl. */
+	public static final String POST_CAPTURE_CHECKOUT_SERVICE = "postCaptureCheckoutService";
+
+	/**
+	 * bean id for implementation of {@link com.elasticpath.service.order.OrderHoldService}.
+	 */
+	public static final String ORDER_HOLD_SERVICE = "orderHoldService";
+
+	/** bean id for implementation of com.elasticpath.domain.messaging.OutboxMessage. */
+	public static final String OUTBOX_MESSAGE = "outboxMessage";
+
+	/** bean id for implementation of com.elasticpath.service.messaging.OutboxMessageService. */
+	public static final String OUTBOX_MESSAGE_SERVICE = "outboxMessageService";
+
+	/** bean id for implementation of com.elasticpath.service.permissions.RoleToPermissionsMappingService. */
+	public static final String ROLE_TO_PERMISSION_MAPPING_SERVICE = "roleToPermissionMappingService";
 
 	private ContextIdNames() {
 		// Do not instantiate this class

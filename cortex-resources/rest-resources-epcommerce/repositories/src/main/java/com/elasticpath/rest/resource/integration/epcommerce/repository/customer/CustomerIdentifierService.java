@@ -19,7 +19,7 @@ public interface CustomerIdentifierService {
      *
      * @return true if customer exists for given parameters.
      */
-    ExecutionResult<Void> isCustomerExists(String userId, String storeCode, String issuer);
+    ExecutionResult<Boolean> isCustomerExists(String userId, String storeCode, String issuer);
 
     /**
      * Util method over deriveCustomer method of corresponding strategy which returns retrieved customer's guid.

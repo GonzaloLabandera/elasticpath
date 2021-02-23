@@ -95,13 +95,6 @@
 </price_list>
 
 <price_list>
-    <guid>0593e983-b24c-47c5-b7de-5e2b867af04d</guid>
-	<description></description>
-    <currency_code>CAD</currency_code>
-    <name>Mobee Female Shopper Price List</name>
-    <hidden>false</hidden>
-</price_list>
-<price_list>
     <guid>d8ef0867-75da-4731-90c1-eee357f7eaf0</guid>
     <description></description>
     <currency_code>CAD</currency_code>

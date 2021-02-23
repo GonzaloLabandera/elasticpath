@@ -85,7 +85,7 @@ public class OrderLockImpl extends AbstractPersistableImpl implements OrderLock 
 
 	/**
 	 * Gets the unique identifier for this domain model object.
-	 * 
+	 *
 	 * @return the unique identifier.
 	 */
 	@Override
@@ -99,17 +99,17 @@ public class OrderLockImpl extends AbstractPersistableImpl implements OrderLock 
 
 	/**
 	 * Sets the unique identifier for this domain model object.
-	 * 
+	 *
 	 * @param uidPk the new unique identifier.
 	 */
 	@Override
 	public void setUidPk(final long uidPk) {
 		this.uidPk = uidPk;
 	}
-	
+
 	/**
 	 * Get the date in milliseconds that this order lock was created on.
-	 * 
+	 *
 	 * @return the created date
 	 */
 	@Override
@@ -121,7 +121,7 @@ public class OrderLockImpl extends AbstractPersistableImpl implements OrderLock 
 
 	/**
 	 * Set the date in milliseconds that the order lock is created.
-	 * 
+	 *
 	 * @param createdDate the start date
 	 */
 	@Override

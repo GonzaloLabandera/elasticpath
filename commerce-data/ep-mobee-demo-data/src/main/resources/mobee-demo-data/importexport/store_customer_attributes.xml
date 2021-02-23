@@ -12,4 +12,16 @@
 		<attribute_key>CP_TAX_EXEMPTION_ID</attribute_key>
 		<policy_key>DEFAULT</policy_key>
 	</store_customer_attribute>
+	<store_customer_attribute>
+		<guid>16ce8648-8303-4ba1-be2d-14c3a0332e1f</guid>
+		<storecode>MOBEE</storecode>
+		<attribute_key>TEST_READONLY_ACCOUNT_ATTRIBUTE_SHORT_TEXT</attribute_key>
+		<policy_key>READ_ONLY</policy_key>
+	</store_customer_attribute>
+	<store_customer_attribute>
+		<guid>c9e7a891-1a9e-4b69-b00a-b6d9657f1c75</guid>
+		<storecode>MOBEE</storecode>
+		<attribute_key>TEST_READONLY_ACCOUNT_ATTRIBUTE_DECIMAL</attribute_key>
+		<policy_key>READ_ONLY</policy_key>
+	</store_customer_attribute>
 </store_customer_attributes>

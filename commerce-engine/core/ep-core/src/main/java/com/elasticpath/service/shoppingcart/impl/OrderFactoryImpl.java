@@ -217,7 +217,8 @@ public class OrderFactoryImpl implements OrderFactory {
 		final Collection<OrderSku> rootItems = getOrderSkuFactory().createOrderSkus(
 						shoppingCart.getShoppingItems(shoppingItem -> !shoppingItem.isBundleConstituent()),
 						taxSnapshot,
-						customerSession.getLocale());
+						customerSession.getLocale(),
+						order.getUidPk());
 
 		final Set<OrderSku> physicalSkus = new HashSet<>();
 		final Set<OrderSku> electronicSkus = new HashSet<>();

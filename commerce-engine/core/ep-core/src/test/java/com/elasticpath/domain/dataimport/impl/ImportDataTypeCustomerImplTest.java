@@ -80,11 +80,10 @@ public class ImportDataTypeCustomerImplTest {
 
 	private static final String[] OPTIONAL_FIELDS = new String[] {
 			IMPORT_FIELD_STATUS, IMPORT_FIELD_PASSWORD, IMPORT_FIELD_CREATIONDATE, IMPORT_FIELD_USERNAME, IMPORT_FIELD_PARENT_GUID,
-			CustomerImpl.ATT_KEY_CP_COMPANY, CustomerImpl.ATT_KEY_CP_DOB, CustomerImpl.ATT_KEY_CP_FAX, CustomerImpl.ATT_KEY_CP_GENDER,
-			CustomerImpl.ATT_KEY_CP_PHONE, CustomerImpl.ATT_KEY_CP_PREF_CURR, CustomerImpl.ATT_KEY_CP_PREF_LOCALE,
-			CustomerImpl.ATT_KEY_CP_BE_NOTIFIED, CustomerImpl.ATT_KEY_CP_BUSINESS_NUMBER, CustomerImpl.ATT_KEY_CP_TAX_EXEMPTION_ID,
-			CustomerImpl.ATT_KEY_AP_BUSINESS_NUMBER, CustomerImpl.ATT_KEY_AP_PHONE, CustomerImpl.ATT_KEY_AP_FAX,
-			CustomerImpl.ATT_KEY_AP_TAX_EXEMPTION_ID};
+			CustomerImpl.ATT_KEY_CP_COMPANY, CustomerImpl.ATT_KEY_CP_DOB, CustomerImpl.ATT_KEY_CP_FAX, CustomerImpl.ATT_KEY_CP_PHONE,
+			CustomerImpl.ATT_KEY_CP_PREF_CURR, CustomerImpl.ATT_KEY_CP_PREF_LOCALE, CustomerImpl.ATT_KEY_CP_BE_NOTIFIED,
+			CustomerImpl.ATT_KEY_CP_BUSINESS_NUMBER, CustomerImpl.ATT_KEY_CP_TAX_EXEMPTION_ID, CustomerImpl.ATT_KEY_AP_BUSINESS_NUMBER,
+			CustomerImpl.ATT_KEY_AP_PHONE, CustomerImpl.ATT_KEY_AP_FAX, CustomerImpl.ATT_KEY_AP_TAX_EXEMPTION_ID };
 
 	private ImportDataTypeCustomerImpl customerImportType;
 

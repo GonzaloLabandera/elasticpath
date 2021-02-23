@@ -4,6 +4,7 @@
 package com.elasticpath.service.customer;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.customer.Customer;
@@ -53,4 +54,24 @@ public interface AccountTreeService {
 	 * @throws EpServiceException       on db error.
 	 */
 	List<String> fetchChildAccountGuids(Customer account) throws IllegalArgumentException, EpServiceException;
+
+	/**
+	 * Fetch the GUIDS of all direct children of the given account.
+	 *
+	 * @param accountId the Account Id for which we want to fetch children for.
+	 * @param pageStartIndex the page start index.
+	 * @param pageSize the number of results per page.
+	 * @return the list of GUIDS for all direct children of the account.
+	 * @throws IllegalArgumentException if the provided Customer is not of type Account.
+	 * @throws EpServiceException       on db error.
+	 */
+	List<String> fetchChildAccountGuidsPaginated(String accountId, int pageStartIndex, int pageSize);
+
+	/**
+	 * Fetch the GUID of the parent account for the account specified by the supplied GUID.
+	 *
+	 * @param accountGuid The guid of the account.
+	 * @return The parent guid.
+	 */
+	Optional<String> fetchParentAccountGuidByChildGuid(String accountGuid);
 }

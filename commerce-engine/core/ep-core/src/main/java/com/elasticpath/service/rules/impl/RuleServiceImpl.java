@@ -47,6 +47,7 @@ import com.elasticpath.service.rules.DuplicatePromoCodeException;
 import com.elasticpath.service.rules.ReportingRuleService;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.RuleSetService;
+import com.elasticpath.service.rules.SellingContextRuleSummary;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.tags.Tag;
@@ -251,8 +252,8 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 		}
 
 		return getPersistentBeanFinder()
-			.withLoadTuners(loadTuner)
-			.get(ContextIdNames.PROMOTION_RULE, ruleUid);
+				.withLoadTuners(loadTuner)
+				.get(ContextIdNames.PROMOTION_RULE, ruleUid);
 	}
 
 	/**
@@ -376,8 +377,8 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 		}
 
 		return getPersistenceEngine()
-			.withLoadTuners(fetchGroupLoadTuner)
-			.retrieveByNamedQueryWithList("RULE_FIND_BY_UIDS", PLACEHOLDER_FOR_LIST, ruleUids);
+				.withLoadTuners(fetchGroupLoadTuner)
+				.retrieveByNamedQueryWithList("RULE_FIND_BY_UIDS", PLACEHOLDER_FOR_LIST, ruleUids);
 	}
 
 	/**
@@ -945,10 +946,24 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	}
 
 	@Override
-	public List<Object[]> findActiveRuleIdSellingContextByScenarioAndStore(final int scenario, final String storeCode) {
+	public List<SellingContextRuleSummary> findActiveRuleIdSellingContextByScenarioAndStore(final int scenario, final String storeCode) {
 
 		return getPersistenceEngine().retrieveByNamedQuery("ACTIVE_RULEID_AND_SELLINGCONTEXT_FIND_BY_SCENARIO_AND_STORE",
 				scenario, storeCode);
+	}
+
+	@Override
+	public List<SellingContextRuleSummary> findActiveRuleIdSellingContextByScenarioAndCatalog(final int scenario, final String catalogCode) {
+
+		return getPersistenceEngine()
+				.retrieveByNamedQuery("ACTIVE_RULEID_AND_SELLINGCONTEXT_FIND_BY_SCENARIO_AND_CATALOG",
+						scenario,
+						catalogCode);
+	}
+
+	@Override
+	public List<SellingContextRuleSummary> findAllActiveRuleIdSellingContext() {
+		return getPersistenceEngine().retrieveByNamedQuery("All_ACTIVE_RULEID_AND_SELLINGCONTEXT");
 	}
 
 	@Override
@@ -1002,6 +1017,8 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 
 		return getPersistenceEngine().retrieveByNamedQueryWithList("RULE_CODE_BY_UIDS", PLACEHOLDER_FOR_LIST, ruleIds);
 	}
+
+
 
 	/**
 	 * @return the {@link ConditionEvaluatorService}

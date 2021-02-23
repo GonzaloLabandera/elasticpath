@@ -3,17 +3,16 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.payments.instruments.order.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CURRENCY;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.PaymentsTestHelpers.CART_ORDER_PAYMENT_INSTRUMENT_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.PaymentsTestHelpers.TEST_MAP;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.PaymentsTestHelpers.createTestPaymentInstrumentDTO;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildOrderPaymentInstrumentEntity;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildOrderPaymentInstrumentIdentifier;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Locale;
@@ -37,6 +36,7 @@ import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrument
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.TestSubjectFactory;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
@@ -100,11 +100,14 @@ public class OrderPaymentInstrumentEntityRepositoryTest {
 				.withAmount(BigDecimal.TEN)
 				.withCurrency("CAD")
 				.build();
+		final Subject subject = TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(SCOPE.getValue(), USER_ID, LOCALE, CURRENCY);
 
 		when(resourceOperationContext.getSubject())
-				.thenReturn(TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(SCOPE.getValue(), USER_ID, LOCALE, CURRENCY));
+				.thenReturn(subject);
 
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_ID);
+		when(customerRepository.getCustomer(USER_ID)).thenReturn(Single.just(customer));
+		when(customerRepository.getCustomerGuid(USER_ID, subject)).thenReturn(USER_ID);
 		when(customerRepository.getCustomer(USER_ID)).thenReturn(Single.just(customer));
 		when(customerPaymentInstrumentRepository.findByCustomer(customer)).thenReturn(Observable.just(customerPaymentInstrument));
 		when(cartOrderPaymentInstrument.getPaymentInstrumentGuid()).thenReturn(PAYMENT_INSTRUMENT_ID);

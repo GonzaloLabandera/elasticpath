@@ -3,14 +3,21 @@
  */
 package com.elasticpath.email.handler.order.helper.impl;
 
+import java.util.List;
+
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.order.OrderHold;
 import com.elasticpath.domain.order.OrderShipment;
+import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.email.domain.EmailProperties;
 import com.elasticpath.email.handler.order.helper.EmailNotificationHelper;
 import com.elasticpath.email.handler.order.helper.OrderEmailPropertyHelper;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.order.OrderHoldService;
 import com.elasticpath.service.order.OrderService;
 
 /**
@@ -21,6 +28,7 @@ public class EmailNotificationHelperImpl implements EmailNotificationHelper {
 
 	private BeanFactory beanFactory;
 	private OrderService orderService;
+	private OrderHoldService orderHoldService;
 	private ProductSkuLookup productSkuLookup;
 
 
@@ -30,6 +38,15 @@ public class EmailNotificationHelperImpl implements EmailNotificationHelper {
 		final OrderEmailPropertyHelper orderEmailPropertyHelper = beanFactory.getSingletonBean(ContextIdNames.EMAIL_PROPERTY_HELPER_ORDER,
 				OrderEmailPropertyHelper.class);
 		return orderEmailPropertyHelper.getOrderConfirmationEmailProperties(order);
+	}
+
+	@Override
+	public EmailProperties getOrderRejectedEmailProperties(final String orderNumber) {
+		final Order order = orderService.findOrderByOrderNumber(orderNumber);
+		final List<OrderHold> orderHolds = orderHoldService.findOrderHoldsByOrderUid(order.getUidPk());
+		final OrderEmailPropertyHelper orderEmailPropertyHelper = beanFactory.getSingletonBean(ContextIdNames.EMAIL_PROPERTY_HELPER_ORDER,
+				OrderEmailPropertyHelper.class);
+		return orderEmailPropertyHelper.getOrderRejectedEmailProperties(order, orderHolds);
 	}
 
 	/**
@@ -52,6 +69,20 @@ public class EmailNotificationHelperImpl implements EmailNotificationHelper {
 		this.beanFactory = beanFactory;
 	}
 
+	/**
+	 * @param orderSku the {@code OrderSku} referencing a particular type of product
+	 * @return the string representation of the product type
+	 * @throws EpServiceException if the product cannot be found
+	 */
+	String getProductTypeNameFromOrderSku(final OrderSku orderSku) {
+		final ProductSku productSku = productSkuLookup.findByGuid(orderSku.getSkuGuid());
+		if (productSku == null) {
+			throw new EpServiceException("ProductSku guid=" + orderSku.getSkuGuid() + " could not be found.");
+		}
+
+		return productSku.getProduct().getProductType().getName();
+	}
+
 	@Override
 	public EmailProperties getShipmentConfirmationEmailProperties(
 			final String orderNumber, final String shipmentNumber) {
@@ -72,5 +103,9 @@ public class EmailNotificationHelperImpl implements EmailNotificationHelper {
 
 	public void setProductSkuLookup(final ProductSkuLookup productSkuLookup) {
 		this.productSkuLookup = productSkuLookup;
+	}
+
+	public void setOrderHoldService(final OrderHoldService orderHoldService) {
+		this.orderHoldService = orderHoldService;
 	}
 }

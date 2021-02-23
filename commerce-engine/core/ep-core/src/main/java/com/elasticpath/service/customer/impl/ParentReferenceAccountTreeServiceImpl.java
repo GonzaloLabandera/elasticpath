@@ -21,6 +21,8 @@ import com.elasticpath.service.customer.CustomerService;
  */
 public class ParentReferenceAccountTreeServiceImpl implements AccountTreeService {
 
+	private static final String ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS = "ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS";
+	private static final String LIST_PARAM_NAME = "guidsThisLevel";
 	private CustomerService customerService;
 
 	@Override
@@ -55,7 +57,7 @@ public class ParentReferenceAccountTreeServiceImpl implements AccountTreeService
 	}
 
 	private void fetchPathToRoot(final String childGuid, final List<String> pathToRoot) {
-		final Optional<String> parentGuid = getParentGuid(childGuid);
+		final Optional<String> parentGuid = fetchParentAccountGuidByChildGuid(childGuid);
 		if (parentGuid.isPresent()) {
 			pathToRoot.add(parentGuid.get());
 			fetchPathToRoot(parentGuid.get(), pathToRoot);
@@ -66,6 +68,15 @@ public class ParentReferenceAccountTreeServiceImpl implements AccountTreeService
 	public List<String> fetchChildAccountGuids(final Customer account) throws IllegalArgumentException, EpServiceException {
 		checkCustomerType(account);
 		return getChildrenGuids(Collections.singletonList(account.getGuid()));
+	}
+
+	@Override
+	public List<String> fetchChildAccountGuidsPaginated(final String accountId, final int pageStartIndex, final int pageSize) {
+		return customerService.getPersistenceEngine().retrieveByNamedQueryWithList(ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS,
+				LIST_PARAM_NAME,
+				Collections.singletonList(accountId),
+				new Object[]{},
+				pageStartIndex, pageSize);
 	}
 
 	private void validateAccounts(final Customer parent, final Customer child) throws IllegalArgumentException {
@@ -86,11 +97,12 @@ public class ParentReferenceAccountTreeServiceImpl implements AccountTreeService
 	}
 
 	private List<String> getChildrenGuids(final List<String> parentGuids) {
-		return customerService.getPersistenceEngine().retrieveByNamedQueryWithList("ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS",
-				"guidsThisLevel", parentGuids);
+		return customerService.getPersistenceEngine().retrieveByNamedQueryWithList(ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS,
+				LIST_PARAM_NAME, parentGuids);
 	}
 
-	private Optional<String> getParentGuid(final String childGuid) {
+	@Override
+	public Optional<String> fetchParentAccountGuidByChildGuid(final String childGuid) {
 		final List<String> guids = customerService.getPersistenceEngine()
 				.retrieveByNamedQuery("ACCOUNT_PARENT_GUID_BY_CHILD_GUID", childGuid);
 		validateParentGuid(guids);

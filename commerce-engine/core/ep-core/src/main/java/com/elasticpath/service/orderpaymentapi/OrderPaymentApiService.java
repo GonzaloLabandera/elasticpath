@@ -81,12 +81,10 @@ public interface OrderPaymentApiService {
 	void orderModified(Order order, List<PaymentInstrumentDTO> paymentInstruments, Money newTotal);
 
 	/**
-	 * Initiates payment actions associated with an explicit refund for the given order.  An explicit refund is a refund
-	 * processed against specified payment instruments, if provided in the paymentInstrumentIds parameter.
+	 * Initiates payment actions associated with a refund for the given order.
 	 *
 	 * @param order              the order
-	 * @param paymentInstruments empty if original PI's to be used (implicit refund), otherwise
-	 *                           the explicit profile payment instruments that need to be used for refund.
+	 * @param paymentInstruments this parameter is currently unused and reserved for future use.
 	 * @param amountToRefund     {@link Money} amount to refund
 	 */
 	void refund(Order order, List<PaymentInstrumentDTO> paymentInstruments, Money amountToRefund);

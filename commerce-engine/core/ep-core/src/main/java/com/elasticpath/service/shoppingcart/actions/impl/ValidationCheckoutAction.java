@@ -8,7 +8,7 @@ import java.util.Collection;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.service.shoppingcart.actions.CheckoutAction;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.exception.CheckoutValidationException;
 import com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService;
 import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
@@ -21,7 +21,7 @@ public class ValidationCheckoutAction implements CheckoutAction {
 	private PurchaseCartValidationService validationService;
 
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		ShoppingCartValidationContext validationContext = validationService.buildContext(context.getShoppingCart());
 
 		Collection<StructuredErrorMessage> errorMessages = validationService.validate(validationContext);

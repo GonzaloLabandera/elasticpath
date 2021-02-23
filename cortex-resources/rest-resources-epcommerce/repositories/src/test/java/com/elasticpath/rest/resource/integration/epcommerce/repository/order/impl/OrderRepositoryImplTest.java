@@ -5,6 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.order.im
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.order.impl.OrderRepositoryImpl.PURCHASE_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -163,6 +164,15 @@ public class OrderRepositoryImplTest {
 		doReturn(ImmutableList.of(root1, root2)).when(order).getRootShoppingItems();
 		assertThat(orderRepository.findShoppingItem(order, ImmutableList.of("root2")))
 				.isEqualTo(root2);
+	}
+
+	@Test
+	public void getAccountGuidAssociatedWithOrderNumber() {
+		when(orderService.getAccountGuidAssociatedWithOrderNumber(anyString())).thenReturn("account_guid");
+
+		orderRepository.getAccountGuidAssociatedWithOrderNumber("test")
+				.test()
+				.assertValue("account_guid");
 	}
 
 	@Test

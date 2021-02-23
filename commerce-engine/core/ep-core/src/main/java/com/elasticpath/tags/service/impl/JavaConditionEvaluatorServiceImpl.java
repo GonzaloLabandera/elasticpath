@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.service.caching.SynchronizedCacheSupport;
+import com.elasticpath.cache.Cache;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.domain.Condition;
@@ -31,7 +31,7 @@ public class JavaConditionEvaluatorServiceImpl implements ConditionEvaluatorServ
 
 	private ConditionDSLBuilder conditionDSLBuilder;
 	private Map<String, ConditionOperatorEvaluator> conditionOperatorEvaluators;
-	private SynchronizedCacheSupport<String, LogicalOperator> decomposedConditionSynchronizedCacheSupport;
+	private Cache<String, LogicalOperator> decomposedConditionCache;
 
 	@Override
 	public boolean evaluateConditionOnTags(final TagSet tags, final ConditionalExpression condition) {
@@ -49,8 +49,8 @@ public class JavaConditionEvaluatorServiceImpl implements ConditionEvaluatorServ
 		if (condition.getConditionString().isEmpty()) {
 			return true;
 		}
-		LogicalOperator logicalOperatorTree = decomposedConditionSynchronizedCacheSupport.cacheResult(
-				aVoid -> conditionDSLBuilder.getLogicalOperationTree(condition.getConditionString()), condition.getConditionString());
+		LogicalOperator logicalOperatorTree = decomposedConditionCache.get(
+				condition.getConditionString(), key -> conditionDSLBuilder.getLogicalOperationTree(key));
 		boolean result = evaluateLogicalOperatorOnMap(tagMap, logicalOperatorTree);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Evaluated condition " + condition.getConditionString() + " with tagSet " + tagMap + " for result " + result);
@@ -136,12 +136,11 @@ public class JavaConditionEvaluatorServiceImpl implements ConditionEvaluatorServ
 				.collect(Collectors.toMap(ConditionOperatorEvaluator::getOperator, Function.identity()));
 	}
 
-	protected SynchronizedCacheSupport<String, LogicalOperator> getDecomposedConditionSynchronizedCacheSupport() {
-		return decomposedConditionSynchronizedCacheSupport;
+	protected Cache<String, LogicalOperator> getDecomposedConditionCache() {
+		return decomposedConditionCache;
 	}
 
-	public void setDecomposedConditionSynchronizedCacheSupport(
-			final SynchronizedCacheSupport<String, LogicalOperator> decomposedConditionSynchronizedCacheSupport) {
-		this.decomposedConditionSynchronizedCacheSupport = decomposedConditionSynchronizedCacheSupport;
+	public void setDecomposedConditionCache(final Cache<String, LogicalOperator> decomposedConditionCache) {
+		this.decomposedConditionCache = decomposedConditionCache;
 	}
 }

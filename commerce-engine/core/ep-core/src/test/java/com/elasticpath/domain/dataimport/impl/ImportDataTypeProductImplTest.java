@@ -35,11 +35,14 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.GlobalConstants;
 import com.elasticpath.commons.exception.EpDateBindException;
 import com.elasticpath.commons.exception.EpIntBindException;
+import com.elasticpath.commons.exception.EpInvalidCatalogCodeException;
 import com.elasticpath.commons.exception.EpInvalidGuidBindException;
 import com.elasticpath.commons.exception.EpInvalidValueBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.commons.exception.EpTooLongBindException;
+import com.elasticpath.commons.util.CatalogCodeUtil;
 import com.elasticpath.commons.util.Utility;
+import com.elasticpath.commons.util.impl.CatalogCodeUtilImpl;
 import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
@@ -170,6 +173,8 @@ public class ImportDataTypeProductImplTest {
 
 	private Catalog masterCatalog;
 
+	private final CatalogCodeUtil catalogCodeUtil = new CatalogCodeUtilImpl();
+
 	private final Utility utility = new UtilityImpl() {
 		private static final long serialVersionUID = 1L;
 
@@ -198,13 +203,14 @@ public class ImportDataTypeProductImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class, validatorUtils);
 		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.CATALOG_CODE_UTIL, CatalogCodeUtil.class, catalogCodeUtil);
 
 		productImportType = createImportDataTypeProduct();
 
 		importGuidHelper = context.mock(ImportGuidHelper.class);
 
 		CatalogLocaleFallbackPolicyFactory localePolicyFactory = new CatalogLocaleFallbackPolicyFactory();
-		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, 
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY,
 				CatalogLocaleFallbackPolicyFactory.class, localePolicyFactory);
 
 		setupSkuOption();
@@ -307,7 +313,7 @@ public class ImportDataTypeProductImplTest {
 	/**
 	 * Test get import field of GUID with an invalid GUID.
 	 */
-	@Test(expected = EpInvalidGuidBindException.class)
+	@Test(expected = EpInvalidCatalogCodeException.class)
 	public void testGetImportFieldOfGuidWithInvalidGuid() {
 		CatalogImportField importField = (CatalogImportField) productImportType.getImportField(ImportDataTypeProductImpl.PREFIX_OF_FIELD_NAME
 				+ PRODUCT_CODE);

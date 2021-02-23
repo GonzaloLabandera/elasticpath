@@ -6,26 +6,15 @@ Feature: Test overriding traits from a client application
   Background:
     Given I am logged in as a public shopper
 
-  Scenario Outline: Verify the default product price for each gender
+  Scenario Outline: Verify the default product prices are the same for male and female users
     When I authenticate as a registered shopper <USERNAME> with the default scope
     And I request the purchase price for item <MOVIE>
     Then I get the purchase price equal to <PRICE>
 
     Examples:
       | USERNAME                    | MOVIE               | PRICE  |
-      | female.user@elasticpath.com | Transformers Female | $19.99 |
+      | female.user@elasticpath.com | Transformers Female | $29.99 |
       | male.user@elasticpath.com   | Transformers Female | $29.99 |
-
-  Scenario Outline: Verify the product price when overriding the personalization header
-    When I authenticate as a registered shopper <USERNAME> with the default scope
-    And I append to the overwritten personalization header the key <HEADER_KEY> and value <HEADER_VALUE>
-    And I request the purchase price for item <MOVIE>
-    Then I get the purchase price equal to <PRICE>
-
-    Examples:
-      | USERNAME                    | MOVIE               | PRICE  | HEADER_KEY      | HEADER_VALUE |
-      | female.user@elasticpath.com | Transformers Female | $29.99 | CUSTOMER_GENDER | M            |
-      | male.user@elasticpath.com   | Transformers Female | $19.99 | CUSTOMER_GENDER | F            |
 
   Scenario: Verify the product price when overriding the personalization header with multiple traits
     Given I am logged in as a public shopper

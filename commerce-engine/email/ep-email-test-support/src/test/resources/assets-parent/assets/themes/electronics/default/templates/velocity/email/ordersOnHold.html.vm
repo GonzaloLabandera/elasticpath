@@ -1,0 +1,36 @@
+#*
+* Copyright (c) Elastic Path Software Inc., 2020
+*#
+## ordersOnHold.html.vm
+#emailInit()
+<?xml-stylesheet href="http://www.w3.org/StyleSheets/TR/W3C-REC.css" type="text/css"?>
+<?xml-stylesheet href="#internalStyle" type="text/css"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <style type="text/css" id="internalStyle">
+
+          .body { width:600px; margin-left:auto; margin-right:auto;
+              background:#fff; color:#333; font-size:11pt; line-height:150%; padding-bottom:20px; border:0;
+              font-family:arial,helvetica,sans-serif;border:2px solid #ccc; }
+
+        .indent {
+           margin-left:30px;
+        }
+
+      </style>
+  </head>
+  <body class="body indent">
+   <p>
+      #emailMessage("email.orderhold.message"): $!storeName
+   </p>
+
+   <p>
+      #emailMessage("email.orderhold.heldOrderCountMessage"): $!heldOrderCount
+    </p>
+
+  </body>
+</html>

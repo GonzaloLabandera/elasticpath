@@ -174,12 +174,6 @@ function set_commerce_manager_version() {
     -f "${project_dir}/commerce-manager/cm-libs/pom.xml" \
     -DnewVersion="${platform_version}"
 
-  # Update com.elasticpath.cmclient.docs POM version
-  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
-    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
-    -f "${project_dir}/commerce-manager/com.elasticpath.cmclient.docs/pom.xml" \
-    -DnewVersion="${platform_version}"
-
   # Update top-level POM version
   mvn ${COMMON_MVN_OPTS} ${maven_settings} \
     org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \

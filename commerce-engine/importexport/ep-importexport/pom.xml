@@ -151,10 +151,6 @@
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-jms</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-jta</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>

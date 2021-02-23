@@ -13,7 +13,7 @@ import com.elasticpath.epcoretool.logic.AbstractRequestReindex;
 /**
  * Adds a rebuild request to the index notification queue.
  */
-@Mojo(name = "request-reindex")
+@Mojo(name = "request-reindex", threadSafe = true)
 public class RequestReindexMojo extends AbstractEpCoreMojo {
 
 	/**

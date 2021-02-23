@@ -24,6 +24,7 @@ import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
 import com.elasticpath.rest.definition.addresses.AddressesIdentifier;
+import com.elasticpath.rest.definition.addresses.ContextAwareAddressIdentifier;
 import com.elasticpath.rest.definition.orders.BillingaddressInfoIdentifier;
 import com.elasticpath.rest.definition.orders.BillingaddressInfoSelectorChoiceIdentifier;
 import com.elasticpath.rest.definition.orders.BillingaddressInfoSelectorIdentifier;
@@ -85,7 +86,7 @@ public class BillingAddressSelectorRepositoryImplTest {
 	private CartOrderRepository cartOrderRepository;
 
 	@Mock
-	private Repository<AddressEntity, AddressIdentifier> addressRepository;
+	private Repository<AddressEntity, ContextAwareAddressIdentifier> addressRepository;
 
 	@Before
 	public void setUp() {
@@ -126,12 +127,12 @@ public class BillingAddressSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoicesReturnsListOfChoosableChoicesWhenSelectedAddressDoesNotExist() {
-		List<AddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
+		List<ContextAwareAddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
 		for (int i = 0; i < NUM_OF_ADDRESSES; i++) {
-			addressIdentifiers.add(AddressIdentifier.builder()
+			addressIdentifiers.add(new ContextAwareAddressIdentifier(AddressIdentifier.builder()
 					.withAddresses(addressesIdentifier)
 					.withAddressId(StringIdentifier.of(String.valueOf(i)))
-					.build());
+					.build()));
 		}
 
 		when(cartOrderRepository.getBillingAddress(cartOrder)).thenReturn(Maybe.empty());
@@ -147,14 +148,14 @@ public class BillingAddressSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoicesReturnsListOfChoicesWhenSelectedAddressExists() {
-		List<AddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
+		List<ContextAwareAddressIdentifier> addressIdentifiers = new ArrayList<>(NUM_OF_ADDRESSES);
 
-		addressIdentifiers.add(AddressIdentifier.builder()
+		addressIdentifiers.add(new ContextAwareAddressIdentifier(AddressIdentifier.builder()
 				.withAddresses(addressesIdentifier)
 				.withAddressId(StringIdentifier.of(NOT_SELECTED_ID))
-				.build());
+				.build()));
 
-		addressIdentifiers.add(addressIdentifier);
+		addressIdentifiers.add(new ContextAwareAddressIdentifier(addressIdentifier));
 
 		when(cartOrderRepository.getBillingAddress(cartOrder)).thenReturn(Maybe.just(selectedAddress));
 		when(addressRepository.findAll(StringIdentifier.of(SCOPE))).thenReturn(Observable.fromIterable(addressIdentifiers));

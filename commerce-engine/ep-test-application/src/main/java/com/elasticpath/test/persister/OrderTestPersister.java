@@ -7,7 +7,6 @@ package com.elasticpath.test.persister;
 import static com.elasticpath.commons.constants.ContextIdNames.CART_ORDER_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.CHECKOUT_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SESSION_SERVICE;
-import static com.elasticpath.commons.constants.ContextIdNames.ORDER_CONFIGURATION_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.PRICING_SNAPSHOT_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.SHOPPER_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART;
@@ -20,10 +19,13 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.event.EventOriginatorHelper;
+import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -33,11 +35,15 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.OrderConfigurationService;
 import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.customer.CustomerSessionService;
+import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutService;
+import com.elasticpath.service.shoppingcart.actions.impl.PostCaptureCheckoutActionContextImpl;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
@@ -61,6 +67,12 @@ public class OrderTestPersister {
 
 	private final CartOrderService cartOrderService;
 
+	private final PostCaptureCheckoutService postCaptureCheckoutService;
+
+	private final EventOriginatorHelper eventOriginatorHelper;
+
+	private final OrderService orderService;
+
 	public OrderTestPersister(final BeanFactory beanFactory, final TestDataPersisterFactory persisterFactory) {
 		this.beanFactory = beanFactory;
 		this.persisterFactory = persisterFactory;
@@ -71,6 +83,9 @@ public class OrderTestPersister {
 		pricingSnapshotService = beanFactory.getSingletonBean(PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
 		taxSnapshotService = beanFactory.getSingletonBean(TAX_SNAPSHOT_SERVICE, TaxSnapshotService.class);
 		cartOrderService = beanFactory.getSingletonBean(CART_ORDER_SERVICE, CartOrderService.class);
+		postCaptureCheckoutService = beanFactory.getSingletonBean(ContextIdNames.POST_CAPTURE_CHECKOUT_SERVICE, PostCaptureCheckoutService.class);
+		orderService = beanFactory.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
+		eventOriginatorHelper = beanFactory.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
 	}
 
 	/**
@@ -155,14 +170,22 @@ public class OrderTestPersister {
 		persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(shoppingCart);
 
 		final boolean throwExceptions = false;
-		getCheckoutService().checkout(shoppingCart, taxSnapshot, customerSession, throwExceptions);
+		CheckoutResults checkoutResults = getCheckoutService().checkout(shoppingCart, taxSnapshot, customerSession, throwExceptions);
 
 		// only one order should have been created by the checkout service
-		return shoppingCart.getCompletedOrder();
+		return postCaptureCheckout(checkoutResults.getOrder());
+	}
+
+	private Order postCaptureCheckout(Order order) {
+		PostCaptureCheckoutActionContext context = new PostCaptureCheckoutActionContextImpl(order);
+		postCaptureCheckoutService.completeCheckout(context);
+		Order postCaptureOrder =  orderService.findOrderByOrderNumber(order.getOrderNumber());
+		postCaptureOrder.setModifiedBy(eventOriginatorHelper.getCustomerOriginator(order.getCustomer()));
+		return postCaptureOrder;
 	}
 
 	OrderConfigurationService getOrderConfigurationService() {
-		return beanFactory.getSingletonBean(ORDER_CONFIGURATION_SERVICE, OrderConfigurationService.class);
+		return beanFactory.getBean("orderConfigurationService");
 	}
 
 	protected CheckoutService getCheckoutService() {

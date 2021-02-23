@@ -15,6 +15,7 @@
 					<xsd:attribute name="path" type="xsd:string" use="required" />
 					<xsd:attribute name="context" type="xsd:string" />
 					<xsd:attribute name="systemPropertyOverrideKey" type="xsd:string" />
+					<xsd:attribute name="deprecatedSystemPropertyOverrideKey" type="xsd:string" />
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>

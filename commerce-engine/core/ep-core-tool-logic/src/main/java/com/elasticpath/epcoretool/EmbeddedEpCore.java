@@ -27,6 +27,7 @@ import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.index.IndexSearchService;
 import com.elasticpath.service.store.StoreService;
+import com.elasticpath.settings.SettingMetadataFactory;
 import com.elasticpath.settings.SettingValueFactory;
 import com.elasticpath.settings.SettingsService;
 
@@ -107,6 +108,15 @@ public class EmbeddedEpCore {
 	 */
 	public SettingValueFactory getSettingValueFactory() {
 		return appCtx.getBean("settingValueFactory", SettingValueFactory.class);
+	}
+
+	/**
+	 * Gets the setting metadata value factory.
+	 *
+	 * @return the setting metadata value factory
+	 */
+	public SettingMetadataFactory getSettingMetadataFactory() {
+		return appCtx.getBean("settingMetadataFactory", SettingMetadataFactory.class);
 	}
 
 	/**

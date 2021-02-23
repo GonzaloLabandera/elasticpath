@@ -3,18 +3,19 @@
  */
 package com.elasticpath.importexport.exporter.exporters.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
 import com.elasticpath.common.dto.customer.UserAccountAssociationDTO;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.UserAccountAssociation;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
 import com.elasticpath.importexport.common.types.JobType;
 import com.elasticpath.importexport.common.util.Message;
 import com.elasticpath.importexport.exporter.context.ExportContext;
+import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.UserAccountAssociationService;
 
 /**
@@ -23,6 +24,8 @@ import com.elasticpath.service.customer.UserAccountAssociationService;
 public class UserAccountAssociationExporterImpl extends AbstractExporterImpl<UserAccountAssociation, UserAccountAssociationDTO, String> {
 
 	private UserAccountAssociationService userAccountAssociationService;
+
+	private CustomerService customerService;
 
 	private static final Logger LOG = Logger.getLogger(UserAccountAssociationExporterImpl.class);
 
@@ -35,7 +38,14 @@ public class UserAccountAssociationExporterImpl extends AbstractExporterImpl<Use
 
 	@Override
 	protected List<UserAccountAssociation> findByIDs(final List<String> subList) {
-		return new ArrayList<>(userAccountAssociationService.findByIDs(subList.stream().map(Long::parseLong).collect(Collectors.toList())));
+		return userAccountAssociationService.findByIDs(subList.stream().map(Long::parseLong).collect(Collectors.toList()))
+				.stream()
+				.filter(this::doesItNotHaveSingleSessionUser)
+				.collect(Collectors.toList());
+	}
+
+	private boolean doesItNotHaveSingleSessionUser(final UserAccountAssociation userAccountAssociation) {
+		return !customerService.findByGuid(userAccountAssociation.getUserGuid()).getCustomerType().equals(CustomerType.SINGLE_SESSION_USER);
 	}
 
 	@Override
@@ -87,6 +97,15 @@ public class UserAccountAssociationExporterImpl extends AbstractExporterImpl<Use
 	 */
 	public void setUserAccountAssociationService(final UserAccountAssociationService userAccountAssociationService) {
 		this.userAccountAssociationService = userAccountAssociationService;
+	}
+
+	/**
+	 * Sets customer service.
+	 *
+	 * @param customerService customer service
+	 */
+	public void setCustomerService(final CustomerService customerService) {
+		this.customerService = customerService;
 	}
 
 	public DomainAdapter<UserAccountAssociation, UserAccountAssociationDTO> getUserAccountAssociationAdapter() {

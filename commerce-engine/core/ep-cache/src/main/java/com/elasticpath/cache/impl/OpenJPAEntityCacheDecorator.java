@@ -6,6 +6,7 @@ package com.elasticpath.cache.impl;
 import java.util.List;
 
 import com.elasticpath.cache.Cache;
+import com.elasticpath.cache.CacheResult;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
 
@@ -19,7 +20,7 @@ import com.elasticpath.persistence.api.PersistenceEngine;
  * @param <K> the class implemented by the cache keys
  * @param <V> the class implemented by the cache values
  */
-public class OpenJPAEntityCacheDecorator<K, V extends Persistable> implements Cache<K, V> {
+public class OpenJPAEntityCacheDecorator<K, V extends Persistable> extends AbstractCacheAdapter<K, V> implements Cache<K, V> {
 	private final PersistenceEngine persistenceEngine;
 	private final Cache<K, V> decoratedCache;
 
@@ -35,7 +36,7 @@ public class OpenJPAEntityCacheDecorator<K, V extends Persistable> implements Ca
 	}
 
 	@Override
-	public V get(final K key) {
+	public CacheResult<V> get(final K key) {
 		return decoratedCache.get(key);
 	}
 
@@ -77,7 +78,7 @@ public class OpenJPAEntityCacheDecorator<K, V extends Persistable> implements Ca
 	}
 
 	@Override
-	public V getByPartialKey(final K partialKey) {
+	public CacheResult<V> getByPartialKey(final K partialKey) {
 		return decoratedCache.getByPartialKey(partialKey);
 	}
 

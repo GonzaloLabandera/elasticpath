@@ -23,6 +23,7 @@ import com.elasticpath.rest.definition.paymentinstruments.PaymentInstrumentIdent
 import com.elasticpath.rest.definition.paymentinstruments.PaymentInstrumentsIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
@@ -37,6 +38,7 @@ public class DefaultPaymentInstrumentLinkRepositoryTest {
 	private static final IdentifierPart<String> SCOPE = StringIdentifier.of("MOBEE");
 	private static final IdentifierPart<String> CUSTOMER_ID = StringIdentifier.of("CUSTOMER_ID");
 	private static final IdentifierPart<String> CUSTOMER_PAYMENT_INSTRUMENT_ID = StringIdentifier.of("CUSTOMER_PAYMENT_INSTRUMENT_ID");
+	private static final String OTHER_CUSTOMER = "other customer";
 
 	@InjectMocks
 	private DefaultPaymentInstrumentLinkRepositoryImpl repository;
@@ -55,6 +57,9 @@ public class DefaultPaymentInstrumentLinkRepositoryTest {
 
 	@Before
 	public void setUp() {
+		final Subject subject = mock(Subject.class);
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+		when(customerRepository.getCustomerGuid(OTHER_CUSTOMER, subject)).thenReturn(CUSTOMER_ID.getValue());
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(CUSTOMER_ID.getValue());
 		when(customerRepository.getCustomer(CUSTOMER_ID.getValue())).thenReturn(Single.just(customer));
 		when(customerPaymentInstrument.getGuid()).thenReturn(CUSTOMER_PAYMENT_INSTRUMENT_ID.getValue());
@@ -68,6 +73,18 @@ public class DefaultPaymentInstrumentLinkRepositoryTest {
 				.thenReturn(customerPaymentInstrument);
 
 		repository.getDefaultPaymentInstrumentIdentifier(createPaymentInstrumentsIdentifier())
+				.test()
+				.assertNoErrors()
+				.assertValue(getExpectedPaymentInstrumentIdentifier());
+	}
+
+	@Test
+	public void getContextAwareDefaultPaymentInstrumentIdentifierReturnsExpectedResult() {
+		when(resourceOperationContext.getUserIdentifier()).thenReturn(OTHER_CUSTOMER);
+		when(filteredPaymentInstrumentService.findDefaultPaymentInstrumentForCustomerAndStore(customer, SCOPE.getValue()))
+				.thenReturn(customerPaymentInstrument);
+
+		repository.getContextAwareDefaultPaymentInstrumentIdentifier(createPaymentInstrumentsIdentifier())
 				.test()
 				.assertNoErrors()
 				.assertValue(getExpectedPaymentInstrumentIdentifier());

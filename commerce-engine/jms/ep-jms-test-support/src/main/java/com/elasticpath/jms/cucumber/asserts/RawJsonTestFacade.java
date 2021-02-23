@@ -22,6 +22,8 @@ import org.json.simple.JSONObject;
 public final class RawJsonTestFacade {
 
 	private static final Logger LOGGER = Logger.getLogger(RawJsonTestFacade.class);
+	private static final String UNABLE_TO_FIND_VALUE_MESSAGE = "Unable to find value: ";
+	private static final String FOR_PATH_MESSAGE = " for path: ";
 
 	/**
 	 * Private constructor.
@@ -110,11 +112,34 @@ public final class RawJsonTestFacade {
 	 * to select message with eventType name = ORDER_CREATED use:
 	 * path  eventType.name
 	 * value ORDER_CREATED
-	 *
+	 * This method asserts that the list is not empty before returning.
 	 * @param jsonObjectList list of messages
 	 * @param path           path to key
 	 * @param value          key value
 	 * @return the JSONObject list
+	 */
+	public static List<JSONObject> getJsonObjectsByPathAndValueAndAssert(final List<JSONObject> jsonObjectList, final String path,
+			final String value) {
+		List<JSONObject> jsonObjects = getJsonObjectsByPathAndValue(jsonObjectList, path, value);
+
+		assertThat(jsonObjects)
+				.as(UNABLE_TO_FIND_VALUE_MESSAGE + value + FOR_PATH_MESSAGE + path)
+				.isNotEmpty();
+
+		return jsonObjects;
+	}
+
+	/**
+	 * Returns list of JsonObject based on path and value
+	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_SHIPMENT_CREATED"},"guid":"80008-1","data":{...
+	 * to select message with eventType name = ORDER_SHIPMENT_CREATED use:
+	 * path  eventType.name
+	 * value ORDER_SHIPMENT_CREATED
+	 * This method does not assert that the object was found - it will return an empty list if the object is not found
+	 * @param jsonObjectList list of messages
+	 * @param path           path to key
+	 * @param value          key value
+	 * @return the JSONObject list - empty if the path and value are not found
 	 */
 	public static List<JSONObject> getJsonObjectsByPathAndValue(final List<JSONObject> jsonObjectList, final String path, final String value) {
 		String jsonPath = "$." + path;
@@ -125,11 +150,6 @@ public final class RawJsonTestFacade {
 				jsonObjects.add(jsonObject);
 			}
 		}
-
-		assertThat(jsonObjects)
-				.as("Unable to find value: " + value + " for path: " + path)
-				.isNotEmpty();
-
 		return jsonObjects;
 	}
 
@@ -143,7 +163,7 @@ public final class RawJsonTestFacade {
 	 * @param jsonObjectList list of messages
 	 * @param path           path to key
 	 * @param value          key value
-	 * @return the JSONObject
+	 * @return the JSONObject - the object will be empty if the path and/or value are not found.
 	 */
 	public static JSONObject getJsonObjectByPathAndValue(final List<JSONObject> jsonObjectList, final String path, final String value) {
 		String jsonPath = "$." + path;
@@ -157,11 +177,56 @@ public final class RawJsonTestFacade {
 				}
 			}
 		} catch (PathNotFoundException pnfe) {
-			LOGGER.error("Unable to find value: " + value + " for path: " + path);
+			LOGGER.error(UNABLE_TO_FIND_VALUE_MESSAGE + value + FOR_PATH_MESSAGE + path);
 		}
 
+		return selectedJsonObject;
+	}
+
+	/**
+	 * Returns true if the value exists at the specified path in the object
+	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_SHIPMENT_CREATED"},"guid":"80008-1","data":{...
+	 * to verify guid = 80008-1 use:
+	 * path  guid
+	 * value 80008-1
+	 *
+	 * @param jsonObject     the JsonObject to parse
+	 * @param path           path to key
+	 * @param value          key value
+	 * @return true if the value at the specified path matches, false otherwise
+	 */
+	public static boolean valueMatches(final JSONObject jsonObject, final String path, final String value) {
+		String jsonPath = "$." + path;
+		try {
+			if (JsonPath.parse(jsonObject.toJSONString()).read(jsonPath) instanceof String
+					&& JsonPath.parse(jsonObject.toJSONString()).read(jsonPath).toString().equals(value)) {
+				return true;
+			}
+		} catch (PathNotFoundException pnfe) {
+			LOGGER.error(UNABLE_TO_FIND_VALUE_MESSAGE + value + FOR_PATH_MESSAGE + path, pnfe);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns JsonObject based on path and value
+	 * example message: {"eventType":{"@class":"OrderEventType","name":"ORDER_SHIPMENT_CREATED"},"guid":"80008-1","data":{...
+	 * to select message with guid = 80008-1 use:
+	 * path  guid
+	 * value 80008-1
+	 * Will assert that the returned object is not empty before returning.
+	 *
+	 * @param jsonObjectList list of messages
+	 * @param path           path to key
+	 * @param value          key value
+	 * @return the JSONObject
+	 */
+	public static JSONObject getJsonObjectByPathAndValueAndAssert(final List<JSONObject> jsonObjectList, final String path, final String value) {
+		JSONObject selectedJsonObject = RawJsonTestFacade.getJsonObjectByPathAndValue(jsonObjectList, path, value);
+
 		assertThat(selectedJsonObject.isEmpty())
-				.as("Unable to find value: " + value + " for path: " + path)
+				.as(UNABLE_TO_FIND_VALUE_MESSAGE + value + FOR_PATH_MESSAGE + path)
 				.isFalse();
 
 		return selectedJsonObject;

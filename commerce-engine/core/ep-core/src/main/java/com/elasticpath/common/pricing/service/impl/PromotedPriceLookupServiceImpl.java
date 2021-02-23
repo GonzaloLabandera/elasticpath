@@ -28,21 +28,26 @@ import com.elasticpath.service.pricing.datasource.BaseAmountDataSourceFactory;
 import com.elasticpath.service.pricing.datasource.BaseAmountDataSourceFactoryBuilder;
 import com.elasticpath.service.pricing.datasource.impl.NoPreprocessBaseAmountDataSourceFactory;
 import com.elasticpath.service.rules.EpRuleEngine;
+import com.elasticpath.settings.provider.SettingValueProvider;
+import com.elasticpath.tags.TagSet;
 
 /**
  * This class looks up the promoted price for products/SKUs.
  */
 public class PromotedPriceLookupServiceImpl implements PromotedPriceLookupService {
 
+	private static final Logger LOG = Logger.getLogger(PromotedPriceLookupServiceImpl.class);
+
 	private PriceLookupService priceLookupService;
 	private PricedEntityFactory pricedEntityFactory;
 	private BundleIdentifier bundleIdentifier;
 	private EpRuleEngine epRuleEngine;
 	private BeanFactory beanFactory;
-	private static final Logger LOG = Logger.getLogger(PromotedPriceLookupServiceImpl.class);
+
+	private SettingValueProvider<Boolean> catalogPromotionsEnabledProvider;
 
 	@Override
-	public Map<String, Price> getSkuPrices(final ProductSku sku, final PriceListStack plStack, final Store store) {
+	public Map<String, Price> getSkuPrices(final ProductSku sku, final PriceListStack plStack, final Store store, final TagSet tagSet) {
 		if (getBundleIdentifier().isCalculatedBundle(sku)) {
 			LOG.error("Operation is not supported on calculated bundles.");
 			return Collections.emptyMap();
@@ -50,50 +55,50 @@ public class PromotedPriceLookupServiceImpl implements PromotedPriceLookupServic
 		Map<String, Price> prices = priceLookupService.getSkuPrices(sku, plStack);
 
 		for (Price price : prices.values()) {
-			applyCatalogPromotions(sku.getProduct(), store, price.getCurrency(), price);
+			applyCatalogPromotions(sku.getProduct(), store, price.getCurrency(), price, tagSet);
 		}
 		return prices;
 	}
 
 	@Override
-	public Price getSkuPrice(final ProductSku sku, final PriceListStack plStack, final Store store) {
-		return getSkuPrice(sku, plStack, store, new NoPreprocessBaseAmountDataSourceFactory());
+	public Price getSkuPrice(final ProductSku sku, final PriceListStack plStack, final Store store, final TagSet tagSet) {
+		return getSkuPrice(sku, plStack, store, new NoPreprocessBaseAmountDataSourceFactory(), tagSet);
 	}
 
 	private Price getSkuPrice(final ProductSku sku, final PriceListStack plStack, final Store store,
-								final BaseAmountDataSourceFactory dataSourceFactory) {
-		PriceProvider priceProvider = getPriceProvider(store, plStack, dataSourceFactory);
+			final BaseAmountDataSourceFactory dataSourceFactory, final TagSet tagSet) {
+		PriceProvider priceProvider = getPriceProvider(store, plStack, dataSourceFactory, tagSet);
 		Price priceForSku = getPricedEntityFactory().createPricedProductSku(sku, plStack, priceProvider, dataSourceFactory).getPrice();
 		if (priceForSku != null) {
-			applyCatalogPromotions(sku.getProduct(), store, priceForSku.getCurrency(), priceForSku);
+			applyCatalogPromotions(sku.getProduct(), store, priceForSku.getCurrency(), priceForSku, tagSet);
 		}
 		return priceForSku;
 	}
 
 	@Override
-	public Price getProductPrice(final Product product, final PriceListStack plStack, final Store store) {
-		return getProductPrice(product, plStack, store, new NoPreprocessBaseAmountDataSourceFactory());
+	public Price getProductPrice(final Product product, final PriceListStack plStack, final Store store, final TagSet tagSet) {
+		return getProductPrice(product, plStack, store, new NoPreprocessBaseAmountDataSourceFactory(), tagSet);
 	}
 
 	@Override
 	public Price getProductPrice(final Product product, final PriceListStack plStack, final Store store,
-									final BaseAmountDataSourceFactory dataSourceFactory) {
-		PriceProvider priceProvider = getPriceProvider(store, plStack, dataSourceFactory);
+			final BaseAmountDataSourceFactory dataSourceFactory, final TagSet tagSet) {
+		PriceProvider priceProvider = getPriceProvider(store, plStack, dataSourceFactory, tagSet);
 		return getPricedEntityFactory().createPricedProduct(product, priceProvider).getPrice();
 	}
 
 	private PriceProvider getPriceProvider(final Store store, final PriceListStack plStack,
-											final BaseAmountDataSourceFactory dataSourceFactory) {
+			final BaseAmountDataSourceFactory dataSourceFactory, final TagSet tagSet) {
 		return new PriceProvider() {
 
 			@Override
 			public Price getProductSkuPrice(final ProductSku productSku) {
-				return PromotedPriceLookupServiceImpl.this.getSkuPrice(productSku, plStack, store, dataSourceFactory);
+				return PromotedPriceLookupServiceImpl.this.getSkuPrice(productSku, plStack, store, dataSourceFactory, tagSet);
 			}
 
 			@Override
 			public Price getProductPrice(final Product product) {
-				return PromotedPriceLookupServiceImpl.this.getProductPrice(product, plStack, store, dataSourceFactory);
+				return PromotedPriceLookupServiceImpl.this.getProductPrice(product, plStack, store, dataSourceFactory, tagSet);
 			}
 
 			@Override
@@ -105,30 +110,42 @@ public class PromotedPriceLookupServiceImpl implements PromotedPriceLookupServic
 
 	@Override
 	public Map<String, Price> getProductsPrices(final Collection<Product> products,
-												final PriceListStack plStack, final Store store) {
+			final PriceListStack plStack, final Store store, final TagSet tagSet) {
 		final Map<String, Price> productCodePrice = new HashMap<>(products.size());
 		BaseAmountDataSourceFactoryBuilder builder = getDataSourceFactoryBuilder();
 		BaseAmountDataSourceFactory dataSourceFactory = builder.priceListStack(plStack).products(products).build();
 		for (Product product : products) {
-			Price price = getProductPrice(product, plStack, store, dataSourceFactory);
+			Price price = getProductPrice(product, plStack, store, dataSourceFactory, tagSet);
 			productCodePrice.put(product.getCode(), price);
 		}
 		return productCodePrice;
 	}
 
 	/**
-	 * @param product product
-	 * @param store store
-	 * @param currency currency
+	 * @param product     product
+	 * @param store       store
+	 * @param currency    currency
 	 * @param priceForSku price for sku
+	 * @param tagSet set of tags within customer session
 	 */
 	@Override
 	public void applyCatalogPromotions(final Product product, final Store store, final Currency currency,
-									   final Price priceForSku) {
+									   final Price priceForSku, final TagSet tagSet) {
+		if (!getCatalogPromotionsEnabledProvider().get()) {
+			return;
+		}
 		if (!getBundleIdentifier().isCalculatedBundle(product)) {
 			getEpRuleEngine().fireCatalogPromotionRules(Arrays.asList(product), currency, store,
-					Collections.singletonMap(product.getCode(), Arrays.asList(priceForSku)));
+					Collections.singletonMap(product.getCode(), Arrays.asList(priceForSku)), tagSet);
 		}
+	}
+
+	protected SettingValueProvider<Boolean> getCatalogPromotionsEnabledProvider() {
+		return catalogPromotionsEnabledProvider;
+	}
+
+	public void setCatalogPromotionsEnabledProvider(final SettingValueProvider<Boolean> catalogPromotionsEnabledProvider) {
+		this.catalogPromotionsEnabledProvider = catalogPromotionsEnabledProvider;
 	}
 
 	protected BaseAmountDataSourceFactoryBuilder getDataSourceFactoryBuilder() {

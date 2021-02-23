@@ -1125,14 +1125,6 @@
     <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
 </base_amount>
 <base_amount>
-    <guid>1F194DDF-19FD-C869-6690-8B0A3EB48B85</guid>
-    <object_guid>transformers01</object_guid>
-    <object_type>PRODUCT</object_type>
-    <quantity>1.00</quantity>
-    <list_price>19.99</list_price>
-    <price_list_guid>0593e983-b24c-47c5-b7de-5e2b867af04d</price_list_guid>
-</base_amount>
-<base_amount>
     <guid>FF7BDB37-2747-514F-3F48-413671358173</guid>
     <object_guid>transformers02</object_guid>
     <object_type>PRODUCT</object_type>

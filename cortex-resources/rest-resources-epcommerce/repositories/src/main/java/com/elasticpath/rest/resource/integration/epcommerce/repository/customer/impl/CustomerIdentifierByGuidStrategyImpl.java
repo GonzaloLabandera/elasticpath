@@ -9,6 +9,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerIdentifierStrategy;
@@ -36,13 +37,13 @@ public class CustomerIdentifierByGuidStrategyImpl implements CustomerIdentifierS
 	}
 
 	@Override
-	public ExecutionResult<Void> isCustomerExists(final String userId, final String storeCode, final String customerIdentifierKey) {
+	public ExecutionResult<Boolean> isCustomerExists(final String userId, final String storeCode, final String customerIdentifierKey) {
 		return customerRepository.isCustomerGuidExists(userId);
 	}
 
 	@Override
 	public ExecutionResult<String> deriveCustomerGuid(final String userId, final String storeCode, final String customerIdentifierKey) {
-		ExecutionResult<Void> executionResult = customerRepository.isCustomerGuidExists(userId);
+		ExecutionResult<Boolean> executionResult = customerRepository.isCustomerGuidExists(userId);
 		if (executionResult.isFailure()) {
 			return ExecutionResultFactory.createNotFound();
 		}
@@ -52,5 +53,10 @@ public class CustomerIdentifierByGuidStrategyImpl implements CustomerIdentifierS
 	@Override
 	public String getCustomerIdentificationKeyField() {
 		return customerIdentificationKeyField;
+	}
+
+	@Override
+	public ExecutionResult<String> deriveUserIdFromCustomer(final Customer customer) {
+		return ExecutionResultFactory.createReadOK(customer.getGuid());
 	}
 }

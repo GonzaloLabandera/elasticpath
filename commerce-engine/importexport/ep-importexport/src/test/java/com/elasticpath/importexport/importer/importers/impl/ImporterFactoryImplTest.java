@@ -36,7 +36,7 @@ public class ImporterFactoryImplTest {
 	public void testCreateImporterForNonSupportedJobType() throws Exception {
 		final ImporterFactoryImpl factory = new ImporterFactoryImpl();
 		factory.setImporterMap(new HashMap<>());
-		factory.createImporter(JobType.ASSETS, null, null);
+		factory.createImporter(JobType.ASSETS.getTagName(), null, null);
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class ImporterFactoryImplTest {
 
 		importerMap.put(JobType.PRODUCT, importer);
 		factory.setImporterMap(importerMap);
-		factory.createImporter(JobType.PRODUCT, importContext, null);
+		factory.createImporter(JobType.PRODUCT.getTagName(), importContext, null);
 	}
 
 	/** This type was added to fix a checkstyle EOF exception. */

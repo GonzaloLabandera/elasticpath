@@ -9,38 +9,32 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
-import com.elasticpath.cmclient.core.BeanLocator;
-import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.wizard.EpWizardDialog;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareHandler;
 import com.elasticpath.cmclient.store.promotions.wizard.NewCatalogPromotionWizard;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.service.changeset.ChangeSetMemberAction;
-import com.elasticpath.service.rules.RuleService;
 
 /**
  * Creates a catalog promotion by opening up the new store promotion wizard. If the wizard is
  * completed successfully, the promotion is saved.
  */
 public class CreateCatalogPromoHandler extends AbstractPolicyAwareHandler {
-	
-	private final PolicyActionContainer handlerContainer = addPolicyActionContainer("createCatalogPromoHandler"); //$NON-NLS-1$		
 
-	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
+	private final PolicyActionContainer handlerContainer = addPolicyActionContainer("createCatalogPromoHandler"); //$NON-NLS-1$
 
 	@Override
 	public Object execute(final ExecutionEvent arg0) throws ExecutionException {
 		final NewCatalogPromotionWizard wizard = new NewCatalogPromotionWizard();
 		final WizardDialog dialog = new EpWizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);
+		dialog.setMinimumPageSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+		dialog.addPageChangingListener(wizard);
 
-		if (dialog.open() == Window.OK) {
-			final RuleService ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
-			ruleService.add(wizard.getModel());
-			changeSetHelper.addObjectToChangeSet(wizard.getModel(), ChangeSetMemberAction.ADD);
+		if (Window.OK == dialog.open()) {
+			return wizard.getModel();
 		}
-		return wizard.getModel();
+
+		return null;
 	}
 	
 	@Override

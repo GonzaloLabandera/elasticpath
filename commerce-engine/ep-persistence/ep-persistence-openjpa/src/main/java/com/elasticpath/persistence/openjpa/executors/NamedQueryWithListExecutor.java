@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.apache.openjpa.persistence.OpenJPAQuery;
 
@@ -24,7 +23,7 @@ import com.elasticpath.persistence.api.Persistable;
 /**
  * A specialized version of the {@link NamedQueryExecutor} executor that executes named queries with list of values.
  * E..g SELECT x From XImpl where x.uidPk IN (:list)
- * 
+ *
  * @param <V> value type
  * @param <T> entity type
  */
@@ -180,8 +179,6 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 
 	@SuppressWarnings("unchecked")
 	private List<T> executeWithParametersAndLimit(final OpenJPAQuery namedQuery) {
-
-		assert ArrayUtils.isNotEmpty(arrayParameters);
 
 		namedQuery.setParameters(arrayParameters);
 

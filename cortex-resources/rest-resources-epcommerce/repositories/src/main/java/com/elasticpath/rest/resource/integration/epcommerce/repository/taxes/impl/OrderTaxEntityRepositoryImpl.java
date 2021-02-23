@@ -12,7 +12,7 @@ import org.springframework.core.convert.ConversionService;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.taxes.OrderTaxIdentifier;
 import com.elasticpath.rest.definition.taxes.TaxesEntity;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.TaxesCalculator;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.CartTotalsCalculator;
 import com.elasticpath.service.tax.TaxCalculationResult;
 
 /**
@@ -25,7 +25,7 @@ public class OrderTaxEntityRepositoryImpl<E extends TaxesEntity, I extends Order
 		implements Repository<TaxesEntity, OrderTaxIdentifier> {
 
 	private ConversionService conversionService;
-	private TaxesCalculator taxesCalculator;
+	private CartTotalsCalculator cartTotalsCalculator;
 
 	@Override
 	public Single<TaxesEntity> findOne(final OrderTaxIdentifier identifier) {
@@ -33,13 +33,13 @@ public class OrderTaxEntityRepositoryImpl<E extends TaxesEntity, I extends Order
 		String scope = identifier.getOrder().getScope().getValue();
 		String orderId = identifier.getOrder().getOrderId().getValue();
 
-		return taxesCalculator.calculateTax(scope, orderId)
+		return cartTotalsCalculator.calculateTax(scope, orderId)
 				.map(this::convertTaxCalculationToTaxesEntity);
 	}
 
 	@Reference
-	public void setTotalsCalculator(final TaxesCalculator taxesCalculator) {
-		this.taxesCalculator = taxesCalculator;
+	public void setCartTotalsCalculator(final CartTotalsCalculator cartTotalsCalculator) {
+		this.cartTotalsCalculator = cartTotalsCalculator;
 	}
 
 	@Reference

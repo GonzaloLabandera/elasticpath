@@ -12,7 +12,6 @@ import java.util.Objects;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
-import org.apache.openjpa.ee.ManagedRuntime;
 import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.enhance.Reflection;
 import org.apache.openjpa.event.AbstractLifecycleListener;
@@ -24,6 +23,7 @@ import org.apache.openjpa.meta.ValueMetaData;
 import org.apache.openjpa.persistence.JPAFacadeHelper;
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.elasticpath.commons.ThreadLocalMap;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -35,6 +35,7 @@ import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngineOperationListener;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
+import com.elasticpath.persistence.openjpa.support.JPAUtil;
 import com.elasticpath.service.audit.AuditDao;
 
 /**
@@ -44,11 +45,33 @@ import com.elasticpath.service.audit.AuditDao;
  * <li>Persist events are used to ensure entirely new objects are saved.</li>
  * <li>Attach events are used to ensure new objects created as part of a merge are tracked.</li>
  * </ul>
+ *
+ * This bean is disabled by default.  When disabled its callbacks are simply shunted and no operations occur.
+ *
+ * Enable this bean in one of the following ways:
+ * <ul>
+ *     <li>setting the enabledByDefault option via the <code></code>setEnabledByDefault(true)</code> method via the Spring configuration</li>
+ *     <li>setting the system property <code>-Dep.audit.enabled=true</code></li>
+ *     <li>calling <code>enableAudit(true)</code></li>
+ * </ul>
+ *
+ * <ul>
+ *     <li><code>enabledByDefault</code> allows a system wide default to be specified.  The default value is <code>false</code>.</li>
+ *     <li>The system property <code>ep.audit.enabled</code> overrides the <code>enabledByDefault</code> setting.  This allows applications to opt-in
+ *     or opt-out system wide default.</li>
+ *     <li>The method <code>enableAudit</code> overrides both the default and the system property.  It is useful in testing scenarios.</li>
+ * </ul>
  */
 @SuppressWarnings("PMD.GodClass")
-public class AuditEntityListener extends AbstractLifecycleListener implements PersistenceEngineOperationListener {
+public class AuditEntityListener
+		extends AbstractLifecycleListener
+		implements PersistenceEngineOperationListener, InitializingBean {
 
 	private static final Logger LOG = Logger.getLogger(AuditEntityListener.class);
+	private static final String AUDIT_ENABLED_SYSTEM_PROPERTY = "ep.audit.enabled";
+
+	private static boolean enabledByDefault;
+	private static boolean enabled;
 
 	private BeanFactory beanFactory;
 	private AuditDao auditDao;
@@ -60,12 +83,48 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 	private ThreadLocalMap<String, Object> metadataMap;
 
 	/**
+	 * Determines if the bean is enabled.
+	 */
+	@Override
+	public void afterPropertiesSet() {
+		enabled = enabledByDefault;
+
+		// If the system property is specified, use it's value
+		String prop = System.getProperty(AUDIT_ENABLED_SYSTEM_PROPERTY);
+		if (prop != null) {
+			enabled = Boolean.getBoolean(AUDIT_ENABLED_SYSTEM_PROPERTY);
+		}
+	}
+
+	/**
+	 * Directly enable audit, useful for testing.
+	 * @param enable true to enable, false to disable.
+	 */
+	public static void enableAudit(final boolean enable) {
+		enabled = enable;
+	}
+
+	/**
+	 * Allow the listener to stay wired in spring, either enabled or disabled.
+	 *
+	 * Different apps can then enable or disable as needed by using the system property.
+	 * @param shouldEnableByDefault true is the auditing should be enabled by default, false otherwise.
+	 */
+	public void setEnabledByDefault(final boolean shouldEnableByDefault) {
+		enabledByDefault = shouldEnableByDefault;
+	}
+
+	/**
 	 * Before persisting, save changeset details for a new object.
 	 *
 	 * @param event the persist event
 	 */
 	@Override
 	public void beforePersist(final LifecycleEvent event) {
+		if (!enabled) {
+			return;
+		}
+
 		Object object = event.getSource();
 		if (!getAuditableClasses().contains(object.getClass().getName())) {
 			return;
@@ -81,6 +140,10 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 	 */
 	@Override
 	public void beforeAttach(final LifecycleEvent event) {
+		if (!enabled) {
+			return;
+		}
+
 		Object object = event.getSource();
 		if (!getAuditableClasses().contains(object.getClass().getName())) {
 			return;
@@ -100,6 +163,10 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 	 */
 	@Override
 	public void beforeDelete(final LifecycleEvent event) {
+		if (!enabled) {
+			return;
+		}
+
 		Object sourceObject = event.getSource();
 		if (!getAuditableClasses().contains(sourceObject.getClass().getName())) {
 			return;
@@ -421,6 +488,9 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 
 	@Override
 	public void beginSingleOperation(final Persistable object, final ChangeType type) {
+		if (!enabled) {
+			return;
+		}
 
 		// If it's a delete then we always create the operation.
 		// Otherwise we only do it if the class is auditable
@@ -435,6 +505,9 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 	@Override
 	public void beginBulkOperation(final String queryName, final String queryString,
 			final String parameters, final ChangeType type) {
+		if (!enabled) {
+			return;
+		}
 
 		if (isAuditableNamedQuery(queryName)) {
 			ChangeTransaction csTransaction = joinChangeTransaction(getTransactionId(), null);
@@ -447,6 +520,10 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 	@Override
 	public void endSingleOperation(final Persistable object,
 			final ChangeType type) {
+		if (!enabled) {
+			return;
+		}
+
 		if (ChangeType.DELETE.equals(type) || getAuditableClasses().contains(object.getClass().getName())) {
 			setCurrentOperation(null);
 		}
@@ -454,6 +531,10 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 
 	@Override
 	public void endBulkOperation() {
+		if (!enabled) {
+			return;
+		}
+
 		setCurrentOperation(null);
 	}
 
@@ -509,22 +590,14 @@ public class AuditEntityListener extends AbstractLifecycleListener implements Pe
 		return OpenJPAPersistence.cast(getPersistenceEngine().getEntityManager());
 	}
 
-	/**
-	 * Returns the id for the current transaction from the managed runtime.
-	 * @return The transaction id
-	 */
-	public String getTransactionId() {
-		ManagedRuntime runtime = getPersistenceEngine().getBroker().getManagedRuntime();
-		int transactionId = 0;
+	private String getTransactionId() {
 		try {
-			Object key = runtime.getTransactionKey();
-			transactionId = key.hashCode();
+			return JPAUtil.getTransactionId(getPersistenceEngine());
 		} catch (Exception e) {
 			LOG.error("Error trying to find transaction", e);
+			return "";
 		}
-		return String.valueOf(transactionId);
 	}
-
 
 	/**
 	 * Get the map of metadata for this listener.

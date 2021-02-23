@@ -1870,7 +1870,7 @@ public class CouponUsageServiceImplTest {
 		assertNotNull("A coupon should have been added.", couponUsage);
 		assertEquals("test@user.com", couponUsage.getCustomerEmailAddress());
 		assertEquals("Use count should be zero as the coupon isn't used yet", 0, couponUsage.getUseCount());
-		assertTrue("By default, these coupons should be active in cart", couponUsage.isActiveInCart());
+		assertTrue("By default, these coupons should be active in cart", couponUsage.isAutoApplyToCarts());
 		assertEquals("Generated code should equal GENERATED_CODE", GENERATED_CODE, couponUsage.getCoupon().getCouponCode());
 		assertEquals(unpopulatedCoupon, couponUsage.getCoupon());
 
@@ -1939,7 +1939,7 @@ public class CouponUsageServiceImplTest {
 		assertNotNull("A coupon should have been added.", couponUsage);
 		assertEquals("test@user.com", couponUsage.getCustomerEmailAddress());
 		assertEquals("Use count should be zero as the coupon isn't used yet", 0, couponUsage.getUseCount());
-		assertTrue("By default, these coupons should be active in cart", couponUsage.isActiveInCart());
+		assertTrue("By default, these coupons should be active in cart", couponUsage.isAutoApplyToCarts());
 		assertEquals("Generated code should equal GENERATED_CODE2", GENERATED_CODE2, couponUsage.getCoupon().getCouponCode());
 		assertEquals(unpopulatedCoupon2, couponUsage.getCoupon());
 	}
@@ -2049,6 +2049,15 @@ public class CouponUsageServiceImplTest {
 		} });
 
 		assertFalse(service.validateCouponUsage(USER_TEST_EMAIL, coupon, couponUsage).isSuccess());
+	}
+
+	@Test
+	public void testThatDisableAutoApplyToCartsUpdatesAutoApplyFlag() {
+		context.checking(new Expectations() { {
+			oneOf(dao).disableAutoApplyToCarts(COUPON_CODE, USER_TEST_EMAIL);
+		} });
+
+		service.disableAutoApplyToCarts(COUPON_CODE, USER_TEST_EMAIL);
 	}
 
 	private Collection<CouponUsage> findEligibleUsagesByEmailAddressInStore(final Long allowedLimit) {

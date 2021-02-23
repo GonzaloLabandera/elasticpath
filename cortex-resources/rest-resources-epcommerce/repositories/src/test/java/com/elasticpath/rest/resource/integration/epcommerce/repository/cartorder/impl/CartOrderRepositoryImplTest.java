@@ -54,6 +54,7 @@ public class CartOrderRepositoryImplTest {
 	private static final String INVALID_CART_ORDER_ID = "invalidCartId";
 	private static final String CART_GUID = "cart guid";
 	private static final String CUSTOMER_GUID = "customer guid";
+	private static final String ACCOUNT_GUID = "account guid";
 	private static final String SHIPPING_ADDRESS_GUID = "SHIPPING_ADDRESS_GUID";
 	private static final String ORDER_WITH_CART_GUID_NOT_FOUND = "No cart order with cart GUID %s was found.";
 	private static final String DELIVERY_ID = "delivery id";
@@ -199,6 +200,20 @@ public class CartOrderRepositoryImplTest {
 		repository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMER_GUID)
 				.test()
 				.assertError(ResourceOperationFailure.notFound(errorMsg));
+	}
+
+	/**
+	 * Test the behaviour of find cart order guids by customer.
+	 */
+	@Test
+	public void testFindCartOrderGuidsByAccount() {
+		List<String> listOfCartOrderGuids = Collections.singletonList(CART_ORDER_GUID);
+		when(cartOrderService.findCartOrderGuidsByAccountGuid(STORE_CODE, ACCOUNT_GUID)).thenReturn(listOfCartOrderGuids);
+
+		repository.findCartOrderGuidsByAccount(STORE_CODE, ACCOUNT_GUID)
+				.test()
+				.assertNoErrors()
+				.assertValueSequence(listOfCartOrderGuids);
 	}
 
 	/**

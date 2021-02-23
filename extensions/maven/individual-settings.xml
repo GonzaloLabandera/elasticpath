@@ -53,7 +53,6 @@
 
 		<!-- H2 developer configuration -->
 		<!-- This overrides the h2-dev-db profile in elasticpath grandparent POM -->
-		<!-- When use this profile, make sure run it with option of non-xa spring profile, e.g. -Dspring.profiles.active=non-xa -->
 		<profile>
 			<id>h2-dev-db</id>
 			<properties>

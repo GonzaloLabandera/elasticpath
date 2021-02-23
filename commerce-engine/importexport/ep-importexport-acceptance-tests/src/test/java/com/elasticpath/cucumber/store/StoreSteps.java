@@ -52,6 +52,8 @@ public class StoreSteps {
 		store.setStoreState(StoreState.UNDER_CONSTRUCTION);
 		store.setStoreType(StoreType.B2C);
 		store.setDefaultLocale(Locale.US);
+		store.setB2CAuthenticatedRole(storeMap.get("authenticated role"));
+		store.setB2CSingleSessionRole(storeMap.get("unauthenticated role"));
 		storeService.saveOrUpdate(store);
 
 		final Store savedStore = storeService.findStoreWithCode(storeMap.get("store code"));

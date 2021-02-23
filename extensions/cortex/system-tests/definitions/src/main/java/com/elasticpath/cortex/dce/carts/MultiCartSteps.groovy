@@ -75,6 +75,11 @@ class MultiCartSteps {
 		MultiCart.getCarts()
 	}
 
+	@When('^I try to create my custom cart$')
+	static void tryGetCreateCartForm() {
+		MultiCart.getCreateCartFormWithoutCheck()
+	}
+
 	@When('^I go to cart (.+)$')
 	static void getSpecificCart(String cartName) {
 		MultiCart.getCart(cartName)

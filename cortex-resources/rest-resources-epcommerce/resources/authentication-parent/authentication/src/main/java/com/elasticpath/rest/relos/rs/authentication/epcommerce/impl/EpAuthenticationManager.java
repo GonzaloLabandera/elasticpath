@@ -12,21 +12,17 @@ import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.authentication.dao.SaltSource;
-import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import com.elasticpath.rest.relos.rs.authentication.User;
+import com.elasticpath.commons.security.impl.EpUserPasswordEncoder;
 
 /**
  * Provides an {@link AuthenticationManager} that calls CE.
  */
 @Component
 public class EpAuthenticationManager implements AuthenticationManager {
-
-	private static final int STRENGTH_256 = 256;
 
 	@Reference
 	private UserDetailsService userDetailsService;
@@ -42,22 +38,16 @@ public class EpAuthenticationManager implements AuthenticationManager {
 	 */
 	@Activate
 	protected void activate() {
-		ShaPasswordEncoder sha256PasswordEncoder = new ShaPasswordEncoder(STRENGTH_256);
 		//Our UserDetailsService produces Users
-		SaltSource saltSource = user -> ((User) user).getSalt();
+
+		EpUserPasswordEncoder passwordEncoder = new EpUserPasswordEncoder();
+
 		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-		daoAuthenticationProvider.setPasswordEncoder(sha256PasswordEncoder);
+		daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
 		daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-		daoAuthenticationProvider.setSaltSource(saltSource);
 		daoAuthenticationProvider.setMessageSource(globalMessageSource);
 
-		ShaPasswordEncoder sha1PasswordEncoder = new ShaPasswordEncoder();
-		DaoAuthenticationProvider fallbackDaoAuthenticationProvider = new DaoAuthenticationProvider();
-		fallbackDaoAuthenticationProvider.setPasswordEncoder(sha1PasswordEncoder);
-		fallbackDaoAuthenticationProvider.setUserDetailsService(userDetailsService);
-		fallbackDaoAuthenticationProvider.setMessageSource(globalMessageSource);
-
-		authenticationManager = new ProviderManager(Arrays.asList(daoAuthenticationProvider, fallbackDaoAuthenticationProvider));
+		authenticationManager = new ProviderManager(Arrays.asList(daoAuthenticationProvider));
 	}
 
 	@Override

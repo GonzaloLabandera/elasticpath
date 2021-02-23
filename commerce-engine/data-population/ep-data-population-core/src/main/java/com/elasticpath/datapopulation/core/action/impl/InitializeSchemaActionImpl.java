@@ -44,7 +44,12 @@ public class InitializeSchemaActionImpl implements DataPopulationAction {
 		actionConfiguration.setLiquibaseChangelogParameters(null);
 		context.setActionConfiguration(actionConfiguration);
 
-		LOG.info("Initializing the Schema using Liquibase change log file '" + actionConfiguration.getLiquibaseChangelog());
+		LOG.debug("Initializing the Schema using Liquibase change log file '" + actionConfiguration.getLiquibaseChangelog());
 		invokeLiquibaseAction.execute(context);
+	}
+
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		return "Initializing database schema using Liquibase change log file '" + schemaInitChangeLogFile.getPath() + "'";
 	}
 }

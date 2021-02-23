@@ -23,6 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class OracleInsertSetGeneratorTest {
+	private static final int BATCH_SIZE = 2;
 	private OracleInsertSetGenerator generator;
 
 	/**
@@ -33,17 +34,33 @@ public class OracleInsertSetGeneratorTest {
 		generator = new OracleInsertSetGenerator();
 	}
 
-	/**
-	 * Test calculate Import Export configuration path.
-	 */
 	@Test
-	public void testGenerateInsertForOracleDB() {
-		final Sql[] insertSatements = generator.generateSql(prepareStatement(), new OracleDatabase(), new SqlGeneratorChain(Collections.emptySortedSet()));
-		assertThat(insertSatements[0].toSql())
+	public void testGenerateInsertsForOracleDBWithGivenBatchSize() {
+		final Sql[] insertStatements = generator.generateSql(prepareStatement(BATCH_SIZE), new OracleDatabase(),
+				new SqlGeneratorChain(Collections.emptySortedSet()));
+		assertThat(insertStatements.length)
+				.isEqualTo(3);
+
+		assertThat(insertStatements[0].toSql())
 				.isEqualTo("INSERT ALL  "
 						+ "INTO testCatalog.testTable (columnOne, columnTwo) VALUES ('value11', 'value12') "
 						+ "INTO testCatalog.testTable (columnOne, columnTwo) VALUES ('value21', 'value22') "
-						+ "SELECT * FROM DUAL");
+						+ "INTO testCatalog.testTable (columnOne, columnTwo) VALUES ('value21', 'value22') SELECT * FROM DUAL");
+		assertThat(insertStatements[1].toSql())
+				.isEqualTo("INSERT ALL  "
+						+ "INTO testCatalog.testTable (columnOne, columnTwo) VALUES ('value21', 'value22') "
+						+ "INTO testCatalog.testTable (columnOne, columnTwo) VALUES ('value21', 'value22') "
+						+ "INTO testCatalog.testTable (columnOne, columnTwo) VALUES ('value21', 'value22') SELECT * FROM DUAL");
+	}
+
+	@Test
+	public void testGenerateValidSQLIfBatchSizeMultipleOfStatementsSize() {
+		final Sql[] insertStatements = generator.generateSql(prepareStatement(BATCH_SIZE), new OracleDatabase(),
+				new SqlGeneratorChain(Collections.emptySortedSet()));
+
+		assertThat(insertStatements[2].toSql())
+				.isEqualTo("SELECT * FROM DUAL");
+
 	}
 
 	@Test
@@ -52,7 +69,13 @@ public class OracleInsertSetGeneratorTest {
 				.isGreaterThan(new InsertSetGenerator().getPriority());
 	}
 
-	private InsertSetStatement prepareStatement() {
+	@Test
+	public void testThatPriorityGreaterThanUpdatedInsertSetStatement() {
+		assertThat(generator.getPriority())
+				.isGreaterThan(new UpdatedInsertSetGenerator().getPriority());
+	}
+
+	private InsertSetStatement prepareStatement(final int batchSize) {
 		final String catalog = "testCatalog";
 		final String schema = "testSchema";
 		final String table = "testTable";
@@ -65,8 +88,12 @@ public class OracleInsertSetGeneratorTest {
 		statementTwo.addColumnValue("columnOne", "value21");
 		statementTwo.addColumnValue("columnTwo", "value22");
 
-		InsertSetStatement setStatement = new InsertSetStatement(catalog, schema, table);
+		InsertSetStatement setStatement = new InsertSetStatement(catalog, schema, table, batchSize);
 		setStatement.addInsertStatement(statementOne);
+		setStatement.addInsertStatement(statementTwo);
+		setStatement.addInsertStatement(statementTwo);
+		setStatement.addInsertStatement(statementTwo);
+		setStatement.addInsertStatement(statementTwo);
 		setStatement.addInsertStatement(statementTwo);
 
 		return setStatement;

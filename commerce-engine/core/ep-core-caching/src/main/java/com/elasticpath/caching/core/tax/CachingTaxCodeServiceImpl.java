@@ -72,7 +72,7 @@ public class CachingTaxCodeServiceImpl extends AbstractEpPersistenceServiceImpl 
 
 	@Override
 	public TaxCode findByCode(final String code) throws EpServiceException {
-		return getTaxCodeByCodeCache().get(code, getTaxCodeByCodeCacheLoader());
+		return getTaxCodeByCodeCache().get(code, taxCodeByCodeCacheLoader::load);
 	}
 
 	@Override

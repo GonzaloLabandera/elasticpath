@@ -117,6 +117,11 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 	 */
 	public static final int PROP_REFRESH_PARTS = 910;
 
+	/**
+	 * The hold modified event id.
+	 */
+	public static final int PROP_HOLD_MODIFIED = 911;
+
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) throws PartInitException {
 		final Long orderUid = input.getAdapter(Long.class);
@@ -180,6 +185,13 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 		firePropertyChange(OrderEditor.PROP_ADD_NOTE);
 	}
 
+	/**
+	 * Notifies the page and the section when a hold is modified.
+	 */
+	public void fireHoldModifiedChanges() {
+		firePropertyChange(OrderEditor.PROP_HOLD_MODIFIED);
+	}
+
 	// ---- DOCfireShipmentAddressMethodChanges
 	/**
 	 * Notifies the summary section when address and/or service level is changed.
@@ -238,6 +250,7 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 			addPage(new OrderPaymentsPage(this));
 			addPage(new OrderReturnsPage(this));
 			addPage(new OrderNotePage(this));
+			addPage(new OrderHoldPage(this));
 			addExtensionPages(getClass().getSimpleName(), FulfillmentPlugin.PLUGIN_ID);
 		} catch (final PartInitException e) {
 			throw new RuntimeException(e);

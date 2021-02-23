@@ -926,7 +926,7 @@ currentRow = null;]]></method>
                     <cell id="710">
                         <property name="colSpan">2</property>
                         <text-data id="732">
-                            <expression name="valueExpr" type="javascript">row["Currency"] + " TOTAL"</expression>
+                            <expression name="valueExpr" type="javascript">params["currency"] + " TOTAL"</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>

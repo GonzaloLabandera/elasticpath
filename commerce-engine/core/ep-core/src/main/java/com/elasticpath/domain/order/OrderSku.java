@@ -331,4 +331,11 @@ public interface OrderSku extends ShoppingItem, ListenableObject {
 	 */
 	boolean isGiftCertificate();
 
+	/**
+	 * Set order ID.
+	 *
+	 * @param orderUidPk the order id.
+	 */
+	void setOrderUidPk(long orderUidPk);
+
 }

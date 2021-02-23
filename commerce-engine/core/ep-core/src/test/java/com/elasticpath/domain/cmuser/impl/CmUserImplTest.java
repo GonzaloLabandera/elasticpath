@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -197,7 +197,7 @@ public class CmUserImplTest {
 		for (int i = 0; i < passwords.length; i++) {
 			final String password = passwords[i];
 			final String hashedPassword = hashedPasswords[i];
-			when(mockPasswordEncoder.encodePassword(password, null)).thenReturn(hashedPassword);
+			when(mockPasswordEncoder.encode(password)).thenReturn(hashedPassword);
 			cmUserImpl.setClearTextPassword(password);
 			cmUserImpl.setPasswordUsingPasswordEncoder(password);
 			assertThat(cmUserImpl.getPassword()).isEqualTo(hashedPassword);
@@ -335,7 +335,7 @@ public class CmUserImplTest {
 		givenTimeServiceReturnsCurrentTime();
 		when(beanFactory.getSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class)).thenReturn(cmPasswordPolicy);
 
-		when(mockPasswordEncoder.encodePassword(newPassword, null)).thenReturn(newPasswordEncoded);
+		when(mockPasswordEncoder.encode(newPassword)).thenReturn(newPasswordEncoded);
 
 		when(cmPasswordPolicy.validate(cmUserImpl)).thenReturn(new ValidationResult());
 
@@ -359,7 +359,7 @@ public class CmUserImplTest {
 		givenTimeServiceReturnsCurrentTime();
 		when(beanFactory.getSingletonBean(ContextIdNames.CM_PASS_WORD_POLICY, CmPasswordPolicy.class)).thenReturn(cmPasswordPolicy);
 
-		when(mockPasswordEncoder.encodePassword(initialPassword, null)).thenReturn("encodedInitialPassword");
+		when(mockPasswordEncoder.encode(initialPassword)).thenReturn("encodedInitialPassword");
 		cmUserImpl.setClearTextPassword(initialPassword);
 		cmUserImpl.setPasswordUsingPasswordEncoder(initialPassword);
 
@@ -370,7 +370,7 @@ public class CmUserImplTest {
 		final String oldPassword = cmUserImpl.getPassword();
 		final String newPassword = "newPassword1";
 		final String encodedNewPassword = "encodedNewPassword1";
-		when(mockPasswordEncoder.encodePassword(newPassword, null)).thenReturn(encodedNewPassword);
+		when(mockPasswordEncoder.encode(newPassword)).thenReturn(encodedNewPassword);
 
 		when(cmPasswordPolicy.validate(cmUserImpl)).thenReturn(new ValidationResult());
 

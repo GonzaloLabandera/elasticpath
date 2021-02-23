@@ -31,11 +31,6 @@
 			   availability="optional"
 			   interface="com.elasticpath.messaging.EventMessagePublisher"/>
 
-	<reference id="domainEventMessagePublisher"
-			   filter="(name=domainEventMessagePublisher)"
-			   availability="optional"
-			   interface="com.elasticpath.messaging.EventMessagePublisher"/>
-
 	<reference id="catalogEventMessagePublisher"
 			   filter="(name=catalogEventMessagePublisher)"
 			   availability="optional"
@@ -256,6 +251,10 @@
 		<reference-listener ref="priceListAssignmentServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
 	</reference>
 
+	<reference id="eventMessageObjectMapper"
+			   availability="optional"
+			   interface="com.elasticpath.messaging.camel.jackson.EventMessageObjectMapper"/>
+
 	<service ref="productDao"
 			 interface="com.elasticpath.persistence.dao.ProductDao"/>
 	<service ref="productTypeDao"
@@ -325,6 +324,9 @@
 	<service ref="customerService"
 			 interface="com.elasticpath.service.customer.CustomerService"/>
 
+	<service ref="accountTreeService"
+			   interface="com.elasticpath.service.customer.AccountTreeService"/>
+
 	<service ref="customerRegistrationService"
 			 interface="com.elasticpath.service.customer.CustomerRegistrationService"/>
 
@@ -334,7 +336,7 @@
 
 	<service ref="customerProfileAttributeService" interface="com.elasticpath.service.customer.CustomerProfileAttributeService"/>
 
-	<service ref="attributeService" interface="com.elasticpath.service.attribute.AttributeService"/>
+	<service ref="nonCachingAttributeService" interface="com.elasticpath.service.attribute.AttributeService"/>
 
 	<service ref="settingsService"
 			 interface="com.elasticpath.settings.SettingsService"/>
@@ -368,6 +370,15 @@
 
 	<service ref="userAccountAssociationService"
 			   interface="com.elasticpath.service.customer.UserAccountAssociationService"/>
+
+	<service ref="roleToPermissionMappingService"
+			 interface="com.elasticpath.service.permissions.RoleToPermissionsMappingService"/>
+
+	<service ref="shiroRolesDeterminationService"
+			 interface="com.elasticpath.service.auth.ShiroRolesDeterminationService"/>
+
+	<service ref="roleValidator"
+			 interface="com.elasticpath.service.permissions.RoleValidator"/>
 
 	<service ref="coreBeanFactory"
 			 interface="com.elasticpath.commons.beanframework.BeanFactory">
@@ -515,6 +526,9 @@
 	<service ref="persistenceEngine"
 			 interface="com.elasticpath.persistence.api.PersistenceEngine"/>
 
+	<service ref="detachmentStrategy"
+			 interface="com.elasticpath.persistence.api.CachedInstanceDetachmentStrategy"/>
+
 	<service ref="productAssociationService"
 			 interface="com.elasticpath.service.catalog.ProductAssociationService"/>
 
@@ -606,7 +620,7 @@
 		</service-properties>
 	</service>
 
-	<service ref="attributeService"
+	<service ref="nonCachingAttributeService"
 			 interface="com.elasticpath.service.attribute.AttributeService">
 		<service-properties>
 			<entry key="caching">

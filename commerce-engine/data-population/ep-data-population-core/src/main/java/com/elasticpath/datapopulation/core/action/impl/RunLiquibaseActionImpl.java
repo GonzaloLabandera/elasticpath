@@ -22,14 +22,9 @@ public class RunLiquibaseActionImpl extends AbstractDataSourceAccessAction {
 
 	@Override
 	public void execute(final DataPopulationContext context) throws LiquibaseActionException {
-		Object wrapper = context.getActionConfiguration();
-		if (!(wrapper instanceof LiquibaseActionConfiguration)) {
-			throw new LiquibaseActionException("Error: No Liquibase parameters provided within a resource wrapper.");
-		}
+		LiquibaseActionConfiguration liquibaseActionConfiguration = getLiquibaseActionConfiguration(context);
 
-		LiquibaseActionConfiguration liquibaseActionConfiguration = (LiquibaseActionConfiguration) wrapper;
 		final String liquibaseChangelog = liquibaseActionConfiguration.getLiquibaseChangelog();
-
 		if (StringUtils.isBlank(liquibaseChangelog)) {
 			throw new LiquibaseActionException("Error: No Liquibase changelog file was configured for this command. ");
 		}
@@ -40,5 +35,24 @@ public class RunLiquibaseActionImpl extends AbstractDataSourceAccessAction {
 				liquibaseActionConfiguration.isDropFirst(),
 				liquibaseActionConfiguration.getLiquibaseChangelogParameters(),
 				createDataSource(liquibaseActionConfiguration.isUseAdminConnections()));
+	}
+
+	private LiquibaseActionConfiguration getLiquibaseActionConfiguration(final DataPopulationContext context) {
+		Object wrapper = context.getActionConfiguration();
+		if (!(wrapper instanceof LiquibaseActionConfiguration)) {
+			throw new LiquibaseActionException("Error: No Liquibase parameters provided within a resource wrapper.");
+		}
+		return (LiquibaseActionConfiguration) wrapper;
+	}
+
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		try {
+			LiquibaseActionConfiguration liquibaseActionConfiguration = getLiquibaseActionConfiguration(context);
+			final String liquibaseChangelog = liquibaseActionConfiguration.getLiquibaseChangelog();
+			return "Updating database using Liquibase change log file '" + liquibaseChangelog + "'";
+		} catch (LiquibaseActionException ex) {
+			return null;
+		}
 	}
 }

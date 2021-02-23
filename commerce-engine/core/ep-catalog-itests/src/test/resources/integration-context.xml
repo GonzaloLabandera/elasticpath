@@ -3,26 +3,27 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:context="http://www.springframework.org/schema/context"
 		xmlns:batch="http://www.springframework.org/schema/batch"
+		xmlns:jpa="http://www.springframework.org/schema/data/jpa"
 		xmlns="http://www.springframework.org/schema/beans"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
-			http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd">
+			http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+			http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
 	<context:annotation-config/>
+	<jpa:repositories base-package="com.elasticpath.catalog.plugin.repository"/>
 
 	<import resource="classpath:integration-core-context.xml"/>
 	<import resource="classpath:ep-test-application.xml"/>
 	<import resource="classpath:integration-checkout-context.xml"/>
 	<import resource="classpath:META-INF/elasticpath/conf/spring/catalog-batch.xml"/>
-	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
+	<import resource="classpath:spring/jobs/relay-outbox-messages-job.xml"/>
+
+	<alias name="txProxyTemplate" alias="batchTxProxyTemplate"/>
+	<alias name="persistenceEngine" alias="batchPersistenceEngine"/>
 
 	<bean id="applicationInitialization" class="com.elasticpath.service.misc.impl.EmptyApplicationInitialization" init-method="init"
 		  depends-on="preEntityManagerInitializationList"/>
-
-	<bean id="jmsBrokerService" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="java:comp/env/jms/test-broker"/>
-		<property name="resourceRef" value="true"/>
-	</bean>
 
 	<bean id="simpleStoreScenario" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean"/>
 
@@ -135,5 +136,9 @@
 		<constructor-arg name="catalogService" ref="catalogDataService"/>
 		<constructor-arg name="maxDelay" value="2"/>
 		<constructor-arg name="minDelay" value="1"/>
+	</bean>
+
+	<bean id="relayOutboxMessagesThreadExecutor" class="com.elasticpath.catalog.messages.RelayOutboxMessagesThreadExecutor">
+		<property name="relayOutboxMessagesJob" ref="relayOutboxMessagesJob"/>
 	</bean>
 </beans>

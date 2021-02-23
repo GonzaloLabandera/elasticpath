@@ -38,7 +38,7 @@
 				FROM ShoppingCartMementoImpl sc
 				WHERE sc.shopperUid = ?1
 				AND sc.status = 'ACTIVE'
-				AND sc.default = true
+				AND sc.defaultInternal = true
 			</query>
 		</named-query>
 	<named-query name="DEFAULT_SHOPPING_CARTGUID_FIND_BY_SHOPPER_UID">
@@ -47,7 +47,7 @@
 			FROM ShoppingCartMementoImpl sc
 			WHERE sc.shopperUid = ?1
 			AND sc.status = 'ACTIVE'
-			AND sc.default = true
+			AND sc.defaultInternal = true
 		</query>
 	</named-query>
 	<named-query name="STORE_BY_CARTGUID">
@@ -161,6 +161,13 @@
 				DELETE
 				FROM ShoppingCartMementoImpl sc
 				WHERE sc.shopperUid = ?1
+			</query>
+		</named-query>
+		<named-query name="DEACTIVATE_SHOPPING_CART">
+			<query>
+				UPDATE ShoppingCartMementoImpl sc
+				SET sc.status = ShoppingCartStatus.INACTIVE, sc.defaultInternal = null
+				WHERE sc.guid = ?1
 			</query>
 		</named-query>
 </entity-mappings>

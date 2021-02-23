@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.elasticpath.repository.PaginationRepository;
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.definition.accounts.PaginatedAccountPurchasesIdentifier;
+import com.elasticpath.rest.definition.purchases.PaginatedAccountPurchasesIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchasesIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
@@ -47,7 +47,7 @@ public class PaginatedAccountPurchasesRepositoryImpl<R extends PaginatedAccountP
 
 	@Override
 	public Single<PaginationEntity> getPaginationInfo(final PaginatedAccountPurchasesIdentifier identifier) {
-		String accountId = identifier.getAccountPurchases().getAccount().getAccountId().getValue();
+		String accountId = identifier.getAccountPurchases().getAccountId().getValue();
 		int result = (new Long(orderRepository.getAccountPurchasesSize(getScope(identifier), accountId))).intValue();
 		int pageSize = getPageSize(identifier);
 		int current = identifier.getPageId().getValue();
@@ -64,7 +64,7 @@ public class PaginatedAccountPurchasesRepositoryImpl<R extends PaginatedAccountP
 	@Override
 	public Observable<PurchaseIdentifier> getElements(final PaginatedAccountPurchasesIdentifier identifier) {
 		int pageId = identifier.getPageId().getValue();
-		String accountId = identifier.getAccountPurchases().getAccount().getAccountId().getValue();
+		String accountId = identifier.getAccountPurchases().getAccountId().getValue();
 		long result = orderRepository.getAccountPurchasesSize(getScope(identifier), accountId);
 		int pageSize = getPageSize(identifier);
 		int maximumPageId = (int) Math.ceil(result / (double) pageSize);
@@ -74,7 +74,7 @@ public class PaginatedAccountPurchasesRepositoryImpl<R extends PaginatedAccountP
 			return Observable.error(ResourceOperationFailure.notFound());
 		}
 
-		IdentifierPart<String> scope = identifier.getAccountPurchases().getAccount().getAccounts().getScope();
+		IdentifierPart<String> scope = identifier.getAccountPurchases().getPurchases().getScope();
 
 		int pageStartIndex = (pageId - 1) * pageSize;
 
@@ -91,13 +91,13 @@ public class PaginatedAccountPurchasesRepositoryImpl<R extends PaginatedAccountP
 	}
 
 	private String getScope(final PaginatedAccountPurchasesIdentifier identifier) {
-		return identifier.getAccountPurchases().getAccount().getAccounts().getScope().getValue();
+		return identifier.getAccountPurchases().getPurchases().getScope().getValue();
 	}
 
 	@Override
 	public Observable<PagingLink<PaginatedAccountPurchasesIdentifier>> getPagingLinks(final PaginatedAccountPurchasesIdentifier identifier) {
 		int pageId = identifier.getPageId().getValue();
-		String accountId = identifier.getAccountPurchases().getAccount().getAccountId().getValue();
+		String accountId = identifier.getAccountPurchases().getAccountId().getValue();
 		long result = orderRepository.getAccountPurchasesSize(getScope(identifier), accountId);
 		int maximumPageSize = (int) Math.ceil(result / (double) getPageSize(identifier));
 

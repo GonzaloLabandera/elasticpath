@@ -19,9 +19,6 @@
 
 	<properties>
 		<groovy.http-builder>0.7.1</groovy.http-builder>
-		<fluent.relos.client.version>1.10.45</fluent.relos.client.version>
-
-		<!--<cargo.plugin.version>1.2.4</cargo.plugin.version>-->
 
 		<enableTrustedSubjectHeaderMode>false</enableTrustedSubjectHeaderMode>
 		<cargo.jvmargs.search>-ea</cargo.jvmargs.search>
@@ -29,15 +26,13 @@
 		<cargo.jvmargs.cortex.jmx>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=6969 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false</cargo.jvmargs.cortex.jmx>
 		<cargo.jvmargs.cortex.logback.threshold>-Dep.logback.console.threshold</cargo.jvmargs.cortex.logback.threshold>
 		<cargo.jvmargs.ep.external.ehcache.xml.path>-Dep.external.ehcache.xml.path=${project.build.testOutputDirectory}/ehcache-cucumber.xml</cargo.jvmargs.ep.external.ehcache.xml.path>
-		<!--<cargo.jvmargs.cortex.cache>-Dep.local.cache.timeout=60</cargo.jvmargs.cortex.cache>-->
-		<!-- for debugging cortex itests-->
-		<!--<cargo.jvmargs.cortex>-ea -XX:+HeapDumpOnOutOfMemoryError
-			-Dfelix.fileinstall.dir=${project.build.testOutputDirectory}/cortex/system/config -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000</cargo.jvmargs.cortex>-->
+		<cargo.jvmargs.integration>-ea</cargo.jvmargs.integration>
 		<ep.cortex.fixture.logger>INFO</ep.cortex.fixture.logger>
 
 		<ep.rest.authtype>OAuth2</ep.rest.authtype>
 		<ep.rest.baseurl>${ep.cortex.url}</ep.rest.baseurl>
 		<ep.search.server.url>${ep.search.url}</ep.search.server.url>
+		<ep.search.mode>PRIMARY</ep.search.mode>
 		<ep.activemq.url>${ep.jms.url}</ep.activemq.url>
 
 		<charset.encoding>UTF-8</charset.encoding>
@@ -46,6 +41,14 @@
 		<datasource.driver>org.h2.Driver</datasource.driver>
 		<datasource.username>sa</datasource.username>
 		<datasource.password>sa</datasource.password>
+
+		<ep.catalog.batch.database.drop.script>CLASSPATH:org/springframework/batch/core/schema-drop-h2.sql</ep.catalog.batch.database.drop.script>
+		<ep.catalog.batch.database.create.script>CLASSPATH:org/springframework/batch/core/schema-h2.sql</ep.catalog.batch.database.create.script>
+		<ep.catalog.batch.non.jta.datasource>dataSource</ep.catalog.batch.non.jta.datasource>
+		<!-- default the db uid/pwd to the value usually specified in settings.xml -->
+		<epdb.systemtest.username>${epdb.username}</epdb.systemtest.username>
+		<epdb.systemtest.password>${epdb.password}</epdb.systemtest.password>
+
 	</properties>
 
 	<profiles>
@@ -62,7 +65,14 @@
 				<epdb.maven.groupId>com.h2database</epdb.maven.groupId>
 				<epdb.maven.artifactId>h2</epdb.maven.artifactId>
 				<epdb.maven.version>${com.h2database.version}</epdb.maven.version>
-				<epdb.jdbc.driver>org.h2.Driver</epdb.jdbc.driver>
+				<epdb.jdbc.driver>${datasource.driver}</epdb.jdbc.driver>
+				<epdb.url>${datasource.url}</epdb.url>
+				<!-- override the db uid/pwd to the values for the local h2 db -->
+				<epdb.systemtest.username>${datasource.username}</epdb.systemtest.username>
+				<epdb.systemtest.password>${datasource.password}</epdb.systemtest.password>
+				<!-- provide an initial dummy value so that integration server will pass validation of this parameter,
+				 but just fail to send emails during tests -->
+				<ep.systemtest.smtp.host>systemtest.smtp.company.com</ep.systemtest.smtp.host>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -72,6 +82,12 @@
 				<dependency>
 					<groupId>com.elasticpath.extensions</groupId>
 					<artifactId>ext-search-webapp</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-integration-webapp</artifactId>
 					<version>${project.version}</version>
 					<type>war</type>
 				</dependency>
@@ -165,9 +181,13 @@
 										<portName>cargo.tomcat.shutdown.port</portName>
 										<portName>ep.activemq.dynamic.itests.port</portName>
 										<portName>ep.search.itest.port.http</portName>
+										<portName>ep.integration.itest.port.http</portName>
 										<portName>search.cargo.tomcat.ajp.port</portName>
 										<portName>search.cargo.rmi.port</portName>
 										<portName>search.cargo.tomcat.shutdown.port</portName>
+										<portName>integration.cargo.tomcat.ajp.port</portName>
+										<portName>integration.cargo.rmi.port</portName>
+										<portName>integration.cargo.tomcat.shutdown.port</portName>
 									</portNames>
 								</configuration>
 							</execution>
@@ -177,6 +197,14 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-dependency-plugin</artifactId>
+						<dependencies>
+							<dependency>
+								<groupId>com.elasticpath.extensions</groupId>
+								<artifactId>cortex-test-h2-database</artifactId>
+								<type>zip</type>
+								<version>${project.version}</version>
+							</dependency>
+						</dependencies>
 						<executions>
 							<execution>
 								<id>unpack-database</id>
@@ -221,7 +249,7 @@
 								</goals>
 								<configuration>
 									<settings>
-										<setting>COMMERCE/SYSTEM/SEARCH/searchHost@default=${ep.search.server.url}</setting>
+										<setting>COMMERCE/SYSTEM/SEARCH/searchHost@replica=${ep.search.server.url}</setting>
 									</settings>
 								</configuration>
 							</execution>
@@ -241,7 +269,7 @@
 					<plugin>
 						<groupId>org.apache.activemq.tooling</groupId>
 						<artifactId>activemq-maven-plugin</artifactId>
-						<version>${org.apache.activemq.tooling.version}</version>
+						<version>${org.apache.activemq.version}</version>
 						<executions>
 							<execution>
 								<id>activemq-embedded-tcp</id>
@@ -271,7 +299,7 @@
 					<plugin>
 						<groupId>org.codehaus.cargo</groupId>
 						<artifactId>cargo-maven2-plugin</artifactId>
-						<version>${cargo.plugin.version}</version>
+
 						<executions>
 							<execution>
 								<id>start-dce-container</id>
@@ -346,6 +374,65 @@
 											<pingTimeout>600000</pingTimeout>
 											<properties>
 												<context>${ep.search.contextUrl}</context>
+											</properties>
+										</deployable>
+									</deployables>
+								</configuration>
+							</execution>
+							<execution>
+								<id>start-integration-container</id>
+								<phase>package</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+								<configuration>
+									<configuration>
+										<home>${project.build.directory}/tomcat9x/integration-container</home>
+										<properties>
+											<cargo.jvmargs>${cargo.jvmargs.integration}</cargo.jvmargs>
+											<cargo.servlet.port>${ep.integration.itest.port.http}</cargo.servlet.port>
+											<cargo.tomcat.ajp.port>${integration.cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+											<cargo.rmi.port>${integration.cargo.rmi.port}</cargo.rmi.port>
+											<cargo.tomcat.shutdown.port>${integration.cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
+
+											<cargo.datasource.url>${datasource.url}</cargo.datasource.url>
+											<cargo.datasource.driver>${datasource.driver}</cargo.datasource.driver>
+											<cargo.datasource.username>${datasource.username}</cargo.datasource.username>
+											<cargo.datasource.password>${datasource.password}</cargo.datasource.password>
+											<cargo.datasource.jndi>jdbc/epjndi</cargo.datasource.jndi>
+											<cargo.datasource.factory>${ep.jndi.factory}</cargo.datasource.factory>
+											<cargo.datasource.scope>Shareable</cargo.datasource.scope>
+											<cargo.datasource.maxActive>250</cargo.datasource.maxActive>
+											<cargo.datasource.maxIdle>30</cargo.datasource.maxIdle>
+											<cargo.datasource.maxWait>10000</cargo.datasource.maxWait>
+											<cargo.datasource.removeAbandoned>true</cargo.datasource.removeAbandoned>
+											<cargo.datasource.testWhileIdle>true</cargo.datasource.testWhileIdle>
+											<cargo.datasource.validationQuery>${epdb.validation.query}</cargo.datasource.validationQuery>
+
+											<cargo.ep.jms.jndi>jms/JMSConnectionFactory</cargo.ep.jms.jndi>
+											<cargo.ep.jms.type>${ep.jms.type}</cargo.ep.jms.type>
+											<cargo.ep.jms.factory>${ep.jms.factory}</cargo.ep.jms.factory>
+											<cargo.ep.jms.url>${ep.jms.url}</cargo.ep.jms.url>
+											<cargo.start.jvmargs>
+												-Dep.tomcat.maxcachesize=${ep.tomcat.maxcachesize}
+												-Dep.catalog.batch.datasource=${ep.catalog.batch.non.jta.datasource}
+												-Dep.catalog.batch.database.drop.script=${ep.catalog.batch.database.drop.script}
+												-Dep.catalog.batch.database.create.script=${ep.catalog.batch.database.create.script}
+												-Dep.jms.factory=org.apache.activemq.jndi.JNDIReferenceFactory
+												-Dep.jms.type=${ep.jms.type}
+												-Dep.jms.url=${ep.jms.url}
+												-Dep.smtp.host=${ep.systemtest.smtp.host}
+											</cargo.start.jvmargs>
+										</properties>
+									</configuration>
+									<deployables>
+										<deployable>
+											<groupId>com.elasticpath.extensions</groupId>
+											<artifactId>ext-integration-webapp</artifactId>
+											<type>war</type>
+											<pingTimeout>600000</pingTimeout>
+											<properties>
+												<context>${ep.integration.context}</context>
 											</properties>
 										</deployable>
 									</deployables>
@@ -435,7 +522,6 @@
 									</dependency>
 								</dependencies>
 								<systemProperties>
-									<PROFILE>non-xa</PROFILE>
 									<java.awt.headless>true</java.awt.headless>
 									<h2.bindAddress>localhost</h2.bindAddress>
 									<!-- Turn logging down out of the gate.  When slf4j starts at debug things get a bit spammy. -->
@@ -576,18 +662,12 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>${epdb.maven.groupId}</groupId>
-			<artifactId>${epdb.maven.artifactId}</artifactId>
-			<version>${epdb.maven.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.tests</groupId>
 			<artifactId>fluent-relos-client</artifactId>
-			<version>${fluent.relos.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -685,6 +765,33 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.elasticpath.tools</groupId>
+				<artifactId>ep-core-tool</artifactId>
+				<configuration>
+					<skip>${skipAllTests}</skip>
+					<jdbcUrl>${epdb.url}</jdbcUrl>
+					<jdbcDriverClass>${epdb.jdbc.driver}</jdbcDriverClass>
+					<jdbcPassword>${epdb.password}</jdbcPassword>
+					<jdbcUsername>${epdb.username}</jdbcUsername>
+					<jdbcConnectionPoolMinIdle>0</jdbcConnectionPoolMinIdle>
+					<jdbcConnectionPoolMaxIdle>0</jdbcConnectionPoolMaxIdle>
+				</configuration>
+				<executions>
+					<execution>
+						<id>override-setting-metadata</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>bulk-set-setting-metadata</goal>
+						</goals>
+						<configuration>
+							<settings>
+								<setting>COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore@refreshStrategy=immediate</setting>
+							</settings>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration combine.self="override">
@@ -712,7 +819,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>${maven-failsafe-plugin.version}</version>
 				<configuration>
 					<encoding>${charset.encoding}</encoding>
 					<argLine>-Dfile.encoding=${charset.encoding}</argLine>

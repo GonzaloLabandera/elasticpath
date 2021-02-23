@@ -96,7 +96,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	@CacheResult
 	public Observable<String> getWishlistIds(final String customerGuid, final String storeCode) {
 		LOG.trace("finding by customer");
-		return customerSessionRepository.findCustomerSessionByGuidAsSingle(customerGuid)
+		return customerSessionRepository.findCustomerSessionByGuidAndStoreCodeAsSingle(customerGuid, storeCode)
 				.map(ShopperReference::getShopper)
 				.flatMapObservable(shopper -> getWishlistInternal(shopper)
 						.map(GloballyIdentifiable::getGuid)

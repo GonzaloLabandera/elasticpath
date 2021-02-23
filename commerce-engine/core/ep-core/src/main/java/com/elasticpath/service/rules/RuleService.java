@@ -28,13 +28,14 @@ import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
  * Provides rule engine-related services for each rule.
  *
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public interface RuleService extends EpPersistenceService  {
 	/**
 	 * Adds the given rule.
 	 *
 	 * @param rule the rule to add
 	 * @return the persisted instance of rule
-	 * @throws DuplicateNameException - if the specified promoCode is already in use.
+	 * @throws DuplicateNameException      - if the specified promoCode is already in use.
 	 * @throws DuplicatePromoCodeException - if the specified promoCode is already in use.
 	 */
 	Rule add(Rule rule) throws DuplicateNameException, DuplicatePromoCodeException;
@@ -44,7 +45,7 @@ public interface RuleService extends EpPersistenceService  {
 	 *
 	 * @param rule the rule to update
 	 * @return the updated object instance
-	 * @throws DuplicateNameException - if the specified promoCode is already in use.
+	 * @throws DuplicateNameException      - if the specified promoCode is already in use.
 	 * @throws DuplicatePromoCodeException - if the specified promoCode is already in use.
 	 */
 	Rule update(Rule rule) throws DuplicateNameException, DuplicatePromoCodeException;
@@ -53,7 +54,6 @@ public interface RuleService extends EpPersistenceService  {
 	 * Delete the rule.
 	 *
 	 * @param rule the rule to remove
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	void remove(Rule rule) throws EpServiceException;
@@ -63,9 +63,7 @@ public interface RuleService extends EpPersistenceService  {
 	 * Throw an unrecoverable exception if there is no matching database row.
 	 *
 	 * @param ruleUid the rule UID
-	 *
 	 * @return the rule if UID exists, otherwise null
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	Rule load(long ruleUid) throws EpServiceException;
@@ -75,9 +73,7 @@ public interface RuleService extends EpPersistenceService  {
 	 * Return null if no matching record exists.
 	 *
 	 * @param ruleUid the rule UID
-	 *
 	 * @return the rule if UID exists, otherwise null
-	 *
 	 * @throws EpServiceException - in case of any errors
 	 */
 	Rule get(long ruleUid) throws EpServiceException;
@@ -87,7 +83,7 @@ public interface RuleService extends EpPersistenceService  {
 	 * Give a load tuner to fine tune the parameters that are loaded into the retrieved object. If
 	 * no tuner is given the default fields will be loaded.
 	 *
-	 * @param ruleUid the rule UID to fetch
+	 * @param ruleUid   the rule UID to fetch
 	 * @param loadTuner the load tuner
 	 * @return the rule if the UID exists, otherwise <code>null</code>
 	 * @throws EpServiceException in case of any errors
@@ -140,7 +136,7 @@ public interface RuleService extends EpPersistenceService  {
 	 * Returns a list of <code>Rule</code>s based on the given uids. The returned rules will be populated based on the
 	 * given {@link FetchGroupLoadTuner}.
 	 *
-	 * @param ruleUids a collection of rule uids
+	 * @param ruleUids            a collection of rule uids
 	 * @param fetchGroupLoadTuner a {@link FetchGroupLoadTuner}.
 	 * @return a list of <code>Rule</code>s
 	 */
@@ -152,7 +148,7 @@ public interface RuleService extends EpPersistenceService  {
 	 *
 	 * @param date date to compare with the last modified date
 	 * @return list of <code>Rule</code> whose last modified date is later than the
-	 *         specified date
+	 * specified date
 	 */
 	List<Long> findUidsByModifiedDate(Date date);
 
@@ -191,8 +187,7 @@ public interface RuleService extends EpPersistenceService  {
 
 	/**
 	 * @param locale locale for which to find promotion names
-	 * @param codes codes for which to retrieve promotion names
-	 *
+	 * @param codes  codes for which to retrieve promotion names
 	 * @return map of coupon codes as keys and localized promotion names as values.
 	 */
 	Map<String, String> getPromotionNamesForCouponCodes(Locale locale, Collection<String> codes);
@@ -226,6 +221,7 @@ public interface RuleService extends EpPersistenceService  {
 
 	/**
 	 * Retrieves the rule with uidPk field only if rule has a limited use condition.
+	 *
 	 * @param promoCode Promotion code to search a rule for
 	 * @return A rule
 	 */
@@ -233,6 +229,7 @@ public interface RuleService extends EpPersistenceService  {
 
 	/**
 	 * Retrieves all rules with limited use for a given set of promotion codes.
+	 *
 	 * @param promoCodes promotion codes
 	 * @return a map, promotion code to rule
 	 */
@@ -281,7 +278,7 @@ public interface RuleService extends EpPersistenceService  {
 	 * passed by the current date. Passing <code>null</code> the exclude date will not exclude
 	 * any dates.
 	 *
-	 * @param excludeFrom any date before this will be excluded
+	 * @param excludeFrom  any date before this will be excluded
 	 * @param ruleScenario the scenario to find changes for
 	 * @return a collection of {@link Rule} UIDs that have been changed since the current date
 	 * @throws EpServiceException in case of any errors
@@ -292,8 +289,8 @@ public interface RuleService extends EpPersistenceService  {
 	 * Finds the given rule base by {@link Store}, {@link Catalog} and scenario ID. It is OK to
 	 * set either {@link Store} or {@link Catalog} to {@code null}.
 	 *
-	 * @param store the store
-	 * @param catalog the catalog
+	 * @param store      the store
+	 * @param catalog    the catalog
 	 * @param scenarioId the scenario ID
 	 * @return a rule base if it exists, otherwise {@code null}
 	 * @throws EpServiceException in case of any errors
@@ -306,9 +303,9 @@ public interface RuleService extends EpPersistenceService  {
 	 * since the given date, {@code null} will be returned. If the rule base does not exist
 	 * {@code null} will also be returned. Store rules do not have a catalog set.
 	 *
-	 * @param storeCode the store code to use
+	 * @param storeCode  the store code to use
 	 * @param scenarioId the scenario ID of the rule base
-	 * @param date the date from which changes should be recognized
+	 * @param date       the date from which changes should be recognized
 	 * @return a rule base if it exists and was modified
 	 * @throws EpServiceException in case of any errors
 	 */
@@ -321,8 +318,8 @@ public interface RuleService extends EpPersistenceService  {
 	 * {@code null} will also be returned. Catalog rules do not have a store set.
 	 *
 	 * @param catalogCode the catalog code to use
-	 * @param scenarioId the scenario ID of the rule base
-	 * @param date the date from which changes should be recognized
+	 * @param scenarioId  the scenario ID of the rule base
+	 * @param date        the date from which changes should be recognized
 	 * @return a rule base if it exists and was modified
 	 * @throws EpServiceException in case of any errors
 	 */
@@ -358,7 +355,7 @@ public interface RuleService extends EpPersistenceService  {
 	 * Finds rules that match the specified scenario and store.
 	 *
 	 * @param scenarioId the scenario id.
-	 * @param storeCode the store code.
+	 * @param storeCode  the store code.
 	 * @return a set of rules that match.
 	 */
 	Collection<Rule> findByScenarioAndStore(int scenarioId, String storeCode);
@@ -366,10 +363,10 @@ public interface RuleService extends EpPersistenceService  {
 	/**
 	 * Collect promotion usage report data.
 	 *
-	 * @param storeUids store uids to wich user has access.
-	 * @param currency currency code or null for all currencies
-	 * @param startDate start date or null
-	 * @param endDate end date. Not nullable parameter
+	 * @param storeUids           store uids to wich user has access.
+	 * @param currency            currency code or null for all currencies
+	 * @param startDate           start date or null
+	 * @param endDate             end date. Not nullable parameter
 	 * @param withCouponCodesOnly true in case if need promotions with configured coupons codes only. Not nullable parameter.
 	 * @return list of report data.
 	 */
@@ -383,11 +380,20 @@ public interface RuleService extends EpPersistenceService  {
 	/**
 	 * Find the active rule id-selling context combinations for the given scenario and store code.
 	 *
-	 * @param scenario rule scenario
+	 * @param scenario  rule scenario
 	 * @param storeCode the store code
 	 * @return list of entries with rule id and its selling context
 	 */
-	List<Object[]> findActiveRuleIdSellingContextByScenarioAndStore(int scenario, String storeCode);
+	List<SellingContextRuleSummary> findActiveRuleIdSellingContextByScenarioAndStore(int scenario, String storeCode);
+
+	/**
+	 * Find the active rule id-selling context combinations for the given scenario and no store.
+	 *
+	 * @param scenario    rule scenario
+	 * @param catalogCode catalog code
+	 * @return list of entries with rule id and its selling context
+	 */
+	List<SellingContextRuleSummary> findActiveRuleIdSellingContextByScenarioAndCatalog(int scenario, String catalogCode);
 
 	/**
 	 * Retrieve all the dependent promotions and put the dependent before, e.g.
@@ -398,13 +404,13 @@ public interface RuleService extends EpPersistenceService  {
 	 * @param promos - the promotions to check if they are dependent on other promotions
 	 * @return a topologically sorted set of rule uids based on dependencies.
 	 * @see http://en.wikipedia.org/wiki/Topological_sorting
-	*/
+	 */
 	Set<Long> retrievePromotionDependencies(Set<Long> promos);
-	
+
 	/**
 	 * True if rule is valid for store, false otherwise.
 	 *
-	 * @param rule rule to check
+	 * @param rule      rule to check
 	 * @param storeCode scope of rule
 	 * @return SUCCESS if rule is valid for store, validation error type otherwise.
 	 */
@@ -415,8 +421,13 @@ public interface RuleService extends EpPersistenceService  {
 	 *
 	 * @param ruleIds The rule IDs.
 	 * @return The list of rule codes.
-	 *
 	 * @throws EpServiceException if db exception occurs.
 	 */
 	Collection<String> findCodesByUids(Collection<Long> ruleIds) throws EpServiceException;
+
+	/**
+	 * Retrieves all selling contexts.
+	 * @return list of selling contexts;
+	 */
+	List<SellingContextRuleSummary> findAllActiveRuleIdSellingContext();
 }

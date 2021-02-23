@@ -10,7 +10,6 @@ import io.reactivex.Completable;
 
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
-import com.elasticpath.rest.definition.base.NameEntity;
 import com.elasticpath.rest.definitions.validator.constants.ValidationMessages;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.validator.AddressValidator;
 
@@ -35,20 +34,10 @@ public class AddressValidatorImpl implements AddressValidator {
 	}
 
 	private boolean representationHasFields(final AddressEntity address) {
-		com.elasticpath.rest.definition.base.AddressEntity addressEntity = address.getAddress();
-		NameEntity nameEntity = address.getName();
+		final com.elasticpath.rest.definition.base.AddressEntity addressEntity = address.getAddress();
 
-		return nameEntityHasData(nameEntity)
-				|| addressEntityHasData(addressEntity)
+		return addressEntityHasData(addressEntity)
 				|| (address.getOrganization() != null && address.getPhoneNumber() != null);
-	}
-
-	private boolean nameEntityHasData(final NameEntity nameEntity) {
-		return nameEntity != null
-				&& (
-				nameEntity.getFamilyName() != null
-						|| nameEntity.getGivenName() != null
-		);
 	}
 
 	@SuppressWarnings("squid:S1067")

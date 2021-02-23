@@ -70,10 +70,9 @@ class CouponsSteps {
 				.isEqualTo(200)
 	}
 
-	@When('^I apply an invalid coupon (.+) to the order')
+	@When('^I apply (?:an invalid )*coupon (.+) to the order')
 	static void applyInvalidCoupon(String couponCode) {
 		Order.applyCoupon(couponCode)
-
 	}
 
 	@Given('^a coupon code (.+) exists')

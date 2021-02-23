@@ -11,6 +11,7 @@ import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.commons.exception.UnsupportedEventActionException;
 import com.elasticpath.core.messaging.catalog.CatalogEventType;
 import com.elasticpath.messaging.EventType;
+import com.elasticpath.persistence.impl.EventActionEnum;
 import com.elasticpath.persistence.impl.EventTypeFactory;
 
 /**
@@ -39,7 +40,7 @@ public class CatalogEventTypeFactoryImpl implements EventTypeFactory {
 	}
 
 	@Override
-	public <T> boolean isSupported(final Class<T> clazz,  final EventAction action) {
+	public <T> boolean isSupported(final Class<T> clazz,  final EventActionEnum action) {
 		return ProjectionEntity.class.isAssignableFrom(clazz);
 	}
 }

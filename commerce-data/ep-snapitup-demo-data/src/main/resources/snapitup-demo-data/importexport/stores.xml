@@ -18,7 +18,9 @@
     <store_admin_email>StoreAdmin@SomeDomain.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>true</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en</locale>
     </locales>
     <currencies>
@@ -80,7 +82,9 @@
     <store_admin_email>StoreAdminUK@snapitupuk.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>true</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en</locale>
     </locales>
     <currencies>
@@ -146,7 +150,9 @@
     <store_admin_email>StoreAdmin@SomeDomain.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>true</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>en</locale>
         <locale>fr</locale>
     </locales>

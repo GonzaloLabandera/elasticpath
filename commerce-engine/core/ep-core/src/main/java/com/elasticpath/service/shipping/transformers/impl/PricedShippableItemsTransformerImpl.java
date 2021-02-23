@@ -57,6 +57,7 @@ public class PricedShippableItemsTransformerImpl implements PricedShippableItems
 		}
 
 		return shippableShoppingItems
+				.filter(shoppingItem -> shoppingItem.getCurrency() != null)
 				.map(shoppingItem -> pricedShippableItemTransformer.apply(shoppingItem,
 																		  createShippableItemPricing(shoppingItem, shippableItemsPricing,
 																									 apportionedSubTotalDiscounts, currency)));

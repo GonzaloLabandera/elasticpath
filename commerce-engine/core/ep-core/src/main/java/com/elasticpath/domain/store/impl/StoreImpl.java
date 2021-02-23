@@ -196,6 +196,10 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 
 	private StoreState storeState;
 
+	private String b2CAuthenticatedRole;
+
+	private String b2CSingleSessionRole;
+
 	/** Defines 20 as a constant to use for maximum string lengths. */
 	private static final int LENGTH_20 = 20;
 
@@ -1062,5 +1066,45 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 	@Override
 	public void setShoppingCartTypes(final Collection<CartType> shoppingCartTypes) {
 		this.shoppingCartTypes = shoppingCartTypes;
+	}
+
+	/**
+	 * Gets the B2C authenticated role for store.
+	 * @return the B2C role.
+	 */
+	@Override
+	@Basic
+	@Column(name = "B2C_AUTHENTICATED_ROLE", length = GlobalConstants.SHORT_TEXT_MAX_LENGTH)
+	public String getB2CAuthenticatedRole() {
+		return b2CAuthenticatedRole;
+	}
+
+	/**
+	 * Sets the B2C authenticated role for store.
+	 * @param b2CAuthenticatedRole the B2C role.
+	 */
+	@Override
+	public void setB2CAuthenticatedRole(final String b2CAuthenticatedRole) {
+		this.b2CAuthenticatedRole = b2CAuthenticatedRole;
+	}
+
+	/**
+	 * Gets the B2C single session role for store.
+	 * @return the B2C role.
+	 */
+	@Basic
+	@Column(name = "B2C_SINGLE_SESSION_ROLE", length = GlobalConstants.SHORT_TEXT_MAX_LENGTH)
+	@Override
+	public String getB2CSingleSessionRole() {
+		return b2CSingleSessionRole;
+	}
+
+	/**
+	 * Sets the B2C single session role for store.
+	 * @param b2CSingleSessionRole the B2C role.
+	 */
+	@Override
+	public void setB2CSingleSessionRole(final String b2CSingleSessionRole) {
+		this.b2CSingleSessionRole = b2CSingleSessionRole;
 	}
 }

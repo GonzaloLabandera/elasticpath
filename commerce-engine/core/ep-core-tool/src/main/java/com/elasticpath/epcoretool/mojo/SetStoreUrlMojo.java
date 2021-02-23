@@ -14,7 +14,7 @@ import com.elasticpath.epcoretool.logic.AbstractSetStoreURL;
 /**
  * Update the store url for the specified store.
  */
-@Mojo(name = "set-store-url")
+@Mojo(name = "set-store-url", threadSafe = true)
 public class SetStoreUrlMojo extends AbstractEpCoreMojo {
 
 	/**

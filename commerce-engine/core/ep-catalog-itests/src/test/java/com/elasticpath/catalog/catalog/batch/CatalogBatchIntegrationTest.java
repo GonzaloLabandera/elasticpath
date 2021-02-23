@@ -5,7 +5,6 @@ package com.elasticpath.catalog.catalog.batch;
 
 import static com.elasticpath.catalog.batch.CatalogJobRunnerImpl.CLEAN_UP_DATABASE_FLAG;
 import static com.elasticpath.catalog.batch.message.CatalogBatchEventType.START_JOB;
-import static com.elasticpath.catalog.catalog.batch.CatalogBatchIntegrationTest.JMS_BROKER_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Duration.TEN_SECONDS;
@@ -19,11 +18,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
-
 import javax.persistence.EntityNotFoundException;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -33,6 +28,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultMessage;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +42,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import com.elasticpath.catalog.batch.message.CatalogBatchEventMessageProcessor;
 import com.elasticpath.catalog.exception.ValidationException;
+import com.elasticpath.catalog.messages.RelayOutboxMessagesThreadExecutor;
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionHistoryEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionHistoryId;
@@ -63,20 +62,16 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.impl.EventMessageImpl;
 import com.elasticpath.persistence.api.Persistable;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
 import com.elasticpath.test.util.Utils;
 
 /**
  * Integration tests for Catalog Batch functionality.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DirtiesDatabase
-public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
-
-	public static final String JMS_BROKER_URL = "tcp://localhost:61622";
+public class CatalogBatchIntegrationTest extends DbTestCase {
 
 	private static final Logger LOGGER = Logger.getLogger(CatalogBatchIntegrationTest.class);
 
@@ -112,6 +107,9 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 	private CatalogProjectionHistoryRepository projectionHistoryRepository;
 
 	@Autowired
+	private RelayOutboxMessagesThreadExecutor relayOutboxMessagesThreadExecutor;
+
+	@Autowired
 	@Qualifier("spyTransactionManager")
 	private SpyTransactionManager spyTransactionManager;
 
@@ -135,6 +133,12 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 						.process(exchange -> LOGGER.info("Catalog endpoint exchange: " + exchange.getIn().getBody()));
 			}
 		});
+		relayOutboxMessagesThreadExecutor.start();
+	}
+
+	@After
+	public void tearDown() {
+		relayOutboxMessagesThreadExecutor.stop();
 	}
 
 	@Test
@@ -185,6 +189,7 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 
 		final String skuOptionCode = Utils.uniqueCode(CODE);
 		persistSkuOption(catalog, skuOptionCode);
+
 		await().atMost(TEN_SECONDS).until(() -> isProjectionExists(OPTION, skuOptionCode, storeCode));
 
 		final Exchange exchange = createExchange(START_JOB, BUILD_ALL_OPTIONS, Collections.singletonMap(CLEAN_UP_DATABASE_FLAG, true));
@@ -215,6 +220,7 @@ public class CatalogBatchIntegrationTest extends XaTransactionTestSupport {
 
 		final String skuOptionCode = Utils.uniqueCode(CODE);
 		persistSkuOption(catalog, skuOptionCode);
+
 		await().atMost(TEN_SECONDS).until(() -> isProjectionExists(OPTION, skuOptionCode, storeCode));
 
 		final ProjectionEntity projectionEntity = projectionRepository.extractProjectionEntity(OPTION, skuOptionCode, storeCode)

@@ -31,19 +31,21 @@ public interface CustomerSessionRepository {
 	 * Creates a customer session for a given customer.
 	 *
 	 * @param customerGuid the customer guid.
+	 * @param storeCode the store code.
 	 * @return a customer session.
-	 * @deprecated use {@link #findCustomerSessionByGuidAsSingle}
+	 * @deprecated use {@link #findCustomerSessionByGuidAndStoreCodeAsSingle}
 	 */
 	@Deprecated
-	ExecutionResult<CustomerSession> findCustomerSessionByGuid(String customerGuid);
+	ExecutionResult<CustomerSession> findCustomerSessionByGuidAndStoreCode(String customerGuid, String storeCode);
 
 	/**
 	 * Creates a customer session for a given customer.
 	 *
 	 * @param customerGuid the customer guid.
+	 * @param storeCode the store code.
 	 * @return a customer session.
 	 */
-	Single<CustomerSession> findCustomerSessionByGuidAsSingle(String customerGuid);
+	Single<CustomerSession> findCustomerSessionByGuidAndStoreCodeAsSingle(String customerGuid, String storeCode);
 
 	/**
 	 * Creates a customer session for a given customer and account.

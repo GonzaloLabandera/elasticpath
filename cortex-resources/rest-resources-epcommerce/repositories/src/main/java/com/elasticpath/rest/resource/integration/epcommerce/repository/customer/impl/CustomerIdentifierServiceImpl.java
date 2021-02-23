@@ -44,7 +44,7 @@ public class CustomerIdentifierServiceImpl implements CustomerIdentifierService 
 
 
 	@Override
-	public ExecutionResult<Void> isCustomerExists(final String userId, final String storeCode, final String issuer) {
+	public ExecutionResult<Boolean> isCustomerExists(final String userId, final String storeCode, final String issuer) {
 		ExecutionResult<CustomerIdentifierStrategy> customerIdentifierStrategy = getCustomerIdentifierStrategy(issuer);
 		if (customerIdentifierStrategy.isFailure()) {
 			return ExecutionResultFactory.createNotFound();
@@ -76,7 +76,6 @@ public class CustomerIdentifierServiceImpl implements CustomerIdentifierService 
 	 * Derives the customer identifier strategy for given issuer info.
 	 *
 	 * @param issuer issuer
-	 *
 	 * @return strategy
 	 */
 	protected ExecutionResult<CustomerIdentifierStrategy> getCustomerIdentifierStrategy(final String issuer) {
@@ -86,7 +85,7 @@ public class CustomerIdentifierServiceImpl implements CustomerIdentifierService 
 		String customerIdentifierKey =
 				customerIdentifierKeyText.contains(":") ? customerIdentifierKeyText.split(":")[0] : customerIdentifierKeyText;
 
-		Optional<CustomerIdentifierStrategy> identifierStrategyOptional =  customerIdentifierStrategyList.stream()
+		Optional<CustomerIdentifierStrategy> identifierStrategyOptional = customerIdentifierStrategyList.stream()
 				.filter(identifierStrategy ->
 						identifierStrategy.getCustomerIdentificationKeyField().equalsIgnoreCase(customerIdentifierKey)).findFirst();
 
@@ -98,7 +97,6 @@ public class CustomerIdentifierServiceImpl implements CustomerIdentifierService 
 	 * Derives the customer identifier key for given issuer using corresponding setting value.
 	 *
 	 * @param issuer issuer
-	 *
 	 * @return customerIdentifierKey
 	 */
 	protected String getCustomerIdentifierKey(final String issuer) {

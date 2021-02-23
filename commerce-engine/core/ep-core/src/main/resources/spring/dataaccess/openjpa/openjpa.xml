@@ -39,97 +39,19 @@
 		  Note that these are OpenJPA LifecycleListeners.  Some of these listeners may <em>also</em> be EP PersistenceEngineEntityListeners.
 		  PersistenceEngineOperationListeners are associated directly with the EP PersistenceEngine, not the OpenJPA EntityManager,
 		  so any listeners which do double duty listening to both interfaces must be registered in both locations. -->
+
 	<util:list id="entityManagerLifecycleListeners">
-		<ref bean="domainEventListener"/>
 		<ref bean="databaseTimestampsEntityListener"/>
 		<ref bean="objectDeletedEntityListener"/>
 		<ref bean="changeSetPersistenceListener"/>
 		<ref bean="persistablePostLoadListener"/>
-		<!--<ref bean="auditEntityListener"/>-->    <!-- Must also be registered in the PersistenceEngine -->
+		<ref bean="auditEntityListener"/>    <!-- Must also be registered in the PersistenceEngine -->
+		<ref bean="domainEventListener"/>
 	</util:list>
 
-	<bean id="sharedEntityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
-		<property name="entityManagerFactory">
-			<ref bean="entityManagerFactory"/>
-		</property>
-	</bean>
-
-	<bean id="eventTypeFactory" class="com.elasticpath.persistence.impl.DomainEventTypeFactoryImpl">
-		<constructor-arg name="supportedClassByEventTypes" ref="classByEventTypesMap"/>
-	</bean>
-
-	<util:map id="classByEventTypesMap" key-type="java.lang.Class" value-type="java.util.List">
-		<entry key="com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl">
-			<list value-type="java.lang.String">
-				<value>SKU_OPTION_CREATED</value>
-				<value>SKU_OPTION_UPDATED</value>
-				<value>SKU_OPTION_DELETED</value>
-			</list>
-		</entry>
-		<entry key="com.elasticpath.domain.catalog.impl.BrandImpl">
-			<list value-type="java.lang.String">
-				<value>BRAND_CREATED</value>
-				<value>BRAND_UPDATED</value>
-				<value>BRAND_DELETED</value>
-			</list>
-		</entry>
-		<entry key="com.elasticpath.domain.modifier.impl.ModifierGroupImpl">
-			<list value-type="java.lang.String">
-				<value>MODIFIER_GROUP_CREATED</value>
-				<value>MODIFIER_GROUP_UPDATED</value>
-				<value>MODIFIER_GROUP_DELETED</value>
-			</list>
-		</entry>
-		<entry key="com.elasticpath.domain.attribute.impl.AttributeImpl">
-			<list value-type="java.lang.String">
-				<value>ATTRIBUTE_CREATED</value>
-				<value>ATTRIBUTE_UPDATED</value>
-				<value>ATTRIBUTE_DELETED</value>
-			</list>
-		</entry>
-		<entry key="com.elasticpath.domain.catalog.impl.ProductImpl">
-			<list value-type="java.lang.String">
-				<value>PRODUCT_CREATED</value>
-				<value>PRODUCT_UPDATED</value>
-				<value>PRODUCT_DELETED</value>
-			</list>
-		</entry>
-		<entry key="com.elasticpath.domain.catalog.impl.ProductBundleImpl">
-			<list value-type="java.lang.String">
-				<value>PRODUCT_CREATED</value>
-				<value>PRODUCT_UPDATED</value>
-				<value>PRODUCT_DELETED</value>
-			</list>
-		</entry>
-		<entry key="com.elasticpath.domain.catalog.impl.CategoryImpl">
-			<list value-type="java.lang.String">
-				<value>CATEGORY_CREATED</value>
-				<value>CATEGORY_UPDATED</value>
-				<value>CATEGORY_DELETED</value>
-			</list>
-		</entry>
-		<entry key="com.elasticpath.domain.catalog.impl.LinkedCategoryImpl">
-			<list value-type="java.lang.String">
-				<value>CATEGORY_LINK_CREATED</value>
-				<value>CATEGORY_LINK_UPDATED</value>
-				<value>CATEGORY_LINK_DELETED</value>
-			</list>
-		</entry>
-	</util:map>
-
-	<util:list id="domainEventListenerEventTypes">
-		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_PERSIST_PERFORMED"/>
-		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_ATTACH"/>
-		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_DELETE"/>
+	<util:list id="entityManagerTransactionListeners">
+		<ref bean="domainEventListener"/>
 	</util:list>
-
-	<bean id="domainEventListener"  class="com.elasticpath.persistence.impl.DomainEventListener">
-		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="eventMessagePublisher" ref="domainEventMessagePublisher"/>
-		<property name="eventMessageFactory" ref="eventMessageFactory"/>
-		<property name="eventTypeFactory" ref="eventTypeFactory"/>
-		<property name="eventTypes" ref="domainEventListenerEventTypes" />
-	</bean>
 
 	<bean id="databaseTimestampsEntityListener" class="com.elasticpath.persistence.impl.DatabaseTimestampsEntityListener">
 		<property name="beanFactory" ref="coreBeanFactory"/>
@@ -230,7 +152,7 @@
 	</util:list>
 
 	<util:list id="persistenceEngineOperationListeners">
-		<!--<ref bean="auditEntityListener"/>-->  <!--Must also be registered in the EntityManagerFactory-->
+		<ref bean="auditEntityListener"/>  <!--Must also be registered in the EntityManagerFactory-->
 		<ref bean="entityModifiedListener"/>
 	</util:list>
 
@@ -282,6 +204,7 @@
 		  abstract="true">
 		<property name="persistenceUnitManager" ref="persistenceUnitManager"/>
 		<property name="lifecycleListeners" ref="entityManagerLifecycleListeners"/>
+		<property name="transactionListeners" ref="entityManagerTransactionListeners"/>
 		<property name="hdsSupportSwitch" ref="hdsSupportSwitch"/>
 	</bean>
 
@@ -296,5 +219,92 @@
 		  init-method="verifyTxIsolationIsReadCommitted">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 	</bean>
+
+	<bean id="detachmentStrategy" class="com.elasticpath.persistence.openjpa.strategies.impl.StrictDetachmentStrategyImpl"/>
+
+	<bean id="eventTypeFactory" class="com.elasticpath.persistence.impl.DomainEventTypeFactoryImpl">
+		<constructor-arg name="supportedClassByEventTypes" ref="classByEventTypesMap"/>
+	</bean>
+
+	<util:map id="classByEventTypesMap" key-type="java.lang.Class" value-type="java.util.List">
+		<entry key="com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl">
+			<list value-type="java.lang.String">
+				<value>SKU_OPTION_CREATED</value>
+				<value>SKU_OPTION_UPDATED</value>
+				<value>SKU_OPTION_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.BrandImpl">
+			<list value-type="java.lang.String">
+				<value>BRAND_CREATED</value>
+				<value>BRAND_UPDATED</value>
+				<value>BRAND_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.modifier.impl.ModifierGroupImpl">
+			<list value-type="java.lang.String">
+				<value>MODIFIER_GROUP_CREATED</value>
+				<value>MODIFIER_GROUP_UPDATED</value>
+				<value>MODIFIER_GROUP_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.attribute.impl.AttributeImpl">
+			<list value-type="java.lang.String">
+				<value>ATTRIBUTE_CREATED</value>
+				<value>ATTRIBUTE_UPDATED</value>
+				<value>ATTRIBUTE_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.ProductImpl">
+			<list value-type="java.lang.String">
+				<value>PRODUCT_CREATED</value>
+				<value>PRODUCT_UPDATED</value>
+				<value>PRODUCT_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.ProductBundleImpl">
+			<list value-type="java.lang.String">
+				<value>PRODUCT_CREATED</value>
+				<value>PRODUCT_UPDATED</value>
+				<value>PRODUCT_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.CategoryImpl">
+			<list value-type="java.lang.String">
+				<value>CATEGORY_CREATED</value>
+				<value>CATEGORY_UPDATED</value>
+				<value>CATEGORY_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.LinkedCategoryImpl">
+			<list value-type="java.lang.String">
+				<value>CATEGORY_LINK_CREATED</value>
+				<value>CATEGORY_LINK_UPDATED</value>
+				<value>CATEGORY_LINK_DELETED</value>
+			</list>
+		</entry>
+	</util:map>
+
+	<util:list id="domainEventListenerEventTypes">
+		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_PERSIST"/>
+		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_ATTACH"/>
+		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_DELETE"/>
+		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.BEFORE_UPDATE"/>
+	</util:list>
+
+	<bean id="domainEventListener"  class="com.elasticpath.persistence.impl.DomainEventListener">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="eventMessageFactory" ref="eventMessageFactory"/>
+		<property name="eventTypeFactory" ref="eventTypeFactory"/>
+		<property name="eventTypes" ref="domainEventListenerEventTypes" />
+		<property name="domainEventChannelSettingPath" value="COMMERCE/SYSTEM/MESSAGING/DOMAIN/channelUri"/>
+		<property name="lifecycleEventFilter">
+			<bean class="com.elasticpath.persistence.impl.LifecycleEventFilter"/>
+		</property>
+	</bean>
+
+	<beans profile="disable-domain-events" >
+		<util:list id="domainEventListenerEventTypes"/>
+	</beans>
 
 </beans>

@@ -15,6 +15,11 @@ class Item extends CommonMethods {
 		client.resume(CortexResponse.elementResponse)
 	}
 
+	static void appliedpromotions() {
+		client.appliedpromotions()
+				.stopIfFailure()
+	}
+
 	static void availability() {
 		client.availability()
 				.stopIfFailure()
@@ -218,6 +223,33 @@ class Item extends CommonMethods {
 		getItem()
 		client.addtowishlistform()
 				.stopIfFailure()
+	}
+
+	static void verifyPromotionByName(List<String> promoNameList, Boolean condition) {
+		appliedpromotions()
+		def appliedPromoResponse = client.save()
+		boolean promoExists = false
+		for (String promoName : promoNameList) {
+			client.resume(appliedPromoResponse)
+			client.body.links.find {
+				if (it.rel == "element") {
+					client.GET(it.uri)
+					if (promoName == client["name"]) {
+						return promoExists = true
+					}
+				}
+			}
+
+			assertThat(promoExists)
+					.as("Unable to find promotion: $promoName")
+					.isEqualTo(condition)
+		}
+	}
+
+	static void verifyPromotionByName(String promoName, Boolean condition) {
+		List<String> promoNameList = new ArrayList<>()
+		promoNameList.add(promoName)
+		verifyPromotionByName(promoNameList, condition)
 	}
 
 	static void addItemToWishListWithoutFollow() {

@@ -6,17 +6,21 @@ package com.elasticpath.cmclient.store.promotions.editors;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.EpUiException;
+import com.elasticpath.cmclient.core.editors.CancelSaveException;
+import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.policy.StatePolicy;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareFormEditor;
@@ -24,12 +28,17 @@ import com.elasticpath.cmclient.store.StorePlugin;
 import com.elasticpath.cmclient.store.promotions.PromotionsMessages;
 import com.elasticpath.cmclient.store.promotions.event.PromotionsChangeEvent;
 import com.elasticpath.cmclient.store.promotions.event.PromotionsEventService;
+import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleElement;
 import com.elasticpath.domain.rules.RuleException;
 import com.elasticpath.domain.rules.RuleParameter;
+import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.service.rules.RuleService;
+import com.elasticpath.service.sellingcontext.SellingContextService;
+import com.elasticpath.tags.domain.ConditionalExpression;
+import com.elasticpath.tags.domain.TagDictionary;
 
 /**
  * Implements a multi-page editor for displaying/editing catalog promotions.
@@ -45,16 +54,29 @@ public class CatalogPromotionsEditor extends AbstractPolicyAwareFormEditor {
 
 	private static final int RULES_PAGE_INDEX = 1;
 
-	private Rule rule;
+	private final RuleService ruleService =
+			BeanLocator.getService(ContextIdNames.RULE_SERVICE);
+	private final SellingContextService sellingContextService =
+			BeanLocator.getService(ContextIdNames.SELLING_CONTEXT_SERVICE);
 
-	private RuleService ruleService;
+	private SellingContext sellingContextForDelete;
+
+	private Rule rule;
 
 	@Override
 	public void initEditor(final IEditorSite site, final IEditorInput input) {
-		this.ruleService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SERVICE, RuleService.class);
-		String guid = input.getAdapter(String.class);
-		this.rule = ruleService.findByRuleCode(guid);
-		setPartName(rule.getName());
+		// empty
+	}
+
+	private Rule getRule(final String guid) {
+		Rule rule = ruleService.findByRuleCode(guid);
+		SellingContext sellingContext = rule.getSellingContext();
+		if (Objects.isNull(sellingContext)) {
+			sellingContext = BeanLocator.getService(ContextIdNames.SELLING_CONTEXT);
+			sellingContext.setName(rule.getName());
+			rule.setSellingContext(sellingContext);
+		}
+		return rule;
 	}
 
 	@Override
@@ -63,16 +85,12 @@ public class CatalogPromotionsEditor extends AbstractPolicyAwareFormEditor {
 
 		try {
 			addPage(new PromotionDetailsPage(this, true), pageContainer);
+			addPage(new PromotionShopperPage(this, false), pageContainer);
 			addPage(new PromotionRulesPage(this, true), pageContainer);
 			addExtensionPages(getClass().getSimpleName(), StorePlugin.PLUGIN_ID);
 		} catch (final PartInitException e) {
 			throw new EpUiException(e);
 		}
-	}
-
-	@Override
-	public void reloadModel() {
-		rule = ruleService.get(rule.getUidPk());
 	}
 
 	@Override
@@ -84,9 +102,27 @@ public class CatalogPromotionsEditor extends AbstractPolicyAwareFormEditor {
 				return;
 			}
 			monitor.worked(1);
+
+			if (!checkSellingContext()) {
+				throw new CancelSaveException("Failed to check Shopper."); //$NON-NLS-1$
+			}
+			monitor.worked(1);
+
 			Rule updatedRule = ruleService.update(rule);
 			monitor.worked(1);
+
+			// update selling context
+			if (!Objects.isNull(this.sellingContextForDelete)) {
+				this.sellingContextService.remove(sellingContextForDelete);
+			}
+			monitor.worked(1);
+
 			PromotionsEventService.getInstance().firePromotionsChangeEvent(new PromotionsChangeEvent(this, updatedRule));
+			monitor.worked(1);
+
+			this.reloadModel();
+			this.reinitStatePolicy();
+			this.refreshEditorPages();
 		} finally {
 			monitor.done();
 		}
@@ -158,6 +194,19 @@ public class CatalogPromotionsEditor extends AbstractPolicyAwareFormEditor {
 	}
 
 	@Override
+	public void reloadModel() {
+		this.setInput(getEditorInput());
+	}
+
+	@Override
+	protected void setInput(final IEditorInput input) {
+		super.setInput(input);
+		GuidEditorInput guidEditorInput = (GuidEditorInput) input;
+		rule = getRule(guidEditorInput.getGuid());
+		setPartName(rule.getName());
+	}
+
+	@Override
 	protected String getSaveOnCloseMessage() {
 		return
 			NLS.bind(PromotionsMessages.get().PromotionEditor_OnSavePrompt,
@@ -178,7 +227,7 @@ public class CatalogPromotionsEditor extends AbstractPolicyAwareFormEditor {
 	@Override
 	protected String getEditorName() {
 		String name = ""; //$NON-NLS-1$
-		if (rule != null) {
+		if (!Objects.isNull(rule)) {
 			name = rule.getName();
 		}
 		return name;
@@ -187,6 +236,44 @@ public class CatalogPromotionsEditor extends AbstractPolicyAwareFormEditor {
 	@Override
 	protected String getEditorToolTip() {
 		return getEditorName();
+	}
+
+	private boolean checkSellingContext() {
+		Rule model = this.getModel();
+		SellingContext sellingContext = model.getSellingContext();
+		if (Objects.isNull(sellingContext)) {
+			return true;
+		}
+
+		ConditionalExpression shopperCE = sellingContext.getCondition(TagDictionary.DICTIONARY_PROMOTIONS_SHOPPER_GUID);
+		if (Objects.isNull(shopperCE)) {
+			model.setSellingContext(null);
+			this.sellingContextForDelete = sellingContext;
+		}
+
+		if (!isConditionalExpressionValid(shopperCE)) {
+			showErrorDialog(TargetedSellingMessages.get().TotalLengthOfConditionsReached);
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean isConditionalExpressionValid(final ConditionalExpression conditionalExpression) {
+		if (!Objects.isNull(conditionalExpression)) {
+			return isConditionLengthValid(conditionalExpression.getConditionString());
+		}
+		return true;
+	}
+
+	private boolean isConditionLengthValid(final String conditionString) {
+		return (Objects.isNull(conditionString) || conditionString.length() <= ConditionalExpression.CONDITION_STRING_MAX_LENGTH);
+	}
+
+	private void showErrorDialog(final String message) {
+		MessageBox messageBox = new MessageBox(this.getSite().getShell(), SWT.OK);
+		messageBox.setMessage(message);
+		messageBox.open();
 	}
 
 }

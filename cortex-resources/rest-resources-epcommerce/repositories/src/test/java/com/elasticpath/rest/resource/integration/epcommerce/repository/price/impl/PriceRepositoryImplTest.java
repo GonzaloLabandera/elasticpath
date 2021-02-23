@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.price.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -49,6 +50,7 @@ import com.elasticpath.money.Money;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.definition.base.CostEntity;
+import com.elasticpath.rest.definition.prices.OfferPriceRangeEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.price.PriceRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
@@ -59,7 +61,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTrans
 import com.elasticpath.service.catalogview.StoreProductService;
 import com.elasticpath.service.store.StoreService;
 
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.TooManyFields"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.TooManyFields", "PMD.GodClass"})
 @RunWith(MockitoJUnitRunner.class)
 public class PriceRepositoryImplTest {
 
@@ -71,6 +73,11 @@ public class PriceRepositoryImplTest {
 	private static final String SKU_1 = "sku1";
 	private static final String SKU_2 = "sku2";
 	private static final String SKU_3 = "sku3";
+
+	private static final BigDecimal SKU1_LIST_PRICE = new BigDecimal(2);
+	private static final BigDecimal SKU1_SALE_PRICE = new BigDecimal(3);
+	private static final BigDecimal OTHER_SKU_SALE_PRICE = new BigDecimal(4);
+	private static final BigDecimal OTHER_SKU_LIST_PRICE = new BigDecimal(5);
 
 	@Mock
 	private Price price;
@@ -293,6 +300,36 @@ public class PriceRepositoryImplTest {
 	}
 
 	@Test
+	public void testGetPricesForPriceRange() {
+		mockGetActiveSkusMethodCalls();
+		when(storeProduct.isSkuDisplayable(any())).thenReturn(true);
+
+		PriceRepository repository = priceRepositoryWithMultiSkuProductWhereListPriceIsSmallerThanSalePrice(mock(StoreProductRepository.class));
+
+		stubMoneyTransformerTransformToEntity(SKU1_LIST_PRICE);
+		stubMoneyTransformerTransformToEntity(OTHER_SKU_SALE_PRICE);
+		stubMoneyTransformerTransformToEntity(OTHER_SKU_LIST_PRICE);
+
+		OfferPriceRangeEntity offerPriceRangeEntity = repository.getPriceRange(STORE_CODE, PRODUCT_GUID_CODE).blockingGet();
+
+		assertEquals("Invalid lower bound for purchase price", SKU1_LIST_PRICE,
+				offerPriceRangeEntity.getPurchasePriceRange().getFromPrice().get(0).getAmount());
+		assertEquals("Invalid upper bound for purchase price", OTHER_SKU_SALE_PRICE,
+				offerPriceRangeEntity.getPurchasePriceRange().getToPrice().get(0).getAmount());
+
+		assertEquals("Invalid lower bound for list price", SKU1_LIST_PRICE,
+				offerPriceRangeEntity.getListPriceRange().getFromPrice().get(0).getAmount());
+		assertEquals("Invalid upper bound for list price", OTHER_SKU_LIST_PRICE,
+				offerPriceRangeEntity.getListPriceRange().getToPrice().get(0).getAmount());
+	}
+
+	private void stubMoneyTransformerTransformToEntity(final BigDecimal bigDecimal) {
+		String displayValue = bigDecimal.toString() + " " + USD;
+		when(moneyTransformer.transformToEntity(Money.valueOf(bigDecimal, Currency.getInstance(Locale.getDefault()))))
+				.thenReturn(CostEntity.builder().withAmount(bigDecimal).withCurrency(USD).withDisplay(displayValue).build());
+	}
+
+	@Test
 	public void testNoPurchasePriceFallsBackToListPriceForPriceRange() {
 		mockGetActiveSkusMethodCalls();
 		when(storeProduct.isSkuDisplayable(any())).thenReturn(true);
@@ -441,6 +478,52 @@ public class PriceRepositoryImplTest {
 		return repository;
 	}
 
+	private StoreProduct stubStoreProduct() {
+		return new StoreProductImpl(new ProductImpl() {
+			@Override
+			public Map<String, ProductSku> getProductSkus() {
+				Map<String, ProductSku> result = new HashMap<>();
+				result.put(SKU_1, sku1);
+				result.put(SKU_2, sku2);
+				result.put(SKU_3, sku3);
+				return result;
+			}
+		});
+	}
+
+	private PriceRepository priceRepositoryWithMultiSkuProductWhereListPriceIsSmallerThanSalePrice(
+			final StoreProductRepository storeProductRepository) {
+
+		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
+				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
+				reactiveAdapterImpl, coreBeanFactory, storeService, storeProductService, moneyTransformer) {
+			@Override
+			public Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
+				return Maybe.just(new PriceImpl() {
+
+					@Override
+					public Money getListPrice() {
+						return getMoneyValue(skuCode, SKU1_LIST_PRICE, OTHER_SKU_LIST_PRICE);
+					}
+
+					@Override
+					public Money getSalePrice() {
+						return getMoneyValue(skuCode, SKU1_SALE_PRICE, OTHER_SKU_SALE_PRICE);
+					}
+
+					@Override
+					public Money getLowestPrice() {
+						return getMoneyValue(skuCode, SKU1_LIST_PRICE.min(SKU1_SALE_PRICE), OTHER_SKU_LIST_PRICE.min(OTHER_SKU_SALE_PRICE));
+					}
+
+				});
+			}
+		};
+		when(storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(anyString(), any()))
+				.thenReturn(Single.just(stubStoreProduct()));
+		return repository;
+	}
+
 	private PriceRepository priceRepositoryWithNoSalePrice(final StoreProductRepository storeProductRepository) {
 		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
 				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
@@ -522,6 +605,14 @@ public class PriceRepositoryImplTest {
 		when(storeService.findStoreWithCode("mobee")).thenReturn(mockStore);
 		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());
 		when(storeProductService.getProductForStore(any(), any())).thenReturn(storeProduct);
+	}
+
+	private Money getMoneyValue(final String skuCode, final BigDecimal sku1Price, final BigDecimal nonSku1Price) {
+		if (SKU_1.equals(skuCode)) {
+			return Money.valueOf(sku1Price, Currency.getInstance(Locale.getDefault()));
+		} else {
+			return Money.valueOf(nonSku1Price, Currency.getInstance(Locale.getDefault()));
+		}
 	}
 
 }

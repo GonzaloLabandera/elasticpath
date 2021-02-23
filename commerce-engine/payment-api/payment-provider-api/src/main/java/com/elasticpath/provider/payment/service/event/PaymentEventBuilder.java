@@ -211,9 +211,6 @@ public final class PaymentEventBuilder {
 		if (amount == null) {
 			throw new IllegalStateException("Builder is not fully initialized, amount is missing");
 		}
-		if (orderPaymentInstrumentDTO == null) {
-			throw new IllegalStateException("Builder is not fully initialized, orderPaymentInstrumentDTO is missing");
-		}
 		final PaymentEvent paymentEvent = beanFactory.getPrototypeBean(
 				PaymentProviderApiContextIdNames.PAYMENT_EVENT, PaymentEvent.class);
 		paymentEvent.setGuid(guid);

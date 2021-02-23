@@ -133,11 +133,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	/**
 	 * System attribute key.
 	 */
-	public static final String ATT_KEY_CP_GENDER = "CP_GENDER";
-
-	/**
-	 * System attribute key.
-	 */
 	public static final String ATT_KEY_CP_COMPANY = "CP_COMPANY";
 
 	/**
@@ -668,28 +663,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	@Transient
-	public char getGender() {
-		char gender = GENDER_NOT_SELECTED;
-		String genderString = getCustomerProfile().getStringProfileValue(ATT_KEY_CP_GENDER);
-		if (genderString != null && genderString.length() == 1) { // there should be exactly one character
-			gender = genderString.charAt(0);
-		}
-		return gender;
-	}
-
-	@Override
-	@Transient
-	public boolean isGenderRequired() {
-		return getCustomerProfile().isProfileValueRequired(ATT_KEY_CP_GENDER);
-	}
-
-	@Override
-	public void setGender(final char gender) {
-		getCustomerProfile().setStringProfileValue(ATT_KEY_CP_GENDER, String.valueOf(gender));
-	}
-
-	@Override
-	@Transient
 	public String getCompany() {
 		return getCustomerProfile().getStringProfileValue(ATT_KEY_CP_COMPANY);
 	}
@@ -719,9 +692,10 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 			return;
 		}
 		checkArgument(
-				status == Customer.STATUS_ACTIVE || status == Customer.STATUS_DISABLED || status == Customer.STATUS_PENDING_APPROVAL,
-				"status must be %s, %s, or %s, but was %s",
-				Customer.STATUS_ACTIVE, Customer.STATUS_DISABLED, Customer.STATUS_PENDING_APPROVAL, status);
+				status == Customer.STATUS_ACTIVE || status == Customer.STATUS_SUSPENDED
+						|| status == Customer.STATUS_DISABLED || status == Customer.STATUS_PENDING_APPROVAL,
+				"status must be %s, %s, %s, or %s, but was %s",
+				Customer.STATUS_ACTIVE, Customer.STATUS_SUSPENDED, Customer.STATUS_DISABLED, Customer.STATUS_PENDING_APPROVAL, status);
 		this.status = status;
 	}
 

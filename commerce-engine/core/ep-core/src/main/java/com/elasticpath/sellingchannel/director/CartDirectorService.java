@@ -77,27 +77,6 @@ public interface CartDirectorService {
 	ShoppingCart removeItemsFromCart(ShoppingCart shoppingCart, String... doomedItemGuids);
 
 	/**
-	 * Refreshes the given shopping cart. For example, updating all its {@link ShoppingItem} with the latest prices.
-	 * After refreshing the cart, the cart is persisted.  Returns the refreshed, persisted ShoppingCart
-	 *
-	 * @param shoppingCart shopping cart
-	 * @return the refreshed, updated {@link com.elasticpath.domain.shoppingcart.ShoppingCart}
-	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
-	 */
-	ShoppingCart refresh(ShoppingCart shoppingCart);
-
-	/**
-	 * Re-applies the catalog promotions to the ShoppingCart so that the
-	 * applied rules are tracked on the cart.
-	 * If you are here then you probably want to re-apply the catalog promotions
-	 * to the cart after you lost the information about which catalog rules
-	 * were applied when you called fireRules().
-	 *
-	 * @param shoppingCart a cart
-	 */
-	void reApplyCatalogPromotions(ShoppingCart shoppingCart);
-
-	/**
 	 * Adds the ProductSku represented by the given SkuCode to the wish list as a wish list item and
 	 * persists the wish list.
 	 *

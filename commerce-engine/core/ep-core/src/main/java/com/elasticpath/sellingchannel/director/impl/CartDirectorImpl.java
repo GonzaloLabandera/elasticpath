@@ -3,7 +3,6 @@
  */
 package com.elasticpath.sellingchannel.director.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -344,18 +343,12 @@ public class CartDirectorImpl implements CartDirector {
 	 * @param items shopping items
 	 */
 	protected void refreshShoppingItems(final Collection<ShoppingItem> items, final ShoppingCart shoppingCart) {
-		final List<ShoppingItem> nullPricedItems = new ArrayList<>();
 		for (final ShoppingItem item : items) {
 			try {
 				priceShoppingItemWithAdjustments(shoppingCart, item);
 			} catch (final ProductUnavailableException exception) {
-				nullPricedItems.add(item);
+				LOG.warn("Unable to determine price for sku: " + item.getSkuGuid());
 			}
-		}
-		// we must remove null priced items from the cart
-		for (final ShoppingItem item : nullPricedItems) {
-			LOG.warn("Sku has no price, removing from cart: " + item.getSkuGuid());
-			items.remove(item);
 		}
 	}
 

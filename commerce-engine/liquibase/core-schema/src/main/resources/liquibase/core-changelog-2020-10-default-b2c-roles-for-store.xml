@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-10-default-b2c-roles-for-store.xml">
+
+	<changeSet id="PB-8494-default-b2c-role-for-store" author="elasticpath">
+		<comment>[PB-8494] Add default B2C role for stores</comment>
+		<addColumn tableName="TSTORE">
+			<column name="B2C_AUTHENTICATED_ROLE" type="VARCHAR(255)">
+			</column>
+			<column name="B2C_SINGLE_SESSION_ROLE" type="VARCHAR(255)">
+			</column>
+		</addColumn>
+		<update tableName="TSTORE">
+			<column name="B2C_AUTHENTICATED_ROLE" value="BUYER"/>
+		</update>
+		<update tableName="TSTORE">
+			<column name="B2C_SINGLE_SESSION_ROLE" value="SINGLE_SESSION_BUYER"/>
+		</update>
+		<addNotNullConstraint tableName="TSTORE" columnName="B2C_AUTHENTICATED_ROLE" columnDataType="VARCHAR(255)"/>
+		<addNotNullConstraint tableName="TSTORE" columnName="B2C_SINGLE_SESSION_ROLE" columnDataType="VARCHAR(255)"/>
+	</changeSet>
+</databaseChangeLog>

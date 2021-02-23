@@ -85,4 +85,14 @@
 			<column name="LAST_EDIT_DATE" />
 		</createIndex>
 	</changeSet>
+	<changeSet id="2020-06-cleanup-anonymous-customers-job-recreate-FKs-for-user-account-association-with-cascade-delete"
+			   author="elasticpath" failOnError="true">
+		<comment>[PB-8561] Drop and create FK with CASCADE deletion for TUSERACCOUNTASSOCIATION</comment>
+
+		<!-- Set cascade deletion for TUSERACCOUNTASSOCIATION -->
+		<dropForeignKeyConstraint constraintName="TUSERACCTASSOC_USER_FK" baseTableName="TUSERACCOUNTASSOCIATION" />
+		<addForeignKeyConstraint constraintName="TUSERACCTASSOC_USER_FK" 	   onDelete="CASCADE"
+								 baseTableName="TUSERACCOUNTASSOCIATION" referencedTableName="TCUSTOMER"
+								 baseColumnNames="USER_CUSTOMER_GUID"   referencedColumnNames="GUID"/>
+	</changeSet>
 </databaseChangeLog>

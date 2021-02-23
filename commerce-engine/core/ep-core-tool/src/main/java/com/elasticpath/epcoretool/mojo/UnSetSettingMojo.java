@@ -14,7 +14,7 @@ import com.elasticpath.epcoretool.logic.AbstractUnSetSetting;
 /**
  * Updates the setting value in the Elastic Path database. If a value already exists, it will be removed.
  */
-@Mojo(name = "unset-setting")
+@Mojo(name = "unset-setting", threadSafe = true)
 public class UnSetSettingMojo extends AbstractEpCoreMojo {
 
 	/**

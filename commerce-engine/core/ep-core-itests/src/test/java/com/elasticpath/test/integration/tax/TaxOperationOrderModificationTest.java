@@ -59,7 +59,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		// checkout
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
 		assertEquals("only one order should have been created by the checkout service", 1, ordersList.size());
@@ -82,7 +82,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		verifyTaxDocumentForOrderShipment(phShipment, store);
 
 		// Add item to the existing order shipment
-		OrderSku newProductOrderSku = getNewProductOrderSku(scenario, "newSku-1");
+		OrderSku newProductOrderSku = getNewProductOrderSku(scenario, "newSku-1", order.getUidPk());
 		BigDecimal previousTotal = phShipment.getTotal();
 		phShipment.addShipmentOrderSku(newProductOrderSku);
 		assertTrue("the previous total amount should be less than the new one", previousTotal.compareTo(phShipment.getTotal()) < 0);
@@ -102,7 +102,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 
 		// add new item again
 		// Add item to the existing order shipment
-		OrderSku newProductOrderSku2 = getNewProductOrderSku(scenario, "newSku-2");
+		OrderSku newProductOrderSku2 = getNewProductOrderSku(scenario, "newSku-2", order.getUidPk());
 		BigDecimal previousTotal2 = phShipment.getTotal();
 		phShipment.addShipmentOrderSku(newProductOrderSku2);
 		assertTrue("the previous total amount should be less than the new one", previousTotal2.compareTo(phShipment.getTotal()) < 0);
@@ -136,7 +136,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
 		assertEquals("Only one order should have been created by the checkout service", 1, ordersList.size());
@@ -161,7 +161,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		newPhysicalShipment.setStatus(OrderShipmentStatus.INVENTORY_ASSIGNED);
 		newPhysicalShipment.initialize();
 
-		OrderSku newProductOrderSku = getNewProductOrderSku(scenario, "newSku-2");
+		OrderSku newProductOrderSku = getNewProductOrderSku(scenario, "newSku-2", order.getUidPk());
 		newPhysicalShipment.addShipmentOrderSku(newProductOrderSku);
 		newPhysicalShipment.setShippingOptionCode(scenario.getShippingOption().getCode());
 		newPhysicalShipment.setShippingCost(BigDecimal.ONE);
@@ -208,7 +208,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
 		assertEquals("only one order should have been created by the checkout service", 1, ordersList.size());
@@ -228,7 +228,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		PhysicalOrderShipment phShipment = order.getPhysicalShipments().iterator().next();
 
 		// Add item to the existing order shipment
-		OrderSku newProductOrderSku = getNewProductOrderSku(scenario, "newSku-3");
+		OrderSku newProductOrderSku = getNewProductOrderSku(scenario, "newSku-3", order.getUidPk());
 		BigDecimal previousTotal = phShipment.getTotal();
 		phShipment.addShipmentOrderSku(newProductOrderSku);
 		assertTrue("the previous total amount should be less than the new one", previousTotal.compareTo(phShipment.getTotal()) < 0);

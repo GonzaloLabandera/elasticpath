@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>addresses</name>
+
+		<resource>
+			<name>account-address-form</name>
+			<description><![CDATA[The addresse form for the account customer]]></description>
+			<uri>{addresses.account-addresses}/form</uri>
+			<form>
+				<entity>addresses.address</entity>
+				<action-rel>createaddressaction</action-rel>
+				<result>account-address</result>
+			</form>
+		</resource>
+
+		<relationship>
+			<name>add-account-address-form-from-account-addresses</name>
+			<description><![CDATA[Link to form to create an address.]]></description>
+			<rel>addressform</rel>
+			<from>account-addresses</from>
+			<to>account-address-form</to>
+		</relationship>
+	</family>
+</definitions>

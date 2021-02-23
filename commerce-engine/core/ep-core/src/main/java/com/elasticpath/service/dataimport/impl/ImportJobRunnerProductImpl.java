@@ -186,13 +186,14 @@ public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
 					product.setCode(nextLine[colNum]);
 					if (!checkChangeSetStatus(product, getRequest().getChangeSetGuid())) {
 						// report error
-						final ImportFault importFault = getImportFaultError();
-						importFault.setCode("import.csvFile.badRow.unavailableForChangeSet");
-						importFault.setArgs(new Object[] { rowNumber, getRequest().getChangeSetGuid() });
+						final ImportFault importFault = createImportFault(
+								ImportFault.ERROR,
+								"import.csvFile.badRow.unavailableForChangeSet",
+								new Object[] { rowNumber, getRequest().getChangeSetGuid() });
 						faults.add(importFault);
 					}
-					}
 				}
+			}
 		}
 	}
 
@@ -203,4 +204,5 @@ public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
 	public void setIndexNotificationService(final IndexNotificationService indexNotificationService) {
 		this.indexNotificationService = indexNotificationService;
 	}
+
 }

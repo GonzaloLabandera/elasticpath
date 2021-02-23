@@ -36,6 +36,8 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 
 	private static final String CUSTOMER_GUID = "CUSTOMER_GUID";
 
+	private static final String ACCOUNT_GUID = "ACCOUNT_GUID";
+
 	private static final String STORE_CODE = "STORE_CODE";
 
 	private final Collection<String> cartOrderGuids = new ArrayList<>();
@@ -53,11 +55,15 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 	private Customer mockCustomer;
 
 	@Mock
+	private Customer mockAccount;
+
+	@Mock
 	private CartOrder mockCartOrder;
 
 	@Before
 	public void setUp() {
 		when(mockCustomer.getGuid()).thenReturn(CUSTOMER_GUID);
+		when(mockAccount.getGuid()).thenReturn(ACCOUNT_GUID);
 		when(mockAddress.getGuid()).thenReturn(NEW_ADDRESS_GUID);
 		when(mockCartOrder.getGuid()).thenReturn(CART_ORDER_GUID);
 	}
@@ -70,6 +76,18 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 		cartOrdersDefaultAddressPopulator.updateAllCartOrdersAddresses(mockCustomer, mockAddress, STORE_CODE, true, false)
 				.test();
 		
+		verify(mockCartOrder, times(1)).setBillingAddressGuid(NEW_ADDRESS_GUID);
+		verify(cartOrderRepository, times(1)).saveCartOrder(mockCartOrder);
+	}
+
+	@Test
+	public void testUpdateAccountBillingAddressOnCartOrdersSuccessfully() {
+		setUpSuccessfulAccountCartOrderRetrieval();
+		allowingCartOrderBillingAddressToBe(null);
+
+		cartOrdersDefaultAddressPopulator.updateAccountCartOrdersAddresses(mockAccount, mockAddress, STORE_CODE, true, false)
+				.test();
+
 		verify(mockCartOrder, times(1)).setBillingAddressGuid(NEW_ADDRESS_GUID);
 		verify(cartOrderRepository, times(1)).saveCartOrder(mockCartOrder);
 	}
@@ -156,6 +174,12 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 		allowingCartOrderForGuid(Single.just(mockCartOrder));
 	}
 
+	private void setUpSuccessfulAccountCartOrderRetrieval() {
+		cartOrderGuids.add(CART_ORDER_GUID);
+		allowingCartOrderGuidsByAccount(Observable.fromIterable(cartOrderGuids));
+		allowingCartOrderForGuid(Single.just(mockCartOrder));
+	}
+
 	private void allowingCartOrderShippingAddressToBe(final String existingAddressGuid) {
 		when(mockCartOrder.getShippingAddressGuid()).thenReturn(existingAddressGuid);
 	}
@@ -172,5 +196,8 @@ public class CartOrdersDefaultAddressPopulatorImplTest {
 		when(cartOrderRepository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMER_GUID)).thenReturn(result);
 	}
 
+	private void allowingCartOrderGuidsByAccount(final Observable<String> result) {
+		when(cartOrderRepository.findCartOrderGuidsByAccount(STORE_CODE, ACCOUNT_GUID)).thenReturn(result);
+	}
 
 }

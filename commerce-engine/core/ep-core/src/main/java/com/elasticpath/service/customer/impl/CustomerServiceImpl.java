@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2019
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.service.customer.impl;
 
@@ -47,8 +47,6 @@ import com.elasticpath.service.customer.dao.CustomerAddressDao;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
-import com.elasticpath.service.search.IndexNotificationService;
-import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.validation.ConstraintViolationTransformer;
@@ -69,8 +67,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	private StoreService storeService;
 
 	private static final String LIST_PLACEHOLDER = "list";
-
-	private IndexNotificationService indexNotificationService;
 
 	private CustomerAddressDao customerAddressDao;
 
@@ -163,9 +159,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		if (customer.getCustomerType() == CustomerType.ACCOUNT) {
 			sendCustomerEvent(CustomerEventType.ACCOUNT_CREATED, customer.getGuid(), null);
 		}
-		if (customer.getCustomerType() == CustomerType.REGISTERED_USER || customer.getCustomerType() == CustomerType.ACCOUNT) {
-			indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
-		}
 	}
 
 	private void validateStore(final Customer customer) {
@@ -197,14 +190,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		defaultCustomerAddressesCheck(customer);
 		defaultCustomerGroupCheck(customer);
 
-		Customer persistedCustomer = getPersistenceEngine().update(customer);
-
-		if (isNotSearchable(customer)) {
-			return persistedCustomer;
-		}
-
-		indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, persistedCustomer.getUidPk());
-		return persistedCustomer;
+		return getPersistenceEngine().update(customer);
 	}
 
 	private Set<ConstraintViolation<Customer>> validatePasswordAndUsername(final Customer customer, final boolean shouldSetPassword) {
@@ -221,12 +207,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 			final List<StructuredErrorMessage> structuredErrorMessageList = constraintViolationTransformer.transform(customerViolations);
 			throw new EpValidationException("Customer validation failure.", structuredErrorMessageList);
 		}
-	}
-
-	private boolean isNotSearchable(final Customer customer) {
-		return customer.getCustomerType() == CustomerType.SINGLE_SESSION_USER
-				&& StringUtils.isEmpty(customer.getFirstName())
-				&& StringUtils.isEmpty(customer.getLastName());
 	}
 
 	/**
@@ -462,6 +442,18 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	@Override
+	public String findCustomerGuidBySharedId(final String sharedId) {
+		final List<String> customerGuids = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_GUID_SELECT_BY_SHAREDID", sharedId);
+		if (customerGuids.size() > 1) {
+			throw new EpServiceException("Inconsistent data -- duplicate shared id:" + sharedId);
+		}
+
+		return customerGuids.isEmpty()
+				? null
+				: customerGuids.get(0);
+	}
+
+	@Override
 	public String findCustomerGuidByProfileAttributeKeyAndValue(final String profileAttributeKey, final String profileAttributeValue) {
 		sanityCheck();
 		List<String> results = getPersistenceEngine().
@@ -671,35 +663,19 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	/**
-	 * Returns all customer uids as a list.
+	 * Retrieves a paginated list of searchable <code>Customer</code> uids where the last modified date is later than the specified date.
+	 * A customer is searchable if they are an 'Account', a 'Registered User' or an 'Single Session User' with at least one Order.
 	 *
-	 * @return all customer uids as a list
+	 * @param lastModifiedDate date to compare with the last modified date
+	 * @param firstResult the first result of the customer list to retrieve
+	 * @param maxResult the maximum number of customers to retrieve
+	 * @return a paginated list of indexable <code>Customer</code> uids whose last modified date is later than the specified date
 	 */
 	@Override
-	public List<Long> findAllUids() {
+	public List<Long> findIndexableUidsPaginated(final Date lastModifiedDate, final int firstResult, final int maxResult) {
 		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_UIDS_ALL");
-	}
-
-	@Override
-	public Collection<Long> filterSearchable(final Collection<Long> uids) {
-		sanityCheck();
-		List<Long> anonymousCustomerUids = getPersistenceEngine().retrieveByNamedQueryWithList(
-				"CUSTOMER_UIDS_FILTER_NON_ANONYMOUS", "list", uids);
-		return new HashSet<>(anonymousCustomerUids);
-	}
-
-	/**
-	 * Retrieves list of searchable <code>Customer</code> uids where the last modified date is later than the specified date.
-	 * A customer is searchable if they have defined their first name or last name.
-	 *
-	 * @param date date to compare with the last modified date
-	 * @return list of <code>Customer</code> whose last modified date is later than the specified date
-	 */
-	@Override
-	public List<Long> findSearchableUidsByModifiedDate(final Date date) {
-		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("SEARCHABLE_CUSTOMER_UIDS_SELECT_BY_MODIFIED_DATE", date);
+		return getPersistenceEngine().retrieveByNamedQuery("FIND_UIDS_OF_INDEXABLE_CUSTOMERS",
+				new Object[] {lastModifiedDate}, firstResult, maxResult);
 	}
 
 	/**
@@ -857,13 +833,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		}
 
 		return modified;
-	}
-
-	/**
-	 * @param indexNotificationService instance to set
-	 */
-	public void setIndexNotificationService(final IndexNotificationService indexNotificationService) {
-		this.indexNotificationService = indexNotificationService;
 	}
 
 	/**

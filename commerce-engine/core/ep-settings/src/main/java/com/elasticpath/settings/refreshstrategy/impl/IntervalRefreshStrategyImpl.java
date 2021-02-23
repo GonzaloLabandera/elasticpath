@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -135,8 +134,7 @@ public class IntervalRefreshStrategyImpl implements SettingRefreshStrategy, Sett
 	/**
 	 * Clears all entries from all caches.
 	 */
-	@VisibleForTesting
-	protected void clearAllCaches() {
+	public static void clearCache() {
 		TIMEOUT_CACHE_MAP.values().forEach(Map::clear);
 		TIMEOUT_CACHE_MAP.clear();
 	}

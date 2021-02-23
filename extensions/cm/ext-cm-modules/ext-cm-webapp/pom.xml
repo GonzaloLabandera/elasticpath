@@ -157,26 +157,6 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>unpack</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>com.elasticpath.cmclient</groupId>
-									<artifactId>com.elasticpath.cmclient.docs</artifactId>
-									<version>${cmclient.platform.feature.version}</version>
-									<overWrite>true</overWrite>
-									<outputDirectory>target/help</outputDirectory>
-									<includes>**</includes>
-									<type>jar</type>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-					<execution>
 						<id>copy</id>
 						<phase>package</phase>
 						<goals>

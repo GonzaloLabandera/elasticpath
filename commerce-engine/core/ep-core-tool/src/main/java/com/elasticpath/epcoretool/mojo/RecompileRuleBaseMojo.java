@@ -13,7 +13,7 @@ import com.elasticpath.epcoretool.logic.AbstractRecompileRuleBase;
 /**
  * Recompiles the EP Promo RuleBase.
  */
-@Mojo(name = "recompile-rulebase")
+@Mojo(name = "recompile-rulebase", threadSafe = true)
 public class RecompileRuleBaseMojo extends AbstractEpCoreMojo {
 
 	@Override

@@ -136,4 +136,12 @@ public interface CouponUsageDao {
 	 * @return a clelction of {@link CouponUsage} objects
 	 */
 	List<CouponUsage> findByUids(Collection<Long> uids);
+
+	/**
+	 * Disables auto-applying of the coupon to the cart.
+	 *
+	 * @param couponCode    the coupon code.
+	 * @param customerEmail the customer email.
+	 */
+	void disableAutoApplyToCarts(String couponCode, String customerEmail);
 }

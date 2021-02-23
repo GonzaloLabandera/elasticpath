@@ -37,6 +37,7 @@
 	</bean>
 
 	<bean id="settingValueFactory" class="com.elasticpath.settings.impl.SettingValueFactoryWithDefinitionImpl"/>
+	<bean id="settingMetadataFactory" class="com.elasticpath.settings.impl.SettingMetadataFactoryImpl"/>
 
 	<!-- Potentital settings overrides via JVM system properties -->
 	<util:map id="settingsSystemPropertyOverrides" key-type="java.lang.String">
@@ -47,8 +48,8 @@
 		<entry key="ep.smtp.scheme" value="COMMERCE/SYSTEM/EMAIL/smtpScheme"/>
 		<entry key="ep.smtp.username" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationUser"/>
 		<entry key="ep.smtp.password" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationPassword"/>
-		<entry key="ep.search.default.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
-		<entry key="ep.search.master.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
+		<entry key="ep.search.replica.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
+		<entry key="ep.search.primary.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
 	</util:map>
 
 	<bean id="immediateRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ImmediateRefreshStrategyImpl">
@@ -71,8 +72,7 @@
 				<entry key="application" value-ref="applicationLifetimeRefreshStrategy"/>
 			</map>
 		</property>
-		<property name="refreshStrategyKey" value="apiRefreshStrategy"/>
-		<property name="defaultRefreshStrategy" ref="immediateRefreshStrategy"/>
+		<property name="refreshStrategyKey" value="refreshStrategy"/>
 	</bean>
 
 	<!--  Default binding. Can be overridden by including a similar line in an xml file read after this one. -->

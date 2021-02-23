@@ -273,11 +273,10 @@ public class DiscountApportioningCalculatorTest {
 		ShoppingItem item1 = mockLeafItem(1, "1", SKU_CODE);
 		ShoppingItem item2 = mockLeafItem(1, "2", SKU_CODE);
 
-		Collection<ShoppingItem> lineItems = new ArrayList<>();
-
-		lineItems.add(item1);
-		lineItems.add(item2);
-		Collection<ShoppingItem> items = discountCalc.getDiscountableShoppingItems(lineItems);
+		Map<ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap = new HashMap<>();
+		shoppingItemPricingSnapshotMap.put(item1, mockLeafItemPricingSnapshot(Money.valueOf(ZERO_00, CA_CURRENCY)));
+		shoppingItemPricingSnapshotMap.put(item2, mockLeafItemPricingSnapshot(Money.valueOf(ZERO_00, CA_CURRENCY)));
+		Collection<ShoppingItem> items = discountCalc.getDiscountableShoppingItems(shoppingItemPricingSnapshotMap);
 		assertEquals(2, items.size());
 		assertTrue(items.contains(item1));
 		assertTrue(items.contains(item2));
@@ -286,9 +285,8 @@ public class DiscountApportioningCalculatorTest {
 	/** */
 	@Test
 	public void testNoDiscountableShoppingItems() {
-		Collection<ShoppingItem> lineItems = new ArrayList<>();
-		
-		Collection<ShoppingItem> items = discountCalc.getDiscountableShoppingItems(lineItems);
+		Map<ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap = new HashMap<>();
+		Collection<ShoppingItem> items = discountCalc.getDiscountableShoppingItems(shoppingItemPricingSnapshotMap);
 		assertTrue(items.isEmpty());
 	}
 	
@@ -305,10 +303,11 @@ public class DiscountApportioningCalculatorTest {
 		constituents.add(0, constituent);
 		
 		ShoppingItem bundle = mockBundleItem(1, "1", "SKU_CODE", constituents);
-		Collection<ShoppingItem> lineItems = new ArrayList<>();
-		lineItems.add(bundle);
+
+		Map<ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap = new HashMap<>();
+		shoppingItemPricingSnapshotMap.put(bundle, mockLeafItemPricingSnapshot(Money.valueOf(ZERO_00, CA_CURRENCY)));
 		
-		Collection<ShoppingItem> items = discountCalc.getDiscountableShoppingItems(lineItems);
+		Collection<ShoppingItem> items = discountCalc.getDiscountableShoppingItems(shoppingItemPricingSnapshotMap);
 		assertEquals(1, items.size());
 		assertTrue(items.contains(constituent));
 	}
@@ -377,8 +376,6 @@ public class DiscountApportioningCalculatorTest {
 				will(returnValue(false));
 				allowing(lineItemMock).isDiscountable(productSkuLookup);
 				will(returnValue(true));
-				allowing(lineItemMock).hasPrice();
-				will(returnValue(true));
 			}
 		});
 		return lineItemMock;
@@ -400,7 +397,8 @@ public class DiscountApportioningCalculatorTest {
 
 				allowing(pricingSnapshot).getListUnitPrice();
 				will(returnValue(lineItemAmount));
-
+				allowing(pricingSnapshot).hasPrice();
+				will(returnValue(true));
 			}
 		});
 
@@ -421,9 +419,6 @@ public class DiscountApportioningCalculatorTest {
 				will(returnValue(constituents));
 				
 				allowing(lineItemMock).isDiscountable(productSkuLookup);
-				will(returnValue(true));
-
-				allowing(lineItemMock).hasPrice();
 				will(returnValue(true));
 			}
 		});

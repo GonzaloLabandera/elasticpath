@@ -13,6 +13,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>import-snapitup-testdata</module>
 		<module>smoketest-data</module>
 		<module>smoketest-h2-database</module>
 		<module>importexport-system-tests</module>

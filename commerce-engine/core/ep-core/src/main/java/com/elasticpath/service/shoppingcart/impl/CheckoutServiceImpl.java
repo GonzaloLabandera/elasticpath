@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -30,12 +31,15 @@ import com.elasticpath.service.shipping.ShippingOptionResult;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.actions.CheckoutAction;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutAction;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutService;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContextImpl;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
-import com.elasticpath.service.shoppingcart.actions.impl.CheckoutActionContextImpl;
 import com.elasticpath.service.shoppingcart.actions.impl.FinalizeCheckoutActionContextImpl;
+import com.elasticpath.service.shoppingcart.actions.impl.PostCaptureCheckoutActionContextImpl;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
@@ -56,6 +60,8 @@ public class CheckoutServiceImpl implements CheckoutService {
 	private BeanFactory beanFactory;
 
 	private CartOrderService cartOrderService;
+
+	private PostCaptureCheckoutService postCaptureCheckoutService;
 
 	@Override
 	public void retrieveShippingOption(final ShoppingCart shoppingCart) {
@@ -155,6 +161,9 @@ public class CheckoutServiceImpl implements CheckoutService {
 			final boolean isOrderExchange = true;
 			this.checkoutInternal(shoppingCart, exchange.getExchangePricingSnapshot(), exchange.getExchangeCustomerSession(),
 					isOrderExchange, awaitExchangeCompletion, exchange, checkoutResults);
+			final PostCaptureCheckoutActionContext postCaptureCheckoutActionContext =
+					new PostCaptureCheckoutActionContextImpl(checkoutResults.getOrder());
+			postCaptureCheckoutService.completeCheckout(postCaptureCheckoutActionContext);
 		}
 	}
 
@@ -179,7 +188,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 									final OrderReturn exchange,
 									final CheckoutResults checkoutResults) {
 		//CHECKSTYLE:ON
-		final CheckoutActionContext actionContext = createActionContext(
+		final PreCaptureCheckoutActionContext actionContext = createActionContext(
 				shoppingCart, pricingSnapshot, customerSession, isOrderExchange,
 				awaitExchangeCompletion, exchange);
 
@@ -243,14 +252,14 @@ public class CheckoutServiceImpl implements CheckoutService {
 	 * @param exchange                    the order return details
 	 * @return a populated actionContext instance
 	 */
-	protected CheckoutActionContext createActionContext(
+	protected PreCaptureCheckoutActionContext createActionContext(
 			final ShoppingCart shoppingCart,
 			final ShoppingCartTaxSnapshot shoppingCartPricingSnapshot,
 			final CustomerSession customerSession,
 			final boolean isOrderExchange,
 			final boolean awaitExchangeCompletion,
 			final OrderReturn exchange) {
-		return new CheckoutActionContextImpl(shoppingCart, shoppingCartPricingSnapshot, customerSession,
+		return new PreCaptureCheckoutActionContextImpl(shoppingCart, shoppingCartPricingSnapshot, customerSession,
 				isOrderExchange, awaitExchangeCompletion, exchange, this::findCartOrderInContext);
 	}
 
@@ -261,27 +270,26 @@ public class CheckoutServiceImpl implements CheckoutService {
 	 * @return a populated finalizeActionContext instance
 	 */
 	protected FinalizeCheckoutActionContextImpl createFinalizeActionContext(
-			final CheckoutActionContext actionContext) {
+			final PreCaptureCheckoutActionContext actionContext) {
 		return new FinalizeCheckoutActionContextImpl(actionContext);
 	}
 
 	private void rollbackCheckout(final List<ReversibleCheckoutAction> executedActions,
-								  final CheckoutActionContext actionContext, final Exception exception) {
+								  final PreCaptureCheckoutActionContext actionContext, final Exception exception) {
 		if (exception instanceof PaymentsException) {
 			LOG.debug("Payment processing error occurred during checkout", exception);
 		} else {
 			LOG.error("Error occurred during checkout", exception);
 		}
 		LOG.debug("Checkout rollback process started.");
-		for (int index = executedActions.size() - 1; index >= 0; index--) {
-			final ReversibleCheckoutAction action = executedActions.get(index);
-			LOG.debug("Executing checkout action rollback " + action.getClass().getName());
+		Lists.reverse(executedActions).forEach(action -> {
 			try {
+				LOG.debug("Executing checkout action rollback " + action.getClass().getName());
 				action.rollback(actionContext);
 			} catch (Exception ex) {
 				LOG.error("Exception thrown during checkout rollback", ex);
 			}
-		}
+		});
 		LOG.debug("Checkout rollback process completed.");
 	}
 
@@ -348,5 +356,13 @@ public class CheckoutServiceImpl implements CheckoutService {
 
 	protected CartOrderService getCartOrderService() {
 		return cartOrderService;
+	}
+
+	public void setPostCaptureCheckoutService(final PostCaptureCheckoutService postCaptureCheckoutService) {
+		this.postCaptureCheckoutService = postCaptureCheckoutService;
+	}
+
+	protected PostCaptureCheckoutService getPostCaptureCheckoutService() {
+		return postCaptureCheckoutService;
 	}
 }

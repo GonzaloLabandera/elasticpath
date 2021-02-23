@@ -5,7 +5,7 @@ package com.elasticpath.service.shoppingcart.actions.impl;
 
 import com.elasticpath.service.shoppingcart.CheckoutEventHandler;
 import com.elasticpath.service.shoppingcart.actions.CheckoutAction;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 
 /**
  * CheckoutAction to trigger preCheckout events registered through checkoutEventHandler.
@@ -14,7 +14,7 @@ public class PreCheckoutCheckoutAction implements CheckoutAction {
 	private CheckoutEventHandler checkoutEventHandler;
 
 	@Override
-	public void execute(final CheckoutActionContext context) {
+	public void execute(final PreCaptureCheckoutActionContext context) {
 		checkoutEventHandler.preCheckout(context.getShoppingCart());
 	}
 

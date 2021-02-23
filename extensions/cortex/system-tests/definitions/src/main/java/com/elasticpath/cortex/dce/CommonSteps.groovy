@@ -366,7 +366,12 @@ class CommonSteps {
 
 	@Then('^post to the saved (?:.*) uri$')
 	static void postToSavedURI() {
-		client.POST(savedUri, [:])
+		def fields = [:]
+		fields.put('name', "CART4")
+
+		client.POST(savedUri, [
+				descriptor: fields
+		]).stopIfFailure()
 	}
 
 	@Then('^the uri of (.+) matches the uri of saved (.+) uri$')

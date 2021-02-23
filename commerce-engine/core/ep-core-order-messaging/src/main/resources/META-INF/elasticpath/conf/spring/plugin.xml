@@ -103,4 +103,37 @@
 			</util:list>
 		</property>
 	</bean>
+
+	<bean id="orderAcceptedEventTypePredicate" class="com.elasticpath.messaging.predicate.impl.CompatibleEventTypePredicate">
+		<property name="compatibleEventTypes">
+			<util:list>
+				<util:constant static-field="com.elasticpath.core.messaging.order.OrderEventType.ORDER_ACCEPTED"/>
+			</util:list>
+		</property>
+	</bean>
+
+	<bean id="orderCancelledEventTypePredicate" class="com.elasticpath.messaging.predicate.impl.CompatibleEventTypePredicate">
+		<property name="compatibleEventTypes">
+			<util:list>
+				<util:constant static-field="com.elasticpath.core.messaging.order.OrderEventType.ORDER_CANCELLED"/>
+			</util:list>
+		</property>
+	</bean>
+
+	<bean id="orderHoldResolutionEventTypePredicate" class="com.elasticpath.messaging.predicate.impl.CompatibleEventTypePredicate">
+		<property name="compatibleEventTypes">
+			<util:list>
+				<util:constant static-field="com.elasticpath.core.messaging.order.OrderEventType.ORDER_HOLDS_RESOLVED"/>
+			</util:list>
+		</property>
+	</bean>
+
+	<bean id="orderOnHoldNotificationEventTypePredicate" class="com.elasticpath.messaging.predicate.impl.CompatibleEventTypePredicate">
+		<property name="compatibleEventTypes">
+			<util:list>
+				<util:constant static-field="com.elasticpath.core.messaging.order.OrderEventType.ORDER_ON_HOLD"/>
+			</util:list>
+		</property>
+	</bean>
+
 </beans>

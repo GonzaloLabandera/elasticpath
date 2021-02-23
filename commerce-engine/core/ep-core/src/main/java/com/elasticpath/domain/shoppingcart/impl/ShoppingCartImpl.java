@@ -31,6 +31,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -38,8 +39,11 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
+import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.rules.Coupon;
@@ -1176,7 +1180,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 		boolean areCodesApplied = false;
 		for (Coupon coupon : couponCodeToCoupon.values()) {
-			if (getCouponUsageService().validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress).isSuccess()) {
+			if (getCouponUsageService().validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress, null).isSuccess()) {
 
 				couponCode = coupon.getCouponCode();
 				limitedUseRule = couponCodeToLimitedUseRule.get(couponCode);
@@ -1209,7 +1213,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		}
 
 		if (!getCouponUsageService().validateCouponRuleAndUsage(
-				coupon, getStore().getCode(), getCustomerEmailAddress()).isSuccess()) {
+				coupon, getStore().getCode(), getCustomerEmailAddress(), null).isSuccess()) {
 			return false;
 		}
 
@@ -1744,6 +1748,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	@Override
 	public void deactivateCart() {
 		getShoppingCartMemento().setStatus(ShoppingCartStatus.INACTIVE);
+		getShoppingCartMemento().setDefault(false);
 	}
 
 	@Override
@@ -1900,6 +1905,26 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		List<ShoppingItem> children = shoppingItem.getChildren();
 
 		updateChildShoppingCartUid(cartUid, children);
+	}
+
+	@Override
+	public List<ModifierField> getModifierFields() {
+		if (store == null) {
+			return Collections.emptyList();
+		}
+
+		List<ModifierGroup> modifierGroups = store.getShoppingCartTypes().stream()
+				.flatMap(cartType -> cartType.getModifiers().stream())
+				.collect(Collectors.toList());
+
+		return modifierGroups.stream()
+				.flatMap(modifierGroup -> modifierGroup.getModifierFields().stream())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Customer getCustomer() {
+		return ObjectUtils.firstNonNull(getShopper().getAccount(), getShopper().getCustomer());
 	}
 
 	/**

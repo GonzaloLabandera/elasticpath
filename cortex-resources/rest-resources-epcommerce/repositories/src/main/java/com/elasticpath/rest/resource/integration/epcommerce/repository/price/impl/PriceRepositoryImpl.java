@@ -163,8 +163,10 @@ public class PriceRepositoryImpl implements PriceRepository {
 		Price minListPrice = getPrice(prices, MIN_LIST_PRICE_REDUCER, listPricePredicate);
 		Price minPurchasePrice = getPrice(prices, MIN_PURCHASE_PRICE_REDUCER, salePricePredicate);
 
+		PriceRangeEntity purchasePriceRange = buildPriceRangeEntity(
+				getMinimumPurchasePrice(minListPrice, minPurchasePrice), maxPurchasePrice.getSalePrice()
+		);
 
-		PriceRangeEntity purchasePriceRange = buildPriceRangeEntity(minPurchasePrice.getSalePrice(), maxPurchasePrice.getSalePrice());
 		PriceRangeEntity listPriceRange = buildPriceRangeEntity(minListPrice.getListPrice(), maxListPrice.getListPrice());
 
 		if (Objects.isNull(purchasePriceRange.getFromPrice()) && Objects.isNull(purchasePriceRange.getToPrice())) {
@@ -174,6 +176,18 @@ public class PriceRepositoryImpl implements PriceRepository {
 				.withPurchasePriceRange(purchasePriceRange)
 				.withListPriceRange(listPriceRange)
 				.build());
+	}
+
+	private Money getMinimumPurchasePrice(final Price price1, final Price price2) {
+
+		Money money1 = price1.getLowestPrice();
+		Money money2 = price2.getLowestPrice();
+
+		if (money1 != null && money2 != null && money1.lessThan(money2)) {
+			return money1;
+		}
+
+		return money2;
 	}
 
 	private Price getPrice(final Observable<Price> prices, final BiFunction<Price, Price, Price> reducer, final Predicate<Price> pricePredicate) {

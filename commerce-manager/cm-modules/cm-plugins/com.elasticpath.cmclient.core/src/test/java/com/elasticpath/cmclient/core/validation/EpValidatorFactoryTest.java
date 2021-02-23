@@ -3,13 +3,21 @@
  */
 package com.elasticpath.cmclient.core.validation;
 
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.rap.rwt.testfixture.TestContext;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.elasticpath.cmclient.core.BeanLocator;
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.util.CatalogCodeUtil;
+import com.elasticpath.commons.util.impl.CatalogCodeUtilImpl;
 
 /**
  * Tests validators.
@@ -24,6 +32,15 @@ public class EpValidatorFactoryTest {
 
 	@Rule
 	public TestContext context = new TestContext();
+
+	@Before
+	public void setup() {
+		BeanFactory mockBeanFactory = mock(BeanFactory.class);
+        BeanLocator.setBeanFactory(mockBeanFactory);
+
+		when(mockBeanFactory.getSingletonBean(ContextIdNames.CATALOG_CODE_UTIL, CatalogCodeUtil.class))
+                .thenReturn(new CatalogCodeUtilImpl());
+	}
 
 	/**
 	 * Tests PHONE validator.

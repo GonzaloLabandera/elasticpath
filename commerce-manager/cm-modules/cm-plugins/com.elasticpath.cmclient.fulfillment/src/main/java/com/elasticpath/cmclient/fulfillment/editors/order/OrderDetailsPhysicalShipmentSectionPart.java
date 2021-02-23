@@ -18,6 +18,7 @@ import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
+import com.elasticpath.cmclient.fulfillment.util.AddressUtil;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
@@ -103,12 +104,15 @@ public class OrderDetailsPhysicalShipmentSectionPart extends AbstractCmClientEdi
 	@Override
 	protected String getSectionTitle() {
 		final OrderAddress address = shipment.getShipmentAddress();
+		final String fullCustomerName = AddressUtil.getFullCustomerName(address);
 		final StringBuilder title = new StringBuilder();
 		title.append(FulfillmentMessages.get().ShipmentSection_Title).append(' ');
-		title.append(shipmentNumber).append(' ');
-		title.append(FulfillmentMessages.get().ShipmentSection_To).append(' ');
-		title.append(address.getFirstName()).append(' ');
-		title.append(address.getLastName());
+		title.append(shipmentNumber);
+		if (StringUtils.isNotEmpty(fullCustomerName)) {
+			title.append(' ');
+			title.append(FulfillmentMessages.get().ShipmentSection_To).append(' ');
+			title.append(fullCustomerName);
+		}
 		title.append(" - ").append(resolveStatusText(shipment.getShipmentStatus())); //$NON-NLS-1$
 
 		if (shipment.getShipmentStatus() == OrderShipmentStatus.SHIPPED) {

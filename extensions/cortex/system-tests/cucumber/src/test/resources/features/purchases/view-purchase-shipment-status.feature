@@ -9,7 +9,7 @@ Feature: View purchase shipment
   Scenario Outline: View purchase and shipment status - shippable item
     When I add item <ITEM_NAME> to the cart with quantity 1
     And I select shipping option CanadaPostExpress
-    And I make a purchase
+    And I make a purchase and wait for it to be released
     Then the purchase status is <PURCHASE_STATUS>
     And I navigate to shipment
     Then I can see the shipment status <SHIPMENT_STATUS>
@@ -25,7 +25,7 @@ Feature: View purchase shipment
   Scenario Outline: View purchase status only - non shippable item
   No shipment status available for non shippable item
     When I add item <ITEM_NAME> to the cart with quantity 1
-    And I make a purchase
+    And I make a purchase and wait for it to be released
     Then the purchase status is <PURCHASE_STATUS>
 
     # Digital Item and Recurring Item
@@ -38,7 +38,7 @@ Feature: View purchase shipment
     When I add item <ITEM_1> to the cart with quantity 1
     And I add item <ITEM_2> to the cart with quantity 1
     And I select shipping option CanadaPostExpress
-    When I make a purchase
+    And I make a purchase and wait for it to be released
     Then the purchase status is <PURCHASE_STATUS>
     And I navigate to shipment
     Then I can see the shipment status <SHIPMENT_STATUS>

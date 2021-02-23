@@ -86,11 +86,11 @@
 
 	<!-- required by solrManager in spring/dataaccess/dao.xml -->
 	<bean id="searchHostLocatorTemplate" class="com.elasticpath.service.search.impl.SettingsSearchHostLocatorImpl" abstract="true">
-		<property name="defaultSearchHostLocationProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="default" systemPropertyOverrideKey="ep.search.default.url"/>
+		<property name="replicaSearchHostLocationProvider">
+			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="replica" systemPropertyOverrideKey="ep.search.replica.url" deprecatedSystemPropertyOverrideKey="ep.search.default.url"/>
 		</property>
-		<property name="masterSearchHostLocationProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="master" systemPropertyOverrideKey="ep.search.master.url"/>
+		<property name="primarySearchHostLocationProvider">
+			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="primary" systemPropertyOverrideKey="ep.search.primary.url" deprecatedSystemPropertyOverrideKey="ep.search.master.url"/>
 		</property>
 	</bean>
 

@@ -71,9 +71,6 @@ public class SyncStepDefinitions {
 				"-g",
 				"01234567-890A-BCDE-F012-34567890ABCD");
 
-		importexport.environment()
-				.put("PROFILE", "non-xa");
-
 		int exitCode = importexport.directory(filenameStartsWith(MAVEN_BUILD_DIRECTORY, "ext-importexport-cli-"))
 				.inheritIO()
 				.start()
@@ -122,9 +119,6 @@ public class SyncStepDefinitions {
 				file(exportConfiguration, "export.config").toString(),
 				"-c",
 				file(exportConfiguration, "export-configuration.xml").toString());
-
-		importexport.environment()
-				.put("PROFILE", "non-xa");
 
 		int exitCode = importexport.directory(IMPORT_EXPORT_CLI_DIRECTORY)
 				.inheritIO()

@@ -20,6 +20,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -52,6 +55,7 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.sellingchannel.ShoppingItemFactory;
+import com.elasticpath.sellingchannel.impl.ShoppingItemFactoryImpl;
 import com.elasticpath.service.catalog.ProductLookup;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.catalog.impl.BundleIdentifierImpl;
@@ -94,6 +98,10 @@ public class ShoppingItemAssemblerImplTest {
 	private static final String SKU_B = "SkuB";
 
 	private static final String CURRENCY_CAD = "CAD";
+
+	private static final String ITEM_FIELD_1_KEY = "ItemField1";
+
+	private static final String ITEM_FIELD_1_VALUE = "ItemField1Value";
 
 	@Mock
 	private BeanFactory beanFactory;
@@ -653,6 +661,44 @@ public class ShoppingItemAssemblerImplTest {
 		assertEquals(2, shoppingItem.getBundleItems(productSkuLookup).size());
 		assertEquals(product1.getDefaultSku().getGuid(), shoppingItem.getBundleItems(productSkuLookup).get(0).getSkuGuid());
 		assertEquals(product2.getDefaultSku().getGuid(), shoppingItem.getBundleItems(productSkuLookup).get(1).getSkuGuid());
+	}
+
+	@Test
+	public void testCreateShoppingItemTreeWhenDtoHasItemFieldsMap() {
+		// given
+		final ProductBundle bundle = createProductBundleWithSkuCode(BUNDLE_CODE_1, BUNDLE_SKU_CODE_1);
+		final Product product1 = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
+		final Product product2 = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
+		bundle.addConstituent(createBundleConstituentFrom(product1, 1, 0));
+		bundle.addConstituent(createBundleConstituentFrom(product2, 1, 1));
+		ShoppingItemFactoryImpl shoppingItemFactoryImpl = new ShoppingItemFactoryImpl();
+		shoppingItemFactoryImpl.setBeanFactory(beanFactory);
+		assembler.setShoppingItemFactory(shoppingItemFactoryImpl);
+		given(beanFactory.getPrototypeBean("shoppingItem", ShoppingItem.class))
+				.will(invocationOnMock -> new ShoppingItemImpl());
+
+		final ShoppingItemDto bundleDto = new ShoppingItemDto(BUNDLE_SKU_CODE_1, 1);
+		final ShoppingItemDto childDto1 = new ShoppingItemDto(PRODUCT_SKU_CODE_1, 1);
+		childDto1.setItemFields(ImmutableMap.of(ITEM_FIELD_1_KEY, ITEM_FIELD_1_VALUE));
+		final ShoppingItemDto childDto2 = new ShoppingItemDto(PRODUCT_SKU_CODE_1, 1);
+
+		bundleDto.addConstituent(childDto1);
+		bundleDto.addConstituent(childDto2);
+
+		// test
+		final ShoppingItemImpl shoppingItem = new ShoppingItemImpl() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isBundle(final ProductSkuLookup productSkuLookup) {
+				return true;
+			}
+		};
+
+		assembler.createShoppingItemTree(bundle, bundleDto, shoppingItem, 1);
+		assertEquals(1, shoppingItem.getChildShoppingItems().get(0).getFields().size());
+		assertTrue(shoppingItem.getChildShoppingItems().get(0).getFields().containsKey(ITEM_FIELD_1_KEY));
+		assertEquals(ITEM_FIELD_1_VALUE, shoppingItem.getChildShoppingItems().get(0).getFields().get(ITEM_FIELD_1_KEY));
 	}
 
 	private Product createProductWithSkuCode(final String productCode, final String skuCode) {

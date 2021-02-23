@@ -65,7 +65,9 @@ public class ImportProcessorImpl extends AbstractEpPersistenceServiceImpl implem
 			final JobType jobType = JobType.getJobTypeByTag(streamReader.getLocalName());
 
 			LOG.info("Begin importing " + jobType);
-			final Importer<? super Persistable, ? super Dto> importer = importerFactory.createImporter(jobType, context, savingManager);
+			final Importer<? super Persistable, ? super Dto> importer = importerFactory.createImporter(streamReader.getLocalName(),
+					context,
+					savingManager);
 
 			runImport(context, streamReader, summary, jobType, importer);
 

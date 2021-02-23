@@ -3,16 +3,24 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.accounts.repositories;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Maps;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
+import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.accounts.AccountEntity;
@@ -21,8 +29,12 @@ import com.elasticpath.rest.definition.accounts.AccountsIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ProfileAttributeFieldTransformer;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.validator.AccountAttributeValidator;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.CustomerProfileValueTransformer;
+import com.elasticpath.rest.resource.integration.epcommerce.transform.DateForEditTransformer;
+import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.customer.CustomerProfileAttributeService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.UserAccountAssociationService;
@@ -49,6 +61,14 @@ public class AccountEntityRepositoryImpl<E extends AccountEntity, I extends Acco
 
 	private ProfileAttributeFieldTransformer profileAttributeFieldTransformer;
 
+	private AccountAttributeValidator accountAttributeValidator;
+
+	private AttributeService attributeService;
+
+	private CustomerRepository customerRepository;
+
+	private DateForEditTransformer dateForEditTransformer;
+
 	@Override
 	public Single<AccountEntity> findOne(final AccountIdentifier identifier) {
 		String accountId = identifier.getAccountId().getValue();
@@ -66,10 +86,80 @@ public class AccountEntityRepositoryImpl<E extends AccountEntity, I extends Acco
 				.collect(Collectors.toList()));
 	}
 
+	@Override
+	public Completable update(final AccountEntity entity, final AccountIdentifier accountIdentifier) {
+		return accountAttributeValidator.validate(entity, accountIdentifier)
+				.andThen(customerRepository.getCustomer(accountIdentifier.getAccountId().getValue())
+						.map(account -> updateAccountData(entity, accountIdentifier, account))
+						.flatMapCompletable(customerRepository::updateCustomer));
+	}
+
+	/**
+	 * Updates the customer attributes with the profile entity.
+	 *
+	 * @param accountEntity     account entity
+	 * @param accountIdentifier the account identifier
+	 * @param account          customer to update
+	 * @return the updated customer
+	 */
+	protected Customer updateAccountData(final AccountEntity accountEntity, final AccountIdentifier accountIdentifier, final Customer account) {
+		final Map<String, Attribute> attributeMap = attributeService.getCustomerProfileAttributesMap(AttributeUsageImpl.ACCOUNT_PROFILE_USAGE);
+
+		// replace map keys with internal keys
+		Map<String, String> dynamicProperties = Maps.newHashMap();
+
+		accountEntity.getDynamicProperties()
+				.forEach((key, value) -> dynamicProperties.put(profileAttributeFieldTransformer.transformToAttributeKey(key),
+						value));
+
+		// add or update keys with non-empty values
+		Set<String> updateKeys = dynamicProperties.entrySet()
+				.stream()
+				.filter(entry -> !StringUtils.isEmpty(entry.getValue()))
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toSet());
+
+		updateKeys.forEach(key ->
+				this.updateCustomerAttribute(key, StringUtils.trimToNull(dynamicProperties.get(key)), account, attributeMap));
+
+		// get set of editable attribute keys that haven't been updated - semantically this implies they should be removed
+		List<String> attributeKeysForRemoval =
+				customerProfileAttributeService.getCustomerEditableAttributeKeys(accountIdentifier.getAccounts().getScope().getValue())
+						.stream()
+						.filter(key -> !updateKeys.contains(key))
+						.collect(Collectors.toList());
+
+		removeAttributes(attributeKeysForRemoval, account);
+
+		return account;
+	}
+
+	@SuppressWarnings({"PMD.MissingBreakInSwitch", "fallthrough"}) // PMD false positive bug - https://sourceforge.net/p/pmd/bugs/1262
+	private void updateCustomerAttribute(final String attributeKey, final String value, final Customer customer,
+										 final Map<String, Attribute> attributeMap) {
+		final AttributeType attributeType = attributeMap.get(attributeKey).getAttributeType();
+		switch (attributeType.getTypeId()) {
+			case AttributeType.DATE_TYPE_ID:
+			case AttributeType.DATETIME_TYPE_ID:
+				customer.getCustomerProfile().setProfileValue(attributeKey,
+						dateForEditTransformer.transformToDomain(attributeType, value)
+								.orElseThrow(() -> new IllegalArgumentException("Date value is missing.")));
+				break;
+			default:
+				customer.getCustomerProfile().setStringProfileValue(attributeKey, value);
+		}
+	}
+
+	private void removeAttributes(final List<String> attributeKeysForRemoval, final Customer customer) {
+		Map<String, CustomerProfileValue> profileValueMap = Maps.newHashMap(customer.getProfileValueMap());
+		attributeKeysForRemoval.forEach(profileValueMap::remove);
+		customer.setProfileValueMap(profileValueMap);
+	}
+
 	/**
 	 * Converts given Customer to AccountEntity.
 	 *
-	 * @param scope the scope
+	 * @param scope    the scope
 	 * @param customer customer to convert
 	 * @return the converted AccountEntity
 	 */
@@ -121,4 +211,26 @@ public class AccountEntityRepositoryImpl<E extends AccountEntity, I extends Acco
 	public void setProfileAttributeFieldTransformer(final ProfileAttributeFieldTransformer profileAttributeFieldTransformer) {
 		this.profileAttributeFieldTransformer = profileAttributeFieldTransformer;
 	}
+
+	@Reference
+	public void setAccountAttributeValidator(final AccountAttributeValidator accountAttributeValidator) {
+		this.accountAttributeValidator = accountAttributeValidator;
+	}
+
+	@Reference
+	public void setDateForEditTransformer(final DateForEditTransformer dateForEditTransformer) {
+		this.dateForEditTransformer = dateForEditTransformer;
+	}
+
+	@Reference
+	public void setAttributeService(final AttributeService attributeService) {
+		this.attributeService = attributeService;
+	}
+
+	@Reference
+	public void setCustomerRepository(final CustomerRepository customerRepository) {
+		this.customerRepository = customerRepository;
+	}
+
+
 }

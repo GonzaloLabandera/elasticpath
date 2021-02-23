@@ -31,7 +31,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import com.elasticpath.core.messaging.changeset.ChangeSetEventType;
 import com.elasticpath.email.EmailDto;
 import com.elasticpath.messaging.EventMessage;
-import com.elasticpath.messaging.camel.jackson.EventMessageObjectMapper;
+import com.elasticpath.messaging.camel.jackson.EventMessageObjectMapperImpl;
 import com.elasticpath.messaging.impl.EventMessageImpl;
 import com.elasticpath.tools.sync.dstmessagelistener.email.converters.EmailDtoConverter;
 import com.elasticpath.messaging.error.handling.policy.impl.RecoverableRetryErrorHandlingPolicy;
@@ -177,7 +177,7 @@ public class DatasyncEmailRouteTest extends CamelTestSupport {
 	}
 
 	private String getJson(final EventMessage eventMessage) throws JsonProcessingException {
-		final EventMessageObjectMapper eventMessageObjectMapper = new EventMessageObjectMapper();
+		final EventMessageObjectMapperImpl eventMessageObjectMapper = new EventMessageObjectMapperImpl();
 		eventMessageObjectMapper.init();
 		return eventMessageObjectMapper.writeValueAsString(eventMessage);
 	}

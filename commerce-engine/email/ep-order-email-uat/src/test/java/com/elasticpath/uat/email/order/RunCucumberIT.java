@@ -15,7 +15,8 @@ import org.junit.runner.RunWith;
 @RunWith(Cucumber.class)
 @CucumberOptions(
 		plugin = {"pretty", "html:target/cucumber", "json:target/cucumber.json", "junit:target/cucumber-junit-reports/cucumber.xml"},
-		glue = "com.elasticpath.uat"
+		glue = "com.elasticpath.uat",
+		tags = {"not @bug", "not @notReady"}
 )
 public class RunCucumberIT {
 

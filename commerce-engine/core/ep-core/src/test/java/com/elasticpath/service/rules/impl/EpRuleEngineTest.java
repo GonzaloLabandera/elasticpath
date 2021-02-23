@@ -1,330 +1,231 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
+
 package com.elasticpath.service.rules.impl;
 
-import static org.hamcrest.Matchers.anyOf;
-import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Currency;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
-import org.drools.core.SessionConfiguration;
-import org.jmock.Expectations;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.cache.SimpleTimeoutCache;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.Utility;
-import com.elasticpath.commons.util.impl.UtilityImpl;
-import com.elasticpath.domain.attribute.AttributeUsage;
-import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
-import com.elasticpath.domain.catalog.Brand;
+import com.elasticpath.commons.util.SimpleCache;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.impl.BrandImpl;
-import com.elasticpath.domain.catalog.impl.CatalogImpl;
-import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.discounts.DiscountItemContainer;
 import com.elasticpath.domain.discounts.ShoppingCartDiscountItemContainer;
-import com.elasticpath.domain.discounts.TotallingApplier;
-import com.elasticpath.domain.discounts.impl.LimitedTotallingApplierImpl;
 import com.elasticpath.domain.discounts.impl.ShoppingCartDiscountItemContainerImpl;
 import com.elasticpath.domain.rules.EpRuleBase;
-import com.elasticpath.domain.rules.Rule;
-import com.elasticpath.domain.rules.RuleAction;
-import com.elasticpath.domain.rules.RuleCondition;
-import com.elasticpath.domain.rules.RuleParameter;
-import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
-import com.elasticpath.domain.rules.impl.BrandConditionImpl;
-import com.elasticpath.domain.rules.impl.CartCategoryAmountDiscountActionImpl;
-import com.elasticpath.domain.rules.impl.CartCurrencyConditionImpl;
-import com.elasticpath.domain.rules.impl.CartNFreeSkusActionImpl;
-import com.elasticpath.domain.rules.impl.CartProductAmountDiscountActionImpl;
-import com.elasticpath.domain.rules.impl.CartSkuAmountDiscountActionImpl;
-import com.elasticpath.domain.rules.impl.CartSkuPercentDiscountActionImpl;
-import com.elasticpath.domain.rules.impl.CartSubtotalAmountDiscountActionImpl;
-import com.elasticpath.domain.rules.impl.CartSubtotalConditionImpl;
-import com.elasticpath.domain.rules.impl.CatalogCurrencyAmountDiscountActionImpl;
 import com.elasticpath.domain.rules.impl.EpRuleBaseImpl;
-import com.elasticpath.domain.rules.impl.LimitedUseCouponCodeConditionImpl;
-import com.elasticpath.domain.rules.impl.ProductCategoryConditionImpl;
-import com.elasticpath.domain.rules.impl.ProductConditionImpl;
-import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
-import com.elasticpath.domain.rules.impl.RuleParameterImpl;
-import com.elasticpath.domain.rules.impl.RuleSetImpl;
-import com.elasticpath.domain.rules.impl.ShippingAmountDiscountActionImpl;
 import com.elasticpath.domain.sellingcontext.SellingContext;
+import com.elasticpath.service.rules.SellingContextRuleSummary;
+import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.domain.store.impl.StoreImpl;
-import com.elasticpath.money.Money;
-import com.elasticpath.service.catalog.ProductService;
-import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.rules.EpRuleEngine;
 import com.elasticpath.service.rules.PromotionRuleDelegate;
-import com.elasticpath.service.rules.PromotionRuleExceptions;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.RuleSetService;
-import com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator;
-import com.elasticpath.service.store.StoreService;
-import com.elasticpath.service.tax.TaxCalculationResult;
-import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
-import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
-import com.elasticpath.settings.SettingsService;
-import com.elasticpath.settings.impl.SettingsServiceImpl;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.service.ConditionEvaluatorService;
-import com.elasticpath.test.MapBasedSimpleTimeoutCache;
 import com.elasticpath.test.factory.RuleSetTestUtility;
-import com.elasticpath.test.jmock.AbstractCatalogDataTestCase;
 
 /**
  * Test cases for {@link EpRuleEngineTest}. This test case is used to test
  * integration of the rules subsystem by constructing rules and testing their execution by the
  * rule engine.
  */
-@SuppressWarnings({ "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects", "PMD.TooManyMethods" })
-public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class EpRuleEngineTest {
 
 	private static final int ORDER_RULESET_ID = 1;
 
 	private static final int PRODUCT_RULESET_ID = 2;
 
+	private static final String CART_RULE_IDS = "CART_RULE_IDS";
+
+	private static final String STORE_CODE = "MOBEE";
+
+	private static final String CATALOG_CODE = "CATALOG_CODE";
+
+	private static final String USD_CURRENCY = "USD";
+
+	@Mock
+	private BeanFactory beanFactory;
+
+	@Mock
+	private RuleService ruleService;
+
+	@Mock
+	private Shopper shopper;
+
+	@Mock
+	private Store store;
+
+	@Mock
+	private TagSet tagSet;
+
+	@Mock
+	private CustomerSession customerSession;
+
+	@Mock
+	private ConditionEvaluatorService mockConditionEvaluatorService;
+
+	@Mock
+	private SellingContext sellingContext;
+
+	@Mock
+	private RuleEngineSessionFactory ruleEngineSessionFactory;
+
+	@Spy
+	private RuleEngineRuleStrategy ruleEngineRuleStrategy;
+
+	@Spy
+	@InjectMocks
 	private DBCompilingRuleEngineImpl ruleEngine;
 
-	private RuleService mockRuleService;
+	private final ShoppingCartDiscountItemContainer shoppingCartDiscountItemContainer = new ShoppingCartDiscountItemContainerImpl();
 
-	private StoreService mockStoreService;
+	private final EpRuleBase epRuleBase = new EpRuleBaseImpl();
 
-	private ConditionEvaluatorService conditionEvaluationService;
+	@Before
+	public void setup() {
+		mockStore();
 
-	private final SellingContext sellingContext = context.mock(SellingContext.class);
-	private final SimpleTimeoutCache<String, SessionConfiguration> mockSimpleTimeoutCache =
-		new MapBasedSimpleTimeoutCache<>();
+		mockShopper();
 
-	/**
-	 * Prepares for tests.
-	 *
-	 * @throws Exception -- in case of any errors.
-	 */
-	@SuppressWarnings("PMD.ExcessiveMethodLength")
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
+		mockSellingContext();
 
-		final ShoppingCartDiscountItemContainerImpl discountItemContainer = new ShoppingCartDiscountItemContainerImpl();
-		discountItemContainer.setProductSkuLookup(getProductSkuLookup());
-		final LimitedTotallingApplierImpl limitedTotallingApplier = new LimitedTotallingApplierImpl();
-		limitedTotallingApplier.setProductSkuLookup(getProductSkuLookup());
+		mockRuleEngineSessionFactory();
 
-		stubGetPrototypeBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsage.class, AttributeUsageImpl.class);
-		stubGetPrototypeBean(ContextIdNames.EP_RULE_BASE, EpRuleBase.class, EpRuleBaseImpl.class);
-		stubGetSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class, getProductService());
-		stubGetPrototypeBean(ContextIdNames.SHOPPING_CART_DISCOUNT_ITEM_CONTAINER, ShoppingCartDiscountItemContainer.class, discountItemContainer);
-		stubGetPrototypeBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResult.class, TaxCalculationResultImpl.class);
-		stubGetPrototypeBean(ContextIdNames.TOTALLING_APPLIER, TotallingApplier.class, limitedTotallingApplier);
+		mockRuleEngineRuleFactory();
 
-		TaxAddressAdapter adapter = new TaxAddressAdapter();
-		stubGetSingletonBean(ContextIdNames.TAX_ADDRESS_ADAPTER, TaxAddressAdapter.class, adapter);
+		mockBeanFactory();
 
-		final EpRuleEngine mockRuleEngine = context.mock(EpRuleEngine.class);
-		stubGetSingletonBean(ContextIdNames.EP_RULE_ENGINE, EpRuleEngine.class, mockRuleEngine);
-		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
-		stubGetSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class, new SettingsServiceImpl());
-		context.checking(new Expectations() {
-			{
-				allowing(mockRuleEngine).fireOrderPromotionRules(with(any(ShoppingCart.class)),
-						with(any(CustomerSession.class))
-				);
-				allowing(mockRuleEngine).fireOrderPromotionSubtotalRules(with(any(ShoppingCart.class)),
-						with(any(CustomerSession.class))
-				);
-				allowing(sellingContext).isSatisfied(
-						with(any(ConditionEvaluatorService.class)), with(any(TagSet.class)), with(any(String[].class)));
-				will(returnValue(RuleValidationResultEnum.SUCCESS));
-			}
-		});
-		ruleEngine = new DBCompilingRuleEngineImpl() {
-			@Override
-			protected Date getLastSuccessfulCompilationBeginDate() {
-				return new Date();
-			}
+		mockRuleService();
 
-			@Override
-			protected void setLastSuccessfulCompilationBeginDate(final Date compilationBeginDate) {
-				// do nothing
-			}
-
-			@Override
-			public TimeService getTimeService() {
-				return createMockedTimeService();
-			}
-
-			@Override
-			protected List<Object[]> getSellingContextsForRules(final String storeCode) {
-				return Collections.singletonList(new Object[]{
-						RuleSetTestUtility.RULE_UID, sellingContext
-				});
-			}
-		};
-		ruleEngine.setStatefulSessionConfiguration(mockSimpleTimeoutCache);
-		ruleEngine.setBeanFactory(getBeanFactory());
-
-		// Mock the rule set service
-		RuleSet catalogRuleSet = createCatalogRuleSet();
-		RuleSet orderRuleSet = createShoppingCartRuleSet();
-
-		ruleEngine.setRuleSetService(createMockRuleSetService(catalogRuleSet, orderRuleSet));
-
-		PromotionRuleDelegateImpl delegate = new PromotionRuleDelegateImpl();
-		ruleEngine.setPromotionRuleDelegate(delegate);
-
-		mockStoreService = context.mock(StoreService.class);
-		ruleEngine.setStoreService(mockStoreService);
-
-		mockRuleService = context.mock(RuleService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockRuleService).findRuleBaseByScenario(
-						with(anyOf(aNull(Store.class), any(Store.class))),
-						with(anyOf(aNull(Catalog.class), any(Catalog.class))),
-						with(any(int.class)));
-				will(returnValue(null));
-
-				allowing(mockRuleService).saveOrUpdateRuleBase(with(any(EpRuleBase.class)));
-			}
-		});
-
-		ruleEngine.setRuleService(mockRuleService);
-
-		stubGetPrototypeBean(ContextIdNames.PROMOTION_RULE_EXCEPTIONS, PromotionRuleExceptions.class, new PromotionRuleExceptionsImpl());
-
-		conditionEvaluationService = context.mock(ConditionEvaluatorService.class);
-		ruleEngine.setConditionEvaluatorService(conditionEvaluationService);
-	}
-
-	private TimeService createMockedTimeService() {
-		final TimeService timeService = context.mock(TimeService.class, "ruleEngineTimeService");
-		context.checking(new Expectations() {
-			{
-				atLeast(1).of(timeService).getCurrentTime();
-				will(returnValue(new Date(System.currentTimeMillis())));
-			}
-		});
-		return timeService;
+		setupRuleEngine();
 	}
 
 	/**
 	 * This method test fires a number of Catalog rules and essentially serves
 	 * as an integration test for those rules by ensuring that their rule engine
-	 * syntax is correct. The rules are configured in createMockCatalogRuleSet().
+	 * syntax is correct.
 	 */
 	@Test
 	public void testFireCatalogRules() {
-		getShoppingCart();
-		Product product = getShippableSku().getProduct();
-		Brand brand = new BrandImpl();
-		product.setBrand(brand);
 
-		// Mock the promotion rule delegate
+		// Given
+		final Product product = mock(Product.class);
+
 		final PromotionRuleDelegate mockDelegate = createMockDelegate();
-		ruleEngine.setRuleSetService(createMockRuleSetService(createCatalogRuleSet(), getEmptyRuleSet()));
-		context.checking(new Expectations() {
-			{
-				atLeast(1).of(mockDelegate).catalogProductInCategory(
-						with(any(Product.class)), with(any(boolean.class)), with(any(String.class)), with(any(String.class)));
-				will(returnValue(true));
-
-				atLeast(1).of(mockDelegate).catalogProductIs(
-						with(any(Product.class)), with(any(boolean.class)), with(any(String.class)), with(any(String.class)));
-				will(returnValue(true));
-
-				atLeast(1).of(mockDelegate).catalogBrandIs(
-						with(any(Product.class)), with(any(boolean.class)), with(any(String.class)), with(any(String.class)));
-				will(returnValue(true));
-
-				oneOf(mockDelegate).applyCatalogCurrencyDiscountAmount(
-						with(any(long.class)),
-						with(any(long.class)),
-						with(aNull(Object.class)),
-						with(any(String.class)),
-						with(any(String.class)),
-						with(any(String.class)));
-			}
-		});
-
 		ruleEngine.setPromotionRuleDelegate(mockDelegate);
-		ruleEngine.fireCatalogPromotionRules(Arrays.asList(product),
-				Currency.getInstance("USD"), getStore(), new HashMap<>());
-	}
 
-	@Override
-	protected Product newProductImpl() {
-		return new ProductImpl() {
-			private static final long serialVersionUID = 5000000001L;
-			@Override
-			public String getDisplayName(final Locale locale) {
-				return "Test Display Name";
-			}
-		};
+		final RuleSet catalogRuleSet = RuleSetTestUtility.createCatalogRuleSet();
+
+		when(mockDelegate.catalogProductInCategory(eq(product), anyBoolean(), anyString(), anyString())).thenReturn(true);
+		when(mockDelegate.catalogProductIs(eq(product), anyBoolean(), anyString(), anyString())).thenReturn(true);
+		when(mockDelegate.catalogBrandIs(eq(product), anyBoolean(), anyString(), anyString())).thenReturn(true);
+
+		ruleEngine.setRuleSetService(createMockRuleSetService(catalogRuleSet, getEmptyRuleSet()));
+
+		// When
+		ruleEngine.fireCatalogPromotionRules(Arrays.asList(product), Currency.getInstance(USD_CURRENCY), store, new HashMap<>(), new TagSet());
+
+		// Verify
+		verify(mockDelegate, times(1)).checkDateRange(anyString(), anyString());
+		verify(mockDelegate, times(1)).checkEnabled(anyString());
+
+		verify(mockDelegate, atLeastOnce()).catalogBrandIs(eq(product), anyBoolean(), anyString(), anyString());
+		verify(mockDelegate, atLeastOnce()).catalogProductIs(eq(product), anyBoolean(), anyString(), anyString());
+		verify(mockDelegate, atLeastOnce()).catalogProductInCategory(eq(product), anyBoolean(), anyString(), anyString());
+		verify(mockDelegate, times(1)).applyCatalogCurrencyDiscountAmount(anyLong(), anyLong(), isNull(), anyString(), anyString(), anyString());
+
 	}
 
 	/**
-	 * This method tests that required parameters are checked for
-	 * appropriately.
+	 * This method tests that the required products parameter is checked for appropriately.
 	 */
-	@SuppressWarnings("PMD.EmptyCatchBlock")
 	@Test
-	public void testFireCatalogRulesRequiredParameters() {
-		List<Product> products = new ArrayList<>();
+	public void testFireCatalogRulesRequiredProductsParameter() {
 
-		try {
-			ruleEngine.fireCatalogPromotionRules(products,
-					Currency.getInstance("USD"), null, new HashMap<>());
-			fail("Shouldn't run rules with a null store");
-		} catch (IllegalArgumentException expected) {
-			// Shouldn't be able to run rules with a null store
-		}
+		ruleEngine.fireCatalogPromotionRules(new ArrayList<>(), Currency.getInstance(USD_CURRENCY), store, new HashMap<>(), new TagSet());
+
+		verify(ruleEngineRuleStrategy, never()).evaluateApplicableRules(any(Catalog.class), any(TagSet.class));
+
 	}
 
 	/**
-	 *
-	 * @return
+	 * This method tests that the required store parameter is checked for appropriately.
 	 */
-	private Store getStore() {
-		Store store = new StoreImpl();
-		Catalog catalog = new CatalogImpl();
-		store.setCatalog(catalog);
-		store.setCode("STORE_CODE");
+	@Test(expected = IllegalArgumentException.class)
+	public void testFireCatalogRulesRequiredStoreParameter() {
 
-		return store;
+		ruleEngine.fireCatalogPromotionRules(new ArrayList<>(), Currency.getInstance(USD_CURRENCY), null, new HashMap<>(), new TagSet());
+
 	}
 
-	private PromotionRuleDelegate createMockDelegate() {
-		final PromotionRuleDelegate mockDelegate = context.mock(PromotionRuleDelegate.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockDelegate).checkDateRange(with(any(String.class)), with(any(String.class)));
-				will(returnValue(Boolean.TRUE));
+	/**
+	 * This method tests that the required shopping carts parameter in promotion rules is checked for appropriately.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testFirePromotionRulesRequiredShoppingCartParameter() {
 
-				allowing(mockDelegate).checkEnabled(with(any(String.class)));
-				will(returnValue(Boolean.TRUE));
-			}
-		});
-		return mockDelegate;
+		ruleEngine.fireOrderPromotionRules(null, customerSession);
+
+	}
+
+
+	/**
+	 * This method tests that the required shopping carts parameter in promotion subtotal rules is checked for appropriately.
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testFirePromotionSubtotalRulesRequiredShoppingCartParameter() {
+
+		ruleEngine.fireOrderPromotionSubtotalRules(null, customerSession);
+
+	}
+
+	/**
+	 * This method tests that shopping cart's store field is not null and the uidpks doesn't return empty.
+	 */
+	@Test(expected =  NullPointerException.class)
+	public void testFirePromotionRulesRequiredStore() {
+		ShoppingCart shoppingCart = createMockShoppingCart(USD_CURRENCY);
+		when(shoppingCart.getStore()).thenReturn(null);
+
+		ruleEngine.fireOrderPromotionRules(shoppingCart, customerSession);
+
+		verify(ruleEngineSessionFactory, never()).getSessionConfiguration();
 	}
 
 	/**
@@ -332,46 +233,30 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testFireShoppingCartRules() {
-		ShoppingCart shoppingCart = givenACartWithAShoppingItemSubtotalCalculator();
 
-		ruleEngine.setRuleSetService(createMockRuleSetService(getEmptyRuleSet(), createShoppingCartRuleSet()));
-		// Mock the promotion rule delegate
+		// Given
+		final ShoppingCart shoppingCart = createMockShoppingCart(USD_CURRENCY);
+		final RuleSet orderRuleSet = RuleSetTestUtility.createShoppingCartRuleSet();
+		ruleEngine.setRuleSetService(createMockRuleSetService(getEmptyRuleSet(), orderRuleSet));
+
 		final PromotionRuleDelegate mockDelegate = createMockDelegate();
-		context.checking(new Expectations() {
-			{
-				atLeast(1).of(mockDelegate)
-						.cartSubtotalAtLeast(with(any(DiscountItemContainer.class)),
-								with(any(String.class)),
-								with(any(String.class)));
-				will(returnValue(true));
-
-				atLeast(1).of(mockDelegate).cartCurrencyMatches(with(any(ShoppingCart.class)), with(any(String.class)));
-				will(returnValue(true));
-
-				atLeast(1).of(mockDelegate).calculateAvailableDiscountQuantity(
-						with(any(ShoppingCart.class)), with(any(long.class)), with(any(int.class)));
-				will(returnValue(1));
-			}
-		});
-
 		ruleEngine.setPromotionRuleDelegate(mockDelegate);
 
-		ruleEngine.fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
-		ruleEngine.fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
-	}
+		when(mockDelegate.cartSubtotalAtLeast(any(DiscountItemContainer.class), anyString(), anyString())).thenReturn(true);
+		when(mockDelegate.cartCurrencyMatches(eq(shoppingCart), anyString())).thenReturn(true);
+		when(mockDelegate.calculateAvailableDiscountQuantity(eq(shoppingCart), anyLong(), anyInt())).thenReturn(1);
 
-	private ShoppingCart givenACartWithAShoppingItemSubtotalCalculator() {
-		final ShoppingCartImpl shoppingCart = getShoppingCart();
-		stubGetSingletonBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, ShoppingItemSubtotalCalculator.class,
-				getShoppingItemSubtotalCalculator());
-		final Currency currency = shoppingCart.getCustomerSession().getCurrency();
-		context.checking(new Expectations() {
-			{
-				allowing(getShoppingItemSubtotalCalculator()).calculate(shoppingCart.getApportionedLeafItems(), shoppingCart, currency);
-				will(returnValue(Money.valueOf(BigDecimal.ZERO, currency)));
-			}
-		});
-		return shoppingCart;
+		// When
+		ruleEngine.fireOrderPromotionRules(shoppingCart, customerSession);
+		ruleEngine.fireOrderPromotionSubtotalRules(shoppingCart, customerSession);
+
+		// Verify
+		verify(mockDelegate, atLeast(2)).checkEnabled(anyString());
+
+		verify(mockDelegate, atLeast(2)).cartSubtotalAtLeast(any(ShoppingCartDiscountItemContainer.class), anyString(), anyString());
+		verify(mockDelegate, atLeast(2)).cartCurrencyMatches(eq(shoppingCart), anyString());
+		verify(mockDelegate, atLeastOnce()).calculateAvailableDiscountQuantity(eq(shoppingCart), anyLong(), anyInt());
+
 	}
 
 	/**
@@ -379,31 +264,28 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testCategoryCartDiscountRule() {
-		RuleSet orderRuleSet = RuleSetTestUtility.createCartCategoryDiscountRuleSet();
+
+		// Given
+		final RuleSet orderRuleSet = RuleSetTestUtility.createCartCategoryDiscountRuleSet();
 		ruleEngine.setRuleSetService(createMockRuleSetService(getEmptyRuleSet(), orderRuleSet));
 
-		ShoppingCart shoppingCart = getShoppingCart();
+		final ShoppingCart shoppingCart = createMockShoppingCart(USD_CURRENCY);
 
-		// Mock the promotion rule delegate
 		final PromotionRuleDelegate mockDelegate = createMockDelegate();
-		context.checking(new Expectations() {
-			{
-				atLeast(1).of(mockDelegate).cartContainsSku(
-						with(any(ShoppingCart.class)), with(any(String.class)), with(any(String.class)), with(any(int.class)));
-				will(returnValue(true));
 
-				atLeast(1).of(mockDelegate).cartCurrencyMatches(with(any(ShoppingCart.class)), with(any(String.class)));
-				will(returnValue(true));
+		when(mockDelegate.cartContainsSku(eq(shoppingCart), anyString(), anyString(), anyInt())).thenReturn(true);
+		when(mockDelegate.cartCurrencyMatches(eq(shoppingCart), anyString())).thenReturn(true);
+		when(mockDelegate.calculateAvailableDiscountQuantity(eq(shoppingCart), anyLong(), anyInt())).thenReturn(1);
 
-				atLeast(1).of(mockDelegate).calculateAvailableDiscountQuantity(
-						with(any(ShoppingCart.class)), with(any(long.class)), with(any(int.class)));
-				will(returnValue(1));
-			}
-		});
-
+		// When
 		ruleEngine.setPromotionRuleDelegate(mockDelegate);
 
-		ruleEngine.fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
+		ruleEngine.fireOrderPromotionRules(shoppingCart, customerSession);
+
+		// Verify
+		verify(mockDelegate, atLeastOnce()).cartContainsSku(eq(shoppingCart), anyString(), anyString(), anyInt());
+		verify(mockDelegate, atLeastOnce()).cartCurrencyMatches(eq(shoppingCart), anyString());
+		verify(mockDelegate, atLeastOnce()).calculateAvailableDiscountQuantity(eq(shoppingCart), anyLong(), anyInt());
 
 	}
 
@@ -412,29 +294,32 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testShippingAmountDiscountRule() {
-		RuleSet orderRuleSet = createShoppingCartRuleSetWithShippingRule();
+
+		// Given
+		final RuleSet orderRuleSet = RuleSetTestUtility.createShoppingCartRuleSetWithShippingRule();
 		ruleEngine.setRuleSetService(createMockRuleSetService(getEmptyRuleSet(), orderRuleSet));
 
-		ShoppingCartImpl shoppingCart = getShoppingCart();
+		final ShoppingCart shoppingCart = createMockShoppingCart(USD_CURRENCY);
+		Currency currency = customerSession.getCurrency();
 
-		// Mock the promotion rule delegate
 		final PromotionRuleDelegate mockDelegate = createMockDelegate();
-		context.checking(new Expectations() {
-			{
-				oneOf(mockDelegate).applyShippingDiscountAmount(
-						with(any(ShoppingCart.class)),
-						with(any(DiscountItemContainer.class)),
-						with(any(long.class)),
-						with(any(long.class)),
-						with(any(String.class)),
-						with(any(String.class)),
-						with(any(Currency.class)));
-			}
-		});
 
+		// When
 		ruleEngine.setPromotionRuleDelegate(mockDelegate);
 
-		ruleEngine.fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+		ruleEngine.fireOrderPromotionSubtotalRules(shoppingCart, customerSession);
+
+		// Verify
+		verify(mockDelegate, times(1)).applyShippingDiscountAmount(
+				eq(shoppingCart),
+				any(DiscountItemContainer.class),
+				anyLong(),
+				anyLong(),
+				anyString(),
+				anyString(),
+				eq(currency)
+		);
+
 	}
 
 	/**
@@ -443,38 +328,32 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testPromotionCodeIncorrect() {
-		stubGetPrototypeBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, RuleCondition.class, LimitedUseCouponCodeConditionImpl.class);
 
-		// Assign a promo code to a rule
-		RuleSet orderRuleSet = createShoppingCartRuleSetWithShippingRule();
-		Rule rule = orderRuleSet.getRules().iterator().next();
+		// Given
+		final RuleSet orderRuleSet = RuleSetTestUtility.createShoppingCartRuleSetWithShippingRuleAndLimitedPromos();
 		ruleEngine.setRuleSetService(createMockRuleSetService(getEmptyRuleSet(), orderRuleSet));
 
-		ShoppingCart shoppingCart = getShoppingCart();
-
-		rule.setCouponEnabled(true);
+		ShoppingCart shoppingCart = createMockShoppingCart(USD_CURRENCY);
 
 		final PromotionRuleDelegate mockDelegate = createMockDelegate();
-		context.checking(new Expectations() {
-			{
-				never(mockDelegate).applyShippingDiscountAmount(
-						with(any(ShoppingCart.class)),
-						with(any(DiscountItemContainer.class)),
-						with(any(long.class)),
-						with(any(long.class)),
-						with(any(String.class)),
-						with(any(String.class)),
-						with(any(Currency.class)));
 
-				atLeast(1).of(mockDelegate).cartHasValidLimitedUseCouponCode(
-						with(any(ShoppingCart.class)),
-						with(any(long.class)));
-				will(returnValue(false));
-			}
-		});
+		when(mockDelegate.cartHasValidLimitedUseCouponCode(eq(shoppingCart), anyLong())).thenReturn(false);
 
+		// When
 		ruleEngine.setPromotionRuleDelegate(mockDelegate);
-		ruleEngine.fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+
+		ruleEngine.fireOrderPromotionSubtotalRules(shoppingCart, customerSession);
+
+		// Verify
+		verify(mockDelegate, never()).applyShippingDiscountAmount(
+				any(ShoppingCart.class),
+				any(DiscountItemContainer.class),
+				anyLong(),
+				anyLong(),
+				anyString(),
+				anyString(),
+				any(Currency.class));
+
 	}
 
 	/**
@@ -483,47 +362,31 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testPromotionCodeCorrect() {
-		stubGetPrototypeBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, RuleCondition.class, LimitedUseCouponCodeConditionImpl.class);
 
-		// Assign a promo code to a rule
-		RuleSet orderRuleSet = createShoppingCartRuleSetWithShippingRule();
-		Rule rule = orderRuleSet.getRules().iterator().next();
+		// Given
+		final RuleSet orderRuleSet = RuleSetTestUtility.createShoppingCartRuleSetWithShippingRuleAndLimitedPromos();
 		ruleEngine.setRuleSetService(createMockRuleSetService(getEmptyRuleSet(), orderRuleSet));
 
-		ShoppingCartImpl shoppingCart = getShoppingCart();
+		ShoppingCart shoppingCart = createMockShoppingCart(USD_CURRENCY);
 
-		rule.setCouponEnabled(true);
-
-		// Test that when cartHasValidLimitedUseCouponCode() returns true, the apply discount method is called
 		final PromotionRuleDelegate mockDelegate = createMockDelegate();
-		context.checking(new Expectations() {
-			{
-				oneOf(mockDelegate).applyShippingDiscountAmount(
-						with(any(ShoppingCart.class)),
-						with(any(DiscountItemContainer.class)),
-						with(any(long.class)),
-						with(any(long.class)),
-						with(any(String.class)),
-						with(any(String.class)),
-						with(any(Currency.class)));
 
-				atLeast(1).of(mockDelegate).cartHasValidLimitedUseCouponCode(
-						with(any(ShoppingCart.class)),
-						with(any(long.class)));
-				will(returnValue(true));
-			}
-		});
+		when(mockDelegate.cartHasValidLimitedUseCouponCode(eq(shoppingCart), anyLong())).thenReturn(true);
 
+		// When
 		ruleEngine.setPromotionRuleDelegate(mockDelegate);
-		ruleEngine.fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
-	}
 
-	private RuleSet getEmptyRuleSet() {
-		RuleSet ruleSet = new RuleSetImpl();
-		ruleSet.setRules(new HashSet<>());
-		ruleSet.setName("NullRuleSet");
-		ruleSet.setScenario(RuleScenarios.CATALOG_BROWSE_SCENARIO);
-		return ruleSet;
+		ruleEngine.fireOrderPromotionSubtotalRules(shoppingCart, customerSession);
+
+		// Verify
+		verify(mockDelegate, atLeastOnce()).applyShippingDiscountAmount(
+				any(ShoppingCart.class),
+				any(DiscountItemContainer.class),
+				anyLong(),
+				anyLong(),
+				anyString(),
+				anyString(),
+				any(Currency.class));
 	}
 
 	/**
@@ -531,273 +394,121 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testBuy3Get1FreeDiscountRule() {
-		// Mock the rule set service
-		RuleSet orderRuleSet = RuleSetTestUtility.createBuyTwoGetOneFreeRuleSet();
+
+		// Given
+		final RuleSet orderRuleSet = RuleSetTestUtility.createBuyTwoGetOneFreeRuleSet();
 		ruleEngine.setRuleSetService(createMockRuleSetService(getEmptyRuleSet(), orderRuleSet));
 
-		ShoppingCart shoppingCart = getShoppingCart();
+		ShoppingCart shoppingCart = createMockShoppingCart(USD_CURRENCY);
 
-		// Mock the promotion rule delegate
 		final PromotionRuleDelegate mockDelegate = createMockDelegate();
-		context.checking(new Expectations() {
-			{
-				atLeast(1).of(mockDelegate).cartContainsProduct(
-						with(any(ShoppingCart.class)),
-						with(any(String.class)),
-						with(any(String.class)),
-						with(any(int.class)),
-						with(any(String.class)));
-				will(returnValue(true));
-			}
-		});
+
+		when(mockDelegate.cartContainsProduct(eq(shoppingCart), anyString(), anyString(), anyInt(), anyString())).thenReturn(true);
+
+		// When
 		ruleEngine.setPromotionRuleDelegate(mockDelegate);
 
 		ruleEngine.fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
 
+		// Then
+		verify(mockDelegate, atLeastOnce()).cartContainsProduct(eq(shoppingCart), anyString(), anyString(), anyInt(), anyString());
+
 	}
 
 	private RuleSetService createMockRuleSetService(final RuleSet catalogRuleSet, final RuleSet orderRuleSet) {
-		final RuleSetService mockRuleSetService = context.mock(
-				RuleSetService.class, String.format("rule set service %d", System.nanoTime()));
-		context.checking(new Expectations() {
-			{
-				allowing(mockRuleSetService).findByScenarioId(PRODUCT_RULESET_ID);
-				will(returnValue(catalogRuleSet));
+		final RuleSetService mockRuleSetService = mock(RuleSetService.class, String.format("rule set service %d", System.nanoTime()));
 
-				allowing(mockRuleSetService).findByScenarioId(ORDER_RULESET_ID);
-				will(returnValue(orderRuleSet));
-			}
-		});
-
-		final List<RuleSet> ruleSets = new ArrayList<>();
-		ruleSets.add(catalogRuleSet);
-		ruleSets.add(orderRuleSet);
-		context.checking(new Expectations() {
-			{
-				allowing(mockRuleSetService).findByModifiedDate(with(any(Date.class)));
-				will(returnValue(ruleSets));
-			}
-		});
+		when(mockRuleSetService.findByScenarioId(PRODUCT_RULESET_ID)).thenReturn(catalogRuleSet);
+		when(mockRuleSetService.findByScenarioId(ORDER_RULESET_ID)).thenReturn(orderRuleSet);
 
 		return mockRuleSetService;
 	}
 
-	private RuleSet createCatalogRuleSet() {
-		RuleSet ruleSet = new RuleSetImpl();
-		ruleSet.setName("com.elasticpath.rules");
-		ruleSet.setScenario(RuleScenarios.CATALOG_BROWSE_SCENARIO);
-
-		Rule promotionRule = new PromotionRuleImpl() {
-			private static final long serialVersionUID = 5807437957059025393L;
-			private final Set<RuleAction> actions = new HashSet<>();
-
-			@Override
-			public void addAction(final RuleAction ruleAction) { //NOPMD
-				actions.add(ruleAction);
-			}
-
-			@Override
-			public void removeAction(final RuleAction ruleAction) {
-				actions.remove(ruleAction);
-			}
-
-			@Override
-			public Set<RuleAction> getActions() {
-				return actions;
-			}
-		};
-		promotionRule.setEnabled(true);
-		promotionRule.setUidPk(RuleSetTestUtility.RULE_UID);
-		promotionRule.initialize();
-		promotionRule.setName("Car Sale");
-		promotionRule.setCatalog(new CatalogImpl());
-
-		// Create a condition that the product is in a particular category
-		RuleCondition categoryCondition = new ProductCategoryConditionImpl();
-		categoryCondition.addParameter(new RuleParameterImpl(RuleParameter.CATEGORY_CODE_KEY, "8"));
-		categoryCondition.addParameter(new RuleParameterImpl(RuleParameter.BOOLEAN_KEY, "true"));
-		promotionRule.addCondition(categoryCondition);
-
-		//Create a condition that constrains the product
-		RuleCondition productCondition = new ProductConditionImpl();
-		productCondition.addParameter(new RuleParameterImpl(RuleParameter.PRODUCT_CODE_KEY, "8"));
-		productCondition.addParameter(new RuleParameterImpl(RuleParameter.BOOLEAN_KEY, "true"));
-		promotionRule.addCondition(productCondition);
-
-		//Create a condition that constrains the brand
-		RuleCondition brandCondition = new BrandConditionImpl();
-		brandCondition.addParameter(new RuleParameterImpl(RuleParameter.BRAND_CODE_KEY, "8"));
-		brandCondition.addParameter(new RuleParameterImpl(RuleParameter.BOOLEAN_KEY, "true"));
-		promotionRule.addCondition(brandCondition);
-
-		// Create a condition that the currency is CAD
-		RuleParameter currencyParam = new RuleParameterImpl();
-		currencyParam.setKey(RuleParameter.CURRENCY_KEY);
-		currencyParam.setValue("CAD");
-
-		// Create an action
-		RuleAction discountAction = new CatalogCurrencyAmountDiscountActionImpl();
-		RuleParameter discountParameter = new RuleParameterImpl();
-		discountParameter.setKey(RuleParameter.DISCOUNT_AMOUNT_KEY);
-		discountParameter.setValue("100");
-		discountAction.addParameter(currencyParam);
-		discountAction.addParameter(discountParameter);
-		promotionRule.addAction(discountAction);
-
-		// promotionRule.addAction(discountAction);
-		promotionRule.setRuleSet(ruleSet);
-		ruleSet.addRule(promotionRule);
-		return ruleSet;
+	private RuleSet getEmptyRuleSet() {
+		return mock(RuleSet.class);
 	}
 
-	private RuleSet createShoppingCartRuleSet() { //NOPMD
-		RuleSet ruleSet = new RuleSetImpl();
-		ruleSet.setName("com.elasticpath.orderrules");
-		ruleSet.setScenario(RuleScenarios.CART_SCENARIO);
+	private ShoppingCart createMockShoppingCart(final String currencyCode) {
+		final ShoppingCart shoppingCart = mock(ShoppingCart.class);
+		when(shoppingCart.getCustomerSession()).thenReturn(customerSession);
 
-		Rule promotionRule = new PromotionRuleImpl() {
-			private static final long serialVersionUID = 527923595161646027L;
-			private final Set<RuleAction> actions = new HashSet<>();
+		final Currency currency = Currency.getInstance(currencyCode);
+		when(customerSession.getCurrency()).thenReturn(currency);
 
-			@Override
-			public void addAction(final RuleAction ruleAction) { //NOPMD
-				actions.add(ruleAction);
-			}
+		when(shoppingCart.getShopper()).thenReturn(shopper);
+		when(shoppingCart.getStore()).thenReturn(store);
 
-			@Override
-			public void removeAction(final RuleAction ruleAction) {
-				actions.remove(ruleAction);
-			}
-
-			@Override
-			public Set<RuleAction> getActions() {
-				return actions;
-			}
-		};
-		promotionRule.setEnabled(true);
-		promotionRule.setUidPk(RuleSetTestUtility.RULE_UID);
-		promotionRule.setName("Order Sale");
-		promotionRule.setStore(new StoreImpl());
-
-		// Create a condition that the product is in a particular category
-		RuleCondition subtotalCondition = new CartSubtotalConditionImpl();
-		RuleParameter subtotalAmountParam = new RuleParameterImpl();
-		subtotalAmountParam.setKey(RuleParameter.SUBTOTAL_AMOUNT_KEY);
-		subtotalAmountParam.setValue("10000");
-		subtotalCondition.addParameter(subtotalAmountParam);
-		promotionRule.addCondition(subtotalCondition);
-
-		// Create a condition that the currency is CAD
-		RuleCondition currencyCondition = new CartCurrencyConditionImpl();
-		RuleParameter currencyParam = new RuleParameterImpl();
-		currencyParam.setKey(RuleParameter.CURRENCY_KEY);
-		currencyParam.setValue("CAD");
-		currencyCondition.addParameter(currencyParam);
-		promotionRule.addCondition(currencyCondition);
-
-		// Create an action
-		RuleAction discountAction = new CartSubtotalAmountDiscountActionImpl();
-		RuleParameter discountParameter = new RuleParameterImpl();
-		discountParameter.setKey(RuleParameter.DISCOUNT_AMOUNT_KEY);
-		discountParameter.setValue("1000");
-		discountAction.addParameter(discountParameter);
-		promotionRule.addAction(discountAction);
-
-		// Create an action to discount a category
-		RuleAction categoryAmountDiscountAction = new CartCategoryAmountDiscountActionImpl();
-		RuleParameter discountAmountParameter = new RuleParameterImpl(RuleParameter.DISCOUNT_AMOUNT_KEY, "5");
-		categoryAmountDiscountAction.addParameter(discountAmountParameter);
-		RuleParameter discountCategoryParameter = new RuleParameterImpl(RuleParameter.CATEGORY_CODE_KEY, "1");
-		categoryAmountDiscountAction.addParameter(discountCategoryParameter);
-		RuleParameter numItemsParameter = new RuleParameterImpl(RuleParameter.NUM_ITEMS_KEY, "2");
-		categoryAmountDiscountAction.addParameter(numItemsParameter);
-		promotionRule.addAction(categoryAmountDiscountAction);
-
-		//Create a CartProductAmountDiscountAction
-		RuleAction cartProductAmountDiscountAction = new CartProductAmountDiscountActionImpl();
-		RuleParameter productDiscountAmountParameter = new RuleParameterImpl(RuleParameter.DISCOUNT_AMOUNT_KEY, "5");
-		cartProductAmountDiscountAction.addParameter(productDiscountAmountParameter);
-		RuleParameter productIdParameter = new RuleParameterImpl(RuleParameter.PRODUCT_CODE_KEY, String.valueOf(PRODUCT_UID_1));
-		cartProductAmountDiscountAction.addParameter(productIdParameter);
-		RuleParameter numProductItemsParameter = new RuleParameterImpl(RuleParameter.NUM_ITEMS_KEY, "2");
-		cartProductAmountDiscountAction.addParameter(numProductItemsParameter);
-		promotionRule.addAction(cartProductAmountDiscountAction);
-
-		//Create a CartSkuAmountDiscountAction
-		RuleAction cartSkuAmountDiscountAction = new CartSkuAmountDiscountActionImpl();
-		RuleParameter skuDiscountAmountParameter = new RuleParameterImpl(RuleParameter.DISCOUNT_AMOUNT_KEY, "5");
-		cartSkuAmountDiscountAction.addParameter(skuDiscountAmountParameter);
-		RuleParameter skuGuidParameter = new RuleParameterImpl(RuleParameter.SKU_CODE_KEY, SKU_GUID_1);
-		cartSkuAmountDiscountAction.addParameter(skuGuidParameter);
-		RuleParameter numSkusParameter = new RuleParameterImpl(RuleParameter.NUM_ITEMS_KEY, "2");
-		cartSkuAmountDiscountAction.addParameter(numSkusParameter);
-		promotionRule.addAction(cartSkuAmountDiscountAction);
-
-		//Create a CartSkuPercentDiscountAction
-		RuleAction cartSkuPercentDiscountAction = new CartSkuPercentDiscountActionImpl();
-		RuleParameter skuDiscountPercentParameter = new RuleParameterImpl(RuleParameter.DISCOUNT_PERCENT_KEY, "5");
-		cartSkuPercentDiscountAction.addParameter(skuDiscountPercentParameter);
-		RuleParameter skuGuidParameter2 = new RuleParameterImpl(RuleParameter.SKU_CODE_KEY, SKU_GUID_1);
-		cartSkuPercentDiscountAction.addParameter(skuGuidParameter2);
-		RuleParameter numSkusParameter2 = new RuleParameterImpl(RuleParameter.NUM_ITEMS_KEY, "2");
-		cartSkuPercentDiscountAction.addParameter(numSkusParameter2);
-		promotionRule.addAction(cartSkuPercentDiscountAction);
-
-		//Create an action to add free SKUs to the cart
-		RuleAction freeSkusAction = new CartNFreeSkusActionImpl();
-		RuleParameter freeSkuCodeParameter = new RuleParameterImpl(RuleParameter.SKU_CODE_KEY, SKU_GUID_1);
-		freeSkusAction.addParameter(freeSkuCodeParameter);
-		RuleParameter numFreeSkusParameter = new RuleParameterImpl(RuleParameter.NUM_ITEMS_KEY, "2");
-		freeSkusAction.addParameter(numFreeSkusParameter);
-		promotionRule.addAction(freeSkusAction);
-
-		promotionRule.setRuleSet(ruleSet);
-		ruleSet.addRule(promotionRule);
-		return ruleSet;
+		return shoppingCart;
 	}
 
-	private RuleSet createShoppingCartRuleSetWithShippingRule() {
-		RuleSet ruleSet = new RuleSetImpl();
-		ruleSet.setName("com.elasticpath.orderrules");
-		ruleSet.setScenario(RuleScenarios.CART_SCENARIO);
+	private PromotionRuleDelegate createMockDelegate() {
+		PromotionRuleDelegate mockDelegate = mock(PromotionRuleDelegate.class);
 
-		Rule promotionRule = new PromotionRuleImpl() {
-			private static final long serialVersionUID = 8570985009402971328L;
-			private final Set<RuleAction> actions = new HashSet<>();
+		when(mockDelegate.checkDateRange(anyString(), anyString())).thenReturn(true);
+		when(mockDelegate.checkEnabled(anyString())).thenReturn(true);
 
-			@Override
-			public void addAction(final RuleAction ruleAction) { //NOPMD
-				actions.add(ruleAction);
-			}
-
-			@Override
-			public void removeAction(final RuleAction ruleAction) {
-				actions.remove(ruleAction);
-			}
-
-			@Override
-			public Set<RuleAction> getActions() {
-				return actions;
-			}
-		};
-		promotionRule.setEnabled(true);
-		promotionRule.setUidPk(RuleSetTestUtility.RULE_UID);
-		promotionRule.setName("Order Sale");
-		promotionRule.setStore(new StoreImpl());
-
-		// Create an action
-		RuleAction discountAction = new ShippingAmountDiscountActionImpl();
-		RuleParameter discountParameter = new RuleParameterImpl();
-		discountParameter.setKey(RuleParameter.DISCOUNT_AMOUNT_KEY);
-		discountParameter.setValue("1");
-		discountAction.addParameter(discountParameter);
-		RuleParameter shippingMethodUidParameter = new RuleParameterImpl(RuleParameter.SHIPPING_OPTION_CODE_KEY, "Code001");
-		discountAction.addParameter(shippingMethodUidParameter);
-		promotionRule.addAction(discountAction);
-
-		promotionRule.setRuleSet(ruleSet);
-		ruleSet.addRule(promotionRule);
-		return ruleSet;
+		return mockDelegate;
 	}
 
+	private void mockStore() {
+		Catalog catalog = mock(Catalog.class);
+
+		when(store.getCatalog()).thenReturn(catalog);
+		when(store.getCode()).thenReturn(STORE_CODE);
+		when(catalog.getCode()).thenReturn(CATALOG_CODE);
+	}
+
+	private void mockShopper() {
+		final SimpleCache simpleCache = mock(SimpleCache.class);
+		final ShopperMemento shopperMemento = mock(ShopperMemento.class);
+
+		when(shopper.getTagSet()).thenReturn(tagSet);
+		when(shopper.getCache()).thenReturn(simpleCache);
+		when(shopper.getShopperMemento()).thenReturn(shopperMemento);
+
+		when(shopperMemento.getStoreCode()).thenReturn(STORE_CODE);
+
+		when(simpleCache.isInvalidated(CART_RULE_IDS)).thenReturn(true);
+	}
+
+	private void mockSellingContext() {
+		when(sellingContext.isSatisfied(any(ConditionEvaluatorService.class), any(TagSet.class), anyString(), anyString()))
+				.thenReturn(RuleValidationResultEnum.SUCCESS);
+	}
+
+	private void mockRuleEngineRuleFactory() {
+
+		ruleEngine.setRuleEngineRuleStrategy(ruleEngineRuleStrategy);
+
+		ruleEngineRuleStrategy.setConditionEvaluatorService(mockConditionEvaluatorService);
+
+		doReturn(Collections.singletonList(new SellingContextRuleSummary(null, RuleSetTestUtility.RULE_UID, sellingContext, null, null)))
+				.when(ruleEngineRuleStrategy).getSellingContextWithRuleUidpk(any(String.class), anyInt());
+
+	}
+
+	private void mockRuleEngineSessionFactory() {
+		ruleEngine.setRuleEngineSessionFactory(ruleEngineSessionFactory);
+	}
+
+	private void setupRuleEngine() {
+		final RuleSet catalogRuleSet = RuleSetTestUtility.createCatalogRuleSet();
+		final RuleSet orderRuleSet = RuleSetTestUtility.createShoppingCartRuleSet();
+		final PromotionRuleDelegate delegate = new PromotionRuleDelegateImpl();
+
+		ruleEngine.setRuleSetService(createMockRuleSetService(catalogRuleSet, orderRuleSet));
+		ruleEngine.setPromotionRuleDelegate(delegate);
+	}
+
+	private void mockBeanFactory() {
+		when(beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_CART_DISCOUNT_ITEM_CONTAINER, ShoppingCartDiscountItemContainer.class))
+				.thenReturn(shoppingCartDiscountItemContainer);
+		when(beanFactory.getPrototypeBean(ContextIdNames.EP_RULE_BASE, EpRuleBase.class)).thenReturn(epRuleBase);
+
+	}
+
+	private void mockRuleService() {
+		when(ruleService.findRuleBaseByScenario(any(), any(), anyInt())).thenReturn(null);
+		when(ruleService.saveOrUpdateRuleBase(epRuleBase)).thenReturn(epRuleBase);
+	}
 }

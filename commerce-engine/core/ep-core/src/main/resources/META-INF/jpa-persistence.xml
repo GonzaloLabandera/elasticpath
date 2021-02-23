@@ -40,6 +40,8 @@
 		<mapping-file>META-INF/datapoint-value-orm.xml</mapping-file>
 		<mapping-file>META-INF/dependent-items-orm.xml</mapping-file>
 		<mapping-file>META-INF/orderpayment-orm.xml</mapping-file>
+		<mapping-file>META-INF/orderhold-orm.xml</mapping-file>
+		<mapping-file>META-INF/outbox-orm.xml</mapping-file>
 
 		<class>com.elasticpath.domain.attribute.impl.AbstractAttributeValueImpl</class>
 		<class>com.elasticpath.domain.attribute.impl.AttributeGroupAttributeImpl</class>
@@ -109,6 +111,7 @@
 		<class>com.elasticpath.domain.order.impl.OrderLockImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderReturnImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderReturnSkuImpl</class>
+		<class>com.elasticpath.domain.order.impl.OrderHoldImpl</class>
 		<class>com.elasticpath.domain.order.impl.AbstractOrderShipmentImpl</class>
 		<class>com.elasticpath.domain.order.impl.PhysicalOrderShipmentImpl</class>
 		<class>com.elasticpath.domain.order.impl.ElectronicOrderShipmentImpl</class>
@@ -211,6 +214,7 @@
 		<class>com.elasticpath.domain.auth.UserAuthenticationMemento</class>
 		<class>com.elasticpath.domain.customer.impl.StoreCustomerAttributeImpl</class>
 		<class>com.elasticpath.domain.customer.impl.AttributePolicyImpl</class>
+		<class>com.elasticpath.domain.messaging.impl.OutboxMessageImpl</class>
 
 		<!-- tagging framework start -->
 

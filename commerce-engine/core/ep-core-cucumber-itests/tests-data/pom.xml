@@ -18,8 +18,6 @@
 		<data.population.cli.directory>${project.build.directory}/cli</data.population.cli.directory>
 		<commons.io.version>2.4</commons.io.version>
 		<commons.cli.version>1.2</commons.cli.version>
-		<org.apache.activemq.tooling.version>5.14.3</org.apache.activemq.tooling.version>
-		<ep.activemq.configUri>broker:(tcp://localhost:61617)?useJmx=true&amp;persistent=false</ep.activemq.configUri>
 	</properties>
 
 	<dependencies>
@@ -71,9 +69,7 @@
 		<profile>
 			<id>create-test-database</id>
 			<activation>
-				<property>
-					<name>!skipAllTests</name>
-				</property>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<resources>
@@ -86,6 +82,25 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-dependency-plugin</artifactId>
+						<dependencies>
+							<dependency>
+								<groupId>com.elasticpath</groupId>
+								<artifactId>ep-data-population-cli-tool-assembly</artifactId>
+								<version>${ep.data.population.version}</version>
+							</dependency>
+							<dependency>
+								<groupId>com.elasticpath.data</groupId>
+								<artifactId>ep-shared-demo-data</artifactId>
+								<type>zip</type>
+								<version>${ep.commerce.data.version}</version>
+							</dependency>
+							<dependency>
+								<groupId>com.elasticpath.data</groupId>
+								<artifactId>ep-mobee-demo-data</artifactId>
+								<type>zip</type>
+								<version>${ep.commerce.data.version}</version>
+							</dependency>
+						</dependencies>
 						<executions>
 							<execution>
 								<id>unpack-data</id>
@@ -120,14 +135,14 @@
 											<groupId>com.elasticpath.data</groupId>
 											<artifactId>ep-shared-demo-data</artifactId>
 											<type>zip</type>
-											<version>${project.version}</version>
+											<version>${ep.commerce.data.version}</version>
 											<outputDirectory>${project.build.directory}/classes/data</outputDirectory>
 										</artifactItem>
 										<artifactItem>
 											<groupId>com.elasticpath.data</groupId>
 											<artifactId>ep-mobee-demo-data</artifactId>
 											<type>zip</type>
-											<version>${project.version}</version>
+											<version>${ep.commerce.data.version}</version>
 											<outputDirectory>${project.build.directory}/classes/data</outputDirectory>
 										</artifactItem>
 									</artifactItems>
@@ -181,31 +196,6 @@
 						</configuration>
 					</plugin>
 					<plugin>
-						<groupId>org.apache.activemq.tooling</groupId>
-						<artifactId>activemq-maven-plugin</artifactId>
-						<version>${org.apache.activemq.tooling.version}</version>
-						<executions>
-							<execution>
-								<id>activemq-embedded-tcp</id>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<phase>process-classes</phase>
-								<configuration>
-									<fork>true</fork>
-									<configUri>${ep.activemq.configUri}</configUri>
-								</configuration>
-							</execution>
-							<execution>
-								<id>stop-embedded-tcp</id>
-								<goals>
-									<goal>stop</goal>
-								</goals>
-								<phase>verify</phase>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
 						<!-- We need to run data population as an external process. If run as a maven plugin
 		                     the database is not closed before it is zipped -->
 						<artifactId>maven-antrun-plugin</artifactId>
@@ -230,7 +220,7 @@
 											<os family="windows" />
 										</condition>
 										<exec executable="${shell.executable}" dir="${data.population.cli.directory}" failonerror="true">
-											<env key="PROFILE" value="non-xa"/>
+											<env key="PROFILE" value="disable-domain-events"/>
 											<arg value="${shell.argument}" />
 											<arg value="${shell.script}" />
 											<arg value="--dataDirectory" />

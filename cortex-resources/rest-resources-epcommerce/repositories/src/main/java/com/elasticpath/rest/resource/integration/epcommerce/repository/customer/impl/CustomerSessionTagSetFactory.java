@@ -31,8 +31,8 @@ public class CustomerSessionTagSetFactory {
 	/**
 	 * Constructor.
 	 *
-	 * @param resourceOperationContext the resource operation context
-	 * @param tagStrategyRegistry tag strategy registry
+	 * @param resourceOperationContext the resource operation context.
+	 * @param tagStrategyRegistry tag strategy registry.
 	 * @param userTraitTransformer The customer session tagger.
 	 */
 	@Inject

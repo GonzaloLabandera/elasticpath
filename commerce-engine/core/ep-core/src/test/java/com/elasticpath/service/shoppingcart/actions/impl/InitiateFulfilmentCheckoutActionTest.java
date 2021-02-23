@@ -19,7 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
 
 /**
  * Test class for {@link InitiateFulfilmentCheckoutAction}.
@@ -36,7 +36,7 @@ public class InitiateFulfilmentCheckoutActionTest {
 	@Test
 	public void verifyFulfilmentNotTriggeredWhenAwaitingExchange() {
 		final Order order = mock(Order.class);
-		final CheckoutActionContext actionContext = createCheckoutActionContext(order);
+		final PostCaptureCheckoutActionContext actionContext = createCheckoutActionContext(order);
 
 		when(order.getStatus()).thenReturn(OrderStatus.AWAITING_EXCHANGE);
 
@@ -49,7 +49,7 @@ public class InitiateFulfilmentCheckoutActionTest {
 	public void verifyFulfilmentTriggeredWhenNotAwaitingExchangeAndNotOnHold() {
 		final Order order = mock(Order.class);
 		final Order updatedOrder = mock(Order.class);
-		final CheckoutActionContext actionContext = createCheckoutActionContext(order);
+		final PostCaptureCheckoutActionContext actionContext = createCheckoutActionContext(order);
 
 		when(order.getStatus()).thenReturn(OrderStatus.CREATED);
 		when(orderService.releaseOrder(order)).thenReturn(updatedOrder);
@@ -64,7 +64,7 @@ public class InitiateFulfilmentCheckoutActionTest {
 	@Test
 	public void verifyFulfilmentNotTriggeredWhenOnHold() {
 		final Order order = mock(Order.class);
-		final CheckoutActionContext actionContext = createCheckoutActionContext(order);
+		final PostCaptureCheckoutActionContext actionContext = createCheckoutActionContext(order);
 
 		when(order.getStatus()).thenReturn(OrderStatus.ONHOLD);
 
@@ -75,17 +75,8 @@ public class InitiateFulfilmentCheckoutActionTest {
 		verifyZeroInteractions(orderService);
 	}
 
-	private CheckoutActionContext createCheckoutActionContext(final Order order) {
-		final CheckoutActionContext checkoutActionContext = new CheckoutActionContextImpl(
-				null,
-				null,
-				null,
-				false,
-				false,
-				null,
-				null
-		);
-		checkoutActionContext.setOrder(order);
+	private PostCaptureCheckoutActionContext createCheckoutActionContext(final Order order) {
+		final PostCaptureCheckoutActionContext checkoutActionContext = new PostCaptureCheckoutActionContextImpl(order);
 
 		return checkoutActionContext;
 	}

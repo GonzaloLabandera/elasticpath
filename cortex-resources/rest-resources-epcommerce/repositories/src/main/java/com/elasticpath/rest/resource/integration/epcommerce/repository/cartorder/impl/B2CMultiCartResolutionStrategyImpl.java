@@ -81,12 +81,6 @@ public class B2CMultiCartResolutionStrategyImpl extends AbstractEpMultiCartStrat
 	private ShoppingCart getCartForCustomerSession(final CustomerSession customerSession) {
 		final ShoppingCart cart = getShoppingCartService().findOrCreateDefaultCartByCustomerSession(customerSession);
 
-		getModifierFieldsWithDefaultValues(cart).forEach(modifierField -> {
-			if ((cart.getCartData().get(modifierField.getCode()) == null) || (cart.getCartData().get(modifierField.getCode()).getValue() == null)) {
-				cart.setCartDataFieldValue(modifierField.getCode(), modifierField.getDefaultCartValue());
-			}
-		});
-
 		final ShoppingCart savedCart = getShoppingCartService().saveIfNotPersisted(cart);
 
 		getCartPostProcessor().postProcessCart(savedCart, customerSession.getShopper(), customerSession);

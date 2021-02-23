@@ -434,4 +434,28 @@ public interface Store extends Persistable, Comparable<Store> {
 	 * @param shoppingCartTypes the cart types.
 	 */
 	void setShoppingCartTypes(Collection<CartType> shoppingCartTypes);
+
+	/**
+	 * Gets the B2C authenticated role for store.
+	 * @return the B2C role.
+	 */
+	String getB2CAuthenticatedRole();
+
+	/**
+	 * Sets the B2C authenticated role for store.
+	 * @param b2CAuthenticatedRole the B2C role.
+	 */
+	void setB2CAuthenticatedRole(String b2CAuthenticatedRole);
+
+	/**
+	 * Gets the B2C single session role for store.
+	 * @return the B2C role.
+	 */
+	String getB2CSingleSessionRole();
+
+	/**
+	 * Sets the B2C single session role for store.
+	 * @param b2CSingleSessionRole the B2C role.
+	 */
+	void setB2CSingleSessionRole(String b2CSingleSessionRole);
 }

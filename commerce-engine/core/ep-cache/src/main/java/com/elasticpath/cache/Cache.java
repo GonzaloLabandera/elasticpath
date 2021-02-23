@@ -3,14 +3,10 @@
  */
 package com.elasticpath.cache;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.cache.impl.CacheUtil;
+import java.util.function.Function;
 
 /**
  * EP Specific Cache interface.  Note that this interface is a strict subset of {@link javax.cache.Cache}.
@@ -29,14 +25,14 @@ public interface Cache<K, V> {
 	 * is called in an attempt to load the entry.
 	 *
 	 * @param key the key whose associated value is to be returned
-	 * @return the element, or null, if it does not exist.
+	 * @return the wrapped result.
 	 * @throws NullPointerException  if the key is null
 	 * @throws ClassCastException    if the implementation is configured to perform
 	 *                               runtime-type-checking, and the key or value
 	 *                               types are incompatible with those that have been
 	 *                               configured for the {@link Cache}
 	 */
-	V get(K key);
+	CacheResult<V> get(K key);
 
 	/**
 	 * Gets an entry from the cache using a partial key.
@@ -86,30 +82,30 @@ public interface Cache<K, V> {
 	 *			@Override
 	 *     		public boolean equals(Object object) {
 	 *				if (this == o) {
-					 	return true;
-	 				}
-	 				if (o == null || getClass() != o.getClass()) {
-					 	return false;
-	 				}
-
-	 				CompoundKey that = (CompoundKey) o;
-
-					return Objects.equals(uidPkIdx, that.uidPkIdx)
-					 || Objects.equals(guidIdx, that.guidIdx)
-					 || Objects.equals(codeIdx, that.codeIdx);
+	 *				 	return true;
+	 *				}
+	 *				if (o == null || getClass() != o.getClass()) {
+	 *				 	return false;
+	 *				}
+	 *
+	 *				CompoundKey that = (CompoundKey) o;
+	 *
+	 *				return Objects.equals(uidPkIdx, that.uidPkIdx)
+	 *				 || Objects.equals(guidIdx, that.guidIdx)
+	 *				 || Objects.equals(codeIdx, that.codeIdx);
 	 *     		}
 	 *
 	 *     		@Override
-				public int hashCode() {
-					return Objects.hash(uidPkIdx);
-				}
+	 *			public int hashCode() {
+	 *				return Objects.hash(uidPkIdx);
+	 *			}
 	 *     }
 	 * </code>
 	 * @param partialKey The key with parital data to search for.
-	 * @return null if no value is found.
+	 * @return wrapped result.
 	 */
-	default V getByPartialKey(K partialKey) {
-		return null;
+	default CacheResult<V> getByPartialKey(K partialKey) {
+		return CacheResult.notPresent();
 	}
 
 	/**
@@ -123,27 +119,14 @@ public interface Cache<K, V> {
 	}
 
 	/**
-	 * Retrieves an object from cache using the given key.
+	 * Retrieves an object from cache using the given key, falling back on the fallbackLoader if it's not present.
 	 *
-	 * @param key the name of the key to retrieve the object by
+	 * @param key            the name of the key to retrieve the object by
 	 * @param fallbackLoader a cache loader to use to load the value if the value cannot be found in cache
-	 * @return the cached object
-	 *
+	 * @return the value
 	 * @throws NullPointerException if either argument is null
 	 */
-	default V get(K key, CacheLoader<K, V> fallbackLoader) {
-		V found = get(key);
-		if (found == null) {
-			found = fallbackLoader.load(key);
-			if (found == null) {
-				return null;
-			} else {
-				put(key, found);
-			}
-		}
-
-		return found;
-	}
+	V get(K key, Function<K, V> fallbackLoader);
 
 	/**
 	 * Retrieves a map with cached values using given keys.
@@ -154,17 +137,7 @@ public interface Cache<K, V> {
 	 *
 	 * @throws NullPointerException if either argument is null
 	 */
-	default Map<K, V> getAll(Collection<? extends K> keyValues) {
-		Map<K, V> result = new LinkedHashMap<>();
-		for (K keyVal : keyValues) {
-			V value = get(keyVal);
-			if (value != null) {
-				result.put(keyVal, value);
-			}
-		}
-
-		return result;
-	}
+	Map<K, V> getAll(Collection<? extends K> keyValues);
 
 	/**
 	 * Retrieves an object from cache using the given keys.
@@ -176,41 +149,7 @@ public interface Cache<K, V> {
 	 *
 	 * @throws NullPointerException if either argument is null
 	 */
-	default Map<K, V> getAll(Collection<? extends K> keyValues, CacheLoader<K, V> fallbackLoader) {
-		Map<K, V> cachedValuesMap = getAll(keyValues);
-
-		int cachedValuesSize = cachedValuesMap.size();
-		int keyValuesSize = keyValues.size();
-
-		if (cachedValuesSize == keyValuesSize) {
-			return cachedValuesMap;
-		}
-
-		if (keyValuesSize > cachedValuesSize) {
-			//more keys than cached values are provided.. need to update the cache
-			final List<K> uncachedKeys = new ArrayList<>(keyValues);
-
-			boolean isCollectionModified = uncachedKeys.removeAll(cachedValuesMap.keySet());
-
-			if (isCollectionModified || cachedValuesMap.isEmpty()) {
-				Map<K, V> unCachedValueMap = fallbackLoader.loadAll(uncachedKeys);
-				for (Map.Entry<K, V> unCachedEntry : unCachedValueMap.entrySet()) {
-					put(unCachedEntry.getKey(), unCachedEntry.getValue());
-				}
-
-				if (cachedValuesMap.isEmpty()) {
-					return unCachedValueMap;
-				}
-
-				return CacheUtil.mergeResults(keyValues, cachedValuesMap, unCachedValueMap);
-
-			} else {
-				throw new EpServiceException("Couldn't remove elements from keyValues collection");
-			}
-		}
-
-		return cachedValuesMap;
-	}
+	Map<K, V> getAll(Collection<K> keyValues, Function<Collection<K>, Map<K, V>> fallbackLoader);
 
 	/**
 	 * Associates the specified value with the specified key in the cache.

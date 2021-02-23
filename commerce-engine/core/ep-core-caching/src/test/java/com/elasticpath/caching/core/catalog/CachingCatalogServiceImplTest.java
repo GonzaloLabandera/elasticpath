@@ -4,7 +4,11 @@
 package com.elasticpath.caching.core.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+
+import java.util.function.Function;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,9 +35,10 @@ public class CachingCatalogServiceImplTest {
 	@Mock
 	private Catalog catalog;
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindByCodeUsesCache() {
-		given(catalogByCodeCache.get(CODE, cachingService.getCatalogByCodeCacheLoader())).willReturn(catalog);
+		given(catalogByCodeCache.get(eq(CODE), any(Function.class))).willReturn(catalog);
 		final Catalog result = cachingService.findByCode(CODE);
 		assertThat(result).isEqualTo(catalog);
 	}

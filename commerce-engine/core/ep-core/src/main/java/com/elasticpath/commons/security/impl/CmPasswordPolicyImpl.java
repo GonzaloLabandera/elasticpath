@@ -12,12 +12,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.commons.security.CmPasswordPolicy;
 import com.elasticpath.commons.security.PasswordHolder;
 import com.elasticpath.commons.security.ValidationError;
 import com.elasticpath.commons.security.ValidationResult;
+import com.elasticpath.domain.cmuser.UserPasswordHistoryItem;
 import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
@@ -172,20 +173,18 @@ public class CmPasswordPolicyImpl extends AbstractPasswordPolicyImpl implements 
 		@Override
 		public ValidationResult apply(final PasswordHolder passwordHolder) {
 			final Integer passwordHistoryLength = passwordHistoryLengthSupplier.get();
-			final String encodedPassword = passwordEncoderSupplier.get().encodePassword(passwordHolder.getUserPassword(), null);
-
-			if (encodedPassword.equals(passwordHolder.getPassword())) {
+			
+			if (passwordEncoderSupplier.get().matches(passwordHolder.getUserPassword(), passwordHolder.getPassword())) {
 				return new ValidationResult(new ValidationError(PASSWORD_VALIDATION_ERROR_MINIMUM_NO_REPEAT_PASSWORD, passwordHistoryLength));
 			}
-
-			final boolean match = passwordHolder.getPasswordHistoryItems().stream()
-					.anyMatch(historyItem -> historyItem.getOldPassword().equals(encodedPassword));
-
-			if (match) {
-				return new ValidationResult(new ValidationError(PASSWORD_VALIDATION_ERROR_MINIMUM_NO_REPEAT_PASSWORD, passwordHistoryLength));
-			} else {
-				return ValidationResult.VALID;
+			
+			for (UserPasswordHistoryItem historyItem : passwordHolder.getPasswordHistoryItems()) {
+				if (passwordEncoderSupplier.get().matches(passwordHolder.getUserPassword(), historyItem.getOldPassword())) {
+					return new ValidationResult(new ValidationError(PASSWORD_VALIDATION_ERROR_MINIMUM_NO_REPEAT_PASSWORD, passwordHistoryLength));
+				}
 			}
+			
+			return ValidationResult.VALID;
 		}
 	}
 

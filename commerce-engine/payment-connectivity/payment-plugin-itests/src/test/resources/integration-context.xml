@@ -17,7 +17,6 @@
 	<import resource="classpath:spring/service/payment-provider-api-service.xml"/>
 
 	<!-- Opt out of messaging. -->
-	<bean id="domainEventMessagePublisher" class="com.elasticpath.messaging.stub.EventMessagePublisherStubImpl"/>
 	<bean id="catalogEventMessagePublisher" class="com.elasticpath.messaging.stub.EventMessagePublisherStubImpl"/>
 
 	<!-- Extension point for plugging in additional test components. -->

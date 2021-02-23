@@ -50,7 +50,17 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-catalog-batch</artifactId>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-spring</artifactId>
+		</dependency>
+
 		<!-- Extra stuff -->
 
 		<dependency>

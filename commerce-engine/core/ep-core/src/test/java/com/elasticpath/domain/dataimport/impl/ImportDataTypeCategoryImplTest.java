@@ -31,10 +31,13 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.GlobalConstants;
 import com.elasticpath.commons.exception.EpDateBindException;
 import com.elasticpath.commons.exception.EpIntBindException;
+import com.elasticpath.commons.exception.EpInvalidCatalogCodeException;
 import com.elasticpath.commons.exception.EpInvalidGuidBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.commons.exception.EpTooLongBindException;
+import com.elasticpath.commons.util.CatalogCodeUtil;
 import com.elasticpath.commons.util.Utility;
+import com.elasticpath.commons.util.impl.CatalogCodeUtilImpl;
 import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
@@ -112,6 +115,8 @@ public class ImportDataTypeCategoryImplTest {
 
 	private Attribute attributeImageSmall;
 
+	private final CatalogCodeUtil catalogCodeUtil = new CatalogCodeUtilImpl();
+
 	private final Utility utility = new UtilityImpl() {
 		private static final long serialVersionUID = 1L;
 
@@ -141,6 +146,7 @@ public class ImportDataTypeCategoryImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class, validatorUtils);
 		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.CATALOG_CODE_UTIL, CatalogCodeUtil.class, catalogCodeUtil);
 
 		categoryImportType = new ImportDataTypeCategoryImpl();
 		categoryImportType.setCategoryLookup(categoryLookup);
@@ -148,7 +154,7 @@ public class ImportDataTypeCategoryImplTest {
 		importGuidHelper = context.mock(ImportGuidHelper.class);
 		
 		CatalogLocaleFallbackPolicyFactory localePolicyFactory = new CatalogLocaleFallbackPolicyFactory();
-		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, 
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY,
 				CatalogLocaleFallbackPolicyFactory.class, localePolicyFactory);
 
 		attributeValueMap = new HashMap<>();
@@ -242,10 +248,10 @@ public class ImportDataTypeCategoryImplTest {
 		importField.setStringValue(category, null, importGuidHelper);
 	}
 
-	@Test(expected = EpInvalidGuidBindException.class)
+	@Test(expected = EpInvalidCatalogCodeException.class)
 	public void testGetImportFieldOfCodeWithInvalidGuid() {
 		ImportField importField = categoryImportType.getImportField(ImportDataTypeProductImpl.PREFIX_OF_FIELD_NAME + CATEGORY_CODE);
-		importField.setStringValue(category, "asdf-123", importGuidHelper);
+		importField.setStringValue(category, " asdf-123", importGuidHelper);
 	}
 
 	/**

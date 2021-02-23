@@ -51,27 +51,14 @@ public class CachingSolrQueryFactoryImpl implements SolrQueryFactory {
 
 	@Override
 	public String getSearchableAttributesFromFilterAttributes(final KeywordSearchCriteria searchCriteria, final SearchConfig searchConfig) {
-		String result = searchableAttributeCache.get(searchCriteria.getStoreCode());
-		if  (result != null) {
-			return result;
-		}
-		result = fallbackQueryFactory.getSearchableAttributesFromFilterAttributes(searchCriteria,
-				searchConfig);
-		searchableAttributeCache.put(searchCriteria.getStoreCode(), result);
-		return result;
+		return searchableAttributeCache.get(searchCriteria.getStoreCode(),
+				cacheKey -> fallbackQueryFactory.getSearchableAttributesFromFilterAttributes(searchCriteria, searchConfig));
 	}
 
 	@Override
 	public String getSearchableAttributes(final SearchConfig searchConfig, final KeywordSearchCriteria searchCriteria) {
-		String storeCode = searchCriteria.getStoreCode();
-		String result = this.searchableAttributeCache.get(storeCode);
-
-		if (result == null) {
-			result = fallbackQueryFactory.getSearchableAttributes(searchConfig, searchCriteria);
-			searchableAttributeCache.put(storeCode, result);
-		}
-
-		return result;
+		return searchableAttributeCache.get(searchCriteria.getStoreCode(),
+				cacheKey -> fallbackQueryFactory.getSearchableAttributes(searchConfig, searchCriteria));
 	}
 
 	@Override

@@ -3,7 +3,6 @@
  */
 package com.elasticpath.catalog.plugin.repository;
 
-import static com.elasticpath.catalog.plugin.repository.CatalogProjectionRepositoryIntegrationTest.JMS_BROKER_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Timestamp;
@@ -15,16 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionId;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
+import com.elasticpath.test.integration.BasicSpringContextTest;
 
 /**
  * Test for {@link CatalogProjectionRepository}.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
-public class CatalogProjectionRepositoryIntegrationTest extends XaTransactionTestSupport {
-
-	public static final String JMS_BROKER_URL = "tcp://localhost:61617";
+public class CatalogProjectionRepositoryIntegrationTest extends BasicSpringContextTest {
 
 	@Autowired
 	private CatalogProjectionRepository catalogProjectionRepository;

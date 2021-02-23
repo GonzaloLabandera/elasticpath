@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-update-shoppingcart-default-value.xml">
+
+	<changeSet id="update-shoppingcart-default-value" author="elasticpath" >
+
+		<!-- make DEFAULTCART column nullable -->
+		<dropNotNullConstraint tableName="TSHOPPINGCART" columnName="DEFAULTCART" columnDataType="BOOLEAN" />
+
+	</changeSet>
+
+	<changeSet id="add-defaultcart-unique-constraint-data-migration"
+			   author="elasticpath" context="migrate-data" dbms="mysql,oracle">
+		<comment>set default cart to null for inactive and non default carts</comment>
+		<update tableName="TSHOPPINGCART">
+			<column name="DEFAULTCART" value="null"/>
+			<where>STATUS = 'INACTIVE' OR DEFAULTCART = 0</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="add-defaultcart-unique-constraint" author="elasticpath" dbms="mysql,h2">
+		<addUniqueConstraint tableName="TSHOPPINGCART" columnNames="SHOPPER_UID,DEFAULTCART" constraintName="UNIQ_SHOPPER_DEFAULTCART" />
+	</changeSet>
+
+	<changeSet id="add-defaultcart-unique-constraint-oracle" author="elasticpath" dbms="oracle">
+		<comment>ONLY apply unique constraint to the shopper with default cart. If shopper's default cart is null, will be ignored.</comment>
+		<sql>
+			CREATE UNIQUE INDEX UNIQ_SHOPPER_DEFAULTCART ON TSHOPPINGCART
+			(
+				CASE WHEN DEFAULTCART IS NULL THEN NULL ELSE SHOPPER_UID END,
+				DEFAULTCART
+			);
+		</sql>
+	</changeSet>
+
+
+</databaseChangeLog>

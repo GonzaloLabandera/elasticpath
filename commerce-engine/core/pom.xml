@@ -45,7 +45,6 @@
 		<module>ep-domain-message-handler</module>
 		<module>catalog-update-event-processor-api</module>
 		<module>catalog-update-event-processor-connectivity</module>
-		<module>ep-jta</module>
 		<module>ep-catalog-itests</module>
 		<module>ep-domain-bulk-handler</module>
 	</modules>

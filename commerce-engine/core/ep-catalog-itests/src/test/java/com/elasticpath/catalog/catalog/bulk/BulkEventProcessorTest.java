@@ -8,7 +8,6 @@ import static com.elasticpath.catalog.bulk.DomainBulkEventType.ATTRIBUTE_CATEGOR
 import static com.elasticpath.catalog.bulk.DomainBulkEventType.ATTRIBUTE_SKU_BULK_UPDATE;
 import static com.elasticpath.catalog.bulk.DomainBulkEventType.BRAND_BULK_UPDATE;
 import static com.elasticpath.catalog.bulk.DomainBulkEventType.OPTION_BULK_UPDATE;
-import static com.elasticpath.catalog.catalog.bulk.BulkEventProcessorTest.JMS_BROKER_URL;
 import static com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.CATEGORY_IDENTITY_TYPE;
 import static com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.OFFER_IDENTITY_TYPE;
 import static com.elasticpath.catalog.update.processor.connectivity.impl.SkuOptionUpdateProcessorImpl.PRODUCTS;
@@ -69,19 +68,15 @@ import com.elasticpath.catalog.entity.translation.TranslationUnit;
 import com.elasticpath.catalog.spi.service.CatalogService;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.impl.EventMessageImpl;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
 
 /**
  * Test of {@link BulkEventProcessor}.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DirtiesDatabase
-public class BulkEventProcessorTest extends XaTransactionTestSupport {
-
-	public static final String JMS_BROKER_URL = "tcp://localhost:61623";
+public class BulkEventProcessorTest extends DbTestCase {
 
 	private static final Logger LOGGER = Logger.getLogger(BulkEventProcessorTest.class);
 

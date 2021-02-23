@@ -42,6 +42,7 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
  */
 public class ProductAssociationServiceImplTest {
 
+	private static final String UNEXPECTED_NUMBER_OF_ASSOCIATIONS = "Unexpected number of associations";
 	private ProductAssociationServiceImpl productAssociationService;
 
 	@Rule
@@ -298,7 +299,7 @@ public class ProductAssociationServiceImplTest {
 	}
 
 	@Test
-	public void testFindByCriteraWithResultsLimitSuccessful() {
+	public void testFindByCriteriaWithResultsLimitSuccessful() {
 		final int startIndex = 0;
 		final int maxResults = 1;
 		final ProductAssociationSearchCriteria searchCriteria = getTestSearchCriteria();
@@ -314,7 +315,7 @@ public class ProductAssociationServiceImplTest {
 		final List<ProductAssociation> productAssociations = productAssociationService.findByCriteria(
 				searchCriteria, startIndex, maxResults);
 
-		assertEquals("Unexpected number of associations", maxResults, productAssociations.size());
+		assertEquals(UNEXPECTED_NUMBER_OF_ASSOCIATIONS, maxResults, productAssociations.size());
 	}
 
 	@Test
@@ -331,7 +332,7 @@ public class ProductAssociationServiceImplTest {
 
 		final Long resultCount = productAssociationService.findCountForCriteria(searchCriteria);
 
-		assertEquals("Unexpected number of associations", expectedValue, resultCount);
+		assertEquals(UNEXPECTED_NUMBER_OF_ASSOCIATIONS, expectedValue, resultCount);
 	}
 
 	@Test(expected = EpServiceException.class)
@@ -348,6 +349,23 @@ public class ProductAssociationServiceImplTest {
 		productAssociationService.findCountForCriteria(searchCriteria);
 	}
 
+	@Test
+	public void testGetAllAssociationsWithSourceProductCode() {
+
+		final LoadTuner loadTuner = mockProductAssociationLoadTuner();
+		context.checking(new Expectations() {
+			{
+				oneOf(mockPersistenceEngine).retrieve(with(any(String.class)), with(any(Object[].class)));
+				will(returnValue(Collections.singletonList(context.mock(ProductAssociation.class))));
+			}
+		});
+
+		final List<ProductAssociation> productAssociations = productAssociationService.getAllAssociations("testProductCode", loadTuner);
+
+		assertEquals(UNEXPECTED_NUMBER_OF_ASSOCIATIONS, 1, productAssociations.size());
+
+	}
+
 	private ProductAssociationSearchCriteria getTestSearchCriteria() {
 		final ProductAssociationSearchCriteria criteria = new ProductAssociationSearchCriteria();
 		criteria.setCatalogCode("testCatalog");
@@ -356,7 +374,7 @@ public class ProductAssociationServiceImplTest {
 		return criteria;
 	}
 
-	private void mockProductAssociationLoadTuner() {
+	private LoadTuner mockProductAssociationLoadTuner() {
 		final ProductAssociationLoadTuner mockLoadTuner = context.mock(ProductAssociationLoadTuner.class);
 		productAssociationService.setProductAssociationLoadTuner(mockLoadTuner);
 		context.checking(new Expectations() {
@@ -365,5 +383,6 @@ public class ProductAssociationServiceImplTest {
 				will(returnValue(mockPersistenceEngine));
 			}
 		});
+		return mockLoadTuner;
 	}
 }

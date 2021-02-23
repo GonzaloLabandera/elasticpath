@@ -116,9 +116,9 @@ public class ChangeSetImportStageImpl implements ImportStage {
 			streamReader = XMLInputFactory.newInstance().createXMLStreamReader(entryToImport);
 			streamReader.nextTag();
 			streamReader.require(XMLStreamConstants.START_ELEMENT, null, null);
-			final JobType jobType = JobType.getJobTypeByTag(streamReader.getLocalName());
+			final String rootName = streamReader.getLocalName();
 
-			final Importer<? super Persistable, ? super Dto> importer = importerFactory.createImporter(jobType, context, savingManager);
+			final Importer<? super Persistable, ? super Dto> importer = importerFactory.createImporter(rootName, context, savingManager);
 
 			final Class<?>[] jaxbClasses = JaxbUtils.createClassArray(importer.getDtoClass(), importer.getAuxiliaryJaxbClasses());
 			final XMLUnmarshaller unmarshaller = createUnmarshaller(jaxbClasses,
@@ -139,7 +139,7 @@ public class ChangeSetImportStageImpl implements ImportStage {
 							Dto unmarshalledObject = unmarshaller.unmarshall(streamReader);
 							addObjectToChangeSetWithErrorHandling(unmarshalledObject, importer, context);
 						} catch (MarshallingRuntimeException marshallingRuntimeException) {
-							LOG.error(new Message("IE-30400", marshallingRuntimeException, jobType.toString(), validationEventHandler
+							LOG.error(new Message("IE-30400", marshallingRuntimeException, rootName, validationEventHandler
 									.getLastErrorStatus()));
 							LOG.error(marshallingRuntimeException.getIEMessage());
 							throw new ImportStageFailedException("IE-30400", marshallingRuntimeException);
@@ -152,17 +152,17 @@ public class ChangeSetImportStageImpl implements ImportStage {
 						LOG.debug("Attempting Transaction Commit");
 						transaction.commit();
 						if (count++ % LOG_EVERY_N_ENTRIES == 0) {
-							LOG.info("Added to change set " + count + " " + jobType.getTagName());
+							LOG.info("Added to change set " + count + " " + rootName);
 						}
 					} catch (TransactionException exception) {
 						LOG.error(new Message("IE-30404", exception, Integer.toString(transactionVolume)));
 						throw new ImportStageFailedException("IE-30404", exception);
 					} catch (Exception exc) {
-						LOG.error(new Message("IE-30402", exc, jobType.toString(), importer.getStatusHolder().getImportStatus()));
+						LOG.error(new Message("IE-30402", exc, rootName, importer.getStatusHolder().getImportStatus()));
 						throw new ImportStageFailedException("IE-30402", exc);
 					}
 				} catch (Exception exception) {
-					LOG.error(new Message("IE-30402", exception, jobType.toString(), importer.getStatusHolder().getImportStatus()));
+					LOG.error(new Message("IE-30402", exception, rootName, importer.getStatusHolder().getImportStatus()));
 					skipNotStartElements(streamReader, importer.getImportedObjectName());
 					try {
 						transaction.rollback();
@@ -172,7 +172,7 @@ public class ChangeSetImportStageImpl implements ImportStage {
 					throw new ImportStageFailedException("IE-30403", exception);
 				}
 			}
-			LOG.info("Added to change set " + count % LOG_EVERY_N_ENTRIES + " " + jobType.getTagName());
+			LOG.info("Added to change set " + count % LOG_EVERY_N_ENTRIES + " " + rootName);
 			session.close();
 
 		} catch (XMLStreamException exception) {
@@ -270,7 +270,7 @@ public class ChangeSetImportStageImpl implements ImportStage {
 		}
 
 		configureDtos(dto, allObjectDescriptors);
-		
+
 		allObjectDescriptors.addAll(resolveRelatedObjects(dto, importer));
 
 		if (CollectionUtils.isEmpty(allObjectDescriptors)) {
@@ -282,7 +282,7 @@ public class ChangeSetImportStageImpl implements ImportStage {
 			metadata.put("action", ChangeSetMemberAction.UNDEFINED.getName());
 
 			setDisplayValues(dto, metadata);
-			
+
 			for (BusinessObjectDescriptor objectDescriptor : allObjectDescriptors) {
 				getChangeSetService().addObjectToChangeSet(getChangeSetGuid(), objectDescriptor, metadata);
 			}
@@ -299,7 +299,7 @@ public class ChangeSetImportStageImpl implements ImportStage {
 				}
 			}
 		}
-		
+
 		if (dto instanceof CategoryDTO) {
 			CategoryDTO categoryDto = (CategoryDTO) dto;
 			for (LinkedCategoryDTO linkedCategoryDTO : categoryDto.getLinkedCategoryDTOList()) {
@@ -324,7 +324,7 @@ public class ChangeSetImportStageImpl implements ImportStage {
 			if (dto instanceof CategoryDTO) {
 				displayValues = ((CategoryDTO) dto).getNameValues();
 			}
-			
+
 			if (displayValues.isEmpty()) {
 				//null check...
 				LOG.error("Missing objectName for search index.");

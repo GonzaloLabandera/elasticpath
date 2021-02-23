@@ -5,6 +5,7 @@ package com.elasticpath.datapopulation.core;
 
 import java.util.Map;
 
+import org.fusesource.jansi.AnsiConsole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -37,7 +38,9 @@ public class DataPopulationCore {
 					+ " is not a known command in data population");
 		}
 
+		AnsiConsole.systemInstall();
 		dpActionExecutor.execute(dataPopulationContext);
+		AnsiConsole.systemUninstall();
 	}
 
 	// Getters and Setters

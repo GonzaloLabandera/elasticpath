@@ -19,10 +19,14 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.orderpaymentapi.impl.CustomerContext;
 import com.elasticpath.domain.orderpaymentapi.impl.PICFieldsRequestContext;
 import com.elasticpath.domain.orderpaymentapi.impl.PICRequestContext;
+import com.elasticpath.rest.definition.accounts.AccountIdentifier;
+import com.elasticpath.rest.definition.accounts.AccountsIdentifier;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.base.CostEntity;
 import com.elasticpath.rest.definition.base.NameEntity;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
+import com.elasticpath.rest.definition.paymentinstructions.AccountPaymentInstructionsIdentifier;
+import com.elasticpath.rest.definition.paymentinstructions.AccountRequestInstructionsFormIdentifier;
 import com.elasticpath.rest.definition.paymentinstructions.DynamicInstructionsEntity;
 import com.elasticpath.rest.definition.paymentinstructions.InstructionsEntity;
 import com.elasticpath.rest.definition.paymentinstructions.OrderPaymentInstructionsIdentifier;
@@ -30,6 +34,9 @@ import com.elasticpath.rest.definition.paymentinstructions.OrderRequestInstructi
 import com.elasticpath.rest.definition.paymentinstructions.PaymentInstructionsIdentifier;
 import com.elasticpath.rest.definition.paymentinstructions.PaymentMethodConfigurationEntity;
 import com.elasticpath.rest.definition.paymentinstructions.RequestInstructionsFormIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentFormIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentsIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentEntity;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentForFormEntity;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentIdentifier;
@@ -41,6 +48,8 @@ import com.elasticpath.rest.definition.paymentinstruments.PaymentInstrumentsIden
 import com.elasticpath.rest.definition.paymentinstruments.ProfilePaymentInstrumentFormIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.PurchasePaymentInstrumentIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.PurchasePaymentMethodIdentifier;
+import com.elasticpath.rest.definition.paymentmethods.AccountPaymentMethodIdentifier;
+import com.elasticpath.rest.definition.paymentmethods.AccountPaymentMethodsIdentifier;
 import com.elasticpath.rest.definition.paymentmethods.OrderPaymentMethodIdentifier;
 import com.elasticpath.rest.definition.paymentmethods.OrderPaymentMethodsIdentifier;
 import com.elasticpath.rest.definition.paymentmethods.ProfilePaymentMethodIdentifier;
@@ -52,7 +61,7 @@ import com.elasticpath.rest.id.type.CompositeIdentifier;
 /**
  * Provides common payment resource helper methods.
  */
-@SuppressWarnings({"PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects", "PMD.GodClass"})
 public final class PaymentResourceHelpers {
 
 	/**
@@ -94,6 +103,18 @@ public final class PaymentResourceHelpers {
 	}
 
 	/**
+	 * Builds a {@link ProfilePaymentMethodsIdentifier} with the given parameter.
+	 *
+	 * @param accountIdentifier profile identifier
+	 * @return ProfilePaymentMethodsIdentifier
+	 */
+	public static AccountPaymentMethodsIdentifier buildAccountPaymentMethodsIdentifier(final AccountIdentifier accountIdentifier) {
+		return AccountPaymentMethodsIdentifier.builder()
+				.withAccount(accountIdentifier)
+				.build();
+	}
+
+	/**
 	 * Builds a {@link ProfilePaymentMethodIdentifier} with the given parameters.
 	 *
 	 * @param userId          unique user identifier
@@ -124,6 +145,21 @@ public final class PaymentResourceHelpers {
 		return ProfilePaymentMethodIdentifier.builder()
 				.withProfilePaymentMethods(buildProfilePaymentMethodsIdentifier(profileIdentifier))
 				.withPaymentMethodId(paymentMethodId)
+				.build();
+	}
+
+	/**
+	 * Builds a {@link ProfilePaymentMethodIdentifier} with the given parameters.
+	 *
+	 * @param accountIdentifier profile identifier
+	 * @param paymentMethodId   the payment method id
+	 * @return ProfilePaymentMethodIdentifier
+	 */
+	public static AccountPaymentMethodIdentifier buildAccountPaymentMethodIdentifier(final AccountIdentifier accountIdentifier,
+																					 final IdentifierPart<String> paymentMethodId) {
+		return AccountPaymentMethodIdentifier.builder()
+				.withAccountPaymentMethods(buildAccountPaymentMethodsIdentifier(accountIdentifier))
+				.withAccountPaymentMethodId(paymentMethodId)
 				.build();
 	}
 
@@ -211,6 +247,39 @@ public final class PaymentResourceHelpers {
 	}
 
 	/**
+	 * Builds an {@link AccountPaymentInstructionsIdentifier} with the given parameters.
+	 *
+	 * @param accountIdentifier         account identifier
+	 * @param methodId                  the payment method id
+	 * @param communicationInstructions communication instructions map
+	 * @param payload                   payload map
+	 * @return PaymentInstructionsIdentifier
+	 */
+	public static AccountPaymentInstructionsIdentifier buildAccountPaymentInstructionsIdentifier(
+			final AccountIdentifier accountIdentifier,
+			final IdentifierPart<String> methodId,
+			final Map<String, String> communicationInstructions,
+			final Map<String, String> payload) {
+
+		Map<String, String> communicationInstructionsWrapped = new HashMap<>(communicationInstructions);
+		Map<String, String> payloadWrapped = new HashMap<>(payload);
+
+		if (communicationInstructionsWrapped.isEmpty()) {
+			communicationInstructionsWrapped.put(FAKE_INSTRUCTIONS_FIELD, StringUtils.EMPTY);
+		}
+
+		if (payloadWrapped.isEmpty()) {
+			payloadWrapped.put(FAKE_INSTRUCTIONS_FIELD, StringUtils.EMPTY);
+		}
+
+		return AccountPaymentInstructionsIdentifier.builder()
+				.withAccountCommunicationInstructionsId(CompositeIdentifier.of(communicationInstructionsWrapped))
+				.withPayloadId(CompositeIdentifier.of(payloadWrapped))
+				.withAccountPaymentMethod(buildAccountPaymentMethodIdentifier(accountIdentifier, methodId))
+				.build();
+	}
+
+	/**
 	 * Builds an {@link OrderPaymentInstructionsIdentifier} with the given parameters.
 	 *
 	 * @param scope                     the scope for this identifier
@@ -256,6 +325,20 @@ public final class PaymentResourceHelpers {
 	                                                                             final IdentifierPart<String> methodId) {
 		return RequestInstructionsFormIdentifier.builder()
 				.withProfilePaymentMethod(buildProfilePaymentMethodIdentifier(profileIdentifier, methodId))
+				.build();
+	}
+
+	/**
+	 * Builds a {@link AccountRequestInstructionsFormIdentifier} with the given parameters.
+	 *
+	 * @param accountIdentifier account identifier
+	 * @param methodId          the payment method id
+	 * @return RequestInstructionsFormIdentifier
+	 */
+	public static AccountRequestInstructionsFormIdentifier buildAccountRequestInstructionsForm(final AccountIdentifier accountIdentifier,
+																						final IdentifierPart<String> methodId) {
+		return AccountRequestInstructionsFormIdentifier.builder()
+				.withAccountPaymentMethod(buildAccountPaymentMethodIdentifier(accountIdentifier, methodId))
 				.build();
 	}
 
@@ -385,6 +468,19 @@ public final class PaymentResourceHelpers {
 	}
 
 	/**
+	 * Builds a {@link ProfilePaymentInstrumentFormIdentifier} linked to the provided {@link ProfilePaymentMethodIdentifier}.
+	 *
+	 * @param identifier {@link ProfilePaymentMethodIdentifier}
+	 * @return {@link ProfilePaymentInstrumentFormIdentifier}
+	 */
+	public static AccountPaymentInstrumentFormIdentifier buildAccountPaymentInstrumentFormIdentifier(
+			final AccountPaymentMethodIdentifier identifier) {
+		return AccountPaymentInstrumentFormIdentifier.builder()
+				.withAccountPaymentMethod(identifier)
+				.build();
+	}
+
+	/**
 	 * Builds {@link PaymentInstrumentsIdentifier} with the provided scope.
 	 *
 	 * @param scope scope tied to the created {@link PaymentInstrumentsIdentifier}
@@ -393,6 +489,25 @@ public final class PaymentResourceHelpers {
 	public static PaymentInstrumentsIdentifier buildPaymentInstrumentsIdentifier(final IdentifierPart<String> scope) {
 		return PaymentInstrumentsIdentifier.builder()
 				.withScope(scope)
+				.build();
+	}
+
+	/**
+	 * Builds {@link AccountPaymentInstrumentsIdentifier} with the provided scope.
+	 *
+	 * @param scope     the scope
+	 * @param accountId the account Id
+	 * @return {@link AccountPaymentInstrumentsIdentifier}
+	 */
+	public static AccountPaymentInstrumentsIdentifier buildAccountPaymentInstrumentsIdentifier(final IdentifierPart<String> scope,
+																							   final IdentifierPart<String> accountId) {
+		return AccountPaymentInstrumentsIdentifier.builder()
+				.withAccount(AccountIdentifier.builder()
+						.withAccountId(accountId)
+						.withAccounts(AccountsIdentifier.builder()
+								.withScope(scope)
+								.build())
+						.build())
 				.build();
 	}
 
@@ -408,6 +523,24 @@ public final class PaymentResourceHelpers {
 		return PaymentInstrumentIdentifier.builder()
 				.withPaymentInstrumentId(paymentInstrumentId)
 				.withPaymentInstruments(buildPaymentInstrumentsIdentifier(scope))
+				.build();
+	}
+
+	/**
+	 * Builds a {@link AccountPaymentInstrumentIdentifier} with the provided scope and identifier.
+	 *
+	 * @param scope                      the scope
+	 * @param accountId                  the account Id
+	 * @param accountPaymentInstrumentId unique payment instrument identifier
+	 * @return {@link PaymentInstrumentIdentifier}
+	 */
+	public static AccountPaymentInstrumentIdentifier buildAccountPaymentInstrumentIdentifier(
+			final IdentifierPart<String> scope,
+			final IdentifierPart<String> accountId,
+			final IdentifierPart<String> accountPaymentInstrumentId) {
+		return AccountPaymentInstrumentIdentifier.builder()
+				.withAccountPaymentInstrumentId(accountPaymentInstrumentId)
+				.withAccountPaymentInstruments(buildAccountPaymentInstrumentsIdentifier(scope, accountId))
 				.build();
 	}
 

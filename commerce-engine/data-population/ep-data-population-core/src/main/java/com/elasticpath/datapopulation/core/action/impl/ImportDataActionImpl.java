@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.Properties;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -25,7 +24,6 @@ public class ImportDataActionImpl implements DataPopulationAction {
 	 * The name of the property key that is used to refer to the Liquibase contexts that should be used when updating the database.
 	 */
 	protected static final String LIQUIBASE_CONTEXTS_PROPERTY_KEY = "liquibase.contexts";
-	private static final Logger LOG = Logger.getLogger(ImportDataActionImpl.class);
 
 	@Autowired
 	private RunLiquibaseActionImpl invokeLiquibaseAction;
@@ -58,8 +56,13 @@ public class ImportDataActionImpl implements DataPopulationAction {
 		actionConfiguration.setLiquibaseChangelogParameters(null);
 		context.setActionConfiguration(actionConfiguration);
 
-		LOG.info("Invoking Liquibase update using change log file '" + liquibaseChangeLogFile + "' and contexts: " + liquibaseContexts);
 		invokeLiquibaseAction.execute(context);
+	}
+
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		final String liquibaseContexts = getLiquibaseContexts(liquibaseContextProperties);
+		return "Updating database using Liquibase change log file '" + liquibaseChangeLogFile.getPath() + "' and contexts: " + liquibaseContexts;
 	}
 
 	/**

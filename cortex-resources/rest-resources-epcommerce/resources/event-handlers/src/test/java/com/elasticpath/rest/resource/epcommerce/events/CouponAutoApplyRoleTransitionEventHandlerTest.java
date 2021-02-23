@@ -73,7 +73,7 @@ public class CouponAutoApplyRoleTransitionEventHandlerTest {
 		when(mockCustomer.getEmail()).thenReturn(EMAIL);
 
 		ShoppingCart mockShoppingCart = mock(ShoppingCart.class, Answers.RETURNS_DEEP_STUBS.get());
-		when(shoppingCartRepository.getShoppingCartForCustomer(NEW_USER_GUID))
+		when(shoppingCartRepository.getShoppingCartForCustomer(NEW_USER_GUID, STORE_CODE))
 				.thenReturn(Single.just(mockShoppingCart));
 		when(mockShoppingCart.getShopper().getCustomer()).thenReturn(mockCustomer);
 		when(mockShoppingCart.getGuid()).thenReturn(SHOPPING_CART_GUID);
@@ -163,7 +163,7 @@ public class CouponAutoApplyRoleTransitionEventHandlerTest {
 	}
 
 	private void verifyMocks(final VerificationMode mode) {
-		verify(shoppingCartRepository, mode).getShoppingCartForCustomer(NEW_USER_GUID);
+		verify(shoppingCartRepository, mode).getShoppingCartForCustomer(NEW_USER_GUID, STORE_CODE);
 		verify(cartOrderRepository, mode).findByCartGuid(SHOPPING_CART_GUID);
 	}
 }

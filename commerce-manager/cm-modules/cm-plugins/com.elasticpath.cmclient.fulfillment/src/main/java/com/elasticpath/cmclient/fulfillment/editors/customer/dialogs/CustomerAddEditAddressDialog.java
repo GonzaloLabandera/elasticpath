@@ -159,8 +159,8 @@ public class CustomerAddEditAddressDialog extends AbstractEpDialog {
 			return;
 		}
 
-		firstNameText.setText(address.getFirstName());
-		lastNameText.setText(address.getLastName());
+		firstNameText.setText(StringUtils.defaultString(address.getFirstName()));
+		lastNameText.setText(StringUtils.defaultString(address.getLastName()));
 		address1Text.setText(address.getStreet1());
 		stateCountryManager.selectStateCombo(address.getSubCountry());
 		organizationText.setText(StringUtils.defaultString(address.getOrganization()));
@@ -181,10 +181,10 @@ public class CustomerAddEditAddressDialog extends AbstractEpDialog {
 		final IEpLayoutData labelData = dialogComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
 		final IEpLayoutData fieldData = dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING, true, false);
 
-		dialogComposite.addLabelBoldRequired(FulfillmentMessages.get().AddressDialog_FirstName, authorization, labelData);
+		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_FirstName, labelData);
 		firstNameText = dialogComposite.addTextField(authorization, fieldData);
 
-		dialogComposite.addLabelBoldRequired(FulfillmentMessages.get().AddressDialog_LastName, authorization, labelData);
+		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_LastName, labelData);
 		lastNameText = dialogComposite.addTextField(authorization, fieldData);
 
 		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_Organization, labelData);
@@ -234,11 +234,11 @@ public class CustomerAddEditAddressDialog extends AbstractEpDialog {
 
 		// FirstName
 		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.firstNameText, this.addressProxy, "firstName", //$NON-NLS-1$
-				EpValidatorFactory.STRING_255_REQUIRED, null, hideDecorationOnFirstValidation);
+				null, null, hideDecorationOnFirstValidation);
 
 		// LastName
 		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.lastNameText, this.addressProxy, "lastName", //$NON-NLS-1$
-				EpValidatorFactory.STRING_255_REQUIRED, null, hideDecorationOnFirstValidation);
+				null, null, hideDecorationOnFirstValidation);
 
 		// Organization
 		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.organizationText, this.addressProxy, "organization", //$NON-NLS-1$

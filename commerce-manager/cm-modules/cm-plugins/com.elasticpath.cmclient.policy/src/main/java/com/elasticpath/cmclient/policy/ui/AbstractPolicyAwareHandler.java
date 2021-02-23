@@ -26,6 +26,16 @@ import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
  */
 public abstract class AbstractPolicyAwareHandler extends AbstractHandler implements StatePolicyTarget, ObjectRegistryListener {
 
+	/**
+	 * Default width of the abstract policy handler.
+	 */
+	public static final int DEFAULT_WIDTH = 750;
+
+	/**
+	 * Default height of the abstract policy handler.
+	 */
+	public static final int DEFAULT_HEIGHT = 300;
+
 	private final StatePolicyDelegate delegate = new DefaultStatePolicyDelegateImpl();
 	
 	private StatePolicy statePolicy;

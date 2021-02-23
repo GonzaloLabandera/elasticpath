@@ -110,14 +110,12 @@ public class ShoppingCartsRemoverForShopperUpdatesTest extends AbstractCartInteg
 
 		checkout(anonymousShoppingCart);
 
-		//after checkout there must be 1 INACTIVE and 1 empty ACTIVE cart
+		//after checkout there must be 1 INACTIVE and 0 ACTIVE carts
 		assertNumberOfAnonymousCartsByStatus(1, "INACTIVE");
-		String newAnonymousActiveCartGuid = assertNumberOfAnonymousCartsByStatus(1, "ACTIVE");
+		assertNumberOfAnonymousCartsByStatus(0, "ACTIVE");
 
 		//find newly created cart
-		ShoppingCart anonymousActiveShoppingCart = findNewActiveCartWithSession(newAnonymousActiveCartGuid,
-				anonymousShoppingCart.getCustomerSession());
-		assertThat(anonymousActiveShoppingCart.getRootShoppingItems()).isEmpty();
+		ShoppingCart anonymousActiveShoppingCart = createShoppingCart(CustomerType.SINGLE_SESSION_USER);
 
 		//and add an item
 		cartDirector.addItemToCart(anonymousActiveShoppingCart, dto);
@@ -134,12 +132,10 @@ public class ShoppingCartsRemoverForShopperUpdatesTest extends AbstractCartInteg
 		assertAllAnonymousCartsAreDeleted(anonymousActiveShoppingCart.getShopper().getUidPk());
 	}
 
-	private String assertNumberOfAnonymousCartsByStatus(final int expectedNumber, final String cartStatus) {
+	private void assertNumberOfAnonymousCartsByStatus(final int expectedNumber, final String cartStatus) {
 		List<String> result = getPersistenceEngine()
 				.retrieve(String.format("select cart.guid from ShoppingCartMementoImpl cart where cart.status = '%s'", cartStatus));
-		assertEquals(result.size(), expectedNumber);
-
-		return result.get(0);
+		assertEquals(expectedNumber, result.size());
 	}
 
 	private void assertAllAnonymousCartsAreDeleted(final long shopperUid) {

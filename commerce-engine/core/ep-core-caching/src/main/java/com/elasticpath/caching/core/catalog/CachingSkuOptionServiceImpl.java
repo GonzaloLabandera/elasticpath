@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -17,6 +16,7 @@ import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
+import com.elasticpath.persistence.api.CachedInstanceDetachmentStrategy;
 import com.elasticpath.persistence.dao.ProductTypeDao;
 import com.elasticpath.service.catalog.SkuOptionKeyExistException;
 import com.elasticpath.service.catalog.SkuOptionService;
@@ -30,6 +30,7 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 
 	private SkuOptionService fallbackSkuOptionService;
 	private ProductTypeDao productTypeDao;
+	private CachedInstanceDetachmentStrategy detachmentStrategy;
 
 	private Cache<SkuOptionCacheKey, SkuOption> skuOptionsCache;
 
@@ -90,16 +91,8 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public SkuOption findByKey(final String key) throws EpServiceException {
-		SkuOptionCacheKey cacheKey = SkuOptionCacheKey.of(key);
-
-		SkuOption skuOption = skuOptionsCache.get(cacheKey);
-
-		if (Objects.isNull(skuOption)) {
-			skuOption = fallbackSkuOptionService.findByKey(key);
-			skuOptionsCache.put(cacheKey, skuOption);
-		}
-
-		return skuOption;
+		final SkuOptionCacheKey cacheKey = SkuOptionCacheKey.of(key);
+		return skuOptionsCache.get(cacheKey, thisKey -> fallbackSkuOptionService.findByKey(key));
 	}
 
 	@Override
@@ -186,7 +179,7 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 		SkuOption skuOption = findByKey(optionKey);
 
 		return skuOption.getOptionValues().stream()
-				.filter(skuOptionValue ->  skuOptionValue.getOptionValueKey().equals(optionValueKey))
+				.filter(skuOptionValue -> skuOptionValue.getOptionValueKey().equals(optionValueKey))
 				.findFirst()
 				.get();
 	}
@@ -196,7 +189,7 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 		SkuOption skuOption = findByKey(optionKey);
 
 		return skuOption.getOptionValues().stream()
-				.filter(skuOptionValue ->  skuOptionValue.getUidPk() == skuOptionValueUid)
+				.filter(skuOptionValue -> skuOptionValue.getUidPk() == skuOptionValueUid)
 				.findFirst()
 				.get();
 	}
@@ -227,18 +220,18 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 	}
 
 	private void cacheSkuOptionsInMap(final Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap, final Collection<SkuOption> skuOptions,
-		final Long productTypeUid) {
+									  final Long productTypeUid) {
 
 		skuOptions
-			.forEach(skuOption ->
-					skuOptionToCacheKeyMap.computeIfAbsent(skuOption, val -> SkuOptionCacheKey.of(skuOption.getOptionKey()))
-						.withProductTypeUid(productTypeUid)
+				.forEach(skuOption ->
+						skuOptionToCacheKeyMap.computeIfAbsent(skuOption, val -> SkuOptionCacheKey.of(skuOption.getOptionKey()))
+								.withProductTypeUid(productTypeUid)
 
-			);
+				);
 	}
 
 	private void flushSkuOptionsToCache(final Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap) {
-		skuOptionToCacheKeyMap.forEach((key, value) -> skuOptionsCache.put(value, key));
+		skuOptionToCacheKeyMap.forEach((skuOption, cacheKey) -> detachAndCache(cacheKey, skuOption));
 
 		//don't wait for GC - SKU options may contain thousands of SKU values or there could be thousands of options (or any combination)
 		skuOptionToCacheKeyMap.clear();
@@ -246,7 +239,7 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public void cache(final SkuOption entity) {
-		skuOptionsCache.put(SkuOptionCacheKey.of(entity.getOptionKey()), entity);
+		detachAndCache(SkuOptionCacheKey.of(entity.getOptionKey()), entity);
 	}
 
 	@Override
@@ -257,5 +250,23 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 	@Override
 	public void invalidateAll() {
 		skuOptionsCache.removeAll();
+	}
+
+	private void detachAndCache(final SkuOptionCacheKey cacheKey, final SkuOption skuOption) {
+		detachSkuOptionsAndValues(skuOption);
+		skuOptionsCache.put(cacheKey, skuOption);
+	}
+
+	private void detachSkuOptionsAndValues(final SkuOption skuOption) {
+		if (skuOption != null) {
+			detachmentStrategy.detach(skuOption);
+			skuOption.getOptionValues().forEach(
+					skuOptionValue -> detachmentStrategy.detach(skuOptionValue)
+			);
+		}
+	}
+
+	public void setDetachmentStrategy(final CachedInstanceDetachmentStrategy detachmentStrategy) {
+		this.detachmentStrategy = detachmentStrategy;
 	}
 }

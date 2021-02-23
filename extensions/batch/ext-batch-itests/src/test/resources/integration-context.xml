@@ -14,15 +14,9 @@
 	<import resource="classpath:ep-test-application.xml"/>
 	<import resource="classpath:integration-checkout-context.xml"/>
 	<import resource="classpath:META-INF/elasticpath/conf/spring/catalog-batch.xml"/>
-	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
 
 	<bean id="applicationInitialization" class="com.elasticpath.service.misc.impl.EmptyApplicationInitialization" init-method="init"
 		  depends-on="preEntityManagerInitializationList"/>
-
-	<bean id="jmsBrokerService" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="java:comp/env/jms/test-broker"/>
-		<property name="resourceRef" value="true"/>
-	</bean>
 
 	<bean id="simpleStoreScenario" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean"/>
 

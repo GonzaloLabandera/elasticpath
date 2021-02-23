@@ -75,10 +75,6 @@
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher" />
 	</bean>
 
-	<bean id="domainEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
-		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
-	</bean>
-
 	<bean id="catalogEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
 	</bean>
@@ -86,6 +82,8 @@
 	<bean id="orderEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher" />
 	</bean>
+
+	<bean id="domainEventListener" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean"/>
 
 	<!-- CACHING -->
 
@@ -121,10 +119,7 @@
 		<constructor-arg ref="cachingProductSkuLookup"/>
 	</bean>
 
-
 	<!-- Extension point for plugging in additional test components. -->
 	<!-- This must occur as the last import in the context to facilitate overriding existing beans. -->
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/ep-itest-plugin.xml"/>
-
-	<bean id="domainEventListener" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean"/>
 </beans>

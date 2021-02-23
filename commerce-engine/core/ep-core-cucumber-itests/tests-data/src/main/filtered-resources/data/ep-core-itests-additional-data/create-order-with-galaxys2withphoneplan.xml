@@ -107,6 +107,7 @@
 			<column name="ORDERING" valueNumeric="0"/>
 			<column name="SKU_GUID" value="2839191C-066F-B716-B05E-43E6AD6CEFE7"/>
 			<column name="BUNDLE_CONSTITUENT" value="true"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TORDERSKU">
 			<column name="UIDPK" valueNumeric="100001"/>
@@ -131,6 +132,7 @@
 			<column name="ORDERING" valueNumeric="1"/>
 			<column name="SKU_GUID" value="d571699f-5e90-4880-8dc9-a531e7d1c50d"/>
 			<column name="BUNDLE_CONSTITUENT" value="false"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TORDERSKU">
 			<column name="UIDPK" valueNumeric="100002"/>
@@ -154,6 +156,7 @@
 			<column name="ORDERING" valueNumeric="1"/>
 			<column name="SKU_GUID" value="db52a050-a3d3-4d92-ac11-5906b122481f"/>
 			<column name="BUNDLE_CONSTITUENT" value="true"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TORDERSKU">
 			<column name="UIDPK" valueNumeric="100003"/>
@@ -178,6 +181,7 @@
 			<column name="ORDERING" valueNumeric="1"/>
 			<column name="SKU_GUID" value="6ffa4028-971c-4adf-955f-8200e2fe665c"/>
 			<column name="BUNDLE_CONSTITUENT" value="true"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TORDERSKU">
 			<column name="UIDPK" valueNumeric="100004"/>
@@ -201,6 +205,7 @@
 			<column name="ORDERING" valueNumeric="2"/>
 			<column name="SKU_GUID" value="22f20bed-7c97-440b-bd18-a66a5c4d1cd0"/>
 			<column name="BUNDLE_CONSTITUENT" value="true"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TORDERSKU">
 			<column name="UIDPK" valueNumeric="100005"/>
@@ -225,6 +230,7 @@
 			<column name="ORDERING" valueNumeric="0"/>
 			<column name="SKU_GUID" value="9e73fb6b-a607-45ab-96ab-95d5761e9f9d"/>
 			<column name="BUNDLE_CONSTITUENT" value="true"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TORDERSKU">
 			<column name="UIDPK" valueNumeric="100006"/>
@@ -249,6 +255,7 @@
 			<column name="ORDERING" valueNumeric="2"/>
 			<column name="SKU_GUID" value="8fa75682-93ac-4c62-a3ae-5938f13b6f99"/>
 			<column name="BUNDLE_CONSTITUENT" value="true"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TORDERSKU">
 			<column name="UIDPK" valueNumeric="100007"/>
@@ -273,6 +280,7 @@
 			<column name="ORDERING" valueNumeric="0"/>
 			<column name="SKU_GUID" value="8fa75682-93ac-4c62-a3ae-5938f13b6f99"/>
 			<column name="BUNDLE_CONSTITUENT" value="true"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TORDERSKU">
 			<column name="UIDPK" valueNumeric="100008"/>
@@ -296,6 +304,7 @@
 			<column name="ORDERING" valueNumeric="3"/>
 			<column name="SKU_GUID" value="39ec4b1b-8971-40dc-8800-52e4f60cd4d6"/>
 			<column name="BUNDLE_CONSTITUENT" value="true"/>
+			<column name="ORDER_UID" value="100000"/>
 		</insert>
 		<insert tableName="TSHOPPER">
 			<column name="UIDPK" valueNumeric="100000"/>
@@ -309,6 +318,7 @@
 			<column name="LAST_MODIFIED_DATE" valueDate="2018-02-19 13:21:25.0"/>
 			<column name="STORECODE" value="MOBEE"/>
 			<column name="STATUS" value="INACTIVE"/>
+			<column name="DEFAULTCART" value="null"/>
 		</insert>
 		<insert tableName="TSHOPPINGCART">
 			<column name="UIDPK" valueNumeric="100001"/>
@@ -317,6 +327,7 @@
 			<column name="LAST_MODIFIED_DATE" valueDate="2018-02-19 13:21:25.0"/>
 			<column name="STORECODE" value="MOBEE"/>
 			<column name="STATUS" value="ACTIVE"/>
+			<column name="DEFAULTCART" value="1"/>
 		</insert>
 		<insert tableName="TCARTITEM">
 			<column name="UIDPK" valueNumeric="100000"/>

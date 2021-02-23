@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-08-cleanup-expired-failed-orders-job.xml">
+
+	<changeSet id="2020-08-purge-expired-failed-orders-job-recreate-FKs-with-cascade-delete" author="elasticpath" failOnError="true">
+		<comment>[PERF-333] Drop and create FKs with CASCADE deletion</comment>
+
+		<!-- ############ Tables with FKs on TORDER.ORDER_NUMBER ############ -->
+
+		<!-- Set cascade deletion for TORDERPAYMENT -->
+		<dropForeignKeyConstraint constraintName="OP_ORDER_NUMBER_FK" 	 baseTableName="TORDERPAYMENT" />
+		<addForeignKeyConstraint constraintName="FK_OPAY_ORDER" 	 	 onDelete="CASCADE"
+								 baseTableName="TORDERPAYMENT" 			 referencedTableName="TORDER"
+								 baseColumnNames="ORDER_NUMBER"   		 referencedColumnNames="ORDER_NUMBER"/>
+		<!-- Set cascade deletion for TORDERPAYMENTINSTRUMENT -->
+		<dropForeignKeyConstraint constraintName="OPI_ORDER_NUMBER_FK" 	 baseTableName="TORDERPAYMENTINSTRUMENT" />
+		<addForeignKeyConstraint constraintName="FK_OPAYINS_ORDER" 	 	 onDelete="CASCADE"
+								 baseTableName="TORDERPAYMENTINSTRUMENT" referencedTableName="TORDER"
+								 baseColumnNames="ORDER_NUMBER" 		 referencedColumnNames="ORDER_NUMBER" />
+
+		<!-- ############ Tables with FKs on TORDERPAYMENTDATA.UIDPK ############ -->
+
+		<!-- Set cascade deletion for TORDERPAYMENTDATA -->
+		<dropForeignKeyConstraint constraintName="OPD_OP_FK" 			baseTableName="TORDERPAYMENTDATA" />
+		<addForeignKeyConstraint constraintName="FK_OPAYDATA_ORDER" 	onDelete="CASCADE"
+								 baseTableName="TORDERPAYMENTDATA" 		referencedTableName="TORDERPAYMENT"
+								 baseColumnNames="ORDER_PAYMENT_UID" 	referencedColumnNames="UIDPK" />
+
+
+		<!-- ############ Tables with FKs on TORDER.UIDPK ############ -->
+
+		<!-- Set cascade deletion for TORDERAUDIT -->
+		<dropForeignKeyConstraint constraintName="TORDERAUDIT_FK_1" 	baseTableName="TORDERAUDIT" />
+		<addForeignKeyConstraint constraintName="FK_OAUDIT_ORDER" 		onDelete="CASCADE"
+								 baseTableName="TORDERAUDIT" 			referencedTableName="TORDER"
+								 baseColumnNames="ORDER_UID" 			referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TAPPLIEDRULE -->
+		<addForeignKeyConstraint constraintName="FK_APPLIED_RULE_ORDER"	onDelete="CASCADE"
+								 baseTableName="TAPPLIEDRULE" 			referencedTableName="TORDER"
+								 baseColumnNames="ORDER_UID" 			referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TORDERDATA -->
+		<dropForeignKeyConstraint constraintName="FK_ORDERDATA_ORDER"	baseTableName="TORDERDATA" />
+		<addForeignKeyConstraint constraintName="FK_ORDERDATA_ORDER" 	onDelete="CASCADE"
+								 baseTableName="TORDERDATA" 			referencedTableName="TORDER"
+								 baseColumnNames="ORDER_UID" 			referencedColumnNames="UIDPK" />
+		<!-- Set cascade deletion for TORDERLOCK -->
+		<dropForeignKeyConstraint constraintName="TORDERLOCK_FK_1" 		baseTableName="TORDERLOCK" />
+		<addForeignKeyConstraint constraintName="FK_OLOCK_ORDER" 		onDelete="CASCADE"
+								 baseTableName="TORDERLOCK" 			referencedTableName="TORDER"
+								 baseColumnNames="ORDER_UID" 			referencedColumnNames="UIDPK" />
+		<!-- Set cascade deletion for TORDERRETURN -->
+		<dropForeignKeyConstraint constraintName="TORDERRETURN_FK_1" 	baseTableName="TORDERRETURN" />
+		<addForeignKeyConstraint constraintName="FK_ORETURN_ORDER" 		onDelete="CASCADE"
+								 baseTableName="TORDERRETURN" 			referencedTableName="TORDER"
+								 baseColumnNames="ORDER_UID" 			referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TORDERSHIPMENT -->
+		<dropForeignKeyConstraint constraintName="TORDERSHIPMENT_FK_3" 	baseTableName="TORDERSHIPMENT" />
+		<addForeignKeyConstraint constraintName="FK_OSHIPMENT_ORDER" 	onDelete="CASCADE"
+								 baseTableName="TORDERSHIPMENT" 		referencedTableName="TORDER"
+								 baseColumnNames="ORDER_UID" 			referencedColumnNames="UIDPK" />
+
+		<!-- ############ Table with FK on TAPPLIEDRULE.UIDPK ############ -->
+
+		<!-- Set cascade deletion for TAPPLIEDRULE -->
+		<dropForeignKeyConstraint constraintName="TAPPLIEDRULECOUPONCODE_FK_1" 	baseTableName="TAPPLIEDRULECOUPONCODE" />
+		<addForeignKeyConstraint constraintName="FK_AP_RULE_COUPON_AP_RULE"		onDelete="CASCADE"
+								 baseTableName="TAPPLIEDRULECOUPONCODE" 		referencedTableName="TAPPLIEDRULE"
+								 baseColumnNames="APPLIED_RULE_UID" 			referencedColumnNames="UIDPK" />
+
+		<!-- ############ Table with FK on TORDERSHIPMENT.UIDPK ############ -->
+
+		<!-- Set cascade deletion for TSHIPMENTTAX -->
+		<dropForeignKeyConstraint constraintName="TSHIPMENTTAX_FK_1" 	baseTableName="TSHIPMENTTAX" />
+		<addForeignKeyConstraint constraintName="FK_TAX_SHIPMENT" 		onDelete="CASCADE"
+								 baseTableName="TSHIPMENTTAX" 			referencedTableName="TORDERSHIPMENT"
+								 baseColumnNames="ORDER_SHIPMENT_UID"	referencedColumnNames="UIDPK" />
+
+		<!-- ############ Table with FK on TORDERRETURN.UIDPK ############ -->
+
+		<!-- Set cascade deletion for TORDERRETURNSKU -->
+		<dropForeignKeyConstraint constraintName="TORDERRETURNSKU_FK_1" baseTableName="TORDERRETURNSKU" />
+		<addForeignKeyConstraint constraintName="FK_ORETSKU_ORETURN" 	onDelete="CASCADE"
+								 baseTableName="TORDERRETURNSKU" 		referencedTableName="TORDERRETURN"
+								 baseColumnNames="ORDER_RETURN_UID" 	referencedColumnNames="UIDPK" />
+
+		<!-- Set cascade deletion for TSHIPMENTTAX -->
+		<dropForeignKeyConstraint constraintName="TSHIPMENTTAX_FK_2" 	baseTableName="TSHIPMENTTAX" />
+		<addForeignKeyConstraint constraintName="FK_TAX_RETURN" 		onDelete="CASCADE"
+								 baseTableName="TSHIPMENTTAX" 			referencedTableName="TORDERRETURN"
+								 baseColumnNames="ORDER_RETURN_UID"		referencedColumnNames="UIDPK" />
+
+		<!-- ############ Table with FK on TORDERSKU.UIDPK ############ -->
+
+		<!-- Set cascade deletion for TORDERRETURNSKU -->
+		<dropForeignKeyConstraint constraintName="TORDERRETURNSKU_FK_2" baseTableName="TORDERRETURNSKU" />
+		<addForeignKeyConstraint constraintName="FK_ORETSKU_OSKU" 		onDelete="CASCADE"
+								 baseTableName="TORDERRETURNSKU" 		referencedTableName="TORDERSKU"
+								 baseColumnNames="ORDER_SKU_UID" 		referencedColumnNames="UIDPK" />
+		<!-- Set cascade deletion for TORDERITEMDATA -->
+		<dropForeignKeyConstraint constraintName="TORDERSKU_FK" 		baseTableName="TORDERITEMDATA" />
+		<addForeignKeyConstraint constraintName="FK_OITEMDATA_OSKU" 	onDelete="CASCADE"
+								 baseTableName="TORDERITEMDATA" 		referencedTableName="TORDERSKU"
+								 baseColumnNames="ORDERSKU_UID" 		referencedColumnNames="UIDPK" />
+		<!-- Set cascade deletion for TORDERSKUPARENT -->
+		<dropForeignKeyConstraint constraintName="FK_OSKUPARENT_CHILD"	baseTableName="TORDERSKUPARENT" />
+		<addForeignKeyConstraint constraintName="FK_OSKUPARENT_C_OSKU" 	onDelete="CASCADE"
+								 baseTableName="TORDERSKUPARENT" 		referencedTableName="TORDERSKU"
+								 baseColumnNames="CHILD_UID" 			referencedColumnNames="UIDPK" />
+
+		<dropForeignKeyConstraint constraintName="FK_OSKUPARENT_PARENT" baseTableName="TORDERSKUPARENT" />
+		<addForeignKeyConstraint constraintName="FK_OSKUPARENT_P_OSKU" 	onDelete="CASCADE"
+								 baseTableName="TORDERSKUPARENT" 		referencedTableName="TORDERSKU"
+								 baseColumnNames="PARENT_UID" 			referencedColumnNames="UIDPK" />
+
+	</changeSet>
+
+	<changeSet id="2020-08-purge-expired-failed-orders-job-cascade-delete-for-shopping-item-rec-price-non-oracle" author="elasticpath" failOnError="true" dbms="mysql,h2,hsql">
+		<comment>[PERF-333] Drop and create FKs with CASCADE deletion for TSHOPPINGITEMRECURRINGPRICE table - non-Oracle dbms</comment>
+		<dropForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRICE_FK_2" 	baseTableName="TSHOPPINGITEMRECURRINGPRICE" />
+		<addForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRI_FK_2" 	onDelete="CASCADE"
+								 baseTableName="TSHOPPINGITEMRECURRINGPRICE" 			referencedTableName="TORDERSKU"
+								 baseColumnNames="ORDERSKU_UID" 						referencedColumnNames="UIDPK" />
+	</changeSet>
+
+	<changeSet id="2020-08-purge-expired-failed-orders-job-cascade-delete-for-shopping-item-rec-price-oracle" author="elasticpath" failOnError="true" dbms="oracle">
+		<comment>[PERF-333] Drop and create FKs with CASCADE deletion for TSHOPPINGITEMRECURRINGPRICE table - Oracle dbms</comment>
+		<dropForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRI_FK_2" 	baseTableName="TSHOPPINGITEMRECURRINGPRICE" />
+		<addForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRI_FK_2" 	onDelete="CASCADE"
+								 baseTableName="TSHOPPINGITEMRECURRINGPRICE" 			referencedTableName="TORDERSKU"
+								 baseColumnNames="ORDERSKU_UID" 						referencedColumnNames="UIDPK" />
+	</changeSet>
+
+	<changeSet id="2020-08-flatten-order-sku-tree-for-better-performance" author="elasticpath" failOnError="true">
+		<comment>[PERF-333] Add ORDER_UID field to TORDERSKU and migrate data</comment>
+
+		<addColumn tableName="TORDERSKU">
+			<column name="ORDER_UID" type="BIGINT"/>
+		</addColumn>
+		<createIndex tableName="TORDERSKU" indexName="I_OSKU_ORDER">
+			<column name="ORDER_UID" />
+		</createIndex>
+
+		<addForeignKeyConstraint constraintName="FK_OSKU_ORDER" 		onDelete="CASCADE"
+								 baseTableName="TORDERSKU" 				referencedTableName="TORDER"
+								 baseColumnNames="ORDER_UID" 			referencedColumnNames="UIDPK" />
+
+		<customChange class="liquibase.ext.elasticpath.AddAndPopulateOrderUidOnOrderSku"/>
+
+		<addNotNullConstraint tableName="TORDERSKU" columnName="ORDER_UID" columnDataType="BIGINT"/>
+	</changeSet>
+
+</databaseChangeLog>

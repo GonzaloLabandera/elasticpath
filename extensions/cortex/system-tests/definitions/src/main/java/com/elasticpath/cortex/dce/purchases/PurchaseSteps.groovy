@@ -4,15 +4,18 @@
 
 package com.elasticpath.cortex.dce.purchases
 
-import static org.assertj.core.api.Assertions.assertThat
-
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static com.elasticpath.cortex.dce.CommonAssertion.assertAddress
 import static com.elasticpath.cortex.dce.CommonAssertion.assertCost
 import static com.elasticpath.cortex.dce.CommonMethods.searchAndOpenItemWithKeyword
-import static com.elasticpath.cortex.dce.SharedConstants.*
+import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_PAYMENT_CONFIGURATION_NAME
+import static com.elasticpath.cortex.dce.SharedConstants.RESERVE_FAILS_PAYMENT_CONFIGURATION_NAME
+import static com.elasticpath.cortex.dce.SharedConstants.DISPLAY_NAME_FIELD
+import static com.elasticpath.cortex.dce.SharedConstants.NAME_FIELD
+import static com.elasticpath.cortex.dce.SharedConstants.TEST_EMAIL_VALUE
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
+import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.DataTable
 import cucumber.api.java.en.And
@@ -24,7 +27,12 @@ import com.elasticpath.cortex.dce.CommonMethods
 import com.elasticpath.cortex.dce.LoginSteps
 import com.elasticpath.cortex.dce.SharedConstants
 import com.elasticpath.cortex.dce.addresses.AddressQuery
-import com.elasticpath.cortexTestObjects.*
+import com.elasticpath.cortexTestObjects.FindItemBy
+import com.elasticpath.cortexTestObjects.Item
+import com.elasticpath.cortexTestObjects.Order
+import com.elasticpath.cortexTestObjects.Payment
+import com.elasticpath.cortexTestObjects.Profile
+import com.elasticpath.cortexTestObjects.Purchase 
 
 class PurchaseSteps {
 
@@ -32,15 +40,21 @@ class PurchaseSteps {
 	static final CARRIER_FIELD = 'carrier'
 	static purchaseUri
 	static savedPurchaseNumber
+
 	static final Map<String, String> ADDRESS = ["country-name"  : "CA",
 												"locality"      : "Vancouver",
 												"postal-code"   : "v7v7v7",
 												"region"        : "BC",
 												"street-address": "1111 EP Road"]
 	static createPurchaseWithFollow = { ->
-		Order.submitPurchase()
+		Order.submitPurchaseAndWaitForRelease()
 		purchaseUri = client.save()
 		savedPurchaseNumber = client.body.'purchase-number'
+	}
+
+	@When('^I (?:can make|make) a purchase and wait for it to be released$')
+	static void submitPurchaseAndWaitForRelease() {
+		Order.submitPurchaseAndWaitForRelease()
 	}
 
 	@When('^I (?:can make|make) a purchase$')
@@ -703,11 +717,28 @@ class PurchaseSteps {
 	}
 
 	@And('^I (?:create|have) an order for scope (.+) with following skus?$')
-	static void purchaseSKUsWithDefaultPaymentAndBillingAddress(String scope, DataTable dataTable) {
+	static void purchaseSKUsWithDefaultPaymentAndBillingAddressAndWaitForRelease(final String scope, final DataTable dataTable) {
+		LoginSteps.registerNewShopperAndLoginWithScope(scope)
+		CommonMethods.addItemsToCart(dataTable)
+		CommonMethods.addPaymentInstrumentAndBillingAddress()
+		Order.submitPurchaseAndWaitForRelease()
+	}
+
+	@And('^I (?:create|have) an order that will be on hold for scope (.+) with following skus?$')
+	static void purchaseSKUsWithDefaultPaymentAndBillingAddress(final String scope, final DataTable dataTable) {
 		LoginSteps.registerNewShopperAndLoginWithScope(scope)
 		CommonMethods.addItemsToCart(dataTable)
 		CommonMethods.addPaymentInstrumentAndBillingAddress()
 		Order.submitPurchase()
+	}
+
+	@And('^I (?:create|have) a failed order for scope (.+) with following skus?$')
+	static void purchaseSKUsWithFailingReservationPaymentAndBillingAddress(String scope, DataTable dataTable) {
+		LoginSteps.registerNewShopperAndLoginWithScope(scope)
+		CommonMethods.addItemsToCart(dataTable)
+		Profile.addUSBillingAddress()
+		Payment.createUnsavedPaymentInstrument(RESERVE_FAILS_PAYMENT_CONFIGURATION_NAME)
+		Order.submitPurchaseWithoutFollow()
 	}
 
 	@And('^I (?:create|have) an account order for scope (.+) and user (.+) and account (.+) with following skus?$')

@@ -166,7 +166,7 @@ public class CouponTestPersister {
 		couponUsage.setCoupon(coupon);
 		couponUsage.setCustomerEmailAddress(email);
 		couponUsage.setUseCount(useCount);
-		couponUsage.setActiveInCart(activeInCart);
+		couponUsage.setAutoApplyToCarts(activeInCart);
 		couponUsage.setSuspended(suspended);
 		return couponUsageService.add(couponUsage);
 	}

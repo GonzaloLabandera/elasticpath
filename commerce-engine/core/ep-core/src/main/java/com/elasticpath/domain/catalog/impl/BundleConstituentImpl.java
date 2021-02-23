@@ -263,8 +263,10 @@ public class BundleConstituentImpl extends AbstractLegacyEntityImpl implements B
 	@Override
 	@Transient
 	public ConstituentItem getConstituent() {
-		if (constituentItem == null) {
-			setConstituentItem();
+		synchronized (this) {
+			if (constituentItem == null) {
+				setConstituentItem();
+			}
 		}
 
 		return constituentItem;
@@ -312,7 +314,4 @@ public class BundleConstituentImpl extends AbstractLegacyEntityImpl implements B
 		}
 		return null;
 	}
-
-
-
 }

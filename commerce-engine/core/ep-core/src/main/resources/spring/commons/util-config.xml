@@ -24,6 +24,8 @@
 		<property name="characterEncoding" value="UTF-8"/>
 	</bean>
 
+	<bean id="catalogCodeUtil" class="com.elasticpath.commons.util.impl.CatalogCodeUtilImpl" scope="singleton" />
+	
 	<bean id="passwordGenerator" class="com.elasticpath.commons.util.impl.PasswordGeneratorImpl" scope="singleton">
 	</bean>
 

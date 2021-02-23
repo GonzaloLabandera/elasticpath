@@ -36,17 +36,6 @@
 		</query>
 	</named-query>
 
-	<named-query name="DELETE_ALL_ORDER_PAYMENT_INSTRUMENTS_BY_ORDER_UID_LIST">
-		<query>
-			DELETE FROM OrderPaymentInstrumentImpl opi
-			WHERE opi.orderNumber IN (
-			SELECT o.orderNumber
-			FROM OrderImpl o
-			WHERE o.uidPk IN (:list)
-			)
-		</query>
-	</named-query>
-
 	<named-query name="FIND_ORDER_PAYMENT_INSTRUMENT_BY_UID">
 		<query>
 			SELECT opi
@@ -121,18 +110,6 @@
 			ORDER BY op.createdDate
 		</query>
 	</named-query>
-
-	<named-query name="DELETE_ALL_ORDER_PAYMENTS_BY_ORDER_UID_LIST">
-		<query>
-			DELETE FROM OrderPaymentImpl op
-			WHERE op.orderNumber IN (
-			SELECT o.orderNumber
-			FROM OrderImpl o
-			WHERE o.uidPk IN (:list)
-			)
-		</query>
-	</named-query>
-
 
 	<named-query name="FIND_STORE_PAYMENT_PROVIDER_CONFIG_BY_UID">
 		<query>

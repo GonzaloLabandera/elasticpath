@@ -32,31 +32,31 @@ public class DomainEventTypeFactoryTest {
 	@Test
 	public void testThatDomainEventTypeFactoryImplIsSupportedEventWithValidClassAndValidEventType() {
 		EventTypeFactory factory = new DomainEventTypeFactoryImpl(supportedClassByEventTypes);
-		assertThat(factory.isSupported(LinkedCategoryImpl.class, EventTypeFactory.EventAction.DELETED)).isTrue();
+		assertThat(factory.isSupported(LinkedCategoryImpl.class, EventActionEnum.DELETED)).isTrue();
 	}
 
 	@Test
 	public void testThatDomainEventTypeFactoryImplIsNotSupportedEventWithNotValidClassAndValidEventType() {
 		EventTypeFactory factory = new DomainEventTypeFactoryImpl(supportedClassByEventTypes);
-		assertThat(factory.isSupported(SkuOption.class, EventTypeFactory.EventAction.DELETED)).isFalse();
+		assertThat(factory.isSupported(SkuOption.class, EventActionEnum.DELETED)).isFalse();
 	}
 
 	@Test
 	public void testThatDomainEventTypeFactoryImplIsNotSupportedEventWithValidClassAndNotValidEventType() {
 		EventTypeFactory factory = new DomainEventTypeFactoryImpl(supportedClassByEventTypes);
-		assertThat(factory.isSupported(LinkedCategoryImpl.class, EventTypeFactory.EventAction.UPDATED)).isFalse();
+		assertThat(factory.isSupported(LinkedCategoryImpl.class, EventActionEnum.UPDATED)).isFalse();
 	}
 
 	@Test
 	public void testThatDomainEventTypeFactoryImplGetValidEventType() {
 		EventTypeFactory factory = new DomainEventTypeFactoryImpl(supportedClassByEventTypes);
-		assertThat(factory.getEventType(LinkedCategoryImpl.class, EventTypeFactory.EventAction.CREATED))
+		assertThat(factory.getEventType(LinkedCategoryImpl.class, EventActionEnum.CREATED))
 				.isEqualTo(DomainEventType.CATEGORY_LINK_CREATED);
 	}
 
 	@Test(expected = UnsupportedEventActionException.class)
 	public void testThatDomainEventTypeFactoryThrowsExceptionInCaseInvalidEventType() {
 		EventTypeFactory factory = new DomainEventTypeFactoryImpl(supportedClassByEventTypes);
-		factory.getEventType(LinkedCategoryImpl.class, EventTypeFactory.EventAction.UPDATED);
+		factory.getEventType(LinkedCategoryImpl.class, EventActionEnum.UPDATED);
 	}
 }

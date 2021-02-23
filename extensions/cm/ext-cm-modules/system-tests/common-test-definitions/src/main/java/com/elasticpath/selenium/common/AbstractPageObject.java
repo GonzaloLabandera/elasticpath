@@ -1341,7 +1341,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	}
 
 	/**
-	 * Gets the formatted time in YYYY-MM-dd with plus or minus number of days.
+	 * Gets the formatted time in yyyy-MM-dd with plus or minus number of days.
 	 *
 	 * @param numberOfDays number of days to plus or minus to current date.
 	 * @return String
@@ -1349,7 +1349,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	public String getDateWithoutTime(final int numberOfDays) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
-		SimpleDateFormat formattedDate = new SimpleDateFormat("YYYY-MM-dd", Locale.ENGLISH);
+		SimpleDateFormat formattedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 		return formattedDate.format(calendar.getTime());
 	}
 

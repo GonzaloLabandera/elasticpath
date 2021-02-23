@@ -6,6 +6,8 @@ package com.elasticpath.batch.jobs.impl.shipments;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -195,6 +197,7 @@ public class ReleasePhysicalShipmentsJobTest extends DbTestCase {
 		order.setCreatedDate(new Date());
 		order.setLocale(Locale.ENGLISH);
 		order.setStoreCode(store.getCode());
+		order.setCurrency(Currency.getInstance("CAD"));
 
 		doInTransaction(status -> saveOrUpdate(order));
 		//set correct status
@@ -207,14 +210,17 @@ public class ReleasePhysicalShipmentsJobTest extends DbTestCase {
 	private OrderShipment createOrderShipment(final Order order, final Date createdDate, final String shipmentNumber) {
 		final PhysicalOrderShipmentImpl orderShipment = new PhysicalOrderShipmentImpl();
 
-		//must set the FAILED_ORDER status to avoid recalculations before update/persists and after load JPA events
-		orderShipment.setStatus(OrderShipmentStatus.FAILED_ORDER);
+		orderShipment.setStatus(OrderShipmentStatus.RELEASED);
 		orderShipment.setLastModifiedDate(new Date());
 		orderShipment.setCreatedDate(createdDate);
 		orderShipment.setShipmentNumber(shipmentNumber);
-		//must disable recalculations - they are not even relevant for the job
-		orderShipment.disableRecalculation();
 		orderShipment.setOrder(order);
+		orderShipment.setItemSubtotal(BigDecimal.TEN);
+		orderShipment.setItemTax(BigDecimal.ZERO);
+		orderShipment.setSubtotalDiscount(BigDecimal.ZERO);
+		orderShipment.setBeforeTaxShippingCost(BigDecimal.ZERO);
+		orderShipment.setShippingTax(BigDecimal.ZERO);
+		orderShipment.setShippingCost(BigDecimal.ZERO);
 
 		doInTransaction(status -> saveOrUpdate(orderShipment));
 

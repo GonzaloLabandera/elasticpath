@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/core-changelog-2020-08-trusted-traits-settings.xml">
+
+	<changeSet id="2020-08-trusted-traits-settings" author="elasticpath">
+		<comment>[SUP-575] Added caching metadata setting for COMMERCE/SYSTEM/API/enableTrustedTraits setting.</comment>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1510"/>
+			<column name="SETTING_DEFINITION_UID" valueNumeric="153"/>
+			<column name="METADATA_KEY" value="environmentSpecific"/>
+			<column name="VALUE" value="false"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="1511"/>
+			<column name="SETTING_DEFINITION_UID" value="153"/>
+			<column name="METADATA_KEY" value="apiRefreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+	</changeSet>
+</databaseChangeLog>

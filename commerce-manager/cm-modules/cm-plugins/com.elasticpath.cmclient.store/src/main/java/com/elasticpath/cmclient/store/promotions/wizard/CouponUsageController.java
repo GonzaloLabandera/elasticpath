@@ -39,7 +39,7 @@ public class CouponUsageController {
 				newCouponUsage.setCoupon(addedCoupon);
 				newCouponUsage.setCustomerEmailAddress(((CouponUsageModelDto) couponUsageModel).getEmailAddress());
 				newCouponUsage.setUseCount(0);
-				newCouponUsage.setActiveInCart(true);
+				newCouponUsage.setAutoApplyToCarts(true);
 				getCouponUsageService().add(newCouponUsage);
 			}
 		}

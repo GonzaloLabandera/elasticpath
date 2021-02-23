@@ -66,7 +66,12 @@ public class CustomerProfileAttributeServiceImpl implements CustomerProfileAttri
 
 	@Override
 	public Set<String> getCustomerEditableAttributeKeys(final String storeCode) {
-		return getAttributeKeysByPermission(storeCode, getEditPermissions(), Collections.emptyList());
+		return getAttributeKeysByPermission(storeCode, getEditPermissions(), Collections.emptyList(), AttributeUsageImpl.USER_PROFILE_USAGE);
+	}
+
+	@Override
+	public Set<String> getAccountEditableAttributeKeys(final String storeCode) {
+		return getAttributeKeysByPermission(storeCode, getEditPermissions(), Collections.emptyList(), AttributeUsageImpl.ACCOUNT_PROFILE_USAGE);
 	}
 
 	@Override
@@ -157,7 +162,7 @@ public class CustomerProfileAttributeServiceImpl implements CustomerProfileAttri
 		Map<String, Optional<CustomerProfileValue>> attributeValueMap = Maps.newHashMap();
 
 		// using foreach instead of a Collector because values can be null
-		getAttributeKeysByPermission(storeCode, allowedPermissions, disallowedPermissions)
+		getAttributeKeysByPermission(storeCode, allowedPermissions, disallowedPermissions, AttributeUsageImpl.USER_PROFILE_USAGE)
 				.stream().forEach(key -> attributeValueMap.put(key, Optional.ofNullable(customer.getProfileValueMap().get(key))));
 
 		return attributeValueMap;
@@ -170,16 +175,18 @@ public class CustomerProfileAttributeServiceImpl implements CustomerProfileAttri
 	 * @param storeCode             the store code
 	 * @param allowedPermissions    the allowed permissions
 	 * @param disallowedPermissions the disallowed permissions
+	 * @param attributeUsage        the attribute usage
 	 * @return the set of permitted attribute keys
 	 */
 	protected Set<String> getAttributeKeysByPermission(final String storeCode,
 													   final List<PolicyPermission> allowedPermissions,
-													   final List<PolicyPermission> disallowedPermissions) {
+													   final List<PolicyPermission> disallowedPermissions,
+													   final AttributeUsage attributeUsage) {
 		final Set<String> attributeKeys = Sets.newHashSet();
 		final List<StoreCustomerAttribute> storeCustomerAttributes = getStoreCustomerAttributeService().findByStore(storeCode);
 		Map<PolicyKey, Set<PolicyPermission>> policies = getPolicies();
 
-		getAttributeService().getCustomerProfileAttributeKeys(AttributeUsageImpl.USER_PROFILE_USAGE).stream()
+		getAttributeService().getCustomerProfileAttributeKeys(attributeUsage).stream()
 				.filter(key -> this.isAttributePermissible(key, storeCustomerAttributes, policies, allowedPermissions, disallowedPermissions))
 				.forEach(attributeKeys::add);
 
@@ -217,7 +224,7 @@ public class CustomerProfileAttributeServiceImpl implements CustomerProfileAttri
 	 */
 	protected Set<String> getAttributeKeysByUsage(final AttributeUsage usage) {
 		final Set<String> attributeKeys = Sets.newHashSet();
-		attributeKeys.addAll(getAttributeService().getCustomerProfileAttributeKeys(AttributeUsageImpl.ACCOUNT_PROFILE_USAGE));
+		attributeKeys.addAll(getAttributeService().getCustomerProfileAttributeKeys(usage));
 		return attributeKeys;
 	}
 

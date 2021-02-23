@@ -3,13 +3,12 @@
  */
 package com.elasticpath.domain.shipping.impl;
 
+import static com.elasticpath.domain.shipping.impl.ShippingCostTestDataFactory.aCostCalculationParam;
+import static com.elasticpath.domain.shipping.impl.ShippingCostTestDataFactory.someCalculationParams;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static com.elasticpath.domain.shipping.impl.ShippingCostTestDataFactory.aCostCalculationParam;
-import static com.elasticpath.domain.shipping.impl.ShippingCostTestDataFactory.someCalculationParams;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -247,4 +246,20 @@ public class AbstractShippingCostCalculationMethodImplTest {
 		verify(shippableLineItem).getQuantity();
 	}
 
+
+	/**
+	 * Tests that a parameter does not exists in the list and an exception will not be thrown.
+	 */
+	@Test
+	public void testHasParameterWithCurrencyDoesNotThrowException() {
+		final ShippingCostCalculationParameter calculationParameter
+				= aCostCalculationParam(ShippingCostCalculationParametersEnum.FIXED_PRICE, new BigDecimal(ELEVEN));
+
+		calculationParameter.setCurrency(CURRENCY_USD);
+		dummyShippingCostCalculationMethodImpl.setParameters(getParameterSet());
+
+		boolean result = dummyShippingCostCalculationMethodImpl.hasParameter(calculationParameter.getKey(), calculationParameter.getCurrency());
+
+		assertThat(result).isEqualTo(false);
+	}
 }

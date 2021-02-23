@@ -87,4 +87,11 @@ public interface SortAttributeService extends EpPersistenceService {
 	 * @return default sort
 	 */
 	SortAttribute getDefaultSortAttributeForStore(String storeCode);
+
+	/**
+	 * Remove all localized name collection.
+	 *
+	 * @param sortAttribute the sort attribute contains collection of localized name.
+	 */
+	void removeAllLocalizedName(SortAttribute sortAttribute);
 }

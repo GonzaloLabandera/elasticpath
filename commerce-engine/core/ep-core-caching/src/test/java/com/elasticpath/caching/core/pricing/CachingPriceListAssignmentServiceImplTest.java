@@ -5,11 +5,13 @@
 package com.elasticpath.caching.core.pricing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,9 +41,6 @@ public class CachingPriceListAssignmentServiceImplTest {
 	private static final String PRICE_LIST_NAME = "priceListName";
 
 	private static final boolean INCLUDE_HIDDEN = true;
-
-	private static final CatalogAndCurrencyCodeAndHiddenCompositeKey CATALOG_CURRENCY_FALSE_KEY = new CatalogAndCurrencyCodeAndHiddenCompositeKey(
-			CATALOG_CODE, CURRENCY_CODE, false);
 
 	private static final CatalogAndCurrencyCodeAndHiddenCompositeKey CATALOG_CURRENCY_TRUE_KEY = new CatalogAndCurrencyCodeAndHiddenCompositeKey(
 			CATALOG_CODE, CURRENCY_CODE, INCLUDE_HIDDEN);
@@ -115,25 +114,14 @@ public class CachingPriceListAssignmentServiceImplTest {
 		verify(fallbackService).list(INCLUDE_HIDDEN);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void verifyListByCatalogAndCurrencyCodeReturnsPLAListFromDaoOnCacheMiss() {
-		when(fallbackService.listByCatalogAndCurrencyCode(CATALOG_CODE, CURRENCY_CODE, false)).thenReturn(notCachedPriceListAssignments);
-		when(priceListAssignmentsByCatalogAndCurrencyCodeCache.get(CATALOG_CURRENCY_FALSE_KEY)).thenReturn(null);
-
-		assertThat(cachingPriceListAssignmentService.listByCatalogAndCurrencyCode(CATALOG_CODE, CURRENCY_CODE, false))
-				.isEqualTo(notCachedPriceListAssignments);
-
-		verify(priceListAssignmentsByCatalogAndCurrencyCodeCache).put(CATALOG_CURRENCY_FALSE_KEY, notCachedPriceListAssignments);
-	}
-
-	@Test
-	public void verifyListByCatalogAndCurrencyCodeReturnsPLAListFromCacheOnCacheHit() {
-		when(priceListAssignmentsByCatalogAndCurrencyCodeCache.get(CATALOG_CURRENCY_TRUE_KEY)).thenReturn(cachedPriceListAssignments);
+	public void verifyListByCatalogAndCurrencyCodeReturnsPLAListFromCache() {
+		when(priceListAssignmentsByCatalogAndCurrencyCodeCache.get(eq(CATALOG_CURRENCY_TRUE_KEY), any(Function.class)))
+				.thenReturn(cachedPriceListAssignments);
 
 		assertThat(cachingPriceListAssignmentService.listByCatalogAndCurrencyCode(CATALOG_CODE, CURRENCY_CODE, INCLUDE_HIDDEN))
 				.isEqualTo(cachedPriceListAssignments);
-
-		verify(priceListAssignmentsByCatalogAndCurrencyCodeCache, never()).put(CATALOG_CURRENCY_TRUE_KEY, notCachedPriceListAssignments);
 	}
 
 	@Test

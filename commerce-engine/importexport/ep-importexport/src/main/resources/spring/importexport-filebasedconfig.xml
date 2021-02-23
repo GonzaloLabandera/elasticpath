@@ -23,17 +23,4 @@
 		<property name="appProperties" ref="applicationProperties" />
 	</bean>
 
-	<beans profile="default">
-		<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-			<property name="locations" value="${configLocation:classpath:importexporttool.config}"></property>
-			<property name="ignoreUnresolvablePlaceholders" value="true"></property>
-		</bean>
-
-		<bean id="applicationInitialization" class="com.elasticpath.importexport.client.DataSourceProperties" factory-method="getInstance">
-			<property name="properties" ref="applicationProperties"/>
-		</bean>
-
-		<bean id="dataSource" class="com.elasticpath.importexport.client.JPADataSource"/>
-	</beans>
-
 </beans>

@@ -157,6 +157,21 @@ class CartSteps {
 		client.authRegisteredUserByName(DEFAULT_SCOPE, "harry.potter@elasticpath.com")
 	}
 
+	@Then('^I save the current cart uri')
+	static void getSelfURI() {
+		Cart.getCart()
+		CART_URI = client.body.self.uri
+	}
+	
+	@Then('^the cart guid is different than the saved cart guid')
+	static void compareCartGuids() {
+		Cart.getCart()
+		String originalCartGuid = ((String)CART_URI).replaceFirst(".*/carts/.*/", "")
+		String newCartGuid = ((String)client.body.self.uri).replaceFirst(".*/carts/.*/", "")
+		assertThat(newCartGuid).as("The cart guids should not be identical")
+				.isNotEqualTo(originalCartGuid)	
+	}
+
 	@Then('^I attempt to clear the first shopper\'s cart$')
 	static void attemptClearSavedShopperCart() {
 		client.DELETE(CART_URI + "/lineitems")
@@ -276,7 +291,7 @@ class CartSteps {
 
 		assertThat(client.response.status)
 				.as("HTTP response status is not as expected")
-				.isEqualTo(409)
+				.isEqualTo(400)
 	}
 
 	@Then('^I am allowed to add to cart$')

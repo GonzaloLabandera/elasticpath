@@ -5,14 +5,9 @@ package com.elasticpath.service.shoppingcart.actions;
 
 import java.util.Map;
 
-import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderReturn;
-import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.plugin.tax.domain.TaxDocument;
 import com.elasticpath.plugin.tax.domain.TaxDocumentId;
 
@@ -20,27 +15,6 @@ import com.elasticpath.plugin.tax.domain.TaxDocumentId;
  * Container class for data required by setupCheckoutActions and reversibleCheckoutActions.
  */
 public interface CheckoutActionContext {
-
-	/**
-	 * Gets the {@link Shopper}.
-	 *
-	 * @return the {@link Shopper}
-	 */
-	Shopper getShopper();
-
-	/**
-	 * Gets the {@link ShoppingCart}.
-	 *
-	 * @return the {@link ShoppingCart}
-	 */
-	ShoppingCart getShoppingCart();
-
-	/**
-	 * Returns the Shopping Cart Tax Snapshot.
-	 *
-	 * @return the Shopping Cart Tax Snapshot
-	 */
-	ShoppingCartTaxSnapshot getShoppingCartTaxSnapshot();
 
 	/**
 	 * Gets the {@link Customer}.  If you need to save the Customer, you need to know where it comes from.
@@ -87,13 +61,6 @@ public interface CheckoutActionContext {
 	OrderReturn getExchange();
 
 	/**
-	 * Returns the Customer Session.
-	 *
-	 * @return the Customer Session
-	 */
-	CustomerSession getCustomerSession();
-
-	/**
 	 * Gets a map of tax document id and tax document.
 	 *
 	 * @return a map of tax document id and tax document
@@ -107,12 +74,4 @@ public interface CheckoutActionContext {
 	 * @param taxDocument   the value of the taxDocuments map
 	 */
 	void addTaxDocument(TaxDocumentId taxDocumentId, TaxDocument taxDocument);
-
-	/**
-	 * Gets cart order for this checkout action context.
-	 *
-	 * @return cart order for this checkout action context.
-	 */
-	CartOrder getCartOrder();
-
 }

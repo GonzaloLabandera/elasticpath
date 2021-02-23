@@ -46,9 +46,10 @@ public interface ShoppingCartRepository {
 	 * Gets the default shopping cart for the customer.
 	 *
 	 * @param customerGuid  The customer.
+	 * @param storeCode The store code.
 	 * @return the ShoppingCart
 	 */
-	Single<ShoppingCart> getShoppingCartForCustomer(String customerGuid);
+	Single<ShoppingCart> getShoppingCartForCustomer(String customerGuid, String storeCode);
 
 	/**
 	 * Gets the shopping cart with given GUID.
@@ -66,15 +67,6 @@ public interface ShoppingCartRepository {
 	 * @return boolean true if the cart exists.
 	 */
 	Single<Boolean> verifyShoppingCartExistsForStore(String cartGuid, String storeCode);
-
-	/**
-	 * Since you inevitably run fireRules() and blow away the record
-	 * of the applied catalog promotions, this method will re-price
-	 * all your items and re-record the catalog promotions for you.
-	 *
-	 * @param cart The cart.
-	 */
-	void reApplyCatalogPromotions(ShoppingCart cart);
 
 	/**
 	 * Adds an item to the cart.

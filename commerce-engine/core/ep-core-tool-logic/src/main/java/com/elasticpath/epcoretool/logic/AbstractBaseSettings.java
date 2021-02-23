@@ -3,13 +3,16 @@
  */
 package com.elasticpath.epcoretool.logic;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.elasticpath.epcoretool.logic.dto.EpSetting;
+import com.elasticpath.settings.SettingMetadataFactory;
 import com.elasticpath.settings.SettingValueFactory;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
+import com.elasticpath.settings.domain.SettingMetadata;
 import com.elasticpath.settings.domain.SettingValue;
 
 /**
@@ -33,6 +36,40 @@ public abstract class AbstractBaseSettings extends AbstractEpCore {
 	}
 
 	/**
+	 * Set setting metadata value.
+	 *
+	 * @param settingName the setting name
+	 * @param metadataKey the metadata key
+	 * @param metadataValue the metadata value
+	 */
+	protected void setSettingMetadata(final String settingName, final String metadataKey, final String metadataValue) {
+
+		getLogger().info("set-setting-metadata: setting=" + settingName + ", metadata=" + metadataKey + ", value=" + metadataValue);
+
+		final SettingsService settingsService = epCore().getSettingsService();
+
+		final SettingDefinition settingDefinition = settingsService.getSettingDefinition(settingName);
+
+		if (settingDefinition == null) {
+			throw new IllegalArgumentException("No setting definition returned from settings service.");
+		}
+
+		final Map<String, SettingMetadata> settingMetadata = settingDefinition.getMetadata();
+		final SettingMetadata settingMetadataValue = settingMetadata.getOrDefault(metadataKey, null);
+
+		if (settingMetadataValue == null) {
+			final SettingMetadataFactory factory = epCore().getSettingMetadataFactory();
+			final SettingMetadata newSettingMetadata = factory.createSettingMetadata(metadataKey, metadataValue);
+			settingMetadata.put(metadataKey, newSettingMetadata);
+		} else {
+			settingMetadataValue.setValue(metadataValue);
+		}
+
+		final SettingDefinition createdSettingDefinition = settingsService.updateSettingDefinition(settingDefinition);
+		getLogger().info(createdSettingDefinition.getMetadata().get(metadataKey).getValue());
+	}
+
+	/**
 	 * First cut at a method which can set a setting. It assumes there's only one value for a given setting and that setting "foo=" means
 	 * "set foo to an empty string". There is no mechanism to set it to null (maybe you want to unset the setting). Note this method calls the EP
 	 * settingsService so it may throw runtime exceptions.
@@ -43,7 +80,7 @@ public abstract class AbstractBaseSettings extends AbstractEpCore {
 	 */
 	protected void setSetting(final String sName, final String sContext, final String sValue) {
 
-		SettingsService settingsService = epCore().getSettingsService();
+		final SettingsService settingsService = epCore().getSettingsService();
 
 		SettingValue epSettingValue;
 
@@ -61,7 +98,7 @@ public abstract class AbstractBaseSettings extends AbstractEpCore {
 			settingsService.deleteSettingValue(epSettingValue);
 		}
 
-		SettingDefinition settingDefinition = settingsService.getSettingDefinition(sName);
+		final SettingDefinition settingDefinition = settingsService.getSettingDefinition(sName);
 		SettingValueFactory factory = epCore().getSettingValueFactory();
 
 		epSettingValue = factory.createSettingValue(settingDefinition);

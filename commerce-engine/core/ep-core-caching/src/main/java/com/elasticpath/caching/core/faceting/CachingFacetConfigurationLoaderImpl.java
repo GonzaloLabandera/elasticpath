@@ -17,13 +17,7 @@ public class CachingFacetConfigurationLoaderImpl  implements FilteredNavigationC
 
 	@Override
 	public FilteredNavigationConfiguration loadFilteredNavigationConfiguration(final String storeCode) {
-
-		if (loadFilteredNavigationConfigurationCache.get(storeCode) != null) {
-			return loadFilteredNavigationConfigurationCache.get(storeCode);
-		}
-		FilteredNavigationConfiguration filteredNavigationConfiguration = fallback.loadFilteredNavigationConfiguration(storeCode);
-		loadFilteredNavigationConfigurationCache.put(storeCode, filteredNavigationConfiguration);
-		return filteredNavigationConfiguration;
+		return loadFilteredNavigationConfigurationCache.get(storeCode, cacheKey -> fallback.loadFilteredNavigationConfiguration(storeCode));
 	}
 
 	@Override

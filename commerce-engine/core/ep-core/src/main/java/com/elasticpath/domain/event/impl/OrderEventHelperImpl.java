@@ -87,6 +87,8 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 	private static final String TITLE_EXCHANGE_COMPLETED = "Exchange Completed";
 
+	private static final String TITLE_ORDER_ACCEPTED = "Order Accepted";
+
 	private PaymentInstrumentWorkflow paymentInstrumentWorkflow;
 
 	private TimeService timeService;
@@ -601,6 +603,19 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_EXCHANGE_COMPLETED, originator);
 
 		order.addOrderEvent(orderEvent);
+	}
+
+	@Override
+	public void logOrderAccepted(final Order order) {
+
+		EventOriginator originator = getEventOriginator(order);
+
+		String detail = "Order is accepted.";
+
+		OrderEvent orderEvent = createOrderEvent(detail, TITLE_ORDER_ACCEPTED, originator);
+
+		order.addOrderEvent(orderEvent);
+
 	}
 
 	private EventOriginator getEventOriginator(final Order order) {

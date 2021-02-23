@@ -1,5 +1,5 @@
-/*
- * Copyright (c) Elastic Path Software Inc., 2019
+/**
+ * Copyright (c) Elastic Path Software Inc., 2006
  */
 package com.elasticpath.service.customer.impl;
 
@@ -61,8 +61,6 @@ import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.search.IndexNotificationService;
-import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 import com.elasticpath.validation.service.CustomerConstraintValidationService;
@@ -102,8 +100,6 @@ public class CustomerServiceImplTest {
 	private CustomerGroupService customerGroupService;
 	@Mock
 	private TimeService timeService;
-	@Mock
-	private IndexNotificationService indexNotificationService;
 	@Mock
 	private PersistenceEngine persistenceEngine;
 	@Mock
@@ -158,7 +154,6 @@ public class CustomerServiceImplTest {
 		assertThat(customerServiceImpl.add(customer)).isEqualTo(customer);
 
 		verify(persistenceEngine).save(customer);
-		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
 		verify(storeService).findValidStoreCode(TEST_STORE_CODE);
 		verify(eventMessagePublisher).publish(any(EventMessage.class));
 		verify(customer).setCreationDate(any(Date.class));
@@ -217,7 +212,6 @@ public class CustomerServiceImplTest {
 
 		verify(customerConstraintValidationService).validate(customer);
 		verify(persistenceEngine).update(customer);
-		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
 	}
 
 	/**

@@ -19,8 +19,8 @@ import java.util.Map;
 
 import org.jmock.Expectations;
 import org.junit.Test;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
-import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -81,7 +81,7 @@ public class CmUserServiceImplTest extends AbstractEPServiceTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetSingletonBean(ContextIdNames.CM_PASSWORDENCODER, PasswordEncoder.class, new ShaPasswordEncoder());
+		stubGetSingletonBean(ContextIdNames.CM_PASSWORDENCODER, PasswordEncoder.class, new BCryptPasswordEncoder());
 		stubGetPrototypeBean(ContextIdNames.CMUSER, CmUser.class, CmUserImpl.class);
 
 		cmUserServiceImpl = new CmUserServiceImpl();

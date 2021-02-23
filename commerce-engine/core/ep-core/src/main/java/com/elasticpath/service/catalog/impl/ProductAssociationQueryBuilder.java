@@ -70,8 +70,13 @@ class ProductAssociationQueryBuilder {
 		addParameter(queryBuffer, "pa.sourceProduct.code", "=", criteria.getSourceProductCode(), parameterList, beginWhereClause);
 		addParameter(queryBuffer, "pa.targetProduct", "=", criteria.getTargetProduct(), parameterList, beginWhereClause);
 		addParameter(queryBuffer, "pa.targetProduct.code", "=", criteria.getTargetProductCode(), parameterList, beginWhereClause);
-		addParameter(queryBuffer, "pa.targetProduct.hidden", "=", criteria.isHidden(), parameterList, beginWhereClause);
-		addParameter(queryBuffer, "pa.targetProduct.notSoldSeparately", "=", criteria.isNotSoldSeparately(), parameterList, beginWhereClause);
+
+		boolean finalBeginWhereClause = beginWhereClause;
+		criteria.isHidden().ifPresent(isHidden ->
+				addParameter(queryBuffer, "pa.targetProduct.hidden", "=", isHidden, parameterList, finalBeginWhereClause));
+		criteria.isNotSoldSeparately().ifPresent(isNotSoldSeparately ->
+				addParameter(queryBuffer, "pa.targetProduct.notSoldSeparately", "=", isNotSoldSeparately, parameterList, finalBeginWhereClause));
+
 		addParameter(queryBuffer, "pa.catalog.code", "=", criteria.getCatalogCode(), parameterList, beginWhereClause);
 
 		if (criteria.getStartDateBefore() != null) {

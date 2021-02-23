@@ -48,9 +48,9 @@ public class PaymentMethodShoppingCartValidatorImpl implements ShoppingCartValid
 		// If payment required
 		if (pricingSnapshot.getSubtotal().signum() > 0 || pricingSnapshot.getShippingCost().getAmount().signum() > 0) {
 			CartOrder cartOrder = context.getCartOrder();
-			Customer customer = shoppingCart.getShopper().getCustomer();
+			Customer customer = shoppingCart.getCustomer();
 			String storeCode = context.getShoppingCart().getStore().getCode();
- 			if (filteredPaymentInstrumentService.findCartOrderPaymentInstrumentsForCartOrderAndStore(cartOrder, storeCode).isEmpty()
+			if (filteredPaymentInstrumentService.findCartOrderPaymentInstrumentsForCartOrderAndStore(cartOrder, storeCode).isEmpty()
 					&& filteredPaymentInstrumentService.findDefaultPaymentInstrumentForCustomerAndStore(
 					customer, storeCode) == null) {
 				StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, MESSAGE_ID,

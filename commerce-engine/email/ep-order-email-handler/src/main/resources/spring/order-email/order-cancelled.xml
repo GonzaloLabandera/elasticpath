@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		">
+
+	<bean id="orderCancelledEmailProducerTemplate" class="com.elasticpath.email.handler.order.producer.impl.OrderCancelledEmailProducer"
+		  abstract="true">
+		<property name="emailComposer" ref="emailComposer"/>
+		<property name="emailNotificationHelper" ref="emailNotificationHelper"/>
+	</bean>
+
+	<bean id="orderCancelledEmailProducer" parent="orderCancelledEmailProducerTemplate"/>
+
+	<bean id="orderCancelledEmailHandlingRouteBuilderTemplate" parent="abstractEventMessageTriggeredEmailRouteBuilder"
+		  abstract="true">
+	<property name="routeId" value="orderCancelledEmailHandler"/>
+	<property name="incomingEndpoint">
+		<bean parent="orderEventExternalEndpoint">
+			<property name="camelContextId" value="ep-order-email-handler"/>
+			<property name="context" value="orderCancelledEmailHandler"/>
+		</bean>
+	</property>
+	<property name="outgoingEndpoint">
+		<bean parent="emailSendingEndpoint">
+			<property name="camelContextId" value="ep-order-email-handler"/>
+		</bean>
+	</property>
+	<property name="eventMessagePredicateFilter" ref="orderCancelledEventTypePredicate"/>
+	<property name="emailProducer" ref="orderCancelledEmailProducer"/>
+	</bean>
+
+	<bean id="orderCancelledEmailHandlingRouteBuilder" parent="orderCancelledEmailHandlingRouteBuilderTemplate"/>
+</beans>

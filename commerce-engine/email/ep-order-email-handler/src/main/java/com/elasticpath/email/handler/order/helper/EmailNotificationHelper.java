@@ -17,7 +17,14 @@ public interface EmailNotificationHelper {
 	 * @return email properties for a confirmation email
 	 */
 	EmailProperties getOrderEmailProperties(String orderNumber);
-	
+
+	/**
+	 * Get email properties for an order cancellation email due to an order hold is unresolvable.
+	 * @param orderNumber is the order number
+	 * @return email properties for a rejection email
+	 */
+	EmailProperties getOrderRejectedEmailProperties(String orderNumber);
+
 	/**
 	 * Get email properties for order shipped email.
 	 * @param orderNumber is the order number

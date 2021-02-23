@@ -11,10 +11,12 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -62,6 +64,7 @@ import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.persister.StoreTestPersister;
+import com.elasticpath.test.util.CheckoutHelper;
 
 @ContextConfiguration
 public class OrderPaymentDataPropagationTest extends DbTestCase {
@@ -111,6 +114,7 @@ public class OrderPaymentDataPropagationTest extends DbTestCase {
 	private ShoppingContext shoppingContext;
 	private ShoppingCart shoppingCart;
 	private EventOriginator originator;
+	private CheckoutHelper checkoutHelper;
 
 	@Before
 	public void initialize() {
@@ -137,6 +141,7 @@ public class OrderPaymentDataPropagationTest extends DbTestCase {
 			}
 			return createResponse(CHARGE_DATA_KEY);
 		});
+		checkoutHelper = new CheckoutHelper(getTac());
 	}
 
 	private PaymentCapabilityResponse createResponse(final String dataKey) {
@@ -274,7 +279,7 @@ public class OrderPaymentDataPropagationTest extends DbTestCase {
 	private Order checkout() {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
-		return checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true).getOrder();
+		return checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
 	}
 
 	private OrderShipment releaseAndCompleteShipment(final Order order, int shipmentIndex) {

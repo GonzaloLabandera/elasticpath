@@ -5,12 +5,12 @@
 
 	<configuration_setting>
 		<name_space>COMMERCE/SYSTEM/SEARCH/searchHost</name_space>
-		<description>DEPRECATED (Use -Dep.search.default.url and -Dep.search.master.url system properties) The search server's URL. If this is not set correctly, searching and browsing in the Cortex and in Commerce Manager will not work. For a search server cluster, this setting must contain two values. The default value must be set to the load balancer URL. A defined value with the context set to 'master' must be set to the master search server URL.</description>
+		<description>DEPRECATED (Use -Dep.search.replica.url and -Dep.search.primary.url system properties) The search server's URL. If this is not set correctly, searching and browsing in the Cortex and in Commerce Manager will not work. For a search server cluster, this setting must contain two values. The default value must be set to the load balancer URL. A defined value with the context set to 'master' must be set to the master search server URL.</description>
 		<default_value type="url">${ep.search.url}</default_value>
 		<max_overrides>-1</max_overrides>
 		<setting_metadata>
 			<value key="environmentSpecific">true</value>
-			<value key="apiRefreshStrategy">interval:timeout=COMMERCE/Cache/Cache_1</value>
+			<value key="refreshStrategy">interval:timeout=COMMERCE/Cache/Cache_1</value>
 		</setting_metadata>
 	</configuration_setting>
 
@@ -21,7 +21,7 @@
 		<max_overrides>1</max_overrides>
 		<setting_metadata>
 			<value key="environmentSpecific">false</value>
-			<value key="apiRefreshStrategy">application</value>
+			<value key="refreshStrategy">application</value>
 		</setting_metadata>
 	</configuration_setting>
 
@@ -52,7 +52,7 @@
 		<max_overrides>1</max_overrides>
 		<setting_metadata>
 			<value key="environmentSpecific">false</value>
-			<value key="apiRefreshStrategy">interval:timeout=COMMERCE/Cache/Cache_1</value>
+			<value key="refreshStrategy">interval:timeout=COMMERCE/Cache/Cache_1</value>
 		</setting_metadata>
 	</configuration_setting>
 

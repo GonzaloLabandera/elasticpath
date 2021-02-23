@@ -22,6 +22,8 @@ import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.OrderFactory;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
+import com.elasticpath.test.persister.TestApplicationContext;
+import com.elasticpath.test.util.CheckoutHelper;
 
 public class OrderBuilder implements DomainObjectBuilder<Order> {
 
@@ -41,6 +43,9 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 
 	@Autowired
 	private TaxSnapshotService taxSnapshotService;
+
+	@Autowired
+    private TestApplicationContext testApplicationContext;
 
 	private boolean allShipmentsCompleted;
 
@@ -100,17 +105,42 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 		ShoppingCart shoppingCart = checkoutTestCartBuilder.build();
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
-		CheckoutResults results = checkoutService.checkout(shoppingCart,
+		CheckoutHelper checkoutHelper = new CheckoutHelper(testApplicationContext);
+		Order order = checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart,
 														   taxSnapshot,
 														   shoppingContext.getCustomerSession(),
 														   true);
-		Order order = results.getOrder();
 
 		if (allShipmentsCompleted) {
 			order = completePhysicalShipmentsForOrder(order, sendShipmentConfirmationEmail);
 		}
 
 		return order;
+	}
+
+	/**
+	 * Enables the setting to hold the order and calls checkout.
+	 * @return the order returned from checkout
+	 */
+	public Order checkoutWithHold() {
+		if (checkoutTestCartBuilder == null) {
+			throw new IllegalStateException("Cannot call checkout() prior to calling withCheckoutTestCartBuilder()");
+		}
+
+		if (shoppingContext == null) {
+			throw new IllegalStateException("Cannot call checkout() prior to calling withShoppingContext()");
+		}
+
+		ShoppingCart shoppingCart = checkoutTestCartBuilder.build();
+		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
+		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
+		CheckoutHelper checkoutHelper = new CheckoutHelper(testApplicationContext);
+		CheckoutResults results =  checkoutHelper.checkoutCartWithHold(shoppingCart,
+				taxSnapshot,
+				shoppingContext.getCustomerSession(),
+				true);
+
+		return results.getOrder();
 	}
 
 	@Override
@@ -162,5 +192,4 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 
 		return completedOrder;
 	}
-
 }

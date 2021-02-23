@@ -121,6 +121,9 @@ public class StoresDefinition {
 	 */
 	@When("^I create store with following values$")
 	public void fillInStoreSummary(final Map<String, String> storeMap) {
+		final Optional<String> registered = Optional.ofNullable(storeMap.get("registered role"));
+		final Optional<String> unregistered = Optional.ofNullable(storeMap.get("unregistered role"));
+
 		storeEditor = storesResultPane.clickCreateStoreButton();
 		storeEditor.maximizeStoreEditor();
 		this.storeCode = "st" + Utility.getRandomUUID();
@@ -133,6 +136,8 @@ public class StoresDefinition {
 		storeEditor.enterStoreName(this.storeName);
 		storeEditor.enterStoreUrl("http://" + this.storeCode + ".elasticpath.com");
 		storeEditor.selectStoreTimezone(storeMap.get("timezone"));
+		registered.ifPresent(role ->storeEditor.selectRegisteredUser(role));
+		unregistered.ifPresent(role ->storeEditor.selectUnregisteredUser(role));
 		storeEditor.selectStoreCountry(storeMap.get("store country"));
 		storeEditor.selectStoreSubCountry(storeMap.get("store sub country"));
 		storeEditor.clickTab("System");

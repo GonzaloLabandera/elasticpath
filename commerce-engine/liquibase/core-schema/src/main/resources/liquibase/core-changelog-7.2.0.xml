@@ -8,6 +8,8 @@
 				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.2.0.xml">
 
 	<changeSet id="7.2.0-add-creation-date-to-customer-profile-value-table" author="elasticpath">
+		<validCheckSum>7:19b44a30e33ae25f14be83259779e6b1</validCheckSum>
+
 		<comment>[PB-3410] Add Created Date to Customer Profile Value</comment>
 
 		<addColumn tableName="TCUSTOMERPROFILEVALUE">
@@ -16,8 +18,16 @@
 			</column>
 		</addColumn>
 
-		<sql>
-			UPDATE TCUSTOMERPROFILEVALUE SET TCUSTOMERPROFILEVALUE.CREATION_DATE = (SELECT CREATION_DATE FROM TCUSTOMER cust WHERE cust.UIDPK = TCUSTOMERPROFILEVALUE.CUSTOMER_UID)
+		<!-- UPDATE...JOIN performs much better on large datasets than an inner SELECT in MySql at least, but is only supported by MySql, so use it for MySql databases only -->
+		<sql dbms="mysql">
+			UPDATE TCUSTOMERPROFILEVALUE JOIN TCUSTOMER ON TCUSTOMERPROFILEVALUE.CUSTOMER_UID = TCUSTOMER.UIDPK SET TCUSTOMERPROFILEVALUE.CREATION_DATE = TCUSTOMER.CREATION_DATE;
+		</sql>
+
+		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
+		<sql dbms="h2, hsqldb, oracle">
+			UPDATE TCUSTOMERPROFILEVALUE
+			   SET TCUSTOMERPROFILEVALUE.CREATION_DATE = (SELECT CREATION_DATE FROM TCUSTOMER cust WHERE cust.UIDPK = TCUSTOMERPROFILEVALUE.CUSTOMER_UID)
+			   WHERE EXISTS (SELECT * FROM TCUSTOMER cust WHERE cust.UIDPK = TCUSTOMERPROFILEVALUE.CUSTOMER_UID);
 		</sql>
 	</changeSet>
 
@@ -141,6 +151,8 @@
 	</changeSet>
 
 	<changeSet id="7.2.0-add-creation-date-to-address-tables" author="elasticpath" context="expand">
+		<validCheckSum>7:49f691ebd09c8d3447afb5ddcd0931cf</validCheckSum>
+
 		<comment>[PB-3411] Add Created and Updated Dates to Address</comment>
 
 		<addColumn tableName="TADDRESS">
@@ -161,17 +173,27 @@
 			</column>
 		</addColumn>
 
-		<sql>
-			UPDATE TADDRESS SET TADDRESS.CREATION_DATE = (SELECT CREATION_DATE FROM TCUSTOMER cust WHERE cust.UIDPK = TADDRESS.CUSTOMER_UID);
+		<!-- UPDATE...JOIN performs much better on large datasets than an inner SELECT in MySql at least, but is only supported by MySql, so use it for MySql databases only -->
+		<sql dbms="mysql">
+			UPDATE TADDRESS JOIN TCUSTOMER ON TADDRESS.CUSTOMER_UID = TCUSTOMER.UIDPK SET TADDRESS.CREATION_DATE = TCUSTOMER.CREATION_DATE;
+			UPDATE TORDERADDRESS JOIN TORDER ON TORDERADDRESS.UIDPK = TORDER.ORDER_BILLING_ADDRESS_UID SET TORDERADDRESS.CREATION_DATE = TORDER.CREATED_DATE;
 		</sql>
-		<sql>
-			UPDATE TORDERADDRESS
-			SET TORDERADDRESS.CREATION_DATE = (SELECT CREATED_DATE FROM TORDER ord WHERE ord.ORDER_BILLING_ADDRESS_UID = TORDERADDRESS.UIDPK);
+
+		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
+		<sql dbms="h2, hsqldb, oracle">
+				UPDATE TADDRESS
+				   SET TADDRESS.CREATION_DATE = (SELECT CREATION_DATE FROM TCUSTOMER cust WHERE cust.UIDPK = TADDRESS.CUSTOMER_UID)
+					 WHERE EXISTS (SELECT * FROM TCUSTOMER cust WHERE cust.UIDPK = TADDRESS.CUSTOMER_UID);
+				UPDATE TORDERADDRESS
+				   SET TORDERADDRESS.CREATION_DATE = (SELECT CREATED_DATE FROM TORDER ord WHERE ord.ORDER_BILLING_ADDRESS_UID = TORDERADDRESS.UIDPK)
+					 WHERE EXISTS (SELECT * FROM TORDER ord WHERE ord.ORDER_BILLING_ADDRESS_UID = TORDERADDRESS.UIDPK);
 		</sql>
 
 	</changeSet>
 
 	<changeSet id="7.2.0-add-creation-date-to-cart-item-and-order-data" author="elasticpath" context="expand">
+		<validCheckSum>7:aee555a19dd54c59532f6d8f2673ffbe</validCheckSum>
+
 		<comment>[PB-3411] Add Created and Updated dates to OrderData and CartItem</comment>
 
 		<addColumn tableName="TORDERDATA">
@@ -189,10 +211,22 @@
 			</column>
 		</addColumn>
 
-		<sql>
-			UPDATE TORDERDATA SET TORDERDATA.CREATION_DATE = (SELECT CREATED_DATE FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID);
-			UPDATE TORDERDATA SET TORDERDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID);
+		<!-- UPDATE...JOIN performs much better on large datasets than an inner SELECT in MySql at least, but is only supported by MySql, so use it for MySql databases only -->
+		<sql dbms="mysql">
+			UPDATE TORDERDATA JOIN TORDER ON TORDERDATA.ORDER_UID = TORDER.UIDPK SET TORDERDATA.CREATION_DATE = TORDER.CREATED_DATE;
+			UPDATE TORDERDATA JOIN TORDER ON TORDERDATA.ORDER_UID = TORDER.UIDPK SET TORDERDATA.LAST_MODIFIED_DATE = TORDER.LAST_MODIFIED_DATE;
 		</sql>
+
+		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
+		<sql dbms="h2, hsqldb, oracle">
+			UPDATE TORDERDATA
+			   SET TORDERDATA.CREATION_DATE = (SELECT CREATED_DATE FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID)
+			   WHERE EXISTS (SELECT * FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID);
+			UPDATE TORDERDATA
+			   SET TORDERDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID)
+				 WHERE EXISTS (SELECT * FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID);
+		</sql>
+
 		<sql>
 			UPDATE TCARTITEM SET TCARTITEM.CREATION_DATE = TCARTITEM.LAST_MODIFIED_DATE;
 		</sql>
@@ -200,6 +234,8 @@
 	</changeSet>
 
 	<changeSet id="7.2.0-add-creation-date-to-shopping-item-data" author="elasticpath" context="expand">
+		<validCheckSum>7:c316ce58930a17fcb2126d20a90f1d74</validCheckSum>
+
 		<comment>[PB-3411] Add Created and Updated dates to Shopping Item Data</comment>
 
 		<addColumn tableName="TSHOPPINGITEMDATA">
@@ -211,13 +247,24 @@
 			</column>
 		</addColumn>
 
-		<sql>
-			UPDATE TSHOPPINGITEMDATA SET TSHOPPINGITEMDATA.CREATION_DATE = (SELECT CREATION_DATE FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID);
-			UPDATE TSHOPPINGITEMDATA SET TSHOPPINGITEMDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID);
+		<!-- UPDATE...JOIN performs much better on large datasets than an inner SELECT in MySql at least, but is only supported by MySql, so use it for MySql databases only -->
+		<sql dbms="mysql">
+			UPDATE TSHOPPINGITEMDATA JOIN TCARTITEM ON TSHOPPINGITEMDATA.CARTITEM_UID = TCARTITEM.UIDPK SET TSHOPPINGITEMDATA.CREATION_DATE = TCARTITEM.CREATION_DATE;
+			UPDATE TSHOPPINGITEMDATA JOIN TCARTITEM ON TSHOPPINGITEMDATA.CARTITEM_UID = TCARTITEM.UIDPK SET TSHOPPINGITEMDATA.LAST_MODIFIED_DATE = TCARTITEM.LAST_MODIFIED_DATE;
+		</sql>
+
+		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
+		<sql dbms="h2, hsqldb, oracle">
+			UPDATE TSHOPPINGITEMDATA
+			   SET TSHOPPINGITEMDATA.CREATION_DATE = (SELECT CREATION_DATE FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID)
+				 WHERE EXISTS (SELECT * FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID);
+			UPDATE TSHOPPINGITEMDATA
+			   SET TSHOPPINGITEMDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID)
+				 WHERE EXISTS (SELECT * FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID);
 		</sql>
 
 	</changeSet>
-	
+
 	<changeSet id="7.2.0-add-table-and-map-data-policies-to-data-policy-segments" author="elasticpath" context="expand">
 
 		<preConditions onFail="MARK_RAN">
@@ -274,7 +321,7 @@
 		<addUniqueConstraint tableName="TDATAPOLICYACTIVITIES" columnNames="DATAPOLICY_UID,ACTIVITY"/>
 
 	</changeSet>
-	
+
 	<changeSet id="7.2.0-add-TSETTINGDEFINITION-setting-for-enable-data-policies" author="elasticpath" context="expand">
 		<comment>[PB-3460] Store setting to enable Data Policies</comment>
 		<insert tableName="TSETTINGDEFINITION">
@@ -302,6 +349,8 @@
 	</changeSet>
 
 	<changeSet id="7.2.0-add-dates-to-order-item-data" author="elasticpath" context="expand">
+		<validCheckSum>7:89571ab26adbfa4ff39948ec607c60ae</validCheckSum>
+
 		<comment>[PB-3630] Add Created and Last Modified dates to Order Item Data table</comment>
 
 		<addColumn tableName="TORDERITEMDATA">
@@ -313,13 +362,21 @@
 			</column>
 		</addColumn>
 
-		<sql>
-			UPDATE TORDERITEMDATA SET TORDERITEMDATA.CREATION_DATE = (SELECT CREATED_DATE FROM TORDERSKU sku WHERE sku.UIDPK =
-			TORDERITEMDATA.ORDERSKU_UID);
-
-			UPDATE TORDERITEMDATA SET TORDERITEMDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TORDERSKU sku WHERE sku.UIDPK =
-			TORDERITEMDATA.ORDERSKU_UID);
+		<!-- UPDATE...JOIN performs much better on large datasets than an inner SELECT in MySql at least, but is only supported by MySql, so use it for MySql databases only -->
+		<sql dbms="mysql">
+			UPDATE TORDERITEMDATA JOIN TORDERSKU ON TORDERITEMDATA.ORDERSKU_UID = TORDERSKU.UIDPK SET TORDERITEMDATA.CREATION_DATE = TORDERSKU.CREATED_DATE;
+			UPDATE TORDERITEMDATA JOIN TORDERSKU ON TORDERITEMDATA.ORDERSKU_UID = TORDERSKU.UIDPK SET TORDERITEMDATA.LAST_MODIFIED_DATE = TORDERSKU.LAST_MODIFIED_DATE;
 		</sql>
 
+		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
+		<sql dbms="h2, hsqldb, oracle">
+			UPDATE TORDERITEMDATA
+			   SET TORDERITEMDATA.CREATION_DATE = (SELECT CREATED_DATE FROM TORDERSKU sku WHERE sku.UIDPK = TORDERITEMDATA.ORDERSKU_UID)
+				 WHERE EXISTS (SELECT * FROM TORDERSKU sku WHERE sku.UIDPK = TORDERITEMDATA.ORDERSKU_UID);
+
+			UPDATE TORDERITEMDATA
+			   SET TORDERITEMDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TORDERSKU sku WHERE sku.UIDPK = TORDERITEMDATA.ORDERSKU_UID)
+				 WHERE EXISTS (SELECT * FROM TORDERSKU sku WHERE sku.UIDPK = TORDERITEMDATA.ORDERSKU_UID)
+		</sql>
 	</changeSet>
 </databaseChangeLog>

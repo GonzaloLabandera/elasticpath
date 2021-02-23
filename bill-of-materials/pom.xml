@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>116</version>
+		<version>120</version>
 		<relativePath/>
 	</parent>
 
@@ -22,7 +22,7 @@
 	<properties>
 		<aopalliance.version>1.0_5</aopalliance.version>
 		<apache.poi.version>4.0.1</apache.poi.version>
-		<api-platform.version>1.44.0.9a0eb55dc1</api-platform.version>
+		<api-platform.version>1.45.0.1eb89ea7a5</api-platform.version>
 		<aspectj.rt.version>1.8.9</aspectj.rt.version>
 		<assertj-core.version>3.11.1</assertj-core.version>
 		<awaitility.version>2.0.0</awaitility.version>
@@ -70,7 +70,9 @@
 		<gherkin.version>5.0.0</gherkin.version>
 		<cucumber-groovy.version>2.0.1</cucumber-groovy.version>
 
-		<jackson.version>2.10.3</jackson.version>
+		<jackson.version>2.11.2</jackson.version>
+		<!-- We intentionally keep jackson-module-jaxb-annotations on an older version than the rest of the jackson modules
+		     because newer versions add a dependency on jakarta.xml.bind-api which causes all sorts of OSGi issues. -->
 		<jackson.module.jaxb.annotations.version>2.9.10</jackson.module.jaxb.annotations.version>
 		<javax.cache.version>1.1.0</javax.cache.version>
 		<javax.el.version>2.2.4</javax.el.version>
@@ -98,13 +100,16 @@
 
 		<okhttp.version>3.14.1</okhttp.version>
 
-		<org.apache.activemq.version>5.15.12</org.apache.activemq.version>
+		<jansi.version>1.18</jansi.version>
+
+		<org.apache.activemq.version>5.16.0</org.apache.activemq.version>
 		<org.apache.ant.version>1.7.1</org.apache.ant.version>
 		<org.apache.batic.version>1.11</org.apache.batic.version>
 		<org.apache.camel.version>2.23.4</org.apache.camel.version>
 		<org.apache.commons.lang3.version>3.8</org.apache.commons.lang3.version>
+		<org.apache.commons.text.version>1.9</org.apache.commons.text.version>
 		<org.apache.geronimo.specs.version>1.0.1</org.apache.geronimo.specs.version>
-		<org.apache.openjpa.version>2.4.0-ep2.1</org.apache.openjpa.version>
+		<org.apache.openjpa.version>2.4.0-ep2.3</org.apache.openjpa.version>
 		<org.apache.servicemix.bundles.quartz.version>2.1.7_1</org.apache.servicemix.bundles.quartz.version>
 		<org.apache.servicemix.spring.ldap.version>2.3.2.RELEASE_1</org.apache.servicemix.spring.ldap.version>
 		<org.apache.servicemix.spring.version>4.3.25.RELEASE_1</org.apache.servicemix.spring.version>
@@ -130,7 +135,7 @@
 		<rxjava.version>2.2.7</rxjava.version>
 
 		<selenium.version>3.141.59</selenium.version>
-		<fluent.relos.client.version>1.10.44</fluent.relos.client.version>
+		<fluent.relos.client.version>1.10.45</fluent.relos.client.version>
 		<servicemix.bundles.aspectj.version>1.8.8_1</servicemix.bundles.aspectj.version>
 		<shiro-core.version>1.3.2</shiro-core.version>
 		<sisu.version>0.3.2</sisu.version>
@@ -159,7 +164,6 @@
 
 		<javax.jms.version>2.0</javax.jms.version>
 
-		<com.atomikos.version>4.0.6</com.atomikos.version>
 		<activemq.kahadb.store.version>5.14.3</activemq.kahadb.store.version>
 
 		<!--Plugins-->
@@ -450,6 +454,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${org.apache.commons.lang3.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>${org.apache.commons.text.version}</version>
 			</dependency>
 
 			<dependency>
@@ -1102,6 +1111,16 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-gift-certificate-creation-message-producer</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-order-accepted-message-consumer</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-order-hold-resolution-message-consumer</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 			<dependency>
@@ -1855,30 +1874,6 @@
 				<version>${dce.version}</version>
 			</dependency>
 
-			<!-- Atomikos dependencies -->
-			<dependency>
-				<groupId>com.atomikos</groupId>
-				<artifactId>transactions-jta</artifactId>
-				<version>${com.atomikos.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.atomikos</groupId>
-				<artifactId>transactions-jdbc</artifactId>
-				<version>${com.atomikos.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.atomikos</groupId>
-				<artifactId>transactions-jms</artifactId>
-				<version>${com.atomikos.version}</version>
-			</dependency>
-
-			<!-- JTA Support -->
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-jta</artifactId>
-				<version>${dce.version}</version>
-			</dependency>
-
 			<!-- Embedded ActiveMQ support for tests -->
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
@@ -2275,6 +2270,11 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
 				<artifactId>ep-rs-authentication-api</artifactId>
+				<version>${api-platform.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
+				<artifactId>ep-rs-authentication-resource</artifactId>
 				<version>${api-platform.version}</version>
 			</dependency>
 			<dependency>
@@ -3220,6 +3220,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.spring-orm</artifactId>
+				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
 				<scope>provided</scope>
@@ -3280,6 +3286,11 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 				<artifactId>ep-rs-authentication-epcommerce</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+				<artifactId>ep-rs-authorization-epcommerce</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>
@@ -3416,6 +3427,11 @@
 				<groupId>com.squareup.okhttp3</groupId>
 				<artifactId>okhttp</artifactId>
 				<version>${okhttp.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.fusesource.jansi</groupId>
+				<artifactId>jansi</artifactId>
+				<version>${jansi.version}</version>
 			</dependency>
 		</dependencies>
 

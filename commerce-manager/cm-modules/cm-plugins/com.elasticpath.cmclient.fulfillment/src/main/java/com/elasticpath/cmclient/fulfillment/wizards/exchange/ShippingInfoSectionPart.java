@@ -30,6 +30,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
+import com.elasticpath.cmclient.fulfillment.util.AddressUtil;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerAddress;
@@ -44,9 +45,6 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
  * This section contains information about shipping.
  */
 class ShippingInfoSectionPart extends AbstractCmClientFormSectionPart {
-
-	private static final String COMMA = ", "; //$NON-NLS-1$
-	private static final String WHITE_SPACE = " "; //$NON-NLS-1$
 
 	private final TaxJurisdictionService taxJurisdictionService;
 
@@ -108,7 +106,7 @@ class ShippingInfoSectionPart extends AbstractCmClientFormSectionPart {
 		for (CustomerAddress customerAddress : addresses) {
 			OrderAddress orderAddress = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 			orderAddress.init(customerAddress);
-			String fullAddress = getFullAddress(orderAddress);
+			final String fullAddress = getFullAddress(orderAddress);
 			addressCombo.setData(fullAddress, orderAddress);
 			addressCombo.add(fullAddress);
 		}
@@ -119,13 +117,7 @@ class ShippingInfoSectionPart extends AbstractCmClientFormSectionPart {
 	}
 
 	private String getFullAddress(final Address customerAddress) {
-		return customerAddress.getFirstName()
-				+ WHITE_SPACE
-				+ customerAddress.getLastName()
-				+ COMMA
-				+ customerAddress.getZipOrPostalCode()
-				+ COMMA
-				+ customerAddress.getCity();
+		return AddressUtil.formatAddress(customerAddress, true);
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import cucumber.api.java.en.When
 
 import com.elasticpath.cortex.dce.CommonMethods
 import com.elasticpath.cortexTestObjects.Cart
+import com.elasticpath.cortexTestObjects.Item
 import com.elasticpath.cortexTestObjects.Order
 import com.elasticpath.cortexTestObjects.Profile
 
@@ -90,6 +91,16 @@ class PromotionSteps {
 	@Then('^the list of applied promotions contains promotion (.+)$')
 	static void verifyListContainsPromotion(String promotionName) {
 		Cart.verifyPromotionByName(promotionName)
+	}
+
+	@Then('^the list of applied catalog promotions contains promotion (.+)$')
+	static void verifyListContainsCatalogPromotion(String promotionName) {
+		Item.verifyPromotionByName(promotionName, true)
+	}
+
+	@Then('^the list of applied catalog promotions does not contain promotion (.+)$')
+	static void verifyListDoesNotContainsCatalogPromotion(String promotionName) {
+		Item.verifyPromotionByName(promotionName, false)
 	}
 
 	@When('^I go to my default cart$')
@@ -179,7 +190,7 @@ class PromotionSteps {
 				.stopIfFailure()
 	}
 
-	@And('^a personalisation header triggers a cart promotion$')
+	@And('^a personalisation header triggers a promotion$')
 	static void addPersonalizationHeader() {
 		// This is set up in the test data.  Product triggerprodforpersonalisedcartdiscountpromo in cart will
 		// trigger promo PersonalisedCartDiscountPromo (15% cart sub-total discount) for shoppers with age > 45

@@ -23,8 +23,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
-import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.impl.CustomerImpl;
 
 /**
  * Test class for {@link DynamicAttributeValueValidator}.
@@ -97,11 +95,11 @@ public class DynamicAttributeValueValidatorTest {
 		when(referentAttribute.isRequired()).thenReturn(true);
 		when(referentAttribute.getAttributeType()).thenReturn(AttributeType.SHORT_TEXT);
 
-		String attributeKey = CustomerImpl.ATT_KEY_CP_GENDER;
+		String attributeKey = "multiOptionAttributeKey";
 		String attributeValue = "X";
 
 		DynamicAttributeValue fieldToValidate = new DynamicAttributeValue(attributeKey, attributeValue, referentAttribute,
-				Sets.newHashSet(String.valueOf(Customer.GENDER_MALE), String.valueOf(Customer.GENDER_FEMALE)));
+				Sets.newHashSet("A", "B"));
 
 		Set<ConstraintViolation<DynamicAttributeValue>> actualConstraintViolations = dynamicAttributeValueValidator.validate(fieldToValidate);
 
@@ -121,11 +119,11 @@ public class DynamicAttributeValueValidatorTest {
 		when(referentAttribute.isRequired()).thenReturn(true);
 		when(referentAttribute.getAttributeType()).thenReturn(AttributeType.SHORT_TEXT);
 
-		String attributeKey = CustomerImpl.ATT_KEY_CP_GENDER;
-		String attributeValue = "M";
+		String attributeKey = "multiOptionAttributeKey";
+		String attributeValue = "A";
 
 		DynamicAttributeValue fieldToValidate = new DynamicAttributeValue(attributeKey, attributeValue, referentAttribute,
-				Sets.newHashSet(String.valueOf(Customer.GENDER_MALE), String.valueOf(Customer.GENDER_FEMALE)));
+				Sets.newHashSet("A", "B"));
 
 		Set<ConstraintViolation<DynamicAttributeValue>> actualConstraintViolations = dynamicAttributeValueValidator.validate(fieldToValidate);
 

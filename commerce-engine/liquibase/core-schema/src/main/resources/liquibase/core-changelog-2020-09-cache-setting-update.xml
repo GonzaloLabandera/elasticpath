@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-cache-setting-update.xml">
+
+	<changeSet id="2020-9-update-cache-refresh-data-key" author="elasticpath">
+		<comment>[PB-8584]Update metadata key name from apiRefreshStrategy to refreshStrategy.</comment>
+		<update tableName="TSETTINGMETADATA">
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<where>METADATA_KEY = 'apiRefreshStrategy' OR METADATA_KEY = 'adminRefreshStrategy'</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="2020-9-update-cache-refresh-data-settings" author="elasticpath">
+		<comment>[PB-8584]Update refreshStrategy metadata for all the settings which were using default strategy (immediate).</comment>
+
+		<createTable tableName="TEMP_TSETTINGMETADATA_UIDPK">
+			<column name="UIDPK" type="BIGINT"/>
+		</createTable>
+
+		<insert tableName="TEMP_TSETTINGMETADATA_UIDPK">
+			<column name="UIDPK" valueComputed="(select MAX(UIDPK) FROM TSETTINGMETADATA where UIDPK &lt; 200000)"/>
+		</insert>
+
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+1 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/ASSETS/importAssetsSubfolder')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+2 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/SHIPPING/carriers')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+3 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/UNITS/weight')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+4 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/UNITS/length')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+5 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/EMAIL/emailTextTemplateEnabled')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+6 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/EMAIL/emailAuthenticationUsername')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+7 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/EMAIL/emailAuthenticationPassword')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+8 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/EMAIL/emailGlobalSenderAddress')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+9 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/EMAIL/emailGlobalSenderName')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+10 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/STORE/PRODUCTRECOMMENDATIONS/numberMaxRecommendations')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+11 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/localeDateFormat')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+12 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/EMAIL/mailHost')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+13 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/EMAIL/mailPort')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+14 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/STORE/storefrontUrl')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+15 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/APPSPECIFIC/RCP/minimumPasswordLength')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+16 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/APPSPECIFIC/RCP/maximumPasswordAge')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+17 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/APPSPECIFIC/RCP/passwordHistoryLength')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+18 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/APPSPECIFIC/RCP/accountLockoutThreshold')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+19 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/APPSPECIFIC/RCP/idleTimeForLock')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+20 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SEARCH/indexOptimizationInterval')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+21 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/ORDERLOCK/minsBeforeCleanUp')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+22 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/ORDERLOCK/batchSize')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+23 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/maxHistory')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+24 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/batchSize')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+25 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/FAILEDORDERCLEANUP/maxHistory')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+26 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/FAILEDORDERCLEANUP/batchSize')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+27 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/PAYMENTGATEWAY/certificatesDirectory')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+28 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/maxHistory')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+29 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+30 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/MESSAGING/DOMAIN/deadLetterChannelUri')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+31 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/MESSAGING/DOMAIN/BULK/channelUri')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+32 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/MESSAGING/DOMAIN/BULK/deadLetterChannelUri')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+33 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/STORE/dataPolicySegments')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+34 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/RELEASESHIPMENTSJOB/batchSize')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT UIDPK+35 FROM TEMP_TSETTINGMETADATA_UIDPK)"/>
+			<column name="SETTING_DEFINITION_UID"
+					valueComputed="(SELECT UIDPK FROM  TSETTINGDEFINITION where path = 'COMMERCE/SYSTEM/EXPIREDOAUTHTOKENCLEANUP/batchSize')"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+
+		<dropTable tableName="TEMP_TSETTINGMETADATA_UIDPK"/>
+	</changeSet>
+</databaseChangeLog>

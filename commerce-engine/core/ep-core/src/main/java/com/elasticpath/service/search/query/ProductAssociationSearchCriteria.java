@@ -4,6 +4,7 @@
 package com.elasticpath.service.search.query;
 
 import java.util.Date;
+import java.util.Optional;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -39,9 +40,9 @@ public class ProductAssociationSearchCriteria extends AbstractSearchCriteriaImpl
 
 	private Date endDateAfter;
 
-	private boolean hidden;
+	private Boolean hidden = false;
 
-	private boolean notSoldSeparately;
+	private Boolean notSoldSeparately = false;
 
 	/**
 	 * Returns The Source Product.
@@ -218,26 +219,26 @@ public class ProductAssociationSearchCriteria extends AbstractSearchCriteriaImpl
 
 	/**
 	 * Gets the hidden flag.
-	 * @return the hidden flag
+	 * @return the optional of hidden flag
 	 */
-	public boolean isHidden() {
-		return hidden;
+	public Optional<Boolean> isHidden() {
+		return Optional.ofNullable(hidden);
 	}
 
 	/**
 	 * Sets the hidden flag.
 	 * @param hidden new hidden flag
 	 */
-	public void setHidden(final boolean hidden) {
+	public void setHidden(final Boolean hidden) {
 		this.hidden = hidden;
 	}
 
 	/**
 	 * Gets not sold separately flag.
-	 * @return not sold separately flag.
+	 * @return the optional of not sold separately flag.
 	 */
-	public boolean isNotSoldSeparately() {
-		return notSoldSeparately;
+	public Optional<Boolean> isNotSoldSeparately() {
+		return Optional.ofNullable(notSoldSeparately);
 	}
 
 
@@ -245,7 +246,7 @@ public class ProductAssociationSearchCriteria extends AbstractSearchCriteriaImpl
 	 * Sets not sold separately flag.
 	 * @param notSoldSeparately new not sold separately flag.
 	 */
-	public void setNotSoldSeparately(final boolean notSoldSeparately) {
+	public void setNotSoldSeparately(final Boolean notSoldSeparately) {
 		this.notSoldSeparately = notSoldSeparately;
 	}
 

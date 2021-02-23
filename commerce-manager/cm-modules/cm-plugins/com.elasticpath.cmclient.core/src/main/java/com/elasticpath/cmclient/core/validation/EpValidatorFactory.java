@@ -193,22 +193,7 @@ public final class EpValidatorFactory {
 	};
 
 	/** Checks that a String has no leading or trailing spaces (and tabs). */
-	public static final IValidator NO_SPACES = new IValidator() {
-
-		public IStatus validate(final Object value) {
-			String stringValue = (String) value;
-			if (stringValue.indexOf(' ') != -1
-					|| stringValue.indexOf('\t') != -1) {
-				return new Status(
-						IStatus.ERROR,
-						CorePlugin.PLUGIN_ID,
-						IStatus.ERROR,
-						CoreMessages.get().EpValidatorFactory_NoSpace,
-						null);
-			}
-			return Status.OK_STATUS;
-		}
-	};
+	public static final IValidator NO_SPACES = new NoSpacesValidator();
 
 	/** Checks that at least one character is present. */
 	public static final IValidator REQUIRED = new RequiredValidator(0);
@@ -859,33 +844,32 @@ public final class EpValidatorFactory {
 	/**
 	 * Validate product code.
 	 */
-	public static final IValidator PRODUCT_CODE_NOT_REQUIRED =
-			new CompoundValidator(MAX_LENGTH_64, NO_SPACES, NO_SPECIAL_CHARACTERS_EXCEPT_DASH);
+	public static final IValidator PRODUCT_CODE_NOT_REQUIRED = new CatalogCodeUtilShim().getProductCodeValidator();
 
 	/**
 	 * Validate product code.
 	 */
-	public static final IValidator PRODUCT_CODE = new CompoundValidator(PRODUCT_CODE_NOT_REQUIRED, REQUIRED);
+	public static final IValidator PRODUCT_CODE = new CatalogCodeUtilShim(REQUIRED).getProductCodeValidator();
 
 	/**
 	 * Validate catalog code.
 	 */
-	public static final IValidator CATALOG_CODE = new CompoundValidator(MAX_LENGTH_64, REQUIRED, NO_SPACES, NO_SPECIAL_CHARACTERS);
+	public static final IValidator CATALOG_CODE = new CatalogCodeUtilShim(REQUIRED).getCatalogCodeValidator();
 
 	/**
 	 * Validate category code.
 	 */
-	public static final IValidator CATEGORY_CODE = new CompoundValidator(MAX_LENGTH_64, REQUIRED, NO_SPACES, NO_SPECIAL_CHARACTERS);
+	public static final IValidator CATEGORY_CODE = new CatalogCodeUtilShim(REQUIRED).getCategoryCodeValidator();
 
 	/**
 	 * Validate SKU code.
 	 */
-	public static final IValidator SKU_CODE_NOT_REQURED = new CompoundValidator(MAX_LENGTH_64, NO_SPACES, NO_SPECIAL_CHARACTERS_EXCEPT_DASH);
+	public static final IValidator SKU_CODE_NOT_REQURED = new CatalogCodeUtilShim().getSkuCodeValidator();
 
 	/**
 	 * Validate SKU code.
 	 */
-	public static final IValidator SKU_CODE = new CompoundValidator(SKU_CODE_NOT_REQURED, REQUIRED);
+	public static final IValidator SKU_CODE = new CatalogCodeUtilShim(REQUIRED).getSkuCodeValidator();
 
 	/**
 	 * Validate warehouse code.
@@ -898,9 +882,9 @@ public final class EpValidatorFactory {
 	public static final IValidator SKU_OPTION_CODE = new CompoundValidator(MAX_LENGTH_64, REQUIRED, NO_SPACES, NO_SPECIAL_CHARACTERS);
 
 	/**
-	 * Validate SKU option code.
+	 * Validate brand code.
 	 */
-	public static final IValidator BRAND_CODE = new CompoundValidator(MAX_LENGTH_64, REQUIRED, NO_SPACES, NO_SPECIAL_CHARACTERS);
+	public static final IValidator BRAND_CODE = new CatalogCodeUtilShim(REQUIRED).getBrandCodeValidator();
 
 	/**
 	 * Validate Cart Item Modifier Group Field Option value.
@@ -922,32 +906,6 @@ public final class EpValidatorFactory {
 		final Calendar calendar = Calendar.getInstance();
 		calendar.set(LIMIT_YEAR, LIMIT_MONTH, LIMIT_DAY);
 		UP_LIMIT_DATE = calendar.getTime();
-	}
-
-	/**
-	 * A common validator for maximum string length.
-	 */
-	private static class MaxStringLengthValidator implements IValidator {
-		private final int stringLength;
-
-		MaxStringLengthValidator(final int stringLength) {
-			this.stringLength = stringLength;
-		}
-
-		public IStatus validate(final Object value) {
-			final String stringValue = (String) value;
-
-			if (stringValue.length() > stringLength) {
-				return new Status(IStatus.ERROR,
-						CorePlugin.PLUGIN_ID,
-						IStatus.ERROR,
-
-						NLS.bind(CoreMessages.get().EpValidatorFactory_MaxCharLength,
-						stringLength),
-						null);
-			}
-			return Status.OK_STATUS;
-		}
 	}
 
 

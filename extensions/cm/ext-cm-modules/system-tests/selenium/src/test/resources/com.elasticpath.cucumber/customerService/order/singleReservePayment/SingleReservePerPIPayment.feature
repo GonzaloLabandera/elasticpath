@@ -74,7 +74,8 @@ Feature: Order Payments By Single Reserve Per Payment Instrument
       | physical_sku | 1        |
     When I search and open order editor for the latest order
     And I enter 2 for order shipment quantity
-    Then Completion of Payment Authorization should be impossible with error message Payment was declined.
+    Then I cannot complete Payment Reservation with error message The reserve process cannot continue because increase amount is impossible.
+    And I cancel Payment Reservation
     And I should NOT see Modify Reserve order payment transaction type in the Payment History
     And Payment Summary should have the following totals
       | Ordered     | <order total> |
@@ -202,15 +203,15 @@ Feature: Order Payments By Single Reserve Per Payment Instrument
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty        | 1                         |
-      | Return Sku Code   | <SKU>                     |
-      | Exchange Sku Code | <SKU>                     |
-      | Return Required   | False                     |
-      | Price List Name   | Mobile Price List         |
-      | Shipping Address  | Test User, 98119, Seattle |
-      | Shipping Method   | FedEx Express             |
-      | Payment Options   | Alternate payment source  |
-      | Payment Source    | <ALTERNATE_PAYMENT>       |
+      | Return Qty        | 1                                                       |
+      | Return Sku Code   | <SKU>                                                   |
+      | Exchange Sku Code | <SKU>                                                   |
+      | Return Required   | False                                                   |
+      | Price List Name   | Mobile Price List                                       |
+      | Shipping Address  | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method   | FedEx Express                                           |
+      | Payment Options   | Alternate payment source                                |
+      | Payment Source    | <ALTERNATE_PAYMENT>                                     |
     Then I should see following order payment transaction in the Payment History
       | Type    | Credit                    |
       | Details | <PAYMENT_INSTRUMENT_NAME> |
@@ -241,15 +242,15 @@ Feature: Order Payments By Single Reserve Per Payment Instrument
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty                                | 1                         |
-      | Return Sku Code                           | <SKU>                     |
-      | Exchange Sku Code                         | <SKU>                     |
-      | Return Required                           | true                      |
-      | Price List Name                           | Mobile Price List         |
-      | Shipping Address                          | Test User, 98119, Seattle |
-      | Shipping Method                           | FedEx Express             |
-      | Payment Options                           | Alternate payment source  |
-      | Payment Source                            | <ALTERNATE_PAYMENT>       |
+      | Return Qty        | 1                                                       |
+      | Return Sku Code   | <SKU>                                                   |
+      | Exchange Sku Code | <SKU>                                                   |
+      | Return Required   | true                                                    |
+      | Price List Name   | Mobile Price List                                       |
+      | Shipping Address  | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method   | FedEx Express                                           |
+      | Payment Options   | Alternate payment source                                |
+      | Payment Source    | <ALTERNATE_PAYMENT>                                     |
     And shipping receive return is processed for quantity 1 of sku <SKU>
     And I complete the exchange refunding to original source
     Then I should see following order payment transaction in the Payment History

@@ -19,6 +19,7 @@ import com.elasticpath.domain.pricing.PriceListStack;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.tags.TagSet;
 
 /**
  * Interface to get Price and Promoted Price.
@@ -64,9 +65,10 @@ public interface PriceLookupFacade {
 	 * @param stack the price list stack for product sku
 	 * @param tierQuantity the tier quantity to filter by (use null if all tiers are required)
 	 * @param store store
+	 * @param tagSet set of tags within customer session
 	 * @return list of applicable prices or an empty list
 	 */
-	List<DisplayPriceDTO> getPricesForOrderSku(ProductSku productSku, PriceListStack stack, Integer tierQuantity, Store store);
+	List<DisplayPriceDTO> getPricesForOrderSku(ProductSku productSku, PriceListStack stack, Integer tierQuantity, Store store, TagSet tagSet);
 
 	/**
 	 * Get a map of all price adjustments on a {@link ProductBundle}, keyed by {@see BundleConstituent} GUID.
@@ -85,8 +87,9 @@ public interface PriceLookupFacade {
 	 * @param store the store catalog used to determine the catalog promotions
 	 * @param currency currency
 	 * @param price to be promoted
+	 * @param tagSet set of tags within customer session
 	 */
-	void applyCatalogPromotions(Product product, Store store, Currency currency, Price price);
+	void applyCatalogPromotions(Product product, Store store, Currency currency, Price price, TagSet tagSet);
 
 	/**
 	 * Calculates the price of a shopping item, considering the selections inside bundles.

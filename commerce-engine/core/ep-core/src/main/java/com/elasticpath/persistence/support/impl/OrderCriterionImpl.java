@@ -85,7 +85,7 @@ public class OrderCriterionImpl implements OrderCriterion {
 	public CriteriaQuery getOrderSearchCriteria(final OrderSearchCriteria orderSearchCriteria,
 										 final Collection<String> stores, final ResultType resultType) {
 		JpqlQueryBuilder queryBuilder = createOrderQueryBuilder(resultType);
-
+		queryBuilder.distinct();
 		final CustomerSearchCriteria customerSearchCriteria = orderSearchCriteria.getCustomerSearchCriteria();
 		final OrderShipmentStatus shipmentStatus = orderSearchCriteria.getShipmentStatus();
 		final String skuCode = orderSearchCriteria.getSkuCode();

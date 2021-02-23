@@ -4,6 +4,7 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.payments.instruments.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildAccountPaymentMethodIdentifier;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildOrderPaymentMethodIdentifier;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildProfilePaymentMethodIdentifier;
 
@@ -20,8 +21,10 @@ import com.elasticpath.domain.orderpaymentapi.CustomerPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
 import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentDTO;
 import com.elasticpath.rest.cache.CacheResult;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.PaymentInstrumentIdentifier;
+import com.elasticpath.rest.definition.paymentmethods.AccountPaymentMethodIdentifier;
 import com.elasticpath.rest.definition.paymentmethods.OrderPaymentMethodIdentifier;
 import com.elasticpath.rest.definition.paymentmethods.ProfilePaymentMethodIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
@@ -78,7 +81,26 @@ public class PaymentInstrumentToPaymentMethodLinkRepositoryImpl implements Payme
 				.flatMapObservable(providerId -> filterForMatchingProviderId(storePaymentProviderConfigs, providerId))
 				.map(GloballyIdentifiable::getGuid)
 				.map(StringIdentifier::of)
-				.map(storeConfigGuidIdentifier -> buildProfilePaymentMethodIdentifier(StringIdentifier.of(userId), scope, storeConfigGuidIdentifier));
+				.map(storeConfigGuidIdentifier -> buildProfilePaymentMethodIdentifier(StringIdentifier.of(userId), scope,
+						storeConfigGuidIdentifier));
+	}
+
+	@Override
+	@CacheResult
+	public Observable<AccountPaymentMethodIdentifier> getAccountPaymentMethodIdentifier(final String accountId,
+																						final AccountPaymentInstrumentIdentifier identifier) {
+		final IdentifierPart<String> scope = identifier.getAccountPaymentInstruments().getAccount().getAccounts().getScope();
+		final String accountPaymentInstrumentGuid = identifier.getAccountPaymentInstrumentId().getValue();
+
+		Observable<StorePaymentProviderConfig> storePaymentProviderConfigs =
+				paymentMethodRepository.getStorePaymentProviderConfigsForStoreCode(scope.getValue());
+
+		return getPaymentProviderIdForCustomerInstrumentGuid(accountPaymentInstrumentGuid)
+				.flatMapObservable(providerId -> filterForMatchingProviderId(storePaymentProviderConfigs, providerId))
+				.map(GloballyIdentifiable::getGuid)
+				.map(StringIdentifier::of)
+				.map(storeConfigGuidIdentifier ->
+						buildAccountPaymentMethodIdentifier(identifier.getAccountPaymentInstruments().getAccount(), storeConfigGuidIdentifier));
 	}
 
 	@Override

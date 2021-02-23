@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
@@ -695,11 +696,10 @@ public class ProductImplTest {
 	}
 
 	/**
-	 * Test that getDisplayName(Locale, boolean) doesn't fall back when it's not supposed to,
-	 * and returns a null String instead.
+	 * Test that getDisplayName(Locale, boolean) falling back on the product code if a display name is empty in the ldf.
 	 */
 	@Test
-	public void testGetDisplayNameFallbackForbidden() {
+	public void testGetDisplayNameFallbackToProductCode() {
 		final LocaleFallbackPolicy policy = context.mock(LocaleFallbackPolicy.class);
 		final CatalogLocaleFallbackPolicyFactory factory = new CatalogLocaleFallbackPolicyFactory() {
 			@Override
@@ -707,21 +707,20 @@ public class ProductImplTest {
 				return policy;
 			}
 		};
-		productImpl.setCode(null);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY,
+				CatalogLocaleFallbackPolicyFactory.class, factory);
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, CatalogLocaleFallbackPolicyFactory.class);
-				will(returnValue(factory));
-				oneOf(policy).getLocales();
-				will(returnValue(new ArrayList<>(Arrays.asList(NON_DEFAULT_LOCALE))));
-				oneOf(policy).getPrimaryLocale(); will(returnValue(NON_DEFAULT_LOCALE));
+				allowing(policy).getLocales();
+				will(returnValue(new ArrayList<>(Arrays.asList(CATALOG_DEFAULT_LOCALE, CATALOG_DEFAULT_LOCALE_LANGUAGE))));
 				ignoring(policy);
 			}
 		});
 
-		productImpl.setLocaleDependantFieldsMap(createLdfMapWithOneLdf(DISPLAYNAME_DEFAULT_LOCALE, CATALOG_DEFAULT_LOCALE));
-		assertNull(productImpl.getDisplayName(NON_DEFAULT_LOCALE, false));
+		productImpl.setLocaleDependantFieldsMap(createLdfMapWithOneLdf(StringUtils.EMPTY, CATALOG_DEFAULT_LOCALE));
+		assertSame("If a display name is empty in the LDF, display name should be the product code.",
+				productImpl.getCode(), productImpl.getDisplayName(NON_DEFAULT_LOCALE, false));
 	}
 
 	private LocaleDependantFields createLocaleDependantFieldsWithDisplayName(final Locale locale, final String displayName) {

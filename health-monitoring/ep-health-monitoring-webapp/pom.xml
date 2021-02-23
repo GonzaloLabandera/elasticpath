@@ -38,7 +38,7 @@
 						<path>${ep.health.monitoring.context}</path>
 						<port>${ep.health.monitoring.tomcat.port.http}</port>
 						<systemProperties>
-							<ep.search.default.url>${ep.search.url}</ep.search.default.url>
+							<ep.search.replica.url>${ep.search.url}</ep.search.replica.url>
 						</systemProperties>
 					</configuration>
 				</plugin>
@@ -65,8 +65,8 @@
 				</plugin>
 				<plugin>
 					<groupId>com.google.code.maven-replacer-plugin</groupId>
-					<artifactId>replacer</artifactId>
-					<version>{maven-replacer-plugin.version}</version>
+					<artifactId>maven-replacer-plugin</artifactId>
+					<version>${maven-replacer-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

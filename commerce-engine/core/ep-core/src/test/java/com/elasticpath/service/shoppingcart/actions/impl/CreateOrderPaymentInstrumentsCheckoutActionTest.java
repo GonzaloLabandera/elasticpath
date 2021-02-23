@@ -23,6 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.cartorder.CartOrder;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderReturn;
@@ -35,12 +36,14 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.service.orderpaymentapi.FilteredPaymentInstrumentService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentInstrumentService;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContextImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateOrderPaymentInstrumentsCheckoutActionTest {
 
 	private static final String PAYMENT_INSTRUMENT_GUID = "PAYMENT_INSTRUMENT_GUID";
+	private static final String STORE_CODE = "mobee";
 
 	@InjectMocks
 	private CreateOrderPaymentInstrumentsCheckoutAction testee;
@@ -53,8 +56,14 @@ public class CreateOrderPaymentInstrumentsCheckoutActionTest {
 	private OrderPaymentApiCleanupService orderPaymentApiCleanupService;
 	@Mock
 	private BeanFactory beanFactory;
+	@Mock
+	private CartOrder cartOrder;
+	@Mock
+	private Customer customer;
+	@Mock
+	private Order order;
 
-	private CheckoutActionContext context;
+	private PreCaptureCheckoutActionContext context;
 
 	@Before
 	public void setUp() throws Exception {
@@ -66,9 +75,7 @@ public class CreateOrderPaymentInstrumentsCheckoutActionTest {
 		final CustomerSession customerSession = mock(CustomerSession.class);
 		final OrderReturn orderReturn = mock(OrderReturn.class);
 
-		final CartOrder cartOrder = mock(CartOrder.class);
-
-		context = new CheckoutActionContextImpl(
+		context = new PreCaptureCheckoutActionContextImpl(
 				shoppingCart,
 				shoppingCartTaxSnapshot,
 				customerSession,
@@ -77,30 +84,42 @@ public class CreateOrderPaymentInstrumentsCheckoutActionTest {
 				orderReturn,
 				(customer, order) -> cartOrder);
 
-        final Order order = mock(Order.class);
-        context.setOrder(order);
+		context.setOrder(order);
 
-        when(beanFactory.getPrototypeBean(ORDER_PAYMENT_INSTRUMENT, OrderPaymentInstrument.class)).thenReturn(new OrderPaymentInstrumentImpl());
+		when(beanFactory.getPrototypeBean(ORDER_PAYMENT_INSTRUMENT, OrderPaymentInstrument.class)).thenReturn(new OrderPaymentInstrumentImpl());
+		when(order.getOrderNumber()).thenReturn("20000");
+		when(order.getStoreCode()).thenReturn(STORE_CODE);
+		when(order.getTotal()).thenReturn(BigDecimal.TEN);
+		when(order.getAccount()).thenReturn(customer);
 
-        final CartOrderPaymentInstrument cartOrderPaymentInstrument = mock(CartOrderPaymentInstrument.class);
-        when(cartOrderPaymentInstrument.getPaymentInstrumentGuid()).thenReturn(PAYMENT_INSTRUMENT_GUID);
-        when(cartOrderPaymentInstrument.getLimitAmount()).thenReturn(BigDecimal.ONE);
-        when(filteredPaymentInstrumentService.findCartOrderPaymentInstrumentsForCartOrderAndStore(cartOrder, context.getOrder().getStoreCode()))
-                .thenReturn(Collections.singletonList(cartOrderPaymentInstrument));
-        when(order.getOrderNumber()).thenReturn("20000");
-    }
+		final CartOrderPaymentInstrument cartOrderPaymentInstrument = mock(CartOrderPaymentInstrument.class);
+		when(cartOrderPaymentInstrument.getPaymentInstrumentGuid()).thenReturn(PAYMENT_INSTRUMENT_GUID);
+		when(cartOrderPaymentInstrument.getLimitAmount()).thenReturn(BigDecimal.ONE);
+		when(filteredPaymentInstrumentService.findCartOrderPaymentInstrumentsForCartOrderAndStore(cartOrder, context.getOrder().getStoreCode()))
+				.thenReturn(Collections.singletonList(cartOrderPaymentInstrument));
+	}
 
 	@Test
 	public void executeCopiesPaymentInstrumentsToOrder() {
-        testee.execute(context);
+		testee.execute(context);
 
-        final ArgumentCaptor<OrderPaymentInstrument> instrumentArgumentCaptor = ArgumentCaptor.forClass(OrderPaymentInstrument.class);
-        verify(orderPaymentInstrumentService).saveOrUpdate(instrumentArgumentCaptor.capture());
-        final OrderPaymentInstrument orderPaymentInstrument = instrumentArgumentCaptor.getValue();
-        assertThat(orderPaymentInstrument.getOrderNumber()).isEqualTo(context.getOrder().getOrderNumber());
-        assertThat(orderPaymentInstrument.getPaymentInstrumentGuid()).isEqualTo(PAYMENT_INSTRUMENT_GUID);
-        assertThat(orderPaymentInstrument.getLimitAmount()).isEqualTo(BigDecimal.ONE);
-    }
+		final ArgumentCaptor<OrderPaymentInstrument> instrumentArgumentCaptor = ArgumentCaptor.forClass(OrderPaymentInstrument.class);
+		verify(orderPaymentInstrumentService).saveOrUpdate(instrumentArgumentCaptor.capture());
+		final OrderPaymentInstrument orderPaymentInstrument = instrumentArgumentCaptor.getValue();
+		assertThat(orderPaymentInstrument.getOrderNumber()).isEqualTo(context.getOrder().getOrderNumber());
+		assertThat(orderPaymentInstrument.getPaymentInstrumentGuid()).isEqualTo(PAYMENT_INSTRUMENT_GUID);
+		assertThat(orderPaymentInstrument.getLimitAmount()).isEqualTo(BigDecimal.ONE);
+	}
+
+	@Test
+	public void executeUsingDefaultAccountPaymentInstrument() {
+		when(filteredPaymentInstrumentService.findCartOrderPaymentInstrumentsForCartOrderAndStore(cartOrder, context.getOrder().getStoreCode()))
+				.thenReturn(Collections.emptyList());
+
+		testee.execute(context);
+
+		verify(filteredPaymentInstrumentService).findDefaultPaymentInstrumentForCustomerAndStore(customer, STORE_CODE);
+	}
 
 	@Test
 	public void rollbackRemovesOrderPaymentInstruments() {

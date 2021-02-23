@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 				"json:target/configuration/users.json",
 				"junit:target/cucumber-junit-reports/configuration/users/cucumber.xml"},
 		glue = {"classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.cortex"},
-		tags = {"@regressionTest", "@configuration", "@user"},
+		tags = {"@regressionTest", "@configuration", "@user", "~@notReady"},
 		features = "src/test/resources/com.elasticpath.cucumber/configuration/users")
 public class RunConfigurationUserTestsIT {
 

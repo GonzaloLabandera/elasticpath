@@ -55,7 +55,6 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableColumn;
 import com.elasticpath.cmclient.core.ui.framework.impl.EpColumnSorterControl;
-import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Catalog;
@@ -464,13 +463,13 @@ public class ProductFinderDialog extends AbstractEpPriceDialog {
 		EpControlBindingProvider.getInstance().bind(bindingContext,
 				productCodeText,
 				this.getModel(),
-				"productCode", EpValidatorFactory.PRODUCT_CODE_NOT_REQUIRED, null, false); //$NON-NLS-1$
+				"productCode", null, null, false); //$NON-NLS-1$
 
 		// bind sku code
 		EpControlBindingProvider.getInstance().bind(bindingContext,
 				skuCodeText,
 				this.getModel(),
-				"productSku", EpValidatorFactory.SKU_CODE_NOT_REQURED, null, false); //$NON-NLS-1$
+				"productSku", null, null, false); //$NON-NLS-1$
 
 		// Bind Brand
 		final ObservableUpdateValueStrategy brandUpdateStrategy = new ObservableUpdateValueStrategy() {

@@ -16,6 +16,19 @@
 
 	<modules>
 		<module>ep-gift-certificate-creation-message-producer</module>
+		<module>ep-order-accepted-message-consumer</module>
+		<module>ep-order-hold-resolution-message-consumer</module>
 	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-pmd-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

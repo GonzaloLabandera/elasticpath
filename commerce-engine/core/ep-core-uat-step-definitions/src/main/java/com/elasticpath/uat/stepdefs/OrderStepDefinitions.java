@@ -115,6 +115,11 @@ public class OrderStepDefinitions {
 	@Qualifier("coreBeanFactory")
 	private BeanFactory beanFactory;
 
+	/**
+	 * Build and checkout a cart.
+	 *
+	 * @throws Exception
+	 */
 	@When("^I successfully purchase my shopping cart contents$")
 	public void createOrder() throws Exception {
 		// Defer execution until we are ready to check for the email
@@ -137,6 +142,39 @@ public class OrderStepDefinitions {
 		});
 	}
 
+	/**
+	 * Build and checkout a cart that will trigger a pending order hold.
+	 */
+	@When("^I successfully purchase my shopping cart contents when order hold is enabled$")
+	public void createHeldOrder() {
+		final Customer customer = buildAndAddCustomer();
+
+		final ShoppingContext shoppingContext = shoppingContextBuilder
+				.withCustomer(customer)
+				.withStoreCode(customer.getStoreCode())
+				.build();
+		shoppingContextPersister.persist(shoppingContext);
+
+		final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
+				.withScenario(scenarioHolder.get())
+				.withCustomerSession(shoppingContext.getCustomerSession());
+
+		orderHolder.set(orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
+				.withShoppingContext(shoppingContext)
+				.checkoutWithHold());
+	}
+
+	/**
+	 * Mark the hold as unresolvable on the current order.
+	 */
+	@And("^the order hold is unresolvable$")
+	public void theOrderHoldIsUnresolvable() {
+		emailSendingCommandHolder.set(() -> orderService.cancelOrder(orderHolder.get()));
+	}
+
+	/**
+	 * Resend the order confirmation email.
+	 */
 	@When("^the CSR resends the order confirmation email$")
 	public void resendOrderConfirmationEmail() {
 		// We need to ensure the previous command is executed for a resend
@@ -148,6 +186,9 @@ public class OrderStepDefinitions {
 		});
 	}
 
+	/**
+	 * Build a cart with physical goods and checkout.
+	 */
 	@Given("^(?:I have|a customer has) previously made a purchase$")
 	public void createInProgressOrder() {
 		final Customer customer = buildAndAddCustomer();
@@ -175,6 +216,34 @@ public class OrderStepDefinitions {
 		orderPaymentApiService.orderCreated(order);
 	}
 
+	/**
+	 * Create a cart and checkout an order.  The order will be placed on hold.
+	 */
+	@Given("^(?:I have|the customer) made a purchase when order hold enabled$")
+	public void createDefaultHeldOrder() {
+		final Customer customer = buildAndAddCustomer();
+
+		final ShoppingContext shoppingContext = shoppingContextBuilder
+				.withCustomer(customer)
+				.withStoreCode(customer.getStoreCode())
+				.build();
+		shoppingContextPersister.persist(shoppingContext);
+
+		final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
+				.withScenario(scenarioHolder.get())
+				.withCustomerSession(shoppingContext.getCustomerSession());
+
+		final Order order = orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
+				.withNonZeroPhysicalShipment()
+				.withShoppingContext(shoppingContext)
+				.checkoutWithHold();
+		orderHolder.set(order);
+	}
+
+	/**
+	 * Complete all the shipments on the order.
+	 * @throws Throwable
+	 */
 	@And("^the purchase has been completed and delivered$")
 	public void completeAllOrderShipments() throws Throwable {
 		Order order = orderHolder.get();

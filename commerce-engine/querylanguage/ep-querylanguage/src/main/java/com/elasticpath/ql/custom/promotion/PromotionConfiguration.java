@@ -8,7 +8,6 @@ import java.util.Set;
 
 import com.elasticpath.ql.parser.AbstractEpQLCustomConfiguration;
 import com.elasticpath.ql.parser.EpQLField;
-import com.elasticpath.ql.parser.EpQLFieldDescriptor;
 import com.elasticpath.ql.parser.EpQLFieldType;
 import com.elasticpath.ql.parser.EpQLSortOrder;
 import com.elasticpath.ql.parser.fieldresolver.impl.NonLocalizedFieldResolver;
@@ -39,22 +38,11 @@ public class PromotionConfiguration extends AbstractEpQLCustomConfiguration {
 				subQueryBuilder);
 		configureField(EpQLField.CATALOG_CODE, SolrIndexConstants.CATALOG_CODE, nonLocalizedFieldResolver, EpQLFieldType.STRING, subQueryBuilder);
 		configureField(EpQLField.STORE_CODE, SolrIndexConstants.STORE_CODE, nonLocalizedFieldResolver, EpQLFieldType.STRING, subQueryBuilder);
-		
-		configurePromotionStateField();		
-	}
-
-	private void configurePromotionStateField() {
 
 		final EnumValueResolver ruleStateEnumResolver = new EnumValueResolver();
 		ruleStateEnumResolver.setEnumValues(getPromotionStateEnumAvailableValues());
-
-		final EpQLFieldDescriptor descriptor = new EpQLFieldDescriptor();
-		descriptor.setFieldTemplate(SolrIndexConstants.PROMOTION_STATE);
-		descriptor.setEpQLFieldResolver(nonLocalizedFieldResolver);
-		descriptor.setEpQLValueResolver(ruleStateEnumResolver);
-		descriptor.setSubQueryBuilder(subQueryBuilder);
-		descriptor.setType(EpQLFieldType.ENUM);
-		getAvailableEpQLObjectFields().put(EpQLField.STATE, descriptor);
+		configureField(EpQLField.STATE, SolrIndexConstants.PROMOTION_STATE, nonLocalizedFieldResolver, ruleStateEnumResolver, EpQLFieldType.ENUM,
+				subQueryBuilder);
 
 		addSortField(SolrIndexConstants.PROMOTION_NAME_EXACT, EpQLSortOrder.ASC);
 	}

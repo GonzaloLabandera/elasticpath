@@ -213,9 +213,6 @@
 		<property name="productLookup" ref="cachingProductLookup"/>
 	</bean>
 
-
-
-
 	<bean id="cachingAttributeServiceAttributesEhCache"
 		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
 		<property name="name" value="cachingAttributeServiceAttributesCache"/>
@@ -228,6 +225,20 @@
 		  factory-bean="localCacheFactory" factory-method="createCache"
 		  depends-on="cachingAttributeServiceAttributesEhCache">
 		<constructor-arg value="cachingAttributeServiceAttributesCache"/>
+	</bean>
+
+	<bean id="cachingAttributesByProfileEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="cachingAttributesByProfileCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="cachingAttributesByProfileCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="cachingAttributesByProfileEhCache">
+		<constructor-arg value="cachingAttributesByProfileCache"/>
 	</bean>
 
 	<bean id="findProductAttributeValueByAttributeUidEhCache"
@@ -259,10 +270,11 @@
 	</bean>
 
 	<bean id="cachingAttributeService" class="com.elasticpath.caching.core.catalog.CachingAttributeServiceImpl">
-		<property name="fallbackAttributeService" ref="attributeService" />
+		<property name="fallbackAttributeService" ref="nonCachingAttributeService" />
 		<property name="attributesByUsageIdCache" ref="cachingAttributeServiceAttributesCache"/>
 		<property name="attributeValueByAttributeUidCache" ref="attributeValueByAttributeUidCache"/>
 		<property name="attributeByKeyCache" ref="cachingAttributeServicefindByKeyCache"/>
+		<property name="attributesByProfileCache" ref="cachingAttributesByProfileCache"/>
 	</bean>
 
 	<bean id="cachingCategoryServiceFindCodeByUidEhCache"
@@ -333,6 +345,7 @@
 		<property name="fallbackSkuOptionService" ref="nonCachingSkuOptionService" />
 		<property name="productTypeDao" ref="productTypeDao" />
 		<property name="skuOptionsCache" ref="skuOptionsCache" />
+		<property name="detachmentStrategy" ref="detachmentStrategy" />
 	</bean>
 
 	<bean id="cachingSolrQueryFactorySearchableAttributeEhCache"

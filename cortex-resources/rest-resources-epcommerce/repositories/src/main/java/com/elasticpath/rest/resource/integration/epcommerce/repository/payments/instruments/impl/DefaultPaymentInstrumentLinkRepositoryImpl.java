@@ -10,6 +10,8 @@ import javax.inject.Singleton;
 
 import io.reactivex.Observable;
 
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentsIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.PaymentInstrumentIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.PaymentInstrumentsIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
@@ -44,7 +46,36 @@ public class DefaultPaymentInstrumentLinkRepositoryImpl implements DefaultPaymen
 
 	@Override
 	public Observable<PaymentInstrumentIdentifier> getDefaultPaymentInstrumentIdentifier(final PaymentInstrumentsIdentifier identifier) {
-		final String customerGuid = resourceOperationContext.getUserIdentifier();
+		return getPaymentInstrumentIdentifier(identifier, resourceOperationContext.getUserIdentifier());
+	}
+
+	@Override
+	public Observable<PaymentInstrumentIdentifier> getContextAwareDefaultPaymentInstrumentIdentifier(final PaymentInstrumentsIdentifier identifier) {
+		final String customerGuid = customerRepository.getCustomerGuid(resourceOperationContext.getUserIdentifier(),
+				resourceOperationContext.getSubject());
+
+		return getPaymentInstrumentIdentifier(identifier, customerGuid);
+	}
+
+	@Override
+	public Observable<AccountPaymentInstrumentIdentifier> getAccountDefaultPaymentInstrumentIdentifier(
+			final AccountPaymentInstrumentsIdentifier identifier) {
+		String accountGuid = identifier.getAccount().getAccountId().getValue();
+		String storeCode = identifier.getAccount().getAccounts().getScope().getValue();
+
+		return customerRepository.getCustomer(accountGuid)
+				.flatMapMaybe(account ->
+						reactiveAdapter.fromServiceAsMaybe(() -> filteredPaymentInstrumentService
+								.findDefaultPaymentInstrumentForCustomerAndStore(account, storeCode)))
+				.flatMapObservable(defaultInstrument -> Observable.just(AccountPaymentInstrumentIdentifier.builder()
+						.withAccountPaymentInstruments(identifier)
+						.withAccountPaymentInstrumentId(StringIdentifier.of(defaultInstrument.getGuid()))
+						.build()))
+				.switchIfEmpty(Observable.empty());
+	}
+
+	private Observable<PaymentInstrumentIdentifier> getPaymentInstrumentIdentifier(final PaymentInstrumentsIdentifier identifier,
+																				   final String customerGuid) {
 		final String storeCode = identifier.getScope().getValue();
 
 		return customerRepository.getCustomer(customerGuid)

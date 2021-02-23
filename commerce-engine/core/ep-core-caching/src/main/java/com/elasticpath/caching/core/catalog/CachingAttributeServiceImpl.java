@@ -32,6 +32,7 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 	private Cache<Long, List<AttributeValueInfo>> attributeValueByAttributeUidCache;
 	private Cache<String, Attribute> attributeByKeyCache;
 	private AttributeService fallbackAttributeService;
+	private Cache<String, Map<String, Attribute>> attributesByProfileCache;
 
 	@Override
 	public Attribute add(final Attribute attribute) throws DuplicateKeyException {
@@ -91,13 +92,7 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public Attribute findByKey(final String key) throws EpServiceException {
-		if (attributeByKeyCache.get(key) != null) {
-			return attributeByKeyCache.get(key);
-		}
-		Attribute attribute = fallbackAttributeService.findByKey(key);
-		attributeByKeyCache.put(key, attribute);
-		return attribute;
-
+		return attributeByKeyCache.get(key, cacheKey -> fallbackAttributeService.findByKey(key));
 	}
 
 	@Override
@@ -137,12 +132,7 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public List<Attribute> getAttributes(final int usageId) {
-		if (attributesByUsageIdCache.get(usageId) != null) {
-			return attributesByUsageIdCache.get(usageId);
-		}
-		List<Attribute> result = fallbackAttributeService.getAttributes(usageId);
-		attributesByUsageIdCache.put(usageId, result);
-		return result;
+		return attributesByUsageIdCache.get(usageId, cacheKey -> fallbackAttributeService.getAttributes(usageId));
 	}
 
 	@Override
@@ -166,7 +156,7 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 	public List<Attribute> getCustomerProfileAttributes() {
 		return fallbackAttributeService.getCustomerProfileAttributes();
 	}
-	
+
 	@Override
 	public Map<String, Attribute> getCustomerProfileAttributesMap(final AttributeUsage... attributeUsages) {
 		return fallbackAttributeService.getCustomerProfileAttributesMap(attributeUsages);
@@ -176,12 +166,13 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 	public List<Attribute> getCustomerProfileAttributes(final AttributeUsage... attributeUsages) {
 		return fallbackAttributeService.getCustomerProfileAttributes(attributeUsages);
 	}
-	
+
 	@Override
 	public Map<String, Attribute> getCustomerProfileAttributesMapByCustomerType(final CustomerType customerType) {
-		return fallbackAttributeService.getCustomerProfileAttributesMapByCustomerType(customerType);
+		return attributesByProfileCache.get(customerType.getName(),
+				cacheKey -> fallbackAttributeService.getCustomerProfileAttributesMapByCustomerType(customerType));
 	}
-	
+
 	@Override
 	public List<Attribute> getAttributesExcludeCustomerProfile() {
 		return fallbackAttributeService.getAttributesExcludeCustomerProfile();
@@ -219,16 +210,8 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public List<AttributeValueInfo> findProductAttributeValueByAttributeUid(final Attribute attribute) {
-		long attributeUid = attribute.getUidPk();
-
-		if (attributeValueByAttributeUidCache.get(attributeUid) != null) {
-			return attributeValueByAttributeUidCache.get(attributeUid);
-		}
-
-		List<AttributeValueInfo> result = fallbackAttributeService.findProductAttributeValueByAttributeUid(attribute);
-		attributeValueByAttributeUidCache.put(attributeUid, result);
-
-		return result;
+		return attributeValueByAttributeUidCache.get(attribute.getUidPk(),
+				cacheKey -> fallbackAttributeService.findProductAttributeValueByAttributeUid(attribute));
 	}
 
 	@Override
@@ -246,7 +229,7 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 	public Set<String> getCustomerProfileAttributeKeys() {
 		return getCustomerProfileAttributeKeys(AttributeUsageImpl.USER_PROFILE_USAGE);
 	}
-	
+
 	@Override
 	public Set<String> getCustomerProfileAttributeKeys(final AttributeUsage attributeUsage) {
 		return getAttributes(attributeUsage)
@@ -273,6 +256,7 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 		attributeByKeyCache.removeAll();
 		attributesByUsageIdCache.removeAll();
 		attributeValueByAttributeUidCache.removeAll();
+		attributesByProfileCache.removeAll();
 	}
 
 	public void setAttributesByUsageIdCache(final Cache<Integer, List<Attribute>> attributesByUsageIdCache) {
@@ -290,6 +274,10 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 
 	public void setFallbackAttributeService(final AttributeService fallbackAttributeService) {
 		this.fallbackAttributeService = fallbackAttributeService;
+	}
+
+	public void setAttributesByProfileCache(final Cache<String, Map<String, Attribute>> attributesByProfileCache) {
+		this.attributesByProfileCache = attributesByProfileCache;
 	}
 
 	@Override

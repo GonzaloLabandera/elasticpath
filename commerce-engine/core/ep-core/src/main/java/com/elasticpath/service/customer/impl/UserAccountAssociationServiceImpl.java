@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.AccountRole;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.UserAccountAssociation;
@@ -20,6 +19,7 @@ import com.elasticpath.domain.customer.impl.UserAccountAssociationImpl;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.UserAccountAssociationService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
+import com.elasticpath.service.permissions.RoleToPermissionsMappingService;
 
 /**
  * User Account Association Service Implementation.
@@ -27,6 +27,7 @@ import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServiceImpl implements UserAccountAssociationService {
 
 	private CustomerService customerService;
+	private RoleToPermissionsMappingService roleToPermissionMappingService;
 
 	@Override
 	public UserAccountAssociation add(final UserAccountAssociation userAccountAssociation) {
@@ -34,8 +35,24 @@ public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServ
 	}
 
 	@Override
+	public UserAccountAssociation update(final String userGuid, final String accountGuid, final String role) {
+		UserAccountAssociation userAccountAssociation = findAssociationForUserAndAccount(userGuid, accountGuid);
+		userAccountAssociation.setAccountRole(role);
+
+		return update(userAccountAssociation);
+	}
+
+	@Override
 	public UserAccountAssociation update(final UserAccountAssociation userAccountAssociation) {
 		return getPersistenceEngine().saveOrUpdate(userAccountAssociation);
+	}
+
+	@Override
+	public void remove(final String userGuid, final String accountGuid) {
+		UserAccountAssociation userAccountAssociation = findAssociationForUserAndAccount(userGuid, accountGuid);
+		if (userAccountAssociation != null) {
+			remove(userAccountAssociation);
+		}
 	}
 
 	@Override
@@ -74,9 +91,9 @@ public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServ
 	}
 
 	@Override
-	public UserAccountAssociation associateUserToAccount(final Customer user, final Customer account, final AccountRole role)
+	public UserAccountAssociation associateUserToAccount(final Customer user, final Customer account, final String role)
 			throws IllegalArgumentException {
-		return associateUserToAccount(user.getGuid(), account.getGuid(), role.getName());
+		return associateUserToAccount(user.getGuid(), account.getGuid(), role);
 	}
 
 	@Override
@@ -98,7 +115,7 @@ public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServ
 			validateUserAccountAssociation(userGuid, accountGuid, role);
 			userAccountAssociation.setUserGuid(userGuid);
 			userAccountAssociation.setAccountGuid(accountGuid);
-			userAccountAssociation.setAccountRole(AccountRole.valueOf(role));
+			userAccountAssociation.setAccountRole(role);
 		}
 		return getPersistenceEngine().saveOrUpdate(userAccountAssociation);
 	}
@@ -129,7 +146,7 @@ public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServ
 	public Collection<UserAccountAssociation> findByIDs(final List<Long> uids) {
 		return getPersistenceEngine().retrieveByNamedQueryWithList("USER_ACCOUNT_ASSOCIATIONS_BY_UIDS", "list", uids);
 	}
-	
+
 	@Override
 	public boolean isExistingUserAssociation(final String accountCustomerGuid, final String associatedCustomerGuid) {
 		final List<Long> results = getPersistenceEngine().retrieveByNamedQuery("USER_ACCOUNT_EXISTS_BY_ACCOUNT_AND_USER", accountCustomerGuid,
@@ -142,7 +159,7 @@ public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServ
 		UserAccountAssociation userAccountAssociation = getPrototypeBean(ContextIdNames.USER_ACCOUNT_ASSOCIATION, UserAccountAssociationImpl.class);
 		userAccountAssociation.setAccountGuid(accountGuid);
 		userAccountAssociation.setUserGuid(userGuid);
-		userAccountAssociation.setAccountRole(AccountRole.valueOf(role));
+		userAccountAssociation.setAccountRole(role);
 		return userAccountAssociation;
 	}
 
@@ -157,17 +174,15 @@ public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServ
 		checkArgument(customerService.getCustomerTypeByGuid(accountGuid).equals(CustomerType.ACCOUNT),
 				"Invalid UserAccountAssociation: The supplied Account guid is not a customer of type ACCOUNT: " + accountGuid);
 
-		checkArgument(customerService.getCustomerTypeByGuid(userGuid).equals(CustomerType.REGISTERED_USER),
+		checkArgument(customerService.getCustomerTypeByGuid(userGuid).equals(CustomerType.REGISTERED_USER)
+						|| customerService.getCustomerTypeByGuid(userGuid).equals(CustomerType.SINGLE_SESSION_USER),
 				"Invalid UserAccountAssociation: The supplied User guid is not a customer of type REGISTERED USER: " + userGuid);
 
 		checkArgument(StringUtils.isNotBlank(role),
 				"Invalid UserAccountAssociation: Missing role.");
 
-		try {
-			AccountRole.valueOf(role);
-		} catch (IllegalArgumentException ex) {
-			throw new IllegalArgumentException("Invalid UserAccountAssociation: The supplied role "
-					+ role + " is not a valid role. ", ex);
+		if (!roleToPermissionMappingService.getDefinedRoleKeys().contains(role)) {
+			throw new IllegalArgumentException("Invalid UserAccountAssociation: The supplied role " + role + " is not a valid role. ");
 		}
 	}
 
@@ -190,5 +205,13 @@ public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServ
 
 	public void setCustomerService(final CustomerService customerService) {
 		this.customerService = customerService;
+	}
+
+	protected RoleToPermissionsMappingService getRoleToPermissionMappingService() {
+		return roleToPermissionMappingService;
+	}
+
+	public void setRoleToPermissionMappingService(final RoleToPermissionsMappingService roleToPermissionMappingService) {
+		this.roleToPermissionMappingService = roleToPermissionMappingService;
 	}
 }

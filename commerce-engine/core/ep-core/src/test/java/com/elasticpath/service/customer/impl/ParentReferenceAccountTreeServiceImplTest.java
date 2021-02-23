@@ -32,6 +32,8 @@ public class ParentReferenceAccountTreeServiceImplTest {
 	private static final String NOT_ACCOUNT_MESSAGE = "This customer is not of type ACCOUNT.";
 	private static final String ACCOUNT_PARENT_GUID = "1";
 	private static final String ACCOUNT_CHILD_GUID = "2";
+	private static final int MAX_RESULTS = 5;
+	private static final int FIRST_RESULT = 1;
 
 	@Mock
 	private CustomerService customerService;
@@ -139,6 +141,17 @@ public class ParentReferenceAccountTreeServiceImplTest {
 
 	@Test
 	public void testThatFetchChildAccountGuidsReturnsChildAccountGuids() {
+		final List<Object> childGuids = Collections.singletonList(ACCOUNT_CHILD_GUID);
+		when(persistenceEngine.retrieveByNamedQueryWithList("ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS",
+				"guidsThisLevel", Collections.singletonList(ACCOUNT_PARENT_GUID), new Object[]{}, FIRST_RESULT, MAX_RESULTS)).thenReturn(childGuids);
+
+		final List<String> childAccountGuids = parentReferenceAccountTreeService.fetchChildAccountGuidsPaginated(parent.getGuid(),
+				FIRST_RESULT, MAX_RESULTS);
+		assertThat(childAccountGuids.get(0)).isEqualTo(ACCOUNT_CHILD_GUID);
+	}
+
+	@Test
+	public void testThatFetchChildAccountGuidsPaginatedReturnsChildAccountGuids() {
 		final List<Object> childGuids = Collections.singletonList(ACCOUNT_CHILD_GUID);
 		when(persistenceEngine.retrieveByNamedQueryWithList("ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS",
 				"guidsThisLevel", Collections.singletonList(ACCOUNT_PARENT_GUID))).thenReturn(childGuids);

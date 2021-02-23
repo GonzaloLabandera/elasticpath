@@ -25,7 +25,7 @@ import com.elasticpath.service.cmuser.UserRoleService;
 public class CmUserTestPersister {
 
 	private static final String DELIM_COMMA = ",";
-	private static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd hh:mm:ss";
+	private static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
 
 	private final BeanFactory beanFactory;
 	private final CmUserService cmUserService;
@@ -91,7 +91,7 @@ public class CmUserTestPersister {
 
 		//default value for CreationDate is new Date(). so don't allow 'null'
 		if (StringUtils.isNotBlank(creationDate)) {
-			cmUser.setCreationDate(new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS, Locale.CANADA)
+			cmUser.setCreationDate(new SimpleDateFormat(DATE_FORMAT, Locale.CANADA)
 				.parse(creationDate));
 		}
 

@@ -10,12 +10,14 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import com.elasticpath.tools.epcoretool.client.parsers.BulkSetSettingParser;
+import com.elasticpath.tools.epcoretool.client.parsers.BulkSetSettingsMetadataParser;
 import com.elasticpath.tools.epcoretool.client.parsers.IndexBuildStatusParser;
 import com.elasticpath.tools.epcoretool.client.parsers.PingSearchServerParser;
 import com.elasticpath.tools.epcoretool.client.parsers.RecompileRuleBaseParser;
 import com.elasticpath.tools.epcoretool.client.parsers.RequestReindexAndWaitParser;
 import com.elasticpath.tools.epcoretool.client.parsers.RequestReindexParser;
 import com.elasticpath.tools.epcoretool.client.parsers.SetCmUserPasswordParser;
+import com.elasticpath.tools.epcoretool.client.parsers.SetSettingMetadataParser;
 import com.elasticpath.tools.epcoretool.client.parsers.SetSettingParser;
 import com.elasticpath.tools.epcoretool.client.parsers.SetStoreURLParser;
 import com.elasticpath.tools.epcoretool.client.parsers.UnSetSettingParser;
@@ -60,6 +62,8 @@ public final class Cli {
 		parsers.put("set-setting", new SetSettingParser());
 		parsers.put("set-store-url", new SetStoreURLParser());
 		parsers.put("unset-setting", new UnSetSettingParser());
+		parsers.put("set-settings-metadata", new SetSettingMetadataParser());
+		parsers.put("bulk-set-settings-metadata", new BulkSetSettingsMetadataParser());
 
 		try {
 			if (args.length == 0) {

@@ -18,7 +18,7 @@ public interface EventTypeFactory {
 	 * @param action event action.
 	 * @return event type.
 	 */
-	default EventType getEventType(Class<?> clazz, EventAction action) {
+	default EventType getEventType(Class<?> clazz, EventActionEnum action) {
 		throw new UnsupportedEventActionException("Unsupported action");
 	}
 
@@ -41,23 +41,5 @@ public interface EventTypeFactory {
 	 * @param action action to check.
 	 * @return true, if type is supported and event type can be built, false otherwise.
 	 */
-	<T> boolean isSupported(Class<T> clazz, EventAction action);
-
-	/**
-	 * Represents domain event action.
-	 */
-	enum EventAction {
-		/**
-		 * Created event.
-		 */
-		CREATED,
-		/**
-		 * Created event.
-		 */
-		UPDATED,
-		/**
-		 * Created event.
-		 */
-		DELETED
-	}
+	<T> boolean isSupported(Class<T> clazz, EventActionEnum action);
 }

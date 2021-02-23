@@ -34,6 +34,7 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.event.CustomerEventListener;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
+import com.elasticpath.cmclient.fulfillment.util.AddressUtil;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
@@ -162,26 +163,7 @@ public class CustomerDetailsAddressDefaultSection extends AbstractCmClientEditor
 	}
 
 	private String formatAddressLabel(final Address address) {
-		final StringBuilder addressLine = new StringBuilder();
-		addressLine.append(address.getFirstName());
-		addressLine.append(' ');
-		addressLine.append(address.getLastName());
-		addressLine.append(", "); //$NON-NLS-1$
-		addressLine.append(address.getStreet1());
-		if (address.getStreet2() != null && !address.getStreet2().equals("")) { //$NON-NLS-1$
-			addressLine.append(", "); //$NON-NLS-1$
-			addressLine.append(address.getStreet2());
-		}
-		addressLine.append(", "); //$NON-NLS-1$
-		addressLine.append(address.getCity());
-		addressLine.append(", "); //$NON-NLS-1$
-		addressLine.append(address.getZipOrPostalCode());
-		if (address.getSubCountry() != null && !address.getSubCountry().equals("")) { //$NON-NLS-1$
-			addressLine.append(", "); //$NON-NLS-1$
-			addressLine.append(address.getSubCountry());
-		}
-
-		return addressLine.toString();
+		return AddressUtil.formatAddress(address, true);
 	}
 
 	@Override

@@ -12,14 +12,14 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty        | 1                         |
-      | Return Sku Code   | <original-sku-code>       |
-      | Exchange Sku Code | <exchange-sku-code>       |
-      | Price List Name   | Mobile Price List         |
-      | Shipping Address  | Test User, 98119, Seattle |
-      | Shipping Method   | FedEx Express             |
-      | Payment Options   | Payment Source            |
-      | Payment Source    | Original payment source   |
+      | Return Qty        | 1                                                       |
+      | Return Sku Code   | <original-sku-code>                                     |
+      | Exchange Sku Code | <exchange-sku-code>                                     |
+      | Price List Name   | Mobile Price List                                       |
+      | Shipping Address  | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method   | FedEx Express                                           |
+      | Payment Options   | Payment Source                                          |
+      | Payment Source    | Original payment source                                 |
     Then I should see the returned sku code <original-sku-code>
     When I open the exchange order editor
     Then I should see the original order# as External Order# and exchange order# as Order#
@@ -37,12 +37,12 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty       | 1                         |
-      | Return Sku Code  | <sku-code>                |
-      | Shipping Address | Test User, 98119, Seattle |
-      | Shipping Method  | FedEx Express             |
-      | Payment Options  | Payment Source            |
-      | Payment Source   | Original payment source   |
+      | Return Qty       | 1                                                       |
+      | Return Sku Code  | <sku-code>                                              |
+      | Shipping Address | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method  | FedEx Express                                           |
+      | Payment Options  | Payment Source                                          |
+      | Payment Source   | Original payment source                                 |
     Then I should NOT see following order payment transaction in the Payment History
       | Type   | Credit   |
       | Status | Approved |
@@ -64,12 +64,12 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty       | 1                         |
-      | Return Sku Code  | <sku-code>                |
-      | Shipping Address | Test User, 98119, Seattle |
-      | Shipping Method  | FedEx Express             |
-      | Payment Options  | Payment Source            |
-      | Payment Source   | Original payment source   |
+      | Return Qty       | 1                                                       |
+      | Return Sku Code  | <sku-code>                                              |
+      | Shipping Address | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method  | FedEx Express                                           |
+      | Payment Options  | Payment Source                                          |
+      | Payment Source   | Original payment source                                 |
     And shipping receive return is processed for quantity 1 of sku <sku-code>
     And I complete the exchange refunding to original source
     Then I should see following order payment transaction in the Payment History
@@ -89,13 +89,13 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty       | 1                         |
-      | Return Sku Code  | <sku-code>                |
-      | Shipping Address | Test User, 98119, Seattle |
-      | Shipping Method  | FedEx Express             |
-      | Manual Refund    | true                      |
-      | Payment Options  | Payment Source            |
-      | Payment Source   | Original payment source   |
+      | Return Qty       | 1                                                       |
+      | Return Sku Code  | <sku-code>                                              |
+      | Shipping Address | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method  | FedEx Express                                           |
+      | Manual Refund    | true                                                    |
+      | Payment Options  | Payment Source                                          |
+      | Payment Source   | Original payment source                                 |
     Then I should see following order payment transaction in the Payment History
       | Type   | Manual Credit     |
       | Status | Approved          |
@@ -122,12 +122,12 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty       | 1                                         |
-      | Return Sku Code  | <sku-code>                                |
-      | Shipping Address | given-name family-name, V7V7V7, Vancouver |
-      | Shipping Method  | Canada Post 2 days                        |
-      | Payment Options  | Payment Source                            |
-      | Payment Source   | Original payment source                   |
+      | Return Qty       | 1                                                                                 |
+      | Return Sku Code  | <sku-code>                                                                        |
+      | Shipping Address | given-name family-name, 123 Broadway, extended address, Vancouver, BC, V7V7V7, CA |
+      | Shipping Method  | Canada Post 2 days                                                                |
+      | Payment Options  | Payment Source                                                                    |
+      | Payment Source   | Original payment source                                                           |
     Then I should see the returned sku code <sku-code>
 
     Examples:
@@ -148,15 +148,15 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty        | 1                         |
-      | Return Sku Code   | <SKU>                     |
-      | Exchange Sku Code | <SKU>                     |
-      | Return Required   | False                     |
-      | Price List Name   | Mobile Price List         |
-      | Shipping Address  | Test User, 98119, Seattle |
-      | Shipping Method   | FedEx Express             |
-      | Payment Options   | Alternate payment source  |
-      | Payment Source    | <ALTERNATE_PAYMENT>       |
+      | Return Qty        | 1                                                       |
+      | Return Sku Code   | <SKU>                                                   |
+      | Exchange Sku Code | <SKU>                                                   |
+      | Return Required   | False                                                   |
+      | Price List Name   | Mobile Price List                                       |
+      | Shipping Address  | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method   | FedEx Express                                           |
+      | Payment Options   | Alternate payment source                                |
+      | Payment Source    | <ALTERNATE_PAYMENT>                                     |
     Then I should see following order payment transaction in the Payment History
       | Type    | Credit             |
       | Details | <ORIGINAL_PAYMENT> |
@@ -181,14 +181,14 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty        | 1                             |
-      | Return Sku Code   | <FREE_SKU>                    |
-      | Exchange Sku Code | <FREE_SKU>                    |
-      | Price List Name   | Mobile Price List             |
-      | Shipping Address  | Test User, V1V 2K2, Vancouver |
-      | Shipping Method   | Canada Post 2 days            |
-      | Payment Options   | Payment Source                |
-      | Payment Source    | Original payment source       |
+      | Return Qty        | 1                                                     |
+      | Return Sku Code   | <FREE_SKU>                                            |
+      | Exchange Sku Code | <FREE_SKU>                                            |
+      | Price List Name   | Mobile Price List                                     |
+      | Shipping Address  | Test User, 123 Somestreet, Vancouver, BC, V1V 2K2, CA |
+      | Shipping Method   | Canada Post 2 days                                    |
+      | Payment Options   | Payment Source                                        |
+      | Payment Source    | Original payment source                               |
     Then I should NOT see Credit order payment transaction type in the Payment History
     When I open the exchange order editor
     Then I should NOT see Reserve order payment transaction type in the Payment History
@@ -211,15 +211,15 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty        | 1                         |
-      | Return Sku Code   | <FREE_SKU>                |
-      | Exchange Sku Code | <FREE_SKU>                |
-      | Return Required   | False                     |
-      | Price List Name   | Mobile Price List         |
-      | Shipping Address  | Test User, 98119, Seattle |
-      | Shipping Method   | FedEx Express             |
-      | Payment Options   | Alternate payment source  |
-      | Payment Source    | <ALTERNATE_PAYMENT>       |
+      | Return Qty        | 1                                                       |
+      | Return Sku Code   | <FREE_SKU>                                              |
+      | Exchange Sku Code | <FREE_SKU>                                              |
+      | Return Required   | False                                                   |
+      | Price List Name   | Mobile Price List                                       |
+      | Shipping Address  | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method   | FedEx Express                                           |
+      | Payment Options   | Alternate payment source                                |
+      | Payment Source    | <ALTERNATE_PAYMENT>                                     |
     Then I should NOT see Credit order payment transaction type in the Payment History
     When I open the exchange order editor
     Then I should see following order payment transaction in the Payment History
@@ -242,16 +242,16 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create exchange with adjusted shipping costs
-      | Return Qty             | 1                             |
-      | Return Sku Code        | <FREE_SKU>                    |
-      | Exchange Sku Code      | <FREE_SKU>                    |
-      | Return Required        | False                         |
-      | Price List Name        | Mobile Price List             |
-      | Shipping Address       | Test User, V1V 2K2, Vancouver |
-      | Shipping Method        | Canada Post 2 days            |
-      | Adjusted Shipping Cost | 0                             |
-      | Payment Options        | Payment Source                |
-      | Payment Source         | Original payment source       |
+      | Return Qty             | 1                                                     |
+      | Return Sku Code        | <FREE_SKU>                                            |
+      | Exchange Sku Code      | <FREE_SKU>                                            |
+      | Return Required        | False                                                 |
+      | Price List Name        | Mobile Price List                                     |
+      | Shipping Address       | Test User, 123 Somestreet, Vancouver, BC, V1V 2K2, CA |
+      | Shipping Method        | Canada Post 2 days                                    |
+      | Adjusted Shipping Cost | 0                                                     |
+      | Payment Options        | Payment Source                                        |
+      | Payment Source         | Original payment source                               |
     Then I should NOT see Credit order payment transaction type in the Payment History
     When I open the exchange order editor
     Then I should NOT see Reserve order payment transaction type in the Payment History
@@ -268,15 +268,15 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with error
-      | Return Qty               | 1                                    |
-      | Return Sku Code          | <FREE_SKU>                           |
-      | Exchange Sku Code        | <FREE_SKU>                           |
-      | Price List Name          | Mobile Price List                    |
-      | Shipping Address         | Test User, V1V 2K2, Vancouver        |
-      | Shipping Method          | Fixed Price No Promo Shipping Option |
-      | Payment Options          | Payment Source                       |
-      | Payment Source           | Original payment source              |
-      | Error processing payment | True                                 |
+      | Return Qty               | 1                                                     |
+      | Return Sku Code          | <FREE_SKU>                                            |
+      | Exchange Sku Code        | <FREE_SKU>                                            |
+      | Price List Name          | Mobile Price List                                     |
+      | Shipping Address         | Test User, 123 Somestreet, Vancouver, BC, V1V 2K2, CA |
+      | Shipping Method          | Fixed Price No Promo Shipping Option                  |
+      | Payment Options          | Payment Source                                        |
+      | Payment Source           | Original payment source                               |
+      | Error processing payment | True                                                  |
     Then Error message No original payment instrument was found for the order. appears
 
     Examples:
@@ -293,14 +293,14 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with error
-      | Return Qty                       | 1                         |
-      | Return Sku Code                  | <sku-code>                |
-      | Shipping Address                 | Test User, 98119, Seattle |
-      | Shipping Method                  | FedEx Express             |
-      | Return Required                  | False                     |
-      | Payment Options                  | Payment Source            |
-      | Payment Source                   | Original payment source   |
-      | Exchange order will be cancelled | True                      |
+      | Return Qty                       | 1                                                       |
+      | Return Sku Code                  | <sku-code>                                              |
+      | Shipping Address                 | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method                  | FedEx Express                                           |
+      | Return Required                  | False                                                   |
+      | Payment Options                  | Payment Source                                          |
+      | Payment Source                   | Original payment source                                 |
+      | Exchange order will be cancelled | True                                                    |
     And I search and open order editor for the latest exchange order
     Then the order status should be Cancelled
     Examples:
@@ -321,16 +321,16 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with following values
-      | Return Qty                                | 1                         |
-      | Return Sku Code                           | <SKU>                     |
-      | Exchange Sku Code                         | <SKU>                     |
-      | Return Required                           | False                     |
-      | Price List Name                           | Mobile Price List         |
-      | Shipping Address                          | Test User, 98119, Seattle |
-      | Shipping Method                           | FedEx Express             |
-      | Payment Options                           | Alternate payment source  |
-      | Not Selected Payment Source error message | true                      |
-      | Payment Source                            | <ALTERNATE_PAYMENT>       |
+      | Return Qty                                | 1                                                       |
+      | Return Sku Code                           | <SKU>                                                   |
+      | Exchange Sku Code                         | <SKU>                                                   |
+      | Return Required                           | False                                                   |
+      | Price List Name                           | Mobile Price List                                       |
+      | Shipping Address                          | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method                           | FedEx Express                                           |
+      | Payment Options                           | Alternate payment source                                |
+      | Not Selected Payment Source error message | true                                                    |
+      | Payment Source                            | <ALTERNATE_PAYMENT>                                     |
     Then I should see following order payment transaction in the Payment History
       | Type    | Credit             |
       | Details | <ORIGINAL_PAYMENT> |
@@ -354,12 +354,12 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     And I create a exchange with following values
-      | Return Qty       | 1                         |
-      | Return Sku Code  | <sku-code>                |
-      | Shipping Address | Test User, 98119, Seattle |
-      | Shipping Method  | FedEx Express             |
-      | Payment Options  | Payment Source            |
-      | Payment Source   | Original payment source   |
+      | Return Qty       | 1                                                       |
+      | Return Sku Code  | <sku-code>                                              |
+      | Shipping Address | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method  | FedEx Express                                           |
+      | Payment Options  | Payment Source                                          |
+      | Payment Source   | Original payment source                                 |
     When I cancel the exchange under the original order
     Then The status of exchange order is Cancelled
     And The RMA status is Cancelled
@@ -376,12 +376,12 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     And I create a exchange with following values
-      | Return Qty       | 1                         |
-      | Return Sku Code  | <sku-code>                |
-      | Shipping Address | Test User, 98119, Seattle |
-      | Shipping Method  | FedEx Express             |
-      | Payment Options  | Payment Source            |
-      | Payment Source   | Original payment source   |
+      | Return Qty       | 1                                                       |
+      | Return Sku Code  | <sku-code>                                              |
+      | Shipping Address | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method  | FedEx Express                                           |
+      | Payment Options  | Payment Source                                          |
+      | Payment Source   | Original payment source                                 |
     And I open the exchange order editor
     And I cancel the order
     And shipping receive return is processed for quantity 1 of sku <sku-code>
@@ -405,14 +405,14 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I create a exchange with error
-      | Return Qty                       | 1                         |
-      | Return Sku Code                  | <sku-code>                |
-      | Shipping Address                 | Test User, 98119, Seattle |
-      | Shipping Method                  | FedEx Express             |
-      | Return Required                  | True                      |
-      | Payment Options                  | Payment Source            |
-      | Payment Source                   | Original payment source   |
-      | Exchange order will be cancelled | False                     |
+      | Return Qty                       | 1                                                       |
+      | Return Sku Code                  | <sku-code>                                              |
+      | Shipping Address                 | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method                  | FedEx Express                                           |
+      | Return Required                  | True                                                    |
+      | Payment Options                  | Payment Source                                          |
+      | Payment Source                   | Original payment source                                 |
+      | Exchange order will be cancelled | False                                                   |
     And shipping receive return is processed for quantity 1 of sku <sku-code>
     And I complete the exchange refunding to original source with error
     Then Error message Capability is not supported by payment provider. appears
@@ -429,12 +429,12 @@ Feature: Order Exchange
     And I search and open order editor for the latest order
     And I complete the order shipment
     When I prepare an exchange with following values
-      | Return Qty       | 1                         |
-      | Return Sku Code  | <sku-code>                |
-      | Shipping Address | Test User, 98119, Seattle |
-      | Shipping Method  | FedEx Express             |
-      | Payment Options  | Payment Source            |
-      | Payment Source   | Original payment source   |
+      | Return Qty       | 1                                                       |
+      | Return Sku Code  | <sku-code>                                              |
+      | Shipping Address | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method  | FedEx Express                                           |
+      | Payment Options  | Payment Source                                          |
+      | Payment Source   | Original payment source                                 |
     Then Authorize Exchange button should be enabled
     And Authorize Exchange button should be disabled on previous page
     And Authorize Exchange button should be disabled on previous page
@@ -459,14 +459,14 @@ Feature: Order Exchange
       | Refund Note             | Refund                  |
       | Payment Source          | Original payment source |
     When I create a exchange with error
-      | Return Qty                       | 1                         |
-      | Return Sku Code                  | <sku-code>                |
-      | Shipping Address                 | Test User, 98119, Seattle |
-      | Shipping Method                  | FedEx Express             |
-      | Return Required                  | False                     |
-      | Payment Options                  | Payment Source            |
-      | Payment Source                   | Original payment source   |
-      | Exchange order will be cancelled | True                      |
+      | Return Qty                       | 1                                                       |
+      | Return Sku Code                  | <sku-code>                                              |
+      | Shipping Address                 | Test User, 555 Elliott Avenue W, Seattle, WA, 98119, US |
+      | Shipping Method                  | FedEx Express                                           |
+      | Return Required                  | False                                                   |
+      | Payment Options                  | Payment Source                                          |
+      | Payment Source                   | Original payment source                                 |
+      | Exchange order will be cancelled | True                                                    |
     Then I should NOT see following order payment transaction in the Payment History
       | Type    | Credit            |
       | Details | <INSTRUMENT_NAME> |

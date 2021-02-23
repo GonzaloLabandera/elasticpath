@@ -31,3 +31,13 @@ Feature: Buyer Finance needs Accounts transactions listed in purchase history
     And I get the account with the field account-business-name with value Some Business Account
     And I follow links purchases
     Then there is an element for the newly create order
+
+  Scenario: Account orders show up in accountpurchaselist link
+	Given I add X-Ep-Account-Shared-Id header accounttest1@elasticpath.com
+ 	And I have previously made a purchase with item code digital_sku
+	And I navigate links defaultprofile -> accounts
+	And I get the account with the field account-business-name with value Some Business Account
+	And I follow links purchases
+	And I get the order with the field status with value COMPLETED
+	And I follow links accountpurchaselist
+	Then there is an element for the newly create order

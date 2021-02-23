@@ -411,6 +411,11 @@
              statePolicy="com.elasticpath.cmclient.store.policy.ShoppingCartPromotionAuthorizationStatePolicy"
              targetId="newShoppingCartPromotionWizard">
        </statePolicyContribution>
+       <statePolicyContribution
+               priority="10"
+               statePolicy="com.elasticpath.cmclient.store.policy.CatalogPromotionAuthorizationStatePolicy"
+               targetId="newCatalogPromotionWizard">
+       </statePolicyContribution>
     </extension>
 
     <extension point="com.elasticpath.cmclient.changeset.supportedComponents">

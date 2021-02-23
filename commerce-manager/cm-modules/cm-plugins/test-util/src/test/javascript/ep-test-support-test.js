@@ -16,14 +16,14 @@ describe("EPTest Test Suite", function () {
     });
 
     describe("scrollToTableItemWithText", function() {
-        var topItem, widget;
+        var rootItem, cachedChildren, widget;
 
         beforeEach(function () {
             //setup test
 
             widget = {
-                _getTopItem: function() {
-                    return topItem;
+                getRootItem: function() {
+                    return rootItem;
                 },
                 scrollItemIntoView: function(a) {
 
@@ -49,7 +49,11 @@ describe("EPTest Test Suite", function () {
                     return this.widget;
                 }
             };
-
+            rootItem = {
+                getCachedChildren: function () {
+                    return cachedChildren;
+                }
+            };
             spyOn(rwt.remote, "WidgetManager").and.returnValue(manager);
             spyOn(widget, 'scrollItemIntoView');
             spyOn(widget, 'deselectAll');
@@ -57,13 +61,25 @@ describe("EPTest Test Suite", function () {
         });
 
         it("returns true when item with string is found", function () {
+            cachedChildren = [{
+                _texts : ["testString"]
+            }];
 
-            topItem= {
-                _texts : ["testString"],
-                getNextItem: function() {
-                    return null;
-                }
-            };
+            var result = EPTest.scrollToTableItemWithText("dummy selector", "testString", "columnName");
+            expect(result).toBe(true);
+            expect(widget.scrollItemIntoView).toHaveBeenCalled();
+            expect(widget.deselectAll).toHaveBeenCalled();
+            expect(widget.selectItem).toHaveBeenCalled();
+
+        });
+        it("returns true when item with string with encoding markers is found", function () {
+            var beginningMarker = '\uFEFF';
+            var endMarker = '\u180E'
+            cachedChildren = [{
+                _texts : [beginningMarker + "testCode" + endMarker + "testString"]
+            }];
+            EPTest.setEncodingMarkers(beginningMarker, endMarker)
+
             var result = EPTest.scrollToTableItemWithText("dummy selector", "testString", "columnName");
             expect(result).toBe(true);
             expect(widget.scrollItemIntoView).toHaveBeenCalled();
@@ -73,45 +89,34 @@ describe("EPTest Test Suite", function () {
         });
 
         it("returns false when string is not found", function () {
+            cachedChildren = [{
+                _texts : ["testString"]
+            }];
 
-            topItem= {
-                _texts : ["testString"],
-                getNextItem: function() {
-                    return null;
-                }
-            };
             var result = EPTest.scrollToTableItemWithText("dummy selector", "unused-string", "columnName");
             expect(result).toBe(false);
             expect(widget.scrollItemIntoView).not.toHaveBeenCalled();
 
         });
         it("returns false when string is in the wrong column", function () {
+            cachedChildren = [{
+                _texts : ["testString"]
+            }];
 
-            topItem= {
-                _texts : ["testString"],
-                getNextItem: function() {
-                    return null;
-                }
-            };
             var result = EPTest.scrollToTableItemWithText("dummy selector", "testString", "otherColumnName");
             expect(result).toBe(false);
             expect(widget.scrollItemIntoView).not.toHaveBeenCalled();
 
         });
         it(" returns true when string is found in 2nd object", function () {
+            cachedChildren = [
+                {
+                    _texts : ["testString" ]
+                },
+                {
+                    _texts : ["second-string"]
+                }];
 
-            var second_item = {
-                _texts : ["second-string"],
-                getNextItem: function() {
-                    return null;
-                }
-            };
-            topItem = {
-                _texts : ["testString" ],
-                getNextItem: function() {
-                    return second_item;
-                    }
-            };
             var result = EPTest.scrollToTableItemWithText("dummy selector", "second-string", "columnName");
             expect(result).toBe(true);
             expect(widget.scrollItemIntoView).toHaveBeenCalled();

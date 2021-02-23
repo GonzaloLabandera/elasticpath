@@ -4,8 +4,6 @@
 
 package com.elasticpath.service.orderpaymentapi;
 
-import java.util.List;
-
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
 
@@ -28,12 +26,4 @@ public interface OrderPaymentApiCleanupService {
 	 * @param order order being cleaned up
 	 */
 	void removeByOrder(Order order);
-
-	/**
-	 * Removes order payment instruments.
-	 *
-	 * @param orderUidList list of all order UIDs being cleaned up
-	 */
-	void removeByOrderUidList(List<Long> orderUidList);
-
 }

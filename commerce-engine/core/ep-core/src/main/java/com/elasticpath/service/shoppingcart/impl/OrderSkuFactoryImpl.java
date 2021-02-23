@@ -51,10 +51,19 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 	private TaxCodeRetriever taxCodeRetriever;
 	private TimeService timeService;
 
+	//used in ShoppingCart#getApportionedLeafItems
 	@Override
 	public Collection<OrderSku> createOrderSkus(final Collection<ShoppingItem> rootItems,
 												final ShoppingCartTaxSnapshot taxSnapshot,
 												final Locale locale) {
+		return createOrderSkus(rootItems, taxSnapshot, locale, 0L);
+	}
+
+	@Override
+	public Collection<OrderSku> createOrderSkus(final Collection<ShoppingItem> rootItems,
+												final ShoppingCartTaxSnapshot taxSnapshot,
+												final Locale locale,
+												final long orderId) {
 		Map<String, ItemPricing> rootPricingMap = extractRootPricing(rootItems, taxSnapshot);
 
 		Map<String, Map<String, ItemPricing>> bundleApportionedPriceMap = getBundleApportionedPriceMap(rootItems, rootPricingMap, taxSnapshot);
@@ -63,10 +72,8 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 
 		applyApportionedDiscount(bundleQuantityApportionedPriceMap, extractDiscount(rootPricingMap));
 
-		return createOrderSkusWithApportionedPrices(rootItems,
-													extractAllLeavesItemPricings(bundleQuantityApportionedPriceMap),
-			taxSnapshot,
-													locale);
+		return createOrderSkusWithApportionedPrices(rootItems, extractAllLeavesItemPricings(bundleQuantityApportionedPriceMap),
+				taxSnapshot, locale, orderId);
 	}
 
 	@Override
@@ -291,11 +298,13 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 									final OrderSku parentSku,
 									final Map<String, List<ItemPricing>> leavesItemPricings,
 									final ShoppingCartTaxSnapshot taxSnapshot,
-									final Locale locale) {
+									final Locale locale,
+								    final long orderId) {
 		Collection<OrderSku> childrenSku = createOrderSkusWithApportionedPrices(parentItem.getBundleItems(getProductSkuLookup()),
 																				leavesItemPricings,
 																				taxSnapshot,
-																				locale);
+																				locale,
+																				orderId);
 
 		for (OrderSku childSku : childrenSku) {
 			parentSku.addChildItem(childSku);
@@ -303,7 +312,9 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 	}
 
 	private OrderSku createOrderSkuWithApportionedPrices(final ShoppingItem item, final ItemPricing apportionedPricing,
-															final ShoppingItemTaxSnapshot shoppingItemTaxSnapshot, final Locale locale) {
+														 final ShoppingItemTaxSnapshot shoppingItemTaxSnapshot,
+														 final Locale locale,
+														 final long orderId) {
 		final OrderSku orderSku = createSimpleOrderSku();
 		copyFields(item, orderSku, locale);
 		copyData(item, orderSku);
@@ -312,6 +323,7 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 		if (apportionedPricing != null) {
 			setItemPricing(orderSku, apportionedPricing);
 		}
+		orderSku.setOrderUidPk(orderId);
 
 		return orderSku;
 	}
@@ -324,12 +336,14 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 	 * @param leavesPricingsMap a price map.
 	 * @param cartTaxSnapshot the tax aware pricing snapshot for the cart containing the shopping items
 	 * @param locale {@code Locale} for determining correct language for product sku description.
+	 * @param orderId the order id
 	 * @return a collection of {@link OrderSku}.
 	 */
 	protected Collection<OrderSku> createOrderSkusWithApportionedPrices(final Collection<ShoppingItem> shoppingItems,
 																		final Map<String, List<ItemPricing>> leavesPricingsMap,
 																		final ShoppingCartTaxSnapshot cartTaxSnapshot,
-																		final Locale locale) {
+																		final Locale locale,
+																		final long orderId) {
 		List<OrderSku> orderSkus = new ArrayList<>();
 		for (ShoppingItem shoppingItem : shoppingItems) {
 			OrderSku parentOrderSku = null;
@@ -337,16 +351,16 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 			List<ItemPricing> leavesPricings = leavesPricingsMap.get(shoppingItem.getGuid());
 			final ShoppingItemTaxSnapshot shoppingItemTaxSnapshot = cartTaxSnapshot.getShoppingItemTaxSnapshot(shoppingItem);
 			if (leavesPricings == null) {
-				parentOrderSku = createOrderSkuWithApportionedPrices(shoppingItem, null, shoppingItemTaxSnapshot, locale);
+				parentOrderSku = createOrderSkuWithApportionedPrices(shoppingItem, null, shoppingItemTaxSnapshot, locale, orderId);
 				orderSkus.add(parentOrderSku);
 			} else {
 				for (ItemPricing leafPricing : leavesPricings) {
-					orderSkus.add(createOrderSkuWithApportionedPrices(shoppingItem, leafPricing, shoppingItemTaxSnapshot, locale));
+					orderSkus.add(createOrderSkuWithApportionedPrices(shoppingItem, leafPricing, shoppingItemTaxSnapshot, locale, orderId));
 				}
 			}
 
 			if (parentOrderSku != null) {
-				createDependants(shoppingItem, parentOrderSku, leavesPricingsMap, cartTaxSnapshot, locale);
+				createDependants(shoppingItem, parentOrderSku, leavesPricingsMap, cartTaxSnapshot, locale, orderId);
 			}
 		}
 
@@ -414,12 +428,17 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 	 * @return the price map.
 	 */
 	protected Map<String, ItemPricing> extractRootPricing(final Collection<ShoppingItem> shoppingItems,
-															final ShoppingCartTaxSnapshot cartTaxSnapshot) {
+														    final ShoppingCartTaxSnapshot cartTaxSnapshot) {
 		Map<String, ItemPricing> pricing = new HashMap<>();
+
 		for (ShoppingItem item : shoppingItems) {
 			final ShoppingItemTaxSnapshot shoppingItemTaxSnapshot = cartTaxSnapshot.getShoppingItemTaxSnapshot(item);
-			pricing.put(item.getGuid(), shoppingItemTaxSnapshot.getPricingSnapshot().getLinePricing());
+			if (shoppingItemTaxSnapshot.hasPrice()) {
+				ItemPricing linePricing = shoppingItemTaxSnapshot.getPricingSnapshot().getLinePricing();
+				pricing.put(item.getGuid(), linePricing);
+			}
 		}
+
 		return pricing;
 	}
 
@@ -574,7 +593,7 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 
 	/**
 	 * Gets the effective tax code for a product sku.
-	 * 
+	 *
 	 * @param productSku sku for which to find tax code
 	 * @return a tax code
 	 */

@@ -44,6 +44,10 @@
 			<artifactId>ep-rest-repositories-epcommerce</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-accounts</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.elasticpath.rest.helix</groupId>
 			<artifactId>helix-data-injectors</artifactId>
 		</dependency>

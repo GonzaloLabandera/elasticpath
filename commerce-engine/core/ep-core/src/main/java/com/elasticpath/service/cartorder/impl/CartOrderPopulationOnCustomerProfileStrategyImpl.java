@@ -3,6 +3,8 @@
  */
 package com.elasticpath.service.cartorder.impl;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cartorder.CartOrder;
@@ -41,7 +43,7 @@ public class CartOrderPopulationOnCustomerProfileStrategyImpl implements CartOrd
 		CartOrder cartOrder = prototypeBeanFactory.getPrototypeBean(ContextIdNames.CART_ORDER, CartOrder.class);
 		cartOrder.setShoppingCartGuid(shoppingCart.getGuid());
 
-		Customer customer = shoppingCart.getShopper().getCustomer();
+		Customer customer = ObjectUtils.firstNonNull(shoppingCart.getShopper().getAccount(), shoppingCart.getShopper().getCustomer());
 
 		// set the default billing address
 		CustomerAddress billingAddress = customer.getPreferredBillingAddress();

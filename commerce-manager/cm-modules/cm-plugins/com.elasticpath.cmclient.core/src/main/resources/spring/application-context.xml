@@ -53,6 +53,4 @@
 
 	<!-- Overrides for the healthcheck monitor -->
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/ext-monitoring.xml" />
-
-	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
 </beans>

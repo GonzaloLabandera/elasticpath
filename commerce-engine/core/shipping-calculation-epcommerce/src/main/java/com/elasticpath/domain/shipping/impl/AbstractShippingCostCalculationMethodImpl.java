@@ -127,7 +127,7 @@ public abstract class AbstractShippingCostCalculationMethodImpl extends Abstract
 	@Override
 	@Transient
 	public boolean hasParameter(final String key, final Currency... currencies) {
-		checkArgument(currencies.length > 1 || key == null, "Illegal argument: key should not be null and only one currency can be matched.");
+		checkArgument(key != null && currencies.length == 1, "Illegal argument: key should not be null and only one currency can be matched.");
 
 		if (getParameters() == null) {
 			return false;

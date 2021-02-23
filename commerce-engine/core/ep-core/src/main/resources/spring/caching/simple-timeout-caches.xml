@@ -33,14 +33,6 @@
 		<property name="timeToIdle" value="86400" />
 	</bean>
 
-	<bean id="ruleSessionConfigurationCache"
-		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-		<property name="name" value="ruleSessionConfigurationCache"/>
-		<property name="cacheManager" ref="epCoreEhcacheManager"/>
-		<property name="timeToLive" value="300" />
-		<property name="timeToIdle" value="300" />
-	</bean>
-
 	<bean id="catalogRuleBaseCache"
 		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
 		<property name="name" value="catalogRuleBaseCache"/>

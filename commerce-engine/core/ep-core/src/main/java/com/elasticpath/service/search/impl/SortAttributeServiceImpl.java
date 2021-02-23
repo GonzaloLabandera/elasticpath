@@ -158,4 +158,17 @@ public class SortAttributeServiceImpl extends AbstractEpPersistenceServiceImpl i
 				.findFirst()
 				.orElse(null);
 	}
+
+	@Override
+	public void removeAllLocalizedName(final SortAttribute sortAttribute) {
+
+		if (sortAttribute.getLocalizedNames() == null) {
+			return;
+		}
+
+		sortAttribute.getLocalizedNames().values()
+				.forEach(getPersistenceEngine()::delete);
+
+		sortAttribute.getLocalizedNames().clear();
+	}
 }

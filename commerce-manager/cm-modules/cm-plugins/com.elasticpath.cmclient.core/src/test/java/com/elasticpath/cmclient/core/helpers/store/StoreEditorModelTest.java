@@ -3,9 +3,11 @@
  */
 package com.elasticpath.cmclient.core.helpers.store;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -26,6 +28,7 @@ import com.elasticpath.domain.store.StoreState;
  */
 public class StoreEditorModelTest {
 
+	private static final String B2C_ROLE = "role";
 	@Rule
 	public final MockitoRule rule = MockitoJUnit.rule();
 
@@ -55,5 +58,33 @@ public class StoreEditorModelTest {
 
 		when(store.getStoreState()).thenReturn(StoreState.UNDER_CONSTRUCTION);
 		assertTrue(editorModel.isStorePaymentConfigurationSavable());
+	}
+
+	@Test
+	public void testThatEditorModelUsesStoreToGetB2CAuthenticatedRole() {
+		when(store.getB2CAuthenticatedRole()).thenReturn(B2C_ROLE);
+
+		assertThat(editorModel.getB2CAuthenticatedRole()).isEqualTo(B2C_ROLE);
+		verify(store).getB2CAuthenticatedRole();
+	}
+
+	@Test
+	public void testThatEditorModelSetB2CAuthenticatedRoleForStore() {
+		editorModel.setB2CAuthenticatedRole(B2C_ROLE);
+		verify(store).setB2CAuthenticatedRole(B2C_ROLE);
+	}
+
+	@Test
+	public void testThatEditorModelUsesStoreToGetB2CSingleSessionRole() {
+		when(store.getB2CSingleSessionRole()).thenReturn(B2C_ROLE);
+
+		assertThat(editorModel.getB2CSingleSessionRole()).isEqualTo(B2C_ROLE);
+		verify(store).getB2CSingleSessionRole();
+	}
+
+	@Test
+	public void testThatEditorModelSetB2CSingleSessionRole() {
+		editorModel.setB2CSingleSessionRole(B2C_ROLE);
+		verify(store).setB2CSingleSessionRole(B2C_ROLE);
 	}
 }

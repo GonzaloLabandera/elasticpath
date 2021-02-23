@@ -21,12 +21,11 @@
 
     <authentication-manager alias="authenticationManager">
         <authentication-provider user-service-ref="cmUserAuthenticationDao">
-            <password-encoder ref="sha1PasswordEncoder" />
+            <password-encoder ref="cmPasswordEncoder" />
         </authentication-provider>
     </authentication-manager>
 
-    <beans:bean id="cmUserAuthenticationDao"
-                class="com.elasticpath.persistence.impl.CmUserAuthenticationDaoImpl">
+    <beans:bean id="cmUserAuthenticationDao" class="com.elasticpath.persistence.impl.CmUserAuthenticationDaoImpl">
         <beans:property name="persistenceEngine" ref="persistenceEngine" />
     </beans:bean>
 

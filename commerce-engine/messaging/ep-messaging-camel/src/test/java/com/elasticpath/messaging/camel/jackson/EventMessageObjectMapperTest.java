@@ -22,11 +22,11 @@ import com.elasticpath.messaging.spi.EventTypeProvider;
 import com.elasticpath.messaging.spi.impl.EventTypeProviderImpl;
 
 /**
- * Test class for {@link com.elasticpath.messaging.camel.jackson.EventMessageObjectMapper}.
+ * Test class for {@link EventMessageObjectMapperImpl}.
  */
 public class EventMessageObjectMapperTest {
 
-	private EventMessageObjectMapper objectMapper;
+	private EventMessageObjectMapperImpl objectMapper;
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery() {
@@ -46,7 +46,7 @@ public class EventMessageObjectMapperTest {
 	@Before
 	public void setUp() {
 		// Override factory methods to return mocks for verification
-		objectMapper = new EventMessageObjectMapper() {
+		objectMapper = new EventMessageObjectMapperImpl() {
 			private static final long serialVersionUID = -9081253602302444287L;
 
 			@Override
@@ -135,7 +135,7 @@ public class EventMessageObjectMapperTest {
 
 	/**
 	 * This method has not been implemented as there is currently no convenient way to unregister a deserializer from the Jackson ObjectMapper.  One
-	 * strategy could be to keep a shadow copy of all EventTypeProviders in EventMessageObjectMapper,
+	 * strategy could be to keep a shadow copy of all EventTypeProviders in EventMessageObjectMapperImpl,
 	 * call setDeserializers() with an empty SimpleDeserializers, then re-register all existing Event Types,
 	 * omitting the one intended to be removed.
 	 *

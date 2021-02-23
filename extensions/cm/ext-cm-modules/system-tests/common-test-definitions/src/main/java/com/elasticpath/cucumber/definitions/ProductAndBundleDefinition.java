@@ -73,6 +73,7 @@ import com.elasticpath.selenium.wizards.CreateProductWizard;
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessiveParameterList",
 		"PMD.ExcessiveImports", "PMD.ExcessivePublicCount"})
 public class ProductAndBundleDefinition {
+	private static final String CLOSE_PANE_ICON_CSS = "div[widget-id*='%s'][active-tab='true'] > div[style*='close.gif']";
 	private static final String FALSE_VALUE = "false";
 	private final CatalogManagement catalogManagement;
 	private CreateBundleWizard createBundleWizard;
@@ -1432,7 +1433,11 @@ public class ProductAndBundleDefinition {
 	 */
 	@After(value = "@cleanupDependentItem", order = Constants.CLEANUP_ORDER_FIRST)
 	public void deleteCatalogMerchandisingTabProduct() {
-		new OrderEditor(driver).closePane("#" + Purchase.getPurchaseNumber());
+		final OrderEditor orderEditor = new OrderEditor(driver);
+		final String purchaseNumber = "#" + Purchase.getPurchaseNumber();
+		if (orderEditor.isElementInteractive(String.format(CLOSE_PANE_ICON_CSS, purchaseNumber))) {
+			orderEditor.closePane(purchaseNumber);
+		}
 		merchandisingTab.selectCatalogTab("Mobile Virtual Catalog");
 		merchandisingTab.clickMerchandisingTab("Dependent Item");
 		deleteMerchandisingTabProduct(dependentLineItem);
@@ -1829,7 +1834,7 @@ public class ProductAndBundleDefinition {
 	@After(value = "@cleanUpProductEnableDateDB", order = Constants.CLEANUP_ORDER_FIRST)
 	public void saveCurrentProductEnableDatePropertyUsingDb() {
 		DBConnector dbc = new DBConnector();
-		SimpleDateFormat dbDateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss", Locale.ENGLISH);
+		SimpleDateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
 		Calendar calendar = Calendar.getInstance();
 		/*we add 1 day to "last_modified_date" value to resolve potential issue
 		of having different time zones on jenkins server and app under test server*/

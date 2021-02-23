@@ -44,8 +44,8 @@
 	<include file="liquibase/core-changelog-2020-04-authentication-config.xml"/>
 	<include file="liquibase/core-changelog-2020-06-setting-cleanup.xml"/>
 	<include file="liquibase/core-changelog-2020-05-accountmanagement-customertype.xml"/>
-    <include file="liquibase/core-changelog-2020-05-cart-cleanup-jobs.xml"/>
-    <include file="liquibase/core-changelog-2020-06-account-profile-attributes.xml" />
+	<include file="liquibase/core-changelog-2020-05-cart-cleanup-jobs.xml"/>
+	<include file="liquibase/core-changelog-2020-06-account-profile-attributes.xml" />
 	<include file="liquibase/core-changelog-2020-06-add-accountmanagement-user-associations.xml" />
 	<include file="liquibase/core-changelog-2020-06-accountmanagement-customer-storecode.xml"/>
 	<include file="liquibase/core-changelog-2020-06-cleanup-anonymous-customers-job.xml"/>
@@ -56,6 +56,20 @@
 	<include file="liquibase/core-changelog-2020-07-increase-timportfault-table-args-column-size.xml"/>
 	<include file="liquibase/core-changelog-2020-07-add-parent-relationship-tcustomer.xml"/>
 	<include file="liquibase/core-changelog-2020-07-link-shopper-orders-accounts.xml" />
+	<include file="liquibase/core-changelog-2020-02-orderhold.xml"/>
 	<include file="liquibase/core-changelog-2020-08-index-customer-auth-uid.xml"/>
 	<include file="liquibase/core-changelog-2020-08-add-selling-context-conditions-for-accounts.xml"/>
+	<include file="liquibase/core-changelog-2020-08-trusted-traits-settings.xml"/>
+	<include file="liquibase/core-changelog-2020-08-cleanup-expired-failed-orders-job.xml"/>
+	<include file="liquibase/core-changelog-2020-09-enable-promotions.xml"/>
+	<include file="liquibase/core-changelog-2020-09-search-server-renaming.xml" />
+	<include file="liquibase/core-changelog-2020-09-remove-gender.xml" />
+	<include file="liquibase/core-changelog-2020-09-cache-setting-update.xml"/>
+	<include file="liquibase/core-changelog-2020-09-convert-customer-passwords-to-bcrypt.xml" />
+	<include file="liquibase/core-changelog-2020-09-convert-cmuser-passwords-to-bcrypt.xml" />
+	<include file="liquibase/core-changelog-2020-09-update-shoppingcart-default-value.xml" />
+	<include file="liquibase/core-changelog-2020-10-create-outbox.xml" />
+	<include file="liquibase/core-changelog-2020-10-default-b2c-roles-for-store.xml" />
+	<include file="liquibase/core-changelog-2020-09-search-master-customer-indexing.xml"/>
+
 </databaseChangeLog>

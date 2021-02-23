@@ -139,7 +139,9 @@
 		</named-query>
 		<named-query name="ACTIVE_RULEID_AND_SELLINGCONTEXT_FIND_BY_SCENARIO_AND_STORE">
 			<query>
-				SELECT rule.uidPk, rule.sellingContext
+				SELECT new com.elasticpath.service.rules.SellingContextRuleSummary(rule.ruleSet.scenario, rule.uidPk, rule.sellingContext,
+				rule.store,
+				rule.catalog)
 				FROM PromotionRuleImpl rule
 				WHERE rule.enabled = true
 				AND (rule.endDate is null OR rule.endDate &gt; CURRENT_TIMESTAMP)
@@ -147,6 +149,29 @@
 				AND rule.store.code = ?2
 			</query>
 		</named-query>
+
+		<named-query name="ACTIVE_RULEID_AND_SELLINGCONTEXT_FIND_BY_SCENARIO_AND_CATALOG">
+			<query>
+				SELECT new com.elasticpath.service.rules.SellingContextRuleSummary(rule.ruleSet.scenario, rule.uidPk, rule.sellingContext,
+				rule.store, rule.catalog)
+				FROM PromotionRuleImpl rule
+				WHERE rule.enabled = true
+				AND (rule.endDate is null OR rule.endDate &gt; CURRENT_TIMESTAMP)
+				AND rule.ruleSet.scenario = ?1
+				AND rule.catalog.code = ?2
+			</query>
+		</named-query>
+
+	<named-query name="All_ACTIVE_RULEID_AND_SELLINGCONTEXT">
+		<query>
+			SELECT new com.elasticpath.service.rules.SellingContextRuleSummary(rule.ruleSet.scenario, rule.uidPk, rule.sellingContext,
+			rule.store,
+			rule.catalog)
+			FROM PromotionRuleImpl rule
+			WHERE rule.enabled = true
+			AND (rule.endDate is null OR rule.endDate &gt; CURRENT_TIMESTAMP)
+		</query>
+	</named-query>
 
 		<named-query name="RULE_FIND_BY_COUPON_CODE">
 			<query>
@@ -581,6 +606,15 @@
 				SELECT cc.guid
 				FROM CouponConfigImpl cc
 				WHERE cc.ruleCode = ?1
+			</query>
+		</named-query>
+		<named-query name="DISABLE_AUTO_APPLY_TO_CARTS_BY_COUPON_CODE_AND_EMAIL">
+			<query>
+				UPDATE CouponUsageImpl cu
+				SET cu.autoApplyToCarts = false
+				WHERE cu.autoApplyToCarts = true
+				AND cu.coupon.couponCode = ?1
+				AND cu.customerEmailAddress = ?2
 			</query>
 		</named-query>
 

@@ -28,12 +28,13 @@ class ImporterFactoryImpl implements ImporterFactory {
 	private Map<JobType, Importer<? super Persistable, ? super Dto>> importerMap;
 
 	@Override
-	public Importer<? super Persistable, ? super Dto> createImporter(final JobType jobType, final ImportContext context,
+	public Importer<? super Persistable, ? super Dto> createImporter(final String rootName, final ImportContext context,
 			final SavingManager<? extends Persistable> savingManager)
 			throws ConfigurationException {
+		final JobType jobType = JobType.getJobTypeByTag(rootName);
 		Importer<? super Persistable, ? super Dto> importer = importerMap.get(jobType);
 		if (importer == null) {
-			throw new ConfigurationException("can not find appropriate importer for job type " + jobType);
+			throw new ConfigurationException(String.format("No importer available for XML root element \"%s\"", rootName));
 		}
 		LOG.debug("Creating importer for Tag: " + jobType.getTagName());
 		initializeImporterHelper(importer, context, context.getImportConfiguration().getImportStrategyType(jobType), savingManager);

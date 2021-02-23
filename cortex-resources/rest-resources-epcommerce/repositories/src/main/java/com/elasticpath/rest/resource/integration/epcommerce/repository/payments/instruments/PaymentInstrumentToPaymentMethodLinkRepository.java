@@ -6,8 +6,10 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.payments
 
 import io.reactivex.Observable;
 
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.PaymentInstrumentIdentifier;
+import com.elasticpath.rest.definition.paymentmethods.AccountPaymentMethodIdentifier;
 import com.elasticpath.rest.definition.paymentmethods.OrderPaymentMethodIdentifier;
 import com.elasticpath.rest.definition.paymentmethods.ProfilePaymentMethodIdentifier;
 
@@ -32,4 +34,14 @@ public interface PaymentInstrumentToPaymentMethodLinkRepository {
 	 * @return the order payment method REST identifier
 	 */
 	Observable<OrderPaymentMethodIdentifier> getOrderPaymentMethodIdentifier(OrderPaymentInstrumentIdentifier identifier);
+
+	/**
+	 * Finds the account payment method REST identifier by account instrument REST identifier.
+	 *
+	 * @param accountId   unique user identifier
+	 * @param identifier account instrument REST identifier
+	 * @return the account payment method REST identifier
+	 */
+	Observable<AccountPaymentMethodIdentifier> getAccountPaymentMethodIdentifier(String accountId, AccountPaymentInstrumentIdentifier identifier);
+
 }

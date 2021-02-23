@@ -14,7 +14,9 @@
     <store_admin_email>StoreAdmin@elasticpath.com</store_admin_email>
     <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
     <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
+	<b2c_authenticated_role>BUYER</b2c_authenticated_role>
+	<b2c_single_session_role>SINGLE_SESSION_BUYER</b2c_single_session_role>
+	<locales>
         <locale>fr_CA</locale>
         <locale>en</locale>
     </locales>

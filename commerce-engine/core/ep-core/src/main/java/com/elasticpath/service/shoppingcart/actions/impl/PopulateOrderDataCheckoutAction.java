@@ -12,12 +12,12 @@ import org.apache.commons.lang.StringUtils;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 //CHECKSTYLE:OFF
 /**
  * <p>Checkout Action which populates the {@link com.elasticpath.domain.order.Order}'s {@link com.elasticpath.domain.order.OrderData} with data
- * from the {@link CheckoutActionContext}.</p>
+ * from the {@link PreCaptureCheckoutActionContext}.</p>
  *
  * <p>The values that are populated by this action need to be configured via Spring, via the property {@link #orderDataProperties}.</p>
  *
@@ -28,7 +28,7 @@ import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
  *       &lt;property name=&quot;orderDataProperties&quot;&gt;
  *          &lt;map&gt;
  *             &lt;-- Vanilla Property Example --&gt;
- *             &lt;entry key=&quot;gender&quot; value=&quot;shoppingCart.shopper.customer.gender&quot;&gt;
+ *             &lt;entry key=&quot;exampleProperty&quot; value=&quot;shoppingCart.shopper.customer.exampleProperty&quot;&gt;
  *
  *             &lt;-- Indexed (array or list) Property Example --&gt;
  *             &lt;entry key=&quot;firstSkuCode&quot; value=&quot;shoppingCart.cartItems[0].productSku.skuCode&quot;&gt;
@@ -54,7 +54,7 @@ public class PopulateOrderDataCheckoutAction implements ReversibleCheckoutAction
 	private Map<String, String> orderDataProperties;
 
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		for (Map.Entry<String, String> orderDataProperty : getOrderDataProperties().entrySet()) {
 			String orderDataPropertyKey = orderDataProperty.getKey();
 			String contextPropertyName = orderDataProperty.getValue();
@@ -96,7 +96,7 @@ public class PopulateOrderDataCheckoutAction implements ReversibleCheckoutAction
 	}
 
 	@Override
-	public void rollback(final CheckoutActionContext context) throws EpSystemException {
+	public void rollback(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		Map<String, String> orderData = new HashMap<>(context.getOrder().getFieldValues());
 		for (String dataKey : orderData.keySet()) {
 			context.getOrder().removeFieldValue(dataKey);

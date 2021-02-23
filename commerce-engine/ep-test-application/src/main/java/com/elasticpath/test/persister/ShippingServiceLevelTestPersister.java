@@ -43,6 +43,8 @@ import com.elasticpath.service.store.StoreService;
 public class ShippingServiceLevelTestPersister {
 
 	private static final String COMMA_DELIM = ",";
+	private static final String BUYER_ROLE = "BUYER";
+	private static final String SINGLE_SESSION_BUYER_ROLE = "SINGLE_SESSION_BUYER";
 
 	private final BeanFactory beanFactory;
 
@@ -176,6 +178,8 @@ public class ShippingServiceLevelTestPersister {
 		mockStore.setStoreFullCreditCardsEnabled(false);
 		mockStore.setStoreType(StoreType.B2C);
 		mockStore.setTimeZone(TimeZone.getDefault());
+		mockStore.setB2CAuthenticatedRole(BUYER_ROLE);
+		mockStore.setB2CSingleSessionRole(SINGLE_SESSION_BUYER_ROLE);
 		try {
 			mockStore.setSupportedLocales(supportedLocales);
 		} catch (Exception e) {

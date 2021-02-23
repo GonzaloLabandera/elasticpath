@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>paymentinstruments</name>
+
+		<uri-part>
+			<name>account-payment-instrument-id</name>
+			<description><![CDATA[The payment Instrument ID]]></description>
+			<string/>
+		</uri-part>
+
+		<resource>
+			<name>account-payment-instruments</name>
+			<description><![CDATA[Payment instruments resource for an account.]]></description>
+			<uri>{base.family}/{accounts.account}</uri>
+			<list-of>account-payment-instrument</list-of>
+		</resource>
+
+		<resource>
+			<name>account-payment-instrument</name>
+			<description><![CDATA[The payment provider instrument.]]></description>
+			<uri>{account-payment-instruments}/{account-payment-instrument-id}</uri>
+			<entity>payment-instrument</entity>
+		</resource>
+
+		<resource>
+			<name>account-payment-instrument-form</name>
+			<description><![CDATA[A payment instrument form for profile payment method.]]></description>
+			<uri>{base.family}/{paymentmethods.account-payment-method}/paymentinstrument/form</uri>
+			<form>
+				<entity>payment-instrument-for-form</entity>
+				<action-rel>createpaymentinstrumentaction</action-rel>
+				<result>account-payment-instrument</result>
+			</form>
+		</resource>
+
+		<advisor>
+			<name>account-payment-instrument-form</name>
+			<description><![CDATA[Provides a blocking advisor to enforce creation fields during account payment instrument creation, as required by the third-party payment provider. Required fields might include a billing address or email address.]]></description>
+			<blocks>account-payment-instrument-form</blocks>
+		</advisor>
+
+		<relationship>
+			<name>account-payment-instruments-for-account</name>
+			<description><![CDATA[The link from account to the list of saved payment instruments.]]></description>
+			<rel>paymentinstruments</rel>
+			<rev>account</rev>
+			<from>accounts.account</from>
+			<to>account-payment-instruments</to>
+		</relationship>
+
+		<relationship>
+			<name>account-payment-instrument-form-for-account-payment-method</name>
+			<description><![CDATA[The link from an account payment method to payment instrument form.]]></description>
+			<rel>paymentinstrumentform</rel>
+			<rev>accountpaymentmethod</rev>
+			<from>paymentmethods.account-payment-method</from>
+			<to>account-payment-instrument-form</to>
+		</relationship>
+
+		<relationship>
+			<name>account-payment-instrument-to-account-payment-instruments</name>
+			<description><![CDATA[The link from a payment instrument to payment instruments.]]></description>
+			<rel>paymentinstruments</rel>
+			<from>account-payment-instrument</from>
+			<to>account-payment-instruments</to>
+		</relationship>
+
+		<relationship>
+			<name>account-payment-instrument-to-account-payment-method</name>
+			<description><![CDATA[Link from a payment instrument to the account payment method.]]></description>
+			<rel>paymentmethod</rel>
+			<from>account-payment-instrument</from>
+			<to>paymentmethods.account-payment-method</to>
+		</relationship>
+
+		<relationship>
+			<name>account-default-payment-instrument-for-account-payment-instruments</name>
+			<description><![CDATA[Provides the default payment instrument from account.]]></description>
+			<rel>default</rel>
+			<from>account-payment-instruments</from>
+			<to>account-payment-instrument</to>
+		</relationship>
+	</family>
+
+</definitions>
+

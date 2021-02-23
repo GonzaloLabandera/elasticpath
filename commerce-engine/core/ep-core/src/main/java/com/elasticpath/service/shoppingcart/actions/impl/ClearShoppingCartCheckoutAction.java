@@ -21,12 +21,10 @@ public class ClearShoppingCartCheckoutAction implements FinalizeCheckoutAction {
 	@Override
 	public void execute(final FinalizeCheckoutActionContext context) throws EpSystemException {
 		ShoppingCart oldShoppingCart = context.getShoppingCart();
-		oldShoppingCart.deactivateCart();
 		if (!context.isOrderExchange()) {
-			//disconnect the old cart from the shopper and customer's session
-			shoppingCartService.disconnectCartFromShopperAndCustomerSession(oldShoppingCart, context);
-
+			shoppingCartService.deactivateCart(oldShoppingCart);
 		}
+
 		//free some memory - doesn't incur new db calls because the cart is not saved nor referenced anywhere else
 		oldShoppingCart.clearItems();
 		/*

@@ -37,4 +37,6 @@ class SharedConstants {
 	public static final DEFAULT_TEST_USER_GUID = "95be8397-5262-49e7-bb7b-485a756abfe5"
 
 	public static final DEFAULT_PAYMENT_CONFIGURATION_NAME = "Smart Path Config"
+
+	public static final RESERVE_FAILS_PAYMENT_CONFIGURATION_NAME = "Reserve Fails"
 }

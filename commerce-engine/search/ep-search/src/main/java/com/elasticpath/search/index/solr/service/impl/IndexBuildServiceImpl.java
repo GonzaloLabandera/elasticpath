@@ -4,6 +4,7 @@
 package com.elasticpath.search.index.solr.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -99,9 +100,9 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 *
 	 * @param indexBuilder the index builder
 	 * @param lastBuildDate the last build date
-	 * @return a set of uids
+	 * @return a list of uids
 	 */
-	protected Set<Long> findAddedOrModifiedUidsInternal(final IndexBuilder indexBuilder, final Date lastBuildDate) {
+	protected List<Long> findAddedOrModifiedUidsInternal(final IndexBuilder indexBuilder, final Date lastBuildDate) {
 		final Collection<Long> addedOrModifiedUids = indexBuilder.findAddedOrModifiedUids(lastBuildDate);
 		final IndexNotificationProcessor indexNotificationProcessor = indexBuilder.getIndexNotificationProcessor();
 
@@ -124,8 +125,7 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Building Index -- total objects of " + indexBuilder.getName() + " modified:" + allModifiedUids.size());
 		}
-
-		return allModifiedUids;
+		return new ArrayList<>(allModifiedUids);
 	}
 
 	/**
@@ -140,17 +140,17 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		final IndexBuilder indexBuilder = getIndexBuilder(indexType);
 		final SolrClient solrClient = getSolrManager().getServer(indexBuilder.getIndexType());
 
-		int operations = 0;
-
+		boolean documentsWerePublished;
 		if (rebuild) {
 			// just find notifications for indexType and then clear this notifications then buildFinished(..) called
 			indexBuilder.getIndexNotificationProcessor().findAllNewNotifications(indexType);
 
-			operations = rebuildInternal(indexBuilder, solrClient);
+			documentsWerePublished = rebuildInternal(indexBuilder, solrClient);
+
 		} else {
-			operations = buildInternal(indexBuilder, solrClient);
+			documentsWerePublished = buildInternal(indexBuilder, solrClient);
 		}
-		buildFinished(indexBuilder, operations, solrClient);
+		buildFinished(indexBuilder, documentsWerePublished, solrClient);
 	}
 
 	/**
@@ -190,50 +190,27 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 *
 	 * @param indexBuilder the index builder to use
 	 * @param solrClient the solr client instance to use
-	 * @return the number of changes done to the indexes in terms of updating them
+	 * @return if there was solr documents published during the build
 	 */
-	protected int buildInternal(final IndexBuilder indexBuilder, final SolrClient solrClient) {
+	protected boolean buildInternal(final IndexBuilder indexBuilder, final SolrClient solrClient) {
 		final Date lastBuildDate = getLastBuildDate(indexBuilder.getIndexType());
 
 		// add or update the corresponding documents in the index for products that were added or updated since the last build
-		final Collection<Long> addedOrModifiedUids = findAddedOrModifiedUidsInternal(indexBuilder, lastBuildDate);
+		final List<Long> addedOrModifiedUids = findAddedOrModifiedUidsInternal(indexBuilder, lastBuildDate);
 
 		// delete the corresponding documents in the index for products that were deleted since the last build
 		final Collection<Long> deletedUids = findDeletedUidsInternal(indexBuilder, lastBuildDate);
-		final boolean isIndexToBeUpdated = !addedOrModifiedUids.isEmpty() || !deletedUids.isEmpty();
-		int operations = 0;
 
-		if (isIndexToBeUpdated) {
-
-			onIndexUpdatingInternal(indexBuilder, solrClient);
-
-			operations = addedOrModifiedUids.size();
-
-			if (operations > 0) {
-
-				onAddUpdateDocuments(indexBuilder, addedOrModifiedUids, solrClient, operations);
-
-				indexBuilder.submit(addedOrModifiedUids);
-
-				PipelineStatus status = getIndexingStatistics().getPipelineStatus(indexBuilder.getIndexType());
-
-				if (status == null) {
-					LOG.error("Pipeline status could not be found. "
-							+ "Index build is started asynchronously, and there is no guarantee it finishes before this method returns.");
-				} else {
-					try {
-						status.waitUntilCompleted();
-					} catch (InterruptedException e) {
-						LOG.error("While waiting for index to build, received exception:", e);
-						Thread.currentThread().interrupt();
-					}
-				}
-			}
-
-			operations += deleteDocumentInIndex(indexBuilder, deletedUids, operations);
-
+		if (addedOrModifiedUids.isEmpty() && deletedUids.isEmpty()) {
+			return false;
 		}
-		return operations;
+
+		onIndexUpdatingInternal(indexBuilder, solrClient);
+
+		publishBatch(indexBuilder, solrClient, addedOrModifiedUids);
+
+		deleteDocumentInIndex(indexBuilder, deletedUids);
+		return true;
 	}
 
 	/**
@@ -241,69 +218,73 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 *
 	 * @param indexBuilder the index builder to use
 	 * @param solrClient the solr client to use
-	 * @return the number of changes done to the index
+	 * @return if there was solr documents published during the build
 	 */
-	protected int rebuildInternal(final IndexBuilder indexBuilder, final SolrClient solrClient) {
+	protected boolean rebuildInternal(final IndexBuilder indexBuilder, final SolrClient solrClient) {
 		// if rebuild, create new index
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Building Index -- recreate start: " + indexBuilder.getName());
 		}
-
-		final List<Long> allUids = indexBuilder.findAllUids();
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Building Index -- total objects of " + indexBuilder.getName() + " to index:" + allUids.size());
-		}
-
-		// This is a rebuild, so we delete all the existing things and then add all the found uids.
-		// If there were no found uids, then we don't actually have any work to do, so we return right away.
-		// Historically we would return the number of Solr operations done, however with the introduction of {@code IndexingPipeline},
-		// this need has gone away and we attempt to appease code that expects these numbers.
-		int operations = 0;
-
 		onIndexUpdatingInternal(indexBuilder, solrClient);
 
 		deleteIndex(solrClient);
 
-		operations = allUids.size();
-
-		if (operations > 0) {
-
-			onAddUpdateDocuments(indexBuilder, allUids, solrClient, operations);
-
-			indexBuilder.submit(allUids);
-
-			PipelineStatus status = getIndexingStatistics().getPipelineStatus(indexBuilder.getIndexType());
-
-			if (status == null) {
-				LOG.error("Pipeline status could not be found. "
-						+ "Index build is started asynchronously, and there is no guarantee it finishes before this method returns.");
-			} else {
-				try {
-					status.waitUntilCompleted();
-				} catch (InterruptedException e) {
-					LOG.error("While waiting for index to build, received exception:", e);
-					Thread.currentThread().interrupt();
-				}
-			}
+		boolean documentsWerePublished = false;
+		if (indexBuilder.canPaginate()) {
+			int page = 0;
+			List<Long> uidsToIndex;
+			do {
+				uidsToIndex = indexBuilder.findIndexableUidsPaginated(page++);
+				documentsWerePublished |= publishBatch(indexBuilder, solrClient, uidsToIndex);
+			} while (!uidsToIndex.isEmpty());
 		} else {
+			List<Long> uidsToIndex = indexBuilder.findAllUids();
+			documentsWerePublished = publishBatch(indexBuilder, solrClient, uidsToIndex);
+		}
+		if (!documentsWerePublished) {
 			commitWithEmptyIndex(solrClient);
 		}
+		return documentsWerePublished;
+	}
 
-		return operations;
+	private boolean publishBatch(final IndexBuilder indexBuilder, final SolrClient solrClient, final List<Long> uidsToIndex) {
+		if (uidsToIndex.isEmpty()) {
+			return false;
+		}
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Building Index -- total objects of " + indexBuilder.getName() + " to index:" + uidsToIndex.size());
+		}
+		onAddUpdateDocuments(indexBuilder, uidsToIndex, solrClient);
+		indexBuilder.submit(uidsToIndex);
+
+		PipelineStatus status = getIndexingStatistics().getPipelineStatus(indexBuilder.getIndexType());
+		if (status == null) {
+			LOG.error("Pipeline status could not be found. "
+					+ "Index build is started asynchronously, and there is no guarantee it finishes before this method returns.");
+		} else {
+			try {
+				status.waitUntilCompleted();
+			} catch (InterruptedException e) {
+				LOG.error("While waiting for index to build, received exception:", e);
+				Thread.currentThread().interrupt();
+			}
+		}
+		return true;
 	}
 
 	/**
 	 * Run finalizing build operations (i.e. final commit, build date)
 	 *
 	 * @param indexBuilder the index builder
-	 * @param operations the number of solr operations performed during the build
+	 * @param documentsWerePublished if there was solr documents published during the build
 	 * @param client the solr client instance
 	 */
-	protected void buildFinished(final IndexBuilder indexBuilder, final int operations, final SolrClient client) {
+	protected void buildFinished(final IndexBuilder indexBuilder, final boolean documentsWerePublished, final SolrClient client) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Building Index -- finished: " + indexBuilder.getName());
 		}
-		if (operations > 0) {
+		if (documentsWerePublished) {
 			onIndexUpdatedInternal(indexBuilder, client);
 		}
 		final IndexNotificationProcessor indexNotificationProcessor = indexBuilder.getIndexNotificationProcessor();
@@ -320,12 +301,10 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 * @param indexBuilder the index builder
 	 * @param uidList the list of UID
 	 * @param solrClient the Solr client
-	 * @param operations the number of operations done so far
 	 */
 	protected void onAddUpdateDocuments(final IndexBuilder indexBuilder,
 			final Collection<Long> uidList,
-			final SolrClient solrClient,
-			final int operations) {
+			final SolrClient solrClient) {
 		// by default does nothing
 	}
 
@@ -334,29 +313,23 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 *
 	 * @param indexBuilder the index builder
 	 * @param deletedUidList the list of UIDs to delete
-	 * @param operations the number of SOLR operations thus far
-	 * @return the number of SOLR operations performed
+	 *
 	 * @throws EpServiceException in case of any errors
 	 */
-	private int deleteDocumentInIndex(final IndexBuilder indexBuilder, final Collection<Long> deletedUidList, final int operations)
+	private void deleteDocumentInIndex(final IndexBuilder indexBuilder, final Collection<Long> deletedUidList)
 			throws EpServiceException {
 
-		int solrOperations = operations; // reassigned to silence PMD
 		LOG.debug("Building Index -- delete start for " + indexBuilder.getName());
-
 		for (final long uid : deletedUidList) {
-
 			try {
 				getSolrManager().getDocumentPublisher(indexBuilder.getIndexType()).deleteDocument(indexBuilder.getIndexType(), uid);
-				solrOperations++;
+
 			} catch (InterruptedException e) {
 				LOG.warn("Interrupted while waiting for the publisher queue to drain", e);
 				Thread.currentThread().interrupt();
 			}
 		}
-
 		LOG.debug("Building Index -- delete end for " + indexBuilder.getName());
-		return solrOperations;
 	}
 
 	public void setSolrManager(final SolrManager solrManager) {

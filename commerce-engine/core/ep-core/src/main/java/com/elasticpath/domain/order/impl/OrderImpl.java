@@ -176,6 +176,8 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 
 	private Customer customer;
 
+	private Long customerUID;
+
 	private Customer account;
 
 	private OrderAddress orderBillingAddress;
@@ -440,6 +442,26 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 		this.customer = customer;
 	}
 
+	/**
+	 * Get the customerUID corresponding to this order.
+	 *
+	 * @return the UID of this Customer
+	 */
+	@Basic
+	@Column(name = "CUSTOMER_UID", insertable = false, updatable = false)
+	protected Long getCustomerUID() {
+		return customerUID;
+	}
+
+	/**
+	 * Set the customerUID corresponding to this order.
+	 *
+	 * @param customerUID the UID of the corresponding customer.
+	 */
+	protected void setCustomerUID(final Long customerUID) {
+		this.customerUID = customerUID;
+	}
+
 	@Override
 	public void setAccount(final Customer account) {
 		this.account = account;
@@ -459,7 +481,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 * @return the order address Uid
 	 */
 	@Override
-	@ManyToOne(targetEntity = OrderAddressImpl.class, cascade = CascadeType.ALL)
+	@ManyToOne(targetEntity = OrderAddressImpl.class, cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.DETACH})
 	@JoinColumn(name = "ORDER_BILLING_ADDRESS_UID")
 	@ForeignKey(name = "FK_O_ORDERADDRESS", enabled = true)
 	public OrderAddress getBillingAddress() {
@@ -481,7 +503,8 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 *
 	 * @return the orders's <code>OrderShipment</code>s
 	 */
-	@OneToMany(targetEntity = AbstractOrderShipmentImpl.class, cascade = CascadeType.ALL, mappedBy = "orderInternal", fetch = FetchType.EAGER)
+	@OneToMany(targetEntity = AbstractOrderShipmentImpl.class, cascade =  {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST,
+			CascadeType.DETACH}, mappedBy = "orderInternal", fetch = FetchType.EAGER)
 	//@OrderBy("createdDate")
 	protected List<OrderShipment> getShipments() {
 		return shipments;
@@ -633,7 +656,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 * @return the orders's <code>OrderEvent</code>s
 	 */
 	@Override
-	@OneToMany(targetEntity = OrderEventImpl.class, cascade = CascadeType.ALL)
+	@OneToMany(targetEntity = OrderEventImpl.class, cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.DETACH})
 	@ElementJoinColumn(name = ORDER_UID)
 	@OrderBy
 	@ElementForeignKey
@@ -883,7 +906,8 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 * @return the orders's <code>OrderReturn</code>s
 	 */
 	@Override
-	@OneToMany(targetEntity = OrderReturnImpl.class, cascade = { CascadeType.MERGE, CascadeType.REFRESH }, mappedBy = "order")
+	@OneToMany(targetEntity = OrderReturnImpl.class, cascade =  {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.DETACH},
+			mappedBy = "order")
 	public Set<OrderReturn> getReturns() {
 		return returns;
 	}
@@ -996,8 +1020,9 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 * @return a set of <code>AppliedRule</code> objects
 	 */
 	@Override
-	@OneToMany(targetEntity = AppliedRuleImpl.class, cascade = CascadeType.ALL)
+	@OneToMany(targetEntity = AppliedRuleImpl.class, cascade =  {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.DETACH})
 	@ElementJoinColumn(name = ORDER_UID, nullable = false, updatable = false)
+	@ElementForeignKey(name = "FK_APPLIED_RULE_ORDER")
 	public Set<AppliedRule> getAppliedRules() {
 		return appliedRules;
 	}
@@ -1296,6 +1321,11 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 		}
 	}
 
+	@Override
+	public void setStatusCreated() {
+		setStatus(OrderStatus.CREATED);
+	}
+
 	/**
 	 * Sets the order status to AWAITING_EXCHANGE.
 	 * This method should be called by the OrderService only.
@@ -1403,8 +1433,10 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	@Override
 	@Transient
 	public boolean isCancellable() {
-		if (CollectionUtils.isNotEmpty(getElectronicShipments())) {
-			LOG.debug("Can't cancel the order since the order has digital goods");
+		if (CollectionUtils.isNotEmpty(getElectronicShipments())
+				&& !OrderStatus.ONHOLD.equals(getStatus())
+		) {
+			LOG.debug("Can't cancel the order since the order has digital goods and it is not on hold.");
 			return false;
 		}
 
@@ -1643,7 +1675,8 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	 * Internal JPA method to get Order Data.
 	 * @return the order data
 	 */
-	@OneToMany(targetEntity = OrderDataImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+	@OneToMany(targetEntity = OrderDataImpl.class, cascade =  {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.DETACH},
+			fetch = FetchType.EAGER)
 	@MapKey(name = "key")
 	@ElementJoinColumn(name = "ORDER_UID", nullable = false)
 	@ElementForeignKey(name = "FK_TORDERDATA_ORDER_UID")

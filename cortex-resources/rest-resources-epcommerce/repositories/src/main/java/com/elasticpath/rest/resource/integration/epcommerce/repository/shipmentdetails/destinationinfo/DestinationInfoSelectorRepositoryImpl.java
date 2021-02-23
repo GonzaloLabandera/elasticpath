@@ -15,6 +15,7 @@ import com.elasticpath.repository.Repository;
 import com.elasticpath.repository.SelectorRepository;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
+import com.elasticpath.rest.definition.addresses.ContextAwareAddressIdentifier;
 import com.elasticpath.rest.definition.shipmentdetails.DestinationInfoIdentifier;
 import com.elasticpath.rest.definition.shipmentdetails.DestinationInfoSelectorChoiceIdentifier;
 import com.elasticpath.rest.definition.shipmentdetails.DestinationInfoSelectorIdentifier;
@@ -37,7 +38,7 @@ import com.elasticpath.rest.selector.SelectorChoice;
 public class DestinationInfoSelectorRepositoryImpl<SI extends DestinationInfoSelectorIdentifier, CI extends DestinationInfoSelectorChoiceIdentifier>
 		implements SelectorRepository<DestinationInfoSelectorIdentifier, DestinationInfoSelectorChoiceIdentifier> {
 
-	private Repository<AddressEntity, AddressIdentifier> addressRepository;
+	private Repository<AddressEntity, ContextAwareAddressIdentifier> addressRepository;
 	private DestinationInfoService destinationInfoService;
 	private CartOrderRepository cartOrderRepository;
 
@@ -59,7 +60,7 @@ public class DestinationInfoSelectorRepositoryImpl<SI extends DestinationInfoSel
 	}
 
 	private SelectorChoice buildSelectorChoice(final DestinationInfoSelectorIdentifier destinationInfoSelectorIdentifier,
-											   final AddressIdentifier addressIdentifier,
+											   final ContextAwareAddressIdentifier addressIdentifier,
 											   final ChoiceStatus choiceStatus) {
 		return SelectorChoice.builder()
 				.withChoice(buildDestinationInfoSelectorChoiceIdentifier(destinationInfoSelectorIdentifier, addressIdentifier))
@@ -69,7 +70,11 @@ public class DestinationInfoSelectorRepositoryImpl<SI extends DestinationInfoSel
 
 	private DestinationInfoSelectorChoiceIdentifier buildDestinationInfoSelectorChoiceIdentifier(
 			final DestinationInfoSelectorIdentifier destinationInfoSelectorIdentifier,
-			final AddressIdentifier addressIdentifier) {
+			final ContextAwareAddressIdentifier contextAwareAddressIdentifier) {
+		final AddressIdentifier addressIdentifier = AddressIdentifier.builder()
+				.withAddressId(contextAwareAddressIdentifier.getAddressId())
+				.withAddresses(contextAwareAddressIdentifier.getAddresses())
+				.build();
 		return DestinationInfoSelectorChoiceIdentifier.builder()
 				.withAddress(addressIdentifier)
 				.withDestinationInfoSelector(destinationInfoSelectorIdentifier)
@@ -88,7 +93,7 @@ public class DestinationInfoSelectorRepositoryImpl<SI extends DestinationInfoSel
 		String orderId = shipmentDetailsId.get(ShipmentDetailsConstants.ORDER_ID);
 		String scope = destinationInfoIdentifier.getScope().getValue();
 		AddressIdentifier addressIdentifier = selectorChoiceId.getAddress();
-		return addressRepository.findOne(addressIdentifier)
+		return addressRepository.findOne(new ContextAwareAddressIdentifier(addressIdentifier))
 				.flatMapMaybe(addressEntity -> buildChoiceIfAddressExists(selectorChoiceId, orderId, scope, addressIdentifier))
 				.toSingle();
 	}
@@ -140,8 +145,8 @@ public class DestinationInfoSelectorRepositoryImpl<SI extends DestinationInfoSel
 				});
 	}
 
-	@Reference(target = "(name=addressEntityRepositoryImpl)")
-	public void setAddressRepository(final Repository<AddressEntity, AddressIdentifier> addressRepository) {
+	@Reference(target = "(name=contextAwareAddressEntityRepositoryImpl)")
+	public void setAddressRepository(final Repository<AddressEntity, ContextAwareAddressIdentifier> addressRepository) {
 		this.addressRepository = addressRepository;
 	}
 

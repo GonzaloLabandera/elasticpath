@@ -3,7 +3,6 @@
  */
 package com.elasticpath.catalog.update.processor.connectivity.impl;
 
-import static com.elasticpath.catalog.update.processor.connectivity.impl.CatalogServiceImplIntegrationTest.JMS_BROKER_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.temporal.ChronoUnit;
@@ -19,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.catalog.entity.Projection;
 import com.elasticpath.catalog.entity.option.Option;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
 import com.elasticpath.catalog.plugin.converter.ProjectionToEntityConverter;
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionHistoryEntity;
@@ -32,15 +29,13 @@ import com.elasticpath.catalog.reader.PaginationRequest;
 import com.elasticpath.catalog.reader.impl.ModifiedSinceImpl;
 import com.elasticpath.catalog.reader.impl.PaginationRequestImpl;
 import com.elasticpath.catalog.spi.service.CatalogService;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.util.Utils;
 
 /**
  * Integration tests for {@link com.elasticpath.catalog.plugin.service.CatalogServiceImpl}.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
-public class CatalogServiceImplIntegrationTest extends XaTransactionTestSupport {
-
-	public static final String JMS_BROKER_URL = "tcp://localhost:61618";
+public class CatalogServiceImplIntegrationTest extends DbTestCase {
 
 	private static final String OPTION = "option";
 	private static final String STORE = "store";

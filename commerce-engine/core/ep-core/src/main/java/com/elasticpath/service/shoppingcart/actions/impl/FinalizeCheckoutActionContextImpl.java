@@ -7,8 +7,8 @@ import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 
 /**
  * Container class for data required by finalizeCheckoutActions.
@@ -26,7 +26,7 @@ public class FinalizeCheckoutActionContextImpl implements FinalizeCheckoutAction
 	 *
 	 * @param checkoutActionContext the checkoutActionContext
 	 */
-	public FinalizeCheckoutActionContextImpl(final CheckoutActionContext checkoutActionContext) {
+	public FinalizeCheckoutActionContextImpl(final PreCaptureCheckoutActionContext checkoutActionContext) {
 		this.order = checkoutActionContext.getOrder();
 		this.shoppingCart = checkoutActionContext.getShoppingCart();
 		this.orderExchange = checkoutActionContext.isOrderExchange();

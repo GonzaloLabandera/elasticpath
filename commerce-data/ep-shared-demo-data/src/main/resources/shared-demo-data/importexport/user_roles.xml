@@ -101,6 +101,28 @@
 			<permission>WAREHOUSE_ORDER_RETURN_EDIT</permission>
 			<permission>PRICE_MANAGEMENT_MANAGE_PRODUCT_PRICING</permission>
 			<permission>ASSIGN_CUSTOMER_SEGMENTS</permission>
+			<permission>CREATE_EDIT_ACCOUNTS</permission>
+			<permission>RESOLVE_GENERIC_HOLD</permission>
+		</permissions>
+	</user_role>
+
+	<user_role guid="452DFB80-F619-46FD-B650-FE69C5B7947E">
+		<name>Customer Service No Hold</name>
+		<permissions>
+			<permission>CREATE_EDIT_EXCHANGES</permission>
+			<permission>CREATE_EDIT_RETURNS</permission>
+			<permission>CREATE_REFUND</permission>
+			<permission>ORDER_UNLOCK</permission>
+			<permission>FULFILLMENT_ORDER_EDIT</permission>
+			<permission>CUSTUMER_IMPORTS_EXECUTE</permission>
+			<permission>CUSTUMER_IMPORTS_MANAGE</permission>
+			<permission>VIEW_CREDITCARD_NUMBER</permission>
+			<permission>EDIT_GIFT_CERTIFICATE_RECIPIENT</permission>
+			<permission>CUSTOMER_EDIT</permission>
+			<permission>WAREHOUSE_ORDER_SHIPMENT_COMPLETE</permission>
+			<permission>WAREHOUSE_ORDER_RETURN_EDIT</permission>
+			<permission>PRICE_MANAGEMENT_MANAGE_PRODUCT_PRICING</permission>
+			<permission>ASSIGN_CUSTOMER_SEGMENTS</permission>
 		</permissions>
 	</user_role>
 

@@ -13,7 +13,7 @@ import com.elasticpath.epcoretool.logic.AbstractIndexBuildStatus;
 /**
  * Display the current search server index rebuild status.
  */
-@Mojo(name = "index-status")
+@Mojo(name = "index-status", threadSafe = true)
 public class IndexBuildStatusMojo extends AbstractEpCoreMojo {
 
 	@Override

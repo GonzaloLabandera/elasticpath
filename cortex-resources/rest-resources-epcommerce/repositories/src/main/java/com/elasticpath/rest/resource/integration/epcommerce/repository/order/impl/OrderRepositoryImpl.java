@@ -170,6 +170,11 @@ public class OrderRepositoryImpl implements OrderRepository {
 	}
 
 	@Override
+	public Maybe<String> getAccountGuidAssociatedWithOrderNumber(final String orderNumber) {
+		return reactiveAdapter.fromServiceAsMaybe(() -> orderService.getAccountGuidAssociatedWithOrderNumber(orderNumber));
+	}
+
+	@Override
 	public Customer getCustomerByOrderNumber(final String orderNumber) {
 		return orderService.getCustomerByOrderNumber(orderNumber);
 	}

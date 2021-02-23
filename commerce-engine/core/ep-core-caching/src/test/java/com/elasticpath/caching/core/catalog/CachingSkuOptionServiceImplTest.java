@@ -4,6 +4,8 @@
 package com.elasticpath.caching.core.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -32,17 +34,20 @@ import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl;
 import com.elasticpath.domain.skuconfiguration.impl.SkuOptionValueImpl;
+import com.elasticpath.persistence.api.CachedInstanceDetachmentStrategy;
 import com.elasticpath.persistence.dao.ProductTypeDao;
 import com.elasticpath.service.catalog.SkuOptionService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CachingSkuOptionServiceImplTest {
+	private static final int FOUR = 4;
 	private static final int THREE = 3;
 	private static final long ONE = 1L;
 	private static final long TWO = 2L;
 
 	@Mock private SkuOptionService fallbackSkuOptionService;
 	@Mock private ProductTypeDao productTypeDao;
+	@Mock private CachedInstanceDetachmentStrategy detachmentStrategy;
 
 	@InjectMocks
 	private CachingSkuOptionServiceImpl fixture;
@@ -102,6 +107,7 @@ public class CachingSkuOptionServiceImplTest {
 
 		fixture.init();
 		assertThat(skuOptionsCacheEhcache.getSize()).isEqualTo(THREE);
+		verify(detachmentStrategy, times(FOUR)).detach(any());
 
 		Set<SkuOption> skuOptions = fixture.findByProductTypeUid(productType.getUidPk());
 		assertThat(skuOptions).containsOnly(skuOption, skuOption2);

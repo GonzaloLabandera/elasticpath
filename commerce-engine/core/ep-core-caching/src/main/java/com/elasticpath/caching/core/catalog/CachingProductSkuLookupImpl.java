@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
 import com.elasticpath.cache.CacheLoader;
+import com.elasticpath.cache.CacheResult;
 import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -41,9 +43,19 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCac
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> P findByUid(final long uidPk) throws EpServiceException {
-		Long productUid = getUidToProductCache().get(uidPk);
-		if (productUid == null) {
-			ProductSku productSku = getFallbackProductSkuLookup().findByUid(uidPk);
+		CacheResult<Long> productUid = getUidToProductCache().get(uidPk);
+		if (productUid.isPresent()) {
+			final Product product = Objects.nonNull(productUid.get())
+					? getProductLookup().findByUid(productUid.get())
+					: null;
+
+			logFindByUidResult(uidPk, productUid, product);
+
+			return Objects.nonNull(product)
+					? (P) getProductSku(product, uidPk)
+					: null;
+		} else {
+			final ProductSku productSku = getFallbackProductSkuLookup().findByUid(uidPk);
 			if (productSku == null) {
 				LOG.warn("Could not load product sku with uidPk from fallback sku lookup" + uidPk);
 				return null;
@@ -51,13 +63,19 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCac
 			cacheSkuIds(productSku.getProduct());
 
 			return (P) productSku;
-		} else {
-			Product product = getProductLookup().findByUid(productUid);
-			if (product == null) {
-				LOG.warn("No product found for productUid " + productUid);
-				return null;
-			}
-			return (P) getProductSku(product, uidPk);
+		}
+	}
+
+	private void logFindByUidResult(final long uidPk, final CacheResult<Long> productUid, final Product product) {
+		if (Objects.isNull(productUid.get())) {
+			LOG.warn("Could not load product sku with uidPk from fallback sku lookup" + uidPk);
+		}
+		logProductSearch(productUid, product);
+	}
+
+	private void logProductSearch(final CacheResult<Long> productUid, final Product product) {
+		if (Objects.isNull(product)) {
+			LOG.warn("No product found for productUid " + productUid);
 		}
 	}
 
@@ -90,27 +108,33 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCac
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> P findByGuid(final String guid) throws EpServiceException {
-		Long productUid = getGuidToProductCache().get(guid);
-		if (productUid == null) {
-			if (getGuidToProductCache().containsKey(guid)) {
-				return null;
-			}
+		CacheResult<Long> productUid = getGuidToProductCache().get(guid);
+		if (productUid.isPresent()) {
+			final Product product = Objects.nonNull(productUid.get())
+					? getProductLookup().findByUid(productUid.get())
+					: null;
+
+			logFindByGuidResult(guid, productUid, product);
+
+			return Objects.nonNull(product)
+					? (P) product.getSkuByGuid(guid)
+					: null;
+		} else {
 			ProductSku productSku = getFallbackProductSkuLookup().findByGuid(guid);
 			if (productSku == null) {
-				LOG.warn("Could not load product sku with guid from fallback sku lookup [" + guid + "]");
 				return null;
 			}
 			cacheSkuIds(productSku.getProduct());
 
 			return (P) productSku;
-		} else {
-			Product product = getProductLookup().findByUid(productUid);
-			if (product == null) {
-				LOG.warn("No product found for productUid " + productUid);
-				return null;
-			}
-			return (P) product.getSkuByGuid(guid);
 		}
+	}
+
+	private void logFindByGuidResult(final String guid, final CacheResult<Long> productUid, final Product product) {
+		if (Objects.isNull(productUid.get())) {
+			LOG.warn("Could not load product sku with guid from fallback sku lookup [" + guid + "]");
+		}
+		logProductSearch(productUid, product);
 	}
 
 	/**
@@ -118,14 +142,14 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCac
 	 * loading skus one at a time instead of all at once is causing real-world issues.
 	 *
 	 * @param guids the sku guids.
-	 * @param <P> the genericized ProductSku sub-class that this finder will return
+	 * @param <P>   the genericized ProductSku sub-class that this finder will return
 	 * @return the sku with the given guid, otherwise null
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> List<P> findByGuids(final Collection<String> guids) throws EpServiceException {
-		final Map<String, Long> productUidsBySkuGuids = getGuidToProductCache().getAll(guids, productUidBySkuGuidCacheLoader);
+		final Map<String, Long> productUidsBySkuGuids = getGuidToProductCache().getAll(guids, productUidBySkuGuidCacheLoader::loadAll);
 		ArrayList<P> productSkus = new ArrayList<>();
 		for (String guid : productUidsBySkuGuids.keySet()) {
 			ProductSku sku = findByGuid(guid);
@@ -141,27 +165,34 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCac
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> P findBySkuCode(final String skuCode) throws EpServiceException {
-		Long productUid = getSkuCodeToProductCache().get(skuCode);
-		if (productUid == null) {
-			if (getSkuCodeToProductCache().containsKey(skuCode)) {
-				return null;
-			}
-			ProductSku productSku = getFallbackProductSkuLookup().findBySkuCode(skuCode);
+		final CacheResult<Long> productUid = getSkuCodeToProductCache().get(skuCode);
+		if (productUid.isPresent()) {
+			final Product product = Objects.nonNull(productUid.get())
+					? getProductLookup().findByUid(productUid.get())
+					: null;
+
+			logFindBySkuCodeSearch(skuCode, productUid, product);
+
+			return Objects.nonNull(product)
+					? (P) product.getSkuByCode(skuCode)
+					: null;
+		} else {
+			final ProductSku productSku = getFallbackProductSkuLookup().findBySkuCode(skuCode);
 			if (productSku == null) {
-				LOG.warn("Could not load product sku with sku code from fallback sku lookup [" + skuCode + "]");
 				return null;
 			}
 			cacheSkuIds(productSku.getProduct());
 
 			return (P) productSku;
-		} else {
-			Product product = getProductLookup().findByUid(productUid);
-			if (product == null) {
-				LOG.warn("No product found for productUid " + productUid);
-				return null;
-			}
-			return (P) product.getSkuByCode(skuCode);
 		}
+	}
+
+	private void logFindBySkuCodeSearch(final String skuCode, final CacheResult<Long> productUid, final Product product) {
+		if (Objects.isNull(productUid.get())) {
+			LOG.warn("Could not load product sku with sku code from fallback sku lookup [" + skuCode + "]");
+		}
+
+		logProductSearch(productUid, product);
 	}
 
 	/**
@@ -169,14 +200,14 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCac
 	 * loading skus one at a time instead of all at once is causing real-world issues.
 	 *
 	 * @param skuCodes the sku code.
-	 * @param <P> The ProductSku implementation sub-class
+	 * @param <P>      The ProductSku implementation sub-class
 	 * @return the matching product skus
 	 * @throws EpServiceException if anything goes wrong
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> List<P> findBySkuCodes(final Collection<String> skuCodes) throws EpServiceException {
-		final Map<String, Long> productUidsBySkuCodes = getSkuCodeToProductCache().getAll(skuCodes, productUidBySkuCodeCacheLoader);
+		final Map<String, Long> productUidsBySkuCodes = getSkuCodeToProductCache().getAll(skuCodes, productUidBySkuCodeCacheLoader::loadAll);
 		ArrayList<P> productSkus = new ArrayList<>();
 		for (String skuCode : productUidsBySkuCodes.keySet()) {
 			ProductSku sku = findBySkuCode(skuCode);
@@ -192,12 +223,14 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCac
 	@Override
 	public Boolean isProductSkuExist(final String skuCode) {
 
-		Boolean isProductSkuExistStatus = getSkuCodeToExistenceStatusCache().get(skuCode);
-		if (isProductSkuExistStatus == null) {
-			isProductSkuExistStatus = getFallbackProductSkuLookup().isProductSkuExist(skuCode);
-			getSkuCodeToExistenceStatusCache().put(skuCode, isProductSkuExistStatus);
+		final CacheResult<Boolean> isProductSkuExistStatus = getSkuCodeToExistenceStatusCache().get(skuCode);
+		if (isProductSkuExistStatus.isPresent()) {
+			return isProductSkuExistStatus.get();
 		}
-		return isProductSkuExistStatus;
+		final Boolean result = getFallbackProductSkuLookup().isProductSkuExist(skuCode);
+		getSkuCodeToExistenceStatusCache().put(skuCode, result);
+
+		return result;
 	}
 
 	@Override
@@ -238,6 +271,7 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCac
 
 	/**
 	 * Adds the given sku's ids into the sku-id-to-product-id caches.
+	 *
 	 * @param sku the sku whose ids to add to cache
 	 */
 	protected void cacheSkuIds(final ProductSku sku) {

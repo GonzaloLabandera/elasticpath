@@ -4,12 +4,14 @@
 package com.elasticpath.domain.dataimport.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.GlobalConstants;
+import com.elasticpath.commons.enums.InvalidCatalogCodeMessage;
 import com.elasticpath.commons.exception.EpBindException;
+import com.elasticpath.commons.exception.EpInvalidCatalogCodeException;
 import com.elasticpath.commons.exception.EpInvalidGuidBindException;
-import com.elasticpath.commons.exception.EpInvalidValueBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.commons.exception.EpUnsupportedOperationException;
 import com.elasticpath.commons.util.impl.ConverterUtils;
@@ -208,8 +210,9 @@ public class ImportDataTypeInventoryImpl extends AbstractImportDataTypeImpl {
 					throw new EpNonNullBindException(super.getName());
 				}
 
-				if (!getUtility().isValidGuidStr(value)) {
-					throw new EpInvalidValueBindException(super.getName());
+				List<InvalidCatalogCodeMessage> messages = getCatalogCodeUtilBean().isValidSkuCode(value);
+				if (!messages.isEmpty()) {
+					throw new EpInvalidCatalogCodeException(super.getName(), messages);
 				}
 
 				final ProductSku productSku = service.findProductSkuByGuid(value);

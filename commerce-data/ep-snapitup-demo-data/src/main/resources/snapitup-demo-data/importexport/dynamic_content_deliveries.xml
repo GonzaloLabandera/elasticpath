@@ -193,45 +193,6 @@
 </dynamic_content_delivery>
 
 <dynamic_content_delivery>
-    <name>Female Shopper</name>
-    <guid>Female Shopper</guid>
-    <priority>5</priority>
-    <dynamiccontent_guid>Kodak EasyShare V705</dynamiccontent_guid>
-    <contentspaces>
-        <contentspace_guid>31D55BF3-41E6-4CD3-AA5D-4C09FD08A59C</contentspace_guid>
-    </contentspaces>
-    <selling_context>
-        <guid>48B66B22-86AE-4A9F-9BA6-4A41A6CE2B9B</guid>
-        <name>DCA SellingContext for Female Shopper</name>
-        <description>DCA SellingContext for Female Shopper</description>
-        <priority>1</priority>
-        <conditions>
-            <condition>
-                <guid>A1815C65-1171-7A84-C384-76BD1E352660</guid>
-                <name>name_TIME</name>
-                <description>desc_TIME</description>
-                <condition_string> { AND { SHOPPING_START_TIME.greaterThan (1230796800000L) }  } </condition_string>
-                <dictionary_guid>TIME</dictionary_guid>
-            </condition>
-            <condition>
-                <guid>B261064E-DD3B-E21B-28D4-8C32ED9C3B51</guid>
-                <name>name_SHOPPER</name>
-                <description>desc_SHOPPER</description>
-                <condition_string> { AND { AND { CUSTOMER_GENDER.equalTo 'F' }  }  } </condition_string>
-                <dictionary_guid>SHOPPER</dictionary_guid>
-            </condition>
-            <condition>
-                <guid>94F2BB7E-E8E9-D62F-9C4A-C818485388F2</guid>
-                <name>name_STORES</name>
-                <description>desc_STORES</description>
-                <condition_string> { OR { SELLING_CHANNEL.equalTo 'SNAPITUP' }  { SELLING_CHANNEL.equalTo 'SNAPITUPUK' }  { SELLING_CHANNEL.equalTo 'SLRWORLD' }  } </condition_string>
-                <dictionary_guid>STORES</dictionary_guid>
-            </condition>
-        </conditions>
-    </selling_context>
-</dynamic_content_delivery>
-
-<dynamic_content_delivery>
     <name>Flash Memory and Batteries Promo</name>
     <guid>Flash Memory and Batteries Promo</guid>
     <priority>10</priority>

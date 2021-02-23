@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -62,6 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
 	private CategoryLoadTuner categoryLoadTunerAll;
 	private CategoryLoadTuner categoryLoadTunerMinimal;
 	private CategoryLoadTuner categoryLoadTunerDefault;
+	private CategoryLoadTuner categoryLoadTunerDefaultPlusAttributes;
 	private ProductService productService;
 	private CatalogService catalogService;
 	private FetchGroupLoadTuner defaultFetchGroupLoadTuner;
@@ -514,58 +514,36 @@ public class CategoryServiceImpl implements CategoryService {
 		saveOrUpdate(two);
 	}
 
-	/**
-	 * Sets the <code>CategoryLoadTuner</code> for populating all data.
-	 *
-	 * @param categoryLoadTunerAll the <code>CategoryLoadTuner</code> for populating all data.
-	 */
+	protected CategoryLoadTuner getCategoryLoadTunerAll() {
+		return categoryLoadTunerAll;
+	}
+
 	public void setCategoryLoadTunerAll(final CategoryLoadTuner categoryLoadTunerAll) {
 		this.categoryLoadTunerAll = categoryLoadTunerAll;
 	}
 
-	/**
-	 * Sets the <code>CategoryLoadTuner</code> for populating minimal data.
-	 *
-	 * @param categoryLoadTunerMinimal the <code>CategoryLoadTuner</code> for populating minimal data.
-	 */
+	protected CategoryLoadTuner getCategoryLoadTunerMinimal() {
+		return categoryLoadTunerMinimal;
+	}
+
 	public void setCategoryLoadTunerMinimal(final CategoryLoadTuner categoryLoadTunerMinimal) {
 		this.categoryLoadTunerMinimal = categoryLoadTunerMinimal;
 	}
 
-	/**
-	 * Sets the default <code>CategoryLoadTuner</code>.
-	 *
-	 * @param categoryLoadTunerDefault the default <code>CategoryLoadTuner</code>
-	 */
+	protected CategoryLoadTuner getCategoryLoadTunerDefault() {
+		return categoryLoadTunerDefault;
+	}
+
 	public void setCategoryLoadTunerDefault(final CategoryLoadTuner categoryLoadTunerDefault) {
 		this.categoryLoadTunerDefault = categoryLoadTunerDefault;
 	}
 
-	/**
-	 * Returns the <code>CategoryLoadTuner</code> for populating all data.
-	 *
-	 * @return the <code>CategoryLoadTuner</code> for populating all data
-	 */
-	public CategoryLoadTuner getCategoryLoadTunerAll() {
-		return categoryLoadTunerAll;
+	protected CategoryLoadTuner getCategoryLoadTunerDefaultPlusAttributes() {
+		return categoryLoadTunerDefaultPlusAttributes;
 	}
 
-	/**
-	 * Returns the default <code>CategoryLoadTuner</code>.
-	 *
-	 * @return the default <code>CategoryLoadTuner</code>
-	 */
-	public CategoryLoadTuner getCategoryLoadTunerDefault() {
-		return categoryLoadTunerDefault;
-	}
-
-	/**
-	 * Returns the <code>CategoryLoadTuner</code> for populating minimal data.
-	 *
-	 * @return the <code>CategoryLoadTuner</code> for populating minimal data
-	 */
-	public CategoryLoadTuner getCategoryLoadTunerMinimal() {
-		return categoryLoadTunerMinimal;
+	public void setCategoryLoadTunerDefaultPlusAttributes(final CategoryLoadTuner categoryLoadTunerDefaultPlusAttributes) {
+		this.categoryLoadTunerDefaultPlusAttributes = categoryLoadTunerDefaultPlusAttributes;
 	}
 
 	/**
@@ -1158,15 +1136,11 @@ public class CategoryServiceImpl implements CategoryService {
 		return result;
 	}
 
-	/**
-	 * Returns a <code>List</code> of Category objects linked to the Category indicated by the given <code>masterCategoryUid</code>.
-	 *
-	 * @param masterCategoryUid the master category uid to look up
-	 * @return a <code>List</code> of all UIDs of all Category objects linked to the Category indicated by the given <code>masterCategoryUid</code>
-	 */
 	@Override
 	public List<Category> findLinkedCategories(final long masterCategoryUid) {
-		return getPersistenceEngine().retrieveByNamedQuery("LINKED_CATEGORY_SELECT_BY_MASTER_CATEGORY_UID", Long.valueOf(masterCategoryUid));
+		PersistenceEngine persistenceEngineWithTuner = getPersistenceEngine()
+			.withLoadTuners(getCategoryLoadTunerDefaultPlusAttributes());
+		return persistenceEngineWithTuner.retrieveByNamedQuery("LINKED_CATEGORY_SELECT_BY_MASTER_CATEGORY_UID", Long.valueOf(masterCategoryUid));
 	}
 
 	@Override

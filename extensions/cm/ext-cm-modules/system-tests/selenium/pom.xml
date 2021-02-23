@@ -150,6 +150,33 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.elasticpath.tools</groupId>
+				<artifactId>ep-core-tool</artifactId>
+				<configuration>
+					<skip>${skipAllTests}</skip>
+					<jdbcUrl>${epdb.url}</jdbcUrl>
+					<jdbcDriverClass>${epdb.jdbc.driver}</jdbcDriverClass>
+					<jdbcPassword>${epdb.password}</jdbcPassword>
+					<jdbcUsername>${epdb.username}</jdbcUsername>
+					<jdbcConnectionPoolMinIdle>0</jdbcConnectionPoolMinIdle>
+					<jdbcConnectionPoolMaxIdle>0</jdbcConnectionPoolMaxIdle>
+				</configuration>
+				<executions>
+					<execution>
+						<id>override-setting-metadata</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>bulk-set-setting-metadata</goal>
+						</goals>
+						<configuration>
+							<settings>
+								<setting>COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore@refreshStrategy=immediate</setting>
+							</settings>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>

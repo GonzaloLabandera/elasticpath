@@ -22,7 +22,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 @Singleton
 @Named("cartOrdersDefaultAddressPopulator")
 public class CartOrdersDefaultAddressPopulatorImpl implements CartOrdersDefaultAddressPopulator {
-	
+
 	private final CartOrderRepository cartOrderRepository;
 
 	/**
@@ -32,15 +32,23 @@ public class CartOrdersDefaultAddressPopulatorImpl implements CartOrdersDefaultA
 	 */
 	@Inject
 	public CartOrdersDefaultAddressPopulatorImpl(
-			@Named("cartOrderRepository")
-			final CartOrderRepository cartOrderRepository) {
+			@Named("cartOrderRepository") final CartOrderRepository cartOrderRepository) {
 		this.cartOrderRepository = cartOrderRepository;
 	}
 
 	@Override
 	public Completable updateAllCartOrdersAddresses(final Customer customer, final CustomerAddress address, final String storeCode,
-			final boolean updateBillingAddress, final boolean updateShippingAddress) {
+													final boolean updateBillingAddress, final boolean updateShippingAddress) {
 		return cartOrderRepository.findCartOrderGuidsByCustomer(storeCode, customer.getGuid())
+				.flatMapSingle(cartOrderGuid -> cartOrderRepository.findByGuid(storeCode, cartOrderGuid))
+				.flatMapSingle(cartOrder -> updateBillingAddress(address, updateBillingAddress, cartOrder))
+				.flatMapCompletable(cartOrder -> updateShippingAddress(address, updateShippingAddress, storeCode, cartOrder));
+	}
+
+	@Override
+	public Completable updateAccountCartOrdersAddresses(final Customer account, final CustomerAddress address, final String storeCode,
+														final boolean updateBillingAddress, final boolean updateShippingAddress) {
+		return cartOrderRepository.findCartOrderGuidsByAccount(storeCode, account.getGuid())
 				.flatMapSingle(cartOrderGuid -> cartOrderRepository.findByGuid(storeCode, cartOrderGuid))
 				.flatMapSingle(cartOrder -> updateBillingAddress(address, updateBillingAddress, cartOrder))
 				.flatMapCompletable(cartOrder -> updateShippingAddress(address, updateShippingAddress, storeCode, cartOrder));
@@ -55,7 +63,7 @@ public class CartOrdersDefaultAddressPopulatorImpl implements CartOrdersDefaultA
 	 * @return cart order
 	 */
 	protected Single<CartOrder> updateBillingAddress(final CustomerAddress address, final boolean updatedPreferredBillingAddress,
-			final CartOrder cartOrder) {
+													 final CartOrder cartOrder) {
 		if (updatedPreferredBillingAddress && cartOrder.getBillingAddressGuid() == null) {
 			cartOrder.setBillingAddressGuid(address.getGuid());
 			return cartOrderRepository.saveCartOrder(cartOrder);
@@ -73,7 +81,7 @@ public class CartOrdersDefaultAddressPopulatorImpl implements CartOrdersDefaultA
 	 * @return Completable
 	 */
 	protected Completable updateShippingAddress(final CustomerAddress address, final boolean updatedPreferredShippingAddress,
-			final String storeCode, final CartOrder cartOrder) {
+												final String storeCode, final CartOrder cartOrder) {
 		if (updatedPreferredShippingAddress && cartOrder.getShippingAddressGuid() == null) {
 			return cartOrderRepository.updateShippingAddressOnCartOrder(address.getGuid(), cartOrder.getGuid(), storeCode).toCompletable();
 		}

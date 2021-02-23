@@ -193,6 +193,14 @@ public interface CustomerService extends EpPersistenceService {
 	String findCustomerGuidBySharedId(String sharedId, String storeCode);
 
 	/**
+	 * Finds customer's guid by shared id.
+	 *
+	 * @param sharedId customer shared ID
+	 * @return Customer's guid.
+	 */
+	String findCustomerGuidBySharedId(String sharedId);
+
+	/**
 	 * Finds customer's guid based on attribute value for the passed attribute key.
 	 *
 	 * @param profileAttributeKey profile attribute key
@@ -257,27 +265,15 @@ public interface CustomerService extends EpPersistenceService {
 	List<Customer> findByUids(Collection<Long> customerUids);
 
 	/**
-	 * Returns all customer uids as a list.
+	 * Retrieves a paginated list of searchable <code>Customer</code> uids where the last modified date is later than the specified date.
+	 * A customer is searchable if they are a 'Registered Customer' or an 'Anonymous Customer' with at least one Order.
 	 *
-	 * @return all customer uids as a list
+	 * @param lastModifiedDate date to compare with the last modified date
+	 * @param firstResult the first result of the customer list to retrieve
+	 * @param maxResults the maximum number of customers to retrieve
+	 * @return a paginated list of indexable <code>Customer</code> uids whose last modified date is later than the specified date
 	 */
-	List<Long> findAllUids();
-
-	/**
-	 * Removes uids which correspond to customers that are not searchable.
-	 * @param uids the uids to filter
-	 * @return the uids of searchable customers
-	 */
-	Collection<Long> filterSearchable(Collection<Long> uids);
-
-	/**
-	 * Retrieves list of searchable <code>Customer</code> uids where the last modified date is later than the specified date.
-	 * A customer is searchable if they have defined their first name or last name.
-	 *
-	 * @param date date to compare with the last modified date
-	 * @return list of <code>Customer</code> uid
-	 */
-	List<Long> findSearchableUidsByModifiedDate(Date date);
+	List<Long> findIndexableUidsPaginated(Date lastModifiedDate, int firstResult, int maxResults);
 
 	/**
 	 * Adds a customer to the default customer group (ensuring that they have the default role).

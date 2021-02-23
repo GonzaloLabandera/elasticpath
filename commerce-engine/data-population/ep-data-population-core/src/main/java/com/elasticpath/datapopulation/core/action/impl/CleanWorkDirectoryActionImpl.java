@@ -32,6 +32,11 @@ public class CleanWorkDirectoryActionImpl implements DataPopulationAction {
 		tmpDir.mkdirs();
 	}
 
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		return "Clean folder '" + workingDirectory + "'";
+	}
+
 	private void deleteDirectory(final File workDirectory) {
 		if (workDirectory.exists()) {
 			try {

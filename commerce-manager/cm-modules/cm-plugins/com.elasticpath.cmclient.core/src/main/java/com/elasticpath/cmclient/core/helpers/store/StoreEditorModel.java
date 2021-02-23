@@ -764,6 +764,38 @@ public class StoreEditorModel {
 		store.setStoreState(storeState);
 	}
 
+	/**
+	 * Gets the B2C authenticated role for store.
+	 * @return the B2C authenticated role.
+	 */
+	public String getB2CAuthenticatedRole() {
+		return store.getB2CAuthenticatedRole();
+	}
+
+	/**
+	 * Sets the B2C authenticated role for store.
+	 * @param b2CRole authenticated the B2C role.
+	 */
+	public void setB2CAuthenticatedRole(final String b2CRole) {
+		store.setB2CAuthenticatedRole(b2CRole);
+	}
+
+	/**
+	 * Gets the B2C single session role for store.
+	 * @return the B2C single session role.
+	 */
+	public String getB2CSingleSessionRole() {
+		return store.getB2CSingleSessionRole();
+	}
+
+	/**
+	 * Sets the B2C single session role for store.
+	 * @param b2CRole single session the B2C role.
+	 */
+	public void setB2CSingleSessionRole(final String b2CRole) {
+		store.setB2CSingleSessionRole(b2CRole);
+	}
+
 	@Override
 	public boolean equals(final Object other) {
 		if (!(other instanceof StoreEditorModel)) {

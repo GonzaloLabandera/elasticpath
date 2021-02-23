@@ -24,11 +24,11 @@ import com.elasticpath.tags.service.SelectableTagValueProvider;
 public class SelectableTagValueServiceLocatorImplTest  {
 	
 	
-	private TagValueType genderTagValueType;
+	private TagValueType exampleTagValueType;
 	
 	private TagValueType simpleTagValueType;
 	
-	private SelectableTagValueProvider<?> genderValueProvider;
+	private SelectableTagValueProvider<?> exampleValueProvider;
 	
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -42,16 +42,16 @@ public class SelectableTagValueServiceLocatorImplTest  {
 	@Before	
 	public void setUp() {
 		
-		genderTagValueType = context.mock(TagValueType.class, "genderTagValueType");
+		exampleTagValueType = context.mock(TagValueType.class, "exampleTagValueType");
 		
 		simpleTagValueType = context.mock(TagValueType.class, "simpleTagValueType");
 		
-		genderValueProvider = context.mock(SelectableTagValueProvider.class, "genderValueProvider");
+		exampleValueProvider = context.mock(SelectableTagValueProvider.class, "exampleValueProvider");
 		
 		context.checking(new Expectations() {
 			{
-				allowing(genderTagValueType).getGuid();
-				will(returnValue("gender"));
+				allowing(exampleTagValueType).getGuid();
+				will(returnValue("example"));
 				
 				allowing(simpleTagValueType).getGuid();
 				will(returnValue("simpleText"));
@@ -60,7 +60,7 @@ public class SelectableTagValueServiceLocatorImplTest  {
 			
 		});
 		
-		serviceLocatorImpl.getValueProviders().put("gender", genderValueProvider);
+		serviceLocatorImpl.getValueProviders().put("example", exampleValueProvider);
 		
 	}
 	
@@ -70,7 +70,7 @@ public class SelectableTagValueServiceLocatorImplTest  {
 	@Test
 	public void testLocateService() {
 		
-		SelectableTagValueProvider<?> provider = serviceLocatorImpl.getSelectableTagValueProvider(genderTagValueType);
+		SelectableTagValueProvider<?> provider = serviceLocatorImpl.getSelectableTagValueProvider(exampleTagValueType);
 		
 		assertNotNull(provider);
 		

@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.commons.security.PasswordHolder;
 import com.elasticpath.commons.security.ValidationResult;
@@ -59,7 +59,7 @@ public class CmPasswordPolicyImplTest {
 		final String currentPassword = "password1";
 		final String encodedPassword = "encodedPassword";
 
-		when(mockPasswordEncoder.encodePassword(currentPassword, null)).thenReturn(encodedPassword);
+		when(mockPasswordEncoder.matches(currentPassword, encodedPassword)).thenReturn(true);
 		when(passwordHolder.getUserPassword()).thenReturn(currentPassword);
 		when(passwordHolder.getPassword()).thenReturn(encodedPassword);
 
@@ -80,7 +80,7 @@ public class CmPasswordPolicyImplTest {
 		final String newPassword = "newPassword";
 		final String newPasswordEncoded = "newPasswordEncoded";
 
-		when(mockPasswordEncoder.encodePassword(newPassword, null)).thenReturn(newPasswordEncoded);
+		when(mockPasswordEncoder.matches(newPassword, newPasswordEncoded)).thenReturn(true);
 
 		final UserPasswordHistoryItem formerPassword1 = mock(UserPasswordHistoryItem.class);
 		final UserPasswordHistoryItem formerPassword2 = mock(UserPasswordHistoryItem.class);

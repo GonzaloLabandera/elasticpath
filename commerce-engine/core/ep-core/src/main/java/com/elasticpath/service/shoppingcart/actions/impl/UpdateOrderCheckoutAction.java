@@ -3,24 +3,30 @@
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
 
+import org.apache.log4j.Logger;
+
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.shoppingcart.CheckoutEventHandler;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureOrderFailureCheckoutAction;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 
 /**
  * CheckoutAction to persist (update) the order after checkout processing.
  */
-public class UpdateOrderCheckoutAction implements ReversibleCheckoutAction {
+public class UpdateOrderCheckoutAction implements ReversibleCheckoutAction, PostCaptureOrderFailureCheckoutAction {
+
+	private static final Logger LOG = Logger.getLogger(UpdateOrderCheckoutAction.class);
 
 	private CheckoutEventHandler checkoutEventHandler;
 
 	private OrderService orderService;
 
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		// Notify the checkout event handler before the order is persisted
 		// No part of the order should be saved until after this point so that
 		// the checkoutEventHandler can reject an order by throwing an exception
@@ -33,7 +39,7 @@ public class UpdateOrderCheckoutAction implements ReversibleCheckoutAction {
 	}
 
 	@Override
-	public void rollback(final CheckoutActionContext context)
+	public void rollback(final PreCaptureCheckoutActionContext context)
 			throws EpSystemException {
 		// NO OP
 	}
@@ -52,5 +58,15 @@ public class UpdateOrderCheckoutAction implements ReversibleCheckoutAction {
 
 	public void setOrderService(final OrderService orderService) {
 		this.orderService = orderService;
+	}
+
+	@Override
+	public void postCaptureRollback(final PostCaptureCheckoutActionContext context, final Exception causeForFailure) {
+		final Order order = context.getOrder();
+		if (order == null) {
+			LOG.error("Order not found in post capture checkout action context");
+		} else {
+			orderService.update(order);
+		}
 	}
 }

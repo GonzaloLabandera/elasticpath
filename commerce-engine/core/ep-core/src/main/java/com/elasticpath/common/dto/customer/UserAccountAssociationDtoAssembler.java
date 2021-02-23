@@ -7,7 +7,6 @@ package com.elasticpath.common.dto.customer;
 import com.elasticpath.common.dto.assembler.AbstractDtoAssembler;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.AccountRole;
 import com.elasticpath.domain.customer.UserAccountAssociation;
 import com.elasticpath.service.customer.CustomerService;
 
@@ -35,7 +34,7 @@ public class UserAccountAssociationDtoAssembler extends AbstractDtoAssembler<Use
 		target.setGuid(source.getGuid());
 		target.setAccountGuid(source.getAccountGuid());
 		target.setUserGuid(source.getUserGuid());
-		target.setRole(source.getAccountRole().getName());
+		target.setRole(source.getAccountRole());
 	}
 
 	@Override
@@ -43,7 +42,7 @@ public class UserAccountAssociationDtoAssembler extends AbstractDtoAssembler<Use
 		target.setGuid(source.getGuid());
 		target.setAccountGuid(source.getAccountGuid());
 		target.setUserGuid(source.getUserGuid());
-		target.setAccountRole(AccountRole.valueOf(source.getRole()));
+		target.setAccountRole(source.getRole());
 	}
 
 	public void setBeanFactory(final BeanFactory beanFactory) {

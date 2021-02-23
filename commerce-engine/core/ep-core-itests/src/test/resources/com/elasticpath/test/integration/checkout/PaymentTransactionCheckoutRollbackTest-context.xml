@@ -6,8 +6,8 @@
 
 	<bean id="failingCheckoutAction" class="com.elasticpath.test.integration.checkout.FailingCheckoutAction"/>
 
-	<bean id="reversibleCheckoutActionMutator" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="targetObject" ref="reversibleActions"/>
+	<bean id="reversiblePostCaptureCheckoutActionsMutator" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="reversiblePostHoldResolvedCaptureActions"/>
 		<property name="targetMethod" value="add"/>
 		<property name="arguments">
 			<ref bean="failingCheckoutAction"/>

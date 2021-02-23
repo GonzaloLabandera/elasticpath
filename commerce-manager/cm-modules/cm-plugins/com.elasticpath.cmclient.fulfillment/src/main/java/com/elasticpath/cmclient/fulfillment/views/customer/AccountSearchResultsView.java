@@ -117,6 +117,7 @@ public class AccountSearchResultsView extends AbstractSortListView implements Ac
 					result = CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_USER_SMALL);
 					break;
 				case Customer.STATUS_DISABLED:
+				case Customer.STATUS_SUSPENDED:
 					result = CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_USER_DISABLED_SMALL);
 					break;
 				case Customer.STATUS_PENDING_APPROVAL:

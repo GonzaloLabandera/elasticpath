@@ -38,7 +38,7 @@ public final class DataHelper {
 	/**
 	 * Date format which is used in DB tables for the dates.
 	 */
-	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("YYYY-M-d HH:mm:ss", Locale.ENGLISH);
+	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-M-d HH:mm:ss", Locale.ENGLISH);
 
 	/**
 	 * Date format which is used in DB tables for the dates.
@@ -48,7 +48,7 @@ public final class DataHelper {
 	/**
 	 * Date format which is used in Syndication API URLs for the dates.
 	 */
-	public static final SimpleDateFormat URL_DATE_FORMAT = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH);
+	public static final SimpleDateFormat URL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.ENGLISH);
 	private static final long ONE_MINUTE_IN_MILLIS = 60000;
 
 	private DataHelper() {

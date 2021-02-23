@@ -42,6 +42,7 @@ public class CustomerSolrInputDocumentCreator extends AbstractDocumentCreatingTa
 		addFieldToDocument(document, SolrIndexConstants.EMAIL, getAnalyzer().analyze(getEntity().getEmail()));
 		addFieldToDocument(document, SolrIndexConstants.PHONE_NUMBER, getAnalyzer().analyze(getEntity().getPhoneNumber()));
 		addFieldToDocument(document, SolrIndexConstants.CREATE_TIME, getAnalyzer().analyze(getEntity().getCreationDate()));
+		addFieldToDocument(document, SolrIndexConstants.LAST_MODIFIED_DATE, getAnalyzer().analyze(getEntity().getLastModifiedDate()));
 		addFieldToDocument(document, SolrIndexConstants.STORE_CODE, getAnalyzer().analyze(getEntity().getStoreCode()));
 		addFieldToDocument(document, SolrIndexConstants.CUSTOMER_TYPE, getEntity().getCustomerType().getName());
 		addFieldToDocument(document, SolrIndexConstants.ROOT_LEVEL, getAnalyzer().analyze(calculateRootLevel()));

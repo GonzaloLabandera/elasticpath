@@ -10,6 +10,7 @@ import cucumber.api.DataTable
 import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
+import org.apache.commons.lang.StringUtils
 
 import com.elasticpath.cortexTestObjects.Profile
 
@@ -67,9 +68,56 @@ class AddressFormFieldSteps {
 		Profile.createAddress(countryCode, extendedAddress, locale, organization, phoneNumber, postalCode, regionCode, streetAddress, familyName, givenName);
 	}
 
-	@When('^I modify existing address with postal code (.+) with Country (.*), Extended-Address (.*), Locality (.*), Organization (.*), Phone-Number (.*), Postal-Code (.*), Region (.*), Street-Address (.*), Family-Name (.*) and Given-Name (.*)$')
-	static void modifyExistingAddressWithParameters(String toBeModifiedAddressPostalCode,
+	@When('^I create account address with Country (.*), Extended-Address (.*), Locality (.*), Organization (.*), Phone-Number (.*), Postal-Code (.*), Region (.*), Street-Address (.*), Family-Name (.*) and Given-Name (.*)$')
+	static void createNewAccountAddressWithParameters(String countryCode,
+											   String extendedAddress,
+											   String locale,
+											   String organization,
+											   String phoneNumber,
+											   String postalCode,
+											   String regionCode,
+											   String streetAddress,
+											   String familyName,
+											   String givenName) {
+
+		client.createaddressaction(
+				[
+						"organization": organization,
+						"phone-number": phoneNumber,
+						address       : ["country-name"    : countryCode,
+										 "extended-address": extendedAddress,
+										 "locality"        : locale,
+										 "postal-code"     : postalCode,
+										 "region"          : regionCode,
+										 "street-address"  : streetAddress],
+						name          : ["family-name": familyName,
+										 "given-name" : givenName]
+				]
+		)
+		.stopIfFailure()
+
+		if (client.response.status == 200 || client.response.status == 201) {
+			getClient().follow()
+		}
+	}
+
+	@When('^I modify existing address with Family-Name (.*), Given-Name (.*), postal code (.+) with Country (.*), Extended-Address (.*), Locality (.*), Organization (.*), Phone-Number (.*), Postal-Code (.*), Region (.*) and Street-Address (.*)$')
+	static void modifyExistingAddressWithParameters(String familyName,
+													String givenName,
+													String toBeModifiedAddressPostalCode,
 													String countryCode,
+													String extendedAddress,
+													String locale,
+													String organization,
+													String phoneNumber,
+													String postalCode,
+													String regionCode,
+													String streetAddress) {
+		Profile.updateAddress(toBeModifiedAddressPostalCode, countryCode, extendedAddress, locale, organization, phoneNumber, postalCode, regionCode, streetAddress, familyName, givenName);
+	}
+
+	@When('^I modify existing account address with Country (.*), Extended-Address (.*), Locality (.*), Organization (.*), Phone-Number (.*), Postal-Code (.*), Region (.*), Street-Address (.*), Family-Name (.*) and Given-Name (.*)$')
+	static void modifyExistingAccountAddressWithParameters(String countryCode,
 													String extendedAddress,
 													String locale,
 													String organization,
@@ -79,18 +127,20 @@ class AddressFormFieldSteps {
 													String streetAddress,
 													String familyName,
 													String givenName) {
-		Profile.updateAddress(toBeModifiedAddressPostalCode, countryCode, extendedAddress, locale, organization, phoneNumber, postalCode, regionCode, streetAddress, familyName, givenName);
+		Profile.putAddress(organization, phoneNumber, countryCode, extendedAddress, locale, postalCode, regionCode, streetAddress, familyName, givenName)
 	}
 
-	@When('^I create address with invalid address key with Country (.*), Locality (.*), Postal-Code (.*), Region (.*), Street-Address (.*), Family-Name (.*) and Given-Name (.*)$')
+	@When('^I create address with invalid address key with Country (.*), Locality (.*), Postal-Code (.*), Region (.*), Street-Address (.*), Organization (.*), Phone-Number (.*), Family-Name (.*) and Given-Name (.*)$')
 	static void createNewAddressWithInvalidAddressKey(String countryCode,
 													  String locale,
 													  String postalCode,
 													  String regionCode,
 													  String streetAddress,
+													  String organization,
+													  String phoneNumber,
 													  String familyName,
 													  String givenName) {
-		Profile.createAddressWithInvalidAddressKey(countryCode, locale, postalCode, regionCode, streetAddress, familyName, givenName);
+		Profile.createAddressWithInvalidAddressKey(countryCode, locale, postalCode, regionCode, streetAddress, organization, phoneNumber, familyName, givenName);
 	}
 
 	@When('^I create address with invalid name key with Country (.*), Locality (.*), Postal-Code (.*), Region (.*), Street-Address (.*), Family-Name (.*) and Given-Name (.*)$')
@@ -107,6 +157,66 @@ class AddressFormFieldSteps {
 	@Then('^the address with postal code (.+) should match the following (.+) values?$')
 	static void verifyAddressContainsValues(String postalCode, String addressFormNode, DataTable dataTable) {
 		Profile.getAddressWithPostalCode(postalCode)
+
+		def mapList = dataTable.asMap(String, String)
+
+		for (def map : mapList) {
+			def key = map.getKey()
+			def value = map.getValue()
+
+			assertThat(client.body."$addressFormNode"."$key")
+					.as("Expected $key does not match")
+					.isEqualTo(value)
+		}
+	}
+
+	@Then('^navigate to the account address with postal code (.+)$')
+	static void GetAddressContainingValues(String postalCode) {
+		def addressExists = false
+		client.body.links.find {
+			if (it.rel == "element") {
+				client.GET(it.uri)
+				if (client["address"]["postal-code"] == postalCode) {
+					return addressExists = true
+				}
+			}
+		}
+		assertThat(addressExists)
+				.as("Unable to find $postalCode")
+				.isTrue()
+	}
+
+	@Then('^I delete to the account address with postal code (.+)$')
+	static void DeleteAddressContainingValues(String postalCode) {
+		def addressExists = false
+		client.body.links.find {
+			if (it.rel == "element") {
+				client.GET(it.uri)
+				if (client["address"]["postal-code"] == postalCode) {
+					return addressExists = true
+				}
+			}
+		}
+		assertThat(addressExists)
+				.as("Unable to find $postalCode")
+				.isTrue()
+		client.DELETE(client.body.self.uri)
+	}
+
+	@Then('^the account address with postal code (.+) should match the following (.+) values?$')
+	static void verifyAccountAddressContainsValues(String postalCode, String addressFormNode, DataTable dataTable) {
+		def addressExists = false
+		client.body.links.find {
+			if (it.rel == "element") {
+				client.GET(it.uri)
+				if (client["address"]["postal-code"] == postalCode) {
+					return addressExists = true
+				}
+			}
+		}
+		assertThat(addressExists)
+				.as("Unable to find $postalCode")
+				.isTrue()
 
 		def mapList = dataTable.asMap(String, String)
 

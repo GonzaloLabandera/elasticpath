@@ -12,9 +12,13 @@
 			<from uri="jms:queue:ep.batch.catalogsyndication"/>
 			<unmarshal ref="eventMessageDataFormat"/>
 			<process ref="catalogBatchEventMessageProcessor"/>
-			<to uri="jms:queue:ep.catalog"/>
+			<to ref="epCatalogBatchMessagingEventExternalEndpoint"/>
 		</route>
 	</camel:camelContext>
+
+	<bean id="epCatalogBatchMessagingEventExternalEndpoint" parent="catalogEventExternalEndpoint">
+		<property name="camelContextId" value="ep-catalog-batch-messaging"/>
+	</bean>
 
 	<bean id="catalogBatchEventMessageProcessor" class="com.elasticpath.catalog.batch.message.CatalogBatchEventMessageProcessor">
 		<constructor-arg name="jobRunners">

@@ -6,6 +6,9 @@ package com.elasticpath.importexport.importer.importers.impl;
 import com.elasticpath.common.dto.sort.SortAttributeDTO;
 import com.elasticpath.domain.search.SortAttribute;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
+import com.elasticpath.importexport.common.types.JobType;
+import com.elasticpath.importexport.exporter.exporters.impl.SortCollectionStrategy;
+import com.elasticpath.importexport.importer.importers.CollectionsStrategy;
 import com.elasticpath.service.search.SortAttributeService;
 
 /**
@@ -53,5 +56,11 @@ public class SortAttributeImporterImpl extends AbstractImporterImpl<SortAttribut
 
 	public void setSortAttributeService(final SortAttributeService sortAttributeService) {
 		this.sortAttributeService = sortAttributeService;
+	}
+
+	@Override
+	protected CollectionsStrategy<SortAttribute, SortAttributeDTO> getCollectionsStrategy() {
+		return new SortCollectionStrategy(getContext().getImportConfiguration().getImporterConfiguration(JobType.SORTATTRIBUTE),
+				sortAttributeService);
 	}
 }

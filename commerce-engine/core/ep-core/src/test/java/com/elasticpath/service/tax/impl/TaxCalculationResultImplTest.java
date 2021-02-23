@@ -5,7 +5,6 @@ package com.elasticpath.service.tax.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -252,35 +251,6 @@ public class TaxCalculationResultImplTest {
 		assertThat(otherTaxAmount)
 				.as("expected tax for ordersku to be set to value given to addItemTax")
 				.isEqualTo("5.00");
-	}
-
-	/**
-	 * test applyTaxes with a line item that wasn't included in calculation. Should not throw exception.
-	 */
-	@Test
-	public void testApplyTaxesSkuNoPriceCodeSuccess() {
-		taxCalculationResult.addItemTax(MYSKU, newMoney("3"));
-		Collection<ShoppingItem> lineItems = new ArrayList<>(2);
-
-		ProductSku myProductSku = new ProductSkuImpl();
-		myProductSku.setSkuCode(MYSKU);
-		myProductSku.setGuid(MYSKU);
-
-		ProductSku otherProductSku = new ProductSkuImpl();
-		otherProductSku.setSkuCode(OTHERSKU);
-		otherProductSku.setGuid(OTHERSKU);
-
-		final ShoppingItem myOrderSku = mock(ShoppingItem.class, "My Order SKU");
-		final ShoppingItem otherOrderSku = mock(ShoppingItem.class, "Other Order SKU");
-
-		when(myOrderSku.hasPrice()).thenReturn(false);
-		when(otherOrderSku.hasPrice()).thenReturn(false);
-
-		lineItems.add(myOrderSku);
-		lineItems.add(otherOrderSku);
-
-		// in order exchange can be added item without price
-		taxCalculationResult.applyTaxes(lineItems);
 	}
 
 	/**

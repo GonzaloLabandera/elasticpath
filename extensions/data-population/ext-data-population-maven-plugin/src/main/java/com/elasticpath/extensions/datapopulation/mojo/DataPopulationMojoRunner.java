@@ -4,9 +4,8 @@
 package com.elasticpath.extensions.datapopulation.mojo;
 
 import java.io.File;
+import java.util.stream.Stream;
 
-import com.elasticpath.datapopulation.core.DataPopulationContextInitializer;
-import com.elasticpath.datapopulation.core.context.configurer.FilterActionConfiguration;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -17,17 +16,22 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 
+import com.elasticpath.datapopulation.core.DataPopulationContextInitializer;
 import com.elasticpath.datapopulation.core.DataPopulationCore;
+import com.elasticpath.datapopulation.core.context.configurer.FilterActionConfiguration;
 
 /**
  * The main maven plugin runner for data population. Provides validation on the directory inputs.
  */
 @Mojo(name = "run", defaultPhase = LifecyclePhase.INSTALL)
 public class DataPopulationMojoRunner extends AbstractMojo {
+
+	private static final String SPRING_PROFILES_ACTIVE_KEY = "spring.profiles.active";
 
     private BeanFactory beanFactory;
     
@@ -59,7 +63,9 @@ public class DataPopulationMojoRunner extends AbstractMojo {
         if ("filter-data".equals(command)) {
         	validatePath(outputDirectory, "outputDirectory", false);
         }
-        
+
+		setSpringProfilesAsSystemPropertyIfPossible();
+
         configureLog4j();
         initializeBeanFactory();
 
@@ -91,7 +97,35 @@ public class DataPopulationMojoRunner extends AbstractMojo {
     	    throw new MojoExecutionException("Invalid parameter - (" + directory + ") does not exist");
         }
     }
-    
+
+	/**
+	 * Set spring.profiles.active system property if the same one is found in the pom.xml.
+	 */
+	protected void setSpringProfilesAsSystemPropertyIfPossible() {
+		Stream.of(getActiveSpringProfilesEnvironmentProperty(),
+				getActiveSpringProfilesSystemProperty(),
+				getActiveSpringProfilesMavenProjectProperty())
+				.filter(StringUtils::isNotBlank)
+				.findFirst()
+				.ifPresent(this::overridesActiveSpringProfiles);
+	}
+
+	private String getActiveSpringProfilesEnvironmentProperty() {
+		return System.getenv("PROFILE");
+	}
+
+	private String getActiveSpringProfilesSystemProperty() {
+		return System.getProperty(SPRING_PROFILES_ACTIVE_KEY);
+	}
+
+	private String getActiveSpringProfilesMavenProjectProperty() {
+		return ((MavenProject) getPluginContext().get("project")).getProperties().getProperty(SPRING_PROFILES_ACTIVE_KEY);
+	}
+
+	private void overridesActiveSpringProfiles(final String activeSpringProfiles) {
+		System.setProperty(SPRING_PROFILES_ACTIVE_KEY, activeSpringProfiles);
+	}
+
     private void initializeBeanFactory() {
         getLog().info("Initializing spring context from conf/spring/ep-data-population-maven.xml");
 

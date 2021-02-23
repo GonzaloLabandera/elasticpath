@@ -97,15 +97,8 @@
 
 	<import resource="sync-hdssupport-context.xml" />
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
-	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
 
 	<import resource="classpath*:META-INF/conf/ep-dst-plugin-local.xml" />
-
-	<util:list id="domainEventListenerEventTypes">
-		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_PERSIST"/>
-		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.BEFORE_UPDATE"/>
-		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_DELETE"/>
-	</util:list>
 
 	<!--
 		Define non-shared cache manager for target context
@@ -127,10 +120,5 @@
 	<bean id="ehCacheConfigurationLoader" class="com.elasticpath.commons.util.EhcacheConfigurationLoader">
 		<property name="pathname" value="${ep.external.datasync.target.ehcache.xml.path:null}"/>
 	</bean>
-
-
-	<beans profile="non-xa" >
-		<util:list id="domainEventListenerEventTypes"/>
-	</beans>
 
 </beans>

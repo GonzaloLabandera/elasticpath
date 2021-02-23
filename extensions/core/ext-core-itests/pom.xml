@@ -54,8 +54,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<!-- if you update the below version you might also need to update the version of maven-surefire-report-plugin -->
-				<version>${maven-failsafe-plugin.version}</version>
 				<configuration>
 					<skipTests>${skipITests}</skipTests>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>

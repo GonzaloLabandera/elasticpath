@@ -139,6 +139,8 @@
 	<bean id="shippingAddressShoppingCartValidator"
 		  class="com.elasticpath.service.shoppingcart.validation.impl.ShippingAddressShoppingCartValidatorImpl"/>
 
+	<bean id="suspendedAccountShoppingCartValidator" class="com.elasticpath.service.shoppingcart.validation.impl.SuspendedAccountShoppingCartValidatorImpl"/>
+
 	<!-- Validation Services -->
 
 	<bean id="addProductSkuToCartValidationService" class="com.elasticpath.service.shoppingcart.validation.impl.AddProductSkuToCartValidationServiceImpl">
@@ -199,6 +201,7 @@
 		<extensibleList:removeFromList>
 			<!-- This strategy only checks to see if there's at least one available in inventory. Instead, we will rely on the
 				     InventoryShoppingItemValidator to ensure that there is sufficient inventory for the items in the cart. -->
+			<ref bean="inventoryProductSkuValidator"/>
 			<ref bean="autoSelectableBundleConstituentDelegateValidator"/>
 		</extensibleList:removeFromList>
 	</extensibleList:modify>
@@ -247,5 +250,6 @@
 		<ref bean="shippingAddressShoppingCartValidator"/>
 		<ref bean="paymentMethodShoppingCartValidator"/>
 		<ref bean="modifierShoppingCartValidator"/>
+		<ref bean="suspendedAccountShoppingCartValidator"/>
 	</extensibleList:create>
 </beans>

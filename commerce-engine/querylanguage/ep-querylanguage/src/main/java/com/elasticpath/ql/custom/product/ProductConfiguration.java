@@ -38,7 +38,7 @@ public class ProductConfiguration extends AbstractEpQLCustomConfiguration {
 
 		configureField(EpQLField.PRODUCT_START_DATE, SolrIndexConstants.START_DATE, nonLocalizedFieldResolver, EpQLFieldType.DATE, subQueryBuilder);
 		configureField(EpQLField.PRODUCT_END_DATE, SolrIndexConstants.END_DATE, nonLocalizedFieldResolver, EpQLFieldType.DATE, subQueryBuilder);
-		configureField(EpQLField.PRODUCT_LAST_MODIFIED_DATE, SolrIndexConstants.LAST_MODIFIED_DATE, nonLocalizedFieldResolver, EpQLFieldType.DATE,
+		configureField(EpQLField.LAST_MODIFIED_DATE, SolrIndexConstants.LAST_MODIFIED_DATE, nonLocalizedFieldResolver, EpQLFieldType.DATE,
 				subQueryBuilder);
 
 		// Note that there is no appropriate Solr index for this EpQL field. The resolution will be provided by ProductStateQueryBuilder.

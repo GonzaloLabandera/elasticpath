@@ -20,7 +20,7 @@ import com.elasticpath.rest.definition.taxes.OrderTaxIdentifier;
 import com.elasticpath.rest.definition.taxes.TaxesEntity;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.TaxesCalculator;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.CartTotalsCalculator;
 import com.elasticpath.service.tax.TaxCalculationResult;
 
 /**
@@ -30,7 +30,7 @@ import com.elasticpath.service.tax.TaxCalculationResult;
 public class OrderTaxEntityRepositoryTest {
 
 	@Mock private ConversionService conversionService;
-	@Mock private TaxesCalculator taxesCalculator;
+	@Mock private CartTotalsCalculator cartTotalsCalculator;
 
 	@InjectMocks
 	private OrderTaxEntityRepositoryImpl<TaxesEntity, OrderTaxIdentifier> repository;
@@ -41,7 +41,7 @@ public class OrderTaxEntityRepositoryTest {
 		TaxCalculationResult taxCalculationResult = mock(TaxCalculationResult.class);
 		TaxesEntity result = mock(TaxesEntity.class);
 
-		when(taxesCalculator.calculateTax(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID))
+		when(cartTotalsCalculator.calculateTax(ResourceTestConstants.SCOPE, ResourceTestConstants.ORDER_ID))
 				.thenReturn(Single.just(taxCalculationResult));
 		when(conversionService.convert(taxCalculationResult, TaxesEntity.class)).thenReturn(result);
 

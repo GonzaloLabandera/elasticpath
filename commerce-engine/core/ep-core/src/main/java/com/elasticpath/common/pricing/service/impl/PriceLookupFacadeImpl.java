@@ -42,6 +42,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.pricing.PriceListDescriptorService;
 import com.elasticpath.service.pricing.PriceLookupService;
 import com.elasticpath.service.pricing.PriceProvider;
+import com.elasticpath.tags.TagSet;
 
 /**
  * It uses the {@link PriceLookupService} to find prices now.
@@ -86,7 +87,7 @@ public class PriceLookupFacadeImpl implements PriceLookupFacade {
 										final Shopper shopper) {
 		invokeListeners(productSku);
 		final PriceListStack plStack = getPriceListStackFromSession(store.getCatalog().getCode(), shopper);
-		return getPromotedPriceLookupService().getSkuPrice(productSku, plStack, store);
+		return getPromotedPriceLookupService().getSkuPrice(productSku, plStack, store, shopper.getTagSet());
 	}
 
 	@Override
@@ -94,7 +95,7 @@ public class PriceLookupFacadeImpl implements PriceLookupFacade {
 											final Shopper shopper) {
 		invokeListeners(product);
 		final PriceListStack plStack = getPriceListStackFromSession(store.getCatalog().getCode(), shopper);
-		return getPromotedPriceLookupService().getProductPrice(product, plStack, store);
+		return getPromotedPriceLookupService().getProductPrice(product, plStack, store, shopper.getTagSet());
 	}
 
 
@@ -104,14 +105,14 @@ public class PriceLookupFacadeImpl implements PriceLookupFacade {
 															final Shopper shopper) {
 		invokeListeners(products);
 		final PriceListStack plStack = getPriceListStackFromSession(store.getCatalog().getCode(), shopper);
-		return getPromotedPriceLookupService().getProductsPrices(products, plStack, store);
+		return getPromotedPriceLookupService().getProductsPrices(products, plStack, store, shopper.getTagSet());
 	}
 
 
 	@Override
 	public List<DisplayPriceDTO> getPricesForOrderSku(final ProductSku productSku, final PriceListStack stack,
-			final Integer tierQuantity, final Store store) {
-		final Map<String, Price> prices = getPromotedPriceLookupService().getSkuPrices(productSku, stack, store);
+													  final Integer tierQuantity, final Store store, final TagSet tagSet) {
+		final Map<String, Price> prices = getPromotedPriceLookupService().getSkuPrices(productSku, stack, store, tagSet);
 
 		if (prices.isEmpty()) {
 			return Collections.emptyList();
@@ -206,11 +207,12 @@ public class PriceLookupFacadeImpl implements PriceLookupFacade {
 	 * @param store store
 	 * @param currency currency
 	 * @param priceForSku price for sku
+	 * @param tagSet set of tags within customer session
 	 */
 	@Override
 	public void applyCatalogPromotions(final Product product, final Store store, final Currency currency,
-									   final Price priceForSku) {
-		getPromotedPriceLookupService().applyCatalogPromotions(product, store, currency, priceForSku);
+									   final Price priceForSku, final TagSet tagSet) {
+		getPromotedPriceLookupService().applyCatalogPromotions(product, store, currency, priceForSku, tagSet);
 	}
 
 	/**

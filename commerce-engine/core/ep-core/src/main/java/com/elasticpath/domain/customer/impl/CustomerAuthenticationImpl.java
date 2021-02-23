@@ -15,13 +15,12 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.openjpa.persistence.DataCache;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.PasswordGenerator;
 import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.impl.AbstractLegacyPersistenceImpl;
-import com.elasticpath.service.security.SaltFactory;
 
 /**
  * Represents the customer Authentication.
@@ -109,15 +108,8 @@ public class CustomerAuthenticationImpl extends AbstractLegacyPersistenceImpl im
 			setPassword(null);
 		} else {
 			final PasswordEncoder passwordEncoder = getSingletonBean(ContextIdNames.PASSWORDENCODER, PasswordEncoder.class);
-			final SaltFactory<String> saltFactory = getSaltFactoryBean();
-			setSalt(saltFactory.createSalt());
-			setPassword(passwordEncoder.encodePassword(clearTextPassword, getSalt()));
+			setPassword(passwordEncoder.encode(clearTextPassword));
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private SaltFactory<String> getSaltFactoryBean() {
-		return getSingletonBean(ContextIdNames.SALT_FACTORY, SaltFactory.class);
 	}
 
 	@Override

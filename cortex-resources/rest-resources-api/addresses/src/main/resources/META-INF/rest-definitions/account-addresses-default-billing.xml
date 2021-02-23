@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>addresses</name>
+
+		<!--
+			Billing Address
+		-->
+		<resource>
+			<name>account-billing-address-selector</name>
+			<description><![CDATA[
+				The selector for the default account billing address.
+			]]></description>
+			<uri>{addresses.account-billing-addresses}/selector</uri>
+			<selector-for>account-billing-addresses</selector-for>
+		</resource>
+		<resource>
+			<name>account-billing-address-selector-choice</name>
+			<description><![CDATA[
+				The choice for an account billing address from the selector.
+			]]></description>
+			<uri>{account-billing-address-selector}/{addresses.account-address}</uri>
+			<choices-for>account-billing-address-selector</choices-for>
+		</resource>
+
+		<relationship>
+			<name>account-billing-addresses-to-account-billing-address-selector</name>
+			<description><![CDATA[
+				The relationship from the Account Address Billing Addresses resource to the Account Billing Address Default Selector resource.
+			]]></description>
+			<rel>selector</rel>
+			<rev>addresses</rev>
+			<from>addresses.account-billing-addresses</from>
+			<to>account-billing-address-selector</to>
+		</relationship>
+
+	</family>
+</definitions>

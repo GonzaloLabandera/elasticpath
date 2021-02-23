@@ -11,7 +11,7 @@ import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.TagSetInvalidationDeterminer;
 import com.elasticpath.domain.pricing.PriceListStack;
 import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.service.rules.impl.AbstractRuleEngineImpl;
+import com.elasticpath.service.rules.impl.RuleEngineRuleStrategy;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
 
@@ -118,10 +118,12 @@ public class CustomerSessionImpl implements CustomerSession {
 
 		if (priceListStackInvalidationDeterminer.needInvalidate(key)) {
 			setPriceListStackValid(false);
-			shopper.getCache().cacheInvalidate(AbstractRuleEngineImpl.RULE_IDS_KEY);
+			shopper.getCache().cacheInvalidate(RuleEngineRuleStrategy.CART_RULE_IDS);
+			shopper.getCache().cacheInvalidate(RuleEngineRuleStrategy.CATALOG_RULE_IDS);
 
 		} else if (promoInvalidationDeterminer.needInvalidate(key)) {
-			shopper.getCache().cacheInvalidate(AbstractRuleEngineImpl.RULE_IDS_KEY);
+			shopper.getCache().cacheInvalidate(RuleEngineRuleStrategy.CART_RULE_IDS);
+			shopper.getCache().cacheInvalidate(RuleEngineRuleStrategy.CATALOG_RULE_IDS);
 		}
 	}
 

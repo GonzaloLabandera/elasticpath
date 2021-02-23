@@ -426,6 +426,7 @@ public class MoveItemDialog extends AbstractEpDialog {
 		final int quantityToMove = orderSkuQuantity.getSelection();
 		final BigDecimal discountToMove = calculateDiscountToMove(quantityToMove);
 		newOrderSku.setQuantity(quantityToMove);
+		newOrderSku.setOrderUidPk(order.getUidPk());
 		final int quantityLeftInOldOrderSku = this.orderSku.getQuantity() - quantityToMove;
 		OrderShipment destinationShipment;
 

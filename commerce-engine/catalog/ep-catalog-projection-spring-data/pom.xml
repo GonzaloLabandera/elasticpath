@@ -28,10 +28,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-jta</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-test-application</artifactId>
 		</dependency>
 		<dependency>

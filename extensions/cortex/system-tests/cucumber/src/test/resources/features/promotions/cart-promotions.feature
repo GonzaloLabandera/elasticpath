@@ -22,7 +22,7 @@ Feature: Cart Promotions
     And the list of applied promotions is empty
 
   Scenario Outline: Retrieve promotions applied to cart triggered by personalisation parameters
-    And a personalisation header triggers a cart promotion
+    And a personalisation header triggers a promotion
     When I add item <ITEM_NAME> to the cart
     And I go to my default cart
     Then there is a list of applied promotions on the cart

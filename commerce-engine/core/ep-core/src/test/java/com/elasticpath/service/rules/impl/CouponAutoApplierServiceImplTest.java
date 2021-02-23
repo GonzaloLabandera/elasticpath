@@ -44,6 +44,8 @@ public class CouponAutoApplierServiceImplTest {
 
 	private final Coupon mockCoupon = context.mock(Coupon.class);
 
+	private final CouponConfig mockCouponConfig = context.mock(CouponConfig.class);
+
 	private final CouponUsage mockCouponUsage = context.mock(CouponUsage.class);
 
 	private final CouponAutoApplierServiceImpl applierService = new CouponAutoApplierServiceImpl();
@@ -60,6 +62,9 @@ public class CouponAutoApplierServiceImplTest {
 				allowing(mockCoupon).getCouponCode();
 				will(returnValue(COUPON_CODE));
 
+				allowing(mockCoupon).getCouponConfig();
+				will(returnValue(mockCouponConfig));
+
 				allowing(mockStore).getCode();
 				will(returnValue(STORECODE));
 
@@ -74,7 +79,7 @@ public class CouponAutoApplierServiceImplTest {
 	@Test
 	public void testFilterKeepsUserSpecificCoupons() {
 		allowingCouponToBeUserSpecific(true);
-		allowingCouponToValidateAs(CouponUsageValidationResultEnum.SUCCESS);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.SUCCESS, null);
 
 		Set<String> result = applierService.filterValidCouponsForCustomer(new HashSet<>(Arrays.asList(COUPON_CODE)),
 				mockStore, EMAIL);
@@ -86,7 +91,7 @@ public class CouponAutoApplierServiceImplTest {
 	@Test
 	public void testFilterKeepsInvalidCoupons() {
 		allowingCouponToBeUserSpecific(false);
-		allowingCouponToValidateAs(CouponUsageValidationResultEnum.ERROR_UNSPECIFIED);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.ERROR_UNSPECIFIED, null);
 
 		Set<String> result = applierService.filterValidCouponsForCustomer(new HashSet<>(Arrays.asList(COUPON_CODE)),
 				mockStore, EMAIL);
@@ -98,6 +103,7 @@ public class CouponAutoApplierServiceImplTest {
 	@Test
 	public void testRetrieveCouponsForAutoApplyDoesNotReturnInactiveCoupons() {
 		setUpCouponUsageServiceToReturnCouponUsages();
+		setUpCouponConfigToHaveUsageType(CouponUsageType.LIMIT_PER_SPECIFIED_USER);
 		allowingCouponUsageToBeActiveInCart(false);
 
 		Set<String> result = applierService.retrieveCouponsApplicableToAutoApply(mockStore, EMAIL);
@@ -108,8 +114,9 @@ public class CouponAutoApplierServiceImplTest {
 	@Test
 	public void testRetrieveCouponsForAutoApplyDoesNotReturnInvalidCoupons() {
 		setUpCouponUsageServiceToReturnCouponUsages();
+		setUpCouponConfigToHaveUsageType(CouponUsageType.LIMIT_PER_SPECIFIED_USER);
 		allowingCouponUsageToBeActiveInCart(true);
-		allowingCouponToValidateAs(CouponUsageValidationResultEnum.ERROR_UNSPECIFIED);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.ERROR_UNSPECIFIED, mockCouponUsage);
 
 		Set<String> result = applierService.retrieveCouponsApplicableToAutoApply(mockStore, EMAIL);
 
@@ -117,10 +124,23 @@ public class CouponAutoApplierServiceImplTest {
 	}
 
 	@Test
+	public void testRetrieveCouponsForAutoApplyDoesNotReturnCouponsWithUsageTypeOtherThanLimitPerSpecifiedUser() {
+		setUpCouponUsageServiceToReturnCouponUsages();
+		setUpCouponConfigToHaveUsageType(CouponUsageType.LIMIT_PER_ANY_USER);
+		allowingCouponUsageToBeActiveInCart(true);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.SUCCESS, null);
+
+		Set<String> result = applierService.retrieveCouponsApplicableToAutoApply(mockStore, EMAIL);
+
+		assertTrue("No coupons should be retrieved.", result.isEmpty());
+	}
+
+	@Test
 	public void testRetrieveCouponsForAutoApplyDoesReturnsActiveAndValidCouponsEligibleForCustomer() {
 		setUpCouponUsageServiceToReturnCouponUsages();
+		setUpCouponConfigToHaveUsageType(CouponUsageType.LIMIT_PER_SPECIFIED_USER);
 		allowingCouponUsageToBeActiveInCart(true);
-		allowingCouponToValidateAs(CouponUsageValidationResultEnum.SUCCESS);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.SUCCESS, mockCouponUsage);
 
 		Set<String> result = applierService.retrieveCouponsApplicableToAutoApply(mockStore, EMAIL);
 
@@ -131,10 +151,6 @@ public class CouponAutoApplierServiceImplTest {
 	private void allowingCouponToBeUserSpecific(final boolean isUserSpecific) {
 		context.checking(new Expectations() {
 			{
-				CouponConfig mockCouponConfig = context.mock(CouponConfig.class);
-				allowing(mockCoupon).getCouponConfig();
-				will(returnValue(mockCouponConfig));
-
 				allowing(mockCouponConfig).getUsageType();
 				if (isUserSpecific) {
 					will(returnValue(CouponUsageType.LIMIT_PER_SPECIFIED_USER));
@@ -146,16 +162,16 @@ public class CouponAutoApplierServiceImplTest {
 	private void allowingCouponUsageToBeActiveInCart(final boolean activeInCart) {
 		context.checking(new Expectations() {
 			{
-				allowing(mockCouponUsage).isActiveInCart();
+				allowing(mockCouponUsage).isAutoApplyToCarts();
 				will(returnValue(activeInCart));
 			}
 		});
 	}
 
-	private void allowingCouponToValidateAs(final CouponUsageValidationResultEnum result) {
+	private void allowingCouponToValidateAs(final CouponUsageValidationResultEnum result, final CouponUsage couponUsage) {
 		context.checking(new Expectations() {
 			{
-				allowing(mockCouponUsageService).validateCouponRuleAndUsage(mockCoupon, STORECODE, EMAIL);
+				allowing(mockCouponUsageService).validateCouponRuleAndUsage(mockCoupon, STORECODE, EMAIL, couponUsage);
 				will(returnValue(result));
 			}
 		});
@@ -172,6 +188,15 @@ public class CouponAutoApplierServiceImplTest {
 
 				allowing(mockCouponUsage).getCoupon();
 				will(returnValue(mockCoupon));
+			}
+		});
+	}
+
+	private void setUpCouponConfigToHaveUsageType(final CouponUsageType couponUsageType) {
+		context.checking(new Expectations() {
+			{
+				allowing(mockCouponConfig).getUsageType();
+				will(returnValue(couponUsageType));
 			}
 		});
 	}

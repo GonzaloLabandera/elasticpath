@@ -10,22 +10,9 @@ import com.elasticpath.tags.domain.LogicalOperator
  * Logical Operator Builder. This implementation builds a tree structure from 
  * condition string by using internal tree implementation.
  */
-public class LogicalTreeBuilder {
-  private static final instance = new LogicalTreeBuilder()
-  private currentNodeList = new Stack<LogicalOperator>()	
+class LogicalTreeBuilder {
+  private currentNodeList = new Stack<LogicalOperator>()
   private logicalOperator
-
-  /**
-   * Singleton constructor.
-   */
-  private LogicalTreeBuilder() { }
-  
-  /**
-   * Returns the instance of builder.
-   */
-  static getInstance() {
-    return instance
-  }
   
   /**
    * Adds a condition leaf to the active logical operator tree.

@@ -23,7 +23,7 @@ import com.elasticpath.validation.domain.ValidationConstraint;
  */
 public class TagValueTypeTest extends DbTestCase {
 
-	private static final String GENDER_TYPE_GUID = "gender";
+	private static final String AGE_TYPE_GUID = "age";
 
 	@Autowired
 	private TagValueTypeService tagValueTypeService;
@@ -34,13 +34,13 @@ public class TagValueTypeTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testFetchConstraintsAndLocalization() {
-				TagValueType tagValType = tagValueTypeService.findByGuid(GENDER_TYPE_GUID);
+				TagValueType tagValType = tagValueTypeService.findByGuid(AGE_TYPE_GUID);
 				Set<ValidationConstraint> valConstraints = tagValType.getValidationConstraints();
 				assertNotNull(valConstraints);
 				assertFalse(valConstraints.isEmpty());
 				ValidationConstraint constraint = valConstraints.iterator().next();
 		assertEquals("Localized message was not retrieved",
-				"Please provide a valid gender", 
+				"Please provide a valid age (valid range 0-120)", 
 						constraint.getLocalizedErrorMessage(Locale.ENGLISH));
 		assertEquals("Missing locale was not handled properly",
 				constraint.getLocalizedErrorMessage(Locale.GERMAN), 

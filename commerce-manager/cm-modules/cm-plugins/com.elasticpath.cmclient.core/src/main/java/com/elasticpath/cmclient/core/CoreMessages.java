@@ -227,6 +227,18 @@ public final class CoreMessages {
 
 	public String EpValidatorFactory_ProductName;
 
+	public String EpValidatorFactory_ProductCode;
+
+	public String EpValidatorFactory_CatalogCode;
+
+	public String EpValidatorFactory_CategoryCode;
+
+	public String EpValidatorFactory_BrandCode;
+
+	public String EpValidatorFactory_SkuCode;
+
+	public String EpValidatorFactory_MaxCharLength_ImportFault;
+
 	public String EpValidatorFactory_AttributeKey;
 
 	public String EpValidatorFactory_AttributeName;

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * Jackson mixin that adds serialization properties to the {@link com.elasticpath.messaging.EventType} interface.
- * @see com.elasticpath.messaging.camel.jackson.EventMessageObjectMapper#addMixInAnnotations(Class, Class)
+ * @see com.elasticpath.messaging.camel.jackson.EventMessageObjectMapperImpl#addMixInAnnotations(Class, Class)
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class EventTypeMixin {

@@ -60,7 +60,7 @@
 						<configuration>
 							<executable>java</executable>
 							<arguments>
-								<argument>-Dep.search.default.url=${ep.search.url}</argument>
+								<argument>-Dep.search.replica.url=${ep.search.url}</argument>
 								<argument>-Xms256m</argument>
 								<argument>-Xmx1024m</argument>
 								<argument>-agentlib:jdwp=transport=dt_socket,address=${ep.debug.port},server=y,suspend=n</argument>

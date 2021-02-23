@@ -27,14 +27,7 @@ public class CachingBaseAmountFinderImpl implements BaseAmountFinder {
 	public Collection<BaseAmount> getBaseAmounts(final ProductSku productSku, final PriceListStack plStack,
 												 final BaseAmountDataSource baseAmountDataSource) {
 		final PricingCacheKey pricingCacheKey = new PricingCacheKey(plStack, productSku.getSkuCode());
-
-		Collection<BaseAmount> result = getCache().get(pricingCacheKey);
-		if (result == null) {
-			result = fallBackFinder.getBaseAmounts(productSku, plStack, baseAmountDataSource);
-			getCache().put(pricingCacheKey, result);
-		}
-
-		return result;
+		return cache.get(pricingCacheKey, key -> fallBackFinder.getBaseAmounts(productSku, plStack, baseAmountDataSource));
 	}
 
 	@Override

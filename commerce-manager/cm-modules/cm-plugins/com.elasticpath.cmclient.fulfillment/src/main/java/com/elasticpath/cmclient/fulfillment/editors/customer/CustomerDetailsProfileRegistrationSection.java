@@ -76,9 +76,6 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 	private static final String[] SELECTABLE_USER_TYPE_STRINGS = new String[]{FulfillmentMessages.get().ProfileRegistrationSection_TypeGuest,
 			FulfillmentMessages.get().ProfileRegistrationSection_TypeRegistered};
 
-	private static final String[] GENDER_STRINGS = new String[]{FulfillmentMessages.get().ProfileRegistrationSection_Male,
-			FulfillmentMessages.get().ProfileRegistrationSection_Female, FulfillmentMessages.get().ProfileRegistrationSection_Gender_Not_Available};
-
 	private static final String[] YES_NO_STRINGS = new String[]{FulfillmentMessages.get().ProfileRegistrationSection_Yes,
 			FulfillmentMessages.get().ProfileRegistrationSection_No};
 	private static final int HIERARCHY_TREESHOLD = 4;
@@ -99,8 +96,6 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 	private CCombo preferredCurrencyCombo;
 
 	private IEpDateTimePicker birthDateComponent;
-
-	private CCombo genderCombo;
 
 	private CCombo htmlEmailCombo;
 
@@ -190,9 +185,6 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 
 			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_BirthDate, labelData);
 			this.birthDateComponent = this.mainPane.addDateTimeComponent(IEpDateTimePicker.STYLE_DATE, authorization, fieldData);
-
-			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_Gender, labelData);
-			this.genderCombo = this.mainPane.addComboBox(authorization, fieldData);
 
 			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_RecHttpMail, labelData);
 			this.htmlEmailCombo = this.mainPane.addComboBox(authorization, fieldData);
@@ -287,8 +279,6 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 		}
 		this.birthDateComponent.setDate(this.customer.getDateOfBirth());
 
-		initGenderCombo();
-
 		this.htmlEmailCombo.setItems(YES_NO_STRINGS);
 		if (customer.isHtmlEmailPreferred()) {
 			htmlEmailCombo.setText(YES_NO_STRINGS[0]);
@@ -354,18 +344,6 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 		return storeService.getTunedStores(registeredStore.getAssociatedStoreUids(), loadTuner);
 	}
 
-	private void initGenderCombo() {
-		this.genderCombo.setItems(GENDER_STRINGS);
-		final char genderChar = this.customer.getGender();
-		if (Customer.GENDER_MALE == genderChar) {
-			this.genderCombo.setText(GENDER_STRINGS[0]);
-		} else if (Customer.GENDER_FEMALE == genderChar) {
-			this.genderCombo.setText(GENDER_STRINGS[1]);
-		} else {
-			this.genderCombo.setText(GENDER_STRINGS[2]); // gender not specified
-		}
-	}
-
 	private IStatus setSelectedLocale(final int selectedIndex) {
 		if (selectedIndex >= 0) {
 			final Locale locale = localesList.get(selectedIndex);
@@ -414,15 +392,6 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 						}
 					}, true);
 
-			bindingProvider.bind(bindingContext, this.genderCombo, null, null, new ObservableUpdateValueStrategy() {
-				@Override
-				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-					final int gender = (Integer) value;
-					setCustomerGender(gender);
-					return Status.OK_STATUS;
-				}
-			}, true);
-
 			bindingProvider.bind(bindingContext, this.htmlEmailCombo, null, null, new ObservableUpdateValueStrategy() {
 				@Override
 				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
@@ -444,7 +413,9 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 			bindingProvider.bind(bindingContext, this.businessNumberText, null, null, new ObservableUpdateValueStrategy() {
 				@Override
 				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-					customer.setBusinessNumber(String.valueOf(value));
+					if (!StringUtils.isBlank((String) value)) {
+						customer.setBusinessNumber(String.valueOf(value));
+					}
 					return Status.OK_STATUS;
 				}
 			}, true);
@@ -452,46 +423,23 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 			bindingProvider.bind(bindingContext, this.taxExemptionIdText, null, null, new ObservableUpdateValueStrategy() {
 				@Override
 				protected IStatus doSet(final IObservableValue observableValue, final Object value) {
-					customer.setTaxExemptionId(String.valueOf(value));
+					if (!StringUtils.isBlank((String) value)) {
+						customer.setTaxExemptionId(String.valueOf(value));
+					}
 					return Status.OK_STATUS;
 				}
 			}, true);
 		}
 	}
 
-	/**
-	 * Sets the customer gender to the model object.
-	 *
-	 * @param comboIndex the gender combo index
-	 */
-	private void setCustomerGender(final int comboIndex) {
-		char genderChar;
-		switch (comboIndex) {
-		case 0:
-			genderChar = Customer.GENDER_MALE;
-			break;
-		case 1:
-			genderChar = Customer.GENDER_FEMALE;
-			break;
-		default:
-			genderChar = Customer.GENDER_NOT_SELECTED;
-			break;
-		}
-		customer.setGender(genderChar);
-	}
-
 	private IStatus setDate(final Object value) {
-		if (StringUtils.isBlank((String) value)) {
-			customer.setDateOfBirth(null);
-			return Status.OK_STATUS;
-		}
-
-		try {
-			final Date date = DateTimeUtilFactory.getDateUtil().parseDate((String) value);
-			customer.setDateOfBirth(date);
-		} catch (final ParseException e) {
-			// return ok anyway
-			return Status.OK_STATUS;
+		if (!StringUtils.isBlank((String) value)) {
+			try {
+				final Date date = DateTimeUtilFactory.getDateUtil().parseDate((String) value);
+				customer.setDateOfBirth(date);
+			} catch (final ParseException e) {
+				// Do nothing as the expected return value is Status.OK_STATUS.
+			}
 		}
 		return Status.OK_STATUS;
 	}

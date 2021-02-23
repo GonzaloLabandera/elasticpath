@@ -29,6 +29,7 @@ import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.EditItemDetailsDialog;
 import com.elasticpath.selenium.dialogs.MoveItemDialog;
 import com.elasticpath.selenium.dialogs.OpenNoteDialog;
+import com.elasticpath.selenium.dialogs.OrderHoldDialog;
 import com.elasticpath.selenium.dialogs.PaymentProcessingErrorDialog;
 import com.elasticpath.selenium.dialogs.SelectASkuDialog;
 import com.elasticpath.selenium.dialogs.TransactionDetailsDialog;
@@ -156,6 +157,13 @@ public class OrderEditor extends AbstractPageObject {
 			+ ".ShipmentSection_CancelShipmentButton']";
 	private static final String RELEASE_SHIPMENT_BUTTON_CSS = "div[widget-id*='%s']+div div[automation-id="
 			+ "'com.elasticpath.cmclient.fulfillment.FulfillmentMessages.ShipmentSection_ReleaseShipmentButton']";
+	private static final String ORDER_HOLD_RESOLVED_COMMENT = "ORDER_HOLD_RESOLVED";
+	private static final String ORDER_HOLD_UNRESOLVABLE_COMMENT = "ORDER_HOLD_UNRESOLVABLE";
+	private static final String MARK_ORDER_HOLD_RESOLVED_BUTTON_CSS =
+			"div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages.OrderHoldList_MarkResolvedButton'";
+	private static final String MARK_ORDER_HOLD_UNRESOLVABLE_BUTTON_CSS =
+			"div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages.OrderHoldList_MarkUnresolvableButton'";
+	private static final String ACTIVE_STATUS = "ACTIVE";
 	private static WebElement shipmentItemRow;
 	private static final String ORDER_DATA_TABLE_CSS = "div[widget-id='Field Value Table']";
 	private static final String ORDER_DATA_TABLE_ROW_CSS = "div[parent-widget-id='Field Value Table']"
@@ -169,6 +177,21 @@ public class OrderEditor extends AbstractPageObject {
 	private static final String MOVE_SHIPMENT_BUTTON = SHIPMENT_SECTION_BY_NUMBER_CSS + FULFILLMENT_MESSAGE + ".ShipmentSection_MoveItemButton']";
 	private static final String SHOW_SKIPPED_PAYMENT_EVENTS = FULFILLMENT_MESSAGE + ".ShowSkippedPaymentEvents_Label'][seeable='true']";
 	private static final String RELEASE_SHIPMENT_BUTTON = "Release shipment";
+	private static final String HOLD_TITLE = FULFILLMENT_MESSAGE + ".OrderHoldPage_Title'][seeable='true']";
+	private static final String ORDER_HOLD_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS
+			+ "div[widget-id*='Order Hold Table'][widget-type='Table'][seeable='true'] ";
+	private static final String ORDER_HOLD_TABLE_COLUMN_CSS = ORDER_HOLD_TABLE_PARENT_CSS + COLUMN_NUM_CSS;
+	private static final String ORDER_HOLD_TABLE_COLUMN_VALUE_CSS = ORDER_HOLD_TABLE_PARENT_CSS + COLUMN_ID_CSS;
+	private static final int ORDER_HOLD_TABLE_STATUS_COLUMN_NUM=1;
+	private static final int ORDER_HOLD_TABLE_RULE_COLUMN_NUM=0;
+	private static final int ORDER_HOLD_TABLE_RESOLVEDBY_COLUMN_NUM=2;
+	private static final String ORDER_HOLD_RESOLVE_DIALOG_CSS =
+			"div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages.OrderHoldDialog_ResolveHoldWindowTitle'";
+	private static final String ORDER_HOLD_UNRESOLVABLE_DIALOG_CSS =
+			"div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages.OrderHoldDialog_UnresolvableHoldWindowTitle'";
+
+
+
 
 	/**
 	 * Constructor.
@@ -480,6 +503,9 @@ public class OrderEditor extends AbstractPageObject {
 				break;
 			case "Notes":
 				getWaitDriver().waitForElementToBeVisible(By.cssSelector(NOTES_TITLE));
+				break;
+			case "Holds":
+				getWaitDriver().waitForElementToBeVisible(By.cssSelector(HOLD_TITLE));
 				break;
 			default:
 				fail("Editor is not visible for tab - " + tabName);
@@ -1467,5 +1493,120 @@ public class OrderEditor extends AbstractPageObject {
 	 */
 	public void selectSkippedPaymentEvents() {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SHOW_SKIPPED_PAYMENT_EVENTS)));
+	}
+
+	/**
+	 * Verifies order hold values.
+	 *
+	 * @param holdRule the description or rule that triggered the order hold.
+	 * @param expectedStatus the expected status of the order hold.
+	 * @param resolvedBy the login id of user who resolved the hold.
+	 */
+	public void verifyOrderHold(final String holdRule, final String expectedStatus, final String resolvedBy) {
+		assertThat(getDriver().findElement(By.cssSelector(String.format(ORDER_HOLD_TABLE_COLUMN_CSS,
+				ORDER_HOLD_TABLE_STATUS_COLUMN_NUM))).getText())
+				.as("Order hold status was not expected")
+				.isEqualTo(expectedStatus);
+		assertThat(getDriver().findElement(By.cssSelector(String.format(ORDER_HOLD_TABLE_COLUMN_CSS,
+				ORDER_HOLD_TABLE_RULE_COLUMN_NUM))).getText())
+				.as("Order hold rule was not expected")
+				.isEqualTo(holdRule);
+		if (StringUtils.isNotEmpty(resolvedBy)) {
+			assertThat(getDriver().findElement(By.cssSelector(String.format(ORDER_HOLD_TABLE_COLUMN_CSS,
+					ORDER_HOLD_TABLE_RESOLVEDBY_COLUMN_NUM))).getText())
+					.as("Order hold resolved by was not expected")
+					.isEqualTo(resolvedBy);
+		}
+	}
+
+	/**
+	 * Resolves all order holds that are in ACTIVE status with a comment of ORDER_HOLD_RESOLVED.
+	 */
+	public void resolveAllHolds() {
+		selectOrderHoldByStatus(ACTIVE_STATUS);
+		OrderHoldDialog holdDialog = clickMarkOrderHoldResolvedButton();
+		resolveHold(holdDialog);
+	}
+
+	/**
+	 * Marks the first ACTIVE order hold as unresolvable with a comment of ORDER_HOLD_UNRESOLVABLE.
+	 */
+	public void markHoldUnresolvable() {
+		selectOrderHoldByStatus(ACTIVE_STATUS);
+		OrderHoldDialog holdDialog = clickMarkOrderHoldUnresolvableButton();
+		markHoldUnresolvable(holdDialog);
+	}
+
+	/**
+	 * Verifies the comment of an order hold row.
+	 * @param status the status of the order hold
+	 */
+	public void verifyOrderHoldStatus(final String status) {
+		WebElement element = getDriver().findElement(By.cssSelector(String.format(ORDER_HOLD_TABLE_COLUMN_CSS, ORDER_HOLD_TABLE_STATUS_COLUMN_NUM)));
+		assertThat(element.getText())
+				.as("Order hold has an unexpected status.")
+				.isEqualTo(status);
+	}
+
+	/**
+	 * Verify that the order hold cannot be marked as unresolvable or resolved by the current user.
+	 */
+	public void verifyOrderHoldUneditable() {
+		selectOrderHoldByStatus(ACTIVE_STATUS);
+		verifyOrderHoldNonResolvable();
+		verifyOrderHoldNonUnresolvable();
+
+	}
+
+	/**
+	 * Verify that the order hold cannot be resolved by the current user.
+	 */
+	public void verifyOrderHoldNonResolvable() {
+		clickMarkOrderHoldResolvedButton();
+		assertThat(isOrderHoldResolveDialogVisible())
+				.as("User should not be able to resolve order holds.")
+				.isEqualTo(false);
+	}
+
+	/**
+	 * Verify that the order hold cannot be marked as unresolvable by the current user.
+	 */
+	public void verifyOrderHoldNonUnresolvable() {
+		clickMarkOrderHoldUnresolvableButton();
+		assertThat(isOrderHoldUnresolvableDialogVisible())
+				.as("Order hold should not be possible to mark as unresolvable.")
+				.isEqualTo(false);
+	}
+
+	private boolean isOrderHoldResolveDialogVisible() {
+		return isElementPresent(By.cssSelector(ORDER_HOLD_RESOLVE_DIALOG_CSS));
+	}
+
+	private boolean isOrderHoldUnresolvableDialogVisible() {
+		return isElementPresent(By.cssSelector(ORDER_HOLD_UNRESOLVABLE_DIALOG_CSS));
+	}
+
+	private void resolveHold(final OrderHoldDialog holdDialog) {
+		holdDialog.enterComment(ORDER_HOLD_RESOLVED_COMMENT);
+		holdDialog.clickOK();
+	}
+
+	private void markHoldUnresolvable(final OrderHoldDialog holdDialog) {
+		holdDialog.enterComment(ORDER_HOLD_UNRESOLVABLE_COMMENT);
+		holdDialog.clickOK();
+	}
+
+	private OrderHoldDialog clickMarkOrderHoldResolvedButton() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(MARK_ORDER_HOLD_RESOLVED_BUTTON_CSS)));
+		return new OrderHoldDialog(getDriver());
+	}
+
+	private OrderHoldDialog clickMarkOrderHoldUnresolvableButton() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(MARK_ORDER_HOLD_UNRESOLVABLE_BUTTON_CSS)));
+		return new OrderHoldDialog(getDriver());
+	}
+
+	private void selectOrderHoldByStatus(final String status) {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(ORDER_HOLD_TABLE_COLUMN_VALUE_CSS, status))));
 	}
 }

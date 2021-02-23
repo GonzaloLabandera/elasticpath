@@ -6,6 +6,5 @@
 	<!-- The following sample/demo data is included by default from the commerce-data project.
 		 You should remove these includes once you have created real data for your project. -->
 	<include file="shared-demo-data/liquibase-changelog.xml" relativeToChangelogFile="true" />
-	<include file="shared-release-data/liquibase-changelog.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

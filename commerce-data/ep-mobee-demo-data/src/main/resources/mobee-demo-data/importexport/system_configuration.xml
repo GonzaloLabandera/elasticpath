@@ -15,7 +15,7 @@
     </defined_values>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">interval:timeout=COMMERCE/Cache/Cache_2</value>
+        <value key="refreshStrategy">interval:timeout=COMMERCE/Cache/Cache_2</value>
     </setting_metadata>
 </configuration_setting>
 
@@ -32,7 +32,7 @@
     </defined_values>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">interval:timeout=COMMERCE/Cache/Cache_2</value>
+        <value key="refreshStrategy">interval:timeout=COMMERCE/Cache/Cache_2</value>
     </setting_metadata>
 </configuration_setting>
 
@@ -45,7 +45,7 @@
 		<value context="MOBEE">false</value>
 	</defined_values>
 	<setting_metadata>
-		<value key="apiRefreshStrategy">interval:timeout=COMMERCE/Cache/Cache_1</value>
+		<value key="refreshStrategy">interval:timeout=COMMERCE/Cache/Cache_1</value>
 		<value key="availableToMarketing">true</value>
 	</setting_metadata>
 </configuration_setting>

@@ -104,7 +104,6 @@ public class DataPointValueServiceImplTest {
 			.as("One record must be updated")
 			.isEqualTo(1);
 
-		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, uidPk);
 		verify(persistenceEngine).executeQueryWithList(updateQuery, inList, entityUidPKs);
 	}
 

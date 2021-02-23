@@ -63,6 +63,14 @@
 		<properties/>
 	</payment_provider_configuration>
 
+	<payment_provider_configuration guid="reserve-fails-payment-provider-config" status="ACTIVE">
+		<name>Reserve Fails</name>
+		<payment_provider_id>smartPathPaymentProviderPlugin</payment_provider_id>
+		<properties>
+			<property key="RESERVE">FAILS</property>
+		</properties>
+	</payment_provider_configuration>
+
 	<payment_provider_configuration guid="cancel-unsupported-config" status="ACTIVE">
 		<name>Cancel Unsupported Config</name>
 		<payment_provider_id>smartPathCancelUnsupportedPaymentProviderPlugin</payment_provider_id>

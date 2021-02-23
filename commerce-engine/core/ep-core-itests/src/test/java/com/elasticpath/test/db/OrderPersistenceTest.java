@@ -159,7 +159,7 @@ public class OrderPersistenceTest extends DbTestCase {
 	public void testShipmentSkusSameAfterMerge() {
 		final Order order = persistOrder(createFullOrder());
 
-		final OrderShipment orderShipment = createOrderShipment();
+		final OrderShipment orderShipment = createOrderShipment(order.getUidPk());
 		order.addShipment(orderShipment);
 
 		final Order savedOrder = updateOrder(order);
@@ -205,7 +205,7 @@ public class OrderPersistenceTest extends DbTestCase {
 	public void testSaveOrderChanges() {
 		final Order order = persistOrder(createFullOrder());
 
-		final OrderShipment orderShipment = createOrderShipment();
+		final OrderShipment orderShipment = createOrderShipment(order.getUidPk());
 		order.addShipment(orderShipment);
 
 		final Order savedOrder = updateOrder(order);
@@ -279,16 +279,16 @@ public class OrderPersistenceTest extends DbTestCase {
 		return getTac().getPersistersFactory().getStoreTestPersister().createDefaultCustomer(scenario.getStore());
 	}
 
-	private OrderShipment createOrderShipment() {
+	private OrderShipment createOrderShipment(final long orderUid) {
 		final PhysicalOrderShipmentImpl orderShipment = new PhysicalOrderShipmentImpl();
 		orderShipment.initialize();
 		Date shipmentDate = new Date();
 		orderShipment.setCreatedDate(shipmentDate);
-		orderShipment.addShipmentOrderSku(getSimpleOrderSku("testsku", "GOODS"));
+		orderShipment.addShipmentOrderSku(getSimpleOrderSku("testsku", "GOODS", orderUid));
 		return orderShipment;
 	}
 	
-	private OrderSku getSimpleOrderSku(final String orderSkuCode, final String taxCode) {
+	private OrderSku getSimpleOrderSku(final String orderSkuCode, final String taxCode, final long orderUid) {
 	
 		Product newProduct = getTac().getPersistersFactory().getCatalogTestPersister().createDefaultProductWithSkuAndInventory(
 				scenario.getCatalog(),
@@ -318,6 +318,7 @@ public class OrderPersistenceTest extends DbTestCase {
 		orderSku.setDisplayName("name_" + orderSkuCode);
 		
 		orderSku.setSkuGuid(productSku.getGuid());
+		orderSku.setOrderUidPk(orderUid);
 		
 		return orderSku;
 	}

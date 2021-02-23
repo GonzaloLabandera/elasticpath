@@ -147,6 +147,14 @@ public interface ProductAssociationService extends EpPersistenceService {
 	Set<ProductAssociation> getAssociations(String sourceProductCode, String catalogCode, boolean withinCatalogOnly);
 
 	/**
+	 * Gets all product associations for a given source product, regardless not sold separately or hidden.
+	 * @param sourceProductCode the source product code
+	 * @param loadTuner the loadd tuner
+	 * @return the list of {@link ProductAssociation}.
+	 */
+	List<ProductAssociation> getAllAssociations(String sourceProductCode, LoadTuner loadTuner);
+
+	/**
 	 * Get product associations based on the criteria.
 	 *
 	 * @param criteria the product criteria.

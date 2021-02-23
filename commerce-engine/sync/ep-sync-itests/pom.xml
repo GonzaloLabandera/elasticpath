@@ -49,12 +49,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-sync</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.elasticpath</groupId>
-					<artifactId>ep-jta</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>

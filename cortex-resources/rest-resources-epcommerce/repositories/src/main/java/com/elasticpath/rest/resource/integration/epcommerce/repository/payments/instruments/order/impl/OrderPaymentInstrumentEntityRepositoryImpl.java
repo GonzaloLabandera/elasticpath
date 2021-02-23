@@ -51,7 +51,8 @@ public class OrderPaymentInstrumentEntityRepositoryImpl<E extends OrderPaymentIn
 	@Override
 	public Single<OrderPaymentInstrumentEntity> findOne(final OrderPaymentInstrumentIdentifier orderPaymentInstrumentIdentifier) {
 		final String instrumentGuid = orderPaymentInstrumentIdentifier.getPaymentInstrumentId().getValue();
-		final String userIdentifier = resourceOperationContext.getUserIdentifier();
+		final String userIdentifier = customerRepository.getCustomerGuid(resourceOperationContext.getUserIdentifier(),
+				resourceOperationContext.getSubject());
 		final Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
 		final Currency currency = SubjectUtil.getCurrency(resourceOperationContext.getSubject());
 

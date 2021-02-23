@@ -9,9 +9,11 @@ import com.google.inject.multibindings.MapBinder;
 
 import com.elasticpath.rest.authorization.parameter.PermissionParameterStrategy;
 import com.elasticpath.rest.definition.wishlists.WishlistIdentifier;
+import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
 import com.elasticpath.rest.definition.wishlists.WishlistsResource;
 import com.elasticpath.rest.helix.api.AbstractHelixModule;
 import com.elasticpath.rest.resource.wishlists.permissions.WishlistIdParameterStrategy;
+import com.elasticpath.rest.resource.wishlists.permissions.WishlistLineItemIdParameterStrategy;
 
 /**
  * Peaberry plumbing class used for importing required services and registering additional parameter resolvers.
@@ -28,5 +30,6 @@ public class WishlistWiring extends AbstractHelixModule {
 	protected void registerParameterResolvers(final MapBinder<String, PermissionParameterStrategy> resolvers) {
 		super.registerParameterResolvers(resolvers);
 		resolvers.addBinding(WishlistIdentifier.WISHLIST_ID).toInstance(new WishlistIdParameterStrategy());
+		resolvers.addBinding(WishlistLineItemIdentifier.LINE_ITEM_ID).toInstance(new WishlistLineItemIdParameterStrategy());
 	}
 }

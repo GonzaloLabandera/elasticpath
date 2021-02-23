@@ -25,15 +25,9 @@ public class CachingCategoryServiceImpl implements CategoryService {
 	private Cache<Long, List<Long>> findFeaturedProductsUidCache;
 	private CategoryService fallbackCategoryService;
 
-
 	@Override
 	public String findCodeByUid(final long uidPk) {
-		if (findCodeByUidCache.get(uidPk) != null) {
-			return findCodeByUidCache.get(uidPk);
-		}
-		String code = fallbackCategoryService.findCodeByUid(uidPk);
-		findCodeByUidCache.put(uidPk, code);
-		return code;
+		return findCodeByUidCache.get(uidPk, key -> fallbackCategoryService.findCodeByUid(uidPk));
 	}
 
 	@Override
@@ -78,15 +72,8 @@ public class CachingCategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<Long> findDescendantCategoryUids(final long categoryUid) {
-		List<Long> descendantCategoryUids = findDescendantCategoriesByUidCache.get(categoryUid);
-		if (descendantCategoryUids != null) {
-			return descendantCategoryUids;
-		}
-
-		descendantCategoryUids = fallbackCategoryService.findDescendantCategoryUids(categoryUid);
-		findDescendantCategoriesByUidCache.put(categoryUid, descendantCategoryUids);
-
-		return descendantCategoryUids;
+		return findDescendantCategoriesByUidCache.get(categoryUid,
+				cacheKey -> fallbackCategoryService.findDescendantCategoryUids(categoryUid));
 	}
 
 	@Override
@@ -186,16 +173,7 @@ public class CachingCategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<Long> findFeaturedProductUidList(final long categoryUid) {
-
-		List<Long> featuredProductUids = findFeaturedProductsUidCache.get(categoryUid);
-
-		if (featuredProductUids != null) {
-			return featuredProductUids;
-		}
-
-		featuredProductUids = fallbackCategoryService.findFeaturedProductUidList(categoryUid);
-		findFeaturedProductsUidCache.put(categoryUid, featuredProductUids);
-		return featuredProductUids;
+		return findFeaturedProductsUidCache.get(categoryUid, cacheKey -> fallbackCategoryService.findFeaturedProductUidList(categoryUid));
 	}
 
 	@Override

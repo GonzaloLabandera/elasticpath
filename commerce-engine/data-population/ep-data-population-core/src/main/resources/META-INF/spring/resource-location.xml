@@ -24,9 +24,6 @@
 	<bean id="environmentFilteringProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="location" value="file:///#{configDirectory.getAbsolutePath()}/filtering.properties"/>
 	</bean>
-	<bean id="jmsProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-		<property name="location" value="file:///#{configDirectory.getAbsolutePath()}/jms.properties"/>
-	</bean>
 	<bean id="globalFilteringProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="location" value="file:///#{dataDirectory.getAbsolutePath()}/config/filtering.properties"/>
 	</bean>

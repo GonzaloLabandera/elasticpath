@@ -296,4 +296,9 @@ public class CouponUsageDaoImpl extends AbstractDaoImpl implements CouponUsageDa
 	public List<CouponUsage> findByUids(final Collection<Long> uids) {
 		return getPersistenceEngine().retrieveByNamedQueryWithList("COUPON_USAGE_FIND_BY_UIDS", "list", uids);
 	}
+
+	@Override
+	public void disableAutoApplyToCarts(final String couponCode, final String customerEmail) {
+		getPersistenceEngine().executeNamedQuery("DISABLE_AUTO_APPLY_TO_CARTS_BY_COUPON_CODE_AND_EMAIL", couponCode, customerEmail);
+	}
 }

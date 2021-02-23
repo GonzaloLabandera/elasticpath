@@ -14,8 +14,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.elasticpath.cortexTestObjects.Purchase;
 import com.elasticpath.selenium.dialogs.AddAccountAssociateDialog;
 import com.elasticpath.selenium.dialogs.DeleteAccountAssociateDialog;
+import com.elasticpath.selenium.dialogs.EditCustomerProfileDialog;
 import com.elasticpath.selenium.editor.CustomerEditor;
 import com.elasticpath.selenium.navigations.CustomerServiceNavigation;
 import com.elasticpath.selenium.resultspane.AccountSearchResultPane;
@@ -33,6 +35,7 @@ public class CustomerDefinition {
 	private CustomerSearchResultsPane customerSearchResultsPane;
 	private CustomerEditor customerEditor;
 	private AddAccountAssociateDialog addAccountAssociateDialog;
+	private final EditCustomerProfileDialog editCustomerProfileDialog;
 	private final ActivityToolbar activityToolbar;
 	private final WebDriver driver;
 
@@ -42,6 +45,7 @@ public class CustomerDefinition {
 	private static final String CHILD_IN_TABLE_CSS = "div[parent-widget-id='Child Accounts'] div[column-id='%s']";
 	private static final String OPEN_ACCOUNT_BUTTON_CSS = "div[widget-id='Open Account Profile...']";
 	private static final String CHILD_ACCOUNT_BTN_CSS = "div[widget-id='Add Child Account...']";
+	private static final String REFRESH_ORDERS_BUTTON_CSS = "div[widget-id='Refresh Orders']";
 	private static final String CHILD_ACCOUNT_HYPERLINK_CSS = "div[appearance-id='hyperlink'][widget-type=Hyperlink]";
 	private static final String CUSTOMER_EDITOR_TABS_CSS = "div[appearance-id='ctab-item'][automation-id*='_Title']";
 
@@ -52,6 +56,7 @@ public class CustomerDefinition {
 		driver = getDriver();
 		customerServiceNavigation = new CustomerServiceNavigation(driver);
 		activityToolbar = new ActivityToolbar(driver);
+		editCustomerProfileDialog = new EditCustomerProfileDialog(driver);
 	}
 
 	/**
@@ -486,6 +491,30 @@ public class CustomerDefinition {
 	}
 
 	/**
+	 * Verify that customer status can be selected.
+	 *
+	 * @param customerStatus customer status for choose.
+	 */
+	@Then("^I can select (.+) status for the customer$")
+	public void verifyStatusCanBeSelected(final String customerStatus) {
+		editCustomerProfileDialog.selectCustomerStatus(customerStatus);
+
+		final String actualStatus = editCustomerProfileDialog.getCurrentStatus();
+
+		assertThat(actualStatus).isEqualTo(customerStatus);
+	}
+
+	/**
+	 * Verify that customer status can not be selected.
+	 *
+	 * @param customerStatus customer status for choose.
+	 */
+	@Then("^There are no (.+) status for the customer$")
+	public void verifyCanNotBeSelected(final String customerStatus) {
+		editCustomerProfileDialog.verifySelectValueIsNotAvailable(customerStatus);
+	}
+
+	/**
 	 * Verify ordered parents of account.
 	 *
 	 * @param expectedParents expected set of parents.
@@ -700,6 +729,22 @@ public class CustomerDefinition {
 	@Then("^the following error message is displayed: (.+)$")
 	public void verifyError(final String errorMessage) {
 		customerEditor.verifyErrorMessageDisplayed(errorMessage);
+	}
+
+	/**
+	 * Verifies current order number in customer profile order tab.
+	 */
+	@When("^I should see the latest order details in customer profile order tab$")
+	public void verifyCustomerProfileOrderId() {
+		customerEditor.verifyCustomerOrderIdColumnValue(Purchase.getPurchaseNumber(), "Order ID");
+	}
+
+	/**
+	 * Clicks Refresh Orders button in customer profile order tab.
+	 */
+	@When("^I refresh orders in customer profile order tab$")
+	public void refreshOrders() {
+		customerEditor.clickButton(REFRESH_ORDERS_BUTTON_CSS, "Refresh Orders");
 	}
 
 }

@@ -32,7 +32,7 @@ public class DomainEventTypeFactoryImpl implements EventTypeFactory {
 	}
 
 	@Override
-	public EventType getEventType(final Class<?> clazz, final EventAction action) {
+	public EventType getEventType(final Class<?> clazz, final EventActionEnum action) {
 		return supportedClassByEventTypes
 				.getOrDefault(clazz, Collections.emptyList())
 				.stream()
@@ -42,7 +42,7 @@ public class DomainEventTypeFactoryImpl implements EventTypeFactory {
 	}
 
 	@Override
-	public <T> boolean isSupported(final Class<T> clazz, final EventAction action) {
+	public <T> boolean isSupported(final Class<T> clazz, final EventActionEnum action) {
 		return supportedClassByEventTypes
 				.getOrDefault(clazz, Collections.emptyList())
 				.stream()

@@ -1,6 +1,16 @@
 @regressionTest @customerService @customer
 Feature: Add address and update name
 
+  Scenario: Suspended status should exist in status combo box for account customer
+    Given I sign in to CM as admin user
+    When I search and open account editor for shared ID SomeBusiness@abc.com
+    Then I can select Suspended status for the customer
+
+  Scenario: Suspended status should not exist in status combo box for registered user
+    Given I sign in to CM as admin user
+    When I search and open customer editor for shared ID MOBEE:harry.potter@elasticpath.com
+    Then There are no Suspended status for the customer
+
   Scenario: Correct set of fields and tabs are displayed for account customer
     Given I sign in to CM as admin user
     When I search and open account editor for shared ID SomeBusiness@abc.com
@@ -42,7 +52,6 @@ Feature: Add address and update name
       | Preferred Language |
       | Preferred Currency |
       | Date of Birth      |
-      | Gender             |
       | Receive HTML Email |
       | Receive Newsletter |
       | Business Number    |

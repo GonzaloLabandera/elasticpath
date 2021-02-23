@@ -5,6 +5,7 @@
 package com.elasticpath.service.shoppingcart.impl;
 
 import java.util.Currency;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -50,7 +51,8 @@ public class ShoppingItemSubtotalCalculatorImpl implements ShoppingItemSubtotalC
 		return shoppingItems
 				.map(createShoppingItemToPricingSnapshotFunction(pricingSnapshot))
 				.map(shoppingItemCostFunction)
-				.reduce(Money.zero(currency), (currentAmount, amountToAdd) -> currentAmount.add(amountToAdd));
+				.filter(Objects::nonNull)
+				.reduce(Money.zero(currency), Money::add);
 	}
 
 	/**

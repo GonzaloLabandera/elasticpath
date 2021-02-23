@@ -63,10 +63,8 @@ Feature: Payment instrument billing address
     And I request payments instructions with a blank billing address and data
     Then the HTTP status is bad request
     And Structured error message contains:
-      | given-name must not be blank              |
       | locality must not be blank                |
       | street-address must not be blank          |
-      | family-name must not be blank             |
       | postal-code must not be blank             |
       | country-name must not be blank            |
       | country-name size must be between 2 and 2 |
@@ -85,10 +83,8 @@ Feature: Payment instrument billing address
     And I create a payment instrument with a blank address and data
     Then the HTTP status is bad request
     And Structured error message contains:
-      | given-name must not be blank              |
       | locality must not be blank                |
       | street-address must not be blank          |
-      | family-name must not be blank             |
       | postal-code must not be blank             |
       | country-name must not be blank            |
       | country-name size must be between 2 and 2 |

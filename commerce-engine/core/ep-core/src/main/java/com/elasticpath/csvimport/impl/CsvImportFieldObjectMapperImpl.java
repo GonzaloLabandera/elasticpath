@@ -6,7 +6,10 @@
  */
 package com.elasticpath.csvimport.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,7 +17,9 @@ import org.apache.commons.lang.StringUtils;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.enums.InvalidCatalogCodeMessage;
 import com.elasticpath.commons.exception.EpBindException;
+import com.elasticpath.commons.exception.EpInvalidCatalogCodeException;
 import com.elasticpath.commons.exception.EpInvalidGuidBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.commons.exception.EpRequiredDependentFieldsMissingBindException;
@@ -64,41 +69,67 @@ public class CsvImportFieldObjectMapperImpl<T> implements CsvImportFieldObjectMa
 			int columnNumber = mapping.getValue();
 			try {
 				importField.setStringValue(prototypeBean, row[columnNumber], null);
+			} catch (EpInvalidCatalogCodeException e) {
+				for (InvalidCatalogCodeMessage message : e.getErrorReasonList()) {
+					faults.add(createImportFault(
+							ImportFault.ERROR,
+							message.getMessageCode(),
+							createImportFaultArgs(importField, columnNumber, row, message)));
+				}
 			} catch (EpInvalidGuidBindException e) {
 				faults.add(createImportFault(
 						ImportFault.WARNING, 
-						"import.csvFile.badRow.wrongGuid", 
-						new Object[] {importField.getName(), importField.getType(), String.valueOf(columnNumber), row[columnNumber]}));
+						"import.csvFile.badRow.wrongGuid",
+						createImportFaultArgs(importField, columnNumber, row)));
 			} catch (EpNonNullBindException e) {
 				faults.add(createImportFault(
 						ImportFault.ERROR, 
-						"import.csvFile.badRow.notNull", 
-						new Object[] {importField.getName(), importField.getType(), String.valueOf(columnNumber), row[columnNumber]}));
+						"import.csvFile.badRow.notNull",
+						createImportFaultArgs(importField, columnNumber, row)));
 			} catch (EpTooLongBindException e) {
 				faults.add(createImportFault(
 						ImportFault.ERROR, 
-						"import.csvFile.badRow.tooLong", 
-						new Object[] {importField.getName(), importField.getType(), String.valueOf(columnNumber), row[columnNumber]}));
+						"import.csvFile.badRow.tooLong",
+						createImportFaultArgs(importField, columnNumber, row)));
 			} catch (EpSalePriceExceedListPriceException e) {
 				faults.add(createImportFault(
 						ImportFault.ERROR, 
-						"import.csvFile.badRow.salePriceExceedListPrice", 
-						new Object[] {importField.getName(), importField.getType(), String.valueOf(columnNumber), row[columnNumber]}));
+						"import.csvFile.badRow.salePriceExceedListPrice",
+						createImportFaultArgs(importField, columnNumber, row)));
 			} catch (EpBindException e) {
 				faults.add(createImportFault(
 						ImportFault.ERROR, 
-						"import.csvFile.badRow.bindError", 
-						new Object[] {importField.getName(), importField.getType(), String.valueOf(columnNumber), row[columnNumber]}));
+						"import.csvFile.badRow.bindError",
+						createImportFaultArgs(importField, columnNumber, row)));
 			} catch (IllegalArgumentException e) {
 				faults.add(createImportFault(
 						ImportFault.ERROR, 
-						"import.csvFile.badRow.badValue", 
-						new Object[] {importField.getName(), importField.getType(), String.valueOf(columnNumber), row[columnNumber]}));
+						"import.csvFile.badRow.badValue",
+						createImportFaultArgs(importField, columnNumber, row)));
 			}
 		}
 		return validatePopulatedBean(prototypeBean, faults);
 	}
-	
+
+
+	private Object[] createImportFaultArgs(final ImportField importField, final Integer columnNumber, final String[] row,
+			final InvalidCatalogCodeMessage message) {
+
+		Object[] args = createImportFaultArgs(importField, columnNumber, row);
+		List<Object> list = Arrays.asList(args);
+		list.addAll(message.getParameters());
+		return list.toArray();
+	}
+
+	private Object[] createImportFaultArgs(final ImportField importField, final Integer columnNumber, final String[] row) {
+		List<Object> args = new ArrayList<>();
+		args.add(importField.getName());
+		args.add(importField.getType());
+		args.add(String.valueOf(columnNumber));
+		args.add(row[columnNumber]);
+		return args.toArray();
+	}
+
 	private T validatePopulatedBean(final T prototypeBean, final Collection<ImportFault> faults) {
 			try {
 				return getDtoImportDataType().validatePopulatedDtoBean(prototypeBean);

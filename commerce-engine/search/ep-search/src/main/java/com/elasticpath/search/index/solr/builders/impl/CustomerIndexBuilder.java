@@ -3,6 +3,7 @@
  */
 package com.elasticpath.search.index.solr.builders.impl;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -20,9 +21,20 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
  */
 public class CustomerIndexBuilder extends AbstractIndexBuilder {
 
+	private static final Date OLDEST_POSSIBLE_CUSTOMER_MODIFICATION_DATE = getDate(2015, 1, 1);
+
+	private static final int INDEXABLE_UIDS_MAX_RESULT = 1000;
+
 	private CustomerService customerService;
 
 	private IndexingPipeline<Collection<Long>> customerIndexingPipeline;
+
+
+	private static Date getDate(final int year, final int month, final int date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(year, month, date);
+		return calendar.getTime();
+	}
 
 	/**
 	 * Returns index build service name.
@@ -53,17 +65,29 @@ public class CustomerIndexBuilder extends AbstractIndexBuilder {
 	 */
 	@Override
 	public List<Long> findAddedOrModifiedUids(final Date lastBuildDate) {
-		return customerService.findSearchableUidsByModifiedDate(lastBuildDate);
+		return customerService.findIndexableUidsPaginated(lastBuildDate, 0, Integer.MAX_VALUE);
 	}
 
 	/**
-	 * Retrieve all UIDs.
-	 * 
-	 * @return all UIDs
+	 * Retrieves a paginated list of all searchable <code>Customer</code> uids.
+	 *
+	 * @param page the current page of the list to retrieve
+	 * @return a paginated list of indexable <code>Customer</code> uids whose last modified date is later than the specified date
 	 */
 	@Override
-	public List<Long> findAllUids() {
-		return customerService.findAllUids();
+	public List<Long> findIndexableUidsPaginated(final int page) {
+		final int firstResult = INDEXABLE_UIDS_MAX_RESULT * page;
+		return customerService.findIndexableUidsPaginated(OLDEST_POSSIBLE_CUSTOMER_MODIFICATION_DATE, firstResult, INDEXABLE_UIDS_MAX_RESULT - 1);
+	}
+
+	/**
+	 * To be used with findIndexableUidsPaginated method and inform use of pagination.
+	 *
+	 * @return false as default, otherwise override it to use pagination.
+	 */
+	@Override
+	public boolean canPaginate() {
+		return true;
 	}
 
 	/**

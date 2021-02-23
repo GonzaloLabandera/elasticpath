@@ -5,11 +5,15 @@ import static com.elasticpath.cortex.dce.SharedConstants.TEST_EMAIL_VALUE
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static org.assertj.core.api.Assertions.assertThat
 
+import cucumber.api.java.After
+import cucumber.api.java.Before
 import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
 
 import com.elasticpath.cortex.dce.CommonMethods
+import com.elasticpath.cortex.dce.DBConnector
+import com.elasticpath.cortex.dce.SharedConstants
 import com.elasticpath.cortexTestObjects.Order
 import com.elasticpath.cortexTestObjects.Profile
 
@@ -17,6 +21,8 @@ class OrdersSteps {
 
 	private static final String DEBUG_MESSAGE_KEY = "debug-message"
 	private static final String ID_KEY = "id"
+
+	private static final DBConnector dbConnector = new DBConnector();
 
 	@When('^I submit the order$')
 	static void submitOrder() {
@@ -202,6 +208,23 @@ class OrdersSteps {
 		def submitOrderActionUrl = client.body.self.uri.toString()
 
 		CommonMethods.submitPostNTimesConcurrently(baseUrl.subSequence(0, baseUrl.length() - 1) + submitOrderActionUrl, 10);
+	}
+
+	@Before(value = "@enableOrderHold")
+	static void enableHoldProcessingForDefaultScope() {
+		dbConnector.executeUpdateQuery("INSERT INTO TSETTINGVALUE VALUES (" +
+				"-1," +
+				"(SELECT UIDPK FROM TSETTINGDEFINITION WHERE PATH = 'COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore')," +
+				"UPPER('$SharedConstants.DEFAULT_SCOPE')," +
+				"CURRENT_TIMESTAMP," +
+				"'true'" +
+				")"
+		)
+	}
+
+	@After(value = "@enableOrderHold")
+	static void disableHoldProcessing() {
+		dbConnector.executeUpdateQuery("DELETE FROM TSETTINGVALUE WHERE UIDPK=-1")
 	}
 
 	private static void configureOnlyOneSelectedShippingAddressForUser() {

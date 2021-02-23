@@ -22,8 +22,6 @@ public final class AddressValidatorTest {
 	private static final String REGION = "REGION";
 	private static final String COUNTRY_NAME = "COUNTRY_NAME";
 	private static final String POSTAL_CODE = "POSTAL_CODE";
-	private static final String FIRST_NAME = "FIRST_NAME";
-	private static final String LAST_NAME = "LAST_NAME";
 
 	private final AddressValidatorImpl validator = new AddressValidatorImpl();
 
@@ -112,24 +110,6 @@ public final class AddressValidatorTest {
 	public void testValidationOnNameEntityWithNoFieldsPopulatedWithinAddressRepresentation() {
 		NameEntity nameEntity = createNameEntity(null, null);
 		testEntityFieldPopulationWithFailure(nameEntity, null, NO_VALID_ADDRESS_FIELDS);
-	}
-
-	/**
-	 * Test validation of given name on name entity within the address representation.
-	 */
-	@Test
-	public void testValidationOfGivenNameOnNameEntityWithinAddressRepresentation() {
-		NameEntity nameEntity = createNameEntity(FIRST_NAME, null);
-		testEntityFieldPopulationWithSuccess(nameEntity, null);
-	}
-
-	/**
-	 * Test validation of family name on name entity within the address representation.
-	 */
-	@Test
-	public void testValidationOfFamilyNameOnNameEntityWithinAddressRepresentation() {
-		NameEntity nameEntity = createNameEntity(null, LAST_NAME);
-		testEntityFieldPopulationWithSuccess(nameEntity, null);
 	}
 
 	private void testEntityFieldPopulationWithSuccess(final NameEntity nameEntity,

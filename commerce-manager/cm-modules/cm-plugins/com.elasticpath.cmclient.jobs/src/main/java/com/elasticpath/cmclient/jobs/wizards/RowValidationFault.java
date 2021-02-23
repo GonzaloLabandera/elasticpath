@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.eclipse.osgi.util.NLS;
 
+import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.jobs.JobsMessages;
 import com.elasticpath.domain.dataimport.ImportFault;
 
@@ -32,7 +33,8 @@ public class RowValidationFault {
 
 	private static Map<String, String> codesToMessages;
 
-	private static final String[] CODES = new String[] { "import.csvFile.badRow.wrongColumns", //$NON-NLS-1$
+	private static final String[] CODES = new String[] {
+			"import.csvFile.badRow.wrongColumns", //$NON-NLS-1$
 			"import.csvFile.badRow.wrongGuid", //$NON-NLS-1$
 //			"import.csvFile.badRow.badGuid", //$NON-NLS-1$ // TOBE ADDED: This is thrown on validation and is not handled by this class
 			"import.csvFile.badRow.notNull", //$NON-NLS-1$
@@ -46,8 +48,18 @@ public class RowValidationFault {
 			"import.csvFile.badRow.salePriceExceedListPrice", //$NON-NLS-1$
 			"import.csvFile.badRow.unavailableForChangeSet", //$NON-NLS-1$
 			"import.csvFile.badRow.priceListUnavailableForChangeSet", //$NON-NLS-1$
-			"import.csvFile.badRow.requiredDependentFieldsMissing" //$NON-NLS-1$
+			"import.csvFile.badRow.requiredDependentFieldsMissing", //$NON-NLS-1$
+
+			"EpValidatorFactory_ValueRequired",
+			"EpValidatorFactory_MaxCharLength_ImportFault",
+			"EpValidatorFactory_NoSpace",
+			"EpValidatorFactory_CatalogCode",
+			"EpValidatorFactory_CategoryCode",
+			"EpValidatorFactory_ProductCode",
+			"EpValidatorFactory_SkuCode",
+			"EpValidatorFactory_BrandCode",
 	};
+	
 	static {
 		int index = 0;
 		codesToMessages = new HashMap<String, String>();
@@ -65,6 +77,15 @@ public class RowValidationFault {
 		codesToMessages.put(CODES[index++], JobsMessages.get().RunWizard_ObjectUnavailableForChangeSet);
 		codesToMessages.put(CODES[index++], JobsMessages.get().RunWizard_PriceListUnavailableForChangeSet);
 		codesToMessages.put(CODES[index++], JobsMessages.get().RunWizard_RequiredDepdendentFieldsMissing);
+
+		codesToMessages.put(CODES[index++], CoreMessages.get().EpValidatorFactory_ValueRequired);
+		codesToMessages.put(CODES[index++], CoreMessages.get().EpValidatorFactory_MaxCharLength_ImportFault);
+		codesToMessages.put(CODES[index++], CoreMessages.get().EpValidatorFactory_NoSpace);
+		codesToMessages.put(CODES[index++], CoreMessages.get().EpValidatorFactory_CatalogCode);
+		codesToMessages.put(CODES[index++], CoreMessages.get().EpValidatorFactory_CategoryCode);
+		codesToMessages.put(CODES[index++], CoreMessages.get().EpValidatorFactory_ProductCode);
+		codesToMessages.put(CODES[index++], CoreMessages.get().EpValidatorFactory_SkuCode);
+		codesToMessages.put(CODES[index++], CoreMessages.get().EpValidatorFactory_BrandCode);
 	}
 
 	/**

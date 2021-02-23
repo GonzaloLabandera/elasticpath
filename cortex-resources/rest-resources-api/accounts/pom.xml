@@ -28,16 +28,6 @@
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-collections-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.definitions</groupId>
-			<artifactId>ep-resource-profiles-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.definitions</groupId>
-			<artifactId>ep-resource-purchases-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 
 	<build>

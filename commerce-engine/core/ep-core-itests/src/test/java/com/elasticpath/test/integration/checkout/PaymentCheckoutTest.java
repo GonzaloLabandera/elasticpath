@@ -14,9 +14,11 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.builder.checkout.CheckoutTestCartBuilder;
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.builder.shopper.ShoppingContext;
@@ -24,7 +26,6 @@ import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.impl.EventOriginatorHelperImpl;
-import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderStatus;
@@ -51,6 +52,7 @@ import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
+import com.elasticpath.test.util.CheckoutHelper;
 
 @ContextConfiguration
 public class PaymentCheckoutTest extends BasicSpringContextTest {
@@ -95,6 +97,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 	private OrderPaymentApiServiceImpl orderPaymentApiService;
 
 	private EventOriginator originator;
+	private CheckoutHelper checkoutHelper;
 
 	/**
 	 * Set up common elements of the test.
@@ -118,6 +121,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		checkoutTestCartBuilder.withScenario(scenario)
 				.withCustomerSession(shoppingContext.getCustomerSession());
 		originator = new EventOriginatorHelperImpl().getSystemOriginator();
+		checkoutHelper = new CheckoutHelper(getTac());
 	}
 
 	/**
@@ -130,9 +134,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults results = checkout(shoppingCart, taxSnapshot);
-
-		Order order = results.getOrder();
+		Order order = checkout(shoppingCart, taxSnapshot);
 		ArrayList<OrderPayment> orderPaymentList = new ArrayList<>(orderPaymentService.findByOrder(order));
 		OrderPaymentValidator orderValidator = OrderPaymentValidator.builder()
 				.withPaymentMatchers(OrderPaymentMatcherFactory.createSuccessfulReserve(),
@@ -160,10 +162,10 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Test 'ensure checkout with failing plugin for charge throws {@link PaymentsException}.
+	 * Test 'ensure checkout with failing plugin for charge throws {@link EpServiceException}.
 	 */
 	@DirtiesDatabase
-	@Test(expected = PaymentsException.class)
+	@Test(expected = EpServiceException.class)
 	public void ensureCheckoutWithFailingForChargePluginThrowsException() {
 		PaymentProviderPluginForIntegrationTesting.addCapability(getClass(), ChargeCapability.class, request -> {
 			throw new PaymentCapabilityRequestFailedException(INTERNAL_MESSAGE, EXTERNAL_MESSAGE, false);
@@ -185,9 +187,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults results = checkout(shoppingCart, taxSnapshot);
-
-		Order order = results.getOrder();
+		Order order = checkout(shoppingCart, taxSnapshot);
 		ArrayList<OrderPayment> orderPaymentList = new ArrayList<>(orderPaymentService.findByOrder(order));
 		OrderPaymentValidator orderValidator = OrderPaymentValidator.builder()
 				.withPaymentMatchers(OrderPaymentMatcherFactory.createSuccessfulReserve())
@@ -206,9 +206,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults results = checkout(shoppingCart, taxSnapshot);
-
-		Order order = results.getOrder();
+		Order order = checkout(shoppingCart, taxSnapshot);
 		ArrayList<OrderPayment> orderPaymentList = new ArrayList<>(orderPaymentService.findByOrder(order));
 		OrderPaymentValidator orderValidator = OrderPaymentValidator.builder()
 				.withPaymentMatchers(OrderPaymentMatcherFactory.createSuccessfulReserve(),
@@ -228,9 +226,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults results = checkout(shoppingCart, taxSnapshot);
-
-		Order order = results.getOrder();
+		Order order = checkout(shoppingCart, taxSnapshot);
 		releaseAndCompletePhysicalShipmentsForOrder(order);
 		order = orderService.findOrderByOrderNumber(order.getOrderNumber());
 		ArrayList<OrderPayment> orderPaymentList = new ArrayList<>(orderPaymentService.findByOrder(order));
@@ -254,9 +250,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults results = checkout(shoppingCart, taxSnapshot);
-
-		Order order = results.getOrder();
+		Order order = checkout(shoppingCart, taxSnapshot);
 		OrderShipment orderShipment = order.getPhysicalShipments().get(0);
 		orderShipment = orderService.processReleaseShipment(orderShipment);
 
@@ -280,6 +274,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		ArrayList<OrderPayment> newOrderPaymentList = new ArrayList<>(orderPaymentService.findByOrder(order));
 		OrderPaymentValidator orderValidator = OrderPaymentValidator.builder()
 				.withPaymentMatchers(OrderPaymentMatcherFactory.createSuccessfulReserve(),
+						OrderPaymentMatcherFactory.createFailedCharge(),
 						OrderPaymentMatcherFactory.createSuccessfulCancel(),
 						OrderPaymentMatcherFactory.createSuccessfulReserve(),
 						OrderPaymentMatcherFactory.createFailedCharge())
@@ -298,9 +293,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults results = checkout(shoppingCart, taxSnapshot);
-
-		Order order = results.getOrder();
+		Order order = checkout(shoppingCart, taxSnapshot);
 		OrderShipment orderShipment = order.getPhysicalShipments().get(0);
 		orderShipment = orderService.processReleaseShipment(orderShipment);
 		try {
@@ -331,9 +324,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults results = checkout(shoppingCart, taxSnapshot);
-
-		Order order = results.getOrder();
+		Order order = checkout(shoppingCart, taxSnapshot);
 		OrderShipment orderShipment = order.getPhysicalShipments().get(0);
 		orderShipment = orderService.processReleaseShipment(orderShipment);
 		final Money moneyBeforeChanges = order.getTotalMoney();
@@ -400,7 +391,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 				.build();
 	}
 
-	private CheckoutResults checkout(final ShoppingCart shoppingCart, final ShoppingCartTaxSnapshot taxSnapshot) {
-		return checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+	private Order checkout(final ShoppingCart shoppingCart, final ShoppingCartTaxSnapshot taxSnapshot) {
+		return checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
 	}
 }

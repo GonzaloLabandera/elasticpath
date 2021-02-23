@@ -142,7 +142,7 @@ public class UserAuthenticationStrategyImpl implements UserAuthenticationStrateg
 	}
 
 	private boolean isAnonymousAuthenticationRequest(final String role) {
-		return AuthenticationConstants.PUBLIC_ROLENAME.equals(role);
+		return AuthenticationConstants.PUBLIC_ROLENAME.equalsIgnoreCase(role);
 	}
 
 	private Customer createAnonymousCustomer(final String storeCode) {

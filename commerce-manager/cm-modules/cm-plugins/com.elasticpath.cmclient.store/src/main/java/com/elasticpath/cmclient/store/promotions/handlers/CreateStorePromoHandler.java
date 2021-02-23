@@ -20,9 +20,6 @@ import com.elasticpath.cmclient.store.promotions.wizard.NewShoppingCartPromotion
  * completed successfully, the promotion is saved.
  */
 public class CreateStorePromoHandler extends AbstractPolicyAwareHandler {
-	
-	private static final int DEFAULT_WIDTH = 750;
-	private static final int DEFAULT_HEIGHT = 300;
 
 	private final PolicyActionContainer handlerContainer = addPolicyActionContainer("createStorePromoHandler"); //$NON-NLS-1$		
 

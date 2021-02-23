@@ -150,6 +150,11 @@
 			<artifactId>org.apache.servicemix.bundles.spring-jms</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-orm</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -291,11 +296,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-messaging-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-messaging-camel</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -403,6 +403,11 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-hds-support</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+			<artifactId>ep-rs-authorization-epcommerce</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -755,7 +760,6 @@
 								ep-bean-framework,
 								ep-persistence-api,
 								ep-converters,
-								ep-messaging-api,
 								ep-messaging-camel,
 								ep-jms,
 								ep-core-customer-messaging,
@@ -908,14 +912,14 @@
 					<warSourceDirectory>${project.build.directory}/${project.artifactId}-${project.version}</warSourceDirectory>
 					<path>${ep.cortex.contextUrl}</path>
 					<port>${ep.cortex.tomcat.port.http}</port>
-					<contextFile>${project.build.directory}/${build.finalName}/META-INF/context.xml</contextFile>
+					<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
 					<systemProperties>
 						<felix.fileinstall.dir>
 							${user.home}/ep/conf/cortex/permissions,${user.home}/ep/conf/cortex,/ep/conf/cortex/permissions,/ep/conf/cortex,/etc/ep/cortex/resources/config/permissions,/etc/ep/cortex/system/config
 						</felix.fileinstall.dir>
 						<org.aspectj.tracing.messages>true</org.aspectj.tracing.messages>
 						<org.aspectj.tracing.factory>org.aspectj.weaver.tools.CommonsTraceFactory</org.aspectj.tracing.factory>
-						<ep.search.default.url>${ep.search.url}</ep.search.default.url>
+						<ep.search.replica.url>${ep.search.url}</ep.search.replica.url>
 						<epdb.username>${epdb.username}</epdb.username>
 						<epdb.password>${epdb.password}</epdb.password>
 						<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>

@@ -22,7 +22,6 @@ import com.elasticpath.service.catalogview.StoreProductService;
  */
 public class CachingStoreProductServiceImpl implements StoreProductService {
 
-
 	private StoreProductService fallbackService;
 
 	private Cache<String, StoreProduct> productForStoreCache;
@@ -39,16 +38,8 @@ public class CachingStoreProductServiceImpl implements StoreProductService {
 
 	@Override
 	public StoreProduct getProductForStore(final Product product, final Store store) {
-		String key = store.getCode() + ":" + product.getGuid();
-		StoreProduct cachedWrappedProduct = productForStoreCache.get(key);
-		if (cachedWrappedProduct != null) {
-			return cachedWrappedProduct;
-		}
-
-		cachedWrappedProduct = fallbackService.getProductForStore(product, store);
-		productForStoreCache.put(key, cachedWrappedProduct);
-
-		return cachedWrappedProduct;
+		String cacheKey = store.getCode() + ":" + product.getGuid();
+		return productForStoreCache.get(cacheKey, key -> fallbackService.getProductForStore(product, store));
 	}
 
 

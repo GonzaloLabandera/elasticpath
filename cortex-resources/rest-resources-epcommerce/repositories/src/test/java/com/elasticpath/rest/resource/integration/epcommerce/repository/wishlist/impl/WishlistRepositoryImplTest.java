@@ -126,7 +126,7 @@ public final class WishlistRepositoryImplTest {
 	public void testGetWishlistIdsForCustomer() {
 		WishList wishlist = createMockWishlist();
 		CustomerSession customerSession = createMockSession();
-		when(customerSessionRepository.findCustomerSessionByGuidAsSingle(any())).thenReturn(Single.just(customerSession));
+		when(customerSessionRepository.findCustomerSessionByGuidAndStoreCodeAsSingle(any(), any())).thenReturn(Single.just(customerSession));
 		when(wishListService.findOrCreateWishListByShopper(mockShopper)).thenReturn(wishlist);
 		when(wishListService.save(wishlist)).thenReturn(wishlist);
 

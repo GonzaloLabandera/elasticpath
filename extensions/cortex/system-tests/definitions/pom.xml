@@ -16,7 +16,6 @@
 	<name>Cortex Common Test Definitions</name>
 
 	<properties>
-		<fluent.relos.client.version>1.10.44</fluent.relos.client.version>
 		<jjwt.version>0.10.5</jjwt.version>
 		<javax.json-api.version>1.1.4</javax.json-api.version>
 		<javax.json.version>1.1.4</javax.json.version>
@@ -82,11 +81,6 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.tests</groupId>
 			<artifactId>fluent-relos-client</artifactId>
-			<version>${fluent.relos.client.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-query-analyzer</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest</groupId>

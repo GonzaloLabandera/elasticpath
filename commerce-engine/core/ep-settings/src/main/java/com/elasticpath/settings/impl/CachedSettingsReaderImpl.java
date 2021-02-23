@@ -14,6 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.DisposableBean;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
@@ -43,8 +44,6 @@ public class CachedSettingsReaderImpl implements SettingsReader, DisposableBean 
 	private SettingsService settingsService;
 
 	private String refreshStrategyKey;
-
-	private SettingRefreshStrategy defaultRefreshStrategy;
 
 	@Override
 	public SettingValue getSettingValue(final String path, final String context) {
@@ -103,7 +102,7 @@ public class CachedSettingsReaderImpl implements SettingsReader, DisposableBean 
 				refreshStrategyParams = refreshStrategyData.getRight();
 			}
 			if (strategy == null) {
-				strategy = getDefaultRefreshStrategy();
+				throw new EpSystemException(String.format("Setting definition %s is missing required 'refreshStrategy' metadata value.", path));
 			}
 			settingData = new ImmutablePair<>(refreshStrategyParams, strategy);
 			SETTING_DATA.put(path, settingData);
@@ -194,22 +193,6 @@ public class CachedSettingsReaderImpl implements SettingsReader, DisposableBean 
 		protected String getMetadataSeperator() {
 			return STRATEGY_METADATA_SEPARATOR;
 		}
-	}
-
-	/**
-	 * @return the defaultRefreshStrategy
-	 */
-	protected SettingRefreshStrategy getDefaultRefreshStrategy() {
-		return defaultRefreshStrategy;
-	}
-
-	/**
-	 * Sets the refresh strategy to be used when a setting definition does not specify one.
-	 *
-	 * @param defaultRefreshStrategy the defaultRefreshStrategy to set
-	 */
-	public void setDefaultRefreshStrategy(final SettingRefreshStrategy defaultRefreshStrategy) {
-		this.defaultRefreshStrategy = defaultRefreshStrategy;
 	}
 
 	@Override

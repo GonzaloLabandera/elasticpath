@@ -135,4 +135,14 @@ public interface OrderLockService extends EpPersistenceService {
 	 */
 	OrderLock writeOrderLock(OrderLock orderLock);
 
+	/**
+	 * Builds and writes a new {@link OrderLock} instance to the database.  This overloaded version of this method is
+	 * safe to call from an in-flight global transaction.
+	 *
+	 * @param orderUid the identifier of the order to lock
+	 * @param cmUserId the uid of the user who owns the lock
+	 * @return the persisted order lock
+	 * @throws com.elasticpath.persistence.api.EpPersistenceException if a matching order lock already exists in the database
+	 */
+	OrderLock writeOrderLock(String orderUid, long cmUserId);
 }

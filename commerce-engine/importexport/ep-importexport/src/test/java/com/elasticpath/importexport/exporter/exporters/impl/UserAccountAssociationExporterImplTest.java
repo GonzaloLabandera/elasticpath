@@ -18,8 +18,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.customer.UserAccountAssociationDTO;
-import com.elasticpath.domain.customer.AccountRole;
+import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.UserAccountAssociation;
+import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.customer.impl.UserAccountAssociationImpl;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
 import com.elasticpath.importexport.common.exception.ConfigurationException;
@@ -27,6 +29,7 @@ import com.elasticpath.importexport.common.types.JobType;
 import com.elasticpath.importexport.exporter.configuration.ExportConfiguration;
 import com.elasticpath.importexport.exporter.configuration.search.SearchConfiguration;
 import com.elasticpath.importexport.exporter.context.ExportContext;
+import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.UserAccountAssociationService;
 
 /**
@@ -35,11 +38,15 @@ import com.elasticpath.service.customer.UserAccountAssociationService;
 @RunWith(MockitoJUnitRunner.class)
 public class UserAccountAssociationExporterImplTest {
 
+	private static final String BUYER_ROLE = "BUYER";
 	@InjectMocks
 	private UserAccountAssociationExporterImpl userAccountAssociationExporter;
 
 	@Mock
 	private UserAccountAssociationService userAccountAssociationService;
+
+	@Mock
+	private CustomerService customerService;
 
 	@Mock
 	private DomainAdapter<UserAccountAssociation, UserAccountAssociationDTO> userAccountAssociationDomainAdapter;
@@ -68,8 +75,8 @@ public class UserAccountAssociationExporterImplTest {
 	public void initialize() throws ConfigurationException {
 		uidpkStringList = Arrays.asList(String.valueOf(UIDPK_1), String.valueOf(UIDPK_2));
 		uidpkLongList = Arrays.asList(UIDPK_1, UIDPK_2);
-		association1 = createUserAccountAssociation(UIDPK_1, USER_GUID_1, ACCOUNT_GUID_1, AccountRole.BUYER);
-		association2 = createUserAccountAssociation(UIDPK_2, USER_GUID_2, ACCOUNT_GUID_2, AccountRole.BUYER);
+		association1 = createUserAccountAssociation(UIDPK_1, USER_GUID_1, ACCOUNT_GUID_1, BUYER_ROLE);
+		association2 = createUserAccountAssociation(UIDPK_2, USER_GUID_2, ACCOUNT_GUID_2, BUYER_ROLE);
 		userAccountAssociationList = Arrays.asList(association1, association2);
 		when(userAccountAssociationService.findAllUids()).thenReturn(uidpkLongList);
 		when(userAccountAssociationService.findByIDs(uidpkLongList)).thenReturn(userAccountAssociationList);
@@ -96,6 +103,11 @@ public class UserAccountAssociationExporterImplTest {
 	 */
 	@Test
 	public void testFindByIDs() throws ConfigurationException {
+		Customer registeredUser = new CustomerImpl();
+		registeredUser.setCustomerType(CustomerType.REGISTERED_USER);
+
+		when(customerService.findByGuid(association1.getUserGuid())).thenReturn(registeredUser);
+		when(customerService.findByGuid(association2.getUserGuid())).thenReturn(registeredUser);
 		List<UserAccountAssociation> results = userAccountAssociationExporter.findByIDs(uidpkStringList);
 
 		assertThat(CollectionUtils.isEqualCollection(results, userAccountAssociationList))
@@ -134,7 +146,7 @@ public class UserAccountAssociationExporterImplTest {
 	}
 
 	private UserAccountAssociation createUserAccountAssociation(final long uidpk, final String userGuid, final String accountGuid,
-																final AccountRole role) {
+																final String role) {
 		UserAccountAssociation userAccountAssociation = new UserAccountAssociationImpl();
 		userAccountAssociation.setUidPk(uidpk);
 		userAccountAssociation.setUserGuid(userGuid);

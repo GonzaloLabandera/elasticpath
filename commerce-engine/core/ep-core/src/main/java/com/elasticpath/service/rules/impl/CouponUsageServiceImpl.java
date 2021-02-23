@@ -591,7 +591,7 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 
 	@Override
 	public CouponUsageValidationResultEnum validateCouponRuleAndUsage(
-			final Coupon coupon, final String storeCode, final String customerEmailAddress) {
+			final Coupon coupon, final String storeCode, final String customerEmailAddress, final CouponUsage couponUsage) {
 
 		if (coupon == null) {
 			return CouponUsageValidationResultEnum.ERROR_UNSPECIFIED;
@@ -613,7 +613,7 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 
 		if (rule.hasLimitedUseCondition()) {
 			CouponUsageValidationResultEnum usageValidationResult = validateCouponUsage(
-					customerEmailAddress, coupon, null);
+					customerEmailAddress, coupon, couponUsage);
 
 			if (!usageValidationResult.isSuccess()) {
 				return usageValidationResult;
@@ -627,7 +627,7 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 	public void ensureValidCouponRuleAndUsage(
 			final Coupon coupon, final String couponCode, final String storeCode, final String customerEmailAddress) {
 
-		CouponUsageValidationResultEnum validationResult = validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress);
+		CouponUsageValidationResultEnum validationResult = validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress, null);
 		switch (validationResult) {
 			case SUCCESS:
 				return;
@@ -643,6 +643,11 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 			default:
 				throw new CouponNotValidException(couponCode);
 		}
+	}
+
+	@Override
+	public void disableAutoApplyToCarts(final String couponCode, final String customerEmail) {
+		dao.disableAutoApplyToCarts(couponCode, customerEmail);
 	}
 
 	/**
@@ -736,7 +741,7 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 					// customer
 					// must enter the coupon to use it.
 					newCouponUsage.setUseCount(0);
-					newCouponUsage.setActiveInCart(true);
+					newCouponUsage.setAutoApplyToCarts(true);
 					newCouponUsage.setSuspended(false);
 					this.add(newCouponUsage);
 				}

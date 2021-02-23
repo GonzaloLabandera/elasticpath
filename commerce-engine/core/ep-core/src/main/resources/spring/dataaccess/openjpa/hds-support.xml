@@ -14,6 +14,7 @@
 		  abstract="true">
 		<property name="persistenceUnitManager" ref="readOnlyPersistenceUnitManager"/>
 		<property name="lifecycleListeners" ref="entityManagerLifecycleListeners"/>
+		<property name="transactionListeners" ref="entityManagerTransactionListeners"/>
 		<property name="hdsSupportSwitch" ref="hdsSupportSwitch"/>
 		<property name="fallbackEntityManagerFactory" ref="entityManagerFactory"/>
 		<property name="jpaPropertyMap">

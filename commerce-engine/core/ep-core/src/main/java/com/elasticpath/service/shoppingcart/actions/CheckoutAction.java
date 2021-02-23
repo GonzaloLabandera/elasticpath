@@ -16,5 +16,5 @@ public interface CheckoutAction {
 	 * @param context object containing data required for execution
 	 * @throws EpSystemException exception object which could be thrown by execution
 	 */
-	void execute(CheckoutActionContext context) throws EpSystemException;
+	void execute(PreCaptureCheckoutActionContext context) throws EpSystemException;
 }

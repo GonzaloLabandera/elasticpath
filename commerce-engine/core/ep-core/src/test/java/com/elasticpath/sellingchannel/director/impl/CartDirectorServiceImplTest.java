@@ -235,14 +235,6 @@ public class CartDirectorServiceImplTest {
 	}
 
 	@Test
-	public void testRefreshHappyPath() {
-		service.refresh(shoppingCart);
-
-		verify(cartDirector).refresh(shoppingCart);
-		expectThatShoppingCartWillBePersisted();
-	}
-
-	@Test
 	public void testAddSkuToWishListHappyPath() {
 		final ShoppingItem shoppingItem = mock(ShoppingItem.class);
 		final ShoppingItem expectedShoppingItem = mock(ShoppingItem.class);

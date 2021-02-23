@@ -1,0 +1,10 @@
+#*
+* Copyright (c) Elastic Path Software Inc., 2020
+*#
+## ordersOnHold.txt.vm
+#emailInit()
+
+#emailMessage("email.orderhold.message"): $!storeName
+
+
+#emailMessage("email.orderhold.heldOrderCountMessage"): $!heldOrderCount

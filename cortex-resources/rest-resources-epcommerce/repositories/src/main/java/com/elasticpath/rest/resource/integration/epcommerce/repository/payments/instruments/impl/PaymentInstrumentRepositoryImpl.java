@@ -5,6 +5,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.payments.instruments.impl;
 
 import static com.elasticpath.commons.constants.ContextIdNames.CART_ORDER_PAYMENT_INSTRUMENT;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildAccountPaymentInstrumentIdentifier;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildOrderPaymentInstrumentIdentifier;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildPICFieldsRequestContext;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.payments.commons.PaymentResourceHelpers.buildPICRequestContext;
@@ -15,6 +16,7 @@ import java.util.Collections;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -38,7 +40,13 @@ import com.elasticpath.domain.orderpaymentapi.StorePaymentProviderConfig;
 import com.elasticpath.domain.orderpaymentapi.impl.PICRequestContext;
 import com.elasticpath.provider.payment.service.instrument.PaymentInstrumentCreationFieldsDTO;
 import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.definition.accounts.AccountIdentifier;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
+import com.elasticpath.rest.definition.paymentinstruments.AccountDefaultPaymentInstrumentSelectorChoiceIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountDefaultPaymentInstrumentSelectorIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentFormIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentIdentifier;
+import com.elasticpath.rest.definition.paymentinstruments.AccountPaymentInstrumentsIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentForFormEntity;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentFormIdentifier;
 import com.elasticpath.rest.definition.paymentinstruments.OrderPaymentInstrumentIdentifier;
@@ -49,6 +57,7 @@ import com.elasticpath.rest.definition.paymentinstruments.ProfilePaymentInstrume
 import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.IdentifierPart;
+import com.elasticpath.rest.id.ResourceIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
@@ -68,6 +77,7 @@ import com.elasticpath.service.orderpaymentapi.FilteredPaymentInstrumentService;
  * The implementation of {@link PaymentInstrumentRepository} related operations.
  */
 @Singleton
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods", "PMD.GodClass", "PMD.NPathComplexity"})
 @Named("paymentInstrumentRepository")
 public class PaymentInstrumentRepositoryImpl implements PaymentInstrumentRepository {
 
@@ -157,6 +167,20 @@ public class PaymentInstrumentRepositoryImpl implements PaymentInstrumentReposit
 	}
 
 	@Override
+	public Single<SubmitResult<AccountPaymentInstrumentIdentifier>> submitAccountPaymentInstrument(
+			final IdentifierPart<String> scope,
+			final PaymentInstrumentForFormEntity formEntity) {
+
+		String accountGuid = getAccountIdFromResourceOperationContext().getValue();
+
+		return customerRepository.getCustomer(accountGuid)
+				.flatMap(customer -> resourceOperationContext.getResourceIdentifier()
+						.map(resourceIdentifier -> ((AccountPaymentInstrumentFormIdentifier) resourceIdentifier))
+						.map(formIdentifier -> createAccountPaymentInstrument(scope, formIdentifier, formEntity, customer))
+						.orElse(Single.error(ResourceOperationFailure.notFound(PAYMENT_METHOD_IS_NOT_FOUND))));
+	}
+
+	@Override
 	public Single<PaymentInstrumentCreationFieldsDTO> getPaymentInstrumentCreationFieldsForProviderConfigGuid(final String storeProviderConfigGuid) {
 		String userId = resourceOperationContext.getUserIdentifier();
 		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
@@ -170,13 +194,48 @@ public class PaymentInstrumentRepositoryImpl implements PaymentInstrumentReposit
 	}
 
 	@Override
+	public Single<PaymentInstrumentCreationFieldsDTO> getAccountPaymentInstrumentCreationFieldsForProviderConfigGuid(
+			final String storeProviderConfigGuid, final String accountId) {
+		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
+		Currency currency = SubjectUtil.getCurrency(resourceOperationContext.getSubject());
+
+		return customerRepository.getCustomer(accountId)
+				.map(customer -> buildPICFieldsRequestContext(locale, currency, customer))
+				.flatMap(requestContext -> storePaymentProviderConfigRepository.findByGuid(storeProviderConfigGuid)
+						.map(StorePaymentProviderConfig::getPaymentProviderConfigGuid)
+						.flatMap(paymentProviderConfigGuid -> orderPaymentApiRepository.getPICFields(paymentProviderConfigGuid, requestContext)));
+	}
+
+	@Override
 	public Observable<PaymentInstrumentIdentifier> findAll(final IdentifierPart<String> scope) {
 		final String customerGuid = resourceOperationContext.getUserIdentifier();
+		return getCustomerPaymentInstrumentObservable(scope, customerGuid)
+				.map(instrument -> buildPaymentInstrumentIdentifier(scope, StringIdentifier.of(instrument.getGuid())));
+	}
+
+	@Override
+	public Observable<AccountPaymentInstrumentIdentifier> findAllAccountPaymentInstruments(final IdentifierPart<String> scope) {
+		final IdentifierPart<String> accountId = getAccountIdFromResourceOperationContext();
+		return getCustomerPaymentInstrumentObservable(scope, accountId.getValue())
+				.map(instrument -> buildAccountPaymentInstrumentIdentifier(scope, accountId, StringIdentifier.of(instrument.getGuid())));
+	}
+
+	@Override
+	public Observable<AccountPaymentInstrumentIdentifier> findAllAccountPaymentInstrumentsByAccountId(final String scope, final String accountId) {
+		return customerRepository.getCustomer(accountId)
+				.flatMapObservable(account -> reactiveAdapter.fromService(() -> filteredPaymentInstrumentService
+						.findCustomerPaymentInstrumentsForCustomerAndStore(account, scope)))
+				.flatMap(Observable::fromIterable)
+				.map(instrument -> buildAccountPaymentInstrumentIdentifier(StringIdentifier.of(scope), StringIdentifier.of(accountId),
+						StringIdentifier.of(instrument.getGuid())));
+	}
+
+	private Observable<CustomerPaymentInstrument> getCustomerPaymentInstrumentObservable(final IdentifierPart<String> scope,
+																						 final String customerGuid) {
 		return customerRepository.getCustomer(customerGuid)
 				.flatMapObservable(customer -> reactiveAdapter.fromService(() -> filteredPaymentInstrumentService
 						.findCustomerPaymentInstrumentsForCustomerAndStore(customer, scope.getValue())))
-				.flatMap(Observable::fromIterable)
-				.map(instrument -> buildPaymentInstrumentIdentifier(scope, StringIdentifier.of(instrument.getGuid())));
+				.flatMap(Observable::fromIterable);
 	}
 
 	private Single<SubmitResult<OrderPaymentInstrumentIdentifier>> createOrderPaymentInstrument(
@@ -207,6 +266,23 @@ public class PaymentInstrumentRepositoryImpl implements PaymentInstrumentReposit
 		return createCustomerPaymentInstrument(paymentMethodId, formEntity, customer)
 				.map(instrumentGuid -> buildPaymentInstrumentIdentifier(scope, StringIdentifier.of(instrumentGuid)))
 				.map(instrumentIdentifier -> SubmitResult.<PaymentInstrumentIdentifier>builder()
+						.withIdentifier(instrumentIdentifier)
+						.withStatus(SubmitStatus.CREATED)
+						.build());
+	}
+
+	private Single<SubmitResult<AccountPaymentInstrumentIdentifier>> createAccountPaymentInstrument(
+			final IdentifierPart<String> scope,
+			final AccountPaymentInstrumentFormIdentifier formIdentifier,
+			final PaymentInstrumentForFormEntity formEntity,
+			final Customer account) {
+
+		final IdentifierPart<String> accountPaymentMethodId = formIdentifier.getAccountPaymentMethod().getAccountPaymentMethodId();
+
+		return createAccountPaymentInstrument(accountPaymentMethodId, formEntity, account)
+				.map(instrumentGuid -> buildAccountPaymentInstrumentIdentifier(scope, StringIdentifier.of(account.getGuid()),
+						StringIdentifier.of(instrumentGuid)))
+				.map(instrumentIdentifier -> SubmitResult.<AccountPaymentInstrumentIdentifier>builder()
 						.withIdentifier(instrumentIdentifier)
 						.withStatus(SubmitStatus.CREATED)
 						.build());
@@ -283,6 +359,17 @@ public class PaymentInstrumentRepositoryImpl implements PaymentInstrumentReposit
 				.flatMap(paymentInstrumentGuid -> createCustomerPaymentInstrumentWithParent(paymentInstrumentGuid, isDefault));
 	}
 
+	private Single<String> createAccountPaymentInstrument(final IdentifierPart<String> paymentMethodId,
+														  final PaymentInstrumentForFormEntity formEntity,
+														  final Customer account) {
+		final boolean isDefault = formEntity.isDefaultOnProfile() == null ? Boolean.FALSE : formEntity.isDefaultOnProfile();
+
+		return storePaymentProviderConfigRepository.findByGuid(paymentMethodId.getValue())
+				.map(StorePaymentProviderConfig::getPaymentProviderConfigGuid)
+				.flatMap(paymentProviderConfigGuid -> createPaymentInstrument(StringIdentifier.of(paymentProviderConfigGuid), formEntity, account))
+				.flatMap(paymentInstrumentGuid -> createAccountPaymentInstrumentWithParent(paymentInstrumentGuid, isDefault));
+	}
+
 	private Single<String> createCustomerPaymentInstrumentWithParent(final String paymentInstrumentGuid, final boolean isDefault) {
 		String customerGuid = resourceOperationContext.getUserIdentifier();
 
@@ -294,6 +381,19 @@ public class PaymentInstrumentRepositoryImpl implements PaymentInstrumentReposit
 				.switchIfEmpty(Single.error(ResourceOperationFailure.notFound(
 						"Customer with id " + customerGuid + " is anonymous and cannot save instruments to profile")))
 				.flatMap(customer -> configureCustomerPaymentInstrument(paymentInstrumentGuid, isDefault, customerPaymentInstrument, customer));
+	}
+
+	private Single<String> createAccountPaymentInstrumentWithParent(final String paymentInstrumentGuid, final boolean isDefault) {
+		String accountGuid = getAccountIdFromResourceOperationContext().getValue();
+
+		CustomerPaymentInstrument accountPaymentInstrument = beanFactory.getPrototypeBean(
+				ContextIdNames.CUSTOMER_PAYMENT_INSTRUMENT, CustomerPaymentInstrument.class);
+
+		return customerRepository.getCustomer(accountGuid)
+				.filter(account -> !account.isAnonymous())
+				.switchIfEmpty(Single.error(ResourceOperationFailure.notFound(
+						"Account with id " + accountGuid + " is anonymous and cannot save instruments to profile")))
+				.flatMap(account -> configureCustomerPaymentInstrument(paymentInstrumentGuid, isDefault, accountPaymentInstrument, account));
 	}
 
 	private Single<String> configureCustomerPaymentInstrument(final String paymentInstrumentGuid, final boolean isDefault,
@@ -346,6 +446,52 @@ public class PaymentInstrumentRepositoryImpl implements PaymentInstrumentReposit
 				.map(addressDTO -> buildPICRequestContext(locale, currency, addressDTO, customer))
 				.flatMap(picRequestContext ->
 						orderPaymentApiRepository.createPI(paymentMethodId.getValue(), finalPaymentInstrumentForm, picRequestContext));
+	}
+
+	@Override
+	public IdentifierPart<String> getAccountIdFromResourceOperationContext() {
+		Optional<ResourceIdentifier> resourceIdentifierOptional = resourceOperationContext.getResourceIdentifier();
+		if (resourceIdentifierOptional.isPresent()) {
+			ResourceIdentifier resourceIdentifier = resourceIdentifierOptional.get();
+			if (resourceIdentifier instanceof AccountPaymentInstrumentFormIdentifier) {
+				return ((AccountPaymentInstrumentFormIdentifier) resourceIdentifier)
+						.getAccountPaymentMethod()
+						.getAccountPaymentMethods()
+						.getAccount()
+						.getAccountId();
+			}
+			if (resourceIdentifier instanceof AccountPaymentInstrumentsIdentifier) {
+				return ((AccountPaymentInstrumentsIdentifier) resourceIdentifier)
+						.getAccount()
+						.getAccountId();
+			}
+			if (resourceIdentifier instanceof AccountDefaultPaymentInstrumentSelectorIdentifier) {
+				return ((AccountDefaultPaymentInstrumentSelectorIdentifier) resourceIdentifier)
+						.getAccountPaymentInstruments()
+						.getAccount()
+						.getAccountId();
+			}
+			if (resourceIdentifier instanceof AccountDefaultPaymentInstrumentSelectorChoiceIdentifier) {
+				return ((AccountDefaultPaymentInstrumentSelectorChoiceIdentifier) resourceIdentifier)
+						.getAccountPaymentInstrument()
+						.getAccountPaymentInstruments()
+						.getAccount()
+						.getAccountId();
+			}
+			if (resourceIdentifier instanceof AccountIdentifier) {
+				return ((AccountIdentifier) resourceIdentifier)
+						.getAccountId();
+			}
+			if (resourceIdentifier instanceof AccountPaymentInstrumentIdentifier) {
+				return ((AccountPaymentInstrumentIdentifier) resourceIdentifier)
+						.getAccountPaymentInstruments()
+						.getAccount()
+						.getAccountId();
+			}
+
+			throw new UnsupportedOperationException(resourceIdentifier.getClass().getName() + " is not supported.");
+		}
+		throw new UnsupportedOperationException("Resource Identifier not found.");
 	}
 
 	@Reference

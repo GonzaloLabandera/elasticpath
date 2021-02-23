@@ -1,0 +1,202 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-02-orderhold.xml">
+
+	<changeSet id="2020-02-add-order-holds" author="elasticpath">
+		<comment>[PSS-29] Create table for order hold feature.</comment>
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TORDERHOLD" />
+			<column name="LAST_VALUE" valueNumeric="100000" />
+		</insert>
+		<createTable tableName="TORDERHOLD">
+			<column name="UIDPK" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="GUID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ORDER_UID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PERMISSION" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="HOLD_DESCRIPTION" type="VARCHAR(1024)">
+				<constraints nullable="false" />
+			</column>
+			<column name="STATUS" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="CREATION_DATE" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+			<column name="RESOLVED_DATE" type="TIMESTAMP">
+				<constraints nullable="true"/>
+			</column>
+			<column name="RESOLVED_BY" type="VARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="REVIEWER_NOTES" type="VARCHAR(2000)">
+				<constraints nullable="true"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="FK_TORDERHOLD_TORDER"
+								 baseTableName="TORDERHOLD"
+								 baseColumnNames="ORDER_UID"
+								 referencedTableName="TORDER"
+								 referencedColumnNames="UIDPK"/>
+
+		<comment>[PSS-29] Create setting for order hold resolved event consumer.</comment>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGVALUE t)"/>
+			<column name="SETTING_DEFINITION_UID" value="115"/>
+			<column name="CONTEXT" value="orderAcceptedMessageConsumer"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.orderAcceptedMessageConsumer.VirtualTopic.ep.orders"/>
+		</insert>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGVALUE t)"/>
+			<column name="SETTING_DEFINITION_UID" value="155"/>
+			<column name="CONTEXT" value="orderAcceptedMessageConsumer"/>
+			<column name="CONTEXT_VALUE" value="jms:topic:VirtualTopic.ep.domain.dlq"/>
+		</insert>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGVALUE t)"/>
+			<column name="SETTING_DEFINITION_UID" value="115"/>
+			<column name="CONTEXT" value="orderHoldResolutionMessageConsumer"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.orderHoldResolutionMessageConsumer.VirtualTopic.ep.orders"/>
+		</insert>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGVALUE t)"/>
+			<column name="SETTING_DEFINITION_UID" value="155"/>
+			<column name="CONTEXT" value="orderHoldResolutionMessageConsumer"/>
+			<column name="CONTEXT_VALUE" value="jms:topic:VirtualTopic.ep.domain.dlq"/>
+		</insert>
+
+		<comment>[PSS-29] Create a setting that forces all orders to go through hold processing.</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGDEFINITION t)" />
+			<column name="PATH" value="COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore" />
+			<column name="VALUE_TYPE" value="Boolean" />
+			<column name="MAX_OVERRIDE_VALUES" value="-1" />
+			<column name="DEFAULT_VALUE" value="false" />
+			<column name="DESCRIPTION" value="Defines a mapping from a store code and boolean which signifies if all orders should be put on hold." />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueNumeric="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="environmentSpecific" />
+			<column name="VALUE" value="false" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueComputed="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2" />
+		</insert>
+
+		<comment>[PSS-29] Create a setting that specifies the role a CM user must have to resolve generic holds.</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGDEFINITION t)" />
+			<column name="PATH" value="COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStoreResolvePermission" />
+			<column name="VALUE_TYPE" value="String" />
+			<column name="MAX_OVERRIDE_VALUES" value="-1" />
+			<column name="DEFAULT_VALUE" value="RESOLVE_GENERIC_HOLD" />
+			<column name="DESCRIPTION" value="Defines a mapping from a store code and String which signifies the permission a user must have to resolve this hold." />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueNumeric="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="environmentSpecific" />
+			<column name="VALUE" value="false" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueComputed="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1" />
+		</insert>
+
+		<comment>[PSS-29] Create a setting that specifies the interval at which hold notification events are generated.</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGDEFINITION t)" />
+			<column name="PATH" value="COMMERCE/SYSTEM/ONHOLD/holdNotificationInterval" />
+			<column name="VALUE_TYPE" value="String" />
+			<column name="MAX_OVERRIDE_VALUES" value="-1" />
+			<column name="DEFAULT_VALUE" value="0 0 /4 * * ?" />
+			<column name="DESCRIPTION"
+					value="The interval to check for outstanding held orders and send notifications.  Specified in quartz cron format." />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueNumeric="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="environmentSpecific" />
+			<column name="VALUE" value="false" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueComputed="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1" />
+		</insert>
+
+		<comment>[PSS-29] Add settings for order ORDER_ON_HOLD events.</comment>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGVALUE t)"/>
+			<column name="SETTING_DEFINITION_UID" value="115"/>
+			<column name="CONTEXT" value="orderOnHoldEmailHandler"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.orderOnHoldEmailHandler.VirtualTopic.ep.orders"/>
+		</insert>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGDEFINITION t)" />
+			<column name="PATH" value="COMMERCE/SYSTEM/ONHOLD/holdNotificationRecipientEmail" />
+			<column name="VALUE_TYPE" value="String" />
+			<column name="MAX_OVERRIDE_VALUES" value="-1" />
+			<column name="DEFAULT_VALUE" value="customerService@SomeDomain.com" />
+			<column name="DESCRIPTION"
+					value="The email address to send notifications about held orders that require action to complete processing." />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueComputed="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="environmentSpecific" />
+			<column name="VALUE" value="false" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueComputed="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1" />
+		</insert>
+
+		<comment>[PSS-29] Create a setting that specifies the stores that will generate hold notification events.</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGDEFINITION t)" />
+			<column name="PATH" value="COMMERCE/SYSTEM/ONHOLD/holdNotificationEnabled" />
+			<column name="VALUE_TYPE" value="Boolean" />
+			<column name="MAX_OVERRIDE_VALUES" value="-1" />
+			<column name="DEFAULT_VALUE" value="false" />
+			<column name="DESCRIPTION" value="Defines a mapping from a store code and boolean which signifies if hold notifications should be sent" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueNumeric="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="environmentSpecific" />
+			<column name="VALUE" value="false" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGMETADATA t)" />
+			<column name="SETTING_DEFINITION_UID" valueComputed="(SELECT MAX(UIDPK) FROM TSETTINGDEFINITION t)" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_2" />
+		</insert>
+
+		<comment>[PSS-29] Add email handler for order cancelled events.</comment>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" valueComputed="(SELECT MAX(UIDPK) + 1 FROM TSETTINGVALUE t)"/>
+			<column name="SETTING_DEFINITION_UID" value="115"/>
+			<column name="CONTEXT" value="orderCancelledEmailHandler"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.orderCancelledEmailHandler.VirtualTopic.ep.orders"/>
+		</insert>
+	</changeSet>
+</databaseChangeLog>

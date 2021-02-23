@@ -11,4 +11,34 @@
 		<multivalue>false</multivalue>
 		<global>false</global>
 	</attribute>
+	<attribute>
+		<key>TEST_READONLY_ACCOUNT_ATTRIBUTE_SHORT_TEXT</key>
+		<name><value language="en">readonly attribute</value></name>
+		<usage>AccountProfile</usage>
+		<type>ShortText</type>
+		<multilanguage>false</multilanguage>
+		<required>false</required>
+		<multivalue>false</multivalue>
+		<global>false</global>
+	</attribute>
+	<attribute>
+		<key>TEST_READONLY_ACCOUNT_ATTRIBUTE_DECIMAL</key>
+		<name><value language="en">decimal</value></name>
+		<usage>AccountProfile</usage>
+		<type>Decimal</type>
+		<multilanguage>false</multilanguage>
+		<required>false</required>
+		<multivalue>false</multivalue>
+		<global>false</global>
+	</attribute>
+	<attribute>
+		<key>TEST_EDITABLE_ACCOUNT_ATTRIBUTE_SHORT_TEXT</key>
+		<name><value language="en">editable attribute</value></name>
+		<usage>AccountProfile</usage>
+		<type>ShortText</type>
+		<multilanguage>false</multilanguage>
+		<required>false</required>
+		<multivalue>false</multivalue>
+		<global>false</global>
+	</attribute>
 </customerprofile_attributes>

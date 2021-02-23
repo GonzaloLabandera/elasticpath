@@ -45,6 +45,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponEntityBuilder;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponTestFactory;
+import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.impl.CouponNotValidException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -75,6 +76,9 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private ShoppingCart shoppingCart;
+
+	@Mock
+	private CouponUsageService couponUsageService;
 
 	@InjectMocks
 	private OrderCouponToCouponinfoRepository<CouponEntity, OrderCouponIdentifier> repository;
@@ -186,6 +190,8 @@ public class OrderCouponToCouponinfoRepositoryTest {
 		repository.delete(orderCouponIdentifier)
 				.test()
 				.assertComplete();
+
+		verify(couponUsageService).disableAutoApplyToCarts(COUPON_CODE, EMAIL);
 	}
 
 	@Test

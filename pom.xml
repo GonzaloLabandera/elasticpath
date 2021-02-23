@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>116</version>
+		<version>120</version>
 		<relativePath/>
 	</parent>
 
@@ -26,7 +26,7 @@
 		<org.apache.camel.version>2.23.4</org.apache.camel.version>
 		<hamcrest.version>1.3</hamcrest.version>
 
-		<api-platform.version>1.44.0.9a0eb55dc1</api-platform.version>
+		<api-platform.version>1.45.0.1eb89ea7a5</api-platform.version>
 
 		<cmclient.version>0.0.0-SNAPSHOT</cmclient.version>
 		<cortex.ep.integration.version>0.0.0-SNAPSHOT</cortex.ep.integration.version>
@@ -35,7 +35,7 @@
 		<hawtbuf.version>1.9</hawtbuf.version>
 		<!-- End of plugin properties -->
 
-		<org.apache.activemq.version>5.15.12</org.apache.activemq.version>
+		<org.apache.activemq.version>5.16.0</org.apache.activemq.version>
 		<!-- Default webapp ports when deployed in a single Tomcat container -->
 		<!-- NOTE: Deprecated because webapps are more stable if deployed in separate Tomcat containers -->
 		<!--       Use port assignments from ep-developer profile instead for development -->
@@ -68,13 +68,12 @@
 		<com.h2database.version>1.4.200</com.h2database.version>
 		<keytool.maven.plugin.version>1.0</keytool.maven.plugin.version>
 		<maven.release.plugin.version>2.4</maven.release.plugin.version>
-		<maven.failsafe.plugin.version>2.19</maven.failsafe.plugin.version>
-		<org.apache.openjpa.version>2.4.0-ep2.1</org.apache.openjpa.version>
+		<org.apache.openjpa.version>2.4.0-ep2.3</org.apache.openjpa.version>
 		<org.liquibase.version>3.4.2</org.liquibase.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<tomcat.maven.plugin.version>3.0.ep1.2</tomcat.maven.plugin.version>
 		<tomcatLogging.version>8.5.2</tomcatLogging.version>
-
+		<cargo.plugin.version>1.6.8</cargo.plugin.version>
 
 		<trinidad.plugin.version>20120309</trinidad.plugin.version>
 
@@ -95,7 +94,9 @@
 		<ep.integration.url>http://${ep.integration.host}:${ep.integration.port.http}${ep.integration.context}</ep.integration.url>
 
 		<!-- Batch Server Settings -->
+		<ep.batch.host>localhost</ep.batch.host>
 		<ep.batch.context>/batch</ep.batch.context>
+		<ep.batch.url>http://${ep.batch.host}:${ep.batch.port.http}${ep.batch.context}</ep.batch.url>
 
 		<!-- Data Sync Server Settings -->
 		<ep.datasync.context>/datasync</ep.datasync.context>
@@ -169,6 +170,7 @@
 
 		<!-- db properties -->
 		<epdb.validation.interval>60000</epdb.validation.interval>
+
 		<dependency.directory>lib</dependency.directory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -180,10 +182,15 @@
 		<jaxb.version>2.3.0</jaxb.version>
 
 		<lifecycle-mapping-plugin.version>1.0.0</lifecycle-mapping-plugin.version>
-		<maven-failsafe-plugin.version>2.17</maven-failsafe-plugin.version>
-		<maven-replacer-plugin.version>1.5.2</maven-replacer-plugin.version>
+		<maven-replacer-plugin.version>1.4.1</maven-replacer-plugin.version>
 		<maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
 		<maven-resources-plugin.version>2.6</maven-resources-plugin.version>
+		<cucable-plugin.version>1.8.0</cucable-plugin.version>
+		<groovy.eclipse.compiler.version>2.9.2-04</groovy.eclipse.compiler.version>
+		<groovy.eclipse.batch.version>2.4.15-01</groovy.eclipse.batch.version>
+		<ph.javacc.maven.plugin.version>4.1.4</ph.javacc.maven.plugin.version>
+		<overriding-maven-invoker-plugin.version>3.2.1</overriding-maven-invoker-plugin.version>
+		<maven.invoker.plugin.version>${overriding-maven-invoker-plugin.version}</maven.invoker.plugin.version>
 	</properties>
 
 	<modules>
@@ -280,11 +287,8 @@
 				<env>default</env>
 				<ep.jms.type>org.apache.activemq.pool.PooledConnectionFactory</ep.jms.type>
 				<ep.jms.factory>org.apache.activemq.jndi.JNDIReferenceFactory</ep.jms.factory>
-				<ep.jms.xa.type>org.apache.activemq.ActiveMQXAConnectionFactory</ep.jms.xa.type>
-				<ep.jms.xa.factory>org.apache.activemq.jndi.JNDIReferenceFactory</ep.jms.xa.factory>
 				<epdb.data.source.type>javax.sql.DataSource</epdb.data.source.type>
 				<epdb.data.source.factory>org.apache.tomcat.jdbc.pool.DataSourceFactory</epdb.data.source.factory>
-				<epdb.data.source.xa.factory>org.apache.tomcat.jdbc.naming.GenericNamingResourcesFactory</epdb.data.source.xa.factory>
 				<ep.jms.url>tcp://localhost:61616</ep.jms.url>
 				<ep.synctarget.jms.url>tcp://localhost:61616</ep.synctarget.jms.url>
 			</properties>
@@ -326,6 +330,11 @@
 				  This is an example configuration and in project development this should be added to the relevant DB profile in settings.xml to
 				  avoid build contamination. DO NOT USE this configuration in production. -->
 			<properties>
+				<!-- The expected mysql db driver version. -->
+				<epdb.maven.version.overriding.for.mysql>8.0.22</epdb.maven.version.overriding.for.mysql>
+				<!-- Overriding the db version property -->
+				<epdb.maven.version>${epdb.maven.version.overriding.for.mysql}</epdb.maven.version>
+
 				<epdb.synctarget.jdbc.driver>com.mysql.jdbc.Driver</epdb.synctarget.jdbc.driver>
 				<epdb.synctarget.host>127.0.0.1</epdb.synctarget.host>
 				<epdb.synctarget.port>3306</epdb.synctarget.port>
@@ -339,6 +348,18 @@
 				<epdb.synctarget.url>
 					jdbc:mysql://${epdb.synctarget.host}:${epdb.synctarget.port}/${epdb.synctarget.databasename}${epdb.synctarget.params}
 				</epdb.synctarget.url>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>oracle-dev-db</id>
+			<properties>
+				<!-- The oracle db driver version. -->
+				<epdb.maven.version.overriding.for.oracle>19.9.0.0</epdb.maven.version.overriding.for.oracle>
+				<!-- Override db related properties - groupId and artifactId change over time -->
+				<epdb.maven.groupId>com.oracle.database.jdbc</epdb.maven.groupId>
+				<epdb.maven.artifactId>ojdbc8</epdb.maven.artifactId>
+				<epdb.maven.version>${epdb.maven.version.overriding.for.oracle}</epdb.maven.version>
 			</properties>
 		</profile>
 	</profiles>
@@ -468,7 +489,7 @@
 				<plugin>
 					<groupId>com.google.code.maven-replacer-plugin</groupId>
 					<artifactId>maven-replacer-plugin</artifactId>
-					<version>1.3.2</version>
+					<version>${maven-replacer-plugin.version}</version>
 					<executions>
 						<execution>
 							<id>suppress-warnings-in-generated-code</id>
@@ -487,6 +508,11 @@
 								</regexFlags>
 
 								<replacements>
+									<replacement>
+										<!-- remove any generated SuppressWarning on class/interface -->
+										<token>(\n)(@SuppressWarnings [a-z\s(){}"]+)(\n)([a-z\s\n]+[\s\n]+(class|interface))</token>
+										<value>$1$3$4</value>
+									</replacement>
 									<replacement>
 										<!-- regex matches a type definition, eg.
 										  -
@@ -508,7 +534,7 @@
 										<value>$1@SuppressWarnings({"cast", "classfile", "deprecation", "dep-ann", "divzero",
 											"empty", "fallthrough", "finally", "options", "overrides",
 											"path", "processing", "rawtypes", "serial", "static",
-											"try", "unchecked", "varargs", "PMD"}) $2</value>
+											"try", "unchecked", "varargs", "unused", "PMD"})$1$2</value>
 									</replacement>
 								</replacements>
 							</configuration>
@@ -526,7 +552,7 @@
 									<pluginExecutionFilter>
 										<groupId>com.google.code.maven-replacer-plugin</groupId>
 										<artifactId>maven-replacer-plugin</artifactId>
-										<versionRange>1.3.2</versionRange>
+										<versionRange>${maven-replacer-plugin.version}</versionRange>
 										<goals>
 											<goal>replace</goal>
 										</goals>
@@ -623,6 +649,20 @@
 							</goals>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<!--
+						Breaking down the large feature of cucumber testing into small pieces.
+						Providing finest granularity of cucumber testing to improve parallelization execution.
+					-->
+					<groupId>com.trivago.rta</groupId>
+					<artifactId>cucable-plugin</artifactId>
+					<version>${cucable-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.cargo</groupId>
+					<artifactId>cargo-maven2-plugin</artifactId>
+					<version>${cargo.plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

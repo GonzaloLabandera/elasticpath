@@ -11,7 +11,6 @@ import org.springframework.security.authentication.event.AuthenticationFailureBa
 import org.springframework.security.core.AuthenticationException;
 
 import com.elasticpath.domain.cmuser.CmUser;
-import com.elasticpath.service.cmuser.CmUserService;
 
 /**
  * Listener that is responsible for handling spring security events.
@@ -19,8 +18,6 @@ import com.elasticpath.service.cmuser.CmUserService;
  */
 public class SpringSecurityListener implements ApplicationListener<ApplicationEvent> {
 	
-	private CmUserService cmUserService;
-
 	@Override
 	public void onApplicationEvent(final ApplicationEvent event) {
 		if (event instanceof AuthenticationFailureBadCredentialsEvent) {
@@ -36,17 +33,10 @@ public class SpringSecurityListener implements ApplicationListener<ApplicationEv
 		final String userName = badCredentialsEvent.getAuthentication().getPrincipal().toString();
 		if (exception instanceof BadCredentialsException && userName != null) {
 
-			handleCmUserFailedLoginAttempt(userName);
 			final CmUser cmUser = (CmUser) badCredentialsEvent.getAuthentication().getDetails();
 			if (cmUser != null) {
 				handleLastAttempt(cmUser);
 			}
-		}
-	}
-
-	private void handleCmUserFailedLoginAttempt(final String userName) {
-		if (userName != null) {
-			cmUserService.addFailedLoginAttempt(userName);
 		}
 	}
 
@@ -55,23 +45,4 @@ public class SpringSecurityListener implements ApplicationListener<ApplicationEv
 			throw new LockedException("Account has been locked.");
 		}
 	}
-
-	/**
-	 * Gets the cmUser service.
-	 * 
-	 * @return the cmUserService
-	 */
-	public CmUserService getCmUserService() {
-		return cmUserService;
-	}
-
-	/**
-	 * Sets the cmUser service.
-	 * 
-	 * @param cmUserService the cmUserService
-	 */
-	public void setCmUserService(final CmUserService cmUserService) {
-		this.cmUserService = cmUserService;
-	}
-
 }

@@ -1094,7 +1094,7 @@
 				WHERE pc.category.uidPk = ?1
 			</query>
 		</named-query>
-		<named-query name="PRODUCT_GUID_SELECT_BY_GUID">
+		<named-query name="PRODUCT_CODE_SELECT_BY_CODE">
 			<query>
 				SELECT p.code
 				FROM ProductImpl p

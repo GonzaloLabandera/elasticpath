@@ -42,4 +42,6 @@ public interface InstructionsEntityRepository {
 	 */
 	Single<PICInstructionsDTO> submitRequestInstructionsForm(String methodId, Locale locale, Currency currency,
 															 PaymentMethodConfigurationEntity configEntity, String userId);
+
+
 }

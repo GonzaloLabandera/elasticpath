@@ -11,7 +11,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.rules.CouponUsageService;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 
 /**
@@ -24,7 +24,7 @@ public class UpdateLimitedUsageNumbersCheckoutAction implements ReversibleChecko
 	private CouponUsageService couponUsageService; 
 
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		final ShoppingCart shoppingCart = context.getShoppingCart();
 		ShoppingCartPricingSnapshot shoppingCartPricingSnapshot = context.getShoppingCartTaxSnapshot().getShoppingCartPricingSnapshot();
 		final PromotionRecordContainer promotionRecordContainer = shoppingCartPricingSnapshot.getPromotionRecordContainer();
@@ -36,7 +36,7 @@ public class UpdateLimitedUsageNumbersCheckoutAction implements ReversibleChecko
 	}
 
 	@Override
-	public void rollback(final CheckoutActionContext context) throws EpSystemException {
+	public void rollback(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		// NO OP
 	}
 

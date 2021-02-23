@@ -3,6 +3,8 @@
  */
 package com.elasticpath.service.search.impl;
 
+import org.apache.log4j.Logger;
+
 import com.elasticpath.service.search.SearchHostLocator;
 import com.elasticpath.settings.provider.SettingValueProvider;
 
@@ -14,11 +16,22 @@ import com.elasticpath.settings.provider.SettingValueProvider;
  */
 public class SettingsSearchHostLocatorImpl implements SearchHostLocator {
 
+	private static final String PRIMARY = "PRIMARY";
+
+	private static final String REPLICA = "REPLICA";
+
+	private static final String EP_SEARCH_MODE = "ep.search.mode";
+
+	/**
+	 * This has been replaced with getSearchMode.
+	*/
 	private boolean requiresMaster;
 
-	private SettingValueProvider<String> defaultSearchHostLocationProvider;
+	private SettingValueProvider<String> replicaSearchHostLocationProvider;
 
-	private SettingValueProvider<String> masterSearchHostLocationProvider;
+	private SettingValueProvider<String> primarySearchHostLocationProvider;
+
+	private static final Logger LOG = Logger.getLogger(SettingsSearchHostLocatorImpl.class);
 
 	/**
 	 * Obtain the URL of the search host stored in the setting service.
@@ -29,11 +42,20 @@ public class SettingsSearchHostLocatorImpl implements SearchHostLocator {
 	 */
 	@Override
 	public String getSearchHostLocation() {
-		if (getRequiresMaster()) {
-			return getMasterSearchHostLocationProvider().get();
+		if (getSearchMode().equalsIgnoreCase(PRIMARY)) {
+			return getPrimaryHostLocation();
 		}
 
-		return getDefaultSearchHostLocationProvider().get();
+		return getReplicaSearchHostLocationProvider().get();
+	}
+
+	protected String getPrimaryHostLocation() {
+		return getPrimarySearchHostLocationProvider().get();
+	}
+
+	@Deprecated
+	protected String getDefaultHostLocation() {
+		return getReplicaSearchHostLocationProvider().get();
 	}
 
 	/**
@@ -43,32 +65,51 @@ public class SettingsSearchHostLocatorImpl implements SearchHostLocator {
 	 *
 	 * @param requiresMaster true if getting master server responsible for indexing in a cluster.
 	 */
-	public void setRequiresMaster(final boolean requiresMaster) {
-		this.requiresMaster = requiresMaster;
+	@Deprecated
+	public void setRequiresMaster(final String requiresMaster) {
+		this.requiresMaster = Boolean.parseBoolean(requiresMaster);
 	}
 
 	/**
-	 * @return true if the master server is required
+	 * Determines the search mode as either PRIMARY or REPLICA.
+	 *
+	 * @return the search mode
 	 */
-	@SuppressWarnings("PMD.BooleanGetMethodName")
-	public boolean getRequiresMaster() {
-		return requiresMaster;
+	protected String getSearchMode() {
+		String searchMode = System.getProperty(EP_SEARCH_MODE);
+		if (searchMode != null) {
+			return searchMode;
+		}
+		return getFallBackRequiresMaster();
 	}
 
-	public void setDefaultSearchHostLocationProvider(final SettingValueProvider<String> defaultSearchHostLocationProvider) {
-		this.defaultSearchHostLocationProvider = defaultSearchHostLocationProvider;
+	/**
+	 * Determine the search mode value of PRIMARY or REPLICA from the deprecated requiresMaster boolean.
+	 *
+	 * @return The search mode.
+	 */
+	private String getFallBackRequiresMaster() {
+		LOG.warn("Deprecated ‘ep.search.requires.master’ ep.properties value should be replaced with ‘ep.search.mode’ JVM system property.");
+		if (requiresMaster) {
+			return PRIMARY;
+		} else {
+			return REPLICA;
+		}
 	}
 
-	protected SettingValueProvider<String> getDefaultSearchHostLocationProvider() {
-		return defaultSearchHostLocationProvider;
+	protected SettingValueProvider<String> getReplicaSearchHostLocationProvider() {
+		return replicaSearchHostLocationProvider;
 	}
 
-	public void setMasterSearchHostLocationProvider(final SettingValueProvider<String> masterSearchHostLocationProvider) {
-		this.masterSearchHostLocationProvider = masterSearchHostLocationProvider;
+	public void setReplicaSearchHostLocationProvider(final SettingValueProvider<String> replicaSearchHostLocationProvider) {
+		this.replicaSearchHostLocationProvider = replicaSearchHostLocationProvider;
 	}
 
-	protected SettingValueProvider<String> getMasterSearchHostLocationProvider() {
-		return masterSearchHostLocationProvider;
+	protected SettingValueProvider<String> getPrimarySearchHostLocationProvider() {
+		return primarySearchHostLocationProvider;
 	}
 
+	public void setPrimarySearchHostLocationProvider(final SettingValueProvider<String> primarySearchHostLocationProvider) {
+		this.primarySearchHostLocationProvider = primarySearchHostLocationProvider;
+	}
 }

@@ -65,10 +65,10 @@ public class TagDefinitionDaoTest extends BasicSpringContextTest {
 	@DirtiesDatabase
     @Test
     public void testDelete() throws Exception {  	    	
-    	TagDefinition tagDefinitionToDelete = tagDefinitionDao.findByGuid("CUSTOMER_GENDER");
+    	TagDefinition tagDefinitionToDelete = tagDefinitionDao.findByGuid("CUSTOMER_AGE_YEARS");
     	assertNotNull(tagDefinitionToDelete);
     	tagDefinitionDao.remove(tagDefinitionToDelete);
-    	assertNull(tagDefinitionDao.findByGuid("CUSTOMER_GENDER"));
+    	assertNull(tagDefinitionDao.findByGuid("CUSTOMER_AGE_YEARS"));
     }
 
     /**

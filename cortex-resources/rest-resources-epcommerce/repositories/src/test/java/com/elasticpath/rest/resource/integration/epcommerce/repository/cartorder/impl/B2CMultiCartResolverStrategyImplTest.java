@@ -5,8 +5,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -32,9 +30,6 @@ import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
-import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
-import com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
@@ -93,15 +88,9 @@ public class B2CMultiCartResolverStrategyImplTest {
 	@Mock
 	private MulticartItemListTypeLocationProvider multicartItemListTypeLocationProvider;
 
-	@Mock
-	private ModifierField modifierField;
-
-	private ShoppingCartImpl cart;
-
 	@Before
 	public void setUp() {
 		strategy = spy(new B2CMultiCartResolutionStrategyImpl());
-		doReturn(Collections.singletonList(modifierField)).when(strategy).getModifierFieldsWithDefaultValues(any(ShoppingCart.class));
 
 		strategy.setReactiveAdapter(reactiveAdapterImpl);
 		strategy.setReactiveAdapter(reactiveAdapterImpl);
@@ -266,25 +255,6 @@ public class B2CMultiCartResolverStrategyImplTest {
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(store);
 
 		assertThat(strategy.getModifierFields(STORE_CODE)).containsExactly(modifierField);
-	}
-
-	@Test
-	public void testDefaultModifierFields() {
-		when(modifierField.getCode()).thenReturn("name");
-		when(modifierField.getDefaultCartValue()).thenReturn("default_value");
-
-		CustomerSession customerSession = mock(CustomerSession.class);
-
-		cart = new ShoppingCartImpl();
-		ShoppingCartMemento memento = new ShoppingCartMementoImpl();
-		memento.setDefault(true);
-		cart.setShoppingCartMemento(memento);
-		cart.setCartDataFieldValue("name", null);
-
-		when(shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession)).thenReturn(cart);
-		when(shoppingCartService.saveIfNotPersisted(cart)).thenReturn(cart);
-
-		assertThat(strategy.getDefaultCart(customerSession).blockingGet().getCartData().get("name").getValue()).isEqualTo("default_value");
 	}
 
 	/**

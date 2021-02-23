@@ -47,18 +47,18 @@ public interface CouponUsage extends Entity {
 	void setCustomerEmailAddress(String email);
 
 	/**
-	 * Set whether the coupon should be applied to the user's shopping cart.
+	 * Set whether the coupon should be automatically applied to the user's shopping cart.
 	 *
-	 * @param activeInCart True if the user has selected the coupon to be applied against cart contents.
+	 * @param autoApplyToCarts True if the user has selected the coupon to be applied against cart contents.
 	 */
-	void setActiveInCart(boolean activeInCart);
+	void setAutoApplyToCarts(boolean autoApplyToCarts);
 
 	/**
-	 * Get whether coupon is active against the user's shopping cart.
+	 * Get whether coupon is auto-apply against the user's shopping cart.
 	 *
-	 * @return True if the user has selected the coupon to be applied against cart contents.
+	 * @return True if the user has selected the coupon to be automatically applied against cart contents.
 	 */
-	boolean isActiveInCart();
+	boolean isAutoApplyToCarts();
 
 	/**
 	 * Get the limited duration end date.

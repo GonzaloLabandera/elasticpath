@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<categories>
+	<category mastercatalog="MobileCatalog">
+		<guid>Games|MobileCatalog</guid>
+		<parentcategory></parentcategory>
+		<code>Games</code>
+		<name>
+			<value language="en">name_to_replace</value>
+			<value language="en_US">name_to_replace</value>
+			<value language="fr"/>
+			<value language="fr_CA"></value>
+		</name>
+		<type>Games</type>
+		<order>1</order>
+		<availability>
+			<storevisible>true</storevisible>
+			<enabledate>2012-04-13T01:00:00+03:00</enabledate>
+		</availability>
+		<attributes>
+			<attribute key="catDescription">
+				<value>This category contains listing of all Games titles available in this store.</value>
+			</attribute>
+			<attribute key="catImage">
+				<value>sony.png</value>
+			</attribute>
+		</attributes>
+		<seo>
+		</seo>
+	</category>
+</categories>

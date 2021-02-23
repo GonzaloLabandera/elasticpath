@@ -4,7 +4,6 @@
 package com.elasticpath.catalog.update.processor.connectivity.impl;
 
 import static com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.OFFER_IDENTITY_TYPE;
-import static com.elasticpath.catalog.update.processor.connectivity.impl.ProductUpdateProcessorImplIntegrationTest.JMS_BROKER_URL;
 import static com.elasticpath.domain.catalog.AvailabilityCriteria.AVAILABLE_FOR_PRE_ORDER;
 import static com.elasticpath.domain.catalog.AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK;
 import static com.elasticpath.domain.catalogview.impl.StoreAvailabilityRule.ALWAYS;
@@ -35,6 +34,7 @@ import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.elasticpath.catalog.messages.RelayOutboxMessagesThreadExecutor;
 import com.elasticpath.catalog.plugin.converter.impl.OfferContent;
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.repository.CatalogProjectionHistoryRepository;
@@ -81,20 +82,16 @@ import com.elasticpath.domain.store.impl.WarehouseImpl;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.impl.TaxCodeImpl;
 import com.elasticpath.persistence.api.Persistable;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
 import com.elasticpath.test.util.Utils;
 
 /**
  * Integration tests for {@link ProductUpdateProcessorImpl}.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DirtiesDatabase
-public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTestSupport {
-
-	public static final String JMS_BROKER_URL = "tcp://localhost:61625";
+public class ProductUpdateProcessorImplIntegrationTest extends DbTestCase {
 
 	private static final Logger LOGGER = Logger.getLogger(ProductUpdateProcessorImplIntegrationTest.class);
 
@@ -138,6 +135,8 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 	private static final Date TWENTY_FIVE_DAYS_AFTER = DateUtils.addDays(NOW, 25);
 	private static final Date TWENTY_DAYS_AFTER = DateUtils.addDays(NOW, 20);
 	private static final Date FIFTEEN_DAYS_AFTER = DateUtils.addDays(NOW, 15);
+	private static final String BUYER_ROLE = "BUYER";
+	private static final String UNAUTHENTICATED_BUYER_ROLE = "BUYER";
 
 	private ObjectMapper objectMapper;
 
@@ -154,6 +153,9 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 
 	@Autowired
 	private CatalogProjectionHistoryRepository historyRepository;
+
+	@Autowired
+	private RelayOutboxMessagesThreadExecutor relayOutboxMessagesThreadExecutor;
 
 	@BeforeClass
 	public static void setUpClass() {
@@ -175,6 +177,12 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 						.process(exchange -> LOGGER.info("Catalog endpoint exchange: " + exchange.getIn().getBody()));
 			}
 		});
+		relayOutboxMessagesThreadExecutor.start();
+	}
+
+	@After
+	public void tearDown() {
+		relayOutboxMessagesThreadExecutor.stop();
 	}
 
 	@Test
@@ -589,6 +597,8 @@ public class ProductUpdateProcessorImplIntegrationTest extends XaTransactionTest
 		store.setWarehouses(warehouse);
 		store.setDefaultCurrency(Currency.getInstance(Locale.CANADA));
 		store.setStoreState(StoreState.UNDER_CONSTRUCTION);
+		store.setB2CAuthenticatedRole(BUYER_ROLE);
+		store.setB2CSingleSessionRole(UNAUTHENTICATED_BUYER_ROLE);
 
 		return doInTransaction(status -> persist(store));
 	}

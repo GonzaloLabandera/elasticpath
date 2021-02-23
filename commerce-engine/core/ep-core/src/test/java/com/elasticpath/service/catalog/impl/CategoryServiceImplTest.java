@@ -51,6 +51,7 @@ import com.elasticpath.commons.util.CategoryGuidUtil;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryDeleted;
+import com.elasticpath.domain.catalog.CategoryLoadTuner;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.AbstractCategoryImpl;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
@@ -112,6 +113,7 @@ public class CategoryServiceImplTest {
 	private CategoryServiceImpl categoryService;
 	private CategoryLookup categoryLookup;
 	private Category category;
+	private CategoryLoadTuner categoryLoadTuner;
 
 	private BeanFactory beanFactory;
 
@@ -149,12 +151,14 @@ public class CategoryServiceImplTest {
 
 		persistenceEngine = context.mock(PersistenceEngine.class);
 		categoryLookup = context.mock(CategoryLookup.class);
+		categoryLoadTuner = context.mock(CategoryLoadTuner.class);
 
 		categoryService = new CategoryServiceImpl();
 		categoryService.setBeanFactory(beanFactory);
 		categoryService.setCategoryGuidUtil(new CategoryGuidUtil());
 		categoryService.setPersistenceEngine(persistenceEngine);
 		categoryService.setCategoryLookup(categoryLookup);
+		categoryService.setCategoryLoadTunerDefaultPlusAttributes(categoryLoadTuner);
 
 		productService = context.mock(ProductService.class);
 		categoryService.setProductService(productService);
@@ -460,6 +464,9 @@ public class CategoryServiceImplTest {
 		// expectations
 		context.checking(new Expectations() {
 			{
+				allowing(persistenceEngine).withLoadTuners(categoryLoadTuner);
+				will(returnValue(persistenceEngine));
+
 				// load the top category once
 				oneOf(categoryLookup).findByUid(category.getUidPk());
 				will(returnValue(category));

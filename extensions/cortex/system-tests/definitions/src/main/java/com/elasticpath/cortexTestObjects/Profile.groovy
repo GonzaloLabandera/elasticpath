@@ -146,6 +146,10 @@ class Profile extends CommonMethods {
 
 		getAddressWithPostalCode(toBeModifiedAddressPostalCode)
 
+		putAddress(organization, phoneNumber, countryCode, extendedAddress, locale, postalCode, regionCode, streetAddress, familyName, givenName)
+	}
+
+	static void putAddress(String organization, String phoneNumber, String countryCode, String extendedAddress, String locale, String postalCode, String regionCode, String streetAddress, String familyName, String givenName) {
 		client.PUT(client.body.self.uri,
 				[
 						"organization": organization,
@@ -160,12 +164,14 @@ class Profile extends CommonMethods {
 										 "given-name" : givenName]])
 	}
 
-	static void createAddressWithInvalidAddressKey(String countryCode, String locale, String postalCode, String regionCode,
-												   String streetAddress, String familyName, String givenName) {
+	static void createAddressWithInvalidAddressKey(String countryCode, String locale, String postalCode, String regionCode, String streetAddress,
+												   String organization, String phoneNumber, String familyName, String givenName) {
 
 		addressform()
 		client.createaddressaction(
 				[
+						"organization": organization,
+						"phone-number": phoneNumber,
 						invalidAddressKey: ["country-name"  : countryCode,
 											"locality"      : locale,
 											"postal-code"   : postalCode,

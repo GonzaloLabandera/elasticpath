@@ -6,7 +6,7 @@ Feature: PUT address field validations
     And I create a default billing address on the profile
 
   Scenario Outline: PUT address with valid field values
-    When I modify existing address with postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
+    When I modify existing address with Family-Name <FAMILY_NAME>, Given-Name <GIVEN_NAME>, postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION> and Street-Address <STREET_ADDRESS>
     Then the HTTP status is no content
 
     Examples:
@@ -14,13 +14,11 @@ Feature: PUT address field validations
       | CA      | Calgary  | v1v1v1      | AB     | 123 street     | testFName   | testLName  |
 
   Scenario Outline: PUT address with empty fields
-    When I modify existing address with postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
+    When I modify existing address with Family-Name <FAMILY_NAME>, Given-Name <GIVEN_NAME>, postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION> and Street-Address <STREET_ADDRESS>
     Then the HTTP status is bad request
     And Structured error message contains:
       | locality may not be null       |
-      | family-name may not be null    |
       | street-address may not be null |
-      | given-name may not be null     |
       | country-name may not be null   |
       | postal-code may not be null    |
 
@@ -29,7 +27,7 @@ Feature: PUT address field validations
       |         |          |             |        |                |             |            |
 
   Scenario Outline: PUT address with invalid country values
-    When I modify existing address with postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
+    When I modify existing address with Family-Name <FAMILY_NAME>, Given-Name <GIVEN_NAME>, postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION> and Street-Address <STREET_ADDRESS>
     Then the HTTP status is bad request
     And I should see validation error message with message type, message id, and debug message
       | messageType | messageId                    | debugMessage                                           |
@@ -41,7 +39,7 @@ Feature: PUT address field validations
       | Canada  | Calgary  | v1v1v1      | AB     | 123 street     | testFName   | testLName  |
 
   Scenario Outline: PUT address with invalid region values
-    When I modify existing address with postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
+    When I modify existing address with Family-Name <FAMILY_NAME>, Given-Name <GIVEN_NAME>, postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION> and Street-Address <STREET_ADDRESS>
     Then the HTTP status is bad request
     And I should see validation error message with message type, message id, and debug message
       | messageType | messageId  | debugMessage    |
@@ -63,7 +61,7 @@ Feature: PUT address field validations
       | postal-code      | V5C1N2       |
       | region           | BC           |
       | street-address   | 123 Broadway |
-    And I modify existing address with postal code V5C1N2 with Country US, Extended-Address , Locality Vancouver, Organization , Phone-Number , Postal-Code 90210, Region WA, Street-Address 123 Broadway, Family-Name Customer and Given-Name Public Tester
+    And I modify existing address with Family-Name , Given-Name , postal code V5C1N2 with Country US, Extended-Address , Locality Vancouver, Organization , Phone-Number , Postal-Code 90210, Region WA and Street-Address 123 Broadway
     Then the HTTP status is no content
     And I view my profile
     And I follow links addresses
@@ -74,6 +72,8 @@ Feature: PUT address field validations
       | postal-code    | 90210        |
       | region         | WA           |
       | street-address | 123 Broadway |
+    And the field family-name matches null
+    And the field given-name matches null
     And the field extended-address matches null
     And the field organization matches null
     And the field phone-number matches null

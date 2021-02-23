@@ -13,6 +13,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.tags.TagSet;
 
 /**
  * Executes rules-engine rules on objects passed as parameters to this class.
@@ -26,9 +27,10 @@ public interface EpRuleEngine {
 	 * @param activeCurrency the active currency of the shopping context
 	 * @param store the {@link Store} the rules will be fired against. The rules will be fired on the catalog related to that store.
 	 * @param prices the map of product code to its list of prices
+	 * @param tagSet set of tags within customer session
 	 */
 	void fireCatalogPromotionRules(Collection<? extends Product> products,
-									Currency activeCurrency, Store store, Map<String, List<Price>> prices);
+									Currency activeCurrency, Store store, Map<String, List<Price>> prices, TagSet tagSet);
 
 	/**
 	 * Executes order promotion rules on the specified shopping cart. Only rules affecting

@@ -7,6 +7,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
+
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Address;
@@ -23,6 +27,8 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
  * Implementation of CartOrderService, CartOrder should not be used in versions of EP prior to 6.4.
  */
 public class CartOrderServiceImpl implements CartOrderService {
+	private static final Logger LOG = Logger.getLogger(CartOrderServiceImpl.class);
+
 	private CustomerAddressDao addressDao;
 	private CartOrderDao cartOrderDao;
 	private ShoppingCartService shoppingCartService;
@@ -108,9 +114,17 @@ public class CartOrderServiceImpl implements CartOrderService {
 		final boolean notExists = getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid()) == null;
 		if (notExists) {
 			final CartOrder cartOrder = cartOrderPopulationStrategy.createCartOrder(shoppingCart);
-			saveOrUpdate(cartOrder);
+			try {
+				saveOrUpdate(cartOrder);
+				return true;
+			} catch (JpaSystemException | DataIntegrityViolationException ex) {
+				// When running in Cortex, JpaSystemException is thrown, but the integration test
+				// throws DataIntegrityViolationException. Not sure why that is, but checking for both works.
+				LOG.warn(String.format("Cart order already created by another thread for the same shopping cart with id: %s and shopper: %s",
+						shoppingCart.getGuid(), shoppingCart.getShopper().getGuid()));
+			}
 		}
-		return notExists;
+		return false;
 	}
 
 	/**
@@ -150,6 +164,11 @@ public class CartOrderServiceImpl implements CartOrderService {
 	@Override
 	public List<String> findCartOrderGuidsByCustomerGuid(final String storeCode, final String customerGuid) {
 		return cartOrderDao.findCartOrderGuidsByCustomerGuid(storeCode, customerGuid);
+	}
+
+	@Override
+	public List<String> findCartOrderGuidsByAccountGuid(final String storeCode, final String accountGuid) {
+		return cartOrderDao.findCartOrderGuidsByAccountGuid(storeCode, accountGuid);
 	}
 
 	@Override

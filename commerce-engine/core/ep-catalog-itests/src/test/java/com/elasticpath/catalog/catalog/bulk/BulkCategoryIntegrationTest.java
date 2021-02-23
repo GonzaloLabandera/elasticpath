@@ -3,7 +3,6 @@
  */
 package com.elasticpath.catalog.catalog.bulk;
 
-import static com.elasticpath.catalog.catalog.bulk.BulkCategoryIntegrationTest.JMS_BROKER_URL;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Duration.TEN_SECONDS;
 import static org.junit.Assert.assertEquals;
@@ -16,21 +15,22 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.elasticpath.catalog.messages.RelayOutboxMessagesThreadExecutor;
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.repository.CatalogProjectionRepository;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.catalog.CategoryService;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
 import com.elasticpath.test.persister.CatalogTestPersister;
 import com.elasticpath.test.persister.TaxTestPersister;
 import com.elasticpath.test.persister.testscenarios.MultiCategoryScenario;
@@ -38,12 +38,9 @@ import com.elasticpath.test.persister.testscenarios.MultiCategoryScenario;
 /**
  * Tests that Category bulk works correctly after link/unlink and include/exclude category.
  */
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DirtiesDatabase
-public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
-
-	public static final String JMS_BROKER_URL = "tcp://localhost:61629";
+public class BulkCategoryIntegrationTest extends DbTestCase {
 
 	private static final Logger LOGGER = Logger.getLogger(BulkCategoryIntegrationTest.class);
 
@@ -55,6 +52,9 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 
 	@Autowired
 	private CatalogProjectionRepository catalogProjectionRepository;
+
+	@Autowired
+	private RelayOutboxMessagesThreadExecutor relayOutboxMessagesThreadExecutor;
 
 	@Autowired
 	@Qualifier("catalogTestPersister")
@@ -90,7 +90,13 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 		masterCategory = scenario.getCategory();
 		virtualStore = scenario.getVirtualStore();
 
+		relayOutboxMessagesThreadExecutor.start();
 		await().atMost(TEN_SECONDS).until(catalogNotifyBuilder::matches);
+	}
+
+	@After
+	public void tearDown() {
+		relayOutboxMessagesThreadExecutor.stop();
 	}
 
 	@Test
@@ -109,7 +115,7 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 	}
 
 	@Test
-	public void testThatOfferProjectionsShouldBeTombstoneForStoreBasedOnLinkedCategoryWhenCategoryExcluded() throws InterruptedException {
+	public void testThatOfferProjectionsShouldBeTombstoneForStoreBasedOnLinkedCategoryWhenCategoryExcluded() {
 		final int expectedNumberOfCatalogEvents = 2;
 		addProduct();
 		checkThatAllOfferProjectionsAreNotTombstone();
@@ -125,20 +131,21 @@ public class BulkCategoryIntegrationTest extends XaTransactionTestSupport {
 
 	@Test
 	public void testThatOfferProjectionsShouldBeNotTombstoneForStoreBasedOnLinkedCategoryWhenCategoryIncluded() {
-		final int expectedNumberOfCatalogEvents = 2;
+		final int expectedNumberOfCatalogEventsAfterAdd = 2;
+		final int expectedNumberOfCatalogEventsAfterRemove = 2;
+
 		addProduct();
 		checkThatAllOfferProjectionsAreNotTombstone();
 
 		NotifyBuilder catalogNotifyBuilder = new NotifyBuilder(catalogCamelContext)
-				.from(JMS_CATALOG_ENDPOINT).whenExactlyCompleted(expectedNumberOfCatalogEvents).create();
+				.from(JMS_CATALOG_ENDPOINT).whenExactlyCompleted(expectedNumberOfCatalogEventsAfterRemove).create();
 
 		categoryService.removeCategoryProducts(parentLinkedCategory);
 		await().atMost(TEN_SECONDS).until(catalogNotifyBuilder::matches);
 		checkThatOfferProjectionForVirtualCatalogIsTombstone();
 
 		catalogNotifyBuilder = new NotifyBuilder(catalogCamelContext)
-				.from(JMS_CATALOG_ENDPOINT).whenExactlyCompleted(expectedNumberOfCatalogEvents).create();
-
+				.from(JMS_CATALOG_ENDPOINT).whenExactlyCompleted(expectedNumberOfCatalogEventsAfterAdd).create();
 
 		categoryService.addLinkedCategoryProducts(parentLinkedCategory);
 		await().atMost(TEN_SECONDS).until(catalogNotifyBuilder::matches);

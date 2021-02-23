@@ -179,7 +179,7 @@ public class ChargeProcessorImpl extends AbstractProcessor implements ChargeProc
 
 				return paymentEvents;
 			} catch (PaymentCapabilityRequestFailedException e) {
-				paymentEvents.addAll(processChargeOnExpiredReserve(toBeCharged, reservationEvent, chargeRequest));
+				processFailedRequest(toBeCharged, reservationEvent, chargeRequest, paymentEvents, e);
 			}
 		}
 
@@ -190,7 +190,7 @@ public class ChargeProcessorImpl extends AbstractProcessor implements ChargeProc
 
 				return paymentEvents;
 			} catch (PaymentCapabilityRequestFailedException e) {
-				paymentEvents.addAll(processChargeOnExpiredReserve(toBeCharged, reservationEvent, chargeRequest));
+				processFailedRequest(toBeCharged, reservationEvent, chargeRequest, paymentEvents, e);
 			}
 		}
 
@@ -211,11 +211,18 @@ public class ChargeProcessorImpl extends AbstractProcessor implements ChargeProc
 
 				return paymentEvents;
 			} catch (PaymentCapabilityRequestFailedException e) {
-				paymentEvents.addAll(processChargeOnExpiredReserve(toBeCharged, reservationEvent, chargeRequest));
+				processFailedRequest(toBeCharged, reservationEvent, chargeRequest, paymentEvents, e);
 			}
 		}
 
 		return paymentEvents;
+	}
+
+	private void processFailedRequest(final MoneyDTO toBeCharged, final PaymentEvent reservationEvent, final ChargeRequest chargeRequest,
+									  final List<PaymentEvent> paymentEvents, final PaymentCapabilityRequestFailedException failedException) {
+		// Record the exception
+		paymentEvents.add(buildFailedChargeEvent(toBeCharged, chargeRequest, reservationEvent, failedException));
+		paymentEvents.addAll(processChargeOnExpiredReserve(toBeCharged, reservationEvent, chargeRequest));
 	}
 
 	/**

@@ -89,6 +89,60 @@
 			<column name="CONTEXT" value="CONTEXT2" />
 			<column name="CONTEXT_VALUE" value="Context value 2" />
 		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399980" />
+			<column name="SETTING_DEFINITION_UID" value="2000" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399981" />
+			<column name="SETTING_DEFINITION_UID" value="2001" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399982" />
+			<column name="SETTING_DEFINITION_UID" value="2002" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399983" />
+			<column name="SETTING_DEFINITION_UID" value="2003" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399984" />
+			<column name="SETTING_DEFINITION_UID" value="2004" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399985" />
+			<column name="SETTING_DEFINITION_UID" value="2005" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399986" />
+			<column name="SETTING_DEFINITION_UID" value="2006" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399987" />
+			<column name="SETTING_DEFINITION_UID" value="2007" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" value="399988" />
+			<column name="SETTING_DEFINITION_UID" value="2008" />
+			<column name="METADATA_KEY" value="refreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
 		<rollback>
 			<![CDATA[
 				delete from TSETTINGDEFINITION where UIDPK >= 2000 and UIDPK <= 2008;

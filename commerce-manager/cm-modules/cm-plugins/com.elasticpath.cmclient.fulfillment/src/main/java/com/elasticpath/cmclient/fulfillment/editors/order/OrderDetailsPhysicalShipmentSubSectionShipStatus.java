@@ -30,6 +30,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
+import com.elasticpath.cmclient.fulfillment.util.AddressUtil;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.event.EventOriginator;
@@ -267,11 +268,18 @@ public class OrderDetailsPhysicalShipmentSubSectionShipStatus implements IProper
 	private String formatReleaseShipmentMessage() {
 		// [MSC-5291] When attempting to release a shipment for a Guest order - confirmation dialog displays 'null null' instead
 		// of First and Last Name
-		return FulfillmentMessages.get().ShipmentSection_ReleaseShipmentConfirmMessage + STRING_NEW_LINE + STRING_NEW_LINE
-				+ FulfillmentMessages.get().ShipmentSection_CancelShipmentShipment + STRING_SPACE + this.shipmentNumber + STRING_SPACE
-				+ FulfillmentMessages.get().ShipmentSection_CancelShipmentTo + STRING_SPACE
-				+ shipment.getShipmentAddress().getFirstName() + STRING_SPACE
-				+ shipment.getShipmentAddress().getLastName();
+		final String fullCustomerName = AddressUtil.getFullCustomerName(shipment.getShipmentAddress());
+		final StringBuilder message = new StringBuilder();
+		message.append(FulfillmentMessages.get().ShipmentSection_ReleaseShipmentConfirmMessage);
+		message.append(STRING_NEW_LINE).append(STRING_NEW_LINE);
+		message.append(FulfillmentMessages.get().ShipmentSection_CancelShipmentShipment).append(STRING_SPACE);
+		message.append(this.shipmentNumber);
+		if (StringUtils.isNotEmpty(fullCustomerName)) {
+			message.append(STRING_SPACE);
+			message.append(FulfillmentMessages.get().ShipmentSection_CancelShipmentTo).append(STRING_SPACE);
+			message.append(fullCustomerName);
+		}
+		return message.toString();
 	}
 
 	private String formatEditorDirtyReleaseShipmentMessage() {

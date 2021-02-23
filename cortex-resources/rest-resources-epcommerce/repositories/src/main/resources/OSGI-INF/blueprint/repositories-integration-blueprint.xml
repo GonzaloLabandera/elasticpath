@@ -47,6 +47,9 @@
 	<reference id="customerService"
 			   interface="com.elasticpath.service.customer.CustomerService"/>
 
+	<reference id="accountTreeService"
+			   interface="com.elasticpath.service.customer.AccountTreeService"/>
+
 	<reference id="customerRegistrationService"
 			   interface="com.elasticpath.service.customer.CustomerRegistrationService"/>
 
@@ -286,17 +289,14 @@
 	<service ref="addressValidator"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.validator.AddressValidator"/>
 
-	<service ref="totalsCalculator"
-			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.calc.TotalsCalculator"/>
+	<service ref="cartTotalsCalculator"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.calc.CartTotalsCalculator"/>
 
 	<service ref="shipmentTotalsCalculator"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.calc.ShipmentTotalsCalculator"/>
 
 	<service ref="cartOrdersDefaultAddressPopulator"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.CartOrdersDefaultAddressPopulator"/>
-
-	<service ref="taxesCalculator"
-			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.calc.TaxesCalculator"/>
 
 	<service ref="cartOrderRepository"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository"/>
@@ -493,5 +493,8 @@
 
 	<service ref="multicartResolutionStrategyListHolder"
 		  interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder"/>
+
+	<service ref="accountStatusIdToAccountStatusMapHolder"
+		  interface="com.elasticpath.rest.resource.integration.epcommerce.repository.accounts.repositories.AccountStatusIdToAccountStatusMapHolder"/>
 
 </blueprint>

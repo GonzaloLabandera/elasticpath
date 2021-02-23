@@ -1,6 +1,8 @@
 @regressionTest @configuration @user
 Feature: User Roles
 
+#https://elasticpath.atlassian.net/browse/PB-9111
+@notReady
   Scenario: Verify user role exists
     Given I sign in to CM as admin user
     And I go to Configuration

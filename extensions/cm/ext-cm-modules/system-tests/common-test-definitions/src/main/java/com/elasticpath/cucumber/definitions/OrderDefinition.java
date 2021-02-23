@@ -13,9 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
@@ -60,10 +64,10 @@ import com.elasticpath.selenium.wizards.PaymentAuthorizationWizard;
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessivePublicCount"})
 public class OrderDefinition {
 
-	private static final String CUSTOMERNAME_COLUUMNNAME = "Customer Name";
-	private static final String ACCOUNTNAME_COLUUMNNAME = "Account Name";
+	private static final String CUSTOMERNAME_COLUMNNAME = "Customer Name";
+	private static final String ACCOUNTNAME_COLUMNNAME = "Account Name";
 	private static final String ORDER_NUMBER_COLUMNNAME = "Order #";
-	private static final String ORDER_STORE_COLUUMNNAME = "Store";
+	private static final String ORDER_STORE_COLUMNNAME = "Store";
 	private static final String ORDER_PHONE_FIELD = "phone";
 	private static final String ORIGINAL_PAYMENT_SOURCE = "Original payment source";
 	private static final String LESS_SHIPMENT_DISCOUNT = "Less shipment discount";
@@ -75,6 +79,7 @@ public class OrderDefinition {
 
 
 	private static final Logger LOGGER = Logger.getLogger(OrderDefinition.class);
+	private static final String HOLD_ALL_ORDERS_FOR_STORE_SETTING = "COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore";
 
 	private final CustomerServiceNavigation customerServiceNavigation;
 	private final ActivityToolbar activityToolbar;
@@ -98,6 +103,7 @@ public class OrderDefinition {
 	private CreateExchangeWizard createExchangeWizard;
 	private PaymentProcessingErrorDialog paymentProcessingErrorDialog;
 	private CompleteExchangeWizard completeExchangeWizard;
+	private PaymentAuthorizationWizard paymentAuthorizationWizard;
 	private final WebDriver driver;
 
 	/**
@@ -162,17 +168,26 @@ public class OrderDefinition {
 	 *
 	 * @param orderNumber the order number.
 	 */
-	@Then("^I should see the order number (.+) in search results pane$")
+	@Then("^I select the row with order number (.+) in search results pane$")
 	public void verifyOrderNumberInSearchResultsPane(final String orderNumber) {
 		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(orderNumber, ORDER_NUMBER_COLUMNNAME);
 	}
 
 	/**
-	 * Verifies latest order in search results pane.
+	 * Verifies latest successful order in search results pane.
 	 */
-	@Then("^I should see the latest order in results pane$")
-	public void verifyLatestOrderInResultsPane() {
-		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
+	@Then("^I select the row with the latest successful order in results page$")
+	public void verifyLatestSuccessfulOrderInResultsPane() {
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(getLatestOrderNumber(), ORDER_NUMBER_COLUMNNAME);
+	}
+
+	/**
+	 * Verifies the order after latest successful order in search results pane.
+	 */
+	@Then("^I select the row with the order after the latest successful order in results page$")
+	public void verifyOrderAfterLatestSuccessfulOrderInResultsPane() {
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(getOrderAfterLatestOrderNumber(),
+				ORDER_NUMBER_COLUMNNAME);
 	}
 
 	/**
@@ -180,9 +195,9 @@ public class OrderDefinition {
 	 *
 	 * @param customerName the customer name.
 	 */
-	@Then("^I should see customer name (.+) in search results pane$")
+	@Then("^I select the row with customer name (.+) in search results pane$")
 	public void verifyCustomerNameInSearchResultsPane(final String customerName) {
-		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(customerName, CUSTOMERNAME_COLUUMNNAME);
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(customerName, CUSTOMERNAME_COLUMNNAME);
 	}
 
 	/**
@@ -190,9 +205,9 @@ public class OrderDefinition {
 	 *
 	 * @param accountName the account name.
 	 */
-	@Then("^I should see account name (.+) in search results pane$")
+	@Then("^I select the row with account name (.+) in search results pane$")
 	public void verifyAccountNameInSearchResultsPane(final String accountName) {
-		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(accountName, ACCOUNTNAME_COLUUMNNAME);
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(accountName, ACCOUNTNAME_COLUMNNAME);
 	}
 
 	/**
@@ -559,10 +574,19 @@ public class OrderDefinition {
 	/**
 	 * Searches order by number.
 	 */
-	@When("^I search the latest order by number$")
-	public void searchOrderByNumber() {
+	@When("^I search the latest successful order by number$")
+	public void searchLatestSuccessfulOrderByNumber() {
 		LOGGER.info("searching for ordernumber.... " + getLatestOrderNumber());
 		searchOrderByNumber(getLatestOrderNumber());
+	}
+
+	/**
+	 * Searches order by number.
+	 */
+	@When("^I search the order after the latest successful order by number$")
+	public void searchOrderAfterLatestSuccessfulOrderByNumber() {
+		LOGGER.info("searching for ordernumber.... " + getOrderAfterLatestOrderNumber());
+		searchOrderByNumber(getOrderAfterLatestOrderNumber());
 	}
 
 	/**
@@ -1286,7 +1310,7 @@ public class OrderDefinition {
 	 *
 	 * @param postalCode the Postal Code.
 	 */
-	@When("^I search for latest orders by Postal Code (.+)$")
+	@When("^I search for latest successful order by Postal Code (.+)$")
 	public void searchOrderByPostalCode(final String postalCode) {
 		customerServiceNavigation.clearInputFieldsInOrdersTab();
 		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
@@ -1311,7 +1335,7 @@ public class OrderDefinition {
 	 *
 	 * @param storeName the Store.
 	 */
-	@When("^I search for latest order by Store (.+)$")
+	@When("^I search for latest successful order by Store (.+)$")
 	public void searchOrderByStore(final String storeName) {
 		customerServiceNavigation.clearInputFieldsInOrdersTab();
 		customerServiceNavigation.enterOrderNumber(getLatestOrderNumber());
@@ -1324,7 +1348,7 @@ public class OrderDefinition {
 	 *
 	 * @param orderStatus the Order status.
 	 */
-	@When("^I search for latest order by Order Status (.+)$")
+	@When("^I search for latest successful order by Order Status (.+)$")
 	public void searchLatestOrderByStatus(final String orderStatus) {
 		closeOrderSearchResultPaneIfOpen();
 		customerServiceNavigation.clearInputFieldsInOrdersTab();
@@ -1340,18 +1364,17 @@ public class OrderDefinition {
 	 *
 	 * @param orderStore the Order Store Column.
 	 */
-	@Then("^I should see Order with Store (.+) in search results pane$")
+	@Then("^I select the row with store (.+) in search results pane$")
 	public void verifyOrderStoreNameInSearchResultsPane(final String orderStore) {
-		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(orderStore, ORDER_STORE_COLUUMNNAME);
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(orderStore, ORDER_STORE_COLUMNNAME);
 	}
-
 
 	/**
 	 * Verify Order Status Column in search results pane.
 	 *
 	 * @param orderStatus the Order Status Column.
 	 */
-	@Then("^I should see Order with Order Status - (.+) in search results pane$")
+	@Then("^The selected row has order status (.+) in search results pane$")
 	public void verifyOrderStatusNameInSearchResultsPane(final String orderStatus) {
 		orderSearchResultPane.verifyOrderStatusExistInResult(orderStatus);
 	}
@@ -1371,7 +1394,16 @@ public class OrderDefinition {
 	}
 
 	/**
-	 * Gets the latest order number.
+	 * Gets the order number after the latest successful order number.
+	 *
+	 * @return orderNumber.
+	 */
+	private String getOrderAfterLatestOrderNumber() {
+		return String.valueOf(Long.valueOf(getLatestOrderNumber()) + 1);
+	}
+
+	/**
+	 * Gets the latest successful order number.
 	 *
 	 * @return orderNumber.
 	 */
@@ -1389,7 +1421,7 @@ public class OrderDefinition {
 	 *
 	 * @param orderShipmentStatus the Order Shipment status.
 	 */
-	@When("^I search for latest order by Order Shipment Status (.+)$")
+	@When("^I search for latest successful order by Order Shipment Status (.+)$")
 	public void searchOrderByShipmentStatus(final String orderShipmentStatus) {
 		closeOrderSearchResultPaneIfOpen();
 		customerServiceNavigation.clearInputFieldsInOrdersTab();
@@ -1403,7 +1435,7 @@ public class OrderDefinition {
 	 *
 	 * @param skuCode the SKU Code .
 	 */
-	@When("^I search for latest order by SKU Code (.+)$")
+	@When("^I search for latest successful order by SKU Code (.+)$")
 	public void searchOrderBySkuCode(final String skuCode) {
 		closeOrderSearchResultPaneIfOpen();
 		customerServiceNavigation.clearInputFieldsInOrdersTab();
@@ -1605,16 +1637,59 @@ public class OrderDefinition {
 	}
 
 	/**
-	 * Verify completion of Payment Authorization should be impossible
+	 * Modifies shipment line item discount, saves the order and reserve a new amount.
+	 *
+	 * @param discount item discount value to be set.
 	 */
-	@And("^Completion of Payment Authorization should be impossible with error message (.+)$")
-	public void verifyIsCompletionPaymentAuthorizationImpossible(final String errorMessage) {
-		PaymentAuthorizationWizard paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+	@When("^I set order shipment line item discount to (.+), save the order and reserve a new amount$")
+	public void setShipmentLineItemDiscountAndReserveNewAmount(final String discount) {
+		clickDetailsTab();
+		orderEditor.setShipmentLineItemDiscount(discount);
+		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		paymentAuthorizationWizard.clickAuthorizeButton();
+	}
+
+	/**
+	 * Verifies completion of Payment Reservation should be impossible.
+	 *
+	 * @param errorMessage the expected error message.
+	 */
+	@And("^I cannot complete Payment Reservation with error message (.+)$")
+	public void verifyThatCompletionPaymentAuthorizationIsImpossible(final String errorMessage) {
+		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
 		paymentAuthorizationWizard.clickAuthorizeButton();
 		assertThat(paymentAuthorizationWizard.isDoneButtonEnable())
 				.as("Done button should be disabled")
 				.isFalse();
 		paymentAuthorizationWizard.verifyErrorMessageDisplayed(errorMessage);
+	}
+
+	/**
+	 * Checks payment reservations.
+	 *
+	 * @param reservations the expected reservations.
+	 */
+	@And("^I see new reservations$")
+	public void checkNewReservations(final Map<String, String> reservations) {
+		paymentAuthorizationWizard.verifyReservations(reservations);
+	}
+
+	/**
+	 * Finishes the Payment Reservation.
+	 */
+	@And("^I can finish Payment Reservation$")
+	public void finishPaymentReservation() {
+		assertThat(paymentAuthorizationWizard.isDoneButtonEnable())
+				.as("Done button should be enabled")
+				.isTrue();
+		paymentAuthorizationWizard.clickDoneButton();
+	}
+
+	/**
+	 * Cancels the Payment Reservation.
+	 */
+	@And("^I cancel Payment Reservation$")
+	public void cancelPaymentReservation() {
 		paymentAuthorizationWizard.clickCancel();
 		paymentAuthorizationWizard.clickOk();
 	}
@@ -1626,7 +1701,7 @@ public class OrderDefinition {
 	 */
 	@And("^I complete Payment Authorization with (.+) payment source$")
 	public void completePaymentAuthorization(final String paymentMethod) {
-		PaymentAuthorizationWizard paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
 		paymentAuthorizationWizard.completePaymentAuthorization(paymentMethod);
 	}
 
@@ -1637,7 +1712,7 @@ public class OrderDefinition {
 	 */
 	@And("^I accept Cancel Reauthorization warning$")
 	public void acceptCancelReAuthorization(final String paymentMethod) {
-		PaymentAuthorizationWizard paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
 		paymentAuthorizationWizard.cancelFailedPaymentAuthorization(paymentMethod);
 	}
 
@@ -1730,6 +1805,65 @@ public class OrderDefinition {
 		createExchangeWizard.verifyAuthorizeButtonIsDisabled();
 	}
 
+	/**
+	 * Verify an order hold exists with proper rule, status and resolved by.
+	 * @param orderHoldDataMap - should include keys of "Hold Rule", "Status" and "Resolved By"
+	 */
+	@And("^An order hold exists with the following")
+	public void orderHoldStatus(final Map<String, String> orderHoldDataMap) {
+		clickHoldTab();
+		orderEditor.verifyOrderHold(orderHoldDataMap.get("Hold Rule"), orderHoldDataMap.get("Status"), orderHoldDataMap.get("Resolved By"));
+	}
+
+	/**
+	 * Resolves active order holds.
+	 */
+	@When("^I resolve all order holds$")
+	public void resolveAllOrderHolds() {
+		orderEditor.resolveAllHolds();
+	}
+
+	/**
+	 * Marks the first active order hold as unresolvable.
+	 */
+	@When("^I mark the first possible order hold unresolvable$")
+	public void markFirstOrderHoldUnresolvable() {
+		orderEditor.markHoldUnresolvable();
+	}
+
+	/**
+	 * Verify the order hold has the specified status.
+	 * @param status the expected status of the order hold.
+	 */
+	@Then("^The order hold status should be (.+)$")
+	public void verifyOrderHoldStatus(final String status) {
+		customerServiceActionToolbar.clickReloadActiveEditor();
+		orderEditor.verifyOrderHoldStatus(status);
+	}
+
+	/**
+	 * Verify that the order hold is not resolvable (ie cannot be approved or rejected) by the current user.
+	 */
+	@Then("^I should be unable to resolve the hold$")
+	public void verifyOrderHoldUneditable() {
+		orderEditor.verifyOrderHoldUneditable();
+	}
+
+	/**
+	 * Removes the the hold all orders setting for the test store
+	 */
+	@After(value = "@disableOrderHold", order = Constants.CLEANUP_ORDER_THIRD)
+	public void disableOrderHold() {
+		NavigationDefinition navigationDefinition = new NavigationDefinition();
+		navigationDefinition.clickConfiguration();
+		SystemConfigurationDefinition systemConfig = new SystemConfigurationDefinition();
+		systemConfig.openSystemConfiguration();
+		systemConfig.enterSettingName(HOLD_ALL_ORDERS_FOR_STORE_SETTING);
+		systemConfig.removeDefinedValueRecord(ImmutableMap.of("setting", HOLD_ALL_ORDERS_FOR_STORE_SETTING, "context", "null",
+				"value", "true"));
+
+	}
+
 	private void clickSummaryTab() {
 		orderEditor.clickTab("Summary");
 	}
@@ -1749,4 +1883,6 @@ public class OrderDefinition {
 	private void clickNotesTab() {
 		orderEditor.clickTab("Notes");
 	}
+
+	private void clickHoldTab() { orderEditor.clickTab("Holds"); }
 }

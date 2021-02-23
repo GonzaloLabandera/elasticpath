@@ -6,6 +6,7 @@ package com.elasticpath.domain.dataimport.impl;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -14,13 +15,13 @@ import org.apache.commons.lang.ObjectUtils;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.GlobalConstants;
+import com.elasticpath.commons.enums.InvalidCatalogCodeMessage;
 import com.elasticpath.commons.exception.EpBindException;
+import com.elasticpath.commons.exception.EpInvalidCatalogCodeException;
 import com.elasticpath.commons.exception.EpInvalidGuidBindException;
-import com.elasticpath.commons.exception.EpInvalidValueBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.commons.exception.EpTooLongBindException;
 import com.elasticpath.commons.exception.EpUnsupportedOperationException;
-import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.attribute.Attribute;
@@ -73,8 +74,6 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 	private ProductType productType;
 
 	private ValidatorUtils validatorUtils;
-
-	private Utility utilityBean;
 
 	@Override
 	public void init(final Object object) {
@@ -134,8 +133,9 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 					throw new EpNonNullBindException(super.getName());
 				}
 
-				if (!getUtilityBean().isValidGuidStr(value)) {
-					throw new EpInvalidValueBindException(super.getName());
+				List<InvalidCatalogCodeMessage> messages = getCatalogCodeUtilBean().isValidProductCode(value);
+				if (!messages.isEmpty()) {
+					throw new EpInvalidCatalogCodeException(super.getName(), messages);
 				}
 
 				final Product product = service.findProductByGuid(value, false, false, true);
@@ -173,8 +173,9 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 					throw new EpNonNullBindException(super.getName());
 				}
 
-				if (!getUtilityBean().isValidGuidStr(value)) {
-					throw new EpInvalidValueBindException(super.getName());
+				List<InvalidCatalogCodeMessage> messages = getCatalogCodeUtilBean().isValidSkuCode(value);
+				if (!messages.isEmpty()) {
+					throw new EpInvalidCatalogCodeException(super.getName(), messages);
 				}
 
 				((ProductSku) entity).setSkuCode(value);
@@ -713,19 +714,4 @@ public class ImportDataTypeProductSkuImpl extends AbstractImportDataTypeImpl {
 		this.validatorUtils = validatorUtils;
 	}
 
-	/**
-	 * Gets the utility bean.
-	 *
-	 * @return the utility bean
-	 */
-	protected Utility getUtilityBean() {
-		if (utilityBean == null) {
-			utilityBean = getSingletonBean(ContextIdNames.UTILITY, Utility.class);
-		}
-		return utilityBean;
-	}
-
-	protected void setUtilityBean(final Utility utilityBean) {
-		this.utilityBean = utilityBean;
-	}
 }

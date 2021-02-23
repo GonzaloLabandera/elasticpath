@@ -42,7 +42,6 @@
 		<ep.log.level>INFO</ep.log.level>
 		<ep.log.dir>target/logs</ep.log.dir>
 
-		<org.apache.activemq.tooling.version>5.14.3</org.apache.activemq.tooling.version>
 		<org.apache.commons.pool2.version>2.4.2</org.apache.commons.pool2.version>
 		<org.apache.geronimo.specs.version>1.1.1</org.apache.geronimo.specs.version>
 		<org.apache.geronimo.management.spec.version>1.0.1</org.apache.geronimo.management.spec.version>

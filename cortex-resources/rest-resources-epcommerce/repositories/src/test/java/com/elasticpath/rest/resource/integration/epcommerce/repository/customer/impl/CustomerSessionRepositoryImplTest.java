@@ -5,6 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.customer
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
@@ -23,6 +24,7 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
@@ -61,6 +63,8 @@ public class CustomerSessionRepositoryImplTest {
 	private Store mockStore;
 	@Mock
 	private Shopper mockShopper;
+	@Mock
+	private ShopperMemento mockShopperMemento;
 	@Mock
 	private Shopper mockShopperWithAccount;
 	@Mock
@@ -144,34 +148,6 @@ public class CustomerSessionRepositoryImplTest {
 	}
 
 	@Test
-	public void testFindOrCreateCustomerSessionExpectedResultNotNullAndSubjectIsNull() {
-
-		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
-
-		Tag tag = new Tag();
-		TagSet tagSet = new TagSet();
-		tagSet.addTag(TAG_KEY, tag);
-
-		when(shopperService.findByCustomerGuid(USER_GUID)).thenReturn(mockShopper);
-		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
-		when(mockShopper.getStoreCode()).thenReturn(STORE_CODE);
-		when(mockStore.getCode()).thenReturn(STORE_CODE);
-		when(mockStore.getDefaultLocale()).thenReturn(LOCALE);
-		when(mockStore.getDefaultCurrency()).thenReturn(CURRENCY);
-		when(customerSessionService.initializeCustomerSessionForPricing(mockCustomerSession, STORE_CODE, CURRENCY))
-				.thenReturn(mockCustomerSession);
-		when(tagSetFactory.createTagSet(mockShopper)).thenReturn(tagSet);
-
-		customerSessionRepository.findOrCreateCustomerSession()
-				.test()
-				.assertNoErrors()
-				.assertValue(mockCustomerSession);
-
-		assertEquals(ASSERT_DESCRIPTION, tag, sessionTagSet.getTagValue(TAG_KEY));
-		verify(sessionPriceListLifecycle).refreshPriceListStack(mockCustomerSession, mockStore);
-	}
-
-	@Test
 	public void testFindOrCreateCustomerSessionWhenShopperNotFound() {
 		setupSubject();
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
@@ -218,7 +194,7 @@ public class CustomerSessionRepositoryImplTest {
 
 		when(mockCustomer.getGuid()).thenReturn(USER_GUID);
 
-		ExecutionResult<CustomerSession> result = customerSessionRepository.findCustomerSessionByGuid(mockCustomer.getGuid());
+		ExecutionResult<CustomerSession> result = customerSessionRepository.findCustomerSessionByGuidAndStoreCode(mockCustomer.getGuid(), STORE_CODE);
 
 		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
 		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
@@ -330,7 +306,7 @@ public class CustomerSessionRepositoryImplTest {
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
 		when(mockStore.getDefaultLocale()).thenReturn(LOCALE);
 
-		ExecutionResult<CustomerSession> result = customerSessionRepository.findCustomerSessionByGuid(mockCustomer.getGuid());
+		ExecutionResult<CustomerSession> result = customerSessionRepository.findCustomerSessionByGuidAndStoreCode(mockCustomer.getGuid(), STORE_CODE);
 
 		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
 		assertEquals("Result should be a server Error", ResourceStatus.SERVER_ERROR, result.getResourceStatus());
@@ -376,6 +352,34 @@ public class CustomerSessionRepositoryImplTest {
 		Currency actual = customerSessionRepository.findCurrencyForCurrentOperation(mockStore);
 
 		assertEquals(CURRENCY, actual);
+	}
+
+	@Test
+	public void testCreateCustomerSessionAsSingleWhenSubjectHasAccount() {
+		setupSubjectWithAccount();
+		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
+		when(shopperService.createAndSaveShopper(STORE_CODE)).thenReturn(mockShopper);
+		when(mockShopper.getShopperMemento()).thenReturn(mockShopperMemento);
+
+		customerSessionRepository.createCustomerSessionAsSingle();
+
+		verify(customerService).findBySharedId(ACCOUNT_SHARED_ID);
+		verify(mockShopperMemento).setAccount(mockAccount);
+		verify(customerSessionService).createWithShopper(mockShopper);
+	}
+
+	@Test
+	public void testCreateCustomerSessionAsSingleWhenSubjectHasNoAccount() {
+		setupSubject();
+		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
+		when(shopperService.createAndSaveShopper(STORE_CODE)).thenReturn(mockShopper);
+		when(mockShopper.getShopperMemento()).thenReturn(mockShopperMemento);
+
+		customerSessionRepository.createCustomerSessionAsSingle();
+
+		verify(customerService, never()).findBySharedId(ACCOUNT_SHARED_ID);
+		verify(mockShopperMemento, never()).setAccount(mockAccount);
+		verify(customerSessionService).createWithShopper(mockShopper);
 	}
 
 	private void mockCreateCustomerSessionWithShopper() {

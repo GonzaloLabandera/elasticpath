@@ -37,8 +37,8 @@ import org.apache.openjpa.persistence.PersistentCollection;
 import org.apache.openjpa.persistence.jdbc.ElementForeignKey;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 import org.apache.openjpa.persistence.jdbc.ForeignKeyAction;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EpPasswordValidationException;
@@ -369,7 +369,7 @@ public class CmUserImpl extends AbstractLegacyEntityImpl implements CmUser {
 		} else {
 			try {
 				final PasswordEncoder passwordEncoder = getSingletonBean(ContextIdNames.CM_PASSWORDENCODER, PasswordEncoder.class);
-				setPassword(passwordEncoder.encodePassword(clearTextPassword, null));
+				setPassword(passwordEncoder.encode(clearTextPassword));
 			} catch (Exception exception) {
 				LOG.error("Unable to set user's password.", exception);
 			}

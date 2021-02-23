@@ -68,11 +68,11 @@ public class CartDirectorServiceImplIntegrationTest extends DbTestCase {
 		persisterFactory.getCatalogTestPersister().addOrUpdateProductBaseAmount(scenario.getCatalog(), product, BigDecimal.ONE, BigDecimal.ONE,
 				BigDecimal.ONE, "USD");
 
-		ShoppingCart updatedCart = cartDirectorService.refresh(shoppingCart);
+		cartDirector.refresh(shoppingCart);
 
 		final ShoppingCartPricingSnapshot cartPricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 
-		final ShoppingItem secondItem = updatedCart.getCartItemsBySkuGuid(item.getSkuGuid()).get(0);
+		final ShoppingItem secondItem = shoppingCart.getCartItemsBySkuGuid(item.getSkuGuid()).get(0);
 
 		final ShoppingItemPricingSnapshot secondItemPricingSnapshot = cartPricingSnapshot.getShoppingItemPricingSnapshot(secondItem);
 		assertEquals(BigDecimal.ONE.setScale(2), secondItemPricingSnapshot.getListUnitPrice().getAmount());

@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>paymentmethods</name>
+
+		<uri-part>
+			<name>account-payment-method-id</name>
+			<description><![CDATA[The account payment method ID.]]></description>
+			<string/>
+		</uri-part>
+
+		<resource>
+			<name>account-payment-methods</name>
+			<description><![CDATA[The payment methods resource for an account.]]></description>
+			<uri>{base.family}/{accounts.account}</uri>
+			<list-of>account-payment-method</list-of>
+		</resource>
+
+		<resource>
+			<name>account-payment-method</name>
+			<description>
+				<![CDATA[A payment method supported by the store, such as a credit card, debit, or cash and accessed through the account.]]>
+			</description>
+			<uri>{account-payment-methods}/{account-payment-method-id}</uri>
+			<entity>payment-method</entity>
+		</resource>
+
+		<relationship>
+			<name>account-payment-methods-for-account-payment-method</name>
+			<description><![CDATA[Link from the account payment methods resource to an individual account payment method.]]></description>
+			<rel>paymentmethods</rel>
+			<from>account-payment-method</from>
+			<to>account-payment-methods</to>
+		</relationship>
+
+		<relationship>
+			<name>account-payment-methods-for-account</name>
+			<description><![CDATA[Link from an account to the available payment methods for that scope and account.]]></description>
+			<rel>paymentmethods</rel>
+			<rev>account</rev>
+			<from>accounts.account</from>
+			<to>account-payment-methods</to>
+		</relationship>
+	</family>
+</definitions>

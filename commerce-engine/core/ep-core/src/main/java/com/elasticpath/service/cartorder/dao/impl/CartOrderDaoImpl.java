@@ -53,4 +53,9 @@ public class CartOrderDaoImpl extends AbstractDaoImpl implements CartOrderDao {
 		return getPersistenceEngine().retrieveByNamedQuery("CART_ORDER_GUIDS_BY_CUSTOMER_GUID", storeCode, customerGuid);
 	}
 
+	@Override
+	public List<String> findCartOrderGuidsByAccountGuid(final String storeCode, final String accountGuid) {
+		return getPersistenceEngine().retrieveByNamedQuery("CART_ORDER_GUIDS_BY_ACCOUNT_GUID", storeCode, accountGuid);
+	}
+
 }

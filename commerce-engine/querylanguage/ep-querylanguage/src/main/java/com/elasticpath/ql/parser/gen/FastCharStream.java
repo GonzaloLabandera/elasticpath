@@ -29,6 +29,10 @@ public final class FastCharStream implements CharStream {
 
 	private int bufferStart = 0; // position in file of buffer
 
+	private int tabSize;
+
+	private boolean trackLineColumn;
+
 	private final Reader input; // source of chars
 
 	/**
@@ -78,7 +82,7 @@ public final class FastCharStream implements CharStream {
 
 	@Override
 	@SuppressWarnings("PMD.MethodNamingConventions")
-	public char BeginToken() throws IOException {
+	public char beginToken() throws IOException {
 		tokenStart = bufferPosition;
 		return readChar();
 	}
@@ -90,13 +94,12 @@ public final class FastCharStream implements CharStream {
 
 	@Override
 	@SuppressWarnings("PMD.MethodNamingConventions")
-	public String GetImage() {
+	public String getImage() {
 		return new String(buffer, tokenStart, bufferPosition - tokenStart);
 	}
 
 	@Override
-	@SuppressWarnings("PMD.MethodNamingConventions")
-	public char[] GetSuffix(final int len) {
+	public char[] getSuffix(final int len) {
 		char[] value = new char[len];
 		System.arraycopy(buffer, bufferPosition - len, value, 0, len);
 		return value;
@@ -104,7 +107,7 @@ public final class FastCharStream implements CharStream {
 
 	@Override
 	@SuppressWarnings({"PMD.MethodNamingConventions","PMD.SystemPrintln"})
-	public void Done() {
+	public void done() {
 		try {
 			input.close();
 		} catch (IOException e) {
@@ -113,13 +116,23 @@ public final class FastCharStream implements CharStream {
 	}
 
 	@Override
-	public int getColumn() {
-		return bufferStart + bufferPosition;
+	public void setTabSize(final int i) {
+		this.tabSize = i;
 	}
 
 	@Override
-	public int getLine() {
-		return 1;
+	public int getTabSize() {
+		return tabSize;
+	}
+
+	@Override
+	public void setTrackLineColumn(final boolean trackLineColumn) {
+		this.trackLineColumn = trackLineColumn;
+	}
+
+	@Override
+	public boolean isTrackLineColumn() {
+		return trackLineColumn;
 	}
 
 	@Override

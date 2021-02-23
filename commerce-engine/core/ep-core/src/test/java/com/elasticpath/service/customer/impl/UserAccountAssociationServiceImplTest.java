@@ -10,6 +10,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +21,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
-import com.elasticpath.domain.customer.AccountRole;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.UserAccountAssociation;
@@ -27,6 +28,7 @@ import com.elasticpath.domain.customer.impl.UserAccountAssociationImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.customer.CustomerService;
+import com.elasticpath.service.permissions.RoleToPermissionsMappingService;
 
 /**
  * Test <code>UserAccountAssociationServiceImpl</code>.
@@ -46,6 +48,9 @@ public class UserAccountAssociationServiceImplTest {
 	@Mock
 	private FetchPlanHelper fetchPlanHelper;
 
+	@Mock
+	private RoleToPermissionsMappingService roleToPermissionMappingService;
+
 	@InjectMocks
 	private UserAccountAssociationServiceImpl userAccountAssociationService;
 
@@ -61,7 +66,7 @@ public class UserAccountAssociationServiceImplTest {
 
 	private static final String ACCOUNT_ROLE = "BUYER";
 
-	private static final AccountRole ROLE = AccountRole.BUYER;
+	private static final String BUYER_ROLE = "BUYER";
 
 	@Mock
 	private UserAccountAssociation userAccountAssociation;
@@ -82,7 +87,8 @@ public class UserAccountAssociationServiceImplTest {
 		when(account.getGuid()).thenReturn(ACCOUNT_GUID);
 		when(userAccountAssociation.getAccountGuid()).thenReturn(ACCOUNT_GUID);
 		when(userAccountAssociation.getUserGuid()).thenReturn(USER_GUID);
-		when(userAccountAssociation.getAccountRole()).thenReturn(AccountRole.BUYER);
+		when(userAccountAssociation.getAccountRole()).thenReturn(BUYER_ROLE);
+		when(roleToPermissionMappingService.getDefinedRoleKeys()).thenReturn(Collections.singleton(BUYER_ROLE));
 	}
 
 	/**
@@ -90,10 +96,10 @@ public class UserAccountAssociationServiceImplTest {
 	 */
 	@Test
 	public void testAssociateUserToAccount() {
-		UserAccountAssociation userAccountAssociation = userAccountAssociationService.associateUserToAccount(user, account, ROLE);
+		UserAccountAssociation userAccountAssociation = userAccountAssociationService.associateUserToAccount(user, account, BUYER_ROLE);
 		assertThat(userAccountAssociation.getUserGuid()).isEqualTo(USER_GUID);
 		assertThat(userAccountAssociation.getAccountGuid()).isEqualTo(ACCOUNT_GUID);
-		assertThat(userAccountAssociation.getAccountRole()).isEqualTo(ROLE);
+		assertThat(userAccountAssociation.getAccountRole()).isEqualTo(BUYER_ROLE);
 	}
 
 	/**

@@ -9,6 +9,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerIdentifierStrategy;
@@ -36,14 +37,14 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImpl implements Custom
 	}
 
 	@Override
-	public ExecutionResult<Void> isCustomerExists(final String userId, final String storeCode, final String customerIdentifierKey) {
+	public ExecutionResult<Boolean> isCustomerExists(final String userId, final String storeCode, final String customerIdentifierKey) {
 		String keyFieldString = getKeyFieldStringFromCustomerIdentifierKey(customerIdentifierKey);
 
 		ExecutionResult<Long> customerExecutionResult =
 				customerRepository.getCustomerCountByProfileAttributeKeyAndValue(keyFieldString, userId);
 		if (customerExecutionResult.isSuccessful()) {
 			if (customerExecutionResult.getData().equals(1L)) {
-				return ExecutionResultFactory.createReadOK(null);
+				return ExecutionResultFactory.createReadOK(Boolean.TRUE);
 			} else if (customerExecutionResult.getData() > 1L) {
 				return ExecutionResultFactory.createBadRequestBody(prepareMultipleCustomersFoundError(keyFieldString, userId));
 			}
@@ -99,5 +100,10 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImpl implements Custom
 	@Override
 	public String getCustomerIdentificationKeyField() {
 		return customerIdentificationKeyField;
+	}
+
+	@Override
+	public ExecutionResult<String> deriveUserIdFromCustomer(final Customer customer) {
+		return ExecutionResultFactory.createNotFound();
 	}
 }

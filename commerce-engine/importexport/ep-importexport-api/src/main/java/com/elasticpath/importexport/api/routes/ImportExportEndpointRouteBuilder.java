@@ -3,6 +3,7 @@
  */
 package com.elasticpath.importexport.api.routes;
 
+import com.ctc.wstx.exc.WstxParsingException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestParamType;
@@ -73,7 +74,7 @@ public class ImportExportEndpointRouteBuilder extends RouteBuilder {
 					.endParam()
 				.to("direct:importRequest");
 
-		onException(EpInvalidRequest.class, ConfigurationException.class, ChangeSetPolicyException.class)
+		onException(EpInvalidRequest.class, ConfigurationException.class, ChangeSetPolicyException.class, WstxParsingException.class)
 				.handled(true)
 				.setHeader(Exchange.HTTP_RESPONSE_CODE, HttpStatus.BAD_REQUEST::value)
 				.transform(simple("${exception.message}"));

@@ -14,7 +14,7 @@ import com.elasticpath.epcoretool.logic.AbstractSetCmUserPassword;
 /**
  * Set the password of the specified CM User.
  */
-@Mojo(name = "set-cmuser-password")
+@Mojo(name = "set-cmuser-password", threadSafe = true)
 public class SetCmUserPasswordMojo extends AbstractEpCoreMojo {
 
 	/**

@@ -50,16 +50,9 @@ public class CachingPriceListAssignmentServiceImpl implements PriceListAssignmen
 
 	@Override
 	public List<PriceListAssignment> listByCatalogAndCurrencyCode(final String catalogCode, final String currencyCode, final boolean includeHidden) {
-		CatalogAndCurrencyCodeAndHiddenCompositeKey key = new CatalogAndCurrencyCodeAndHiddenCompositeKey(catalogCode, currencyCode, includeHidden);
-		List<PriceListAssignment> priceListAssignments = priceListAssignmentCache.get(key);
-
-		if (priceListAssignments != null) {
-			return priceListAssignments;
-		}
-
-		priceListAssignments = fallbackService.listByCatalogAndCurrencyCode(catalogCode, currencyCode, includeHidden);
-		priceListAssignmentCache.put(key, priceListAssignments);
-		return priceListAssignments;
+		final CatalogAndCurrencyCodeAndHiddenCompositeKey cacheKey = new CatalogAndCurrencyCodeAndHiddenCompositeKey(catalogCode,
+				currencyCode, includeHidden);
+		return priceListAssignmentCache.get(cacheKey, key -> fallbackService.listByCatalogAndCurrencyCode(catalogCode, currencyCode, includeHidden));
 	}
 
 	@Override

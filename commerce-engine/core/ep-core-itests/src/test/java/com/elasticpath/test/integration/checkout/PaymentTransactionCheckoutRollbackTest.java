@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Elastic Path Software Inc., 2019
  */
+
 package com.elasticpath.test.integration.checkout;
 
 import static org.junit.Assert.assertEquals;
@@ -11,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -41,6 +42,7 @@ import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
+import com.elasticpath.test.util.CheckoutHelper;
 
 /**
  * Test payment transaction rollbacks on a failed checkout action.
@@ -80,6 +82,7 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 
 	private ShoppingContext shoppingContext;
 	private Customer defaultCustomer;
+	private CheckoutHelper checkoutHelper;
 
 	/**
 	 * Set up common elements of the test.
@@ -99,6 +102,7 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 		shoppingContextPersister.persist(shoppingContext);
 
 		checkoutTestCartBuilder.withScenario(scenario);
+		checkoutHelper = new CheckoutHelper(getTac());
 	}
 
 	/**
@@ -117,7 +121,8 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 			final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 			final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-			checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(),
+					true);
 			fail("The order should fail with an exception on checkout.");
 		} catch (EpServiceException e) {
 			// ignore exception
@@ -153,7 +158,7 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 			final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 			final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-			checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
 			fail("The order should fail with an exception on checkout.");
 		} catch (EpServiceException e) {
 			// ignore exception
@@ -183,7 +188,7 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 			final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 			final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-			checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
 			fail("The order should fail with an exception on checkout.");
 		} catch (EpServiceException e) {
 			// ignore exception

@@ -104,10 +104,12 @@ public class OrderPaymentInstrumentSelectorRepositoryImpl
 
 	@Override
 	public Observable<SelectorChoice> getChoices(final OrderPaymentInstrumentSelectorIdentifier selectorIdentifier) {
+		final String customerGuid = customerRepository.getCustomerGuid(resourceOperationContext.getUserIdentifier(),
+				resourceOperationContext.getSubject());
 		final String storeCode = selectorIdentifier.getOrder().getScope().getValue();
 		final String orderId = selectorIdentifier.getOrder().getOrderId().getValue();
 
-		return reactiveAdapter.fromService(() -> resourceOperationContext.getUserIdentifier())
+		return reactiveAdapter.fromService(() -> customerGuid)
 				.flatMapSingle(customerId -> customerRepository.getCustomer(customerId))
 				.flatMap(customer -> cartOrderRepository.findByGuid(storeCode, orderId)
 						.flatMapObservable(cartOrder -> cartOrderPaymentInstrumentRepository.findByCartOrder(cartOrder))

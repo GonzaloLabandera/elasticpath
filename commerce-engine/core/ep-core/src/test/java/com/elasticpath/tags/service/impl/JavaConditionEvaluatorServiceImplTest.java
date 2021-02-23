@@ -19,12 +19,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.elasticpath.cache.SimpleTimeoutCache;
-import com.elasticpath.service.caching.impl.FakeSynchronizedCacheSupportImpl;
+import com.elasticpath.cache.Cache;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.domain.ConditionalExpression;
 import com.elasticpath.tags.domain.LogicalOperator;
@@ -64,7 +64,6 @@ public class JavaConditionEvaluatorServiceImplTest {
 	private static final BigDecimal MINUS_TEN_BIGDECIMAL = new BigDecimal("-10.0");
 	private static final BigDecimal MINUS_NINE_BIGDECIMAL = new BigDecimal("-9.0");
 
-	
 	private static final int TEN = 10;
 	private static final int THREE = 3;
 	private static final int FIFTY = 50;
@@ -1065,11 +1064,15 @@ public class JavaConditionEvaluatorServiceImplTest {
 
 	@SuppressWarnings("unchecked")
 	private JavaConditionEvaluatorServiceImpl givenEvaluatorService() {
-		JavaConditionEvaluatorServiceImpl cachingEvaluator = new JavaConditionEvaluatorServiceImpl();
+		Cache<String, LogicalOperator> decomposedConditionCache = mock(Cache.class);
+		when(decomposedConditionCache.get(any(), any())).then(invocation -> {
+			String key = invocation.getArgument(0);
+			Function<String, LogicalOperator> fallbackLoader = invocation.getArgument(1);
+			return fallbackLoader.apply(key);
+		});
 
-		SimpleTimeoutCache<String, LogicalOperator> cache = mock(SimpleTimeoutCache.class);
-		when(cache.get(any())).thenReturn(null);
-		cachingEvaluator.setDecomposedConditionSynchronizedCacheSupport(new FakeSynchronizedCacheSupportImpl<>());
+		JavaConditionEvaluatorServiceImpl cachingEvaluator = new JavaConditionEvaluatorServiceImpl();
+		cachingEvaluator.setDecomposedConditionCache(decomposedConditionCache);
 
 		GroovyConditionDSLBuilderImpl conditionDSLBuilder = new GroovyConditionDSLBuilderImpl();
 		TagDefinitionReader tagDefinitionReader = mock(TagDefinitionReader.class);

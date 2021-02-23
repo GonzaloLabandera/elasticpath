@@ -65,7 +65,7 @@ public class CachingCatalogServiceImpl extends AbstractEpPersistenceServiceImpl 
 
 	@Override
 	public Catalog findByCode(final String code) throws EpServiceException {
-		return getCatalogByCodeCache().get(code, getCatalogByCodeCacheLoader());
+		return getCatalogByCodeCache().get(code, catalogByCodeCacheLoader::load);
 	}
 
 	@Override

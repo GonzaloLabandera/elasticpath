@@ -37,6 +37,7 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.views.order.OpenOrderEditorAction;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.service.order.OrderService;
 
@@ -80,7 +81,7 @@ public class CustomerDetailsOrderSection extends AbstractCmClientEditorPageSecti
 	public CustomerDetailsOrderSection(final FormPage formPage, final AbstractCmClientFormEditor editor) {
 		super(formPage, editor, ExpandableComposite.TITLE_BAR);
 		this.customer = (Customer) editor.getModel();
-		this.orders = ORDER_SERVICE.findOrderByCustomerGuid(this.customer.getGuid(), true);
+		findOrdersForCustomer();
 	}
 
 	@Override
@@ -259,13 +260,21 @@ public class CustomerDetailsOrderSection extends AbstractCmClientEditorPageSecti
 	@Override
 	public void widgetSelected(final SelectionEvent event) {
 		if (event.getSource() == this.refreshOrdersButton) {
-			this.orders = ORDER_SERVICE.findOrderByCustomerGuid(this.customer.getGuid(), true);
+			findOrdersForCustomer();
 			this.epTableViewer.setInput(this.orders);
 			this.epTableViewer.getSwtTableViewer().refresh();
 		} else if (event.getSource() == this.viewDetailsButton) {
 			final OpenOrderEditorAction editorAction = new OpenOrderEditorAction(this.epTableViewer.getSwtTableViewer(), PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite());
 			editorAction.run();
+		}
+	}
+
+	private void findOrdersForCustomer() {
+		if (customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			this.orders = ORDER_SERVICE.findOrderByAccountGuid(this.customer.getGuid(), true);
+		} else {
+			this.orders = ORDER_SERVICE.findOrderByCustomerGuid(this.customer.getGuid(), true);
 		}
 	}
 }

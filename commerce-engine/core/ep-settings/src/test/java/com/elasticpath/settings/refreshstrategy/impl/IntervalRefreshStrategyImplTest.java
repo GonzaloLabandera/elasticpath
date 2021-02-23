@@ -51,7 +51,7 @@ public class IntervalRefreshStrategyImplTest extends AbstractSettingRefreshStrat
 	@Before
 	@After
 	public void clearCaches() {
-		refreshStrategy.clearAllCaches();
+		IntervalRefreshStrategyImpl.clearCache();
 	}
 
 	@Override

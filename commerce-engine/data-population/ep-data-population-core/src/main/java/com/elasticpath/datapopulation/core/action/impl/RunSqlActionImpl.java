@@ -19,7 +19,6 @@ import com.elasticpath.datapopulation.core.service.SqlService;
  */
 public class RunSqlActionImpl extends AbstractDataSourceAccessAction {
 
-
 	@Autowired
 	private SqlService sqlService;
 
@@ -39,6 +38,23 @@ public class RunSqlActionImpl extends AbstractDataSourceAccessAction {
 		// initialize the sql service data source connections
 		DataSource dataSource = createDataSource(useConnection);
 		sqlService.executeSql(sqlStatement, sqlFile, dataSource, readFullScript);
+	}
+
+	@Override
+	public String getDescription(final DataPopulationContext context) {
+		Object wrapper = context.getActionConfiguration();
+		if (wrapper instanceof SqlActionConfiguration) {
+			SqlActionConfiguration sqlActionConfiguration = (SqlActionConfiguration) wrapper;
+			String sqlStatement = sqlActionConfiguration.getSqlStatement();
+			if (sqlStatement != null) {
+				return "Executing SQL statement '" + sqlStatement + "'";
+			}
+			File sqlFile = sqlActionConfiguration.getSqlFile();
+			if (sqlFile != null) {
+				return "Executing SQL file '" + sqlFile.getPath() + "'";
+			}
+		}
+		return null;
 	}
 
 }

@@ -8,7 +8,7 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.actions.CheckoutAction;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 
 /**
  * CheckoutService to update the related customer record when an order is processed.
@@ -20,7 +20,7 @@ public class UpdateCustomerCheckoutAction implements CheckoutAction {
 	private ShopperService shopperService;
 
 	@Override
-	public void execute(final CheckoutActionContext context) {
+	public void execute(final PreCaptureCheckoutActionContext context) {
 		if (context.isOrderExchange()) {
 			return;
 		}

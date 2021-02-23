@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CmClientResources;
@@ -190,8 +190,8 @@ public class EpLoginChangePasswordDialog extends AbstractEpDialog implements Mod
 
 	@Override
 	protected void okPressed() {
+		if (!passwordEncoder.matches(oldPasswordText.getText(), userToChange.getPassword())) {
 
-		if (!passwordEncoder.isPasswordValid(userToChange.getPassword(), oldPasswordText.getText(), null)) {
 			String oldPasswordIncorrect = CoreMessages.get().EpLoginChangePasswordDialog_CurrentPasswordIncorrect;
 			if (userToChange.isTemporaryPassword()) {
 				oldPasswordIncorrect = CoreMessages.get().EpLoginChangePasswordDialog_TemporaryPasswordIncorrect;

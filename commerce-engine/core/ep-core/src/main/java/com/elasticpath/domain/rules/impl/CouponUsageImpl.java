@@ -133,13 +133,13 @@ public class CouponUsageImpl extends AbstractEntityImpl implements CouponUsage {
 	@Override
 	@Basic
 	@Column(name = "ACTIVE_IN_CART", nullable = false)
-	public boolean isActiveInCart() {
+	public boolean isAutoApplyToCarts() {
 		return activeInCart;
 	}
 
 	@Override
-	public void setActiveInCart(final boolean activeInCart) {
-		this.activeInCart = activeInCart;
+	public void setAutoApplyToCarts(final boolean autoApplyToCarts) {
+		this.activeInCart = autoApplyToCarts;
 	}
 
 	@Override
@@ -214,7 +214,7 @@ public class CouponUsageImpl extends AbstractEntityImpl implements CouponUsage {
 	public void initialize() {
 		// don't call super or else setGuid will be called
 		// super.initialize();
-		setActiveInCart(true);
+		setAutoApplyToCarts(true);
 		setSuspended(false);
 		setCustomerEmailAddress(""); // not null!
 	}

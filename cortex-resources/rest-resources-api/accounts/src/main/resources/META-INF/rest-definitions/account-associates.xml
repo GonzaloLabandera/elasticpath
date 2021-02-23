@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<!--
+	  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+	  -->
+
+	<!-- This resource family definition should be used as a starting point -->
+	<family>
+		<name>accounts</name>
+
+		<uri-part>
+			<name>associate-id</name>
+			<description><![CDATA[The account associate ID.]]></description>
+			<string/>
+		</uri-part>
+
+		<!-- resource for a list of associates -->
+		<resource>
+			<name>associates</name>
+			<description><![CDATA[List of associates.]]></description>
+			<uri>{account}/associates</uri>
+			<list-of>associate</list-of>
+		</resource>
+
+		<!-- resource for an associate entity -->
+		<resource>
+			<name>associate</name>
+			<description><![CDATA[Resource for an associate.]]></description>
+			<uri>{associates}/{associate-id}</uri>
+			<entity>associate</entity>
+		</resource>
+
+		<!-- resource for an associate entity -->
+		<resource>
+			<name>associatedetails</name>
+			<description><![CDATA[Resource for details of associate.]]></description>
+			<uri>{associate}/details</uri>
+			<entity>associatedetails</entity>
+		</resource>
+
+		<resource>
+			<name>add-associate-form</name>
+			<description><![CDATA[The form for adding associates to an account by email.]]></description>
+			<uri>{associates}/form</uri>
+			<form>
+				<entity>add-associate-form</entity>
+				<action-rel>addassociateaction</action-rel>
+				<result>associate</result>
+			</form>
+		</resource>
+
+		<!-- Link associates to accounts -->
+		<relationship>
+			<name>associates-for-account</name>
+			<description><![CDATA[Retrieve associates for an account.]]></description>
+			<rel>associates</rel>
+			<rev>account</rev>
+			<from>account</from>
+			<to>associates</to>
+		</relationship>
+
+		<relationship>
+			<name>associate-to-associates</name>
+			<description><![CDATA[Link from associate to associates.]]></description>
+			<rel>associates</rel>
+			<from>associate</from>
+			<to>associates</to>
+		</relationship>
+
+		<relationship>
+			<name>associatedetails-from-associate</name>
+			<description><![CDATA[Link from associate to associate details.]]></description>
+			<rel>associatedetails</rel>
+			<rev>associate</rev>
+			<from>associate</from>
+			<to>associatedetails</to>
+		</relationship>
+
+		<relationship>
+			<name>add-account-associate-by-email-form-from-account-associates</name>
+			<description><![CDATA[Link to add account associate by email form from account associates.]]></description>
+			<rel>add-associate-form</rel>
+			<from>associates</from>
+			<to>add-associate-form</to>
+		</relationship>
+
+		<relationship>
+			<name>account-buyer-roles-from-add-account-associate-by-email-form</name>
+			<description><![CDATA[Link from add account associate by email form to the account's buyer roles.]]></description>
+			<rel>buyerroles</rel>
+			<from>add-associate-form</from>
+			<to>account-buyer-roles</to>
+		</relationship>
+
+
+		<!-- associate entity -->
+		<entity>
+			<name>associate</name>
+			<description><![CDATA[An account associate.]]></description>
+			<property>
+				<name>role</name>
+				<description><![CDATA[This Associate's role.]]></description>
+				<string/>
+			</property>
+			<entity-type>accounts.account.associate</entity-type>
+		</entity>
+
+		<!-- add associate form entity -->
+		<entity>
+			<name>add-associate-form</name>
+			<description><![CDATA[An account associate.]]></description>
+			<property>
+				<name>role</name>
+				<description><![CDATA[This Associate's role.]]></description>
+				<string/>
+			</property>
+			<property>
+				<name>email</name>
+				<description><![CDATA[Email by which associate is to be identified and added to account.]]></description>
+				<string/>
+			</property>
+			<entity-type>aaccount.add-associate-form</entity-type>
+		</entity>
+
+		<!-- associatedetails entity -->
+		<entity>
+			<name>associatedetails</name>
+			<description><![CDATA[Account associate details.]]></description>
+			<property>
+				<name>email</name>
+				<description><![CDATA[This Associate's email.]]></description>
+				<string/>
+			</property>
+			<property>
+				<name>first-name</name>
+				<description><![CDATA[This Associate's first name.]]></description>
+				<string/>
+			</property>
+			<property>
+				<name>last-name</name>
+				<description><![CDATA[This Associate's last name.]]></description>
+				<string/>
+			</property>
+			<entity-type>accounts.account.associatedetails</entity-type>
+		</entity>
+	</family>
+</definitions>

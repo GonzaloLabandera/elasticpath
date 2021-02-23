@@ -67,7 +67,6 @@ public class CartOrderServiceImplTest {
 		cartOrderService.setShoppingCartService(shoppingCartService);
 		cartOrderService.setCartOrderShippingInformationSanitizer(cartOrderShippingInformationSanitizer);
 		cartOrderService.setPersistenceEngine(persistenceEngine);
-
 	}
 
 	/**

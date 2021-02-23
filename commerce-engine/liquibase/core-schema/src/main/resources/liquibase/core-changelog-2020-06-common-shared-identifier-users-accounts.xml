@@ -43,6 +43,47 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="PB-8250 Eliminate duplicate for customers for the same story" author="elasticpath" context="migrate-data" dbms="mysql">
+		<createTable tableName="TSHARED_ID">
+			<column name="UIDPK" type="BIGINT"/>
+			<column name="SHARED_ID" type="VARCHAR(255)"/>
+		</createTable>
+		<sql>
+			INSERT INTO TSHARED_ID
+			SELECT UIDPK, concat(SHARED_ID, floor(RAND() * 100))
+			FROM TCUSTOMER
+			WHERE SHARED_ID IN (SELECT SHARED_ID FROM TCUSTOMER GROUP BY SHARED_ID, CUSTOMER_TYPE HAVING count(*) > 1);
+		</sql>
+		<sql>
+			UPDATE TCUSTOMER tc, TSHARED_ID ts
+			SET tc.SHARED_ID = ts.SHARED_ID
+			WHERE tc.UIDPK = ts.UIDPK
+		</sql>
+		<dropTable tableName="TSHARED_ID"/>
+	</changeSet>
+
+	<changeSet id="PB-8250 Eliminate duplicate for customers for the same story Oracle db" author="elasticpath" context="migrate-data" dbms="oracle">
+		<createTable tableName="TSHARED_ID">
+			<column name="UIDPK" type="BIGINT"/>
+			<column name="SHARED_ID" type="VARCHAR(255)"/>
+		</createTable>
+		<sql>
+			INSERT INTO TSHARED_ID
+			SELECT UIDPK, concat(SHARED_ID, floor(DBMS_RANDOM.VALUE(0, 100)))
+			FROM TCUSTOMER
+			WHERE SHARED_ID IN (SELECT SHARED_ID FROM TCUSTOMER GROUP BY SHARED_ID, CUSTOMER_TYPE HAVING count(*) > 1);
+		</sql>
+		<sql>
+			UPDATE TCUSTOMER tc
+			SET SHARED_ID = (SELECT ts.SHARED_ID
+			FROM TSHARED_ID ts
+			WHERE ts.UIDPK = tc.UIDPK)
+			WHERE EXISTS(
+			SELECT 1 FROM TSHARED_ID ts WHERE ts.UIDPK = tc.UIDPK);
+		</sql>
+		<dropTable tableName="TSHARED_ID"/>
+	</changeSet>
+
 	<changeSet id="PB-8250 Migrate Data to USERNAME" author="elasticpath" context="migrate-data">
 		<sql>
 			UPDATE TCUSTOMERAUTHENTICATION ta

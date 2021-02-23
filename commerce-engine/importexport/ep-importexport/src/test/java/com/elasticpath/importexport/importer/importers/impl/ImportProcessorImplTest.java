@@ -90,7 +90,7 @@ public class ImportProcessorImplTest {
 		given(customerImporter.executeImport(customerDTO2)).willReturn(true);
 		willReturn(DTO_CLASS).given(customerImporter).getDtoClass();
 
-		willReturn(customerImporter).given(importerFactory).createImporter(JOB_TYPE, importContext, savingManager);
+		willReturn(customerImporter).given(importerFactory).createImporter(JOB_TYPE.getTagName(), importContext, savingManager);
 		given(persistenceEngine.getSharedPersistenceSession()).willReturn(persistenceSession);
 		given(persistenceSession.beginTransaction()).willReturn(transaction);
 	}

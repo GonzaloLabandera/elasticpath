@@ -19,6 +19,17 @@ Feature: Retrieve Total Of Cart
       | Sleepy Hallow | 12.99  | CAD      | $12.99         |
 
 
+  Scenario Outline: Can Retrieve Total Of Cart when Item in Cart has no Price
+    Given I add item <ITEM_NAME> to the cart
+    And I append to the overwritten personalization header the key CURRENCY and value EUR
+    And I retrieve the cart total
+    Then the cost fields has amount: <AMOUNT>, currency: <CURRENCY> and display: <DISPLAY_AMOUNT>
+
+    Examples:
+      | ITEM_NAME     | AMOUNT | CURRENCY | DISPLAY_AMOUNT |
+      | Sleepy Hallow | 0.00   | EUR      | €0.00          |
+
+
   Scenario Outline: Verify Total Of Cart with Multiple Lineitems
     Given I add item <ITEM_NAME_1> to the cart
     And I add item <ITEM_NAME_2> to the cart

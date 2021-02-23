@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
 
 import com.elasticpath.cache.Cache;
+import com.elasticpath.cache.CacheResult;
+import com.elasticpath.cache.impl.AbstractCacheAdapter;
 import com.elasticpath.money.Money;
 import com.elasticpath.shipping.connectivity.dto.PricedShippableItem;
 import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
@@ -421,13 +424,17 @@ public class CachingShippingCalculationServiceImplTest {
 		return new ShippingCalculationResultCacheKeyBuilderImpl();
 	}
 
-	private static class MockShippingCalculationResultCache implements Cache<ShippingCalculationResultCacheKey, ShippingCalculationResult> {
+	private static class MockShippingCalculationResultCache extends AbstractCacheAdapter<ShippingCalculationResultCacheKey, ShippingCalculationResult>
+			implements Cache<ShippingCalculationResultCacheKey, ShippingCalculationResult> {
 
 		private final Map<ShippingCalculationResultCacheKey, ShippingCalculationResult> cacheMap = new HashMap<>();
 
 		@Override
-		public ShippingCalculationResult get(final ShippingCalculationResultCacheKey key) {
-			return cacheMap.get(key);
+		public CacheResult<ShippingCalculationResult> get(final ShippingCalculationResultCacheKey key) {
+			final CacheResult<ShippingCalculationResult> value = Objects.isNull(cacheMap.get(key))
+					? CacheResult.notPresent()
+					: CacheResult.create(cacheMap.get(key));
+			return value;
 		}
 
 		@Override

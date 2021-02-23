@@ -137,6 +137,7 @@ public class OrderPaymentInstrumentSelectorRepositoryTest {
 		when(cartOrderPaymentInstrumentRepository.saveOrUpdate(newCartOrderPaymentInstrument)).thenReturn(Single.just(newCartOrderPaymentInstrument));
 
 		when(customerRepository.getCustomer(CUSTOMER_GUID)).thenReturn(Single.just(customer));
+		when(customerRepository.getCustomerGuid(CUSTOMER_GUID, subject)).thenReturn(CUSTOMER_GUID);
 		when(filteredPaymentInstrumentService.findCustomerPaymentInstrumentsForCustomerAndStore(customer, STORE_CODE))
 				.thenReturn(ImmutableList.of(existingCustomerPaymentInstrument));
 

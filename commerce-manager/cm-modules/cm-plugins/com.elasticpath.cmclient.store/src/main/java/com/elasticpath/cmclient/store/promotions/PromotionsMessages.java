@@ -267,6 +267,8 @@ public final class PromotionsMessages extends BaseMessages {
 	public String CreatePromotionWizard_Page_Step2_Title;
 	public String CreatePromotionWizard_Page_Step2_Description;
 
+	public String CreateCatalogPromotionWizard_Page_Step2_Title;
+
 	// Promotion step3 page
 	public String CreatePromotionWizard_Page_Step3_Title;
 	public String CreatePromotionWizard_Page_Step3_Description;

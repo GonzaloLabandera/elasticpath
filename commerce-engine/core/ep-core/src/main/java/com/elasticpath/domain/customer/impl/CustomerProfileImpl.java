@@ -15,6 +15,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.exception.EpBindException;
 import com.elasticpath.commons.util.impl.LocaleUtils;
@@ -103,22 +104,26 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 	}
 
 	private void setStringAttributeValue(final Attribute attribute, final Locale locale,
-										 final String stringValue, final Date creationDate) throws EpBindException {
-		CustomerProfileValue attributeValue = getAttributeValueWithoutFallBack(attribute.getKey(), locale);
-		if (attributeValue != null) {
-			String attributeStringValue = attributeValue.getStringValue();
-			if (!Objects.equals(stringValue, attributeStringValue)) {
-				attributeValue.setStringValue(stringValue);
+										 final String newValue, final Date creationDate) throws EpBindException {
+		CustomerProfileValue attributeCurrentValue = getAttributeValueWithoutFallBack(attribute.getKey(), locale);
+		if (attributeCurrentValue != null) {
+			if (!isEqualAttribute(newValue, attributeCurrentValue.getStringValue())) {
+				attributeCurrentValue.setStringValue(newValue);
 			}
 			return;
 		}
 
-		attributeValue = createAttributeValue(attribute);
-		attributeValue.setStringValue(stringValue);
-		attributeValue.setCreationDate(creationDate);
+		attributeCurrentValue = createAttributeValue(attribute);
+		attributeCurrentValue.setStringValue(newValue);
+		attributeCurrentValue.setCreationDate(creationDate);
 		final String localizedAttributeKey = getLocalizedAttributeKey(attribute.getKey(), locale);
-		attributeValue.setLocalizedAttributeKey(localizedAttributeKey);
-		getProfileValueMap().put(localizedAttributeKey, attributeValue);
+		attributeCurrentValue.setLocalizedAttributeKey(localizedAttributeKey);
+		getProfileValueMap().put(localizedAttributeKey, attributeCurrentValue);
+	}
+
+	private boolean isEqualAttribute(final String newValue, final String currentValue) {
+		return (StringUtils.isEmpty(newValue) && StringUtils.isEmpty(currentValue))
+				|| Objects.equals(newValue, currentValue);
 	}
 
 	@Override

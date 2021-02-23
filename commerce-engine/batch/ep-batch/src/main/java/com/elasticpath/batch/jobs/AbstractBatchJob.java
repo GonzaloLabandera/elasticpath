@@ -146,10 +146,11 @@ public abstract class AbstractBatchJob<ENT> {
 	}
 
 	private void printDebugInfo(final long startTime) {
-		LOG.info("{} quartz job completed in {}ms\nProcessed {} records\nNumber of successfully processed records: {}\nNumber of skipped records: "
-						+ "{}\nNumber of failed records: {}",
-				getJobName(), (System.currentTimeMillis() - startTime), numOfProcessedRecords, numOfSuccessfullyProcessedRecords,
-				numOfSkippedRecords, numOfFailedRecords);
+		if (numOfProcessedRecords > 0) {
+			LOG.info("{} quartz job completed in {}ms: processed {}, successful {}, skipped {}, failed {}",
+					getJobName(), (System.currentTimeMillis() - startTime), numOfProcessedRecords, numOfSuccessfullyProcessedRecords,
+					numOfSkippedRecords, numOfFailedRecords);
+		}
 	}
 
 	private void initCounters() {

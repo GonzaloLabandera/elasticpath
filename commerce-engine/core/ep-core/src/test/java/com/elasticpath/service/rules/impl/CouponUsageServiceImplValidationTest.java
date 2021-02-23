@@ -51,7 +51,7 @@ public class CouponUsageServiceImplValidationTest {
 
 	@Test
 	public void testWhenCouponIsNullSpecIsNotSatisfied() {
-		boolean result = couponUsageService.validateCouponRuleAndUsage(null, STORE_CODE, EMAIL).isSuccess();
+		boolean result = couponUsageService.validateCouponRuleAndUsage(null, STORE_CODE, EMAIL, null).isSuccess();
 
 		assertFalse("Specification should not be satisfied by null coupon.", result);
 	}
@@ -60,7 +60,7 @@ public class CouponUsageServiceImplValidationTest {
 	public void testWhenCouponCodeIsEmptySpecIsNotSatisfied() {
 		setUpCouponCodeForCoupon(StringUtils.EMPTY);
 
-		boolean result = couponUsageService.validateCouponRuleAndUsage(coupon, STORE_CODE, EMAIL).isSuccess();
+		boolean result = couponUsageService.validateCouponRuleAndUsage(coupon, STORE_CODE, EMAIL, null).isSuccess();
 
 		assertFalse("Specification should not be satisfied by null coupon code.", result);
 	}
@@ -70,7 +70,7 @@ public class CouponUsageServiceImplValidationTest {
 		setUpCouponCodeForCoupon(COUPON_CODE);
 		setUpRuleToBeValid(RuleValidationResultEnum.ERROR_UNSPECIFIED);
 
-		boolean result = couponUsageService.validateCouponRuleAndUsage(coupon, STORE_CODE, EMAIL).isSuccess();
+		boolean result = couponUsageService.validateCouponRuleAndUsage(coupon, STORE_CODE, EMAIL, null).isSuccess();
 
 		assertFalse("Specification should not be satisfied by invalid rule.", result);
 	}
@@ -81,7 +81,7 @@ public class CouponUsageServiceImplValidationTest {
 		setUpRuleToBeValid(RuleValidationResultEnum.SUCCESS);
 		setUpCouponUsageToBeValidForRule(false);
 
-		boolean result = couponUsageService.validateCouponRuleAndUsage(coupon, STORE_CODE, EMAIL).isSuccess();
+		boolean result = couponUsageService.validateCouponRuleAndUsage(coupon, STORE_CODE, EMAIL, null).isSuccess();
 
 		assertFalse("Specification should not be satisfied by invalid coupon usage.", result);
 	}
@@ -92,7 +92,7 @@ public class CouponUsageServiceImplValidationTest {
 		setUpRuleToBeValid(RuleValidationResultEnum.SUCCESS);
 		setUpCouponUsageToBeValidForRule(true);
 
-		boolean result = couponUsageService.validateCouponRuleAndUsage(coupon, STORE_CODE, EMAIL).isSuccess();
+		boolean result = couponUsageService.validateCouponRuleAndUsage(coupon, STORE_CODE, EMAIL, null).isSuccess();
 
 		assertTrue("Specification should be satisfied by valid potential coupon usage.", result);
 	}

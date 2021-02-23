@@ -697,6 +697,11 @@ class PaymentInstrumentsSteps {
 		checkPaymentInstrumentName(name)
 	}
 
+	@When('^I access (.+) payment instrument from account$')
+	static def accessAccountPaymentInstrumentByName(String name) {
+		checkPaymentInstrumentName(name)
+	}
+
 	@When('^I access payment instrument with default name from purchase$')
 	static def accessPurchasePaymentInstrumentByDefaultName() {
 		Purchase.purchasepaymentinstruments()

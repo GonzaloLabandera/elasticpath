@@ -14,7 +14,7 @@ import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.totals.CartLineItemTotalIdentifier;
 import com.elasticpath.rest.definition.totals.TotalEntity;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.TotalsCalculator;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.CartTotalsCalculator;
 
 /**
  * Cart Line Item Total Entity Repository.
@@ -26,7 +26,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.Tota
 public class CartLineItemTotalEntityRepositoryImpl<E extends TotalEntity, I extends CartLineItemTotalIdentifier>
 		implements Repository<TotalEntity, CartLineItemTotalIdentifier> {
 
-	private TotalsCalculator totalsCalculator;
+	private CartTotalsCalculator cartTotalsCalculator;
 	private ConversionService conversionService;
 
 	@Override
@@ -38,7 +38,7 @@ public class CartLineItemTotalEntityRepositoryImpl<E extends TotalEntity, I exte
 		String cartId = cartIdentifier.getCartId().getValue();
 		String scope = cartIdentifier.getCarts().getScope().getValue();
 
-		return totalsCalculator.calculateTotalForLineItem(scope, cartId, lineItemId)
+		return cartTotalsCalculator.calculateTotalForShoppingItem(scope, cartId, lineItemId)
 				.map(this::convertMoneyToTotalEntity);
 	}
 
@@ -53,8 +53,8 @@ public class CartLineItemTotalEntityRepositoryImpl<E extends TotalEntity, I exte
 	}
 
 	@Reference
-	public void setTotalsCalculator(final TotalsCalculator totalsCalculator) {
-		this.totalsCalculator = totalsCalculator;
+	public void setCartTotalsCalculator(final CartTotalsCalculator cartTotalsCalculator) {
+		this.cartTotalsCalculator = cartTotalsCalculator;
 	}
 
 	@Reference

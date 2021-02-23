@@ -15,7 +15,7 @@ public class CouponUsageAdapter extends AbstractDomainAdapterImpl<CouponUsage, C
 
 	@Override
 	public void populateDTO(final CouponUsage source, final CouponUsageDTO target) {
-		target.setActiveInCart(source.isActiveInCart());
+		target.setActiveInCart(source.isAutoApplyToCarts());
 		target.setCouponCode(source.getCoupon().getCouponCode());
 		target.setEmail(source.getCustomerEmailAddress());
 	}
@@ -23,7 +23,7 @@ public class CouponUsageAdapter extends AbstractDomainAdapterImpl<CouponUsage, C
 	@Override
 	public void populateDomain(final CouponUsageDTO source, final CouponUsage target) {
 		target.setCustomerEmailAddress(source.getEmail());
-		target.setActiveInCart(source.isActiveInCart());
+		target.setAutoApplyToCarts(source.isActiveInCart());
 	}
 
 	/**

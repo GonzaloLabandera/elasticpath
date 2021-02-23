@@ -42,7 +42,6 @@ public class PromotionsDefinition {
 	private static String cartCouponType = "coupon type";
 	private final WebDriver driver;
 
-
 	/**
 	 * Constructor.
 	 */
@@ -98,6 +97,13 @@ public class PromotionsDefinition {
 		createCatalogPromotionWizard.enterPromotionName(catalogPromoName);
 		createCatalogPromotionWizard.enterPromotionDisplayName(catalogPromoMap.get("display name") + DASH + uuidString);
 		createCatalogPromotionWizard.enterEnableDateTime("Mar 17, 2017 2:39 PM");
+		createCatalogPromotionWizard.clickNextInDialog();
+		if (catalogPromoMap.get("registered shopper condition") != null) {
+			createCatalogPromotionWizard.clickShopperConditionsRadioButton();
+			createCatalogPromotionWizard.createNewStatementBlock();
+			createCatalogPromotionWizard.addNewStatement();
+			createCatalogPromotionWizard.selectStatementConditions("Customer Profile", "are registered customers", "matching (case sensitive)", "True");
+		}
 		createCatalogPromotionWizard.clickNextInDialog();
 		createCatalogPromotionWizard.openConditionMenu();
 		createCatalogPromotionWizard.selectConditionMenuItem(catalogPromoMap.get("condition menu item"));

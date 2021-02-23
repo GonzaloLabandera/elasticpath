@@ -5,6 +5,7 @@ package com.elasticpath.cmclient.catalog.editors.sku;
 
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.core.databinding.DataBindingContext;
 
 import com.elasticpath.cmclient.core.ui.framework.ControlModificationListener;
 import com.elasticpath.cmclient.core.ui.framework.IEpViewPart;
@@ -35,5 +36,12 @@ public interface IEpSkuOverviewViewPart extends IEpViewPart, SelectionListener, 
 	 * @param validateSku should the validation begin
 	 */
 	void setValidateSku(boolean validateSku);
-	
+
+	/**
+	 * Binds the specific controls to the binding context for wizard dialog.
+	 *
+	 * @param bindingContext the context
+	 */
+	void bindWizardDialogControls(DataBindingContext bindingContext);
+
 }

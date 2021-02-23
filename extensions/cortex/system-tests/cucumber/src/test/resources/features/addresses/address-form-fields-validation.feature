@@ -10,17 +10,13 @@ Feature: Addresses Form Fields Validations
     And I create address with Country <COUNTRY>, Extended-Address <EXTENDED_ADDRESS>, Locality <LOCALITY>, Organization <ORGANIZATION>, Phone-Number <PHONE_NUMBER>, Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
     Then the HTTP status is bad request
     And Structured error message contains:
-      | given-name must not be blank                  |
       | locality must not be blank                    |
       | street-address must not be blank              |
       | country-name size must be between 2 and 2     |
       | postal-code size must be between 1 and 50     |
       | locality size must be between 1 and 200       |
-      | family-name must not be blank                 |
-      | family-name size must be between 1 and 100    |
       | postal-code must not be blank                 |
       | country-name must not be blank                |
-      | given-name size must be between 1 and 100     |
       | street-address size must be between 1 and 200 |
 
     Examples:
@@ -54,12 +50,7 @@ Feature: Addresses Form Fields Validations
   Scenario Outline: Address field validation - missing name block
     When I get address form
     And I create address with Country <COUNTRY>, Extended-Address <EXTENDED_ADDRESS>, Locality <LOCALITY>, Organization <ORGANIZATION>, Phone-Number <PHONE_NUMBER>, Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
-    Then the HTTP status is bad request
-    And Structured error message contains:
-      | family-name must not be blank              |
-      | family-name size must be between 1 and 100 |
-      | given-name must not be blank               |
-      | given-name size must be between 1 and 100  |
+    Then the HTTP status is OK, created
 
     Examples:
       | COUNTRY | EXTENDED_ADDRESS | LOCALITY  | ORGANIZATION | PHONE_NUMBER | POSTAL_CODE | REGION | STREET_ADDRESS   | FAMILY_NAME | GIVEN_NAME |
@@ -67,7 +58,7 @@ Feature: Addresses Form Fields Validations
 
   Scenario Outline: Address field validation - invalid address key
     When I get address form
-    And I create address with invalid address key with Country <COUNTRY>, Locality <LOCALITY>, Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
+    And I create address with invalid address key with Country <COUNTRY>, Locality <LOCALITY>, Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Organization <ORGANIZATION>, Phone-Number <PHONE_NUMBER>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
     Then the HTTP status is bad request
     And Structured error message contains:
       | postal-code may not be null    |
@@ -82,10 +73,7 @@ Feature: Addresses Form Fields Validations
   Scenario Outline: Address field validation - invalid name key
     When I get address form
     And I create address with invalid name key with Country <COUNTRY>, Locality <LOCALITY>, Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
-    Then the HTTP status is bad request
-    And Structured error message contains:
-      | given-name may not be null  |
-      | family-name may not be null |
+    Then the HTTP status is OK, created
 
     Examples:
       | COUNTRY | LOCALITY  | POSTAL_CODE | REGION | STREET_ADDRESS   | FAMILY_NAME | GIVEN_NAME |

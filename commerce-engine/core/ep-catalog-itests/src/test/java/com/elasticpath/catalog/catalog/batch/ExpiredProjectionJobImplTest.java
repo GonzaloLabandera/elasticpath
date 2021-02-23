@@ -4,7 +4,6 @@
 package com.elasticpath.catalog.catalog.batch;
 
 
-import static com.elasticpath.catalog.catalog.batch.ExpiredProjectionJobImplTest.JMS_BROKER_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
@@ -19,15 +18,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import com.elasticpath.catalog.plugin.entity.ProjectionEntity;
 import com.elasticpath.catalog.plugin.entity.ProjectionId;
 import com.elasticpath.catalog.plugin.repository.CatalogProjectionRepository;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.integration.DirtiesDatabase;
-import com.elasticpath.test.jta.JmsBrokerConfigurator;
-import com.elasticpath.test.jta.XaTransactionTestSupport;
 import com.elasticpath.test.util.Utils;
 
-@JmsBrokerConfigurator(url = JMS_BROKER_URL)
 @DirtiesDatabase
-public class ExpiredProjectionJobImplTest extends XaTransactionTestSupport {
-	public static final String JMS_BROKER_URL = "tcp://localhost:61627";
+public class ExpiredProjectionJobImplTest extends DbTestCase {
 	private static final String HASH_CODE = "hash";
 	private static final String OPTION = "option";
 	private static final int PAST_TIME = 60 * 1000;

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-search-master-customer-indexing.xml">
+
+
+	<changeSet id="2020-09-replace-composite-index-for-simple-index-for-customer-on-tcustomerprofilevalue" author="elasticpath">
+		<validCheckSum>7:e9ca4f105c6bce4b5e8a7eb61b543584</validCheckSum>
+
+		<comment>
+			[SUP-573] Create a index for CUSTOMER_UID on TCUSTOMERPROFILEVALUE and delete previous composite index
+		</comment>
+
+		<dropForeignKeyConstraint baseTableName="TCUSTOMERPROFILEVALUE" constraintName="FK_PROFILE_CUSTOMER"/>
+
+		<dropIndex tableName="TCUSTOMERPROFILEVALUE" indexName="I_CPV_CUID_ATTKEY" />
+
+		<addForeignKeyConstraint constraintName="FK_PROFILE_CUSTOMER" 			onDelete="CASCADE"
+								 baseTableName="TCUSTOMERPROFILEVALUE" 	referencedTableName="TCUSTOMER"
+								 baseColumnNames="CUSTOMER_UID" 		referencedColumnNames="UIDPK" />
+
+		<createIndex tableName="TCUSTOMERPROFILEVALUE" indexName="I_CPV_CUID">
+			<column name="CUSTOMER_UID"/>
+		</createIndex>
+	</changeSet>
+
+</databaseChangeLog>

@@ -3,6 +3,9 @@
  */
 package com.elasticpath.rest.relos.rs.authentication.epcommerce.transformer.impl;
 
+import javax.json.Json;
+
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 
 import com.elasticpath.domain.customer.Customer;
@@ -27,8 +30,26 @@ public class CustomerTransformerImpl implements CustomerTransformer {
 
 		user.setRequestedScope(customer.getStoreCode());
 		user.setUsername(customer.getUserId());
-		user.setPassword(customer.getCustomerAuthentication().getPassword());
-		user.setSalt(customer.getCustomerAuthentication().getSalt());
+
+		/* 	We need a way for the EpUserPasswordEncoder to be aware of both the password and salt so it can hash using the old SHA256 encoding
+			approach. However, Spring security only passes a single field for the password hash to the Bcrypt encoder (because the salt is
+			included in the Bcrypt hash). Therefore, we encode the password hash and salt in a JSON object which is decoded within
+			EpUserPasswordEncoder (if the salt is present). This also allows us to differentiate between a password that is hashed with
+			Bcrypt(password) vs Bcrypt(SHA256(password)).
+		 */
+		String salt = customer.getCustomerAuthentication().getSalt();
+		if (StringUtils.isEmpty(salt)) {
+			user.setPassword(customer.getCustomerAuthentication().getPassword());
+		} else {
+			String passwordWithSalt = Json.createObjectBuilder()
+					.add("password", customer.getCustomerAuthentication().getPassword())
+					.add("salt", customer.getCustomerAuthentication().getSalt())
+					.build()
+					.toString();
+
+			user.setPassword(passwordWithSalt);
+		}
+
 		user.setPrincipals(PrincipalsUtil.createRolePrincipals(customer.getCustomerRoleMapper().getAllRoles()));
 		setUserStatesFromCustomerStatus(user, customer.getStatus());
 		user.setUserId(customer.getGuid());

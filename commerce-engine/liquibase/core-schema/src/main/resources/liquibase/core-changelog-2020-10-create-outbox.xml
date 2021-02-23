@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-10-create-outbox.xml">
+
+	<changeSet id="create-outbox" author="elasticpath" >
+
+		<createTable tableName="TOUTBOXMESSAGE">
+			<column name="UIDPK" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="CREATED_DATE" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CAMEL_URI" type="varchar(1024)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="MESSAGE_BODY" type="clob">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<createIndex tableName="TOUTBOXMESSAGE" indexName="I_CMO_CREATED_DATE" unique="false">
+			<column name="CREATED_DATE" />
+		</createIndex>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TOUTBOXMESSAGE"/>
+			<column name="LAST_VALUE" valueNumeric="200000"/>
+		</insert>
+
+	</changeSet>
+
+	<changeSet id="define-outbox-settings" author="elasticpath">
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="221" />
+			<column name="PATH" value="COMMERCE/SYSTEM/OUTBOXRELAY/batchSize" />
+			<column name="VALUE_TYPE" value="Integer" />
+			<column name="MAX_OVERRIDE_VALUES" value="1" />
+			<column name="DEFAULT_VALUE" value="100" />
+			<column name="DESCRIPTION" value="The maximum number of outbox messages to relay to ActiveMQ on each quartz job execution." />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1736"/>
+			<column name="SETTING_DEFINITION_UID" valueNumeric="221"/>
+			<column name="METADATA_KEY" value="refreshStrategy"/>
+			<column name="VALUE" value="interval:timeout=COMMERCE/Cache/Cache_1"/>
+		</insert>
+	</changeSet>
+</databaseChangeLog>

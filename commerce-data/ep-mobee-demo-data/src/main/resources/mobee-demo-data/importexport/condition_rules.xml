@@ -850,6 +850,46 @@
 		</actions>
 	</rule>
 	<rule>
+		<code>500b9a9e-0c85-4662-aa4b-950cbd325d1a</code>
+		<conditions>
+			<and>
+				<condition>
+					<kind>Condition</kind>
+					<type>limitedUseCouponCodeCondition</type>
+					<parameters/>
+					<exceptions/>
+				</condition>
+				<and>
+					<condition>
+						<kind>Condition</kind>
+						<type>productInCartCondition</type>
+						<parameters>
+							<parameter>
+								<key>numItemsQuantifier</key>
+								<value>AT_LEAST</value>
+							</parameter>
+							<parameter>
+								<key>productCode</key>
+								<value>productWith10PercentOffCoupon</value>
+							</parameter>
+							<parameter>
+								<key>numItems</key>
+								<value>1</value>
+							</parameter>
+						</parameters>
+						<exceptions/>
+					</condition>
+				</and>
+			</and>
+		</conditions>
+		<actions>
+			<action>
+				<type>ShoppingCartPromotion</type>
+				<code>500b9a9e-0c85-4662-aa4b-950cbd325d1a</code>
+			</action>
+		</actions>
+	</rule>
+	<rule>
 		<code>8f6fe5ad-4f82-4562-9b41-393caed77707</code>
 		<conditions>
 			<and>
@@ -1199,6 +1239,44 @@
 			<action>
 				<type>ShoppingCartPromotion</type>
 				<code>c8565b32-0f43-4832-b8be-d5d1da456bac</code>
+			</action>
+		</actions>
+	</rule>
+	<rule>
+		<code>923e41f4-6041-4a4b-abff-ca06b9b5b169</code>
+		<conditions>
+			<and>
+				<or>
+					<condition>
+						<kind>Condition</kind>
+						<type>productCondition</type>
+						<parameters>
+							<parameter>
+								<key>productCode</key>
+								<value>triggerprodforregisteredcustomers</value>
+							</parameter>
+						</parameters>
+						<exceptions/>
+					</condition>
+					<condition>
+						<kind>Condition</kind>
+						<type>productCondition</type>
+						<parameters>
+							<parameter>
+								<key>productCode</key>
+								<value>incrediblehulk</value>
+							</parameter>
+						</parameters>
+						<exceptions/>
+					</condition>
+
+				</or>
+			</and>
+		</conditions>
+		<actions>
+			<action>
+				<type>CatalogPromotion</type>
+				<code>923e41f4-6041-4a4b-abff-ca06b9b5b169</code>
 			</action>
 		</actions>
 	</rule>

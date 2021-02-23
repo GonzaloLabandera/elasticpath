@@ -3,7 +3,6 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.customer;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
@@ -41,6 +40,7 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.editors.customer.dialogs.CustomerAddEditAddressDialog;
 import com.elasticpath.cmclient.fulfillment.editors.customer.dialogs.CustomerRemoveAddressDialog;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
+import com.elasticpath.cmclient.fulfillment.util.AddressUtil;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 
@@ -79,10 +79,6 @@ public class CustomerDetailsAddressMainSection extends AbstractCmClientEditorPag
 	private EpState authorization;
 
 	private boolean authorized;
-
-	private static final String BLANK = " "; //$NON-NLS-1$
-
-	private static final String COMMASEPERATOR = ", "; //$NON-NLS-1$
 
 	private static final String NULLSTRING = ""; //$NON-NLS-1$
 
@@ -318,23 +314,9 @@ public class CustomerDetailsAddressMainSection extends AbstractCmClientEditorPag
 
 			switch (columnIndex) {
 			case 0:
-				return address.getFirstName() + BLANK + address.getLastName();
+				return AddressUtil.getFullCustomerName(address);
 			case 1:
-				final StringBuilder builder = new StringBuilder();
-				builder.append(address.getStreet1());
-				if (address.getStreet2() != null && !StringUtils.isBlank(address.getStreet2())) {
-					builder.append(BLANK);
-					builder.append(address.getStreet2());
-				}
-				builder.append(COMMASEPERATOR);
-				builder.append(address.getCity());
-				if (address.getSubCountry() != null && !StringUtils.isBlank(address.getSubCountry())) {
-					builder.append(COMMASEPERATOR);
-					builder.append(address.getSubCountry());
-				}
-				builder.append(COMMASEPERATOR);
-				builder.append(address.getZipOrPostalCode());
-				return builder.toString();
+				return AddressUtil.formatAddress(address, false);
 			case 2:
 				return address.getPhoneNumber();
 			default:

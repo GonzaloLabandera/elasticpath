@@ -110,22 +110,6 @@ public class UtilityImplTest {
 		assertTrue(utility.isValidZipPostalCode("aaa BBB112"));
 	}
 
-	/**
-	 * Test method for 'com.elasticpath.commons.util.impl.UtilityImpl.isValidZipPostalCode(String)'.
-	 */
-	@Test
-	public void testIsGuidStr() {
-		assertTrue(utility.isValidGuidStr("aaaBBB112"));
-
-		assertFalse(utility.isValidGuidStr(null));
-		assertFalse(utility.isValidGuidStr(""));
-		assertFalse(utility.isValidGuidStr("/aaaBBB112"));
-		assertFalse(utility.isValidGuidStr("/aaaBBB112/"));
-		assertFalse(utility.isValidGuidStr(" aaaBBB112"));
-		assertFalse(utility.isValidGuidStr("aaaBBB112 "));
-		assertTrue(utility.isValidGuidStr("aaa-BBB112"));
-	}
-
 	@Test
 	public void verifyGetDefaultLocalizedDateFormatUsesDateFormatProvider() {
 		final String dateFormat = "EEE MMM dd HH:mm:ss yyyy";

@@ -71,8 +71,16 @@ public class ProductBundleSkuOverviewViewPart extends AbstractProductSkuOverview
 
 	@Override
 	public void bindControls(final DataBindingContext bindingContext) {
+		// Because this instance is already the Dialog
+		bindWizardDialogControls(bindingContext);
+	}
+
+	@Override
+	public void bindWizardDialogControls(final DataBindingContext bindingContext) {
 		final EpControlBindingProvider provider = EpControlBindingProvider.getInstance();
-		final IValidator compoundSkuValidator = new CompoundValidator(new IValidator[]{EpValidatorFactory.SKU_CODE, getSkuValidator()});
+
+		final IValidator compoundSkuValidator = new CompoundValidator(new IValidator[]{ EpValidatorFactory.SKU_CODE, getSkuValidator() });
+
 		EpValueBinding binding = provider.bind(bindingContext, skuCodeText, compoundSkuValidator, null,
 				new SkuValidationUpdateValueStrategy(getProductSku()), true);
 		binding.getBinding().validateTargetToModel();

@@ -3,7 +3,6 @@
  */
 package liquibase.ext.elasticpath;
 
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,17 +27,35 @@ public class PopulateCustomerType implements CustomTaskChange {
 	private static final Logger LOG = LogFactory.getInstance().getLog();
 
 	private static final int DEFAULT_BATCH_SIZE = 1000;
-	private static final int PARAM_SIZE = 10;
 
-	private static final String SELECT_ALL_ANONYMOUS_USERS = "SELECT CUSTOMER_UID FROM TCUSTOMERPROFILEVALUE "
-			+ "WHERE LOCALIZED_ATTRIBUTE_KEY='CP_ANONYMOUS_CUST' AND BOOLEAN_VALUE=1";
+	protected static final String SELECT_ANONYMOUS_CUSTOMERS =
+			" SELECT CUSTOMER_UID "
+			+ "FROM TCUSTOMER TC "
+			+ "INNER JOIN TCUSTOMERPROFILEVALUE TCP ON TC.UIDPK = TCP.CUSTOMER_UID "
+			+ "AND TC.CUSTOMER_TYPE IS NULL "
+			+ "AND TCP.LOCALIZED_ATTRIBUTE_KEY='CP_ANONYMOUS_CUST' "
+			+ "AND TCP.BOOLEAN_VALUE=1";
 
-	private static final String SELECT_ALL_REGISTERED_USERS = "SELECT CUSTOMER_UID FROM TCUSTOMERPROFILEVALUE "
-			+ "WHERE LOCALIZED_ATTRIBUTE_KEY='CP_ANONYMOUS_CUST' AND BOOLEAN_VALUE=0";
+	protected static final String SELECT_REGISTERED_CUSTOMERS =
+			" SELECT CUSTOMER_UID "
+			+ "FROM TCUSTOMER TC "
+			+ "INNER JOIN TCUSTOMERPROFILEVALUE TCP ON TC.UIDPK = TCP.CUSTOMER_UID "
+			+ "AND TC.CUSTOMER_TYPE IS NULL "
+			+ "AND TCP.LOCALIZED_ATTRIBUTE_KEY='CP_ANONYMOUS_CUST' "
+			+ "AND TCP.BOOLEAN_VALUE=0";
+
+	protected static final String UPDATE_TO_SINGLE_SESSION_USER = "UPDATE TCUSTOMER SET CUSTOMER_TYPE='SINGLE_SESSION_USER' WHERE UIDPK = ?";
+	protected static final String UPDATE_TO_REGISTERED_USER = "UPDATE TCUSTOMER SET CUSTOMER_TYPE='REGISTERED_USER' WHERE UIDPK = ?";
+
+	private int batchSize;
 
 
-	private static final String UPDATE_TO_SINGLE_SESSION_USER = "UPDATE TCUSTOMER SET CUSTOMER_TYPE='SINGLE_SESSION_USER' WHERE UIDPK IN  (%s)";
-	private static final String UPDATE_TO_REGISTERED_USER = "UPDATE TCUSTOMER SET CUSTOMER_TYPE='REGISTERED_USER' WHERE UIDPK IN  (%s)";
+	/**
+	 * Constructor
+	 */
+	public PopulateCustomerType() {
+		batchSize =	DEFAULT_BATCH_SIZE;
+	}
 
 	@Override
 	public void execute(Database database) throws CustomChangeException {
@@ -52,62 +69,51 @@ public class PopulateCustomerType implements CustomTaskChange {
 		final JdbcConnection connection = (JdbcConnection) database.getConnection();
 
 		long startTime = System.currentTimeMillis();
-		executeBatchUpdate(connection, SELECT_ALL_ANONYMOUS_USERS, UPDATE_TO_SINGLE_SESSION_USER);
-		executeBatchUpdate(connection, SELECT_ALL_REGISTERED_USERS, UPDATE_TO_REGISTERED_USER);
+
+		migrateCustomers(connection, SELECT_ANONYMOUS_CUSTOMERS, UPDATE_TO_SINGLE_SESSION_USER);
+		migrateCustomers(connection, SELECT_REGISTERED_CUSTOMERS, UPDATE_TO_REGISTERED_USER);
 
 		long totalElapsedTime = System.currentTimeMillis() - startTime;
 		LOG.info(String.format("Customer type migration completed. Total time: %d", totalElapsedTime));
 	}
 
-	private void executeBatchUpdate(final JdbcConnection connection, final String selectSQL, final String updateSQL) throws CustomChangeException {
-		try (PreparedStatement preparedStatement = connection.prepareStatement(selectSQL)) {
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+	protected void migrateCustomers(final JdbcConnection connection, final String selectSQL, final String updateSQL) throws CustomChangeException {
+		while (true) {
+			try (PreparedStatement selectCustomerStatement = connection.prepareStatement(selectSQL)) {
+				selectCustomerStatement.setMaxRows(getBatchSize());
 
-				String updateStatementWithParamPlaceholder = getUpdateStatementWithParameterPlaceholder(updateSQL);
-
-				PreparedStatement updateCustomerType = connection.prepareStatement(updateStatementWithParamPlaceholder);
-				int runner = 0;
-				int paramRunner = 0;
-				while (resultSet.next()) {
-
-					paramRunner++;
-					BigDecimal customerUid = resultSet.getBigDecimal(1);
-					updateCustomerType.setBigDecimal(paramRunner, customerUid);
-
-					if (paramRunner % PARAM_SIZE == 0) {
-						paramRunner = 0;
-						updateCustomerType.addBatch();
+					try (ResultSet customersResultSet = selectCustomerStatement.executeQuery()) {
+						if (customersResultSet.next()) {
+							updateCustomersBatch(connection, customersResultSet, updateSQL);
+						} else {
+							break;
+						}
 					}
-
-					runner++;
-					if (runner % DEFAULT_BATCH_SIZE == 0) {
-						updateCustomerType.executeBatch();
-						updateCustomerType.clearBatch();
-					}
+			} catch (Exception e) {
+				try {
+					connection.rollback();
+				} catch (DatabaseException dbexc) {
+					LOG.severe("Can't rollback transaction", dbexc);
 				}
-
-				if (paramRunner % PARAM_SIZE != 0) {
-					updateCustomerType.addBatch();
-				}
-
-				// Make sure all updates are executed.
-				if (runner % DEFAULT_BATCH_SIZE != 0) {
-					updateCustomerType.executeBatch();
-				}
+				throw new CustomChangeException("An error occurred when updating customer records", e);
 			}
-		} catch (DatabaseException | SQLException e) {
-			throw new CustomChangeException("An error occurred when updating customer records", e);
 		}
 	}
 
-	private String getUpdateStatementWithParameterPlaceholder(final String updateStatement) {
-		StringBuilder withParams = new StringBuilder("?");
-
-		for (int i = 1; i < PARAM_SIZE; i++) {
-			withParams.append(", ?");
+	@SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveImports"})
+	private void updateCustomersBatch(final JdbcConnection connection, final ResultSet customersResultSet, final String updateSQL)
+			throws SQLException, DatabaseException {
+		try (PreparedStatement updateCustomerStatement = connection.prepareStatement(updateSQL)) {
+			connection.setAutoCommit(false);
+			do {
+				long customerUid = customersResultSet.getLong(1);
+				updateCustomerStatement.setLong(1, customerUid);
+				updateCustomerStatement.addBatch();
+			} while (customersResultSet.next());
+			updateCustomerStatement.executeBatch();
+			updateCustomerStatement.clearBatch();
+			connection.commit();
 		}
-
-		return String.format(updateStatement, withParams.toString());
 	}
 
 	@Override
@@ -129,4 +135,13 @@ public class PopulateCustomerType implements CustomTaskChange {
 	public ValidationErrors validate(Database database) {
 		return null;
 	}
+
+	private int getBatchSize() {
+		return batchSize;
+	}
+
+	public void setBatchSize(int batchSize) {
+		this.batchSize = batchSize;
+	}
+
 }

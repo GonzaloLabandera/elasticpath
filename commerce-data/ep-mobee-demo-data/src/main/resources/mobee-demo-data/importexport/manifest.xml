@@ -37,5 +37,6 @@
     <resource>shipping_service_levels.xml</resource>
     <resource>customer_consents.xml</resource>
     <resource>sort_attributes.xml</resource>
+    <resource>useraccountassociations.xml</resource>
     <resource>store_customer_attributes.xml</resource>
 </manifest>

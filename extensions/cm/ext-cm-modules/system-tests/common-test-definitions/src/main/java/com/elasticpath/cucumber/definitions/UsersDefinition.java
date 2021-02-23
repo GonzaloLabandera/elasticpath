@@ -9,8 +9,8 @@ import java.util.UUID;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.openqa.selenium.WebDriver;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.elasticpath.selenium.dialogs.ChangePasswordDialog;
 import com.elasticpath.selenium.dialogs.ChangeTimezoneDialog;
@@ -117,9 +117,11 @@ public class UsersDefinition {
 		createUserDialog.clickMoveRightButton();
 		createUserDialog.clickFinishButton();
 
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String brcyptPassword = passwordEncoder.encode(userMap.get(PASSWORD));
+
 		DBConnector dbConnector = new DBConnector();
-		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET PASSWORD='" + DigestUtils.sha1Hex(userMap.get(PASSWORD)) + "' WHERE USER_NAME='"
-				+ newUserName + "'");
+		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET PASSWORD='" + brcyptPassword + "' WHERE USER_NAME='" + newUserName + "'");
 		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET STATUS='1' WHERE USER_NAME='" + newUserName + "'");
 		dbConnector.executeUpdateQuery("UPDATE TCMUSER SET LAST_CHANGED_PASSWORD_DATE='" + dbConnector.getDate("2025-01-01 12:00:00")
 				+ "' WHERE USER_NAME='" + newUserName + "'");
@@ -382,11 +384,14 @@ public class UsersDefinition {
 		DBConnector dbConnector = new DBConnector();
 		int uidpk = dbConnector.getMaxUidpk("TCMUSER", "UIDPK < 200000") + 1;
 
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String brcyptPassword = passwordEncoder.encode(userMap.get(PASSWORD));
+
 		String query = "INSERT INTO TCMUSER (UIDPK,USER_NAME,EMAIL,FIRST_NAME,LAST_NAME,PASSWORD,CREATION_DATE,LAST_LOGIN_DATE"
 				+ ",LAST_CHANGED_PASSWORD_DATE,FAILED_LOGIN_ATTEMPTS,GUID,STATUS,ALL_WAREHOUSE_ACCESS,ALL_CATALOG_ACCESS"
 				+ ",ALL_STORE_ACCESS,ALL_PRICELIST_ACCESS,LAST_MODIFIED_DATE) VALUES (" + uidpk + ",'" + newUserName
 				+ COMMA + newUserName + "@elasticpath.com','" + userMap.get("First Name") + COMMA + userMap.get("Last Name")
-				+ COMMA + DigestUtils.sha1Hex(userMap.get(PASSWORD)) + COMMA + dbConnector.getDate(date) + COMMA
+				+ COMMA + brcyptPassword + COMMA + dbConnector.getDate(date) + COMMA
 				+ dbConnector.getDate(date) + COMMA + dbConnector.getDate(date) + "',0,'" + UUID.randomUUID().toString()
 				+ "',1,1,1,1,1,'" + dbConnector.getDate(date) + "')";
 

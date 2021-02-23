@@ -65,10 +65,26 @@ public abstract class AbstractEpQLCustomConfiguration {
 	 */
 	public void configureField(final EpQLField epQLFieldName, final String solrFieldName,
 			final EpQLFieldResolver fieldResolver, final EpQLFieldType fieldType, final SubQueryBuilder subQueryBuilder) {
+		configureField(epQLFieldName, solrFieldName, fieldResolver, this.epQLValueResolver, fieldType, subQueryBuilder);
+	}
+
+	/**
+	 * Prepares Solr field descriptor used to recognize EpQl field.
+	 * Correspondence is kept by means of map
+	 *
+	 * @param epQLFieldName the name which may occur in EpQL query
+	 * @param solrFieldName recognizable Solr name existing in indexes
+	 * @param fieldResolver resolver recognizing and translating EpQL field names into Solr field names
+	 * @param valueResolver resolver for translating EpQL values into syntax that is applicable for the underlying implementation
+	 * @param fieldType type of field value
+	 * @param subQueryBuilder query builder to build queries described by constructed descriptor
+	 */
+	public void configureField(final EpQLField epQLFieldName, final String solrFieldName, final EpQLFieldResolver fieldResolver,
+							   final EpQLValueResolver valueResolver, final EpQLFieldType fieldType, final SubQueryBuilder subQueryBuilder) {
 		final EpQLFieldDescriptor descriptor = new EpQLFieldDescriptor();
 		descriptor.setFieldTemplate(solrFieldName);
 		descriptor.setEpQLFieldResolver(fieldResolver);
-		descriptor.setEpQLValueResolver(epQLValueResolver);
+		descriptor.setEpQLValueResolver(valueResolver);
 		descriptor.setSubQueryBuilder(subQueryBuilder);
 		descriptor.setType(fieldType);
 		getAvailableEpQLObjectFields().put(epQLFieldName, descriptor);

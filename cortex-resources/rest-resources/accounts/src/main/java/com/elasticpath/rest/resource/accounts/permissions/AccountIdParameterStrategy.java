@@ -9,6 +9,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import io.reactivex.Observable;
 import org.apache.shiro.subject.PrincipalCollection;
 
 import com.elasticpath.repository.Repository;
@@ -21,6 +22,7 @@ import com.elasticpath.rest.id.transform.IdentifierTransformer;
 import com.elasticpath.rest.id.transform.IdentifierTransformerProvider;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.identity.util.PrincipalsUtil;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 
 /**
  * Strategy to look up permission for account resource.
@@ -36,13 +38,25 @@ public final class AccountIdParameterStrategy extends AbstractCollectionValueStr
 	@Inject
 	private IdentifierTransformerProvider identifierTransformerProvider;
 
+	@Inject
+	private Provider<CustomerRepository> customerRepository;
+
 	@Override
 	protected Collection<String> getParameterValues(final PrincipalCollection principals) {
 		String scope = PrincipalsUtil.getScope(principals);
 		final IdentifierTransformer<Identifier> identifierTransformer = identifierTransformerProvider.forUriPart(AccountIdentifier.ACCOUNT_ID);
-		return repository.get()
-				.findAll(StringIdentifier.of(scope))
-				.map(accountIdentifier -> identifierTransformer.identifierToUri(accountIdentifier.getAccountId()))
+		return Observable.merge(
+				repository.get()
+						.findAll(StringIdentifier.of(scope))
+						.map(accountIdentifier -> identifierTransformer.identifierToUri(accountIdentifier.getAccountId())),
+				//merge with direct children
+				repository.get()
+						.findAll(StringIdentifier.of(scope))
+						.map(accountIdentifier -> customerRepository.get().findDescendants(accountIdentifier.getAccountId().getValue()))
+						.flatMapIterable(guids -> guids)
+						.map(StringIdentifier::of)
+						.map(identifierTransformer::identifierToUri)
+		)
 				.toList()
 				.blockingGet();
 	}

@@ -3,6 +3,7 @@
  */
 package com.elasticpath.uat.email.order.stepdefs;
 
+import static com.elasticpath.email.test.support.EmailContentAssert.assertEmailContentContainsExpectedText;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
@@ -15,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import javax.mail.Message;
 
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import org.apache.velocity.tools.generic.DateTool;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.store.StoreService;
 import com.elasticpath.uat.ScenarioContextValueHolder;
 
 /**
@@ -36,8 +39,13 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
  */
 public class OrderEmailStepDefinitions {
 
+	private static final String ONE_HELD_ORDER_MESSAGE = "The number of orders on hold with outstanding resolution is: 1";
+
 	@Autowired
 	private Geography geography;
+
+	@Autowired
+	private StoreService storeService;
 
 	@Autowired
 	@Qualifier("orderHolder")
@@ -59,14 +67,14 @@ public class OrderEmailStepDefinitions {
 	public void verifyEmailContainsOrderNumber(final String emailSubject) throws Exception {
 		final String emailContents = getContents(getEmailMessageBySubject(emailSubject, receivedMessagesHolder.get()));
 		assertEmailContentContainsOrderNumber("The order confirmation email contents should include the order number",
-											  emailContents, orderHolder.get().getOrderNumber());
+				emailContents, orderHolder.get().getOrderNumber());
 	}
 
 	@Then("^the(?: \"(.+)\")? email should contain the order total$")
 	public void verifyEmailContainsOrderTotal(final String emailSubject) throws Exception {
 		final String emailContents = getContents(getEmailMessageBySubject(emailSubject, receivedMessagesHolder.get()));
 		assertThat("The order confirmation email contents should include the order total",
-				   emailContents, containsString(orderHolder.get().getTotal().toPlainString()));
+				emailContents, containsString(orderHolder.get().getTotal().toPlainString()));
 	}
 
 	@Then("^the(?: \"(.+)\")? email should contain the order date$")
@@ -105,7 +113,7 @@ public class OrderEmailStepDefinitions {
 		for (final String addressElement : addressElements) {
 			if (addressElement != null) {
 				assertThat("The order confirmation email contents should include each part of the shipping address",
-						   emailContents, containsString(addressElement));
+						emailContents, containsString(addressElement));
 			}
 		}
 	}
@@ -114,14 +122,14 @@ public class OrderEmailStepDefinitions {
 	public void verifyEmailContainsOrderShipmentNumber(final String emailSubject) throws Exception {
 		final String emailContents = getContents(getEmailMessageBySubject(emailSubject, receivedMessagesHolder.get()));
 		assertThat("The order shipment confirmation email contents should include the order shipment number",
-				   emailContents, containsString(orderShipmentHolder.get().getShipmentNumber()));
+				emailContents, containsString(orderShipmentHolder.get().getShipmentNumber()));
 	}
 
 	@Then("^the(?: \"(.+)\")? email should contain the date the shipment shipped$")
 	public void verifyEmailContainsOrderShipmentShipDate(final String emailSubject) throws Exception {
 		final String emailContents = getContents(getEmailMessageBySubject(emailSubject, receivedMessagesHolder.get()));
 		assertThat("The order shipment confirmation email contents should include the order shipment date",
-				   emailContents, containsString(orderShipmentHolder.get().getShipmentDate().toString()));
+				emailContents, containsString(orderShipmentHolder.get().getShipmentDate().toString()));
 	}
 
 	@Then("^the(?: \"(.+)\")? email should contain the shipment method$")
@@ -134,9 +142,9 @@ public class OrderEmailStepDefinitions {
 			final PhysicalOrderShipment physicalOrderShipment = (PhysicalOrderShipment) orderShipment;
 
 			assertThat("The physical order shipment confirmation email contents should include the order shipment carier code",
-					   emailContents, containsString(physicalOrderShipment.getCarrierCode()));
+					emailContents, containsString(physicalOrderShipment.getCarrierCode()));
 			assertThat("The physical order shipment confirmation email contents should include the order shipment option name",
-					   emailContents, containsString(physicalOrderShipment.getShippingOptionName()));
+					emailContents, containsString(physicalOrderShipment.getShippingOptionName()));
 		}
 	}
 
@@ -144,32 +152,47 @@ public class OrderEmailStepDefinitions {
 	public void verifyEmailContainsOrderShipmentTrackingCode(final String emailSubject, final String trackingCode) throws Exception {
 		final String emailContents = getContents(getEmailMessageBySubject(emailSubject, receivedMessagesHolder.get()));
 		assertThat("The order shipment confirmation email contents should include the order shipment tracking code",
-				   emailContents, containsString(trackingCode));
+				emailContents, containsString(trackingCode));
 	}
 
 	@Then("^the(?: \"(.+)\")? email should contain the shipment total$")
 	public void verifyEmailContainsOrderShipmentTotal(final String emailSubject) throws Exception {
 		final String emailContents = getContents(getEmailMessageBySubject(emailSubject, receivedMessagesHolder.get()));
 		assertThat("The order shipment confirmation email contents should include the order shipment number",
-				   emailContents, containsString(orderShipmentHolder.get().getTotal().toPlainString()));
+				emailContents, containsString(orderShipmentHolder.get().getTotal().toPlainString()));
 	}
 
 	/**
 	 * Verifies that the given String contents contains the display names of all provided ShoppingItems for the given locale.
 	 *
-	 * @param emailContents the email contents
-	 * @param shoppingItems the items
-	 * @param locale the locale for which the display name should be determined
+	 * @param emailContents    the email contents
+	 * @param shoppingItems    the items
+	 * @param locale           the locale for which the display name should be determined
 	 * @param productSkuLookup a product sku lookup
 	 */
 	public static void verifyContentsContainsItemDisplayNames(final String emailContents, final Iterable<? extends ShoppingItem> shoppingItems,
-															  final Locale locale, final ProductSkuLookup productSkuLookup) {
+			final Locale locale, final ProductSkuLookup productSkuLookup) {
 		for (final ShoppingItem shoppingItem : shoppingItems) {
 			ProductSku productSku = productSkuLookup.findByGuid(shoppingItem.getSkuGuid());
 			final String displayName = productSku.getDisplayName(locale);
 			assertThat("The email contents should include the name of each item purchased",
-					   emailContents, containsString(displayName));
+					emailContents, containsString(displayName));
 		}
 	}
 
+	@Then("^the(?: \"(.+)\")? email should contain the store name$")
+	public void verifyEmailContainsStoreName(final String emailSubject) throws Exception {
+		final String emailContents = getContents(getEmailMessageBySubject(emailSubject, receivedMessagesHolder.get()));
+		String storeName = storeService.findStoreWithCode(orderHolder.get().getStoreCode()).getName();
+		assertEmailContentContainsExpectedText("The order hold notification email contents should include the store name",
+				storeName, emailContents);
+
+	}
+
+	@And("^the(?: \"(.+)\")? email should contain the number of orders on hold$")
+	public void verifyEmailContainsNumberOfOrdersOnHold(final String emailSubject) throws Exception {
+		final String emailContents = getContents(getEmailMessageBySubject(emailSubject, receivedMessagesHolder.get()));
+		assertEmailContentContainsExpectedText("The order hold notification email contents should include the number of held orders",
+				ONE_HELD_ORDER_MESSAGE, emailContents);
+	}
 }

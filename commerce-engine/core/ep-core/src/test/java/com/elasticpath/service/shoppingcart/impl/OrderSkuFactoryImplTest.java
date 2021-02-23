@@ -60,6 +60,7 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
 /**
  * Tests for OrderSkuFactoryImpl.
  */
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class OrderSkuFactoryImplTest {
 	private static final int THREE_INT = 3;
 
@@ -338,7 +339,7 @@ public class OrderSkuFactoryImplTest {
 		child1.addChild(child12);
 
 		Collection<OrderSku> actualSkus =
-				factory.createOrderSkusWithApportionedPrices(Arrays.asList(root), leavesPricingMap, cartTaxSnapshot, null);
+				factory.createOrderSkusWithApportionedPrices(Arrays.asList(root), leavesPricingMap, cartTaxSnapshot, null, 0L);
 
 		assertEquals(1, actualSkus.size());
 
@@ -586,6 +587,11 @@ public class OrderSkuFactoryImplTest {
 			@Override
 			public ItemPricing getLinePricing() {
 				return new ItemPricing(totalUnitPrice, totalUnitDiscount, quantity);
+			}
+
+			@Override
+			public boolean hasPrice() {
+				return true;
 			}
 		};
 		item.setGuid(guid);

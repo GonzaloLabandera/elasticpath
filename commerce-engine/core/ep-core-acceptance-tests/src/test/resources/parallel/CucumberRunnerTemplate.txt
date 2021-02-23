@@ -1,0 +1,17 @@
+package parallel.runners;
+
+import cucumber.api.CucumberOptions;
+import cucumber.api.junit.Cucumber;
+import org.junit.runner.RunWith;
+
+@RunWith(Cucumber.class)
+@CucumberOptions(
+        features = {"target/parallel/features/[CUCABLE:FEATURE].feature"},
+        glue = {"classpath:com.elasticpath.cucumber"},
+        plugin = {"pretty",
+                "html:target/cucumber-html-reports/[CUCABLE:RUNNER]",
+                "json:target/cucumber-report/[CUCABLE:RUNNER].json",
+                "junit:target/cucumber-junit-reports/[CUCABLE:RUNNER]/cucumber.xml"}
+)
+public class [CUCABLE:RUNNER] {
+}

@@ -194,13 +194,14 @@ public class PricedShippableItemContainerTransformerImplApportioningTest {
 		when(shoppingItem.getGuid()).thenReturn("shoppingItemGuidFor_" + skuGuid);
 		when(shoppingItem.getSkuGuid()).thenReturn(skuGuid);
 		when(shoppingItem.getQuantity()).thenReturn(quantity);
-		when(shoppingItem.hasPrice()).thenReturn(true);
 		when(shoppingItem.isDiscountable(productSkuLookup)).thenReturn(true);
 		when(shoppingItem.isBundle(productSkuLookup)).thenReturn(false);
 		when(shoppingItem.isShippable(productSkuLookup)).thenReturn(isShippable);
+		when(shoppingItem.getCurrency()).thenReturn(CURRENCY);
 
 		final ShoppingItemPricingSnapshot itemPricingSnapshot = mock(ShoppingItemPricingSnapshot.class, RETURNS_DEEP_STUBS);
 		when(shoppingCartPricingSnapshot.getShoppingItemPricingSnapshot(shoppingItem)).thenReturn(itemPricingSnapshot);
+		when(itemPricingSnapshot.hasPrice()).thenReturn(true);
 
 		when(itemPricingSnapshot.getPriceCalc().forUnitPrice().withCartDiscounts().getMoney()).thenReturn(unitPrice);
 

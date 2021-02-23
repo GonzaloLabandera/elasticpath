@@ -5,6 +5,7 @@ package com.elasticpath.commons.beanframework.config;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -18,6 +19,9 @@ import org.w3c.dom.Element;
  * A class that contains base functionality that is shared by all of the extensibleList Spring custom namespace BeanDefinitionParser classes.
  */
 public abstract class AbstractExtensibleListBeanDefinitionParser extends AbstractBeanDefinitionParser {
+
+	private static final Logger LOG = Logger.getLogger(AbstractExtensibleListBeanDefinitionParser.class);
+
 	/**
 	 * Parses the list of bean references from within the extensible list create tag.
 	 * @param element - the extensibleList:create root element , with an optional value-type tag to enforce object type within the list
@@ -51,7 +55,7 @@ public abstract class AbstractExtensibleListBeanDefinitionParser extends Abstrac
 				Class<?> targetType = ClassUtils.forName(valueTypeClassName, classLoader);
 				if (!isListValueTypesValid(parserContext, beanReferenceList, classLoader, targetType)) {
 					parserContext.getReaderContext().error(
-							"extensibleList bean [" + element + "] contains a bean reference that"
+							"extensibleList bean [" + element.getAttribute("id") + "] contains a bean reference that"
 									+ " is not of valueType [" + valueTypeClassName + "]",
 							element);
 				}
@@ -79,6 +83,11 @@ public abstract class AbstractExtensibleListBeanDefinitionParser extends Abstrac
 			if (beanRef instanceof RuntimeBeanReference) {
 				String beanRefName = ((RuntimeBeanReference) beanRef).getBeanName();
 				String beanRefClassName = parserContext.getRegistry().getBeanDefinition(beanRefName).getBeanClassName();
+				if (beanRefClassName == null) {
+					LOG.error("Bean definition [" + beanRefName + "] that is referenced in extensible list could not be found.  It must "
+							+ "be of type "
+							+ targetType.getName());
+				}
 				Class<?> beanRefClass = ClassUtils.forName(beanRefClassName, classLoader);
 				if (!targetType.isAssignableFrom(beanRefClass)) {
 					return false;

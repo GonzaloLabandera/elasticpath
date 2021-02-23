@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.cartorder.impl.CartOrderImpl;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -34,13 +34,15 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.persistence.TestPersistenceEngine;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.dao.CustomerAddressDao;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
-import com.elasticpath.test.integration.BasicSpringContextTest;
+import com.elasticpath.test.concurrent.ConcurrencyTestUtils;
+import com.elasticpath.test.db.DbTestCase;
 import com.elasticpath.test.persister.CatalogTestPersister;
 import com.elasticpath.test.persister.PaymentInstrumentPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
@@ -50,7 +52,9 @@ import com.elasticpath.test.util.Utils;
 /**
  * Cart order service integration test.
  */
-public class CartOrderServiceImplTest extends BasicSpringContextTest {
+public class CartOrderServiceImplTest extends DbTestCase {
+
+	private static final Logger LOG = Logger.getLogger(CartOrderServiceImplTest.class);
 
 	private static final String INVALID_SHIPPING_OPTION_CODE = "INVALID_SHIPPING_OPTION_CODE";
 
@@ -72,7 +76,6 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 	private static String DEFAULT_SHIPPING_OPTION_CODE;
 
-
 	@Autowired
 	private BeanFactory beanFactory;
 
@@ -92,13 +95,13 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	private CustomerService customerService;
 
 	@Autowired
-	private CustomerBuilder customerBuilder;
-
-	@Autowired
 	private CatalogTestPersister catalogTestPersister;
 
 	@Autowired
 	private PaymentInstrumentPersister paymentInstrumentPersister;
+
+	@Autowired
+	private TestPersistenceEngine testPersistenceEngine;
 
 	private Store store;
 
@@ -107,7 +110,6 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	private Customer customer;
 
 	private ProductSku shippableProductSku;
-	private String customerGuid;
 
 	/**
 	 * A setup for the integration test.
@@ -118,7 +120,6 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrderGuid = Utils.uniqueCode("CARTORDER");
 		billingAddressGuid = Utils.uniqueCode("BAGUID");
 		shippingAddressGuid = Utils.uniqueCode("SAGUID");
-		customerGuid = Utils.uniqueCode("CUSTOMER");
 		SimpleStoreScenario scenario = getTac().useScenario(SimpleStoreScenario.class);
 
 		ShippingRegion defaultShippingRegion = scenario.getShippingRegion();
@@ -415,6 +416,53 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		assertThat(cartOrderLastModifiedDate)
 			.as("The last modified date should be null, iff the cart order is not found.")
 			.isNull();
+	}
+
+	/**
+	 * Verifies that if multiple threads attempt to create a cart order simultaneously
+	 * that the unique constraint error handling will handle this properly.
+	 */
+	@Test
+	public void testCreateCartOrderIfPossibleWithMultipleThreads() {
+		ShoppingCart shoppingCart = loadShoppingCart();
+
+		// Make sure TCARTORDER is not in the database
+		doInTransaction(status -> testPersistenceEngine.executeNativeQuery("DELETE TCARTORDER WHERE SHOPPINGCART_GUID = ?1", shoppingCart.getGuid()));
+
+		// Run 5 concurrent cart order creation calls to attempt to reproduce PB-8639
+		List<CreateOrderIfPossibleRunnable> cartOrderCreationRunnables = ConcurrencyTestUtils.executeTestWithTimeout(5, 1000, new ConcurrencyTestUtils.RunnableFactory<CreateOrderIfPossibleRunnable>() {
+			@Override
+			public CreateOrderIfPossibleRunnable createRunnable() {
+				return new CreateOrderIfPossibleRunnable(shoppingCart);
+			}
+		});
+
+		assertThat(cartOrderCreationRunnables)
+				.as("Exception thrown in createOrderIfPossible")
+				.allMatch(element -> element.getException() == null);
+	}
+
+	class CreateOrderIfPossibleRunnable implements Runnable {
+		private Exception exception;
+		private ShoppingCart shoppingCart;
+
+		public CreateOrderIfPossibleRunnable(ShoppingCart shoppingCart) {
+			this.shoppingCart = shoppingCart;
+		}
+
+		@Override
+		public void run() {
+			try {
+				cartOrderService.createOrderIfPossible(shoppingCart);
+			} catch (Exception ex) {
+				LOG.error("Exception thrown in createOrderIfPossible", ex);
+				this.exception = ex;
+			}
+		}
+
+		public Exception getException() {
+			return exception;
+		}
 	}
 
 	private ShoppingCart configureAndPersistCart() {

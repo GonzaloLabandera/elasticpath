@@ -21,5 +21,10 @@ public enum PurchaseStatus {
 	/**
 	 * Purchase has been canceled.
 	 */
-	CANCELED
+	CANCELED,
+
+	/**
+	 * Purchase is on hold.
+	 */
+	ON_HOLD
 }

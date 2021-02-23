@@ -1,6 +1,5 @@
 
 options {
-    STATIC = false;
     JAVA_UNICODE_ESCAPE = true;
     USER_CHAR_STREAM = true;
 }
@@ -60,7 +59,7 @@ public class EpQueryParserImpl implements EpQueryParser {
 		} catch (ParseException tme) {
 			// rethrow to include the original query:
 			throw new EpQLParseException("Cannot parse '" + query + "': " + tme.getMessage());
-		} catch (TokenMgrError tme) {
+		} catch (TokenMgrException tme) {
 			throw new EpQLParseException("Cannot parse '" + query + "': " + tme.getMessage());
 		} catch (RuntimeException exception) {
 			throw new EpQLParseException("Cannot parse '" + query + ":" +  exception.getMessage());
@@ -89,7 +88,7 @@ public class EpQueryParserImpl implements EpQueryParser {
 			return epQuery.toString();
 		} catch (ParseException tme) {
 			throw new EpQLParseException("Cannot parse '" + query + "': " + tme.getMessage());
-		} catch (TokenMgrError tme) {
+		} catch (TokenMgrException tme) {
 			throw new EpQLParseException("Cannot parse '" + query + "': " + tme.getMessage());
 		} catch (RuntimeException exception) {
 			throw new EpQLParseException("Cannot parse '" + query + ":" +  exception.getMessage());

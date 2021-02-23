@@ -5,7 +5,6 @@ package com.elasticpath.cmclient.fulfillment.editors.customer.dialogs;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.IDialogLabelKeys;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
@@ -13,6 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
+import com.elasticpath.cmclient.fulfillment.util.AddressUtil;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
@@ -23,12 +23,8 @@ import com.elasticpath.service.customer.CustomerService;
  * 
  */
 public class CustomerRemoveAddressDialog extends MessageDialog {
-	
-	private static final String COMMA = ", "; //$NON-NLS-1$
 
 	private static final String RETURN = "\n"; //$NON-NLS-1$
-
-	private static final String EMPTY_SPACE = " "; //$NON-NLS-1$
 
 	private static final String[] BUTTONS = { 
 			JFaceResources.getString(IDialogLabelKeys.OK_LABEL_KEY),
@@ -75,31 +71,13 @@ public class CustomerRemoveAddressDialog extends MessageDialog {
 	}
 	
 	private String buildAddressString(final CustomerAddress address) {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 
-		builder.append(address.getFirstName());
-		builder.append(EMPTY_SPACE);
-		builder.append(address.getLastName());
-		builder.append(RETURN);
-		builder.append(address.getStreet1());
-		
-		if (!StringUtils.isBlank(address.getStreet2())) {
-			builder.append(EMPTY_SPACE);
-			builder.append(address.getStreet2());
+		builder.append(AddressUtil.getFullCustomerName(address));
+		if (builder.length() != 0) {
+			builder.append(RETURN);
 		}
-		
-		builder.append(COMMA);
-		builder.append(address.getCity());
-		builder.append(COMMA);
-		
-		if (!StringUtils.isBlank(address.getSubCountry())) {
-			builder.append(address.getSubCountry());
-			builder.append(COMMA);
-		}
-		
-		builder.append(address.getZipOrPostalCode());
-		builder.append(COMMA);
-		builder.append(address.getCountry());
+		builder.append(AddressUtil.formatAddress(address, false));
 		builder.append(RETURN);
 		builder.append(address.getPhoneNumber());
 

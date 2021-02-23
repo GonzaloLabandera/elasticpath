@@ -19,6 +19,7 @@ tmlog*.log
 # Ignored directories #
 */*/ep-dcapi-core-wrapper-epcommerce/lib/
 jms/activemq-broker/overlays/
+cortex/ext-cortex-webapp/overlays/
 
 # Generated CM default CSS
 cm/ext-plugins/branding/themes/default.css*

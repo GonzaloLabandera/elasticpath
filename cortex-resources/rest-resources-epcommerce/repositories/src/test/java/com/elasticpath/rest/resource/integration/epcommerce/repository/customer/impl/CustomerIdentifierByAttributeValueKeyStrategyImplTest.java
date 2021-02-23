@@ -44,7 +44,7 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 		when(customerRepository.getCustomerCountByProfileAttributeKeyAndValue(VALID_CUSTOMER_IDENTIFIER_KEY.split(":")[1], VALID_USER_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(1L));
 
-		ExecutionResult<Void> executionResult =
+		ExecutionResult<Boolean> executionResult =
 				customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(VALID_USER_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isSuccessful());
 	}
@@ -60,7 +60,7 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 		when(customerRepository.getCustomerCountByProfileAttributeKeyAndValue(customerIdentifierKey, VALID_USER_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(0L));
 
-		ExecutionResult<Void> executionResult =
+		ExecutionResult<Boolean> executionResult =
 				customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(VALID_USER_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
 
 		String errorMessage = CustomerIdentifierByAttributeValueKeyStrategyImpl.prepareNoCustomerFoundError(customerIdentifierKey, VALID_USER_ID);
@@ -78,7 +78,7 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 		when(customerRepository.getCustomerCountByProfileAttributeKeyAndValue(getKeyFieldStringFromCustomerIdentifierKey(), VALID_USER_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(2L));
 
-		ExecutionResult<Void> executionResult =
+		ExecutionResult<Boolean> executionResult =
 				customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(VALID_USER_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
 
 		String errorMessage =

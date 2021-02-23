@@ -197,6 +197,8 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		target.setStoreState(StoreState.valueOf(source.getStoreState()));
 		target.setStoreType(source.getStoreType());
 		target.setDescription(source.getDescription());
+		target.setB2CAuthenticatedRole(source.getAuthenticatedB2CRole());
+		target.setB2CSingleSessionRole(source.getSingleSessionB2CRole());
 
 		Catalog catalog = catalogService.findByCode(source.getCatalogCode());
 

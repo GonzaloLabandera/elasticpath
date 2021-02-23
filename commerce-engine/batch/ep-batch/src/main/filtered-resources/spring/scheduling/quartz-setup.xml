@@ -35,6 +35,8 @@
 		<ref bean="cleanupAnonymousCustomersTrigger"/>
 		<ref bean="expiredDataPointValuesJobProcessorTrigger"/>
 		<ref bean="dataPointRevokedConsentsJobProcessorTrigger"/>
+		<ref bean="orderHoldNotificationJobProcessorTrigger"/>
+		<ref bean="relayOutboxMessagesTrigger"/>
 	</util:list>
 
 	<util:list id="topSellerSchedulingTriggers">

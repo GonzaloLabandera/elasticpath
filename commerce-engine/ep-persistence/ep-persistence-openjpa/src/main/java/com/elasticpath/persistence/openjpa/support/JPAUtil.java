@@ -5,11 +5,22 @@
 package com.elasticpath.persistence.openjpa.support;
 
 import java.lang.reflect.Field;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.persistence.EntityManager;
+
+import org.apache.openjpa.ee.ManagedRuntime;
 import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.kernel.OpenJPAStateManager;
+import org.apache.openjpa.meta.ClassMetaData;
+import org.apache.openjpa.meta.FieldMetaData;
+import org.apache.openjpa.persistence.JPAFacadeHelper;
+import org.apache.openjpa.persistence.OpenJPAPersistence;
 
 import com.elasticpath.persistence.api.EpPersistenceException;
+import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 
 
 /**
@@ -96,4 +107,44 @@ public final class JPAUtil {
 	private static OpenJPAStateManager getStateManager(final PersistenceCapable entity) {
 		return (OpenJPAStateManager) entity.pcGetStateManager();
 	}
+
+	/**
+	 * Returns the id for the current transaction from the managed runtime.
+	 *
+	 * @param jpaPersistenceEngine the JPA persistence engine
+	 * @return the transaction id
+	 * @throws Exception if there is an issue retrieving the transaction key
+	 */
+	public static String getTransactionId(final JpaPersistenceEngine jpaPersistenceEngine) throws Exception {
+		ManagedRuntime runtime = jpaPersistenceEngine.getBroker().getManagedRuntime();
+		Object key = runtime.getTransactionKey();
+		int transactionId = key.hashCode();
+		return String.valueOf(transactionId);
+	}
+
+	/**
+	 * Determines if the passed entity is dirty.
+	 *
+	 * @param persistenceCapable the entity object
+	 * @param jpaPersistenceEngine the JPA persistence engine
+	 * @return true if the entity is dirty
+	 */
+	@SuppressWarnings("unchecked")
+	public static boolean isDirty(final PersistenceCapable persistenceCapable, final JpaPersistenceEngine jpaPersistenceEngine) {
+		if (persistenceCapable.pcIsDirty()) {
+			return true;
+		}
+
+		EntityManager entityManager = jpaPersistenceEngine.getEntityManager();
+		ClassMetaData metaData = JPAFacadeHelper.getMetaData(entityManager, persistenceCapable.getClass());
+
+		Set<Class<?>> collect = (Set<Class<?>>) OpenJPAPersistence.cast(entityManager).getDirtyObjects().stream()
+				.map(Object::getClass)
+				.collect(Collectors.toSet());
+
+		return Stream.of(metaData.getDeclaredFields())
+				.map(FieldMetaData::getRelationType)
+				.anyMatch(collect::contains);
+	}
+
 }

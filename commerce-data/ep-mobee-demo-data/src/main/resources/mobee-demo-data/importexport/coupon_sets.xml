@@ -40,6 +40,27 @@
 	</coupon_set>
 	<coupon_set>
 		<coupon_config>
+			<rule_code>500b9a9e-0c85-4662-aa4b-950cbd325d1a</rule_code>
+			<coupon_config_code>020302b3-03fe-42df-9421-52fd20120244</coupon_config_code>
+			<coupon_usage_type>limitPerSpecifiedUser</coupon_usage_type>
+			<usage_limit>2147483647</usage_limit>
+			<duration_days>0</duration_days>
+			<limited_duration>false</limited_duration>
+			<multi_use_per_order>false</multi_use_per_order>
+		</coupon_config>
+		<coupons>
+			<coupon_code>AUTO_APPLIED_TO_BE_REMOVED</coupon_code>
+		</coupons>
+		<coupon_usages>
+			<coupon_usage>
+				<coupon_code>AUTO_APPLIED_TO_BE_REMOVED</coupon_code>
+				<active_in_cart>true</active_in_cart>
+				<email>itest.remove.applied.coupon@elasticpath.com</email>
+			</coupon_usage>
+		</coupon_usages>
+	</coupon_set>
+	<coupon_set>
+		<coupon_config>
 			<rule_code>71cece23-b31b-468e-af92-7675b05453ac</rule_code>
 			<coupon_config_code>57957dd2-843c-4c0e-b9f5-6cdfb2b12345</coupon_config_code>
 			<coupon_usage_type>limitPerCoupon</coupon_usage_type>

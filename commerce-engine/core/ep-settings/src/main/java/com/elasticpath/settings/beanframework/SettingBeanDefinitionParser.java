@@ -59,6 +59,11 @@ public class SettingBeanDefinitionParser extends AbstractSingleBeanDefinitionPar
 			beanDefinitionBuilder.addPropertyValue("systemPropertyOverrideKey", systemPropertyOverrideKey);
 		}
 
+		final String deprecatedSystemPropertyOverrideKey = element.getAttribute("deprecatedSystemPropertyOverrideKey");
+		if (StringUtils.hasText(deprecatedSystemPropertyOverrideKey)) {
+			beanDefinitionBuilder.addPropertyValue("deprecatedSystemPropertyOverrideKey", deprecatedSystemPropertyOverrideKey);
+		}
+
 		beanDefinitionBuilder.addPropertyReference("settingsReader", "settingsReader");
 		beanDefinitionBuilder.addPropertyReference("settingValueTypeConverter", "settingValueTypeConverter");
 	}

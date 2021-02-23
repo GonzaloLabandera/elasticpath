@@ -9,11 +9,13 @@ import static com.elasticpath.commons.constants.ContextIdNames.ORDER_PAYMENT_INS
 import java.math.BigDecimal;
 import java.util.Collection;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.cartorder.CartOrder;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.CustomerPaymentInstrument;
@@ -21,7 +23,7 @@ import com.elasticpath.domain.orderpaymentapi.OrderPaymentInstrument;
 import com.elasticpath.service.orderpaymentapi.FilteredPaymentInstrumentService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentInstrumentService;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 
 /**
@@ -37,7 +39,7 @@ public class CreateOrderPaymentInstrumentsCheckoutAction implements ReversibleCh
 	private BeanFactory beanFactory;
 
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		final CartOrder cartOrder = context.getCartOrder();
 		if (cartOrder != null) {
 			final Collection<CartOrderPaymentInstrument> instruments = filteredPaymentInstrumentService
@@ -63,8 +65,9 @@ public class CreateOrderPaymentInstrumentsCheckoutAction implements ReversibleCh
 	}
 
 	private void useDefaultCustomerPaymentInstrumentForOrder(final Order order) {
+		Customer customer = ObjectUtils.firstNonNull(order.getAccount(), order.getCustomer());
 		final CustomerPaymentInstrument defaultCustomerPaymentInstrument =
-				filteredPaymentInstrumentService.findDefaultPaymentInstrumentForCustomerAndStore(order.getCustomer(), order.getStoreCode());
+				filteredPaymentInstrumentService.findDefaultPaymentInstrumentForCustomerAndStore(customer, order.getStoreCode());
 		if (defaultCustomerPaymentInstrument == null) {
 			if (order.getTotal().compareTo(BigDecimal.ZERO) > 0) {
 				LOG.warn("Attempting to purchase non-free product without payment instrument");
@@ -82,7 +85,7 @@ public class CreateOrderPaymentInstrumentsCheckoutAction implements ReversibleCh
 	}
 
 	@Override
-	public void rollback(final CheckoutActionContext context) throws EpSystemException {
+	public void rollback(final PreCaptureCheckoutActionContext context) throws EpSystemException {
 		final Order order = context.getOrder();
 		if (order == null) {
 			LOG.error("Order not found in checkout action context");

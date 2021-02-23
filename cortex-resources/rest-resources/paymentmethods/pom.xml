@@ -32,6 +32,10 @@
 			<artifactId>repository-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-accounts</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.elasticpath.rest.helix</groupId>
 			<artifactId>helix-api</artifactId>
 		</dependency>
@@ -50,6 +54,10 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-profiles</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-accounts</artifactId>
 		</dependency>
 	</dependencies>
 

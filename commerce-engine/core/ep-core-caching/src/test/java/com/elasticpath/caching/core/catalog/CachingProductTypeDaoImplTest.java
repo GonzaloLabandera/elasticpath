@@ -4,7 +4,11 @@
 package com.elasticpath.caching.core.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+
+import java.util.function.Function;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,9 +35,10 @@ public class CachingProductTypeDaoImplTest {
 	@Mock
 	private ProductType productType;
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindProductTypeWithAttributesUsesCache() {
-		given(productTypeByNameCache.get(NAME, cachingDao.getProductTypeByNameCacheLoader())).willReturn(productType);
+		given(productTypeByNameCache.get(eq(NAME), any(Function.class))).willReturn(productType);
 		final ProductType result = cachingDao.findProductTypeWithAttributes(NAME);
 		assertThat(result).isEqualTo(productType);
 	}

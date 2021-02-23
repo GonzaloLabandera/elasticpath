@@ -8,6 +8,7 @@
 
 	<!-- Imported Services -->
 	<reference id="persistenceEngine" interface="com.elasticpath.persistence.api.PersistenceEngine"/>
+	<reference id="detachmentStrategy" interface="com.elasticpath.persistence.api.CachedInstanceDetachmentStrategy"/>
 	<reference id="productDao" interface="com.elasticpath.persistence.dao.ProductDao"/>
 	<reference id="settingsReader" interface="com.elasticpath.settings.SettingsReader"/>
 
@@ -43,7 +44,7 @@
 			   filter="(caching=false)"/>
 
 
-	<reference id="attributeService" interface="com.elasticpath.service.attribute.AttributeService"
+	<reference id="nonCachingAttributeService" interface="com.elasticpath.service.attribute.AttributeService"
 			   filter="(caching=false)"/>
 
 

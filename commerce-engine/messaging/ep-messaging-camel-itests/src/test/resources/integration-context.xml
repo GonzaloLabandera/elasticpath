@@ -77,18 +77,9 @@
 		<property name="camelContextId" value="ep-messaging-camel-itest"/>
 	</bean>
 
-	<bean id="domainEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
-		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
-	</bean>
-
 	<bean id="domainEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
 		<property name="uri" value="direct:/dev/null"/>
 		<property name="camelContextId" value="ep-messaging-camel-itest"/>
-	</bean>
-
-	<bean id="epDomainMessagingDomainEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
-		<property name="uri" value="direct:/dev/null" />
-		<property name="camelContextId" value="ep-domain-messaging"/>
 	</bean>
 
 	<bean id="domainDeadLetterEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">

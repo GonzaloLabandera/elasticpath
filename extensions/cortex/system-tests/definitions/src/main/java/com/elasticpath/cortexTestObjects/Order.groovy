@@ -9,11 +9,15 @@ import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_PAYMENT_CONFIGU
 import static org.assertj.core.api.Assertions.assertThat
 
 import com.elasticpath.cortex.dce.CommonMethods
+import com.elasticpath.jms.cucumber.definitions.JmsDefinitions
+import com.elasticpath.jms.cucumber.definitions.RawJsonDefinitions
 
 /**
  * Order.
  */
 class Order extends CommonMethods {
+
+	static final ORDER_EVENT_TOPIC = 'VirtualTopic.ep.orders'
 
 	static void getOrder() {
 		client.GET("/")
@@ -91,12 +95,23 @@ class Order extends CommonMethods {
 				.stopIfFailure()
 	}
 
+	static submitPurchaseAndWaitForRelease() {
+		final JmsDefinitions jmsDefinitions = new JmsDefinitions()
+		jmsDefinitions.listenToChannel(ORDER_EVENT_TOPIC)
+
+		submitPurchase()
+
+		final RawJsonDefinitions rawJsonDefinitions = new RawJsonDefinitions()
+		rawJsonDefinitions.waitForEventMessage('ORDER_RELEASED', Purchase.getPurchaseNumber(), ORDER_EVENT_TOPIC)
+	}
+
 	static void submitPurchase() {
 		submitPurchaseWithoutFollow()
 		client.follow()
 				.stopIfFailure()
 		CortexResponse.purchaseResponse = client.save()
 		Purchase.setPurchaseNumber()
+
 		println("purchase number: " + Purchase.getPurchaseNumber())
 	}
 

@@ -11,7 +11,7 @@ Feature: View purchase shipment lineitem tax
     When I add item with code portable_tv_hdbuy_sku to my cart
     And I add item with code bundle_with_physical_and_multisku_items_bundle_sku to my cart
     And I select shipping option CanadaPostExpress
-    When I make a purchase
+    When I make a purchase and wait for it to be released
     And I view the shipment line item for item "Portable TV"
     And I follow the shipment tax link
     Then I see the total field has amount: 18.12, currency: CAD and display: $18.12

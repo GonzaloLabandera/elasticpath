@@ -1,5 +1,7 @@
 package com.elasticpath.cucumber.definitions;
 
+import java.util.Map;
+
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
@@ -49,6 +51,16 @@ public class NavigationDefinition {
 	@When("^(?:I have access to|I go to) Promotions and Shipping$")
 	public void clickPromotionsShippingButton() {
 		activityToolbar.clickPromotionsShippingButton();
+	}
+
+	/**
+	 * Catalog promotion exists.
+	 *
+	 * @param catalogPromoMap the catalog promotion map.
+	 */
+	@When("^I have catalog promotion with following values$")
+	public void doNothing(final Map<String, String> catalogPromoMap) {
+		//This step means that the promotion has already been created.
 	}
 
 	/**

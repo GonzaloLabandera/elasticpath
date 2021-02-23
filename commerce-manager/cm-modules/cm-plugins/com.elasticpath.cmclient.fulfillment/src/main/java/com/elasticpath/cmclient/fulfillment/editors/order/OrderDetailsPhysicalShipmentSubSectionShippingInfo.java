@@ -91,16 +91,27 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		this.order = (Order) editor.getModel();
 		this.editor = editor;
 		this.mainPane = mainPane;
-		addressList = new ArrayList<>();
-		// create copies of shipment address and customer addresses so we are not working with the actual instances
-		OrderAddress shipmentAddress = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
-		shipmentAddress.init(shipment.getShipmentAddress());
-		addressList.add(shipmentAddress);
-		for (Address address : order.getCustomer().getAddresses()) {
+		this.addressList = initializeAddressList();
+	}
+
+	private List<Address> initializeAddressList() {
+		final List<Address> shipmentAddressList = new ArrayList<>();
+		shipmentAddressList.add(shipment.getShipmentAddress());
+
+		if (order.getAccount() == null) {
+			shipmentAddressList.addAll(order.getCustomer().getAddresses());
+		} else {
+			shipmentAddressList.addAll(order.getAccount().getAddresses());
+		}
+
+		List<Address> resultShipmentAddressList = new ArrayList<>();
+		for (Address address : shipmentAddressList) {
 			OrderAddress orderAddress = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 			orderAddress.init(address);
-			addressList.add(orderAddress);
+			resultShipmentAddressList.add(orderAddress);
 		}
+
+		return resultShipmentAddressList;
 	}
 
 	private EpState getStateFromPermissions() {

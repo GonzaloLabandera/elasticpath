@@ -80,6 +80,15 @@ public interface OrderService extends EpPersistenceService {
 	List<Order> findOrderByCustomerGuid(String customerGuid, boolean isExactMatch);
 
 	/**
+	 * Retrieve the list of orders by the account's guid.
+	 *
+	 * @param accountGuid the account's guid.
+	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
+	 * @return list of orders matching the account's guid.
+	 */
+	List<Order> findOrderByAccountGuid(String accountGuid, boolean isExactMatch);
+
+	/**
 	 * Retrieve the list of orders by the customer's guid and store code.
 	 *
 	 * @param customerGuid     the customer's guid
@@ -377,6 +386,14 @@ public interface OrderService extends EpPersistenceService {
 	Order holdOrder(Order order);
 
 	/**
+	 * Triggers post capture checkout actions.
+	 *
+	 * @param order the order to be processed.
+	 * @return the updated order
+	 */
+	Order triggerPostCaptureCheckout(Order order);
+
+	/**
 	 * Releases a hold on an order.
 	 *
 	 * @param order the order on which to release the hold
@@ -465,22 +482,6 @@ public interface OrderService extends EpPersistenceService {
 	void updateLimitedUsagePromotionCurrentNumbers(Collection<Long> appliedRuleUids, List<String> limitedUsagePromotionCodes);
 
 	/**
-	 * Gets a list of order UIDs for "failed" orders that are created before the given date.
-	 *
-	 * @param toDate     the date. orders that are created before this date will be returned.
-	 * @param maxResults the maximum number of results to be returned
-	 * @return a list of order UIDs
-	 */
-	List<Long> getFailedOrderUids(Date toDate, int maxResults);
-
-	/**
-	 * Delete orders with the given UIDs.
-	 *
-	 * @param orderUids UIDs of the orders to be removed
-	 */
-	void deleteOrders(List<Long> orderUids);
-
-	/**
 	 * Find latest order GUID by cart order GUID.
 	 *
 	 * @param cartOrderGuid the cart order GUID
@@ -540,4 +541,19 @@ public interface OrderService extends EpPersistenceService {
 	 */
 	void captureImmediatelyShippableShipments(Order order);
 
+	/**
+	 * Obtains account guid associated with a given order number.
+	 *
+	 * @param orderNumber the order number
+	 *
+	 * @return account guid.
+	 */
+
+	String getAccountGuidAssociatedWithOrderNumber(String orderNumber);
+	/**
+	 * Determines if there are orders with outstanding holds and publishes a hold notification event, if necessary.
+	 *
+	 * @param storeCode the store to query and publish notification for
+	 */
+	void sendOrderHoldNotificationEvent(String storeCode);
 }

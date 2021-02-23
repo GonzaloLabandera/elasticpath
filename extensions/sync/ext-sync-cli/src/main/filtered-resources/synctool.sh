@@ -12,4 +12,4 @@ for x in $LIB/*.jar; do
 done
 export DST_CLASSPATH=.:$DST_CLASSPATH
 
-"$JAVA_HOME"/bin/java -cp "$DST_CLASSPATH" -Dep.spring.profile=${ep.spring.profile} -Xmx512m com.elasticpath.tools.sync.client.SynchronizationTool  $@
+"$JAVA_HOME"/bin/java -cp "$DST_CLASSPATH" -Xmx512m com.elasticpath.tools.sync.client.SynchronizationTool  $@

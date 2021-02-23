@@ -1,12 +1,9 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2019
+ * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.test.integration;
 
-import static com.elasticpath.commons.constants.ContextIdNames.EVENT_ORIGINATOR_HELPER;
-import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART_SERVICE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -17,6 +14,7 @@ import java.util.Locale;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
@@ -33,6 +31,7 @@ import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.factory.TestShoppingCartFactoryForTestApplication;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -48,6 +47,7 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.service.shoppingcart.impl.OrderFactoryImpl;
 import com.elasticpath.test.db.DbTestCase;
+import com.elasticpath.test.util.CheckoutHelper;
 import com.elasticpath.test.util.Utils;
 
 /**
@@ -83,10 +83,12 @@ public class OrderFactoryImplTest extends DbTestCase {
 
 	private ShoppingContext shoppingContext;
 
+	private CheckoutHelper checkoutHelper;
+
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
 	 *
-	 * @throws Exception when exception
+	 * @throws Exception when exception.
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -96,6 +98,7 @@ public class OrderFactoryImplTest extends DbTestCase {
 				.withStoreCode(scenario.getStore().getCode())
 				.build();
 		shopperService.save(shoppingContext.getShopper());
+		checkoutHelper = new CheckoutHelper(getTac());
 	}
 
 	@After
@@ -121,15 +124,16 @@ public class OrderFactoryImplTest extends DbTestCase {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults checkoutResult = checkoutService.checkout(
-				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), false);
-		assertTrue("order should fail", checkoutResult.isOrderFailed());
+		CheckoutResults results = checkoutHelper.checkoutCartWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(),
+				false);
+		assertTrue("order should fail", results.isOrderFailed());
 
-		Order order = checkoutResult.getOrder();
+		Order order = results.getOrder();
 		assertNotNull("There should have been an order on the checkout results", order);
 		assertTrue("The order should be persistent", order.isPersisted());
 		assertNull("The order cart order GUID should be null to allow the order to be resubmitted since there is a unique constraint on the "
 				+ "CART_ORDER_GUID", order.getCartOrderGuid());
+
 	}
 
 	/**
@@ -146,12 +150,15 @@ public class OrderFactoryImplTest extends DbTestCase {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults checkoutResult = checkoutService.checkout(
-				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), false);
-		assertFalse("The order should not have failed", checkoutResult.isOrderFailed());
+		CheckoutResults results = checkoutHelper.checkoutCartWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(),
+				true);
+		Order order = results.getOrder();
 
-		Order order = checkoutResult.getOrder();
 		assertNotNull("There should have been an order on the checkout results", order);
+
+		order = checkoutHelper.finalizeOrder(order);
+
+		assertEquals("The order should be in progress", OrderStatus.IN_PROGRESS, order.getStatus());
 		assertTrue("The order should be persistent", order.isPersisted());
 		assertEquals("The order cart order GUID should be set to the corresponding cart order GUID", cartOrder.getGuid(), order.getCartOrderGuid());
 	}

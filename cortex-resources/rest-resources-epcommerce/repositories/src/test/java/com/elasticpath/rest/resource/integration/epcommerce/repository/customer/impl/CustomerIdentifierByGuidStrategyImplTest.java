@@ -43,7 +43,7 @@ public class CustomerIdentifierByGuidStrategyImplTest {
 		when(customerRepository.isCustomerGuidExists(VALID_GUID))
 				.thenReturn(ExecutionResultFactory.createReadOK(null));
 
-		ExecutionResult<Void> executionResult =
+		ExecutionResult<Boolean> executionResult =
 				customerIdentifierByGuidStrategy.isCustomerExists(VALID_GUID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isSuccessful());
 	}
@@ -56,7 +56,7 @@ public class CustomerIdentifierByGuidStrategyImplTest {
 		when(customerRepository.isCustomerGuidExists(INVALID_GUID))
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
-		ExecutionResult<Void> executionResult =
+		ExecutionResult<Boolean> executionResult =
 				customerIdentifierByGuidStrategy.isCustomerExists(INVALID_GUID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertFalse(executionResult.isSuccessful());
 	}

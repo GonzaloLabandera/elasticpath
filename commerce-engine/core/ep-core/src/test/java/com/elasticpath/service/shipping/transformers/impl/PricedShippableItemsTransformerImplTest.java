@@ -111,6 +111,9 @@ public class PricedShippableItemsTransformerImplTest {
 		when(shippableItemsPricing.getShoppingItemPricingFunction()).thenReturn(itemPricingFunction);
 		when(itemPricingFunction.apply(shoppingItem1)).thenReturn(shoppingItemPricingSnapshot1);
 		when(itemPricingFunction.apply(shoppingItem2)).thenReturn(shoppingItemPricingSnapshot2);
+
+		when(shoppingItem1.getCurrency()).thenReturn(CURRENCY);
+		when(shoppingItem2.getCurrency()).thenReturn(CURRENCY);
 	}
 
 	@Test

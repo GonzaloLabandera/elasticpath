@@ -4,7 +4,6 @@
 package com.elasticpath.domain.customer.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -28,7 +27,6 @@ import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerType;
-import com.elasticpath.service.security.SaltFactory;
 import com.elasticpath.test.factory.CustomerBuilder;
 
 /**
@@ -167,7 +165,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testSetEmail() {
-		final String[] testData = new String[]{"aaaa@aaa.aaa", "", null};
+		final String[] testData = new String[]{"aaaa@aaa.aaa", ""};
 		for (final String email : testData) {
 			customerImpl.setEmail(email);
 			assertThat(customerImpl.getEmail()).isEqualTo(email);
@@ -246,7 +244,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testSetFirstName() {
-		final String[] testData = new String[] { "aaaaa", "", null };
+		final String[] testData = new String[] { "aaaaa", "" };
 		for (final String firstName : testData) {
 			customerImpl.setFirstName(firstName);
 			assertThat(customerImpl.getFirstName()).isEqualTo(firstName);
@@ -266,7 +264,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testSetLastName() {
-		final String[] testData = new String[] { "aaaaaa", "", null };
+		final String[] testData = new String[] { "aaaaaa", ""};
 		for (final String lastName : testData) {
 			customerImpl.setLastName(lastName);
 			assertThat(customerImpl.getLastName()).isEqualTo(lastName);
@@ -294,21 +292,16 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testSetClearTextPassword() {
-		@SuppressWarnings("unchecked") final SaltFactory<String> saltFactory = mock(SaltFactory.class);
-		when(beanFactory.getSingletonBean(ContextIdNames.SALT_FACTORY, SaltFactory.class)).thenReturn(saltFactory);
-
 		final String[] passwords = new String[] { "AbCdEfGhI", "AbCdEfGhIjKlMnOpQrS", "aA123_$@#^&", "", null };
 		final String[] hashedPasswords = new String[] { "d60c7aaba158d8270ec509390438152ca931ec6a", "32a6ea3419c4d9653cf51c6500f3accef2012ab0",
 				"e9d1d12fbb45ca95c496f3a33a40956c1a4da1ef", null, null };
 
-		final String salt = "SALT";
 		for (int i = 0; i < passwords.length; i++) {
 			final String password = passwords[i];
 			final String hashedPassword = hashedPasswords[i];
 
 			if (!StringUtils.isBlank(password)) {
-				when(saltFactory.createSalt()).thenReturn(salt);
-				when(passwordEncoder.encodePassword(password, salt)).thenReturn(hashedPassword);
+				when(passwordEncoder.encode(password)).thenReturn(hashedPassword);
 			}
 
 			customerImpl.setClearTextPassword(password);
@@ -410,12 +403,12 @@ public class CustomerImplTest {
 	}
 
 	/**
-	 * Test method for setting customer gender.
+	 * Test method for setting SUSPENDED customer status.
 	 */
 	@Test
-	public void testSetGender() {
-		this.customerImpl.setGender(Customer.GENDER_FEMALE);
-		assertThat(this.customerImpl.getGender()).isEqualTo(Customer.GENDER_FEMALE);
+	public void testSetSuspendedStatus() {
+		customerImpl.setStatus(Customer.STATUS_SUSPENDED);
+		assertThat(this.customerImpl.getStatus()).isEqualTo(Customer.STATUS_SUSPENDED);
 	}
 
 	/**

@@ -33,6 +33,8 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 
 	private String systemPropertyOverrideValue;
 
+	private String deprecatedSystemPropertyOverrideKey;
+
 	@Override
 	public T get() {
 		return get(null);
@@ -44,7 +46,7 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 
 		SettingValue settingValue = getSettingValue(context);
 
-		if (systemPropertyOverrideKey != null) {
+		if (systemPropertyOverrideKey != null || deprecatedSystemPropertyOverrideKey != null) {
 			settingValue = applyPossibleSystemPropertyOverride(settingValue);
 		}
 
@@ -68,18 +70,33 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 	}
 
 	private SettingValue applyPossibleSystemPropertyOverride(final SettingValue settingValue) {
+		if (StringUtils.isNotEmpty(deprecatedSystemPropertyOverrideKey)) {
+			String overrideValue = System.getProperty(deprecatedSystemPropertyOverrideKey);
 
-		if (systemPropertyOverrideValue == null) {
-			final String overrideValue = System.getProperty(systemPropertyOverrideKey);
+			if (StringUtils.isNotEmpty(overrideValue)) {
+				LOG.warn("Deprecated ‘" + deprecatedSystemPropertyOverrideKey + "’ JVM system property should be replaced with ‘"
+						+ systemPropertyOverrideKey + "’.");
+				systemPropertyOverrideValue = overrideValue;
+				LOG.info(
+						String.format("Setting override applied for path: '%s', context: '%s' and deprecatedSystemPropertyOverrideKey: '%s'",
+								path,
+								StringUtils.defaultString(context),
+								deprecatedSystemPropertyOverrideKey));
+			}
+		}
+
+		if (StringUtils.isNotEmpty(systemPropertyOverrideKey)) {
+			String overrideValue = System.getProperty(systemPropertyOverrideKey);
 			if (StringUtils.isNotEmpty(overrideValue)) {
 				systemPropertyOverrideValue = overrideValue;
 				LOG.info(
 						String.format("Setting override applied for path: '%s', context: '%s' and systemPropertyOverrideKey: '%s'",
 								path,
-								context == null ? "" : context,
+								StringUtils.defaultString(context),
 								systemPropertyOverrideKey));
 			}
 		}
+
 		if (systemPropertyOverrideValue != null) {
 			return new OverridingSettingValueImpl(settingValue, systemPropertyOverrideValue);
 		}
@@ -136,4 +153,7 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 		this.systemPropertyOverrideKey = systemPropertyOverrideKey;
 	}
 
+	public void setDeprecatedSystemPropertyOverrideKey(final String deprecatedSystemPropertyOverrideKey) {
+		this.deprecatedSystemPropertyOverrideKey = deprecatedSystemPropertyOverrideKey;
+	}
 }

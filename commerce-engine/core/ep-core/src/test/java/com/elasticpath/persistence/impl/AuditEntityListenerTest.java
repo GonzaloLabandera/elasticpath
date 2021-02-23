@@ -112,6 +112,7 @@ public class AuditEntityListenerTest {
 		};
 		auditEntityListener.setBeanFactory(beanFactory);
 		auditEntityListener.setMetadataMap(metadataMap);
+		AuditEntityListener.enableAudit(true);
 
 		realJpaPersistenceEngine.setQueryReaderFactory(queryReaderFactory);
 

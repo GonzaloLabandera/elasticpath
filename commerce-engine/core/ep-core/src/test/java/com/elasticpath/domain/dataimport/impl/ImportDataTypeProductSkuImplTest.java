@@ -36,7 +36,9 @@ import com.elasticpath.commons.exception.EpDateBindException;
 import com.elasticpath.commons.exception.EpIntBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.commons.exception.EpTooLongBindException;
+import com.elasticpath.commons.util.CatalogCodeUtil;
 import com.elasticpath.commons.util.Utility;
+import com.elasticpath.commons.util.impl.CatalogCodeUtilImpl;
 import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
@@ -126,6 +128,8 @@ public class ImportDataTypeProductSkuImplTest {
 
 	private SkuOption skuOption;
 
+	private final CatalogCodeUtil catalogCodeUtil = new CatalogCodeUtilImpl();
+
 	private final Utility utility = new UtilityImpl() {
 		private static final long serialVersionUID = 1L;
 
@@ -154,6 +158,7 @@ public class ImportDataTypeProductSkuImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.VALIDATOR_UTILS, ValidatorUtils.class, validatorUtils);
 		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.UTILITY, Utility.class, utility);
+		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.CATALOG_CODE_UTIL, CatalogCodeUtil.class, catalogCodeUtil);
 
 		productSkuImportType = new ImportDataTypeProductSkuImpl();
 

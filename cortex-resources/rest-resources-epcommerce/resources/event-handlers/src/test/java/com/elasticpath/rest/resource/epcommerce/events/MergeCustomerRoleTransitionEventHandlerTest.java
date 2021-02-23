@@ -75,7 +75,7 @@ public class MergeCustomerRoleTransitionEventHandlerTest {
 		ExecutionResult<CustomerSession> customerSession = ExecutionResultFactory.createReadOK(mockCustomerSession);
 		ExecutionResult<Object> mergedCustomerSession = ExecutionResultFactory.createUpdateOK();
 
-		when(mockCustomerSessionRepository.findCustomerSessionByGuid(anyString())).thenReturn(customerSession);
+		when(mockCustomerSessionRepository.findCustomerSessionByGuidAndStoreCode(anyString(), anyString())).thenReturn(customerSession);
 
 		when(customerRepository.mergeCustomer(mockCustomerSession, mockRecipientCustomer, SCOPE)).thenReturn(mergedCustomerSession);
 
@@ -83,8 +83,8 @@ public class MergeCustomerRoleTransitionEventHandlerTest {
 
 		verify(mockRoleTransitionEvent).getNewUserGuid();
 		verify(mockRoleTransitionEvent).getOldUserGuid();
-		verify(customerRepository).findCustomerByGuid(NEW_USER_GUID);
-		verify(mockCustomerSessionRepository).findCustomerSessionByGuid(OLD_USER_GUID);
+		verify(customerRepository).findCustomerByGuidAndStoreCode(NEW_USER_GUID, SCOPE);
+		verify(mockCustomerSessionRepository).findCustomerSessionByGuidAndStoreCode(OLD_USER_GUID, SCOPE);
 		verify(customerRepository).mergeCustomer(any(CustomerSession.class), any(Customer.class), any(String.class));
 	}
 
@@ -92,7 +92,7 @@ public class MergeCustomerRoleTransitionEventHandlerTest {
 		ExecutionResult<Customer> recipientCustomer = ExecutionResultFactory.createReadOK(mockRecipientCustomer);
 		when(mockRoleTransitionEvent.getOldUserGuid()).thenReturn(OLD_USER_GUID);
 		when(mockRoleTransitionEvent.getNewUserGuid()).thenReturn(NEW_USER_GUID);
-		when(customerRepository.findCustomerByGuid(NEW_USER_GUID)).thenReturn(recipientCustomer);
+		when(customerRepository.findCustomerByGuidAndStoreCode(NEW_USER_GUID, SCOPE)).thenReturn(recipientCustomer);
 	}
 
 	private void mockRoleTransition() {

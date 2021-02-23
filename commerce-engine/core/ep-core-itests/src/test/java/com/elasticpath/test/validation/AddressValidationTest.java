@@ -32,10 +32,6 @@ public class AddressValidationTest extends AbstractValidationTest {
 	/** Test validation for last name property. */
 	@Test
 	public void testValidateLastName() {
-		Set<ConstraintViolation<Address>> violations = getValidator().validate(address);
-		assertViolationsContains("Unset value should fail", violations, "lastName");
-
-		assertValidationViolation("Blanks not allowed", address, "lastName", RandomStringUtils.random(5, WHITESPACE));
 		assertValidationSuccess(address, "lastName", "sharks");
 		assertValidationSuccess("String is just long enough", address, "lastName", RandomStringUtils.random(Address.MEDIUM_MAXLENGTH));
 		assertValidationViolation("String is just too long", address, "lastName", RandomStringUtils.random(Address.MEDIUM_MAXLENGTH + 1));
@@ -44,10 +40,6 @@ public class AddressValidationTest extends AbstractValidationTest {
 	/** Test validation for first name property. */
 	@Test
 	public void testValidateFirstName() {
-		Set<ConstraintViolation<Address>> violations = getValidator().validate(address);
-		assertViolationsContains("unset value", violations, "firstName");
-
-		assertValidationViolation("no blanks", address, "firstName", RandomStringUtils.random(5, WHITESPACE));
 		assertValidationSuccess(address, "firstName", "lazors!");
 		assertValidationSuccess("just long enough", address, "firstName", RandomStringUtils.random(Address.MEDIUM_MAXLENGTH));
 		assertValidationViolation("too long", address, "firstName", RandomStringUtils.random(Address.MEDIUM_MAXLENGTH + 1));

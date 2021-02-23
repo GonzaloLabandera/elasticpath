@@ -35,11 +35,28 @@ public interface IndexBuilder {
 
 	/**
 	 * Retrieve all UIDs.
-	 * 
+	 *
 	 * @return all UIDs
 	 */
 	List<Long> findAllUids();
-	
+
+	/**
+	 * Retrieves a paginated list of all searchable uids.
+	 *
+	 * @param page the current page of the list to retrieve
+	 * @return a paginated list of indexable uids whose last modified date is later than the specified date
+	 */
+	List<Long> findIndexableUidsPaginated(int page);
+
+	/**
+	 * To be used with findIndexableUidsPaginated method and inform use of pagination.
+	 *
+	 * @return false as default, otherwise override it to use pagination.
+	 */
+	default boolean canPaginate() {
+		return false;
+	}
+
 	/**
 	 * Retrieves a set of all UIDs that represent the given notification.
 	 *

@@ -50,4 +50,4 @@ Feature: Account Associates
 	
     Examples:
       | accountSharedId                | associateUserEmail         | errorMessage |
-      | SomeBusiness@abc.com           | doesnot@exist.com    	    | No registered user can be found with the specified email address. The user must register on the storefront before they can be associated with this account.|
+      | SomeBusiness@abc.com           | doesnot@exist.com    	    | No registered shopper can be found with the specified email address. The shopper must register on the storefront before they can be associated with this account.|

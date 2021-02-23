@@ -37,7 +37,6 @@ public class CustomerValidationTest extends AbstractValidationTest {
 
 	private static final String USERNAME = "username";
 	private static final String PASSWORD = "password";
-	private static final String SHARED_ID = "sharedId";
 
 	/** Test initialization. */
 	@Before
@@ -208,7 +207,7 @@ public class CustomerValidationTest extends AbstractValidationTest {
 
 		customerAddress2.setFirstName(null);
 		violations = getCustomerConstraintValidationService().validate(customer);
-		assertViolationsContains("first name now invalid", violations, "addresses[1].firstName");
+		assertViolationsNotContains(violations, "addresses[1].firstName");
 		assertViolationsContains("city still invalid", violations, "addresses[0].city");
 
 		customerAddress1.setCity("a city");

@@ -4,7 +4,6 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +19,7 @@ import com.elasticpath.rest.definition.purchases.PurchasesIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.service.customer.UserAccountAssociationService;
 
@@ -39,6 +39,8 @@ public class AccountEntityPurchaseRepositoryImpl<E extends AccountEntity, I exte
 
 	private UserAccountAssociationService userAccountAssociationService;
 
+	private CustomerRepository customerRepository;
+
 	@Override
 	public Observable<PurchaseIdentifier> findAll(final IdentifierPart<String> scope) {
 		List<String> orderIdsArray = new ArrayList<>();
@@ -46,13 +48,20 @@ public class AccountEntityPurchaseRepositoryImpl<E extends AccountEntity, I exte
 				resourceOperationContext.getUserIdentifier()).blockingIterable()
 				.forEach(orderIdsArray::add);
 
-		Collection<UserAccountAssociation> associationsForUser =
-				userAccountAssociationService.findAssociationsForUser(resourceOperationContext.getUserIdentifier());
-		associationsForUser.forEach(userAccountAssociation ->
-				orderRepository.findOrderIdsByAccountGuid(scope.getValue(),
-						userAccountAssociation.getAccountGuid(),
-						0,
-						Integer.MAX_VALUE)
+		List<String> accountGuids = userAccountAssociationService
+				.findAssociationsForUser(resourceOperationContext.getUserIdentifier())
+				.stream().map(UserAccountAssociation::getAccountGuid)
+				.collect(Collectors.toList());
+
+		List<String> childAccountGuids = accountGuids.stream()
+				.map(accountGuid -> customerRepository.findDescendants(accountGuid))
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+
+		accountGuids.addAll(childAccountGuids);
+
+		accountGuids.forEach(guid ->
+				orderRepository.findOrderIdsByAccountGuid(scope.getValue(), guid, 0, Integer.MAX_VALUE)
 						.blockingIterable().forEach(orderIdsArray::add));
 
 		return Observable.fromIterable(getPurchaseIdentifiers(scope, orderIdsArray));
@@ -81,5 +90,10 @@ public class AccountEntityPurchaseRepositoryImpl<E extends AccountEntity, I exte
 	@Reference
 	public void setUserAccountAssociationService(final UserAccountAssociationService userAccountAssociationService) {
 		this.userAccountAssociationService = userAccountAssociationService;
+	}
+
+	@Reference
+	public void setCustomerRepository(final CustomerRepository customerRepository) {
+		this.customerRepository = customerRepository;
 	}
 }

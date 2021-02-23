@@ -1,19 +1,12 @@
 package com.elasticpath.test.integration;
 
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.Currency;
+import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.Endpoint;
-import org.apache.camel.EndpointInject;
-import org.apache.camel.builder.NotifyBuilder;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.spi.DataFormat;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +24,7 @@ import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.BrandImpl;
+import com.elasticpath.domain.messaging.OutboxMessage;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl;
@@ -38,6 +32,7 @@ import com.elasticpath.domain.skuconfiguration.impl.SkuOptionValueImpl;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.messaging.EventMessage;
+import com.elasticpath.messaging.camel.jackson.EventMessageObjectMapper;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.persistence.impl.DomainEventListener;
 import com.elasticpath.service.catalog.BrandService;
@@ -45,6 +40,7 @@ import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.service.catalog.CategoryTypeService;
 import com.elasticpath.service.catalog.SkuOptionService;
 import com.elasticpath.service.catalog.impl.ProductServiceImpl;
+import com.elasticpath.service.messaging.OutboxMessageService;
 import com.elasticpath.test.persister.TaxTestPersister;
 import com.elasticpath.test.persister.TestDataPersisterFactory;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
@@ -53,11 +49,6 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
  * Tests that the {@link DomainEventListener} correctly handles changes in database and sends event messages to message queue.
  */
 public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
-
-	private static final String DOMAIN_MESSAGING_CAMEL_CONTEXT = "ep-domain-messaging";
-	private static final String MOCK_DOMAIN_ENDPOINT = "mock:domain/events";
-
-	private NotifyBuilder notifyBuilder;
 
 	private SkuOption skuOption;
 
@@ -86,20 +77,13 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 	private EventMessageFactory eventMessageFactory;
 
 	@Autowired
-	@Qualifier(DOMAIN_MESSAGING_CAMEL_CONTEXT)
-	private CamelContext camelContext;
-
-	@EndpointInject(uri = MOCK_DOMAIN_ENDPOINT, context = DOMAIN_MESSAGING_CAMEL_CONTEXT)
-	private MockEndpoint mockDomainEventEndpoint;
-
-	@EndpointInject(ref = "epDomainMessagingDomainEventExternalEndpoint")
-	private Endpoint domainEventOutgoingEndpoint;
+	private EventMessageObjectMapper eventMessageObjectMapper;
 
 	@Autowired
-	protected DataFormat eventMessageDataFormat;
+	private CategoryTypeService categoryTypeService;
 
 	@Autowired
-	protected CategoryTypeService categoryTypeService;
+	private OutboxMessageService outboxMessageService;
 
 	@Autowired
 	private BeanFactory beanFactory;
@@ -110,15 +94,6 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 
 	@Before
 	public void setUp() throws Exception {
-		camelContext.addRoutes(new RouteBuilder() {
-			@Override
-			public void configure() {
-				from(domainEventOutgoingEndpoint)
-						.unmarshal(eventMessageDataFormat)
-						.to(MOCK_DOMAIN_ENDPOINT);
-			}
-		});
-
 		final SimpleStoreScenario scenario = getTac().useScenario(SimpleStoreScenario.class);
 		catalog = scenario.getCatalog();
 		skuOption = createSkuOption(catalog);
@@ -127,103 +102,67 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 		warehouse = scenario.getWarehouse();
 		category = scenario.getCategory();
 		testDataPersisterFactory = getTac().getPersistersFactory();
-
-		clearEndpoint();
 	}
-
 
 	/**
 	 * Verify, that message with DomainEventType.SKU_OPTION_CREATED is sent to camel endpoint after SkuOption was persisted.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterPersistSkuOption() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(1)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
+	public void testThatDomainEventMessageSendsToMessageQueueAfterPersistSkuOption() throws JsonProcessingException {
+		clearEventMessageOutbox();
 
 		skuOptionService.add(skuOption);
 
-		assertTrue(notifyBuilder.matches(1, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.SKU_OPTION_CREATED, skuOption.getGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.SKU_OPTION_CREATED, skuOption.getGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.SKU_OPTION_UPDATED is sent to camel endpoint after SkuOption was updated.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterAttachSkuOption() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(2)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
-
+	public void testThatDomainEventMessageSendsToMessageQueueAfterAttachSkuOption() throws JsonProcessingException {
 		skuOptionService.add(skuOption);
 
 		final SkuOption updatedSkuOption = skuOptionService.get(skuOption.getUidPk());
 		updatedSkuOption.setOptionKey("updatedOptionKey");
 
-		clearEndpoint();
+		clearEventMessageOutbox();
 
 		skuOptionService.update(updatedSkuOption);
 
-		assertTrue(notifyBuilder.matches(1, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.SKU_OPTION_UPDATED, updatedSkuOption.getGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.SKU_OPTION_UPDATED, updatedSkuOption.getGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.SKU_OPTION_DELETED is sent to camel endpoint after SkuOption was deleted.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterDeleteSkuOption() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(2)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
-
+	public void testThatDomainEventMessageSendsToMessageQueueAfterDeleteSkuOption() throws JsonProcessingException {
 		skuOptionService.add(skuOption);
-		clearEndpoint();
+
+		clearEventMessageOutbox();
 
 		skuOptionService.remove(skuOption);
 
-		assertTrue(notifyBuilder.matches(3, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.SKU_OPTION_DELETED, skuOption.getGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.SKU_OPTION_DELETED, skuOption.getGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.CATEGORY_UPDATED is sent to camel endpoint after Category was reordered.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterReorderingCategoryChildren() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(4)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
-
+	public void testThatDomainEventMessageSendsToMessageQueueAfterReorderingCategoryChildren() throws JsonProcessingException {
 		final Category parent = createMasterCategory("parent", catalog, categoryType, null, 1);
 		categoryService.saveOrUpdate(parent);
 
@@ -231,179 +170,114 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 		categoryService.saveOrUpdate(child1);
 		categoryService.saveOrUpdate(createMasterCategory("child2", catalog, categoryType, parent, 0));
 
-		clearEndpoint();
+		clearEventMessageOutbox();
+
 		categoryService.updateCategoryOrderUp(child1);
 
-		assertTrue(notifyBuilder.matches(3, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.CATEGORY_UPDATED, child1.getCompoundGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.CATEGORY_UPDATED, child1.getCompoundGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.CATEGORY_CREATED is sent to camel endpoint after Category was persisted.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterPersistCategory() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(1)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
-		clearEndpoint();
+	public void testThatDomainEventMessageSendsToMessageQueueAfterPersistCategory() throws JsonProcessingException {
+		clearEventMessageOutbox();
+
 		final Category category = createMasterCategory("category", catalog, categoryType, null, 0);
 		categoryService.add(category);
 
-		assertTrue(notifyBuilder.matches(1, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.CATEGORY_CREATED, category.getCompoundGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.CATEGORY_CREATED, category.getCompoundGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.CATEGORY_DELETED is sent to camel endpoint after Category was deleted.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterDeleteCategory() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(2)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
+	public void testThatDomainEventMessageSendsToMessageQueueAfterDeleteCategory() throws JsonProcessingException {
 		final Category category = createMasterCategory("category", catalog, categoryType, null, 0);
 		categoryService.add(category);
-		clearEndpoint();
+
+		clearEventMessageOutbox();
 
 		categoryService.removeCategoryTree(category.getUidPk());
 
-		assertTrue(notifyBuilder.matches(3, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.CATEGORY_DELETED, category.getCompoundGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.CATEGORY_DELETED, category.getCompoundGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.BRAND_DELETED is sent to camel endpoint after Brand was deleted.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterDeleteBrand() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(2)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
-
+	public void testThatDomainEventMessageSendsToMessageQueueAfterDeleteBrand() throws JsonProcessingException {
 		brandService.add(brand);
-		clearEndpoint();
+
+		clearEventMessageOutbox();
 
 		brandService.remove(brand);
 
-		assertTrue(notifyBuilder.matches(3, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.BRAND_DELETED, brand.getGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.BRAND_DELETED, brand.getGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.BRAND_CREATED is sent to camel endpoint after Brand was persisted.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterPersistBrand() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(1)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
-		clearEndpoint();
+	public void testThatDomainEventMessageSendsToMessageQueueAfterPersistBrand() throws JsonProcessingException {
+		clearEventMessageOutbox();
 
 		brandService.add(brand);
 
-		assertTrue(notifyBuilder.matches(1, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.BRAND_CREATED, brand.getGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.BRAND_CREATED, brand.getGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.BRAND_UPDATED is sent to camel endpoint after Brand was updated.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsToMessageQueueAfterAttachBrand() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(2)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
-
+	public void testThatDomainEventMessageSendsToMessageQueueAfterAttachBrand() throws JsonProcessingException {
 		brandService.add(brand);
+
+		clearEventMessageOutbox();
+
 		final Brand updatedBrand = brandService.get(brand.getUidPk());
 		updatedBrand.setImageUrl("url");
-		clearEndpoint();
-
 		brandService.saveOrUpdate(updatedBrand);
 
-		assertTrue(notifyBuilder.matches(1, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.BRAND_UPDATED, updatedBrand.getGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.BRAND_UPDATED, updatedBrand.getGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	/**
 	 * Verify, that message with DomainEventType.PRODUCT_UPDATED is sent to camel endpoint after Product was updated.
 	 *
-	 * @throws InterruptedException on failure
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testThatDomainEventMessageSendsTwoMessageQueueAfterUpdatingFeaturedProductListInProduct() throws InterruptedException {
-		notifyBuilder = new NotifyBuilder(camelContext)
-				.whenDone(1)
-				.wereSentTo(MOCK_DOMAIN_ENDPOINT)
-				.create();
-
+	public void testDomainEventMessageAfterUpdatingFeaturedProductListInCategory() throws JsonProcessingException {
 		final Product product = persistProductWithSku();
 
-		clearEndpoint();
+		clearEventMessageOutbox();
 
 		productService.refreshProductCategoryFeaturedField(product.getUidPk(), category.getUidPk(), 1);
 
-		assertTrue(notifyBuilder.matches(3, TimeUnit.SECONDS));
-
-		mockDomainEventEndpoint.message(0)
-				.body(EventMessage.class)
-				.isEqualTo(eventMessageFactory.createEventMessage(DomainEventType.PRODUCT_UPDATED, product.getGuid(), null));
-		mockDomainEventEndpoint.assertIsSatisfied();
-	}
-
-	private void clearEndpoint() {
-		try {
-			Thread.sleep(1000);
-			mockDomainEventEndpoint.reset();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		EventMessage expectedEventMessage = eventMessageFactory.createEventMessage(DomainEventType.PRODUCT_UPDATED, product.getGuid(), null);
+		Assert.assertTrue(isEventMessageInOutbox(expectedEventMessage));
 	}
 
 	private Product persistProductWithSku() {
@@ -428,7 +302,7 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 				orderLimit);
 	}
 
-	public CategoryType persistCategoryType(final String categoryTypeName, final Catalog catalog) {
+	private CategoryType persistCategoryType(final String categoryTypeName, final Catalog catalog) {
 		final CategoryType categoryType = beanFactory.getPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class);
 		categoryType.setCatalog(catalog);
 		categoryType.setName(categoryTypeName);
@@ -436,7 +310,7 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 		return categoryTypeService.add(categoryType);
 	}
 
-	public Category createMasterCategory(final String categoryCode, final Catalog catalog, final CategoryType categoryType,
+	private Category createMasterCategory(final String categoryCode, final Catalog catalog, final CategoryType categoryType,
 										 final Category parentCategory, final int ordering) {
 		final CategoryGuidUtil guidUtil = new CategoryGuidUtil();
 		final Category category = beanFactory.getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
@@ -474,4 +348,14 @@ public class DomainEventListenerIntegrationTest extends BasicSpringContextTest {
 		return brand;
 	}
 
+	private boolean isEventMessageInOutbox(final EventMessage expectedEventMessage) throws JsonProcessingException {
+		String expectedEventMessageString = eventMessageObjectMapper.writeValueAsString(expectedEventMessage);
+		List<OutboxMessage> messageOutboxList = outboxMessageService.list();
+		return messageOutboxList.stream()
+				.anyMatch(messageOutbox -> messageOutbox.getMessageBody().equals(expectedEventMessageString));
+	}
+
+	private void clearEventMessageOutbox() {
+		outboxMessageService.list().forEach(outboxMessage -> outboxMessageService.remove(outboxMessage));
+	}
 }

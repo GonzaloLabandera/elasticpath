@@ -491,7 +491,6 @@
 		<property name="stages">
 			<util:list>
 				<ref bean="batchingGroupingStage"/>
-				<ref bean="customerFilteringStage"/>
 				<ref bean="customerLoadingStage"/>
 				<ref bean="customerDocumentCreatorStage"/>
 				<ref bean="customerDocumentPublishingStage"/>
@@ -507,34 +506,6 @@
 		<property name="solrManager" ref="solrManager" />
 		<property name="indexType">
 			<value type="com.elasticpath.service.search.IndexType">CUSTOMER</value>
-		</property>
-	</bean>
-
-	<!-- Filtering Related : customerFilter -->
-
-	<bean id="customerFilterTaskFactory"
-		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
-		<property name="targetBeanName">
-			<idref bean="customerFilter" />
-		</property>
-	</bean>
-
-	<bean id="customerFilteringStage"
-		class="com.elasticpath.search.index.pipeline.impl.UidFilteringStage">
-		<property name="indexFilteringTaskFactory" ref="customerFilterTaskFactory" />
-		<property name="taskExecutor">
-			<bean class="org.springframework.core.task.SyncTaskExecutor" />
-		</property>
-	</bean>
-
-	<bean id="customerFilter"
-		class="com.elasticpath.search.index.filter.impl.CustomerFilter"
-		scope="prototype">
-		<property name="customerService" ref="customerService" />
-		<property name="pipelinePerformance">
-			<!-- pass in a black hole PipelinePerformance for integration tests.. -->
-			<bean
-				class="com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl" />
 		</property>
 	</bean>
 

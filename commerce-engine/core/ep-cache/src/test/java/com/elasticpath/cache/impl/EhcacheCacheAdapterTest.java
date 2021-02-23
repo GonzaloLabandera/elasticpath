@@ -19,22 +19,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+import com.google.common.collect.Lists;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+import org.apache.commons.collections.CollectionUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.Lists;
-
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.cache.CacheLoader;
+import com.elasticpath.cache.CacheResult;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EhcacheCacheAdapterTest {
@@ -44,7 +42,7 @@ public class EhcacheCacheAdapterTest {
 	private static final String VAL_2 = "value2";
 	private static final String FOO = "foo";
 	private static final String BAR = "bar";
-	
+
 	private static final int THREE = 3;
 	private static final int FOUR = 4;
 
@@ -73,16 +71,16 @@ public class EhcacheCacheAdapterTest {
 	public void verifyThatGetOnCacheHitReturnsACachedObject() {
 		cache.put(new Element(FOO, BAR));
 
-		assertEquals(BAR, adapter.get(FOO));
+		assertEquals(BAR, adapter.get(FOO).get());
 	}
 
 	@Test
 	public void verifyThatGetOnCacheMissReturnsNull() {
-		assertNull(adapter.get(FOO));
+		assertEquals(CacheResult.notPresent(), adapter.get(FOO));
 	}
 
 	@Test
-	public void verifyThatCacheContainsKey()  {
+	public void verifyThatCacheContainsKey() {
 
 		cache.put(new Element(KEY_1, VAL_1));
 
@@ -90,39 +88,39 @@ public class EhcacheCacheAdapterTest {
 	}
 
 	@Test
-	public void shouldGetFromCacheOnCacheHitNotFromDb()  {
+	public void shouldGetFromCacheOnCacheHitNotFromDb() {
 		cache.put(new Element(KEY_1, VAL_1));
 
-		assertEquals(VAL_1, adapter.get(KEY_1, fallbackCacheLoader));
+		assertEquals(VAL_1, adapter.get(KEY_1, fallbackCacheLoader::load));
 
 		verifyZeroInteractions(fallbackCacheLoader);
 	}
 
 	@Test
-	public void shouldGetFromDbOnCacheMissUsingFallbackLoader()  {
+	public void shouldGetFromDbOnCacheMissUsingFallbackLoader() {
 		when(fallbackCacheLoader.load(KEY_1)).thenReturn(VAL_1);
 
-		assertEquals(VAL_1, adapter.get(KEY_1, fallbackCacheLoader));
+		assertEquals(VAL_1, adapter.get(KEY_1, fallbackCacheLoader::load));
 		//verify that value is stored in cache
-		assertEquals(VAL_1, adapter.get(KEY_1));
+		assertEquals(VAL_1, adapter.get(KEY_1).get());
 
 		verify(fallbackCacheLoader).load(KEY_1);
 		verifyNoMoreInteractions(fallbackCacheLoader);
 	}
 
 	@Test
-	public void shouldReturnNullFromDbOnCacheMissUsingFallbackLoader()  {
+	public void shouldReturnNullFromDbOnCacheMissUsingFallbackLoader() {
 		when(fallbackCacheLoader.load(KEY_1)).thenReturn(null);
 
-		assertNull(adapter.get(KEY_1, fallbackCacheLoader));
-		assertNull(VAL_1, adapter.get(KEY_1));
+		assertNull(adapter.get(KEY_1, fallbackCacheLoader::load));
+		assertEquals(CacheResult.create(null), adapter.get(KEY_1));
 
 		verify(fallbackCacheLoader).load(KEY_1);
 		verifyNoMoreInteractions(fallbackCacheLoader);
 	}
 
 	@Test
-	public void shouldReturnCompleteMapWithCachedValuesOnAllCacheHits()  {
+	public void shouldReturnCompleteMapWithCachedValuesOnAllCacheHits() {
 		List<String> keys = Lists.newArrayList(KEY_1, KEY_2);
 		List<String> values = Lists.newArrayList(VAL_1, VAL_2);
 
@@ -137,7 +135,7 @@ public class EhcacheCacheAdapterTest {
 	}
 
 	@Test
-	public void shouldReturnPartialMapWithCachedValuesOnPartialCacheHits()  {
+	public void shouldReturnPartialMapWithCachedValuesOnPartialCacheHits() {
 		List<String> keys = Lists.newArrayList(KEY_1, KEY_2);
 
 		cache.put(new Element(KEY_1, VAL_1));
@@ -155,7 +153,7 @@ public class EhcacheCacheAdapterTest {
 	}
 
 	@Test
-	public void shouldReturnEmptyMapForOnCacheMisses()  {
+	public void shouldReturnEmptyMapForOnCacheMisses() {
 		List<String> keys = Lists.newArrayList(KEY_1, KEY_2);
 
 		cache.put(new Element("miss1", VAL_1));
@@ -167,14 +165,14 @@ public class EhcacheCacheAdapterTest {
 	}
 
 	@Test
-	public void shouldReturnCompleteMapWithAllCachedValuesOnAllCacheHitsWithoutFallbackLoader()  {
+	public void shouldReturnCompleteMapWithAllCachedValuesOnAllCacheHitsWithoutFallbackLoader() {
 		List<String> keys = Lists.newArrayList(KEY_1, KEY_2);
 		List<String> values = Lists.newArrayList(VAL_1, VAL_2);
 
 		cache.put(new Element(KEY_1, VAL_1));
 		cache.put(new Element(KEY_2, VAL_2));
 
-		Map<String, String> result = adapter.getAll(keys, fallbackCacheLoader);
+		Map<String, String> result = adapter.getAll(keys, fallbackCacheLoader::loadAll);
 
 		assertEquals(2, result.size());
 		assertTrue(result.keySet().containsAll(keys));
@@ -184,7 +182,7 @@ public class EhcacheCacheAdapterTest {
 	}
 
 	@Test
-	public void shouldLoadFromDbOnPartialHits()  {
+	public void shouldLoadFromDbOnPartialHits() {
 		List<String> keys = Lists.newArrayList(KEY_1, KEY_2);
 		List<String> values = Lists.newArrayList(VAL_1, VAL_2);
 		List<String> missingKey = Lists.newArrayList(KEY_2);
@@ -196,20 +194,20 @@ public class EhcacheCacheAdapterTest {
 
 		when(fallbackCacheLoader.loadAll(missingKey)).thenReturn(expectedMapWithMissingKeyVal);
 
-		Map<String, String> result = adapter.getAll(keys, fallbackCacheLoader);
+		Map<String, String> result = adapter.getAll(keys, fallbackCacheLoader::loadAll);
 
 		assertEquals(2, result.size());
 		assertTrue(result.keySet().containsAll(keys));
 		assertTrue(result.values().containsAll(values));
-		assertEquals(VAL_1, adapter.get(KEY_1));
-		assertEquals(VAL_2, adapter.get(KEY_2));
+		assertEquals(VAL_1, adapter.get(KEY_1).get());
+		assertEquals(VAL_2, adapter.get(KEY_2).get());
 
 		verify(fallbackCacheLoader).loadAll(missingKey);
 		verifyZeroInteractions(fallbackCacheLoader);
 	}
 
 	@Test
-	public void shouldLoadFromDbOnAllMisses()  {
+	public void shouldLoadFromDbOnAllMisses() {
 		List<String> keys = Lists.newArrayList(KEY_1, KEY_2);
 		List<String> values = Lists.newArrayList(VAL_1, VAL_2);
 
@@ -219,13 +217,13 @@ public class EhcacheCacheAdapterTest {
 
 		when(fallbackCacheLoader.loadAll(keys)).thenReturn(expectedMapWithMissingKeyVal);
 
-		Map<String, String> result = adapter.getAll(keys, fallbackCacheLoader);
+		Map<String, String> result = adapter.getAll(keys, fallbackCacheLoader::loadAll);
 
 		assertEquals(2, result.size());
 		assertTrue(result.keySet().containsAll(keys));
 		assertTrue(result.values().containsAll(values));
-		assertEquals(VAL_1, adapter.get(KEY_1));
-		assertEquals(VAL_2, adapter.get(KEY_2));
+		assertEquals(VAL_1, adapter.get(KEY_1).get());
+		assertEquals(VAL_2, adapter.get(KEY_2).get());
 
 		verify(fallbackCacheLoader).loadAll(keys);
 		verifyZeroInteractions(fallbackCacheLoader);
@@ -245,8 +243,8 @@ public class EhcacheCacheAdapterTest {
 		cacheKeyForGet.setName(FOO);
 
 		//name is not part of hash, hence simple get will return null
-		assertNull(adapter.get(cacheKeyForGet));
-		assertEquals(BAR, adapter.getByPartialKey(cacheKeyForGet));
+		assertEquals(CacheResult.notPresent(), adapter.get(cacheKeyForGet));
+		assertEquals(BAR, adapter.getByPartialKey(cacheKeyForGet).get());
 	}
 
 	@Test
@@ -265,7 +263,7 @@ public class EhcacheCacheAdapterTest {
 		cacheKeyForGet.addSomeUid(1);
 
 		//name is not part of hash, hence simple get will return null
-		assertNull(adapter.get(cacheKeyForGet));
+		assertEquals(CacheResult.notPresent(), adapter.get(cacheKeyForGet));
 		assertTrue(adapter.getAllByPartialKey(cacheKeyForGet).containsAll(Lists.newArrayList("bar#1", "bar#3")));
 	}
 
@@ -296,8 +294,8 @@ public class EhcacheCacheAdapterTest {
 			}
 			CompositeCacheKey that = (CompositeCacheKey) other;
 			return uid == that.uid
-				|| Objects.equals(name, that.name)
-				|| CollectionUtils.containsAny(someUids, that.someUids);
+					|| Objects.equals(name, that.name)
+					|| CollectionUtils.containsAny(someUids, that.someUids);
 		}
 
 		@Override

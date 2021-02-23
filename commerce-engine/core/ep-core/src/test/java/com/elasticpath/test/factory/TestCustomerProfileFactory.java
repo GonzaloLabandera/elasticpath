@@ -41,8 +41,6 @@ public class TestCustomerProfileFactory {
 				AttributeType.SHORT_TEXT);
 		addAttribute(customerProfileMap, AttributeUsageImpl.USER_PROFILE_USAGE, CustomerImpl.ATT_KEY_CP_FAX, NOT_REQUIRED,
 				AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, AttributeUsageImpl.USER_PROFILE_USAGE, CustomerImpl.ATT_KEY_CP_GENDER, NOT_REQUIRED,
-				AttributeType.SHORT_TEXT);
 		addAttribute(customerProfileMap, AttributeUsageImpl.USER_PROFILE_USAGE, CustomerImpl.ATT_KEY_CP_COMPANY, NOT_REQUIRED,
 				AttributeType.SHORT_TEXT);
 		addAttribute(customerProfileMap, AttributeUsageImpl.USER_PROFILE_USAGE, CustomerImpl.ATT_KEY_CP_HTML_EMAIL, REQUIRED,

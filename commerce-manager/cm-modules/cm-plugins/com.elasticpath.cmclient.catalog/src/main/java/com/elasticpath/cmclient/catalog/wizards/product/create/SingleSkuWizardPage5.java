@@ -202,7 +202,8 @@ public class SingleSkuWizardPage5 extends AbstractEPWizardPage<ProductModel> imp
 
 	@Override
 	protected void bindControls() {
-		productSkuOverviewViewPart.bindControls(getDataBindingContext());
+
+		productSkuOverviewViewPart.bindWizardDialogControls(getDataBindingContext());
 
 		if (isDigitalAssetsSectionAvailable()) {
 			digitalAssetViewPart.bindControls(getDataBindingContext());

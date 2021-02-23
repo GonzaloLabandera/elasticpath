@@ -21,6 +21,7 @@ import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.persistence.JPAFacadeHelper;
 import org.junit.After;
+import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -30,13 +31,13 @@ import com.elasticpath.persistence.api.ChangeType;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.impl.AuditEntityListener;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 
 /**
  * An abstract superclass for audit tests.
  */
 @SuppressWarnings("PMD.GodClass")
-@ContextConfiguration(locations = {"classpath:integration-audit-context.xml"}, inheritLocations = true)
 public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 
 	private static final Logger LOG = Logger.getLogger(AbstractAuditTestSupport.class);
@@ -67,6 +68,11 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 	 */
 	protected static final String FIND_DATA_CHANGED_BY_GUID_AND_TYPE =
 			"SELECT dc FROM DataChangedImpl dc WHERE dc.changeOperation.changeTypeName=?1";
+
+	@Before
+	public void enableAuditing() {
+		AuditEntityListener.enableAudit(true);
+	}
 
 	/**
 	 * tearDown method for each test method.

@@ -14,6 +14,8 @@ import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.openjpa.persistence.OpenJPAEntityManagerFactorySPI;
+import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -115,6 +117,8 @@ public class AnonymousCustomersCleanupJobTest extends DbTestCase {
 
 		preJobAssertions(FIVE);
 
+		removeEntityLifecycleListener();
+
 		anonymousCustomersCleanupJob.execute();
 
 		// assert that only valid customers and relevant entities are purged
@@ -141,6 +145,8 @@ public class AnonymousCustomersCleanupJobTest extends DbTestCase {
 		preJobAssertions(THREE);
 
 		initJobWithPersistenceEngineThrowingException(exceptionalCustomer.getUidPk());
+
+		removeEntityLifecycleListener();
 
 		anonymousCustomersCleanupJob.execute();
 
@@ -169,6 +175,8 @@ public class AnonymousCustomersCleanupJobTest extends DbTestCase {
 		Customer purgeableCustomer2 = createCustomer("Anonymous", "Three", true, false);
 
 		preJobAssertions(THREE);
+
+		removeEntityLifecycleListener();
 
 		anonymousCustomersCleanupJob.execute();
 
@@ -375,5 +383,10 @@ public class AnonymousCustomersCleanupJobTest extends DbTestCase {
 		PersistenceEngine failingJpaPersistenceEngine = new FailingJpaPersistenceEngine(batchPersistenceEngineTarget, customerUidToFailFor,
 				"DELETE_CUSTOMERS_BY_UIDS");
 		purgeAnonymousCustomersBatchProcessor.setPersistenceEngine(failingJpaPersistenceEngine);
+	}
+
+	private void removeEntityLifecycleListener() {
+		OpenJPAEntityManagerFactorySPI spiEMFactory = (OpenJPAEntityManagerFactorySPI) OpenJPAPersistence.cast(batchEntityManagerFactory);
+		spiEMFactory.removeLifecycleListener(databaseTimestampsEntityListener);
 	}
 }

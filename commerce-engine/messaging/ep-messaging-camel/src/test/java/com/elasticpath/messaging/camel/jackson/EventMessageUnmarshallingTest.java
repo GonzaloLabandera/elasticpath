@@ -39,7 +39,7 @@ public class EventMessageUnmarshallingTest extends CamelTestSupport {
 	private MockEndpoint outgoingEndpoint;
 
 	private Map<String, Object> data;
-	private EventMessageObjectMapper objectMapper;
+	private EventMessageObjectMapperImpl objectMapper;
 	private JacksonDataFormat jacksonDataFormat;
 
 	@Override
@@ -54,7 +54,7 @@ public class EventMessageUnmarshallingTest extends CamelTestSupport {
 		incomingEndpoint = getMandatoryEndpoint("direct:incoming");
 		outgoingEndpoint = getMockEndpoint("mock:outgoing");
 
-		objectMapper = new EventMessageObjectMapper();
+		objectMapper = new EventMessageObjectMapperImpl();
 		objectMapper.setEventMessageFactory(new EventMessageFactoryImpl());
 		objectMapper.init();
 

@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>purchases</name>
+
+		<uri-part>
+			<name>page-id</name>
+			<description>Identifier for a purchase pagination page.</description>
+			<integer/>
+		</uri-part>
+
+		<resource>
+			<name>account-purchases</name>
+			<description>An alias of accounts.purchases resource.</description>
+			<uri>{purchases.purchases}/accounts/{accounts.account-id}</uri>
+			<alias>paginated-account-purchases</alias>
+		</resource>
+
+		<resource>
+			<name>paginated-account-purchases</name>
+			<description>A list of account purchases resource.</description>
+			<uri>/{account-purchases}/{page-id}</uri>
+			<paginates>purchases.purchase</paginates>
+		</resource>
+
+		<relationship>
+			<name>account-to-purchases</name>
+			<description>Link from account resource to the purchases alias resource.</description>
+			<rel>purchases</rel>
+			<from>accounts.account</from>
+			<to>account-purchases</to>
+		</relationship>
+
+		<relationship>
+			<name>account-purchases-for-purchases</name>
+			<description>The account purchases associated with the purchases.</description>
+			<rel>accountpurchaselist</rel>
+			<from>purchases.purchase</from>
+			<to>paginated-account-purchases</to>
+		</relationship>
+	</family>
+</definitions>

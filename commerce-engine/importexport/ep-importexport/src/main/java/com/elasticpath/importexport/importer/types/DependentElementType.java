@@ -157,5 +157,10 @@ public enum DependentElementType {
 	/**
 	 * Types for CM Import Jobs.
 	 */
-	CM_IMPORT_MAPPINGS;
+	CM_IMPORT_MAPPINGS,
+
+	/**
+	 * Types for Sort Attribute Import Jobs.
+	 */
+	SORT_LOCALIZED_NAMES;
 }

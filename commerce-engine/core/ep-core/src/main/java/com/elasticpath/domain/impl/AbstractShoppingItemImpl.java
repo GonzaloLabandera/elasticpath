@@ -846,12 +846,16 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	public ItemPricing getLinePricing() {
 		return new ItemPricing(
 				getLineValue(getLowestUnitPrice()),
-				getDiscount().getAmount(),
+				getDiscount() == null ? null : getDiscount().getAmount(),
 				getQuantity());
 	}
 
 	@Transient
 	private BigDecimal getLineValue(final Money unitValue) {
+		if (unitValue == null) {
+			return null;
+		}
+
 		return unitValue.multiply(getQuantity()).getAmount();
 	}
 	

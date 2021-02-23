@@ -66,6 +66,7 @@ import com.elasticpath.service.search.solr.AnalyzerImpl;
 import com.elasticpath.service.search.solr.IndexUtilityImpl;
 import com.elasticpath.service.search.solr.SolrIndexConstants;
 import com.elasticpath.service.store.StoreService;
+import com.elasticpath.tags.TagSet;
 
 /**
  * Test {@link ProductSolrInputDocumentCreator}.
@@ -583,7 +584,7 @@ public class ProductIndexBuilderTest {
 
 				PromotedPriceLookupService promotedPriceLookupService = context.mock(PromotedPriceLookupService.class);
 				allowing(promotedPriceLookupService).getProductPrice(with(product), with(priceListStack), with(store),
-																	with(baseAmountDataSourceFactory));
+																	with(baseAmountDataSourceFactory), with(any(TagSet.class)));
 				will(returnValue(price));
 				builder.setPromotedPriceLookupService(promotedPriceLookupService);
 			}

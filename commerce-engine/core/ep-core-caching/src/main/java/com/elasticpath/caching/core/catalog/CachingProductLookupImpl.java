@@ -34,28 +34,29 @@ public class CachingProductLookupImpl implements ProductLookup, MutableCachingSe
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends Product> P findByUid(final long uidpk) throws EpServiceException {
-		return (P) getProductByUidCache().get(uidpk, productByUidLoader);
+		return (P) getProductByUidCache().get(uidpk, productByUidLoader::load);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends Product> List<P> findByUids(final Collection<Long> uidPks) throws EpServiceException {
-		Map<Long, Product> result = getProductByUidCache().getAll(uidPks, productByUidLoader);
-
+		Map<Long, Product> result = getProductByUidCache().getAll(uidPks, productByUidLoader::loadAll);
 		return new ArrayList<>((Collection<P>) result.values());
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends Product> P findByGuid(final String guid) throws EpServiceException {
-		Long productUidPk = getProductUidByGuidCache().get(guid, productByGuidLoader);
-
-		return (P) getProductByUidCache().get(productUidPk);
+		final Long productUidPk = getProductUidByGuidCache().get(guid, productByGuidLoader::load);
+		if (productUidPk != null) {
+			return findByUid(productUidPk);
+		}
+		return null;
 	}
 
 	@Override
 	public <P extends Product> List<P> findByGuids(final Collection<String> guids) throws EpServiceException {
-		final Map<String, Long> result = getProductUidByGuidCache().getAll(guids, productByGuidLoader);
+		final Map<String, Long> result = getProductUidByGuidCache().getAll(guids, productByGuidLoader::loadAll);
 		return findByUids(result.values());
 	}
 
@@ -108,7 +109,7 @@ public class CachingProductLookupImpl implements ProductLookup, MutableCachingSe
 	private class ProductByUidLoader implements CacheLoader<Long, Product> {
 		@Override
 		public Product load(final Long key) {
-			Product product =  getFallbackLookup().findByUid(key);
+			Product product = getFallbackLookup().findByUid(key);
 
 			cacheProductUidByGuidIfRequired(product);
 

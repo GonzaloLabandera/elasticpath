@@ -37,11 +37,6 @@
 
 		<dependency>
 			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-jta</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
 			<artifactId>payment-plugin-connectivity</artifactId>
 		</dependency>
 

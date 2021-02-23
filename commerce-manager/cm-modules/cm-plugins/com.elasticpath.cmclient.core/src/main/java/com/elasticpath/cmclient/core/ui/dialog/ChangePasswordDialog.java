@@ -16,7 +16,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
@@ -182,7 +182,8 @@ public class ChangePasswordDialog extends AbstractEpDialog implements ModifyList
 	@Override
 	protected void okPressed() {
 
-		if (requireOldPassword && !passwordEncoder.isPasswordValid(userToChange.getPassword(), oldPassword.getText(), null)) {
+		if (!passwordEncoder.matches(oldPassword.getText(), userToChange.getPassword())) {
+
 			setErrorMessage(CoreMessages.get().ChangePasswordDialog_Error_OldPasswordIncorrect);
 			return;
 		}

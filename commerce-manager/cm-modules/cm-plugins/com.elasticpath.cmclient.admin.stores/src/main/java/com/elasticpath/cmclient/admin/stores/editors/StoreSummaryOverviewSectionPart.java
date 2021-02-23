@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -24,6 +25,7 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
 import com.elasticpath.cmclient.admin.stores.util.EpUrlValidator;
 import com.elasticpath.cmclient.admin.stores.util.TimeZonesUtil;
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -37,6 +39,8 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.validation.CompoundValidator;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.service.permissions.RoleToPermissionsMappingService;
 
 /**
  * UI representation of the Store Summary Overview Section.
@@ -51,6 +55,10 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 
 	private static final int DESCRIPTION_AREA_HEIGHT = 75;
 
+	private static final String BUYER_ROLE = "BUYER";
+
+	private static final String SINGLE_SESSION_BUYER_ROLE = "SINGLE_SESSION_BUYER";
+
 	private Text storeCodeText;
 
 	private Text storeNameText;
@@ -63,22 +71,28 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 
 	private CCombo timeZoneCombo;
 
+	private CCombo registeredUserRoleCombo;
+
+	private CCombo singleSessionUserRoleCombo;
+
 	private Button enableDataPoliciesCheckbox;
 
 	private IEpLayoutComposite controlPane;
 
-	/** instance of <code>EpCountrySelectorControl</code> which manages logic of State and Country combo. */
+	/**
+	 * instance of <code>EpCountrySelectorControl</code> which manages logic of State and Country combo.
+	 */
 	private final EpCountrySelectorControl stateCountryManager;
 
 	private final Map<String, String> availableTimeZonesMap;
-	
+
 	private final boolean authorized;
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param editor the editor containing this Section Constructor to create a new Section in an editor's FormPage.
-	 * @param formPage the form page
+	 *
+	 * @param editor     the editor containing this Section Constructor to create a new Section in an editor's FormPage.
+	 * @param formPage   the form page
 	 * @param authorized whether the current user is authorized to edit the store
 	 */
 	public StoreSummaryOverviewSectionPart(final FormPage formPage, final AbstractCmClientFormEditor editor, final boolean authorized) {
@@ -100,7 +114,7 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 				hideFirstValidationErrors);
 		binder.bind(bindingContext, storeDescriptionText, getStoreEditorModel(), "description", null, null, hideFirstValidationErrors); //$NON-NLS-1$
 
-		CompoundValidator urlValidator = new CompoundValidator(new IValidator[] { new EpUrlValidator() });
+		CompoundValidator urlValidator = new CompoundValidator(new IValidator[]{new EpUrlValidator()});
 		if (!getStoreEditorModel().getStoreState().isIncomplete()) {
 			urlValidator.addValidator(EpValidatorFactory.REQUIRED);
 		}
@@ -116,6 +130,25 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 			}
 		};
 		binder.bind(bindingContext, timeZoneCombo, null, null, timezoneUpdateStrategy, hideFirstValidationErrors);
+
+
+		final ObservableUpdateValueStrategy registeredUserRoleStrategy = new ObservableUpdateValueStrategy() {
+			@Override
+			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
+				getStoreEditorModel().setB2CAuthenticatedRole(registeredUserRoleCombo.getText());
+				return Status.OK_STATUS;
+			}
+		};
+		binder.bind(bindingContext, registeredUserRoleCombo, null, null, registeredUserRoleStrategy, hideFirstValidationErrors);
+
+		final ObservableUpdateValueStrategy singleSessionRoleStrategy = new ObservableUpdateValueStrategy() {
+			@Override
+			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
+				getStoreEditorModel().setB2CSingleSessionRole(singleSessionUserRoleCombo.getText());
+				return Status.OK_STATUS;
+			}
+		};
+		binder.bind(bindingContext, singleSessionUserRoleCombo, null, null, singleSessionRoleStrategy, hideFirstValidationErrors);
 
 		final ObservableUpdateValueStrategy countryUpdateStrategy = new ObservableUpdateValueStrategy() {
 			@Override
@@ -159,7 +192,7 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 
 		controlPane.addLabelBold(AdminStoresMessages.get().StoreDescription,
 				controlPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.BEGINNING));
-		storeDescriptionText = controlPane.addTextArea(true, false, getEditableState(), 
+		storeDescriptionText = controlPane.addTextArea(true, false, getEditableState(),
 				controlPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true));
 		((TableWrapData) storeDescriptionText.getLayoutData()).heightHint = DESCRIPTION_AREA_HEIGHT;
 
@@ -179,17 +212,24 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 		controlPane.addLabelBoldRequired(AdminStoresMessages.get().StoreSubCountry, EpState.EDITABLE, labelData);
 		stateCountryManager.setStateCombo(controlPane.addComboBox(getEditableState(), fieldData));
 
+		controlPane.addLabelBoldRequired(AdminStoresMessages.get().RegisteredUserRole, EpState.EDITABLE, labelData);
+		registeredUserRoleCombo = controlPane.addComboBox(getEditableState(), fieldData);
+
+		controlPane.addLabelBoldRequired(AdminStoresMessages.get().SingleSessionUserRole, EpState.EDITABLE, labelData);
+		singleSessionUserRoleCombo = controlPane.addComboBox(getEditableState(), fieldData);
+
 		controlPane.addLabelBold(AdminStoresMessages.get().EnableDataPolicies,
 				controlPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.BEGINNING));
 		enableDataPoliciesCheckbox = controlPane.addCheckBoxButton(AdminStoresMessages.EMPTY_STRING, EpState.EDITABLE, null);
 
 		stateCountryManager.initStateCountryCombo(getEditableState());
 	}
-	
+
 	/**
 	 * If a required label is editable then its text will be preceded by an asterisk.
 	 * If a store is in a COMPLETE state then the store code cannot be edited so there's no
 	 * point to having an asterisk in the label.
+	 *
 	 * @return {@code EpState.EDITABLE} if the label should indicate that its field is required,
 	 * else {@code EpState.READONLY}
 	 */
@@ -199,14 +239,14 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 		}
 		return EpState.EDITABLE;
 	}
-	
+
 	/**
 	 * @return true if the store is complete, false if not.
 	 */
 	boolean isStoreComplete() {
 		return !getStoreEditorModel().getStoreState().isIncomplete();
 	}
-	
+
 	@Override
 	protected void populateControls() {
 		for (final Entry<String, String> entry : availableTimeZonesMap.entrySet()) {
@@ -214,10 +254,14 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 			timeZoneCombo.add(entry.getValue());
 		}
 
+		registeredUserRoleCombo.setItems(getRoleToPermissions().getDefinedRoleKeys().toArray(new String[0]));
+		singleSessionUserRoleCombo.setItems(getRoleToPermissions().getDefinedRoleKeys().toArray(new String[0]));
 		stateCountryManager.populateStateCountryCombo();
 		stateCountryManager.selectCountryCombo(getStoreEditorModel().getCountry());
 
 		if (isEditStore()) {
+			registeredUserRoleCombo.setText(getStoreEditorModel().getB2CAuthenticatedRole());
+			singleSessionUserRoleCombo.setText(getStoreEditorModel().getB2CSingleSessionRole());
 			storeCodeText.setText(getStoreEditorModel().getCode());
 			storeNameText.setText(getStoreEditorModel().getName());
 			if (getStoreEditorModel().getDescription() != null) {
@@ -229,6 +273,8 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 			timeZoneCombo.setText(getTimeZoneId());
 			stateCountryManager.selectStateCombo(getStoreEditorModel().getSubCountry());
 		} else {
+			registeredUserRoleCombo.setText(getDefaultRegisteredUser());
+			singleSessionUserRoleCombo.setText(getDefaultSingleSessionUser());
 			timeZoneCombo.setText(TimeZonesUtil.getTimeZoneName(0, CorePlugin.getDefault().getDefaultLocale()));
 			stateCountryManager.selectCountryCombo(0);
 		}
@@ -238,6 +284,18 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 		enableDataPoliciesCheckbox.setSelection(getStoreEditorModel().isStoreEnableDataPoliciesSettingEnabled());
 
 		controlPane.setControlModificationListener(getEditor());
+	}
+
+	private String getDefaultSingleSessionUser() {
+		return getRoleToPermissions().getDefinedRoleKeys().contains(SINGLE_SESSION_BUYER_ROLE)
+				? SINGLE_SESSION_BUYER_ROLE
+				: getRoleToPermissions().getDefinedRoleKeys().stream().findFirst().orElse(StringUtils.EMPTY);
+	}
+
+	private String getDefaultRegisteredUser() {
+		return getRoleToPermissions().getDefinedRoleKeys().contains(BUYER_ROLE)
+				? BUYER_ROLE
+				: getRoleToPermissions().getDefinedRoleKeys().stream().findFirst().orElse(StringUtils.EMPTY);
 	}
 
 	private String getTimeZoneId() {
@@ -266,14 +324,14 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 	private StoreEditorModel getStoreEditorModel() {
 		return (StoreEditorModel) getEditor().getModel();
 	}
-	
+
 	/**
 	 * @return true if the current user is authorized to edit the current store, false if not.
 	 */
 	boolean isCurrentUserAuthorized() {
 		return authorized;
 	}
-	
+
 	/**
 	 * @return {@code EpState.EDITABLE} if a control should be editable, else {@code EpState.READ_ONLY}.
 	 */
@@ -282,5 +340,9 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 			return EpState.EDITABLE;
 		}
 		return EpState.READ_ONLY;
+	}
+
+	private static RoleToPermissionsMappingService getRoleToPermissions() {
+		return BeanLocator.getSingletonBean(ContextIdNames.ROLE_TO_PERMISSION_MAPPING_SERVICE, RoleToPermissionsMappingService.class);
 	}
 }

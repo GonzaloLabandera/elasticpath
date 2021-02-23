@@ -15,7 +15,9 @@ Feature: Store
       | catalog               | Master Catalog A                   |
       | language              | English (United States)            |
       | currency              | USD                                |
-    And the store should exist in the list
+	  | registered role       | BUYER                              |
+	  | unregistered role     | SINGLE_SESSION_BUYER               |
+	  And the store should exist in the list
 
   # The following scenarios do not follow the best practice of having well-defined and isolated Given-When-Then conditions.  However, because
   # creating a store is very expensive it was deemed more efficient to keep the number of scenarios small.

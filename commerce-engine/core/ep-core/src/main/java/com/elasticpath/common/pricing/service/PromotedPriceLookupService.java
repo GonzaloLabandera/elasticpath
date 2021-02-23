@@ -13,6 +13,7 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.pricing.PriceListStack;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.pricing.datasource.BaseAmountDataSourceFactory;
+import com.elasticpath.tags.TagSet;
 
 /**
  * Obtains the promoted price for the given product/SKUs.
@@ -24,9 +25,10 @@ public interface PromotedPriceLookupService {
 	 * @param sku to look up
 	 * @param plStack a {@link PriceListStack} for price lookup
 	 * @param store store
+	 * @param tagSet set of tags within customer session
 	 * @return the price map where key is the Price List guid and value is the price for this guid
 	 */
-	Map<String, Price> getSkuPrices(ProductSku sku, PriceListStack plStack, Store store);
+	Map<String, Price> getSkuPrices(ProductSku sku, PriceListStack plStack, Store store, TagSet tagSet);
 
 	/**
 	 * Obtain the Price for a given {@link ProductSku} in a {@link PriceListStack}.
@@ -34,9 +36,10 @@ public interface PromotedPriceLookupService {
 	 * @param sku to look up
 	 * @param plStack a {@link PriceListStack} for price lookup
 	 * @param store store
+	 * @param tagSet set of tags within customer session
 	 * @return the catalog promoted price for the sku
 	 */
-	Price getSkuPrice(ProductSku sku, PriceListStack plStack, Store store);
+	Price getSkuPrice(ProductSku sku, PriceListStack plStack, Store store, TagSet tagSet);
 
 
 	/**
@@ -45,9 +48,10 @@ public interface PromotedPriceLookupService {
 	 * @param product the product to look up
 	 * @param plStack a {@link PriceListStack} for price lookup
 	 * @param store store
+	 * @param tagSet set of tags within customer session
 	 * @return the catalog promoted price for the product
 	 */
-	Price getProductPrice(Product product, PriceListStack plStack, Store store);
+	Price getProductPrice(Product product, PriceListStack plStack, Store store, TagSet tagSet);
 
 
 	/**
@@ -57,10 +61,11 @@ public interface PromotedPriceLookupService {
 	 * @param plStack a {@link PriceListStack} for price lookup
 	 * @param store store
 	 * @param dataSourceFactory the BaseAmountDataSourceFactory to be used to access the base amounts.
+	 * @param tagSet set of tags within customer session
 	 * @return the catalog promoted price for the product
 	 */
 	Price getProductPrice(Product product, PriceListStack plStack, Store store,
-							BaseAmountDataSourceFactory dataSourceFactory);
+							BaseAmountDataSourceFactory dataSourceFactory, TagSet tagSet);
 
 
 	/**
@@ -69,10 +74,11 @@ public interface PromotedPriceLookupService {
 	 * @param products the products to look up
 	 * @param plStack a {@link PriceListStack} for price lookup
 	 * @param store store
+	 * @param tagSet set of tags within customer session
 	 * @return price map where key is the product code and value is the price for this code
 	 */
 	Map<String, Price> getProductsPrices(Collection<Product> products,
-											PriceListStack plStack, Store store);
+											PriceListStack plStack, Store store, TagSet tagSet);
 
 
 	/**
@@ -82,8 +88,9 @@ public interface PromotedPriceLookupService {
 	 * @param store the store catalog used to determine the catalog promotions
 	 * @param currency currency
 	 * @param price to be promoted
+	 * @param tagSet set of tags within customer session
 	 */
-	void applyCatalogPromotions(Product product, Store store, Currency currency, Price price);
+	void applyCatalogPromotions(Product product, Store store, Currency currency, Price price, TagSet tagSet);
 
 
 }

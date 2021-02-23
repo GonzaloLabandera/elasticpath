@@ -260,14 +260,20 @@
     </bean>
 
 <!-- Customer configuration -->
-    <bean id="customerConfiguration" parent="abstractEpQLObjectConfiguration" class="com.elasticpath.ql.custom.customer.CustomerConfiguration">
-        <property name="completeQueryBuilder">
-            <ref bean="luceneQueryBuilder"/>
-        </property>
-        <property name="epQLValueResolver">
-            <ref bean="luceneValueResolver"/>
-        </property>
-    </bean>
+	<bean id="customerConfiguration" parent="abstractEpQLObjectConfiguration" class="com.elasticpath.ql.custom.customer.CustomerConfiguration">
+		<property name="nonLocalizedFieldResolver">
+			<ref bean="nonLocalizedFieldResolver"/>
+		</property>
+		<property name="subQueryBuilder">
+			<ref bean="luceneSubQueryBuilder"/>
+		</property>
+		<property name="completeQueryBuilder">
+			<ref bean="luceneQueryBuilder"/>
+		</property>
+		<property name="epQLValueResolver">
+			<ref bean="luceneValueResolver"/>
+		</property>
+	</bean>
 
 <!-- CustomerProfileAttribute configuration -->
     <bean id="customerProfileAttributeConfiguration" parent="abstractEpQLObjectConfiguration" class="com.elasticpath.ql.custom.customer.CustomerProfileAttributeConfiguration">

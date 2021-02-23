@@ -21,12 +21,25 @@ have the required permissions..
 			<string/>
 		</uri-part>
 
+		<uri-part>
+			<name>page-id</name>
+			<description>Identifier for a account pagination page.</description>
+			<integer/>
+		</uri-part>
+
 		<!-- resource for a list of accounts -->
 		<resource>
 			<name>accounts</name>
 			<description><![CDATA[List of accounts.]]></description>
 			<uri>{base.family}/{base.scope}</uri>
 			<list-of>account</list-of>
+		</resource>
+
+		<resource>
+			<name>account-buyer-roles</name>
+			<description><![CDATA[List of buyer roles.]]></description>
+			<uri>{accounts}/buyerroles</uri>
+			<entity>account-buyer-roles</entity>
 		</resource>
 
 		<!-- resource for an account entity -->
@@ -52,14 +65,43 @@ have the required permissions..
 			<uri>{account}/attributes</uri>
 			<entity>account-attributes</entity>
 		</resource>
+		
+		<resource>
+			<name>account-status</name>
+			<description><![CDATA[An Account's status.]]></description>
+			<uri>{account}/status</uri>
+			<entity>account-status</entity>
+		</resource>
 
-		<!-- Link accounts list to the user's profile -->
+		<!-- resource for child accounts -->
+		<resource>
+			<name>child-accounts</name>
+			<description><![CDATA[List of child accounts.]]></description>
+			<uri>{account}/childaccounts</uri>
+			<alias>paginated-child-accounts</alias>
+		</resource>
+
+		<resource>
+			<name>paginated-child-accounts</name>
+			<description><![CDATA[Paginated list of accounts.]]></description>
+			<uri>{child-accounts}/{page-id}</uri>
+			<paginates>account</paginates>
+		</resource>
+
 		<relationship>
-			<name>accounts-from-profile</name>
-			<description><![CDATA[Link from profile resource to accounts list.]]></description>
+			<name>accounts-from-root</name>
+			<description><![CDATA[Unimplemented Link from root resource.]]></description>
 			<rel>accounts</rel>
-			<from>profiles.profile</from>
+			<from>base.root</from>
 			<to>accounts</to>
+		</relationship>
+
+		<relationship>
+			<name>account-buyer-roles-from-account</name>
+			<description><![CDATA[Link from accounts to the account's buyer roles.]]></description>
+			<rel>buyerroles</rel>
+			<from>accounts</from>
+			<to>account-buyer-roles</to>
 		</relationship>
 
 		<!-- Link account attributes to accounts -->
@@ -96,6 +138,40 @@ have the required permissions..
 			<to>account</to>
 		</relationship>
 
+		<!-- Link status to account -->
+		<relationship>
+			<name>account-status-from-account</name>
+			<description><![CDATA[Link from account entity resource to the account's status.]]></description>
+			<rel>status</rel>
+			<from>account</from>
+			<to>account-status</to>
+		</relationship>
+
+		<relationship>
+			<name>account-status-to-account</name>
+			<description><![CDATA[Link to account entity resource from the account's status.]]></description>
+			<rel>account</rel>
+			<from>account-status</from>
+			<to>account</to>
+		</relationship>
+
+		<!-- Link account to child accounts-->
+		<relationship>
+			<name>account-to-child-accounts</name>
+			<description><![CDATA[Link to children accounts entity resource from the account's attributes.]]></description>
+			<rel>childaccounts</rel>
+			<from>account</from>
+			<to>child-accounts</to>
+		</relationship>
+
+		<relationship>
+			<name>child-accounts-to-account</name>
+			<description><![CDATA[Link to account entity resource from the account's status.]]></description>
+			<rel>account</rel>
+			<from>paginated-child-accounts</from>
+			<to>account</to>
+		</relationship>
+
 		<!-- account entity -->
 		<entity>
 			<name>account</name>
@@ -116,12 +192,37 @@ have the required permissions..
 			<entity-type>accounts.account.shared-account-id</entity-type>
 		</entity>
 
+		<!-- account status -->
+		<entity>
+			<name>account-status</name>
+			<description><![CDATA[An Account status.]]></description>
+			<property>
+				<name>status</name>
+				<description><![CDATA[This Account's status.]]></description>
+				<string/>
+			</property>
+			<entity-type>accounts.account.account-status</entity-type>
+		</entity>
+
 		<!-- account attributes entity -->
 		<entity>
 			<name>account-attributes</name>
 			<description><![CDATA[Attributes for an account.]]></description>
 			<dynamic/>
 			<entity-type>account.attributes</entity-type>
+		</entity>
+
+		<entity>
+			<name>account-buyer-roles</name>
+			<description><![CDATA[Roles for an account.]]></description>
+			<property>
+				<name>roles</name>
+				<description><![CDATA[Account's buyer roles.]]></description>
+				<array>
+					<string/>
+				</array>
+			</property>
+			<entity-type>account.account-buyer-roles</entity-type>
 		</entity>
 	</family>
 </definitions>

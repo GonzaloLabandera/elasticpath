@@ -105,7 +105,7 @@ public class ImportDataTypeCustomerAddressImpl extends AbstractImportDataTypeImp
 					throw new EpNonNullBindException(super.getName());
 				}
 
-				if (!getUtility().isValidGuidStr(value)) {
+				if (!getUtilityBean().isValidGuidStr(value)) {
 					throw new EpInvalidGuidBindException(super.getName());
 				}
 

@@ -39,6 +39,24 @@ a customer's first name, last name, username, [addresses](addresses.md). You can
 			<to>default-profile</to>
 		</relationship>
 
+		<!-- Link accounts list to the user's profile -->
+		<relationship>
+			<name>accounts-from-profile</name>
+			<description><![CDATA[Link from profile resource to accounts list.]]></description>
+			<rel>accounts</rel>
+			<from>profiles.profile</from>
+			<to>accounts.accounts</to>
+		</relationship>
+
+		<!-- Link selected account to the user's profile -->
+		<relationship>
+			<name>selected-account-from-profile</name>
+			<description><![CDATA[Link from profile resource to selected account.]]></description>
+			<rel>selectedaccount</rel>
+			<from>profiles.profile</from>
+			<to>accounts.account</to>
+		</relationship>
+
 		<entity>
 			<name>profile-attributes</name>
 			<description><![CDATA[The profile of the logged in customer.]]></description>

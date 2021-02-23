@@ -21,11 +21,6 @@
 	<reference id="eventMessageDataFormat" interface="org.apache.camel.spi.DataFormat"/>
 	<reference id="camelAnnotatedClassList" interface="java.util.Set"/>
 
-	<service ref="domainEventMessagePublisher" interface="com.elasticpath.messaging.EventMessagePublisher">
-		<service-properties>
-			<entry key="name" value="domainEventMessagePublisher"/>
-		</service-properties>
-	</service>
 	<service ref="domainEventTypeProvider" interface="com.elasticpath.messaging.spi.EventTypeProvider"/>
 
 </blueprint>

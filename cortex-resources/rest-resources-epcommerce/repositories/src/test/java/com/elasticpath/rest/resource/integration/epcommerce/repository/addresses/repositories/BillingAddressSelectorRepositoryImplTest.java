@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.repositories;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +34,7 @@ import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
+import com.elasticpath.rest.selector.SelectStatus;
 
 /**
  * Test mechanism for {@link BillingAddressSelectorRepositoryImpl}.
@@ -189,5 +191,13 @@ public class BillingAddressSelectorRepositoryImplTest {
 				.test()
 				.assertNoErrors();
 
+	}
+
+	@Test
+	public void testSelectStatusExisting() {
+		when(customer.getPreferredBillingAddress()).thenReturn(customerAddress);
+		when(customerAddress.getGuid()).thenReturn(ADDRESS_GUID);
+		SelectStatus selectStatus = prototype.setBillingAddress(customer, ADDRESS_GUID).blockingGet();
+		assertThat(selectStatus).isEqualTo(SelectStatus.EXISTING);
 	}
 }

@@ -12,7 +12,9 @@ import java.util.TreeSet;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.enums.InvalidCatalogCodeMessage;
 import com.elasticpath.commons.exception.EpBindException;
+import com.elasticpath.commons.exception.EpInvalidCatalogCodeException;
 import com.elasticpath.commons.exception.EpInvalidGuidBindException;
 import com.elasticpath.commons.exception.EpNonNullBindException;
 import com.elasticpath.domain.catalog.Catalog;
@@ -76,18 +78,18 @@ public class ImportJobRunnerCategoryImpl extends AbstractImportJobRunnerImpl {
 		csvFileReader.readNext();
 
 		int rowNumber = 0;
-		String[] nextLine;
+		String[] row;
 		final SortedSet<String> guidsInCsvFile = new TreeSet<>();
 		final String parentCategoryFieldName = ImportDataTypeCategoryImpl.PREFIX_OF_FIELD_NAME 
 			+ ImportDataTypeCategoryImpl.PARENT_CATEGORY_CODE;
 		
-		while ((nextLine = csvFileReader.readNext()) != null) {
+		while ((row = csvFileReader.readNext()) != null) {
 			rowNumber++;
 			final List<ImportFault> faults = new ArrayList<>();
 
 			String guid = null;
 			if (getGuidColNumber() != null) {
-				guid = nextLine[getGuidColNumber().intValue()];
+				guid = row[getGuidColNumber().intValue()];
 				guidsInCsvFile.add(guid);
 			}
 
@@ -100,39 +102,47 @@ public class ImportJobRunnerCategoryImpl extends AbstractImportJobRunnerImpl {
 					if (importField.getName().equals(parentCategoryFieldName)) {
 						// Only if we can not find the parent category guid in the csv file,
 						// we need to load it from database
-						if (nextLine[colNum] != null && !guidsInCsvFile.contains(nextLine[colNum])) {
-							checkField(nextLine[colNum], entity, importField);
+						if (row[colNum] != null && !guidsInCsvFile.contains(row[colNum])) {
+							checkField(row[colNum], entity, importField);
 						}
 					} else {
-						checkField(nextLine[colNum], entity, importField);
+						checkField(row[colNum], entity, importField);
+					}
+				} catch (EpInvalidCatalogCodeException e) {
+					for (InvalidCatalogCodeMessage message : e.getErrorReasonList()) {
+						final ImportFault importFault = createImportFault(
+								ImportFault.ERROR,
+								message.getMessageCode(),
+								createImportFaultArgs(importField, colNum, row, message));
+						faults.add(importFault);
 					}
 				} catch (EpInvalidGuidBindException e) {
-					final ImportFault importFault = getImportFaultWarning();
-					importFault.setCode("import.csvFile.badRow.wrongGuid");
-					importFault.setArgs(new Object[] { importField.getName(), importField.getType(), String.valueOf(colNum.intValue()),
-							nextLine[colNum.intValue()] });
+					final ImportFault importFault = createImportFault(
+							ImportFault.WARNING,
+							"import.csvFile.badRow.wrongGuid",
+							createImportFaultArgs(importField, colNum, row));
 					faults.add(importFault);
 				} catch (EpNonNullBindException e) {
-					final ImportFault importFault = getImportFaultError();
-					importFault.setCode("import.csvFile.badRow.notNull");
-					importFault.setArgs(new Object[] { importField.getName(), importField.getType(), String.valueOf(colNum.intValue()),
-							nextLine[colNum.intValue()] });
+					final ImportFault importFault = createImportFault(
+							ImportFault.ERROR,
+							"import.csvFile.badRow.notNull",
+							createImportFaultArgs(importField, colNum, row));
 					faults.add(importFault);
 				} catch (EpBindException e) {
-					final ImportFault importFault = getImportFaultError();
-					importFault.setCode("import.csvFile.badRow.bindError");
-					importFault.setArgs(new Object[] { importField.getName(), importField.getType(), String.valueOf(colNum.intValue()),
-							nextLine[colNum.intValue()] });
+					final ImportFault importFault = createImportFault(
+							ImportFault.ERROR,
+							"import.csvFile.badRow.bindError",
+							createImportFaultArgs(importField, colNum, row));
 					faults.add(importFault);
 				}
 			}
 			
-			validateChangeSetStatus(nextLine, rowNumber, faults, entity);
+			validateChangeSetStatus(row, rowNumber, faults, entity);
 
 			if (!faults.isEmpty()) {
 				final ImportBadRow importBadRow = getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 				importBadRow.setRowNumber(rowNumber);
-				importBadRow.setRow(nextLine[0]);
+				importBadRow.setRow(row[0]);
 				importBadRow.addImportFaults(faults);
 				importBadRows.add(importBadRow);
 			}

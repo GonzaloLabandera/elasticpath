@@ -310,13 +310,13 @@ public class TaxCalculationServiceImplTest {
 				final PriceCalculator priceCalc = context.mock(PriceCalculator.class);
 				allowing(pricingSnapshot).getPriceCalc();
 				will(returnValue(priceCalc));
+				allowing(pricingSnapshot).hasPrice();
+				will(returnValue(true));
 				allowing(priceCalc).withCartDiscounts();
 				will(returnValue(priceCalc));
 				allowing(priceCalc).getAmount();
 				will(returnValue(lineItemPriceMoney.getAmount()));
 
-				allowing(shoppingItem).hasPrice();
-				will(returnValue(true));
 				allowing(shoppingItem).getSkuGuid();
 				will(returnValue(productSku.getGuid()));
 				allowing(shoppingItem).getGuid();

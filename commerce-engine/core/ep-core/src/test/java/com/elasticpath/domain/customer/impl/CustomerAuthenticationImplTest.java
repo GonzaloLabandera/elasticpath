@@ -14,13 +14,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.PasswordGenerator;
 import com.elasticpath.domain.customer.CustomerAuthentication;
-import com.elasticpath.service.security.SaltFactory;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
@@ -29,13 +28,11 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
 public class CustomerAuthenticationImplTest {
 
 	private static final String CLEAR_TEXT_PASSWORD = "password";
-	private static final String SALT = "530c5d386aac490cb88052f8768f5f4035d5475bb2c033ee855d9016062e47fc";
 	private static final String ENCODED_PASSWORD = "957278bbd71a7f7c9dc9853df31f6675b6671d0945aa8689c7abfb9287b293d0";
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 	private PasswordEncoder passwordEncoder;
-	private SaltFactory<String> saltFactory;
 	private BeanFactory beanFactory;
 	private BeanFactoryExpectationsFactory beanExpectations;
 
@@ -52,7 +49,6 @@ public class CustomerAuthenticationImplTest {
 		beanFactory = context.mock(BeanFactory.class);
 		beanExpectations = new BeanFactoryExpectationsFactory(context, beanFactory);
 		passwordEncoder = context.mock(PasswordEncoder.class);
-		saltFactory = context.mock(SaltFactory.class);
 	}
 
 	@After
@@ -66,17 +62,14 @@ public class CustomerAuthenticationImplTest {
 	@Test
 	public void testSetClearPassword() {
 		beanExpectations.oneBeanFactoryGetSingletonBean(ContextIdNames.PASSWORDENCODER, PasswordEncoder.class, passwordEncoder);
-		beanExpectations.oneBeanFactoryGetSingletonBean(ContextIdNames.SALT_FACTORY, SaltFactory.class, saltFactory);
 		context.checking(new Expectations() {
 			{
-				oneOf(saltFactory).createSalt(); will(returnValue(SALT));
-				oneOf(passwordEncoder).encodePassword(CLEAR_TEXT_PASSWORD, SALT); will(returnValue(ENCODED_PASSWORD));
+				oneOf(passwordEncoder).encode(CLEAR_TEXT_PASSWORD); will(returnValue(ENCODED_PASSWORD));
 			}
 		});
 		customerAuthentication.setClearTextPassword(CLEAR_TEXT_PASSWORD);
 		assertEquals("The clear text password should be as set", CLEAR_TEXT_PASSWORD, customerAuthentication.getClearTextPassword());
 		assertEquals("The password should be set to the value returned by the encoder", ENCODED_PASSWORD, customerAuthentication.getPassword());
-		assertEquals("The salt should be set to the value return by the factory", SALT, customerAuthentication.getSalt());
 	}
 
 	/**
@@ -87,7 +80,6 @@ public class CustomerAuthenticationImplTest {
 		customerAuthentication.setClearTextPassword(StringUtils.EMPTY);
 		context.checking(new Expectations() {
 			{
-				never(saltFactory);
 				never(passwordEncoder);
 			}
 		});
@@ -102,16 +94,12 @@ public class CustomerAuthenticationImplTest {
 		final PasswordGenerator passwordGenerator = context.mock(PasswordGenerator.class);
 		final String randomPassword = "MyNtgYZf3U";
 
-		beanExpectations.allowingBeanFactoryGetSingletonBean(ContextIdNames.PASSWORD_GENERATOR,
-			PasswordGenerator.class, passwordGenerator);
+		beanExpectations.allowingBeanFactoryGetSingletonBean(ContextIdNames.PASSWORD_GENERATOR, PasswordGenerator.class, passwordGenerator);
 		beanExpectations.oneBeanFactoryGetSingletonBean(ContextIdNames.PASSWORDENCODER, PasswordEncoder.class, passwordEncoder);
-		beanExpectations.oneBeanFactoryGetSingletonBean(ContextIdNames.SALT_FACTORY, SaltFactory.class, saltFactory);
 		context.checking(new Expectations() {
 			{
 				oneOf(passwordGenerator).getPassword(); will(returnValue(randomPassword));
-				oneOf(saltFactory).createSalt(); will(returnValue(SALT));
-				oneOf(passwordEncoder).encodePassword(randomPassword, SALT);
-				will(returnValue(ENCODED_PASSWORD));
+				oneOf(passwordEncoder).encode(randomPassword); will(returnValue(ENCODED_PASSWORD));
 			}
 		});
 		customerAuthentication.resetPassword();

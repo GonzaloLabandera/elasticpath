@@ -119,9 +119,21 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 				.flatMap(Observable::fromIterable);
 	}
 
+	@Override
+	public Observable<String> findCartOrderGuidsByAccount(final String storeCode, final String accountGuid) {
+		return reactiveAdapter.fromService(() -> findCartOrderGuidsByAccountGuid(storeCode, accountGuid),
+				String.format(NO_CART_ORDERS_FOR_CUSTOMER, accountGuid, storeCode))
+				.flatMap(Observable::fromIterable);
+	}
+
 	@CacheResult
 	private List<String> findCartOrderGuidsByCustomerGuid(final String storeCode, final String customerGuid) {
 		return coreCartOrderService.findCartOrderGuidsByCustomerGuid(storeCode, customerGuid);
+	}
+
+	@CacheResult
+	private List<String> findCartOrderGuidsByAccountGuid(final String storeCode, final String accountGuid) {
+		return coreCartOrderService.findCartOrderGuidsByAccountGuid(storeCode, accountGuid);
 	}
 
 	@Override

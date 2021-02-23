@@ -261,9 +261,5 @@
 		   <groupId>com.elasticpath</groupId>
 		   <artifactId>ep-health-monitoring-plugin-jms</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-jta</artifactId>
-		</dependency>
 	</dependencies>
 </project>

@@ -29,7 +29,7 @@ public class RegisteredCustomerAllOrNoneUsernamePasswordSaltFieldsExistValidator
 	@Override
 	public boolean isValid(final Customer customer, final ConstraintValidatorContext context) {
 		if ((CustomerType.REGISTERED_USER == customer.getCustomerType())
-				&& !areAllUsernamePasswordSaltSet(customer) && !areAllUsernamePasswordSaltEmpty(customer)) {
+				&& !areAllUsernamePasswordSet(customer) && !areAllUsernamePasswordEmpty(customer)) {
 
 			buildConstraintViolation(context,
 					"{com.elasticpath.validation.validators.impl.RegisteredCustomerAllOrNoneUsernamePasswordSaltFieldsExistValidator.message}");
@@ -40,20 +40,14 @@ public class RegisteredCustomerAllOrNoneUsernamePasswordSaltFieldsExistValidator
 		return true;
 	}
 
-	private String getCustomerAuthenticationSalt(final Customer customer) {
-		return customer.getCustomerAuthentication() == null ? null : customer.getCustomerAuthentication().getSalt();
-	}
-
-	private boolean areAllUsernamePasswordSaltSet(final Customer customer) {
+	private boolean areAllUsernamePasswordSet(final Customer customer) {
 		return StringUtils.isNotEmpty(customer.getUsername())
-				&& StringUtils.isNotEmpty(customer.getPassword())
-				&& StringUtils.isNotEmpty(getCustomerAuthenticationSalt(customer));
+				&& StringUtils.isNotEmpty(customer.getPassword());
 	}
 
-	private boolean areAllUsernamePasswordSaltEmpty(final Customer customer) {
+	private boolean areAllUsernamePasswordEmpty(final Customer customer) {
 		return StringUtils.isEmpty(customer.getUsername())
-				&& StringUtils.isEmpty(customer.getPassword())
-				&& StringUtils.isEmpty(getCustomerAuthenticationSalt(customer));
+				&& StringUtils.isEmpty(customer.getPassword());
 	}
 
 	/**

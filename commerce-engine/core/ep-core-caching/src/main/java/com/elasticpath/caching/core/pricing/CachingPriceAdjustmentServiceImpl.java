@@ -23,18 +23,11 @@ public class CachingPriceAdjustmentServiceImpl implements PriceAdjustmentService
 
 	@Override
 	public Map<String, PriceAdjustment> findByPriceListAndBundleConstituentsAsMap(final String priceListGuid,
-		final Collection<String> bundleConstituentsIds) {
+																				  final Collection<String> bundleConstituentsIds) {
 
-		final PriceListGuidAndBundleConstituentsKey key = new PriceListGuidAndBundleConstituentsKey(priceListGuid, bundleConstituentsIds);
-
-		Map<String, PriceAdjustment> result = getCache().get(key);
-
-		if (result == null) {
-			result = fallbackService.findByPriceListAndBundleConstituentsAsMap(key.getPriceListGuid(), key.getBundleConstituentsIds());
-			getCache().put(key, result);
-		}
-
-		return result;
+		final PriceListGuidAndBundleConstituentsKey cacheKey = new PriceListGuidAndBundleConstituentsKey(priceListGuid, bundleConstituentsIds);
+		return cache.get(cacheKey, key -> fallbackService.findByPriceListAndBundleConstituentsAsMap(key.getPriceListGuid(),
+				key.getBundleConstituentsIds()));
 	}
 
 	// non-cached calls

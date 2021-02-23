@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>addresses</name>
+
+		<!--
+			Shipping Address
+		-->
+		<resource>
+			<name>account-shipping-address-selector</name>
+			<description><![CDATA[
+				The selector for the account default shipping-address.
+			]]></description>
+			<uri>{account-shipping-addresses}/selector</uri>
+			<selector-for>account-shipping-addresses</selector-for>
+		</resource>
+
+		<resource>
+			<name>account-shipping-address-selector-choice</name>
+			<description><![CDATA[
+				The choice for an account shipping-address from the selector.
+			]]></description>
+			<uri>{account-shipping-address-selector}/{account-address}</uri>
+			<choices-for>account-shipping-address-selector</choices-for>
+		</resource>
+
+		<relationship>
+			<name>account-shipping-addresses-to-account-shipping-address-selector</name>
+			<description><![CDATA[
+				The relationship from the Account Shipping Addresses resource to the Account Shipping Address Selector resource.
+			]]></description>
+			<rel>selector</rel>
+			<rev>addresses</rev>
+			<from>account-shipping-addresses</from>
+			<to>account-shipping-address-selector</to>
+		</relationship>
+
+	</family>
+</definitions>

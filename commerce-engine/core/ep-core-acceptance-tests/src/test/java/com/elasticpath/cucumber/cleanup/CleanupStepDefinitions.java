@@ -11,15 +11,12 @@ import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
 import com.elasticpath.cucumber.category.CategoryStepDefinitionsHelper;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.order.jobs.impl.FailedOrdersCleanupJob;
 import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.OrderPaymentInstrument;
 import com.elasticpath.domain.shopper.Shopper;
@@ -30,16 +27,11 @@ import com.elasticpath.service.orderpaymentapi.CartOrderPaymentInstrumentService
 import com.elasticpath.service.orderpaymentapi.OrderPaymentInstrumentService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
-import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * Clean up test step definitions class.
  */
 public class CleanupStepDefinitions {
-
-	@Autowired
-	@Qualifier("cleanupFailedOrdersJob")
-	private FailedOrdersCleanupJob failedOrdersCleanupJob;
 
 	@Inject
 	@Named("shoppingCartHolder")
@@ -90,16 +82,6 @@ public class CleanupStepDefinitions {
 	}
 
 	/**
-	 * Sets the number of days of failed order history to keep before a Quartz job clears it.
-	 *
-	 * @param maxHistory the number of days of failed order history.
-	 */
-	@Given("^the FAILEDORDERCLEANUP maxHistory is (\\d+) day$")
-	public void setOrderMaxHistory(final int maxHistory) {
-		failedOrdersCleanupJob.setMaxDaysHistoryProvider(new SimpleSettingValueProvider<>(maxHistory));
-	}
-
-	/**
 	 * Sets up an order in FAILED state for the current test environment.
 	 *
 	 * @param dataTable the shopping items
@@ -115,14 +97,6 @@ public class CleanupStepDefinitions {
 	@And("^the anonymous customer created a payment instrument in order$")
 	public void createPaymentInstrument() {
 		cartOrderPaymentInstrumentGuid = cleanupStepDefinitionsHelper.createPaymentInstrument();
-	}
-
-	/**
-	 * Runs the failed orders cleanup job.
-	 */
-	@When("^the cleanupFailedOrdersJob processes$")
-	public void runFailedOrdersCleanupJobProcessor() {
-		failedOrdersCleanupJob.removeFailedOrders();
 	}
 
 	/**

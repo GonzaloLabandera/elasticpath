@@ -93,9 +93,10 @@ public class ModifyReservationProcessorImplTest extends AbstractProcessorImplTes
 
 		final PaymentAPIResponse response = testee.modifyReservation(createModifyReservationRequest(newAmount));
 
-		assertThat(response.isSuccess()).isEqualTo(false);
+		assertThat(response.isSuccess()).isFalse();
 		assertThat(response.getExternalMessage()).isEqualTo("Increase amount modification failed.");
-		assertThat(response.getInternalMessage()).isEqualTo("Increase amount modification failed due the modify process has thrown exception.");
+		assertThat(response.getInternalMessage()).isEqualTo("Elastic Path attempted to replace the existing reservation with a new, higher amount, "
+				+ "but was unsuccessful.\nTherefore, the order modification cannot be completed.");
 		assertThat(response.getEvents()).isEmpty();
 	}
 

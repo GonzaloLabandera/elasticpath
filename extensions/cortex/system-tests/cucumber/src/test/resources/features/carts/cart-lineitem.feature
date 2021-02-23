@@ -219,7 +219,7 @@ Feature: Cart Lineitems
     And I follow links addtocartform
     Then there are no addtodefaultcartaction links
     And post to a created addtodefaultcartaction uri
-    And the HTTP status is conflict
+    And the HTTP status is bad request
 
     Examples:
       | SKU_WITH_NO_PRICE |

@@ -48,6 +48,7 @@ import com.elasticpath.test.persister.StoreTestPersister;
 import com.elasticpath.test.persister.TaxTestPersister;
 import com.elasticpath.test.persister.TestDataPersisterFactory;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
+import com.elasticpath.test.util.CheckoutHelper;
 
 public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTest {
 
@@ -94,6 +95,8 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 	@Autowired
 	protected OrderPaymentService orderPaymentService;
 
+	protected CheckoutHelper checkoutHelper;
+
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
 	 */
@@ -115,6 +118,8 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 		address = persisterFactory.getStoreTestPersister().createCustomerAddress("Bond", "James", "1234 Pine Street", "", "Vancouver", "CA", "BC",
 				"V6J5G4", "891312345007");
 		customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(customer);
+
+		checkoutHelper = new CheckoutHelper(getTac());
 	}
 	
 	public void setUpTaxJurisdictionForStore(final Store store, final ShippingRegion shippingRegion) {
@@ -153,7 +158,7 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 		orderTaxTestVerifier.verifyTaxDocumentReversal(taxDocumentId);
 	}
 	
-	public OrderSku getNewProductOrderSku(final SimpleStoreScenario scenario, final String orderSkuCode) {
+	public OrderSku getNewProductOrderSku(final SimpleStoreScenario scenario, final String orderSkuCode, final long orderId) {
 		Product newProduct = getTac().getPersistersFactory().getCatalogTestPersister().createDefaultProductWithSkuAndInventory(
 																						scenario.getCatalog(),
 																						scenario.getCategory(), 
@@ -183,6 +188,8 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 		}
 
 		orderSku.setDisplayName("product_name2");
+		orderSku.setOrderUidPk(orderId);
+
 		return orderSku;
 	}
 	

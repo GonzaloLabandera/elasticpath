@@ -1007,24 +1007,23 @@ var EPTest = (function () {
             if (columnIndex < 0) {
                 return false;
             }
-            var item = table._getTopItem();
 
             var matchTextToAnyString = function (strings, text) {
-
-                return typeof (item._texts[columnIndex]) !== "undefined" && item._texts[columnIndex] !== null
-                    && item._texts[columnIndex].toLowerCase() === text.toLowerCase();
-
+                //need this because column text might have encoded information in non-visible UTF-8 characters
+                var columnValue = _removeTestSequence(strings[columnIndex])
+                return typeof (columnValue) !== "undefined" && columnValue !== null
+                    && columnValue.toLowerCase() === text.toLowerCase();
             };
 
-            while (typeof(item) !== "undefined" && item !== null) {
-                if (item._texts !== null && typeof(item._texts) !== "undefined"
-                    && matchTextToAnyString(item._texts, text)) {
-                    table.scrollItemIntoView(item);
+            var items = table.getRootItem().getCachedChildren()
+            for (var i = 0; i < items.length; i++) {
+                if (items[i]._texts !== null && typeof(items[i]._texts) !== "undefined"
+                    && matchTextToAnyString(items[i]._texts, text)) {
+                    table.scrollItemIntoView(items[i]);
                     table.deselectAll();
-                    table.selectItem(item);
+                    table.selectItem(items[i]);
                     return true;
                 }
-                item = item.getNextItem();
             }
             return false;
         },

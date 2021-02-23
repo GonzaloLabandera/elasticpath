@@ -302,7 +302,7 @@ public class ProductMerchandisingAssociationDialog extends AbstractEpDialog impl
 			return cachedValidateProductCodeResult;
 		};
 
-		final IValidator validator = new CompoundValidator(new IValidator[] { EpValidatorFactory.PRODUCT_CODE, productValidator });
+		final IValidator validator = new CompoundValidator(new IValidator[] { productValidator });
 		EpControlBindingProvider.getInstance().bind(bindingContext, productCodeText, validator, null, new ObservableUpdateValueStrategy() {
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object value) {

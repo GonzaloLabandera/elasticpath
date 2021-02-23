@@ -189,4 +189,38 @@ public class ProductAssociationQueryBuilderTest {
 				+ 		" AND pa.catalog.code = ?6",
 				queryString);
 	}
+
+
+	@Test
+	public void testBuildCountQueryWithoutFlagsOfHiddenAndNotSoldSeparately() throws Exception {
+		allCriteria.setNotSoldSeparately(null);
+		allCriteria.setHidden(null);
+		ProductAssociationQuery query = builder.buildCountQuery(allCriteria);
+		String queryString = query.getQueryString();
+		Object[] queryParams = query.getQueryParameters().toArray();
+
+		assertEquals("SELECT COUNT(pa.uidPk)"
+						+ " FROM ProductAssociationImpl pa,"
+						+ 		" IN(pa.sourceProduct.productCategories) spc,"
+						+ 		" IN(pa.targetProduct.productCategories) tpc"
+						+ " WHERE"
+						+ 		" tpc.category.catalog = pa.catalog"
+						+ 		" AND spc.category.catalog = pa.catalog"
+						+ 		" AND pa.associationType = ?1"
+						+ 		" AND pa.sourceProduct.code = ?2"
+						+ 		" AND pa.targetProduct.code = ?3"
+						+ 		" AND pa.catalog.code = ?4"
+						+ 		" AND (pa.startDateInternal IS NULL OR pa.startDateInternal <= ?5)"
+						+ 		" AND (pa.endDateInternal IS NULL OR pa.endDateInternal > ?6)",
+				queryString);
+		assertEquals(new Object[] {
+						ProductAssociationType.CROSS_SELL,
+						"TestSourceProductCode",
+						"TestTargetProductCode",
+						"TestCatalogCode",
+						expectedDate,
+						expectedDate
+				},
+				queryParams);
+	}
 }

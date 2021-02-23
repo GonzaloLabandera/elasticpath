@@ -7,14 +7,14 @@ import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.plugin.tax.domain.TaxDocument;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
-import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
+import com.elasticpath.service.shoppingcart.actions.PostCaptureCheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.ReversiblePostCaptureCheckoutAction;
 import com.elasticpath.service.tax.TaxOperationService;
 
 /**
  * Commits the taxes by committing order related tax documents using the tax manager.
  */
-public class CommitOrderTaxCheckoutAction implements ReversibleCheckoutAction {
+public class CommitOrderTaxCheckoutAction implements ReversiblePostCaptureCheckoutAction {
 
 	private TaxOperationService taxOperationService;
 	
@@ -25,7 +25,7 @@ public class CommitOrderTaxCheckoutAction implements ReversibleCheckoutAction {
 	 * @throws EpSystemException on error
 	 */
 	@Override
-	public void execute(final CheckoutActionContext context) throws EpSystemException {
+	public void execute(final PostCaptureCheckoutActionContext context) throws EpSystemException {
 		
 		//Exchange orders' tax documents are committed with its OrderReturn by <code>ReturnAndExchangeService<code>
 		if (context.getOrder().isExchangeOrder()) {
@@ -50,7 +50,7 @@ public class CommitOrderTaxCheckoutAction implements ReversibleCheckoutAction {
 	 * @throws EpSystemException on error
 	 */
 	@Override
-	public void rollback(final CheckoutActionContext context) throws EpSystemException {
+	public void rollback(final PostCaptureCheckoutActionContext context) throws EpSystemException {
 		
 		if (context.getOrder().isExchangeOrder()) {
 			return;

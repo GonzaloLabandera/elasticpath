@@ -30,6 +30,14 @@ public interface CustomerProfileAttributeService {
 	Set<String> getCustomerEditableAttributeKeys(String storeCode);
 
 	/**
+	 * Gets the full set of editable attribute keys for a given store.
+	 *
+	 * @param storeCode the store
+	 * @return the set of editable keys
+	 */
+	Set<String> getAccountEditableAttributeKeys(String storeCode);
+
+	/**
 	 * Gets the full set of editable attributes for a given store and customer.
 	 * Combines attributes that already have values for the customer along with attributes that do not
 	 * but which are still considered editable.

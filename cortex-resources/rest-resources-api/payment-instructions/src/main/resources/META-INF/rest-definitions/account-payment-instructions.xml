@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>paymentinstructions</name>
+
+		<uri-part>
+			<name>account-communication-instructions-id</name>
+			<description><![CDATA[The account communication instructions id.]]></description>
+			<composite/>
+		</uri-part>
+
+		<uri-part>
+			<name>account-payload-id</name>
+			<description><![CDATA[The account payload id.]]></description>
+			<composite/>
+		</uri-part>
+
+		<resource>
+			<name>account-request-instructions-form</name>
+			<description><![CDATA[Provides the form with which to request payment instructions for a third party payment provider.]]></description>
+			<uri>{base.family}/{paymentmethods.account-payment-method}/instructions/form</uri>
+			<form>
+				<entity>payment-method-configuration</entity>
+				<action-rel>requestpaymentinstructionsaction</action-rel>
+				<result>account-payment-instructions</result>
+			</form>
+		</resource>
+
+		<resource>
+			<name>account-payment-instructions</name>
+			<description>
+				<![CDATA[The payment instructions resource, providing payment provider-defined details for creating valid payment instruments.]]>
+			</description>
+			<uri>{base.family}/{paymentmethods.account-payment-method}/instructions/{account-communication-instructions-id}/{payload-id}</uri>
+			<entity>instructions</entity>
+		</resource>
+
+		<advisor>
+			<name>account-request-instructions-form</name>
+			<description><![CDATA[Provides a blocking advisor to enforce creation fields during profile payment instrument creation, as required by the third-party payment provider. Required fields might include a billing address or email address.]]></description>
+			<blocks>account-request-instructions-form</blocks>
+		</advisor>
+
+		<relationship>
+			<name>account-request-instructions-form-for-account-payment-method</name>
+			<description><![CDATA[The link from a account payment method to request instructions form.]]></description>
+			<rel>requestinstructionsform</rel>
+			<rev>accountpaymentmethod</rev>
+			<from>paymentmethods.account-payment-method</from>
+			<to>account-request-instructions-form</to>
+		</relationship>
+
+		<relationship>
+			<name>account-payment-instructions-to-account-payment-method</name>
+			<description><![CDATA[The link from payment instructions to a account payment method.]]></description>
+			<rel>paymentmethod</rel>
+			<from>account-payment-instructions</from>
+			<to>paymentmethods.account-payment-method</to>
+		</relationship>
+
+	</family>
+</definitions>

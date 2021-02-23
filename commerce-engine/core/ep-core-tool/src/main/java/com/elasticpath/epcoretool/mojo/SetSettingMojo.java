@@ -14,7 +14,7 @@ import com.elasticpath.epcoretool.logic.AbstractSetSetting;
 /**
  * Updates the setting value in the Elastic Path database. If a value already exists, it will be removed.
  */
-@Mojo(name = "set-setting")
+@Mojo(name = "set-setting", threadSafe = true)
 public class SetSettingMojo extends AbstractEpCoreMojo {
 
 	/**

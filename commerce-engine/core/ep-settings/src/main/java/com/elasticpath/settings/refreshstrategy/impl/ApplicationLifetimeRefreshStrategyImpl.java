@@ -81,4 +81,11 @@ public class ApplicationLifetimeRefreshStrategyImpl implements SettingRefreshStr
 		return settingsReader;
 	}
 
+	/**
+	 * Utility method to clear cache entries.
+	 */
+	public static void clearCache() {
+		CACHE_MAP.clear();
+	}
+
 }

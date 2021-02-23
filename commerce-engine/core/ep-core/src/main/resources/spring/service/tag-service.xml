@@ -3,11 +3,9 @@
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:util="http://www.springframework.org/schema/util"
-		xmlns:settings="http://www.elasticpath.com/schema/settings"
 		xsi:schemaLocation="
 				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
-				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 		">
 
 	<bean id="conditionEvaluationService" class="com.elasticpath.tags.service.impl.JavaConditionEvaluatorServiceImpl">
@@ -27,13 +25,9 @@
 				<bean class="com.elasticpath.tags.service.impl.conditionoperators.ContainsOperatorEvaluatorImpl"/>
 			</set>
 		</property>
-		<property name="decomposedConditionSynchronizedCacheSupport">
-			<bean class="com.elasticpath.service.caching.impl.SynchronizedCacheSupportImpl">
-				<property name="evaluationCache">
-					<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-						<property name="cache" ref="decomposedConditionCache"/>
-					</bean>
-				</property>
+		<property name="decomposedConditionCache">
+			<bean class="com.elasticpath.cache.impl.EhcacheCacheAdapter">
+				<constructor-arg ref="decomposedConditionCache"/>
 			</bean>
 		</property>
 	</bean>
@@ -124,7 +118,7 @@
 		<property name="tagOperatorDao" ref="tagOperatorDao" />
 	</bean>
 
-        <bean id="conditionValidationFacade" class="com.elasticpath.tags.service.impl.ConditionValidationFacadeImpl">
+	<bean id="conditionValidationFacade" class="com.elasticpath.tags.service.impl.ConditionValidationFacadeImpl">
 		<property name="validationService" ref="declarativeValidationService" />
 	</bean>
 
@@ -149,4 +143,11 @@
 	<bean id="tagGroupFactory" class="com.elasticpath.tags.service.impl.TagGroupFactoryImpl" />
 
 	<bean id="tagDefinitionFactory" class="com.elasticpath.tags.service.impl.TagDefinitionFactoryImpl" />
+
+	<bean id="ruleEngineRuleStrategy" class="com.elasticpath.service.rules.impl.RuleEngineRuleStrategy">
+		<property name="conditionEvaluatorService" ref="conditionEvaluationService" />
+		<property name="dataStrategy" ref="ruleEngineDataStrategy"/>
+	</bean>
+
+	<bean id="ruleEngineSessionFactory" class="com.elasticpath.service.rules.impl.RuleEngineSessionFactory"/>
 </beans>

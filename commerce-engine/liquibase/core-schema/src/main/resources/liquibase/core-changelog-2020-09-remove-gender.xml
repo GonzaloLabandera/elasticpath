@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-08-remove-gender.xml">
+
+	<changeSet id="2020-08-remove-gender" author="elasticpath" >
+		<comment>[PB-8390] Remove gender system profile attribute</comment>
+
+		<delete tableName="TCUSTOMERPROFILEVALUE">
+			<where>LOCALIZED_ATTRIBUTE_KEY = 'CP_GENDER'</where>
+		</delete>
+		
+		<delete tableName="TATTRIBUTE">
+			<where>ATTRIBUTE_KEY = 'CP_GENDER'</where>
+		</delete>
+		
+		<delete tableName="TTAGDICTIONARYTAGDEFINITION">
+			<where>TAGDEFINITION_GUID = 'CUSTOMER_GENDER'</where>
+		</delete>
+
+		<delete tableName="TTAGALLOWEDVALUE">
+			<where>TAGVALUETYPE_GUID = 'gender'</where>
+		</delete>	
+		
+		<delete tableName="TTAGVALUETYPEOPERATOR">
+			<where>TAGVALUETYPE_GUID = 'gender'</where>
+		</delete>
+		
+		<delete tableName="TTAGDEFINITION">
+			<where>GUID = 'CUSTOMER_GENDER'</where>
+		</delete>		
+		
+		<delete tableName="TTAGVALUETYPE">
+			<where>GUID = 'gender'</where>
+		</delete>
+
+		<delete tableName="TVALIDATIONCONSTRAINTS">
+			<where>ERROR_MESSAGE_KEY = 'validationTagGenderError'</where>
+		</delete>
+		
+		<delete tableName="TLOCALIZEDPROPERTIES">
+			<where>LOCALIZED_PROPERTY_KEY like 'validationTagGenderError_%'</where>
+		</delete>
+		
+		<delete tableName="TLOCALIZEDPROPERTIES">
+			<where>LOCALIZED_PROPERTY_KEY='tagDefinitionDisplayName_en' AND VALUE = 'are of gender'</where>
+		</delete>
+		
+		<delete tableName="TLOCALIZEDPROPERTIES">
+			<where>LOCALIZED_PROPERTY_KEY='attributeDisplayName_en' AND VALUE = 'Gender'</where>
+		</delete>
+				
+	</changeSet>
+	
+</databaseChangeLog>

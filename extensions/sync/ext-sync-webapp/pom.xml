@@ -94,7 +94,7 @@
 					<configuration>
 						<path>${ep.datasync.context}</path>
 						<port>${ep.datasync.tomcat.port.http}</port>
-						<contextFile>${project.build.directory}/${build.finalName}/META-INF/context.xml</contextFile>
+						<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
 
 						<systemProperties>
 							<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
@@ -117,10 +117,6 @@
 							<ep.jms.type>${ep.jms.type}</ep.jms.type>
 							<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
 							<ep.jms.url>${ep.jms.url}</ep.jms.url>
-							<epdb.data.source.xa.factory>${epdb.data.source.xa.factory}</epdb.data.source.xa.factory>
-							<epdb.data.source.xa.type>${epdb.data.source.xa.type}</epdb.data.source.xa.type>
-							<ep.jms.xa.factory>${ep.jms.xa.factory}</ep.jms.xa.factory>
-							<ep.jms.xa.type>${ep.jms.xa.type}</ep.jms.xa.type>
 							<ep.changesets.enabled>${ep.changesets.enabled}</ep.changesets.enabled>
 						</systemProperties>
 					</configuration>

@@ -49,21 +49,18 @@ public class GroovyConditionDSLBuilderTest  {
 	private static final String SELLING_CHANNEL = "SELLING_CHANNEL";
 	private static final String CATEGORIES_VISITED = "CATEGORIES_VISITED";
 	private static final String CUSTOMER_AGE_YEARS = "CUSTOMER_AGE_YEARS"; 
-	private static final String CUSTOMER_GENDER = "CUSTOMER_GENDER";
 	private static final String DAYS_SINCE_LAST_VISIT = "DAYS_SINCE_LAST_VISIT";
 
 	private final TagDefinition cartSubtotalTagDefinition = context.mock(TagDefinition.class, "cartSubtotalTagDefinition");
 	private final TagDefinition sellingChannelTagDefinition = context.mock(TagDefinition.class, "sellingChannelTagDefinition");
 	private final TagDefinition categoriesVisitedTagDefinition = context.mock(TagDefinition.class, "categoriesVisitedTagDefinition");
 	private final TagDefinition customerAgeYearsTagDefinition = context.mock(TagDefinition.class, "customerAgeYearsTagDefinition");
-	private final TagDefinition customerGenderTagDefinition = context.mock(TagDefinition.class, "customerGenderTagDefinition");
 	private final TagDefinition daysSinceLastVisitTagDefinition = context.mock(TagDefinition.class, "daysSinceLastVisitTagDefinition");
 
 	private final TagValueType moneyTagValueType = context.mock(TagValueType.class, "moneyTagValueType");
 	private final TagValueType sellingChannelTagValueType = context.mock(TagValueType.class, "sellingChannelTagValueType");
 	private final TagValueType categoriesVisitedTagValueType = context.mock(TagValueType.class, "categoriesVisitedTagValueType");
 	private final TagValueType customerAgeYearsTagValueType = context.mock(TagValueType.class, "customerAgeYearsTagValueType");
-	private final TagValueType customerGenderTagValueType = context.mock(TagValueType.class, "customerGenderTagValueType");
 	private final TagValueType daysSinceLastVisitTagValueType = context.mock(TagValueType.class, "daysSinceLastVisitTagValueType");
 
 	
@@ -105,7 +102,6 @@ public class GroovyConditionDSLBuilderTest  {
 		definitions.add(sellingChannelTagDefinition);
 		definitions.add(categoriesVisitedTagDefinition);
 		definitions.add(customerAgeYearsTagDefinition);
-		definitions.add(customerGenderTagDefinition);
 		definitions.add(daysSinceLastVisitTagDefinition);
 
 		context.checking(new Expectations() {
@@ -153,16 +149,6 @@ public class GroovyConditionDSLBuilderTest  {
 				allowing(customerAgeYearsTagDefinition).getGuid();
 				will(returnValue(CUSTOMER_AGE_YEARS));
 
-				//CUSTOMER_GENDER setup
-				allowing(customerGenderTagValueType).getJavaType();
-				will(returnValue(String.class.getCanonicalName()));
-
-				allowing(customerGenderTagDefinition).getValueType();
-				will(returnValue(customerGenderTagValueType));
-
-				allowing(customerGenderTagDefinition).getGuid();
-				will(returnValue(CUSTOMER_GENDER));
-
 				//DAYS_SINCE_LAST_VISIT setup
 				allowing(daysSinceLastVisitTagValueType).getJavaType();
 				will(returnValue(Long.class.getCanonicalName()));
@@ -205,7 +191,7 @@ public class GroovyConditionDSLBuilderTest  {
 
 		conditionString = " { AND { CART_SUBTOTAL.equalTo (100.0G) } "
 				+ " { OR { CATEGORIES_VISITED.includes 'PANASONIC' }  { CATEGORIES_VISITED.includesIgnoreCase 'SONY' }  } " 
-				+	" { AND { CUSTOMER_AGE_YEARS.lessThan (50i) }  { CUSTOMER_GENDER.equalTo 'F' }  }  } ";
+				+	" { AND { CUSTOMER_AGE_YEARS.lessThan (50i) }  }  } ";
 		
 		root = cBuilder.getLogicalOperationTree(conditionString);
 		

@@ -14,15 +14,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.BeanLocator;
+import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -40,8 +39,6 @@ import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderReturn;
-import com.elasticpath.domain.order.OrderShipment;
-import com.elasticpath.domain.order.OrderStatus;
 import com.elasticpath.domain.orderpaymentapi.OrderPaymentAmounts;
 import com.elasticpath.money.MoneyFormatter;
 import com.elasticpath.service.cmuser.CmUserService;
@@ -75,10 +72,6 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 	private final OrderPaymentApiService orderPaymentApiService;
 
 	private Button cancelOrderButton;
-
-	private Button holdOrderButton;
-
-	private Button releaseOrderButton;
 
 	private Text orderStatusText;
 
@@ -121,12 +114,6 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 			cancelButtonState = EpState.EDITABLE;
 		} else {
 			cancelButtonState = EpState.READ_ONLY;
-		}
-		EpState onHoldButtonState;
-		if (editor.isAuthorizedAndNotLocked()) {
-			onHoldButtonState = EpState.EDITABLE;
-		} else {
-			onHoldButtonState = EpState.READ_ONLY;
 		}
 
 		mainPane = CompositeFactory.createTableWrapLayoutComposite(parentComposite, 2, false);
@@ -191,15 +178,6 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 				cancelButtonState, null);
 		cancelOrderButton.addSelectionListener(this);
 
-		final Image holdOrderImage = FulfillmentImageRegistry.getImage(FulfillmentImageRegistry.IMAGE_HOLD_ORDER);
-		holdOrderButton = buttonsPane.addPushButton(FulfillmentMessages.get().OrderSummaryOverviewSection_HoldOrder,
-				holdOrderImage, onHoldButtonState, null);
-		holdOrderButton.addSelectionListener(this);
-
-		final Image releaseOrderImage = FulfillmentImageRegistry.getImage(FulfillmentImageRegistry.IMAGE_RELEASE_ORDER);
-		releaseOrderButton = buttonsPane.addPushButton(FulfillmentMessages.get().OrderSummaryOverviewSection_ReleaseOrder, releaseOrderImage,
-				onHoldButtonState, null);
-		releaseOrderButton.addSelectionListener(this);
 	}
 
 	@Override
@@ -235,29 +213,6 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 		if (exchangeDiscount != null) {
 			exchangeDiscount.setText(getMoneyFormatter().formatCurrency(this.order.getDueToRMAMoney(), order.getLocale()));
 		}
-
-		updateButtons();
-	}
-
-	/**
-	 *
-	 */
-	private void updateButtons() {
-		if (editor.isAuthorizedAndNotLocked() && !this.getSection().isDisposed()) {
-			cancelOrderButton.setEnabled(editor.isAuthorizedAndAvailableForEdit() && this.order.isCancellable()
-					&& this.isShipmentsCanBeCanceled(order));
-			holdOrderButton.setEnabled(editor.isAuthorizedAndNotLocked() && this.order.isHoldable());
-			releaseOrderButton.setEnabled(editor.isAuthorizedAndNotLocked() && this.order.getStatus().equals(OrderStatus.ONHOLD));
-		}
-	}
-
-	private boolean isShipmentsCanBeCanceled(final Order order) {
-		for (OrderShipment shipment : order.getAllShipments()) {
-			if (!shipment.isCancellable()) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -341,17 +296,6 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 					FulfillmentMessages.get().OrderSummaryPage_EditorDirtyCancelOrder_Message,
 					FulfillmentMessages.get().OrderSummaryOverviewSection_DialogCancelTitle,
 					FulfillmentMessages.get().OrderSummaryOverviewSection_DialogCancelMessage, () -> order = getOrderService().cancelOrder(order));
-		} else if (event.getSource() == releaseOrderButton) {
-			checkAndAsk(FulfillmentMessages.get().OredrSummaryPage_EditorDirtyRemoveHoldOrder_Title,
-					FulfillmentMessages.get().OrderSummaryPage_EditorDirtyRemoveHoldOrder_Message,
-					FulfillmentMessages.get().OrderSummaryOverviewSection_DialogReleaseTitle,
-					FulfillmentMessages.get().OrderSummaryOverviewSection_DialogReleaseMessage,
-					() -> order = getOrderService().releaseHoldOnOrder(order));
-		} else if (event.getSource() == holdOrderButton) {
-			checkAndAsk(FulfillmentMessages.get().OrderSummaryPage_EditorDirtyPlaceOnHoldOrder_Title,
-					FulfillmentMessages.get().OrderSummaryPage_EditorDirtyPlaceOnHoldOrder_Message,
-					FulfillmentMessages.get().OrderSummaryOverviewSection_DialogHoldTitle,
-					FulfillmentMessages.get().OrderSummaryOverviewSection_DialogHoldMessage, () -> order = getOrderService().holdOrder(order));
 		}
 	}
 
@@ -380,9 +324,6 @@ public class OrderSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 	
 	@Override
 	public void propertyChanged(final Object source, final int propId) {
-		if (propId == IEditorPart.PROP_DIRTY) {
-			updateButtons();
-		}
 		if (propId == OrderEditor.PROP_REFRESH_PARTS) {
 			this.orderTotalText.setText(getMoneyFormatter().formatCurrency(this.order.getTotalMoney(), order.getLocale()));
 			this.balanceDueText.setText(getMoneyFormatter().formatCurrency(this.orderPaymentAmounts.getAmountDue(), order.getLocale()));

@@ -3,6 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer.impl;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -12,11 +15,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.inject.Provider;
+import java.util.Collections;
+import java.util.List;
 
 import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,24 +29,37 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
+import com.elasticpath.domain.customer.UserAccountAssociation;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
+import com.elasticpath.rest.advise.ImmutableMessage;
+import com.elasticpath.rest.chain.BrokenChainException;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
+import com.elasticpath.rest.identity.Subject;
+import com.elasticpath.rest.identity.attribute.AccountSharedIdSubjectAttribute;
+import com.elasticpath.rest.identity.attribute.SubjectAttribute;
+import com.elasticpath.rest.identity.type.ImmutableSubject;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.dto.CustomerDTO;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
+import com.elasticpath.service.customer.AccountTreeService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionService;
+import com.elasticpath.service.customer.UserAccountAssociationService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
+import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.domain.SettingValue;
 
 /**
  * Test class for {@link CustomerRepositoryImpl}.
@@ -53,14 +68,18 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
 @RunWith(MockitoJUnitRunner.class)
 public class CustomerRepositoryImplTest {
 
+	private static final String ACCOUNT_ROLE_FIELD_SETTING_PATH = "COMMERCE/SYSTEM/JWT/singleSessionUserRole";
 	private static final String THE_RESULT_SHOULD_BE_SUCCESSFUL = "The result should be successful";
 	private static final String THE_RESULT_SHOULD_BE_A_FAILURE = "The result should be a failure";
 	private static final String SHARED_ID = "sharedId";
+	private static final String ACCOUNT_SHARED_ID = "sharedId";
 	private static final String SCOPE = "scope";
 	private static final String CUSTOMER_GUID = "customer_guid";
 	private static final String EP_PERSISTENCE_EXCEPTION = "ep persistence exception";
-	private static final String ADDRESS_GUID = "addressGuid";
-	private static final String CART_GUID = "cartGuid";
+	private static final String ACCOUNT_GUID = "accountGuid";
+	private static final int PAGE_START_INDEX = 1;
+	private static final int PAGE_SIZE = 5;
+
 	@Mock
 	private CustomerService mockCustomerService;
 	@InjectMocks
@@ -86,16 +105,21 @@ public class CustomerRepositoryImplTest {
 	@Mock
 	private BeanFactory coreBeanFactory;
 	@Mock
-	private Provider<CartOrderRepository> cartOrderRepositoryProvider;
+	private SettingsReader settingsReader;
 	@Mock
-	private CartOrderRepository cartOrderRepository;
+	private UserAccountAssociationService userAccountAssociationService;
+	@Mock
+	private AccountTreeService accountTreeService;
 
 	private CustomerRepositoryImpl customerRepository;
 
 	@Before
 	public void setUp() {
-		customerRepository = new CustomerRepositoryImpl(mockCustomerService, mockCustomerSessionRepository, mockCustomerSessionService,
-				mockShoppingCartService, coreBeanFactory, cartOrderRepositoryProvider, reactiveAdapter);
+		customerRepository = new CustomerRepositoryImpl(mockCustomerService, accountTreeService, mockCustomerSessionRepository,
+				mockCustomerSessionService,
+				mockShoppingCartService, coreBeanFactory, reactiveAdapter, settingsReader,
+				userAccountAssociationService);
+		when(mockCustomerService.findCustomerGuidBySharedId(SHARED_ID)).thenReturn(ACCOUNT_GUID);
 	}
 
 	@Test
@@ -138,11 +162,11 @@ public class CustomerRepositoryImplTest {
 	public void testFindCustomerByGuidWithValidGuid() {
 		Customer expectedCustomer = new CustomerImpl();
 
-		when(mockCustomerSessionRepository.findCustomerSessionByGuid(CUSTOMER_GUID))
+		when(mockCustomerSessionRepository.findCustomerSessionByGuidAndStoreCode(CUSTOMER_GUID, SCOPE))
 				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
 		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(expectedCustomer);
 
-		ExecutionResult<Customer> result = customerRepository.findCustomerByGuid(CUSTOMER_GUID);
+		ExecutionResult<Customer> result = customerRepository.findCustomerByGuidAndStoreCode(CUSTOMER_GUID, SCOPE);
 
 		assertTrue("The result should be a success", result.isSuccessful());
 		assertEquals("The customer returned should be the same as expected", expectedCustomer, result.getData());
@@ -150,11 +174,11 @@ public class CustomerRepositoryImplTest {
 
 	@Test
 	public void testFindCustomerByGuidWithCustomerNotFound() {
-		when(mockCustomerSessionRepository.findCustomerSessionByGuid(CUSTOMER_GUID))
+		when(mockCustomerSessionRepository.findCustomerSessionByGuidAndStoreCode(CUSTOMER_GUID, SCOPE))
 				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
 		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(null);
 
-		ExecutionResult<Customer> result = customerRepository.findCustomerByGuid(CUSTOMER_GUID);
+		ExecutionResult<Customer> result = customerRepository.findCustomerByGuidAndStoreCode(CUSTOMER_GUID, SCOPE);
 
 		assertTrue("The result should be a failure", result.isFailure());
 		assertEquals("The resource status should be NOT_FOUND", ResourceStatus.NOT_FOUND, result.getResourceStatus());
@@ -162,10 +186,10 @@ public class CustomerRepositoryImplTest {
 
 	@Test
 	public void testFindCustomerByGuidWhenExceptionThrown() {
-		when(mockCustomerSessionRepository.findCustomerSessionByGuid(CUSTOMER_GUID))
+		when(mockCustomerSessionRepository.findCustomerSessionByGuidAndStoreCode(CUSTOMER_GUID, SCOPE))
 				.thenThrow(new EpPersistenceException(EP_PERSISTENCE_EXCEPTION));
 
-		ExecutionResult<Customer> result = customerRepository.findCustomerByGuid(CUSTOMER_GUID);
+		ExecutionResult<Customer> result = customerRepository.findCustomerByGuidAndStoreCode(CUSTOMER_GUID, SCOPE);
 		assertServerError(result);
 	}
 
@@ -249,26 +273,6 @@ public class CustomerRepositoryImplTest {
 	}
 
 	@Test
-	public void shouldUpdateShippingAddressOnCartWhenAddressExists() {
-		when(mockCustomer.getPreferredShippingAddress()).thenReturn(mockAddress);
-		when(mockCustomer.getStoreCode()).thenReturn(SCOPE);
-		when(mockCustomer.getGuid()).thenReturn(CUSTOMER_GUID);
-		when(mockAddress.getGuid()).thenReturn(ADDRESS_GUID);
-		when(cartOrderRepositoryProvider.get()).thenReturn(cartOrderRepository);
-		when(cartOrderRepository.findCartOrderGuidsByCustomer(SCOPE, CUSTOMER_GUID)).thenReturn(Observable.just(CART_GUID));
-		when(cartOrderRepository.updateShippingAddressOnCartOrder(ADDRESS_GUID, CART_GUID, SCOPE))
-				.thenReturn(Single.just(true));
-
-		customerRepository.updateShippingAddressOnCustomerCart(mockCustomer, mockAddress)
-				.test()
-				.assertNoErrors();
-
-		verify(cartOrderRepository, times(1)).findCartOrderGuidsByCustomer(SCOPE, CUSTOMER_GUID);
-		verify(cartOrderRepository, times(1)).updateShippingAddressOnCartOrder(ADDRESS_GUID, CART_GUID, SCOPE);
-	}
-
-
-	@Test
 	public void testUpdateInCache() throws Exception {
 		when(mockCustomerService.update(mockCustomer)).thenReturn(mockCustomer);
 
@@ -292,5 +296,165 @@ public class CustomerRepositoryImplTest {
 		when(customer.isFirstTimeBuyer()).thenReturn(false);
 
 		assertFalse(customerRepository.isFirstTimeBuyer(customer));
+	}
+
+	@Test
+	public void testThatFindOrCreateUserReturnsExistingUser() {
+		Customer expectedCustomer = new CustomerImpl();
+		expectedCustomer.setCustomerType(CustomerType.SINGLE_SESSION_USER);
+
+		when(mockCustomerSessionRepository.findCustomerSessionBySharedId(SCOPE, SHARED_ID))
+				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
+		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(expectedCustomer);
+
+		Customer resultCustomer = customerRepository.findOrCreateUser(null, SCOPE, SHARED_ID, null).getData();
+
+		verify(mockCustomerSessionRepository).findCustomerSessionBySharedId(SCOPE, SHARED_ID);
+		verify(mockCustomerSession.getShopper()).getCustomer();
+		assertEquals("The returned customer should be the same as expected", expectedCustomer, resultCustomer);
+	}
+
+	@Test(expected = BrokenChainException.class)
+	public void testThatFindOrCreateUserThrowsExceptionIfAccountSharedIdIsNull() {
+		when(mockCustomerSessionRepository.findCustomerSessionBySharedId(SCOPE, SHARED_ID))
+				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
+		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(null);
+
+		customerRepository.findOrCreateUser(null, SCOPE, SHARED_ID, null);
+
+		verify(mockCustomerSessionRepository, times(2)).findCustomerSessionBySharedId(SCOPE, SHARED_ID);
+		verify(mockCustomerSession.getShopper(), times(2)).getCustomer();
+	}
+
+	@Test
+	public void testThatFindOrCreateUserThrowsExceptionIfAccountDoesNotExist() {
+		when(mockCustomerSessionRepository.findCustomerSessionBySharedId(SCOPE, SHARED_ID))
+				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
+		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(null);
+		when(mockCustomerService.findBySharedId(ACCOUNT_SHARED_ID))
+				.thenReturn(null);
+
+		assertThatThrownBy(() -> customerRepository.findOrCreateUser(null, SCOPE, SHARED_ID, ACCOUNT_SHARED_ID))
+				.isInstanceOf(BrokenChainException.class)
+				.extracting(exception -> ((BrokenChainException) exception).getBrokenResult())
+				.extracting(result -> ((ExecutionResult) result).getStructuredErrorMessages().get(0))
+				.extracting(message -> ((ImmutableMessage) message).getId())
+				.isEqualTo("authentication.account.not.found");
+
+		verify(mockCustomerSessionRepository, times(2)).findCustomerSessionBySharedId(SCOPE, SHARED_ID);
+		verify(mockCustomerSession.getShopper(), times(2)).getCustomer();
+		verify(mockCustomerService, times(2)).findBySharedId(ACCOUNT_SHARED_ID);
+	}
+
+	@Test(expected = BrokenChainException.class)
+	public void testThatFindOrCreateUserThrowsExceptionIfThereIsFailureDuringAuthenticationOfTheUser() {
+		Customer account = new CustomerImpl();
+		Customer authenticatedUser = mock(Customer.class);
+		CustomerDTO customerDTO = mockCustomerDTO();
+
+		when(mockCustomerSessionRepository.findCustomerSessionBySharedId(SCOPE, SHARED_ID))
+				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
+		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(null);
+		when(mockCustomerService.findBySharedId(ACCOUNT_SHARED_ID))
+				.thenReturn(account);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class)).thenReturn(authenticatedUser);
+		when(mockCustomerService.addByAuthenticate(authenticatedUser, false)).thenThrow(new RuntimeException());
+
+		customerRepository.findOrCreateUser(customerDTO, SCOPE, SHARED_ID, ACCOUNT_SHARED_ID);
+
+		verify(mockCustomerSessionRepository, times(2)).findCustomerSessionBySharedId(SCOPE, SHARED_ID);
+		verify(mockCustomerSession.getShopper(), times(2)).getCustomer();
+		verify(mockCustomerService, times(2)).findBySharedId(ACCOUNT_SHARED_ID);
+		verify(coreBeanFactory, times(2)).getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
+		verify(mockCustomerService).addByAuthenticate(authenticatedUser, false);
+	}
+
+	@Test
+	public void testThatFindOrCreateUserCreatesUserByValuesFromUserDTOAndAssociateItWithAccount() {
+		Customer account = new CustomerImpl();
+		Customer expectedUser = mock(Customer.class);
+		CustomerDTO customerDTO = mockCustomerDTO();
+		SettingValue settingValue = mock(SettingValue.class);
+		when(settingValue.getValue()).thenReturn("BUYER");
+		UserAccountAssociation userAccountAssociation = mock(UserAccountAssociation.class);
+
+		when(mockCustomerSessionRepository.findCustomerSessionBySharedId(SCOPE, SHARED_ID))
+				.thenReturn(ExecutionResultFactory.createReadOK(mockCustomerSession));
+		when(mockCustomerSession.getShopper().getCustomer()).thenReturn(null);
+		when(mockCustomerService.findBySharedId(ACCOUNT_SHARED_ID))
+				.thenReturn(account);
+		when(coreBeanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class)).thenReturn(expectedUser);
+		when(mockCustomerService.addByAuthenticate(expectedUser, false)).thenReturn(expectedUser);
+		when(settingsReader.getSettingValue(ACCOUNT_ROLE_FIELD_SETTING_PATH, SCOPE)).thenReturn(settingValue);
+		when(userAccountAssociationService.associateUserToAccount(expectedUser, account, "BUYER"))
+				.thenReturn(userAccountAssociation);
+
+		final Customer resultCustomer = customerRepository.findOrCreateUser(customerDTO, SCOPE, SHARED_ID, ACCOUNT_SHARED_ID).getData();
+
+		verify(mockCustomerSessionRepository).findCustomerSessionBySharedId(SCOPE, SHARED_ID);
+		verify(mockCustomerSession.getShopper()).getCustomer();
+		verify(mockCustomerService).findBySharedId(ACCOUNT_SHARED_ID);
+		verify(coreBeanFactory).getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
+		verify(mockCustomerService).addByAuthenticate(expectedUser, false);
+		verify(settingsReader).getSettingValue(ACCOUNT_ROLE_FIELD_SETTING_PATH, SCOPE);
+		verify(userAccountAssociationService).associateUserToAccount(expectedUser, account, "BUYER");
+		assertEquals("The returned customer should be the same as expected", expectedUser, resultCustomer);
+	}
+
+	private CustomerDTO mockCustomerDTO() {
+		CustomerDTO customerDTO = mock(CustomerDTO.class);
+		when(customerDTO.getStoreCode()).thenReturn(SCOPE);
+		when(customerDTO.getSharedId()).thenReturn(SHARED_ID);
+		when(customerDTO.getEmail()).thenReturn("email");
+		when(customerDTO.getFirstName()).thenReturn("firstName");
+		when(customerDTO.getLastName()).thenReturn("lastName");
+		when(customerDTO.getUsername()).thenReturn("username");
+		when(customerDTO.getUserCompany()).thenReturn("user company");
+
+		return customerDTO;
+	}
+
+	@Test
+	public void testGetAccountGuid() {
+		final SubjectAttribute attribute = new AccountSharedIdSubjectAttribute("key", SHARED_ID);
+		final Subject subject = new ImmutableSubject(emptyList(), singleton(attribute));
+
+		final String resultGuid = customerRepository.getAccountGuid(subject);
+		assertEquals("The returned customer GUID should be the same as expected", ACCOUNT_GUID, resultGuid);
+	}
+
+	@Test
+	public void testGetCustomerGuidReturnsAccountGuid() {
+		final SubjectAttribute attribute = new AccountSharedIdSubjectAttribute("key", SHARED_ID);
+		final Subject subject = new ImmutableSubject(emptyList(), singleton(attribute));
+
+		final String resultGuid = customerRepository.getCustomerGuid(CUSTOMER_GUID, subject);
+		assertEquals("The returned GUID should be account GUID", ACCOUNT_GUID, resultGuid);
+	}
+
+	@Test
+	public void testGetCustomerGuidReturnsUserGuidWhenNoSharedIdInSubject() {
+		final Subject subject = new ImmutableSubject(emptyList(), emptyList());
+
+		final String resultGuid = customerRepository.getCustomerGuid(CUSTOMER_GUID, subject);
+		assertEquals("The returned GUID should be user GUID", CUSTOMER_GUID, resultGuid);
+	}
+
+	@Test
+	public void testFindChildren() {
+		when(mockCustomerService.findByGuid(ACCOUNT_GUID)).thenReturn(mockCustomer);
+		when(accountTreeService.fetchSubtree(mockCustomer)).thenReturn(Collections.singletonList(CUSTOMER_GUID));
+
+		final List<String> childAccounts = customerRepository.findDescendants(ACCOUNT_GUID);
+		assertEquals("The returned child account guids be the same as expected", Collections.singletonList(CUSTOMER_GUID), childAccounts);
+	}
+
+	@Test
+	public void testFindChildrenPaginated() {
+		when(accountTreeService.fetchChildAccountGuidsPaginated(ACCOUNT_GUID, PAGE_START_INDEX, PAGE_SIZE))
+				.thenReturn(Collections.singletonList(CUSTOMER_GUID));
+
+		final List<String> childAccounts = customerRepository.findPaginatedChildren(ACCOUNT_GUID, PAGE_START_INDEX, PAGE_SIZE);
+		assertEquals("The returned paginated child account guids be the same as expected", Collections.singletonList(CUSTOMER_GUID), childAccounts);
 	}
 }

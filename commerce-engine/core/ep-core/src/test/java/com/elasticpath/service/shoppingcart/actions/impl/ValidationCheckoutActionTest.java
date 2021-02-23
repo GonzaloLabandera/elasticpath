@@ -20,7 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
+import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.exception.CheckoutValidationException;
 import com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService;
 import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
@@ -42,7 +42,7 @@ public class ValidationCheckoutActionTest {
 	private PurchaseCartValidationService validationService;
 
 	@Mock
-	private CheckoutActionContext checkoutActionContext;
+	private PreCaptureCheckoutActionContext checkoutActionContext;
 
 	@Mock
 	private ShoppingCartValidationContext validationContext;

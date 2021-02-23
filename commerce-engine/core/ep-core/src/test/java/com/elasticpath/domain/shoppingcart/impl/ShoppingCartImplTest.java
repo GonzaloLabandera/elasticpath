@@ -44,8 +44,10 @@ import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.Address;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
+import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.BrandLocalizedPropertyValueImpl;
@@ -101,6 +103,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 	private static final long RULE_ID = 123L;
 	private static final long ACTION_ID = 456L;
+	private static final String USER_GUID = "2";
 
 	private ShoppingCartImpl shoppingCart;
 
@@ -1268,7 +1271,6 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 
-
 	@Test
 	public void verifyNullIsReturnedWhenThereIsNoParent() {
 		final ShoppingCartImpl shoppingCart = getShoppingCart();
@@ -1285,6 +1287,28 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		}
 
 		assertNull("Null is returned when there is no parent", shoppingCart.getParentProductSku(parent));
+	}
+
+	@Test
+	public void testGetCustomerReturnsAccountIfItPresents() {
+		final Customer account = new CustomerImpl();
+		account.setGuid("1");
+		final Customer user = new CustomerImpl();
+		user.setGuid(USER_GUID);
+		shoppingCart.getShopper().setAccount(account);
+		shoppingCart.getShopper().setCustomer(user);
+
+		assertEquals("Account is returned if it presents", account, shoppingCart.getCustomer());
+	}
+
+	@Test
+	public void testGetCustomerReturnsUserIfAccountDoesNotPresent() {
+		final Customer user = new CustomerImpl();
+		user.setGuid(USER_GUID);
+
+		shoppingCart.getShopper().setCustomer(user);
+
+		assertEquals("User is returned if account does not present", user, shoppingCart.getCustomer());
 	}
 
 	@Override
@@ -1308,10 +1332,13 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 			{
 				allowing(shoppingItem).isShippable(getProductSkuLookup());
 				will(returnValue(true));
-				allowing(shoppingItem).getChildren(); will(returnValue(new ArrayList<>()));
+				allowing(shoppingItem).getChildren();
+				will(returnValue(new ArrayList<>()));
 				allowing(shoppingItem).setItemType(ItemType.SIMPLE);
-				allowing(shoppingItem).getItemType(); will(returnValue(ItemType.SIMPLE));
-				allowing(shoppingItem).isCalculatedBundle(getProductSkuLookup()); will(returnValue(false));
+				allowing(shoppingItem).getItemType();
+				will(returnValue(ItemType.SIMPLE));
+				allowing(shoppingItem).isCalculatedBundle(getProductSkuLookup());
+				will(returnValue(false));
 			}
 		});
 
@@ -1325,10 +1352,13 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 			{
 				allowing(shoppingItem).isShippable(getProductSkuLookup());
 				will(returnValue(false));
-				allowing(shoppingItem).getChildren(); will(returnValue(new ArrayList<>()));
+				allowing(shoppingItem).getChildren();
+				will(returnValue(new ArrayList<>()));
 				allowing(shoppingItem).setItemType(ItemType.SIMPLE);
-				allowing(shoppingItem).getItemType(); will(returnValue(ItemType.SIMPLE));
-				allowing(shoppingItem).isCalculatedBundle(getProductSkuLookup()); will(returnValue(false));
+				allowing(shoppingItem).getItemType();
+				will(returnValue(ItemType.SIMPLE));
+				allowing(shoppingItem).isCalculatedBundle(getProductSkuLookup());
+				will(returnValue(false));
 			}
 		});
 

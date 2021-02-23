@@ -745,6 +745,39 @@
 		</actions>
 	</promotion>
 	<promotion type="Cart">
+		<store_code>MOBEE</store_code>
+		<name>AutoApplyCouponToItestsRemoveAppliedCouponUser</name>
+		<displayName>
+			<value language="en">AutoApplyCouponToItestsRemoveAppliedCouponUser</value>
+		</displayName>
+		<code>500b9a9e-0c85-4662-aa4b-950cbd325d1a</code>
+		<description>Coupon promo to auto apply to
+			itest.remove.applied.coupon@elasticpath.com
+		</description>
+		<availability>
+			<enabled>true</enabled>
+		</availability>
+		<actions>
+			<action type="cartProductPercentDiscountAction">
+				<parameters>
+					<parameter>
+						<key>discountPercent</key>
+						<value>10</value>
+					</parameter>
+					<parameter>
+						<key>productCode</key>
+						<value>productWith10PercentOffCoupon</value>
+					</parameter>
+					<parameter>
+						<key>numItems</key>
+						<value>1</value>
+					</parameter>
+				</parameters>
+				<exceptions/>
+			</action>
+		</actions>
+	</promotion>
+	<promotion type="Cart">
 		<store_code>toastie</store_code>
 		<name>10PercentOffForProductWith10PercentCouponToastie</name>
 		<displayName>
@@ -1137,5 +1170,87 @@
 				<exceptions/>
 			</action>
 		</actions>
+	</promotion>
+	<promotion type="Catalog">
+		<catalog_code>Mobile</catalog_code>
+		<name>RegisteredShopperCatalogPromotion45</name>
+		<displayName>
+			<value language="en">Registered Shopper Catalog Promotion 45</value>
+		</displayName>
+		<code>923e41f4-6041-4a4b-abff-ca06b9b5b169</code>
+		<description>Catalog promo for registered users</description>
+		<availability>
+			<enabled>true</enabled>
+			<enabledate>2014-03-21T12:51:38-07:00</enabledate>
+		</availability>
+		<actions>
+			<action type="catalogCurrencyPercentDiscountAction">
+				<parameters>
+					<parameter>
+						<key>discountPercent</key>
+						<value>45</value>
+					</parameter>
+					<parameter>
+						<key>currency</key>
+						<value>CAD</value>
+					</parameter>
+				</parameters>
+				<exceptions/>
+			</action>
+		</actions>
+		<selling_context>
+			<guid>30274326-8a5b-4f2f-bf17-fe0ba00a5bb0</guid>
+			<name>RegisteredShopperCatalogPromotion45</name>
+			<priority>0</priority>
+			<conditions>
+				<condition>
+					<guid>ad609564-4c88-40ae-bf8d-d2cde70aa8f4</guid>
+					<name>829313322875377</name>
+					<condition_string> { AND { AND { REGISTERED_CUSTOMER.equalTo true }  }  } </condition_string>
+					<dictionary_guid>PROMOTIONS_SHOPPER</dictionary_guid>
+				</condition>
+			</conditions>
+		</selling_context>
+	</promotion>
+	<promotion type="Catalog">
+		<catalog_code>search_catalog</catalog_code>
+		<name>50% off Catalog Shopper Promotion</name>
+		<displayName>
+			<value language="en_CA">50% off Mobile Catalog Shopper Promotion</value>
+		</displayName>
+		<code>20b04452-0751-4858-b167-b86d000bef7f</code>
+		<description></description>
+		<availability>
+			<enabled>true</enabled>
+			<enabledate>2017-03-17T14:39:00+03:00</enabledate>
+		</availability>
+		<actions>
+			<action type="catalogCurrencyPercentDiscountAction">
+				<parameters>
+					<parameter>
+						<key>currency</key>
+						<value>CAD</value>
+					</parameter>
+					<parameter>
+						<key>discountPercent</key>
+						<value>50</value>
+					</parameter>
+				</parameters>
+				<exceptions/>
+			</action>
+		</actions>
+		<selling_context>
+			<guid>452a76ec-b341-42ef-b907-2c9c6c2079a8</guid>
+			<name>50% off Catalog Shopper Promotion</name>
+			<priority>0</priority>
+			<conditions>
+				<condition>
+					<guid>8bcb237e-9b36-4f04-ab60-81d3b424dff5</guid>
+					<name>274325012579768</name>
+					<condition_string> { AND { AND { REGISTERED_CUSTOMER.equalTo true }  }  } </condition_string>
+					<dictionary_guid>PROMOTIONS_SHOPPER</dictionary_guid>
+				</condition>
+			</conditions>
+		</selling_context>
 	</promotion>
 </promotions>

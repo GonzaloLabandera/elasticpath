@@ -42,24 +42,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <configuration>
-                        <reportPlugins>
-                            <plugin>
-                                <groupId>com.wakaleo.schemaspy</groupId>
-                                <artifactId>maven-schemaspy-plugin</artifactId>
-                                <version>1.0.4</version>
-                                <configuration>
-                                    <databaseType>${data.population.schemaspy.dbType}</databaseType>
-                                    <jdbcUrl>${data.population.url}</jdbcUrl>
-                                    <database>${data.population.databasename}</database>
-                                    <host>${data.population.host}</host>
-                                    <user>${data.population.username}</user>
-                                    <password>${data.population.password}</password>
-                                    <port>${data.population.port}</port>
-                                </configuration>
-                            </plugin>
-                        </reportPlugins>
-                    </configuration>
                     <dependencies>
                         <!-- Database JDBC driver -->
                         <dependency>
@@ -72,4 +54,22 @@
             </plugins>
         </pluginManagement>
     </build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>com.wakaleo.schemaspy</groupId>
+				<artifactId>maven-schemaspy-plugin</artifactId>
+				<version>1.0.4</version>
+				<configuration>
+					<databaseType>${data.population.schemaspy.dbType}</databaseType>
+					<jdbcUrl>${data.population.url}</jdbcUrl>
+					<database>${data.population.databasename}</database>
+					<host>${data.population.host}</host>
+					<user>${data.population.username}</user>
+					<password>${data.population.password}</password>
+					<port>${data.population.port}</port>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>

@@ -125,15 +125,6 @@ public class ProductSkuOverviewViewPart extends AbstractProductSkuOverviewViewPa
 	public void bindControls(final DataBindingContext bindingContext) {
 		final EpControlBindingProvider provider = EpControlBindingProvider.getInstance();
 
-		final IValidator compoundSkuValidator = new CompoundValidator(new IValidator[] { EpValidatorFactory.SKU_CODE, getSkuValidator() });
-
-		EpValueBinding binding = provider.bind(bindingContext, skuCodeText, compoundSkuValidator, null,
-				new SkuValidationUpdateValueStrategy(getProductSku()), true);
-		setSkuCodeBinding(binding);
-		skuCodeText.addModifyListener(this);
-
-		binding.getBinding().validateTargetToModel();
-
 		if (isSkuPartOfMultiSkuProduct()) {
 			bindStartAndEndDate(bindingContext);
 			bindTaxCode(bindingContext);
@@ -164,6 +155,22 @@ public class ProductSkuOverviewViewPart extends AbstractProductSkuOverviewViewPa
 
 		digitalAssetDownloadable.addSelectionListener(digitalSelectionAdapter);
 		digitalAssetRadioButton.addSelectionListener(digitalSelectionAdapter);
+	}
+
+	@Override
+	public void bindWizardDialogControls(final DataBindingContext bindingContext) {
+		final EpControlBindingProvider provider = EpControlBindingProvider.getInstance();
+
+		final IValidator compoundSkuValidator = new CompoundValidator(new IValidator[]{ EpValidatorFactory.SKU_CODE, getSkuValidator() });
+
+		EpValueBinding binding = provider.bind(bindingContext, skuCodeText, compoundSkuValidator, null,
+				new SkuValidationUpdateValueStrategy(getProductSku()), true);
+		setSkuCodeBinding(binding);
+		skuCodeText.addModifyListener(this);
+		binding.getBinding().validateTargetToModel();
+
+		// Call the bind controls of this class
+		bindControls(bindingContext);
 	}
 
 	/**

@@ -132,7 +132,7 @@ public class SettingValueBackedPredicateITest extends CamelTestSupport {
 	}
 
 	private SettingDefinition createSettingDefinition(final String settingPath) {
-		final String refreshStrategyKey = "coreRefreshStrategy";
+		final String refreshStrategyKey = "refreshStrategy";
 
 		final SettingMetadata settingMetaData = beanFactory.getPrototypeBean(ContextIdNames.SETTING_METADATA, SettingMetadata.class);
 		settingMetaData.setKey(refreshStrategyKey);

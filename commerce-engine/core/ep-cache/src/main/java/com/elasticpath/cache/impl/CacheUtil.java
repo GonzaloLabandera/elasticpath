@@ -33,13 +33,13 @@ public final class CacheUtil {
 		Map<K, V> combinedResults = new LinkedHashMap<>(keys.size() * 2);
 		for (K key : keys) {
 			V result = results.get(key);
-			if (result != null) {
+			if (results.containsKey(key)) {
 				combinedResults.put(key, result);
 				continue;
 			}
 
 			result = results2.get(key);
-			if (result != null) {
+			if (results2.containsKey(key)) {
 				combinedResults.put(key, result);
 			}
 		}

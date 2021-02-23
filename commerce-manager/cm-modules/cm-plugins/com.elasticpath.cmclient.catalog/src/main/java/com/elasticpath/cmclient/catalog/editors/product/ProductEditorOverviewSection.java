@@ -241,12 +241,6 @@ public class ProductEditorOverviewSection extends AbstractPolicyAwareEditorPageS
 	// ---- DOCbindControls
 
 	private IStatus checkProductCode(final String stringValue) {
-		// check required
-		final IStatus status = EpValidatorFactory.PRODUCT_CODE.validate(stringValue);
-		if (!status.isOK()) {
-			return status;
-		}
-
 		// check unique
 		if (!stringValue.equals(productCodeText.getData(ORI_PRODUCT_CODE)) && productService.guidExists(stringValue)) {
 

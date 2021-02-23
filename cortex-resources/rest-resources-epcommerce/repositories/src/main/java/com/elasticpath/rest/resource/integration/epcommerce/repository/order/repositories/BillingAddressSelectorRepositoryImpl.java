@@ -15,6 +15,7 @@ import com.elasticpath.repository.Repository;
 import com.elasticpath.repository.SelectorRepository;
 import com.elasticpath.rest.definition.addresses.AddressEntity;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
+import com.elasticpath.rest.definition.addresses.ContextAwareAddressIdentifier;
 import com.elasticpath.rest.definition.orders.BillingaddressInfoIdentifier;
 import com.elasticpath.rest.definition.orders.BillingaddressInfoSelectorChoiceIdentifier;
 import com.elasticpath.rest.definition.orders.BillingaddressInfoSelectorIdentifier;
@@ -29,18 +30,18 @@ import com.elasticpath.rest.selector.SelectorChoice;
 
 /**
  * Implementation of a repository for selecting a billing address.
- * 
- * @param <SI>  the selector identifier type
+ *
+ * @param <SI> the selector identifier type
  * @param <CI> the choice identifier type
  */
 @Component
-public class BillingAddressSelectorRepositoryImpl<SI extends BillingaddressInfoSelectorIdentifier, CI extends 
+public class BillingAddressSelectorRepositoryImpl<SI extends BillingaddressInfoSelectorIdentifier, CI extends
 		BillingaddressInfoSelectorChoiceIdentifier>
 		implements SelectorRepository<BillingaddressInfoSelectorIdentifier, BillingaddressInfoSelectorChoiceIdentifier> {
 
 	private CartOrderRepository cartOrderRepository;
 
-	private Repository<AddressEntity, AddressIdentifier> repository;
+	private Repository<AddressEntity, ContextAwareAddressIdentifier> repository;
 
 	@Override
 	public Single<Choice> getChoice(final BillingaddressInfoSelectorChoiceIdentifier selectorChoiceId) {
@@ -72,7 +73,7 @@ public class BillingAddressSelectorRepositoryImpl<SI extends BillingaddressInfoS
 	private Observable<SelectorChoice> getChoicesWithSelectedAddress(final BillingaddressInfoSelectorIdentifier billingaddressInfoSelectorIdentifier,
 																	 final IdentifierPart<String> scope, final String selectedAddress) {
 		return repository.findAll(scope)
-				.map(addressIdentifier -> buildSelectorChoice(billingaddressInfoSelectorIdentifier, addressIdentifier,
+				.map(addressIdentifier -> buildSelectorChoice(billingaddressInfoSelectorIdentifier, addressIdentifier.getAddressIdentifier(),
 						getChoiceStatus(addressIdentifier.getAddressId().getValue(), selectedAddress)));
 	}
 
@@ -179,8 +180,8 @@ public class BillingAddressSelectorRepositoryImpl<SI extends BillingaddressInfoS
 		this.cartOrderRepository = cartOrderRepository;
 	}
 
-	@Reference(target = "(name=addressEntityRepositoryImpl)")
-	public void setRepository(final Repository<AddressEntity, AddressIdentifier> repository) {
+	@Reference(target = "(name=contextAwareAddressEntityRepositoryImpl)")
+	public void setRepository(final Repository<AddressEntity, ContextAwareAddressIdentifier> repository) {
 		this.repository = repository;
 	}
 }
