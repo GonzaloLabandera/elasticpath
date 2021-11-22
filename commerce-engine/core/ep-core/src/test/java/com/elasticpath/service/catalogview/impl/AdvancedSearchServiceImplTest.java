@@ -34,7 +34,6 @@ import com.elasticpath.domain.catalogview.search.AdvancedSearchRequest;
 import com.elasticpath.domain.catalogview.search.SearchResult;
 import com.elasticpath.domain.catalogview.search.impl.AdvancedSearchRequestImpl;
 import com.elasticpath.domain.catalogview.search.impl.SearchResultImpl;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
@@ -51,6 +50,7 @@ import com.elasticpath.settings.domain.impl.SettingValueImpl;
 import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.TestCustomerSessionFactory;
+import com.elasticpath.test.factory.TestShopperFactory;
 
 /**
  * Collection of unit tests for {@link AdvancedSearchServiceImpl}.
@@ -267,8 +267,9 @@ public class AdvancedSearchServiceImplTest {
 	}
 
 	private Shopper createShopper() {
-		CustomerSession session = TestCustomerSessionFactory.getInstance().createNewCustomerSession();
-		return session.getShopper();
+		Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMemento();
+		shopper.setCustomerSession(TestCustomerSessionFactory.getInstance().createNewCustomerSession());
+		return shopper;
 	}
 
 }

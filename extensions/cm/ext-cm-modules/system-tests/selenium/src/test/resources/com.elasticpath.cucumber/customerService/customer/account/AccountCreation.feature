@@ -11,3 +11,7 @@ Feature: Seller Admin needs to create new Accounts
 	And I fill in the decimal attribute 10.00
     And I save account
     Then new Account is created
+    Then I open the newly created account
+    When I delete the newly created account
+    Then I verify account is deleted
+    Then I verify the newly created account tab is closed

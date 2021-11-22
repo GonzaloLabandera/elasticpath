@@ -15,6 +15,7 @@ public class UserMenuDialog extends AbstractDialog {
 	private static final String CHANGE_PAGINATION_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='Change Pagination Settings']";
 	private static final String CHANGE_PASSWORD_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='Change Password']";
 	private static final String CHANGE_TIMEZONE_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='Set Time Zone']";
+	private static final String ABOUT_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='About']";
 
 
 	/**
@@ -63,5 +64,15 @@ public class UserMenuDialog extends AbstractDialog {
 	public ChangeTimezoneDialog clickChangeTimezone() {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(CHANGE_TIMEZONE_CSS)));
 		return new ChangeTimezoneDialog(getDriver());
+	}
+
+	/**
+	 * Clicks About.
+	 *
+	 * @return AboutApplicationDialog
+	 */
+	public AboutApplicationDialog clickAbout() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(ABOUT_CSS)));
+		return new AboutApplicationDialog(getDriver());
 	}
 }

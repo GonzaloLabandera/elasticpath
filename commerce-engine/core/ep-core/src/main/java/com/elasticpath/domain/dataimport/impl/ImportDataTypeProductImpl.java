@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.GlobalConstants;
@@ -660,7 +660,6 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 				final Product product = (Product) entity;
 				final ProductSku sku = getProductSku(product);
 				sku.setSkuCode(value);
-				sku.setGuid(value);
 				// Add sku into map after the skucode has been set.
 				product.addOrUpdateSku(sku);
 			}

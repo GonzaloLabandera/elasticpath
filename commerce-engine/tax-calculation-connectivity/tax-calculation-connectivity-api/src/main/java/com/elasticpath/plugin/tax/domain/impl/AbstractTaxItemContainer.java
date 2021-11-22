@@ -6,8 +6,8 @@ package com.elasticpath.plugin.tax.domain.impl;
 import java.io.Serializable;
 import java.util.Currency;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.elasticpath.plugin.tax.domain.TaxAddress;
 import com.elasticpath.plugin.tax.domain.TaxItemContainer;

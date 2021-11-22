@@ -14,7 +14,6 @@ import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
 
 /**
@@ -40,7 +39,7 @@ public interface ShoppingCartRepository {
 	 * @param cartGuid the cart.
 	 * @return the map of cartData descriptors. map.
 	 */
-	Map<String, CartData> getCartDescriptors(String cartGuid);
+	Map<String, String> getCartDescriptors(String cartGuid);
 
 	/**
 	 * Gets the default shopping cart for the customer.
@@ -49,7 +48,7 @@ public interface ShoppingCartRepository {
 	 * @param storeCode The store code.
 	 * @return the ShoppingCart
 	 */
-	Single<ShoppingCart> getShoppingCartForCustomer(String customerGuid, String storeCode);
+	Single<ShoppingCart> getDefaultShoppingCartForCustomer(String customerGuid, String storeCode);
 
 	/**
 	 * Gets the shopping cart with given GUID.

@@ -224,6 +224,22 @@
 		<reference-listener ref="taxCodeServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
 	</reference>
 
+	<reference id="cachingAttributeValueValidationService"
+			   availability="optional"
+			   interface="com.elasticpath.validation.service.AttributeValueValidationService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="attributeValueValidationServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
+	<reference id="cachingModifierFieldValidationService"
+			   availability="optional"
+			   interface="com.elasticpath.validation.service.ModifierFieldValidationService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="modifierFieldValidationServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
 	<!-- export services -->
 	<service ref="nonCachingStoreService"
 			 interface="com.elasticpath.service.store.StoreService" ranking="100">
@@ -306,6 +322,22 @@
 	</service>
 
 	<service ref="taxCodeService" interface="com.elasticpath.service.tax.TaxCodeService">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="attributeValueValidationService" interface="com.elasticpath.validation.service.AttributeValueValidationService">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="modifierFieldValidationService" interface="com.elasticpath.validation.service.ModifierFieldValidationService">
 		<service-properties>
 			<entry key="caching">
 				<value type="java.lang.Boolean">false</value>
@@ -556,12 +588,6 @@
 	<service ref="modifierFieldValidationService"
 			 interface="com.elasticpath.validation.service.ModifierFieldValidationService"/>
 
-
-	<service ref="createCartValidationService"
-			 interface="com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService">
-	</service>
-
-
 	<service ref="shippingServiceLevelService"
 			 interface="com.elasticpath.service.shipping.ShippingServiceLevelService"/>
 
@@ -595,9 +621,6 @@
 
 	<service ref="pricedShippableItemContainerTransformer"
 			 interface="com.elasticpath.service.shipping.transformers.PricedShippableItemContainerTransformer"/>
-
-	<service ref="addProductSkuToCartValidationService"
-			 interface="com.elasticpath.service.shoppingcart.validation.AddProductSkuToCartValidationService"/>
 
 	<service ref="purchaseCartValidationService"
 			 interface="com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService"/>
@@ -650,6 +673,8 @@
 
 	<service ref="hdsSupportBean" interface="com.elasticpath.persistence.openjpa.routing.HDSSupportBean"/>
 
+	<service ref="versionService" interface="com.elasticpath.commons.util.impl.VersionService"/>
+
 	<service ref="orderPaymentApiService"
 			 interface="com.elasticpath.service.orderpaymentapi.OrderPaymentApiService"/>
 
@@ -682,5 +707,18 @@
 
 	<service ref="productInventoryShoppingService"
 			 interface="com.elasticpath.sellingchannel.inventory.ProductInventoryShoppingService"/>
+
+	<service ref="addressService"
+			 interface="com.elasticpath.service.customer.AddressService"/>
+
+	<service ref="xpfExtensionLookup" interface="com.elasticpath.xpf.XPFExtensionLookup"/>
+
+	<service ref="xpfShoppingCartValidationContextBuilder" interface="com.elasticpath.xpf.context.builders.ShoppingCartValidationContextBuilder"/>
+
+	<service ref="xpfProductSkuValidationContextBuilder" interface="com.elasticpath.xpf.context.builders.ProductSkuValidationContextBuilder"/>
+
+	<service ref="xpfHttpTagSetContextBuilder" interface="com.elasticpath.xpf.context.builders.HttpTagSetContextBuilder"/>
+
+	<service ref="productRecommendationXPFBridge" interface="com.elasticpath.xpf.bridges.ProductRecommendationXPFBridge"/>
 
 </blueprint>

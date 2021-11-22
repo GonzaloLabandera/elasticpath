@@ -67,6 +67,12 @@
 	<reference id="taxCodeService" interface="com.elasticpath.service.tax.TaxCodeService"
 			   filter="(caching=false)"/>
 
+	<reference id="attributeValueValidationService" interface="com.elasticpath.validation.service.AttributeValueValidationService"
+			   filter="(caching=false)"/>
+
+	<reference id="modifierFieldValidationService" interface="com.elasticpath.validation.service.ModifierFieldValidationService"
+			   filter="(caching=false)"/>
+
 	<!-- Exported Services  -->
 
 	<service ref="cachingStoreProductService"
@@ -248,4 +254,21 @@
 		</service-properties>
 	</service>
 
+	<service ref="cachingAttributeValueValidationService" interface="com.elasticpath.validation.service.AttributeValueValidationService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="cachingModifierFieldValidationService" interface="com.elasticpath.validation.service.ModifierFieldValidationService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="defaultCacheManagerWrapper" interface="com.elasticpath.caching.core.CacheManagerWrapper"/>
 </blueprint>

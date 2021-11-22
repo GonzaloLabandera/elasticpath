@@ -9,7 +9,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -38,7 +39,7 @@ public class RenderMediatorImpl implements RenderMediator {
 	static final String SIGNAL_ERROR = "<<error>>";
 
 	/** The logger for the RenderMediatorImpl class. **/
-	private static final Logger LOG = Logger.getLogger(RenderMediatorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(RenderMediatorImpl.class);
 
 	private ParameterValueResolver parameterValueResolver;
 

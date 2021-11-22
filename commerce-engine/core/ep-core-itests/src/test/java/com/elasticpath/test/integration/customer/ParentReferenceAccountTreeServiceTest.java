@@ -9,14 +9,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerType;
-import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.customer.AccountTreeService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.test.db.DbTestCase;
@@ -54,28 +52,10 @@ public class ParentReferenceAccountTreeServiceTest extends DbTestCase {
 
 	@DirtiesDatabase
 	@Test
-	public void testThatParentAddsChildToParent() {
-		accountTreeService.parent(parent, child);
-
-		assertThat(child.getParentGuid()).isEqualTo(parent.getGuid());
-	}
-
-	@DirtiesDatabase
-	@Test
-	public void testThatParentThrowExceptionWhenChildHasParent() {
-		accountTreeService.parent(root, child);
-
-		assertThatThrownBy(() -> accountTreeService.parent(parent, child))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("The child customer already has a parent.");
-	}
-
-	@DirtiesDatabase
-	@Test
 	public void testThatParentThrowExceptionWhenChildIsRoot() {
-		accountTreeService.parent(root, parent);
+		accountTreeService.insertClosures(parent.getGuid(), root.getGuid());
 
-		assertThatThrownBy(() -> accountTreeService.parent(parent, root))
+		assertThatThrownBy(() -> accountTreeService.insertClosures(root.getGuid(), parent.getGuid()))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("The child customer is a root of the parents' tree");
 	}
@@ -83,32 +63,26 @@ public class ParentReferenceAccountTreeServiceTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testThatFetchSubtreeReturnsGuidsOfSubtreeMembers() {
-		accountTreeService.parent(root, parent);
-		accountTreeService.parent(parent, child);
+		accountTreeService.insertClosures(parent.getGuid(), root.getGuid());
+		accountTreeService.insertClosures(child.getGuid(), parent.getGuid());
 
-		final List<String> subtree = accountTreeService.fetchSubtree(root);
+		parent = customerService.findByGuid(parent.getGuid());
+		root = customerService.findByGuid(root.getGuid());
+		child = customerService.findByGuid(child.getGuid());
+
+		final List<String> subtree = accountTreeService.findDescendantGuids(root.getGuid());
 		assertThat(subtree).contains(parent.getGuid()).contains(child.getGuid());
 	}
 
 	@DirtiesDatabase
 	@Test
 	public void testThatFetchRootReturnsPathOfGuidsToRoot() {
-		accountTreeService.parent(root, parent);
-		accountTreeService.parent(parent, child);
+		accountTreeService.insertClosures(parent.getGuid(), root.getGuid());
+		accountTreeService.insertClosures(child.getGuid(), parent.getGuid());
 
-		final List<String> pathToRoot = accountTreeService.fetchPathToRoot(child);
-		assertThat(pathToRoot.get(0)).isEqualTo(parent.getGuid());
-		assertThat(pathToRoot.get(1)).isEqualTo(root.getGuid());
-	}
-
-	@DirtiesDatabase
-	@Test
-	public void testThatFetchChildAccountGuidsReturnsChildAccountGuids() {
-		accountTreeService.parent(root, parent);
-		accountTreeService.parent(parent, child);
-
-		final List<String> childAccountGuids = accountTreeService.fetchChildAccountGuids(root);
-		assertThat(childAccountGuids).contains(parent.getGuid()).doesNotContain(child.getGuid());
+		final List<String> pathToRoot = accountTreeService.findAncestorGuids(child.getGuid());
+		assertThat(pathToRoot.get(0)).isEqualTo(root.getGuid());
+		assertThat(pathToRoot.get(1)).isEqualTo(parent.getGuid());
 	}
 
 	private Customer createAccount(final String sharedId) {

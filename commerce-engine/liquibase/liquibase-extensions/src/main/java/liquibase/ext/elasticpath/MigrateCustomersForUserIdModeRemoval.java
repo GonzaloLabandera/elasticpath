@@ -154,32 +154,32 @@ public class MigrateCustomersForUserIdModeRemoval implements CustomSqlChange {
 
 			try {
 				selectCustStatement = connection.prepareStatement(
-						"select UIDPK, AUTHENTICATION_UID from TCUSTOMER where UIDPK >= ?");
+						"SELECT UIDPK, AUTHENTICATION_UID FROM TCUSTOMER WHERE UIDPK >= ?");
 
 				selectAnonCpvStatement = connection.prepareStatement(
-						"select CUSTOMER_UID, BOOLEAN_VALUE from TCUSTOMERPROFILEVALUE "
-								+ "where ATTRIBUTE_UID = ? "
-								+ "and CUSTOMER_UID in " + buildMultiArgsParam(maxBatchSize));
+						"SELECT CUSTOMER_UID, BOOLEAN_VALUE FROM TCUSTOMERPROFILEVALUE "
+								+ "WHERE ATTRIBUTE_UID = ? "
+								+ "AND CUSTOMER_UID IN " + buildMultiArgsParam(maxBatchSize));
 				selectAnonCpvStatement.setLong(1, getAnonCustAttributeUid(connection));
 
 				nullifyCustAuthStatement = connection.prepareStatement(
-						"update TCUSTOMER set AUTHENTICATION_UID=NULL "
-								+ "where UIDPK in " + buildMultiArgsParam(maxBatchSize));
+						"UPDATE TCUSTOMER set AUTHENTICATION_UID=NULL "
+								+ "WHERE UIDPK IN " + buildMultiArgsParam(maxBatchSize));
 
 				deleteAuthStatement = connection.prepareStatement(
-						"delete from TCUSTOMERAUTHENTICATION "
-								+ "where UIDPK in " + buildMultiArgsParam(maxBatchSize));
+						"DELETE FROM TCUSTOMERAUTHENTICATION "
+								+ "WHERE UIDPK IN " + buildMultiArgsParam(maxBatchSize));
 
 				deleteDummyEmailStatement = connection.prepareStatement(
-						"delete from TCUSTOMERPROFILEVALUE "
-								+ "where ATTRIBUTE_UID = ? "
-								+ "and SHORT_TEXT_VALUE = 'public@ep-cortex.com' "
-								+ "and CUSTOMER_UID in " + buildMultiArgsParam(maxBatchSize));
+						"DELETE FROM TCUSTOMERPROFILEVALUE "
+								+ "WHERE ATTRIBUTE_UID = ? "
+								+ "AND SHORT_TEXT_VALUE = 'public@ep-cortex.com' "
+								+ "AND CUSTOMER_UID IN " + buildMultiArgsParam(maxBatchSize));
 				deleteDummyEmailStatement.setLong(1, getEmailCustAttributeUid(connection));
 
 				updateCustUserIdStatement = connection.prepareStatement(
-						"update TCUSTOMER set USER_ID=GUID "
-								+ "where UIDPK in " + buildMultiArgsParam(maxBatchSize));
+						"UPDATE TCUSTOMER SET USER_ID = GUID "
+								+ "WHERE UIDPK IN " + buildMultiArgsParam(maxBatchSize));
 
 			} catch (Exception e) {
 				this.close();
@@ -427,12 +427,14 @@ public class MigrateCustomersForUserIdModeRemoval implements CustomSqlChange {
 	private class CustomerResult {
 		private long customerUid;
 		private long authenticationUid;
-		private boolean isAnonymous;
+		private boolean isAnonymous = false;
 
-		private CustomerResult(final long customerUid, final long authenticationUid, final boolean isAnonymous) {
+		private CustomerResult(final long customerUid, final long authenticationUid, final Boolean isAnonymous) {
 			this.customerUid = customerUid;
 			this.authenticationUid = authenticationUid;
-			this.isAnonymous = isAnonymous;
+			if (isAnonymous != null) {
+				this.isAnonymous = isAnonymous;
+			}
 		}
 	}
 

@@ -39,7 +39,7 @@ public class ExceptionTransformerImpl implements ExceptionTransformer {
 	 * @param structuredErrorMessageTransformer the structured error message transformer
 	 */
 	@Inject
-	ExceptionTransformerImpl(
+	public ExceptionTransformerImpl(
 			@Named("conversionService") final ConversionService conversionService,
 			@Named("structuredErrorMessageTransformer") final StructuredErrorMessageTransformer structuredErrorMessageTransformer) {
 		this.conversionService = conversionService;

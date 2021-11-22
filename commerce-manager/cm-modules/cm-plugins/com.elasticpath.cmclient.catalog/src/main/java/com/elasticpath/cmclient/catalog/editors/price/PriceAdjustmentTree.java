@@ -12,8 +12,9 @@ import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.CellEditor;
@@ -64,7 +65,7 @@ import com.elasticpath.domain.catalog.Product;
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.GodClass" })
 public class PriceAdjustmentTree extends AbstractStatePolicyTargetImpl {
 
-	private static final Logger LOG = Logger.getLogger(PriceAdjustmentTree.class);
+	private static final Logger LOG = LogManager.getLogger(PriceAdjustmentTree.class);
 
 	private StatePolicy statePolicy;
 

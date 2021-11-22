@@ -16,7 +16,7 @@ Feature: Account Associates
   Scenario Outline: Add associate form fields validations - all fields empty
     Given I navigate links defaultprofile -> accounts
     And I get the account with the field account-business-name with value Some Business Account
-    When I follow links associates -> add-associate-form
+    When I follow links associates -> addassociateform
     And I create an account associate with email <EMAIL>, role <ROLE>
     Then the HTTP status is bad request
     And Structured error message contains:
@@ -30,7 +30,7 @@ Feature: Account Associates
   Scenario Outline: Add associate form fields validations - incorrect email
     Given I navigate links defaultprofile -> accounts
     And I get the account with the field account-business-name with value Some Business Account
-    When I follow links associates -> add-associate-form
+    When I follow links associates -> addassociateform
     And I create an account associate with email <EMAIL>, role <ROLE>
     Then the HTTP status is bad request
     And Structured error message contains:
@@ -43,7 +43,7 @@ Feature: Account Associates
   Scenario Outline: Add associate form fields validations - incorrect role
     Given I navigate links defaultprofile -> accounts
     And I get the account with the field account-business-name with value Some Business Account
-    When I follow links associates -> add-associate-form
+    When I follow links associates -> addassociateform
     And I create an account associate with email <EMAIL>, role <ROLE>
     Then the HTTP status is bad request
     And Structured error message contains:
@@ -56,7 +56,7 @@ Feature: Account Associates
   Scenario Outline: BUYER_ADMIN can add account associate
     Given I navigate links defaultprofile -> accounts
     And I get the account with the field account-business-name with value Some Business Account
-    When I follow links associates -> add-associate-form
+    When I follow links associates -> addassociateform
     And I create an account associate with email <EMAIL>, role <ROLE>
     And I get the associate with the field role with value <ROLE>
     And I follow links associatedetails

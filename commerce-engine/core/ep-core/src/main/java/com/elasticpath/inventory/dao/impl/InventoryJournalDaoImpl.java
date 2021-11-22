@@ -17,6 +17,7 @@ import com.elasticpath.inventory.strategy.InventoryJournalRollup;
 import com.elasticpath.inventory.strategy.impl.InventoryJournalRollupImpl;
 import com.elasticpath.persistence.dao.impl.AbstractDaoImpl;
 
+
 /**
  * Data access methods for <code>InventoryJournal</code>.
  */
@@ -29,13 +30,14 @@ public class InventoryJournalDaoImpl extends AbstractDaoImpl implements Inventor
 
 	@Override
 	public InventoryJournalRollup getRollup(final InventoryKey inventoryKey) {
-		final List<InventoryJournalRollup> result = getPersistenceEngine().retrieveByNamedQuery(
+		final List<InventoryJournalRollup> result = getPersistenceEngine().retrieveByNamedNativeQuery(
 				"INVENTORY_JOURNAL_SUM_DELTAS_BY_SKUCODE_AND_WAREHOUSE_UID",
+				InventoryJournalRollupImpl.class,
 				inventoryKey.getSkuCode(),
 				inventoryKey.getWarehouseUid());
 
 		if (result.isEmpty()) {
-			return new InventoryJournalRollupImpl(inventoryKey.getSkuCode(), inventoryKey.getWarehouseUid(), 0L, 0L);
+			return new InventoryJournalRollupImpl(inventoryKey.getSkuCode(), inventoryKey.getWarehouseUid(), 0, 0);
 		}
 
 		return result.get(0);
@@ -44,9 +46,21 @@ public class InventoryJournalDaoImpl extends AbstractDaoImpl implements Inventor
 	@Override
 	public Map<String, InventoryJournalRollup> getInventoryRollupsForSkusInWarehouse(final Set<String> skuCodes, final long warehouseUid) {
 		final Map<String, InventoryJournalRollup> result = new HashMap<>();
-		final List<InventoryJournalRollup> rollups = getPersistenceEngine().retrieveByNamedQueryWithList(
-				"INVENTORY_JOURNAL_SUM_DELTAS_BY_SKUCODES_AND_WAREHOUSE_UID", "list",
-				skuCodes, warehouseUid);
+		final List<InventoryJournalRollup> rollups;
+
+		if (skuCodes.size() == 1) {
+			rollups = getPersistenceEngine().retrieveByNamedNativeQuery(
+					"INVENTORY_JOURNAL_SUM_DELTAS_BY_SKUCODE_AND_WAREHOUSE_UID",
+					InventoryJournalRollupImpl.class,
+					skuCodes.iterator().next(),
+					warehouseUid);
+		} else {
+			rollups = getPersistenceEngine().retrieveByNamedNativeQueryWithList(
+					"INVENTORY_JOURNAL_SUM_DELTAS_BY_SKUCODES_AND_WAREHOUSE_UID",
+					InventoryJournalRollupImpl.class,
+					skuCodes,
+					warehouseUid);
+		}
 
 		for (InventoryJournalRollup rollup : rollups) {
 			result.put(rollup.getInventoryKey().getSkuCode(), rollup);
@@ -56,9 +70,9 @@ public class InventoryJournalDaoImpl extends AbstractDaoImpl implements Inventor
 
 	@Override
 	public InventoryJournalRollup getRollupByUids(final List<Long> journalUids) {
-		
-		List<InventoryJournalRollup> result = getPersistenceEngine().retrieveByNamedQueryWithList(
-				"INVENTORY_JOURNAL_ROLLUPS_BY_UIDS", "uids", journalUids);
+		List<InventoryJournalRollup> result = getPersistenceEngine().retrieveByNamedNativeQueryWithList(
+				"INVENTORY_JOURNAL_ROLLUPS_BY_UIDS",
+				InventoryJournalRollupImpl.class, journalUids);
 		
 		if (result.isEmpty()) {
 			return null;
@@ -79,7 +93,6 @@ public class InventoryJournalDaoImpl extends AbstractDaoImpl implements Inventor
 		}
 
 		return baseRollup;
-		
 	}
 
 	@Override
@@ -91,7 +104,8 @@ public class InventoryJournalDaoImpl extends AbstractDaoImpl implements Inventor
 
 	@Override
 	public void removeAll(final List<Long> journalUids) {
-		getPersistenceEngine().executeNamedQueryWithList("INVENTORY_JOURNAL_DELETE_BY_UIDS", "uids", journalUids);
+		getPersistenceEngine().executeNamedNativeQueryWithList("INVENTORY_JOURNAL_DELETE_BY_UIDS", journalUids);
+		getPersistenceEngine().clearCache();
 	}
 	
 	@Override
@@ -99,6 +113,7 @@ public class InventoryJournalDaoImpl extends AbstractDaoImpl implements Inventor
 		getPersistenceEngine().executeNamedQuery("INVENTORY_JOURNAL_DELETE_BY_SKU_WAREHOUSE",
 				inventoryKey.getSkuCode(),
 				inventoryKey.getWarehouseUid());
+		getPersistenceEngine().clearCache();
 	}
 
 	@Override

@@ -5,7 +5,7 @@ package com.elasticpath.domain.catalog;
 
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 

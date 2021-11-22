@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.elasticpath.commons.handlers.libjar.LibJarHandlerInitializer;
 import com.elasticpath.plugin.payment.provider.PaymentProviderPlugin;
 import com.elasticpath.plugin.payment.provider.capabilities.Capability;
 import com.elasticpath.plugin.payment.provider.capabilities.PaymentCapabilityRequestFailedException;
@@ -38,8 +39,8 @@ public class PaymentProviderServiceTest extends BasicSpringContextTest {
 	private PaymentProviderConfiguration paymentProviderConfiguration;
 
 	@BeforeClass
-	public static void setUpLibJarHandler() {
-	    LibJarHandlerInitializer.initialize();
+	public static void setUpLibJarHandler() throws NoSuchFieldException, IllegalAccessException {
+		LibJarHandlerInitializer.initialize();
 	}
 
 	@Before

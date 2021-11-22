@@ -11,9 +11,10 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.contentspace.ContentWrapper;
@@ -30,7 +31,7 @@ import com.elasticpath.service.contentspace.ScriptEngineFactory;
  */
 public class ParameterValueResolverImpl implements ParameterValueResolver {
 
-	private static final Logger LOG = Logger.getLogger(ParameterValueResolverImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ParameterValueResolverImpl.class);
 
 	private BeanFactory beanFactory;
 

@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.apache.openjpa.persistence.jdbc.FetchMode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.junit.Test;
@@ -66,6 +67,7 @@ import com.elasticpath.domain.event.impl.OrderEventHelperImpl;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderEvent;
@@ -267,7 +269,7 @@ public class ReturnAndExchangeServiceImplOldTest extends AbstractEPServiceTestCa
 		stubGetSingletonBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class, StandardMoneyFormatter.class);
 		stubGetSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class, mockProductSkuLookup);
 		stubGetSingletonBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, ShoppingItemSubtotalCalculator.class, shoppingItemSubtotalCalculator);
-
+		stubGetPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class, ModifierFieldsMapWrapper.class);
 		/* setup order. */
 		setupOrder();
 		/* setup order service impl. */
@@ -355,8 +357,8 @@ public class ReturnAndExchangeServiceImplOldTest extends AbstractEPServiceTestCa
 		final OrderShipment shipment = mockOrderShipment();
 		orderImpl.addShipment(shipment);
 		orderImpl.setModifiedBy(new EventOriginatorImpl());
-		orderImpl.setFieldValue(DATA_FIELD_1, DATA_VALUE_1);
-		orderImpl.setFieldValue(DATA_FIELD_2, DATA_VALUE_2);
+		orderImpl.getModifierFields().put(DATA_FIELD_1, DATA_VALUE_1);
+		orderImpl.getModifierFields().put(DATA_FIELD_2, DATA_VALUE_2);
 	}
 
 	private void setupCheckoutService() {
@@ -687,6 +689,13 @@ public class ReturnAndExchangeServiceImplOldTest extends AbstractEPServiceTestCa
 		stubGetPrototypeBean(ContextIdNames.ORDER_RETURN, OrderReturn.class, OrderReturnImpl.class);
 
 		stubGetPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class, FetchGroupLoadTunerImpl.class);
+		exchangeService.setFetchPlanHelper(getMockFetchPlanHelper());
+
+		context.checking(new Expectations() {
+			{
+				oneOf(getMockFetchPlanHelper()).setFetchMode(with(FetchMode.JOIN));
+			}
+		});
 		assertSame(orderReturn.getUidPk(), exchangeService.get(0).getUidPk());
 	}
 
@@ -709,6 +718,7 @@ public class ReturnAndExchangeServiceImplOldTest extends AbstractEPServiceTestCa
 				will(returnValue(orderReturn));
 
 				oneOf(getMockFetchPlanHelper()).setLoadTuners(with(any(LoadTuner[].class)));
+				oneOf(getMockFetchPlanHelper()).setFetchMode(with(FetchMode.JOIN));
 			}
 		});
 
@@ -732,7 +742,6 @@ public class ReturnAndExchangeServiceImplOldTest extends AbstractEPServiceTestCa
 
 				allowing(mockCustomerSessionService)
 						.initializeCustomerSessionForPricing(with(equal(customerSession)), with(any(String.class)), with(any(Currency.class)));
-				will(returnValue(customerSession));
 
 				allowing(mockShopperService).findOrCreateShopper(with(any(Customer.class)), with(any(String.class)));
 				will(returnValue(shopper));
@@ -762,9 +771,9 @@ public class ReturnAndExchangeServiceImplOldTest extends AbstractEPServiceTestCa
 		assertTrue("No shipping option set on the exchange shopping cart", selectedShippingOption.isPresent());
 		assertEquals("Incorrect shipping option set on the exchange shopping cart", shippingOption, selectedShippingOption.get());
 		assertEquals("Incorrect list of cart items set on the exchange shopping cart", cartItemList, shoppingCart.getAllShoppingItems());
-		assertEquals("Incorrect cart data size", 2, shoppingCart.getCartData().size());
-		assertEquals("Incorrect cart data of Field1", DATA_VALUE_1, shoppingCart.getCartDataFieldValue(DATA_FIELD_1));
-		assertEquals("Incorrect cart data of Field2", DATA_VALUE_2, shoppingCart.getCartDataFieldValue(DATA_FIELD_2));
+		assertEquals("Incorrect cart data size", 2, shoppingCart.getModifierFields().getMap().size());
+		assertEquals("Incorrect cart data of Field1", DATA_VALUE_1, shoppingCart.getModifierFields().get(DATA_FIELD_1));
+		assertEquals("Incorrect cart data of Field2", DATA_VALUE_2, shoppingCart.getModifierFields().get(DATA_FIELD_2));
 	}
 
 	/**

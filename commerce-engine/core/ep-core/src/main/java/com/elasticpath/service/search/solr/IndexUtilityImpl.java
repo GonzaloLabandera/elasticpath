@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
@@ -32,7 +33,7 @@ public class IndexUtilityImpl implements IndexUtility {
 	 */
 	private static final char PRICE_LIST_SEPARATOR = '#';
 
-	private static final Logger LOG = Logger.getLogger(IndexUtilityImpl.class);
+	private static final Logger LOG = LogManager.getLogger(IndexUtilityImpl.class);
 	
 	private static final String DEFAULT_ATTRIBUTE_TYPE = "_st";
 

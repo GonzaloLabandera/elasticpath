@@ -11,9 +11,9 @@ import static com.elasticpath.cortex.dce.CommonMethods.verifyLineitemsNotContain
 import static com.elasticpath.cortex.dce.CommonMethods.verifyNumberOfElements
 import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_SCOPE
 import static com.elasticpath.cortex.dce.SharedConstants.ELEMENT_LINK
-import static WishlistsConstants.FAMILY_NAME
-import static WishlistsConstants.GIVEN_NAME
-import static WishlistsConstants.PASSWORD
+import static com.elasticpath.cortex.dce.wishlists.WishlistsConstants.FAMILY_NAME
+import static com.elasticpath.cortex.dce.wishlists.WishlistsConstants.GIVEN_NAME
+import static com.elasticpath.cortex.dce.wishlists.WishlistsConstants.PASSWORD
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
 import static org.assertj.core.api.Assertions.assertThat

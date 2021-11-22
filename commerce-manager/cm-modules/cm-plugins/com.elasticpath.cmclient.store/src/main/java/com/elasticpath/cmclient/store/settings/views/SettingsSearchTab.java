@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.store.settings.views;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -43,7 +44,7 @@ public class SettingsSearchTab implements IStoreMarketingInnerTab {
 
 	private static final int COLUMN_STORE_NAME_WIDTH = 200;
 
-	private static final Logger LOG = Logger.getLogger(SettingsSearchTab.class);
+	private static final Logger LOG = LogManager.getLogger(SettingsSearchTab.class);
 	private static final String STORE_TABLE = "Store"; //$NON-NLS-1$
 
 	private final int tabIndex;

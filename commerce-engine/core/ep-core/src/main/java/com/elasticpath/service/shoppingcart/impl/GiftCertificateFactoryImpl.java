@@ -47,12 +47,12 @@ public class GiftCertificateFactoryImpl implements GiftCertificateFactory {
 		giftCertificate.setCreationDate(new Date());
 		giftCertificate.setCurrencyCode(currency.getCurrencyCode());
 		giftCertificate.setPurchaseAmount(pricingSnapshot.getPriceCalc().withCartDiscounts().getAmount());
-		giftCertificate.setRecipientEmail(shoppingItem.getFieldValue(GiftCertificate.KEY_RECIPIENT_EMAIL));
-		giftCertificate.setRecipientName(shoppingItem.getFieldValue(GiftCertificate.KEY_RECIPIENT_NAME));
-		giftCertificate.setSenderName(shoppingItem.getFieldValue(GiftCertificate.KEY_SENDER_NAME));
+		giftCertificate.setRecipientEmail(shoppingItem.getModifierFields().get(GiftCertificate.KEY_RECIPIENT_EMAIL));
+		giftCertificate.setRecipientName(shoppingItem.getModifierFields().get(GiftCertificate.KEY_RECIPIENT_NAME));
+		giftCertificate.setSenderName(shoppingItem.getModifierFields().get(GiftCertificate.KEY_SENDER_NAME));
 		giftCertificate.setStore(store);
 		giftCertificate.setTheme(giftCertificateSku.getSkuCode());
-		giftCertificate.setMessage(shoppingItem.getFieldValue(GiftCertificate.KEY_MESSAGE));
+		giftCertificate.setMessage(shoppingItem.getModifierFields().get(GiftCertificate.KEY_MESSAGE));
 
 		return giftCertificate;
 	}

@@ -20,7 +20,8 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -54,7 +55,7 @@ import com.elasticpath.service.search.IndexType;
 @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.ExcessiveClassLength", "PMD.TooManyMethods", "PMD.GodClass" })
 public class CategoryServiceImpl implements CategoryService {
 
-	private static final Logger LOG = Logger.getLogger(CategoryServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CategoryServiceImpl.class);
 
 	private static final String PLACE_HOLDER_FOR_LIST = "list";
 

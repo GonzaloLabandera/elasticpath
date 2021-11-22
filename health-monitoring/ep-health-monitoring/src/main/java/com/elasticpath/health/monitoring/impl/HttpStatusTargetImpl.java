@@ -11,7 +11,8 @@ import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.health.monitoring.ResponseValidator;
 import com.elasticpath.health.monitoring.Status;
@@ -22,7 +23,7 @@ import com.elasticpath.health.monitoring.StatusType;
  */
 public class HttpStatusTargetImpl extends AbstractStatusCheckerTarget {
 
-	private static final Logger LOG = Logger.getLogger(HttpStatusTargetImpl.class);
+	private static final Logger LOG = LogManager.getLogger(HttpStatusTargetImpl.class);
 
 	private static final int NANOSECONDS_IN_1_MS = 1000000;
 	private static final String URL_ERR_PREFIX = "URL = ";

@@ -3,23 +3,18 @@
  */
 package com.elasticpath.service.shoppingcart.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 
-import com.elasticpath.common.pricing.service.PriceLookupFacade;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.core.messaging.customer.CustomerEventType;
-import com.elasticpath.domain.catalog.Price;
-import com.elasticpath.domain.catalog.PricingScheme;
-import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
@@ -78,8 +73,6 @@ public class WishListServiceImpl implements WishListService {
 
 	private CartDirector cartDirector;
 
-	private PriceLookupFacade priceLookupFacade;
-
 	private StoreService storeService;
 	private ProductSkuLookup productSkuLookup;
 
@@ -113,9 +106,12 @@ public class WishListServiceImpl implements WishListService {
 		ShoppingItem item = cartDirector.createShoppingItem(productSku, store, QUANTITY_ONE);
 
 		ProductType productType = productSkuLookup.findBySkuCode(productSku).getProduct().getProductType();
+		final Map<String, String> fieldsMap = new HashMap<>();
+
 		modifierService
 				.findModifierFieldsByProductType(productType)
-				.forEach(modifierField -> item.setFieldValue(modifierField.getCode(), ""));
+				.forEach(modifierField -> fieldsMap.put(modifierField.getCode(), ""));
+		item.getModifierFields().putAll(fieldsMap);
 
 		AddToWishlistResult addToWishlistResult = addItem(wishList, item);
 		save(wishList);
@@ -190,25 +186,6 @@ public class WishListServiceImpl implements WishListService {
 	}
 
 	@Override
-	public WishList findOrCreateWishListWithPrice(final CustomerSession customerSession) {
-		final Shopper shopper = customerSession.getShopper();
-		final WishList wishList = findOrCreateWishListByShopper(shopper);
-		final Store store = storeService.findStoreWithCode(shopper.getStoreCode());
-		for (ShoppingItem shoppingItem : wishList.getAllItems()) {
-			final ProductSku sku = getProductSkuLookup().findByGuid(shoppingItem.getSkuGuid());
-			final Price price = priceLookupFacade.getPromotedPriceForSku(sku, store, shopper);
-			if (price != null) {
-				PricingScheme pricingScheme = price.getPricingScheme();
-				Set<Integer> minQuantities = pricingScheme.getPriceTiersMinQuantities();
-				int quantity = minQuantities.iterator().next();
-				shoppingItem.setPrice(quantity, price);
-			}
-		}
-
-		return wishList;
-	}
-
-	@Override
 	public void shareWishList(final WishListMessage wishListMessage, final WishList wishList, final String storeCode, final Locale locale) {
 		final Map<String, Object> wishListMessageData = Maps.newHashMap();
 		wishListMessageData.put(LOCALE_KEY, locale.toString());
@@ -262,15 +239,6 @@ public class WishListServiceImpl implements WishListService {
 	 */
 	public void setWishListDao(final WishListDao wishListDao) {
 		this.wishListDao = wishListDao;
-	}
-
-	/**
-	 * Set the price look up facade.
-	 *
-	 * @param priceLookupFacade the price look up facade instance
-	 */
-	public void setPriceLookupFacade(final PriceLookupFacade priceLookupFacade) {
-		this.priceLookupFacade = priceLookupFacade;
 	}
 
 	/**

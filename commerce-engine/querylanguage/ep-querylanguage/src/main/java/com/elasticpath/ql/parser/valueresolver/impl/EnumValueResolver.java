@@ -42,19 +42,38 @@ public class EnumValueResolver implements EpQLValueResolver {
 		return resolvedValues;
 	}
 
-	private void verifyFieldTypeIsEnum(final EpQLTerm epQLTerm, final EpQLFieldType fieldType) throws ParseException {
+	/**
+	 * Verify Field Type is Enum.
+	 *
+	 * @param epQLTerm  the epQLTerm
+	 * @param fieldType the field type
+	 * @throws ParseException the exception
+	 */
+	protected void verifyFieldTypeIsEnum(final EpQLTerm epQLTerm, final EpQLFieldType fieldType) throws ParseException {
 		if (fieldType != EpQLFieldType.ENUM) {
 			throw new ParseException("The field <" + epQLTerm.getEpQLField().getFieldName() + "> should be of type enum");
 		}
 	}
 
-	private void verifyEnumValue(final EpQLTerm epQLTerm) throws ParseException {
+	/**
+	 * Verify Enum Value.
+	 *
+	 * @param epQLTerm the epQLTerm
+	 * @throws ParseException the exception
+	 */
+	protected void verifyEnumValue(final EpQLTerm epQLTerm) throws ParseException {
 		if (!enumValues.contains(epQLTerm.getQueryText())) {
 			throw new ParseException("Unexpected enum value. Allowed values are [" + allowedValues + "]");
 		}
 	}
 
-	private void verifyQuoteAbsenceValue(final EpQLTerm epQLTerm) throws ParseException {
+	/**
+	 * Verify Quote Absence Value.
+	 *
+	 * @param epQLTerm the epQLTerm
+	 * @throws ParseException the exception
+	 */
+	protected void verifyQuoteAbsenceValue(final EpQLTerm epQLTerm) throws ParseException {
 		if (epQLTerm.getQueryText().indexOf('\'') > -1) {
 			throw new ParseException("Enum can not contain quoted value for: " + epQLTerm.getEpQLField().getFieldName());
 		}

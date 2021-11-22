@@ -29,9 +29,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.elasticpath.base.cache.CacheResult;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
-import com.elasticpath.cache.CacheResult;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;

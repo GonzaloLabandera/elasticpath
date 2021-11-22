@@ -5,17 +5,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import cucumber.api.java.After;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import com.elasticpath.configuration.Configuration;
 import com.elasticpath.coretool.CoreTool;
 import com.elasticpath.cucumber.definitions.SystemConfigurationDefinition;
 import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
@@ -29,17 +31,14 @@ import com.elasticpath.selenium.util.DBConnector;
  */
 public class EpCoreToolDefinition {
 
-	private static final Logger LOGGER = Logger.getLogger(EpCoreToolDefinition.class);
+	private static final Logger LOGGER = LogManager.getLogger(EpCoreToolDefinition.class);
+	private static final Set<String> SEARCH_INDEX_TYPES = ImmutableSet.of("category", "product", "promotion", "cmuser", "sku");
 	private final CoreTool coreTool;
 	private final SearchIndexesResultPane searchIndexesResultPane;
 	private final SystemConfigurationDefinition systemConfigurationDefinition;
 	private final SystemConfigurationResultPane systemConfigurationResultPane;
 	private static final int COUNTER_125 = 125;
 	private final DBConnector dbConnector;
-	private final Configuration configuration;
-	private static final int INDEX_COUNT_6 = 6;
-	private static final int INDEX_COUNT_1 = 1;
-	private ResultSet resultSet;
 	private final WebDriver driver;
 
 	/**
@@ -54,7 +53,6 @@ public class EpCoreToolDefinition {
 		this.systemConfigurationDefinition = systemConfigurationDefinition;
 		this.systemConfigurationResultPane = new SystemConfigurationResultPane(driver);
 		dbConnector = new DBConnector();
-		configuration = new Configuration(driver);
 	}
 
 	/**
@@ -69,71 +67,38 @@ public class EpCoreToolDefinition {
 	}
 
 	/**
-	 * Verifies rebuilding status of all indexes.
+	 * Verifies status of all indexes.
 	 *
 	 * @param status the index status
 	 */
-	@Then("^the status of all indexes should be (.+)$")
+	@Then("^the DB status of all indexes should be (.+)$")
 	public void verifyIndexesStatus(final String status) {
-		Map<String, String> dbMap = getDbIndexNotifyMap();
-		LOGGER.info("db value map: " + dbMap);
-		int counter = 0;
-		int statusCount = configuration.getStatusCount(status.toUpperCase(Locale.ENGLISH));
-		LOGGER.info("search indexes count for status " + status + "..... " + statusCount);
-		while (statusCount != INDEX_COUNT_6 && counter < COUNTER_125) {
+		Map<String, String> unexpectedIndexStatuses = getUnexpectedIndexStatusesFromDatabase(SEARCH_INDEX_TYPES, status);
+		for (int i = 0; i < COUNTER_125; i++) {
+			if (unexpectedIndexStatuses.isEmpty()) {
+				break;
+			}
 			searchIndexesResultPane.sleep(Constants.SLEEP_HUNDRED_MILLI_SECONDS);
-			statusCount = configuration.getStatusCount(status.toUpperCase(Locale.ENGLISH));
-			LOGGER.info("search indexes count for status " + status + "..... " + statusCount);
-			counter++;
+			unexpectedIndexStatuses = getUnexpectedIndexStatusesFromDatabase(unexpectedIndexStatuses.keySet(), status);
 		}
-		assertThat(statusCount)
-				.as("Index status is not as expected - db value map: " + dbMap)
-				.isEqualTo(INDEX_COUNT_6);
+		assertThat(unexpectedIndexStatuses.isEmpty())
+				.as("Index status is not as expected. Unexpected statuses: " + unexpectedIndexStatuses)
+				.isTrue();
 	}
 
-	/**
-	 * Verifies rebuilding status an index.
-	 *
-	 * @param indexName the index name
-	 * @param status    the index status
-	 */
-	@Then("^the status of (.+) index should be (.+)$")
-	public void verifyIndexStatus(final String indexName, final String status) {
-		Map<String, String> dbMap = getDbIndexNotifyMap();
-		LOGGER.info("db value map: " + dbMap);
-		int counter = 0;
-		int statusCount = configuration.getStatusCount(indexName, status.toUpperCase(Locale.ENGLISH));
-		LOGGER.info(indexName + " search index count for status " + status + " ..... " + statusCount);
-		while (statusCount != INDEX_COUNT_1 && counter < COUNTER_125) {
-			searchIndexesResultPane.sleep(Constants.SLEEP_HUNDRED_MILLI_SECONDS);
-			statusCount = configuration.getStatusCount(indexName, status.toUpperCase(Locale.ENGLISH));
-			LOGGER.info(indexName + " search index count for status " + status + " ..... " + statusCount);
-			counter++;
-		}
-		assertThat(statusCount)
-				.as("Index status of " + indexName + " is not as expected - db value map: " + dbMap)
-				.isEqualTo(INDEX_COUNT_1);
-	}
-
-	private Map<String, String> getDbIndexNotifyMap() {
-		Map<String, String> indexNotifyMap = new HashMap<>();
-		resultSet = dbConnector.executeQuery("SELECT INDEX_TYPE, UPDATE_TYPE FROM TINDEXNOTIFY");
-		try {
+	private Map<String, String> getUnexpectedIndexStatusesFromDatabase(final Set<String> indexTypes, String status) {
+		final String indexTypesString = "'" + StringUtils.join(indexTypes, "','") + "'";
+		final Map<String, String> unexpectedIndexStatuses = new HashMap<>();
+		try (final ResultSet resultSet = dbConnector.executeQuery(
+				String.format("SELECT INDEX_TYPE, INDEX_STATUS FROM TINDEXBUILDSTATUS WHERE INDEX_TYPE IN (%s) AND INDEX_STATUS <> '%s'",
+						indexTypesString, status))) {
 			while (resultSet.next()) {
-				indexNotifyMap.put(resultSet.getString(1), resultSet.getString(2));
+				unexpectedIndexStatuses.put(resultSet.getString(1), resultSet.getString(2));
 			}
 		} catch (SQLException e) {
 			LOGGER.error(e);
-		} finally {
-			try {
-				if (resultSet != null) {
-					resultSet.close();
-				}
-			} catch (SQLException ex) {
-				LOGGER.error(ex);
-			}
 		}
-		return indexNotifyMap;
+		return unexpectedIndexStatuses;
 	}
 
 	/**

@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2021 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>recommendations</name>
+		<description>
+			<![CDATA[
+Recommendations suggest additional offers that may interest shoppers. For example, if a shopper is viewing an iPod,
+you may want to display related offers such as iPod accessories. If the shopper is viewing offers in a Digital Camera
+[navigation node](navigations.md) then you can use recommendations to highlight a set of featured digital cameras in that node.
+
+Recommendations are lists of offers, accessible through [offer](offers.md) for offer recommendations,  [navigation nodes](navigations.md)
+for navigation recommendations, and the recommendations entry point for store recommendations.
+The recommendation-group-rel name reflects the type of recommendation.  For example, when accessing an offer's recommendations
+ a rel name could be "crosssells", which indicates the rel links to a list of "cross-sell" offers.
+
+The *recommendation-group-rel* can be:
+
+- `crosssell`
+- `upsell`
+- `warranty`
+- `accessory`
+- `replacement`
+- `recommendation`
+]]>
+		</description>
+
+		<uri-part>
+			<name>recommendation-group-id</name>
+			<description><![CDATA[The recommendations group ID.]]></description>
+			<plain-string/>
+		</uri-part>
+
+		<uri-part>
+			<name>recommendation-page-id</name>
+			<description>Identifier for a pagination page.</description>
+			<integer/>
+		</uri-part>
+
+		<resource>
+			<name>offer-recommendation-groups</name>
+			<description><![CDATA[Groups of offers recommended for an offer.]]></description>
+			<uri>/{base.family}/{offers.offer}</uri>
+		</resource>
+
+		<relationship>
+			<name>recommendations-for-offer</name>
+			<description><![CDATA[Read other offers recommended for an offer.]]></description>
+			<rel>recommendations</rel>
+			<from>offers.offer</from>
+			<to>offer-recommendation-groups</to>
+		</relationship>
+
+		<!--Alias resource as entry point to the first page of paginated-recommendation groups-->
+		<resource>
+			<name>offer-recommendation-group</name>
+			<description><![CDATA[Other offers recommended for an offer.]]></description>
+			<uri>/{offer-recommendation-groups}/{recommendation-group-id}</uri>
+			<alias>paginated-offers-recommendations</alias>
+		</resource>
+
+		<!-- A paginated resource that displays a list of links to individual country resources -->
+		<resource>
+			<name>paginated-offers-recommendations</name>
+			<description>A list of recommendation groups.</description>
+			<uri>/{offer-recommendation-group}/pages/{recommendation-page-id}</uri>
+			<paginates>offers.offer</paginates>
+		</resource>
+
+		<!--All of the recommendation groups for the offer-->
+		<relationship>
+			<name>recommendations-for-offer-crosssell</name>
+			<description><![CDATA[Link from groups to specific recommendation group.]]></description>
+			<rel>crosssell</rel>
+			<from>offer-recommendation-groups</from>
+			<to>offer-recommendation-group</to>
+		</relationship>
+
+		<relationship>
+			<name>recommendations-for-offer-upsell</name>
+			<description><![CDATA[Link from groups to specific recommendation group.]]></description>
+			<rel>upsell</rel>
+			<from>offer-recommendation-groups</from>
+			<to>offer-recommendation-group</to>
+		</relationship>
+
+		<relationship>
+			<name>recommendations-for-offer-warranty</name>
+			<description><![CDATA[Link from groups to specific recommendation group.]]></description>
+			<rel>warranty</rel>
+			<from>offer-recommendation-groups</from>
+			<to>offer-recommendation-group</to>
+		</relationship>
+
+		<relationship>
+			<name>recommendations-for-offer-accessory</name>
+			<description><![CDATA[Link from groups to specific recommendation group.]]></description>
+			<rel>accessory</rel>
+			<from>offer-recommendation-groups</from>
+			<to>offer-recommendation-group</to>
+		</relationship>
+
+		<relationship>
+			<name>recommendations-for-offer-replacement</name>
+			<description><![CDATA[Link from groups to specific recommendation group.]]></description>
+			<rel>replacement</rel>
+			<from>offer-recommendation-groups</from>
+			<to>offer-recommendation-group</to>
+		</relationship>
+
+		<relationship>
+			<name>recommendations-for-offer-recommendation</name>
+			<description><![CDATA[Link from groups to specific recommendation group.]]></description>
+			<rel>recommendation</rel>
+			<from>offer-recommendation-groups</from>
+			<to>offer-recommendation-group</to>
+		</relationship>
+
+	</family>
+</definitions>

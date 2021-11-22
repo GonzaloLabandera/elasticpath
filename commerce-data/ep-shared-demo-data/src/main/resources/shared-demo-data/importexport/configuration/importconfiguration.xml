@@ -132,6 +132,7 @@
     <importer type="DATA_POLICY">
       <importstrategy>INSERT</importstrategy>
     </importer>
+
   </importstrategy>
   <packager type="NONE"/>
   <retrieval>

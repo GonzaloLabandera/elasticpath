@@ -10,8 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.FetchAttribute;
@@ -109,7 +109,7 @@ public abstract class AbstractLocaleDependantFieldsImpl extends AbstractPersista
 	@Basic
 	@Column(name = "LOCALE", length = LOCALE_LENGTH, nullable = false)
 	@Externalizer("toString")
-	@Factory("org.apache.commons.lang.LocaleUtils.toLocale")
+	@Factory("org.apache.commons.lang3.LocaleUtils.toLocale")
 	public Locale getLocale() {
 		return locale;
 	}

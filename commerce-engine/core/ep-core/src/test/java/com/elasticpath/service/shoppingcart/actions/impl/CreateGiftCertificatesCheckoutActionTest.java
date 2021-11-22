@@ -25,6 +25,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.core.messaging.giftcertificate.GiftCertificateEventType;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Product;
@@ -35,6 +37,8 @@ import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
@@ -119,12 +123,19 @@ public class CreateGiftCertificatesCheckoutActionTest {
 
 	@Mock
 	private EventMessagePublisher eventMessagePublisher;
+	@Mock
+	private BeanFactory beanFactory;
 
 	@InjectMocks
 	private CreateGiftCertificatesCheckoutAction checkoutAction;
 
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
+
 	@Before
 	public void setUp() {
+		elasticPath.setBeanFactory(beanFactory);
+
 		when(order.getGuid()).thenReturn(ORDER_GUID);
 		when(order.getCurrency()).thenReturn(CURRENCY);
 		when(order.getStoreCode()).thenReturn(STORE_CODE);
@@ -142,6 +153,9 @@ public class CreateGiftCertificatesCheckoutActionTest {
 				.thenReturn(eventMessage1);
 		when(eventMessageFactory.createEventMessage(eq(GiftCertificateEventType.GIFT_CERTIFICATE_CREATED), eq(GIFT_CERTIFICATE_GUID_2), anyMap()))
 				.thenReturn(eventMessage2);
+
+		when(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.thenAnswer(invocation -> new ModifierFieldsMapWrapper());
 	}
 
 	@Test
@@ -158,10 +172,12 @@ public class CreateGiftCertificatesCheckoutActionTest {
 
 		checkoutAction.execute(checkoutContext);
 
-		assertEquals("Unexpected gift certificate GUID", GIFT_CERTIFICATE_GUID_1, giftCertificateOrderSku1.getFieldValue(GiftCertificate.KEY_GUID));
-		assertEquals("Unexpected gift certificate GUID", GIFT_CERTIFICATE_GUID_2, giftCertificateOrderSku2.getFieldValue(GiftCertificate.KEY_GUID));
+		assertEquals("Unexpected gift certificate GUID", GIFT_CERTIFICATE_GUID_1,
+				giftCertificateOrderSku1.getModifierFields().get(GiftCertificate.KEY_GUID));
+		assertEquals("Unexpected gift certificate GUID", GIFT_CERTIFICATE_GUID_2,
+				giftCertificateOrderSku2.getModifierFields().get(GiftCertificate.KEY_GUID));
 		assertNull("Non-Gift-Certificate OrderSkus should not contain a gift certificate GUID",
-				nonGiftCertificateOrderSku.getFieldValue(GiftCertificate.KEY_GUID));
+				nonGiftCertificateOrderSku.getModifierFields().get(GiftCertificate.KEY_GUID));
 		verify(eventMessagePublisher).publish(eventMessage1);
 		verify(eventMessagePublisher).publish(eventMessage2);
 	}

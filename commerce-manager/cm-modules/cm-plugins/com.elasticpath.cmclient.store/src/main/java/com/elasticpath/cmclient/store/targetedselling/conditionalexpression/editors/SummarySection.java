@@ -6,7 +6,7 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.editors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;

@@ -25,9 +25,19 @@
 		<ep.activemq.context>/jms</ep.activemq.context>
 		<cargo.timeout>600000</cargo.timeout>
 		<ping.timeout>600000</ping.timeout>
-		<cargo.plugin.version>1.6.8</cargo.plugin.version>
 		<ep.catalog.batch.database.drop.script>CLASSPATH:org/springframework/batch/core/schema-drop-h2.sql</ep.catalog.batch.database.drop.script>
 		<ep.catalog.batch.database.create.script>CLASSPATH:org/springframework/batch/core/schema-h2.sql</ep.catalog.batch.database.create.script>
+
+		<epdb.validation.query>SELECT 1</epdb.validation.query>
+
+		<h2.epdb.url>jdbc:h2:tcp://localhost:${h2.port}/SMOKETESTDB;DB_CLOSE_DELAY=-1</h2.epdb.url>
+		<h2.epdb.jdbc.driver>org.h2.Driver</h2.epdb.jdbc.driver>
+		<h2.epdb.username>sa</h2.epdb.username>
+		<h2.epdb.password>sa</h2.epdb.password>
+		<h2.epdb.maven.groupId>com.h2database</h2.epdb.maven.groupId>
+		<h2.epdb.maven.artifactId>h2</h2.epdb.maven.artifactId>
+		<h2.epdb.maven.version>${com.h2database.version}</h2.epdb.maven.version>
+
 	</properties>
 
 	<profiles>
@@ -58,6 +68,10 @@
 						<exclusion>
 							<groupId>org.slf4j</groupId>
 							<artifactId>slf4j-log4j12</artifactId>
+						</exclusion>
+						<exclusion>
+							<groupId>org.apache.logging.log4j</groupId>
+							<artifactId>log4j-slf4j-impl</artifactId>
 						</exclusion>
 					</exclusions>
 				</dependency>
@@ -119,7 +133,6 @@
 							</execution>
 						</executions>
 					</plugin>
-
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
@@ -363,9 +376,8 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -423,13 +435,17 @@
 		 - The following are dependencies of activemq-broker.
 		-->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
@@ -550,8 +566,12 @@
 									<artifactId>slf4j-api</artifactId>
 								</dependency>
 								<dependency>
-									<groupId>log4j</groupId>
-									<artifactId>log4j</artifactId>
+									<groupId>org.apache.logging.log4j</groupId>
+									<artifactId>log4j-api</artifactId>
+								</dependency>
+								<dependency>
+									<groupId>org.apache.logging.log4j</groupId>
+									<artifactId>log4j-core</artifactId>
 								</dependency>
 								<dependency>
 									<groupId>org.apache.geronimo.specs</groupId>
@@ -593,6 +613,28 @@
 							</dependencies>
 							<systemProperties>
 								<bundle.location>${project.build.directory}/extensions</bundle.location>
+								<epdb.username>${h2.epdb.username}</epdb.username>
+								<epdb.password>${h2.epdb.password}</epdb.password>
+								<epdb.jdbc.driver>${h2.epdb.jdbc.driver}</epdb.jdbc.driver>
+								<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+								<epdb.url>${h2.epdb.url}</epdb.url>
+								<epdb.ro.url>${h2.epdb.url}</epdb.ro.url>
+								<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+								<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+								<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+								<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+								<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+								<ep.jms.type>${ep.jms.type}</ep.jms.type>
+								<ep.jms.url>${ep.jms.url}</ep.jms.url>
+								<ep.catalog.batch.database.drop.script>${ep.catalog.batch.database.drop.script}</ep.catalog.batch.database.drop.script>
+								<ep.catalog.batch.database.create.script>${ep.catalog.batch.database.create.script}</ep.catalog.batch.database.create.script>
+								<epdb.synctarget.removeabandonedtimeout>500</epdb.synctarget.removeabandonedtimeout>
+								<epdb.synctarget.jdbc.driver>${h2.epdb.jdbc.driver}</epdb.synctarget.jdbc.driver>
+								<epdb.synctarget.username>${h2.epdb.username}</epdb.synctarget.username>
+								<epdb.synctarget.password>${h2.epdb.password}</epdb.synctarget.password>
+								<epdb.synctarget.url>${h2.epdb.url}</epdb.synctarget.url>
+								<ep.synctarget.jms.url>${ep.jms.url}</ep.synctarget.jms.url>
+								<Log4jContextSelector>org.apache.logging.log4j.core.selector.ClassLoaderContextSelector</Log4jContextSelector>
 							</systemProperties>
 						</container>
 
@@ -604,49 +646,7 @@
 								<cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
 								<cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
 								<cargo.tomcat.shutdown.port>${cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
-
-								<cargo.datasource.url>jdbc:h2:tcp://localhost:${h2.port}/SMOKETESTDB;DB_CLOSE_DELAY=-1</cargo.datasource.url>
-								<cargo.datasource.driver>org.h2.Driver</cargo.datasource.driver>
-								<cargo.datasource.username>sa</cargo.datasource.username>
-								<cargo.datasource.password>sa</cargo.datasource.password>
-								<cargo.datasource.jndi>jdbc/epjndi</cargo.datasource.jndi>
-								<cargo.datasource.factory>${ep.jndi.factory}</cargo.datasource.factory>
-								<cargo.datasource.scope>Shareable</cargo.datasource.scope>
-								<cargo.datasource.maxActive>250</cargo.datasource.maxActive>
-								<cargo.datasource.maxIdle>30</cargo.datasource.maxIdle>
-								<cargo.datasource.maxWait>10000</cargo.datasource.maxWait>
-								<cargo.datasource.removeAbandoned>true</cargo.datasource.removeAbandoned>
-								<cargo.datasource.testWhileIdle>true</cargo.datasource.testWhileIdle>
-								<cargo.datasource.validationQuery>${epdb.validation.query}</cargo.datasource.validationQuery>
-
-								<cargo.ep.jms.jndi>jms/JMSConnectionFactory</cargo.ep.jms.jndi>
-								<cargo.ep.jms.type>${ep.jms.type}</cargo.ep.jms.type>
-								<cargo.ep.jms.factory>${ep.jms.factory}</cargo.ep.jms.factory>
-								<cargo.ep.jms.url>${ep.jms.url}</cargo.ep.jms.url>
-								<cargo.start.jvmargs>
-									-Dep.tomcat.maxcachesize=${ep.tomcat.maxcachesize}
-									-Dep.catalog.batch.database.drop.script=${ep.catalog.batch.database.drop.script}
-									-Dep.catalog.batch.database.create.script=${ep.catalog.batch.database.create.script}
-									-Dep.jms.factory=org.apache.activemq.jndi.JNDIReferenceFactory
-									-Depdb.synctarget.removeabandonedtimeout=500
-									-Depdb.synctarget.jdbc.driver=org.h2.Driver
-									-Depdb.synctarget.username=sa
-									-Depdb.synctarget.password=sa
-									-Depdb.synctarget.url=jdbc:h2:tcp://localhost:${h2.port}/SMOKETESTDB;DB_CLOSE_DELAY=-1
-									-Dep.jms.type=${ep.jms.type}
-									-Dep.jms.url=${ep.jms.url}
-									-Dep.synctarget.jms.url=${ep.jms.url}
-								</cargo.start.jvmargs>
-
 							</properties>
-							<files>
-								<copy>
-									<file>${project.basedir}/src/test/resources/tomcat9x/context.xml</file>
-									<tofile>conf/context.xml</tofile>
-									<configfile>true</configfile>
-									<overwrite>true</overwrite>
-								</copy>
-							</files>
 						</configuration>
 					</configuration>
 					<executions>

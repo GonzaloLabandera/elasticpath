@@ -27,8 +27,8 @@
 			<artifactId>ep-converters</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -39,8 +39,12 @@
 			<artifactId>openjpa</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -61,6 +65,10 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-xpf</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -98,12 +106,16 @@
 							com.elasticpath.base.exception,
 							com.elasticpath.converter,
 							com.elasticpath.persistence.api,
+							com.elasticpath.xpf,
+							com.elasticpath.xpf.impl,
+							com.elasticpath.xpf.connectivity.entity,
+							com.elasticpath.xpf.connectivity.context,
+							com.elasticpath.xpf.connectivity.extensionpoint,
 							javax.persistence,
-							org.apache.commons.lang,
-							org.apache.commons.lang.math,
+							org.apache.commons.lang3.math,
 							org.apache.commons.lang3,
 							org.apache.commons.lang3.tuple,
-							org.apache.log4j,
+							org.apache.logging.log4j,
 							org.apache.openjpa.enhance,
 							org.apache.openjpa.persistence,
 							org.apache.openjpa.persistence.jdbc,

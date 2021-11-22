@@ -1,0 +1,33 @@
+{
+	"extensions": [
+		{
+			"identifier": {
+				"pluginId": "ep-externalTestPlugin-*",
+				"extensionClass": "com.elasticpath.plugins.ExternalDefaultTestSystemInformationImpl$TestSystemInformation",
+				"extensionPointKey": "SYSTEM_INFORMATION"
+			},
+			"enabled": true,
+			"priority": 10,
+			"defaultSelectorMode": "DEFAULT_ALL",
+			"selectors": [
+				{
+					"type": "XPFExtensionSelectorByStoreCode",
+					"value": "MOBEE"
+				}
+			],
+			"settings": [
+				{
+					"key": "SAMPLE_MAP",
+					"dataType": "INTEGER",
+					"collectionType": "MAP",
+					"values": [
+						{
+							"key": "mobee",
+							"value": 2345
+						}
+					]
+				}
+			]
+		}
+	]
+}

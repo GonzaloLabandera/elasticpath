@@ -4,12 +4,16 @@
 
 package com.elasticpath.service.datapolicy.readers;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
 
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
@@ -37,11 +41,9 @@ public class OrderDataValueReaderTest extends AbstractDataPointValueReaderTest {
 	@Override
 	protected String getExpectedReadQuery(final String... dataPointKeys) {
 
-		return "SELECT oData.uidPk,oData.creationDate,oData.lastModifiedDate,oData.key,oData.value"
-			.concat(" FROM OrderImpl o")
-			.concat(" INNER JOIN o.orderDataInternal oData")
-			.concat(" WHERE o.customer.guid = ?1")
-			.concat(" AND oData.key IN (:dataPointKeys)");
+		return "SELECT ord.uidPk,ord.createdDate,ord.lastModifiedDate,ord.modifierFields"
+			.concat(" FROM OrderImpl ord")
+			.concat(" WHERE ord.customer.guid = ?1");
 	}
 
 	@Override
@@ -63,5 +65,15 @@ public class OrderDataValueReaderTest extends AbstractDataPointValueReaderTest {
 	@Test
 	public void shouldBeFalseForInvalidKey() {
 		//validation always returns true
+	}
+
+	@Override
+	protected List<Object[]> getRawData(final boolean shouldIncludeFieldValue) {
+		ModifierFieldsMapWrapper modifierFields = new ModifierFieldsMapWrapper();
+		modifierFields.put(DATAPOINT_1_KEY, DATAPOINT_1_DB_VALUE);
+
+		Object[] rawData = new Object[]{UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, modifierFields};
+
+		return Collections.singletonList(rawData);
 	}
 }

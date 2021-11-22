@@ -10,7 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -19,7 +20,7 @@ import org.apache.log4j.Logger;
  *
  */
 public final class FileSystemUtil {
-	private static final Logger LOG = Logger.getLogger(FileSystemUtil.class);
+	private static final Logger LOG = LogManager.getLogger(FileSystemUtil.class);
 
 	/**
 	 * Private constructor.

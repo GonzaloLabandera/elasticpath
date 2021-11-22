@@ -3,7 +3,7 @@
  */
 package com.elasticpath.tags.service.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Expression builder class for constructing a groovy script from DSL string.

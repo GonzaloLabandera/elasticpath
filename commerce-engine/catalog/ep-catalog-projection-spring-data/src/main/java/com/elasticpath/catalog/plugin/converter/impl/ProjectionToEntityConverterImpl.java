@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -120,6 +121,7 @@ public class ProjectionToEntityConverterImpl implements ProjectionToEntityConver
 		entity.setContent(jsonContent);
 		entity.setSchemaVersion(schemaVersion);
 
+		entity.setGuid(UUID.randomUUID().toString());
 		return entity;
 	}
 
@@ -140,6 +142,7 @@ public class ProjectionToEntityConverterImpl implements ProjectionToEntityConver
 		final ProjectionEntity entity = new ProjectionEntity();
 		entity.setProjectionId(projectionId);
 		entity.setProjectionDateTime(Date.from(source.getModifiedDateTime().toInstant()));
+		entity.setGuid(UUID.randomUUID().toString());
 		setFieldsAsDeleted(entity);
 		return entity;
 	}

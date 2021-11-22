@@ -47,13 +47,12 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 	 * @param reactiveAdapter         reactiveAdapter
 	 */
 	@Inject
-	StoreProductRepositoryImpl(
+	public StoreProductRepositoryImpl(
 			@Named("storeRepository") final StoreRepository storeRepository,
 			@Named("productLookup") final ProductLookup coreProductLookup,
 			@Named("storeProductService") final StoreProductService coreStoreProductService,
 			@Named("productSkuRepository") final ProductSkuRepository productSkuRepository,
 			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
-
 		this.storeRepository = storeRepository;
 		this.coreProductLookup = coreProductLookup;
 		this.coreStoreProductService = coreStoreProductService;

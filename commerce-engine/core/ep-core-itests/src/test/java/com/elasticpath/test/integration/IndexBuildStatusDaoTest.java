@@ -21,7 +21,7 @@ import com.elasticpath.service.search.IndexType;
  */
 public class IndexBuildStatusDaoTest extends BasicSpringContextTest {
 
-	private static final int NUM_OF_DEFAULT_INDEX_TYPES = 6;
+	private static final int NUM_OF_DEFAULT_INDEX_TYPES = 5;
 
 	/** The main object under test. */
 	@Autowired
@@ -50,7 +50,6 @@ public class IndexBuildStatusDaoTest extends BasicSpringContextTest {
 		assertThat(indexBuildStatusList).hasSize(NUM_OF_DEFAULT_INDEX_TYPES);
 
 		assertThat(findIndexType(indexBuildStatusList, IndexType.CATEGORY)).isTrue();
-		assertThat(findIndexType(indexBuildStatusList, IndexType.CUSTOMER)).isTrue();
 		assertThat(findIndexType(indexBuildStatusList, IndexType.PRODUCT)).isTrue();
 		assertThat(findIndexType(indexBuildStatusList, IndexType.PROMOTION)).isTrue();
 		assertThat(findIndexType(indexBuildStatusList, IndexType.CMUSER)).isTrue();

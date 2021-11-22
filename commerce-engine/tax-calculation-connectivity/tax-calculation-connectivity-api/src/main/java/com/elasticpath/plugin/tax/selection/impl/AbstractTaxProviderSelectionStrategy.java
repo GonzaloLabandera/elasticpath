@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.plugin.tax.TaxProviderPluginInvoker;
 import com.elasticpath.plugin.tax.exception.TaxCalculationException;
@@ -20,7 +21,7 @@ import com.elasticpath.plugin.tax.selection.TaxProviderSelectionStrategy;
  */
 public abstract class AbstractTaxProviderSelectionStrategy implements TaxProviderSelectionStrategy {
 
-	private static final Logger LOG = Logger.getLogger(AbstractTaxProviderSelectionStrategy.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractTaxProviderSelectionStrategy.class);
 	
 	@Override
 	public TaxProviderPluginInvoker findProviderByName(final String taxProviderName) {

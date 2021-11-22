@@ -8,7 +8,7 @@
 	</parent>
 	
 	<artifactId>ext-batch-parent</artifactId>
-	<name>Extension Batch Server Parent</name>
+	<name>Batch Web Application</name>
 	<packaging>pom</packaging>
 
 	<modules>

@@ -6,7 +6,7 @@ package com.elasticpath.tools.sync.job.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.elasticpath.tools.sync.job.JobEntry;
 import com.elasticpath.tools.sync.job.JobEntryCreator;

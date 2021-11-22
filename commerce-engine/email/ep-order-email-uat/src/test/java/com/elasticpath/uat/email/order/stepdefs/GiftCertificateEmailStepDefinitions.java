@@ -57,7 +57,7 @@ public class GiftCertificateEmailStepDefinitions {
 	public void verifyEmailContainsGiftCertificateCode(final String emailSubject) throws Exception {
 		final OrderSku giftCertificateOrderSku = findGiftCertificateOrderSku();
 
-		assertNthEmailContentsContainsValue(emailSubject, "code", giftCertificateOrderSku.getFieldValue(GiftCertificate.KEY_CODE));
+		assertNthEmailContentsContainsValue(emailSubject, "code", giftCertificateOrderSku.getModifierFields().get(GiftCertificate.KEY_CODE));
 	}
 
 	@Then("^the(?: \"(.+)\")? email should contain the gift certificate amount$")
@@ -72,14 +72,14 @@ public class GiftCertificateEmailStepDefinitions {
 	public void verifyEmailContainsGiftCertificateSenderName(final String emailSubject) throws Exception {
 		final OrderSku giftCertificateOrderSku = findGiftCertificateOrderSku();
 
-		assertNthEmailContentsContainsValue(emailSubject, "sender name", giftCertificateOrderSku.getFieldValue(GiftCertificate.KEY_SENDER_NAME));
+		assertNthEmailContentsContainsValue(emailSubject, "sender name", giftCertificateOrderSku.getModifierFields().get(GiftCertificate.KEY_SENDER_NAME));
 	}
 
 	@Then("^the(?: \"(.+)\")? email should contain the gift certificate recipient name$")
 	public void verifyEmailContainsGiftCertificateRecipientName(final String emailSubject) throws Exception {
 		final OrderSku giftCertificateOrderSku = findGiftCertificateOrderSku();
 
-		assertNthEmailContentsContainsValue(emailSubject, "recipient name", giftCertificateOrderSku.getFieldValue(GiftCertificate.KEY_RECIPIENT_NAME));
+		assertNthEmailContentsContainsValue(emailSubject, "recipient name", giftCertificateOrderSku.getModifierFields().get(GiftCertificate.KEY_RECIPIENT_NAME));
 	}
 
 	@When("^the gift certificate email is resent to (.+)$")

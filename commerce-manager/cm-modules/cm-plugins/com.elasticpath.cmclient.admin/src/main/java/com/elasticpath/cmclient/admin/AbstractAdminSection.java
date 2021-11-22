@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -23,7 +24,7 @@ import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
  * Abstract base class for admin section extensions that display their items in an admin section as a list.
  */
 public abstract class AbstractAdminSection implements IAdminSection {
-	private static final Logger LOG = Logger.getLogger(AbstractAdminSection.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractAdminSection.class);
 
 	private final EpControlFactory controlFactory = EpControlFactory.getInstance();
 

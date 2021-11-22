@@ -10,10 +10,8 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -26,7 +24,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.PostLoad;
@@ -52,7 +49,6 @@ import com.elasticpath.domain.catalog.DigitalAsset;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.impl.DigitalAssetImpl;
 import com.elasticpath.domain.cmuser.CmUser;
-import com.elasticpath.domain.impl.AbstractItemData;
 import com.elasticpath.domain.impl.AbstractShoppingItemImpl;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
@@ -159,8 +155,6 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 
 	private int preOrBackOrderQuantity;
 
-	private Map<String, AbstractItemData> fieldValues = new HashMap<>();
-
 	private List<OrderSku> childOrderSkus = new ArrayList<>();
 
 	private OrderSku parent;
@@ -246,43 +240,6 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 	@Override
 	public void setBundleItems(final List<ShoppingItem> bundleItems) {
 		setChildItemsInternal(bundleItems);
-	}
-
-	/**
-	 * Sets the {@code OrderItemData} - for JPA.
-	 * @param itemData the cart item data
-	 */
-	protected void setItemData(final Map<String, AbstractItemData> itemData) {
-		this.fieldValues = itemData;
-	}
-
-	@Override
-	protected AbstractItemData createItemData(final String name, final String value) {
-		return new OrderItemData(name, value);
-	}
-
-	/**
-	 * Internal JPA method to get Item Data.
-	 * @return the item data
-	 */
-	@Override
-	@OneToMany(targetEntity = OrderItemData.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-	@MapKey(name = "key")
-	@ElementJoinColumn(name = FK_COLUMN_NAME, nullable = false)
-	@ElementForeignKey
-	@ElementDependent
-	protected Map<String, AbstractItemData> getItemData() {
-		return this.fieldValues;
-	}
-
-	@Transient
-	@Override
-	public Map<String, String> getFields() {
-		Map<String, String> fields = new HashMap<>();
-		for (String key : getItemData().keySet()) {
-			fields.put(key, getItemData().get(key).getValue());
-		}
-		return Collections.unmodifiableMap(fields);
 	}
 
 	/**
@@ -703,9 +660,7 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 	}
 
 	private void copyDataFieldsFrom(final OrderSku orderSku) {
-		for (String key : orderSku.getFields().keySet()) {
-			this.setFieldValue(key, orderSku.getFieldValue(key));
-		}
+		getModifierFields().putAll(orderSku.getModifierFields().getMap());
 	}
 
 	/**
@@ -1023,7 +978,7 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 	@Transient
 	@Override
 	public boolean isGiftCertificate() {
-		return getFieldValue(GiftCertificate.KEY_GUID) != null;
+		return getModifierFields().get(GiftCertificate.KEY_GUID) != null;
 	}
 
 	/**

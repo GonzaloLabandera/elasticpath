@@ -11,7 +11,6 @@ import cucumber.api.DataTable
 import cucumber.api.java.en.Given
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
-import org.apache.log4j.spi.LoggerRepository
 
 import com.elasticpath.cortex.dce.CommonMethods
 import com.elasticpath.cortexTestObjects.Order

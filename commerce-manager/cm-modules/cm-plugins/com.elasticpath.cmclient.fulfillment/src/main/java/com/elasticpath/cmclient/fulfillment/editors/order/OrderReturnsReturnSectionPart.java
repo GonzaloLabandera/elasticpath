@@ -9,7 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -75,7 +76,7 @@ import com.elasticpath.service.order.ReturnAndExchangeService;
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.GodClass"})
 public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSectionPart {
 
-	private static final Logger LOG = Logger.getLogger(OrderReturnsReturnSectionPart.class);
+	private static final Logger LOG = LogManager.getLogger(OrderReturnsReturnSectionPart.class);
 
 	private static final int COLUMN_WIDTH_SKU_CODE = 100;
 

@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.core.helpers;
 import com.elasticpath.cmclient.core.CmSingletonUtil;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
 import com.elasticpath.cmclient.core.ui.framework.IEpTabFolder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.rap.rwt.internal.lifecycle.UITestUtil;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
@@ -21,7 +22,7 @@ import java.util.Map;
  * Falls back to No-Op util if none registered as extension.
  */
 public class EPTestUtilFactory {
-	private static final Logger LOG = Logger.getLogger(EPTestUtilFactory.class);
+	private static final Logger LOG = LogManager.getLogger(EPTestUtilFactory.class);
 	private TestIdUtil epWidgetUtil;
 
 
@@ -51,7 +52,7 @@ public class EPTestUtilFactory {
 	 * No-Op implementation of the TestIdUtil.
 	 */
 	private static class NoOpEpTestUtil implements TestIdUtil {
-		private static final Logger LOG = Logger.getLogger(NoOpEpTestUtil.class);
+		private static final Logger LOG = LogManager.getLogger(NoOpEpTestUtil.class);
 		private static final String NO_OP = "NO-OP";
 
 		@Override

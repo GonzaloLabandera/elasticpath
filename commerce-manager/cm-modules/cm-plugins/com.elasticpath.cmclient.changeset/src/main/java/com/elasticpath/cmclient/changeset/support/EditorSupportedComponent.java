@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.changeset.support;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -26,7 +27,7 @@ import com.elasticpath.service.changeset.ChangeSetService;
  */
 public class EditorSupportedComponent extends AbstractSupportedComponent implements SupportedComponent {
 
-	private static final Logger LOG = Logger.getLogger(EditorSupportedComponent.class);
+	private static final Logger LOG = LogManager.getLogger(EditorSupportedComponent.class);
 	
 	private final Map<String, EditorResolver> editorResolvers = new HashMap<>();
 	

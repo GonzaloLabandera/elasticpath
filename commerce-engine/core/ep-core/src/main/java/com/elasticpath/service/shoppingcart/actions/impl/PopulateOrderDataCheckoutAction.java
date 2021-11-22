@@ -4,95 +4,55 @@
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.domain.order.Order;
 import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.connectivity.context.XPFOrderDataPopulatorContext;
+import com.elasticpath.xpf.connectivity.extensionpoint.OrderDataPopulator;
+import com.elasticpath.xpf.converters.ShoppingCartConverter;
+import com.elasticpath.xpf.impl.XPFExtensionSelectorByStoreCode;
+
 //CHECKSTYLE:OFF
+
 /**
  * <p>Checkout Action which populates the {@link com.elasticpath.domain.order.Order}'s {@link com.elasticpath.domain.order.OrderData} with data
  * from the {@link PreCaptureCheckoutActionContext}.</p>
  *
- * <p>The values that are populated by this action need to be configured via Spring, via the property {@link #orderDataProperties}.</p>
- *
- * <p>For instance:</p>
- *
- * <pre>
- *    &lt;bean id=&quot;populateOrderDataCheckoutAction&quot; class=&quot;com.elasticpath.service.shoppingcart.actions.impl&quot;&gt;
- *       &lt;property name=&quot;orderDataProperties&quot;&gt;
- *          &lt;map&gt;
- *             &lt;-- Vanilla Property Example --&gt;
- *             &lt;entry key=&quot;exampleProperty&quot; value=&quot;shoppingCart.shopper.customer.exampleProperty&quot;&gt;
- *
- *             &lt;-- Indexed (array or list) Property Example --&gt;
- *             &lt;entry key=&quot;firstSkuCode&quot; value=&quot;shoppingCart.cartItems[0].productSku.skuCode&quot;&gt;
- *
- *             &lt;-- Single Mapped Property Example --&gt;
- *             &lt;entry key=&quot;foo&quot; value=&quot;shoppingCart.shopper.cache.item(FOO)&quot;&gt;
- *
- *             &lt;-- Full Map Import Example
- *
- *                    This will copy all the elements in the given map to the OrderData map.  For instance, the entry
- *                    ["FREE-PHONE", 50] in the limitedUsagePromotionRuleCodes map would be copied to the OrderData map
- *                    as ["ruleCode.FREE-PHONE", 50].
- *             --&gt;
- *             &lt;entry key=&quot;ruleCode&quot; value=&quot;shoppingCartPricingSnapshot.promotionRecordContainer.limitedUsagePromotionRuleCodes&quot;&gt;
- *          &lt;/map&gt;
- *       &lt;/property&gt;
- *    &lt;/bean&gt;
+ * <p>The values that are populated by this action are supplied by com.elasticpath.xpf.connectivity.order.OrderDataPopulator implementations
+ * returned by XPFExtensionLookup</p>
  * </pre>
- *
  */
 //CHECKSTYLE:ON
 public class PopulateOrderDataCheckoutAction implements ReversibleCheckoutAction {
-	private Map<String, String> orderDataProperties;
+	private XPFExtensionLookup xpfExtensionLookup;
+	private ShoppingCartConverter xpfShoppingCartConverter;
+
+	private static final Logger LOG = LogManager.getLogger(PopulateOrderDataCheckoutAction.class);
 
 	@Override
 	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {
-		for (Map.Entry<String, String> orderDataProperty : getOrderDataProperties().entrySet()) {
-			String orderDataPropertyKey = orderDataProperty.getKey();
-			String contextPropertyName = orderDataProperty.getValue();
+		List<OrderDataPopulator> orderDataPopulators = getOrderDataPopulators(context);
+		XPFOrderDataPopulatorContext orderDataPopulationContext = new XPFOrderDataPopulatorContext(
+				xpfShoppingCartConverter.convert(context.getShoppingCart()));
 
+		orderDataPopulators.forEach(orderDataPopulator -> {
 			try {
-				Object propertyValue = PropertyUtils.getProperty(context, contextPropertyName);
-				if (propertyValue == null) {
-					continue;
-				}
-
-				if (propertyValue instanceof Map) {
-					for (Map.Entry<?, ?> mapEntry : ((Map<?, ?>) propertyValue).entrySet()) {
-						if (mapEntry.getValue() == null) {
-							continue;
-						}
-
-						setOrderDataValue(context.getOrder(), getSubMapKey(orderDataPropertyKey, mapEntry.getKey()), mapEntry.getValue());
-					}
-				} else {
-					setOrderDataValue(context.getOrder(), orderDataPropertyKey, propertyValue);
-				}
-			} catch (Exception ex) {
-				throw new EpServiceException("Could not read CheckoutActionContext property: " + orderDataProperty.getKey(), ex);
+				Map<String, String> orderDataMap = orderDataPopulator.collectOrderData(orderDataPopulationContext);
+				orderDataMap.keySet().forEach(key ->
+						context.getOrder().getModifierFields().putIfAbsent(key, orderDataMap.get(key)));
+			} catch (Exception e) {
+				LOG.error("Exception thrown by " + orderDataPopulator.getClass().getName() + ".  ", e);
 			}
-		}
-	}
-
-	/**
-	 * Sets the given value for the given key in the OrderData.  This method is protected to allow extension projects
-	 * to customize serialization.
-	 *
-	 * @param order the order
-	 * @param propertyKey the property key
-	 * @param propertyValue the value
-	 */
-	protected void setOrderDataValue(final Order order, final String propertyKey, final Object propertyValue) {
-		final String orderDataValue = propertyValue.toString();
-		order.setFieldValue(propertyKey, orderDataValue);
+		});
 	}
 
 	@Override
@@ -105,7 +65,8 @@ public class PopulateOrderDataCheckoutAction implements ReversibleCheckoutAction
 
 	/**
 	 * Creates the key that will be used to store the given input map element in the OrderData map.
-	 * @param baseKey the base key for the input map
+	 *
+	 * @param baseKey       the base key for the input map
 	 * @param mapElementKey the name of the key that the element is stored in in the input map
 	 * @return the key that will be used to store the element in the OrderData map
 	 */
@@ -120,11 +81,17 @@ public class PopulateOrderDataCheckoutAction implements ReversibleCheckoutAction
 		return stringBuilder.toString();
 	}
 
-	public void setOrderDataProperties(final Map<String, String> orderDataProperties) {
-		this.orderDataProperties = orderDataProperties;
+	private List<OrderDataPopulator> getOrderDataPopulators(final PreCaptureCheckoutActionContext context) {
+		XPFExtensionSelectorByStoreCode selector = new XPFExtensionSelectorByStoreCode(context.getShoppingCart().getStore().getCode());
+		return xpfExtensionLookup.getMultipleExtensions(OrderDataPopulator.class,
+				XPFExtensionPointEnum.ORDER_DATA_POPULATOR, selector);
 	}
 
-	protected Map<String, String> getOrderDataProperties() {
-		return orderDataProperties;
+	public void setXpfExtensionLookup(final XPFExtensionLookup xpfExtensionLookup) {
+		this.xpfExtensionLookup = xpfExtensionLookup;
+	}
+
+	public void setXpfShoppingCartConverter(final ShoppingCartConverter xpfShoppingCartConverter) {
+		this.xpfShoppingCartConverter = xpfShoppingCartConverter;
 	}
 }

@@ -22,5 +22,15 @@
 		validationInterval="${epdb.validation.interval}"
 
 	/>
-</Context>
 
+	<Resource name="jms/JMSConnectionFactory"
+			  auth="Container"
+			  type="${ep.jms.type}"
+			  description="JMS Connection Factory"
+			  factory="${ep.jms.factory}"
+			  brokerURL="failover:(${ep.jms.url})?maxReconnectAttempts=2&amp;jms.prefetchPolicy.all=20"
+			  poolMaxConnections="1"
+			  poolMaximumActiveSessionPerConnection="200"
+			  poolIdleTimeout="10000"
+	/>
+</Context>

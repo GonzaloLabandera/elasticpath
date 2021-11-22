@@ -44,7 +44,7 @@ public class ProductAssociationQueryBuilderTest {
 		String queryString = query.getQueryString();
 		Object[] queryParams = query.getQueryParameters().toArray();
 
-		assertEquals("SELECT COUNT(pa.uidPk)"
+		assertEquals("SELECT COUNT(DISTINCT pa.uidPk)"
 					+ " FROM ProductAssociationImpl pa,"
 					+ 		" IN(pa.sourceProduct.productCategories) spc,"
 					+ 		" IN(pa.targetProduct.productCategories) tpc"
@@ -78,7 +78,7 @@ public class ProductAssociationQueryBuilderTest {
 		allCriteria.setWithinCatalogOnly(false);
 		ProductAssociationQuery query = builder.buildCountQuery(allCriteria);
 		String queryString = query.getQueryString();
-		assertEquals("SELECT COUNT(pa.uidPk)"
+		assertEquals("SELECT COUNT(DISTINCT pa.uidPk)"
 				+ " FROM ProductAssociationImpl pa"
 				+ " WHERE"
 				+ 		" pa.associationType = ?1"
@@ -98,7 +98,7 @@ public class ProductAssociationQueryBuilderTest {
 		allCriteria.setAssociationType(null);
 		ProductAssociationQuery query = builder.buildCountQuery(allCriteria);
 		String queryString = query.getQueryString();
-		assertEquals("SELECT COUNT(pa.uidPk)"
+		assertEquals("SELECT COUNT(DISTINCT pa.uidPk)"
 				+ " FROM ProductAssociationImpl pa"
 				+ " WHERE"
 				+ 		" pa.sourceProduct.code = ?1"
@@ -117,7 +117,7 @@ public class ProductAssociationQueryBuilderTest {
 		allCriteria.setCatalogCode(null);
 		ProductAssociationQuery query = builder.buildCountQuery(allCriteria);
 		String queryString = query.getQueryString();
-		assertEquals("SELECT COUNT(pa.uidPk)"
+		assertEquals("SELECT COUNT(DISTINCT pa.uidPk)"
 				+ " FROM ProductAssociationImpl pa"
 				+ " WHERE"
 				+ 		" pa.associationType = ?1"
@@ -136,7 +136,7 @@ public class ProductAssociationQueryBuilderTest {
 		allCriteria.setEndDateAfter(null);
 		ProductAssociationQuery query = builder.buildCountQuery(allCriteria);
 		String queryString = query.getQueryString();
-		assertEquals("SELECT COUNT(pa.uidPk)"
+		assertEquals("SELECT COUNT(DISTINCT pa.uidPk)"
 				+ " FROM ProductAssociationImpl pa"
 				+ " WHERE"
 				+ 		" pa.associationType = ?1"
@@ -155,7 +155,7 @@ public class ProductAssociationQueryBuilderTest {
 		allCriteria.setStartDateBefore(null);
 		ProductAssociationQuery query = builder.buildCountQuery(allCriteria);
 		String queryString = query.getQueryString();
-		assertEquals("SELECT COUNT(pa.uidPk)"
+		assertEquals("SELECT COUNT(DISTINCT pa.uidPk)"
 				+ " FROM ProductAssociationImpl pa"
 				+ " WHERE"
 				+ 		" pa.associationType = ?1"
@@ -174,7 +174,7 @@ public class ProductAssociationQueryBuilderTest {
 		allCriteria.setEndDateAfter(null);
 		ProductAssociationQuery query = builder.buildCountQuery(allCriteria);
 		String queryString = query.getQueryString();
-		assertEquals("SELECT COUNT(pa.uidPk)"
+		assertEquals("SELECT COUNT(DISTINCT pa.uidPk)"
 				+ " FROM ProductAssociationImpl pa,"
 				+ 		" IN(pa.sourceProduct.productCategories) spc,"
 				+ 		" IN(pa.targetProduct.productCategories) tpc"
@@ -199,7 +199,7 @@ public class ProductAssociationQueryBuilderTest {
 		String queryString = query.getQueryString();
 		Object[] queryParams = query.getQueryParameters().toArray();
 
-		assertEquals("SELECT COUNT(pa.uidPk)"
+		assertEquals("SELECT COUNT(DISTINCT pa.uidPk)"
 						+ " FROM ProductAssociationImpl pa,"
 						+ 		" IN(pa.sourceProduct.productCategories) spc,"
 						+ 		" IN(pa.targetProduct.productCategories) tpc"

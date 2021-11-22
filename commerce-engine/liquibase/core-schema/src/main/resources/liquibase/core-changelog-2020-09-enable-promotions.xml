@@ -5,9 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-enable-promotions.xml">
-
-
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-enable-promotions.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="catalog-promotion-enable-setting" author="elasticpath" >
 		<comment>If true allows catalog promotions to be created and evaluated during price lookups.</comment>

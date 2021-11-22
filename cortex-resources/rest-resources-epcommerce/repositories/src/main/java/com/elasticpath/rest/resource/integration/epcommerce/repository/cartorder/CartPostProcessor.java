@@ -3,7 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 
@@ -18,7 +17,6 @@ public interface CartPostProcessor {
 	 *
 	 * @param cart            the cart
 	 * @param shopper         the shopper
-	 * @param customerSession the customer session
 	 */
-	void postProcessCart(ShoppingCart cart, Shopper shopper, CustomerSession customerSession);
+	void postProcessCart(ShoppingCart cart, Shopper shopper);
 }

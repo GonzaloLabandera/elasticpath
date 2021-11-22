@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.catalog.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -31,7 +32,7 @@ import com.elasticpath.service.changeset.ChangeSetMemberAction;
  */
 public class CreateCategoryAction  extends AbstractCatalogViewAction implements ObjectRegistryListener {
 
-	private static final Logger LOG = Logger.getLogger(CreateCategoryAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateCategoryAction.class);
 	
 	private static final String ACTION_NAME = "createCategoryAction";  //$NON-NLS-1$
 

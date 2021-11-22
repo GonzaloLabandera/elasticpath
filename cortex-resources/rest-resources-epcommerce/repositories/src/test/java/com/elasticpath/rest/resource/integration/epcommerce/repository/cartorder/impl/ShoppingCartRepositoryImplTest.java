@@ -6,6 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,11 @@ import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.structured.InvalidBusinessStateException;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
@@ -37,6 +43,7 @@ import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.sellingchannel.ProductUnavailableException;
@@ -49,14 +56,17 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
 @SuppressWarnings({"deprecation", "PMD.TooManyMethods"})
 @RunWith(MockitoJUnitRunner.class)
 public class ShoppingCartRepositoryImplTest {
-	private static final String CART_GUID = "cart";
-	private static final String USER_GUID = "user";
+	private static final String CART_GUID = "cartGuid";
+	private static final String USER_GUID = "userGuid";
 	private static final String ACCOUNT_SHARED_ID = "accountSharedId";
-	private static final String SKU_CODE = "sku";
-	private static final String STORE_CODE = "store";
+	private static final String SKU_CODE = "skuCode";
+	private static final String STORE_CODE = "storeCode";
 
 	private static final String PLACEHOLDER_KEY = "Placeholder Key";
 	private static final String PLACEHOLDER_VALUE = "Placeholder Value";
+
+	@Mock
+	private ShopperRepository shopperRepository;
 
 	@Mock
 	private ShoppingCartService shoppingCartService;
@@ -89,13 +99,24 @@ public class ShoppingCartRepositoryImplTest {
 	private Subject subject;
 
 	@Mock
-	ShoppingCart cart;
+	private ShoppingCart cart;
+
+	@Mock
+	private Shopper shopper;
+
+	@Mock
+	private BeanFactory beanFactory;
+
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
 
 	@Before
 	public void setUp() {
-
+		elasticPath.setBeanFactory(beanFactory);
 		when(multiCartResolutionStrategyHolder.getStrategies()).thenReturn(Collections.singletonList(strategy));
 		repository.setReactiveAdapter(reactiveAdapterImpl);
+		when(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.thenAnswer(invocation -> new ModifierFieldsMapWrapper());
 	}
 
 	/**
@@ -165,7 +186,7 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void testUpdateCartItemHappyPath() {
-		ShoppingItem shoppingItem = mock(ShoppingItem.class);
+		ShoppingItem shoppingItem = mock(ShoppingItem.class, RETURNS_DEEP_STUBS);
 		when(shoppingItem.getUidPk()).thenReturn(1L);
 		ShoppingItemDto shoppingItemDto = new ShoppingItemDto(SKU_CODE, 2);
 		when(shoppingItemDtoFactory.createDto(SKU_CODE, 2)).thenReturn(shoppingItemDto);
@@ -182,7 +203,7 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void shouldNotUpdateCartItemWhenProductIsNotPurchasable() {
-		ShoppingItem shoppingItem = mock(ShoppingItem.class);
+		ShoppingItem shoppingItem = mock(ShoppingItem.class, RETURNS_DEEP_STUBS);
 		when(shoppingItem.getUidPk()).thenReturn(1L);
 		ShoppingItemDto shoppingItemDto = new ShoppingItemDto(SKU_CODE, 2);
 		when(shoppingItemDtoFactory.createDto(SKU_CODE, 2)).thenReturn(shoppingItemDto);
@@ -249,7 +270,6 @@ public class ShoppingCartRepositoryImplTest {
 	@Test
 	public void testFindAllCarts() {
 		when(resourceOperationContext.getSubject()).thenReturn(subject);
-
 		when(strategy.isApplicable(subject)).thenReturn(true);
 		when(strategy.findAllCarts(USER_GUID, ACCOUNT_SHARED_ID, STORE_CODE, subject))
 				.thenReturn(Observable.just(CART_GUID, "OTHER_GUID"));
@@ -272,9 +292,9 @@ public class ShoppingCartRepositoryImplTest {
 		shoppingItemSingle.test()
 				.assertNoErrors()
 				.assertValue(addedItem)
-				.assertValue(shoppingItem -> shoppingItem.getFields().size() == 0);
+				.assertValue(shoppingItem -> shoppingItem.getModifierFields().getMap().size() == 0);
 
-		addedItem.setFieldValue(PLACEHOLDER_KEY, PLACEHOLDER_VALUE);
+		addedItem.getModifierFields().put(PLACEHOLDER_KEY, PLACEHOLDER_VALUE);
 		repository.updateCartItem(cart, addedItem, SKU_CODE, 1)
 				.test()
 				.assertNoErrors();
@@ -305,6 +325,24 @@ public class ShoppingCartRepositoryImplTest {
 				.test()
 				.assertError(isResourceOperationFailureNotFound());
 
+	}
+
+	/**
+	 * Test the behaviour of get shopping cart for customer.
+	 */
+	@Test
+	public void testGettingShoppingCartForCustomer() {
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+		when(strategy.isApplicable(subject)).thenReturn(true);
+		when(shopperRepository.findOrCreateShopper(USER_GUID, STORE_CODE))
+				.thenReturn(Single.just(shopper));
+		when(strategy.getDefaultCart(shopper))
+				.thenReturn(Single.just(cart));
+
+		repository.getDefaultShoppingCartForCustomer(USER_GUID, STORE_CODE)
+				.test()
+				.assertNoErrors()
+				.assertValue(cart);
 	}
 
 	private Predicate<Throwable> isResourceOperationFailureNotFound() {

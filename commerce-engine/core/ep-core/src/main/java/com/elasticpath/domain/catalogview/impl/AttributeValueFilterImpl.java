@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.SeoConstants;
@@ -38,7 +39,7 @@ public class AttributeValueFilterImpl extends AbstractFilterImpl<AttributeValueF
 
 	private String displayName;
 
-	private static final Logger LOG = Logger.getLogger(AttributeValueFilterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AttributeValueFilterImpl.class);
 
 	private String alias;
 

@@ -9,8 +9,9 @@ import java.util.Map;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
 import net.sf.ehcache.CacheManager;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.support.GenericApplicationContext;
@@ -56,7 +57,7 @@ import com.elasticpath.test.persister.testscenarios.AbstractScenario;
  */
 public class TestApplicationContext {
 
-	private static final Logger LOG = Logger.getLogger(TestApplicationContext.class);
+	private static final Logger LOG = LogManager.getLogger(TestApplicationContext.class);
 
 	@Autowired
 	/** The Spring application context that mimics the platform setup. */

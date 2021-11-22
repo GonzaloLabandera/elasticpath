@@ -31,7 +31,6 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.impl.OrderImpl;
 import com.elasticpath.domain.rules.AppliedCoupon;
@@ -72,7 +71,7 @@ import com.elasticpath.service.rules.CouponService;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.dao.CouponUsageDao;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
-import com.elasticpath.test.factory.TestCustomerSessionFactory;
+import com.elasticpath.test.factory.TestShopperFactory;
 
 /**
  * Unit test for {@code CouponUsageServiceImpl}.
@@ -255,9 +254,7 @@ public class CouponUsageServiceImplTest {
 	}
 
 	private Shopper createShopper() {
-		CustomerSession session = TestCustomerSessionFactory.getInstance().createNewCustomerSession();
-
-		return session.getShopper();
+		return TestShopperFactory.getInstance().createNewShopperWithMemento();
 	}
 
 	private void setCustomerWithEmailOnShopper(final Shopper shopper, final String email) {

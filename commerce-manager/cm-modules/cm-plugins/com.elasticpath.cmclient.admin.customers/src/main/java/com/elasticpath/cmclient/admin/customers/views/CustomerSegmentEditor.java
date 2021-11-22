@@ -10,7 +10,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -46,7 +47,7 @@ public class CustomerSegmentEditor extends AbstractCmClientFormEditor {
 	 */
 	public static final String ID_EDITOR = CustomerSegmentEditor.class.getName();
 
-	private static final Logger LOG = Logger.getLogger(CustomerSegmentEditor.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerSegmentEditor.class);
 
 	private static final int TOTAL_WORK_UNITS = 2;
 

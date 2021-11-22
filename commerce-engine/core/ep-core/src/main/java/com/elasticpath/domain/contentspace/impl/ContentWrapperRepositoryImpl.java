@@ -6,7 +6,8 @@ package com.elasticpath.domain.contentspace.impl;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.util.InvalidatableCache;
 import com.elasticpath.domain.contentspace.ContentWrapper;
@@ -19,7 +20,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
  */
 public class ContentWrapperRepositoryImpl implements ContentWrapperRepository, InvalidatableCache {
 
-	private static final Logger LOG = Logger.getLogger(ContentWrapperRepositoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ContentWrapperRepositoryImpl.class);
 
 	private Map<String, ContentWrapper> contentWrappers;
 

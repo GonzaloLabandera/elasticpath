@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -23,7 +24,7 @@ import com.elasticpath.service.search.query.SearchCriteria;
  */
 public class SolrIndexSearchServiceImpl implements IndexSearchService {
 
-	private static final Logger LOG = Logger.getLogger(SolrIndexSearchServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SolrIndexSearchServiceImpl.class);
 
 	private SpellIndexSearcher spellIndexSearcher;
 

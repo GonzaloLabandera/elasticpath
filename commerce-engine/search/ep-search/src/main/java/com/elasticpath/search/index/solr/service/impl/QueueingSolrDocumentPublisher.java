@@ -10,8 +10,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.lang.time.StopWatch;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
@@ -58,7 +59,7 @@ public class QueueingSolrDocumentPublisher implements SolrDocumentPublisher {
 
 	private BlockingQueue<SolrPublishCommand> documentQueue;
 
-	private static final Logger LOG = Logger.getLogger(QueueingSolrDocumentPublisher.class);
+	private static final Logger LOG = LogManager.getLogger(QueueingSolrDocumentPublisher.class);
 
 	private int documentQueueSize = DEFAULT_QUEUE_SIZE;
 

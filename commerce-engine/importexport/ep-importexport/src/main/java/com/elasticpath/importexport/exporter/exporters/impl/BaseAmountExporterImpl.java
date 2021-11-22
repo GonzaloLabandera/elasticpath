@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.domain.pricing.BaseAmount;
@@ -22,7 +23,7 @@ import com.elasticpath.service.pricing.BaseAmountService;
  */
 public class BaseAmountExporterImpl extends AbstractExporterImpl<BaseAmount, BaseAmountDTO, String> {
 	
-	private static final Logger LOG = Logger.getLogger(BaseAmountExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(BaseAmountExporterImpl.class);
 	
 	private BaseAmountAdapter baseAmountAdapter;
 

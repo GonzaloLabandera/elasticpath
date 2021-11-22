@@ -15,7 +15,7 @@ import com.elasticpath.cmclient.core.CoreMessages;
  */
 public class NavigationEvent extends EventObject {
 	private static final long serialVersionUID = 1L;
-//	private static final Logger LOG = Logger.getLogger(NavigationEvent.class);
+//	private static final Logger LOG = LogManager.getLogger(NavigationEvent.class);
 
 	/** Defines a type of navigation action. */
 	public enum NavigationType {

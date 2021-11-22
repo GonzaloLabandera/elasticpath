@@ -5,7 +5,6 @@ package com.elasticpath.service.orderpaymentapi;
 
 import java.util.Collection;
 
-import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.service.EpPersistenceService;
 
@@ -38,18 +37,18 @@ public interface CartOrderPaymentInstrumentService extends EpPersistenceService 
 	CartOrderPaymentInstrument findByGuid(String guid);
 
 	/**
-	 * Find all {@link CartOrderPaymentInstrument} entities by the {@link CartOrder}.
+	 * Find all {@link CartOrderPaymentInstrument} entities by the cart order.
 	 *
-	 * @param cartOrder the {@link CartOrder} entity
-	 * @return {@link CartOrderPaymentInstrument} entity
+	 * @param cartOrderGuid the cart order guid
+	 * @return collection of {@link CartOrderPaymentInstrument} entities
 	 */
-	Collection<CartOrderPaymentInstrument> findByCartOrder(CartOrder cartOrder);
+	Collection<CartOrderPaymentInstrument> findByCartOrderGuid(String cartOrderGuid);
 
 	/**
-	 * Checks if {@link CartOrder} has any associated {@link CartOrderPaymentInstrument} entities.
+	 * Checks if cart order has any associated {@link CartOrderPaymentInstrument} entities.
 	 *
-	 * @param cartOrder the {@link CartOrder} entity
+	 * @param cartOrderGuid the cart order guid
 	 * @return true if payment instruments attached to the cart order
 	 */
-	boolean hasPaymentInstruments(CartOrder cartOrder);
+	boolean hasPaymentInstruments(String cartOrderGuid);
 }

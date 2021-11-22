@@ -8,8 +8,9 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.SeoConstants;
@@ -33,7 +34,7 @@ import com.elasticpath.service.search.query.StandardSortBy;
  */
 @SuppressWarnings("PMD.GodClass")
 public abstract class AbstractCatalogViewRequestImpl extends AbstractEpDomainImpl implements CatalogViewRequest, Cloneable {
-	private static final Logger LOG = Logger.getLogger(AbstractCatalogViewRequestImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractCatalogViewRequestImpl.class);
 	/**
 	 * Serial version id.
 	 */

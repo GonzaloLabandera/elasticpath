@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.store.shipping.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.widgets.Display;
 
 import com.elasticpath.cmclient.core.BeanLocator;
@@ -25,7 +26,7 @@ import com.elasticpath.service.shipping.ShippingServiceLevelService;
  */
 public class ShippingLevelSearchRequestJob extends AbstractSearchRequestJob<ShippingServiceLevel> {
 
-	private static final Logger LOG = Logger.getLogger(ShippingLevelSearchRequestJob.class);
+	private static final Logger LOG = LogManager.getLogger(ShippingLevelSearchRequestJob.class);
 
 	private final ShippingServiceLevelService shippingServiceLevelService;
 

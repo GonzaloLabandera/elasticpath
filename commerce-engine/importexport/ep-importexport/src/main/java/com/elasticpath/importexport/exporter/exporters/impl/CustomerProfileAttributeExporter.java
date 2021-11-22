@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
@@ -25,7 +26,7 @@ import com.elasticpath.service.attribute.AttributeService;
  */
 public class CustomerProfileAttributeExporter extends AbstractExporterImpl<Attribute, AttributeDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(CustomerProfileAttributeExporter.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerProfileAttributeExporter.class);
 
 	private List<String> attributeKeys;
 

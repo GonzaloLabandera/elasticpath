@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
@@ -32,7 +32,7 @@ import com.elasticpath.rest.definition.discounts.DiscountForCartIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTransformer;
 
 /**
@@ -49,9 +49,9 @@ public class DiscountsEntityForCartRepositoryImplTest {
 	@Mock
 	private CartOrderRepository cartOrderRepository;
 	@Mock
-	private CustomerSessionRepository customerSessionRepository;
+	private ShopperRepository shopperRepository;
 	@Mock
-	private CustomerSession customerSession;
+	private Shopper shopper;
 	@Mock
 	private MoneyTransformer moneyTransformer;
 	@Mock
@@ -64,8 +64,8 @@ public class DiscountsEntityForCartRepositoryImplTest {
 
 	@Before
 	public void initialize() {
-		when(customerSessionRepository.findOrCreateCustomerSession())
-				.thenReturn(Single.just(customerSession));
+		when(shopperRepository.findOrCreateShopper())
+				.thenReturn(Single.just(shopper));
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class DiscountsEntityForCartRepositoryImplTest {
 				.thenReturn(Single.just(shoppingCartPricingSnapshot));
 
 		when(shoppingCartPricingSnapshot.getSubtotalDiscountMoney()).thenReturn(MONEY_TEN);
-		when(customerSession.getLocale()).thenReturn(Locale.CANADA);
+		when(shopper.getLocale()).thenReturn(Locale.CANADA);
 
 		when(moneyTransformer.transformToEntity(MONEY_TEN, Locale.CANADA))
 				.thenReturn(CostEntity.builder().withAmount(BigDecimal.TEN).withCurrency("CAD").withDisplay("CANADA").build());

@@ -30,9 +30,10 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -42,8 +43,7 @@ import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
-import com.elasticpath.domain.modifier.ModifierField;
-import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.rules.Coupon;
@@ -103,9 +103,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	private static final long serialVersionUID = 5000000002L;
 
-	private static final Logger LOG = Logger.getLogger(ShoppingCartImpl.class.getName());
-
-	private CustomerSession customerSession;
+	private static final Logger LOG = LogManager.getLogger(ShoppingCartImpl.class.getName());
 
 	private BigDecimal subtotalDiscount = BigDecimal.ZERO;
 
@@ -235,31 +233,12 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * Return the <code>CustomerSession</code>. instance. Customer sessions track information about sessions where the customer may not be logged
-	 * in.
+	 * Return the <code>CustomerSession</code>. instance.
 	 *
 	 * @return the <code>CustomerSession</code> instance
-	 * @deprecated
 	 */
-	@Override
-	@Deprecated
-	public CustomerSession getCustomerSession() {
-		return customerSession;
-	}
-
-	/**
-	 * Set the <code>CustomerSession</code>. instance. Customer sessions track information about sessions where the customer may not be logged in.
-	 *
-	 * @param customerSession the <code>CustomerSession</code> instance
-	 * @deprecated
-	 */
-	@Override
-	@Deprecated
-	public void setCustomerSession(final CustomerSession customerSession) {
-		this.customerSession = customerSession;
-		if (customerSession != null) {
-			setShopper(customerSession.getShopper());
-		}
+	protected CustomerSession getCustomerSession() {
+		return getShopper().getCustomerSession();
 	}
 
 	/**
@@ -1742,7 +1721,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 			throw new EpServiceException("Pricing not available for Shipping Option [" + shippingOption.getCode() + "]");
 		}
 
-		return new ImmutableShippingPricingSnapshot(shippingPricing, customerSession.getCurrency());
+		return new ImmutableShippingPricingSnapshot(shippingPricing, getCustomerSession().getCurrency());
 	}
 
 	@Override
@@ -1861,25 +1840,17 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public String getCartDataFieldValue(final String name) {
-		return  getShoppingCartMemento().getCartDataFieldValue(name);
+		return  getShoppingCartMemento().getModifierFields().get(name);
 	}
 
 	@Override
 	public void setCartDataFieldValue(final String name, final String value) {
-		getShoppingCartMemento().setCartDataFieldValue(name, value);
+		getShoppingCartMemento().getModifierFields().put(name, value);
 	}
 
-
 	@Override
-	public Map<String, CartData> getCartData() {
-		return getShoppingCartMemento().getCartData();
-	}
-
-
-
-	@Override
-	public CartData createCartData(final String name, final String value) {
-		return new CartData(name, value);
+	public Map<String, String> getCartData() {
+		return getShoppingCartMemento().getModifierFields().getMap();
 	}
 
 	/**
@@ -1908,18 +1879,8 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	@Override
-	public List<ModifierField> getModifierFields() {
-		if (store == null) {
-			return Collections.emptyList();
-		}
-
-		List<ModifierGroup> modifierGroups = store.getShoppingCartTypes().stream()
-				.flatMap(cartType -> cartType.getModifiers().stream())
-				.collect(Collectors.toList());
-
-		return modifierGroups.stream()
-				.flatMap(modifierGroup -> modifierGroup.getModifierFields().stream())
-				.collect(Collectors.toList());
+	public ModifierFieldsMapWrapper getModifierFields() {
+		return getShoppingCartMemento().getModifierFields();
 	}
 
 	@Override

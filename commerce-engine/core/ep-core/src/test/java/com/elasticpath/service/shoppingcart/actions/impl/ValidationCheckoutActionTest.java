@@ -4,14 +4,15 @@
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.assertj.core.groups.Tuple.tuple;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
 
 import com.google.common.collect.ImmutableList;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,11 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.exception.CheckoutValidationException;
 import com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
 
 /**
  * Unit tests for {@link ValidationCheckoutAction}.
@@ -45,38 +47,38 @@ public class ValidationCheckoutActionTest {
 	private PreCaptureCheckoutActionContext checkoutActionContext;
 
 	@Mock
-	private ShoppingCartValidationContext validationContext;
+	private ShoppingCart shoppingCart;
 
 	@Mock
-	private ShoppingCart shoppingCart;
+	private Store store;
+
+	@Mock
+	private Shopper shopper;
+
+	@Before
+	public void setUp() {
+		given(checkoutActionContext.getShoppingCart()).willReturn(shoppingCart);
+		given(checkoutActionContext.getShopper()).willReturn(shopper);
+		given(shoppingCart.getStore()).willReturn(store);
+	}
 
 	@Test
 	public void testCheckoutValid() {
 		// Given
-		given(checkoutActionContext.getShoppingCart()).willReturn(shoppingCart);
-
-		given(validationService.buildContext(shoppingCart)).willReturn(validationContext);
-
-		given(validationService.validate(validationContext)).willReturn(Collections.emptyList());
-
+		given(validationService.validate(shoppingCart, shopper, store)).willReturn(Collections.emptyList());
 
 		// When
 		checkoutAction.execute(checkoutActionContext);
 
 		// Then
-		verify(validationService).buildContext(shoppingCart);
-		verify(validationService).validate(validationContext);
+		verify(validationService).validate(shoppingCart, shopper, store);
 	}
 
 
 	@Test
 	public void testCheckoutInvalid() {
 		// Given
-		given(checkoutActionContext.getShoppingCart()).willReturn(shoppingCart);
-
-		given(validationService.buildContext(shoppingCart)).willReturn(validationContext);
-
-		given(validationService.validate(validationContext)).willReturn(
+		given(validationService.validate(shoppingCart, shopper, store)).willReturn(
 				ImmutableList.of(ERROR_MESSAGE));
 
 		// When

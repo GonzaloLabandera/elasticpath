@@ -1,6 +1,7 @@
 package com.elasticpath.cmclient.core.handlers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,7 +24,7 @@ import org.json.JSONObject;
  */
 public class RedirectFilter implements Filter {
 
-	private static final Logger LOG = Logger.getLogger(RedirectFilter.class);
+	private static final Logger LOG = LogManager.getLogger(RedirectFilter.class);
 
 	@Override
 	public void init(final FilterConfig filterConfig) throws ServletException {

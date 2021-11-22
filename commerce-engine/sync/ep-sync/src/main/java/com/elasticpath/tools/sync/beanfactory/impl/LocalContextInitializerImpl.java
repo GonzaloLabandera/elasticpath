@@ -6,7 +6,8 @@ package com.elasticpath.tools.sync.beanfactory.impl;
 import java.util.Properties;
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -26,7 +27,7 @@ public class LocalContextInitializerImpl implements ContextInitializer {
 	private static final String BEAN_NAME_DATA_SOURCE_PROPERTIES = "dataSourceProperties";
 	private static final String BEAN_NAME_DATA_SOURCE = "injectedDataSource";
 
-	private static final Logger LOG = Logger.getLogger(LocalContextInitializerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(LocalContextInitializerImpl.class);
 	
 	private String pathToXmlFile;
 

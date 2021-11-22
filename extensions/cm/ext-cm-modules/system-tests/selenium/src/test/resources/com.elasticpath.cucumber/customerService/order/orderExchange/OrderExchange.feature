@@ -277,7 +277,7 @@ Feature: Order Exchange
       | Payment Options          | Payment Source                                        |
       | Payment Source           | Original payment source                               |
       | Error processing payment | True                                                  |
-    Then Error message No original payment instrument was found for the order. appears
+    Then Error message Payment method must be specified. appears
 
     Examples:
       | FREE_SKU                |

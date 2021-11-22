@@ -6,7 +6,8 @@ package com.elasticpath.service.impl;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -23,7 +24,7 @@ import com.elasticpath.service.EpPersistenceService;
  * other services of the persistable domain models.
  */
 public abstract class AbstractEpPersistenceServiceImpl implements EpPersistenceService, BeanFactory {
-	private static final Logger LOG = Logger.getLogger(AbstractEpPersistenceServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractEpPersistenceServiceImpl.class);
 	private PersistenceEngine persistenceEngine;
 	private final PersistentBeanFinder persistentBeanFinder = new PersistentBeanFinder();
 

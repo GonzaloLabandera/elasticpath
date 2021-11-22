@@ -5,14 +5,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Simple properties manager class to keep the loading of configuration file in one place.
  */
 public class PropertyManager {
 
-	private static final Logger LOGGER = Logger.getLogger(PropertyManager.class);
+	private static final Logger LOGGER = LogManager.getLogger(PropertyManager.class);
 
 	/** Singleton instance. **/
 	private static PropertyManager instance;

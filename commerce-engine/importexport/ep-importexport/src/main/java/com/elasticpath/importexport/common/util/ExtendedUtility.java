@@ -18,7 +18,7 @@ public class ExtendedUtility extends UtilityImpl {
 	private Locale dateFormatterLocale;
 	private String dateFormatterPattern;
 
-	//private static final Logger LOG = Logger.getLogger(ExtendedUtility.class);
+	//private static final Logger LOG = LogManager.getLogger(ExtendedUtility.class);
 
 	/**
 	 * Setter.

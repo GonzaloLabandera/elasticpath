@@ -13,6 +13,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.navigations.CustomerServiceNavigation;
 import com.elasticpath.selenium.resultspane.AccountSearchResultPane;
 import com.elasticpath.selenium.util.Constants;
@@ -129,13 +130,13 @@ public class AccountDefinition {
 	/**
 	 * Verify first level account child.
 	 */
-	@Then("^Child Accounts table does not contain second level (.+) child")
+	@Then("^Child Accounts table does not contain (.+) child")
 	public void verifySecondLevelAccountChild(final String expectedChild) {
 		final List<String> children = extractChildren();
 
-		assertThat(children.get(0))
+		assertThat(children.isEmpty() || !children.get(0).equals(expectedChild))
 				.as("Account shows not expected child.")
-				.isNotEqualTo(expectedChild);
+				.isTrue();
 	}
 
 	/**
@@ -235,6 +236,31 @@ public class AccountDefinition {
 		accountSearchResultsPane.closeAccountSearchResultsPane();
 		searchAccountBusinessName(businessName);
 		verifyBusinessNameEntryInList(businessName);
+	}
+
+	@When("^I delete the newly created account$")
+	public void deleteNewAccount() {
+		accountSearchResultsPane.isAccountInListFullMatch(businessName, businessName);
+		ConfirmDialog confirmDialog = accountSearchResultsPane.clickDeleteServiceLevelButton();
+		confirmDialog.clickOKButton("FulfillmentMessages.ConfirmDeleteAccount");
+	}
+
+	@Then("^I verify account is deleted$")
+	public void verifyAccountIsDeleted() {
+		assertThat(accountSearchResultsPane.isAccountInListFullMatch(businessName, businessName))
+				.as("Delete failed, Account is still in the list - " + businessName)
+				.isFalse();
+	}
+
+	@Then("^I open the newly created account$")
+	public void openAccountDetailsTab() {
+		accountSearchResultsPane.selectAndOpenAccountEditorByBusinessName(businessName);
+	}
+
+
+	@Then("^I verify the newly created account tab is closed$")
+	public void iVerifyAccountTabIsClosed() {
+		accountSearchResultsPane.verifyAccountTabNotExists(businessName);
 	}
 
 	/**

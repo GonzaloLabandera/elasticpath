@@ -4,7 +4,7 @@
 package com.elasticpath.rest.resource.offers.prototypes;
 
 import io.reactivex.Single;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.rest.definition.offers.CodeEntity;
 import com.elasticpath.rest.definition.offers.OfferLookupFormResource;

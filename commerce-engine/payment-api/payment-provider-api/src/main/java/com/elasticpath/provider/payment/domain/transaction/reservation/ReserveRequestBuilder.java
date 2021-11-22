@@ -22,6 +22,7 @@ public final class ReserveRequestBuilder {
 	private MoneyDTO amount;
 	private Map<String, String> customRequestData;
 	private OrderContext orderContext;
+	private int rereserveCount;
 
 	private ReserveRequestBuilder() {
 	}
@@ -80,6 +81,17 @@ public final class ReserveRequestBuilder {
 	}
 
 	/**
+	 * With rereserve count builder.
+	 *
+	 * @param rereserveCount the rereserve coun
+	 * @return the builder
+	 */
+	public ReserveRequestBuilder withRereserveCount(final int rereserveCount) {
+		this.rereserveCount = rereserveCount;
+		return this;
+	}
+
+	/**
 	 * Build reservation request.
 	 *
 	 * @param beanFactory EP bean factory
@@ -103,6 +115,7 @@ public final class ReserveRequestBuilder {
 		request.setAmount(amount);
 		request.setCustomRequestData(customRequestData);
 		request.setOrderContext(orderContext);
+		request.setRereserveCount(rereserveCount);
 		return request;
 	}
 }

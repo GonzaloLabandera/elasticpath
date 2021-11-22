@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="FILE"
+			fileName="${project.build.directory}/${project.artifactId}.log"
+			append="false">
+			<PatternLayout
+				pattern="%X{testForkNumber}| %-5p %t %d{ISO8601} %c - %m%n" />
+		</File>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%X{testForkNumber}| %-5p %t %d{ISO8601} %c - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.elasticpath" level="${ep.log.level}" additivity="false">
+			${ep.log.to}
+		</Logger>
+		<Root level="warn">
+			${ep.log.to}
+		</Root>
+	</Loggers>
+</Configuration>

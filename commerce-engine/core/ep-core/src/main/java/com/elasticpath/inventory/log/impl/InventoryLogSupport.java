@@ -3,15 +3,16 @@
  */
 package com.elasticpath.inventory.log.impl;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class provides Inventory specific logging capabilities. Log4j logger is used for logging purposes. 
  */
 public class InventoryLogSupport {
 
-	private static final Logger LOGGER = Logger.getLogger("com.elasticpath.inventory");
+	private static final Logger LOGGER = LogManager.getLogger("com.elasticpath.inventory");
 
 	private InventoryLogFormatter formatter;
 	
@@ -25,7 +26,7 @@ public class InventoryLogSupport {
 	 * @param logContext holds the information to log
 	 */
 	public void logCommandExecution(final InventoryLogContext logContext) {
-		if (LOGGER.isEnabledFor(level)) {
+		if (LOGGER.isEnabled(level)) {
 			String formattedLogEntry = formatter.format(TRACE_EXECUTION, logContext);
 			LOGGER.log(level, formattedLogEntry);
 		}
@@ -51,7 +52,7 @@ public class InventoryLogSupport {
 	 * @return true if the level is enabled.
 	 */
 	public boolean isEnabledFor(final Level level) {
-		return LOGGER.isEnabledFor(level);
+		return LOGGER.isEnabled(level);
 	}
 	
 	/**

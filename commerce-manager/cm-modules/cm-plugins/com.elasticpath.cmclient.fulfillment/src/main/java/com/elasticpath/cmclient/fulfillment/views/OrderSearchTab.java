@@ -56,7 +56,7 @@ import com.elasticpath.service.search.query.StandardSortBy;
 @SuppressWarnings("PMD.TooManyFields")
 public class OrderSearchTab implements ISearchTab {
 
-	// private static final Logger LOG = Logger.getLogger(OrderSearchTab.class);
+	// private static final Logger LOG = LogManager.getLogger(OrderSearchTab.class);
 
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 

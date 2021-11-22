@@ -71,7 +71,7 @@ public class AddSkuWizardPage2 extends AbstractEPWizardPage<Product> implements 
 
 	private Label attributeImageLabel;
 	
-//	private static final Logger LOG = Logger.getLogger(AddSkuWizardPage2.class);
+//	private static final Logger LOG = LogManager.getLogger(AddSkuWizardPage2.class);
 	
 		
 

@@ -6,7 +6,8 @@ package com.elasticpath.test.integration.junit;
 import java.sql.SQLException;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
 
@@ -23,7 +24,7 @@ public class DatabaseTestExecutionListenerHelper {
 	private static final String JNDI_NAME = "java:comp/env/jdbc/epjndi";
 	private static final String READ_ONLY_JNDI_NAME = "java:comp/env/jdbc/epjndiReadOnly";
 
-	private static final Logger LOG = Logger.getLogger(DatabaseTestExecutionListenerHelper.class);
+	private static final Logger LOG = LogManager.getLogger(DatabaseTestExecutionListenerHelper.class);
 
 	private DatabaseTestExecutionListenerHelper() {
 		// prohibit instances of this class being created

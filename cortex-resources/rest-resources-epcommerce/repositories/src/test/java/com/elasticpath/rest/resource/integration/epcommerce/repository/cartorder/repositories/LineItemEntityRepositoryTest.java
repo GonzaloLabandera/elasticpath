@@ -18,6 +18,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -51,7 +52,7 @@ public class LineItemEntityRepositoryTest {
 	private LineItemEntity lineItemEntity;
 	@Mock
 	private ShoppingCart cart;
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private ShoppingItem shoppingItem;
 	@Mock
 	private ProductSku productSku;
@@ -71,7 +72,7 @@ public class LineItemEntityRepositoryTest {
 	@Test
 	public void successfullyFindOneItem() {
 		setupMocksForFindOne(LINE_ITEM_ID, ENCODED_ITEM_ID);
-		when(shoppingItem.getFields()).thenReturn(null);
+		when(shoppingItem.getModifierFields().getMap()).thenReturn(null);
 
 		LineItemIdentifier lineItemIdentifier = IdentifierTestFactory.buildLineItemIdentifier(SCOPE, CART_ID, LINE_ITEM_ID);
 		repository.findOne(lineItemIdentifier)
@@ -86,7 +87,7 @@ public class LineItemEntityRepositoryTest {
 	public void successfullyFindOneConfigurableItem() {
 		setupMocksForFindOne(LINE_ITEM_ID, ENCODED_ITEM_ID);
 		String value = "value";
-		when(shoppingItem.getFields()).thenReturn(Collections.singletonMap("key", value));
+		when(shoppingItem.getModifierFields().getMap()).thenReturn(Collections.singletonMap("key", value));
 		ModifierField modifierField = mock(ModifierField.class);
 		when(modifierField.getCode()).thenReturn("code");
 		when(modifiersRepository.findModifierValues(CART_ID, LINE_ITEM_ID))

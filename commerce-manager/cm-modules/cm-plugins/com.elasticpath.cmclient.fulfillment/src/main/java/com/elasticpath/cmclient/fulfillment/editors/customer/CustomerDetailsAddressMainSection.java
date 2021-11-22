@@ -24,6 +24,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -41,8 +42,10 @@ import com.elasticpath.cmclient.fulfillment.editors.customer.dialogs.CustomerAdd
 import com.elasticpath.cmclient.fulfillment.editors.customer.dialogs.CustomerRemoveAddressDialog;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
 import com.elasticpath.cmclient.fulfillment.util.AddressUtil;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
+import com.elasticpath.service.customer.AddressService;
 
 /**
  * Represents the UI of customer details address.
@@ -92,6 +95,8 @@ public class CustomerDetailsAddressMainSection extends AbstractCmClientEditorPag
 		super(formPage, editor, ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
 		this.customer = (Customer) editor.getModel();
 		this.listener = editor;
+		AddressService addressService = BeanLocator.getSingletonBean(ContextIdNames.ADDRESS_SERVICE, AddressService.class);
+		this.customer.getTransientAddresses().addAll(addressService.findByCustomer(customer.getUidPk()));
 	}
 
 	@Override
@@ -258,7 +263,7 @@ public class CustomerDetailsAddressMainSection extends AbstractCmClientEditorPag
 		public Object[] getElements(final Object element) {
 			Object[] result = null;
 			if (element instanceof Customer) {
-				result = ((Customer) element).getAddresses().toArray();
+				result = ((Customer) element).getTransientAddresses().toArray();
 			}
 			return result;
 		}

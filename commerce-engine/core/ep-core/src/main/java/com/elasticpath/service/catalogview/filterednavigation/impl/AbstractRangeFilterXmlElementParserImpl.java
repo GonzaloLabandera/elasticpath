@@ -6,7 +6,7 @@ package com.elasticpath.service.catalogview.filterednavigation.impl;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang3.LocaleUtils;
 import org.jdom.Element;
 
 import com.elasticpath.domain.catalogview.FilterDisplayInfo;

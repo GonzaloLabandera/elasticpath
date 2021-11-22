@@ -308,10 +308,24 @@
 		   statistics="true"
 	/>
 
+	<cache name="enabledStoreLocaleCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="1000"
+		   statistics="true"
+	/>
+
 	<cache name="modifiedDateByUidCache"
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="sellingContextByCatalogCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="1000"
 		   statistics="true"
 	/>
 

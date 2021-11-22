@@ -13,7 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.openjpa.persistence.DataCache;
 
 import com.elasticpath.domain.dataimport.ImportNotificationMetadata;

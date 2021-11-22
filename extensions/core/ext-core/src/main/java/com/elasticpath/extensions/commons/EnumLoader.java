@@ -5,19 +5,21 @@ package com.elasticpath.extensions.commons;
 
 import com.elasticpath.commons.util.extenum.AbstractExtensibleEnum;
 import com.elasticpath.commons.util.extenum.ExtensibleEnum;
-import org.apache.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Loads the given extensible enums so that their values are added into memory and are available. This is primarily to load values defined by
  * sub-classes up front so they are available.
  */
 public class EnumLoader {
-	private static final Logger LOG = Logger.getLogger(EnumLoader.class);
+	private static final Logger LOG = LogManager.getLogger(EnumLoader.class);
 	private List<Class<? extends AbstractExtensibleEnum<ExtensibleEnum>>> enums;
 
 	/**
@@ -32,10 +34,10 @@ public class EnumLoader {
 		for (Class<? extends AbstractExtensibleEnum<ExtensibleEnum>> enumClass : enumClasses) {
 			final Field[] declaredFields = enumClass.getDeclaredFields();
 
-			LOG.debug("Loading constants in class: " + enumClass.getName());
+			LOG.debug("Loading constants in class: {}", enumClass.getName());
 			for (Field field : declaredFields) {
 				if (isPublicStaticConstant(field)) {
-					LOG.debug("Loaded '" + field.getName() + "' constant; value: " + field.get(null));
+					LOG.debug("Loaded '{}' constant; value: {}", field.getName(), field.get(null));
 				}
 			}
 		}

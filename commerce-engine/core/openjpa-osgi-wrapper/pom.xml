@@ -32,52 +32,13 @@
 		</dependency>
 
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.3</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.openjpa</groupId>
 			<artifactId>openjpa</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.openjpa</groupId>
-					<artifactId>openjpa-jdbc</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.openjpa</groupId>
-					<artifactId>openjpa-jest</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.openjpa</groupId>
-					<artifactId>openjpa-kernel</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.openjpa</groupId>
-					<artifactId>openjpa-persistence</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.openjpa</groupId>
-					<artifactId>openjpa-persistence-jdbc</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.openjpa</groupId>
-					<artifactId>openjpa-lib</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.xbean</groupId>
-					<artifactId>xbean-asm5-shaded</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.xbean</groupId>
-					<artifactId>xbean-asm-util</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-pool</groupId>
-					<artifactId>commons-pool</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -123,9 +84,10 @@
 							org.springframework.cache.ehcache,
 							org.springframework.beans.factory.config,
 							org.springframework.jmx.support,
-							org.apache.log4j,
+							org.apache.logging.log4j,
 							org.slf4j,
 							com.elasticpath.service.osgi,
+							com.elasticpath.domain.misc.types,
 							!*
 						</Import-Package>
 						<_exportcontents>

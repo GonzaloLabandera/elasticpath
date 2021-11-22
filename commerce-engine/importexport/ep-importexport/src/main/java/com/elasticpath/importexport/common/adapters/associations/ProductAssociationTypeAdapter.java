@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.dto.productassociation.ProductAssociationTypeDTO;
 
@@ -15,7 +16,7 @@ import com.elasticpath.importexport.common.dto.productassociation.ProductAssocia
  * Custom xml adapter for {@link ProductAssociationTypeDTO}.
  */
 public class ProductAssociationTypeAdapter extends XmlAdapter<String, ProductAssociationTypeDTO> {
-	private static final Logger LOG = Logger.getLogger(ProductAssociationTypeAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(ProductAssociationTypeAdapter.class);
 	@Override
 	public ProductAssociationTypeDTO unmarshal(final String value) throws Exception {
 

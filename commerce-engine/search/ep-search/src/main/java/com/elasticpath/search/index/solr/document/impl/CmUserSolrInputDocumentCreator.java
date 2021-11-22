@@ -3,7 +3,8 @@
  */
 package com.elasticpath.search.index.solr.document.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.elasticpath.domain.catalog.Catalog;
@@ -18,7 +19,7 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
  */
 public class CmUserSolrInputDocumentCreator extends AbstractDocumentCreatingTask<CmUser> {
 
-	private static final Logger LOG = Logger.getLogger(CmUserSolrInputDocumentCreator.class);
+	private static final Logger LOG = LogManager.getLogger(CmUserSolrInputDocumentCreator.class);
 
 	private IndexUtility indexUtility;
 

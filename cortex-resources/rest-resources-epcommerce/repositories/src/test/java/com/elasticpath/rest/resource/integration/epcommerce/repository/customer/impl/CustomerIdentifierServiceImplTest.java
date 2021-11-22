@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerIdentifierStrategy;
 import com.elasticpath.settings.SettingsReader;
@@ -40,7 +41,6 @@ public class CustomerIdentifierServiceImplTest {
 	private static final String USER_ID_STR = "SHARED_ID";
 	private static final String ATTRIBUTE_VALUE_STR = "ATTRIBUTE_VALUE";
 	private static final String ATTRIBUTE_VALUE_SETTING = "ATTRIBUTE_VALUE:Punchout";
-	private static final String VALID_STORE = "store";
 	private static final String TEST_USER_ID = "testUser";
 	private static final String TEST_GUID = "testGuid";
 	private static final String TEST_ATTRIBUTE_VALUE = "Test";
@@ -134,16 +134,18 @@ public class CustomerIdentifierServiceImplTest {
 	 */
 	@Test
 	public void testIsCustomerExists() {
-		when(customerIdentifierByGuidStrategy.isCustomerExists(TEST_GUID, VALID_STORE, GUID_STR))
+		when(customerIdentifierByGuidStrategy.isCustomerExists(TEST_GUID, CustomerType.REGISTERED_USER, GUID_STR))
 				.thenReturn(ExecutionResultFactory.createReadOK(null));
-		when(customerIdentifierByUserIdStrategy.isCustomerExists(TEST_USER_ID, VALID_STORE, USER_ID_STR))
+		when(customerIdentifierByUserIdStrategy.isCustomerExists(TEST_USER_ID, CustomerType.REGISTERED_USER, USER_ID_STR))
 				.thenReturn(ExecutionResultFactory.createReadOK(null));
-		when(customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(TEST_ATTRIBUTE_VALUE, VALID_STORE, ATTRIBUTE_VALUE_SETTING))
+		when(customerIdentifierByAttributeValueKeyStrategy
+				.isCustomerExists(TEST_ATTRIBUTE_VALUE, CustomerType.REGISTERED_USER, ATTRIBUTE_VALUE_SETTING))
 				.thenReturn(ExecutionResultFactory.createReadOK(null));
 
-		assertTrue(customerIdentifierStrategyUtil.isCustomerExists(TEST_GUID, VALID_STORE, GUID_ISSUER).isSuccessful());
-		assertTrue(customerIdentifierStrategyUtil.isCustomerExists(TEST_USER_ID, VALID_STORE, SHARED_ID_ISSUER).isSuccessful());
-		assertTrue(customerIdentifierStrategyUtil.isCustomerExists(TEST_ATTRIBUTE_VALUE, VALID_STORE, ATTRIBUTE_VALUE_ISSUER).isSuccessful());
+		assertTrue(customerIdentifierStrategyUtil.isCustomerExists(TEST_GUID, CustomerType.REGISTERED_USER, GUID_ISSUER).isSuccessful());
+		assertTrue(customerIdentifierStrategyUtil.isCustomerExists(TEST_USER_ID, CustomerType.REGISTERED_USER, SHARED_ID_ISSUER).isSuccessful());
+		assertTrue(customerIdentifierStrategyUtil
+				.isCustomerExists(TEST_ATTRIBUTE_VALUE, CustomerType.REGISTERED_USER, ATTRIBUTE_VALUE_ISSUER).isSuccessful());
 	}
 
 	/**
@@ -151,16 +153,17 @@ public class CustomerIdentifierServiceImplTest {
 	 */
 	@Test
 	public void testInvalidIsCustomerExists() {
-		when(customerIdentifierByGuidStrategy.isCustomerExists(INVALID_TEXT, VALID_STORE, GUID_STR))
+		when(customerIdentifierByGuidStrategy.isCustomerExists(INVALID_TEXT, CustomerType.REGISTERED_USER, GUID_STR))
 				.thenReturn(ExecutionResultFactory.createNotFound());
-		when(customerIdentifierByUserIdStrategy.isCustomerExists(INVALID_TEXT, VALID_STORE, USER_ID_STR))
+		when(customerIdentifierByUserIdStrategy.isCustomerExists(INVALID_TEXT, CustomerType.REGISTERED_USER, USER_ID_STR))
 				.thenReturn(ExecutionResultFactory.createNotFound());
-		when(customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(INVALID_TEXT, VALID_STORE, ATTRIBUTE_VALUE_SETTING))
+		when(customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(INVALID_TEXT, CustomerType.REGISTERED_USER, ATTRIBUTE_VALUE_SETTING))
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
-		assertFalse(customerIdentifierStrategyUtil.isCustomerExists(INVALID_TEXT, VALID_STORE, GUID_ISSUER).isSuccessful());
-		assertFalse(customerIdentifierStrategyUtil.isCustomerExists(INVALID_TEXT, VALID_STORE, SHARED_ID_ISSUER).isSuccessful());
-		assertFalse(customerIdentifierStrategyUtil.isCustomerExists(INVALID_TEXT, VALID_STORE, ATTRIBUTE_VALUE_ISSUER).isSuccessful());
+		assertFalse(customerIdentifierStrategyUtil.isCustomerExists(INVALID_TEXT, CustomerType.REGISTERED_USER, GUID_ISSUER).isSuccessful());
+		assertFalse(customerIdentifierStrategyUtil.isCustomerExists(INVALID_TEXT, CustomerType.REGISTERED_USER, SHARED_ID_ISSUER).isSuccessful());
+		assertFalse(customerIdentifierStrategyUtil
+				.isCustomerExists(INVALID_TEXT, CustomerType.REGISTERED_USER, ATTRIBUTE_VALUE_ISSUER).isSuccessful());
 	}
 
 	/**
@@ -168,17 +171,21 @@ public class CustomerIdentifierServiceImplTest {
 	 */
 	@Test
 	public void testDeriveCustomerGuid() {
-		when(customerIdentifierByGuidStrategy.deriveCustomerGuid(TEST_GUID, VALID_STORE, GUID_STR))
+		when(customerIdentifierByGuidStrategy.deriveCustomerGuid(TEST_GUID, CustomerType.REGISTERED_USER, GUID_STR))
 				.thenReturn(ExecutionResultFactory.createNotImplemented());
-		when(customerIdentifierByUserIdStrategy.deriveCustomerGuid(TEST_USER_ID, VALID_STORE, USER_ID_STR))
+		when(customerIdentifierByUserIdStrategy.deriveCustomerGuid(TEST_USER_ID, CustomerType.REGISTERED_USER, USER_ID_STR))
 				.thenReturn(ExecutionResultFactory.createReadOK(TEST_GUID));
-		when(customerIdentifierByAttributeValueKeyStrategy.deriveCustomerGuid(TEST_ATTRIBUTE_VALUE, VALID_STORE, ATTRIBUTE_VALUE_SETTING))
+		when(customerIdentifierByAttributeValueKeyStrategy
+				.deriveCustomerGuid(TEST_ATTRIBUTE_VALUE, CustomerType.REGISTERED_USER, ATTRIBUTE_VALUE_SETTING))
 				.thenReturn(ExecutionResultFactory.createReadOK(TEST_GUID));
 
-		assertEquals(ExecutionResultFactory.createNotFound(), customerIdentifierStrategyUtil.deriveCustomerGuid(TEST_GUID, VALID_STORE, GUID_ISSUER));
-		assertEquals(TEST_GUID, customerIdentifierStrategyUtil.deriveCustomerGuid(TEST_USER_ID, VALID_STORE, SHARED_ID_ISSUER).getData());
+		assertEquals(ExecutionResultFactory.createNotFound(), customerIdentifierStrategyUtil
+				.deriveCustomerGuid(TEST_GUID, CustomerType.REGISTERED_USER, GUID_ISSUER));
+		assertEquals(TEST_GUID, customerIdentifierStrategyUtil.deriveCustomerGuid(TEST_USER_ID, CustomerType.REGISTERED_USER, SHARED_ID_ISSUER)
+				.getData());
 		assertEquals(TEST_GUID,
-				customerIdentifierStrategyUtil.deriveCustomerGuid(TEST_ATTRIBUTE_VALUE, VALID_STORE, ATTRIBUTE_VALUE_ISSUER).getData());
+				customerIdentifierStrategyUtil.deriveCustomerGuid(TEST_ATTRIBUTE_VALUE, CustomerType.REGISTERED_USER, ATTRIBUTE_VALUE_ISSUER)
+						.getData());
 	}
 
 	/**
@@ -186,15 +193,16 @@ public class CustomerIdentifierServiceImplTest {
 	 */
 	@Test
 	public void testDeriveInvalidCustomerGuid() {
-		when(customerIdentifierByGuidStrategy.deriveCustomerGuid(INVALID_TEXT, VALID_STORE, GUID_STR))
+		when(customerIdentifierByGuidStrategy.deriveCustomerGuid(INVALID_TEXT, CustomerType.REGISTERED_USER, GUID_STR))
 				.thenReturn(ExecutionResultFactory.createNotFound());
-		when(customerIdentifierByUserIdStrategy.deriveCustomerGuid(INVALID_TEXT, VALID_STORE, USER_ID_STR))
+		when(customerIdentifierByUserIdStrategy.deriveCustomerGuid(INVALID_TEXT, CustomerType.REGISTERED_USER, USER_ID_STR))
 				.thenReturn(ExecutionResultFactory.createNotFound());
-		when(customerIdentifierByAttributeValueKeyStrategy.deriveCustomerGuid(INVALID_TEXT, VALID_STORE, ATTRIBUTE_VALUE_SETTING))
+		when(customerIdentifierByAttributeValueKeyStrategy.deriveCustomerGuid(INVALID_TEXT, CustomerType.REGISTERED_USER, ATTRIBUTE_VALUE_SETTING))
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
-		assertFalse(customerIdentifierStrategyUtil.deriveCustomerGuid(INVALID_TEXT, VALID_STORE, GUID_ISSUER).isSuccessful());
-		assertFalse(customerIdentifierStrategyUtil.deriveCustomerGuid(INVALID_TEXT, VALID_STORE, SHARED_ID_ISSUER).isSuccessful());
-		assertFalse(customerIdentifierStrategyUtil.deriveCustomerGuid(INVALID_TEXT, VALID_STORE, ATTRIBUTE_VALUE_ISSUER).isSuccessful());
+		assertFalse(customerIdentifierStrategyUtil.deriveCustomerGuid(INVALID_TEXT, CustomerType.REGISTERED_USER, GUID_ISSUER).isSuccessful());
+		assertFalse(customerIdentifierStrategyUtil.deriveCustomerGuid(INVALID_TEXT, CustomerType.REGISTERED_USER, SHARED_ID_ISSUER).isSuccessful());
+		assertFalse(customerIdentifierStrategyUtil
+				.deriveCustomerGuid(INVALID_TEXT, CustomerType.REGISTERED_USER, ATTRIBUTE_VALUE_ISSUER).isSuccessful());
 	}
 }

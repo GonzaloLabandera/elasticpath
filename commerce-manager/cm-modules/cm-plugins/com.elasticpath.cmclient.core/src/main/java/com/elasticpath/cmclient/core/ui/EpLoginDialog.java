@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core.ui;
 
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -47,7 +48,7 @@ import com.elasticpath.settings.SettingsReader;
  */
 public class EpLoginDialog extends AbstractEpDialog {
 
-	private static final Logger LOG = Logger.getLogger(EpLoginDialog.class);
+	private static final Logger LOG = LogManager.getLogger(EpLoginDialog.class);
 	private static final String SETTING_GLOBAL_SENDER_ADDRESS = "COMMERCE/SYSTEM/EMAIL/emailGlobalSenderAddress";
 
 	private final AuthenticationService authenticationService = AuthenticationServiceImpl.getInstance();

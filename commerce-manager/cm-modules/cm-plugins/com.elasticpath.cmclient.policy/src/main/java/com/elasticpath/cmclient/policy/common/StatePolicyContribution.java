@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.policy.common;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
@@ -14,7 +15,7 @@ import com.elasticpath.cmclient.policy.StatePolicy;
  */
 public class StatePolicyContribution {
 	
-	private static final Logger LOG = Logger.getLogger(StatePolicyExtensionRetriever.class);
+	private static final Logger LOG = LogManager.getLogger(StatePolicyExtensionRetriever.class);
 	
 	private static final String ATTR_TARGET_ID = "targetId"; //$NON-NLS-1$
 

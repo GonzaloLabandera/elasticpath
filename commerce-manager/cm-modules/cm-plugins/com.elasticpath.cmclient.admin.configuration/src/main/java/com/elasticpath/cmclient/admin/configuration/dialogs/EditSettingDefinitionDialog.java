@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin.configuration.dialogs;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -27,7 +28,7 @@ public class EditSettingDefinitionDialog extends AbstractEpDialog {
 
 	//Global variables
 	/** The logger. */
-	protected static final Logger LOG = Logger.getLogger(EditSettingDefinitionDialog.class);
+	protected static final Logger LOG = LogManager.getLogger(EditSettingDefinitionDialog.class);
 	
 	private final SettingDefinition settingDefinition;
 	

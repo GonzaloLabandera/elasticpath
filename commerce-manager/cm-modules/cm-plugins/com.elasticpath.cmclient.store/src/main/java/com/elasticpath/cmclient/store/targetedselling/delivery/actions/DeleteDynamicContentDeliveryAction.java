@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.store.targetedselling.delivery.actions;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
@@ -37,7 +38,7 @@ import com.elasticpath.tags.domain.TagDictionary;
 public class DeleteDynamicContentDeliveryAction extends BaseDynamicContentDeliveryAction {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(DeleteDynamicContentDeliveryAction.class);
+	private static final Logger LOG = LogManager.getLogger(DeleteDynamicContentDeliveryAction.class);
 
 	/** DynamicContentSearchResultsView list view. */
 	private final DynamicContentDeliverySearchResultsView listView;

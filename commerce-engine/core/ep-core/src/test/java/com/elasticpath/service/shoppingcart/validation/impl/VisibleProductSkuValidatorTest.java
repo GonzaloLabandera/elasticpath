@@ -16,10 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFProduct;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VisibleProductSkuValidatorTest {
@@ -30,24 +30,24 @@ public class VisibleProductSkuValidatorTest {
 	private VisibleProductSkuValidatorImpl validator;
 
 	@Mock
-	private ProductSkuValidationContext context;
+	private XPFProductSkuValidationContext context;
 
 	@Mock
-	private Product product;
+	private XPFProduct product;
 
 	@Mock
-	private ProductSku productSku;
+	private XPFProductSku productSku;
 
 	@Before
 	public void setUp() {
 		given(productSku.getProduct()).willReturn(product);
-		given(productSku.getSkuCode()).willReturn(SKU_CODE);
+		given(productSku.getCode()).willReturn(SKU_CODE);
 		given(context.getProductSku()).willReturn(productSku);
 	}
 
 	@Test
 	public void testProductIsNotVisible() {
-		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage("item.not.visible",
+		XPFStructuredErrorMessage structuredErrorMessage = new XPFStructuredErrorMessage("item.not.visible",
 				String.format("Item '%s' is not visible.", SKU_CODE),
 				ImmutableMap.of("item-code", SKU_CODE));
 
@@ -55,7 +55,7 @@ public class VisibleProductSkuValidatorTest {
 		given(product.isHidden()).willReturn(true);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(structuredErrorMessage);
@@ -67,7 +67,7 @@ public class VisibleProductSkuValidatorTest {
 		given(product.isHidden()).willReturn(false);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();

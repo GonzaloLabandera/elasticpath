@@ -49,22 +49,22 @@ public class AddAndPopulateOrderUidOnOrderSku implements CustomSqlChange {
 	/* This query will be reused for both "plain" (non-bundle, non-bundle-constituent) and bundle constituent SKUs
 	   to determine order id.
 	 */
-	private static final String SELECT_ORDER_SKUS_BASE = "SELECT osku.uidpk, oship.ORDER_UID FROM TORDERSKU osku "
+	private static final String SELECT_ORDER_SKUS_BASE = "SELECT osku.UIDPK, oship.ORDER_UID FROM TORDERSKU osku "
 			+ "LEFT OUTER JOIN TORDERSHIPMENT oship ON osku.ORDER_SHIPMENT_UID = oship.UIDPK ";
 
 	// Select bundle constituents - looking for one with non-null ORDER_UID
 	private PreparedStatement selectBundleConstituentOrderSkusStatement;
 	private static final String SELECT_BUNDLE_CONSTITUENT_ORDER_SKUS = SELECT_ORDER_SKUS_BASE
-			+ "WHERE osku.uidpk IN (SELECT CHILD_UID FROM TORDERSKUPARENT WHERE PARENT_UID = ?)";
+			+ "WHERE osku.UIDPK IN (SELECT CHILD_UID FROM TORDERSKUPARENT WHERE PARENT_UID = ?)";
 
 	// Select both "plain" and bundle parent order SKUs
 	private PreparedStatement selectOrderSkusStatement;
 	private static final String SELECT_ORDER_SKUS = SELECT_ORDER_SKUS_BASE
-			+ "WHERE osku.ORDER_UID IS NULL AND osku.BUNDLE_CONSTITUENT = 0";
+			+ "WHERE osku.ORDER_UID IS NULL AND osku.BUNDLE_CONSTITUENT = 'false'";
 
 	// Get the total number of order SKUs
 	private PreparedStatement selectCountOfOrderSkusStatement;
-	private static final String SELECT_COUNT_OF_ORDER_SKUS = "SELECT count(*) FROM TORDERSKU WHERE ORDER_UID IS NULL";
+	private static final String SELECT_COUNT_OF_ORDER_SKUS = "SELECT COUNT(*) FROM TORDERSKU WHERE ORDER_UID IS NULL";
 
 	// Update "plain" order SKU with order ID
 	private PreparedStatement updatePlainOrderSkuStatement;

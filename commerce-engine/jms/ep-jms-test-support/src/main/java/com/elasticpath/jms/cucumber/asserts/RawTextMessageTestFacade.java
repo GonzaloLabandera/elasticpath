@@ -9,7 +9,8 @@ import java.util.List;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Class for testing TextMessage values.
@@ -17,7 +18,7 @@ import org.apache.log4j.Logger;
 @SuppressWarnings("PMD.UseUtilityClass")
 public final class RawTextMessageTestFacade {
 
-	private static final Logger LOGGER = Logger.getLogger(RawTextMessageTestFacade.class);
+	private static final Logger LOGGER = LogManager.getLogger(RawTextMessageTestFacade.class);
 
 	/**
 	 * Private constructor.

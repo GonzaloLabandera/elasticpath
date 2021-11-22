@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
 import com.elasticpath.domain.cmuser.CmUser;
+import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
@@ -26,6 +28,7 @@ public class CachingStoreServiceImpl implements StoreService {
 	private StoreRetrieveStrategy storeCache;
 	private StoreService fallbackStoreService;
 	private Cache<String, Collection<String>> storeCartTypeCache;
+	private Cache<StoreState, Set<SupportedLocale>> enabledStoreLocaleCache;
 
 	/**
 	 * When caching is involved, ignore the load tuner and cache the whole thing.
@@ -59,7 +62,7 @@ public class CachingStoreServiceImpl implements StoreService {
 	 * @param storeUids a collection of store UIDs
 	 * @param loadTuner the load tuner to ignore
 	 * @return the collection of stores
-	 * @throws EpServiceException
+	 * @throws EpServiceException in case of error
 	 */
 	@Override
 	public Collection<Store> getTunedStores(final Collection<Long> storeUids, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
@@ -237,11 +240,20 @@ public class CachingStoreServiceImpl implements StoreService {
 		return getFallbackStoreService().calculateCurrentPickDelayTimestamp(storeCode);
 	}
 
+	@Override
+	public Set<SupportedLocale> findAllEnabledStoreLocales() {
+		return enabledStoreLocaleCache.get(StoreState.OPEN, key -> getFallbackStoreService().findAllEnabledStoreLocales());
+	}
+
 	public Cache<String, Collection<String>> getStoreCartTypeCache() {
 		return storeCartTypeCache;
 	}
 
 	public void setStoreCartTypeCache(final Cache<String, Collection<String>> storeCartTypeCache) {
 		this.storeCartTypeCache = storeCartTypeCache;
+	}
+
+	public void setEnabledStoreLocaleCache(final Cache<StoreState, Set<SupportedLocale>> enabledStoreLocaleCache) {
+		this.enabledStoreLocaleCache = enabledStoreLocaleCache;
 	}
 }

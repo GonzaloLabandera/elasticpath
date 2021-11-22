@@ -16,6 +16,7 @@ import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.CustomerOrderingService;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.shipping.ShippingOptionResult;
 import com.elasticpath.service.shipping.ShippingOptionService;
@@ -32,6 +33,8 @@ public class CustomerOrderingServiceImpl implements CustomerOrderingService {
 	private CustomerService customerService;
 
 	private ShippingOptionService shippingOptionService;
+
+	private AddressService addressService;
 
 	@Override
 	public void selectShippingAddress(final Shopper shopper, final CustomerAddress shippingAddress) {
@@ -64,8 +67,8 @@ public class CustomerOrderingServiceImpl implements CustomerOrderingService {
 
 		final Customer customer = shopper.getCustomer();
 		// Address will actually be added just if it's not currently contained in the customer's addresses list. Safe operation.
-		customer.addAddress(shippingAddress);
-
+		shippingAddress.setCustomerUidPk(customer.getUidPk());
+		addressService.save(shippingAddress);
 		// Set the billing address to the shipping address by default
 		// if no billing address is available
 		if (shoppingCart.getBillingAddress() == null) {
@@ -91,7 +94,8 @@ public class CustomerOrderingServiceImpl implements CustomerOrderingService {
 		Customer customer = shopper.getCustomer();
 
 		// Address will actually be added just if it's not currently contained in the customer's addresses list. Safe operation.
-		customer.addAddress(billingAddress);
+		billingAddress.setCustomerUidPk(customer.getUidPk());
+		addressService.save(billingAddress);
 		customer.setPreferredBillingAddress(billingAddress);
 
 		if (customer.isPersisted()) {
@@ -122,4 +126,7 @@ public class CustomerOrderingServiceImpl implements CustomerOrderingService {
 		this.shippingOptionService = shippingOptionService;
 	}
 
+	public void setAddressService(final AddressService addressService) {
+		this.addressService = addressService;
+	}
 }

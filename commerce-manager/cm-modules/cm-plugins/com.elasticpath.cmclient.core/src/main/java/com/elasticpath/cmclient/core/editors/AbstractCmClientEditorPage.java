@@ -11,7 +11,8 @@ import java.util.Map;
 
 import com.elasticpath.cmclient.core.helpers.EPTestUtilFactory;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.events.DisposeEvent;
@@ -50,7 +51,7 @@ public abstract class AbstractCmClientEditorPage extends FormPage {
 	 */
 	protected static final int LEFT_MARGIN = 10;
 	
-	private static final Logger LOG = Logger.getLogger(AbstractCmClientEditorPage.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractCmClientEditorPage.class);
 
 	private boolean isLocaleDependent;
 	

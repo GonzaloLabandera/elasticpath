@@ -13,11 +13,12 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hamcrest.Matchers;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.security.core.GrantedAuthority;
 
-import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.rest.command.ExecutionResult;
+import com.elasticpath.base.exception.structured.EpStructureErrorMessageException;
 import com.elasticpath.rest.identity.RolePrincipal;
 import com.elasticpath.rest.identity.TestRoleConstants;
 import com.elasticpath.rest.util.collection.CollectionUtil;
@@ -31,6 +32,9 @@ public class AuthenticationUtilTest {
 	private static final String STORE_CODE = "STORE_CODE";
 	private static final String USERNAME = "USERNAME";
 	private static final RoleValidator ROLE_VALIDATOR = new RoleValidatorImpl(Collections.singleton("PUBLIC"));
+
+	@Rule
+	public ExpectedException thrownException = ExpectedException.none();
 
 	/**
 	 * Test create authorities.
@@ -76,23 +80,19 @@ public class AuthenticationUtilTest {
 	 */
 	@Test
 	public void testEmptyRoles() {
-		ExecutionResult<Customer> result = AuthenticationUtil.isValidRoles(new ArrayList<>(), ROLE_VALIDATOR);
-
-		assertTrue(result.isFailure());
-		assertEquals("authentication.missing.header", result.getStructuredErrorMessages().get(0).getId());
-		assertEquals("Missing role headers", result.getStructuredErrorMessages().get(0).getDebugMessage());
+		thrownException.expect(EpStructureErrorMessageException.class);
+		thrownException.expectMessage("Missing role headers: [error,authentication.missing.header,Missing role headers,{}]");
+		AuthenticationUtil.isValidRoles(new ArrayList<>(), ROLE_VALIDATOR);
 	}
 
 	/**
 	 * Test that multiple roles are not valid.
 	 */
 	@Test
-	public void testMultipleRoles() {
-		ExecutionResult<Customer> result = AuthenticationUtil.isValidRoles(Arrays.asList("role1", "role2"), ROLE_VALIDATOR);
-
-		assertTrue(result.isFailure());
-		assertEquals("authentication.too.many.roles", result.getStructuredErrorMessages().get(0).getId());
-		assertEquals("Too many roles in request header", result.getStructuredErrorMessages().get(0).getDebugMessage());
+	public void testMultipleRoles() throws EpStructureErrorMessageException {
+		thrownException.expect(EpStructureErrorMessageException.class);
+		thrownException.expectMessage("Too many roles in request header: [error,authentication.too.many.roles,Too many roles in request header,{}]");
+		AuthenticationUtil.isValidRoles(Arrays.asList("role1", "role2"), ROLE_VALIDATOR);
 	}
 
 	/**
@@ -100,11 +100,10 @@ public class AuthenticationUtilTest {
 	 */
 	@Test
 	public void testInvalidRole() {
-		ExecutionResult<Customer> result = AuthenticationUtil.isValidRoles(Collections.singletonList("role1"), ROLE_VALIDATOR);
-
-		assertTrue(result.isFailure());
-		assertEquals("authentication.wrong.role", result.getStructuredErrorMessages().get(0).getId());
-		assertEquals("Current role is invalid. Valid roles are: PUBLIC", result.getStructuredErrorMessages().get(0).getDebugMessage());
+		thrownException.expect(EpStructureErrorMessageException.class);
+		thrownException.expectMessage("Current role is invalid. Valid roles are: PUBLIC: "
+				+ "[error,authentication.wrong.role,Current role is invalid. Valid roles are: PUBLIC,{}]");
+		AuthenticationUtil.isValidRoles(Collections.singletonList("role1"), ROLE_VALIDATOR);
 	}
 
 	/**
@@ -112,8 +111,7 @@ public class AuthenticationUtilTest {
 	 */
 	@Test
 	public void testValidRole() {
-		ExecutionResult<Customer> result = AuthenticationUtil.isValidRoles(Collections.singletonList("PUBLIC"), ROLE_VALIDATOR);
-
-		assertTrue(result.isSuccessful());
+		// Since Junit 4 does not have a way to assert no exception is thrown, this test fails when the isValidRoles call results in an exception.
+		AuthenticationUtil.isValidRoles(Collections.singletonList("PUBLIC"), ROLE_VALIDATOR);
 	}
 }

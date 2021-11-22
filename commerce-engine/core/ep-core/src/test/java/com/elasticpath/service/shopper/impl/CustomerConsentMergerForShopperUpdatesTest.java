@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
@@ -30,9 +29,6 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 
 	@Mock
 	private CustomerConsentService customerConsentService;
-
-	@Mock
-	private CustomerSession customerSession;
 
 	private static final String MYSTERY_MAN = "MysteryMan";
 	private static final String REGULAR_JOE = "RegularJoe";
@@ -52,9 +48,7 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 
 		Shopper registeredShopper = createRegisteredCustomerWithConsents();
 
-		when(customerSession.getShopper()).thenReturn(registeredShopper);
-
-		customerConsentMergerForShopperUpdates.invalidateShopper(customerSession, anonymousShopper);
+		customerConsentMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		verify(customerConsentService).updateCustomerGuids(anonymousCustomerGuid, registeredShopper.getCustomer().getGuid());
 	}
@@ -66,9 +60,7 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 
 		Shopper registeredShopper = createRegisteredCustomerWithoutConsents();
 
-		when(customerSession.getShopper()).thenReturn(registeredShopper);
-
-		customerConsentMergerForShopperUpdates.invalidateShopper(customerSession, anonymousShopper);
+		customerConsentMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		verify(customerConsentService).updateCustomerGuids(anonymousCustomerGuid, registeredShopper.getCustomer().getGuid());
 	}
@@ -79,9 +71,8 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 		Shopper anonymousShopper = createShopper(anonymousCustomerGuid, CustomerType.SINGLE_SESSION_USER);
 
 		Shopper registeredShopper = createRegisteredCustomerWithConsents();
-		when(customerSession.getShopper()).thenReturn(registeredShopper);
 
-		customerConsentMergerForShopperUpdates.invalidateShopper(customerSession, anonymousShopper);
+		customerConsentMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		verify(customerConsentService).updateCustomerGuids(anonymousCustomerGuid, registeredShopper.getCustomer().getGuid());
 	}
@@ -93,7 +84,7 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 
 		Shopper registeredShopper = createRegisteredCustomerWithConsents();
 
-		customerConsentMergerForShopperUpdates.invalidateShopper(customerSession, anonymousShopper);
+		customerConsentMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		verify(customerConsentService, never()).updateCustomerGuids(originalRegisteredCustomerGuid, registeredShopper.getCustomer().getGuid());
 	}

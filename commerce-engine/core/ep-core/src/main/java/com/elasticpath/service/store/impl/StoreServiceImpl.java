@@ -14,12 +14,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cmuser.CmUser;
+import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.search.UpdateType;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
@@ -530,6 +531,13 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		int warehousePickDelay = getStoreService().findStoreWithCode(storeCode).getWarehouse().getPickDelay();
 
 		return DateUtils.addMinutes(getTimeService().getCurrentTime(), -warehousePickDelay);
+	}
+
+	@Override
+	public Set<SupportedLocale> findAllEnabledStoreLocales() {
+		sanityCheck();
+		List<SupportedLocale> localeList = getPersistenceEngine().retrieveByNamedQuery("FIND_ALL_ENABLED_STORE_LOCALES", StoreState.OPEN);
+		return new HashSet<>(localeList);
 	}
 
 	//return switchable proxy store service to leverage cache

@@ -18,6 +18,7 @@ import com.elasticpath.domain.dataimport.ImportDataType;
 import com.elasticpath.domain.dataimport.ImportJob;
 import com.elasticpath.domain.dataimport.impl.AbstractImportTypeImpl;
 import com.elasticpath.domain.dataimport.impl.ImportDataTypeCustomerAddressImpl;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.util.Utils;
@@ -39,7 +40,8 @@ public class ImportCustomerAddressTest extends ImportJobTestCase {
 
 	@Autowired
 	private CustomerService customerService;
-
+	@Autowired
+	private AddressService addressService;
 	/**
 	 * Test import CustomerAddress insert/update.
 	 * 
@@ -55,7 +57,7 @@ public class ImportCustomerAddressTest extends ImportJobTestCase {
 		executeImportJob(createUpdateCustomerAddressImportJob());
 
 		Customer customer = customerService.findByGuid("101");
-		CustomerAddress customerAddress = customer.getAddressByGuid(CUSTOMER_GUID);
+		CustomerAddress customerAddress = addressService.findByCustomerAndAddressGuid(customer.getUidPk(), CUSTOMER_GUID);
 
 		// assert new customer address has been created during import
 		assertEquals(CUSTOMER_GUID, customerAddress.getGuid());
@@ -70,7 +72,7 @@ public class ImportCustomerAddressTest extends ImportJobTestCase {
 		assertEquals(ZIPCODE, customerAddress.getZipOrPostalCode());
 
 		// assert existing customer address has been updated during import
-		CustomerAddress customerAddress2 = customer.getAddressByGuid("1002");
+		CustomerAddress customerAddress2 = addressService.findByCustomerAndAddressGuid(customer.getUidPk(), "1002");
 		assertEquals("1002", customerAddress2.getGuid());
 		assertEquals("CustomerFN2", customerAddress2.getFirstName());
 		assertEquals(CUSTOMER_L_N, customerAddress2.getLastName());
@@ -84,7 +86,7 @@ public class ImportCustomerAddressTest extends ImportJobTestCase {
 
 		// assert new customer address has been created during import
 		Customer customer2 = customerService.findByGuid("102");
-		CustomerAddress customerAddress3 = customer2.getAddressByGuid("1003");
+		CustomerAddress customerAddress3 = addressService.findByCustomerAndAddressGuid(customer2.getUidPk(), "1003");
 		assertEquals("1003", customerAddress3.getGuid());
 		assertEquals("CustomerFN", customerAddress3.getFirstName());
 		assertEquals(CUSTOMER_L_N, customerAddress3.getLastName());
@@ -115,7 +117,7 @@ public class ImportCustomerAddressTest extends ImportJobTestCase {
 		executeImportJob(createCustomUpdateCustomerAddressImportJob());
 
 		Customer customer = customerService.findByGuid("101");
-		CustomerAddress customerAddress = customer.getAddressByGuid(CUSTOMER_GUID);
+		CustomerAddress customerAddress = addressService.findByCustomerAndAddressGuid(customer.getUidPk(), CUSTOMER_GUID);
 
 		// assert new customer address has been created during import
 		assertEquals(CUSTOMER_GUID, customerAddress.getGuid());

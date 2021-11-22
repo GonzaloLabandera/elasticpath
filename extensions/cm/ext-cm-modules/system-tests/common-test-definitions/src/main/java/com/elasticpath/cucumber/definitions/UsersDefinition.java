@@ -9,9 +9,12 @@ import java.util.UUID;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.elasticpath.selenium.dialogs.AboutApplicationDialog;
 import com.elasticpath.selenium.dialogs.ChangePasswordDialog;
 import com.elasticpath.selenium.dialogs.ChangeTimezoneDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
@@ -36,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings({"PMD.TooManyMethods"})
 public class UsersDefinition {
 	private static final String COMMA = "','";
+	private static final String ORACLE_DB_TYPE = "oracle";
 	private final ConfigurationActionToolbar configurationActionToolbar;
 	private final UserSearch userSearch;
 	private final UsersResultPane usersResultPane;
@@ -47,8 +51,9 @@ public class UsersDefinition {
 
 	private UserMenuDialog userMenuDialog;
 	private ChangeTimezoneDialog changeTimezoneDialog;
+	private AboutApplicationDialog aboutApplicationDialog;
 	private static final String PASSWORD = "Password";
-	private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(UsersDefinition.class);
+	private static final Logger LOGGER = LogManager.getLogger(UsersDefinition.class);
 	private final WebDriver driver;
 
 	/**
@@ -387,13 +392,17 @@ public class UsersDefinition {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String brcyptPassword = passwordEncoder.encode(userMap.get(PASSWORD));
 
+		String accessFlags = dbConnector.getDatabaseType().equalsIgnoreCase(ORACLE_DB_TYPE)
+				? "1,1,1,1"
+				: "true,true,true,true";
+
 		String query = "INSERT INTO TCMUSER (UIDPK,USER_NAME,EMAIL,FIRST_NAME,LAST_NAME,PASSWORD,CREATION_DATE,LAST_LOGIN_DATE"
 				+ ",LAST_CHANGED_PASSWORD_DATE,FAILED_LOGIN_ATTEMPTS,GUID,STATUS,ALL_WAREHOUSE_ACCESS,ALL_CATALOG_ACCESS"
 				+ ",ALL_STORE_ACCESS,ALL_PRICELIST_ACCESS,LAST_MODIFIED_DATE) VALUES (" + uidpk + ",'" + newUserName
 				+ COMMA + newUserName + "@elasticpath.com','" + userMap.get("First Name") + COMMA + userMap.get("Last Name")
 				+ COMMA + brcyptPassword + COMMA + dbConnector.getDate(date) + COMMA
 				+ dbConnector.getDate(date) + COMMA + dbConnector.getDate(date) + "',0,'" + UUID.randomUUID().toString()
-				+ "',1,1,1,1,1,'" + dbConnector.getDate(date) + "')";
+				+ "',1," + accessFlags + ",'" + dbConnector.getDate(date) + "')";
 
 		dbConnector.executeUpdateQuery(query);
 
@@ -474,5 +483,24 @@ public class UsersDefinition {
 	private void openCmUserMenu(){
 		new ActivityToolbar(driver).clickUserMenu();
 		userMenuDialog = new UserMenuDialog(driver);
+	}
+
+	/**
+	 * Opens About dialog in CM users menu.
+	 */
+	@And("^I open About dialog")
+	public void openAboutDialog() {
+		openCmUserMenu();
+		aboutApplicationDialog = userMenuDialog.clickAbout();
+	}
+
+	@Then("^the About dialog is displayed$")
+	public void theAboutDialogIsDisplayed() {
+		assertThat(aboutApplicationDialog).isNotNull();
+	}
+
+	@And("^I can close the About dialog")
+	public void closeAboutDialog() {
+		aboutApplicationDialog.clickCloseButton();
 	}
 }

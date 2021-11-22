@@ -83,7 +83,7 @@ public class AccountAddressEntityRepositoryImpl<E extends AddressEntity, I exten
 		String accountGuid = getAccountId().getValue();
 		CustomerAddress customerAddress = addressRepository.convertAddressEntityToCustomerAddress(entity);
 		Customer accountCustomer = customerRepository.getCustomer(accountGuid).blockingGet();
-
+		customerAddress.setCustomerUidPk(accountCustomer.getUidPk());
 		Optional<CustomerAddress> existingAddressOptional = addressRepository.getExistingAddressMatchingAddress(customerAddress,
 				accountCustomer);
 

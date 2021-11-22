@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.pricing.DisplayPriceDTO;
@@ -38,18 +39,19 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
+import com.elasticpath.service.catalog.BundleIdentifier;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.pricing.PriceListDescriptorService;
 import com.elasticpath.service.pricing.PriceLookupService;
-import com.elasticpath.service.pricing.PriceProvider;
 import com.elasticpath.tags.TagSet;
 
 /**
  * It uses the {@link PriceLookupService} to find prices now.
  */
+@SuppressWarnings({"PMD.GodClass"})
 public class PriceLookupFacadeImpl implements PriceLookupFacade {
 
-	private static final Logger LOG = Logger.getLogger(PriceLookupFacadeImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PriceLookupFacadeImpl.class);
 
 	private PriceLookupService priceLookupService;
 
@@ -67,6 +69,8 @@ public class PriceLookupFacadeImpl implements PriceLookupFacade {
 	
 	private ShoppingItemAssembler shoppingItemAssembler;
 	private ProductSkuLookup productSkuLookup;
+
+	private BundleIdentifier bundleIdentifier;
 
 	@Override
 	public Map<String, PriceAdjustment> getPriceAdjustmentsForBundle(final ProductBundle bundle, final String catalogCode,
@@ -274,36 +278,17 @@ public class PriceLookupFacadeImpl implements PriceLookupFacade {
 		return getShoppingItemPrice(shoppingItem, store, shopper);
 	}
 
+	@Override
+	public boolean hasPriceForSku(final ProductSku productSku, final Store store, final Shopper shopper) {
+		if (bundleIdentifier.isCalculatedBundle(productSku)) {
+			return true;
+		}
 
-	/**
-	 * Get the price provider for the given settings.
-	 * @param store the store
-	 * @param shopper the customer session
-	 * @return the price provider that returns a promoted price for products and sku's
-	 */
-	protected PriceProvider createPriceProvider(final Store store, final Shopper shopper) {
 		final PriceListStack plStack = getPriceListStackFromSession(store.getCatalog().getCode(), shopper);
-		return new PriceProvider() {
-			@Override
-			public Price getProductSkuPrice(final ProductSku productSku) {
-				return PriceLookupFacadeImpl.this.getPromotedPriceForSku(productSku, store, shopper);
-			}
+		Price skuPrice = priceLookupService.getSkuPrice(productSku, plStack);
 
-			@Override
-			public Price getProductPrice(final Product product) {
-				return PriceLookupFacadeImpl.this.getPromotedPriceForProduct(product, store, shopper);
-			}
-
-			@Override
-			public Currency getCurrency() {
-				return plStack.getCurrency();
-			}
-
-		};
+		return skuPrice != null;
 	}
-
-
-
 
 	private void invokeListeners(final Entity entity) {
 		if (!CollectionUtils.isEmpty(listenerList)) {
@@ -389,5 +374,13 @@ public class PriceLookupFacadeImpl implements PriceLookupFacade {
 
 	public void setProductSkuLookup(final ProductSkuLookup productSkuLookup) {
 		this.productSkuLookup = productSkuLookup;
+	}
+
+	public BundleIdentifier getBundleIdentifier() {
+		return bundleIdentifier;
+	}
+
+	public void setBundleIdentifier(final BundleIdentifier bundleIdentifier) {
+		this.bundleIdentifier = bundleIdentifier;
 	}
 }

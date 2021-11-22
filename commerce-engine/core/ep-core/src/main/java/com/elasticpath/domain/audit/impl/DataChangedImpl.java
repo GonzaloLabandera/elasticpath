@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
@@ -64,8 +64,12 @@ public class DataChangedImpl extends AbstractPersistableImpl implements DataChan
 	@Id
 	@Column(name = "UIDPK")
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = TABLE_NAME)
-	@TableGenerator(name = TABLE_NAME, table = "JPA_GENERATED_KEYS",
-					pkColumnName = "ID", valueColumnName = "LAST_VALUE", pkColumnValue = TABLE_NAME)
+	@TableGenerator(name = TABLE_NAME,
+			table = "JPA_GENERATED_KEYS",
+			pkColumnName = "ID",
+			valueColumnName = "LAST_VALUE",
+			pkColumnValue = TABLE_NAME,
+			allocationSize = HIGH_CONCURRENCY_ALLOCATION_SIZE)
 	public long getUidPk() {
 		return uidPk;
 	}

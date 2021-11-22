@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -62,7 +63,7 @@ import com.elasticpath.service.tax.TaxCodeService;
 @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.GodClass" })
 public class ProductSkuOverviewViewPart extends AbstractProductSkuOverviewViewPart implements IEpSkuOverviewViewPart {
 
-	private static final Logger LOG = Logger.getLogger(ProductSkuOverviewViewPart.class);
+	private static final Logger LOG = LogManager.getLogger(ProductSkuOverviewViewPart.class);
 	private static final int DIGITAL_ASSET_DOWNLOADABLE_BOX_WIDTH = 113;
 
 	private IPolicyTargetLayoutComposite leftLayout;

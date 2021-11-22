@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.changeset.helpers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PartInitException;
 
@@ -21,7 +22,7 @@ import com.elasticpath.service.changeset.ChangeSetService;
  */
 public class EditorSupport implements IEditorListener {
 
-	private static final Logger LOG = Logger.getLogger(EditorSupport.class);
+	private static final Logger LOG = LogManager.getLogger(EditorSupport.class);
 	private final ChangeSetService changeSetService;
 	
 	

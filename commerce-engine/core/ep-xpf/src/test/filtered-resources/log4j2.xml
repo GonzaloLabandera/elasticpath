@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="FILE"
+			  fileName="${project.build.directory}/${project.artifactId}.log"
+			  append="false">
+			<PatternLayout
+					pattern="%d{DEFAULT} [%t] %p %c %notEmpty{%ndc }- %m%n" />
+		</File>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5p %t %d{ISO8601} %c - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.elasticpath" level="debug">
+			${ep.log.to}
+		</Logger>
+		<!-- Configured log level as ChecksumAndLogVisitorTest uses logging to verify tests. -->
+		<Logger name="com.elasticpath.xpf.impl" level="trace" additivity="false">
+			${ep.log.to}
+		</Logger>
+		<Root level="info">
+			${ep.log.to}
+		</Root>
+	</Loggers>
+</Configuration>

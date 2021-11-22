@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.test.common.exception.TestApplicationException;
 import com.elasticpath.test.persister.TestConfigurationFactory.ResourceProvider;
@@ -18,7 +19,7 @@ import com.elasticpath.test.persister.TestConfigurationFactory.ResourceProvider;
  * to be on the classpath. The file can be overridden by using the system property {@code config}.
  */
 public class TestConfig {
-	private static final Logger LOG = Logger.getLogger(TestConfig.class);
+	private static final Logger LOG = LogManager.getLogger(TestConfig.class);
 
 	/** Relative directory to the project for static runtime data. */
 	public static final String PROPERTY_RUNNING_DIRECTORY = "runtime.directory";

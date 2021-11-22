@@ -12,7 +12,7 @@
 
 	<artifactId>ext-sync-webapp</artifactId>
 	<packaging>war</packaging>
-	<name>DST Message Listener Server Webapp</name>
+	<name>Data Sync Web Application</name>
 
 	<dependencies>
 		<dependency>
@@ -82,110 +82,115 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-health-monitoring-plugin-jms</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-operational-insights-message-consumer</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-web</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.tomcat.maven</groupId>
-					<artifactId>tomcat8-maven-plugin</artifactId>
-					<configuration>
-						<path>${ep.datasync.context}</path>
-						<port>${ep.datasync.tomcat.port.http}</port>
-						<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+				<configuration>
+					<path>${ep.datasync.context}</path>
+					<port>${ep.datasync.tomcat.port.http}</port>
+					<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
 
-						<systemProperties>
-							<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
-							<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
-							<epdb.username>${epdb.username}</epdb.username>
-							<epdb.password>${epdb.password}</epdb.password>
-							<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
-							<epdb.url>${epdb.url}</epdb.url>
-							<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
-							<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
-							<ep.datasync.port.http>${ep.datasync.tomcat.port.http}</ep.datasync.port.http>
-							<ep.datasync.port.https>${ep.datasync.tomcat.port.https}</ep.datasync.port.https>
-							<epdb.synctarget.validation.query>${epdb.synctarget.validation.query}</epdb.synctarget.validation.query>
-							<epdb.synctarget.removeabandonedtimeout>${epdb.synctarget.removeabandonedtimeout}</epdb.synctarget.removeabandonedtimeout>
-							<epdb.synctarget.username>${epdb.synctarget.username}</epdb.synctarget.username>
-							<epdb.synctarget.password>${epdb.synctarget.password}</epdb.synctarget.password>
-							<epdb.synctarget.jdbc.driver>${epdb.synctarget.jdbc.driver}</epdb.synctarget.jdbc.driver>
-							<epdb.synctarget.url>${epdb.synctarget.url}</epdb.synctarget.url>
-							<ep.synctarget.jms.url>${ep.synctarget.jms.url}</ep.synctarget.jms.url>
-							<ep.jms.type>${ep.jms.type}</ep.jms.type>
-							<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
-							<ep.jms.url>${ep.jms.url}</ep.jms.url>
-							<ep.changesets.enabled>${ep.changesets.enabled}</ep.changesets.enabled>
-						</systemProperties>
-					</configuration>
+					<systemProperties>
+						<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+						<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+						<epdb.username>${epdb.username}</epdb.username>
+						<epdb.password>${epdb.password}</epdb.password>
+						<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
+						<epdb.url>${epdb.url}</epdb.url>
+						<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+						<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+						<ep.datasync.port.http>${ep.datasync.tomcat.port.http}</ep.datasync.port.http>
+						<ep.datasync.port.https>${ep.datasync.tomcat.port.https}</ep.datasync.port.https>
+						<epdb.synctarget.validation.query>${epdb.synctarget.validation.query}</epdb.synctarget.validation.query>
+						<epdb.synctarget.removeabandonedtimeout>${epdb.synctarget.removeabandonedtimeout}</epdb.synctarget.removeabandonedtimeout>
+						<epdb.synctarget.username>${epdb.synctarget.username}</epdb.synctarget.username>
+						<epdb.synctarget.password>${epdb.synctarget.password}</epdb.synctarget.password>
+						<epdb.synctarget.jdbc.driver>${epdb.synctarget.jdbc.driver}</epdb.synctarget.jdbc.driver>
+						<epdb.synctarget.url>${epdb.synctarget.url}</epdb.synctarget.url>
+						<ep.synctarget.jms.url>${ep.synctarget.jms.url}</ep.synctarget.jms.url>
+						<ep.jms.type>${ep.jms.type}</ep.jms.type>
+						<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+						<ep.jms.url>${ep.jms.url}</ep.jms.url>
+						<ep.changesets.enabled>${ep.changesets.enabled}</ep.changesets.enabled>
+						<ep.plugins.folder>${project.basedir}/../../plugins/ext-plugin-config/target/plugins</ep.plugins.folder>
+					</systemProperties>
+				</configuration>
 
 
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.activemq</groupId>
-							<artifactId>activemq-all</artifactId>
-							<version>${org.apache.activemq.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.camel</groupId>
-							<artifactId>camel-jms</artifactId>
-							<version>${org.apache.camel.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.camel</groupId>
-							<artifactId>camel-core</artifactId>
-							<version>${org.apache.camel.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>commons-pool</groupId>
-							<artifactId>commons-pool</artifactId>
-							<version>${commons.pool.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.commons</groupId>
-							<artifactId>commons-pool2</artifactId>
-							<version>${org.apache.commons.pool2.version}</version>
-						</dependency>
-						<!-- Include JDBC driver dependency -->
-						<dependency>
-							<groupId>${epdb.maven.groupId}</groupId>
-							<artifactId>${epdb.maven.artifactId}</artifactId>
-							<version>${epdb.maven.version}</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<artifactId>maven-war-plugin</artifactId>
-					<configuration>
-						<escapeString>\</escapeString>
-						<webResources>
-							<resource>
-								<directory>src/main/webapp</directory>
-								<filtering>true</filtering>
-								<includes>
-									<include>**/log4j.properties</include>
-								</includes>
-							</resource>
-							<resource>
-								<directory>src/main/webapp</directory>
-								<filtering>false</filtering>
-								<excludes>
-									<exclude>**/log4j.properties</exclude>
-								</excludes>
-							</resource>
-						</webResources>
-					</configuration>
-				</plugin>
-
-				<plugin>
-					<groupId>com.google.code.maven-replacer-plugin</groupId>
-					<artifactId>replacer</artifactId>
-					<version>${maven-replacer-plugin.version}</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.activemq</groupId>
+						<artifactId>activemq-all</artifactId>
+						<version>${org.apache.activemq.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.camel</groupId>
+						<artifactId>camel-jms</artifactId>
+						<version>${org.apache.camel.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.camel</groupId>
+						<artifactId>camel-core</artifactId>
+						<version>${org.apache.camel.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>commons-pool</groupId>
+						<artifactId>commons-pool</artifactId>
+						<version>${commons.pool.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-pool2</artifactId>
+						<version>${org.apache.commons.pool2.version}</version>
+					</dependency>
+					<!-- Include JDBC driver dependency -->
+					<dependency>
+						<groupId>${epdb.maven.groupId}</groupId>
+						<artifactId>${epdb.maven.artifactId}</artifactId>
+						<version>${epdb.maven.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<escapeString>\</escapeString>
+					<webResources>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>false</filtering>
+						</resource>
+					</webResources>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${ep.release.version}</Implementation-Version>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<profiles>

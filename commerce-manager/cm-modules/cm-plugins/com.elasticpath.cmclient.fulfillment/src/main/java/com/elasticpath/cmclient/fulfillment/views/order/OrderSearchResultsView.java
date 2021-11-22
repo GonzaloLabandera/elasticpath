@@ -4,7 +4,8 @@
  */
 package com.elasticpath.cmclient.fulfillment.views.order;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
@@ -31,7 +32,7 @@ import com.elasticpath.service.search.query.StandardSortBy;
  */
 public class OrderSearchResultsView extends AbstractSortListView implements OrderEventListener {
 
-	private static final Logger LOG = Logger.getLogger(OrderSearchResultsView.class);
+	private static final Logger LOG = LogManager.getLogger(OrderSearchResultsView.class);
 
 	/** The view ID. */
 	public static final String VIEW_ID = OrderSearchResultsView.class.getName();

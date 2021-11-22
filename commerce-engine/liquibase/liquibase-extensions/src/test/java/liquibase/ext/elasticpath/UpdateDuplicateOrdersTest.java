@@ -62,7 +62,7 @@ public class UpdateDuplicateOrdersTest {
 	private PreparedStatement updateOrderPreparedStatement;
 
 	private static final String SELECT_DUPLICATE_ORDER_GUIDS =
-			"SELECT CART_ORDER_GUID FROM TORDER GROUP BY CART_ORDER_GUID HAVING COUNT(*) > 1";
+			"SELECT CART_ORDER_GUID FROM TORDER WHERE CART_ORDER_GUID IS NOT NULL GROUP BY CART_ORDER_GUID HAVING COUNT(*) > 1";
 
 	@Before
 	public void init() throws SQLException {
@@ -173,7 +173,7 @@ public class UpdateDuplicateOrdersTest {
 	}
 
 	private void setupSingleBatchAddAndClear() throws DatabaseException, SQLException {
-		when(connection.prepareStatement("UPDATE TORDER SET CART_ORDER_GUID = ? WHERE (UIDPK = ?)")).thenReturn(updateOrderPreparedStatement);
+		when(connection.prepareStatement("UPDATE TORDER SET CART_ORDER_GUID = ? WHERE UIDPK = ?")).thenReturn(updateOrderPreparedStatement);
 		doNothing().when(updateOrderPreparedStatement).addBatch();
 		when(updateOrderPreparedStatement.executeBatch()).thenReturn(new int[1]);
 		doNothing().when(updateOrderPreparedStatement).clearBatch();
@@ -205,7 +205,7 @@ public class UpdateDuplicateOrdersTest {
 		verify(updateOrderPreparedStatement).setString(2, uidpk);
 		verify(updateOrderPreparedStatement).addBatch();
 		verify(updateOrderPreparedStatement).close();
-		verify(connection).prepareStatement("UPDATE TORDER SET CART_ORDER_GUID = ? WHERE (UIDPK = ?)");
+		verify(connection).prepareStatement("UPDATE TORDER SET CART_ORDER_GUID = ? WHERE UIDPK = ?");
 	}
 
 	private void setupSingleDuplicateOrdersResponse(final String cartOrderGuid) throws SQLException,

@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>120</version>
+		<version>124</version>
 		<relativePath/>
 	</parent>
 
@@ -22,7 +22,8 @@
 	<properties>
 		<aopalliance.version>1.0_5</aopalliance.version>
 		<apache.poi.version>4.0.1</apache.poi.version>
-		<api-platform.version>1.45.0.1eb89ea7a5</api-platform.version>
+		<api-platform.version>1.46.0.2d06f00d07</api-platform.version>
+		<ep-xpf-spi.version>1.0.1.776fd74a38</ep-xpf-spi.version>
 		<aspectj.rt.version>1.8.9</aspectj.rt.version>
 		<assertj-core.version>3.11.1</assertj-core.version>
 		<awaitility.version>2.0.0</awaitility.version>
@@ -32,16 +33,16 @@
 		<com.h2database.version>1.4.200</com.h2database.version>
 		<com.google.protobuf.version>2.6.0</com.google.protobuf.version>
 		<com.jayway.jsonpath.json-path.version>1.2.0</com.jayway.jsonpath.json-path.version>
+		<net.minidev.json-smart.version>2.4.7</net.minidev.json-smart.version>
 		<com.springsource.org.aopalliance.version>1.0.0</com.springsource.org.aopalliance.version>
 		<com.sun.mail.version>1.5.6</com.sun.mail.version>
-		<com.thoughtworks.xstream.version>1.4.11.1</com.thoughtworks.xstream.version>
+		<com.thoughtworks.xstream.version>1.4.18</com.thoughtworks.xstream.version>
 		<cmclient.platform.feature.version>0.0.0-SNAPSHOT</cmclient.platform.feature.version>
 		<cmclient.version>0.0.0-SNAPSHOT</cmclient.version>
 		<commons-beanutils.version>1.9.4</commons-beanutils.version>
 		<commons-codec.version>1.14</commons-codec.version>
 		<commons-fileupload.version>1.4</commons-fileupload.version>
 		<commerce.extensions.version>0.0.0-SNAPSHOT</commerce.extensions.version>
-		<commons-lang.version>2.6</commons-lang.version>
 		<commons.pool.version>1.6</commons.pool.version>
 		<cortex.ep.integration.version>0.0.0-SNAPSHOT</cortex.ep.integration.version>
 		<cxf-uritemplate-utils.version>1.13</cxf-uritemplate-utils.version>
@@ -88,8 +89,9 @@
 		<javax.servlet.version>3.1.0</javax.servlet.version>
 		<javax.security.jacc.version>1.5</javax.security.jacc.version>
 		<jetty.version>9.3.28.v20191105</jetty.version>
+		<jersey.version>2.28</jersey.version>
 
-		<log4j.version>1.2.17</log4j.version>
+		<log4j.version>2.13.3</log4j.version>
 		<logback.version>1.2.3</logback.version> <!-- logback is bound to a specific version of slf4j -->
 
 		<metrics.version>3.2.6</metrics.version>
@@ -102,35 +104,40 @@
 
 		<jansi.version>1.18</jansi.version>
 
-		<org.apache.activemq.version>5.16.0</org.apache.activemq.version>
+		<org.apache.activemq.version>5.16.1</org.apache.activemq.version>
 		<org.apache.ant.version>1.7.1</org.apache.ant.version>
 		<org.apache.batic.version>1.11</org.apache.batic.version>
-		<org.apache.camel.version>2.23.4</org.apache.camel.version>
+		<org.apache.camel.version>2.25.3</org.apache.camel.version>
 		<org.apache.commons.lang3.version>3.8</org.apache.commons.lang3.version>
 		<org.apache.commons.text.version>1.9</org.apache.commons.text.version>
+		<org.apache.commons.collections3.version>3.2.2</org.apache.commons.collections3.version>
+		<org.apache.commons.collections4.version>4.4</org.apache.commons.collections4.version>
 		<org.apache.geronimo.specs.version>1.0.1</org.apache.geronimo.specs.version>
-		<org.apache.openjpa.version>2.4.0-ep2.3</org.apache.openjpa.version>
-		<org.apache.servicemix.bundles.quartz.version>2.1.7_1</org.apache.servicemix.bundles.quartz.version>
+		<org.apache.openjpa.version>2.4.0-ep2.4</org.apache.openjpa.version>
+		<org.apache.servicemix.bundles.quartz.version>2.3.2_1</org.apache.servicemix.bundles.quartz.version>
 		<org.apache.servicemix.spring.ldap.version>2.3.2.RELEASE_1</org.apache.servicemix.spring.ldap.version>
-		<org.apache.servicemix.spring.version>4.3.25.RELEASE_1</org.apache.servicemix.spring.version>
+		<org.apache.servicemix.spring.version>4.3.30.RELEASE_1</org.apache.servicemix.spring.version>
 		<org.apache.servicemix.spring.security.core.version>4.2.13.RELEASE_1</org.apache.servicemix.spring.security.core.version>
 		<org.apache.servicemix.spring.security.version>4.2.4.RELEASE_1</org.apache.servicemix.spring.security.version>
-		<org.apache.servicemix.bundles.xstream.version>1.4.11.1_1</org.apache.servicemix.bundles.xstream.version>
+		<org.apache.servicemix.bundles.xstream.version>1.4.18_1</org.apache.servicemix.bundles.xstream.version>
 		<org.apache.derby.version>10.11.1.1</org.apache.derby.version>
 		<org.eclipse.emf.version>2.12.0.v20160420-0247</org.eclipse.emf.version>
 		<org.hibernate.version>5.4.3.Final</org.hibernate.version>
 		<org.json.version>20170516</org.json.version>
 		<org.kubek2k.version>1.0.8</org.kubek2k.version>
-		<org.liquibase.version>3.4.2</org.liquibase.version>
+		<org.liquibase.version>3.10.3</org.liquibase.version>
 		<org.mvel.mvel2.version>2.4.0.Final</org.mvel.mvel2.version>
 		<org.springframework.security.version>4.2.13.RELEASE</org.springframework.security.version>
-		<org.springframework.version>4.3.25.RELEASE</org.springframework.version>
+		<org.springframework.version>4.3.30.RELEASE</org.springframework.version>
 		<org.springframework.shell.version>1.0.0.RELEASE</org.springframework.shell.version>
 		<org.springframework.security-oauth2.version>2.3.8.RELEASE</org.springframework.security-oauth2.version>
 		<org.springframework.spring.batch.version>4.0.4.RELEASE</org.springframework.spring.batch.version>
 		<osgi.core.version>6.0.0</osgi.core.version>
+		<oshi.version>5.7.4</oshi.version>
+		<jna.version>5.8.0</jna.version>
 
 		<peaberry.version>1.3</peaberry.version>
+		<pf4j.version>3.6.0</pf4j.version>
 
 		<rxjava.version>2.2.7</rxjava.version>
 
@@ -139,11 +146,11 @@
 		<servicemix.bundles.aspectj.version>1.8.8_1</servicemix.bundles.aspectj.version>
 		<shiro-core.version>1.3.2</shiro-core.version>
 		<sisu.version>0.3.2</sisu.version>
-		<slf4j.version>1.7.25</slf4j.version>
-		<solr.version>7.2.1</solr.version>
+		<slf4j.version>1.7.26</slf4j.version>
+		<solr.version>7.4.0</solr.version>
 
-		<tomcat.version>9.0.16</tomcat.version>
-		<tomcatLogging.version>8.5.2</tomcatLogging.version>
+		<tomcat.version>9.0.50</tomcat.version>
+		<tomcatLogging.version>9.0.0.M6</tomcatLogging.version>
 
 		<wiremock.version>2.23.2</wiremock.version>
 		<ws-rs.version>2.1.1</ws-rs.version>
@@ -154,8 +161,6 @@
 		<org.mybatis.version>3.2.3</org.mybatis.version>
 		<org.reflections.version>0.9.11</org.reflections.version>
 
-		<mysql-connector-java.version>5.1.44</mysql-connector-java.version>
-
 		<json-schema-validator.version>2.2.6</json-schema-validator.version>
 
 		<spring-data.version>1.11.22.RELEASE</spring-data.version>
@@ -165,6 +170,16 @@
 		<javax.jms.version>2.0</javax.jms.version>
 
 		<activemq.kahadb.store.version>5.14.3</activemq.kahadb.store.version>
+
+		<bval.version>0.4</bval.version>
+		<servicemix.commons-collections.version>3.2.1_3</servicemix.commons-collections.version>
+		<servicemix.ehcache.version>2.6.0_2</servicemix.ehcache.version>
+		<wstx-asl.version>3.2.9</wstx-asl.version>
+		<postgresql.jdbc.driver.version>42.2.23</postgresql.jdbc.driver.version>
+		<maven.plugin.api.version>3.3.3</maven.plugin.api.version>
+		<maven.plugin.annotations.version>3.4</maven.plugin.annotations.version>
+		<lombok.version>1.18.20</lombok.version>
+		<xsync.version>1.3</xsync.version>
 
 		<!--Plugins-->
 		<version.allowMajor>false</version.allowMajor>
@@ -443,12 +458,12 @@
 			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
-				<version>3.2.2</version>
+				<version>${org.apache.commons.collections3.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>commons-lang</groupId>
-				<artifactId>commons-lang</artifactId>
-				<version>${commons-lang.version}</version>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>${org.apache.commons.collections4.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -475,8 +490,20 @@
 			</dependency>
 
 			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-web</artifactId>
 				<version>${log4j.version}</version>
 			</dependency>
 
@@ -505,12 +532,6 @@
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
 				<version>1.4</version>
-				<exclusions>
-					<exclusion>
-						<groupId>commons-lang</groupId>
-						<artifactId>commons-lang</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -544,9 +565,9 @@
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>${slf4j.version}</version>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j-impl</artifactId>
+				<version>${log4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -561,10 +582,6 @@
 					<exclusion>
 						<groupId>commons-collections</groupId>
 						<artifactId>commons-collections</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>commons-lang</groupId>
-						<artifactId>commons-lang</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -594,12 +611,40 @@
 				<version>${org.apache.openjpa.version}</version>
 				<exclusions>
 					<exclusion>
-						<groupId>commons-lang</groupId>
-						<artifactId>commons-lang</artifactId>
-					</exclusion>
-					<exclusion>
 						<groupId>junit</groupId>
 						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.openjpa</groupId>
+						<artifactId>openjpa-jest</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.openjpa</groupId>
+						<artifactId>openjpa-kernel</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.openjpa</groupId>
+						<artifactId>openjpa-persistence</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.openjpa</groupId>
+						<artifactId>openjpa-persistence-jdbc</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.openjpa</groupId>
+						<artifactId>openjpa-lib</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.xbean</groupId>
+						<artifactId>xbean-asm5-shaded</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.xbean</groupId>
+						<artifactId>xbean-asm-util</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-pool</groupId>
+						<artifactId>commons-pool</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -703,6 +748,11 @@
 				<version>${org.kubek2k.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.pf4j</groupId>
+				<artifactId>pf4j</artifactId>
+				<version>${pf4j.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
@@ -733,6 +783,19 @@
 				<artifactId>ep-settings</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath.xpf</groupId>
+				<artifactId>ep-xpf-connectivity</artifactId>
+				<version>${ep-xpf-spi.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-xpf</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-caching</artifactId>
@@ -849,6 +912,11 @@
 			<dependency>
 				<groupId>com.elasticpath.extensions</groupId>
 				<artifactId>ep-cortex-common-test-definitions</artifactId>
+				<version>${commerce.extensions.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.extensions</groupId>
+				<artifactId>performance-common-test-definitions</artifactId>
 				<version>${commerce.extensions.version}</version>
 			</dependency>
 			<dependency>
@@ -1081,6 +1149,12 @@
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-jms-test-support</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-email-test-support</artifactId>
 				<version>${dce.version}</version>
 				<scope>test</scope>
@@ -1121,6 +1195,21 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-order-hold-resolution-message-consumer</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-operational-insights-core</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-operational-insights-message-consumer</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-operational-insights-api</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 			<dependency>
@@ -1218,6 +1307,16 @@
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
 				<version>${org.liquibase.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-classic</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-core</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -1264,6 +1363,10 @@
 						<artifactId>slf4j-jdk14</artifactId>
 					</exclusion>
 					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-1.2-api</artifactId>
+					</exclusion>
+					<exclusion>
 						<groupId>org.eclipse.jetty</groupId>
 						<artifactId>*</artifactId>
 					</exclusion>
@@ -1291,6 +1394,10 @@
 						<groupId>org.apache.hadoop</groupId>
 						<artifactId>hadoop-hdfs</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -1302,6 +1409,12 @@
 				<groupId>org.apache.zookeeper</groupId>
 				<artifactId>zookeeper</artifactId>
 				<version>${zookeeper.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<!-- httpcomponents are used by solrj but we want to use a newer version -->
 			<dependency>
@@ -1375,10 +1488,6 @@
 					<exclusion>
 						<groupId>commons-io</groupId>
 						<artifactId>commons-io</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>commons-lang</groupId>
-						<artifactId>commons-lang</artifactId>
 					</exclusion>
 					<exclusion>
 						<groupId>commons-collections</groupId>
@@ -1561,13 +1670,13 @@
 				<!-- org.apache.solr:solr-core depends on woodstox:wstx-asl which has no pom.xml, so we exclude it and depend on this instead -->
 				<groupId>org.codehaus.woodstox</groupId>
 				<artifactId>wstx-asl</artifactId>
-				<version>3.2.9</version>
+				<version>${wstx-asl.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
-				<version>2.1.7</version>
+				<version>2.3.2</version>
 				<exclusions>
 					<exclusion>
 						<groupId>javax.transaction</groupId>
@@ -1616,6 +1725,10 @@
 						<groupId>org.owasp.antisamy</groupId>
 						<artifactId>antisamy</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -1647,6 +1760,25 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.commons-collections</artifactId>
+				<version>${servicemix.commons-collections.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.bval</groupId>
+				<artifactId>org.apache.bval.bundle</artifactId>
+				<version>${bval.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.ehcache</artifactId>
+				<version>${servicemix.ehcache.version}</version>
+			</dependency>
+
 			<!-- jackson -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -1687,7 +1819,7 @@
 			<dependency>
 				<groupId>org.apache.xmlbeans</groupId>
 				<artifactId>xmlbeans</artifactId>
-				<version>2.4.0</version>
+				<version>3.0.0</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
@@ -1889,6 +2021,12 @@
 				<version>2.3.0</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+			</dependency>
+
 			<!-- End of commerce engine dependencies -->
 
 			<dependency>
@@ -1911,6 +2049,11 @@
 			<dependency>
 				<groupId>com.elasticpath.rest</groupId>
 				<artifactId>ep-rest-api</artifactId>
+				<version>${api-platform.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest</groupId>
+				<artifactId>ep-rest-json-jackson</artifactId>
 				<version>${api-platform.version}</version>
 			</dependency>
 			<dependency>
@@ -2100,6 +2243,11 @@
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-references-api</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-recommendations-api</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
@@ -2202,6 +2350,21 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>shipping-calculation-connectivity-api</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-xpf-test-plugins</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>xpf-external-plugin</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>xpf-external-replaced-plugin</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 			<dependency>
@@ -2812,6 +2975,11 @@
 				<artifactId>ep-resource-accounts</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.resource.cortex</groupId>
+				<artifactId>ep-resource-references</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
 
 			<!-- Pin tomcat version used in plugin -->
 			<dependency>
@@ -3128,6 +3296,13 @@
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.extensions</groupId>
+				<artifactId>performance-test-h2-database</artifactId>
+				<version>${commerce.extensions.version}</version>
+				<scope>provided</scope>
+				<type>zip</type>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.extensions</groupId>
 				<artifactId>integration-test-h2-database</artifactId>
 				<version>${commerce.extensions.version}</version>
 				<scope>provided</scope>
@@ -3280,11 +3455,6 @@
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-				<artifactId>ep-rs-subject-lookup-epcommerce</artifactId>
-				<version>${cortex.ep.integration.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 				<artifactId>ep-rs-authentication-epcommerce</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
@@ -3301,6 +3471,11 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 				<artifactId>ep-hds-support</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+				<artifactId>ep-version-support</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>
@@ -3376,6 +3551,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>net.minidev</groupId>
+				<artifactId>json-smart</artifactId>
+				<version>${net.minidev.json-smart.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.framework</artifactId>
 				<version>${felix.framework.version}</version>
@@ -3432,6 +3613,62 @@
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
 				<version>${jansi.version}</version>
+			</dependency>
+			<!-- jersey dependencies -->
+			<dependency>
+				<groupId>org.glassfish.jersey.core</groupId>
+				<artifactId>jersey-common</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.core</groupId>
+				<artifactId>jersey-client</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-hk2</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-jaxb</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${postgresql.jdbc.driver.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-plugin-api</artifactId>
+				<version>${maven.plugin.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugin-tools</groupId>
+				<artifactId>maven-plugin-annotations</artifactId>
+				<version>${maven.plugin.annotations.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.antkorwin</groupId>
+				<artifactId>xsync</artifactId>
+				<version>${xsync.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.oshi</groupId>
+				<artifactId>oshi-core</artifactId>
+				<version>${oshi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.java.dev.jna</groupId>
+				<artifactId>jna</artifactId>
+				<version>${jna.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.java.dev.jna</groupId>
+				<artifactId>jna-platform</artifactId>
+				<version>${jna.version}</version>
 			</dependency>
 		</dependencies>
 

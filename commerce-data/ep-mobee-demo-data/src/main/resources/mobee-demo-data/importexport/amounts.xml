@@ -54,6 +54,15 @@
 </base_amount>
 
 <base_amount>
+    <guid>3A4F619B-B611-E874-2EEE-A080FFDE831G</guid>
+    <object_guid>ps94949</object_guid>
+    <object_type>PRODUCT</object_type>
+    <quantity>1.00</quantity>
+    <list_price>11.00</list_price>
+    <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
+
+<base_amount>
     <guid>C32903F3-8494-0D57-2C2B-908108BB0BD8</guid>
     <object_guid>mb_3456789</object_guid>
     <object_type>PRODUCT</object_type>

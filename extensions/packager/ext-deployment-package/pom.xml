@@ -186,7 +186,22 @@
 			<version>${org.apache.activemq.version}</version>
 			<type>zip</type>
 			<classifier>bin</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+
+		<!-- ext-plugin-config dependency -->
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-plugin-config</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-pool</artifactId>
@@ -215,7 +230,6 @@
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jms_1.1_spec</artifactId>
-			<version>${org.apache.geronimo.specs.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

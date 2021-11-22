@@ -7,9 +7,8 @@ import java.util.Collection;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -191,30 +190,30 @@ public class CustomerValidationTest extends AbstractValidationTest {
 		Set<ConstraintViolation<Customer>> violations = getCustomerConstraintValidationService().validate(customer);
 		assertViolationsNotContains("address is not required", violations, "addresses");
 
-		CustomerAddress customerAddress1 = createValidCustomerAddress();
-		customer.getAddresses().add(customerAddress1);
+		CustomerAddress preferredBillingAddress = createValidCustomerAddress();
+		customer.setPreferredBillingAddress(preferredBillingAddress);
 		violations = getCustomerConstraintValidationService().validate(customer);
-		assertViolationsNotContains("valid address given", violations, "addresses[0].city");
+		assertViolationsNotContains("invalid preferred billing address given", violations, "preferredBillingAddress.city");
 
-		customerAddress1.setCity(null);
+		preferredBillingAddress.setCity(null);
 		violations = getCustomerConstraintValidationService().validate(customer);
-		assertViolationsContains("invalid city on address", violations, "addresses[0].city");
+		assertViolationsContains("invalid city on preferred billing address", violations, "preferredBillingAddress.city");
 
-		CustomerAddress customerAddress2 = createValidCustomerAddress();
-		customer.getAddresses().add(customerAddress2);
+		CustomerAddress preferredShippingAddress = createValidCustomerAddress();
+		customer.setPreferredShippingAddress(preferredShippingAddress);
 		violations = getCustomerConstraintValidationService().validate(customer);
-		assertViolationsNotContains("2nd valid address given", violations, "addresses[1].firstName");
+		assertViolationsNotContains("invalid preferred shipping address given", violations, "preferredShippingAddress.firstName");
 
-		customerAddress2.setFirstName(null);
+		preferredShippingAddress.setFirstName(null);
 		violations = getCustomerConstraintValidationService().validate(customer);
-		assertViolationsNotContains(violations, "addresses[1].firstName");
-		assertViolationsContains("city still invalid", violations, "addresses[0].city");
+		assertViolationsNotContains(violations, "preferredShippingAddress.firstName");
+		assertViolationsContains("preferred billing address city still invalid", violations, "preferredBillingAddress.city");
 
-		customerAddress1.setCity("a city");
-		customerAddress2.setFirstName("a firstName");
+		preferredBillingAddress.setCity("a city");
+		preferredShippingAddress.setFirstName("a firstName");
 		violations = getCustomerConstraintValidationService().validate(customer);
-		assertViolationsNotContains(violations, "addresses[1].firstName");
-		assertViolationsNotContains(violations, "addresses[0].city");
+		assertViolationsNotContains(violations, "preferredShippingAddress.firstName");
+		assertViolationsNotContains(violations, "preferredBillingAddress.city");
 	}
 
 	public CustomerAddress createValidCustomerAddress() {

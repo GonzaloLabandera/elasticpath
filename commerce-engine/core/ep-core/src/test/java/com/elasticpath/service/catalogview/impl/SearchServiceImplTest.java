@@ -223,12 +223,6 @@ public class SearchServiceImplTest {
 
 		mockShoppingCart = context.mock(ShoppingCart.class);
 
-		context.checking(new Expectations() {
-			{
-				allowing(mockShoppingCart).setCustomerSession(mockCustomerSession);
-				atLeast(1).of(mockCustomerSession).setShopper(with(any(Shopper.class)));
-			}
-		});
 		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMementoAndCustomerAndCustomerSessionAndShoppingCart(
 				null, mockCustomerSession, mockShoppingCart);
 		context.checking(new Expectations() {

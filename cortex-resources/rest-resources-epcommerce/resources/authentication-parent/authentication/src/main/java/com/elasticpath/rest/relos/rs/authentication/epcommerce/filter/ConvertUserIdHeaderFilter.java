@@ -3,10 +3,7 @@
  */
 package com.elasticpath.rest.relos.rs.authentication.epcommerce.filter;
 
-import static com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil.createStructuredErrorMessageException;
-
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -18,15 +15,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.Multimap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import com.elasticpath.base.exception.structured.EpStructureErrorMessageException;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil;
+import com.elasticpath.rest.relos.rs.authentication.epcommerce.util.ErrorUtil;
 import com.elasticpath.rest.relos.rs.authentication.request.AddHeadersRequestWrapper;
 import com.elasticpath.rest.relos.rs.authentication.request.HeadersRemoverRequestWrapper;
 import com.elasticpath.rest.relos.rs.authentication.request.ModifiedHeaderRequestWrapper;
@@ -63,16 +61,14 @@ public class ConvertUserIdHeaderFilter implements Filter {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		final String issuer = SubjectHeadersUtil.getIssuerFromRequest(httpRequest);
-		Collection<String> scopes = SubjectHeadersUtil.getUserScopesFromRequest(httpRequest);
 
-		String scope = scopes.stream().findFirst().orElse(null);
 		String userId = SubjectHeadersUtil.getUserIdFromRequest(httpRequest);
 		if (StringUtils.isNotBlank(userId)) {
 			try {
-				HttpServletRequest updatedRequest = updateUserIdHeaderWithCustomerGuid(httpRequest, issuer, userId, scope);
+				HttpServletRequest updatedRequest = updateUserIdHeaderWithCustomerGuid(httpRequest, issuer, userId, CustomerType.REGISTERED_USER);
 				chain.doFilter(updatedRequest, response);
 			} catch (EpStructureErrorMessageException ex) {
-				AuthenticationUtil.reportFailure(httpResponse, HttpServletResponse.SC_BAD_REQUEST, ex.getStructuredErrorMessages().get(0));
+				ErrorUtil.reportFailure(httpResponse, HttpServletResponse.SC_BAD_REQUEST, ex.getStructuredErrorMessages().get(0));
 			}
 		} else {
 			chain.doFilter(request, response);
@@ -88,11 +84,11 @@ public class ConvertUserIdHeaderFilter implements Filter {
 	 * @param httpRequest the httpRequest
 	 * @param issuer the issuer specified in jwt token
 	 * @param userId the user id specified in the jwt token
-	 * @param storeCode store code
+	 * @param customerType customer type
 	 */
 	private HttpServletRequest updateUserIdHeaderWithCustomerGuid(final HttpServletRequest httpRequest, final String issuer, final String userId,
-			final String storeCode) {
-		ExecutionResult<String> deriveGuidExecutionResult = customerIdentifierService.deriveCustomerGuid(userId, storeCode, issuer);
+			final CustomerType customerType) {
+		ExecutionResult<String> deriveGuidExecutionResult = customerIdentifierService.deriveCustomerGuid(userId, customerType, issuer);
 		if (deriveGuidExecutionResult.isSuccessful()) {
 			Multimap<String, String> headers = ModifiedHeaderRequestWrapper.createHeaderMultimap();
 			headers.put(SubjectHeaderConstants.USER_ID, deriveGuidExecutionResult.getData());
@@ -102,7 +98,8 @@ public class ConvertUserIdHeaderFilter implements Filter {
 			updatedHttpRequest = new AddHeadersRequestWrapper(updatedHttpRequest, headers);
 			return updatedHttpRequest;
 		} else {
-			throw createStructuredErrorMessageException("authentication.customer.not.found", "No customer found for the provided user ID.");
+			throw ErrorUtil.createStructuredErrorMessageException(
+					"authentication.customer.not.found", "No customer found for the provided user ID" + ".");
 		}
 	}
 }

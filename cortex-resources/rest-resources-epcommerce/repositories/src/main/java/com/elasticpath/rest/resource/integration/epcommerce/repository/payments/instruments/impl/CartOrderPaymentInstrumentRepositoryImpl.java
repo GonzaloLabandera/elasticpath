@@ -62,7 +62,7 @@ public class CartOrderPaymentInstrumentRepositoryImpl implements CartOrderPaymen
 	@CacheResult
 	@Override
 	public Observable<CartOrderPaymentInstrument> findByCartOrder(final CartOrder cartOrder) {
-		return reactiveAdapter.fromService(() -> cartOrderPaymentInstrumentService.findByCartOrder(cartOrder))
+		return reactiveAdapter.fromService(() -> cartOrderPaymentInstrumentService.findByCartOrderGuid(cartOrder.getGuid()))
 				.flatMap(Observable::fromIterable);
 	}
 

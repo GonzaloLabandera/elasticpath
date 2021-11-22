@@ -6,7 +6,7 @@
  */
 package com.elasticpath.domain.pricing.csvimport.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.commons.exception.EpBindException;

@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
@@ -26,7 +27,6 @@ public class CustomerIdentifierBySharedIdStrategyImplTest {
 
 	private static final String VALID_SHARED_ID = "testUser";
 	private static final String INVALID_SHARED_ID = "invalidSharedId";
-	private static final String VALID_STORE_CODE = "TestStore";
 	private static final String VALID_CUSTOMER_IDENTIFIER_KEY = "SHARED_ID";
 	private static final String CUSTOMER_GUID = "customerGuid";
 
@@ -41,11 +41,11 @@ public class CustomerIdentifierBySharedIdStrategyImplTest {
 	 */
 	@Test
 	public void testValidCustomerExists() {
-		when(customerRepository.isCustomerExistsBySharedIdAndStoreCode(VALID_STORE_CODE, VALID_SHARED_ID))
+		when(customerRepository.isCustomerExistsBySharedIdAndStoreCode(CustomerType.REGISTERED_USER, VALID_SHARED_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(null));
 
 		ExecutionResult<Boolean> executionResult =
-				customerIdentifierByUserIdStrategy.isCustomerExists(VALID_SHARED_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+				customerIdentifierByUserIdStrategy.isCustomerExists(VALID_SHARED_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isSuccessful());
 	}
 
@@ -54,11 +54,11 @@ public class CustomerIdentifierBySharedIdStrategyImplTest {
 	 */
 	@Test
 	public void testCustomerExistsWithInvalidUserId() {
-		when(customerRepository.isCustomerExistsBySharedIdAndStoreCode(VALID_STORE_CODE, INVALID_SHARED_ID))
+		when(customerRepository.isCustomerExistsBySharedIdAndStoreCode(CustomerType.REGISTERED_USER, INVALID_SHARED_ID))
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
 		ExecutionResult<Boolean> executionResult =
-				customerIdentifierByUserIdStrategy.isCustomerExists(INVALID_SHARED_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+				customerIdentifierByUserIdStrategy.isCustomerExists(INVALID_SHARED_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertFalse(executionResult.isSuccessful());
 	}
 
@@ -67,11 +67,11 @@ public class CustomerIdentifierBySharedIdStrategyImplTest {
 	 */
 	@Test
 	public void deriveCustomerGuidValidTest() {
-		when(customerRepository.findCustomerGuidBySharedId(VALID_STORE_CODE, VALID_SHARED_ID, VALID_CUSTOMER_IDENTIFIER_KEY))
+		when(customerRepository.findCustomerGuidBySharedId(CustomerType.REGISTERED_USER, VALID_SHARED_ID, VALID_CUSTOMER_IDENTIFIER_KEY))
 				.thenReturn(ExecutionResultFactory.createReadOK(CUSTOMER_GUID));
 
 		ExecutionResult<String> executionResult =
-				customerIdentifierByUserIdStrategy.deriveCustomerGuid(VALID_SHARED_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+				customerIdentifierByUserIdStrategy.deriveCustomerGuid(VALID_SHARED_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isSuccessful());
 		assertEquals(CUSTOMER_GUID, executionResult.getData());
 	}
@@ -81,11 +81,11 @@ public class CustomerIdentifierBySharedIdStrategyImplTest {
 	 */
 	@Test
 	public void deriveCustomerGuidInvalidTest() {
-		when(customerRepository.findCustomerGuidBySharedId(VALID_STORE_CODE, INVALID_SHARED_ID, VALID_CUSTOMER_IDENTIFIER_KEY))
+		when(customerRepository.findCustomerGuidBySharedId(CustomerType.REGISTERED_USER, INVALID_SHARED_ID, VALID_CUSTOMER_IDENTIFIER_KEY))
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
 		ExecutionResult<String> executionResult =
-				customerIdentifierByUserIdStrategy.deriveCustomerGuid(INVALID_SHARED_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+				customerIdentifierByUserIdStrategy.deriveCustomerGuid(INVALID_SHARED_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isFailure());
 	}
 }

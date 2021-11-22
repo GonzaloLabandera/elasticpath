@@ -4,7 +4,8 @@
 package com.elasticpath.cmclient.admin.warehouses.actions;
 
 import com.elasticpath.cmclient.core.BeanLocator;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -25,7 +26,7 @@ import com.elasticpath.service.store.WarehouseService;
 public class CreateWarehouseAction extends Action {
 
 	/** The log. */
-	private static final Logger LOG = Logger.getLogger(CreateWarehouseAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateWarehouseAction.class);
 
 	/** Warehouse list view. */
 	private final WarehouseListView listView;

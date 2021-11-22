@@ -206,6 +206,7 @@ public class AccountBillingAddressSelectorRepositoryImplTest {
 
 	@Test
 	public void testSelector() {
+		when(addressRepository.getExistingAddressByGuid(ADDRESS1, account)).thenReturn(Single.just(customerAddress));
 		AccountBillingAddressSelectorChoiceIdentifier accountBillingAddressSelectorChoiceIdentifier =
 				mock(AccountBillingAddressSelectorChoiceIdentifier.class);
 		Observable<String> cartOrderGuidObservable = Observable.just(CART_ORDER_GUID);

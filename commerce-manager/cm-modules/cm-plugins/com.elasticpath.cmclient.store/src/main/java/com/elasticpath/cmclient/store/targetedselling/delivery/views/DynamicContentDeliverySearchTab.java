@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.store.targetedselling.delivery.views;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.graphics.Image;

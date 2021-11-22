@@ -243,36 +243,6 @@ public class RuleServiceImpl2Test {
 		assertEquals(ruleBase, ruleService.findRuleBaseByScenario(store, catalog, scenarioUid));
 	}
 	
-	/**
-	 * Verifies that if the query returns more than 1 result that the exception is thrown with the expected message.
-	 */
-	@Test
-	public void testFindChangedStoreRuleBases() {
-		final List<EpRuleBase> returnList = new ArrayList<>();
-		returnList.add(new EpRuleBaseImpl());
-		returnList.add(new EpRuleBaseImpl());
-
-		context.checking(new Expectations() { {
-				oneOf(persistenceEngine).retrieveByNamedQuery(
-						"EP_RULE_BASE_FIND_CHANGED_STORECODE_SCENARIO",
-						"storeCode", 1, null);
-				will(returnValue(returnList));
-		} });
-
-		boolean expectedExceptionCaught = false;
-		try {
-			ruleService.findChangedStoreRuleBases("storeCode", 1, null);
-		} catch (EpServiceException e) {
-			expectedExceptionCaught = true;
-			assertEquals(
-					"Inconsistent data, found more than 1 item, expected 1 with store code storeCode, no catalog and scenario 1",
-					e.getMessage());
-		}
-
-		assertTrue("Expect an EpServiceException", expectedExceptionCaught);
-
-	}
-	
 	@Test
 	public void testRuleCodeIsValidWhenExistingAndInStoreAndEnabledAndActiveForDateRange() {
 		final Rule rule = context.mock(Rule.class);

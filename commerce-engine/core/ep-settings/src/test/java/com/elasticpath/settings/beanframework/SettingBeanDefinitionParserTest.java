@@ -27,7 +27,7 @@ public class SettingBeanDefinitionParserTest {
 	public static final String PATH_ATTRIBUTE = "path";
 	public static final String CONTEXT_ATTRIBUTE = "context";
 	public static final String SYSTEM_PROPERTY_OVERRIDEKEY = "systemPropertyOverrideKey";
-	public static final String SETTINGS_READER = "settingsReader";
+	public static final String XPF_EXTENSION_LOOKUP = "xpfExtensionLookup";
 	private static final String SETTING_VALUE_TYPE_CONVERTER = "settingValueTypeConverter";
 
 	private final SettingBeanDefinitionParser parser = new SettingBeanDefinitionParser();
@@ -50,7 +50,7 @@ public class SettingBeanDefinitionParserTest {
 		parser.doParse(element, beanDefinitionBuilder);
 
 		verify(beanDefinitionBuilder).addPropertyValue(PATH_ATTRIBUTE, PATH);
-		verify(beanDefinitionBuilder).addPropertyReference(SETTINGS_READER, SETTINGS_READER);
+		verify(beanDefinitionBuilder).addPropertyReference(XPF_EXTENSION_LOOKUP, XPF_EXTENSION_LOOKUP);
 		verify(beanDefinitionBuilder).addPropertyReference(SETTING_VALUE_TYPE_CONVERTER, SETTING_VALUE_TYPE_CONVERTER);
 	}
 
@@ -66,7 +66,7 @@ public class SettingBeanDefinitionParserTest {
 
 		verify(beanDefinitionBuilder).addPropertyValue(PATH_ATTRIBUTE, PATH);
 		verify(beanDefinitionBuilder).addPropertyValue(CONTEXT_ATTRIBUTE, CONTEXT);
-		verify(beanDefinitionBuilder).addPropertyReference(SETTINGS_READER, SETTINGS_READER);
+		verify(beanDefinitionBuilder).addPropertyReference(XPF_EXTENSION_LOOKUP, XPF_EXTENSION_LOOKUP);
 		verify(beanDefinitionBuilder).addPropertyReference(SETTING_VALUE_TYPE_CONVERTER, SETTING_VALUE_TYPE_CONVERTER);
 	}
 
@@ -82,7 +82,7 @@ public class SettingBeanDefinitionParserTest {
 
 		verify(beanDefinitionBuilder).addPropertyValue(PATH_ATTRIBUTE, PATH);
 		verify(beanDefinitionBuilder).addPropertyValue(SYSTEM_PROPERTY_OVERRIDEKEY, SYSTEM_PROPERTY_OVERRIDEKEY);
-		verify(beanDefinitionBuilder).addPropertyReference(SETTINGS_READER, SETTINGS_READER);
+		verify(beanDefinitionBuilder).addPropertyReference(XPF_EXTENSION_LOOKUP, XPF_EXTENSION_LOOKUP);
 		verify(beanDefinitionBuilder).addPropertyReference(SETTING_VALUE_TYPE_CONVERTER, SETTING_VALUE_TYPE_CONVERTER);
 	}
 

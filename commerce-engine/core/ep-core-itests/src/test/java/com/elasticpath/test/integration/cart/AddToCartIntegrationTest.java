@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.sellingchannel.director.CartDirectorService;
@@ -40,7 +40,9 @@ public class AddToCartIntegrationTest extends AbstractCartIntegrationTestParent 
 	@Test
 	public void testAddSkuIncreasesQuantityRegardlessOfUpdateCommand() {
 		Product product = persistProductWithSku();
-		ShoppingCart shoppingCart = createShoppingCart(createCustomerSession());
+		Shopper shopper = createShopper(createPersistedCustomer());
+		shopper.setStoreCode(getScenario().getStore().getCode());
+		ShoppingCart shoppingCart = createShoppingCart(shopper);
 		String skuCode = product.getDefaultSku().getSkuCode();
 		ShoppingItemDto dto = new ShoppingItemDto(skuCode, 1);
 		cartDirectorService.addItemToCart(shoppingCart, dto);
@@ -59,18 +61,19 @@ public class AddToCartIntegrationTest extends AbstractCartIntegrationTestParent 
 		final String value = "TESTVALUE";
 
 		Product product = persistProductWithSku();
-		CustomerSession customerSession = createCustomerSession();
-		ShoppingCart shoppingCart = createShoppingCart(customerSession);
+		Shopper shopper = createShopper(createPersistedCustomer());
+		shopper.setStoreCode(getScenario().getStore().getCode());
+		ShoppingCart shoppingCart = createShoppingCart(shopper);
 		shoppingCart.setDefault(true);
 		ShoppingItemDto dto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 1);
 
 		final ShoppingItem addedCartItem = cartDirectorService.addItemToCart(shoppingCart, dto);
-		addedCartItem.setFieldValue(key, value);
-		assertThat(shoppingCart.getRootShoppingItems().iterator().next().getFieldValue(key)).isEqualTo(value);
+		addedCartItem.getModifierFields().put(key, value);
+		assertThat(shoppingCart.getRootShoppingItems().iterator().next().getModifierFields().get(key)).isEqualTo(value);
 		shoppingCartService.saveOrUpdate(shoppingCart);
 
-		ShoppingCart retrievedShoppingCart = shoppingCartService.findOrCreateByShopper(customerSession.getShopper());
+		ShoppingCart retrievedShoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(shopper);
 		assertThat(retrievedShoppingCart.getRootShoppingItems()).hasSize(1);
-		assertThat(retrievedShoppingCart.getRootShoppingItems().iterator().next().getFieldValue(key)).isEqualTo(value);
+		assertThat(retrievedShoppingCart.getRootShoppingItems().iterator().next().getModifierFields().get(key)).isEqualTo(value);
 	}
 }

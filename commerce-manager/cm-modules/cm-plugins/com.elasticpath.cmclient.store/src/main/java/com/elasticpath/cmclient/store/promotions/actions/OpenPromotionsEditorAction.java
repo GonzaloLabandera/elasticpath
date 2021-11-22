@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.store.promotions.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -24,7 +25,7 @@ import com.elasticpath.domain.rules.Rule;
  */
 public class OpenPromotionsEditorAction extends Action implements IDoubleClickListener {
 
-	private static final Logger LOG = Logger.getLogger(OpenPromotionsEditorAction.class);
+	private static final Logger LOG = LogManager.getLogger(OpenPromotionsEditorAction.class);
 
 	private final TableViewer viewer;
 

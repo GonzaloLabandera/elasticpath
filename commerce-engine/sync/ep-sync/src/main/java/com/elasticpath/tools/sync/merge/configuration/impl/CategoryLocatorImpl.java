@@ -3,7 +3,8 @@
  */
 package com.elasticpath.tools.sync.merge.configuration.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.Category;
@@ -19,7 +20,7 @@ import com.elasticpath.tools.sync.exception.SyncToolConfigurationException;
  */
 public class CategoryLocatorImpl extends AbstractEntityLocator {
 
-	private static final Logger LOG = Logger.getLogger(CategoryLocatorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CategoryLocatorImpl.class);
 
 	private CategoryLookup categoryLookup;
 	private CategoryService categoryService;

@@ -9,9 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
@@ -35,6 +33,7 @@ import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.orderpaymentapi.CustomerPaymentInstrumentService;
@@ -64,6 +63,9 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 	@Autowired
 	private CustomerGroupService customerGroupService;
+
+	@Autowired
+	private AddressService addressService;
 
 	@Autowired
 	private CustomerGroupBuilder customerGroupBuilder;
@@ -225,22 +227,21 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 		// Add an address to the customer
 		final CustomerAddress customerAddress = createAddress();
-		customer.addAddress(customerAddress);
-		assertThat(customer.getAddresses()).containsOnly(customerAddress);
 
-		String guid = customer.getAddresses().get(0).getGuid();
-		assertThat(guid).isNotNull();
+		assertThat(customerAddress.getGuid()).isNotNull();
 
 		// Update the customer
-		Customer updatedCustomer = service.update(customer);
-		assertThat(updatedCustomer.getAddresses()).hasSize(1);
-		CustomerAddress updatedAddress = updatedCustomer.getAddresses().get(0);
+		Customer updatedCustomer = service.addOrUpdateAddress(customer, customerAddress);
+		List<CustomerAddress> customerAddresses = addressService.findByCustomer(updatedCustomer.getUidPk());
+
+		assertThat(customerAddresses).hasSize(1);
+		CustomerAddress updatedAddress = customerAddresses.get(0);
 		assertThat(updatedAddress.isPersisted())
 			.as("The customer's address should now be persistent")
 			.isTrue();
 
 		// Load the address back from the customer object
-		CustomerAddress retrievedAddress = updatedCustomer.getAddressByUid(updatedAddress.getUidPk());
+		CustomerAddress retrievedAddress = addressService.findByCustomerAndAddressUid(updatedCustomer.getUidPk(), updatedAddress.getUidPk());
 		assertThat(retrievedAddress)
 			.as("The address should be found in the database and match the updated address")
 			.isEqualTo(updatedAddress);
@@ -266,19 +267,19 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 			.hasSize(1);
 
 		// Add an address to the customer and save to the DB
-		customer.addAddress(createAddress());
-		Customer updatedCustomer = service.update(customer);
+		CustomerAddress customerAddress = createAddress();
+		Customer updatedCustomer = service.addOrUpdateAddress(customer, customerAddress);
 		assertThat(updatedCustomer.getCustomerGroups())
 			.as("The customer should still have a group")
 			.hasSize(1);
 
 		// Make a change to the address and save to the DB
-		CustomerAddress address = updatedCustomer.getAddresses().get(0);
+		CustomerAddress address = customerAddress;
 		long addressUid = address.getUidPk();
 		String uniqueName = Utils.uniqueCode("name");
 		address.setFirstName(uniqueName);
-		Customer updatedTwiceCustomer = service.update(updatedCustomer);
-		CustomerAddress updatedAddress = updatedTwiceCustomer.getAddressByUid(addressUid);
+		Customer updatedTwiceCustomer = service.addOrUpdateAddress(updatedCustomer, address);
+		CustomerAddress updatedAddress = addressService.findByCustomerAndAddressUid(updatedTwiceCustomer.getUidPk(), addressUid);
 		assertThat(updatedAddress.getUidPk())
 			.as("The updated address should have the same ID")
 			.isEqualTo(addressUid);
@@ -293,8 +294,8 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 			.as("Name should not have changed")
 			.isEqualTo(lastName);
 		assertThat(updatedAddress).isEqualTo(address);
-		Customer updatedThriceCustomer = service.update(updatedTwiceCustomer);
-		CustomerAddress updatedTwiceAddress = updatedThriceCustomer.getAddressByUid(addressUid);
+		Customer updatedThriceCustomer = service.addOrUpdateAddress(updatedTwiceCustomer, updatedAddress);
+		CustomerAddress updatedTwiceAddress = addressService.findByCustomerAndAddressUid(updatedThriceCustomer.getUidPk(), addressUid);
 		assertThat(updatedTwiceAddress.getUidPk())
 			.as("The address of the updated customer should still have the same ID")
 			.isEqualTo(addressUid);
@@ -321,7 +322,9 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		// Assert that we can create an address and not make it the default.
 		customer = service.add(createCustomer());
 		customer = service.addOrUpdateAddress(customer, createAddress());
-		assertThat(customer.getAddresses()).hasSize(1);
+
+		List<CustomerAddress> customerAddresses = addressService.findByCustomer(customer.getUidPk());
+		assertThat(customerAddresses).hasSize(1);
 		assertThat(customer.getPreferredBillingAddress())
 			.as("The customer should not have a preferred billing address.")
 			.isNull();
@@ -330,31 +333,35 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 			.isNull();
 
 		// Assert that we can update an address and not make it the default.
-		address = customer.getAddresses().get(0);
+		address = customerAddresses.get(0);
 		address.setFirstName("a");
 		customer = service.addOrUpdateAddress(customer, address);
-		assertThat(customer.getAddresses()).hasSize(1);
+		customerAddresses = addressService.findByCustomer(customer.getUidPk());
+
+		assertThat(customerAddresses).hasSize(1);
 		assertThat(customer.getPreferredBillingAddress())
 			.as("The customer should not have a preferred billing address.")
 			.isNull();
 		assertThat(customer.getPreferredShippingAddress())
 			.as("The customer should not have a preferred shipping address.")
 			.isNull();
-		assertThat(customer.getAddresses().get(0))
+		assertThat(customerAddresses.get(0))
 			.as("The persisted billing address should equal the in-memory billing address.")
 			.isEqualTo(address);
 
 		// Assert that we can make an existing address the default billing address.
-		address = customer.getAddresses().get(0);
+		address = customerAddresses.get(0);
 		customer = service.addOrUpdateCustomerBillingAddress(customer, address);
-		assertThat(customer.getAddresses().size()).isEqualTo(1);
+		customerAddresses = addressService.findByCustomer(customer.getUidPk());
+
+		assertThat(customerAddresses.size()).isEqualTo(1);
 		assertThat(customer.getPreferredBillingAddress())
 			.as("The customer should have a preferred billing address.")
 			.isEqualTo(address);
 		assertThat(customer.getPreferredShippingAddress())
 			.as("The customer should not have a preferred shipping address.")
 			.isNull();
-		assertThat(customer.getAddresses().get(0))
+		assertThat(customerAddresses.get(0))
 			.as("The persisted billing address should equal the in-memory billing address.")
 			.isEqualTo(address);
 

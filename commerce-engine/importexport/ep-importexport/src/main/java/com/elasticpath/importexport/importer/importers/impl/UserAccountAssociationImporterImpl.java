@@ -4,7 +4,8 @@
 
 package com.elasticpath.importexport.importer.importers.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.customer.UserAccountAssociationDTO;
 import com.elasticpath.domain.customer.UserAccountAssociation;
@@ -20,7 +21,7 @@ public class UserAccountAssociationImporterImpl extends AbstractImporterImpl<Use
 
 	private UserAccountAssociationService userAccountAssociationService;
 
-	private static final Logger LOG = Logger.getLogger(UserAccountAssociationImporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(UserAccountAssociationImporterImpl.class);
 
 	@Override
 	protected String getDtoGuid(final UserAccountAssociationDTO dto) {

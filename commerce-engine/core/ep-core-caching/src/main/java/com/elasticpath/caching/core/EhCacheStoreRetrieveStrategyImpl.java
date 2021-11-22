@@ -9,7 +9,7 @@ import java.util.List;
 
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.util.InvalidatableCache;
 import com.elasticpath.domain.store.Store;

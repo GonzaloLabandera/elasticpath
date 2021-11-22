@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="[EP-DataPopulation] [%p] %m%n" />
+		</Console>
+		<IESummary name="IE_SUMMARY"/>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.elasticpath" level="info" additivity="false">
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="IE_SUMMARY" />
+		</Logger>
+		<Logger name="com.elasticpath.caching.core" level="error" additivity="false">
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="IE_SUMMARY" />
+		</Logger>
+		<Root level="warn">
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="IE_SUMMARY" />
+		</Root>
+	</Loggers>
+</Configuration>

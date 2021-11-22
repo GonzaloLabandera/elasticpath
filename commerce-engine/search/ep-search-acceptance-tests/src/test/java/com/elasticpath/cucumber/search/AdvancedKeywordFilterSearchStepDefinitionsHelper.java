@@ -251,7 +251,7 @@ public class AdvancedKeywordFilterSearchStepDefinitionsHelper {
 		shopper.setGuid("shopper-1");
 		shopper.setStoreCode(scenario.getStore().getCode());
 		CustomerSession customerSession = new CustomerSessionImpl();
-		shopper.updateTransientDataWith(customerSession);                                                                              
+		shopper.setCustomerSession(customerSession);
 		PriceListStackImpl priceListStack = new PriceListStackImpl();
 		priceListStack.addPriceList(PL_GUID);
 		priceListStack.setCurrency(Currency.getInstance("CAD"));

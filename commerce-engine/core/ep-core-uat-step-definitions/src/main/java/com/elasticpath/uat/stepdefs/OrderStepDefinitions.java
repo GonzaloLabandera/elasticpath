@@ -134,7 +134,7 @@ public class OrderStepDefinitions {
 
 			final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
 					.withScenario(scenarioHolder.get())
-					.withCustomerSession(shoppingContext.getCustomerSession());
+					.withShopper(shoppingContext.getShopper());
 
 				orderHolder.set(orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
 										.withShoppingContext(shoppingContext)
@@ -157,7 +157,7 @@ public class OrderStepDefinitions {
 
 		final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
 				.withScenario(scenarioHolder.get())
-				.withCustomerSession(shoppingContext.getCustomerSession());
+				.withShopper(shoppingContext.getShopper());
 
 		orderHolder.set(orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
 				.withShoppingContext(shoppingContext)
@@ -201,7 +201,7 @@ public class OrderStepDefinitions {
 
 		final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
 				.withScenario(scenarioHolder.get())
-				.withCustomerSession(shoppingContext.getCustomerSession());
+				.withShopper(shoppingContext.getShopper());
 
 		final Order order = orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
 				.withNonZeroPhysicalShipment()
@@ -231,7 +231,7 @@ public class OrderStepDefinitions {
 
 		final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
 				.withScenario(scenarioHolder.get())
-				.withCustomerSession(shoppingContext.getCustomerSession());
+				.withShopper(shoppingContext.getShopper());
 
 		final Order order = orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
 				.withNonZeroPhysicalShipment()

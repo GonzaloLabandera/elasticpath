@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.pricelistmanager.policy;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.policy.common.AbstractStatePolicyImpl;

@@ -387,16 +387,6 @@ public class ImportDataTypeInventoryImpl extends AbstractImportDataTypeImpl {
 	}
 
 	/**
-	 * Clear the value objects of the given entity.
-	 * 
-	 * @param entity the entity
-	 */
-	/*
-	 * public void clearValueObjects(final Entity entity) { final ProductSku productSku = (ProductSku) entity; productSku.getInventory().clear(); //
-	 * isn't implemented yet. }
-	 */
-
-	/**
 	 * Check the type of the given persistence object.
 	 * 
 	 * @param object the persistence object

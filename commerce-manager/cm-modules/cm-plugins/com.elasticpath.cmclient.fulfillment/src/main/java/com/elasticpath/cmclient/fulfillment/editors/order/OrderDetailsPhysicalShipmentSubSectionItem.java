@@ -10,8 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.conversion.StringToNumberConverter;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -104,7 +105,7 @@ import com.elasticpath.service.tax.TaxCodeRetriever;
 	"PMD.GodClass", "PMD.PrematureDeclaration" })
 public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyListener, SelectionListener {
 
-	private static final Logger LOG = Logger.getLogger(OrderDetailsPhysicalShipmentSubSectionItem.class);
+	private static final Logger LOG = LogManager.getLogger(OrderDetailsPhysicalShipmentSubSectionItem.class);
 
 	private static final String STRING_MINUS = " - "; //$NON-NLS-1$
 

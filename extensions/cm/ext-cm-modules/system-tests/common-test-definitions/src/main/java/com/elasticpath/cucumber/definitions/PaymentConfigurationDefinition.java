@@ -6,7 +6,8 @@ import java.util.Map;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.cortex.dce.payment.PaymentMethodsSteps;
@@ -25,7 +26,7 @@ import com.elasticpath.selenium.util.Utility;
  */
 @SuppressWarnings({"PMD.TooManyMethods"})
 public class PaymentConfigurationDefinition {
-	private static final Logger LOGGER = Logger.getLogger(PaymentConfigurationDefinition.class);
+	private static final Logger LOGGER = LogManager.getLogger(PaymentConfigurationDefinition.class);
 	private static final String PROPERTY_NAME = "Property name";
 	private static final String OLD_VALUE = "Old value";
 	private static final String NEW_VALUE = "New value";
@@ -352,11 +353,11 @@ public class PaymentConfigurationDefinition {
 		final String configurationName = paymentConfiguration.getConfigurationName();
 		final DBConnector dbConnector = new DBConnector();
 
-		dbConnector.executeUpdateQuery("UPDATE TPAYMENTPROVIDERCONFIGDATA SET TPAYMENTPROVIDERCONFIGDATA.CONFIG_DATA='" + value + "' \n"
-				+ "WHERE TPAYMENTPROVIDERCONFIGDATA.CONFIG_KEY='" + configKey + "' \n"
-				+ "AND TPAYMENTPROVIDERCONFIGDATA.PAYMENTPROVIDERCONFIG_UID = \n"
-				+ "(SELECT TPAYMENTPROVIDERCONFIG.UIDPK FROM TPAYMENTPROVIDERCONFIG WHERE TPAYMENTPROVIDERCONFIG"
-				+ ".CONFIGURATION_NAME='" + configurationName + "')");
+		dbConnector.executeUpdateQuery("UPDATE TPAYMENTPROVIDERCONFIGDATA SET CONFIG_DATA='" + value + "' \n"
+				+ "WHERE CONFIG_KEY='" + configKey + "' \n"
+				+ "AND PAYMENTPROVIDERCONFIG_UID = \n"
+				+ "(SELECT UIDPK FROM TPAYMENTPROVIDERCONFIG WHERE "
+				+ "CONFIGURATION_NAME='" + configurationName + "')");
 	}
 
 }

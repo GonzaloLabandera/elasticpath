@@ -23,7 +23,8 @@ import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Random;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.misc.RandomGuid;
@@ -77,7 +78,7 @@ public class RandomGuidImpl implements RandomGuid {
 	 */
 	private static final long serialVersionUID = 5000000001L;
 
-	private static final Logger LOG = Logger.getLogger(RandomGuidImpl.class);
+	private static final Logger LOG = LogManager.getLogger(RandomGuidImpl.class);
 
 	private static final String VALUE_DASH = "-";
 

@@ -5,8 +5,9 @@ package com.elasticpath.cmclient.core.dialog.value.dialog;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -33,7 +34,7 @@ public class DecimalDialog extends AbstractValueDialog<BigDecimal> implements
 	/**
 	 * A logger for this class.
 	 */
-	protected static final Logger LOG = Logger.getLogger(DecimalDialog.class);
+	protected static final Logger LOG = LogManager.getLogger(DecimalDialog.class);
 
 	/**
 	 * the text area for decimal value input.

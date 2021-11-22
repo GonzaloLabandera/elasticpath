@@ -12,7 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,7 +32,7 @@ import com.elasticpath.persistence.dao.PropertyLoaderAware;
  */
 public class PropertiesDaoLoaderFactoryImpl<T extends PropertyLoaderAware> implements FactoryBean<T>, InitializingBean, ApplicationContextAware {
 
-	private static final Logger LOG = Logger.getLogger(PropertiesDaoLoaderFactoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PropertiesDaoLoaderFactoryImpl.class);
 	private final Properties loadedProperties = new Properties();
 	private ResourcePatternResolver resourceLoader;
 	private Class<T> objectType;

@@ -144,7 +144,7 @@
 	<bean id="inventoryJournalRollupTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
 		<property name="jobDetail" ref="inventoryJournalRollupJob" />
 		<property name="startDelay" value="30000" /> <!-- wait 30 seconds after startup -->
-		<property name="repeatInterval" value="86400000" /> <!-- then run every 24 hours -->
+		<property name="repeatInterval" value="60000" /> <!-- then run every minute -->
 	</bean>
 
     <!-- 

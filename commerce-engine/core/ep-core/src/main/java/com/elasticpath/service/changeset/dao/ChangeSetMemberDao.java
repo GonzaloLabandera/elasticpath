@@ -27,15 +27,6 @@ public interface ChangeSetMemberDao {
 	Collection<BusinessObjectMetadata> findBusinessObjectMetadataByGroupId(String guid);
 
 	/**
-	 * Finds business object meta data by business object descriptor.
-	 *
-	 * @param businessObjectDescriptor business object descriptor
-	 * @return the collection of business object meta data
-	 */
-	Collection<BusinessObjectMetadata> findBusinessObjectMetadataByDescriptor(BusinessObjectDescriptor businessObjectDescriptor);
-
-
-	/**
 	 * Removes business object and its meta data by object descriptor.
 	 *
 	 * @param objectDescriptor the business object descriptor

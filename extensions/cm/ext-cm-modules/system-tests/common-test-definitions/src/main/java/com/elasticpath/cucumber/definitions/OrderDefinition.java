@@ -20,7 +20,9 @@ import cucumber.api.java.en.When;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.cortexTestObjects.Purchase;
@@ -77,8 +79,7 @@ public class OrderDefinition {
 	private static final String REFUND_OPTION = "Refund Option";
 	private static final String MANUAL_REFUND = "Manual Refund";
 
-
-	private static final Logger LOGGER = Logger.getLogger(OrderDefinition.class);
+	private static final Logger LOGGER = LogManager.getLogger(OrderDefinition.class);
 	private static final String HOLD_ALL_ORDERS_FOR_STORE_SETTING = "COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore";
 
 	private final CustomerServiceNavigation customerServiceNavigation;

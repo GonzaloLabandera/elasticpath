@@ -28,9 +28,9 @@
 						<configuration>
 							<artifacts>
 								<artifact>
-									<file>cm-rap32.target</file>
+									<file>cm-rap.target</file>
 									<type>target</type>
-									<classifier>cm-rap32</classifier>
+									<classifier>cm-rap</classifier>
 								</artifact>
 							</artifacts>
 						</configuration>

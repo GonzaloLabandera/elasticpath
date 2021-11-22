@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.admin.taxes.views;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.Separator;
@@ -35,7 +36,7 @@ import com.elasticpath.service.tax.TaxJurisdictionService;
 public class TaxJurisdictionsListView extends AbstractListView {
 
 	/** The logger. */
-	protected static final Logger LOG = Logger.getLogger(TaxJurisdictionsListView.class);
+	protected static final Logger LOG = LogManager.getLogger(TaxJurisdictionsListView.class);
 
 	/** The View's ID. */
 	public static final String VIEW_ID = "com.elasticpath.cmclient.admin.taxes.views.TaxJurisdictionListView"; //$NON-NLS-1$

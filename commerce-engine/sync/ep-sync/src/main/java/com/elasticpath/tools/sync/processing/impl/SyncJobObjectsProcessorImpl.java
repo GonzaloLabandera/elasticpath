@@ -5,7 +5,8 @@ package com.elasticpath.tools.sync.processing.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.persistence.api.EpPersistenceException;
@@ -27,7 +28,7 @@ import com.elasticpath.tools.sync.target.result.Summary;
  */
 public class SyncJobObjectsProcessorImpl implements SyncJobObjectProcessor {
 
-	private static final Logger LOG = Logger.getLogger(SyncJobObjectsProcessorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SyncJobObjectsProcessorImpl.class);
 
 	private SyncBeanFactory syncBeanFactory;
 

@@ -6,7 +6,8 @@ package com.elasticpath.importexport.common.transformers.impl;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.transformers.Transformer;
 import com.elasticpath.importexport.common.util.runner.AbstractPipedStreamRunner;
@@ -18,7 +19,7 @@ import com.elasticpath.importexport.common.util.runner.AbstractPipedStreamRunner
  */
 public abstract class AbstractTransformerImpl implements Transformer {
 
-	private static final Logger LOG = Logger.getLogger(AbstractTransformerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractTransformerImpl.class);
 
 	/**
 	 * Perform actual transformation.

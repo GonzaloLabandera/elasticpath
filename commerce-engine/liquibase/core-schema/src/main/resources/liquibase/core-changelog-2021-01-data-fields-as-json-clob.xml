@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-01-data-fields-as-json-clob.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+	<changeSet id="PB-8894-data-fields-as-json-clob" author="elasticpath">
+		<validCheckSum>8:6cdcb06a753bacc7448aa13603f8685f</validCheckSum>
+		<comment>[PB-8894] CLOB Cart(Item) and Order(Item) data fields</comment>
+		<addColumn tableName="TORDER">
+			<column name="MODIFIER_FIELDS" type="clob"/>
+			<column name="HAS_MODIFIERS" type="boolean" defaultValueBoolean="true"/>
+		</addColumn>
+		<addColumn tableName="TORDERSKU">
+			<column name="MODIFIER_FIELDS" type="clob"/>
+			<column name="HAS_MODIFIERS" type="boolean" defaultValueBoolean="true"/>
+		</addColumn>
+		<addColumn tableName="TSHOPPINGCART">
+			<column name="MODIFIER_FIELDS" type="clob"/>
+			<column name="HAS_MODIFIERS" type="boolean" defaultValueBoolean="true"/>
+		</addColumn>
+		<addColumn tableName="TCARTITEM">
+			<column name="MODIFIER_FIELDS" type="clob"/>
+			<column name="HAS_MODIFIERS" type="boolean" defaultValueBoolean="true" />
+		</addColumn>
+	</changeSet>
+
+	<!-- ============ Migrate TCARTDATA table ================== -->
+	<changeSet id="PB-8894-CLOB-cart-data" author="elasticpath">
+		<comment>[PB-8894] CLOBing TCARTDATA fields to TSHOPPINGCART.MODIFIER_FIELDS</comment>
+		<customChange class="liquibase.ext.elasticpath.migration.modifierfields.ClobModifierFields">
+			<param name="tableName">TCARTDATA</param>
+		</customChange>
+	</changeSet>
+	<!-- ============ Drop TCARTDATA table ================== -->
+	<changeSet id="PB-8894-CLOB-drop-cart-data-table-and-sequencer" author="elasticpath">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="TCARTDATA"/>
+		</preConditions>
+		<dropTable tableName="TCARTDATA" />
+
+		<delete tableName="JPA_GENERATED_KEYS">
+			<where>ID = 'TCARTDATA'</where>
+		</delete>
+	</changeSet>
+
+	<!-- ============ Migrate TORDERDATA table ================== -->
+	<changeSet id="PB-8894-CLOB-order-data" author="elasticpath">
+		<comment>[PB-8894] CLOBing TORDERDATA fields to TORDER.MODIFIER_FIELDS</comment>
+
+		<customChange class="liquibase.ext.elasticpath.migration.modifierfields.ClobModifierFields">
+			<param name="tableName">TORDERDATA</param>
+		</customChange>
+	</changeSet>
+	<!-- ============ Drop TORDERDATA table ================== -->
+	<changeSet id="PB-8894-CLOB-drop-order-data-table-and-sequencer" author="elasticpath">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="TORDERDATA"/>
+		</preConditions>
+		<dropTable tableName="TORDERDATA" />
+
+		<delete tableName="JPA_GENERATED_KEYS">
+			<where>ID = 'TORDERDATA'</where>
+		</delete>
+	</changeSet>
+
+	<!-- ============ Migrate TORDERITEMDATA table ================== -->
+	<changeSet id="PB-8894-CLOB-order-item-data" author="elasticpath">
+		<comment>[PB-8894] CLOBing TORDERITEMDATA fields to TORDERSKU.MODIFIER_FIELDS</comment>
+
+		<customChange class="liquibase.ext.elasticpath.migration.modifierfields.ClobModifierFields">
+			<param name="tableName">TORDERITEMDATA</param>
+		</customChange>
+	</changeSet>
+	<!-- ============ Drop TORDERITEMDATA table ================== -->
+	<changeSet id="PB-8894-CLOB-drop-order-item-data-table-and-sequencer" author="elasticpath">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="TORDERITEMDATA"/>
+		</preConditions>
+		<dropTable tableName="TORDERITEMDATA" />
+
+		<delete tableName="JPA_GENERATED_KEYS">
+			<where>ID = 'TORDERITEMDATA'</where>
+		</delete>
+	</changeSet>
+
+	<!-- ============ Migrate TSHOPPINGITEMDATA table ================== -->
+	<changeSet id="PB-8894-CLOB-cart-item-data" author="elasticpath">
+		<comment>[PB-8894] CLOBing TSHOPPINGITEMDATA fields to TCARTITEM.MODIFIER_FIELDS</comment>
+
+		<customChange class="liquibase.ext.elasticpath.migration.modifierfields.ClobModifierFields">
+			<param name="tableName">TSHOPPINGITEMDATA</param>
+		</customChange>
+	</changeSet>
+	<!-- ============ Drop TSHOPPINGITEMDATA table ================== -->
+	<changeSet id="PB-8894-CLOB-drop-shopping-item-data-table-and-sequencer" author="elasticpath">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="TSHOPPINGITEMDATA"/>
+		</preConditions>
+		<dropTable tableName="TSHOPPINGITEMDATA" />
+
+		<delete tableName="JPA_GENERATED_KEYS">
+			<where>ID = 'TSHOPPINGITEMDATA'</where>
+		</delete>
+	</changeSet>
+</databaseChangeLog>

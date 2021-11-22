@@ -9,14 +9,15 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.BrowsableEndpoint;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 
 /**
  * Implementation of <code>CamelContextMessagePurger</code> that purges the context by draining all BrowsableEndpoints.
  */
 public class CamelContextEndpointDrainerImpl implements CamelContextMessagePurger {
-	private static final Logger LOG = Logger.getLogger(CamelContextEndpointDrainerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CamelContextEndpointDrainerImpl.class);
 	private static final long POLLING_CONSUMER_RECEIVE_TIMEOUT = 5000;
 
 	/**

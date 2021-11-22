@@ -3,8 +3,9 @@
  */
 package com.elasticpath.cmclient.admin.users.views;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -52,7 +53,7 @@ import com.elasticpath.service.store.StoreService;
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass" })
 public class UserSearchView extends AbstractCmClientView {
 
-	private static final Logger LOG = Logger.getLogger(UserSearchView.class);
+	private static final Logger LOG = LogManager.getLogger(UserSearchView.class);
 	
 	/** The View's ID. */
 	public static final String VIEW_ID = "com.elasticpath.cmclient.admin.users.views.UserSearchView"; //$NON-NLS-1$

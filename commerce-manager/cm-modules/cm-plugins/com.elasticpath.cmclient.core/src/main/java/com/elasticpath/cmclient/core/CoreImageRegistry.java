@@ -198,6 +198,9 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	/** Change pagination icon. */
 	public static final ImageDescriptor CHANGE_PAGINATION = getImageDescriptor(PLUGIN_ID, "pagination-change_default_22.png"); //$NON-NLS-1$
 
+	/** About application icon. */
+	public static final ImageDescriptor ABOUT_APPLICATION = getImageDescriptor(PLUGIN_ID, "help_default_22.png"); //$NON-NLS-1$
+
 	/** Open icon. */
 	public static final ImageDescriptor IMAGE_OPEN = getImageDescriptor(PLUGIN_ID, "baseline-open_in_new-22px.png"); //$NON-NLS-1$
 

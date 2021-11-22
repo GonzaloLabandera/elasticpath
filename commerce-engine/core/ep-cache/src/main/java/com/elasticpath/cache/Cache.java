@@ -4,9 +4,11 @@
 package com.elasticpath.cache;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import com.elasticpath.base.cache.CacheResult;
 
 /**
  * EP Specific Cache interface.  Note that this interface is a strict subset of {@link javax.cache.Cache}.
@@ -35,90 +37,6 @@ public interface Cache<K, V> {
 	CacheResult<V> get(K key);
 
 	/**
-	 * Gets an entry from the cache using a partial key.
-	 *
-	 * The key is considered partial if one or more fields do not participate in the <strong>hash-code</strong> calculation but they do participate
-	 * in <strong>equals</strong>.
-	 * Partial keys <strong>MUST</strong> be composite objects and implement <strong>equals</strong> method using <strong>||</strong> (vs &&) operator
-	 * (unlike typical implementation of the <strong>equals</strong> method) between all participating fields that uniquely identify the key.
-	 * The <strong>hashCode</strong> MUST include only 1 field, the one that will be the most searched by.
-	 *
-	 * This breaks the usual contract when implementing <strong>equals</strong> and <strong>hashCode</strong> methods but it allows
-	 * re-purposing of the same cache.
-	 *
-	 * The concept is very similar to RDBMS, with primary and foreign keys.
-	 *
-	 * Partial keys perform very well in Ehcache caches with less than <strong>one million</strong> entries and they are by no means slower
-	 * than <strong>hashCode</strong> search (O(N) vs O(1); it also depends on the position of the target value in the list of keys).
-	 *
-	 * While other map-based structures require full-table scan (and thus O(N) performance), {@link java.util.TreeMap} offers O(log N) retrieval
-	 * and excellent performance.
-	 *
-	 * When designing a cache with partial keys, the first consideration is to determine which field(s) will be used the most.
-	 * Such fields should be used in <strong>hashCode</strong> while others excluded and used only in <string>equals</string>.
-	 *
-	 * All key fields <strong>MUST</strong> uniquely identify the target object and guarantee that a single match will be returned.
-	 *
-	 * In the following example, CompoundKey can be used for searching entities by <strong>uidPk</strong> field and <strong>hashCode</strong>
-	 * or by either <strong>guid</strong> or <strong>code</strong> fields, using <strong>equals</strong>.
-	 *
-	 * <code>
-	 *     public class CompoundKey {
-	 *     		private Long uidPkIdx;
-	 *     		private String guidIdx;
-	 *     		private String codeIdx;
-	 *
-	 *     		public void setUidPkIdx(Long uidPkIdx) {
-	 *     			this.uidPkIdx = uidPkIdx;
-	 *     		}
-	 *
-	 *     		public void setGuidIdx(String guidIdx) {
-	 *     			this.guidIdx = guidIdx;
-	 *     		}
-	 *
-	 *     		public void setCodeIdx(String codeIdx) {
-	 *     			this.codeIdx = codeIdx;
-	 *     		}
-	 *			@Override
-	 *     		public boolean equals(Object object) {
-	 *				if (this == o) {
-	 *				 	return true;
-	 *				}
-	 *				if (o == null || getClass() != o.getClass()) {
-	 *				 	return false;
-	 *				}
-	 *
-	 *				CompoundKey that = (CompoundKey) o;
-	 *
-	 *				return Objects.equals(uidPkIdx, that.uidPkIdx)
-	 *				 || Objects.equals(guidIdx, that.guidIdx)
-	 *				 || Objects.equals(codeIdx, that.codeIdx);
-	 *     		}
-	 *
-	 *     		@Override
-	 *			public int hashCode() {
-	 *				return Objects.hash(uidPkIdx);
-	 *			}
-	 *     }
-	 * </code>
-	 * @param partialKey The key with parital data to search for.
-	 * @return wrapped result.
-	 */
-	default CacheResult<V> getByPartialKey(K partialKey) {
-		return CacheResult.notPresent();
-	}
-
-	/**
-	 * Return all values from the cache that correspond to the partial key.
-	 *
-	 * @param partialKey the partial key
-	 * @return null if no values are found, otherwise a list of found values.
-	 */
-	default List<V> getAllByPartialKey(K partialKey) {
-		return null;
-	}
-
-	/**
 	 * Retrieves an object from cache using the given key, falling back on the fallbackLoader if it's not present.
 	 *
 	 * @param key            the name of the key to retrieve the object by
@@ -127,6 +45,18 @@ public interface Cache<K, V> {
 	 * @throws NullPointerException if either argument is null
 	 */
 	V get(K key, Function<K, V> fallbackLoader);
+
+	/**
+	 * Retrieves an object from cache using the given key, falling back on the fallbackLoader if it's not present.
+	 * The populateCacheFunction provides custom cache population when simple put is not enough.
+	 *
+	 * @param key            the name of the key to retrieve the object by
+	 * @param fallbackLoader a cache loader to use to load the value if the value cannot be found in cache
+	 * @param populateCacheFunction custom cache population function
+	 * @return the value
+	 * @throws NullPointerException if either argument is null
+	 */
+	V get(K key, Function<K, V> fallbackLoader, BiFunction<K, V, V> populateCacheFunction);
 
 	/**
 	 * Retrieves a map with cached values using given keys.
@@ -161,6 +91,7 @@ public interface Cache<K, V> {
 	 *
 	 * @param key   key with which the specified value is to be associated
 	 * @param value value to be associated with the specified key
+	 * @return the value
 	 * @throws NullPointerException  if key is null or if value is null
 	 * @throws ClassCastException    if the implementation is configured to perform
 	 *                               runtime-type-checking, and the key or value
@@ -168,7 +99,7 @@ public interface Cache<K, V> {
 	 *                               configured for the {@link Cache}
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	void put(K key, V value);
+	V put(K key, V value);
 
 	/**
 	 * Removes the mapping for a key from this cache if it is present.

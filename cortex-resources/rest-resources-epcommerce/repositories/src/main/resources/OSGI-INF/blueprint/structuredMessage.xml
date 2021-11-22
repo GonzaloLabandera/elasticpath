@@ -93,4 +93,26 @@
 		<property name="cartOrderRepository" ref="cartOrderRepository"/>
 	</bean>
 
+	<bean id="structuredErrorMessageConverter" class="com.elasticpath.xpf.converters.StructuredErrorMessageConverter">
+		<property name="structuredErrorMessageTypeConverter" ref="structuredErrorMessageTypeConverter" />
+		<property name="structuredErrorResolutionConverter" ref="structuredErrorResolutionConverter" />
+	</bean>
+
+	<bean id="structuredErrorMessageTypeConverter" class="com.elasticpath.xpf.converters.StructuredErrorMessageTypeConverter">
+	</bean>
+
+	<bean id="structuredErrorResolutionConverter" class="com.elasticpath.xpf.converters.StructuredErrorResolutionConverter">
+	</bean>
+
+	<bean id="xpfStructuredErrorMessageConverter" class="com.elasticpath.xpf.converters.XPFStructuredErrorMessageConverter">
+		<property name="xpfStructuredErrorMessageTypeConverter" ref="xpfStructuredErrorMessageTypeConverter" />
+		<property name="xpfStructuredErrorResolutionConverter" ref="xpfStructuredErrorResolutionConverter" />
+	</bean>
+
+	<bean id="xpfStructuredErrorMessageTypeConverter" class="com.elasticpath.xpf.converters.XPFStructuredErrorMessageTypeConverter">
+	</bean>
+
+	<bean id="xpfStructuredErrorResolutionConverter" class="com.elasticpath.xpf.converters.XPFStructuredErrorResolutionConverter">
+	</bean>
+
 </beans>

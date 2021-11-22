@@ -10,7 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
@@ -44,7 +45,7 @@ import com.elasticpath.cmclient.core.CoreImageRegistry;
 @SuppressWarnings("PMD.GodClass")
 public class SimplifiedCoolbarManager extends CoolBarManager2 implements PerspectiveService {
 
-	private static final Logger LOG = Logger.getLogger(SimplifiedCoolbarManager.class);
+	private static final Logger LOG = LogManager.getLogger(SimplifiedCoolbarManager.class);
 	private static final int MAX_POSITION_PERCENT = 100; //100% of the parent composite
 	private static final int HALF_POSITION_PERCENT = 50; //50% of the parent composite
 

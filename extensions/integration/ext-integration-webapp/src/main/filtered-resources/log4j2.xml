@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="FILE"
+			fileName="${user.home}/ep/logs/ep-integration.log"
+			append="false">
+			<PatternLayout
+				pattern="%d{DEFAULT} [%t] %p %c %notEmpty{%ndc }- %m%n" />
+		</File>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="[EP-Integration] %-5p %t %d{ISO8601} %c - %m%n" />
+		</Console>
+		<IESummary name="IE_SUMMARY"/>
+	</Appenders>
+	<Loggers>
+		<Logger name="openjpa" level="ERROR" additivity="false">
+			${ep.log.to}
+			<AppenderRef ref="IE_SUMMARY" />
+		</Logger>
+		<Logger name="com.elasticpath" level="${ep.log.level}" additivity="false">
+			${ep.log.to}
+			<AppenderRef ref="IE_SUMMARY" />
+		</Logger>
+		<Logger name="com.elasticpath.extensions" level="${ep.log.level}" additivity="false">
+			${ep.log.to}
+			<AppenderRef ref="IE_SUMMARY" />
+		</Logger>
+		<Root level="warn">
+			${ep.log.to}
+			<AppenderRef ref="IE_SUMMARY" />
+		</Root>
+	</Loggers>
+</Configuration>

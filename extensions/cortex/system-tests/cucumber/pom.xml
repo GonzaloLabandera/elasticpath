@@ -18,11 +18,11 @@
 	</description>
 
 	<properties>
-		<groovy.http-builder>0.7.1</groovy.http-builder>
-
 		<enableTrustedSubjectHeaderMode>false</enableTrustedSubjectHeaderMode>
 		<cargo.jvmargs.search>-ea</cargo.jvmargs.search>
-		<cargo.jvmargs.cortex>-ea -XX:+HeapDumpOnOutOfMemoryError -Dfelix.fileinstall.dir=${project.build.testOutputDirectory}/cortex/system/config -DenableTrustedSubjectHeaderMode=${enableTrustedSubjectHeaderMode}</cargo.jvmargs.cortex>
+		<!-- Suppress various warnings and exceptions with these JVM sys properties -->
+		<cargo.jvmargs.cortex.search>-Dep.search.mode=${ep.search.mode} -Dep.search.primary.url=${ep.search.url}</cargo.jvmargs.cortex.search>
+		<cargo.jvmargs.cortex>-ea -XX:+HeapDumpOnOutOfMemoryError -Dfelix.fileinstall.dir=${project.build.testOutputDirectory}/cortex/system/config -DenableTrustedSubjectHeaderMode=${enableTrustedSubjectHeaderMode} ${cargo.jvmargs.cortex.search}</cargo.jvmargs.cortex>
 		<cargo.jvmargs.cortex.jmx>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=6969 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false</cargo.jvmargs.cortex.jmx>
 		<cargo.jvmargs.cortex.logback.threshold>-Dep.logback.console.threshold</cargo.jvmargs.cortex.logback.threshold>
 		<cargo.jvmargs.ep.external.ehcache.xml.path>-Dep.external.ehcache.xml.path=${project.build.testOutputDirectory}/ehcache-cucumber.xml</cargo.jvmargs.ep.external.ehcache.xml.path>
@@ -37,11 +37,6 @@
 
 		<charset.encoding>UTF-8</charset.encoding>
 
-		<datasource.url>jdbc:h2:${project.build.directory}/database/CORTEXDB;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE</datasource.url>
-		<datasource.driver>org.h2.Driver</datasource.driver>
-		<datasource.username>sa</datasource.username>
-		<datasource.password>sa</datasource.password>
-
 		<ep.catalog.batch.database.drop.script>CLASSPATH:org/springframework/batch/core/schema-drop-h2.sql</ep.catalog.batch.database.drop.script>
 		<ep.catalog.batch.database.create.script>CLASSPATH:org/springframework/batch/core/schema-h2.sql</ep.catalog.batch.database.create.script>
 		<ep.catalog.batch.non.jta.datasource>dataSource</ep.catalog.batch.non.jta.datasource>
@@ -49,36 +44,60 @@
 		<epdb.systemtest.username>${epdb.username}</epdb.systemtest.username>
 		<epdb.systemtest.password>${epdb.password}</epdb.systemtest.password>
 
+		<ep-core-tool.jdbcUrl>${epdb.url}</ep-core-tool.jdbcUrl>
+		<ep-core-tool.jdbcDriverClass>${epdb.jdbc.driver}</ep-core-tool.jdbcDriverClass>
+		<ep-core-tool.jdbcPassword>${epdb.password}</ep-core-tool.jdbcPassword>
+		<ep-core-tool.jdbcUsername>${epdb.username}</ep-core-tool.jdbcUsername>
+
 	</properties>
 
 	<profiles>
 		<profile>
 			<id>setup-local-integration-test</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>!skipAllTests</name>
+				</property>
 			</activation>
 			<properties>
 				<ep.cortex.port.http>${ep.cortex.itest.port.http}</ep.cortex.port.http>
 				<ep.search.port.http>${ep.search.itest.port.http}</ep.search.port.http>
 				<ep.jms.port.tcp>${ep.activemq.dynamic.itests.port}</ep.jms.port.tcp>
 				<ep.activemq.configUri>broker:(${ep.activemq.url})?useJmx=false&amp;persistent=false&amp;useShutdownHook=false&amp;brokerName=${ep.jms.host}${ep.jms.port.tcp}</ep.activemq.configUri>
-				<epdb.maven.groupId>com.h2database</epdb.maven.groupId>
-				<epdb.maven.artifactId>h2</epdb.maven.artifactId>
-				<epdb.maven.version>${com.h2database.version}</epdb.maven.version>
-				<epdb.jdbc.driver>${datasource.driver}</epdb.jdbc.driver>
-				<epdb.url>${datasource.url}</epdb.url>
+
+				<!-- Option AUTO_SERVER=TRUE enables multiple access to same db since it needs modification before tests -->
+				<h2.file.epdb.url>jdbc:h2:file:${project.build.directory}/database/COMMONTESTDB;AUTO_SERVER=TRUE</h2.file.epdb.url>
+				<!-- Option DB_CLOSE_DELAY=-1 keeps tomcat container shutdown properly without outputting annoying error -->
+				<h2.file.for.tomcat.epdb.url>${h2.file.epdb.url};DB_CLOSE_DELAY=-1</h2.file.for.tomcat.epdb.url>
+				<h2.epdb.jdbc.driver>org.h2.Driver</h2.epdb.jdbc.driver>
+				<h2.epdb.username>sa</h2.epdb.username>
+				<h2.epdb.password>sa</h2.epdb.password>
+				<h2.epdb.maven.groupId>com.h2database</h2.epdb.maven.groupId>
+				<h2.epdb.maven.artifactId>h2</h2.epdb.maven.artifactId>
+				<h2.epdb.maven.version>${com.h2database.version}</h2.epdb.maven.version>
+
+				<epdb.maven.groupId>${h2.epdb.maven.groupId}</epdb.maven.groupId>
+				<epdb.maven.artifactId>${h2.epdb.maven.artifactId}</epdb.maven.artifactId>
+				<epdb.maven.version>${h2.epdb.maven.version}</epdb.maven.version>
+
 				<!-- override the db uid/pwd to the values for the local h2 db -->
-				<epdb.systemtest.username>${datasource.username}</epdb.systemtest.username>
-				<epdb.systemtest.password>${datasource.password}</epdb.systemtest.password>
-				<!-- provide an initial dummy value so that integration server will pass validation of this parameter,
-				 but just fail to send emails during tests -->
-				<ep.systemtest.smtp.host>systemtest.smtp.company.com</ep.systemtest.smtp.host>
+				<epdb.jdbc.driver>${h2.epdb.jdbc.driver}</epdb.jdbc.driver>
+				<epdb.url>${h2.file.epdb.url}</epdb.url>
+				<epdb.ro.url>${h2.file.epdb.url}</epdb.ro.url>
+
+				<epdb.systemtest.username>${h2.epdb.username}</epdb.systemtest.username>
+				<epdb.systemtest.password>${h2.epdb.password}</epdb.systemtest.password>
+
+				<ep-core-tool.jdbcUrl>${h2.file.epdb.url}</ep-core-tool.jdbcUrl>
+				<ep-core-tool.jdbcDriverClass>${h2.epdb.jdbc.driver}</ep-core-tool.jdbcDriverClass>
+				<ep-core-tool.jdbcPassword>${h2.epdb.password}</ep-core-tool.jdbcPassword>
+				<ep-core-tool.jdbcUsername>${h2.epdb.username}</ep-core-tool.jdbcUsername>
+
+				<!-- setting "mail-disabled-for-tests" for smtp host will prevent sending emails and subsequent HostNotFound exceptions -->
+                <ep.systemtest.smtp.host>mail-disabled-for-tests</ep.systemtest.smtp.host>
+				<epdb.validation.query>SELECT 1</epdb.validation.query>
 			</properties>
 			<dependencies>
-				<dependency>
-					<groupId>com.h2database</groupId>
-					<artifactId>h2</artifactId>
-				</dependency>
 				<dependency>
 					<groupId>com.elasticpath.extensions</groupId>
 					<artifactId>ext-search-webapp</artifactId>
@@ -151,17 +170,60 @@
 					<artifactId>log4j-over-slf4j</artifactId>
 				</dependency>
 				<dependency>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-common-test-database</artifactId>
+					<version>${project.version}</version>
+					<type>zip</type>
+					<exclusions>
+						<exclusion>
+							<groupId>com.elasticpath.extensions</groupId>
+							<artifactId>ext-data-population-cli</artifactId>
+						</exclusion>
+						<exclusion>
+							<groupId>com.elasticpath.extensions</groupId>
+							<artifactId>ext-data</artifactId>
+						</exclusion>
+					</exclusions>
 				</dependency>
 				<dependency>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-core</artifactId>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-common-files</artifactId>
+					<version>${project.version}</version>
+					<type>zip</type>
 				</dependency>
 			</dependencies>
 
 			<build>
 				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<!-- apply properties to common files -->
+							<execution>
+								<id>copy-and-filter-common-files</id>
+								<phase>process-test-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.build.testOutputDirectory}/tmp-common-files</directory>
+											<filtering>true</filtering>
+											<includes>**/*</includes>
+											<excludes>**/server.xml</excludes>
+										</resource>
+										<resource>
+											<directory>${project.build.testOutputDirectory}/tmp-common-files</directory>
+											<filtering>false</filtering>
+											<includes>**/server.xml</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 					<!-- Randomly allocates an available port to each of the listed properties -->
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
@@ -197,14 +259,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-dependency-plugin</artifactId>
-						<dependencies>
-							<dependency>
-								<groupId>com.elasticpath.extensions</groupId>
-								<artifactId>cortex-test-h2-database</artifactId>
-								<type>zip</type>
-								<version>${project.version}</version>
-							</dependency>
-						</dependencies>
 						<executions>
 							<execution>
 								<id>unpack-database</id>
@@ -217,10 +271,17 @@
 									<artifactItems>
 										<artifactItem>
 											<groupId>com.elasticpath.extensions</groupId>
-											<artifactId>cortex-test-h2-database</artifactId>
+											<artifactId>ext-common-test-database</artifactId>
 											<overWrite>true</overWrite>
 											<type>zip</type>
 											<outputDirectory>${project.build.directory}/database</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>com.elasticpath.extensions</groupId>
+											<artifactId>ext-common-files</artifactId>
+											<overWrite>true</overWrite>
+											<type>zip</type>
+											<outputDirectory>${project.build.testOutputDirectory}/tmp-common-files</outputDirectory>
 										</artifactItem>
 									</artifactItems>
 								</configuration>
@@ -232,13 +293,13 @@
 						<groupId>com.elasticpath.tools</groupId>
 						<artifactId>ep-core-tool</artifactId>
 						<configuration>
-							<jdbcUrl>jdbc:h2:${project.build.directory}/database/CORTEXDB;AUTO_SERVER=TRUE</jdbcUrl>
-							<jdbcDriverClass>org.h2.Driver</jdbcDriverClass>
-							<jdbcPassword>sa</jdbcPassword>
-							<jdbcUsername>sa</jdbcUsername>
+							<skip>${skipAllTests}</skip>
+							<jdbcUrl>${ep-core-tool.jdbcUrl}</jdbcUrl>
+							<jdbcDriverClass>${ep-core-tool.jdbcDriverClass}</jdbcDriverClass>
+							<jdbcUsername>${ep-core-tool.jdbcUsername}</jdbcUsername>
+							<jdbcPassword>${ep-core-tool.jdbcPassword}</jdbcPassword>
 							<jdbcConnectionPoolMinIdle>0</jdbcConnectionPoolMinIdle>
 							<jdbcConnectionPoolMaxIdle>0</jdbcConnectionPoolMaxIdle>
-							<skip>${skipAllTests}</skip>
 						</configuration>
 						<executions>
 							<execution>
@@ -395,33 +456,11 @@
 											<cargo.rmi.port>${integration.cargo.rmi.port}</cargo.rmi.port>
 											<cargo.tomcat.shutdown.port>${integration.cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
 
-											<cargo.datasource.url>${datasource.url}</cargo.datasource.url>
-											<cargo.datasource.driver>${datasource.driver}</cargo.datasource.driver>
-											<cargo.datasource.username>${datasource.username}</cargo.datasource.username>
-											<cargo.datasource.password>${datasource.password}</cargo.datasource.password>
-											<cargo.datasource.jndi>jdbc/epjndi</cargo.datasource.jndi>
-											<cargo.datasource.factory>${ep.jndi.factory}</cargo.datasource.factory>
-											<cargo.datasource.scope>Shareable</cargo.datasource.scope>
-											<cargo.datasource.maxActive>250</cargo.datasource.maxActive>
-											<cargo.datasource.maxIdle>30</cargo.datasource.maxIdle>
-											<cargo.datasource.maxWait>10000</cargo.datasource.maxWait>
-											<cargo.datasource.removeAbandoned>true</cargo.datasource.removeAbandoned>
-											<cargo.datasource.testWhileIdle>true</cargo.datasource.testWhileIdle>
-											<cargo.datasource.validationQuery>${epdb.validation.query}</cargo.datasource.validationQuery>
-
-											<cargo.ep.jms.jndi>jms/JMSConnectionFactory</cargo.ep.jms.jndi>
-											<cargo.ep.jms.type>${ep.jms.type}</cargo.ep.jms.type>
-											<cargo.ep.jms.factory>${ep.jms.factory}</cargo.ep.jms.factory>
-											<cargo.ep.jms.url>${ep.jms.url}</cargo.ep.jms.url>
 											<cargo.start.jvmargs>
-												-Dep.tomcat.maxcachesize=${ep.tomcat.maxcachesize}
 												-Dep.catalog.batch.datasource=${ep.catalog.batch.non.jta.datasource}
 												-Dep.catalog.batch.database.drop.script=${ep.catalog.batch.database.drop.script}
 												-Dep.catalog.batch.database.create.script=${ep.catalog.batch.database.create.script}
-												-Dep.jms.factory=org.apache.activemq.jndi.JNDIReferenceFactory
-												-Dep.jms.type=${ep.jms.type}
-												-Dep.jms.url=${ep.jms.url}
-												-Dep.smtp.host=${ep.systemtest.smtp.host}
+												-Dep.smtp.host=mail-disabled-for-tests
 											</cargo.start.jvmargs>
 										</properties>
 									</configuration>
@@ -512,45 +551,36 @@
 										<groupId>org.slf4j</groupId>
 										<artifactId>jcl-over-slf4j</artifactId>
 									</dependency>
-									<dependency>
-										<groupId>ch.qos.logback</groupId>
-										<artifactId>logback-classic</artifactId>
-									</dependency>
-									<dependency>
-										<groupId>ch.qos.logback</groupId>
-										<artifactId>logback-core</artifactId>
-									</dependency>
 								</dependencies>
 								<systemProperties>
 									<java.awt.headless>true</java.awt.headless>
 									<h2.bindAddress>localhost</h2.bindAddress>
 									<!-- Turn logging down out of the gate.  When slf4j starts at debug things get a bit spammy. -->
 									<org.slf4j.simpleLogger.defaultLogLevel>WARN</org.slf4j.simpleLogger.defaultLogLevel>
+									<epdb.username>${h2.epdb.username}</epdb.username>
+									<epdb.password>${h2.epdb.password}</epdb.password>
+									<epdb.jdbc.driver>${h2.epdb.jdbc.driver}</epdb.jdbc.driver>
+									<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+									<epdb.url>${h2.file.for.tomcat.epdb.url}</epdb.url>
+									<epdb.ro.url>${h2.file.for.tomcat.epdb.url}</epdb.ro.url>
+									<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+									<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+									<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+									<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+									<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+									<ep.jms.type>${ep.jms.type}</ep.jms.type>
+									<ep.jms.url>${ep.jms.url}</ep.jms.url>
 								</systemProperties>
 							</container>
 							<configuration>
 								<properties>
 									<cargo.logging>medium</cargo.logging>
-									<cargo.datasource.url>${datasource.url}</cargo.datasource.url>
-									<cargo.datasource.driver>${datasource.driver}</cargo.datasource.driver>
-									<cargo.datasource.username>${datasource.username}</cargo.datasource.username>
-									<cargo.datasource.password>${datasource.password}</cargo.datasource.password>
-									<cargo.ep.jms.type>${ep.jms.type}</cargo.ep.jms.type>
-									<cargo.ep.jms.factory>${ep.jms.factory}</cargo.ep.jms.factory>
-									<cargo.ep.jms.url>${ep.jms.url}</cargo.ep.jms.url>
-									<cargo.ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</cargo.ep.tomcat.maxcachesize>
 								</properties>
 
 								<files>
 									<copy>
-										<file>${project.basedir}/src/test/resources/tomcat9x/server.xml</file>
+										<file>${project.build.testOutputDirectory}/tomcat9x/server.xml</file>
 										<tofile>conf/server.xml</tofile>
-										<configfile>true</configfile>
-										<overwrite>true</overwrite>
-									</copy>
-									<copy>
-										<file>${project.basedir}/src/test/resources/tomcat9x/context.xml</file>
-										<tofile>conf/context.xml</tofile>
 										<configfile>true</configfile>
 										<overwrite>true</overwrite>
 									</copy>
@@ -738,7 +768,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-jms-test-support</artifactId>
-			<version>${dce.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
@@ -768,11 +797,15 @@
 				<groupId>com.elasticpath.tools</groupId>
 				<artifactId>ep-core-tool</artifactId>
 				<configuration>
+					<!--
+						Since there is a same plugin ep-core-tool which is defined early than this.
+						The following configuration will be overridden when on profile setup-local-integration-test.
+					 -->
 					<skip>${skipAllTests}</skip>
-					<jdbcUrl>${epdb.url}</jdbcUrl>
-					<jdbcDriverClass>${epdb.jdbc.driver}</jdbcDriverClass>
-					<jdbcPassword>${epdb.password}</jdbcPassword>
-					<jdbcUsername>${epdb.username}</jdbcUsername>
+					<jdbcUrl>${ep-core-tool.jdbcUrl}</jdbcUrl>
+					<jdbcDriverClass>${ep-core-tool.jdbcDriverClass}</jdbcDriverClass>
+					<jdbcUsername>${ep-core-tool.jdbcUsername}</jdbcUsername>
+					<jdbcPassword>${ep-core-tool.jdbcPassword}</jdbcPassword>
 					<jdbcConnectionPoolMinIdle>0</jdbcConnectionPoolMinIdle>
 					<jdbcConnectionPoolMaxIdle>0</jdbcConnectionPoolMaxIdle>
 				</configuration>
@@ -806,12 +839,12 @@
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-compiler</artifactId>
-						<version>2.9.2-04</version>
+						<version>${groovy.eclipse.compiler.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-batch</artifactId>
-						<version>2.4.15-01</version>
+						<version>${groovy.eclipse.batch.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

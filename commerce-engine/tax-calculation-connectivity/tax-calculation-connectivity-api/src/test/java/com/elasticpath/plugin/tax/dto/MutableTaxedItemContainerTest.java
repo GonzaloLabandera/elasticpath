@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Currency;
 import java.util.Locale;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 
 import com.elasticpath.plugin.tax.domain.TaxAddress;
@@ -119,7 +119,7 @@ public class MutableTaxedItemContainerTest {
 		container2.setOriginAddress(address1);
 		container2.setTaxInclusive(true);
 
-		MutableTaxedItemContainer serialized = (MutableTaxedItemContainer) SerializationUtils.clone(container2);
+		MutableTaxedItemContainer serialized = SerializationUtils.clone(container2);
 		assertEquals(container2, serialized);
 	}
 }

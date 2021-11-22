@@ -12,7 +12,8 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.jms.test.support.JmsChannelType;
 import com.elasticpath.jms.test.support.JmsTestProducer;
@@ -22,7 +23,7 @@ import com.elasticpath.jms.test.support.JmsTestProducer;
  */
 public class ActiveMqTestProducer implements JmsTestProducer {
 
-	private static final Logger LOGGER = Logger.getLogger(ActiveMqTestProducer.class);
+	private static final Logger LOGGER = LogManager.getLogger(ActiveMqTestProducer.class);
 
 	private Connection connection;
 	private Session session;

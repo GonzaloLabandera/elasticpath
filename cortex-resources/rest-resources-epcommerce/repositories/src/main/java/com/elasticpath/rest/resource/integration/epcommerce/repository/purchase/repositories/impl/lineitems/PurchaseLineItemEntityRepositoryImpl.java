@@ -107,7 +107,7 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	}
 
 	private Single<PurchaseLineItemConfigurationEntity> createConfiguration(final OrderSku orderSku) {
-		Map<String, String> fields = orderSku.getFields();
+		Map<String, String> fields = orderSku.getModifierFields().getMap();
 		if (fields != null) {
 			return retrieveModifierFields(orderSku.getSkuGuid())
 					.map(modifierFields -> {

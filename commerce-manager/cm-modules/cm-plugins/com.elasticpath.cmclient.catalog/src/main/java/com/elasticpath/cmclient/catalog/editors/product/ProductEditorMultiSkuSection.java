@@ -5,8 +5,9 @@ package com.elasticpath.cmclient.catalog.editors.product;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -95,7 +96,7 @@ public class ProductEditorMultiSkuSection extends AbstractPolicyAwareEditorPageS
 
 	private final IWorkbenchPage workbenchPage;
 
-	private static final Logger LOG = Logger.getLogger(ProductEditorMultiSkuSection.class);
+	private static final Logger LOG = LogManager.getLogger(ProductEditorMultiSkuSection.class);
 
 	private final ProductSkuService productSkuService = BeanLocator.getSingletonBean(ContextIdNames.PRODUCT_SKU_SERVICE, ProductSkuService.class);
 

@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -61,7 +62,7 @@ public class AccountDetailsAssociatesSection extends AbstractCmClientEditorPageS
 	/** serialVersionUID. */
 	private static final long serialVersionUID = -3131557219939699766L;
 	
-	private static final Logger LOG = Logger.getLogger(AccountDetailsAssociatesSection.class);
+	private static final Logger LOG = LogManager.getLogger(AccountDetailsAssociatesSection.class);
 
 	private static final int COLUMN_WIDTH_ASSOCIATE_NAME = 250;
 	

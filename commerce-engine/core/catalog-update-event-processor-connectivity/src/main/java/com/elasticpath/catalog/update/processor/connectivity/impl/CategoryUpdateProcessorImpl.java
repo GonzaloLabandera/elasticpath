@@ -15,7 +15,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.entity.NameIdentity;
 import com.elasticpath.catalog.entity.category.Category;
@@ -45,7 +46,7 @@ public class CategoryUpdateProcessorImpl implements CategoryUpdateProcessor {
 	 */
 	public static final String PRODUCTS = "products";
 
-	private static final Logger LOGGER = Logger.getLogger(CategoryUpdateProcessorImpl.class);
+	private static final Logger LOGGER = LogManager.getLogger(CategoryUpdateProcessorImpl.class);
 
 	private final ProjectionService<com.elasticpath.domain.catalog.Category, Category> projectionService;
 	private final CategoryWriterRepository repository;
@@ -87,7 +88,7 @@ public class CategoryUpdateProcessorImpl implements CategoryUpdateProcessor {
 
 	@Override
 	public void processCategoryCreated(final com.elasticpath.domain.catalog.Category category) {
-		LOGGER.debug("Category created: " + category.getGuid());
+		LOGGER.debug("Category created: {}", category.getGuid());
 
 		final List<Category> categories = projectionService.buildProjections(category, category.getCatalog());
 		categories.forEach(repository::write);
@@ -95,7 +96,7 @@ public class CategoryUpdateProcessorImpl implements CategoryUpdateProcessor {
 
 	@Override
 	public void processCategoryUpdated(final com.elasticpath.domain.catalog.Category category) {
-		LOGGER.debug("Category updated: " + category.getGuid());
+		LOGGER.debug("Category updated: {}", category.getGuid());
 
 		final List<Category> categories = projectionService.buildProjections(category, category.getCatalog());
 
@@ -128,14 +129,14 @@ public class CategoryUpdateProcessorImpl implements CategoryUpdateProcessor {
 
 	@Override
 	public void processCategoryDeleted(final String guid) {
-		LOGGER.debug("Category deleted: " + guid);
+		LOGGER.debug("Category deleted: {}", guid);
 
 		repository.delete(guid);
 	}
 
 	@Override
 	public void processCategoryLinked(final com.elasticpath.domain.catalog.Category category) {
-		LOGGER.debug("Category linked: " + category.getGuid());
+		LOGGER.debug("Category linked: {}", category.getGuid());
 
 		final List<Category> categories = projectionService.buildProjections(category, category.getCatalog());
 		categories.forEach(repository::write);
@@ -146,7 +147,7 @@ public class CategoryUpdateProcessorImpl implements CategoryUpdateProcessor {
 
 	@Override
 	public void processCategoryIncludedExcluded(final com.elasticpath.domain.catalog.Category linkedCategory, final List<String> stores) {
-		LOGGER.debug("Linked category updated: " + linkedCategory.getGuid());
+		LOGGER.debug("Linked category updated: {}", linkedCategory.getGuid());
 
 		final List<com.elasticpath.domain.catalog.Category> childCategories = extractAllChildCategory(linkedCategory);
 
@@ -170,7 +171,7 @@ public class CategoryUpdateProcessorImpl implements CategoryUpdateProcessor {
 
 	@Override
 	public void processCategoryUnlinked(final String code, final List<String> stores) {
-		LOGGER.debug("Category unlinked: " + code);
+		LOGGER.debug("Category unlinked: {}", code);
 
 		stores.forEach(store -> repository.delete(code, store));
 

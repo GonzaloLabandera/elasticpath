@@ -5,7 +5,7 @@ package com.elasticpath.domain.dataimport.impl;
 
 import java.util.Locale;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cmuser.CmUser;

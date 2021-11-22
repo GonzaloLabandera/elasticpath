@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.giftcertificate.GiftCertificateDTO;
@@ -27,7 +28,7 @@ import com.elasticpath.service.catalog.GiftCertificateService;
  */
 public class GiftCertificateExporter  extends AbstractExporterImpl<GiftCertificate, GiftCertificateDTO, String> {
 	
-	private static final Logger LOG = Logger.getLogger(GiftCertificateExporter.class);
+	private static final Logger LOG = LogManager.getLogger(GiftCertificateExporter.class);
 	
 	private List<String> giftCertificateGuids;
 	

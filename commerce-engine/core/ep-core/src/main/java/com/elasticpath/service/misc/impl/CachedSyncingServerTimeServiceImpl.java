@@ -6,7 +6,8 @@ package com.elasticpath.service.misc.impl;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.service.misc.TimeService;
 
@@ -17,7 +18,7 @@ import com.elasticpath.service.misc.TimeService;
  */
 @SuppressWarnings("PMD.AvoidUsingVolatile")
 public class CachedSyncingServerTimeServiceImpl implements TimeService {
-	private static final Logger LOG = Logger.getLogger(CachedSyncingServerTimeServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CachedSyncingServerTimeServiceImpl.class);
 	private TimeService timeService;
 	private volatile long cacheTimeout;
 	private final AtomicLong drift = new AtomicLong();

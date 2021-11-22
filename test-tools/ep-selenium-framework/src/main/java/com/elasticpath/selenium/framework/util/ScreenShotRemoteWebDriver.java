@@ -2,7 +2,8 @@ package com.elasticpath.selenium.framework.util;
 
 import java.net.URL;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -15,7 +16,7 @@ import org.openqa.selenium.remote.SessionId;
  */
 public class ScreenShotRemoteWebDriver extends RemoteWebDriver {
 
-	private static final Logger LOGGER = Logger.getLogger(RemoteWebDriver.class);
+	private static final Logger LOGGER = LogManager.getLogger(RemoteWebDriver.class);
 
 	/**
 	 * constructor.

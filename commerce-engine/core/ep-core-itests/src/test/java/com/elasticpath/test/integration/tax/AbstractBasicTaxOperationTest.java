@@ -21,13 +21,13 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shipping.Region;
 import com.elasticpath.domain.shipping.ShippingRegion;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.TaxJurisdiction;
@@ -61,7 +61,7 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 
 	protected CustomerAddress address;
 
-	protected CustomerSession customerSession;
+	protected Shopper shopper;
 
 	protected SimpleStoreScenario scenario;
 
@@ -117,7 +117,7 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 		customer = persisterFactory.getStoreTestPersister().createDefaultCustomer(store);
 		address = persisterFactory.getStoreTestPersister().createCustomerAddress("Bond", "James", "1234 Pine Street", "", "Vancouver", "CA", "BC",
 				"V6J5G4", "891312345007");
-		customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(customer);
+		shopper = persisterFactory.getStoreTestPersister().persistShopperWithAssociatedEntities(customer);
 
 		checkoutHelper = new CheckoutHelper(getTac());
 	}

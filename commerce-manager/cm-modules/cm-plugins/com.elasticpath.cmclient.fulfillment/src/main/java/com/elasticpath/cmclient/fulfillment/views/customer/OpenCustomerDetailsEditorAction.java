@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.fulfillment.views.customer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -23,7 +24,7 @@ import com.elasticpath.domain.customer.Customer;
  */
 public class OpenCustomerDetailsEditorAction extends Action implements IDoubleClickListener {
 
-	private static final Logger LOG = Logger.getLogger(OpenCustomerDetailsEditorAction.class);
+	private static final Logger LOG = LogManager.getLogger(OpenCustomerDetailsEditorAction.class);
 
 	private final TableViewer viewer;
 

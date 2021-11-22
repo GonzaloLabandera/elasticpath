@@ -9,7 +9,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -53,7 +54,7 @@ import com.elasticpath.test.util.Utils;
 @SuppressWarnings({ "PMD.TestClassWithoutTestCases", "PMD.AbstractClassWithoutAbstractMethod", "PMD.AbstractNaming" })
 public abstract class DbTestCase extends BasicSpringContextTest {
 
-	private static final Logger LOG = Logger.getLogger(DbTestCase.class);
+	private static final Logger LOG = LogManager.getLogger(DbTestCase.class);
 
 	/** Store scenario. */
 	protected SimpleStoreScenario scenario;

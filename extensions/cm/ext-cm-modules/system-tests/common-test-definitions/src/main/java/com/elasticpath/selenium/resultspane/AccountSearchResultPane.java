@@ -9,6 +9,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
+import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.editor.CustomerEditor;
 
 /**
@@ -27,6 +28,7 @@ public class AccountSearchResultPane extends AbstractPageObject {
 	private static final String ACCOUNT_SEARCH_RESULT_CELL_PARTIAL_MATCH_CSS = ACCOUNT_SEARCH_RESULT_ROW_CSS
 			+ "div[column-id*='%s'][column-num='%s']";
 	private static final String CUSTOMER_EDITOR_TOOLTIP_CSS = "div[widget-id*='Customer #']";
+	private static final String CUSTOMER_EDITOR_TOOLTIP_BUSINESS_NAME_CSS = "div[widget-id*='Customer #%s']";
 
 	public static final String SHARED_ID_COLUMN = "Shared ID";
 	public static final String BUSINESS_NAME_COLUMN = "Business Name";
@@ -34,6 +36,8 @@ public class AccountSearchResultPane extends AbstractPageObject {
 	public static final int BILLING_ADDRESS_COLUMN_INDEX = 4;
 	private static final String OPENED_ACCOUNT = "div[automation-id="
 			+ "'com.elasticpath.cmclient.fulfillment.FulfillmentMessages.CustomerDetails_Tooltip']> div[style*='close.gif']";
+
+	private static final String DELETE_ACCOUNT_BUTTON_CSS = "div[widget-id='Delete Account'][appearance-id='toolbar-button'][seeable='true']";
 
 	/**
 	 * Constructor.
@@ -132,6 +136,18 @@ public class AccountSearchResultPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Select Account and open editor by business name.
+	 *
+	 * @param accountBusinessName the account business name.
+	 * @return the customer editor.
+	 */
+	public CustomerEditor selectAndOpenAccountEditorByBusinessName(final String accountBusinessName) {
+		verifyEntryInList(accountBusinessName, BUSINESS_NAME_COLUMN);
+		doubleClick(getSelectedElement(), CUSTOMER_EDITOR_TOOLTIP_CSS);
+		return new CustomerEditor(getDriver());
+	}
+
+	/**
 	 * Checks if there is entry with provided value in a search result table using full match for expected table value.
 	 *
 	 * @param expectedValue an expected value.
@@ -143,4 +159,18 @@ public class AccountSearchResultPane extends AbstractPageObject {
 				.isTrue();
 	}
 
+	public ConfirmDialog clickDeleteServiceLevelButton() {
+		clickButton(DELETE_ACCOUNT_BUTTON_CSS, "Delete Account");
+		return new ConfirmDialog(getDriver());
+	}
+
+	/**
+	 * Checks if account tab is closed.
+	 * @param businessName business name of the account tab
+	 */
+	public void verifyAccountTabNotExists(final String businessName) {
+		assertThat(isElementPresent(By.cssSelector(String.format(CUSTOMER_EDITOR_TOOLTIP_BUSINESS_NAME_CSS, businessName))))
+				.as("There are opened account tabs")
+				.isFalse();
+	}
 }

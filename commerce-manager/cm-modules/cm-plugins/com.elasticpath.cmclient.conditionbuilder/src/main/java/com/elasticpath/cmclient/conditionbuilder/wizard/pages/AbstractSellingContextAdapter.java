@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.conditionbuilder.wizard.pages;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditions.SellingContextResolver;
 import com.elasticpath.cmclient.core.BeanLocator;

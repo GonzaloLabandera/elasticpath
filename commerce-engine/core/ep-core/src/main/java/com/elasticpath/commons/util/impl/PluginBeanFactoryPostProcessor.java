@@ -6,7 +6,8 @@ package com.elasticpath.commons.util.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
@@ -19,7 +20,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  *  to modify the original base configuration files.
  */
 public class PluginBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
-	private static final Logger LOG = Logger.getLogger(PluginBeanFactoryPostProcessor.class);
+	private static final Logger LOG = LogManager.getLogger(PluginBeanFactoryPostProcessor.class);
 
 	private String extensionBeanName;
 	private String extensionClassName;

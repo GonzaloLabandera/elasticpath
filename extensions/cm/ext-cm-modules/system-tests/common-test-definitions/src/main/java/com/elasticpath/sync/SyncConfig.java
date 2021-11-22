@@ -1,5 +1,6 @@
 package com.elasticpath.sync;
 
+import static com.elasticpath.base.util.ProcessBuilderUtils.execWithRedirectedErrorStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
@@ -10,7 +11,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.selenium.domainobjects.ReplaceString;
 import com.elasticpath.selenium.framework.util.PropertyManager;
@@ -27,7 +29,7 @@ public class SyncConfig {
 	private final String syncCliPath;
 	private static final String SYNC_FILE_NAME = "sync.sh";
 	private URL loc;
-	private static final Logger LOGGER = Logger.getLogger(SyncConfig.class);
+	private static final Logger LOGGER = LogManager.getLogger(SyncConfig.class);
 	private final ReplaceString replaceString;
 
 	/**
@@ -60,11 +62,11 @@ public class SyncConfig {
 		BufferedReader bufferedReader = null;
 		try {
 			loc = getClass().getClassLoader().getResource("sync.sh");
-			Runtime.getRuntime().exec("chmod 777 " + loc.getPath()).waitFor();
-			Runtime.getRuntime().exec("chmod 777 " + syncCliPath + "/synctool.sh").waitFor();
+			execWithRedirectedErrorStream("chmod 777 " + loc.getPath()).waitFor();
+			execWithRedirectedErrorStream("chmod 777 " + syncCliPath + "/synctool.sh").waitFor();
 			String[] cmd = {loc.getPath(), resourseFolderPath + "/" + propertyManager.getProperty("sync.cli"), changeSetGuid};
 			LOGGER.info("cmd ...... : " + resourseFolderPath + "/" + propertyManager.getProperty("sync.cli") + " changeSetGuid: " + changeSetGuid);
-			process = Runtime.getRuntime().exec(cmd);
+			process = execWithRedirectedErrorStream(cmd);
 
 			bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 

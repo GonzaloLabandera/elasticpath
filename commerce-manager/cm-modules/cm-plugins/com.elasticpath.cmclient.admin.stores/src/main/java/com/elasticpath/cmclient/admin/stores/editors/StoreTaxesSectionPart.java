@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -58,7 +59,7 @@ public class StoreTaxesSectionPart extends AbstractCmClientEditorPageSectionPart
 	private final boolean editable;
 
 	/** The log. */
-	private static final Logger LOG = Logger.getLogger(StoreTaxesSectionPart.class);
+	private static final Logger LOG = LogManager.getLogger(StoreTaxesSectionPart.class);
 	
 	/**
 	 * Constructor.

@@ -8,8 +8,8 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import com.elasticpath.commons.util.extenum.AbstractExtensibleEnum;
 import com.elasticpath.validation.defs.AbstractConstraintDef;

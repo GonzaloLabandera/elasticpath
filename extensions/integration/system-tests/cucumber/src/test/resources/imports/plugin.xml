@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<plugins>
+	<plugin guid="GUID">
+		<descriptor_url>http://testplugindescriptor.com/</descriptor_url>
+		<descriptor_json>test_descriptor_url_json</descriptor_json>
+		<plugin_jar_url>file:///xpf-test-plugin.jar</plugin_jar_url>
+		<pf4j_plugin_id>ep-id-01</pf4j_plugin_id>
+		<pinned_version>01</pinned_version>
+		<settings>
+			<setting>
+				<key>1</key>
+				<data_type>INTEGER</data_type>
+				<collection_type>LIST</collection_type>
+				<values>
+					<value>2</value>
+					<value>5</value>
+				</values>
+			</setting>
+			<setting>
+				<key>3</key>
+				<data_type>DECIMAL</data_type>
+				<collection_type>SINGLE</collection_type>
+				<values>
+					<value>2.00</value>
+				</values>
+			</setting>
+			<setting>
+				<key>5</key>
+				<data_type>DATE</data_type>
+				<collection_type>SINGLE</collection_type>
+				<values>
+					<value>2021-05-15T08:49:23+03:00</value>
+				</values>
+			</setting>
+			<setting>
+				<key>6</key>
+				<data_type>SHORT_TEXT</data_type>
+				<collection_type>MAP</collection_type>
+				<values>
+					<value key="m_key">t</value>
+				</values>
+			</setting>
+			<setting>
+				<key>4</key>
+				<data_type>BOOLEAN</data_type>
+				<collection_type>SINGLE</collection_type>
+				<values>
+					<value>true</value>
+				</values>
+			</setting>
+			<setting>
+				<key>2</key>
+				<data_type>SHORT_TEXT</data_type>
+				<collection_type>SET</collection_type>
+				<values>
+					<value>text</value>
+					<value>text</value>
+				</values>
+			</setting>
+		</settings>
+	</plugin>
+</plugins>

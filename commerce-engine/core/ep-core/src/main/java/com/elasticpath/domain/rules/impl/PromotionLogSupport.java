@@ -3,8 +3,9 @@
  */
 package com.elasticpath.domain.rules.impl;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.util.extenum.AbstractExtensibleEnum;
 /**
@@ -33,7 +34,7 @@ public class PromotionLogSupport extends AbstractExtensibleEnum<PromotionLogSupp
 	 */
 	public PromotionLogSupport(final int ordinal, final String name, final String subCategory) {
 		super(ordinal, name, PromotionLogSupport.class);
-		logger = Logger.getLogger(LOG_ROOT + "." + subCategory);
+		logger = LogManager.getLogger(LOG_ROOT + "." + subCategory);
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class PromotionLogSupport extends AbstractExtensibleEnum<PromotionLogSupp
 	 * @param message the message to be logged
 	 */
 	public void log(final Level level, final String message) {
-		if (logger.isEnabledFor(level)) {
+		if (logger.isEnabled(level)) {
 			logger.log(level, message);
 		}	
 	}

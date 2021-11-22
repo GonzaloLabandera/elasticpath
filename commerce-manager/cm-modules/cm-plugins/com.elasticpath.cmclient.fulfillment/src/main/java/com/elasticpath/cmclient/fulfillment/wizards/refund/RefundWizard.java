@@ -7,7 +7,8 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -49,7 +50,7 @@ public final class RefundWizard extends AbstractEpWizard<RefundItem> {
 	private final RefundCardInfoPage cardInfoPage;
 	private final RefundSummaryPage summaryPage;
 
-	private static final Logger LOG = Logger.getLogger(RefundWizard.class);
+	private static final Logger LOG = LogManager.getLogger(RefundWizard.class);
 
 	/**
 	 * The constructor.

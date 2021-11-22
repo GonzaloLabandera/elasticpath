@@ -38,7 +38,8 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import groovy.json.internal.IO;
 import org.apache.camel.builder.NotifyBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.velocity.tools.generic.DateTool;
 import org.junit.Assert;
 import org.jvnet.mock_javamail.Mailbox;
@@ -71,7 +72,7 @@ public class EmailStepDefinitions {
 	private static final long MAX_SECONDS_TO_WAIT_FOR_EMAIL = 20;
 	private static final int TIME_TO_SLEEP = 1000;
 
-	private static final Logger LOG = Logger.getLogger(EmailStepDefinitions.class);
+	private static final Logger LOG = LogManager.getLogger(EmailStepDefinitions.class);
 
 
 	@Autowired

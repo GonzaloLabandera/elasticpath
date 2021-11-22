@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.conditionbuilder.adapter.ConditionModelAdapter;
 import com.elasticpath.cmclient.conditionbuilder.adapter.impl.tag.ConditionModelAdapterImpl;
@@ -31,7 +32,7 @@ public final class ConditionBuilderPluginHelper {
 
 	private static final String PLUGIN_ID = "com.elasticpath.cmclient.conditionbuilder";
 
-	private static final Logger LOG = Logger.getLogger(ConditionBuilderPluginHelper.class);
+	private static final Logger LOG = LogManager.getLogger(ConditionBuilderPluginHelper.class);
 
 	private static final String COMPOSITE_FACTORY = "ConditionRowCompositeCreatorFactory";
 	private static final String ADAPTOR_FACTORY = "ConditionModelAdapterFactory";

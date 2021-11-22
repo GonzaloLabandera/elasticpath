@@ -5,19 +5,41 @@ package com.elasticpath.test;
 
 import static org.junit.Assert.fail;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Core;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.apache.logging.log4j.core.filter.AbstractFilterable;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import com.elasticpath.commons.util.Pair;
 
 /**
  * A utility class to help the testing of Log4J output.
  */
-public class TestLog4jLoggingAppender extends ConsoleAppender {
+@Plugin(name = TestLog4jLoggingAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
+public final class TestLog4jLoggingAppender extends AbstractAppender {
+
+	/** Plugin Name. */
+	public static final String PLUGIN_NAME = "TestLog4jLogging";
+
+	private TestLog4jLoggingAppender(final String name, final Filter filter,
+			final Layout<? extends Serializable> layout, final boolean ignoreExceptions, final Property[] properties) {
+		super(name, filter, layout, ignoreExceptions, properties);
+	}
 
 	private final Map<EventKey, State> called = new HashMap<>();
 
@@ -29,7 +51,8 @@ public class TestLog4jLoggingAppender extends ConsoleAppender {
 
 		/**
 		 * Creates an instance.
-		 * @param level the logging level.
+		 * 
+		 * @param level   the logging level.
 		 * @param message the logging message.
 		 */
 		EventKey(final Level level, final String message) {
@@ -39,14 +62,14 @@ public class TestLog4jLoggingAppender extends ConsoleAppender {
 
 	/**
 	 * Verify that the expected log messages were received and that no unexpected
-	 * messages were received.  Calls Assert.fail with details of the failure, if any.
+	 * messages were received. Calls Assert.fail with details of the failure, if
+	 * any.
 	 */
 	public void verify() {
 		boolean result = true;
 		for (final Map.Entry<EventKey, State> callEntry : called.entrySet()) {
 			State state = callEntry.getValue();
-			if (!state.shouldCall() && state.wasCalled()
-					|| state.shouldCall() && !state.wasCalled()) {
+			if (!state.shouldCall() && state.wasCalled() || state.shouldCall() && !state.wasCalled()) {
 				result = false;
 			}
 		}
@@ -59,8 +82,8 @@ public class TestLog4jLoggingAppender extends ConsoleAppender {
 		StringBuilder builder = new StringBuilder();
 		for (final Map.Entry<EventKey, State> callEntry : called.entrySet()) {
 			State state = callEntry.getValue();
-			builder.append("Logging message '").append(state.getLevel()).append(": ").append(state.getMsg()).append(
-					"' was ");
+			builder.append("Logging message '").append(state.getLevel()).append(": ").append(state.getMsg())
+					.append("' was ");
 			if (state.shouldCall()) {
 				builder.append("expected ");
 			} else {
@@ -78,26 +101,37 @@ public class TestLog4jLoggingAppender extends ConsoleAppender {
 
 	/**
 	 * Adds an logging expectation.
+	 * 
 	 * @param level the level at which the message should be logged.
-	 * @param msg the message that is expected to be logged.
+	 * @param msg   the message that is expected to be logged.
 	 */
 	public void addMessageToVerify(final Level level, final String msg) {
 		called.put(new EventKey(level, msg), new State(msg, true, false, level));
 	}
 
 	/**
-	 * The tie into log4j - listen for log events and add them for later verification.
+	 * The tie into log4j - listen for log events and add them for later
+	 * verification.
+	 * 
 	 * @param loggingEvent the log event that the code under test has emitted.
 	 */
-	@Override
 	@SuppressWarnings("PMD.AvoidSynchronizedAtMethodLevel")
-	public synchronized void doAppend(final LoggingEvent loggingEvent) {
+	@Override
+	public synchronized void append(final LogEvent loggingEvent) {
 		EventKey key = new EventKey(loggingEvent.getLevel(), loggingEvent.getMessage().toString());
 		if (called.containsKey(key)) {
 			called.get(key).setCalled(true);
 		} else {
 			called.put(key, new State(loggingEvent.getMessage().toString(), false, true, loggingEvent.getLevel()));
 		}
+	}
+	
+	/**
+	 * @return a new instance of Builder.
+	 */
+	@PluginBuilderFactory
+	public static Builder newBuilder() {
+		return new Builder();
 	}
 
 	/**
@@ -111,8 +145,7 @@ public class TestLog4jLoggingAppender extends ConsoleAppender {
 		private boolean called;
 		private final Level level;
 
-		State(final String msg, final boolean shouldCall,
-				final boolean wasCalled, final Level level) {
+		State(final String msg, final boolean shouldCall, final boolean wasCalled, final Level level) {
 			this.msg = msg;
 			this.shouldCall = shouldCall;
 			this.called = wasCalled;
@@ -139,4 +172,60 @@ public class TestLog4jLoggingAppender extends ConsoleAppender {
 			return level;
 		}
 	}
+
+	/**
+	 * Builder for IESummaryAppender.
+	 * 
+	 * @param <B> The type to build
+	 */
+	@SuppressWarnings({ "squid:S2176", "squid:S2972" })
+	public static class Builder<B extends Builder<B>> extends AbstractFilterable.Builder<B>
+			implements org.apache.logging.log4j.core.util.Builder<TestLog4jLoggingAppender> {
+
+		@PluginBuilderAttribute
+		@Required(message = "No name provided for TestLog4jLoggingAppender")
+		private String name = PLUGIN_NAME;
+
+		@PluginBuilderAttribute
+		private boolean ignoreExceptions;
+
+		/**
+		 * Set the name.
+		 * 
+		 * @param name the name
+		 * @return this Builder
+		 */
+		public Builder setName(final String name) {
+			this.name = name;
+			return this;
+		}
+
+		/**
+		 * Set ignoreExceptions.
+		 * 
+		 * @param ignoreExceptions true if the appender should ignore exceptions
+		 * @return this Builder
+		 */
+		public Builder setIgnoreExceptions(final boolean ignoreExceptions) {
+			this.ignoreExceptions = ignoreExceptions;
+			return this;
+		}
+
+		@SuppressWarnings("PMD.AccessorClassGeneration")
+		@Override
+		public TestLog4jLoggingAppender build() {
+
+			Filter testLog4jLoggingFilter = new AbstractFilter() {
+				@Override
+				public Result filter(final LogEvent event) {
+					return Result.ACCEPT;
+				}
+			};
+			Layout layout = PatternLayout.createDefaultLayout();
+
+			return new TestLog4jLoggingAppender(name, testLog4jLoggingFilter, layout, ignoreExceptions,
+					getPropertyArray());
+		}
+	}
+
 }

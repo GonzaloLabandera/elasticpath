@@ -3,6 +3,19 @@
  */
 package com.elasticpath.performancetools.queryanalyzer.utils;
 
+import static com.elasticpath.performancetools.queryanalyzer.utils.Defaults.CSV_OUTPUT_FILE_EXTENSION;
+import static com.elasticpath.performancetools.queryanalyzer.utils.Defaults.DEFAULT_OUTPUT_FILE_NAME_PREFIX;
+import static com.elasticpath.performancetools.queryanalyzer.utils.Defaults.DOT_DELIMITER;
+import static com.elasticpath.performancetools.queryanalyzer.utils.Defaults.JSON_OUTPUT_FILE_EXTENSION;
+import static com.elasticpath.performancetools.queryanalyzer.utils.Patterns.TIMESTAMP_FORMAT_PATTERN;
+import static com.elasticpath.performancetools.queryanalyzer.utils.Patterns.TIMESTAMP_PATTERN;
+import static com.elasticpath.performancetools.queryanalyzer.utils.SystemProperties.PRINT_JSON_TO_CONSOLE_ONLY_SYSTEM_PROPERTY;
+import static com.elasticpath.performancetools.queryanalyzer.utils.SystemProperties.RESULT_STATS_FILE_FORMAT_SYSTEM_PROPERTY;
+import static com.elasticpath.performancetools.queryanalyzer.utils.SystemProperties.RESULT_STATS_FILE_NAME_SYSTEM_PROPERTY;
+import static java.lang.String.join;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -12,19 +25,17 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.elasticpath.performancetools.queryanalyzer.QueryAnalyzerConfigurator;
 import com.elasticpath.performancetools.queryanalyzer.beans.JPAQuery;
 import com.elasticpath.performancetools.queryanalyzer.beans.Operation;
 
 /**
  * Util class for performing various operations.
  */
+@SuppressWarnings("PMD.UnsynchronizedStaticDateFormatter")
 public final class Utils {
 
-	/**
-	 * Log timestamp format.
-	 */
-	public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss,S";
-	private static final String DEFAULT_OUTPUT_JSON_FILE_PATH = "/ep/db_statistics.json";
+	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(TIMESTAMP_FORMAT_PATTERN, Locale.getDefault());
 
 	private Utils() {
 		//Utility class
@@ -34,27 +45,24 @@ public final class Utils {
 	 * Return the reference to an output JSON file, if not overridden by
 	 * -Dprint.json.to.console.only system property.
 	 *
+	 * @param outputFileExtension  the output file extension
 	 * @return null if JSON output is redirected to console;
 	 * otherwise reference to JSON output file.
 	 */
-	public static File getOutputJSONFileIfEnabled() {
-		if (StringUtils.isNotBlank(System.getProperty(SystemProperties.PRINT_JSON_TO_CONSOLE_ONLY_SYSTEM_PROPERTY))) {
+	public static File getOutputFileIfEnabled(final String outputFileExtension) {
+		//system property has a precedence over input param
+		if (isNotBlank(System.getProperty(PRINT_JSON_TO_CONSOLE_ONLY_SYSTEM_PROPERTY))) {
 			return null;
 		}
 
-		String outputJSONFilePath = System.getProperty(SystemProperties.OUTPUT_JSON_FILE_PATH_SYSTEM_PROPERTY);
-		if (StringUtils.isBlank(outputJSONFilePath)) {
-			outputJSONFilePath = System.getProperty("user.home") + DEFAULT_OUTPUT_JSON_FILE_PATH;
-		}
+		final File outputFile = getOutputResultFile(outputFileExtension);
+		final File parent = outputFile.getParentFile();
 
-		final File outputJSONFile = new File(outputJSONFilePath);
-		final File parent = outputJSONFile.getParentFile();
-
-		if (!parent.exists() && parent.isDirectory() && !parent.mkdirs()) {
+		if (!parent.exists() && !parent.mkdirs()) {
 			throw new IllegalStateException("Folder [" + parent.getAbsolutePath() + "] couldn't be created");
 		}
 
-		return outputJSONFile;
+		return outputFile;
 	}
 
 	/**
@@ -82,8 +90,7 @@ public final class Utils {
 											 final boolean isPreviousOperation) throws Exception {
 		if (timestampMatcher.find()) {
 			final String timestamp = timestampMatcher.group(1);
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault());
-			final Date date = simpleDateFormat.parse(timestamp);
+			final Date date = SIMPLE_DATE_FORMAT.parse(timestamp);
 			if (isPreviousOperation) {
 				operation.setFinishedAt(date);
 			} else {
@@ -104,8 +111,7 @@ public final class Utils {
 														 final boolean isStop) throws Exception {
 		if (timestampMatcher.find()) {
 			final String timestamp = timestampMatcher.group(1);
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault());
-			final Date date = simpleDateFormat.parse(timestamp);
+			final Date date = SIMPLE_DATE_FORMAT.parse(timestamp);
 			if (isStop) {
 				operation.setJpaFinishedOfAt(date);
 			} else {
@@ -124,8 +130,7 @@ public final class Utils {
 	public static void setJpaQueryStartTimestamp(final Matcher timestampMatcher, final JPAQuery jpaQuery) throws Exception {
 		if (timestampMatcher.find()) {
 			final String timestamp = timestampMatcher.group(1);
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault());
-			final Date date = simpleDateFormat.parse(timestamp);
+			final Date date = SIMPLE_DATE_FORMAT.parse(timestamp);
 			jpaQuery.setStartedAt(date);
 		}
 	}
@@ -157,7 +162,7 @@ public final class Utils {
 
 		String line;
 		while ((line = reader.readLine()) != null) {
-			final Matcher timestampMatcher = Patterns.TIMESTAMP_PATTERN.matcher(line);
+			final Matcher timestampMatcher = TIMESTAMP_PATTERN.matcher(line);
 			if (timestampMatcher.find()) {
 				queryBuffer.append(line);
 				break;
@@ -172,12 +177,57 @@ public final class Utils {
 	}
 
 	/**
-	 * Removes TAB and replace CR chars with single space.
+	 * Removes TAB and replace CR chars with a single space.
 	 *
 	 * @param input string to be processed.
 	 * @return clean string.
 	 */
 	public static String removeTabAndCRChars(final String input) {
-		return input.replaceAll("\\t", "").replaceAll("\\n", " ");
+		return input.replaceAll("\\t", "")
+				.replaceAll("\\n", " ");
+	}
+
+	/**
+	 * Get the output file extension from the "result.file.name" system property or default to "json".
+	 * @return the output file extension
+	 */
+	public static String getOutputFileExtension() {
+		return System.getProperty(RESULT_STATS_FILE_FORMAT_SYSTEM_PROPERTY, JSON_OUTPUT_FILE_EXTENSION);
+	}
+	/*
+	 * Build the full path to the output file, using all available system properties and defaults.
+	 *
+	 * @return the full path of the output file for storing statistics
+	 * @param outputFileExtension the output file extension
+	 */
+	private static File getOutputResultFile(final String outputFileExtension) {
+		QueryAnalyzerConfigurator qaConfiguratorInstance = QueryAnalyzerConfigurator.INSTANCE;
+
+		String outputFolderPath = qaConfiguratorInstance.getResultFolderPath();
+
+		String testIdPrefix = qaConfiguratorInstance.getTestId();
+		if (isNotEmpty(testIdPrefix)) {
+			testIdPrefix += "_";
+		}
+		String applicationNamePrefix = qaConfiguratorInstance.getApplicationName() + "_";
+
+		String outputFileName = System.getProperty(RESULT_STATS_FILE_NAME_SYSTEM_PROPERTY, getFullOutputFileName(outputFileExtension));
+
+		if (CSV_OUTPUT_FILE_EXTENSION.equalsIgnoreCase(outputFileExtension)) {
+			return new File(outputFolderPath, applicationNamePrefix + outputFileName);
+		}
+		return new File(outputFolderPath, testIdPrefix + applicationNamePrefix + outputFileName);
+	}
+
+	private static String getFullOutputFileName(final String overridingOutputFileExtension) {
+		String outputFileExtension;
+
+		if (StringUtils.isEmpty(overridingOutputFileExtension)) {
+			outputFileExtension = System.getProperty(RESULT_STATS_FILE_FORMAT_SYSTEM_PROPERTY, JSON_OUTPUT_FILE_EXTENSION);
+		} else {
+			outputFileExtension = overridingOutputFileExtension;
+		}
+
+		return join(DOT_DELIMITER, DEFAULT_OUTPUT_FILE_NAME_PREFIX, outputFileExtension);
 	}
 }

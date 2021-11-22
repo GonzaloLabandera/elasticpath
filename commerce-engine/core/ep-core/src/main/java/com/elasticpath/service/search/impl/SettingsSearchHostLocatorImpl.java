@@ -3,7 +3,8 @@
  */
 package com.elasticpath.service.search.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.service.search.SearchHostLocator;
 import com.elasticpath.settings.provider.SettingValueProvider;
@@ -31,7 +32,7 @@ public class SettingsSearchHostLocatorImpl implements SearchHostLocator {
 
 	private SettingValueProvider<String> primarySearchHostLocationProvider;
 
-	private static final Logger LOG = Logger.getLogger(SettingsSearchHostLocatorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SettingsSearchHostLocatorImpl.class);
 
 	/**
 	 * Obtain the URL of the search host stored in the setting service.

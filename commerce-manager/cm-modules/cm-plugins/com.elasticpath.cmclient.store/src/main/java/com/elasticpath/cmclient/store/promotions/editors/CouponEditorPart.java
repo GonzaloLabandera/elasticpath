@@ -8,8 +8,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -89,7 +90,7 @@ public class CouponEditorPart extends AbstractPolicyAwareEditorPageSectionPart {
 	private static final int COUPON_CODE_COLUMN_WIDTH = 200;
 	private static final int COLUMN_WIDTH = 100;
 	private static final int EMAIL_COLUMN_WIDTH = 300;
-	private static final transient Logger LOG = Logger.getLogger(CouponEditorPart.class);
+	private static final transient Logger LOG = LogManager.getLogger(CouponEditorPart.class);
 
 	private static final int LAYOUT_COLUMN_COUNT = 3;
 	private static final String COUPON_USAGE_TABLE = "Coupon Usage"; //$NON-NLS-1$

@@ -3,9 +3,10 @@
  */
 package com.elasticpath.domain.shoppingcart.impl; //NOPMD
 
+import static com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.loadModifierFieldsIfRequired;
+
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Basic;
@@ -16,9 +17,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.MapKey;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -37,6 +39,9 @@ import org.apache.openjpa.persistence.jdbc.ElementForeignKey;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 import org.apache.openjpa.persistence.jdbc.ForeignKeyAction;
 
+import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.misc.types.Modifiable;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.persistence.support.FetchGroupConstants;
@@ -57,7 +62,7 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 			}
 		)
 	})
-public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements ShoppingCartMemento {
+public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements ShoppingCartMemento, Modifiable {
 
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
@@ -78,11 +83,10 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 	/** List of ALL the objects in this Cart. */
 	private List<ShoppingItem> allItems = new ArrayList<>();
 
-
-	private static final String FK_COLUMN_NAME = "SHOPPING_CART_UID";
-	private Map<String, CartData> cartData = new HashMap<>();
 	private Boolean defaultCart;
 
+	private ModifierFieldsMapWrapper modifierFields;
+	private Boolean hasModifiers = Boolean.FALSE;
 
 	/**
 	 * Default Constructor.
@@ -91,7 +95,6 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 		super();
 	}
 
-	
 	/**
 	 * Accesses the field for {@code name} and returns the current value. If the field has not been set
 	 * then will return null.
@@ -102,51 +105,43 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 	@Override
 	@Transient
 	public String getCartDataFieldValue(final String name) {
-		CartData data = getCartData().get(name);
-		if (data == null) {
-			return null;
-		}
-		return data.getValue();
+		return getModifierFields().get(name);
 	}
 
 	@Override
 	public void setCartDataFieldValue(final String name, final String value) {
-		CartData data;
-		if (getCartData().containsKey(name)) {
-			data = getCartData().get(name);
-			data.setValue(value);
-		} else {
-			data = createCartData(name, value);
-			getCartData().put(name, data);
-		}
+		getModifierFields().put(name, value);
 	}
 
-	private CartData createCartData(final String name, final String value) {
-		return new CartData(name, value);
+	@Lob
+	@Persistent(fetch = FetchType.LAZY)
+	@Column(name = "MODIFIER_FIELDS")
+	@Externalizer("com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.toJSON")
+	@Factory("com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.fromJSON")
+	@Override
+	public ModifierFieldsMapWrapper getModifierFields() {
+		if (modifierFields == null) {
+			modifierFields = getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class);
+		} else if (!modifierFields.getMap().isEmpty()) {
+			//this ensures proper setting of the "hasModifiers" flag and must be called here
+			setHasModifiers(true);
+		}
+		return modifierFields;
 	}
 
 	/**
-	 * Internal JPA method to get Item Data.
-	 * @return the item data
+	 * Set modifier fields.
 	 *
-	 *
-
+	 * @param newModifierFields the new modifier fields to set.
 	 */
-	@OneToMany(targetEntity = CartData.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-	@ElementJoinColumn(name = FK_COLUMN_NAME, nullable = false)
-	@ElementForeignKey
-	@MapKey(name = "key")
-	@ElementDependent
-	@Override
-	public Map<String, CartData> getCartData() {
-		return this.cartData;
+	public void setModifierFields(final ModifierFieldsMapWrapper newModifierFields) {
+		this.modifierFields = newModifierFields;
 	}
 
 	@Override
-	public void setCartData(final Map<String, CartData> cartData) {
-		this.cartData = cartData;
+	public Map<String, String> getCartData() {
+		return getModifierFields().getMap();
 	}
-
 
 	/**
 	 * Initializes the shopping cart. Call setElasticPath before initializing.
@@ -258,6 +253,22 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 	}
 
 	@Override
+	@Basic
+	@Column(name = "HAS_MODIFIERS")
+	public Boolean getHasModifiers() {
+		return hasModifiers;
+	}
+
+	/**
+	 * Set a flag whether entity has modifier fields.
+	 *
+	 * @param hasModifiers the flag.
+	 */
+	public void setHasModifiers(final Boolean hasModifiers) {
+		this.hasModifiers = hasModifiers;
+	}
+
+	@Override
 	@Transient
 	public boolean isDefault() {
 		return isDefaultInternal() != null && isDefaultInternal();
@@ -271,5 +282,11 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 			setDefaultInternal(null);
 		}
 	}
-
+	/**
+	 * Mark "modifierFields" field as loaded.
+	 */
+	@PostLoad
+	public void postLoadCallback() {
+		loadModifierFieldsIfRequired(this);
+	}
 }

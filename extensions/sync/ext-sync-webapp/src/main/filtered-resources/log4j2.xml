@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="FILE"
+			fileName="${user.home}/ep/logs/ep-datasync.log"
+			append="false">
+			<PatternLayout pattern="%d{DEFAULT} [%t] %p %c %notEmpty{%ndc }- %m%n" />
+		</File>
+		<File name="SYNC"
+			fileName="${user.home}/ep/logs/ep-datasync-processing.log"
+			append="false">
+			<PatternLayout pattern="%d{DEFAULT} [%t] %p %c %notEmpty{%ndc }- %m%n" />
+		</File>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="[EP-DataSync] %-5p %t %d{ISO8601} %c - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.elasticpath" level="${ep.log.level}" additivity="false">
+			${ep.log.to}
+		</Logger>
+		<Logger name="com.elasticpath.tools.sync" level="debug" additivity="false">
+			<AppenderRef ref="SYNC" />
+			${ep.log.to}
+		</Logger>
+		<Logger name="com.elasticpath.tools.sync.dstmessagelistener.tools.launcher" level="debug" additivity="false">
+			<AppenderRef ref="SYNC" />
+			${ep.log.to}
+		</Logger>
+		
+		<!-- Enabling Camel tracer interceptor that is used for logging the route executions at INFO level -->
+		<!-- http://camel.apache.org/tracer.html -->
+		<Logger name="org.apache.camel" level="info" additivity="false">
+			${ep.log.to}
+		</Logger>
+		<Root level="warn">
+			${ep.log.to}
+		</Root>
+	</Loggers>
+</Configuration>

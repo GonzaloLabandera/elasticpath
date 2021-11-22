@@ -3,7 +3,8 @@
  */
 package com.elasticpath.repo.ext.health.monitor;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -17,7 +18,7 @@ import com.elasticpath.health.monitoring.impl.HttpStatusTargetImpl;
  */
 public class ExtApplicationStatusTargetImpl extends ApplicationStatusTargetImpl {
 
-	private static final Logger LOG = Logger.getLogger(ExtApplicationStatusTargetImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ExtApplicationStatusTargetImpl.class);
 
 	@Autowired
 	private ApplicationContext applicationContext;

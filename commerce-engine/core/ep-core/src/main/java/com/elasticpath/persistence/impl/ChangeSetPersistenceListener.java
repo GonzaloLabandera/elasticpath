@@ -3,20 +3,21 @@
  */
 package com.elasticpath.persistence.impl;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.event.AbstractLifecycleListener;
 import org.apache.openjpa.event.LifecycleEvent;
-
+import org.apache.openjpa.event.TransactionEvent;
+import org.apache.openjpa.event.TransactionListener;
 import com.elasticpath.commons.ThreadLocalMap;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -24,6 +25,7 @@ import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
 import com.elasticpath.domain.objectgroup.BusinessObjectMetadata;
 import com.elasticpath.persistence.api.ChangeType;
+import com.elasticpath.persistence.openjpa.support.JPAUtil;
 import com.elasticpath.service.changeset.ChangeSetMemberAction;
 import com.elasticpath.service.changeset.ChangeSetPolicy;
 import com.elasticpath.service.changeset.ChangeSetService;
@@ -36,25 +38,26 @@ import com.elasticpath.service.objectgroup.dao.BusinessObjectGroupDao;
  * Listens to persistence events and updates the metadata for the change set.
  */
 @SuppressWarnings("PMD.GodClass")
-public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
+public class ChangeSetPersistenceListener extends AbstractLifecycleListener implements TransactionListener {
 
-	private static final Logger LOG = Logger.getLogger(ChangeSetPersistenceListener.class);
-
+	private static final Logger LOG = LogManager.getLogger(ChangeSetPersistenceListener.class);
 	private static final String KEY_ACTION = "action";
-	private BeanFactory beanFactory;
 
+	private BeanFactory beanFactory;
 	private ChangeSetMemberDao changeSetMemberDao;
 	private BusinessObjectGroupDao businessObjectGroupDao;
-	private ThreadLocalMap<String, Object> metadataMap;
 	private TimeService timeService;
 	private ChangeSetService changeSetService;
 	private ChangeSetHelper changeSetHelper;
 	private Set<String> ignoreClasses = new HashSet<>();
+	private LifecycleEventFilter lifecycleEventFilter;
 
-	private ThreadLocalMap<BusinessObjectDescriptor, BusinessObjectMetadata> actionMetadataMap;
+	// Keep the thread-locals together
+	private final ThreadLocalMap<BusinessObjectDescriptor, BusinessObjectMetadata> actionMetadataMap = new ThreadLocalMap<>();
+	private final ThreadLocal<Map<BusinessObjectDescriptor, BusinessObjectGroupMember>> newGroupMembers = ThreadLocal.withInitial(HashMap::new);
+	private ThreadLocalMap<String, Object> metadataMap;
 
 	private static final Map<ChangeSetMemberAction, Integer> ACTION_PRIORITY = new HashMap<>();
-
 	static {
 		// the lower the number the lower the priority
 		ACTION_PRIORITY.put(ChangeSetMemberAction.ADD, 2);
@@ -77,7 +80,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 		if (actionMetadata == null) {
 			// no cached meta data exists for the object descriptor
 			actionMetadata = createAndPopulateMetadata(KEY_ACTION, changeType, objectDescriptor);
-			getActionMetadataMap().put(objectDescriptor, actionMetadata);
+			LOG.trace("Created action metadata {}", actionMetadata);
 			actionChanged = true;
 		} else {
 			// see if the cached meta data action needs updating based on the new action
@@ -87,6 +90,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 				actionMetadata.setMetadataValue(newActionName);
 				getActionMetadataMap().put(objectDescriptor, actionMetadata);
 				actionChanged = true;
+				LOG.trace("Updated action metadata {}", actionMetadata);
 			}
 		}
 		if (actionMetadata.getBusinessObjectGroupMember() == null) {
@@ -95,7 +99,7 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 			//This method should only be executed in stage2.
 			//If the business object group member cannot be found, it means the object is related to some other object.
 			//For example, single sku will not be added into change set, the product will be added into change set instead.
-			LOG.debug(objectDescriptor + " is not in the change set. It may be a dependency of another object.");
+			LOG.debug("{} is not in the change set. It may be a dependency of another object.", objectDescriptor);
 			return;
 		}
 
@@ -107,25 +111,21 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	/**
 	 * Adds an object to a change set.
 	 *
-	 * @param objectDescriptor the object descriptor
-	 */
-	protected void addObjectToChangeSet(final BusinessObjectDescriptor objectDescriptor) {
+     * @param objectDescriptor the object descriptor
+     * @return the groupMember if newly created during this call
+     */
+	protected BusinessObjectGroupMember addObjectToChangeSet(final BusinessObjectDescriptor objectDescriptor) {
 		if (objectDescriptor != null && getMetadataMap().containsKey("addToChangeSetFlag")) {
-
-			if (getActionMetadataMap().containsKey(objectDescriptor)) {
-				// already processed, no need to reprocess this objectDescriptor for this thread/transaction
-				// does this cause us not to properly store the action metadata?
-				return;
-			}
 
 			Map<String, String> changeSetMetaDataMap = new HashMap<>();
 
 			changeSetMetaDataMap.put("addedByUserGuid", getChangeSetUserGuid());
 			changeSetMetaDataMap.put("dateAdded", getCurrentDateString());
 
-			getChangeSetService().addObjectToChangeSet(getChangeSetGuid(), objectDescriptor, changeSetMetaDataMap, false);
+			return getChangeSetService().addObjectToChangeSet(getChangeSetGuid(), objectDescriptor, changeSetMetaDataMap, false);
 		}
-	}
+        return null;
+    }
 
 	/**
 	 *
@@ -202,7 +202,12 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 		BusinessObjectMetadata metadata = beanFactory.getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class);
 		metadata.setMetadataKey(key);
 		metadata.setMetadataValue(getAction(changeType).getName());
-		BusinessObjectGroupMember businessObjectGroupMember = getBusinessObjectGroupDao().findGroupMemberByObjectDescriptor(objectDescriptor);
+
+		// Prevent a 'instance already existing in L1 cache' issue, shortcut to the newly created instance, so we avoid flushing to the DB.
+		BusinessObjectGroupMember businessObjectGroupMember = newGroupMembers.get().get(objectDescriptor);
+		if (businessObjectGroupMember == null) {
+           businessObjectGroupMember = getBusinessObjectGroupDao().findGroupMemberByGroupIdObjectDescriptor(getChangeSetGuid(), objectDescriptor);
+        }
 		metadata.setBusinessObjectGroupMember(businessObjectGroupMember);
 		return metadata;
 	}
@@ -264,46 +269,49 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 			// the listener is not enabled
 			return;
 		}
-		Object object = event.getSource();
-		if (ignoreObject(object)) {
+		if (ignoreObject(event.getSource())) {
 			return;
 		}
 
-		// The getBusinessObjectDescriptor should *only* be run on these events. If it's run for other events then
-		// the object may no longer be there (because it's been deleted).
 
+		final PersistenceCapable pcObject = (PersistenceCapable) event.getSource();
 		switch (event.getType()) {
 			case LifecycleEvent.BEFORE_ATTACH:
 			case LifecycleEvent.BEFORE_STORE:
-				final BusinessObjectDescriptor objectDescriptor = getBusinessObjectDescriptor(object);
-				PersistenceCapable pcObject = (PersistenceCapable) object;
-				if (pcObject.pcGetStateManager() == null) {
-					processChangeSetData(objectDescriptor, ChangeType.CREATE);
+				logEvent(event);
+				if (JPAUtil.hasStateManager(pcObject)) {
+					processChangeSetData(ChangeType.UPDATE, pcObject);
 				} else {
-					processChangeSetData(objectDescriptor, ChangeType.UPDATE);
+					processChangeSetData(ChangeType.CREATE, pcObject);
 				}
 				break;
 			case LifecycleEvent.BEFORE_UPDATE:
-				final BusinessObjectDescriptor objectDescriptor1 = getBusinessObjectDescriptor(object);
-				processChangeSetData(objectDescriptor1, ChangeType.UPDATE);
+				logEvent(event);
+				processChangeSetData(ChangeType.UPDATE, pcObject);
 				break;
 			case LifecycleEvent.BEFORE_PERSIST:
-				final BusinessObjectDescriptor objectDescriptor2 = getBusinessObjectDescriptor(object);
-				processChangeSetData(objectDescriptor2, ChangeType.CREATE);
+				logEvent(event);
+				processChangeSetData(ChangeType.CREATE, pcObject);
 				break;
 			case LifecycleEvent.BEFORE_DELETE:
-				final BusinessObjectDescriptor objectDescriptor3 = getBusinessObjectDescriptor(object);
-				processChangeSetData(objectDescriptor3, ChangeType.DELETE);
+				logEvent(event);
+				processChangeSetData(ChangeType.DELETE, pcObject);
 				break;
 			default:
 				// not supported event
 		}
 	}
 
+	private void logEvent(final LifecycleEvent event) {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Processing {}", event.getType());
+		}
+	}
+
 	private boolean ignoreObject(final Object object) {
 		if (ignoreClasses.contains(object.getClass().getName())) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(object.getClass().getName() + " is ignored by changesetPersistenceListener!!!");
+				LOG.debug("{} is ignored by changesetPersistenceListener!!!", object.getClass().getName());
 			}
 			return true;
 		}
@@ -313,17 +321,40 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	/**
 	 * Process the change set data.
 	 *
-	 * @param objectDescriptor the object descriptor
 	 * @param changeType the change operation type
+	 * @param object the object we are actually storing
 	 */
-	protected void processChangeSetData(final BusinessObjectDescriptor objectDescriptor, final ChangeType changeType) {
-		if (objectDescriptor != null) {
+	protected void processChangeSetData(final ChangeType changeType, final PersistenceCapable object) {
+		final BusinessObjectDescriptor objectDescriptor = getBusinessObjectDescriptor(object);
 
-			// in case that step is enabled - add the object to the change set
-			addObjectToChangeSet(objectDescriptor);
-			addOrUpdateMetadata(objectDescriptor, changeType);
-
+		EventActionEnum eventActionEnum = getEventActionEnum(changeType);
+		if (objectDescriptor == null || lifecycleEventFilter.wasPreviouslyProcessed(eventActionEnum,
+				(Class<PersistenceCapable>) object.getClass(), objectDescriptor.getObjectIdentifier())) {
+			return;
 		}
+		lifecycleEventFilter.trackProcessed(eventActionEnum, (Class<PersistenceCapable>) object.getClass(), objectDescriptor.getObjectIdentifier());
+
+		if (newGroupMembers.get().get(objectDescriptor) != null) {
+			return;
+		}
+
+		BusinessObjectGroupMember groupMember = addObjectToChangeSet(objectDescriptor);
+		if (groupMember != null && JPAUtil.isNew((PersistenceCapable) groupMember)) {
+			// Cache so we can reuse, avoiding triggering a database flush.
+			newGroupMembers.get().put(objectDescriptor, groupMember);
+		}
+
+		addOrUpdateMetadata(objectDescriptor, changeType);
+	}
+
+	private EventActionEnum getEventActionEnum(final ChangeType changeType) {
+		EventActionEnum eventType = EventActionEnum.CREATED;
+		if (changeType == ChangeType.DELETE) {
+			eventType = EventActionEnum.DELETED;
+		} else if (changeType == ChangeType.UPDATE) {
+			eventType = EventActionEnum.UPDATED;
+		}
+		return eventType;
 	}
 
 
@@ -395,18 +426,68 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 *
 	 * @return the action metadata map
 	 */
-	public ThreadLocalMap<BusinessObjectDescriptor, BusinessObjectMetadata> getActionMetadataMap() {
-		if (actionMetadataMap == null) {
-			actionMetadataMap = new ThreadLocalMap<>();
-			Collection<BusinessObjectMetadata> actionMetaDataCollection =
-				getChangeSetMemberDao().findBusinessObjectMetadataByGroupIdAndMetadataKey(getChangeSetGuid(), KEY_ACTION);
-			for (BusinessObjectMetadata metadata : actionMetaDataCollection) {
-				BusinessObjectDescriptor memberDescriptor =
-					getChangeSetHelper().convertGroupMemberToDescriptor(metadata.getBusinessObjectGroupMember());
-				actionMetadataMap.put(memberDescriptor, metadata);
-			}
-		}
+	protected ThreadLocalMap<BusinessObjectDescriptor, BusinessObjectMetadata> getActionMetadataMap() {
 		return actionMetadataMap;
 	}
 
+	private void resetAfterTransaction() {
+		if (!isListenerActive()) {
+			return;
+		}
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Resetting thread local storage after transaction");
+		}
+		getActionMetadataMap().clear();
+		lifecycleEventFilter.endTransaction();
+	}
+
+
+	@Override
+	public void afterBegin(final TransactionEvent event) {
+		lifecycleEventFilter.beginTransaction();
+	}
+
+	@Override
+	public void afterCommit(final TransactionEvent event) {
+		resetAfterTransaction();
+	}
+
+	@Override
+	public void afterRollback(final TransactionEvent event) {
+		resetAfterTransaction();
+	}
+
+	@Override
+	public void afterFlush(final TransactionEvent event) {
+		if (isListenerActive()) {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Resetting new member cache after flush.");
+			}
+			newGroupMembers.set(new HashMap<>());
+		}
+	}
+
+	@Override
+	public void beforeCommit(final TransactionEvent event) { /* noop */ }
+
+	@Override
+	public void afterStateTransitions(final TransactionEvent event) { /*noop*/ }
+
+	@Override
+	public void afterCommitComplete(final TransactionEvent event) { /*noop*/ }
+
+	@Override
+	public void afterRollbackComplete(final TransactionEvent event) { /*noop*/ }
+
+	@Override
+	public void beforeFlush(final TransactionEvent event) { /*noop*/ }
+
+	protected LifecycleEventFilter getLifecycleEventFilter() {
+		return lifecycleEventFilter;
+	}
+
+	public void setLifecycleEventFilter(final LifecycleEventFilter lifecycleEventFilter) {
+		this.lifecycleEventFilter = lifecycleEventFilter;
+	}
 }

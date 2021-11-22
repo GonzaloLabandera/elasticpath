@@ -18,8 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -46,7 +46,7 @@ import com.elasticpath.tags.service.TagValueTypeService;
 public class TagDefinitionAdapterTest {
 
 	private static final String LANGUAGE = "en";
-	private static final String INVALID_LANGUAGE = "foo";
+	private static final String INVALID_LANGUAGE = "invalid_language";
 	private static final Locale LANGUAGE_LOCALE = LocaleUtils.toLocale(LANGUAGE);
 	private static final String TAG_DEFINITION_CODE = "TAG_DEFINITION_CODE";
 	private static final String TAG_DEFINITION_DISPLAY_NAME = "TAG_DEFINITION_DISPLAY_NAME";

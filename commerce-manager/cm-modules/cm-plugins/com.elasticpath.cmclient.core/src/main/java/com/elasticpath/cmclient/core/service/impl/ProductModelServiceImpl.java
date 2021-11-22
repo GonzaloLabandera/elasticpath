@@ -56,8 +56,7 @@ public class ProductModelServiceImpl implements ProductModelService {
 
         int index = 0;
         for (final Product currentProduct : products) {
-            productModels[index] = new ProductModel(currentProduct, buildProductPriceModelList(currentProduct, true),
-                    getPriceListSectionModels(currentProduct.getCatalogs()));
+            productModels[index] = new ProductModel(currentProduct, Collections.emptyList(), Collections.emptyMap());
             index++;
         }
 
@@ -107,35 +106,8 @@ public class ProductModelServiceImpl implements ProductModelService {
             return null;
         }
 
-        Map<String, List<PriceListSectionModel>> priceListSectionModels = getPriceListSectionModels(product.getCatalogs());
-        List<PriceListDescriptorDTO> priceLists = new ArrayList<PriceListDescriptorDTO>();
-
-        for (List<PriceListSectionModel> sectionModels : priceListSectionModels.values()) {
-            for (PriceListSectionModel sectionModel : sectionModels) {
-                priceLists.add(sectionModel.getPriceListDescriptorDTO());
-            }
-        }
-
-        return new ProductModel(product, buildProductPriceModelList(product,
-                priceLists), priceListSectionModels);
-    }
-
-    /**
-     * Build the price editor model list for product with given guid and
-     * existent price list descriptors.
-     *
-     * @param product    the {@link Product} instance
-     * @param priceLists lists descriptors that are associated with the given product
-     * @return list of price editor models
-     */
-    private List<PriceListEditorModel> buildProductPriceModelList(
-            final Product product, final List<PriceListDescriptorDTO> priceLists) {
-
-        final List<PriceListEditorModel> priceModelList = new ArrayList<PriceListEditorModel>();
-        for (Entry<PriceListDescriptorDTO, List<BaseAmountDTO>> entry : priceListHelperService.getPriceListMap(product, priceLists).entrySet()) {
-            priceModelList.add(new PriceListEditorModelImpl(entry.getKey(), entry.getValue()));
-        }
-        return priceModelList;
+        // Pass an empty price and section models as we don't need them this point. They will get calculated when the pricing tab is clicked.
+		return new ProductModel(product, Collections.emptyList(), new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
     }
 
     @Override
@@ -165,10 +137,15 @@ public class ProductModelServiceImpl implements ProductModelService {
     private List<PriceListEditorModel> buildProductSkuPriceModelList(
             final ProductSku productSku,
             final List<PriceListDescriptorDTO> priceLists) {
-        final List<PriceListEditorModel> priceModelList = new ArrayList<PriceListEditorModel>();
-        for (Entry<PriceListDescriptorDTO, List<BaseAmountDTO>> entry : priceListHelperService.getPriceListMap(productSku, priceLists).entrySet()) {
-            priceModelList.add(new ProductSkuPriceListModelImpl(entry.getKey(), entry.getValue()));
-        }
+
+        final List<PriceListEditorModel> priceModelList = Collections.synchronizedList(new ArrayList<>());
+
+		Map<PriceListDescriptorDTO, List<BaseAmountDTO>> priceListMap = priceListHelperService.getPriceListMap(productSku, priceLists);
+
+		priceListMap.entrySet().parallelStream().forEach(priceList -> {
+			priceModelList.add(new ProductSkuPriceListModelImpl(priceList.getKey(), priceList.getValue()));
+		});
+
         return priceModelList;
     }
 

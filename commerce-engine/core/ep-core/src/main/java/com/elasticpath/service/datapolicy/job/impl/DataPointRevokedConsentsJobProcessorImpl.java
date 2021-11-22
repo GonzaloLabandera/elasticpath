@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.service.datapolicy.DataPointService;
@@ -22,7 +23,7 @@ import com.elasticpath.service.datapolicy.job.DataPointValueJob;
  */
 public class DataPointRevokedConsentsJobProcessorImpl implements DataPointValueJob {
 
-	private static final Logger LOG = Logger.getLogger(DataPointRevokedConsentsJobProcessorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(DataPointRevokedConsentsJobProcessorImpl.class);
 	private DataPointValueService dataPointValueService;
 	private DataPointService dataPointService;
 

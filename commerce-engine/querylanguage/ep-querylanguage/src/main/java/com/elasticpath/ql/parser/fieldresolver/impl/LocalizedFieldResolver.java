@@ -8,7 +8,7 @@ package com.elasticpath.ql.parser.fieldresolver.impl;
 
 import java.util.Locale;
 
-import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang3.LocaleUtils;
 
 import com.elasticpath.ql.parser.EpQLFieldDescriptor;
 import com.elasticpath.ql.parser.EpQLTerm;

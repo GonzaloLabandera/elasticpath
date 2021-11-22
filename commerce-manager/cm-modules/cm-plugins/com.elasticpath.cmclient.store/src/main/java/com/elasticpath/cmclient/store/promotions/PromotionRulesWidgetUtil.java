@@ -13,9 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -99,7 +100,7 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
  */
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyMethods", "PMD.ExcessiveClassLength"})
 public final class PromotionRulesWidgetUtil {
-	private static final Logger LOG = Logger.getLogger(PromotionRulesWidgetUtil.class);
+	private static final Logger LOG = LogManager.getLogger(PromotionRulesWidgetUtil.class);
 
 	private static final int NUM_ITEMS_SPINNER_WIDTH = 40;
 

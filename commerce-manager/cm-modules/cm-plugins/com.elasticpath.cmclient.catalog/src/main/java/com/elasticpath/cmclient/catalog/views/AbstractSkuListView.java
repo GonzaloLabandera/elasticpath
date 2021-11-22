@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.catalog.views;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
@@ -41,7 +42,7 @@ import com.elasticpath.service.search.query.SkuSearchCriteria;
 public abstract class AbstractSkuListView extends AbstractSortListView implements ProductSkuListener, 
 	ObjectRegistryListener, ChangeSetMemberSelectionProvider {
 
-	private static final Logger LOG = Logger.getLogger(AbstractSkuListView.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractSkuListView.class);
 
 	private SkuSearchCriteria searchCriteria;
 

@@ -32,17 +32,22 @@
 
 		<charset.encoding>UTF-8</charset.encoding>
 
-		<datasource.url>jdbc:h2:${project.build.directory}/database/INTEGRATIONDB;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE</datasource.url>
-		<datasource.driver>org.h2.Driver</datasource.driver>
-		<datasource.username>sa</datasource.username>
-		<datasource.password>sa</datasource.password>
+		<h2.file.epdb.url>jdbc:h2:file:${project.build.directory}/database/COMMONTESTDB;AUTO_SERVER=TRUE</h2.file.epdb.url>
+		<!-- keep h2 db connection open until tomcat container shutdown -->
+		<h2.file.for.tomcat.epdb.url>${h2.file.epdb.url};DB_CLOSE_DELAY=-1</h2.file.for.tomcat.epdb.url>
+		<h2.epdb.jdbc.driver>org.h2.Driver</h2.epdb.jdbc.driver>
+		<h2.epdb.username>sa</h2.epdb.username>
+		<h2.epdb.password>sa</h2.epdb.password>
+		<epdb.validation.query>SELECT 1</epdb.validation.query>
 	</properties>
 
 	<profiles>
 		<profile>
 			<id>setup-local-integration-test</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>!skipAllTests</name>
+				</property>
 			</activation>
 			<properties>
 				<ep.integration.port.http>${ep.integration.itest.port.http}</ep.integration.port.http>
@@ -53,7 +58,6 @@
 				<epdb.maven.groupId>com.h2database</epdb.maven.groupId>
 				<epdb.maven.artifactId>h2</epdb.maven.artifactId>
 				<epdb.maven.version>${com.h2database.version}</epdb.maven.version>
-				<epdb.jdbc.driver>org.h2.Driver</epdb.jdbc.driver>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -169,49 +173,15 @@
 							</execution>
 						</executions>
 					</plugin>
-					<!-- Adds dependencies to bring in the In-Memory H2 database -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<dependencies>
-							<dependency>
-								<groupId>com.elasticpath.extensions</groupId>
-								<artifactId>integration-test-h2-database</artifactId>
-								<type>zip</type>
-								<version>${project.version}</version>
-							</dependency>
-						</dependencies>
-						<executions>
-							<execution>
-								<id>unpack-database</id>
-								<phase>generate-test-resources</phase>
-								<goals>
-									<goal>unpack</goal>
-								</goals>
-								<configuration>
-									<skip>${skipAllTests}</skip>
-									<artifactItems>
-										<artifactItem>
-											<groupId>com.elasticpath.extensions</groupId>
-											<artifactId>integration-test-h2-database</artifactId>
-											<overWrite>true</overWrite>
-											<type>zip</type>
-											<outputDirectory>${project.build.directory}/database</outputDirectory>
-										</artifactItem>
-									</artifactItems>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<!-- Sets up the In-Memory H2 database -->
 					<plugin>
 						<groupId>com.elasticpath.tools</groupId>
 						<artifactId>ep-core-tool</artifactId>
 						<configuration>
-							<jdbcUrl>jdbc:h2:${project.build.directory}/database/INTEGRATIONDB;AUTO_SERVER=TRUE</jdbcUrl>
-							<jdbcDriverClass>org.h2.Driver</jdbcDriverClass>
-							<jdbcPassword>sa</jdbcPassword>
-							<jdbcUsername>sa</jdbcUsername>
+							<jdbcUrl>${h2.file.epdb.url}</jdbcUrl>
+							<jdbcDriverClass>${h2.epdb.jdbc.driver}</jdbcDriverClass>
+							<jdbcPassword>${h2.epdb.password}</jdbcPassword>
+							<jdbcUsername>${h2.epdb.username}</jdbcUsername>
 							<jdbcConnectionPoolMinIdle>0</jdbcConnectionPoolMinIdle>
 							<jdbcConnectionPoolMaxIdle>0</jdbcConnectionPoolMaxIdle>
 							<skip>${skipAllTests}</skip>
@@ -264,20 +234,6 @@
 											<cargo.rmi.port>${integration.cargo.rmi.port}</cargo.rmi.port>
 											<cargo.tomcat.shutdown.port>${integration.cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
 										</properties>
-										<files>
-											<copy>
-												<file>${project.basedir}/src/test/resources/tomcat9x/server.xml</file>
-												<tofile>conf/server.xml</tofile>
-												<configfile>true</configfile>
-												<overwrite>true</overwrite>
-											</copy>
-											<copy>
-												<file>${project.basedir}/src/test/resources/tomcat9x/context.xml</file>
-												<tofile>conf/Catalina/localhost/${ep.integration.context}.xml</tofile>
-												<configfile>true</configfile>
-												<overwrite>true</overwrite>
-											</copy>
-										</files>
 									</configuration>
 									<deployables>
 										<deployable>
@@ -325,20 +281,6 @@
 											<cargo.rmi.port>${batch.cargo.rmi.port}</cargo.rmi.port>
 											<cargo.tomcat.shutdown.port>${batch.cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
 										</properties>
-										<files>
-											<copy>
-												<file>${project.basedir}/src/test/resources/tomcat9x/server.xml</file>
-												<tofile>conf/server.xml</tofile>
-												<configfile>true</configfile>
-												<overwrite>true</overwrite>
-											</copy>
-											<copy>
-												<file>${project.basedir}/src/test/resources/tomcat9x/context.xml</file>
-												<tofile>conf/Catalina/localhost/${ep.batch.context}.xml</tofile>
-												<configfile>true</configfile>
-												<overwrite>true</overwrite>
-											</copy>
-										</files>
 									</configuration>
 									<deployables>
 										<deployable>
@@ -386,20 +328,6 @@
 											<cargo.rmi.port>${search.cargo.rmi.port}</cargo.rmi.port>
 											<cargo.tomcat.shutdown.port>${search.cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
 										</properties>
-										<files>
-											<copy>
-												<file>${project.basedir}/src/test/resources/tomcat9x/server.xml</file>
-												<tofile>conf/server.xml</tofile>
-												<configfile>true</configfile>
-												<overwrite>true</overwrite>
-											</copy>
-											<copy>
-												<file>${project.basedir}/src/test/resources/tomcat9x/context.xml</file>
-												<tofile>conf/Catalina/localhost/${ep.search.contextUrl}.xml</tofile>
-												<configfile>true</configfile>
-												<overwrite>true</overwrite>
-											</copy>
-										</files>
 									</configuration>
 									<deployables>
 										<deployable>
@@ -512,20 +440,32 @@
 									<h2.bindAddress>localhost</h2.bindAddress>
 									<!-- Turn logging down out of the gate.  When slf4j starts at debug things get a bit spammy. -->
 									<org.slf4j.simpleLogger.defaultLogLevel>WARN</org.slf4j.simpleLogger.defaultLogLevel>
+									<epdb.username>${h2.epdb.username}</epdb.username>
+									<epdb.password>${h2.epdb.password}</epdb.password>
+									<epdb.jdbc.driver>${h2.epdb.jdbc.driver}</epdb.jdbc.driver>
+									<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+									<epdb.url>${h2.file.for.tomcat.epdb.url}</epdb.url>
+									<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+									<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+									<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+									<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+									<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+									<ep.jms.type>${ep.jms.type}</ep.jms.type>
+									<ep.jms.url>${ep.jms.url}</ep.jms.url>
 								</systemProperties>
 							</container>
 							<configuration>
 								<properties>
 									<cargo.logging>medium</cargo.logging>
-									<cargo.datasource.url>${datasource.url}</cargo.datasource.url>
-									<cargo.datasource.driver>${datasource.driver}</cargo.datasource.driver>
-									<cargo.datasource.username>${datasource.username}</cargo.datasource.username>
-									<cargo.datasource.password>${datasource.password}</cargo.datasource.password>
-									<cargo.ep.jms.type>${ep.jms.type}</cargo.ep.jms.type>
-									<cargo.ep.jms.factory>${ep.jms.factory}</cargo.ep.jms.factory>
-									<cargo.ep.jms.url>${ep.jms.url}</cargo.ep.jms.url>
-									<cargo.ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</cargo.ep.tomcat.maxcachesize>
 								</properties>
+								<files>
+									<copy>
+										<file>${project.build.testOutputDirectory}/tomcat9x/server.xml</file>
+										<tofile>conf/server.xml</tofile>
+										<configfile>true</configfile>
+										<overwrite>true</overwrite>
+									</copy>
+								</files>
 							</configuration>
 						</configuration>
 					</plugin>
@@ -738,10 +678,87 @@
 			<artifactId>xml-apis</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-common-test-database</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+			<exclusions>
+				<exclusion>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-data-population-cli</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-data</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-common-files</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-database-and-common-files</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<skip>${skipAllTests}</skip>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.elasticpath.extensions</groupId>
+									<artifactId>ext-common-test-database</artifactId>
+									<overWrite>true</overWrite>
+									<type>zip</type>
+									<outputDirectory>${project.build.directory}/database</outputDirectory>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.elasticpath.extensions</groupId>
+									<artifactId>ext-common-files</artifactId>
+									<overWrite>true</overWrite>
+									<type>zip</type>
+									<outputDirectory>${project.build.testOutputDirectory}/tmp-common-files</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<!-- apply properties to common files -->
+					<execution>
+						<id>copy-and-filter-common-files</id>
+						<phase>process-test-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.testOutputDirectory}/tmp-common-files</directory>
+									<filtering>true</filtering>
+									<includes>**/*</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -757,12 +774,12 @@
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-compiler</artifactId>
-						<version>2.9.2-04</version>
+						<version>${groovy.eclipse.compiler.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-batch</artifactId>
-						<version>2.4.15-01</version>
+						<version>${groovy.eclipse.batch.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

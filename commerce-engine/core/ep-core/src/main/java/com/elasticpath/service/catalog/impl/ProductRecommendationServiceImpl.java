@@ -15,7 +15,8 @@ import java.util.Set;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -75,7 +76,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
  */
 public class ProductRecommendationServiceImpl extends AbstractEpPersistenceServiceImpl implements ProductRecommendationService {
 
-	private static final Logger LOG = Logger.getLogger(ProductRecommendationServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ProductRecommendationServiceImpl.class);
 
 	/** Setting this value as the history months or max recommendations disables the product recommendation feature. */
 	private static final int DISABLE_VALUE = -1;

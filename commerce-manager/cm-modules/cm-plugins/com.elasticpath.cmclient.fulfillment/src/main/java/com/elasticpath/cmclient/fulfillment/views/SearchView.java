@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.AggregateValidationStatus;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IStatus;
@@ -48,7 +49,7 @@ import com.elasticpath.cmclient.fulfillment.perspective.FulfillmentPerspectiveFa
  */
 public class SearchView extends AbstractCmClientView implements SelectionListener, ControlModificationListener, IPerspectiveListener {
 
-	private static final Logger LOG = Logger.getLogger(SearchView.class);
+	private static final Logger LOG = LogManager.getLogger(SearchView.class);
 
 	private static final int TAB_ACCOUNTS = 1;
 

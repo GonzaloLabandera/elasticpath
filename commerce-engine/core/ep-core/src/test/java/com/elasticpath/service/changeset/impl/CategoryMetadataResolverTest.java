@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.domain.objectgroup.impl.BusinessObjectDescriptorImpl;

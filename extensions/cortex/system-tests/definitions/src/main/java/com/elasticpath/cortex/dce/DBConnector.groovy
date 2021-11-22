@@ -4,14 +4,15 @@ import static org.junit.Assert.assertTrue
 
 import java.sql.*
 
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.LogManager
 
 /**
  * DB Connector class for connecting to and querying the database.
  */
 class DBConnector {
 
-	private static final Logger LOGGER = Logger.getLogger(DBConnector.class);
+	private static final Logger LOGGER = LogManager.getLogger(DBConnector.class);
 	private Statement statement;
 	private ResultSet resultSet;
 	private Connection connection;

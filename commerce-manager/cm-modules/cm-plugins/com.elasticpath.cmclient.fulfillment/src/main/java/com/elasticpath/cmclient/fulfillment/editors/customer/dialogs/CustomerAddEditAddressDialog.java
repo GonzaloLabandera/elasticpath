@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.fulfillment.editors.customer.dialogs;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -210,7 +210,7 @@ public class CustomerAddEditAddressDialog extends AbstractEpDialog {
 		countryCombo = dialogComposite.addComboBox(authorization, fieldData);
 		stateCountryManager.setCountryCombo(countryCombo);
 
-		dialogComposite.addLabelBoldRequired(FulfillmentMessages.get().AddressDialog_Phone, authorization, labelData);
+		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_Phone, labelData);
 		phoneText = dialogComposite.addTextField(authorization, fieldData);
 
 		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_Fax, labelData);
@@ -288,7 +288,7 @@ public class CustomerAddEditAddressDialog extends AbstractEpDialog {
 
 		// Phone
 		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.phoneText, this.addressProxy, "phoneNumber", //$NON-NLS-1$
-				EpValidatorFactory.PHONE_REQUIRED, null, hideDecorationOnFirstValidation);
+				EpValidatorFactory.PHONE_IGNORE_SPACES, null, hideDecorationOnFirstValidation);
 
 		// Fax
 		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.faxText, this.addressProxy, "faxNumber", //$NON-NLS-1$

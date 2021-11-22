@@ -19,10 +19,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierType;
 import com.elasticpath.validation.impl.ConstraintViolationTransformerImpl;
 import com.elasticpath.validation.service.impl.ModifierFieldValidationServiceImpl;
+import com.elasticpath.xpf.connectivity.entity.XPFModifierField;
 
 /**
  * Test class for {@link ModifierFieldValidationServiceImpl}.
@@ -34,7 +34,7 @@ public class ModifierFieldValidationServiceImplTest {
 	private ModifierFieldValidationServiceImpl fixture;
 
 	@Mock
-	private ModifierField referentField;
+	private XPFModifierField referentField;
 
 	private static final int MIN_SIZE = 0;
 	private static final int SHORT_MAX_SIZE = 5;
@@ -58,16 +58,16 @@ public class ModifierFieldValidationServiceImplTest {
 		Map<String, String> itemsToValidate = new HashMap<>();
 		itemsToValidate.put(decimalFieldName, fieldValue);
 
-		Set<ModifierField> referentFields = new HashSet<>();
+		Set<XPFModifierField> referentFields = new HashSet<>();
 
 		when(referentField.getCode()).thenReturn(decimalFieldName);
-		when(referentField.getFieldType()).thenReturn(ModifierType.DECIMAL);
+		when(referentField.getModifierType()).thenReturn(ModifierType.DECIMAL.getName());
 		when(referentField.isRequired()).thenReturn(true);
 		when(referentField.getMaxSize()).thenReturn(MEDIUM_MAX_SIZE);
 
 		referentFields.add(referentField);
 
-		List<StructuredErrorMessage> actualStructuredErrorMessages = fixture.validate(itemsToValidate, referentFields);
+		List<StructuredErrorMessage> actualStructuredErrorMessages = fixture.validate(itemsToValidate, referentFields, null);
 
 		assertEquals(1, actualStructuredErrorMessages.size());
 
@@ -98,16 +98,16 @@ public class ModifierFieldValidationServiceImplTest {
 		Map<String, String> itemsToValidate = new HashMap<>();
 		itemsToValidate.put(shortTextFieldName, fieldValue);
 
-		Set<ModifierField> referentFields = new HashSet<>();
+		Set<XPFModifierField> referentFields = new HashSet<>();
 
 		when(referentField.getCode()).thenReturn(shortTextFieldName);
-		when(referentField.getFieldType()).thenReturn(ModifierType.SHORT_TEXT);
+		when(referentField.getModifierType()).thenReturn(ModifierType.SHORT_TEXT.getName());
 		when(referentField.isRequired()).thenReturn(false);
 		when(referentField.getMaxSize()).thenReturn(SHORT_MAX_SIZE);
 
 		referentFields.add(referentField);
 
-		List<StructuredErrorMessage> actualStructuredErrorMessages = fixture.validate(itemsToValidate, referentFields);
+		List<StructuredErrorMessage> actualStructuredErrorMessages = fixture.validate(itemsToValidate, referentFields, null);
 
 		assertEquals(1, actualStructuredErrorMessages.size());
 
@@ -139,14 +139,14 @@ public class ModifierFieldValidationServiceImplTest {
 		Map<String, String> itemsToValidate = new HashMap<>();
 		itemsToValidate.put(messageFieldName, "");
 
-		Set<ModifierField> referentFields = new HashSet<>();
+		Set<XPFModifierField> referentFields = new HashSet<>();
 
 		when(referentField.getCode()).thenReturn(messageFieldName);
 		when(referentField.isRequired()).thenReturn(true);
 
 		referentFields.add(referentField);
 
-		List<StructuredErrorMessage> actualStructuredErrorMessages = fixture.validate(itemsToValidate, referentFields);
+		List<StructuredErrorMessage> actualStructuredErrorMessages = fixture.validate(itemsToValidate, referentFields, null);
 
 		assertEquals(1, actualStructuredErrorMessages.size());
 

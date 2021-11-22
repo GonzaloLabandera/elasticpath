@@ -16,6 +16,7 @@
 		<activeProfile>tomcat-developer</activeProfile>
 		<activeProfile>mysql-dev-db</activeProfile>
 		<!-- <activeProfile>oracle-dev-db</activeProfile> -->
+		<!-- <activeProfile>postgresql-dev-db</activeProfile> -->
 		<activeProfile>with-oauth2-resource</activeProfile>
 		<activeProfile>activemq-dev-jms</activeProfile>
 		<activeProfile>allow-snapshots-from-central</activeProfile>
@@ -45,14 +46,26 @@
 			<id>oracle-dev-db</id>
 			<properties>
 				<epdb.schemaname>COMMERCEDB</epdb.schemaname>
-                <epdb.databasename>XE</epdb.databasename>
-                <epdb.username>${epdb.schemaname}</epdb.username>
-                <epdb.password>ep</epdb.password>
+				<epdb.databasename>XE</epdb.databasename>
+				<epdb.username>${epdb.schemaname}</epdb.username>
+				<epdb.password>ep</epdb.password>
 				<epdb.reset_user>sys as sysdba</epdb.reset_user>
 				<epdb.reset_password>YOUR_SYS_PASSWORD</epdb.reset_password>
 				<epdb.default.tablespace>users</epdb.default.tablespace>
-                <epdb.temporary.tablespace>temp</epdb.temporary.tablespace>
+				<epdb.temporary.tablespace>temp</epdb.temporary.tablespace>
 				<ep.database.timezone>UTC</ep.database.timezone>
+			</properties>
+		</profile>
+
+		<!-- PostgreSQL developer configuration -->
+		<!-- This overrides the postgresql-dev-db profile in elasticpath grandparent POM -->
+		<profile>
+			<id>postgresql-dev-db</id>
+			<properties>
+				<epdb.schemaname>COMMERCEDB</epdb.schemaname>
+				<epdb.reset_user>eproot</epdb.reset_user>
+				<epdb.reset_password>YOUR_SUPERUSER_PASSWORD</epdb.reset_password>
+				<data.population.environment>local</data.population.environment>
 			</properties>
 		</profile>
 

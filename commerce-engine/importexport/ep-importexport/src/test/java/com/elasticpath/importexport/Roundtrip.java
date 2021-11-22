@@ -14,7 +14,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -33,7 +34,7 @@ import com.elasticpath.importexport.importer.controller.ImportController;
 @SuppressWarnings("PMD.DoNotCallSystemExit")
 public class Roundtrip {
 	
-	private static final Logger LOGGER = Logger.getLogger(Roundtrip.class);
+	private static final Logger LOGGER = LogManager.getLogger(Roundtrip.class);
 	private static final int WRONG_ARGS_EXIT_CODE = 1;
 	private static final int NUM_ARGS = 3;
 	

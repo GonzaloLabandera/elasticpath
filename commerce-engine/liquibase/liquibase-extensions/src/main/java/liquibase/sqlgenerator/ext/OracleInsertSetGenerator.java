@@ -19,7 +19,7 @@ import liquibase.statement.core.InsertStatement;
  * Replace {@link InsertSetGenerator} to support Oracle database.
  * It should be in the package "liquibase.sqlgenerator.ext" to automatically registered.
  */
-@SuppressWarnings("squid:S1149")
+@SuppressWarnings({"squid:S1149", "rawtypes"})
 public class OracleInsertSetGenerator extends InsertSetGenerator {
 	private InsertGenerator myGenerator = new InsertGenerator();
 

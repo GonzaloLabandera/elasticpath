@@ -643,13 +643,12 @@
 		<property name="solrProvider" ref="solrManager" />
 		<property name="queryComposerFactory" ref="queryComposerFactory" />
 		<property name="solrQueryFactory" ref="solrQueryFactory" />
-		<property name="elasticPath" ref="elasticPath" />
-		<property name="solrFacetAdapter" ref="solrFacetAdapter" />
+		<property name="beanFactory" ref="coreBeanFactory" />
 		<property name="indexUtility" ref="indexUtility" />
-		<property name="retrieveCatalogFromCache" value="false" />
+		<property name="filteredNavigationConfigurationLoader" ref="cachedFacetConfigurationLoader"/>
 	</bean>
 
-	<bean id="paymentScheduleHelper" class="com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl">
+	<bean id="paymentScheduleHelper" class="com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl" init-method="init">
 		<property name="skuOptionService" ref="skuOptionService" />
 		<property name="beanFactory" ref="coreBeanFactory" />
 	</bean>

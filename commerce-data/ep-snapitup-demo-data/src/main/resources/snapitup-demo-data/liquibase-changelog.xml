@@ -25,7 +25,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Prism System","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -39,7 +39,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera / Film Speed Range","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -53,7 +53,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Viewfinder / Viewfinder Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -67,7 +67,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Miscellaneous / Color","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -81,7 +81,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Display (Projector) / Diagonal Size","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -95,7 +95,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera / Shooting Modes","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -109,7 +109,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical Viewfinder / Magnification","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -123,7 +123,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Flash Memory / Form Factor","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -137,7 +137,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"System Requirements / OS Required","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -151,7 +151,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Image Stabilizer","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -165,7 +165,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical Viewfinder / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -179,7 +179,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"fr":"Audio Input FR","en":"Audio Input / Microphone Operation Mode"}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -193,7 +193,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Media Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -207,7 +207,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Digital Camera / Digital Camera Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -221,7 +221,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Digital Video Format","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -235,7 +235,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Magnification","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -249,7 +249,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Objective Lens Diameter","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -263,7 +263,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Lens System / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -277,7 +277,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera / Exposure Metering","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -291,7 +291,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Analog Video Format","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -305,7 +305,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Exposure Parameters / Shooting Programs","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -319,7 +319,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Eye Relief","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -333,7 +333,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Special Effects","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -347,7 +347,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -361,7 +361,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Product Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -375,7 +375,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Telescope Class","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -389,7 +389,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"System Requirements / Platform","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -403,7 +403,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera / Camera Format","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -417,7 +417,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Lens System / Min Focus Range","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -431,7 +431,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Display (Projector) / Display Form Factor","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -445,7 +445,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Special Functions","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -459,7 +459,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera / Timer Functions","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -473,7 +473,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera / Date Imprint Selections","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -487,7 +487,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -501,7 +501,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Battery / Manufacturer Battery Name","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -515,7 +515,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Lens System / Optical Zoom","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -529,7 +529,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Sensor Resolution","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -543,7 +543,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Battery / Battery Form Factor","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -557,7 +557,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Finderscope / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -571,7 +571,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Header / Product Line","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -585,7 +585,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Battery / Supported Battery Form Factor","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -599,7 +599,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Light Sensitivity","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -613,7 +613,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Audio Input / Microphone Technology","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -627,7 +627,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Optical Sensor Size","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -641,7 +641,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Digital Zoom","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -655,7 +655,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Flash Memory / Storage Capacity","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -669,7 +669,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Header / Model","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -683,7 +683,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Camcorder Sensor Resolution","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -697,7 +697,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Telescope Aperture","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -711,7 +711,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Service &amp; Support / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -725,7 +725,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera Flash / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -739,7 +739,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Viewfinder / Viewfinder Color Support","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -753,7 +753,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Camcorder Effective Video Resolution","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -767,7 +767,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Digital Camera / Supported Flash Memory","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -781,7 +781,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Lens System / Lens Aperture","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -795,7 +795,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera Flash / Flash Modes","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -809,7 +809,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Audio Input / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -823,7 +823,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Optical Sensor Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -837,7 +837,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Lens System / Min Focal Length","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -851,7 +851,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera / Auto Focus","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -865,7 +865,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical System / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -879,7 +879,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Finderscope / Magnification","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -893,7 +893,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Still Image Format","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -907,7 +907,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Battery / Run Time (Up To)","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -921,7 +921,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Display (Projector) / Technology","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -935,7 +935,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Shooting Modes","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -949,7 +949,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Camera Flash / Red Eye Reduction","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -963,7 +963,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Display (Projector) / Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -977,7 +977,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Lens System / Max Focal Length","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -991,7 +991,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Sensor Qty","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -1005,7 +1005,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Video Input / Digital Scene Transition","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -1019,7 +1019,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Features","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -1033,7 +1033,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Design","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -1047,7 +1047,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Amount","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -1061,7 +1061,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Color","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -1075,7 +1075,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Color","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -1089,7 +1089,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Size","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -1103,7 +1103,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"fr":"ColorFR","en":"Color"}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -1117,7 +1117,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Billed","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -1131,7 +1131,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Plan Size","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -1145,7 +1145,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"fr":"BrandFR","en":"Brand"}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -1159,7 +1159,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Product Sku Code","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -1173,7 +1173,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"fr":"CategoryFR","en":"Category"}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -1187,7 +1187,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"fr":"PriceFr","en":"Price"}'/>
 			<column name="FACET_TYPE" valueNumeric='1'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr":"&lt; 100","en":"&lt; 100"}},{"start":100,"end":200,"displayNameMap":{"fr":"100 - 200","en":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr":"200 - 300","en":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr":"> 300","en":"> 300"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -1201,7 +1201,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Length","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -1215,7 +1215,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Product Name","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -1229,7 +1229,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"fr":"HeightFR","en":"Height"}'/>
 			<column name="FACET_TYPE" valueNumeric='1'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr":"&lt; 100","en":"&lt; 100"}},{"start":100,"end":200,"displayNameMap":{"fr":"100 - 200","en":"1000- 20 "}},{"start":200,"end":300,"displayNameMap":{"fr":"200 - 300","en":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr":"> 300","en":"> 300"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -1243,7 +1243,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Width","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -1257,7 +1257,7 @@
 			<column name="STORECODE" value='SNAPITUP'/>
 			<column name="DISPLAY_NAME" value='{"en":"Weight","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>

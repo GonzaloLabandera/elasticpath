@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.CouponUsageType;
 import com.elasticpath.domain.shopper.Shopper;
@@ -40,19 +39,17 @@ public class PromotionCodeInvalidatorForShopperUpdates implements CustomerSessio
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void invalidateShopper(final CustomerSession customerSession, final Shopper invalidShopper) {
-
-		final Shopper currentShopper = customerSession.getShopper();
+	public void invalidateShopper(final Shopper invalidShopper, final Shopper newShopper) {
 
 		// If the invalidated shopping context was for an anonymous session, do not change ANY of the promotions on
 		// login because it might result in someone not converting due to the price increase. There cannot be any
 		// user specific coupons applied to the anonymous sessions anyways.
 		boolean wasAnonymousSession = isAnonymousShopper(invalidShopper);
-		if (wasAnonymousSession || currentShopper.equals(invalidShopper)) {
+		if (wasAnonymousSession || newShopper.equals(invalidShopper)) {
 			return;
 		}
 
-		final ShoppingCart shoppingCart = currentShopper.getCurrentShoppingCart();
+		final ShoppingCart shoppingCart = newShopper.getCurrentShoppingCart();
 		final Set<String> couponCodes = shoppingCart.getPromotionCodes();
 
 		// Remove all coupons to ensure that we have cleared out any and all promotions that may be linked to the old CustomerSession.

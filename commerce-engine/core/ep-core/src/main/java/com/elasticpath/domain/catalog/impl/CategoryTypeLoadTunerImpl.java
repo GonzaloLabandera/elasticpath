@@ -7,8 +7,8 @@ import static com.elasticpath.persistence.support.FetchFieldConstants.CATEGORY_A
 
 import java.util.Objects;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.openjpa.persistence.FetchPlan;
 
 import com.elasticpath.domain.catalog.CategoryTypeLoadTuner;

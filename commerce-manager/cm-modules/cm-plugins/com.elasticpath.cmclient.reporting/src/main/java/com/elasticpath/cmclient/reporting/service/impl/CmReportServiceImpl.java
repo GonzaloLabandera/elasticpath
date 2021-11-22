@@ -24,7 +24,8 @@ import com.elasticpath.cmclient.core.DownloadServiceHandler;
 import com.elasticpath.cmclient.core.util.FileSystemUtil;
 import com.elasticpath.cmclient.core.util.ServiceUtil;
 import com.elasticpath.cmclient.reporting.ReportingPlugin;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -65,7 +66,7 @@ import org.eclipse.rap.rwt.client.service.UrlLauncher;
 @SuppressWarnings({"PMD.AvoidUsingShortType", "PMD.GodClass"})
 public class CmReportServiceImpl implements CmReportService {
 
-	private static final Logger LOG = Logger.getLogger(CmReportServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CmReportServiceImpl.class);
 	/**
 	 * specifies the temp folder.
 	 */

@@ -7,8 +7,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.Resource;
 import org.apache.velocity.runtime.resource.ResourceManager;
@@ -26,7 +27,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 @SuppressWarnings("PMD.GodClass")
 public class StoreResourceManagerImpl extends ResourceManagerImpl implements InvalidatableCache {
 
-	private static final Logger LOGGER = Logger.getLogger(StoreResourceManagerImpl.class);
+	private static final Logger LOGGER = LogManager.getLogger(StoreResourceManagerImpl.class);
 
 	private static StoreConfig storeConfig;
 

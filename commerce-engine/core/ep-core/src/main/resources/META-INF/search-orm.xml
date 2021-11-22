@@ -6,10 +6,21 @@
 			<query>
 				SELECT inot
 				FROM IndexNotificationImpl inot
-				WHERE inot.indexTypeInternal = :type
+				WHERE inot.indexTypeInternal = ?1
 				ORDER BY inot.uidPk
 			</query>
 		</named-query>
+
+		<named-query name="INDEXNOTIFY_FIND_BY_INDEX_TYPE_AND_DELETE_ALL_OR_REBUILD">
+			<query>
+				SELECT inot
+				FROM IndexNotificationImpl inot
+				WHERE inot.indexTypeInternal = ?1
+				AND (inot.updateType = ?2 OR inot.updateType = ?3)
+				ORDER BY inot.uidPk DESC
+			</query>
+		</named-query>
+
 		<named-query name="INDEXNOTIFY_FIND_BY_INDEX_AND_UPDATE_TYPE">
 			<query>
 				SELECT inot
@@ -17,6 +28,21 @@
 				WHERE inot.indexTypeInternal = ?1
 				AND inot.updateType = ?2
 				ORDER BY inot.uidPk
+			</query>
+		</named-query>
+
+		<named-query name="DELETE_INDEXNOTIFY_BY_MAX_UID_AND_INDEXTYPE">
+			<query>
+				DELETE FROM IndexNotificationImpl inot
+				WHERE inot.uidPk &lt;= ?1
+				AND inot.indexTypeInternal = ?2
+			</query>
+		</named-query>
+
+		<named-query name="DELETE_INDEXNOTIFY_BY_UIDS">
+			<query>
+				DELETE FROM IndexNotificationImpl inot
+				WHERE inot.uidPk IN (:list)
 			</query>
 		</named-query>
 

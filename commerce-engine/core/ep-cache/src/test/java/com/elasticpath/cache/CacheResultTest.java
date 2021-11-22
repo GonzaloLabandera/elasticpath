@@ -11,6 +11,8 @@ import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
+import com.elasticpath.base.cache.CacheResult;
+
 public class CacheResultTest {
 	@Test
 	public void testThatIsPresentReturnsTrueForNonNullObject() {

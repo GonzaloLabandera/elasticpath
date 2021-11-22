@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core.security;
 
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 /**
@@ -15,7 +16,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 public class PermissionSet extends TreeSet<String> {
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger LOG = Logger.getLogger(PermissionSet.class);
+	private static final Logger LOG = LogManager.getLogger(PermissionSet.class);
 	
 	/** The extension's permissions element. */
 	public static final String TAG_PERMISSIONS = "permissions"; //$NON-NLS-1$

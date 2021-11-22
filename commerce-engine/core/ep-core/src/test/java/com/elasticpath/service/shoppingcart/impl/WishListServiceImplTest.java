@@ -24,7 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.core.messaging.customer.CustomerEventType;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.shoppingcart.WishListMessage;
@@ -36,7 +35,7 @@ import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.shoppingcart.dao.WishListDao;
-import com.elasticpath.test.factory.TestCustomerSessionFactory;
+import com.elasticpath.test.factory.TestShopperFactory;
 
 
 /**
@@ -81,8 +80,7 @@ public class WishListServiceImplTest {
 	 */
 	@Test
 	public void testCreateWishList() {
-		final CustomerSession customerSession = TestCustomerSessionFactory.getInstance().createNewCustomerSession();
-		final Shopper shopper = customerSession.getShopper();
+		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMemento();
 
 		when(beanFactory.getPrototypeBean(ContextIdNames.WISH_LIST, WishList.class)).thenReturn(new WishListImpl() {
 			private static final long serialVersionUID = -7785511152889149172L;

@@ -51,8 +51,10 @@ import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.service.customer.AccountTreeService;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
+import com.elasticpath.service.customer.impl.AddressServiceImpl;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.CustomerAddressBuilder;
 import com.elasticpath.test.factory.CustomerBuilder;
@@ -136,6 +138,8 @@ public class CustomerDtoAssemblerTest {
 
 	private AccountTreeService accountTreeService;
 
+	private AddressService addressService;
+
 	private final Utility utility = new UtilityImpl() {
 		private static final long serialVersionUID = 1L;
 
@@ -167,6 +171,8 @@ public class CustomerDtoAssemblerTest {
 		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class, CustomerAddressImpl.class);
 		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthentication.class,
 				CustomerAuthenticationImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ADDRESS_SERVICE, AddressService.class,
+				AddressServiceImpl.class);
 
 		customerService = context.mock(CustomerService.class);
 		accountTreeService = context.mock(AccountTreeService.class);
@@ -175,9 +181,12 @@ public class CustomerDtoAssemblerTest {
 		customerDtoAssembler.setBeanFactory(beanFactory);
 
 		customerGroupService = context.mock(CustomerGroupService.class);
+		addressService = context.mock(AddressService.class);
+
 		customerDtoAssembler.setCustomerGroupService(customerGroupService);
 		customerDtoAssembler.setCustomerService(customerService);
 		customerDtoAssembler.setAccountTreeService(accountTreeService);
+		customerDtoAssembler.setAddressService(addressService);
 	}
 
 	/**
@@ -193,6 +202,12 @@ public class CustomerDtoAssemblerTest {
 	 */
 	@Test
 	public void testCustomerAssembleDtoFromDomainObject() {
+		context.checking(new Expectations() {
+			{
+				allowing(addressService).findByCustomer(0L);
+				will(returnValue(Collections.singletonList(address)));
+			}
+		});
 		CustomerDTO expectedCustomerDTO = createTestCustomerDtoBuilder()
 				.build();
 
@@ -210,6 +225,12 @@ public class CustomerDtoAssemblerTest {
 	 */
 	@Test
 	public void testCustomerAssembleDtoFromDomainObjectWithParentGuid() {
+		context.checking(new Expectations() {
+			{
+				allowing(addressService).findByCustomer(0L);
+				will(returnValue(Collections.singletonList(address)));
+			}
+		});
 		CustomerDTO expectedCustomerDTO = createCustomerDTOWithParent(PARENT_GUID, CustomerType.ACCOUNT);
 
 		Customer customer = createAccountWithAllFields(PARENT_GUID);
@@ -225,6 +246,13 @@ public class CustomerDtoAssemblerTest {
 	 */
 	@Test
 	public void testCustomerAssembleDtoDoesNotSetPreferredBillingAddressWhenNull() {
+		context.checking(new Expectations() {
+			{
+				allowing(addressService).findByCustomer(0L);
+				will(returnValue(Collections.singletonList(address)));
+			}
+		});
+
 		CustomerDTO expectedCustomerDto = createTestCustomerDtoBuilder().build();
 		expectedCustomerDto.setPreferredBillingAddressGuid(null);
 
@@ -244,6 +272,13 @@ public class CustomerDtoAssemblerTest {
 	 */
 	@Test
 	public void testCustomerAssembleDtoDoesNotSetPreferredShippingingAddressWhenNull() {
+		context.checking(new Expectations() {
+			{
+				allowing(addressService).findByCustomer(0L);
+				will(returnValue(Collections.singletonList(address)));
+			}
+		});
+
 		CustomerDTO expectedCustomerDto = createTestCustomerDtoBuilder().build();
 		expectedCustomerDto.setPreferredShippingAddressGuid(null);
 
@@ -287,7 +322,7 @@ public class CustomerDtoAssemblerTest {
 
 		final Customer parent = createAccount(null);
 
-		shouldFindParentCustomer(parent);
+		shouldFindCustomerTypeByGuid(parent.getCustomerType());
 		shouldFindRootCustomerGuid(parent, SOME_ROOT_GUID);
 
 		Customer expectedCustomer = createAccountWithAllFields(PARENT_GUID);
@@ -308,7 +343,7 @@ public class CustomerDtoAssemblerTest {
 	public void testThatAssembleDomainMethodThrowsExceptionIfParentDoesNotExistInDb() {
 		shouldFindDefaultCustomerGroupByName();
 		shouldFindCustomerGroupsByGuid();
-		shouldFindParentCustomer(null);
+		shouldFindCustomerTypeByGuid(null);
 
 		CustomerDTO customerDto = createCustomerDTOWithParent(PARENT_GUID, CustomerType.ACCOUNT);
 		Customer customer = CustomerBuilder.newCustomer().build();
@@ -343,7 +378,7 @@ public class CustomerDtoAssemblerTest {
 
 		final Customer parent = createCustomer();
 
-		shouldFindParentCustomer(parent);
+		shouldFindCustomerTypeByGuid(parent.getCustomerType());
 
 		CustomerDTO customerDto = createCustomerDTOWithParent(PARENT_GUID, CustomerType.ACCOUNT);
 
@@ -370,17 +405,8 @@ public class CustomerDtoAssemblerTest {
 	private void shouldFindRootCustomerGuid(final Customer parent, final String rootGuid) {
 		context.checking(new Expectations() {
 			{
-				allowing(accountTreeService).fetchPathToRoot(parent);
+				allowing(accountTreeService).findAncestorGuids(parent.getGuid());
 				will(returnValue(Collections.singletonList(rootGuid)));
-			}
-		});
-	}
-
-	private void shouldFindParentCustomer(final Customer parent) {
-		context.checking(new Expectations() {
-			{
-				allowing(customerService).findByGuid(PARENT_GUID);
-				will(returnValue(parent));
 			}
 		});
 	}
@@ -404,7 +430,7 @@ public class CustomerDtoAssemblerTest {
 		customerDtoAssembler.assembleDomain(customerDto, customer);
 
 		assertReflectionEquals(EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL, expectedCustomer, customer, ReflectionComparatorMode.LENIENT_DATES);
-		assertEquals("The domain object should have no duplicate addresses", 1, customer.getAddresses().size());
+		assertEquals("The domain object should have no duplicate addresses", 1, customer.getTransientAddresses().size());
 	}
 
 	/**
@@ -478,6 +504,12 @@ public class CustomerDtoAssemblerTest {
 	 */
 	@Test
 	public void testCustomerDtoAssemblerUsesEmptyingFilterIfNoCardFilterSet() {
+		context.checking(new Expectations() {
+			{
+				allowing(addressService).findByCustomer(0L);
+				will(returnValue(Collections.emptyList()));
+			}
+		});
 		Customer customer = CustomerBuilder.newCustomer().build();
 		CustomerDTO customerDto = new CustomerDTO();
 
@@ -486,6 +518,12 @@ public class CustomerDtoAssemblerTest {
 
 	@Test
 	public void testCustomerDtoAssemblerAssemblesCustomerProfileValuesWithCreationDate() {
+		context.checking(new Expectations() {
+			{
+				allowing(addressService).findByCustomer(0L);
+				will(returnValue(Collections.emptyList()));
+			}
+		});
 		Customer customer = CustomerBuilder.newCustomer().build();
 		customer.setPreferredShippingAddress(null);
 
@@ -565,6 +603,15 @@ public class CustomerDtoAssemblerTest {
 			{
 				allowing(customerGroupService).findByGuid(DEFAULT_CUSTOMER_GROUP_GUID);
 				will(returnValue(defaultCustomerGroup));
+			}
+		});
+	}
+
+	private void shouldFindCustomerTypeByGuid(final CustomerType customerType) {
+		context.checking(new Expectations() {
+			{
+				allowing(customerService).getCustomerTypeByGuid(PARENT_GUID);
+				will(returnValue(customerType));
 			}
 		});
 	}

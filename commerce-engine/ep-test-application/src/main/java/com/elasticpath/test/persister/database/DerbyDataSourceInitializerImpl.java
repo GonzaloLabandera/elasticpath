@@ -11,7 +11,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.test.common.exception.DataSourceInitializerException;
 import com.elasticpath.test.common.exception.TestApplicationException;
@@ -31,7 +32,7 @@ import com.elasticpath.test.common.exception.TestApplicationException;
  * 
  */
 public class DerbyDataSourceInitializerImpl extends AbstractDataSourceInitializer {
-	private static final Logger LOG = Logger.getLogger(DerbyDataSourceInitializerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(DerbyDataSourceInitializerImpl.class);
 	
 	/**
 	 * Create an instance that initializes a Derby db.

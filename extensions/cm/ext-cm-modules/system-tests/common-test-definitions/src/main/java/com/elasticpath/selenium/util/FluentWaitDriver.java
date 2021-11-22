@@ -8,6 +8,9 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -28,7 +31,7 @@ public class FluentWaitDriver extends WaitDriver {
 
 	private static final int POLLING_INTERVAL = 500;
 	private static final String ATTRIBUTE_VALUE = "value";
-	private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(FluentWaitDriver.class);
+	private static final Logger LOGGER = LogManager.getLogger(FluentWaitDriver.class);
 
 	private final FluentWait<WebDriver> wait;
 

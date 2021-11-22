@@ -17,7 +17,8 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.kie.api.KieBase;
 import org.kie.api.io.ResourceType;
@@ -33,6 +34,7 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.PropertiesDao;
 import com.elasticpath.persistence.api.EpPersistenceException;
@@ -49,7 +51,7 @@ import com.elasticpath.service.store.StoreService;
  */
 public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements RecompilingRuleEngine {
 
-	private static final Logger LOG = Logger.getLogger(DBCompilingRuleEngineImpl.class);
+	private static final Logger LOG = LogManager.getLogger(DBCompilingRuleEngineImpl.class);
 
 	/** The property name for the last rule update/recompile date. */
 	private static final String LAST_COMPILATION_BEGIN_DATE_PROP = "LastSuccessfulCompilationBeginDate";
@@ -134,7 +136,9 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 		}
 
 		if (ruleBase == null) {
-			RuleSet ruleSet = ruleSetService.findByScenarioId(scenarioId);
+			RuleSetLoadTuner ruleSetLoadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class);
+			ruleSetLoadTuner.setLoadingRules(true);
+			RuleSet ruleSet = ruleSetService.findByScenarioId(scenarioId, ruleSetLoadTuner);
 			return recompileRuleBase(ruleSet, store);
 		}
 
@@ -264,7 +268,9 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 		if (lastSuccessfulCompilationBeginDate == null) {
 				lastSuccessfulCompilationBeginDate = new Date(0);
 		}
-		List<RuleSet> ruleSets = ruleSetService.findByModifiedDate(lastSuccessfulCompilationBeginDate);
+		RuleSetLoadTuner ruleSetLoadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class);
+		ruleSetLoadTuner.setLoadingRules(true);
+		List<RuleSet> ruleSets = ruleSetService.findByModifiedDate(lastSuccessfulCompilationBeginDate, ruleSetLoadTuner);
 		List<Store> stores = storeService.findAllCompleteStores();
 		LOG.debug("Checking for modified rule sets");
 

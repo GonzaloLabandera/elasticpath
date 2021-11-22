@@ -7,7 +7,6 @@ import java.util.Currency;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.discounts.DiscountItemContainer;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 
@@ -177,15 +176,6 @@ public interface PromotionRuleDelegate {
 	 * @return true if the state is ACTIVE, false if it is DISABLED
 	 */
 	boolean checkEnabled(String state);
-
-	/**
-	 * Checks if the customer is in the specified customer group.
-	 *
-	 * @param customerSession the customer session containing a reference to the customer
-	 * @param customerGroup the customer group that the customer must belong to
-	 * @return true if the customer belongs to the specified group
-	 */
-	boolean customerInGroup(CustomerSession customerSession, long customerGroup);
 
 	/**
 	 * Checks if the customer already has an account in the system.

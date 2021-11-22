@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.EntityManager;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.enhance.Reflection;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
@@ -40,7 +41,7 @@ import com.elasticpath.test.integration.BasicSpringContextTest;
 @SuppressWarnings("PMD.GodClass")
 public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 
-	private static final Logger LOG = Logger.getLogger(AbstractAuditTestSupport.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractAuditTestSupport.class);
 
 	private static final long ONE_MINUTE = 60000;
 

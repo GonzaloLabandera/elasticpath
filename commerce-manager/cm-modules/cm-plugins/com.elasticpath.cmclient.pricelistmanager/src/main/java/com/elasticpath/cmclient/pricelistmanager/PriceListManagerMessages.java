@@ -8,7 +8,7 @@ package com.elasticpath.cmclient.pricelistmanager; //NOPMD
 
 import java.lang.reflect.Field;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.core.MessageException;
 import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;

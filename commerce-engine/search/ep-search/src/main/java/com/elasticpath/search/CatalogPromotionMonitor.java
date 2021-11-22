@@ -12,7 +12,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.exception.EpDateBindException;
 import com.elasticpath.domain.rules.Rule;
@@ -56,7 +57,7 @@ public class CatalogPromotionMonitor {
 	
 	private int maxClauseCount;
 
-	private static final Logger LOG = Logger.getLogger(CatalogPromotionMonitor.class);
+	private static final Logger LOG = LogManager.getLogger(CatalogPromotionMonitor.class);
 	
 	/**
 	 * Checks for catalog promotion changes and notifies SOLR of these changes.

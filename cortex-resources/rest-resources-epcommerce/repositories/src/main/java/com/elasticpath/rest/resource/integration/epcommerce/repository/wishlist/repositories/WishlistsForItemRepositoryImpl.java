@@ -28,7 +28,7 @@ public class WishlistsForItemRepositoryImpl<I extends ItemIdentifier, LI extends
 
 	@Override
 	public Observable<WishlistIdentifier> getElements(final ItemIdentifier itemIdentifier) {
-		return wishlistRepository.findWishlistsContainingItem(itemIdentifier.getItemId().getValue())
+		return wishlistRepository.findWishlistsContainingItem(itemIdentifier.getScope().getValue(), itemIdentifier.getItemId().getValue())
 				.map(wishList -> buildWishlistIdentifier(wishList.getStoreCode(), wishList.getGuid()))
 				.toObservable();
 	}

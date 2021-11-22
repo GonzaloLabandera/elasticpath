@@ -4,7 +4,7 @@
 
 package com.elasticpath.service.search.solr.query;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 
 /**

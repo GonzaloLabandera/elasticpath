@@ -196,7 +196,6 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		shoppingCart.setShopper(shopper);
 		shoppingCart.setStore(store);
 		shoppingCart.getShoppingCartMemento().setGuid(cartGuid);
-		shoppingCart.setCustomerSession(customerSession);
 		shopper.setCurrentShoppingCart(shoppingCart);
 		return shoppingCartService.saveOrUpdate(shoppingCart);
 	}

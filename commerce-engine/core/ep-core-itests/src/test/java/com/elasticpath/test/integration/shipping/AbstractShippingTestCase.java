@@ -59,7 +59,7 @@ public abstract class AbstractShippingTestCase extends DbTestCase {
 		shoppingContextPersister.persist(shoppingContext);
 
 		checkoutTestCartBuilder.withScenario(scenario)
-				.withCustomerSession(shoppingContext.getCustomerSession());
+				.withShopper(shoppingContext.getShopper());
 
 		final CustomerSession customerSession = shoppingContext.getCustomerSession();
 		locale = customerSession.getLocale();

@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.customer.CustomerGroupDTO;
 import com.elasticpath.domain.customer.Customer;
@@ -22,7 +23,7 @@ import com.elasticpath.service.customer.CustomerGroupService;
  */
 public class CustomerGroupExporter extends AbstractExporterImpl<CustomerGroup, CustomerGroupDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(CustomerGroupExporter.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerGroupExporter.class);
 
 	private List<String> customerGroupGuids;
 

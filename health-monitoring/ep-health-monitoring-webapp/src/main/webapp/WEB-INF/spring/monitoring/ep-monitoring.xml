@@ -5,7 +5,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
  						   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-	<bean id="statusChecker" class="StatusCheckerImpl">
+	<bean id="statusChecker" class="com.elasticpath.health.monitoring.impl.StatusCheckerImpl">
 		<property name="loadBalancerTargets" ref="loadBalancerStatusCheckerTargetList"/>
 		<property name="additionalInfoTargets" ref="additionalInfoStatusCheckerTargetList"/>
 	</bean>

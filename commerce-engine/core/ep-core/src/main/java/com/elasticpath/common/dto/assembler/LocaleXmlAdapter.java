@@ -6,7 +6,7 @@ package com.elasticpath.common.dto.assembler;
 import java.util.Locale;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang3.LocaleUtils;
 
 /**
  * A simple JAXB adapter which converts between Locale and String.

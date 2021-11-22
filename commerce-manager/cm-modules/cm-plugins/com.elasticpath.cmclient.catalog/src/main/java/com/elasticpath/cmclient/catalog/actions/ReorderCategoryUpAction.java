@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.catalog.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -22,7 +23,7 @@ public class ReorderCategoryUpAction extends AbstractCatalogViewAction {
 
 	private static final String ACTION_NAME = "reorderCategoryUpAction"; //$NON-NLS-1$
 
-	private static final Logger LOG = Logger.getLogger(ReorderCategoryUpAction.class);
+	private static final Logger LOG = LogManager.getLogger(ReorderCategoryUpAction.class);
 
 	private Category category;
 

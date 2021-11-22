@@ -41,6 +41,8 @@
 			file:${user.home}/ep/conf/ep.override.properties,
 			file:${user.home}/ep/conf/ep.integration.override.properties" />
 
+	<bean id="libJarProtocolHandler" class="com.elasticpath.commons.handlers.libjar.LibJarHandlerInitializer" init-method="initialize"/>
+
 	<!-- ep-core jar wiring -->
 	<import resource="classpath:ep-integration-context.xml"/>
 

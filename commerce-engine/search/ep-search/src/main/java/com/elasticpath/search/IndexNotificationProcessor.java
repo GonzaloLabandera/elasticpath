@@ -22,7 +22,7 @@ public interface IndexNotificationProcessor {
 	 * @return new notifications to process
 	 * @see #getRawNotifications()
 	 */
-	List<IndexNotification> findAllNewNotifications(IndexType indexType);
+	List<IndexNotification> getNotifications(IndexType indexType);
 
 	/**
 	 * Retrieves the list of {@link IndexNotification}s. Notifications are collapsed so that
@@ -30,31 +30,27 @@ public interface IndexNotificationProcessor {
 	 * stored.
 	 *
 	 * @return the list of {@link IndexNotification}s
-	 * @see #findAllNewNotifications(IndexType)
+	 * @see #getNotifications(IndexType)
 	 */
 	List<IndexNotification> getNotifications();
-
-	/**
-	 * Retrieves the list of raw {@link IndexNotification}s. These notifications have not been
-	 * pre-processed in any way. These notifications are a cached version of what is stored.
-	 *
-	 * @return the list of raw {@link IndexNotification}s
-	 * @see #findAllNewRawNotifications(IndexType)
-	 */
-	List<IndexNotification> getRawNotifications();
-
-	/**
-	 * Retrieves the list of raw {@link IndexNotification}s. These notifications have not been
-	 * pre-processed in any way. This list is freshly retrieved.
-	 *
-	 * @param indexType the type of notifications to retrieve
-	 * @return the list of raw {@link IndexNotification}s
-	 */
-	List<IndexNotification> findAllNewRawNotifications(IndexType indexType);
 
 	/**
 	 * Removes all of the stored notifications.
 	 */
 	void removeStoredNotifications();
 
+	/**
+	 * Find the last indexnotification with rebuild/delete all.
+	 * @param indexType the index type.
+	 * @return list of notification.
+	 */
+	List<IndexNotification> findLastDeleteAllOrRebuildIndexType(IndexType indexType);
+
+	/**
+	 * Remove notifications based on the max uid and index type.
+	 *
+	 * @param maxUid the max uid
+	 * @param indexType the index type
+	 */
+	void removeNotificationByMaxUidAndIndexType(Long maxUid, IndexType indexType);
 }

@@ -6,8 +6,9 @@ package com.elasticpath.domain.order.jobs.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.order.OrderLock;
@@ -29,7 +30,7 @@ public class OrderLockCleanupJobImpl implements OrderLockCleanupJob {
 	
 	private static final String BATCH_JOB_NAME = "CleanupOrderLocksJob";
 	
-	private static final Logger LOGGER = Logger.getLogger(OrderLockCleanupJobImpl.class);
+	private static final Logger LOGGER = LogManager.getLogger(OrderLockCleanupJobImpl.class);
 
 	private SettingValueProvider<Integer> batchSizeProvider;
 

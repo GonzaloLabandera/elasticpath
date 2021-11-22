@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.catalog.editors.price.baseamounts;
 
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;

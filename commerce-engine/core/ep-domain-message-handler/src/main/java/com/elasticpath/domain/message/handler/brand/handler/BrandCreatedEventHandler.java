@@ -3,7 +3,8 @@
  */
 package com.elasticpath.domain.message.handler.brand.handler;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.update.processor.capabilities.BrandUpdateProcessor;
 import com.elasticpath.domain.catalog.Brand;
@@ -16,7 +17,7 @@ import com.elasticpath.messaging.EventMessage;
  */
 public class BrandCreatedEventHandler implements EventMessageHandler {
 
-	private static final Logger LOGGER = Logger.getLogger(BrandCreatedEventHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(BrandCreatedEventHandler.class);
 
 	private final EventMessageHandlerHelper<Brand> eventMessageHandlerHelper;
 	private final BrandUpdateProcessor brandUpdateProcessor;

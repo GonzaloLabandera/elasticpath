@@ -8,26 +8,33 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.pf4j.Extension;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shipping.ShippingOptionResult;
-import com.elasticpath.service.shipping.ShippingOptionService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidator;
-import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.annotations.XPFEmbedded;
+import com.elasticpath.xpf.connectivity.annontation.XPFAssignment;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFShippingOption;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
+import com.elasticpath.xpf.connectivity.extension.XPFExtensionPointImpl;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingCartValidator;
 
 /**
  * Determines if a valid shipping option has been specified (if cart contains physical SKUs).
  */
-public class ShippingOptionShoppingCartValidatorImpl implements ShoppingCartValidator {
+@SuppressWarnings("checkstyle:magicnumber")
+@Extension
+@XPFEmbedded
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_SHOPPING_CART_AT_CHECKOUT, priority = 1020)
+public class ShippingOptionShoppingCartValidatorImpl extends XPFExtensionPointImpl implements ShoppingCartValidator {
 
 	private static final String NEED_SHIPPING_OPTION_MESSAGE_ID = "need.shipping.option";
 
@@ -41,37 +48,34 @@ public class ShippingOptionShoppingCartValidatorImpl implements ShoppingCartVali
 	public static final Set<String> MESSAGE_IDS = ImmutableSet
 			.of(NEED_SHIPPING_OPTION_MESSAGE_ID, INVALID_SHIPPING_OPTION_MESSAGE_ID, SHIPPING_OPTIONS_UNAVAILABLE_MESSAGE_ID);
 
-	private ShippingOptionService shippingOptionService;
-
 	@Override
-	public Collection<StructuredErrorMessage> validate(final ShoppingCartValidationContext context) {
-		final ShoppingCart shoppingCart = context.getShoppingCart();
+	public Collection<XPFStructuredErrorMessage> validate(final XPFShoppingCartValidationContext context) {
+		final XPFShoppingCart xpfShoppingCart = context.getShoppingCart();
 
-		if (shoppingCart.requiresShipping()) {
-			if (!shoppingCart.getSelectedShippingOption().isPresent()) {
-				StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, NEED_SHIPPING_OPTION_MESSAGE_ID,
+		if (xpfShoppingCart.isRequiresShipping()) {
+			if (xpfShoppingCart.getSelectedShippingOption() == null) {
+				XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO,
+						NEED_SHIPPING_OPTION_MESSAGE_ID,
 						"Shipping option must be specified.", Collections.emptyMap(),
-						new StructuredErrorResolution(ShoppingCart.class, shoppingCart.getGuid()));
+						new XPFStructuredErrorResolution(ShoppingCart.class, xpfShoppingCart.getGuid()));
 				return Collections.singletonList(errorMessage);
 			}
-			final ShippingOptionResult shippingOptionResult = getShippingOptionService().getShippingOptions(shoppingCart);
 
-			if (!shippingOptionResult.isSuccessful()) {
-				StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.ERROR,
+			if (context.getAvailableShippingOptions() == null) {
+				XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.ERROR,
 						SHIPPING_OPTIONS_UNAVAILABLE_MESSAGE_ID,
-						"There was a problem retrieving shipping options from the shipping service: " + shippingOptionResult
-								.getErrorDescription(false),
-						Collections.emptyMap(), new StructuredErrorResolution(ShoppingCart.class, shoppingCart.getGuid()));
+						"There was a problem retrieving shipping options from the shipping service",
+						Collections.emptyMap(), new XPFStructuredErrorResolution(ShoppingCart.class, xpfShoppingCart.getGuid()));
 				return Collections.singletonList(errorMessage);
 			}
-			final ShippingOption shippingOptionSelected = shoppingCart.getSelectedShippingOption().orElse(null);
-			checkNotNull(shippingOptionSelected, "shoppingCart shipping option should have been verified and should exist.");
+			final XPFShippingOption selectedShippingOption = xpfShoppingCart.getSelectedShippingOption();
+			checkNotNull(selectedShippingOption, "shoppingCart shipping option should have been verified and should exist.");
 
-			if (!isValidShippingOption(shippingOptionResult.getAvailableShippingOptions(), shippingOptionSelected)) {
-				StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.ERROR,
+			if (!isValidShippingOption(context.getAvailableShippingOptions(), selectedShippingOption)) {
+				XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.ERROR,
 						INVALID_SHIPPING_OPTION_MESSAGE_ID, "Selected shipping option is not valid.",
 						ImmutableMap.of(
-								"shipping-option", shippingOptionSelected.getCode()));
+								"shipping-option", selectedShippingOption.getCode()));
 				return Collections.singletonList(errorMessage);
 			}
 		}
@@ -82,23 +86,15 @@ public class ShippingOptionShoppingCartValidatorImpl implements ShoppingCartVali
 	 * Returns whether a shipping option contained in the list of shipping options matches the given non-null one.
 	 * It only searches by both shipping option code and carrier code fields for a match.
 	 *
-	 * @param validShippingOptions the list of shipping options to search through.
+	 * @param validShippingOptions   the list of shipping options to search through.
 	 * @param shippingOptionSelected the shipping option to find a match for, must not be {@code null}.
 	 * @return {@code true} if a shipping option matches by both shipping option code and carrier code; {@code false} otherwise.
 	 */
-	protected boolean isValidShippingOption(final List<ShippingOption> validShippingOptions, final ShippingOption shippingOptionSelected) {
+	private boolean isValidShippingOption(final Set<XPFShippingOption> validShippingOptions,
+										  final XPFShippingOption shippingOptionSelected) {
 		return isNotEmpty(validShippingOptions)
 				&& validShippingOptions.stream().anyMatch(
 				shippingOption -> shippingOption.getCode().equals(shippingOptionSelected.getCode())
 						&& shippingOption.getCarrierCode().equals(shippingOptionSelected.getCarrierCode()));
 	}
-
-	protected ShippingOptionService getShippingOptionService() {
-		return this.shippingOptionService;
-	}
-
-	public void setShippingOptionService(final ShippingOptionService shippingOptionService) {
-		this.shippingOptionService = shippingOptionService;
-	}
-
 }

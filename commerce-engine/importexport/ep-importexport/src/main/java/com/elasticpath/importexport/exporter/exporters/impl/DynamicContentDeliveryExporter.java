@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.contentspace.DynamicContent;
 import com.elasticpath.domain.targetedselling.DynamicContentDelivery;
@@ -29,7 +30,7 @@ public class DynamicContentDeliveryExporter extends AbstractExporterImpl<Dynamic
 
 	private List<String> dcdGuids;
 
-	private static final Logger LOG = Logger.getLogger(DynamicContentDeliveryExporter.class);
+	private static final Logger LOG = LogManager.getLogger(DynamicContentDeliveryExporter.class);
 
 	private DomainAdapter<DynamicContentDelivery, DynamicContentDeliveryDTO> adapter;
 

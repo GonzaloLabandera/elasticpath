@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.core.conversion;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.conversion.Converter;
 
 /**

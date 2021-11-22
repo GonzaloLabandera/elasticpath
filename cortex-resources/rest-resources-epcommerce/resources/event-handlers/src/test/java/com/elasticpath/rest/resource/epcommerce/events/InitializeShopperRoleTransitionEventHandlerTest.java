@@ -38,7 +38,7 @@ public class InitializeShopperRoleTransitionEventHandlerTest {
 	public void testHandleEvent() throws Exception {
 		final String newUserGuid = "newUser";
 
-		when(shoppingCartRepository.getShoppingCartForCustomer(newUserGuid, STORE_CODE))
+		when(shoppingCartRepository.getDefaultShoppingCartForCustomer(newUserGuid, STORE_CODE))
 				.thenReturn(Single.defer(doInitShoppingCart));
 
 		RoleTransitionEvent event = ResourceTypeFactory.createResourceEntity(RoleTransitionEvent.class)

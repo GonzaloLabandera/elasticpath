@@ -5,7 +5,8 @@ package com.elasticpath.importexport.importer.importers.impl;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.importexport.common.exception.ConfigurationException;
@@ -23,7 +24,7 @@ import com.elasticpath.persistence.api.Persistable;
  */
 class ImporterFactoryImpl implements ImporterFactory {
 
-	private static final Logger LOG = Logger.getLogger(ImporterFactoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ImporterFactoryImpl.class);
 
 	private Map<JobType, Importer<? super Persistable, ? super Dto>> importerMap;
 

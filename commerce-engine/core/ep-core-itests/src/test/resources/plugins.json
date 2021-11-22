@@ -1,0 +1,22 @@
+{
+	"plugins": [
+		{
+			"identifier": {
+				"pluginId": "ep-externalTestPlugin-*"
+			},
+			"settings": [
+				{
+					"key": "SAMPLE_MAP",
+					"dataType": "INTEGER",
+					"collectionType": "MAP",
+					"values": [
+						{
+							"key": "NUMBER_OF_PUPPIES",
+							"value": "99"
+						}
+					]
+				}
+			]
+		}
+	]
+}

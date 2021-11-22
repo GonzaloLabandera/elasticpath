@@ -529,4 +529,40 @@
 		<property name="productTypeByNameCache" ref="productTypeByNameCache"/>
 	</bean>
 
+	<!-- Dynamic Constraint validators -->
+	<bean id="dynamicRequiredValidatorCacheEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="dynamicRequiredValidatorCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="3600"/>
+		<property name="timeToIdle" value="3600"/>
+	</bean>
+
+	<bean id="dynamicRequiredValidatorCache" factory-bean="localCacheFactory" factory-method="createCache" depends-on="dynamicRequiredValidatorCacheEhCache">
+		<constructor-arg value="dynamicRequiredValidatorCache"/>
+	</bean>
+
+	<bean id="dynamicCompleteValidatorCacheEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="dynamicCompleteValidatorCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="3600"/>
+		<property name="timeToIdle" value="3600"/>
+		<property name="maxEntriesLocalHeap" value="1000"/>
+	</bean>
+
+	<bean id="dynamicCompleteValidatorCache" factory-bean="localCacheFactory" factory-method="createCache" depends-on="dynamicCompleteValidatorCacheEhCache">
+		<constructor-arg value="dynamicCompleteValidatorCache"/>
+	</bean>
+
+	<bean id="cachingAttributeValueValidationService" class="com.elasticpath.caching.core.catalog.CachingAttributeValueValidationServiceImpl">
+		<property name="fallbackAttributeValueValidationService" ref="attributeValueValidationService"/>
+		<property name="requiredValidatorCache" ref="dynamicRequiredValidatorCache"/>
+		<property name="completeValidatorCache" ref="dynamicCompleteValidatorCache"/>
+	</bean>
+
+	<bean id="cachingModifierFieldValidationService" class="com.elasticpath.caching.core.catalog.CachingModifierFieldValidationServiceImpl">
+		<property name="fallbackModifierFieldValidationService" ref="modifierFieldValidationService"/>
+		<property name="requiredValidatorCache" ref="dynamicRequiredValidatorCache"/>
+		<property name="completeValidatorCache" ref="dynamicCompleteValidatorCache"/>
+	</bean>
+
 </beans>

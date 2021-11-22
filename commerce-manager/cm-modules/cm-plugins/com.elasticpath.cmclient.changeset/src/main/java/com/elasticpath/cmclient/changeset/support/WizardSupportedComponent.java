@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.changeset.support;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.ui.PlatformUI;
@@ -19,7 +20,7 @@ import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
  */
 public class WizardSupportedComponent extends AbstractSupportedComponent {
 
-	private static final Logger LOG = Logger.getLogger(WizardSupportedComponent.class);
+	private static final Logger LOG = LogManager.getLogger(WizardSupportedComponent.class);
 	
 	private final IConfigurationElement configElement;
 

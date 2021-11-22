@@ -11,13 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import liquibase.change.custom.CustomSqlChange;
 import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.SetupException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -28,15 +25,18 @@ import liquibase.statement.core.InsertStatement;
 /**
  * Custom liquibase change that converts attribute names to localized properties.
  */
-public class ConvertAttributeNamesToLocalizedProperties implements CustomSqlChange {
+public class ConvertAttributeNamesToLocalizedProperties extends AbstractEpCustomSqlChange {
 
 	private static final Logger LOG = LogFactory.getInstance().getLog();
 	private static final String TABLE_LOCALIZED_PROPERTIES = "TLOCALIZEDPROPERTIES";
+	private static final String TABLE_JPA_GENERATED_KEYS = "JPA_GENERATED_KEYS";
+	private static final String COLUMN_LAST_VALUE = "LAST_VALUE";
+
 	private static final String JPA_GENERATED_KEYS_NOT_FOUND = "No JPA_GENERATED_KEYS value for " + TABLE_LOCALIZED_PROPERTIES + " found.";
-	private static final String GET_CURRENT_VALUE = "SELECT LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID = " + "'" + TABLE_LOCALIZED_PROPERTIES + "'";
+	private static final String GET_CURRENT_VALUE = "SELECT %s FROM %s WHERE ID = '%s'";
+
 	private static final String TABLE_ATTRIBUTES = "TATTRIBUTE";
 	private static final String GET_TATTRIBUTE_COUNT = "SELECT COUNT(*) FROM " + TABLE_ATTRIBUTES;
-	private static final String CONNECTION_ERROR = "Unable to get connection from database";
 	private static final String VALUE_RETURNED_BY_DB_WITH_UNEXPECTED_TYPE = "Value returned by DB with unexpected type: ";
 	private static final String QUERY_ATTRIBUTE = "SELECT TATTRIBUTE.UIDPK, TATTRIBUTE.NAME FROM TATTRIBUTE WHERE TATTRIBUTE.ATTRIBUTE_USAGE = 4";
 	private static final String QUERY_ATTRIBUTE_AND_TCATALOG = "SELECT TATTRIBUTE.UIDPK, TATTRIBUTE.NAME, TCATALOG.DEFAULT_LOCALE FROM TATTRIBUTE"
@@ -51,36 +51,37 @@ public class ConvertAttributeNamesToLocalizedProperties implements CustomSqlChan
 	private static final String COLUMN_NAME = "NAME";
 	private static final String COLUMN_TYPE_VALUE = "Attribute";
 	private static final String COLUMN_LOCALIZED_PROPERTY_KEY_VALUE = "attributeDisplayName_";
-	private static final String UPDATE_JPA_GENERATED_KEYS = "UPDATE JPA_GENERATED_KEYS SET LAST_VALUE = %d WHERE ID like '%s'";
+	private static final String UPDATE_JPA_GENERATED_KEYS = "UPDATE %s SET %s = %d WHERE ID LIKE '%s'";
 
 	private Long uidpkCurrentValue;
 
-
 	@Override
 	public SqlStatement[] generateStatements(final Database database) throws CustomChangeException {
-		if (!(database.getConnection() instanceof JdbcConnection)) {
-			throw new UnexpectedLiquibaseException(CONNECTION_ERROR);
-		}
-		final JdbcConnection connection = (JdbcConnection) database.getConnection();
-		final Object uidpkCurrentValueObject = getSingleValueFromDB(connection, GET_CURRENT_VALUE);
+		super.init(database);
+
+		final String formattedQuery = String.format(GET_CURRENT_VALUE,
+				quoteColumnNames(COLUMN_LAST_VALUE),
+				quoteTableName(TABLE_JPA_GENERATED_KEYS), TABLE_LOCALIZED_PROPERTIES);
+
+		final Object uidpkCurrentValueObject = getSingleValueFromDB(formattedQuery);
 		if (uidpkCurrentValueObject == null) {
 			throw new CustomChangeException(JPA_GENERATED_KEYS_NOT_FOUND);
 		}
 		uidpkCurrentValue = getLong(uidpkCurrentValueObject);
-		final Long attributeCount = getLong(getSingleValueFromDB(connection, GET_TATTRIBUTE_COUNT));
+		final Long attributeCount = getLong(getSingleValueFromDB(GET_TATTRIBUTE_COUNT));
 		final List<SqlStatement> results = new ArrayList<>();
 		try {
 			final long updatedKeyVal = uidpkCurrentValue + attributeCount;
-			updateJPAKeyForTLocalizedProperties(connection, updatedKeyVal);
-			insertCatalogProductSkuAttributes(database, connection, results);
-			insertCustomerProfileAttributes(database, connection, results);
+			updateJPAKeyForTLocalizedProperties(updatedKeyVal);
+			insertCatalogProductSkuAttributes(database, results);
+			insertCustomerProfileAttributes(database, results);
 		} catch (DatabaseException | SQLException e) {
 			throw new CustomChangeException(e);
 		}
 		return results.toArray(new SqlStatement[0]);
 	}
 
-	private void insertCustomerProfileAttributes(final Database database, final JdbcConnection connection, final List<SqlStatement> results)
+	private void insertCustomerProfileAttributes(final Database database, final List<SqlStatement> results)
 			throws SQLException, DatabaseException {
 		try (final Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
 			try (final ResultSet resultSet = statement.executeQuery(QUERY_ATTRIBUTE)) {
@@ -95,7 +96,7 @@ public class ConvertAttributeNamesToLocalizedProperties implements CustomSqlChan
 		}
 	}
 
-	private void insertCatalogProductSkuAttributes(final Database database, final JdbcConnection connection, final List<SqlStatement> results)
+	private void insertCatalogProductSkuAttributes(final Database database, final List<SqlStatement> results)
 			throws SQLException, DatabaseException {
 		try (final Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
 			try (final ResultSet resultSet = statement.executeQuery(QUERY_ATTRIBUTE_AND_TCATALOG)) {
@@ -110,10 +111,14 @@ public class ConvertAttributeNamesToLocalizedProperties implements CustomSqlChan
 		}
 	}
 
-	private void updateJPAKeyForTLocalizedProperties(final JdbcConnection connection, final Long updatedKeyVal)
+	private void updateJPAKeyForTLocalizedProperties(final Long updatedKeyVal)
 			throws SQLException, DatabaseException {
 		try (Statement statement = connection.createStatement()) {
-			final int resultSet = statement.executeUpdate(String.format(UPDATE_JPA_GENERATED_KEYS, updatedKeyVal, TABLE_LOCALIZED_PROPERTIES));
+			String formattedUpdateQuery = String.format(UPDATE_JPA_GENERATED_KEYS,
+					quoteTableName(TABLE_JPA_GENERATED_KEYS),
+					quoteColumnNames(COLUMN_LAST_VALUE), updatedKeyVal, TABLE_LOCALIZED_PROPERTIES);
+
+			final int resultSet = statement.executeUpdate(formattedUpdateQuery);
 			if (resultSet == 1) {
 				LOG.info("Updated JPA_GENERATED_KEYS LAST_VALUE column with updated count for TLOCALIZEDPROPERTIES entry.");
 			}
@@ -133,7 +138,7 @@ public class ConvertAttributeNamesToLocalizedProperties implements CustomSqlChan
 		return insertStatement;
 	}
 
-	private Object getSingleValueFromDB(final JdbcConnection connection, final String sql) throws CustomChangeException {
+	private Object getSingleValueFromDB(final String sql) throws CustomChangeException {
 		try (final Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
 			try (final ResultSet resultSet = statement.executeQuery(sql)) {
 				if (resultSet.next()) {

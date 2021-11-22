@@ -5,7 +5,8 @@ package com.elasticpath.tools.sync.job.transaction.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tools.sync.job.descriptor.TransactionJobDescriptorEntry;
 
@@ -14,7 +15,7 @@ import com.elasticpath.tools.sync.job.descriptor.TransactionJobDescriptorEntry;
  */
 public class TransactionPerGivenQtyJobEntryIterator extends AbstractTransactionListIterator {
 
-	private static final Logger LOG = Logger.getLogger(TransactionPerGivenQtyJobEntryIterator.class);
+	private static final Logger LOG = LogManager.getLogger(TransactionPerGivenQtyJobEntryIterator.class);
 
 	private int index;
 

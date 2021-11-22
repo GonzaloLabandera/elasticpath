@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.catalog.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -35,7 +36,7 @@ import com.elasticpath.domain.catalog.ProductSku;
  */
 public class DeleteProductAction extends AbstractCatalogViewAction implements ISelectionChangedListener {
 
-	private static final Logger LOG = Logger.getLogger(DeleteProductAction.class);
+	private static final Logger LOG = LogManager.getLogger(DeleteProductAction.class);
 
 	private final ProductModelController productModelController = new ProductModelController();
 

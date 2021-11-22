@@ -57,6 +57,9 @@
 
    <exporter type="USERACCOUNTASSOCIATION"/>
 
+   <exporter type="MODIFIERGROUP"/>
+   <exporter type="MODIFIERGROUPFILTER"/>
+
   </exporters>
   <packager type="NONE"/>
   <delivery>

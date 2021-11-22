@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -23,7 +24,7 @@ import com.elasticpath.service.shipping.ShippingRegionService;
  */
 public class ShippingRegionExporterImpl extends AbstractExporterImpl<ShippingRegion, ShippingRegionDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(ShippingRegionExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ShippingRegionExporterImpl.class);
 
 	private ImportExportSearcher importExportSearcher;
 	private ShippingRegionService shippingRegionService;

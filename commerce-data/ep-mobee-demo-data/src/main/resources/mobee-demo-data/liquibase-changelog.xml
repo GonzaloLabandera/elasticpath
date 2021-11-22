@@ -15,6 +15,7 @@
 	</changeSet>
 
 	<changeSet id="add-default-mobee-facets" author="elasticpath" context="mobee-data">
+		<validCheckSum>8:c1ba7c680a4d5310d5a4b5c6d7fc51a5</validCheckSum>
 		<comment>Configure Default Facets</comment>
 		<insert tableName="TFACET">
 			<column name="UIDPK" valueNumeric='1'/>
@@ -25,7 +26,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Plot Keyword","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -39,7 +40,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Languages","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -53,7 +54,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Storyline","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -67,7 +68,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Color","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -81,7 +82,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"en":"Runtime","fr_CA":"","fr":"Runtime_fr"}'/>
 			<column name="FACET_TYPE" valueNumeric='1'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"0 - 100","fr_CA":"0 - 100","fr":"0 to 100 fr"}},{"start":100,"end":200,"displayNameMap":{"en":"100 - 200","fr_CA":"100 - 200","fr":"100 to 200 fr"}},{"start":200,"end":300,"displayNameMap":{"en":"200 - 300","fr_CA":"200 - 300","fr":"200 to 300 fr"}},{"start":300,"end":null,"displayNameMap":{"en":"300 +","fr_CA":"300 +","fr":"300 + fr"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -95,7 +96,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Viewer&apos;s Rating","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -109,7 +110,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Tagline","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -123,7 +124,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Rental Days","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='1'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='1'/>
 		</insert>
@@ -137,7 +138,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Format","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -151,7 +152,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Specific Resolution","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='1'/>
 		</insert>
@@ -165,7 +166,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Screen Format","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='1'/>
 		</insert>
@@ -179,7 +180,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Color","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='1'/>
 		</insert>
@@ -193,7 +194,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Product Color","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -207,7 +208,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Product Description","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='0'/>
 		</insert>
@@ -221,7 +222,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Video Quality","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -235,7 +236,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Purchase Type","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -249,7 +250,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Resolution","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -263,7 +264,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"main","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -277,7 +278,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"side","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -291,7 +292,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Design","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -305,7 +306,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Amount","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -319,7 +320,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Color","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -333,7 +334,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Billed","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='2'/>
 		</insert>
@@ -347,7 +348,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Brand","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -361,7 +362,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Product Sku Code","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -375,7 +376,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Category","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='0'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -389,7 +390,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"en":"Price","fr_CA":"","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='1'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":5,"displayNameMap":{"en":"Below $5","fr_CA":"0 - 100","fr":"0 - 100"}},{"start":5,"end":20,"displayNameMap":{"en":"$5 to $20","fr_CA":"100 - 200","fr":"100 - 200"}},{"start":20,"end":50,"displayNameMap":{"en":"$20 to $50","fr_CA":"200 - 300","fr":"200 - 300"}},{"start":50,"end":200,"displayNameMap":{"en":"$50 to $200","fr_CA":"300 +","fr":"300 +"}},{"start":200,"end":null,"displayNameMap":{"en":"$200 and Above","fr_CA":"","fr":""}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -403,7 +404,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Length","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -417,7 +418,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Product Name","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -431,7 +432,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Height","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -445,7 +446,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Width","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -459,7 +460,7 @@
 			<column name="STORECODE" value='MOBEE'/>
 			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Weight","fr":""}'/>
 			<column name="FACET_TYPE" valueNumeric='2'/>
-			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueBoolean='true'/>
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
@@ -478,7 +479,7 @@
 			<column name="NAME" value="Test Change Set"/>
 			<column name="DESCRIPTION" value="Test Change Set"/>
 			<column name="OBJECT_GROUP_ID" value="865223FE-4B81-6971-ED99-0BE65A82C8C2"/>
-			<column name="CREATED_DATE" valueDate="2020-01-01 00:00:00.0t"/>
+			<column name="CREATED_DATE" valueDate="2020-01-01 00:00:00.0"/>
 			<column name="CREATED_BY_USER_GUID" value="300"/>
 			<column name="STATE_CODE" value="OPEN"/>
 		</insert>

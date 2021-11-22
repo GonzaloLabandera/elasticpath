@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import cucumber.api.java.After;
 import cucumber.api.java.en.Then;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.definitions.api.helpers.StepsHelper;
 import com.elasticpath.definitions.data.database.QueryBuilder;
@@ -286,7 +287,8 @@ public class PopulationDefinition {
 				this.projection.getDeleted(),
 				this.projection.getSchemaVersion(),
 				this.projection.getContentHash(),
-				this.projection.getContent()
+				this.projection.getContent(),
+				UUID.randomUUID().toString()
 		);
 	}
 

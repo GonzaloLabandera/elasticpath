@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.core.dialog.value.support.AbstractDialogEditingSupport;
 import com.elasticpath.cmclient.core.dialog.value.support.DialogValueLabelProvider;

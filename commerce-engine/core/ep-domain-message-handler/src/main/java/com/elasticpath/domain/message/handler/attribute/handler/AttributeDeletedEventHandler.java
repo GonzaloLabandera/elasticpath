@@ -3,7 +3,8 @@
  */
 package com.elasticpath.domain.message.handler.attribute.handler;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.update.processor.capabilities.AttributeUpdateProcessor;
 import com.elasticpath.domain.message.handler.EventMessageHandler;
@@ -14,7 +15,7 @@ import com.elasticpath.messaging.EventMessage;
  */
 public class AttributeDeletedEventHandler implements EventMessageHandler {
 
-	private static final Logger LOGGER = Logger.getLogger(AttributeDeletedEventHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(AttributeDeletedEventHandler.class);
 
 	private final AttributeUpdateProcessor attributeUpdateProcessor;
 

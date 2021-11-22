@@ -60,6 +60,12 @@ public final class Patterns {
 	 */
 	public static final Pattern SQL_PATTERN_DATE_OPTIONAL = Pattern.compile(SQL_PATTERN_BASE_STRING + "?");
 
+	/** The log file name pattern. */
+	public static final Pattern LOG_FILENAME_PATTERN = Pattern.compile("fileName\\s*=\\s*\"(.+?)\"");
+
+	/** The timestamp format patter. */
+	public static final String TIMESTAMP_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss,S";
+
 	private Patterns() {
 		//constant holder
 	}

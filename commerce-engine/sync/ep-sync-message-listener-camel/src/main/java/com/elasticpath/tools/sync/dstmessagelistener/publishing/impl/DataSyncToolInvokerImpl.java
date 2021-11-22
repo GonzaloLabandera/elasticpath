@@ -5,7 +5,8 @@ package com.elasticpath.tools.sync.dstmessagelistener.publishing.impl;
 
 import static java.lang.String.format;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.tools.sync.client.SyncJobConfiguration;
@@ -19,7 +20,7 @@ import com.elasticpath.tools.sync.target.result.Summary;
  */
 public class DataSyncToolInvokerImpl implements DataSyncToolInvoker {
 
-	private static final Logger LOG = Logger.getLogger(DataSyncToolInvokerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(DataSyncToolInvokerImpl.class);
 
 	private SyncToolLauncher syncToolLauncher;
 

@@ -76,12 +76,12 @@
 	<repositories>
 		<repository>
 			<id>RAP</id>
-			<url>http://download.eclipse.org/rt/rap/3.4</url>
+			<url>http://download.eclipse.org/rt/rap/3.5</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
-			<id>OxygenRepository</id>
-			<url>http://download.eclipse.org/releases/oxygen</url>
+			<id>EclipseReleasesRepository</id>
+			<url>http://download.eclipse.org/releases/photon</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>

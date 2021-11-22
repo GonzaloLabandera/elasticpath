@@ -16,7 +16,7 @@
 	<artifactId>ext-cortex-webapp</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>Extension Cortex CE REST Webapp</name>
+	<name>Cortex REST Web Application</name>
 	<description>Extension Cortex CE Web Application</description>
 
 	<properties>
@@ -29,7 +29,7 @@
 		<resource-runtime>cortex</resource-runtime>
 
 		<!-- Override slf4j -->
-		<slf4j.version>1.7.25</slf4j.version>
+		<slf4j.version>1.7.26</slf4j.version>
 		<spring-security-oauth2.osgi.version>2.3.3.RELEASE</spring-security-oauth2.osgi.version>
 	</properties>
 
@@ -114,8 +114,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -326,6 +326,16 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-operational-insights-message-consumer</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-operational-insights-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-cache</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -358,13 +368,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-bean-framework</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Subject -->
-		<dependency>
-			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-			<artifactId>ep-rs-subject-lookup-epcommerce</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -540,6 +543,11 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-geographies</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-references</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -739,6 +747,7 @@
 								com.elasticpath.extensions.rest.resource
 							</includeGroupIds>
 							<excludeArtifactIds>
+								ep-rest-definitions-schema,
 								ep-resource-base-api,
 								ep-resource-collections-api,
 								ep-rest-repositories-epcommerce
@@ -763,6 +772,8 @@
 								ep-messaging-camel,
 								ep-jms,
 								ep-core-customer-messaging,
+								ep-operational-insights-message-consumer,
+								ep-operational-insights-core,
 								ep-core-domain-messaging,
 								ep-cache,
 								ep-core-caching,
@@ -848,7 +859,7 @@
 								org.jbpm,
 								com.google.protobuf,
 								com.sun.mail,
-								commons-lang,
+								commons-lang3,
 								commons-codec,
 								com.sun.xml.bind
 							</includeGroupIds>
@@ -875,6 +886,27 @@
 							</artifactItems>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy-log4j2-artifacts</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+							<excludeTransitive>true</excludeTransitive>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.logging.log4j</groupId>
+									<artifactId>log4j-api</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.logging.log4j</groupId>
+									<artifactId>log4j-core</artifactId>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
@@ -882,6 +914,14 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
 					<webResources>
 						<resource>
@@ -900,6 +940,13 @@
 						</resource>
 					</webResources>
 					<escapeString>\</escapeString>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${ep.release.version}</Implementation-Version>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+					</archive>
 				</configuration>
 			</plugin>
 
@@ -933,7 +980,7 @@
 						<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
 						<ep.jms.type>${ep.jms.type}</ep.jms.type>
 						<ep.jms.url>${ep.jms.url}</ep.jms.url>
-
+						<ep.plugins.folder>${project.basedir}/../../plugins/ext-plugin-config/target/plugins</ep.plugins.folder>
 					</systemProperties>
 					<webapps>
 						<webapp>
@@ -1120,39 +1167,37 @@
 				<bundle.location/>
 			</properties>
 			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-dependency-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>copy-development-OSGi-bundles</id>
-									<phase>prepare-package</phase>
-									<goals>
-										<goal>copy</goal>
-									</goals>
-									<configuration>
-										<outputDirectory>${war-bundle-directory-level-1}</outputDirectory>
-										<artifactItems>
-											<artifactItem>
-												<groupId>org.apache.felix</groupId>
-												<artifactId>org.apache.felix.shell</artifactId>
-												<version>${felix.shell.version}</version>
-											</artifactItem>
-											<artifactItem>
-												<groupId>org.apache.felix</groupId>
-												<artifactId>org.apache.felix.shell.remote</artifactId>
-												<version>${felix.shell.remote.version}</version>
-											</artifactItem>
-										</artifactItems>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-development-OSGi-bundles</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${war-bundle-directory-level-1}</outputDirectory>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.apache.felix</groupId>
+											<artifactId>org.apache.felix.shell</artifactId>
+											<version>${felix.shell.version}</version>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.apache.felix</groupId>
+											<artifactId>org.apache.felix.shell.remote</artifactId>
+											<version>${felix.shell.remote.version}</version>
+										</artifactItem>
+									</artifactItems>
 
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
 			</build>
 		</profile>
 
@@ -1265,47 +1310,59 @@
 				</property>
 			</activation>
 			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-war-plugin</artifactId>
-							<configuration>
-								<webResources>
-									<resource>
-										<directory>src/main/webapp</directory>
-										<filtering>true</filtering>
-									</resource>
-
-								</webResources>
-							</configuration>
-						</plugin>
-						<plugin>
-							<groupId>org.eclipse.m2e</groupId>
-							<artifactId>lifecycle-mapping</artifactId>
-							<version>${lifecycle-mapping-plugin.version}</version>
-							<configuration>
-								<lifecycleMappingMetadata>
-									<pluginExecutions>
-										<pluginExecution>
-											<pluginExecutionFilter>
-												<groupId>org.apache.maven.plugins</groupId>
-												<artifactId>maven-dependency-plugin</artifactId>
-												<versionRange>[2.8,)</versionRange>
-												<goals>
-													<goal>unpack-dependencies</goal>
-												</goals>
-											</pluginExecutionFilter>
-											<action>
-												<ignore/>
-											</action>
-										</pluginExecution>
-									</pluginExecutions>
-								</lifecycleMappingMetadata>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>manifest</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<webResources>
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>true</filtering>
+								</resource>
+							</webResources>
+							<archive>
+								<manifestEntries>
+									<Implementation-Version>${ep.release.version}</Implementation-Version>
+									<Implementation-Title>${project.name}</Implementation-Title>
+									<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+								</manifestEntries>
+							</archive>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.m2e</groupId>
+						<artifactId>lifecycle-mapping</artifactId>
+						<version>${lifecycle-mapping-plugin.version}</version>
+						<configuration>
+							<lifecycleMappingMetadata>
+								<pluginExecutions>
+									<pluginExecution>
+										<pluginExecutionFilter>
+											<groupId>org.apache.maven.plugins</groupId>
+											<artifactId>maven-dependency-plugin</artifactId>
+											<versionRange>[2.8,)</versionRange>
+											<goals>
+												<goal>unpack-dependencies</goal>
+											</goals>
+										</pluginExecutionFilter>
+										<action>
+											<ignore/>
+										</action>
+									</pluginExecution>
+								</pluginExecutions>
+							</lifecycleMappingMetadata>
+						</configuration>
+					</plugin>
+				</plugins>
 			</build>
 		</profile>
 

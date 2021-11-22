@@ -12,7 +12,7 @@
 	</parent>
 	<artifactId>ext-search-webapp</artifactId>
 	<packaging>war</packaging>
-	<name>Extension Search Web Application</name>
+	<name>Search Web Application</name>
 
 	<dependencies>
 		<dependency>
@@ -27,115 +27,133 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-common-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>javax.servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
-        <dependency>
-            <groupId>com.elasticpath</groupId>
-            <artifactId>ep-health-monitoring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.elasticpath</groupId>
-            <artifactId>ep-health-monitoring-plugin-core</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-jms</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-health-monitoring</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-health-monitoring-plugin-core</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ext-search-index-status</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.gemini.blueprint</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>payment-plugin-connectivity</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-operational-insights-message-consumer</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-web</artifactId>
+		</dependency>
 	</dependencies>
 
 	<properties>
 		<m2eclipse.wtp.contextRoot>${ep.search.contextUrl}</m2eclipse.wtp.contextRoot>
-		<javax.servlet.version>3.1.0</javax.servlet.version>
-
 	</properties>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.tomcat.maven</groupId>
-					<artifactId>tomcat8-maven-plugin</artifactId>
-					<configuration>
-						<path>${ep.search.contextUrl}</path>
-						<port>${ep.search.tomcat.port.http}</port>
-						<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
-						<systemProperties>
-							<ep.search.primary.url>${ep.search.url}</ep.search.primary.url>
-							<ep.search.mode>PRIMARY</ep.search.mode>
-							<epdb.username>${epdb.username}</epdb.username>
-							<epdb.password>${epdb.password}</epdb.password>
-							<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
-							<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
-							<epdb.url>${epdb.url}</epdb.url>
-							<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
-							<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
-							<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
-							<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
-							<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
-							<ep.jms.type>${ep.jms.type}</ep.jms.type>
-							<ep.jms.url>${ep.jms.url}</ep.jms.url>
-						</systemProperties>
-					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>${epdb.maven.groupId}</groupId>
-							<artifactId>${epdb.maven.artifactId}</artifactId>
-							<version>${epdb.maven.version}</version>
-						</dependency>
-						<!-- Include JDBC driver dependency -->
-						<dependency>
-							<groupId>${epdb.maven.groupId}</groupId>
-							<artifactId>${epdb.maven.artifactId}</artifactId>
-							<version>${epdb.maven.version}</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<artifactId>maven-war-plugin</artifactId>
-					<configuration>
-						<escapeString>\</escapeString>
-						<webResources>
-							<resource>
-								<directory>src/main/webapp</directory>
-								<filtering>true</filtering>
-								<includes>
-									<include>**/log4j.properties</include>
-								</includes>
-							</resource>
-							<resource>
-								<directory>src/main/webapp</directory>
-								<filtering>false</filtering>
-								<excludes>
-									<exclude>**/log4j.properties</exclude>
-								</excludes>
-							</resource>
-							<resource>
-								<directory>${project.build.directory}/solrHome</directory>
-								<targetPath>WEB-INF/solrHome</targetPath>
-							</resource>
-						</webResources>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>com.google.code.maven-replacer-plugin</groupId>
-					<artifactId>replacer</artifactId>
-					<version>${maven-replacer-plugin.version}</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-
-		<!-- solr.xml is not meant to be picked up from the classpath so instead we'll add it and the necessary xmls to the search jar and use the maven dependency plugin to extract the solrHome directory to the target of the wars and itests so they may be 
-			used/bundled into the wars -->
 		<plugins>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+				<configuration>
+					<path>${ep.search.contextUrl}</path>
+					<port>${ep.search.tomcat.port.http}</port>
+					<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
+					<systemProperties>
+						<ep.search.primary.url>${ep.search.url}</ep.search.primary.url>
+						<ep.search.mode>PRIMARY</ep.search.mode>
+						<epdb.username>${epdb.username}</epdb.username>
+						<epdb.password>${epdb.password}</epdb.password>
+						<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
+						<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+						<epdb.url>${epdb.url}</epdb.url>
+						<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+						<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+						<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+						<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+						<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+						<ep.jms.type>${ep.jms.type}</ep.jms.type>
+						<ep.jms.url>${ep.jms.url}</ep.jms.url>
+						<ep.plugins.folder>${project.basedir}/../../plugins/ext-plugin-config/target/plugins</ep.plugins.folder>
+					</systemProperties>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>${epdb.maven.groupId}</groupId>
+						<artifactId>${epdb.maven.artifactId}</artifactId>
+						<version>${epdb.maven.version}</version>
+					</dependency>
+					<!-- Include JDBC driver dependency -->
+					<dependency>
+						<groupId>${epdb.maven.groupId}</groupId>
+						<artifactId>${epdb.maven.artifactId}</artifactId>
+						<version>${epdb.maven.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.activemq</groupId>
+						<artifactId>activemq-pool</artifactId>
+						<version>${org.apache.activemq.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.activemq</groupId>
+						<artifactId>activemq-jms-pool</artifactId>
+						<version>${org.apache.activemq.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<escapeString>\</escapeString>
+					<webResources>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>false</filtering>
+						</resource>
+						<resource>
+							<directory>${project.build.directory}/solrHome</directory>
+							<targetPath>WEB-INF/solrHome</targetPath>
+						</resource>
+					</webResources>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${ep.release.version}</Implementation-Version>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+
+		<!-- solr.xml is not meant to be picked up from the classpath so instead we'll add it and the necessary xmls to the search jar and use the maven dependency plugin to extract the solrHome directory to the target of the wars and itests so they may be
+			used/bundled into the wars -->
+
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -197,22 +215,20 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-war-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>manifest</goal>
+								</goals>
+							</execution>
+						</executions>
 						<configuration>
 						<escapeString>\</escapeString>
 							<webResources>
 								<resource>
 									<directory>src/main/webapp</directory>
-									<filtering>true</filtering>
-									<includes>
-										<include>**/log4j.properties</include>
-									</includes>
-								</resource>
-								<resource>
-									<directory>src/main/webapp</directory>
 									<filtering>false</filtering>
-									<excludes>
-										<exclude>**/log4j.properties</exclude>
-									</excludes>
 								</resource>
 								<resource>
 									<directory>${project.build.directory}/${project.build.finalName}/WEB-INF/solrHome</directory>
@@ -220,6 +236,13 @@
 								</resource>
 
 							</webResources>
+							<archive>
+								<manifestEntries>
+									<Implementation-Version>${ep.release.version}</Implementation-Version>
+									<Implementation-Title>${project.name}</Implementation-Title>
+									<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+								</manifestEntries>
+							</archive>
 						</configuration>
 					</plugin>
 				</plugins>

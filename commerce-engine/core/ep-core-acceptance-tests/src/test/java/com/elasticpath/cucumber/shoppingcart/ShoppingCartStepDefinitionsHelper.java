@@ -9,14 +9,11 @@ import static java.util.Collections.singletonList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import cucumber.api.DataTable;
-
 import com.google.common.collect.ImmutableMap;
-
+import cucumber.api.DataTable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
@@ -26,9 +23,9 @@ import com.elasticpath.domain.builder.shopper.ShoppingContext;
 import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -127,9 +124,9 @@ public class ShoppingCartStepDefinitionsHelper {
 		final StoreTestPersister storeTestPersister = persisterFactory.getStoreTestPersister();
 		final OrderTestPersister orderTestPersister = persisterFactory.getOrderTestPersister();
 
-		final CustomerSession customerSession = storeTestPersister.persistCustomerSessionWithAssociatedEntities(customer);
+		final Shopper shopper = storeTestPersister.persistShopperWithAssociatedEntities(customer);
 		return orderTestPersister.persistEmptyShoppingCart(
-				customer.getPreferredBillingAddress(), customer.getPreferredShippingAddress(), customerSession,
+				shopper, customer.getPreferredBillingAddress(), customer.getPreferredShippingAddress(),
 				shippingOptionHolder.get(),
 				storeHolder.get());
 	}

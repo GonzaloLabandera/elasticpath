@@ -8,7 +8,8 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import com.google.common.collect.ImmutableSet;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.catalog.PriceTier;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
@@ -26,7 +27,7 @@ public class PriceTierImpl extends AbstractEpDomainImpl implements PriceTier {
 	 */
 	private static final long serialVersionUID = 5000000002L;
 
-	private static final Logger LOG = Logger.getLogger(PriceTierImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PriceTierImpl.class);
 
 	private int minQty;
 

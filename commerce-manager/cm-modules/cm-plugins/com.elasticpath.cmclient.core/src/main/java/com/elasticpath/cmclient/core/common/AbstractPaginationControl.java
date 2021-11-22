@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.core.common;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.core.CoreMessages;
@@ -21,7 +22,7 @@ public abstract class AbstractPaginationControl implements IPaginationControl {
 	/**
 	 * The logger.
 	 * */
-	private static final Logger LOG = Logger.getLogger(AbstractPaginationControl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractPaginationControl.class);
 
 	private final PaginationSupport paginationSupport;
 

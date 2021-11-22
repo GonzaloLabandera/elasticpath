@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.customer.CustomerDTO;
 import com.elasticpath.domain.customer.Customer;
@@ -28,7 +29,7 @@ import com.elasticpath.service.customer.CustomerService;
  */
 public class CustomerExporter extends AbstractExporterImpl<Customer, CustomerDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(CustomerExporter.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerExporter.class);
 
 	private List<String> customerGuids;
 
@@ -50,15 +51,8 @@ public class CustomerExporter extends AbstractExporterImpl<Customer, CustomerDTO
 
 	@Override
 	protected void initializeExporter(final ExportContext context) throws ConfigurationException {
-		List<Long> customerUids = getImportExportSearcher().searchUids(getContext().getSearchConfiguration(), EPQueryType.CUSTOMER);
-		customerGuids = new ArrayList<>(customerUids.size());
-		
-		for (Customer customer : customerService.findByUids(customerUids)) {
-			if (!customer.isAnonymous()) {
-				customerGuids.add(customer.getGuid());
-			}
-		}
-		
+		this.customerGuids = getImportExportSearcher().searchGuids(getContext().getSearchConfiguration(), EPQueryType.CUSTOMER);
+
 		LOG.info("The list for " + customerGuids.size() + " customers retrieved from the database.");
 	}
 

@@ -4,7 +4,8 @@
 package com.elasticpath.cmclient.core.views;
 
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
@@ -53,7 +54,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 	 */
 	private static final int MARGIN_BOTTOM = 5;
 
-	private static final Logger LOG = Logger.getLogger(AbstractListView.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractListView.class);
 
 	private String tableName;
 

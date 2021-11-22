@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core.validation;
 
 import java.math.BigDecimal;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -16,7 +17,7 @@ import com.elasticpath.cmclient.core.CorePlugin;
 /** Checks that the input is a big decimal. */
 public class BigDecimalValidator implements IValidator {
 
-	private static final Logger LOG = Logger.getLogger(BigDecimalValidator.class);
+	private static final Logger LOG = LogManager.getLogger(BigDecimalValidator.class);
 
 	private static final int BIG_DECIMAL_MAX_LENGTH = 20; // 19 characters + '.'
 

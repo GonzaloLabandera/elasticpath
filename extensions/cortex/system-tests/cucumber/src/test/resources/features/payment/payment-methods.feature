@@ -59,6 +59,7 @@ Feature: Payment methods on order
       | Reverse Unsupported Config              |
       | Single Reserve Per PI Happy Path Config |
       | Reserve Fails                           |
+      | Charge Fails                            |
 
   Scenario: All Payment Methods visible in customer order - new shopper
     Given I login as a newly registered shopper
@@ -79,6 +80,7 @@ Feature: Payment methods on order
       | Reverse Unsupported Config              |
       | Single Reserve Per PI Happy Path Config |
       | Reserve Fails                           |
+      | Charge Fails                            |
 
   Scenario: Non Saveable Payment Method not visible in customer profile - existing shopper
     Given I authenticate as a registered shopper harry.potter@elasticpath.com on scope mobee
@@ -102,6 +104,7 @@ Feature: Payment methods on order
       | Reverse Unsupported Config              |
       | Single Reserve Per PI Happy Path Config |
       | Reserve Fails                           |
+      | Charge Fails                            |
 
   Scenario: All Payment Methods visible in customer order - existing shopper
     Given I authenticate as a registered shopper harry.potter@elasticpath.com on scope mobee
@@ -122,6 +125,7 @@ Feature: Payment methods on order
       | Reverse Unsupported Config              |
       | Single Reserve Per PI Happy Path Config |
       | Reserve Fails                           |
+      | Charge Fails                            |
 
   Scenario: Shopper can access Payment Method from Order Payment Instrument
     Given I have authenticated as a newly registered shopper

@@ -5,14 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Helper class which has methods which are used by API step definition classes.
  */
 public final class StepsHelper {
 
-	private static final Logger LOGGER = Logger.getLogger(StepsHelper.class);
+	private static final Logger LOGGER = LogManager.getLogger(StepsHelper.class);
 
 	private StepsHelper() {
 	}

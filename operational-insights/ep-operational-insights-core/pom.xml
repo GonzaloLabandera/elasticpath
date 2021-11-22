@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.elasticpath</groupId>
+		<artifactId>operational-insights</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>ep-operational-insights-core</artifactId>
+	<name>Operational Insights Core</name>
+	<packaging>bundle</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-caching</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-pool</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.oshi</groupId>
+			<artifactId>oshi-core</artifactId>
+		</dependency>
+		<!-- Start of oshi-core dependencies, which need to be here for Embedded-Dependency to work properly -->
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna-platform</artifactId>
+		</dependency>
+		<!-- End of oshi-core dependencies, which need to be here for Embedded-Dependency to work properly -->
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Embed-Dependency>oshi-core,jna,jna-platform</Embed-Dependency>
+						<Export-Package>
+							com.elasticpath.insights.service
+						</Export-Package>
+						<Import-Package>
+							com.elasticpath.base.exception,
+							com.elasticpath.caching.core,
+							com.elasticpath.commons.beanframework,
+							com.elasticpath.commons.constants,
+							com.elasticpath.commons.util.extenum,
+							com.elasticpath.commons.util.impl,
+							com.elasticpath.domain.attribute,
+							com.elasticpath.commons.util,
+							com.elasticpath.persistence.api,
+							com.elasticpath.persistence.openjpa.support,
+							com.elasticpath.service.misc,
+							org.apache.openjpa.persistence.jdbc,
+							org.apache.commons.lang3,
+							org.osgi.service.blueprint,
+							org.slf4j,
+							org.springframework.beans.factory,
+							org.springframework.core,
+							org.springframework.util,
+							net.sf.ehcache,
+							net.sf.ehcache.config,
+							net.sf.ehcache.statistics,
+							net.sf.ehcache.pool,
+							net.sf.ehcache.pool.impl
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-pmd-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>

@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.catalog.perspectives;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -30,7 +31,7 @@ import com.elasticpath.cmclient.jobs.views.CatalogJobListView;
  */
 public class CatalogPerspectiveFactory implements IPerspectiveFactory {
 
-	private static final Logger LOG = Logger.getLogger(CatalogPerspectiveFactory.class);
+	private static final Logger LOG = LogManager.getLogger(CatalogPerspectiveFactory.class);
 	
 	private static final String BROWSE_SEARCH_FOLDER_ID = "BrowseSearchViewsFolder"; //$NON-NLS-1$
 

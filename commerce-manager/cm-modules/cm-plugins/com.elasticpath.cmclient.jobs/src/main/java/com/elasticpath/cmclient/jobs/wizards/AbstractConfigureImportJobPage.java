@@ -6,8 +6,9 @@ package com.elasticpath.cmclient.jobs.wizards;
 import java.io.File;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -85,7 +86,7 @@ public abstract class AbstractConfigureImportJobPage extends AbstractEPWizardPag
 
 	private static final int MAX_ALLOW_ERROR = 100;
 
-	private static final Logger LOG = Logger.getLogger(AbstractConfigureImportJobPage.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractConfigureImportJobPage.class);
 	private final Display display;
 	/**
 	 * Constructor.

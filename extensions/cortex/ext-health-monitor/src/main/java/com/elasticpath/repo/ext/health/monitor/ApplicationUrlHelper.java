@@ -6,14 +6,15 @@ package com.elasticpath.repo.ext.health.monitor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Helper class used to get and set the health check url.
  */
 public final class ApplicationUrlHelper {
 
-	private static final Logger LOG = Logger.getLogger(ApplicationUrlHelper.class);
+	private static final Logger LOG = LogManager.getLogger(ApplicationUrlHelper.class);
 
 	private static String healthCheckUrl;
 	private static final String CORTEX_HEALTHCHECK = "/cortex/healthcheck";
@@ -51,7 +52,7 @@ public final class ApplicationUrlHelper {
 			}
 
 		} catch (URISyntaxException e) {
-			LOG.error("Error with extractAndSetHealthCheckUrl: " + e.getMessage());
+			LOG.error("Error with extractAndSetHealthCheckUrl: {}", e.getMessage());
 		}
 	}
 

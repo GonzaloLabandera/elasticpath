@@ -116,7 +116,6 @@
 				<entry key="com.elasticpath.domain.catalog.Product"><util:constant static-field="com.elasticpath.service.search.IndexType.PRODUCT"/></entry>
 				<entry key="com.elasticpath.domain.catalog.ProductBundle"><util:constant static-field="com.elasticpath.service.search.IndexType.PRODUCT"/></entry>
 				<entry key="com.elasticpath.domain.catalog.Category"><util:constant static-field="com.elasticpath.service.search.IndexType.CATEGORY"/></entry>
-				<entry key="com.elasticpath.domain.customer.Customer"><util:constant static-field="com.elasticpath.service.search.IndexType.CUSTOMER"/></entry>
 				<entry key="com.elasticpath.domain.rules.Rule"><util:constant static-field="com.elasticpath.service.search.IndexType.PROMOTION"/></entry>
 				<entry key="com.elasticpath.domain.cmuser.CmUser"><util:constant static-field="com.elasticpath.service.search.IndexType.CMUSER"/></entry>
 			</map>

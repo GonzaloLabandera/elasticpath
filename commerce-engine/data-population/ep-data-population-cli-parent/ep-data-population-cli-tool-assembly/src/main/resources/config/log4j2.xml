@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="FILE"
+			fileName="logs/data-population.log"
+			append="false">
+			<PatternLayout
+				pattern="%-5p %t %d{ISO8601} %c - %m%n" />
+		</File>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5p %t %d{ISO8601} %c - %m%n" />
+		</Console>
+		<IESummary name="IE_SUMMARY"/>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.elasticpath.importexport" level="info" additivity="false">
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="IE_SUMMARY" />
+		</Logger>
+		<Logger name="liquibase" level="info" additivity="false">
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="FILE" />
+		</Logger>
+		<!-- Set the PropertiesFactoryBean logging to output to the log file only as it warns about optional properties files not existing and we don't want that being output to the console as it will worry users unnecessarily. -->
+		<Logger name="org.springframework.beans.factory.config.PropertiesFactoryBean" level="warn" additivity="false">
+			<AppenderRef ref="FILE" />
+		</Logger>
+		
+		<!-- Output data population logging to file only since it's chatty -->
+		<Logger name="com.elasticpath.repo.datapopulation" level="info" additivity="false">
+			<AppenderRef ref="FILE" />
+		</Logger>
+		
+		<!-- Configure any Ant output that is logged to be logged to the standard log file and not the console -->
+		<Logger name="com.elasticpath.repo.datapopulation.cli.plugin.ant.AntCommand-StdOut" level="info" additivity="false">
+			<AppenderRef ref="FILE" />
+		</Logger>
+		<Logger name="com.elasticpath.repo.datapopulation.cli.plugin.ant.AntCommand-StdErr" level="info" additivity="false">
+			<AppenderRef ref="FILE" />
+		</Logger>
+		
+		<Root level="warn">
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="IE_SUMMARY" />
+		</Root>
+	</Loggers>
+</Configuration>

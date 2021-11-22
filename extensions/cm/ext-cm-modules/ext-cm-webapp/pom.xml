@@ -16,7 +16,7 @@
 	<artifactId>ext-cm-webapp</artifactId>
 	<packaging>eclipse-feature</packaging>
 
-	<name>Extension CM Web Application</name>
+	<name>Commerce Manager Web Application</name>
 	<description>Extension CM Webapp which builds a war from the feature configuration using tycho</description>
 
 	<properties>
@@ -53,17 +53,11 @@
 							<outputDirectory>${basedir}/target/WEB-INF/classes</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${basedir}/src/main/webapp/WEB-INF/misc/</directory>
-									<filtering>true</filtering>
-									<includes>
-										<include>log4j.properties</include>
-									</includes>
-								</resource>
-								<resource>
 									<directory>${basedir}/src/main/filtered-resources/</directory>
 									<filtering>true</filtering>
 									<includes>
 										<include>module.properties</include>
+										<include>log4j2.xml</include>
 									</includes>
 								</resource>
 							</resources>
@@ -229,6 +223,29 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${ep.release.version}</Implementation-Version>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+					</archive>
+					<warSourceDirectory>${project.build.directory}</warSourceDirectory>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
@@ -236,7 +253,6 @@
 		<dependency>
 			<groupId>com.elasticpath.cmclient</groupId>
 			<artifactId>com.elasticpath.cmclient.platform.feature</artifactId>
-			<version>${cmclient.platform.feature.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>

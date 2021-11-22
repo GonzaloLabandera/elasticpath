@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.admin.paymentconfigurations.actions;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -31,7 +32,7 @@ import com.elasticpath.service.store.StoreService;
  */
 public class DisablePaymentConfigurationsAction extends Action {
 
-	private static final Logger LOG = Logger.getLogger(DisablePaymentConfigurationsAction.class);
+	private static final Logger LOG = LogManager.getLogger(DisablePaymentConfigurationsAction.class);
 
 	private final PaymentConfigurationsListView listView;
 

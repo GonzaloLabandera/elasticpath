@@ -8,7 +8,8 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.test.common.exception.DataSourceInitializerException;
 
@@ -16,7 +17,7 @@ import com.elasticpath.test.common.exception.DataSourceInitializerException;
  * MySql implementation of AbstractDataSourceInitializer.
  */
 public class MySQLDataSourceInitializerImpl extends AbstractDataSourceInitializer {
-	private static final Logger LOG = Logger.getLogger(MySQLDataSourceInitializerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(MySQLDataSourceInitializerImpl.class);
 	
 	/**
 	 * Create an instance of that initializes a MySQL db.
@@ -40,7 +41,8 @@ public class MySQLDataSourceInitializerImpl extends AbstractDataSourceInitialize
 			stmnt = conn.createStatement();
 			stmnt.execute("drop database if exists " + getDatabaseName());
 			stmnt.execute("create database " + getDatabaseName() + " character set utf8");
-			stmnt.execute("grant all on " + getDatabaseName() + ".* to '" + username + "'@'" + host + "' identified by '" + password + "'");
+			stmnt.execute("create user if not exists '" + username + "'@'" + host + "' identified by '" + password + "'");
+			stmnt.execute("grant all privileges on " + getDatabaseName() + ".* to '" + username + "'@'" + host + "'");
 		} catch (Exception exception) {
 			LOG.fatal("Failed to create test database", exception);
 			

@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
 import com.elasticpath.importexport.common.dto.settings.DefinedValueDTO;
@@ -29,7 +30,7 @@ import com.elasticpath.settings.domain.SettingValue;
  */
 public class SettingDefinitionExporter extends AbstractExporterImpl<SettingDefinition, SettingDTO, Long> {
 
-	private static final Logger LOG = Logger.getLogger(SettingDefinitionExporter.class);
+	private static final Logger LOG = LogManager.getLogger(SettingDefinitionExporter.class);
 	
 	private DomainAdapter<SettingDefinition, SettingDTO> settingDefinitionAdapter;
 

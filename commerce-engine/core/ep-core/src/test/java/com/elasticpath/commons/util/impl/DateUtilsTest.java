@@ -29,16 +29,16 @@ public class DateUtilsTest {
 		Date currentDate = new Date(); // current date
 
 		// add one day to current date
-		final Date tomorrowSameTime = org.apache.commons.lang.time.DateUtils.addDays(currentDate, 1);
+		final Date tomorrowSameTime = org.apache.commons.lang3.time.DateUtils.addDays(currentDate, 1);
 		// the tomorrow date will be set to 00h:00m:00s
 		final Date tomorrowMidnight = new Date(tomorrowSameTime.getYear(), tomorrowSameTime.getMonth(), tomorrowSameTime.getDate());
 		// by removing a second from midnight we get back to today's last millisecond
-		final Date todayLastMilli = org.apache.commons.lang.time.DateUtils.addMilliseconds(tomorrowMidnight, -1);
+		final Date todayLastMilli = org.apache.commons.lang3.time.DateUtils.addMilliseconds(tomorrowMidnight, -1);
 		// compare the result with what is expected
 		assertEquals(todayLastMilli, DateUtils.getEndOfDay(currentDate));
 		
 		// add one day to today's last millisecond time
-		final Date tomorrowLastMilli = org.apache.commons.lang.time.DateUtils.addDays(todayLastMilli, 1);
+		final Date tomorrowLastMilli = org.apache.commons.lang3.time.DateUtils.addDays(todayLastMilli, 1);
 		// compare with any tomorrow date (for example midnight
 		assertEquals(tomorrowLastMilli, DateUtils.getEndOfDay(tomorrowMidnight));
 	}

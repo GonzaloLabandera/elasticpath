@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Currency;
 import java.util.Locale;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 
 import com.elasticpath.plugin.tax.common.TaxJournalType;
@@ -224,7 +224,7 @@ public class MutableTaxableItemContainerTest {
 
 		container1.setItems(Arrays.<TaxableItem> asList(taxableItem1, taxableItem2));
 
-		MutableTaxableItemContainer serialized = (MutableTaxableItemContainer) SerializationUtils.clone(container1);
+		MutableTaxableItemContainer serialized = SerializationUtils.clone(container1);
 		assertEquals(serialized, container1);
 	}
 

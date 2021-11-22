@@ -6,13 +6,14 @@ package com.elasticpath.commons.util;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Helper utility to retry if the method execution result in an exception.
  */
 public final class ExecutionRetryHelper {
-	private static final  Logger LOG = Logger.getLogger(ExecutionRetryHelper.class);
+	private static final Logger LOG = LogManager.getLogger(ExecutionRetryHelper.class);
 
 	/**
 	 * Default constructor.
@@ -44,7 +45,7 @@ public final class ExecutionRetryHelper {
 					exceptionCallBack.accept(exception);
 				}
 			}
-			LOG.debug("Retrying " + operation + ", attempt " + count);
+			LOG.debug("Retrying {}, attempt {}", operation, count);
 		}
 	}
 }

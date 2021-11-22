@@ -1,5 +1,8 @@
-<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
-<web-app>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
 	<display-name>Elastic Path Batch Server</display-name>
 
 	<!-- spring framework context configuration -->
@@ -7,14 +10,6 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>/WEB-INF/elastic-path-servlet.xml</param-value>
 	</context-param>
-	<context-param>
-		<param-name>log4jConfigLocation</param-name>
-		<param-value>/WEB-INF/misc/log4j.properties</param-value>
-	</context-param>
-
-	<listener>
-		<listener-class>com.elasticpath.web.context.impl.EpLog4jConfigListener</listener-class>
-	</listener>
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>

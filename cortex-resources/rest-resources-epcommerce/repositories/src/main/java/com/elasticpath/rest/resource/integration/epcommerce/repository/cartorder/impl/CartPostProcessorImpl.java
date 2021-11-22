@@ -6,7 +6,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartPostProcessor;
@@ -35,14 +34,12 @@ public class CartPostProcessorImpl implements CartPostProcessor {
 
 	@Override
 	public void postProcessCart(final ShoppingCart cart,
-			final Shopper shopper,
-			final CustomerSession customerSession) {
+								final Shopper shopper) {
 
 		if (cart != null) {
-			//Need to setup session and cart for refresher to work properly.
+			//Need to setup shopper and cart for refresher to work properly.
 			shopper.setCurrentShoppingCart(cart);
-			shopper.updateTransientDataWith(customerSession);
-
+			cart.setShopper(shopper);
 			cartOrderService.createOrderIfPossible(cart);
 		}
 	}

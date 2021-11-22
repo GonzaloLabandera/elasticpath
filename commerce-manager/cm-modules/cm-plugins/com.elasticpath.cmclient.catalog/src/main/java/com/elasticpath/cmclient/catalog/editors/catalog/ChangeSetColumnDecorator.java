@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.catalog.editors.catalog;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;

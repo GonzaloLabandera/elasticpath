@@ -4,7 +4,8 @@
 package com.elasticpath.settings.beanframework;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
@@ -18,7 +19,7 @@ import com.elasticpath.settings.impl.OverridingSettingValueImpl;
  */
 public class SettingFactoryBean extends AbstractFactoryBean<String> {
 
-	private static final Logger LOG = Logger.getLogger(SettingFactoryBean.class);
+	private static final Logger LOG = LogManager.getLogger(SettingFactoryBean.class);
 
 	/**
 	 * The @Autowired is necessary as otherwise we do not get the settings reader injected in time for createInstance().

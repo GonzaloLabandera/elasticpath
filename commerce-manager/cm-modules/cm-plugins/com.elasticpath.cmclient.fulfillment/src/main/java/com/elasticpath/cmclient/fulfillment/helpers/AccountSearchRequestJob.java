@@ -5,12 +5,16 @@ package com.elasticpath.cmclient.fulfillment.helpers;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.swt.widgets.Display;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.helpers.AbstractSearchRequestJob;
+import com.elasticpath.cmclient.core.search.SearchJob;
+import com.elasticpath.cmclient.core.search.impl.AccountDatabaseSearchJobImpl;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
@@ -21,7 +25,7 @@ import com.elasticpath.service.customer.CustomerService;
  */
 public class AccountSearchRequestJob extends AbstractSearchRequestJob<Customer> {
 
-	private static final Logger LOG = Logger.getLogger(AccountSearchRequestJob.class);
+	private static final Logger LOG = LogManager.getLogger(AccountSearchRequestJob.class);
 
 	private final CustomerService customerService;
 
@@ -53,4 +57,12 @@ public class AccountSearchRequestJob extends AbstractSearchRequestJob<Customer> 
 		}
 		return customerService.findByUids(uidList);
 	}
+
+	// ---- getSearchJob
+	@Override
+	protected SearchJob getSearchJob(final Display display) {
+		return new AccountDatabaseSearchJobImpl(this, display);
+	}
+	// ---- getSearchJob
+
 }

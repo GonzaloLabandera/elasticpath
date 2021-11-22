@@ -8,7 +8,8 @@ import java.util.List;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -34,7 +35,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
  * Represents a default implementation of <code>SearchService</code>.
  */
 public class SearchServiceImpl extends AbstractSearchServiceImpl implements SearchService {
-	private static final Logger LOG = Logger.getLogger(SearchServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SearchServiceImpl.class);
 
 	private SearchConfigFactory searchConfigFactory;
 

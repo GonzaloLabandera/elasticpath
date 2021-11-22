@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.entity.offer.Offer;
 import com.elasticpath.catalog.spi.CatalogProjectionPluginProvider;
@@ -34,7 +35,7 @@ public class ProductUpdateProcessorImpl implements ProductUpdateProcessor {
 	 */
 	public static final String PRODUCTS = "products";
 
-	private static final Logger LOGGER = Logger.getLogger(ProductUpdateProcessorImpl.class);
+	private static final Logger LOGGER = LogManager.getLogger(ProductUpdateProcessorImpl.class);
 
 	private final ProjectionService<Product, Offer> projectionService;
 	private final OfferWriterRepository repository;
@@ -68,7 +69,7 @@ public class ProductUpdateProcessorImpl implements ProductUpdateProcessor {
 
 	@Override
 	public void processProductCreated(final Product product, final ProductBundle... bundlesContainingProduct) {
-		LOGGER.debug("Product created: " + product.getGuid());
+		LOGGER.debug("Product created: {}", product.getGuid());
 
 		final List<Offer> offers = product.getCatalogs().stream()
 				.flatMap(catalog -> projectionService.buildProjections(product, catalog).stream())
@@ -79,7 +80,7 @@ public class ProductUpdateProcessorImpl implements ProductUpdateProcessor {
 
 	@Override
 	public void processProductUpdated(final Product product, final String... bundlesContainingProductCodes) {
-		LOGGER.debug("Product updated: " + product.getGuid());
+		LOGGER.debug("Product updated: {}", product.getGuid());
 
 		final List<Offer> offers = product.getCatalogs().stream()
 				.flatMap(catalog -> projectionService.buildProjections(product, catalog).stream())
@@ -107,7 +108,7 @@ public class ProductUpdateProcessorImpl implements ProductUpdateProcessor {
 
 	@Override
 	public void processProductDeleted(final String guid, final ProductBundle... bundlesContainingProduct) {
-		LOGGER.debug("Product deleted: " + guid);
+		LOGGER.debug("Product deleted: {}", guid);
 
 		repository.delete(guid);
 	}

@@ -10,7 +10,8 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -18,6 +19,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.wizard.AbstractEpWizard;
@@ -43,6 +45,7 @@ import com.elasticpath.service.order.ReturnExchangeRefundTypeEnum;
 import com.elasticpath.service.orderpaymentapi.management.PaymentInstrumentManagementService;
 import com.elasticpath.service.orderpaymentapi.management.PaymentStatistic;
 import com.elasticpath.service.orderpaymentapi.management.PaymentStatisticService;
+import com.elasticpath.service.shoppingcart.actions.exception.CheckoutValidationException;
 
 /**
  * The wizard for creating and editing Exchange.
@@ -53,7 +56,7 @@ public final class ExchangeWizard extends AbstractEpWizard<ExchangeModel> {
 	/**
 	 * The logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(ExchangeWizard.class);
+	private static final Logger LOG = LogManager.getLogger(ExchangeWizard.class);
 
 	private static final String ERROR_OCCURRED_WHILE_PROCESSING_AN_EXCHANGE = "Error occurred while processing an exchange."; //$NON-NLS-1$
 
@@ -224,6 +227,14 @@ public final class ExchangeWizard extends AbstractEpWizard<ExchangeModel> {
 			LOG.error(ERROR_OCCURRED_WHILE_PROCESSING_AN_EXCHANGE, amountException); //$NON-NLS-1$
 			MessageDialog.openError(getShell(), FulfillmentMessages.get().RefundWizard_IncorrectRefundAmount_Title,
 					FulfillmentMessages.get().RefundWizard_IncorrectRefundAmount_Message);
+			return false;
+		} catch (CheckoutValidationException checkoutValidationException) {
+			LOG.error(ERROR_OCCURRED_WHILE_PROCESSING_AN_EXCHANGE, checkoutValidationException); //$NON-NLS-1$
+			String errorMessage = "There are the following validation error messages: \n"
+					+ checkoutValidationException.getStructuredErrorMessages().stream()
+					.map(StructuredErrorMessage::getDebugMessage)
+					.collect(Collectors.joining("\n"));
+			MessageDialog.openError(getShell(), FulfillmentMessages.get().RefundWizard_ValidationError_Title, errorMessage);
 			return false;
 		} catch (Exception exception) {
 			LOG.error(ERROR_OCCURRED_WHILE_PROCESSING_AN_EXCHANGE, exception); //$NON-NLS-1$

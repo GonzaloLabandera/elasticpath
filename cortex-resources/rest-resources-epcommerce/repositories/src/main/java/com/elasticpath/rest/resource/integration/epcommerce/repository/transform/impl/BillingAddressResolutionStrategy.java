@@ -4,7 +4,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl;
 
 import io.reactivex.Maybe;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.rest.definition.orders.BillingaddressInfoIdentifier;

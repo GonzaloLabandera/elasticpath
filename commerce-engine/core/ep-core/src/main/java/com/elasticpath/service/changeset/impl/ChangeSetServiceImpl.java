@@ -13,7 +13,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.ChangeSetDependencyDto;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -43,7 +44,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class ChangeSetServiceImpl implements ChangeSetService {
 
-	private static final Logger LOG = Logger.getLogger(ChangeSetServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetServiceImpl.class);
 
 	private ChangeSetMemberDao changeSetMemberDao;
 
@@ -68,8 +69,8 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 
 	@Override
 	@SuppressWarnings("PMD.NPathComplexity")
-	public void addObjectToChangeSet(final String changeSetGuid,
-			final BusinessObjectDescriptor objectDescriptor, final Map<String, String> objectMetadata, final boolean resolveMetadata) {
+	public BusinessObjectGroupMember addObjectToChangeSet(final String changeSetGuid, final BusinessObjectDescriptor objectDescriptor,
+														  final Map<String, String> objectMetadata, final boolean resolveMetadata) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Entering method addObjectToChangeSet(" + changeSetGuid + ", " + objectDescriptor + ")");
 		}
@@ -91,7 +92,7 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("The object: " + objectDescriptor + " is already a member of change set: " + changeSetGuid);
 			}
-			return;
+            return null;
 		}
 
 		if (!objectStatus.isAvailable(changeSetGuid)) {
@@ -114,6 +115,7 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 		}
 
 		changeSetMemberDao.add(groupMember, metadata);
+		return groupMember;
 	}
 
 	/**
@@ -482,7 +484,8 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 			return;
 		}
 
-		Collection<BusinessObjectMetadata> metadataCollection = changeSetMemberDao.findBusinessObjectMetadataByDescriptor(objectDescriptor);
+		Collection<BusinessObjectMetadata> metadataCollection =
+                changeSetMemberDao.findBusinessObjectMetadataByGroupIdAndDescriptor(businessObjectGroupMember.getGroupId(), objectDescriptor);
 
 		// Update existing values
 		for (BusinessObjectMetadata metadata : metadataCollection) {

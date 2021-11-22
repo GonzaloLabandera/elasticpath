@@ -45,6 +45,7 @@
 		<property name="priceListStackInvalidationDeterminer" ref="priceListStackInvalidator"/>
 		<property name="promoInvalidationDeterminer" ref="promoInvalidator"/>
 	</bean>
+	<bean id="customerClosure" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerClosureImpl"/>
 	<bean id="customerGroup" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerGroupImpl"/>
 	<bean id="customerRole" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerRoleImpl"/>
 	<bean id="customerAddress" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerAddressImpl"/>
@@ -72,6 +73,7 @@
 	<bean id="taxCalculationResult" scope="prototype" class="com.elasticpath.service.tax.impl.TaxCalculationResultImpl"/>
 	<bean id="attributeValue" scope="prototype" class="com.elasticpath.domain.attribute.impl.TransientAttributeValueImpl"/>
 	<bean id="ruleSet" scope="prototype" class="com.elasticpath.domain.rules.impl.RuleSetImpl"/>
+	<bean id="ruleSetLoadTuner" scope="prototype" class="com.elasticpath.domain.rules.impl.RuleSetLoadTunerImpl"/>
 	<bean id="shoppingCart" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl"/>
 	<bean id="shoppingCartMemento" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl"/>
 	<bean id="shoppingItem" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl"/>
@@ -355,12 +357,6 @@
 	<!-- Shipping Calculation -->
 	<bean id="shippingOptionResult" scope="prototype" class="com.elasticpath.service.shipping.impl.ShippingOptionResultImpl" />
 
-	<!-- Validation framework -->
-	<bean id="productSkuValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ProductSkuValidationContextImpl"/>
-	<bean id="shoppingItemDtoValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingItemDtoValidationContextImpl"/>
-	<bean id="shoppingItemValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingItemValidationContextImpl"/>
-	<bean id="shoppingCartValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingCartValidationContextImpl"/>
-
 	<!-- Facets -->
 	<bean id="facet" scope="prototype" class="com.elasticpath.domain.search.impl.FacetImpl"/>
 
@@ -395,4 +391,6 @@
 
 	<!-- Outbox -->
 	<bean id="outboxMessage" scope="prototype" class="com.elasticpath.domain.messaging.impl.OutboxMessageImpl"/>
+	<bean id="modifierFieldsMapWrapper" scope="prototype" class="com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper"/>
+
 </beans>

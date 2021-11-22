@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.fulfillment.editors.order;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredContentProvider;

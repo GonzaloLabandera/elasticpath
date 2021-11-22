@@ -90,7 +90,7 @@ public class DataPointValueServiceImplTest {
 	}
 
 	@Test
-	public void shouldRemoveCustomerProfileFirstNameAndTriggerIndexing() {
+	public void shouldRemoveCustomerProfileFirstNameWithoutIndexing() {
 		String inList = "list";
 		String updateQuery = "update CustomerProfileValueImpl prof SET profile.shortTextValue=null WHERE profile.uidPk IN (:" + inList + ")";
 		Long uidPk = 1L;
@@ -98,12 +98,13 @@ public class DataPointValueServiceImplTest {
 
 		when(persistenceEngine.executeQueryWithList(updateQuery, inList, entityUidPKs)).thenReturn(1);
 
-		int numOfRemovedValues = service.removeValuesByQuery(updateQuery, inList, entityUidPKs, IndexType.CUSTOMER);
+		int numOfRemovedValues = service.removeValuesByQuery(updateQuery, inList, entityUidPKs, null);
 
 		assertThat(numOfRemovedValues)
 			.as("One record must be updated")
 			.isEqualTo(1);
 
+		verify(indexNotificationService, never()).addNotificationForEntityIndexUpdate(any(IndexType.class), eq(uidPk));
 		verify(persistenceEngine).executeQueryWithList(updateQuery, inList, entityUidPKs);
 	}
 

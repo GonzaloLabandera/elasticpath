@@ -190,7 +190,7 @@ public class PricedShippableItemContainerTransformerImplApportioningTest {
 	// for creating a real integration test.
 
 	private void mockShoppingItem(final String skuGuid, final Money unitPrice, final int quantity, final boolean isShippable) {
-		final ShoppingItem shoppingItem = mock(ShoppingItem.class);
+		final ShoppingItem shoppingItem = mock(ShoppingItem.class, RETURNS_DEEP_STUBS);
 		when(shoppingItem.getGuid()).thenReturn("shoppingItemGuidFor_" + skuGuid);
 		when(shoppingItem.getSkuGuid()).thenReturn(skuGuid);
 		when(shoppingItem.getQuantity()).thenReturn(quantity);

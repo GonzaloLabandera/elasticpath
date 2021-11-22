@@ -19,8 +19,8 @@ import java.util.Optional;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import io.restassured.response.Response;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import com.elasticpath.definitions.api.helpers.Constants;
 import com.elasticpath.definitions.api.helpers.StepsHelper;

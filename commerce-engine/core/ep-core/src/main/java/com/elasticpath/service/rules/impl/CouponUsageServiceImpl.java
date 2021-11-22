@@ -17,10 +17,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -54,7 +55,7 @@ import com.elasticpath.service.rules.dao.CouponUsageDao;
  */
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class CouponUsageServiceImpl implements CouponUsageService {
-	private static final Logger LOG = Logger.getLogger(CouponUsageServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CouponUsageServiceImpl.class);
 
 	private CouponUsageDao dao;
 	private RuleService ruleService;

@@ -8,7 +8,8 @@ import java.net.URL;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.asset.ImageMap;
 import com.elasticpath.domain.asset.MutableImageMapWithAbsolutePath;
@@ -19,7 +20,7 @@ import com.elasticpath.domain.asset.MutableImageMapWithAbsolutePath;
 public class ImageMapWithAbsolutePathImpl implements MutableImageMapWithAbsolutePath {
 	private static final long serialVersionUID = 1L;
 
-	private static final transient Logger LOG = Logger.getLogger(ImageMapWithAbsolutePathImpl.class);
+	private static final transient Logger LOG = LogManager.getLogger(ImageMapWithAbsolutePathImpl.class);
 	
 	private ImageMap relativeImageMap;
 	private URL absolutePathPrefix;

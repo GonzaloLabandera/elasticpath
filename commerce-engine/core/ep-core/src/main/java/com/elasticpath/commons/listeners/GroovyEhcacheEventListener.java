@@ -14,7 +14,7 @@ import com.elasticpath.commons.util.GroovyUtility;
  * Custom Ehcache listener used to remove expired compiled Groovy scripts from cache
  * by calling {@link GroovyUtility#removeExpiredCompiledScriptFromCache}.
  */
-@SuppressWarnings("PMD.UncommentedEmptyMethodBody")
+@SuppressWarnings({"PMD.UncommentedEmptyMethodBody", "squid:S1186"})
 public class GroovyEhcacheEventListener implements CacheEventListener {
 
 

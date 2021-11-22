@@ -60,7 +60,7 @@ public class CatalogLocaleImpl extends AbstractPersistableImpl implements Suppor
 	@Persistent
 	@Column(name = "LOCALE")
 	@Externalizer("toString")
-	@Factory("org.apache.commons.lang.LocaleUtils.toLocale")
+	@Factory("org.apache.commons.lang3.LocaleUtils.toLocale")
 	public Locale getLocale() {
 		return locale;
 	}

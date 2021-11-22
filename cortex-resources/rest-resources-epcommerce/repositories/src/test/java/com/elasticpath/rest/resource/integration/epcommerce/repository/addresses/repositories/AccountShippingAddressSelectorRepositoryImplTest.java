@@ -205,6 +205,7 @@ public class AccountShippingAddressSelectorRepositoryImplTest {
 				mock(AccountShippingAddressSelectorChoiceIdentifier.class);
 		when(accountShippingAddressSelectorChoiceIdentifier.getAccountShippingAddressSelector()).thenReturn(accountShippingAddressSelectorIdentifier);
 		when(accountShippingAddressSelectorChoiceIdentifier.getAccountAddress()).thenReturn(address1Identifier);
+		when(addressRepository.getExistingAddressByGuid(ADDRESS1, customer)).thenReturn(Single.just(customerAddress));
 		when(customerRepository.update(customer)).thenReturn(Single.just(customer));
 		when(customer.getStoreCode()).thenReturn(STORE_CODE);
 		when(customer.getGuid()).thenReturn(ACCOUNT_GUID);

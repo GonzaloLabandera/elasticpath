@@ -10,7 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
@@ -30,7 +31,7 @@ import com.elasticpath.service.rules.RuleService;
 */
 public class PromotionUsageServiceImpl {
 
-	private static final Logger LOG = Logger.getLogger(PromotionUsageServiceImpl.class.getName());
+	private static final Logger LOG = LogManager.getLogger(PromotionUsageServiceImpl.class.getName());
 
 	private static final int CURRENCY_IDX = 0;
 	private static final int RULENAME_IDX = 3;

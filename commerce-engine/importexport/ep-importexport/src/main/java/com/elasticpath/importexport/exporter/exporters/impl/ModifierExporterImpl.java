@@ -10,7 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -32,7 +33,7 @@ public class ModifierExporterImpl extends AbstractExporterImpl<ModifierGroup, Mo
 	private Set<String> modifierCodeSet;
 
 
-	private static final Logger LOG = Logger.getLogger(ModifierExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ModifierExporterImpl.class);
 
 
 	@Override

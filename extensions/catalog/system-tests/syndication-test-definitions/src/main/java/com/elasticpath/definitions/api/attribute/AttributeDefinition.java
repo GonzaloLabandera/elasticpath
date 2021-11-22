@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import cucumber.api.java.en.Then;
 import io.restassured.response.Response;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.definitions.stateobjects.Context;
 import com.elasticpath.definitions.testobjects.SingleAttributeApiResponse;

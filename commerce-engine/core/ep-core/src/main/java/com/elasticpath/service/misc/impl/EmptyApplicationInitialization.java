@@ -3,14 +3,15 @@
  */
 package com.elasticpath.service.misc.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Empty application initialization. Does nothing other than log the fact it was called.
  */
 public class EmptyApplicationInitialization {
 	
-	private static final Logger LOG = Logger.getLogger(EmptyApplicationInitialization.class);
+	private static final Logger LOG = LogManager.getLogger(EmptyApplicationInitialization.class);
 	
 	/**
 	 * Do nothing other than log.

@@ -3,6 +3,8 @@
  */
 package com.elasticpath.performancetools.queryanalyzer;
 
+import static com.elasticpath.performancetools.queryanalyzer.JMXClient.CE_LOGGERS;
+import static com.elasticpath.performancetools.queryanalyzer.utils.Defaults.TRACE_LOG_LEVEL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.management.ManagementFactory;
@@ -34,11 +36,11 @@ public class JMXClientTest {
 		mbs.registerMBean(jmxConfigurator, name);
 
 		JMXClient jmxClient = new JMXClient(mbs);
-		jmxClient.toggleLogLevel(JMXClient.TRACE_LOG_LEVEL);
+		jmxClient.toggleLogLevel(TRACE_LOG_LEVEL);
 
 		List<String> loggerLevels = new ArrayList<>();
 
-		for (String logger : JMXClient.TRACE_LOGGERS) {
+		for (String logger : CE_LOGGERS) {
 			final String loggerLevel = (String) mbs.invoke(name,
 					"getLoggerLevel",
 					new Object[]{logger},
@@ -48,6 +50,6 @@ public class JMXClientTest {
 		}
 
 		assertThat(loggerLevels)
-				.allMatch(level -> level.equalsIgnoreCase(JMXClient.TRACE_LOG_LEVEL));
+				.allMatch(level -> level.equalsIgnoreCase(TRACE_LOG_LEVEL));
 	}
 }

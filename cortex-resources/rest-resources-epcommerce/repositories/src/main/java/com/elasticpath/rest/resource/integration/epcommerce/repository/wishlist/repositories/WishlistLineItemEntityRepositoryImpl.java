@@ -94,7 +94,7 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 	 */
 	protected Single<WishlistLineItemEntity> buildWishlistLineItemEntity(final ShoppingItem shoppingItem, final ProductSku
 			productSku, final String itemId, final String lineItemGuid, final WishList wishList) {
-		Map<String, String> fields = shoppingItem.getFields();
+		Map<String, String> fields = shoppingItem.getModifierFields().getMap();
 		Single<LineItemConfigurationEntity> lineItemConfigurationEntity;
 		if (fields == null) {
 			lineItemConfigurationEntity = Single.just(LineItemConfigurationEntity.builder().build());

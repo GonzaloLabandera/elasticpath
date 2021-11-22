@@ -3,8 +3,9 @@ package com.elasticpath.selenium.navigations;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -100,7 +101,7 @@ public class CatalogManagement extends AbstractNavigation {
 	private static final String SKU_SEARCH_SCROLL_BAR_CSS = LEFT_PANE_INNER_PARENT_CSS
 			+ "div[appearance-id='scrolledcomposite'][seeable='true']>div[appearance-id='scrollbar'] div[appearance-id='scrollbar-thumb']";
 	private static final int SLEEP_TIME_IN_MILLI = 1000;
-	private static final Logger LOGGER = Logger.getLogger(CatalogManagement.class);
+	private static final Logger LOGGER = LogManager.getLogger(CatalogManagement.class);
 
 	/**
 	 * Constructor.

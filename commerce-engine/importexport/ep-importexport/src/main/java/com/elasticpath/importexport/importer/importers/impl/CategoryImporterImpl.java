@@ -6,7 +6,8 @@ package com.elasticpath.importexport.importer.importers.impl;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -34,7 +35,7 @@ import com.elasticpath.service.catalog.CategoryService;
  */
 public class CategoryImporterImpl extends AbstractImporterImpl<Category, CategoryDTO> {
 	
-	private static final Logger LOG = Logger.getLogger(CategoryImporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CategoryImporterImpl.class);
 
 	private CategoryAdapter categoryAdapter;
 

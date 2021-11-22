@@ -16,8 +16,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -494,7 +494,7 @@ public class CatalogTestPersister {
 	 * @return updated product
 	 */
 	private Product initLocaleDependantFields(final Product product, final String productName) {
-		product.getLocaleDependantFields(Locale.ENGLISH).setDisplayName(StringEscapeUtils.unescapeHtml(productName));
+		product.getLocaleDependantFields(Locale.ENGLISH).setDisplayName(StringEscapeUtils.unescapeHtml3(productName));
 
 		return product;
 	}

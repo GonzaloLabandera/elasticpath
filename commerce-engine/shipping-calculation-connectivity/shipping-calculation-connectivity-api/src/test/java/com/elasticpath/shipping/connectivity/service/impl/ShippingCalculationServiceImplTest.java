@@ -5,7 +5,6 @@ package com.elasticpath.shipping.connectivity.service.impl;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,8 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.Before;
@@ -48,8 +45,8 @@ import com.elasticpath.shipping.connectivity.spi.capability.ShippingOptionListCa
 public class ShippingCalculationServiceImplTest {
 
 	private static final String STORE_CODE = "storeCode";
-	private static final String DISPLAY_NAME = "testDisplayName";
-	private static final String SHIPPING_OPTION_CODE = "testShippingOptionCode";
+//	private static final String DISPLAY_NAME = "testDisplayName";
+//	private static final String SHIPPING_OPTION_CODE = "testShippingOptionCode";
 
 	@InjectMocks
 	private ShippingCalculationServiceImpl shippingCalculationServiceImpl;
@@ -111,8 +108,8 @@ public class ShippingCalculationServiceImplTest {
 		when(mockShippingOptionListCapability.getUnpricedShippingOptions(mockUnpricedShippableItemContainer))
 				.thenReturn(Collections.singletonList(mockShippingOption));
 
-		when(mockShippingOption.getCode()).thenReturn(SHIPPING_OPTION_CODE);
-		when(mockShippingOption.getDisplayName(any(Locale.class))).thenReturn(Optional.of(DISPLAY_NAME));
+//		when(mockShippingOption.getCode()).thenReturn(SHIPPING_OPTION_CODE);
+//		when(mockShippingOption.getDisplayName(any(Locale.class))).thenReturn(Optional.of(DISPLAY_NAME));
 		shippingOptions = Collections.singletonList(mockShippingOption);
 	}
 

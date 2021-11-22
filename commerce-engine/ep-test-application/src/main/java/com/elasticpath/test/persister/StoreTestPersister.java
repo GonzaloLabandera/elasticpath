@@ -4,6 +4,7 @@
 
 package com.elasticpath.test.persister;
 
+import static com.elasticpath.commons.constants.ContextIdNames.ADDRESS_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.CART_ORDER_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.CMUSER_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER;
@@ -71,6 +72,7 @@ import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.money.Money;
 import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.cmuser.CmUserService;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.shipping.ShippingOptionTransformer;
@@ -128,6 +130,8 @@ public class StoreTestPersister {
 
 	private final CartOrderService cartOrderService;
 
+	private final AddressService addressService;
+
 	/**
 	 * Constructor initializes necessary services and beanFactory.
 	 *
@@ -151,6 +155,8 @@ public class StoreTestPersister {
 		shippingServiceLevelCurrencies.add(Currency.getInstance("USD"));
 		shippingServiceLevelCurrencies.add(Currency.getInstance("CAD"));
 		shippingServiceLevelCurrencies.add(Currency.getInstance("GBP"));
+
+		addressService = beanFactory.getSingletonBean(ADDRESS_SERVICE, AddressService.class);
 	}
 
 	/**
@@ -226,13 +232,13 @@ public class StoreTestPersister {
 				"891312345007");
 		final CustomerAddress address2 = createCustomerAddress("Bond", "James", "28 Main Street", "", "Toronto", "CA", "ON", "K6J5G4",
 				"912348724938");
-		persistCustomerSessionWithAssociatedEntities(persistCustomer(null, store, "james@bond.com", address1, address2));
+		persistShopperWithAssociatedEntities(persistCustomer(null, store, "james@bond.com", address1, address2));
 
 		final CustomerAddress address3 = createCustomerAddress("John", "Smith", "73 Oak Street", "", "Washington", "US", "WA", "832901",
 				"782390129353");
 		final CustomerAddress address4 = createCustomerAddress("John", "Smith", "11 Peace Street", "", "New York", "US", "NY", "818923",
 				"728930174927");
-		persistCustomerSessionWithAssociatedEntities(persistCustomer(null, store, "john@smith.com", address3, address4));
+		persistShopperWithAssociatedEntities(persistCustomer(null, store, "john@smith.com", address3, address4));
 	}
 
 	/**
@@ -310,10 +316,13 @@ public class StoreTestPersister {
 	 * @param customerAddresses array of available customer addresses
 	 * @return persisted customer
 	 */
+	@SuppressWarnings({"squid:S2068"})
 	public Customer persistCustomer(final String guid, final Store store, final String email,
 									final CustomerAddress... customerAddresses) {
 		final Customer customer = beanFactory.getPrototypeBean(CUSTOMER, Customer.class);
+		customer.setUsername(email);
 		customer.setCustomerType(CustomerType.REGISTERED_USER);
+		customer.setPassword("password", "salt");
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
 		customer.setCreationDate(new Date());
@@ -322,12 +331,18 @@ public class StoreTestPersister {
 		customer.setGuid(StringUtils.isNotEmpty(guid) ? guid : new RandomGuidImpl().toString());
 		customer.setEmail(email);
 		customer.setStoreCode(store.getCode());
-		customer.setPreferredBillingAddress(customerAddresses[0]);
+
+		Customer persistedCustomer =  customerService.add(customer);
+
 		for (final CustomerAddress address : customerAddresses) {
-			customer.addAddress(address);
+			address.setCustomerUidPk(persistedCustomer.getUidPk());
 		}
 
-		return customerService.add(customer);
+		addressService.save(customerAddresses);
+		customer.setPreferredBillingAddress(customerAddresses[0]);
+		customerService.update(customer);
+
+		return persistedCustomer;
 	}
 
 	/**
@@ -372,6 +387,7 @@ public class StoreTestPersister {
 		customerAddress.setStreet2(street2);
 		customerAddress.setCity(city);
 		customerAddress.setCountry(country);
+
 		customerAddress.setSubCountry(state);
 		customerAddress.setZipOrPostalCode(zip);
 		customerAddress.setPhoneNumber(phone);
@@ -379,27 +395,24 @@ public class StoreTestPersister {
 	}
 
 	/**
-	 * Persist the Customer Session.
+	 * Persist the Shopper.
 	 *
-	 * @param customer the customer corresponding to the session
-	 * @return persisted customerSession
+	 * @param customer the customer corresponding to the shopper
+	 * @return persisted shopper
 	 */
-	public CustomerSession persistCustomerSessionWithAssociatedEntities(final Customer customer) {
+	public Shopper persistShopperWithAssociatedEntities(final Customer customer) {
 		Currency currency = Currency.getInstance(Locale.US);
 
 		final Shopper shopper = TestShopperFactoryForTestApplication.getInstance().createNewShopperWithMemento();
 		shopper.setCustomer(customer);
 		shopper.setStoreCode(customer.getStoreCode());
 		shopperService.save(shopper);
-		ShoppingCart shoppingCart = shoppingCartService.findOrCreateByShopper(shopper);
+		ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(shopper);
 
 		CustomerSession session = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
-		session.setShopper(shopper);
 		session.setCurrency(currency);
 		session.setLocale(Locale.US);
-		session = customerSessionService.initializeCustomerSessionForPricing(session, customer.getStoreCode(), currency);
-
-		shoppingCart.setCustomerSession(session);
+		customerSessionService.initializeCustomerSessionForPricing(session, customer.getStoreCode(), currency);
 
 		ShoppingCart persistedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		shopper.setCurrentShoppingCart(persistedShoppingCart);
@@ -407,8 +420,8 @@ public class StoreTestPersister {
 
 		cartOrderService.createOrderIfPossible(persistedShoppingCart);
 
-		shopper.updateTransientDataWith(session);
-		return session;
+		shopper.setCustomerSession(session);
+		return shopper;
 	}
 
 	/**

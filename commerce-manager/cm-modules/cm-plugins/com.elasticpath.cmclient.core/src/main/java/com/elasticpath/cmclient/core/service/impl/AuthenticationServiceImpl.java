@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core.service.impl;
 
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.rcp.RemoteAuthenticationException;
@@ -24,7 +25,7 @@ import com.elasticpath.cmclient.core.service.AuthenticationService;
  *
  */
 public final class AuthenticationServiceImpl implements AuthenticationService {
-	private static final Logger LOG = Logger.getLogger(AuthenticationServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AuthenticationServiceImpl.class);
 
 	private transient Authentication authToken;
 

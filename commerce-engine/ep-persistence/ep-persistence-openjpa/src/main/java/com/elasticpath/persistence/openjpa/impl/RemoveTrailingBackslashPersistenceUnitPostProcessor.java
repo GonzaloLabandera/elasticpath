@@ -7,7 +7,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 
@@ -19,7 +20,7 @@ import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
  * is a pure jar file. */
 public class RemoveTrailingBackslashPersistenceUnitPostProcessor implements PersistenceUnitPostProcessor {
 
-	private static final Logger LOG = Logger.getLogger(RemoveTrailingBackslashPersistenceUnitPostProcessor.class);
+	private static final Logger LOG = LogManager.getLogger(RemoveTrailingBackslashPersistenceUnitPostProcessor.class);
 
 	/**
 	 * Remove the trailing backslash from the root url of the persistence unit.

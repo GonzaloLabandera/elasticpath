@@ -7,7 +7,8 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -29,7 +30,7 @@ import com.elasticpath.service.search.query.ProductSearchCriteria;
  */
 public class PriceUpdatedNotificationServiceImpl implements PriceUpdatedNotificationService {
 
-	private static final Logger LOG = Logger.getLogger(PriceUpdatedNotificationServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PriceUpdatedNotificationServiceImpl.class);
 
 	private IndexNotificationService indexNotificationService;
 

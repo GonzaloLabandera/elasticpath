@@ -4,7 +4,7 @@
 
 package com.elasticpath.batch.jobs;
 
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * This class encapsulates an error that occurred while processing one batch of records.
@@ -39,7 +39,7 @@ public final class BatchJobProcessingError {
 
 	@Override
 	public String toString() {
-		return new org.apache.commons.lang.builder.ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+		return new org.apache.commons.lang3.builder.ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
 				.append("errorMessage", getErrorMessage())
 				.append("csvIDs", getCsvIDs())
 				.toString();

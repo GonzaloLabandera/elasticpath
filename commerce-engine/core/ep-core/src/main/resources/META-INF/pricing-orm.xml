@@ -325,6 +325,22 @@
 				AND pla.hidden = false
 			</query>
 		</named-query>
+
+		<named-query name="PRICE_LIST_ASSIGNMENTS_CATALOG_CODE_VISIBLE_ONLY_LITE">
+			<query>
+				SELECT new com.elasticpath.domain.pricing.impl.PriceListAssignmentImpl(pla.guid, pla.name,
+					pla.description, pla.priority, pl.guid, pl.name, cat.uidPk, cat.name, pl.currencyCode, pla.hidden)
+				FROM
+					PriceListAssignmentImpl as pla,
+					PriceListDescriptorImpl as pl,
+					CatalogImpl as cat
+				WHERE pla.catalog.code = ?1
+					AND pla.hidden = false
+					AND pla.catalog.code = cat.code
+					AND pla.priceListDescriptor.uidPk = pl.uidPk
+			</query>
+		</named-query>
+
 		<named-query name="PRICE_LIST_ASSIGNMENTS_FIND_BY_GUID">
 			<query>
 				SELECT pla

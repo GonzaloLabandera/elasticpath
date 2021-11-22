@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.core.ui.framework;
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.events.FocusEvent;

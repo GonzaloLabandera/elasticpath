@@ -59,6 +59,7 @@ import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.impl.OrderSkuImpl;
 import com.elasticpath.domain.shopper.Shopper;
@@ -175,6 +176,7 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 		stubGetSingletonBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, ShoppingItemSubtotalCalculator.class,
 				getShoppingItemSubtotalCalculator());
 		stubGetSingletonBean(ContextIdNames.TIME_SERVICE, TimeService.class, getTimeService());
+		stubGetPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class, ModifierFieldsMapWrapper.class);
 
 		mockTimeService();
 		mockOrderSkuFactory();
@@ -465,8 +467,7 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 		customerSession.setLocale(LOCALE);
 
 		final ShoppingCartImpl shoppingCart = TestShoppingCartFactory.getInstance().createNewCartWithMemento(
-				customerSession.getShopper(), getMockedStore());
-		shoppingCart.setCustomerSession(customerSession);
+				shopper, getMockedStore());
 		shoppingCart.setBillingAddress(getAddress());
 		shoppingCart.setShippingAddress(getAddress());
 		return shoppingCart;
@@ -475,7 +476,7 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 	private CustomerSession createCustomerSessionForShopper(final Shopper shopper) {
 		final CustomerSession customerSession = TestCustomerSessionFactory.getInstance().createNewCustomerSessionWithContext(shopper);
 		final Customer customer = createCustomer();
-		customerSession.getShopper().setCustomer(customer);
+		shopper.setCustomer(customer);
 		return customerSession;
 	}
 

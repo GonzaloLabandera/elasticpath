@@ -16,6 +16,7 @@ import org.openqa.selenium.WebElement;
 
 import com.elasticpath.cortexTestObjects.Purchase;
 import com.elasticpath.selenium.dialogs.AddAccountAssociateDialog;
+import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.DeleteAccountAssociateDialog;
 import com.elasticpath.selenium.dialogs.EditCustomerProfileDialog;
 import com.elasticpath.selenium.editor.CustomerEditor;
@@ -44,6 +45,7 @@ public class CustomerDefinition {
 
 	private static final String CHILD_IN_TABLE_CSS = "div[parent-widget-id='Child Accounts'] div[column-id='%s']";
 	private static final String OPEN_ACCOUNT_BUTTON_CSS = "div[widget-id='Open Account Profile...']";
+	private static final String DELETE_ACCOUNT_BUTTON_CSS = "div[widget-id='Delete Child Account...']";
 	private static final String CHILD_ACCOUNT_BTN_CSS = "div[widget-id='Add Child Account...']";
 	private static final String REFRESH_ORDERS_BUTTON_CSS = "div[widget-id='Refresh Orders']";
 	private static final String CHILD_ACCOUNT_HYPERLINK_CSS = "div[appearance-id='hyperlink'][widget-type=Hyperlink]";
@@ -550,6 +552,14 @@ public class CustomerDefinition {
 	public void openChild(final String expectedChild) {
 		customerEditor.click(By.cssSelector(String.format(CHILD_IN_TABLE_CSS, expectedChild)));
 		customerEditor.clickButton(OPEN_ACCOUNT_BUTTON_CSS, "Open Account Profile...");
+	}
+
+	@Then("^I delete (.+) child")
+	public void selectChild(final String expectedChild) {
+		customerEditor.click(By.cssSelector(String.format(CHILD_IN_TABLE_CSS, expectedChild)));
+		customerEditor.clickButton(DELETE_ACCOUNT_BUTTON_CSS, "Delete Child Account...");
+		ConfirmDialog confirmDialog = new ConfirmDialog(getDriver());
+		confirmDialog.clickOKButton("FulfillmentMessages.ConfirmDeleteAccount");
 	}
 
 	/**

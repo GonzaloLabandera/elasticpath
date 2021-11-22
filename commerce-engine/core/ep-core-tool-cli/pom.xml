@@ -28,6 +28,11 @@
 							<addClasspath>true</addClasspath>
 							<mainClass>com.elasticpath.tools.epcoretool.client.Cli</mainClass>
 						</manifest>
+						<manifestEntries>
+							<Implementation-Version>${ep.release.version}</Implementation-Version>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
 					</archive>
 				</configuration>
 			</plugin>
@@ -87,8 +92,12 @@
 			<version>${epdb.maven.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
 		</dependency>
 	</dependencies>
 </project>

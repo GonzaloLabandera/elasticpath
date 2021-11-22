@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.admin.users.helpers;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.admin.users.event.AdminUsersEventService;
 import com.elasticpath.cmclient.core.BeanLocator;
@@ -21,7 +22,7 @@ import com.elasticpath.service.cmuser.CmUserService;
  */
 public class UserSearchRequestJob extends AbstractSearchRequestJob<CmUser> {
 
-	private static final Logger LOG = Logger.getLogger(UserSearchRequestJob.class);
+	private static final Logger LOG = LogManager.getLogger(UserSearchRequestJob.class);
 	
 	private final CmUserService userService;
 

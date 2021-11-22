@@ -11,7 +11,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -37,7 +38,7 @@ import com.elasticpath.persistence.api.PersistenceEngine;
  */
 public class EpContextConfigListener implements ServletContextListener {
 	/** Logger. * */
-	private static final Logger LOG = Logger.getLogger(EpContextConfigListener.class);
+	private static final Logger LOG = LogManager.getLogger(EpContextConfigListener.class);
 
 	private BeanFactory beanFactory;
 

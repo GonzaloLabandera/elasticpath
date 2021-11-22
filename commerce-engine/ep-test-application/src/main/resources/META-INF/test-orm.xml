@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2019 Elastic Path Software Inc. All rights reserved.
+  -->
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+	<named-query name="ADDRESSES_BY_CUSTOMER_UIDS">
+		<query>
+			SELECT address
+			FROM CustomerAddressImpl address
+			WHERE address.customerUidPk IN (:list)
+		</query>
+	</named-query>
+
+	<named-query name="ADDRESS_BY_CUSTOMER_UID_AND_STREET1">
+		<query>
+			SELECT address
+			FROM CustomerAddressImpl address
+			WHERE address.customerUidPk = ?1
+			AND address.street1 = ?2
+		</query>
+	</named-query>
+</entity-mappings>

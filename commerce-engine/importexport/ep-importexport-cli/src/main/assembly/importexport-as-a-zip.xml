@@ -10,7 +10,7 @@
 	<include>*configuration.xml</include>
 	<include>importexport.bat</include>
 	<include>importexporttool.config</include>
-	<include>log4j.properties</include>
+	<include>log4j2.xml</include>
 	<include>README.txt</include>
       </includes>
     </fileSet>

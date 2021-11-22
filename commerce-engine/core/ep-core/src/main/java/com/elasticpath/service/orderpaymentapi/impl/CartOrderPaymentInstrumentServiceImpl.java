@@ -5,7 +5,6 @@ package com.elasticpath.service.orderpaymentapi.impl;
 
 import java.util.Collection;
 
-import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.orderpaymentapi.CartOrderPaymentInstrumentService;
@@ -40,16 +39,16 @@ public class CartOrderPaymentInstrumentServiceImpl extends AbstractEpPersistence
 	}
 
 	@Override
-	public Collection<CartOrderPaymentInstrument> findByCartOrder(final CartOrder cartOrder) {
+	public Collection<CartOrderPaymentInstrument> findByCartOrderGuid(final String cartOrderGuid) {
 		sanityCheck();
 
 		return getPersistenceEngine()
-				.retrieveByNamedQuery("FIND_CART_ORDER_PAYMENT_INSTRUMENTS_BY_CART_ORDER_ALL", cartOrder.getUidPk());
+				.retrieveByNamedQuery("FIND_CART_ORDER_PAYMENT_INSTRUMENTS_BY_CART_ORDER_GUID", cartOrderGuid);
 	}
 
 	@Override
-	public boolean hasPaymentInstruments(final CartOrder cartOrder) {
-		return !findByCartOrder(cartOrder).isEmpty();
+	public boolean hasPaymentInstruments(final String cartOrderGuid) {
+		return !findByCartOrderGuid(cartOrderGuid).isEmpty();
 	}
 
 	@Override

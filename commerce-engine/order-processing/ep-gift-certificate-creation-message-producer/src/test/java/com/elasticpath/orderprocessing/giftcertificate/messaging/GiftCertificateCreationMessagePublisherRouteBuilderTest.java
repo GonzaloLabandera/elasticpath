@@ -4,6 +4,7 @@
 package com.elasticpath.orderprocessing.giftcertificate.messaging;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Sets;
@@ -263,11 +263,11 @@ public class GiftCertificateCreationMessagePublisherRouteBuilderTest extends Cam
 
 	private OrderSku createOrderSku(final String orderSkuGuid, final BigDecimal unitPrice, final Map<String, String> gcFields,
 									final OrderShipment orderShipment) {
-		final OrderSkuImpl giftCertificateOrderSku = mock(OrderSkuImpl.class, UUID.randomUUID().toString());
+		final OrderSkuImpl giftCertificateOrderSku = mock(OrderSkuImpl.class, RETURNS_DEEP_STUBS);
 		
 		when(giftCertificateOrderSku.getGuid()).thenReturn(orderSkuGuid);
 		when(giftCertificateOrderSku.getTotal()).thenReturn(Money.valueOf(unitPrice, Currency.getInstance("CAD")));
-		when(giftCertificateOrderSku.getFields()).thenReturn(gcFields);
+		when(giftCertificateOrderSku.getModifierFields().getMap()).thenReturn(gcFields);
 		when(giftCertificateOrderSku.isGiftCertificate()).thenReturn(true);
 		when(giftCertificateOrderSku.getShipment()).thenReturn(orderShipment);
 

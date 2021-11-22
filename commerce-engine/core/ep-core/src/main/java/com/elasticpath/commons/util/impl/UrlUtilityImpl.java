@@ -10,8 +10,9 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.util.UrlUtility;
 
@@ -20,7 +21,7 @@ import com.elasticpath.commons.util.UrlUtility;
  */
 public class UrlUtilityImpl implements UrlUtility {
 	
-	private static final Logger LOG = Logger.getLogger(UrlUtilityImpl.class);
+	private static final Logger LOG = LogManager.getLogger(UrlUtilityImpl.class);
 	
 	private String encoding;
 

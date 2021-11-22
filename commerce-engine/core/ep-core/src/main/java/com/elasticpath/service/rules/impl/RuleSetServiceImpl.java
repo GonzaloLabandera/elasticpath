@@ -10,6 +10,7 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.rules.RuleSetService;
@@ -94,10 +95,12 @@ public class RuleSetServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
-	public RuleSet findByScenarioId(final int scenarioId) throws EpServiceException {
+	public RuleSet findByScenarioId(final int scenarioId, final RuleSetLoadTuner ruleSetLoadTuner) throws EpServiceException {
 		sanityCheck();
 
-		final List<RuleSet> results = getPersistenceEngine().retrieveByNamedQuery("RULESET_FIND_BY_SCENARIO", Integer.valueOf(scenarioId));
+		final List<RuleSet> results = getPersistenceEngine()
+				.withLoadTuners(ruleSetLoadTuner)
+				.retrieveByNamedQuery("RULESET_FIND_BY_SCENARIO", Integer.valueOf(scenarioId));
 		RuleSet ruleSet = null;
 		if (results.size() == 1) {
 			ruleSet = results.get(0);
@@ -116,10 +119,12 @@ public class RuleSetServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
-	public RuleSet findByName(final String name) throws EpServiceException {
+	public RuleSet findByName(final String name, final RuleSetLoadTuner ruleSetLoadTuner) throws EpServiceException {
 		sanityCheck();
 
-		final List<RuleSet> results = getPersistenceEngine().retrieveByNamedQuery("RULESET_FIND_BY_NAME", name);
+		final List<RuleSet> results = getPersistenceEngine()
+				.withLoadTuners(ruleSetLoadTuner)
+				.retrieveByNamedQuery("RULESET_FIND_BY_NAME", name);
 		RuleSet ruleSet = null;
 		if (results.size() == 1) {
 			ruleSet = results.get(0);
@@ -164,26 +169,16 @@ public class RuleSetServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 	}
 
 	/**
-	 * List all ruleSets stored in the database.
-	 *
-	 * @return a list of ruleSets
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public List<RuleSet> list() throws EpServiceException {
-		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("RULESET_SELECT_ALL");
-	}
-
-	/**
 	 * Retrieves list of <code>RuleSet</code>s where the last modified date is later than the specified date.
 	 *
 	 * @param date date to compare with the last modified date
 	 * @return list of <code>RuleSet</code> whose last modified date is later than the specified date
 	 */
 	@Override
-	public List<RuleSet> findByModifiedDate(final Date date) {
-		return getPersistenceEngine().retrieveByNamedQuery("RULE_SET_SELECT_BY_MODIFIED_DATE", date);
+	public List<RuleSet> findByModifiedDate(final Date date, final RuleSetLoadTuner ruleSetLoadTuner) {
+		return getPersistenceEngine()
+				.withLoadTuners(ruleSetLoadTuner)
+				.retrieveByNamedQuery("RULE_SET_SELECT_BY_MODIFIED_DATE", date);
 	}
 
 	/**

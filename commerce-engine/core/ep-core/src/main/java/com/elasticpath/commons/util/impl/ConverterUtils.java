@@ -10,7 +10,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 import com.elasticpath.commons.constants.GlobalConstants;
 import com.elasticpath.commons.exception.EpBigDecimalBindException;
@@ -48,7 +48,7 @@ public final class ConverterUtils {
 	 *
 	 * @param bigDecimalValue the <code>BigDecimal</code> object
 	 * @return a <code>String</code> object
-	 * @deprecated use org.apache.commons.lang.ObjectUtils#toString(Object, String) instead
+	 * @deprecated use org.apache.commons.lang3.ObjectUtils#toString(Object, String) instead
 	 */
 	@Deprecated
 	public static String bigDecimal2String(final BigDecimal bigDecimalValue) {

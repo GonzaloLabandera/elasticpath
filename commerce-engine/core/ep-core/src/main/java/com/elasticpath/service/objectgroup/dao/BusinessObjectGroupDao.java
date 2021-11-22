@@ -105,11 +105,12 @@ public interface BusinessObjectGroupDao {
 	void removeGroupMembersByGroupId(String objectGroupId);
 
 	/**
-	 * Finds group member by object descriptor.
+	 * Finds group member by object descriptor in the specified group.
+	 * @param groupId the object group to search withing
 	 * @param objectDescriptor the object descriptor
 	 * @return the business object group member
 	 */
-	BusinessObjectGroupMember findGroupMemberByObjectDescriptor(BusinessObjectDescriptor objectDescriptor);
+	BusinessObjectGroupMember findGroupMemberByGroupIdObjectDescriptor(String groupId, BusinessObjectDescriptor objectDescriptor);
 
 	/**
 	 * Gets the count of group members belonging to a group with groupId.

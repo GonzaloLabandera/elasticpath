@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.elasticpath.search.index.solr.service.IndexBuildPolicy;
 import com.elasticpath.search.index.solr.service.IndexBuildPolicyContext;

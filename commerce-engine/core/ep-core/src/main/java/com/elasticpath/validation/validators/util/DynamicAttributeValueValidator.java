@@ -7,10 +7,12 @@ package com.elasticpath.validation.validators.util;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import com.google.common.collect.Lists;
 
+import com.elasticpath.cache.Cache;
+import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.validation.defs.AbstractConstraintDef;
@@ -22,39 +24,36 @@ import com.elasticpath.validation.defs.SingleOptionDef;
  * Validator used for validation of dynamic fields, like {@link Attribute}.
  * It uses Hibernate implementation because of the ability to add constraints programmatically.
  */
-public class DynamicAttributeValueValidator extends ConstraintValidator<DynamicAttributeValue> {
+public class DynamicAttributeValueValidator extends AbstractConstraintValidator<DynamicAttributeValue> {
 
 	/**
-	 * Default constructor.
-	 * Initializes required Hibernate structures.
+	 * Default constructor. Initializes required Hibernate structures.
+	 *
+	 * @param requiredValidatorCache a cache for "is required" dynamic value validators
+	 * @param completeValidatorCache a cache for "complete" dynamic value validators
 	 */
-	public DynamicAttributeValueValidator() {
-		super(DynamicAttributeValue.class);
+	public DynamicAttributeValueValidator(final Cache<Pair<Object, Set<String>>, Validator> requiredValidatorCache,
+										  final Cache<Pair<Object, Set<String>>, Validator> completeValidatorCache) {
+		super(DynamicAttributeValue.class, requiredValidatorCache, completeValidatorCache);
 	}
 
-	/**
-	 * Validate dynamic field.
-	 *
-	 * @param valueToValidate a value to validate.
-	 * @return a set of {@link ConstraintViolation} instances or empty set.
-	 */
-	public Set<ConstraintViolation<DynamicAttributeValue>> validate(final DynamicAttributeValue valueToValidate) {
+	@Override
+	public Validator getIsRequiredValidator(final DynamicAttributeValue dynamicValue) {
+		initHibernateValidator();
+		addIsRequiredConstraint(dynamicValue);
+		return getValidatorWithCurrentConstraints();
+	}
 
-		addIsRequiredConstraint(valueToValidate);
-
-		Set<ConstraintViolation<DynamicAttributeValue>> violations = validateWithCurrentConstraints(valueToValidate);
-		if (!violations.isEmpty()) {
-			return violations;
-		}
-
-		addAdditionalConstraints(valueToValidate);
-
-		return validateWithCurrentConstraints(valueToValidate);
+	@Override
+	public Validator getCompleteValidator(final DynamicAttributeValue dynamicValue) {
+		initHibernateValidator();
+		addAdditionalConstraints(dynamicValue);
+		return getValidatorWithCurrentConstraints();
 	}
 
 	private void addIsRequiredConstraint(final DynamicAttributeValue valueToValidate) {
 		final String attributeKey = valueToValidate.getAttributeKey();
-		final Attribute attribute = valueToValidate.getAttribute();
+		final Attribute attribute = valueToValidate.getValueTypeDefinition();
 
 		if (attribute.isRequired()) {
 			getConstraintMappingContext().constraint(
@@ -65,14 +64,14 @@ public class DynamicAttributeValueValidator extends ConstraintValidator<DynamicA
 
 	private void addAdditionalConstraints(final DynamicAttributeValue valueToValidate) {
 		final String attributeKey = valueToValidate.getAttributeKey();
-		final Attribute attribute = valueToValidate.getAttribute();
+		final Attribute attribute = valueToValidate.getValueTypeDefinition();
 		List<AbstractConstraintDef<?>> typeConstraintDefs = Lists.newArrayList();
 
 		attribute.getAttributeType().getConstraintDefs().ifPresent(
 				constraintDefs -> Collections.addAll(typeConstraintDefs, constraintDefs));
 
 		// Additional constraints based on field type. Each field may contain one or more constraint definitions
-		final String[] validFieldOptions = valueToValidate.getValidOptions().orElse(new String[]{});
+		final String[] validFieldOptions = valueToValidate.getValidOptions().toArray(new String[0]);
 
 		// allows validation invoker to define pick lists
 		if (validFieldOptions.length > 0) {
@@ -91,13 +90,10 @@ public class DynamicAttributeValueValidator extends ConstraintValidator<DynamicA
 		}
 	}
 
-	private Set<ConstraintViolation<DynamicAttributeValue>> validateWithCurrentConstraints(
-			final DynamicAttributeValue valueToValidate) {
-
+	private Validator getValidatorWithCurrentConstraints() {
 		return getConfiguration().addMapping(getConstraintMapping())
 				.buildValidatorFactory()
-				.getValidator()
-				.validate(valueToValidate);
+				.getValidator();
 	}
 
 }

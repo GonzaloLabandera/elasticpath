@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -23,7 +24,7 @@ import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
  */
 public class ApplicationStarter implements IApplication {
 
-	private static final Logger LOG = Logger.getLogger(ApplicationStarter.class);
+	private static final Logger LOG = LogManager.getLogger(ApplicationStarter.class);
 
 	/**
 	 * Initializes service handlers, widget util etc. i.e. everything that requires UI thread.

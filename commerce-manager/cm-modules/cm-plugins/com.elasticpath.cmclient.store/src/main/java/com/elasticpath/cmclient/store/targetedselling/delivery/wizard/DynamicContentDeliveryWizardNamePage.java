@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.delivery.wizard;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.swt.SWT;

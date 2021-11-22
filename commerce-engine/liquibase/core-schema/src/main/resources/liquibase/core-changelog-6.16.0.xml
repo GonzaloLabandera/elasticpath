@@ -2,7 +2,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-6.16.0.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-6.16.0.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<!-- Reminder:
 		- Table names cannot exceed 30 characters (Oracle limitation)
@@ -21,14 +22,15 @@
 	</changeSet>
 
 	<changeSet id="6.16.0-add boolean column in TCUSTOMER" author="elasticpath">
+		<validCheckSum>8:89bdbe9ee0a1614ca4fd3c681c97c919</validCheckSum>
 		<comment>[PB-1560] Improve first-time buyer performance</comment>
 
 		<addColumn tableName="TCUSTOMER">
-			<column name="IS_FIRST_TIME_BUYER" type="TINYINT" defaultValue="1"/>
+			<column name="IS_FIRST_TIME_BUYER" type="BOOLEAN" defaultValueBoolean="true"/>
 		</addColumn>
 		<!-- update customers as non-first time buyers if they have at least 1 order -->
 		<update tableName="TCUSTOMER">
-			<column name="IS_FIRST_TIME_BUYER" value="0"/>
+			<column name="IS_FIRST_TIME_BUYER" value="false"/>
 			<where>UIDPK in (select CUSTOMER_UID
 				from TORDER
 				where STATUS &lt;&gt; 'FAILED'

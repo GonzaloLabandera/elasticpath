@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -29,7 +30,7 @@ public class InventoryExporterImpl extends AbstractExporterImpl<ProductSku, Inve
 
 	private ProductSkuLookup productSkuLookup;
 	
-	private static final Logger LOG = Logger.getLogger(InventoryExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(InventoryExporterImpl.class);
 	
 	private ProductInventoryManagementService productInventoryManagementService;
 	

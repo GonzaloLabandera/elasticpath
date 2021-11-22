@@ -42,12 +42,11 @@ public class ShipmentTotalsCalculatorImpl implements ShipmentTotalsCalculator {
 	 * @param pricingSnapshotRepository pricingSnapshotRepository
 	 */
 	@Inject
-	ShipmentTotalsCalculatorImpl(
+	public ShipmentTotalsCalculatorImpl(
 			@Named("shipmentRepository")
 			final ShipmentRepository shipmentRepository,
 			@Named("pricingSnapshotRepository")
 			final PricingSnapshotRepository pricingSnapshotRepository) {
-
 		this.shipmentRepository = shipmentRepository;
 		this.pricingSnapshotRepository = pricingSnapshotRepository;
 	}

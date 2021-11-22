@@ -28,6 +28,10 @@
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-collections-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-references-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

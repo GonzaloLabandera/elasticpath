@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core.helpers;
 
 import javassist.NotFoundException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
@@ -19,7 +20,7 @@ import com.elasticpath.cmclient.core.CmSingletonUtil;
  */
 public final class MainCompositeHolder {
 
-	private static final Logger LOG = Logger.getLogger(MainCompositeHolder.class);
+	private static final Logger LOG = LogManager.getLogger(MainCompositeHolder.class);
 	private Composite mainComposite;
 
 	private MainCompositeHolder() {

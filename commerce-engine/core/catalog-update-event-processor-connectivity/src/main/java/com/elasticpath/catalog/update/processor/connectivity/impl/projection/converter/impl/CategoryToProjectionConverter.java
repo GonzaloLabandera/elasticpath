@@ -18,7 +18,8 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.CatalogReaderCapability;
 import com.elasticpath.catalog.entity.AvailabilityRules;
@@ -53,7 +54,7 @@ import com.elasticpath.service.store.StoreService;
  */
 public class CategoryToProjectionConverter implements Converter<com.elasticpath.domain.catalog.Category, Category> {
 
-	private static final Logger LOGGER = Logger.getLogger(CategoryToProjectionConverter.class);
+	private static final Logger LOGGER = LogManager.getLogger(CategoryToProjectionConverter.class);
 
 	private final CategoryService categoryService;
 	private final CatalogProjectionPluginProvider provider;

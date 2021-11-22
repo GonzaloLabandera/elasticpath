@@ -15,7 +15,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.jdbc.ScriptRunner;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.datapopulation.core.exceptions.SqlActionException;
 import com.elasticpath.datapopulation.core.utils.DpUtils;
@@ -28,7 +29,7 @@ public class SqlService {
 	 * The delimiter String used in SQL statements.
 	 */
 	protected static final String SQL_STATEMENT_DELIMITER = ";";
-	private static final Logger LOG = Logger.getLogger(SqlService.class);
+	private static final Logger LOG = LogManager.getLogger(SqlService.class);
 
 	/**
 	 * Executes the given SQL statement(s), and/or file containing SQL statements to execute. If both are specified, both are executed, first the

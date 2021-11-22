@@ -6,7 +6,8 @@ package com.elasticpath.service.tax.resolver.impl;
 import java.math.BigDecimal;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.tax.TaxCategory;
@@ -29,7 +30,7 @@ import com.elasticpath.service.tax.resolver.TaxRateDescriptorResolver;
  * Default implementation of a {@link TaxRateDescriptorResolver} to retrieve tax rates and tax jurisdiction from EP persistence.
  */
 public class TaxRateDescriptorResolverImpl implements TaxRateDescriptorResolver {
-	private static final Logger LOG = Logger.getLogger(TaxRateDescriptorResolverImpl.class);
+	private static final Logger LOG = LogManager.getLogger(TaxRateDescriptorResolverImpl.class);
 
 	private static final BigDecimal PERCENT_CONVERT = new BigDecimal("100");
 

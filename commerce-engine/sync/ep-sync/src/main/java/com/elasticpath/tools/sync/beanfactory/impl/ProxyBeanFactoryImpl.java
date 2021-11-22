@@ -6,7 +6,8 @@ package com.elasticpath.tools.sync.beanfactory.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -24,7 +25,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  */
 public class ProxyBeanFactoryImpl extends AbstractBeanFactory {
 
-	private static final Logger LOG = Logger.getLogger(ProxyBeanFactoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ProxyBeanFactoryImpl.class);
 	
 	private final Map<String, Object> beanMap = new HashMap<>();
 	

@@ -8,7 +8,7 @@
 
 	<bean id="settingValueProvider" class="com.elasticpath.settings.provider.impl.SettingValueProviderImpl"
 			scope="prototype">
-		<property name="settingsReader" ref="settingsReader"/>
+		<property name="xpfExtensionLookup" ref="xpfExtensionLookup"/>
 		<property name="settingValueTypeConverter" ref="settingValueTypeConverter"/>
 	</bean>
 

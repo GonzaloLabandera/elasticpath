@@ -14,7 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
 
 import com.elasticpath.health.monitoring.ServerStatusChecker;
@@ -37,7 +38,7 @@ public class ServerStatusCheckerImpl implements ServerStatusChecker {
 
     private static final String ENCODING = "UTF-8";
 
-    private static final Logger LOG = Logger.getLogger(ServerStatusCheckerImpl.class);
+    private static final Logger LOG = LogManager.getLogger(ServerStatusCheckerImpl.class);
 
     /**
      * Cross-Origin Resource Sharing (CORS) header name.

@@ -5,8 +5,9 @@ package com.elasticpath.cmclient.pricelistassignments.actions;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
@@ -37,7 +38,7 @@ import com.elasticpath.service.store.StoreService;
  */
 public class DeletePriceListAssigment extends AbstractPolicyAwareAction {
 
-	private static final Logger LOG = Logger.getLogger(DeletePriceListAssigment.class);
+	private static final Logger LOG = LogManager.getLogger(DeletePriceListAssigment.class);
 	
 	private final PriceListAssigmentsSearchView view;
 

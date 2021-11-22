@@ -13,8 +13,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.reporting.ReportType;
@@ -71,7 +72,7 @@ public class InventoryLowStockReportServiceImpl {
 	
 	private Locale locale;
 	
-	private static final Logger LOG = Logger.getLogger(InventoryLowStockReportServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(InventoryLowStockReportServiceImpl.class);
 	
 	private void retrieveReportParams() {
 		Map<String, Object> params = null;

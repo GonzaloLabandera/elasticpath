@@ -31,7 +31,8 @@ import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultMessage;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,7 @@ import com.elasticpath.test.integration.DirtiesDatabase;
 @DirtiesDatabase
 public class BulkEventProcessorTest extends DbTestCase {
 
-	private static final Logger LOGGER = Logger.getLogger(BulkEventProcessorTest.class);
+	private static final Logger LOGGER = LogManager.getLogger(BulkEventProcessorTest.class);
 
 	private static final String BRAND_CODE = "brand";
 	private static final String BRAND_NAME = "brandName";

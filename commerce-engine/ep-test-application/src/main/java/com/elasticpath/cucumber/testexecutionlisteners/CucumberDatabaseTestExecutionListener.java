@@ -5,7 +5,8 @@ package com.elasticpath.cucumber.testexecutionlisteners;
 
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
@@ -17,7 +18,7 @@ import com.elasticpath.test.support.jndi.JndiContextManager;
  */
 public class CucumberDatabaseTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Logger LOG = Logger.getLogger(CucumberDatabaseTestExecutionListener.class);
+	private static final Logger LOG = LogManager.getLogger(CucumberDatabaseTestExecutionListener.class);
 
 	@Override
 	public final int getOrder() {

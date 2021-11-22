@@ -108,8 +108,7 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 		CheckoutHelper checkoutHelper = new CheckoutHelper(testApplicationContext);
 		Order order = checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart,
 														   taxSnapshot,
-														   shoppingContext.getCustomerSession(),
-														   true);
+				true);
 
 		if (allShipmentsCompleted) {
 			order = completePhysicalShipmentsForOrder(order, sendShipmentConfirmationEmail);
@@ -171,6 +170,9 @@ public class OrderBuilder implements DomainObjectBuilder<Order> {
 															customerSession,
 															shoppingCart,
 															taxSnapshot);
+
+		order.getModifierFields().putAll(shoppingCart.getModifierFields().getMap());
+
 		order.releaseOrder();
 
 		if (allShipmentsCompleted) {

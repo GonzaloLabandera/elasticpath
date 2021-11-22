@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -32,7 +33,7 @@ import com.elasticpath.commons.util.extenum.ExtensibleEnum;
 public final class PluginHelper {
     private static final String CORE_PLUGIN_ID = "com.elasticpath.cmclient.core";
 
-	private static final Logger LOG = Logger.getLogger(PluginHelper.class);
+	private static final Logger LOG = LogManager.getLogger(PluginHelper.class);
 
     /**
      * Plugin Extension point ids (referenced in Plugin.xml).

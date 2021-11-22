@@ -1,4 +1,4 @@
-Elastic Path Commerce 8.2.0 (build 8.2.0.20210223101810-8fd03)
+Elastic Path Commerce 8.3.0 (build 8.3.0.20211122135916-080512)
 ------------------------------------------------
 This package contains the following source code folders and resources for Elastic Path Commerce.
 
@@ -26,4 +26,4 @@ The source distribution relies on additional Elastic Path projects that are avai
 
 Project name        Version                            References
 ------------        -------                            ----------
-Cortex/Helix        1.45.0.1eb89ea7a5                  <api-platform.version> property in pom.xml and bill-of-materials/pom.xml
+Cortex/Helix        1.46.0.2d06f00d07                  <api-platform.version> property in pom.xml and bill-of-materials/pom.xml

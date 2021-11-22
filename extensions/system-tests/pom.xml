@@ -19,6 +19,7 @@
 		<module>importexport-system-tests</module>
 		<module>sync-system-tests</module>
 		<module>webapp-smoketests</module>
+		<module>performance-tests</module>
 	</modules>
 
 	<reporting>

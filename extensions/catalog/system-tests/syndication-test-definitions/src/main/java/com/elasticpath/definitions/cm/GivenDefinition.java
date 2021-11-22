@@ -7,7 +7,8 @@ import java.util.Optional;
 
 import cucumber.api.java.en.Given;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.definitions.utils.DataHelper;
 import com.elasticpath.selenium.domainobjects.Attribute;
@@ -44,7 +45,7 @@ public class GivenDefinition {
 	private final Product product;
 	private final Category category;
 	private final ProductContainer productContainer;
-	private static final Logger LOGGER = Logger.getLogger(GivenDefinition.class);
+	private static final Logger LOGGER = LogManager.getLogger(GivenDefinition.class);
 
 	/**
 	 * Constructor.

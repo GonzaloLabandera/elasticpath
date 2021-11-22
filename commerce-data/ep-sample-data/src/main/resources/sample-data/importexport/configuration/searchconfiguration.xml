@@ -14,7 +14,7 @@
     <query for="TaxCode">FIND TaxCode</query>
     <query for="Warehouse">FIND Warehouse</query>
     <query for="Store">FIND Store WHERE StoreCode='store-MasterB' OR StoreCode='store-VirtualAB'</query>
-    <query for="Customer">FIND Customer</query>
+	<query for="Customer">FIND Customer WHERE CustomerType != SINGLE_SESSION_USER</query>
     <query for="CustomerProfileAttribute">FIND CustomerProfileAttribute</query>
     <query for="CmUser">FIND CmUser</query>
     <query for="UserRole">FIND UserRole</query>

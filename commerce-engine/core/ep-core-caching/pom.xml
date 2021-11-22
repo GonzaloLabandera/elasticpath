@@ -19,7 +19,10 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.antkorwin</groupId>
+			<artifactId>xsync</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>javax.cache</groupId>
 			<artifactId>cache-api</artifactId>
@@ -73,6 +76,7 @@
 							com.elasticpath.domain.discounts.impl,
 							com.elasticpath.service.catalog.impl,
 							com.elasticpath.settings.beanframework,
+							com.antkorwin.xsync,
 							org.drools.core,
 							org.drools.core.base,
 							org.drools.core.common,

@@ -258,7 +258,7 @@ class Items {
 				.isEqualTo(204)
 	}
 
-	@Then('^the Bundle is removed, as well as all of its DepedentLineItems$')
+	@Then('^the Bundle is removed, as well as all of its DependentLineItems$')
 	static void verifyBundleRemoved() {}
 
 	@Given('^a non-Bundle Item, lookup the item by (.+) and add the Item to Cart$')

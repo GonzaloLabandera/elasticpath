@@ -13,8 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.rules.CouponConfig;
@@ -33,7 +34,7 @@ import com.elasticpath.service.rules.RuleService;
  */
 public class ReportingRuleServiceImpl implements ReportingRuleService {
 	
-	private static final Logger LOG = Logger.getLogger(ReportingRuleServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ReportingRuleServiceImpl.class);
 	
 	private static final String PLACEHOLDER_FOR_LIST = "list";
 	

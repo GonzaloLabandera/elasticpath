@@ -45,7 +45,7 @@ public class RuleSolrInputDocumentCreatorTest {
 	private final Analyzer analyzer = new AnalyzerImpl();
 
 	/**
-	 * Set up {@link CustomerSolrInputDocumentCreator}.
+	 * Set up {@link RuleSolrInputDocumentCreator}.
 	 */
 	@Before
 	public void setUp() {

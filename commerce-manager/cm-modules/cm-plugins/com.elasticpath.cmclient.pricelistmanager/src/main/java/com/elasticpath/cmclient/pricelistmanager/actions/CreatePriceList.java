@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.pricelistmanager.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PartInitException;
@@ -19,7 +20,7 @@ import com.elasticpath.domain.pricing.PriceListDescriptor;
  */
 public class CreatePriceList extends AbstractPolicyAwareAction {
 
-	private static final Logger LOG = Logger.getLogger(CreatePriceList.class.getName());
+	private static final Logger LOG = LogManager.getLogger(CreatePriceList.class.getName());
 	
 	/**
 	 * The constructor.

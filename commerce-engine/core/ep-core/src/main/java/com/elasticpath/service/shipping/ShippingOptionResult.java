@@ -6,7 +6,7 @@ package com.elasticpath.service.shipping;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.shipping.connectivity.dto.ShippingCalculationResult;

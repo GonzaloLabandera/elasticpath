@@ -6,17 +6,28 @@ package com.elasticpath.service.shoppingcart.validation.impl;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
+import org.pf4j.Extension;
+
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidator;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.annotations.XPFEmbedded;
+import com.elasticpath.xpf.connectivity.annontation.XPFAssignment;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
+import com.elasticpath.xpf.connectivity.extension.XPFExtensionPointImpl;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingCartValidator;
 
 /**
  * Determines if a billing address has been specified (if cart contains physical skus).
  */
-public class BillingAddressShoppingCartValidatorImpl implements ShoppingCartValidator {
+@SuppressWarnings("checkstyle:magicnumber")
+@Extension
+@XPFEmbedded
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_SHOPPING_CART_AT_CHECKOUT, priority = 1040)
+public class BillingAddressShoppingCartValidatorImpl extends XPFExtensionPointImpl implements ShoppingCartValidator {
 
 	/**
 	 * Message id for this validation.
@@ -24,14 +35,14 @@ public class BillingAddressShoppingCartValidatorImpl implements ShoppingCartVali
 	public static final String MESSAGE_ID = "need.billing.address";
 
 	@Override
-	public Collection<StructuredErrorMessage> validate(final ShoppingCartValidationContext context) {
+	public Collection<XPFStructuredErrorMessage> validate(final XPFShoppingCartValidationContext context) {
 
-		final ShoppingCart shoppingCart = context.getShoppingCart();
+		final XPFShoppingCart shoppingCart = context.getShoppingCart();
 
 		if (shoppingCart.getBillingAddress() == null) {
-			StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, MESSAGE_ID,
+			XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO, MESSAGE_ID,
 					"Billing address must be specified.", Collections.emptyMap(),
-					new StructuredErrorResolution(ShoppingCart.class, shoppingCart.getGuid()));
+					new XPFStructuredErrorResolution(ShoppingCart.class, shoppingCart.getGuid()));
 			return Collections.singletonList(errorMessage);
 		}
 

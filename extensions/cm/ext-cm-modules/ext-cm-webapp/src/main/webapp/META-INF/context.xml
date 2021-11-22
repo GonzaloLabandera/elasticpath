@@ -21,6 +21,7 @@
 			  url="${epdb.url}"
 			  validationQuery="${epdb.validation.query}"
 			  validationInterval="${epdb.validation.interval}"
+			  jdbcInterceptors="ResetAbandonedTimer"
 	/>
 
 	<Resource auth="Container"
@@ -28,10 +29,10 @@
 			  type="${ep.jms.type}"
 			  description="JMS Connection Factory"
 			  factory="${ep.jms.factory}"
-			  brokerURL="failover:${ep.jms.url}"
-			  maxConnections="25"
-			  maximumActiveSessionPerConnection="25"
-			  idleTimeout="10000"
+			  brokerURL="failover:(${ep.jms.url})?maxReconnectAttempts=2&amp;jms.prefetchPolicy.all=20"
+			  poolMaxConnections="1"
+			  poolMaximumActiveSessionPerConnection="200"
+			  poolIdleTimeout="10000"
 	/>
 
 </Context>

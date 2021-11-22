@@ -7,7 +7,8 @@ import com.elasticpath.cmclient.store.promotions.PromotionsMessages;
 import com.elasticpath.cmclient.store.settings.SettingsMessages;
 import com.elasticpath.cmclient.store.shipping.ShippingLevelsMessages;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveListener;
@@ -54,7 +55,7 @@ public class StorePlugin extends AbstractPolicyAwareUIPlugin {
 	/**
 	 * LOG logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(StorePlugin.class);
+	private static final Logger LOG = LogManager.getLogger(StorePlugin.class);
 
 	/**
 	 * Boolean flag to disable content related to Dynamic Content in the UI, but keep the code around as it may be revived some day.

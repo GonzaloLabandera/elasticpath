@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="FILE"
+			fileName="target/log/ep-cortex.log"
+			append="false">
+			<PatternLayout pattern="%-5p %t %d{ISO8601} %c - %m%n" />
+		</File>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5p %t %d{ISO8601} %c - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="selenium" level="debug" additivity="false">
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="CONSOLE" />
+		</Logger>
+		<Logger name="com.elasticpath" level="debug" additivity="false">
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="CONSOLE" />
+		</Logger>
+		<Root level="warn">
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="CONSOLE" />
+		</Root>
+	</Loggers>
+</Configuration>

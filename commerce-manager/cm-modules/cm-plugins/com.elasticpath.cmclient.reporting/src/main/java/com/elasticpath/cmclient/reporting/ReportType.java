@@ -7,7 +7,8 @@ package com.elasticpath.cmclient.reporting;
 import java.io.IOException;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Path;
@@ -22,7 +23,7 @@ import org.osgi.framework.Bundle;
  */
 public class ReportType implements Comparable<ReportType> {
 
-	private static final Logger LOG = Logger.getLogger(ReportType.class);
+	private static final Logger LOG = LogManager.getLogger(ReportType.class);
 	
 	private static final String TAG_REPORTTYPE = "report"; //$NON-NLS-1$
 	

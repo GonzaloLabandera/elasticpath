@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-08-cleanup-expired-failed-orders-job.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-08-cleanup-expired-failed-orders-job.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="2020-08-purge-expired-failed-orders-job-recreate-FKs-with-cascade-delete" author="elasticpath" failOnError="true">
 		<comment>[PERF-333] Drop and create FKs with CASCADE deletion</comment>
@@ -122,7 +123,7 @@
 
 	</changeSet>
 
-	<changeSet id="2020-08-purge-expired-failed-orders-job-cascade-delete-for-shopping-item-rec-price-non-oracle" author="elasticpath" failOnError="true" dbms="mysql,h2,hsql">
+	<changeSet id="2020-08-purge-expired-failed-orders-job-cascade-delete-for-shopping-item-rec-price-non-oracle" author="elasticpath" failOnError="true" dbms="mysql,h2,hsql,postgresql">
 		<comment>[PERF-333] Drop and create FKs with CASCADE deletion for TSHOPPINGITEMRECURRINGPRICE table - non-Oracle dbms</comment>
 		<dropForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRICE_FK_2" 	baseTableName="TSHOPPINGITEMRECURRINGPRICE" />
 		<addForeignKeyConstraint constraintName="TSHOPPINGITEMRECURRINGPRI_FK_2" 	onDelete="CASCADE"

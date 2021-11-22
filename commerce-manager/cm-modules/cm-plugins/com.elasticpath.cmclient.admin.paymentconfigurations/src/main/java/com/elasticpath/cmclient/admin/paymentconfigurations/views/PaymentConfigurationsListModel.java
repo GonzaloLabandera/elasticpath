@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import com.elasticpath.cmclient.core.ui.framework.impl.EpDisabledColorTextDecorator;
 import com.elasticpath.provider.payment.domain.PaymentProviderConfigurationStatus;

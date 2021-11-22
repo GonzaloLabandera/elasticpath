@@ -17,6 +17,7 @@
 				<property name="checkoutService" ref="checkoutService"/>
 				<property name="customerService" ref="customerService"/>
 				<property name="shippingOptionService" ref="shippingOptionService"/>
+				<property name="addressService" ref="addressService"/>
 			</bean>
 		</property>
 	</bean>
@@ -29,6 +30,7 @@
 				<property name="shopperService" ref="shopperService"/>
 				<property name="cartDirector" ref="cartDirector"/>
 				<property name="shippingOptionService" ref="shippingOptionService"/>
+				<property name="addressService" ref="addressService" />
 			</bean>
 		</property>
 	</bean>

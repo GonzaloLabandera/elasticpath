@@ -7,10 +7,10 @@ package com.elasticpath.selenium.wizards;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.springframework.util.StringUtils;
 
 /**
  * Create Return Wizard.

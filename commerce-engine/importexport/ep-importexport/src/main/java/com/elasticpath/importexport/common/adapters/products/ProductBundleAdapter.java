@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.pricing.PriceAdjustmentDto;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -41,7 +42,7 @@ import com.elasticpath.service.catalog.BundleValidator;
  */
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class ProductBundleAdapter extends AbstractDomainAdapterImpl<ProductBundle, ProductBundleDTO> {
-	private static final Logger LOG = Logger.getLogger(ProductBundleAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(ProductBundleAdapter.class);
 
 	private BundleConstituentFactory constituentFactory;
 

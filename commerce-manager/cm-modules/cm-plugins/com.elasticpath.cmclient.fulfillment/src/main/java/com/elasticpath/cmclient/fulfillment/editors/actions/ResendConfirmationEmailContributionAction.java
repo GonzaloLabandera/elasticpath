@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -21,7 +22,7 @@ import com.elasticpath.service.order.OrderService;
  */
 public class ResendConfirmationEmailContributionAction extends Action {
 
-	private static final Logger LOG = Logger.getLogger(ResendConfirmationEmailContributionAction.class);
+	private static final Logger LOG = LogManager.getLogger(ResendConfirmationEmailContributionAction.class);
 
 	private final AbstractOrderPage orderPage;
 

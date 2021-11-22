@@ -10,7 +10,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.exception.runtime.ExportRuntimeException;
 import com.elasticpath.importexport.exporter.delivery.DeliveryMethod;
@@ -21,7 +22,7 @@ import com.elasticpath.importexport.exporter.packager.Packager;
  */
 public class ZipPackagerImpl implements Packager {
 	
-	private static final Logger LOG = Logger.getLogger(ZipPackagerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ZipPackagerImpl.class);
 	
 	private static final int BUFFER_SIZE = 1024;
 

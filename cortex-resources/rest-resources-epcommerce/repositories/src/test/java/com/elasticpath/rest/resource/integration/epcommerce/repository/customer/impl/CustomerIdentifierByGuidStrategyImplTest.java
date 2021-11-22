@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
@@ -26,7 +27,6 @@ public class CustomerIdentifierByGuidStrategyImplTest {
 
 	private static final String VALID_GUID = "testGuid";
 	private static final String INVALID_GUID = "invalidGuid";
-	private static final String VALID_STORE_CODE = "TestStore";
 	private static final String VALID_CUSTOMER_IDENTIFIER_KEY = "GUID";
 
 	@Mock
@@ -44,7 +44,7 @@ public class CustomerIdentifierByGuidStrategyImplTest {
 				.thenReturn(ExecutionResultFactory.createReadOK(null));
 
 		ExecutionResult<Boolean> executionResult =
-				customerIdentifierByGuidStrategy.isCustomerExists(VALID_GUID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+				customerIdentifierByGuidStrategy.isCustomerExists(VALID_GUID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isSuccessful());
 	}
 
@@ -57,7 +57,7 @@ public class CustomerIdentifierByGuidStrategyImplTest {
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
 		ExecutionResult<Boolean> executionResult =
-				customerIdentifierByGuidStrategy.isCustomerExists(INVALID_GUID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+				customerIdentifierByGuidStrategy.isCustomerExists(INVALID_GUID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertFalse(executionResult.isSuccessful());
 	}
 
@@ -69,7 +69,7 @@ public class CustomerIdentifierByGuidStrategyImplTest {
 		when(customerRepository.isCustomerGuidExists(VALID_GUID))
 				.thenReturn(ExecutionResultFactory.createReadOK(null));
 
-		ExecutionResult<String> executionResult = customerIdentifierByGuidStrategy.deriveCustomerGuid(VALID_GUID, VALID_STORE_CODE,
+		ExecutionResult<String> executionResult = customerIdentifierByGuidStrategy.deriveCustomerGuid(VALID_GUID, CustomerType.REGISTERED_USER,
 				VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isSuccessful());
 		assertEquals(VALID_GUID, executionResult.getData());

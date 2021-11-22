@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2021
+  -->
+
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<bean id="productRecommendationXPFBridge" class="com.elasticpath.xpf.bridges.impl.ProductRecommendationXPFBridgeImpl">
+		<property name="storeConverter" ref="xpfStoreConverter" />
+		<property name="xpfExtensionLookup" ref="xpfExtensionLookup" />
+	</bean>
+
+	<bean id="orderHoldStrategyXPFBridge" class="com.elasticpath.xpf.bridges.impl.OrderHoldStrategyXPFBridgeImpl">
+		<property name="shoppingCartConverter" ref="xpfShoppingCartConverter" />
+		<property name="orderHoldConverter" ref="xpfOrderHoldConverter" />
+		<property name="xpfExtensionLookup" ref="xpfExtensionLookup" />
+	</bean>
+
+</beans>

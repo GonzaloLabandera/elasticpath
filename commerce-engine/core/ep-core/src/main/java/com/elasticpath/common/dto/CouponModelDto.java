@@ -6,7 +6,7 @@ package com.elasticpath.common.dto;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**

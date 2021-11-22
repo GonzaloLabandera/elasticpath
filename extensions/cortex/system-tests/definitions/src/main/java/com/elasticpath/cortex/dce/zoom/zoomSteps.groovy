@@ -5,47 +5,17 @@ import static org.assertj.core.api.Assertions.assertThat
 
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
-import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
-import org.assertj.core.data.Percentage
-
-import com.elasticpath.cortex.dce.DatabaseAnalyzerClient
 
 class ZoomSteps {
 
 	static ZOOM_ITEM
 	static SAVED_RESPONSE
 
-	@When('^I start measuring db queries$')
-	static void databaseAnalyzerStart() {
-		DatabaseAnalyzerClient.instance.start()
-	}
-
-	@When('^I stop measuring db queries$')
-	static void databaseAnalyzerStop() {
-		DatabaseAnalyzerClient.instance.stop()
-	}
-
-	@Then('^total number of DB calls should be close to (\\d+) calls with allowed deviation of (\\d+.\\d+) percent$')
-	static void verifyNumberOfDBCallsWithDeviation(int dbcalls, double percentage) {
-		int totalDbCalls = DatabaseAnalyzerClient.instance.getOverallDBCalls()
-
-		assertThat(totalDbCalls)
-				.isCloseTo(dbcalls, Percentage.withPercentage(percentage))
-	}
-
 	@When('^I zoom to cart with a query (.+)$')
 	static void zoomToCart(def zoom) {
 		client.GET("/carts/mobee/default?zoom=$zoom")
-	}
-
-	@And('^number of DB calls for table (.+) should be close to (\\d+) calls with allowed deviation of (\\d+.\\d+) percent$')
-	static void verifyNumberOfCallsToTableWithDeviation(String table, int dbcalls, double percentage) {
-		int totalDbCalls = DatabaseAnalyzerClient.instance.getDBCallsByTableName(table)
-
-		assertThat(totalDbCalls)
-				.isCloseTo(dbcalls, Percentage.withPercentage(percentage))
 	}
 
 	@Then('^I inspect the zoom object (.+)$')

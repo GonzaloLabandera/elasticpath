@@ -42,6 +42,7 @@ import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.quantity.Quantity;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ItemType;
@@ -86,6 +87,9 @@ public class AbstractShoppingItemImplTest {
 
 	private ShoppingItemRecurringPriceAssemblerImpl recurringPriceAssembler;
 
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
+
 	/**
 	 * Set up required before each test.
 	 */
@@ -93,11 +97,14 @@ public class AbstractShoppingItemImplTest {
 	public void setUp() {
 		recurringPriceAssembler = new ShoppingItemRecurringPriceAssemblerImpl();
 		recurringPriceAssembler.setBeanFactory(beanFactory);
+		elasticPath.setBeanFactory(beanFactory);
 
 		when(beanFactory.getSingletonBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER, ShoppingItemRecurringPriceAssembler.class))
 				.thenReturn(recurringPriceAssembler);
 		when(beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE, ShoppingItemRecurringPrice.class))
 				.thenAnswer(invocation -> new ShoppingItemRecurringPriceImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.thenAnswer(invocation -> new ModifierFieldsMapWrapper());
 
 		final PaymentScheduleHelperImpl paymentScheduleHelper = getPaymentScheduleHelper();
 
@@ -429,8 +436,8 @@ public class AbstractShoppingItemImplTest {
 	@Test
 	public void testSetNullFieldValues() {
 		AbstractShoppingItemImpl item = new ShoppingItemImpl();
-		item.mergeFieldValues(null);
-		assertThat(item.getItemData()).isEmpty();
+		item.getModifierFields().putAll(null);
+		assertThat(item.getModifierFields().getMap()).isEmpty();
 	}
 
 	/**.*/
@@ -440,10 +447,11 @@ public class AbstractShoppingItemImplTest {
 		Map<String, String> values = new HashMap<>();
 		values.put("key1", "value1");
 		values.put("key2", "value2");
-		item.mergeFieldValues(values);
-		assertThat(item.getItemData()).hasSize(2);
-		assertThat(item.getFieldValue("key1")).isEqualTo("value1");
-		assertThat(item.getFieldValue("key2")).isEqualTo("value2");
+		item.getModifierFields().putAll(values);
+		Map<String, String> modifierFieldsMap = item.getModifierFields().getMap();
+		assertThat(modifierFieldsMap).hasSize(2);
+		assertThat(modifierFieldsMap.get("key1")).isEqualTo("value1");
+		assertThat(modifierFieldsMap.get("key2")).isEqualTo("value2");
 	}
 
 	private AbstractShoppingItemImpl prepareShoppingItem(final BigDecimal lowestUnitPrice,
@@ -586,11 +594,11 @@ public class AbstractShoppingItemImplTest {
 		final String key = "Record";
 		final String value = "Test Data";
 		final AbstractShoppingItemImpl shoppingItem = new ShoppingItemImpl();
-		shoppingItem.setFieldValue(key, value);
+		shoppingItem.getModifierFields().put(key, value);
 
-		assertThat(shoppingItem.getItemData()).containsKey(key);
-		assertThat(shoppingItem.getItemData().get(key).getKey()).isEqualTo(key);
-		assertThat(shoppingItem.getItemData().get(key).getValue()).isEqualTo(value);
+		Map<String, String> modifierFieldsMap = shoppingItem.getModifierFields().getMap();
+		assertThat(modifierFieldsMap).containsKey(key);
+		assertThat(modifierFieldsMap.get(key)).isEqualTo(value);
 	}
 
 	/**
@@ -602,13 +610,13 @@ public class AbstractShoppingItemImplTest {
 		final String oldValue = "Old Data";
 		final String newValue = "New Data";
 		final AbstractShoppingItemImpl shoppingItem = new ShoppingItemImpl();
-		shoppingItem.setFieldValue(key, oldValue);
+		shoppingItem.getModifierFields().put(key, oldValue);
 
-		assertThat(shoppingItem.getItemData().get(key).getValue()).isEqualTo(oldValue);
+		assertThat(shoppingItem.getModifierFields().get(key)).isEqualTo(oldValue);
 
-		shoppingItem.setFieldValue(key, newValue);
+		shoppingItem.getModifierFields().put(key, newValue);
 
-		assertThat(shoppingItem.getItemData().get(key).getValue()).isEqualTo(newValue);
+		assertThat(shoppingItem.getModifierFields().get(key)).isEqualTo(newValue);
 	}
 
 	/**
@@ -621,15 +629,13 @@ public class AbstractShoppingItemImplTest {
 		final String oldValue = "Old Data";
 		final String newValue = "New Data";
 		final AbstractShoppingItemImpl shoppingItem = new ShoppingItemImpl();
-		shoppingItem.setFieldValue(key, oldValue);
+		shoppingItem.getModifierFields().put(key, oldValue);
 
-		AbstractItemData itemData = shoppingItem.getItemData().get(key);
-		shoppingItem.setFieldValue(key, newValue);
+		assertThat(shoppingItem.getModifierFields().get(key)).isEqualTo(oldValue);
 
-		assertThat(shoppingItem.getItemData().get(key).getValue()).isEqualTo(newValue);
-		assertThat(shoppingItem.getItemData().get(key))
-			.as("Expected setFieldValue to modify existing item data object")
-			.isEqualTo(itemData);
+		shoppingItem.getModifierFields().put(key, newValue);
+
+		assertThat(shoppingItem.getModifierFields().get(key)).isEqualTo(newValue);
 	}
 
 	@Test
@@ -692,7 +698,7 @@ public class AbstractShoppingItemImplTest {
 
 		assertThat(shoppingItem.isMultiSku(productSkuLookup)).isFalse();
 		assertThat(comparisonItem.getSkuGuid()).isEqualTo(shoppingItem.getSkuGuid());
-		assertThat(comparisonItem.getFields()).isEqualTo(shoppingItem.getFields());
+		assertThat(comparisonItem.getModifierFields().getMap()).isEqualTo(shoppingItem.getModifierFields().getMap());
 
 		assertThat(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem)).isFalse();
 	}
@@ -711,7 +717,7 @@ public class AbstractShoppingItemImplTest {
 
 		assertThat(shoppingItem.isMultiSku(productSkuLookup)).isTrue();
 		assertThat(comparisonItem.getSkuGuid()).isNotEqualTo(shoppingItem.getSkuGuid());
-		assertThat(comparisonItem.getFields()).isEqualTo(shoppingItem.getFields());
+		assertThat(comparisonItem.getModifierFields().getMap()).isEqualTo(shoppingItem.getModifierFields().getMap());
 
 		assertThat(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem)).isFalse();
 	}
@@ -730,7 +736,7 @@ public class AbstractShoppingItemImplTest {
 
 		assertThat(shoppingItem.isMultiSku(productSkuLookup)).isTrue();
 		assertThat(comparisonItem.getSkuGuid()).isEqualTo(shoppingItem.getSkuGuid());
-		assertThat(comparisonItem.getFields()).isNotEqualTo(shoppingItem.getFields());
+		assertThat(comparisonItem.getModifierFields()).isNotEqualTo(shoppingItem.getModifierFields());
 
 		assertThat(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem)).isFalse();
 	}
@@ -749,7 +755,7 @@ public class AbstractShoppingItemImplTest {
 
 		assertThat(shoppingItem.isMultiSku(productSkuLookup)).isTrue();
 		assertThat(comparisonItem.getSkuGuid()).isEqualTo(shoppingItem.getSkuGuid());
-		assertThat(comparisonItem.getFields()).isEqualTo(shoppingItem.getFields());
+		assertThat(comparisonItem.getModifierFields().getMap()).isEqualTo(shoppingItem.getModifierFields().getMap());
 
 		assertThat(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem)).isTrue();
 	}
@@ -814,7 +820,7 @@ public class AbstractShoppingItemImplTest {
 	private ShoppingItem createShoppingItemWithSkuAndOptionalNameFieldValues(final String sku, final String nameFieldValue) {
 		ShoppingItem shoppingItem = new ShoppingItemImpl();
 		shoppingItem.setSkuGuid(sku);
-		shoppingItem.setFieldValue("name", Objects.isNull(nameFieldValue) ? "Batman" : nameFieldValue);
+		shoppingItem.getModifierFields().put("name", Objects.isNull(nameFieldValue) ? "Batman" : nameFieldValue);
 		return shoppingItem;
 	}
 }

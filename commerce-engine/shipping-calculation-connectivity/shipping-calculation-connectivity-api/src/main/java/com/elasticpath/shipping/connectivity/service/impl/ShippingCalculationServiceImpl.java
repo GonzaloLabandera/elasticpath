@@ -10,13 +10,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.shipping.connectivity.dto.PricedShippableItem;
@@ -43,7 +44,7 @@ import com.elasticpath.shipping.connectivity.spi.capability.ShippingOptionListPe
  * Default implementation of {@link ShippingCalculationService}.
  */
 public class ShippingCalculationServiceImpl implements ShippingCalculationService {
-	private static final Logger LOG = Logger.getLogger(ShippingCalculationServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ShippingCalculationServiceImpl.class);
 
 	/**
 	 * Error code for when no shipping calculation provider is matched.
@@ -86,7 +87,7 @@ public class ShippingCalculationServiceImpl implements ShippingCalculationServic
 
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(format("Getting unpriced shipping calculation provider for store [%s] and destination [%s]...",
-						unpricedShippableItemContainer.getStoreCode(), ObjectUtils.toString(destination, "null")));
+						unpricedShippableItemContainer.getStoreCode(), Objects.toString(destination, "null")));
 			}
 
 			final Collection<? extends ShippableItem> shippableItems = unpricedShippableItemContainer.getShippableItems();

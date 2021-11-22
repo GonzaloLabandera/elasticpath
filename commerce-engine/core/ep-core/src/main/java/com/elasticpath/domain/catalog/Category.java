@@ -236,5 +236,4 @@ public interface Category extends Comparable<Category>, Entity, ObjectWithLocale
 	 * @param include true if this category has been included
 	 */
 	void setIncluded(boolean include);
-
 }

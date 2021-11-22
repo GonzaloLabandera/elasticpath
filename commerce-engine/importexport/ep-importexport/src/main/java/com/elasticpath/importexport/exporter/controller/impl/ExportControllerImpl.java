@@ -12,8 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.importexport.common.ImportExportContextIdNames;
@@ -21,18 +21,16 @@ import com.elasticpath.importexport.common.configuration.ConfigurationLoader;
 import com.elasticpath.importexport.common.configuration.PackagerConfiguration;
 import com.elasticpath.importexport.common.exception.ConfigurationException;
 import com.elasticpath.importexport.common.exception.runtime.ExportRuntimeException;
-import com.elasticpath.importexport.common.logging.IESummaryAppender;
 import com.elasticpath.importexport.common.manifest.Manifest;
 import com.elasticpath.importexport.common.manifest.ManifestBuilder;
 import com.elasticpath.importexport.common.marshalling.XMLMarshaller;
 import com.elasticpath.importexport.common.summary.Summary;
 import com.elasticpath.importexport.common.summary.SummaryLayout;
-import com.elasticpath.importexport.common.summary.SummaryLogger;
 import com.elasticpath.importexport.common.summary.impl.SimpleSummaryLayout;
-import com.elasticpath.importexport.common.summary.impl.SummaryImpl;
 import com.elasticpath.importexport.common.transformers.Transformer;
 import com.elasticpath.importexport.common.transformers.TransformersChainFactory;
 import com.elasticpath.importexport.common.types.PackageType;
+import com.elasticpath.importexport.common.util.LogAppenderUtil;
 import com.elasticpath.importexport.common.util.MessageResolver;
 import com.elasticpath.importexport.common.util.Timer;
 import com.elasticpath.importexport.common.util.Timer.Time;
@@ -56,7 +54,7 @@ import com.elasticpath.importexport.exporter.packager.PackagerFactory;
  */
 public class ExportControllerImpl implements ExportController {
 
-	private static final Logger LOG = Logger.getLogger(ExportControllerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ExportControllerImpl.class);
 
 	private static final int KILOBYTE = 1024;
 
@@ -100,7 +98,7 @@ public class ExportControllerImpl implements ExportController {
 			throw new ConfigurationException("configuration could not be loaded");
 		}
 
-		Appender summaryAppender = attachSummary();
+		LogAppenderUtil.initializeSummary(context);
 		final Timer timer = new Timer();
 
 		LOG.debug("Create export sequence");
@@ -126,7 +124,7 @@ public class ExportControllerImpl implements ExportController {
 		}
 
 		Time time = timer.getElapsedTime();
-		Summary collectedSummary = detachSummary(summaryAppender);
+		Summary collectedSummary = LogAppenderUtil.detachSummary(context);
 		LOG.info("Export job finished in " + time);
 
 		assemblePackage(packager, manifestBuilder, layout, collectedSummary);
@@ -136,28 +134,6 @@ public class ExportControllerImpl implements ExportController {
 		}
 		failures = collectedSummary.failuresExist();
 		return collectedSummary;
-	}
-
-	/**
-	 * Create summary object for this export process, associate it with IESummaryAppender to get control over logging. All export-related application
-	 * messages will be collected in summary.
-	 *
-	 * @return IESummaryAppender to deassociate it from log4j later
-	 */
-	private IESummaryAppender attachSummary() {
-		IESummaryAppender summaryAppender = new IESummaryAppender();
-		SummaryLogger summary = new SummaryImpl();
-		summaryAppender.setSummaryLogger(summary);
-		Logger.getRootLogger().addAppender(summaryAppender);
-		context.setSummary(summary);
-		return summaryAppender;
-	}
-
-	private Summary detachSummary(final Appender summaryAppender) {
-		Summary summary = context.getSummary();
-		context.setSummary(null);
-		Logger.getRootLogger().removeAppender(summaryAppender);
-		return summary;
 	}
 
 	/**

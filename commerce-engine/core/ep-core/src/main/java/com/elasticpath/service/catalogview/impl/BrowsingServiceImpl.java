@@ -12,7 +12,8 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Category;
@@ -39,7 +40,7 @@ import com.elasticpath.service.search.query.ProductSearchCriteria;
  */
 public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implements BrowsingService {
 
-	private static final Logger LOG = Logger.getLogger(BrowsingServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(BrowsingServiceImpl.class);
 
 	private PaginationService paginationService;
 	private CategoryService categoryService;

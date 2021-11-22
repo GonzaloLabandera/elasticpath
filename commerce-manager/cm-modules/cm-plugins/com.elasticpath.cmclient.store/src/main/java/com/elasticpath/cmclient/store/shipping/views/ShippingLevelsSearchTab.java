@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.store.shipping.views;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -38,7 +39,7 @@ import com.elasticpath.service.store.StoreService;
  * Tab for SearchView. Filters Shipping Service Levels list.
  */
 public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketingInnerTab {
-	private static final Logger LOG = Logger.getLogger(ShippingLevelsSearchTab.class);
+	private static final Logger LOG = LogManager.getLogger(ShippingLevelsSearchTab.class);
 
 	private static final int INDEX_ALL = 0;
 

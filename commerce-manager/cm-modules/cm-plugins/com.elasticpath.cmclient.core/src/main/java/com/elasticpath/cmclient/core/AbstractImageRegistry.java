@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -19,7 +20,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 @SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class AbstractImageRegistry {
 
-	private static final Logger LOG = Logger.getLogger(AbstractImageRegistry.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractImageRegistry.class);
 
 	/**
 	 * String:	pluginId.

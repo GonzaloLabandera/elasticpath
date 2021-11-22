@@ -4,8 +4,6 @@
 
 package com.elasticpath.validation.validators.util;
 
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.elasticpath.domain.modifier.ModifierField;
@@ -15,11 +13,9 @@ import com.elasticpath.domain.modifier.ModifierFieldOption;
  * A wrapper class for {@link ModifierField} used
  * in dynamic validation.
  */
-public class DynamicModifierField {
+public class DynamicModifierField extends DynamicValue<ModifierField> {
 	private final String valueToValidate;
 	private final String fieldName;
-	private final ModifierField referentField;
-	private final String[] validOptions;
 
 	/**
 	 * Custom constructor.
@@ -31,19 +27,12 @@ public class DynamicModifierField {
 	public DynamicModifierField(final String fieldName,
 								final String valueToValidate,
 								final ModifierField referentField) {
-
-		this.fieldName = fieldName;
-		this.valueToValidate = valueToValidate;
-		this.referentField = referentField;
-		this.validOptions = getValidFieldOptions(referentField.getModifierFieldOptions());
-	}
-
-	private String[] getValidFieldOptions(final Set<ModifierFieldOption> validFieldOptions) {
-		return validFieldOptions
+		super(referentField, referentField.getModifierFieldOptions()
 				.stream()
 				.map(ModifierFieldOption::getValue)
-				.collect(Collectors.toList())
-				.toArray(new String[]{});
+				.collect(Collectors.toSet()));
+		this.fieldName = fieldName;
+		this.valueToValidate = valueToValidate;
 	}
 
 	/**
@@ -54,7 +43,7 @@ public class DynamicModifierField {
 	 * String array with zero or more invalid options.
 	 */
 	public String[] getInvalidOptions() {
-		return MultiOptionHandler.getInvalidOptions(valueToValidate, validOptions);
+		return MultiOptionHandler.getInvalidOptions(valueToValidate, getValidOptions().toArray(new String[0]));
 	}
 
 	/**
@@ -65,20 +54,5 @@ public class DynamicModifierField {
 	 */
 	public String getFieldName() {
 		return fieldName;
-	}
-
-	/**
-	 * Get valid field options, if any.
-	 * Applicable to {@link com.elasticpath.domain.modifier.ModifierType#PICK_SINGLE_OPTION} and
-	 * {@link com.elasticpath.domain.modifier.ModifierType#PICK_MULTI_OPTION} field types.
-	 *
-	 * @return an array of valid options, if available or empty array.
-	 */
-	public Optional<String[]> getValidOptions() {
-		return Optional.ofNullable(validOptions);
-	}
-
-	public ModifierField getReferentField() {
-		return referentField;
 	}
 }

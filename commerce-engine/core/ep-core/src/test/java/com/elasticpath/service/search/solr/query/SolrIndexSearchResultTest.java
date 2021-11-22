@@ -22,10 +22,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.ElasticPath;
-import com.elasticpath.domain.catalog.Catalog;
-import com.elasticpath.domain.catalog.impl.CatalogImpl;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
 import com.elasticpath.domain.catalogview.BrandFilter;
@@ -33,25 +30,13 @@ import com.elasticpath.domain.catalogview.CategoryFilter;
 import com.elasticpath.domain.catalogview.FilterOption;
 import com.elasticpath.domain.catalogview.PriceFilter;
 import com.elasticpath.domain.catalogview.impl.FilterOptionImpl;
-import com.elasticpath.service.catalog.CatalogService;
 import com.elasticpath.service.search.query.SearchCriteria;
 import com.elasticpath.service.search.solr.SolrIndexSearcherImpl;
-import com.elasticpath.service.store.StoreService;
 
 /**
  * Test case for {@link SolrIndexSearchResult}.
  */
 public class SolrIndexSearchResultTest {
-
-	/**
-	 * Store code to use within all tests.
-	 */
-	private static final String TEST_STORE_CODE = "SAMPLE_STORECODE";
-
-	/**
-	 * Master catalog code.
-	 */
-	private static final String TEST_MASTER_CATALOG_CODE = "a master catalog code that no one would ever think of";
 
 	private SolrIndexSearchResult solrIndexSearchResult;
 
@@ -62,13 +47,8 @@ public class SolrIndexSearchResultTest {
 
 	private TestSolrSearcher testSolrSearcher;
 
-	private CatalogService mockCatalogService;
-
-	private StoreService mockStoreService;
-
 	@Mock
-	private ElasticPath elasticPath;
-
+	private BeanFactory beanFactory;
 
 	/**
 	 * Prepares for tests.
@@ -77,10 +57,8 @@ public class SolrIndexSearchResultTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		createMockCatalogService();
-
 		solrIndexSearchResult = new SolrIndexSearchResult();
-		testSolrSearcher = new TestSolrSearcher(elasticPath);
+		testSolrSearcher = new TestSolrSearcher(beanFactory);
 		solrIndexSearchResult.setIndexSearcher(testSolrSearcher);
 
 		mockSearcher = context.mock(Searcher.class);
@@ -248,31 +226,6 @@ public class SolrIndexSearchResultTest {
 	}
 
 	/**
-	 * Test the {@link StoreService#getCatalogCodeForStore(String)} and  cache store to catalog cache.
-	 */
-	@Test
-	public void testGetStoreCatalog() {
-		mockStoreService = context.mock(StoreService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockStoreService).getCatalogCodeForStore(with(any(String.class)));
-				will(returnValue(TEST_MASTER_CATALOG_CODE));
-
-				allowing(elasticPath).getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
-				will(returnValue(mockStoreService));
-			}
-		});
-
-		testSolrSearcher.getStoreCodeToCatalogCodeMap().clear();
-		final Catalog catalog = testSolrSearcher.getStoreCatalog(TEST_STORE_CODE);
-
-		assertEquals(TEST_MASTER_CATALOG_CODE, catalog.getCode());
-		//be sure, that catalog in cache
-		assertEquals(1, testSolrSearcher.getStoreCodeToCatalogCodeMap().size());
-		assertEquals(TEST_MASTER_CATALOG_CODE, testSolrSearcher.getStoreCodeToCatalogCodeMap().get(TEST_STORE_CODE).getCode());
-	}
-
-	/**
 	 * Test method for {@link SolrIndexSearchResult#getResults(int, int)} with negative numbers.
 	 * No search should occur.
 	 */
@@ -376,9 +329,9 @@ public class SolrIndexSearchResultTest {
 
 		private int numFound;
 
-		TestSolrSearcher(final ElasticPath elasticPath) {
+		TestSolrSearcher(final BeanFactory beanFactory) {
 			super();
-			setElasticPath(elasticPath);
+			setBeanFactory(beanFactory);
 		}
 
 		@Override
@@ -396,27 +349,6 @@ public class SolrIndexSearchResultTest {
 		public void setNumFoundOnSearch(final int numFound) {
 			this.numFound = numFound;
 		}
-
-		@Override
-		public Catalog getStoreCatalog(final String storeCode) { //NOPMD
-			return super.getStoreCatalog(storeCode);
-		}
-
-		@Override
-		public Map<String, Catalog> getStoreCodeToCatalogCodeMap() { //NOPMD
-			return super.getStoreCodeToCatalogCodeMap();
-		}
-
-		@Override
-		public StoreService getStoreService() { //NOPMD
-			return super.getStoreService();
-		}
-
-		@Override
-		public CatalogService getCatalogService() { //NOPMD
-			return super.getCatalogService();
-		}
-
 	}
 
 	/**
@@ -425,28 +357,4 @@ public class SolrIndexSearchResultTest {
 	private interface Searcher {
 		void search(int startIndex, int maxResults);
 	}
-
-	/**
-	 * @return a mock catalog.
-	 */
-	private Catalog getCatalog() {
-		Catalog catalog = new CatalogImpl();
-		catalog.setCode(TEST_MASTER_CATALOG_CODE);
-		return catalog;
-	}
-
-	private void createMockCatalogService() {
-		mockCatalogService = context.mock(CatalogService.class);
-		context.checking(new Expectations() {
-			{
-
-				allowing(mockCatalogService).findByCode(with(any(String.class)));
-				will(returnValue(getCatalog()));
-
-				allowing(elasticPath).getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
-				will(returnValue(mockCatalogService));
-			}
-		});
-	}
-
 }

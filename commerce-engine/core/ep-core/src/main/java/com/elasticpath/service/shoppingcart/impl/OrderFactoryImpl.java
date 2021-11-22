@@ -92,7 +92,7 @@ public class OrderFactoryImpl implements OrderFactory {
 		order.setLocale(customerSession.getLocale());
 		order.setStore(shoppingCart.getStore());
 		order.setCustomer(customer);
-		order.setAccount(customerSession.getShopper().getAccount());
+		order.setAccount(shoppingCart.getShopper().getAccount());
 
 		if (isOrderExchange) {
 			order.setExchangeOrder(Boolean.TRUE);
@@ -173,7 +173,7 @@ public class OrderFactoryImpl implements OrderFactory {
 			billingAddress.init(shoppingCart.getBillingAddress());
 			order.setBillingAddress(billingAddress);
 		}
-		order.setAccount(customerSession.getShopper().getAccount());
+		order.setAccount(shoppingCart.getShopper().getAccount());
 
 		if (customer.isAnonymous()) {
 			updateAnonymousCustomer(order, customer);
@@ -185,10 +185,6 @@ public class OrderFactoryImpl implements OrderFactory {
 
 		// CM user uid, null if order not placed through CSR
 		order.setCmUserUID(shoppingCart.getCmUserUID());
-
-		//add cart data to order data
-		shoppingCart.getCartData().values().forEach(datum -> order.setFieldValue(datum.getKey(), datum.getValue()));
-
 	}
 
 	/**

@@ -6,7 +6,8 @@
  */
 package com.elasticpath.cmclient.core.wizard;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -26,7 +27,7 @@ import com.elasticpath.cmclient.core.wizard.page.IBeforeFinishNotifier;
  */
 public abstract class AbstractEpWizard<T> extends Wizard implements IPageChangingListener {
 
-	private static final Logger LOG = Logger.getLogger(AbstractEpWizard.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractEpWizard.class);
 
 	private Image wizardImage;
 

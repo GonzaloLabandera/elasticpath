@@ -57,7 +57,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	 * @param indexUtility the index utility.
 	 */
 	@Inject
-	CategoryRepositoryImpl(
+	public CategoryRepositoryImpl(
 			@Named("categoryLookup") final CategoryLookup categoryLookup,
 			@Named("storeRepository") final StoreRepository storeRepository,
 			@Named("coreBeanFactory") final BeanFactory coreBeanFactory,
@@ -65,7 +65,6 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 			@Named("productLookup") final ProductLookup productLookup,
 			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter,
 			@Named("indexUtility") final IndexUtility indexUtility) {
-
 		this.categoryLookup = categoryLookup;
 		this.categoryService = categoryService;
 		this.coreBeanFactory = coreBeanFactory;

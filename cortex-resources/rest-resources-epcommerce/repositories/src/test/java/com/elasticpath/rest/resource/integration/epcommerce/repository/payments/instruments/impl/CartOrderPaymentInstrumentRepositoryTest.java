@@ -56,7 +56,7 @@ public class CartOrderPaymentInstrumentRepositoryTest {
 	public void findByCartOrderReturnsAllPaymentInstrumentsForACartOrder() {
 		final CartOrderPaymentInstrument cartOrderPaymentInstrument2 = mock(CartOrderPaymentInstrument.class);
 
-		when(cartOrderPaymentInstrumentService.findByCartOrder(cartOrder))
+		when(cartOrderPaymentInstrumentService.findByCartOrderGuid(cartOrder.getGuid()))
 				.thenReturn(ImmutableList.of(cartOrderPaymentInstrument, cartOrderPaymentInstrument2));
 
 		repository.findByCartOrder(cartOrder)
@@ -67,7 +67,7 @@ public class CartOrderPaymentInstrumentRepositoryTest {
 
 	@Test
 	public void findByCartOrderReturnsEmptyWhenNoPaymentInstrumentsExistForACartOrder() {
-		when(cartOrderPaymentInstrumentService.findByCartOrder(cartOrder)).thenReturn(Collections.emptyList());
+		when(cartOrderPaymentInstrumentService.findByCartOrderGuid(cartOrder.getGuid())).thenReturn(Collections.emptyList());
 
 		repository.findByCartOrder(cartOrder)
 				.test()

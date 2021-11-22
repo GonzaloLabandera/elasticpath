@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.openjpa.persistence.DataCache;
 
 import com.elasticpath.commons.constants.ContextIdNames;

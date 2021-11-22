@@ -5,7 +5,7 @@ package com.elasticpath.inventory.strategy.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.Level;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.orm.jpa.JpaOptimisticLockingFailureException;
 import org.springframework.orm.jpa.JpaSystemException;

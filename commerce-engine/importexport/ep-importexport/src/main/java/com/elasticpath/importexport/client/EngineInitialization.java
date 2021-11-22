@@ -7,7 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -25,7 +26,7 @@ public final class EngineInitialization {
 
 	private static final String APPLICATION_CONTEXT_FILE = "spring/importexport-context.xml";
 
-	private static final Logger LOG = Logger.getLogger(EngineInitialization.class);
+	private static final Logger LOG = LogManager.getLogger(EngineInitialization.class);
 
 	private ApplicationContext appCtx;
 

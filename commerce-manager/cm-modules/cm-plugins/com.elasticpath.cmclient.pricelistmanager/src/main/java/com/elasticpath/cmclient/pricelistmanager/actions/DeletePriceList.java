@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.pricelistmanager.actions;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
@@ -48,7 +49,7 @@ import com.elasticpath.service.cmuser.CmUserService;
 @SuppressWarnings({"PMD.PrematureDeclaration", "restriction"})
 public class DeletePriceList extends AbstractPolicyAwareAction {
 
-	private static final Logger LOG = Logger.getLogger(DeletePriceList.class.getName());
+	private static final Logger LOG = LogManager.getLogger(DeletePriceList.class.getName());
 
 	private final PriceListSearchResultsView view;
 

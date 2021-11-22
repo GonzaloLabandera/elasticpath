@@ -64,8 +64,7 @@ public class ShoppingContextBuilder implements DomainObjectBuilder<ShoppingConte
 		final CustomerSession customerSession = buildCustomerSession();
 		final Shopper shopper = buildShopper();
 
-		shopper.updateTransientDataWith(customerSession);
-		customerSession.setShopper(shopper);
+		shopper.setCustomerSession(customerSession);
 
 		return new ShoppingContext(customerSession, shopper);
 	}

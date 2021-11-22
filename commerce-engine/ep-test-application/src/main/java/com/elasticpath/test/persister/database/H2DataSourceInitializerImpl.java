@@ -11,7 +11,8 @@ import java.sql.Statement;
 import java.util.Properties;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.h2.store.fs.FileUtils;
 
 import com.elasticpath.test.common.exception.DataSourceInitializerException;
@@ -27,7 +28,7 @@ import com.elasticpath.test.persister.TestConfig;
  *
  */
 public class H2DataSourceInitializerImpl extends AbstractDataSourceInitializer {
-	private static final Logger LOG = Logger
+	private static final Logger LOG = LogManager
 			.getLogger(H2DataSourceInitializerImpl.class);
 
 	private RunMode runMode = RunMode.IN_MEMORY;

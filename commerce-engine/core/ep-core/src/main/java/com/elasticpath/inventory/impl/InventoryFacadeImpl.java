@@ -20,17 +20,23 @@ import com.elasticpath.inventory.strategy.InventoryStrategy;
 import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
- * Out-of-the box implementation of the {@link InventoryFacade}. 
+ * Out-of-the box implementation of the {@link InventoryFacade}.
  */
 public class InventoryFacadeImpl implements InventoryFacade {
-	
-	/** The selected strategy. */
+
+	/**
+	 * The selected strategy.
+	 */
 	private InventoryStrategy selectedStrategy;
 
-	/** The strategies. */
+	/**
+	 * The strategies.
+	 */
 	private Map<String, InventoryStrategy> strategies = new HashMap<>();
 
-	/** Provides the ID of the selected strategy. */
+	/**
+	 * Provides the ID of the selected strategy.
+	 */
 	private SettingValueProvider<String> inventoryStrategyIdProvider;
 
 	/**
@@ -44,26 +50,29 @@ public class InventoryFacadeImpl implements InventoryFacade {
 
 	/**
 	 * Selects the {@link InventoryStrategy} by key, which should be provided through the Settings framework.
-	 * 
+	 *
 	 * @param strategyId The selected strategy ID, which is the key in the strategies map.
+	 * @return the selected strategy
 	 * @throws IllegalArgumentException If the given strategyId doesn't exist in the strategies map.
 	 */
-	public void selectStrategy(final String strategyId) { 		
+	public InventoryStrategy selectStrategy(final String strategyId) {
 		InventoryStrategy inventoryStrategy = strategies.get(strategyId);
 		if (inventoryStrategy == null) {
 			throw new IllegalArgumentException("InventoryStrategy with id [" + strategyId + "] does not exist.");
 		}
 		selectedStrategy = inventoryStrategy;
+
+		return inventoryStrategy;
 	}
 
 	@Override
 	public void executeInventoryCommand(final InventoryCommand command) {
-		selectedStrategy.executeCommand(command);
+		getSelectedInventoryStrategy().executeCommand(command);
 	}
-	
+
 	@Override
 	public CommandFactory getInventoryCommandFactory() {
-		return selectedStrategy.getCommandFactory();
+		return getSelectedInventoryStrategy().getCommandFactory();
 	}
 
 	@Override
@@ -76,46 +85,38 @@ public class InventoryFacadeImpl implements InventoryFacade {
 
 	@Override
 	public InventoryDto getInventory(final ProductSku productSku, final Long warehouseId) {
-		return selectedStrategy.getInventory(productSku, warehouseId);
+		return getSelectedInventoryStrategy().getInventory(productSku, warehouseId);
 	}
 
 	@Override
 	public InventoryDto getInventory(final String skuCode, final Long warehouseId) {
-		return selectedStrategy.getInventory(skuCode, warehouseId);
+		return getSelectedInventoryStrategy().getInventory(skuCode, warehouseId);
 	}
 
 	@Override
 	public InventoryDto getInventory(final InventoryKey inventoryKey) {
-		return selectedStrategy.getInventory(inventoryKey.getSkuCode(), inventoryKey.getWarehouseUid());
+		return getSelectedInventoryStrategy().getInventory(inventoryKey.getSkuCode(), inventoryKey.getWarehouseUid());
 	}
-	
+
 	@Override
 	public Map<InventoryKey, InventoryDto> getInventories(final Set<InventoryKey> inventoryKeys) {
-		return selectedStrategy.getInventories(inventoryKeys);
+		return getSelectedInventoryStrategy().getInventories(inventoryKeys);
 	}
 
 	@Override
 	public Map<Long, InventoryDto> getInventoriesForSku(final String skuCode) {
-		return selectedStrategy.getInventoriesForSku(skuCode);
+		return getSelectedInventoryStrategy().getInventoriesForSku(skuCode);
 	}
 
 	@Override
 	public Map<Long, InventoryDto> getInventoriesForSku(final ProductSku productSku) {
-		return selectedStrategy.getInventoriesForSku(productSku);
+		return getSelectedInventoryStrategy().getInventoriesForSku(productSku);
 	}
 
 	@Override
 	public Map<String, InventoryDto> getInventoriesForSkusInWarehouse(
 			final Set<String> skuCodes, final long warehouseUid) {
-		return selectedStrategy.getInventoriesForSkusInWarehouse(skuCodes, warehouseUid);
-	}
-
-	/**
-	 * Called by Spring after all setters are called.
-	 * Reads the configured inventory strategy from the settings framework and sets the appropriate Strategy.
-	 */
-	public void init() {
-		selectStrategy(getInventoryStrategyIdProvider().get());
+		return getSelectedInventoryStrategy().getInventoriesForSkusInWarehouse(skuCodes, warehouseUid);
 	}
 
 	/**
@@ -123,15 +124,26 @@ public class InventoryFacadeImpl implements InventoryFacade {
 	 */
 	@Override
 	public Capabilities getCapabilities() {
-		return selectedStrategy.getCapabilities();
+		return getSelectedInventoryStrategy().getCapabilities();
 	}
 
 	@Override
-	public List<InventoryDto> findLowStockInventories(final Set<String> skuCodes, final long warehouseUid) {		
-		return selectedStrategy.findLowStockInventories(skuCodes, warehouseUid);
+	public List<InventoryDto> findLowStockInventories(final Set<String> skuCodes, final long warehouseUid) {
+		return getSelectedInventoryStrategy().findLowStockInventories(skuCodes, warehouseUid);
 	}
 
+	/**
+	 * Gets default or selected inventory strategy.
+	 *
+	 * @return inventory strategy
+	 */
 	InventoryStrategy getSelectedInventoryStrategy() {
+		synchronized (this) {
+			if (selectedStrategy == null) {
+				selectedStrategy = selectStrategy(getInventoryStrategyIdProvider().get());
+			}
+		}
+
 		return selectedStrategy;
 	}
 

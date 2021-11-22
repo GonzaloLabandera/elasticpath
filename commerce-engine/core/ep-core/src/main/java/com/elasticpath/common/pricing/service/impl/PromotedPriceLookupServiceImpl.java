@@ -10,7 +10,8 @@ import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.pricing.service.PromotedPriceLookupService;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -36,7 +37,7 @@ import com.elasticpath.tags.TagSet;
  */
 public class PromotedPriceLookupServiceImpl implements PromotedPriceLookupService {
 
-	private static final Logger LOG = Logger.getLogger(PromotedPriceLookupServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PromotedPriceLookupServiceImpl.class);
 
 	private PriceLookupService priceLookupService;
 	private PricedEntityFactory pricedEntityFactory;

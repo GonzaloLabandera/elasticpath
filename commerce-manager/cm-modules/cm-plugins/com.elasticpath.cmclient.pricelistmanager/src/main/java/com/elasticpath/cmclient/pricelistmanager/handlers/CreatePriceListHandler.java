@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.pricelistmanager.handlers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.IEditorInput;
@@ -22,7 +23,7 @@ import com.elasticpath.domain.pricing.PriceListDescriptor;
  */
 public class CreatePriceListHandler extends AbstractPolicyAwareHandler {
 	
-	private static final Logger LOG = Logger.getLogger(CreatePriceListHandler.class);
+	private static final Logger LOG = LogManager.getLogger(CreatePriceListHandler.class);
 
 	private final PolicyActionContainer handlerContainer = addPolicyActionContainer("createVirtualCatalogHandler"); //$NON-NLS-1$	
 	

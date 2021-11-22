@@ -24,48 +24,60 @@ public class CustomerDefaultPaymentInstrumentServiceImpl implements CustomerDefa
 		sanityCheck();
 
 		CustomerDefaultPaymentInstrument customerDefaultPaymentInstrument = (CustomerDefaultPaymentInstrument) getPersistenceEngine()
-                .retrieveByNamedQuery("FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER", customerPaymentInstrument.getCustomerUid())
+				.retrieveByNamedQuery("FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER_UID", customerPaymentInstrument.getCustomerUid())
 				.stream()
 				.findFirst()
 				.orElse(null);
 
-        if (customerDefaultPaymentInstrument == null) {
-            customerDefaultPaymentInstrument = new CustomerDefaultPaymentInstrumentImpl(customerPaymentInstrument);
-        } else {
-            customerDefaultPaymentInstrument.setCustomerPaymentInstrument(customerPaymentInstrument);
-        }
-        getPersistenceEngine().saveOrUpdate(customerDefaultPaymentInstrument);
-    }
+		if (customerDefaultPaymentInstrument == null) {
+			customerDefaultPaymentInstrument = new CustomerDefaultPaymentInstrumentImpl(customerPaymentInstrument);
+		} else {
+			customerDefaultPaymentInstrument.setCustomerPaymentInstrument(customerPaymentInstrument);
+		}
+		getPersistenceEngine().saveOrUpdate(customerDefaultPaymentInstrument);
+	}
 
-    @Override
-    public CustomerPaymentInstrument getDefaultForCustomer(final Customer customer) {
-        return getDefaultForCustomerUid(customer.getUidPk());
-    }
+	@Override
+	public CustomerPaymentInstrument getDefaultForCustomer(final Customer customer) {
+		return getDefaultForCustomerUid(customer.getUidPk());
+	}
 
-    private CustomerPaymentInstrument getDefaultForCustomerUid(final long customerUid) {
-        sanityCheck();
+	private CustomerPaymentInstrument getDefaultForCustomerUid(final long customerUid) {
+		sanityCheck();
 
-        return getPersistenceEngine().retrieveByNamedQuery(
-                "FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER", customerUid)
-                .stream()
-                .map(association -> ((CustomerDefaultPaymentInstrument) association).getCustomerPaymentInstrument())
-                .findFirst()
-                .orElse(null);
-    }
+		return getPersistenceEngine().retrieveByNamedQuery(
+				"FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER_UID", customerUid)
+				.stream()
+				.map(association -> ((CustomerDefaultPaymentInstrument) association).getCustomerPaymentInstrument())
+				.findFirst()
+				.orElse(null);
+	}
 
-    @Override
+	@Override
+	public CustomerPaymentInstrument getDefaultForCustomerGuid(final String customerGuid) {
+		sanityCheck();
+
+		return getPersistenceEngine().retrieveByNamedQuery(
+				"FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER_GUID", customerGuid)
+				.stream()
+				.map(association -> ((CustomerDefaultPaymentInstrument) association).getCustomerPaymentInstrument())
+				.findFirst()
+				.orElse(null);
+	}
+
+	@Override
 	public boolean hasDefaultPaymentInstrument(final Customer customer) {
 		return getDefaultForCustomer(customer) != null;
 	}
 
 	@Override
 	public boolean isDefault(final CustomerPaymentInstrument customerPaymentInstrument) {
-        if (customerPaymentInstrument == null) {
-            return false;
-        }
-        final CustomerPaymentInstrument defaultCustomerPaymentInstrument = getDefaultForCustomerUid(customerPaymentInstrument.getCustomerUid());
-        return customerPaymentInstrument.equals(defaultCustomerPaymentInstrument);
-    }
+		if (customerPaymentInstrument == null) {
+			return false;
+		}
+		final CustomerPaymentInstrument defaultCustomerPaymentInstrument = getDefaultForCustomerUid(customerPaymentInstrument.getCustomerUid());
+		return customerPaymentInstrument.equals(defaultCustomerPaymentInstrument);
+	}
 
 	public void setPersistenceEngine(final PersistenceEngine persistenceEngine) {
 		this.persistenceEngine = persistenceEngine;

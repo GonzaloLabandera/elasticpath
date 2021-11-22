@@ -4,7 +4,8 @@
 
 package com.elasticpath.cmclient.store.shipping.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -25,7 +26,7 @@ import com.elasticpath.service.shipping.ShippingServiceLevelService;
 public class EditShippingLevelAction extends Action {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(EditShippingLevelAction.class);
+	private static final Logger LOG = LogManager.getLogger(EditShippingLevelAction.class);
 
 	/** ShippingLevelsSearchResultsView list view. */
 	private final ShippingLevelsSearchResultsView listView;

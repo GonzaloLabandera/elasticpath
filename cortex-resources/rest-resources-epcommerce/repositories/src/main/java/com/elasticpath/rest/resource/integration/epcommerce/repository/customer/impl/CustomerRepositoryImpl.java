@@ -13,8 +13,8 @@ import javax.inject.Singleton;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +24,8 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.ExecutionRetryHelper;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.CustomerType;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.cache.CacheRemove;
@@ -41,14 +40,13 @@ import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.dto.CustomerDTO;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.customer.AccountTreeService;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.customer.UserAccountAssociationService;
-import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.settings.domain.SettingValue;
 
@@ -68,49 +66,45 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 	private final CustomerService customerService;
 	private final AccountTreeService accountTreeService;
-	private final CustomerSessionRepository customerSessionRepository;
 	private final CustomerSessionService customerSessionService;
-	private final ShoppingCartService shoppingCartService;
 	private final BeanFactory coreBeanFactory;
 	private final ReactiveAdapter reactiveAdapter;
 	private final SettingsReader settingsReader;
 	private final UserAccountAssociationService userAccountAssociationService;
+	private final AddressService addressService;
 
 
 	/**
 	 * Constructor.
-	 * @param customerService               The customerService instance.
+	 * @param customerService               The customer service
 	 * @param accountTreeService            the account tree service
-	 * @param customerSessionRepository     the customer session repository
 	 * @param customerSessionService        the customer session service
-	 * @param shoppingCartService           shopping cart service
-	 * @param coreBeanFactory               beanFactory.
+	 * @param coreBeanFactory               the bean factory
 	 * @param reactiveAdapter               the reactive adapter
 	 * @param settingsReader                the settings reader
 	 * @param userAccountAssociationService the user account association service
+	 * @param addressService the address service
 	 */
 	@Inject
 	@SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
-	CustomerRepositoryImpl(
+	public CustomerRepositoryImpl(
 			@Named("customerService") final CustomerService customerService,
 			@Named("accountTreeService") final AccountTreeService accountTreeService,
-			@Named("customerSessionRepository") final CustomerSessionRepository customerSessionRepository,
 			@Named("customerSessionService") final CustomerSessionService customerSessionService,
-			@Named("shoppingCartService") final ShoppingCartService shoppingCartService,
 			@Named("coreBeanFactory") final BeanFactory coreBeanFactory,
 			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter,
 			@Named("settingsReader") final SettingsReader settingsReader,
-			@Named("userAccountAssociationService") final UserAccountAssociationService userAccountAssociationService) {
+			@Named("userAccountAssociationService") final UserAccountAssociationService userAccountAssociationService,
+			@Named("addressService") final AddressService addressService) {
 
 		this.customerService = customerService;
 		this.accountTreeService = accountTreeService;
-		this.customerSessionRepository = customerSessionRepository;
 		this.customerSessionService = customerSessionService;
-		this.shoppingCartService = shoppingCartService;
 		this.coreBeanFactory = coreBeanFactory;
 		this.reactiveAdapter = reactiveAdapter;
 		this.settingsReader = settingsReader;
 		this.userAccountAssociationService = userAccountAssociationService;
+		this.addressService = addressService;
 	}
 
 	@Override
@@ -125,19 +119,14 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 			@Override
 			public ExecutionResult<?> build() {
 				// If storeCode is null, then the search is for account
+				Customer customer;
 				if (storeCode == null) {
-					Customer customer = customerService.findBySharedId(sharedId);
-					Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
-
-					return ExecutionResultFactory.createReadOK(customer);
+					customer = customerService.findBySharedId(sharedId, CustomerType.ACCOUNT);
+				} else {
+					customer = customerService.findBySharedId(sharedId, CustomerType.SINGLE_SESSION_USER);
 				}
-
-				final CustomerSession customerSessionResult = Assign.ifSuccessful(findCustomerSessionBySharedIdWithoutException(storeCode,
-						sharedId));
-				final Customer customer = customerSessionResult.getShopper().getCustomer();
 				Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
 				customer.setStoreCode(storeCode);
-
 				return ExecutionResultFactory.createReadOK(customer);
 			}
 		}.execute();
@@ -145,11 +134,11 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 	@Override
 	public ExecutionResult<Customer> findOrCreateUser(final CustomerDTO customerDTO, final String scope,
-													  final String userId, final String accountSharedId) {
+													  final String sharedId, final String accountSharedId) {
 
 		// Retry execution of findOrCreateUser to handle race condition scenario.
 		return ExecutionRetryHelper.withRetry(
-				() -> findOrCreateUserInternal(customerDTO, scope, userId, accountSharedId),
+				() -> findOrCreateUserInternal(customerDTO, scope, sharedId, accountSharedId),
 				RETRY_COUNT,
 				"findOrCreateUser",
 				exception -> {
@@ -160,12 +149,12 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	private BrokenChainException processException(final Exception exception) {
 		return exception instanceof BrokenChainException
 				? (BrokenChainException) exception
-				: new BrokenChainException(exception.getLocalizedMessage());
+				: new BrokenChainException(exception.getMessage());
 	}
 
 	private ExecutionResult<Customer> findOrCreateUserInternal(final CustomerDTO customerDTO, final String scope,
-															   final String userId, final String accountSharedId) {
-		final ExecutionResult<Customer> userExecutionResult = findCustomerBySharedId(scope, userId);
+															   final String sharedId, final String accountSharedId) {
+		final ExecutionResult<Customer> userExecutionResult = findCustomerBySharedId(scope, sharedId);
 
 		if (isSingleSessionUserExistsInDatabase(userExecutionResult)) {
 			return userExecutionResult;
@@ -256,26 +245,15 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 		return customer.getCustomerType().equals(CustomerType.SINGLE_SESSION_USER);
 	}
 
-	private ExecutionResult<CustomerSession> findCustomerSessionBySharedIdWithoutException(final String storeCode, final String sharedId) {
-		try {
-			return customerSessionRepository.findCustomerSessionBySharedId(storeCode, sharedId);
-		} catch (final Exception e) {
-			LOG.error(String.format("Error when finding customer session by store code %s and shared ID %s", storeCode, sharedId), e);
-			return ExecutionResultFactory.createServerError("Server error when finding customer session by shared ID");
-		}
-	}
-
 	@Override
 	@CacheResult
 	public ExecutionResult<Customer> findCustomerByGuidAndStoreCode(final String customerGuid, final String storeCode) {
 		return new ExecutionResultChain() {
 			@Override
 			public ExecutionResult<?> build() {
-				final CustomerSession customerSessionResult = Assign
-						.ifSuccessful(findByCustomerSessionByGuidAndStoreCodeWithoutException(customerGuid, storeCode));
-				final Customer customer = customerSessionResult.getShopper().getCustomer();
+				Customer customer = customerService.findByGuid(customerGuid);
 				Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
-
+				customer.setStoreCode(storeCode);
 				return ExecutionResultFactory.createReadOK(customer);
 			}
 		}.execute();
@@ -334,11 +312,11 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 	@Override
 	@CacheResult
-	public ExecutionResult<Boolean> isCustomerExistsBySharedIdAndStoreCode(final String storeCode, final String sharedId) {
+	public ExecutionResult<Boolean> isCustomerExistsBySharedIdAndStoreCode(final CustomerType customerType, final String sharedId) {
 		return new ExecutionResultChain() {
 			@Override
 			public ExecutionResult<?> build() {
-				final boolean customerExists = customerService.isCustomerExistsBySharedIdAndStoreCode(sharedId, storeCode);
+				final boolean customerExists = customerService.isCustomerExistsBySharedId(sharedId, customerType);
 				if (!customerExists) {
 					return ExecutionResultFactory.createNotFound();
 				}
@@ -349,11 +327,12 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 	@Override
 	@CacheResult
-	public ExecutionResult<String> findCustomerGuidBySharedId(final String storeCode, final String sharedId, final String customerIdentifierKey) {
+	public ExecutionResult<String> findCustomerGuidBySharedId(final CustomerType customerType, final String sharedId,
+															  final String customerIdentifierKey) {
 		return new ExecutionResultChain() {
 			@Override
 			public ExecutionResult<?> build() {
-				final String customerGuid = customerService.findCustomerGuidBySharedId(sharedId, storeCode);
+				final String customerGuid = customerService.findCustomerGuidBySharedId(sharedId, customerType);
 				if (StringUtils.isEmpty(customerGuid)) {
 					return ExecutionResultFactory.createNotFound();
 				}
@@ -379,15 +358,6 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 		}.execute();
 	}
 
-	private ExecutionResult<CustomerSession> findByCustomerSessionByGuidAndStoreCodeWithoutException(final String guid, final String storeCode) {
-		try {
-			return customerSessionRepository.findCustomerSessionByGuidAndStoreCode(guid, storeCode);
-		} catch (final Exception e) {
-			LOG.error(String.format("Error when finding customer session by guid %s", guid), e);
-			return ExecutionResultFactory.createServerError("Server error when finding customer session by guid");
-		}
-	}
-
 	@Override
 	@CacheResult(uniqueIdentifier = "findCustomerByUsername")
 	public ExecutionResult<Customer> findCustomerByUsername(final String username, final String storeCode) {
@@ -396,16 +366,8 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 			public ExecutionResult<?> build() {
 				final Customer customer = Assign.ifSuccessful(findCustomerByUserNameWithoutException(username, storeCode));
 				Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
-
-				final CustomerSession customerSessionResult =
-						Assign.ifSuccessful(findCustomerSessionBySharedIdWithoutException(storeCode, customer.getSharedId()));
-
-				// Customer object obtained using shopper data entry(created if not exists).
-				final Customer sessionCustomer = customerSessionResult.getShopper().getCustomer();
-				Ensure.notNull(sessionCustomer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
-				sessionCustomer.setStoreCode(storeCode);
-
-				return ExecutionResultFactory.createReadOK(sessionCustomer);
+				customer.setStoreCode(storeCode);
+				return ExecutionResultFactory.createReadOK(customer);
 
 			}
 		}.execute();
@@ -439,15 +401,14 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	@Override
 	public String getAccountGuid(final Subject subject) {
 		return Optional.ofNullable(SubjectUtil.getAccountSharedId(subject))
-				.map(customerService::findCustomerGuidBySharedId)
+				.map(sharedId-> customerService.findCustomerGuidBySharedId(sharedId, CustomerType.ACCOUNT))
 				.orElse(null);
 	}
 
 	@Override
 	@CacheRemove(typesToInvalidate = Customer.class)
 	public Completable updateCustomer(final Customer customer) {
-		return reactiveAdapter.fromServiceAsSingle(() -> customerService.update(customer))
-				.flatMapCompletable(updatedCustomer -> customerSessionRepository.invalidateCustomerSessionByGuid(customer.getGuid()));
+		return reactiveAdapter.fromServiceAsCompletable(() -> customerService.update(customer));
 	}
 
 	@Override
@@ -469,14 +430,11 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	}
 
 	@Override
-	public ExecutionResult<Object> mergeCustomer(final CustomerSession customerSession,
-												 final Customer recipientCustomer,
+	public ExecutionResult<Object> mergeCustomer(final Shopper singleSessionShopper,
+												 final Customer registeredCustomer,
 												 final String validatedStoreCode) {
 		try {
-			ensureShopperHasAssociatedShoppingCart(customerSession);
-
-			customerSessionService.changeFromAnonymousToRegisteredCustomer(customerSession, recipientCustomer, validatedStoreCode);
-
+			customerSessionService.changeFromSingleSessionToRegisteredCustomer(singleSessionShopper, registeredCustomer, validatedStoreCode);
 		} catch (final Exception exception) {
 			LOG.error("Error merging customer session", exception);
 			return ExecutionResultFactory.createServerError("Server error when merging customer session");
@@ -506,31 +464,24 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
 	@Override
 	public Single<CustomerAddress> createAddressForCustomer(final Customer customer, final CustomerAddress customerAddress) {
-		for (CustomerAddress existingAddress : customer.getAddresses()) {
-			if (existingAddress.equals(customerAddress)) {
-				return Single.just(existingAddress);
-			}
+		customerAddress.setCustomerUidPk(customer.getUidPk());
+		CustomerAddress existingAddress = addressService.findByAddress(customer.getUidPk(), customerAddress);
+		if (existingAddress == null) {
+			return addAddress(customer, customerAddress)
+					.map(updatedCustomer -> customerAddress);
 		}
 
-		return addAddress(customer, customerAddress)
-				.map(updatedCustomer -> customerAddress);
+		return Single.just(existingAddress);
 	}
 
 	@Override
 	public List<String> findDescendants(final String accountGuid) {
-		return accountTreeService.fetchSubtree(customerService.findByGuid(accountGuid));
+		return accountTreeService.findDescendantGuids(accountGuid);
 	}
 
 	@Override
 	public List<String> findPaginatedChildren(final String accountId, final int pageStartIndex, final int pageSize) {
-		return accountTreeService.fetchChildAccountGuidsPaginated(accountId, pageStartIndex, pageSize);
+		return accountTreeService.findChildGuidsPaginated(accountId, pageStartIndex, pageSize);
 	}
 
-	/*
-	 * This is necessary for the CE session management update handlers to work correctly.
-	 */
-	private void ensureShopperHasAssociatedShoppingCart(final CustomerSession customerSession) {
-		final ShoppingCart donorShoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
-		donorShoppingCart.getShopper().setCurrentShoppingCart(donorShoppingCart);
-	}
 }

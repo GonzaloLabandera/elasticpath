@@ -18,7 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.FieldInfo;
 import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -50,7 +51,7 @@ import com.elasticpath.service.search.solr.SpellingConstants.SpellingParams;
 @SuppressWarnings("PMD.GodClass")
 public class MultiLocaleSpellCheckerRequestHandler extends RequestHandlerBase implements SolrCoreAware {
 
-	private static final Logger LOG = Logger.getLogger(MultiLocaleSpellCheckerRequestHandler.class);
+	private static final Logger LOG = LogManager.getLogger(MultiLocaleSpellCheckerRequestHandler.class);
 
 	private static final Pattern LOCALE_SPLIT_PATTERN = Pattern.compile("_");
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+ * Copyright (c) Elastic Path Software Inc., 2020
  */
 package com.elasticpath.cache.impl;
 
@@ -8,12 +8,14 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import com.elasticpath.base.cache.CacheResult;
+import com.elasticpath.base.cache.SynchronizedCacheSupport;
+import com.elasticpath.base.cache.impl.SynchronizedCacheSupportImpl;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
-import com.elasticpath.cache.CacheResult;
-import com.elasticpath.cache.SynchronizedCacheSupport;
 
 /**
  * Abstract class implementing generic methods of the Cache interface.
@@ -26,7 +28,12 @@ public abstract class AbstractCacheAdapter<K, V> implements Cache<K, V> {
 
 	@Override
 	public V get(final K key, final Function<K, V> fallbackLoader) {
-		return synchronizedCacheSupport.get(key, fallbackLoader, this::get, pair -> put(pair.getKey(), pair.getValue()));
+		return synchronizedCacheSupport.get(key, fallbackLoader, this::get, this::put);
+	}
+
+	@Override
+	public V get(final K key, final Function<K, V> fallbackLoader, final BiFunction<K, V, V> populateCacheFunction) {
+		return synchronizedCacheSupport.get(key, fallbackLoader, this::get, populateCacheFunction);
 	}
 
 	@Override

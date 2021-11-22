@@ -70,8 +70,8 @@ public final class FetchFieldConstants {
 	public static final String OWNER = "owner";
 	/** field name. */
 	public static final String SHIPMENT_ORDER_SKUS_INTERNAL = "shipmentOrderSkusInternal";
-
-
+	/** field name. */
+	public static final String RULES = "rules";
 
 	private FetchFieldConstants() {
 		// Do not instantiate this class

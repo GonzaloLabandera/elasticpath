@@ -124,13 +124,13 @@
 
 	<bean id="trustedTraitSettingProvider" class="com.elasticpath.settings.provider.impl.SettingValueProviderImpl">
 		<property name="path" value="COMMERCE/SYSTEM/API/enableTrustedTraits"/>
-		<property name="settingsReader" ref="settingsService"/>
+		<property name="xpfExtensionLookup" ref="xpfExtensionLookup"/>
 		<property name="settingValueTypeConverter" ref="settingValueTypeConverter"/>
 	</bean>
 
 	<bean id="shoppingCartItemListTypeProvider" class="com.elasticpath.settings.provider.impl.SettingValueProviderImpl">
 		<property name="path" value="COMMERCE/STORE/shoppingCartItemListType"/>
-		<property name="settingsReader" ref="settingsReader"/>
+		<property name="xpfExtensionLookup" ref="xpfExtensionLookup"/>
 		<property name="settingValueTypeConverter" ref="settingValueTypeConverter"/>
 	</bean>
 

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.assembler.pricing.BaseAmountDtoAssembler;

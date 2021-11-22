@@ -8,6 +8,8 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.apache.commons.text.RandomStringGenerator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.selenium.framework.util.PropertyManager;
 
@@ -15,7 +17,7 @@ import com.elasticpath.selenium.framework.util.PropertyManager;
  * Utility class for commonly used method.
  */
 public final class Utility {
-	private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(Utility.class);
+	private static final Logger LOGGER = LogManager.getLogger(Utility.class);
 	private static final String DATE_FORMAT = "MMM d, yyyy h:mm a";
 	private static final String SIMPLE_DATE_FORMAT = "MMM d, yyyy";
 

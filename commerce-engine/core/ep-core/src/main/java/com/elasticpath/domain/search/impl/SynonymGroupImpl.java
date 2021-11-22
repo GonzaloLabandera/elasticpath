@@ -132,7 +132,7 @@ public class SynonymGroupImpl extends AbstractLegacyPersistenceImpl implements S
 	@Override
 	@Persistent(optional = false)
 	@Externalizer("toString")
-	@Factory("org.apache.commons.lang.LocaleUtils.toLocale")
+	@Factory("org.apache.commons.lang3.LocaleUtils.toLocale")
 	@Column(name = "LOCALE", length = LENGTH_20)
 	public Locale getLocale() {
 		return locale;

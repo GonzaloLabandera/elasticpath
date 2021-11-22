@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -64,7 +65,7 @@ import com.elasticpath.tags.TagSet;
 @SuppressWarnings("PMD.GodClass")
 public class InlinePriceEditingSupport extends AbstractInlineEditingSupport {
 	
-	private static final Logger LOG = Logger.getLogger(InlinePriceEditingSupport.class);
+	private static final Logger LOG = LogManager.getLogger(InlinePriceEditingSupport.class);
 	
 	/** Column indices. */
 	private static final int INDEX_IMAGE = 0;

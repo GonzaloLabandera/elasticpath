@@ -8,7 +8,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.GloballyIdentifiable;
 import com.elasticpath.common.dto.tax.TaxJurisdictionDTO;
@@ -26,7 +27,7 @@ import com.elasticpath.service.tax.TaxJurisdictionService;
  */
 public class TaxJurisdictionExporter extends AbstractExporterImpl<TaxJurisdiction, TaxJurisdictionDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(TaxJurisdictionExporter.class);
+	private static final Logger LOG = LogManager.getLogger(TaxJurisdictionExporter.class);
 
 	private ImportExportSearcher importExportSearcher;
 	private DomainAdapter<TaxJurisdiction, TaxJurisdictionDTO> taxJurisdictionAdapter;

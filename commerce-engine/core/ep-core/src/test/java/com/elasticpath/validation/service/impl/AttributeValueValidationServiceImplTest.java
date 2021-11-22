@@ -29,6 +29,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.cache.Cache;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.validation.ConstraintViolationTransformer;
@@ -64,7 +65,7 @@ public class AttributeValueValidationServiceImplTest {
 
 	@Before
 	public void setup() {
-		when(service.getDynamicAttributeValueValidator())
+		when(service.getDynamicAttributeValueValidator(any(Cache.class), any(Cache.class)))
 				.thenReturn(dynamicAttributeValueValidator);
 	}
 

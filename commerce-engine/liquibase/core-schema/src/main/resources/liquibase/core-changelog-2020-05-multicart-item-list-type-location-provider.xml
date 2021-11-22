@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-05-multicart-item-list-type-location-provider.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-05-multicart-item-list-type-location-provider.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="core-changelog-2020-05-multicart-item-list-type-location-provider" author="elasticpath">
 		<comment>[PB-8395] Setting definition for defining cart type to be used by shopping cart resources</comment>

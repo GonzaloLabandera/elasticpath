@@ -11,7 +11,8 @@ import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -67,7 +68,7 @@ public class ParametersTableSection extends AbstractStatePolicyTargetImpl implem
 
 	private static final int NAME_COLUMN_WIDTH = 200;
 
-	private static final Logger LOG = Logger.getLogger(ParametersTableSection.class);
+	private static final Logger LOG = LogManager.getLogger(ParametersTableSection.class);
 
 	private static final String PARAMETERS_TABLE = "Parameters"; //$NON-NLS-1$
 

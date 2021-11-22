@@ -18,7 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.selenium.framework.util.PropertyManager;
 
@@ -28,7 +29,7 @@ import com.elasticpath.selenium.framework.util.PropertyManager;
 @SuppressWarnings({"PMD.GodClass"})
 public class DBConnector {
 
-	private static final Logger LOGGER = Logger.getLogger(DBConnector.class);
+	private static final Logger LOGGER = LogManager.getLogger(DBConnector.class);
 	private static final String TCATEGORYLDF_TABLE = "TCATEGORYLDF";
 	private static final String TPRODUCTLDF_TABLE = "TPRODUCTLDF";
 	private static final String INNER_JOIN = "INNER JOIN ";
@@ -393,6 +394,11 @@ public class DBConnector {
 		return dateString;
 	}
 
+	public String getDatabaseType() {
+		//in a string like jdbc:oracle:, extract "oracle"
+		String[] tokens = dbUrl.split(":");
+		return tokens[1];
+	}
 	private String getDbConnectionClass() {
 		return propertyManager.getProperty("db.connection.driver.class");
 	}

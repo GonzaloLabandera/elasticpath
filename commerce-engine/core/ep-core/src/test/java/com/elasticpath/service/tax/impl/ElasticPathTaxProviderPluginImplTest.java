@@ -18,9 +18,9 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.WriterAppender;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.appender.WriterAppender;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -170,7 +170,17 @@ public class ElasticPathTaxProviderPluginImplTest {
 	@Test
 	public void testCalculateWithTaxExemptionShouldLogError() {
 		StringWriter logWriter = new StringWriter();
-		Logger.getRootLogger().addAppender(new WriterAppender(new SimpleLayout(), logWriter));
+		org.apache.logging.log4j.core.Logger rootLogger = (org.apache.logging.log4j.core.Logger) LogManager
+				.getRootLogger();
+		PatternLayout patternLayout = PatternLayout.newBuilder().withPattern("%level - %m%n").build();
+		WriterAppender writerAppender = WriterAppender.newBuilder()
+				.setName("testCalculateWithTaxExemptionShouldLogErrorWriterAppender")
+				.setLayout(patternLayout)
+				.setTarget(logWriter)
+				.build();
+		writerAppender.start();
+		rootLogger.addAppender(writerAppender);
+		
 		String documentId = "AK_89_item_and_shipping_docId" + System.currentTimeMillis();
 		TaxExemption taxExemption = new TaxExemptionImpl();
 		taxExemption.setExemptionId(TAX_EXEMPTION_ID);
@@ -180,6 +190,9 @@ public class ElasticPathTaxProviderPluginImplTest {
 
 		assertThat("Unsupported Tax Exemption should be logged", logWriter.toString(),
 				startsWith("WARN - The tax provider does not provide tax exemption services."));
+		
+		rootLogger.removeAppender(writerAppender);
+		writerAppender.stop();
 	}
 
 	private void setupTaxContainerHelper(final String documentId,

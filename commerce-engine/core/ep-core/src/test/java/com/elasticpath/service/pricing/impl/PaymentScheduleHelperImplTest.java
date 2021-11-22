@@ -9,6 +9,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,10 +20,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Rule;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -37,27 +43,40 @@ import com.elasticpath.service.catalog.SkuOptionService;
 /**
  * Tests {@link PaymentScheduleHelperImpl}.
  */
-@SuppressWarnings("PMD.TooManyStaticImports")
+@RunWith(MockitoJUnitRunner.class)
 public class PaymentScheduleHelperImplTest {
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	@Mock
+	private SkuOptionService skuOptionService;
+	@Mock
+	private BeanFactory beanFactory;
 
+	@Mock
+	private ProductSku sku;
+	@Mock
+	private Product product;
+
+	private SkuOption skuOption;
+	@Mock
+	private SkuOptionValue sov;
+
+	@InjectMocks
+	private PaymentScheduleHelperImpl fixture;
+
+	@Before
+	public void init() {
+		skuOption = mock(SkuOption.class);
+		when(skuOptionService.findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY)).thenReturn(skuOption);
+		fixture.init();
+	}
 	/**
 	 * Test createPaymentSchedule method for empty option value map.
 	 */
 	@Test
 	public void testGetPaymentSchedule1() {
-		final ProductSku sku = context.mock(ProductSku.class);
-		final PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(sku).getOptionValueMap(); will(returnValue(null));
-			}
-		});
-		
-		assertNull(psh.getPaymentSchedule(sku));
+		when(sku.getOptionValueMap()).thenReturn(null);
+
+		assertNull(fixture.getPaymentSchedule(sku));
 	}
 	
 	/**
@@ -65,21 +84,15 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testGetPaymentSchedule2() {
-		final ProductSku sku = context.mock(ProductSku.class);
-		final Product product = context.mock(Product.class);
-		final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
-		final PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		psh.setSkuOptionService(skuOptionService);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(sku).getOptionValueMap(); will(returnValue(Collections.emptyMap()));
-				oneOf(sku).getProduct(); will(returnValue(product));
-				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); will(returnValue(null));
-			}
-		});
-		
-		assertNull(psh.getPaymentSchedule(sku));
+		when(sku.getOptionValueMap()).thenReturn(Collections.emptyMap());
+		when(sku.getProduct()).thenReturn(product);
+		when(skuOptionService.findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY)).thenReturn(null);
+
+		PaymentScheduleHelperImpl fixture = new PaymentScheduleHelperImpl();
+		fixture.setSkuOptionService(skuOptionService);
+		fixture.init();
+
+		assertNull(fixture.getPaymentSchedule(sku));
 	}
 	
 	/**
@@ -87,23 +100,12 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testGetPaymentSchedule3() {
-		final ProductSku sku = context.mock(ProductSku.class);
-		final Product product = context.mock(Product.class);
-		final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
-		final SkuOption skuOption = context.mock(SkuOption.class);
-		final PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		psh.setSkuOptionService(skuOptionService);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(sku).getOptionValueMap(); will(returnValue(Collections.emptyMap()));
-				oneOf(sku).getProduct(); will(returnValue(product));
-				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); will(returnValue(skuOption));
-				oneOf(sku).getSkuOptionValue(skuOption); will(returnValue(null));
-			}
-		});
-		
-		assertNull(psh.getPaymentSchedule(sku));
+		when(sku.getOptionValueMap()).thenReturn(Collections.emptyMap());
+		when(sku.getProduct()).thenReturn(product);
+		when(sku.getSkuOptionValue(skuOption)).thenReturn(null);
+
+		assertNull(fixture.getPaymentSchedule(sku));
+		verify(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY);
 	}
 
 	/**
@@ -111,26 +113,16 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testGetPaymentSchedule4() {
-		final ProductSku sku = context.mock(ProductSku.class);
-		final Product product = context.mock(Product.class);
-		final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
-		final SkuOption skuOption = context.mock(SkuOption.class);
-		final SkuOptionValue sov = context.mock(SkuOptionValue.class);
-		final PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		psh.setSkuOptionService(skuOptionService);
 		final Map<String, SkuOptionValue> optionMap = new HashMap<>();
 		optionMap.put(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY, sov);
-		context.checking(new Expectations() {
-			{
-				oneOf(sku).getOptionValueMap(); will(returnValue(optionMap));
-				oneOf(sku).getProduct(); will(returnValue(product));
-				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); will(returnValue(skuOption));
-				oneOf(sov).getOptionValueKey(); will(returnValue(PaymentScheduleHelperImpl.PAY_NOW_OPTION_VALUE_KEY));
-				oneOf(sku).getSkuOptionValue(skuOption); will(returnValue(sov));
-			}
-		});
-		
-		assertNull(psh.getPaymentSchedule(sku));
+
+		when(sku.getOptionValueMap()).thenReturn(optionMap);
+		when(sku.getProduct()).thenReturn(product);
+		when(sku.getSkuOptionValue(skuOption)).thenReturn(sov);
+		when(sov.getOptionValueKey()).thenReturn(PaymentScheduleHelperImpl.PAY_NOW_OPTION_VALUE_KEY);
+
+		assertNull(fixture.getPaymentSchedule(sku));
+		verify(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY);
 	}
 	
 	/**
@@ -138,46 +130,28 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testGetPaymentSchedule5() {
-		final ProductSku sku = context.mock(ProductSku.class);
-		final Product product = context.mock(Product.class);
-		final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
-		final SkuOption skuOption = context.mock(SkuOption.class);
-		final SkuOptionValue sov = context.mock(SkuOptionValue.class);
-		final PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		final BeanFactory beanFactory = context.mock(BeanFactory.class);
-		psh.setBeanFactory(beanFactory);
-		psh.setSkuOptionService(skuOptionService);
 		final Map<String, SkuOptionValue> optionMap = new HashMap<>();
 		optionMap.put(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY, sov);
 		final String optionValueKey = "Monthly";
-		context.checking(new Expectations() {
-			{
-				allowing(beanFactory).getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class); 
-				will(returnValue(new PaymentScheduleImpl()));
-				allowing(sku).getOptionValueMap(); 
-				will(returnValue(optionMap));
-				allowing(sku).getProduct(); 
-				will(returnValue(product));
-				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); 
-				will(returnValue(skuOption));
-				allowing(sov).getOptionValueKey(); 
-				will(returnValue(optionValueKey));
-				allowing(sov).getOrdering(); 
-				will(returnValue(0));
-				allowing(sku).getSkuOptionValue(skuOption); 
-				will(returnValue(sov));
-			}
-		});
-		
-		PaymentSchedule paymentSchedule = psh.getPaymentSchedule(sku);
+
+		when(sku.getOptionValueMap()).thenReturn(optionMap);
+		when(sku.getProduct()).thenReturn(product);
+		when(sku.getSkuOptionValue(skuOption)).thenReturn(sov);
+		when(sov.getOptionValueKey()).thenReturn(optionValueKey);
+		when(sov.getOrdering()).thenReturn(0);
+		when(beanFactory.getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class)).thenReturn(new PaymentScheduleImpl());
+
+		PaymentSchedule paymentSchedule = fixture.getPaymentSchedule(sku);
 		assertNotNull(paymentSchedule);
 		assertSame(paymentSchedule.getName(), optionValueKey);
 		assertNotNull(paymentSchedule.getPaymentFrequency());
 		assertNull(paymentSchedule.getScheduleDuration());
 		assertNotNull(paymentSchedule.getPaymentFrequency().getUnit());
 		assertSame(paymentSchedule.getPaymentFrequency().getUnit(), optionValueKey);
-		
-		assertEquals(paymentSchedule, psh.getPaymentSchedule(sku));
+
+		assertEquals(paymentSchedule, fixture.getPaymentSchedule(sku));
+		verify(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY);
+		verify(beanFactory, times(2)).getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class);
 	}
 	
 	/**
@@ -185,14 +159,13 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testCreatePaymentSchedule1() {
-		PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl() {
+		PaymentScheduleHelperImpl fixture = new PaymentScheduleHelperImpl() {
 			@Override
 			protected boolean isPurchaseTime(final SkuOptionValue skuOptionValue) {
 				return true;
 			}
 		};
-		final SkuOptionValue sov = context.mock(SkuOptionValue.class);
-		assertNull(psh.createPaymentSchedule(sov));
+		assertNull(fixture.createPaymentSchedule(sov));
 	}
 	
 	/**
@@ -200,50 +173,42 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testCreatePaymentSchedule2() {
-		PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl() {
+		PaymentScheduleHelperImpl fixture = new PaymentScheduleHelperImpl() {
 			@Override
 			protected boolean isPurchaseTime(final SkuOptionValue skuOptionValue) {
 				return false;
 			}
 		};
-		final BeanFactory beanFactory = context.mock(BeanFactory.class);
-		context.checking(new Expectations() {
-			{
-				allowing(beanFactory).getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class); 
-				will(returnValue(new PaymentScheduleImpl()));
-			}
-		});
-		psh.setBeanFactory(beanFactory);
+		when(beanFactory.getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class)).thenReturn(new PaymentScheduleImpl());
+		fixture.setBeanFactory(beanFactory);
+		fixture.setSkuOptionService(skuOptionService);
 	
 		SkuOptionValue sov = new SkuOptionValueImpl();
 		sov.setOptionValueKey("sov1");
-		PaymentSchedule paymentSchedule = psh.createPaymentSchedule(sov);
+		PaymentSchedule paymentSchedule = fixture.createPaymentSchedule(sov);
+
 		assertNotNull(paymentSchedule);
 		assertEquals(sov.getOptionValueKey(), paymentSchedule.getName());
 		assertNotNull(paymentSchedule.getPaymentFrequency());
 		assertEquals(paymentSchedule.getPaymentFrequency().getAmount(), 1);
 		assertEquals(paymentSchedule.getPaymentFrequency().getUnit(), sov.getOptionValueKey());
 	
-		assertEquals(paymentSchedule, psh.createPaymentSchedule(sov));
+		assertEquals(paymentSchedule, fixture.createPaymentSchedule(sov));
 	}
-	
 
-	
 	/**
 	 * Test isPurchaseTime method for recurring and non-recurring items.
 	 */
 	@Test
 	public void testIsPurchaseTime() {
-		PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		
-		assertTrue(psh.isPurchaseTime(null));
+		assertTrue(fixture.isPurchaseTime(null));
 		
 		SkuOptionValue sov = new SkuOptionValueImpl();
 		sov.setOptionValueKey("sov1");
-		assertFalse(psh.isPurchaseTime(sov));
+		assertFalse(fixture.isPurchaseTime(sov));
 		
 		sov.setOptionValueKey(PaymentScheduleHelperImpl.PAY_NOW_OPTION_VALUE_KEY);
-		assertTrue(psh.isPurchaseTime(sov));
+		assertTrue(fixture.isPurchaseTime(sov));
 	}
 
 	/**
@@ -251,20 +216,9 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testGetFrequencyOption() {
-		PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
-		psh.setSkuOptionService(skuOptionService);
-		final SkuOption skuOption = context.mock(SkuOption.class);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); will(returnValue(skuOption));
-			}
-		});
-	
-		SkuOption frequencyOption = psh.getFrequencyOption(null);
+		SkuOption frequencyOption = fixture.getFrequencyOption(null);
 		assertSame(frequencyOption, skuOption);
-		assertSame(psh.getFrequencyOption(context.mock(Product.class)), frequencyOption);
+		assertSame(fixture.getFrequencyOption(product), frequencyOption);
 		
 	}
 
@@ -273,25 +227,22 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testIsPaymentScheduleCapable1() {
-		final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
-		final Product product = context.mock(Product.class);
-		final ProductType productType = context.mock(ProductType.class);
+		final ProductType productType = mock(ProductType.class);
 		final SkuOption skuOption = new SkuOptionImpl();
 		skuOption.setOptionKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY);
+
 		final Set<SkuOption> soSet = new HashSet<>();
 		soSet.add(skuOption);
-		
-		PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		psh.setSkuOptionService(skuOptionService);
-		context.checking(new Expectations() {
-			{
-				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); will(returnValue(skuOption));
-				oneOf(product).getProductType(); will(returnValue(productType));
-				oneOf(productType).getSkuOptions(); will(returnValue(soSet));
-			}
-		});
-		
-		assertTrue(psh.isPaymentScheduleCapable(product));
+
+		when(skuOptionService.findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY)).thenReturn(skuOption);
+		when(product.getProductType()).thenReturn(productType);
+		when(productType.getSkuOptions()).thenReturn(soSet);
+
+		PaymentScheduleHelperImpl fixture = new PaymentScheduleHelperImpl();
+		fixture.setSkuOptionService(skuOptionService);
+		fixture.init();
+
+		assertTrue(fixture.isPaymentScheduleCapable(product));
 	}
 	
 	/**
@@ -299,9 +250,7 @@ public class PaymentScheduleHelperImplTest {
 	 */
 	@Test
 	public void testIsPaymentScheduleCapable2() {
-		final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
-		final Product product = context.mock(Product.class);
-		final ProductType productType = context.mock(ProductType.class);
+		final ProductType productType = mock(ProductType.class);
 		final SkuOption skuOption = new SkuOptionImpl();
 		skuOption.setOptionKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY);
 
@@ -310,18 +259,15 @@ public class PaymentScheduleHelperImplTest {
 		final Set<SkuOption> soSet = new HashSet<>();
 		soSet.add(skuOption2);
 
-		PaymentScheduleHelperImpl psh = new PaymentScheduleHelperImpl();
-		psh.setSkuOptionService(skuOptionService);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); will(returnValue(skuOption));
-				oneOf(product).getProductType(); will(returnValue(productType));
-				oneOf(productType).getSkuOptions(); will(returnValue(soSet));
-			}
-		});
-		
-		assertFalse(psh.isPaymentScheduleCapable(product));
+		when(skuOptionService.findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY)).thenReturn(skuOption);
+		when(product.getProductType()).thenReturn(productType);
+		when(productType.getSkuOptions()).thenReturn(soSet);
+
+		PaymentScheduleHelperImpl fixture = new PaymentScheduleHelperImpl();
+		fixture.setSkuOptionService(skuOptionService);
+		fixture.init();
+
+		assertFalse(fixture.isPaymentScheduleCapable(product));
 	}
 
 }

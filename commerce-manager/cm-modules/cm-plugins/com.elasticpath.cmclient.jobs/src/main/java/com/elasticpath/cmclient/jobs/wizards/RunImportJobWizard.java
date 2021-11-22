@@ -8,11 +8,12 @@ import java.util.Collection;
 import java.util.Locale;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -55,7 +56,7 @@ import com.elasticpath.service.dataimport.ImportService;
  * Run import job wizard.
  */
 public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
-	private static final Logger LOG = Logger.getLogger(RunImportJobWizard.class);
+	private static final Logger LOG = LogManager.getLogger(RunImportJobWizard.class);
 	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 
 	private final int type;
@@ -212,6 +213,8 @@ public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 	 */
 	private class CmImportJob extends Job {
 
+		private static final long JOB_PROGRESS_UPDATE_SLEEP_MILLIS = 1000L;
+
 		/**
 		 * Constructor.
 		 *
@@ -246,6 +249,11 @@ public class RunImportJobWizard extends AbstractEpWizard<ImportJobRequest> {
 					monitor.subTask(getSubTaskCurrentRowName(status, currentRow));
 					status = importService.getImportJobStatus(status.getProcessId());
 					currentRow = status.getCurrentRow();
+					try {
+						Thread.sleep(JOB_PROGRESS_UPDATE_SLEEP_MILLIS);
+					} catch (InterruptedException ie) {
+						// ignore, carry on.
+					}
 				}
 				setProperty(IProgressConstants.ICON_PROPERTY, JobsImageRegistry.JOB_IMPORT_DONE);
 				showResults(status, this);

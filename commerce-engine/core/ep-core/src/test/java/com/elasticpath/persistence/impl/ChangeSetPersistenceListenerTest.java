@@ -57,6 +57,7 @@ public class ChangeSetPersistenceListenerTest {
 	private final BusinessObjectDescriptor businessObjectDescriptor = new BusinessObjectDescriptorImpl();
 	private final ChangeSetMemberDao changeSetMemberDao = context.mock(ChangeSetMemberDao.class);
 	private final ChangeSetHelper changeSetHelper = context.mock(ChangeSetHelper.class);
+	private final BeanFactory beanFactory = context.mock(BeanFactory.class);
 	private ChangeSetPersistenceListenerTestDouble listener;
 
 	@SuppressWarnings("unchecked")
@@ -69,6 +70,8 @@ public class ChangeSetPersistenceListenerTest {
 	public void setUp() {
 		listener = new ChangeSetPersistenceListenerTestDouble();
 		listener.setMetadataMap(threadLocalMap);
+		listener.setBeanFactory(beanFactory);
+		listener.setLifecycleEventFilter(new LifecycleEventFilter());
 	}
 
 	/**
@@ -122,9 +125,10 @@ public class ChangeSetPersistenceListenerTest {
 			}
 		};
 		listener.setMetadataMap(threadLocalMap);
+		listener.setLifecycleEventFilter(new LifecycleEventFilter());
 
 		context.checking(new Expectations() { {
-			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
+			allowing(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
 			will(returnValue(Collections.emptyList()));
 
 			oneOf(changeSetMemberDao).addOrUpdateObjectMetadata(metadata);
@@ -136,6 +140,9 @@ public class ChangeSetPersistenceListenerTest {
 			will(returnValue(false));
 
 		} });
+
+		// Start a transaction
+		listener.afterBegin(null);
 
 		// Persisted object just to have something to work with.
 		Product product = new ProductImpl();
@@ -155,6 +162,17 @@ public class ChangeSetPersistenceListenerTest {
 		final BusinessObjectDescriptor businessObjectDescriptor = new BusinessObjectDescriptorImpl();
 		final BusinessObjectGroupMember businessObjectGroupMember = new BusinessObjectGroupMemberImpl();
 
+		final BusinessObjectGroupDao businessObjectGroupDao = context.mock(BusinessObjectGroupDao.class);
+		ChangeSetPersistenceListener listener = new ChangeSetPersistenceListenerTestDouble() {
+			@Override
+			protected BusinessObjectGroupDao getBusinessObjectGroupDao() {
+				return businessObjectGroupDao;
+			}
+		};
+		listener.setMetadataMap(threadLocalMap);
+		listener.setBeanFactory(beanFactory);
+		listener.setLifecycleEventFilter(new LifecycleEventFilter());
+
 		// Using a mock so we can expect the set.
 		final BusinessObjectMetadata metadata = context.mock(BusinessObjectMetadata.class);
 
@@ -162,18 +180,20 @@ public class ChangeSetPersistenceListenerTest {
 		metadataList.add(metadata);
 
 		context.checking(new Expectations() { {
+
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class); will(returnValue(metadata));
+
+			allowing(metadata).setMetadataKey(ACTION);
 			allowing(metadata).getMetadataKey(); will(returnValue(ACTION));
 			allowing(metadata).getBusinessObjectGroupMember(); will(returnValue(businessObjectGroupMember));
 			oneOf(metadata).setMetadataValue(ChangeSetMemberAction.ADD.getName());
 
-			oneOf(metadata).getMetadataValue();
-			will(returnValue(ChangeSetMemberAction.UNDEFINED.getName()));
+			allowing(businessObjectGroupDao)
+					.findGroupMemberByGroupIdObjectDescriptor(
+							with(any(String.class)),  with(businessObjectDescriptor));
+			will(returnValue(businessObjectGroupMember));
 
-			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
-			will(returnValue(metadataList));
-
-			oneOf(changeSetHelper).convertGroupMemberToDescriptor(businessObjectGroupMember);
-			will(returnValue(businessObjectDescriptor));
+			oneOf(metadata).setBusinessObjectGroupMember(businessObjectGroupMember);
 
 			oneOf(changeSetMemberDao).addOrUpdateObjectMetadata(metadata);
 
@@ -184,6 +204,9 @@ public class ChangeSetPersistenceListenerTest {
 			will(returnValue(false));
 
 		} });
+
+		// Start a transaction
+		listener.afterBegin(null);
 
 		// Persisted object just to have something to work with.
 		Product product = new ProductImpl();
@@ -211,20 +234,20 @@ public class ChangeSetPersistenceListenerTest {
 			protected BusinessObjectMetadata createAndPopulateMetadata(final String keyAction,
 					final ChangeType changeType, final BusinessObjectDescriptor objectDescriptor) {
 				// This method is here so that we can verify that the dao is called with the return.
-				if (ACTION.equals(keyAction) && changeType.equals(ChangeType.UPDATE) && objectDescriptor.equals(businessObjectDescriptor)) {
+				if (ACTION.equals(keyAction) && changeType.equals(ChangeType.CREATE) && objectDescriptor.equals(businessObjectDescriptor)) {
 					return metadata;
 				}
 				return null;
 			}
 		};
+		listener.setLifecycleEventFilter(new LifecycleEventFilter());
 
 		final PersistenceCapable object = context.mock(PersistenceCapable.class);
-		final StateManager stateManager = context.mock(StateManager.class);
 
 		context.checking(new Expectations() { {
-			oneOf(object).pcGetStateManager(); will(returnValue(stateManager));
+			oneOf(object).pcGetStateManager(); will(returnValue(null));
 
-			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
+			allowing(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
 			will(returnValue(Collections.emptyList()));
 
 			oneOf(changeSetMemberDao).addOrUpdateObjectMetadata(metadata);
@@ -236,6 +259,9 @@ public class ChangeSetPersistenceListenerTest {
 			will(returnValue(false));
 
 		} });
+
+		// Start a transaction
+		listener.afterBegin(null);
 
 		LifecycleEvent event = new LifecycleEvent(object, LifecycleEvent.BEFORE_STORE);
 		listener.eventOccurred(event);
@@ -250,6 +276,18 @@ public class ChangeSetPersistenceListenerTest {
 	public void testStoreUpdate() {
 
 		final BusinessObjectDescriptor businessObjectDescriptor = new BusinessObjectDescriptorImpl();
+
+		final BusinessObjectGroupDao businessObjectGroupDao = context.mock(BusinessObjectGroupDao.class);
+		ChangeSetPersistenceListener listener = new ChangeSetPersistenceListenerTestDouble() {
+			@Override
+			protected BusinessObjectGroupDao getBusinessObjectGroupDao() {
+				return businessObjectGroupDao;
+			}
+		};
+		listener.setMetadataMap(threadLocalMap);
+		listener.setBeanFactory(beanFactory);
+		listener.setLifecycleEventFilter(new LifecycleEventFilter());
+
 		final BusinessObjectGroupMember businessObjectGroupMember = new BusinessObjectGroupMemberImpl();
 
 		// Using a mock so we can expect the set.
@@ -263,18 +301,18 @@ public class ChangeSetPersistenceListenerTest {
 
 		context.checking(new Expectations() { {
 			oneOf(object).pcGetStateManager(); will(returnValue(stateManager));
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class); will(returnValue(metadata));
+			allowing(metadata).setMetadataKey(ACTION);
 			allowing(metadata).getMetadataKey(); will(returnValue(ACTION));
 			allowing(metadata).getBusinessObjectGroupMember(); will(returnValue(businessObjectGroupMember));
 			oneOf(metadata).setMetadataValue(ChangeSetMemberAction.EDIT.getName());
 
-			oneOf(metadata).getMetadataValue();
-			will(returnValue(ChangeSetMemberAction.UNDEFINED.getName()));
+			allowing(businessObjectGroupDao)
+					.findGroupMemberByGroupIdObjectDescriptor(
+							with(any(String.class)),  with(businessObjectDescriptor));
+			will(returnValue(businessObjectGroupMember));
 
-			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
-			will(returnValue(metadataList));
-
-			oneOf(changeSetHelper).convertGroupMemberToDescriptor(businessObjectGroupMember);
-			will(returnValue(businessObjectDescriptor));
+			oneOf(metadata).setBusinessObjectGroupMember(businessObjectGroupMember);
 
 			oneOf(changeSetMemberDao).addOrUpdateObjectMetadata(metadata);
 
@@ -285,6 +323,9 @@ public class ChangeSetPersistenceListenerTest {
 			will(returnValue(false));
 
 		} });
+
+		// Start a transaction
+		listener.afterBegin(null);
 
 		LifecycleEvent event = new LifecycleEvent(object, LifecycleEvent.BEFORE_STORE);
 		listener.eventOccurred(event);
@@ -298,12 +339,19 @@ public class ChangeSetPersistenceListenerTest {
 	@Test
 	public void testDeleteCreate() {
 
+		final BusinessObjectGroupDao businessObjectGroupDao = context.mock(BusinessObjectGroupDao.class);
+
 		final BusinessObjectDescriptor businessObjectDescriptor = new BusinessObjectDescriptorImpl();
 		final BusinessObjectMetadata metadata = new BusinessObjectMetadataImpl();
 		final BusinessObjectGroupMember businessObjectGroupMember = new BusinessObjectGroupMemberImpl();
 		metadata.setBusinessObjectGroupMember(businessObjectGroupMember);
 
 		ChangeSetPersistenceListener listener = new ChangeSetPersistenceListenerTestDouble() {
+
+			@Override
+			protected BusinessObjectGroupDao getBusinessObjectGroupDao() {
+				return businessObjectGroupDao;
+			}
 
 			@Override
 			protected BusinessObjectMetadata createAndPopulateMetadata(final String keyAction,
@@ -315,11 +363,12 @@ public class ChangeSetPersistenceListenerTest {
 				return null;
 			}
 		};
-
+		listener.setLifecycleEventFilter(new LifecycleEventFilter());
 
 		context.checking(new Expectations() { {
 
-			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
+
+			allowing(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
 			will(returnValue(Collections.emptyList()));
 
 			oneOf(changeSetMemberDao).addOrUpdateObjectMetadata(metadata);
@@ -331,6 +380,10 @@ public class ChangeSetPersistenceListenerTest {
 			will(returnValue(false));
 
 		} });
+
+		// Start a transaction
+		listener.afterBegin(/* no real event needed */ null);
+		listener.setBeanFactory(beanFactory);
 
 		// Persisted object just to have something to work with.
 		Product product = new ProductImpl();
@@ -349,6 +402,17 @@ public class ChangeSetPersistenceListenerTest {
 
 		final BusinessObjectDescriptor businessObjectDescriptor = new BusinessObjectDescriptorImpl();
 
+		final BusinessObjectGroupDao businessObjectGroupDao = context.mock(BusinessObjectGroupDao.class);
+		ChangeSetPersistenceListener listener = new ChangeSetPersistenceListenerTestDouble() {
+			@Override
+			protected BusinessObjectGroupDao getBusinessObjectGroupDao() {
+				return businessObjectGroupDao;
+			}
+		};
+		listener.setMetadataMap(threadLocalMap);
+		listener.setBeanFactory(beanFactory);
+		listener.setLifecycleEventFilter(new LifecycleEventFilter());
+
 		// Using a mock so we can expect the set.
 		final BusinessObjectMetadata metadata = context.mock(BusinessObjectMetadata.class);
 		final BusinessObjectGroupMember businessObjectGroupMember = new BusinessObjectGroupMemberImpl();
@@ -357,17 +421,20 @@ public class ChangeSetPersistenceListenerTest {
 		metadataList.add(metadata);
 
 		context.checking(new Expectations() { {
+			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class); will(returnValue(metadata));
+
+			allowing(metadata).setMetadataKey(ACTION);
 			allowing(metadata).getMetadataKey(); will(returnValue(ACTION));
 			allowing(metadata).getBusinessObjectGroupMember(); will(returnValue(businessObjectGroupMember));
 			oneOf(metadata).setMetadataValue(ChangeSetMemberAction.DELETE.getName());
 
-			oneOf(metadata).getMetadataValue();
-			will(returnValue(ChangeSetMemberAction.UNDEFINED.getName()));
+			allowing(businessObjectGroupDao)
+					.findGroupMemberByGroupIdObjectDescriptor(
+							with(any(String.class)),  with(businessObjectDescriptor));
+			will(returnValue(businessObjectGroupMember));
 
-			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
-			will(returnValue(metadataList));
+			oneOf(metadata).setBusinessObjectGroupMember(businessObjectGroupMember);
 
-			oneOf(changeSetHelper).convertGroupMemberToDescriptor(businessObjectGroupMember); will(returnValue(businessObjectDescriptor));
 
 			oneOf(changeSetMemberDao).addOrUpdateObjectMetadata(metadata);
 
@@ -378,6 +445,9 @@ public class ChangeSetPersistenceListenerTest {
 			will(returnValue(false));
 
 		} });
+
+		// Start a transaction
+		listener.afterBegin(null);
 
 		// Persisted object just to have something to work with.
 		Product product = new ProductImpl();
@@ -400,7 +470,6 @@ public class ChangeSetPersistenceListenerTest {
 			}
 		};
 
-		final BeanFactory beanFactory = context.mock(BeanFactory.class);
 		final BusinessObjectMetadata metadata = context.mock(BusinessObjectMetadata.class);
 
 		final BusinessObjectGroupMember businessObjectGroupMember = new BusinessObjectGroupMemberImpl();
@@ -411,8 +480,8 @@ public class ChangeSetPersistenceListenerTest {
 			oneOf(metadata).setMetadataKey(ACTION);
 			oneOf(metadata).setMetadataValue("DELETE");
 			allowing(businessObjectGroupDao)
-						.findGroupMemberByObjectDescriptor(
-								businessObjectDescriptor);
+						.findGroupMemberByGroupIdObjectDescriptor(
+								with(any(String.class)),  with(businessObjectDescriptor));
 				will(returnValue(businessObjectGroupMember));
 			oneOf(metadata).setBusinessObjectGroupMember(businessObjectGroupMember);
 		} });
@@ -443,6 +512,11 @@ public class ChangeSetPersistenceListenerTest {
 		threadLocalMap.put("currentChangeSet", null);
 
 		listener.setMetadataMap(threadLocalMap);
+		listener.setLifecycleEventFilter(new LifecycleEventFilter());
+
+		// Start a transaction
+		listener.afterBegin(null);
+
 		// Persisted object just to have something to work with.
 		Product product = new ProductImpl();
 

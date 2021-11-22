@@ -24,8 +24,8 @@
 		<aspectj.compiliance.level>1.8</aspectj.compiliance.level>
 
 		<jacoco.instruction.covered-ratio>0.81</jacoco.instruction.covered-ratio>
-		<jacoco.branch.covered-ratio>0.72</jacoco.branch.covered-ratio>
-		<jacoco.line.covered-ratio>0.82</jacoco.line.covered-ratio>
+		<jacoco.branch.covered-ratio>0.71</jacoco.branch.covered-ratio>
+		<jacoco.line.covered-ratio>0.81</jacoco.line.covered-ratio>
 		<jacoco.complexity.covered-ratio>0.78</jacoco.complexity.covered-ratio>
 		<jacoco.method.covered-ratio>0.80</jacoco.method.covered-ratio>
 	</properties>
@@ -223,6 +223,10 @@
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-references-api</artifactId>
 		</dependency>
 	</dependencies>
 

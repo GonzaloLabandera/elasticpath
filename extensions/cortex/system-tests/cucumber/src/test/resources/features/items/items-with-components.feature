@@ -54,10 +54,10 @@ Feature: Items with components
       | PURCHASABLE_BUNDLE |
       | mb_6789012_sku     |
 
-  Scenario Outline: Bundle is removed, as well as all of its DepedentLineItems
+  Scenario Outline: Bundle is removed, as well as all of its DependentLineItems
     Given a cart containing a <PURCHASABLE_BUNDLE> and its Constituents
     When regardless of the type of selection rule of the Bundle, remove the <PURCHASABLE_BUNDLE> from the Cart
-    Then the Bundle is removed, as well as all of its DepedentLineItems
+    Then the Bundle is removed, as well as all of its DependentLineItems
 
     Examples:
       | PURCHASABLE_BUNDLE                         |

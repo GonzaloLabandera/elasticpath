@@ -5,7 +5,8 @@ package com.elasticpath.batch.jobs.impl;
 
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.batch.jobs.SearchTermsAggregatorJob;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -16,7 +17,7 @@ import com.elasticpath.service.misc.TimeService;
  */
 public class SearchTermsAggregatorJobImpl implements SearchTermsAggregatorJob {
 
-	private static final Logger LOG = Logger.getLogger(SearchTermsAggregatorJobImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SearchTermsAggregatorJobImpl.class);
 
 	private static final int MILLIS_PER_SECOND = 1000;
 	private PersistenceEngine persistenceEngine;

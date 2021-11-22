@@ -187,7 +187,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	private static final String CUSTOMER_UID = "CUSTOMER_UID";
 
-	private List<CustomerAddress> addresses = new ArrayList<>();
+	private final List<CustomerAddress> addresses = new ArrayList<>();
 
 	private String sharedId;
 
@@ -281,31 +281,23 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	}
 
 	@Override
-	@OneToMany(targetEntity = CustomerAddressImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-	@ElementJoinColumn(name = CUSTOMER_UID, nullable = false)
-	@ElementForeignKey(name = "taddress_ibfk_1")
-	@ElementDependent
-	public List<CustomerAddress> getAddresses() {
+	@Transient
+	public List<CustomerAddress> getTransientAddresses() {
 		return addresses;
-	}
-
-	@Override
-	public void setAddresses(final List<CustomerAddress> addresses) {
-		this.addresses = addresses;
 	}
 
 	@Override
 	public void addAddress(final CustomerAddress address) {
 		checkNotNull(address, "address to add must not be null");
-		if (!getAddresses().contains(address)) {
-			getAddresses().add(address);
+		if (!getTransientAddresses().contains(address)) {
+			getTransientAddresses().add(address);
 		}
 	}
 
 	@Override
 	public void removeAddress(final CustomerAddress address) {
 		checkNotNull(address, "address to remove must not be null");
-		getAddresses().remove(address);
+		getTransientAddresses().remove(address);
 		if (Objects.equal(address, getPreferredShippingAddress())) {
 			setPreferredShippingAddress(null);
 		}
@@ -328,9 +320,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	public void setPreferredShippingAddress(final CustomerAddress address) {
-		if (address != null) {
-			addAddress(address);
-		}
 		setPreferredShippingAddressInternal(address);
 	}
 
@@ -354,9 +343,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	public void setPreferredBillingAddress(final CustomerAddress address) {
-		if (address != null) {
-			addAddress(address);
-		}
 		setPreferredBillingAddressInternal(address);
 	}
 
@@ -749,19 +735,8 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	@Transient
-	public CustomerAddress getAddressByUid(final long addressUid) {
-		for (CustomerAddress currAddress : getAddresses()) {
-			if (currAddress.getUidPk() == addressUid) {
-				return currAddress;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	@Transient
 	public CustomerAddress getAddressByGuid(final String addressGuid) {
-		for (Object element : getAddresses()) {
+		for (Object element : getTransientAddresses()) {
 			CustomerAddress currAddress = (CustomerAddress) element;
 			if (currAddress.getGuid() != null && currAddress.getGuid().equals(addressGuid)) {
 				return currAddress;

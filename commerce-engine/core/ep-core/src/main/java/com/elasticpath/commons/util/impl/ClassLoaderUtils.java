@@ -7,14 +7,15 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Utilities for manipulating the classloader.
  */
 public final class ClassLoaderUtils {
 
-	private static final Logger LOG = Logger.getLogger(ClassLoaderUtils.class);
+	private static final Logger LOG = LogManager.getLogger(ClassLoaderUtils.class);
 	
 	private ClassLoaderUtils() {
 		super();

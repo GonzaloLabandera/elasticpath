@@ -6,7 +6,8 @@ package com.elasticpath.persistence.impl;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,7 +25,7 @@ import com.elasticpath.persistence.api.Query;
  */
 public class CmUserAuthenticationDaoImpl implements UserDetailsService {
 
-	private static final Logger LOG = Logger.getLogger(CmUserAuthenticationDaoImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CmUserAuthenticationDaoImpl.class);
 
 	private PersistenceEngine persistenceEngine;
 

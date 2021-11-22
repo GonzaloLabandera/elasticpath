@@ -13,6 +13,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerIdentifierService;
@@ -44,18 +45,18 @@ public class CustomerIdentifierServiceImpl implements CustomerIdentifierService 
 
 
 	@Override
-	public ExecutionResult<Boolean> isCustomerExists(final String userId, final String storeCode, final String issuer) {
+	public ExecutionResult<Boolean> isCustomerExists(final String userId, final CustomerType customerType, final String issuer) {
 		ExecutionResult<CustomerIdentifierStrategy> customerIdentifierStrategy = getCustomerIdentifierStrategy(issuer);
 		if (customerIdentifierStrategy.isFailure()) {
 			return ExecutionResultFactory.createNotFound();
 		}
 
 		String customerIdentifierKey = getCustomerIdentifierKey(issuer);
-		return customerIdentifierStrategy.getData().isCustomerExists(userId, storeCode, customerIdentifierKey);
+		return customerIdentifierStrategy.getData().isCustomerExists(userId, customerType, customerIdentifierKey);
 	}
 
 	@Override
-	public ExecutionResult<String> deriveCustomerGuid(final String userId, final String storeCode, final String issuer) {
+	public ExecutionResult<String> deriveCustomerGuid(final String userId, final CustomerType customerType, final String issuer) {
 		ExecutionResult<CustomerIdentifierStrategy> customerIdentifierStrategy = getCustomerIdentifierStrategy(issuer);
 		if (customerIdentifierStrategy.isFailure()) {
 			return ExecutionResultFactory.createNotFound();
@@ -63,7 +64,7 @@ public class CustomerIdentifierServiceImpl implements CustomerIdentifierService 
 
 		String customerIdentifierKey = getCustomerIdentifierKey(issuer);
 		ExecutionResult<String> customerExecutionResult =
-				customerIdentifierStrategy.getData().deriveCustomerGuid(userId, storeCode, customerIdentifierKey);
+				customerIdentifierStrategy.getData().deriveCustomerGuid(userId, customerType, customerIdentifierKey);
 
 		if (customerExecutionResult.isSuccessful()) {
 			return ExecutionResultFactory.createReadOK(customerExecutionResult.getData());

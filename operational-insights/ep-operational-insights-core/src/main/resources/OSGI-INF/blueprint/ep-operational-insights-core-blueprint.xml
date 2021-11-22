@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint
+		xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+		">
+
+	<reference id="coreBeanFactory" interface="com.elasticpath.commons.beanframework.BeanFactory"/>
+	<reference id="defaultCacheManagerWrapper" interface="com.elasticpath.caching.core.CacheManagerWrapper"/>
+	<reference id="persistenceEngine" interface="com.elasticpath.persistence.api.PersistenceEngine"/>
+	<reference id="timeService" interface="com.elasticpath.service.misc.TimeService"/>
+	<reference id="jmsConnectionFactory"
+			   interface="javax.jms.ConnectionFactory"
+			   filter="(jndiName=jms/JMSConnectionFactory)"/>
+
+	<service ref="insightsService" interface="com.elasticpath.insights.service.InsightsService"/>
+
+</blueprint>

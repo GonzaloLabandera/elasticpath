@@ -7,14 +7,15 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Utility timer to track time to run a test.
  */
 public final class TestTimer {
 
-	private static final Logger LOG = Logger.getLogger(TestTimer.class);
+	private static final Logger LOG = LogManager.getLogger(TestTimer.class);
 
 	private static final Map<String, Long> TIMER_MAP = new HashMap<>();
 

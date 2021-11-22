@@ -6,7 +6,8 @@ package com.elasticpath.tools.sync.client.controller.impl;
 import javax.sql.DataSource;
 
 import net.sf.ehcache.CacheManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -34,7 +35,7 @@ import com.elasticpath.tools.sync.processing.SyncJobObjectProcessor;
  */
 public class FullController extends AbstractSyncController {
 
-	private static final Logger LOG = Logger.getLogger(FullController.class);
+	private static final Logger LOG = LogManager.getLogger(FullController.class);
 
 	private static final String SOURCE_SYNC_REQ_ADAPTER = "changeSetAdapter";
 

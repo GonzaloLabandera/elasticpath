@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.core.controlcontribution;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;

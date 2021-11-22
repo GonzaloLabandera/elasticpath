@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,7 @@ public class CatalogProjectionRepositoryIntegrationTest extends BasicSpringConte
 		entityOne.setContent("content");
 		entityOne.setSchemaVersion("shemaVersion");
 		entityOne.setProjectionId(id);
+		entityOne.setGuid(UUID.randomUUID().toString());
 		return entityOne;
 	}
 }

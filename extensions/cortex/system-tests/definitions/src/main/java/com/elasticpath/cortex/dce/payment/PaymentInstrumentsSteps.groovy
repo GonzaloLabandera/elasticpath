@@ -95,6 +95,13 @@ class PaymentInstrumentsSteps {
 		Order.submitPurchase()
 	}
 
+	@And('^I make a purchase with newly created payment instrument for registered user with scope (.+) with following skus?$')
+	static void purchaseSKUsWithoutDefaultPaymentInstrumentForRegisteredUser(String scope, DataTable dataTable) {
+		CommonMethods.addItemsToCart(dataTable)
+		saveInstrumentDetails()
+		Order.submitPurchase()
+	}
+
 	@And('^my order does not have a payment instrument applied$')
 	static void verifyOrderHasNoPaymentInstrument() {
 		Order.paymentinstrumentselector()

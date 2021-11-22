@@ -19,6 +19,7 @@ public class ReserveRequest implements PaymentAPIRequest {
 	private MoneyDTO amount;
 	private Map<String, String> customRequestData;
 	private OrderContext orderContext;
+	private int reserveCount;
 
 	/**
 	 * Gets selected instruments list.
@@ -74,5 +75,13 @@ public class ReserveRequest implements PaymentAPIRequest {
 	@Override
 	public void setOrderContext(final OrderContext orderContext) {
 		this.orderContext = orderContext;
+	}
+
+	public int getRereserveCount() {
+		return reserveCount;
+	}
+
+	public void setRereserveCount(final int reserveCount) {
+		this.reserveCount = reserveCount;
 	}
 }

@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.window.Window;
@@ -28,7 +29,7 @@ import com.elasticpath.commons.constants.ValueTypeEnum;
 @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.PrematureDeclaration" })
 public abstract class AbstractDialogEditingSupport<M, V> extends EditingSupport {
 
-	private static final Logger LOG = Logger.getLogger(AbstractDialogEditingSupport.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractDialogEditingSupport.class);
 
 	private static final EditingSupportDialogFactory DEFAULT_DIALOG_FACTORY = new SimpleEditingSupportDialogFactory();
 	

@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.drools.core.RuleBaseConfiguration;
 import org.drools.core.SessionConfiguration;
 import org.drools.core.WorkingMemory;
@@ -50,7 +51,7 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 
 	private PromotionRuleDelegate promotionRuleDelegate;
 
-	private static final Logger LOG = Logger.getLogger(AbstractRuleEngineImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractRuleEngineImpl.class);
 
 	//injected via Spring
 	private RuleEngineSessionFactory ruleEngineSessionFactory;

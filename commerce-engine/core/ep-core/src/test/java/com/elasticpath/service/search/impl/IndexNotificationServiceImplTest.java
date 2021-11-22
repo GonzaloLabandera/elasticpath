@@ -7,7 +7,6 @@ import static org.junit.Assert.assertSame;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.apache.lucene.search.BooleanQuery;
 import org.jmock.Expectations;
@@ -36,6 +35,8 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
  */
 public class IndexNotificationServiceImplTest {
 
+	private static final int DEFAULT_BATCH_SIZE = 100;
+
 	private IndexNotificationServiceImpl indexNotificationServiceImpl;
 	
 	@Rule
@@ -51,7 +52,7 @@ public class IndexNotificationServiceImplTest {
 	private SearchConfigFactory mockSearchConfigFactory;
 
 	private SearchConfig mockSearchConfig;
-	
+
 	/**
 	 * Prepares for tests.
 	 * 
@@ -75,6 +76,7 @@ public class IndexNotificationServiceImplTest {
 		indexNotificationServiceImpl = new IndexNotificationServiceImpl();
 		indexNotificationServiceImpl.setPersistenceEngine(mockPersistenceEngine);
 		indexNotificationServiceImpl.setSearchConfigFactory(mockSearchConfigFactory);
+		indexNotificationServiceImpl.setDefaultBatchSize(DEFAULT_BATCH_SIZE);
 		
 		mockQueryComposerFactory = context.mock(QueryComposerFactory.class);
 		indexNotificationServiceImpl.setQueryComposerFactory(mockQueryComposerFactory);
@@ -126,7 +128,8 @@ public class IndexNotificationServiceImplTest {
 			{
 				oneOf(mockPersistenceEngine).retrieveByNamedQuery(
 						"INDEXNOTIFY_FIND_BY_INDEX_TYPE",
-						Collections.<String, Object>singletonMap("type", indexType.getIndexName()));
+						new Object[] { indexType.getIndexName() },
+						0, DEFAULT_BATCH_SIZE);
 				will(returnValue(notifications));
 			}
 		});

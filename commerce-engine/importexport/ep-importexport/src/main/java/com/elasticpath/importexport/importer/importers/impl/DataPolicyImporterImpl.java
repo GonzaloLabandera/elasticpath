@@ -3,7 +3,8 @@
  */
 package com.elasticpath.importexport.importer.importers.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.datapolicy.DataPolicyDTO;
 import com.elasticpath.domain.datapolicy.DataPolicy;
@@ -18,7 +19,7 @@ import com.elasticpath.service.datapolicy.DataPolicyService;
  */
 public class DataPolicyImporterImpl extends AbstractImporterImpl<DataPolicy, DataPolicyDTO> {
 
-	private static final Logger LOG = Logger.getLogger(DataPolicyImporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(DataPolicyImporterImpl.class);
 
 	private DomainAdapter<DataPolicy, DataPolicyDTO> dataPolicyAdapter;
 

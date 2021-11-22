@@ -9,7 +9,8 @@ import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.search.SafeSearchCodes;
 
@@ -22,7 +23,7 @@ import com.elasticpath.cmclient.core.search.SafeSearchCodes;
  */
 public class SafeSearchCodesImpl implements SafeSearchCodes {
 	
-	private static final transient Logger LOG = Logger.getLogger(SafeSearchCodesImpl.class);
+	private static final transient Logger LOG = LogManager.getLogger(SafeSearchCodesImpl.class);
 
 	private static final String PERMISSION_ENFORCER = "PermissionEnforcer";    //$NON-NLS-1$
 

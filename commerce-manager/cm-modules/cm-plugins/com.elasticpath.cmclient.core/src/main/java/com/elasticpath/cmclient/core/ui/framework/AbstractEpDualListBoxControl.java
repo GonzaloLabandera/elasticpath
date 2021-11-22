@@ -11,7 +11,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -91,7 +92,7 @@ public abstract class AbstractEpDualListBoxControl<T> {
 
 	private static final int TABLE_WIDTH = 200;
 
-	private static final Logger LOG = Logger.getLogger(AbstractEpDualListBoxControl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractEpDualListBoxControl.class);
 
 	private Button addOneButton;
 

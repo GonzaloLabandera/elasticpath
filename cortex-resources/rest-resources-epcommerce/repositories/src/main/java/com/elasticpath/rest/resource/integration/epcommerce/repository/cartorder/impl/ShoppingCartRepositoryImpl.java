@@ -23,14 +23,13 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.rest.cache.CacheRemove;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.sellingchannel.director.CartDirectorService;
@@ -49,7 +48,7 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	@Inject
 	private CartDirectorService cartDirectorService;
 	@Inject
-	private CustomerSessionRepository customerSessionRepository;
+	private ShopperRepository shopperRepository;
 	@Inject
 	private ShoppingItemDtoFactory shoppingItemDtoFactory;
 	@Inject
@@ -77,13 +76,13 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	}
 
 	@Override
-	public Map<String, CartData> getCartDescriptors(final String cartGuid) {
+	public Map<String, String> getCartDescriptors(final String cartGuid) {
 		return shoppingCartService.getCartDescriptors(cartGuid);
 	}
 
 	@Override
-	public Single<ShoppingCart> getShoppingCartForCustomer(final String customerGuid, final String storeCode) {
-		return customerSessionRepository.findCustomerSessionByGuidAndStoreCodeAsSingle(customerGuid, storeCode)
+	public Single<ShoppingCart> getDefaultShoppingCartForCustomer(final String customerGuid, final String storeCode) {
+		return shopperRepository.findOrCreateShopper(customerGuid, storeCode)
 				.flatMap(this.getStrategy()::getDefaultCart);
 	}
 
@@ -92,7 +91,6 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	public Single<ShoppingCart> getShoppingCart(final String cartGuid) {
 		return getStrategy().getShoppingCartSingle(cartGuid);
 	}
-
 
 	@Override
 	@CacheResult(uniqueIdentifier = "verifyShoppingCartExistsForStore")
@@ -199,7 +197,7 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	@Override
 	@CacheRemove(typesToInvalidate = {ShoppingCart.class, ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
 	public Completable updateCartItem(final ShoppingCart cart, final ShoppingItem shoppingItem, final String skuCode, final int quantity) {
-		Map<String, String> itemFields = Optional.ofNullable(shoppingItem.getFields())
+		Map<String, String> itemFields = Optional.ofNullable(shoppingItem.getModifierFields().getMap())
 				.orElse(Collections.emptyMap());
 
 		ShoppingItemDto shoppingItemDto = getShoppingItemDto(skuCode, quantity, itemFields);

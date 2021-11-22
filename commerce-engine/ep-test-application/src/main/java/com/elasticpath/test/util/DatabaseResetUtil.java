@@ -3,7 +3,8 @@
  */
 package com.elasticpath.test.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.BeanFactory;
 
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -16,7 +17,7 @@ import com.elasticpath.test.persister.database.DataSourceInitializer;
  */
 public class DatabaseResetUtil {
 	
-	private static final Logger LOG = Logger.getLogger(DatabaseResetUtil.class);
+	private static final Logger LOG = LogManager.getLogger(DatabaseResetUtil.class);
 	
 	/**
 	 * Reset database. 

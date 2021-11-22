@@ -9,6 +9,7 @@ import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.accounts.AccountEntity;
 import com.elasticpath.rest.definition.accounts.AccountIdentifier;
@@ -40,7 +41,7 @@ public class SelectedAccountFromProfileLinksRepositoryImpl<E extends AccountEnti
 		final Optional<String> accountSharedId = Optional.ofNullable(
 				SubjectUtil.getAccountSharedId(resourceOperationContext.getSubject()));
 		return accountSharedId.map(sharedId -> Observable.just(AccountIdentifier.builder()
-				.withAccountId(StringIdentifier.of(customerService.findCustomerGuidBySharedId(sharedId)))
+				.withAccountId(StringIdentifier.of(customerService.findCustomerGuidBySharedId(sharedId, CustomerType.ACCOUNT)))
 				.withAccounts(AccountsIdentifier.builder().withScope(scope).build())
 				.build())).orElseGet(Observable::empty);
 	}

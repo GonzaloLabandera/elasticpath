@@ -7,7 +7,8 @@ import java.util.Map;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
@@ -28,7 +29,7 @@ import com.elasticpath.service.cmuser.CmUserService;
  */
 public class LoginManager implements ILoginManager {
 
-	private static final Logger LOG = Logger.getLogger(LoginManager.class);
+	private static final Logger LOG = LogManager.getLogger(LoginManager.class);
 
 	private CmUser cmUser;
 

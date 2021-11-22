@@ -3,10 +3,11 @@
  */
 package com.elasticpath.service.shoppingcart.impl;
 
-import static com.elasticpath.service.shoppingcart.impl.OrderSkuAsShoppingItemPricingSnapshotAction.returnTheSameOrderSkuAsPricingSnapshot;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,13 +26,12 @@ import java.util.UUID;
 
 import com.google.common.collect.ImmutableMap;
 import org.assertj.core.api.SoftAssertions;
-import org.jmock.Expectations;
-import org.jmock.auto.Mock;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -41,10 +41,11 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
+import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.impl.OrderSkuImpl;
 import com.elasticpath.domain.shoppingcart.ItemType;
-import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
@@ -55,12 +56,12 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.tax.TaxCodeRetriever;
 import com.elasticpath.service.tax.impl.DiscountApportioningCalculatorImpl;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Tests for OrderSkuFactoryImpl.
  */
 @SuppressWarnings({"PMD.TooManyMethods"})
+@RunWith(MockitoJUnitRunner.class)
 public class OrderSkuFactoryImplTest {
 	private static final int THREE_INT = 3;
 
@@ -102,49 +103,33 @@ public class OrderSkuFactoryImplTest {
 
 	private static final String TAX_CODE = "TAX_CODE";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
 	@Mock private BeanFactory beanFactory;
 	@Mock private ProductSkuLookup productSkuLookup;
-	@Mock private ShoppingCartPricingSnapshot cartPricingSnapshot;
 	@Mock private ShoppingCartTaxSnapshot cartTaxSnapshot;
 	@Mock private TaxCodeRetriever taxCodeRetriever;
-	private BeanFactoryExpectationsFactory expectationsFactory;
 
+	@InjectMocks
 	private OrderSkuFactoryImpl factory;
+
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
 
 	/** */
 	@Before
 	public void setUp() {
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class, OrderSkuImpl.class);
+		elasticPath.setBeanFactory(beanFactory);
+		when(beanFactory.getPrototypeBean(ContextIdNames.ORDER_SKU, OrderSku.class))
+				.thenAnswer(invocationOnMock -> OrderSkuImpl.class.newInstance());
+		when(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.thenAnswer(invocationOnMock -> ModifierFieldsMapWrapper.class.newInstance());
 
 		DiscountApportioningCalculatorImpl discountApportioningCalculator = new DiscountApportioningCalculatorImpl();
 		discountApportioningCalculator.setProductSkuLookup(productSkuLookup);
 
-		context.checking(new Expectations() {
-			{
-				allowing(cartTaxSnapshot).getShoppingCartPricingSnapshot();
-				will(returnValue(cartPricingSnapshot));
+		when(cartTaxSnapshot.getShoppingItemTaxSnapshot(any(ShoppingItem.class)))
+				.thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
 
-				allowing(cartTaxSnapshot).getShoppingItemTaxSnapshot(with(any(ShoppingItem.class)));
-				will(returnTheSameOrderSkuAsPricingSnapshot());
-
-				allowing(cartPricingSnapshot).getShoppingItemPricingSnapshot(with(any(ShoppingItem.class)));
-				will(returnTheSameOrderSkuAsPricingSnapshot());
-			}
-		});
-		factory = new OrderSkuFactoryImpl();
-		factory.setBeanFactory(beanFactory);
 		factory.setDiscountApportioner(discountApportioningCalculator);
-		factory.setProductSkuLookup(productSkuLookup);
-		factory.setTaxCodeRetriever(taxCodeRetriever);
-	}
-
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
 	}
 
 	/**
@@ -152,22 +137,17 @@ public class OrderSkuFactoryImplTest {
 	 */
 	@Test
 	public void testDataFieldsCopied() {
-		final ShoppingItem cartItem = context.mock(ShoppingItem.class);
+		final ShoppingItem cartItem = mock(ShoppingItem.class, RETURNS_DEEP_STUBS);
 		final OrderSku orderSku = new OrderSkuImpl();
 		final Map<String, String> data = new HashMap<>();
 		data.put("KEY1", "VALUE1");
 		data.put("KEY2", "VALUE2");
 
-		context.checking(new Expectations() {
-			{
-				allowing(cartItem).getFields();
-				will(returnValue(data));
-			}
-		});
+		when(cartItem.getModifierFields().getMap()).thenReturn(data);
 
 		factory.copyData(cartItem, orderSku);
 
-		assertEquals(data, orderSku.getFields());
+		assertEquals(data, orderSku.getModifierFields().getMap());
 	}
 
 	/** */
@@ -457,33 +437,22 @@ public class OrderSkuFactoryImplTest {
 
 	@Test
 	public void verifyNewOrderSkuPopulatedWithAllSuppliedFields() throws Exception {
-		final ProductSku sku = context.mock(ProductSku.class);
+		final ProductSku sku = mock(ProductSku.class);
 		final String skuCode = "SKU123";
 		final String skuGuid = UUID.randomUUID().toString();
 		final int quantity = 1;
 		final int ordering = 2;
 		final Map<String, String> fields = ImmutableMap.of("Foo", "Bar");
-		final TaxCode taxCode = context.mock(TaxCode.class);
+		final TaxCode taxCode = mock(TaxCode.class);
 		final String taxCodeString = "TAXCODE";
 		final BigDecimal unitPrice = TWO_CENTS;
 		final Price price = new PriceImpl();
 		price.setListPrice(Money.valueOf(unitPrice, Currency.getInstance(Locale.CANADA)), quantity);
 
-		context.checking(new Expectations() {
-			{
-				allowing(sku).getSkuCode();
-				will(returnValue(skuCode));
-
-				allowing(sku).getGuid();
-				will(returnValue(skuGuid));
-
-				allowing(taxCodeRetriever).getEffectiveTaxCode(sku);
-				will(returnValue(taxCode));
-
-				allowing(taxCode).getCode();
-				will(returnValue(taxCodeString));
-			}
-		});
+		when(sku.getSkuCode()).thenReturn(skuCode);
+		when(sku.getGuid()).thenReturn(skuGuid);
+		when(taxCodeRetriever.getEffectiveTaxCode(sku)).thenReturn(taxCode);
+		when(taxCode.getCode()).thenReturn(taxCodeString);
 
 		final OrderSku orderSku = factory.createOrderSku(sku, price, quantity, ordering, fields);
 
@@ -615,12 +584,7 @@ public class OrderSkuFactoryImplTest {
 	}
 
 	private void givenProductSkuLookupWillFindSku(final ProductSku sku) {
-		context.checking(new Expectations() {
-			{
-				allowing(productSkuLookup).findByGuid(sku.getGuid());
-				will(returnValue(sku));
-			}
-		});
+		when(productSkuLookup.findByGuid(sku.getGuid())).thenReturn(sku);
 	}
 
 

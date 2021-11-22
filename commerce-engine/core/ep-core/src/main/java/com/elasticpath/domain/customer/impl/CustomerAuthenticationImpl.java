@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.openjpa.persistence.DataCache;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -90,6 +90,12 @@ public class CustomerAuthenticationImpl extends AbstractLegacyPersistenceImpl im
 		this.clearTextPassword = clearTextPassword;
 		// encrypt the clearTextPassword and set it into the password field.
 		setPasswordUsingPasswordEncoder(clearTextPassword);
+
+		//
+		// Ensure that salt is null so that CustomerTransformerImpl#transform recognizes that the password hash is now in BCrypt format
+		// and not BCrypt + SHA-256 format.
+		//
+		setSalt(null);
 	}
 
 	@Override

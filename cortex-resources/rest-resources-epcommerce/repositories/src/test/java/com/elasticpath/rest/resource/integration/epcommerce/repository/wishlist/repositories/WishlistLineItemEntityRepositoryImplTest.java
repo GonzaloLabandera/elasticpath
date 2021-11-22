@@ -19,6 +19,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -58,7 +59,7 @@ public class WishlistLineItemEntityRepositoryImplTest {
 	@Mock
 	private ModifierField modifierField;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private ShoppingItem shoppingItem;
 
 	@Mock
@@ -158,7 +159,7 @@ public class WishlistLineItemEntityRepositoryImplTest {
 		when(wishlistRepository.getShoppingItem(wishList, LINE_ITEM_ID)).thenReturn(Single.just(shoppingItem));
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(itemRepository.getItemIdForSku(productSku)).thenReturn(SKU_CODE);
-		when(shoppingItem.getFields()).thenReturn(null);
+		when(shoppingItem.getModifierFields().getMap()).thenReturn(null);
 		when(wishList.getGuid()).thenReturn(WISHLIST_ID);
 
 		repository.findOne(wishlistLineItemIdentifier)
@@ -175,7 +176,7 @@ public class WishlistLineItemEntityRepositoryImplTest {
 		when(wishlistRepository.getShoppingItem(wishList, LINE_ITEM_ID)).thenReturn(Single.just(shoppingItem));
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(itemRepository.getItemIdForSku(productSku)).thenReturn(SKU_CODE);
-		when(shoppingItem.getFields()).thenReturn(ITEM_ID_MAP);
+		when(shoppingItem.getModifierFields().getMap()).thenReturn(ITEM_ID_MAP);
 		when(modifiersRepository.findModifiersByProduct(product)).thenReturn(Single.just(ImmutableList.of(modifierField)));
 		when(modifierField.getCode()).thenReturn(ItemRepository.SKU_CODE_KEY);
 		when(wishList.getGuid()).thenReturn(WISHLIST_ID);

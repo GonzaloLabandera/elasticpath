@@ -6,7 +6,8 @@ package com.elasticpath.datapopulation.cli.tool.configuration;
 import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
 
 import com.elasticpath.datapopulation.cli.tool.DataPopulationCliException;
@@ -22,7 +23,7 @@ public class FileConfiguration implements ConfiguredDirectoriesAware {
 	 * Set the standard order value for calling {@link #setProperty()} to 100 to allow plenty of methods to be executed either before or afterwards.
 	 */
 	protected static final int SET_PROPERTY_ORDER = 100;
-	private static final Logger LOG = Logger.getLogger(FileConfiguration.class);
+	private static final Logger LOG = LogManager.getLogger(FileConfiguration.class);
 	private String systemPropertyKey;
 	private String fileLocation;
 	private String defaultFilename;

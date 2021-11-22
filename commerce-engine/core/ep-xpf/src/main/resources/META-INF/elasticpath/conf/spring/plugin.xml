@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<bean id="pluginsFolder" class="java.lang.String">
+		<constructor-arg value="#{systemProperties['ep.plugins.folder']?:systemProperties['user.home'].concat('/ep/plugins')}"/>
+	</bean>
+
+	<bean id="xpfSingletonExtensionFactory" class="com.elasticpath.xpf.impl.XPFSingletonExtensionFactory">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="settingConverter" ref="xpfSettingConverter"/>
+	</bean>
+
+	<bean id="pluginManager" class="com.elasticpath.xpf.impl.XPFPluginManager">
+		<constructor-arg ref="coreBeanFactory"/>
+		<constructor-arg ref="xpfSingletonExtensionFactory"/>
+		<constructor-arg ref="xpfSettingConverter"/>
+		<constructor-arg ref="pluginsFolder"/>
+	</bean>
+
+	<bean id="xpfExtensionRegistrar" class="com.elasticpath.xpf.impl.XPFExtensionRegistrar">
+		<property name="pluginManager" ref="pluginManager"/>
+	</bean>
+
+	<bean id="xpfExtensionLookup" class="com.elasticpath.xpf.impl.XPFExtensionLookupImpl">
+		<property name="pluginManager" ref="pluginManager" />
+		<property name="extensionPointResolver" ref="xpfExtensionsResolver" />
+	</bean>
+
+	<bean id="xpfExtensionsResolver" class="com.elasticpath.xpf.impl.XPFInMemoryExtensionResolverImpl" init-method="init" depends-on="xpfPluginFactory">
+		<property name="pluginManager" ref="pluginManager" />
+		<property name="configurationLoader" ref="xpfConfigurationLoader" />
+	</bean>
+
+	<bean id="xpfExtensionsResolverMBean" class="com.elasticpath.xpf.impl.XPFExtensionResolverMBeanWrapperImpl" init-method="init">
+		<property name="extensionsResolver" ref="xpfExtensionsResolver" />
+	</bean>
+
+	<bean id="xpfPluginFactory" class="com.elasticpath.xpf.impl.XPFPluginFactoryImpl" init-method="init">
+		<property name="beanFactory" ref="coreBeanFactory" />
+	</bean>
+
+	<bean id="xpfPluginFactoryMBean" class="com.elasticpath.xpf.impl.XPFPluginFactoryMBeanWrapperImpl" init-method="init">
+		<property name="xpfPluginFactory" ref="xpfPluginFactory" />
+	</bean>
+
+	<bean id="xpfSettingConverter" class="com.elasticpath.xpf.converters.XPFPluginSettingConverter" />
+
+	<bean id="xpfConfigurationLoader" class="com.elasticpath.xpf.impl.XPFConfigurationLoaderImpl" >
+		<constructor-arg ref="xpfObjectMapper"/>
+		<constructor-arg ref="pluginManager"/>
+		<constructor-arg ref="pluginsFolder"/>
+		<constructor-arg ref="xpfSettingValueParser"/>
+	</bean>
+
+
+	<bean id="xpfSettingValueParser" class="com.elasticpath.xpf.impl.XPFSettingValueParser">
+		<property name="environment" ref="environment"/>
+		<property name="propertySources">
+			<list>
+				<value>${user.home}/ep/conf/ep.properties</value>
+				<value>/ep/conf/ep.properties</value>
+				<value>/etc/ep/ep.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="xpfObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+
+</beans>

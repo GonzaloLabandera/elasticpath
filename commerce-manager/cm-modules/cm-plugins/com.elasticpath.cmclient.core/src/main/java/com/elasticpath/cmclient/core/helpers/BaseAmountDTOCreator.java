@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.core.helpers;
 import com.elasticpath.cmclient.core.helpers.extenders.EpModelCreator;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 
 /**
@@ -14,7 +15,7 @@ import com.elasticpath.common.dto.pricing.BaseAmountDTO;
  */
 public final class BaseAmountDTOCreator {
 
-	private static final Logger LOG = Logger.getLogger(BaseAmountDTOCreator.class);
+	private static final Logger LOG = LogManager.getLogger(BaseAmountDTOCreator.class);
 
 	private BaseAmountDTOCreator() {
 		// Empty constructor.

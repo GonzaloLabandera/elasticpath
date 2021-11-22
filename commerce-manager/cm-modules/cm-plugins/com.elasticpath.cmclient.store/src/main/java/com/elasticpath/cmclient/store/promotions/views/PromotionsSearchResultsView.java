@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.store.promotions.views;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -56,7 +57,7 @@ public class PromotionsSearchResultsView extends AbstractSortListView implements
 
 	private static final String PROMOTIONS_SEARCH_RESULTS_TABLE = "Promotions Search Results"; //$NON-NLS-1$
 
-	private static final Logger LOG = Logger.getLogger(PromotionsSearchResultsView.class);
+	private static final Logger LOG = LogManager.getLogger(PromotionsSearchResultsView.class);
 
 	// Table Column Constants
 	private static final int COLUMN_IMAGE = 0;

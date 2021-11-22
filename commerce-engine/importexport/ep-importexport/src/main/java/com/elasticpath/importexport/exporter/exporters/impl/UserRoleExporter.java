@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.cmuser.UserRoleDTO;
 import com.elasticpath.domain.cmuser.UserRole;
@@ -25,7 +26,7 @@ import com.elasticpath.service.cmuser.UserRoleService;
  */
 public class UserRoleExporter extends AbstractExporterImpl<UserRole, UserRoleDTO, String> {
 	
-	private static final Logger LOG = Logger.getLogger(UserRoleExporter.class);
+	private static final Logger LOG = LogManager.getLogger(UserRoleExporter.class);
 	private ImportExportSearcher importExportSearcher;
 	private DomainAdapter<UserRole, UserRoleDTO> userRoleAdapter;
 	private List<String> userRoleGuids;

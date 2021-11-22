@@ -39,7 +39,7 @@ public class SqlStatementChain extends AbstractParserChain {
 			line.setValue(processedLine);
 
 			if (isInsert(statementBuffer.toString())) {
-				JPAQuery insertJPAQuery = new JPAQuery("BATCH INSERT");
+				JPAQuery insertJPAQuery = new JPAQuery("SQL INSERT");
 				jpaQuery.setValue(insertJPAQuery);
 				operation.getValue().addJPAQuery(jpaQuery.getValue());
 			}
@@ -52,10 +52,11 @@ public class SqlStatementChain extends AbstractParserChain {
 
 	@Override
 	protected boolean isApplicableTo(final String line) {
-		return line != null && line.matches(Markers.MULTI_LINE_MATCH_SQL_STATEMENT_MARKER);
+		return line != null
+				&& (line.matches(Markers.MULTI_LINE_MATCH_SQL_STATEMENT_MARKER) || line.contains(Markers.BATCHING_PREPSTMT_MARKER));
 	}
 
 	private boolean isInsert(final String statementLines) {
-		return statementLines.contains(Markers.SQL_BATCH_STATEMENT_MARKER) || statementLines.contains("INSERT INTO");
+		return statementLines.contains("INSERT INTO");
 	}
 }

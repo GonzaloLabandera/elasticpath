@@ -5,14 +5,15 @@ import static io.restassured.config.ConnectionConfig.connectionConfig;
 
 import cucumber.api.java.Before;
 import io.restassured.RestAssured;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Object which is responsible for initial set up of http client.
  */
 public class SetUp {
 
-	private static final Logger LOGGER = Logger.getLogger(SetUp.class);
+	private static final Logger LOGGER = LogManager.getLogger(SetUp.class);
 
 	/**
 	 * Sets up Cm Login user to be used for authentication by http client.

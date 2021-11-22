@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -24,7 +25,6 @@ import com.elasticpath.domain.catalog.PriceTier;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.discounts.DiscountItemContainer;
 import com.elasticpath.domain.rules.CouponConfig;
@@ -54,7 +54,7 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 
-	private static final Logger LOG = Logger.getLogger(PromotionRuleDelegateImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PromotionRuleDelegateImpl.class);
 
 	private static final String PERCENT_DIVISOR = "100";
 
@@ -165,8 +165,7 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	 */
 	@Override
 	public boolean cartCurrencyMatches(final ShoppingCart shoppingCart, final String currencyCode) {
-		final CustomerSession customerSession = shoppingCart.getCustomerSession();
-
+		final CustomerSession customerSession = shoppingCart.getShopper().getCustomerSession();
 		return customerSession.getCurrency().getCurrencyCode().equals(currencyCode);
 	}
 
@@ -646,22 +645,6 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	@Override
 	public boolean checkEnabled(final String state) {
 		return "true".equalsIgnoreCase(state);
-	}
-
-	@Override
-	public boolean customerInGroup(final CustomerSession customerSession, final long customerGroup) {
-		Customer customer = customerSession.getShopper().getCustomer();
-		if (customer == null) {
-			return false;
-		}
-
-		for (CustomerGroup currCustomerGroup : customer.getCustomerGroups()) {
-			if (currCustomerGroup.getUidPk() == customerGroup) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	@Override

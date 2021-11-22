@@ -21,6 +21,7 @@ import com.elasticpath.rest.definition.addresses.ShippingAddressSelectorChoiceId
 import com.elasticpath.rest.definition.addresses.ShippingAddressSelectorIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.AddressRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.selector.Choice;
@@ -45,6 +46,7 @@ public class ShippingAddressSelectorRepositoryImpl<
 	private CustomerRepository customerRepository;
 	private ResourceOperationContext resourceOperationContext;
 	private CartOrderRepository cartOrderRepository;
+	private AddressRepository addressRepository;
 
 	@Override
 	public Single<Choice> getChoice(final ShippingAddressSelectorChoiceIdentifier selectorChoiceId) {
@@ -165,7 +167,7 @@ public class ShippingAddressSelectorRepositoryImpl<
 	}
 
 	private Single<Customer>  updateCustomerPreferredAddress(final Customer customer, final String addressGuid) {
-		final CustomerAddress customerAddress = customer.getAddressByGuid(addressGuid);
+		final CustomerAddress customerAddress = addressRepository.getExistingAddressByGuid(addressGuid, customer).blockingGet();
 		customer.setPreferredShippingAddress(customerAddress);
 		return customerRepository.update(customer);
 	}
@@ -202,5 +204,9 @@ public class ShippingAddressSelectorRepositoryImpl<
 	@Reference
 	public void setCartOrderRepository(final CartOrderRepository cartOrderRepository) {
 		this.cartOrderRepository = cartOrderRepository;
+	}
+	@Reference
+	public void setAddressRepository(final AddressRepository addressRepository) {
+		this.addressRepository = addressRepository;
 	}
 }

@@ -19,6 +19,7 @@ import org.junit.Test;
 /**
  * Tests the {@link UpdatedInsertSetGenerator}.
  */
+@SuppressWarnings({"unchecked","rawtypes"})
 public class UpdatedInsertSetGeneratorTest {
 	private static final int BATCH_SIZE = 2;
 	private UpdatedInsertSetGenerator generator;

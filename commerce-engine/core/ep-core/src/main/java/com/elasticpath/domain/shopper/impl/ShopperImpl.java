@@ -6,8 +6,6 @@ package com.elasticpath.domain.shopper.impl;
 import java.util.Currency;
 import java.util.Locale;
 
-import com.elasticpath.commons.util.SimpleCache;
-import com.elasticpath.commons.util.impl.SimpleCacheImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.pricing.PriceListStack;
@@ -22,7 +20,6 @@ import com.elasticpath.tags.TagSet;
  * The abstract aspects of Shoppers in the system, extensions
  * will add the specifics, e.g. identity, etc.
  */
-
 public class ShopperImpl implements Shopper {
 
 	/**
@@ -40,16 +37,7 @@ public class ShopperImpl implements Shopper {
 
 	private WishList wishList;
 
-	private final SimpleCache simpleCache;
-
 	private transient ShopperBrowsingActivity browsingActivity;
-
-	/**
-	 * Constructor for ShopperImpl.
-	 */
-	public ShopperImpl() {
-		simpleCache = new SimpleCacheImpl();
-	}
 
 	@Override
 	public String getGuid() {
@@ -71,32 +59,26 @@ public class ShopperImpl implements Shopper {
 		getShopperMemento().setUidPk(uidPk);
 	}
 
-	// implementing UpdateShopperTransientData
-
 	@Override
-	public void updateTransientDataWith(final CustomerSession customerSession) {
+	public void setCustomerSession(final CustomerSession customerSession) {
 		this.customerSession = customerSession;
-
-		if (shoppingCart != null) {
-			shoppingCart.setCustomerSession(customerSession);
-		}
 	}
 
-	// implementing CurrencyProvider
+	@Override
+	public CustomerSession getCustomerSession() {
+		return customerSession;
+	}
 
 	@Override
 	public Currency getCurrency() {
 		return customerSession.getCurrency();
 	}
 
-	// implementing LocaleProvider
-
 	@Override
 	public Locale getLocale() {
 		return customerSession.getLocale();
 	}
 
-	// implementing StoreCodeProvider
 	@Override
 	public String getStoreCode() {
 		return getShopperMemento().getStoreCode();
@@ -107,7 +89,6 @@ public class ShopperImpl implements Shopper {
 		getShopperMemento().setStoreCode(storeCode);
 	}
 
-	// implementing CustomerAccessor
 	@Override
 	public Customer getCustomer() {
 		return shopperMemento.getCustomer();
@@ -138,8 +119,6 @@ public class ShopperImpl implements Shopper {
 		return customerSignedIn;
 	}
 
-	// implementing PriceListStackCache
-
 	@Override
 	public PriceListStack getPriceListStack() {
 		return customerSession.getPriceListStack();
@@ -155,8 +134,6 @@ public class ShopperImpl implements Shopper {
 		return customerSession.isPriceListStackValid();
 	}
 
-	// implementing ShoppingCartAccessor
-
 	@Override
 	public ShoppingCart getCurrentShoppingCart() {
 		return shoppingCart;
@@ -166,8 +143,6 @@ public class ShopperImpl implements Shopper {
 	public void setCurrentShoppingCart(final ShoppingCart shoppingCart) {
 		this.shoppingCart = shoppingCart;
 	}
-
-	// implementing WishListAccessor
 
 	@Override
 	public WishList getCurrentWishList() {
@@ -179,20 +154,10 @@ public class ShopperImpl implements Shopper {
 		this.wishList = wishList;
 	}
 
-	// interface TagSource
 	@Override
 	public TagSet getTagSet() {
 		return customerSession.getCustomerTagSet();
 	}
-
-	// implements SimpleCacheProvider
-
-	@Override
-	public SimpleCache getCache() {
-		return simpleCache;
-	}
-
-	// implements Shopper
 
 	@Override
 	public ShopperMemento getShopperMemento() {

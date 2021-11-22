@@ -6,7 +6,7 @@ package com.elasticpath.sellingchannel.presentation.impl;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl;

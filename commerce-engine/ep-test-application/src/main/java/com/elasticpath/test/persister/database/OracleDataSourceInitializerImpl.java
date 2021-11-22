@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.test.common.exception.DataSourceInitializerException;
 
@@ -17,7 +18,7 @@ import com.elasticpath.test.common.exception.DataSourceInitializerException;
  * Oracle implementation of AbstractDataSourceInitializer.
  */
 public class OracleDataSourceInitializerImpl extends AbstractDataSourceInitializer {
-	private static final Logger LOG = Logger.getLogger(OracleDataSourceInitializerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(OracleDataSourceInitializerImpl.class);
 	private static final int USER_DOES_NOT_EXIST_ERR_CODE = 1918;
 
 	private String newUserName;

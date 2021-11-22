@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin.taxes.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -23,7 +24,7 @@ import com.elasticpath.service.tax.TaxJurisdictionService;
 public class DeleteTaxValueAction extends Action {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(DeleteTaxValueAction.class);
+	private static final Logger LOG = LogManager.getLogger(DeleteTaxValueAction.class);
 
 	/** Manage Tax Value Dialog. */
 	private final ManageTaxValuesDialog manageTaxValueDialog;

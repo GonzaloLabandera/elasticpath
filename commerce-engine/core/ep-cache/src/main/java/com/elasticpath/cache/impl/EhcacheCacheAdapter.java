@@ -3,13 +3,11 @@
  */
 package com.elasticpath.cache.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import net.sf.ehcache.Element;
 
-import com.elasticpath.cache.CacheResult;
+import com.elasticpath.base.cache.CacheResult;
 
 /**
  * A wrapper which provides a {@link com.elasticpath.cache.Cache} interface for ehcache.
@@ -40,9 +38,10 @@ public class EhcacheCacheAdapter<K, V> extends AbstractCacheAdapter<K, V> implem
 	}
 
 	@Override
-	public void put(final K key, final V value) {
+	public V put(final K key, final V value) {
 		Element ele = new Element(key, value);
 		cache.put(ele);
+		return value;
 	}
 
 	@Override
@@ -69,39 +68,5 @@ public class EhcacheCacheAdapter<K, V> extends AbstractCacheAdapter<K, V> implem
 	@Override
 	public boolean containsKey(final K key) {
 		return cache.getKeys().contains(key);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public CacheResult<V> getByPartialKey(final K partialKey) {
-		for (Object key : cache.getKeys()) {
-			if (key.equals(partialKey)) {
-				Element element = cache.get(key);
-				if (Objects.nonNull(element)) {
-					return CacheResult.create((V) element.getObjectValue());
-				}
-			}
-		}
-
-		return CacheResult.notPresent();
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<V> getAllByPartialKey(final K partialKey) {
-		List<V> result = new ArrayList<>();
-
-		for (Object key : cache.getKeys()) {
-			if (key.equals(partialKey)) {
-				Element element = cache.get(key);
-				if (element != null) {
-					result.add((V) element.getObjectValue());
-				}
-			}
-		}
-
-		return result.isEmpty()
-				? null
-				: result;
 	}
 }

@@ -89,6 +89,18 @@
 			<outputDirectory>tools</outputDirectory>
 		</dependencySet>
 
+		<!-- plugins -->
+		<dependencySet>
+			<includes>
+				<include>com.elasticpath.extensions:ext-plugin-config:zip</include>
+			</includes>
+			<unpack>true</unpack>
+			<useStrictFiltering>true</useStrictFiltering>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>plugins</outputDirectory>
+		</dependencySet>
+
 	</dependencySets>
 
 	<fileSets>

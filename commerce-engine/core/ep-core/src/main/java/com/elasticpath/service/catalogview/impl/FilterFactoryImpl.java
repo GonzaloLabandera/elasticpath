@@ -13,8 +13,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -50,7 +51,7 @@ import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigation
  */
 @SuppressWarnings("PMD.GodClass")
 public class FilterFactoryImpl implements FilterFactory {
-	private static final Logger LOG = Logger.getLogger(FilterFactoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(FilterFactoryImpl.class);
 	private static final String WITH_ID_MSG_PART = " with ID = ";
 	private static final String WAS_NOT_FOUND_CREATING_A_NEW_ONE_MSG_PART = " was not found. Creating a new one.";
 	private static final String UNDERSCORE = "_";

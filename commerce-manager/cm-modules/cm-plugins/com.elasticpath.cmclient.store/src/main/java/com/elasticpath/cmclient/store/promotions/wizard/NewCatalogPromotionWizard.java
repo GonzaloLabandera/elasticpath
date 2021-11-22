@@ -21,6 +21,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.DuplicateNameException;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleScenarios;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.service.changeset.ChangeSetMemberAction;
 import com.elasticpath.service.rules.RuleService;
@@ -58,11 +59,13 @@ public class NewCatalogPromotionWizard extends AbstractPolicyAwareWizard<Rule> {
 
 		final RuleSetService ruleSetService = BeanLocator.getService(
 				ContextIdNames.RULE_SET_SERVICE);
+		final RuleSetLoadTuner ruleSetLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER,
+				RuleSetLoadTuner.class);
 
 		SellingContext sellingContext = BeanLocator.getService(ContextIdNames.SELLING_CONTEXT);
 
 		model = BeanLocator.getService(ContextIdNames.PROMOTION_RULE);
-		model.setRuleSet(ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO));
+		model.setRuleSet(ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO, ruleSetLoadTuner));
 		model.setEnabled(true);
 		model.setSellingContext(sellingContext);
 

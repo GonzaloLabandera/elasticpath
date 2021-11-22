@@ -5,7 +5,8 @@ package com.elasticpath.cucumber;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.test.context.TestContext;
@@ -20,7 +21,7 @@ public class CucumberJPADatabaseTestExecutionListener extends AbstractTestExecut
 
 	private static final String JNDI_NAME = "java:comp/env/jdbc/epjndi";
 
-	private static final Logger LOG = Logger.getLogger(CucumberJPADatabaseTestExecutionListener.class);
+	private static final Logger LOG = LogManager.getLogger(CucumberJPADatabaseTestExecutionListener.class);
 
 	@Override
 	public final int getOrder() {

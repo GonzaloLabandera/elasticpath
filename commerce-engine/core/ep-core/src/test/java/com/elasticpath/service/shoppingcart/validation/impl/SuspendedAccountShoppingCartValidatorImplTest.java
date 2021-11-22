@@ -9,6 +9,7 @@ import static org.mockito.BDDMockito.given;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,13 +18,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
-import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFAttributeValue;
+import com.elasticpath.xpf.connectivity.entity.XPFCustomer;
+import com.elasticpath.xpf.connectivity.entity.XPFCustomerStatusEnum;
+import com.elasticpath.xpf.connectivity.entity.XPFShopper;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SuspendedAccountShoppingCartValidatorImplTest {
@@ -35,16 +38,19 @@ public class SuspendedAccountShoppingCartValidatorImplTest {
 	private SuspendedAccountShoppingCartValidatorImpl validator;
 
 	@Mock
-	private ShoppingCartValidationContext context;
+	private XPFShoppingCartValidationContext context;
 
 	@Mock
-	private Shopper shopper;
+	private XPFShopper shopper;
 
 	@Mock
-	private Customer customer;
+	private XPFCustomer customer;
 
 	@Mock
-	private ShoppingCart shoppingCart;
+	private XPFShoppingCart shoppingCart;
+
+	@Mock
+	private XPFAttributeValue attributeValue;
 
 
 	@Before
@@ -57,35 +63,36 @@ public class SuspendedAccountShoppingCartValidatorImplTest {
 	@Test
 	public void testThatValidatorReturnsStructuredErrorMessageIfAccountStatusSuspended() {
 		given(customer.getSharedId()).willReturn(ACCOUNT_SHARED_ID);
-		given(customer.getBusinessName()).willReturn(ACCOUNT_BUSINESS_NAME);
+		given(customer.getAttributeValueByKey("AP_NAME", null)).willReturn(Optional.of(attributeValue));
+		given(attributeValue.getStringValue()).willReturn(ACCOUNT_BUSINESS_NAME);
 		given(customer.getGuid()).willReturn(ACCOUNT_GUID);
+		given(customer.getStatus()).willReturn(XPFCustomerStatusEnum.STATUS_SUSPENDED);
 
-		final StructuredErrorMessage structuredErrorMessage = createErrorMessage(context);
+		final XPFStructuredErrorMessage structuredErrorMessage = createErrorMessage(context);
 
-		given(customer.getStatus()).willReturn(Customer.STATUS_SUSPENDED);
-
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		assertThat(messageCollections).containsOnly(structuredErrorMessage);
 	}
 
 	@Test
 	public void testThatValidatorReturnsEmptyListIfAccountNotSuspended() {
-		given(customer.getStatus()).willReturn(Customer.STATUS_DISABLED);
+		given(customer.getStatus()).willReturn(XPFCustomerStatusEnum.STATUS_DISABLED);
 
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		assertThat(messageCollections).isEmpty();
 	}
 
-	private StructuredErrorMessage createErrorMessage(final ShoppingCartValidationContext context) {
-		final Customer account = context.getShoppingCart().getShopper().getAccount();
+	private XPFStructuredErrorMessage createErrorMessage(final XPFShoppingCartValidationContext context) {
+		final XPFCustomer account = context.getShoppingCart().getShopper().getAccount();
 		final Map<String, String> data = new HashMap<>();
 		data.put("account-shared-id", account.getSharedId());
-		data.put("account-business-name", account.getBusinessName());
+		data.put("account-business-name",
+				account.getAttributeValueByKey("AP_NAME", null).map(XPFAttributeValue::getStringValue).orElse(null));
 
-		return new StructuredErrorMessage(StructuredErrorMessageType.ERROR, SuspendedAccountShoppingCartValidatorImpl.MESSAGE_ID,
+		return new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.ERROR, SuspendedAccountShoppingCartValidatorImpl.MESSAGE_ID,
 				"The account you are transacting for is currently suspended.", data,
-				new StructuredErrorResolution(Customer.class, account.getGuid()));
+				new XPFStructuredErrorResolution(XPFCustomer.class, account.getGuid()));
 	}
 }

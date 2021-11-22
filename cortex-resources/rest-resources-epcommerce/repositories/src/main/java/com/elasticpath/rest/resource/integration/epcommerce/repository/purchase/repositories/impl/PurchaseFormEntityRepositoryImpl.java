@@ -32,7 +32,7 @@ import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.PurchaseRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.service.CartHasItemsService;
 
@@ -60,7 +60,7 @@ public class PurchaseFormEntityRepositoryImpl<E extends PurchaseFormEntity, I ex
 
 	private PricingSnapshotRepository pricingSnapshotRepository;
 
-	private CustomerSessionRepository customerSessionRepository;
+	private ShopperRepository shopperRepository;
 
 	private CartHasItemsService cartHasItemsService;
 
@@ -108,8 +108,8 @@ public class PurchaseFormEntityRepositoryImpl<E extends PurchaseFormEntity, I ex
 		return cartOrderRepository.findByGuid(store, orderId)
 				.flatMap(cartOrder -> getShoppingCart(StringIdentifier.of(store), cartOrder)
 						.flatMap(shoppingCart -> pricingSnapshotRepository.getShoppingCartTaxSnapshot(shoppingCart)
-								.flatMap(taxSnapshot -> customerSessionRepository.findOrCreateCustomerSession()
-										.flatMap(customerSession -> checkout(shoppingCart, taxSnapshot, customerSession)))))
+								.flatMap(taxSnapshot -> shopperRepository.findOrCreateShopper()
+										.flatMap(shopper -> checkout(shoppingCart, taxSnapshot, shopper.getCustomerSession())))))
 				.map(purchaseId -> buildPurchaseIdentifier(store, purchaseId));
 	}
 
@@ -203,8 +203,8 @@ public class PurchaseFormEntityRepositoryImpl<E extends PurchaseFormEntity, I ex
 	}
 
 	@Reference
-	public void setCustomerSessionRepository(final CustomerSessionRepository customerSessionRepository) {
-		this.customerSessionRepository = customerSessionRepository;
+	public void setShopperRepository(final ShopperRepository shopperRepository) {
+		this.shopperRepository = shopperRepository;
 	}
 
 	@Reference

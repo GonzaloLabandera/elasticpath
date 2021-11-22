@@ -9,7 +9,8 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -32,7 +33,7 @@ import com.elasticpath.datapopulation.core.utils.SqlInputStream;
  */
 public class InitializeDatabaseActionImpl implements DataPopulationAction {
 
-	private static final Logger LOG = Logger.getLogger(InitializeDatabaseActionImpl.class);
+	private static final Logger LOG = LogManager.getLogger(InitializeDatabaseActionImpl.class);
 
 	@Autowired
 	private FilterService filterService;

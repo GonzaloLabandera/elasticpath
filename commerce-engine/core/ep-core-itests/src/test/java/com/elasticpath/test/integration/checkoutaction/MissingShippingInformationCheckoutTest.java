@@ -118,7 +118,6 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 
 		Order order = checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart,
 				taxSnapshot,
-				shoppingContext.getCustomerSession(),
 				false);
 
 		assertEquals("Order should succeed.", order.getStatus(), OrderStatus.IN_PROGRESS);
@@ -176,8 +175,6 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		final CustomerSession customerSession = shoppingContext.getCustomerSession();
 		customerSession.setCurrency(Currency.getInstance(Locale.US));
 
-		// FIXME: Remove once shoppingCart does not delegate back to CustomerSession.
-		shoppingCart.setCustomerSession(customerSession);
 		shoppingCart.setBillingAddress(getAddress());
 		shoppingCart.setShippingAddress(getAddress());
 

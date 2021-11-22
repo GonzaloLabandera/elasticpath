@@ -3,8 +3,9 @@
  */
 package com.elasticpath.cmclient.fulfillment.views.customer;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -45,7 +46,7 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 	 */
 	public static final String VIEW_ID = CustomerSearchResultsView.class.getName();
 
-	private static final Logger LOG = Logger.getLogger(CustomerSearchResultsView.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerSearchResultsView.class);
 
 	// table column constants
 	private static final int COLUMN_IMAGE = 0;

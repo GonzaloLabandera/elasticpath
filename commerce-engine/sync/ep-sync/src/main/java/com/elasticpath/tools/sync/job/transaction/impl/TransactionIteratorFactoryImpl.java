@@ -7,7 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tools.sync.exception.SyncToolRuntimeException;
 import com.elasticpath.tools.sync.job.descriptor.TransactionJobDescriptorEntry;
@@ -20,7 +21,7 @@ import com.elasticpath.tools.sync.job.transaction.TransactionSettings;
  */
 public class TransactionIteratorFactoryImpl implements TransactionIteratorFactory {
 	
-	private static final Logger LOG = Logger.getLogger(TransactionIteratorFactoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(TransactionIteratorFactoryImpl.class);
 
 	private Map<TransactionAttribute, TransactionListIterator> iteratorMap;
 

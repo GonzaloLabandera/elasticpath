@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>ext-data-population-cli</artifactId>
-	<name>Extension Data Population CLI</name>
+	<name>Data Population Tool CLI</name>
 	<description>Data population CLI tool that includes client extensions to core, importexport and data population functionality.</description>
 	<packaging>jar</packaging>
 
@@ -94,6 +94,19 @@
 					<descriptors>
 						<descriptor>assembly.xml</descriptor>
 					</descriptors>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${ep.release.version}</Implementation-Version>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+					</archive>
 				</configuration>
 			</plugin>
 		</plugins>

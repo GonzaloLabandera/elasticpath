@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin.taxes.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.IAction;
 
 import com.elasticpath.cmclient.admin.taxes.TaxesImageRegistry;
@@ -16,7 +17,7 @@ import com.elasticpath.cmclient.core.actions.AbstractAuthorizedShowViewAction;
  * Opens tax values dialog.
  */
 public class ShowTaxValuesDialogAction extends AbstractAuthorizedShowViewAction {
-	private static final Logger LOG = Logger.getLogger(ShowTaxValuesDialogAction.class);
+	private static final Logger LOG = LogManager.getLogger(ShowTaxValuesDialogAction.class);
 
 	@Override
 	public void run(final IAction action) {

@@ -61,10 +61,12 @@ public class UpdateDuplicateOrders implements CustomTaskChange {
 	private static final String NUMBER_SEPARATOR = "-dup-";
 	private static final String CONFIRMATION_MESSAGE = "Updated %s Orders to remove duplicate Cart Order Guids";
 
-	private static final String SELECT_DUPLICATE_ORDER_GUIDS = "SELECT CART_ORDER_GUID FROM TORDER GROUP BY CART_ORDER_GUID HAVING COUNT(*) > 1";
+	private static final String SELECT_DUPLICATE_ORDER_GUIDS =
+			"SELECT CART_ORDER_GUID FROM TORDER WHERE CART_ORDER_GUID IS NOT NULL GROUP BY CART_ORDER_GUID HAVING COUNT(*) > 1";
+
 	private static final String SELECT_DUPLICATE_ORDERS = "SELECT UIDPK,ORDER_NUMBER,CART_ORDER_GUID FROM TORDER WHERE CART_ORDER_GUID IN (%s)";
 
-	private static final String UPDATE_CART_ORDER_GUID_FOR_ORDER = "UPDATE TORDER SET CART_ORDER_GUID = ? WHERE (UIDPK = ?)";
+	private static final String UPDATE_CART_ORDER_GUID_FOR_ORDER = "UPDATE TORDER SET CART_ORDER_GUID = ? WHERE UIDPK = ?";
 
 	@Override
 	public void execute(final Database database) throws CustomChangeException {

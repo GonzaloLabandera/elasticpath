@@ -1,10 +1,10 @@
 package com.elasticpath.importexport;
 
+import static com.elasticpath.base.util.ProcessBuilderUtils.execWithRedirectedErrorStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +12,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.selenium.domainobjects.ReplaceString;
 import com.elasticpath.selenium.framework.util.PropertyManager;
@@ -33,26 +34,25 @@ public class ImportExport {
 	private static final String TOTAL_NUMBER_OF_OBJECTS = "Total Number Of Objects";
 	private static final String ARE_NOT_AS_EXPECTED = " are not as expected";
 	private final String importExportCli;
-	private static final String newImportExportCli = "ep-importExport-cli";
+	private static final String NEW_IMPORT_EXPORT_CLI = "ep-importExport-cli";
 	private final String newImportExportFolderPath;
 	private URL loc;
-	private static final Logger LOGGER = Logger.getLogger(ImportExport.class);
+	private static final Logger LOGGER = LogManager.getLogger(ImportExport.class);
 	private final ReplaceString replaceString;
 	private String outPutLog;
 	private Map<String, Integer> exportedObjectsMap;
 	private Map<String, Integer> importedObjectsMap;
 	private String exportDbHost;
 	private String exportDBPort;
-	private String exportImportSchemaName;
 
 	/**
 	 * Constructor.
 	 */
 	public ImportExport() {
-		URL loc = getClass().getClassLoader().getResource(IMPORT_EXPORT_FILE_NAME);
+		loc = getClass().getClassLoader().getResource(IMPORT_EXPORT_FILE_NAME);
 		resourseFolderPath = new File(loc.getFile()).getParent();
 		importExportCli = propertyManager.getProperty("import.export.cli");
-		newImportExportFolderPath = resourseFolderPath + "/" + newImportExportCli;
+		newImportExportFolderPath = resourseFolderPath + "/" + NEW_IMPORT_EXPORT_CLI;
 		replaceString = new ReplaceString();
 	}
 
@@ -62,11 +62,11 @@ public class ImportExport {
 	public void copyFolder() {
 		try {
 			loc = getClass().getClassLoader().getResource(COPY_FILE_NAME);
-			Runtime.getRuntime().exec(CHMOD_777 + loc.getPath()).waitFor();
+			execWithRedirectedErrorStream(CHMOD_777 + loc.getPath()).waitFor();
 			String[] cmd = {loc.getPath(), resourseFolderPath, importExportCli, newImportExportFolderPath};
-			LOGGER.info("cmd ...... : " + loc.getPath() + " ------ " + resourseFolderPath + " ------- " + importExportCli
-					+ " ------- " + newImportExportFolderPath);
-			Process process = Runtime.getRuntime().exec(cmd);
+			LOGGER.info("cmd ...... : {} ------ {} ------- {} ------- {}", loc.getPath(), resourseFolderPath,
+					importExportCli, newImportExportFolderPath);
+			Process process = execWithRedirectedErrorStream(cmd);
 			readLines(process);
 		} catch (Exception e) {
 			LOGGER.error(e);
@@ -83,10 +83,10 @@ public class ImportExport {
 	public void deleteFolder() {
 		try {
 			loc = getClass().getClassLoader().getResource(DELETE_FOLDER_FILE_NAME);
-			Runtime.getRuntime().exec(CHMOD_777 + loc.getPath()).waitFor();
+			execWithRedirectedErrorStream(CHMOD_777 + loc.getPath()).waitFor();
 			String[] cmd = {loc.getPath(), resourseFolderPath, newImportExportFolderPath};
-			LOGGER.info("cmd ...... : " + loc.getPath() + " ------ " + resourseFolderPath + " ------- " + newImportExportFolderPath);
-			Process process = Runtime.getRuntime().exec(cmd);
+			LOGGER.info("cmd ...... : {} ------ {} ------- {}", loc.getPath(), resourseFolderPath, newImportExportFolderPath);
+			Process process = execWithRedirectedErrorStream(cmd);
 			readLines(process);
 		} catch (Exception e) {
 			LOGGER.error(e);
@@ -98,31 +98,24 @@ public class ImportExport {
 	}
 
 	private void readLines(final Process process) {
-		BufferedReader bufferedReader = null;
-		try {
-			bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 
 			String line;
-			outPutLog = "";
+			StringBuilder outputLogBuilder = new StringBuilder();
 			while ((line = bufferedReader.readLine()) != null) {
 				LOGGER.info(line);
-				outPutLog = outPutLog + line + "#\n";
+				outputLogBuilder.append(line);
+				outputLogBuilder.append("#\n");
 			}
 			exitValue = process.waitFor();
-			LOGGER.info("Process exitValue: " + exitValue);
+			LOGGER.info("Process exitValue: {}", exitValue);
+			outPutLog = outputLogBuilder.toString();
 			LOGGER.info(outPutLog);
 		} catch (Exception e) {
 			LOGGER.error(e);
 		} finally {
-			try {
-				if (process != null) {
-					process.destroy();
-				}
-				if (bufferedReader != null) {
-					bufferedReader.close();
-				}
-			} catch (IOException e) {
-				LOGGER.error(e);
+			if (process != null) {
+				process.destroy();
 			}
 		}
 	}
@@ -152,7 +145,7 @@ public class ImportExport {
 	public void runImportWithFlag(final String changeSetGuid, final String flag) {
 		LOGGER.info("Running Import with change set guid and flag (s1 or s2).....");
 		printConfigFile();
-		LOGGER.info("change set guid: " + changeSetGuid);
+		LOGGER.info("change set guid: {}", changeSetGuid);
 		runImportExport("Import", "-i -c importconfiguration.xml -g " + changeSetGuid + " -s " + flag);
 	}
 
@@ -171,11 +164,12 @@ public class ImportExport {
 	private void runImportExport(final String type, final String cliCmd) {
 		try {
 			loc = getClass().getClassLoader().getResource(IMPORT_EXPORT_FILE_NAME);
-			Runtime.getRuntime().exec(CHMOD_777 + loc.getPath()).waitFor();
-			Runtime.getRuntime().exec(CHMOD_777 + newImportExportFolderPath + "/importexport.sh").waitFor();
-			String[] cmd = {loc.getPath(), resourseFolderPath + "/" + newImportExportCli, cliCmd};
-			LOGGER.info("cmd ...... : " + resourseFolderPath + "/" + newImportExportCli);
-			Process process = Runtime.getRuntime().exec(cmd);
+            execWithRedirectedErrorStream(CHMOD_777 + loc.getPath()).waitFor();
+            execWithRedirectedErrorStream(CHMOD_777 + newImportExportFolderPath + "/importexport.sh").waitFor();
+			String[] cmd = {loc.getPath(), resourseFolderPath + "/" + NEW_IMPORT_EXPORT_CLI, cliCmd};
+			LOGGER.info("cmd ...... : {}/{}", resourseFolderPath, NEW_IMPORT_EXPORT_CLI);
+
+			Process process = execWithRedirectedErrorStream(cmd);
 			readLines(process);
 		} catch (Exception e) {
 			LOGGER.error(e);
@@ -234,7 +228,7 @@ public class ImportExport {
 	public void createExportedObjectsMap() {
 		exportedObjectsMap = new HashMap<>();
 		createObjectsMap(exportedObjectsMap);
-		LOGGER.info("Number of exported objects:...  " + exportedObjectsMap.size());
+		LOGGER.info("Number of exported objects:...  {}", exportedObjectsMap.size());
 	}
 
 	/**
@@ -243,13 +237,13 @@ public class ImportExport {
 	public void createImportedObjectsMap() {
 		importedObjectsMap = new HashMap<>();
 		createObjectsMap(importedObjectsMap);
-		LOGGER.info("Number of imported objects:...  " + importedObjectsMap.size());
+		LOGGER.info("Number of imported objects:...  {}", importedObjectsMap.size());
 	}
 
 	private void createObjectsMap(final Map<String, Integer> objectsMap) {
 		String[] actualResultArray = outPutLog.substring(outPutLog.indexOf(TOTAL_NUMBER_OF_OBJECTS)).split("#");
 		for (String actualResult : actualResultArray) {
-			LOGGER.info("actual Result...............: " + actualResult);
+			LOGGER.info("actual Result...............: {}", actualResult);
 			String[] objectResultArray = actualResult.split(":");
 			if (!objectResultArray[0].contains("EP-ImportExport")
 					&& objectResultArray.length > 1 && objectResultArray[1].chars().allMatch(Character::isDigit)) {
@@ -335,7 +329,7 @@ public class ImportExport {
 	private void modifyExportConfigFile() {
 		exportDbHost = propertyManager.getProperty("export.db.connection.host");
 		exportDBPort = propertyManager.getProperty("export.db.connection.port");
-		exportImportSchemaName = propertyManager.getProperty("export.import.db.schemaname");
+		String exportImportSchemaName = propertyManager.getProperty("export.import.db.schemaname");
 		String filePath = newImportExportFolderPath + "/importexporttool.config";
 		replaceString.replaceString(filePath, "127.0.0.1", exportDbHost);
 		replaceString.replaceString(filePath, "localhost", exportDbHost);
@@ -397,8 +391,6 @@ public class ImportExport {
 			while ((line = bufferedReader.readLine()) != null) {
 				LOGGER.info(line);
 			}
-		} catch (FileNotFoundException e) {
-			LOGGER.error(e.getMessage());
 		} catch (IOException e) {
 			LOGGER.error(e.getMessage());
 		}

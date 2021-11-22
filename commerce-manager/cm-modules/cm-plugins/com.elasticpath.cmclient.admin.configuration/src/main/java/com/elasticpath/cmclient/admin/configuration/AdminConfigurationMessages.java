@@ -63,7 +63,6 @@ public final class AdminConfigurationMessages {
 
 	// Search index names
 	public String category;
-	public String customer;
 	public String order;
 	public String orderreturn;
 	public String product;

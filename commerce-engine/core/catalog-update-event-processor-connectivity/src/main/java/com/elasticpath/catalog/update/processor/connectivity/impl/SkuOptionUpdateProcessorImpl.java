@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.entity.option.Option;
 import com.elasticpath.catalog.spi.CatalogProjectionPluginProvider;
@@ -34,7 +35,7 @@ public class SkuOptionUpdateProcessorImpl implements SkuOptionUpdateProcessor {
 	 */
 	public static final String PRODUCTS = "products";
 
-	private static final Logger LOGGER = Logger.getLogger(SkuOptionUpdateProcessorImpl.class);
+	private static final Logger LOGGER = LogManager.getLogger(SkuOptionUpdateProcessorImpl.class);
 
 	private final ProjectionService<SkuOption, Option> projectionService;
 	private final OptionWriterRepository repository;
@@ -71,7 +72,7 @@ public class SkuOptionUpdateProcessorImpl implements SkuOptionUpdateProcessor {
 
 	@Override
 	public void processSkuOptionCreated(final SkuOption skuOption) {
-		LOGGER.debug("SkuOption created: " + skuOption.getGuid());
+		LOGGER.debug("SkuOption created: {}", skuOption.getGuid());
 
 		final List<Option> options = projectionService.buildAllStoresProjections(skuOption);
 		options.forEach(repository::write);
@@ -79,7 +80,7 @@ public class SkuOptionUpdateProcessorImpl implements SkuOptionUpdateProcessor {
 
 	@Override
 	public void processSkuOptionUpdated(final SkuOption skuOption) {
-		LOGGER.debug("SkuOption updated: " + skuOption.getGuid());
+		LOGGER.debug("SkuOption updated: {}", skuOption.getGuid());
 		boolean skuOptionIsUpdated = false;
 		final List<Option> options = projectionService.buildAllStoresProjections(skuOption);
 		for (Option optionProjection : options) {
@@ -110,7 +111,7 @@ public class SkuOptionUpdateProcessorImpl implements SkuOptionUpdateProcessor {
 
 	@Override
 	public void processSkuOptionDeleted(final String guid) {
-		LOGGER.debug("SkuOption deleted: " + guid);
+		LOGGER.debug("SkuOption deleted: {}", guid);
 
 		repository.delete(guid);
 	}

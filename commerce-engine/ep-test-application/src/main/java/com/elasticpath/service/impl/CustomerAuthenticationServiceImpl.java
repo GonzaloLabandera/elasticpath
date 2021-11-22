@@ -33,16 +33,16 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 	private Utility utility;
 
 	@Override
-	public void loginStore(final Store store, final String sharedId) {
-		loginStoreInternal(store, sharedId, true);
+	public void loginStore(final Store store, final String userName) {
+		loginStoreInternal(store, userName, true);
 	}
 
-	private void loginStoreInternal(final Store store, final String sharedId, final boolean primaryCustomerSession) {
-		validate(store, sharedId);
+	private void loginStoreInternal(final Store store, final String userName, final boolean primaryCustomerSession) {
+		validate(store, userName);
 
-		final Customer customer = findCustomer(store, sharedId);
+		final Customer customer = findCustomer(store, userName);
 		if (customer == null) {
-			throw new TestApplicationException("Couldn't log into store " + store.getCode() + " with shared id " + sharedId);
+			throw new TestApplicationException("Couldn't log into store " + store.getCode() + " with user name " + userName);
 		}
 
 		handleSignIn(store, customer, primaryCustomerSession);
@@ -53,25 +53,25 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		ShoppingTestData.getInstance().setStore(store);
 	}
 
-	private void validate(final Store store, final String sharedId) {
+	private void validate(final Store store, final String userName) {
 		if (store == null) {
 			throw new TestApplicationException("Store cannot be null");
 		}
 
-		if (sharedId == null) {
-			throw new TestApplicationException("Shared id cannot be null");
+		if (userName == null) {
+			throw new TestApplicationException("User name cannot be null");
 		}
 	}
 
-	private Customer findCustomer(final Store store, final String sharedId) {
-		final Customer customer = customerService.findBySharedId(sharedId, store.getCode());
+	private Customer findCustomer(final Store store, final String userName) {
+		final Customer customer = customerService.findCustomerByUserName(userName, store.getCode());
 		if (customer != null) {
 			customer.setPreferredLocale(store.getDefaultLocale());
 		}
 		return customer;
 	}
 
-	private void createAndAddAnonymousCustomerSession(final Store store, final Customer customer, final boolean primaryCustomerSession) {
+	private void createAndAddAnonymousShopper(final Store store, final Customer customer, final boolean primaryCustomerSession) {
 		if (customer == null) {
 			//don't persist the customer unless you talk with Ivan, Mike, Edison or Matt (or all).
 			throw new IllegalArgumentException("Customer cannot be null. If your customer is null, consider to use createAnonymousSession.");
@@ -86,50 +86,51 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
 		customerSession.setLocale(store.getDefaultLocale());
 		customerSession.setCurrency(store.getDefaultCurrency());
-		customerSession = customerSessionService.initializeCustomerSessionForPricing(customerSession, store.getCode(), store.getDefaultCurrency());
+		customerSessionService.initializeCustomerSessionForPricing(customerSession, store.getCode(), store.getDefaultCurrency());
 
-		createOrLoadShoppingCart(customerSession, store, customer);
+		createOrLoadShoppingCart(shopper, customerSession, store, customer);
 
 		shopperService.save(shopper);
 
 		if (primaryCustomerSession) {
-			ShoppingTestData.getInstance().setCustomerSession(customerSession);
+			ShoppingTestData.getInstance().setShopper(shopper);
 		} else {
-			ShoppingTestData.getInstance().setSecondaryCustomerSession(customerSession);
+			ShoppingTestData.getInstance().setSecondaryShopper(shopper);
 		}
 		ShoppingTestData.getInstance().setStore(store);
 	}
 
 	private void handleCustomerSignIn(final Store store, final Customer customer, final boolean primaryCustomerSession) {
-		createAndAddAnonymousCustomerSession(store, customer, primaryCustomerSession);
+		createAndAddAnonymousShopper(store, customer, primaryCustomerSession);
+		ShoppingTestData shoppingTestData = ShoppingTestData.getInstance();
 		if (primaryCustomerSession) {
-			handleCustomerSignIn(customer, ShoppingTestData.getInstance().getCustomerSession());
+			handleCustomerSignIn(customer, shoppingTestData.getShopper());
 		} else {
-			handleCustomerSignIn(customer, ShoppingTestData.getInstance().getSecondaryCustomerSession());
+			handleCustomerSignIn(customer, shoppingTestData.getSecondaryShopper());
 		}
 		ShoppingTestData.getInstance().setStore(store);
 	}
 
-	private void handleCustomerSignIn(final Customer customer, final CustomerSession customerSession) {
-		customerSession.getShopper().setCustomer(customer);
-		customerSession.setPriceListStackValid(false);
+	private void handleCustomerSignIn(final Customer customer, final Shopper shopper) {
+		shopper.setCustomer(customer);
+		shopper.getCustomerSession().setPriceListStackValid(false);
 	}
 
-	private void createOrLoadShoppingCart(final CustomerSession customerSession, final Store store) {
-		ShoppingCart shoppingCart = getShoppingCartService().findOrCreateByShopper(customerSession.getShopper());
+	private void createOrLoadShoppingCart(final Shopper shopper, final CustomerSession customerSession, final Store store) {
+		ShoppingCart shoppingCart = getShoppingCartService().findOrCreateDefaultCartByShopper(shopper);
 		customerSession.setCurrency(store.getDefaultCurrency());
-		shoppingCart.setCustomerSession(customerSession);
 		shoppingCart.setStore(store);
 		shoppingCart.setDefault(true);
 
 		shoppingCart = getShoppingCartService().saveIfNotPersisted(shoppingCart);
-		customerSession.getShopper().setCurrentShoppingCart(shoppingCart);
+		shopper.setCurrentShoppingCart(shoppingCart);
 	}
 
-	private ShoppingCart createOrLoadShoppingCart(final CustomerSession customerSession, final Store store, final Customer customer) {
-		createOrLoadShoppingCart(customerSession, store);
-		final ShoppingCart shoppingCart = customerSession.getShopper().getCurrentShoppingCart();
-		shoppingCart.setShopper(customerSession.getShopper());
+	private ShoppingCart createOrLoadShoppingCart(final Shopper shopper, final CustomerSession customerSession, final Store store,
+												  final Customer customer) {
+		createOrLoadShoppingCart(shopper, customerSession, store);
+		final ShoppingCart shoppingCart = shopper.getCurrentShoppingCart();
+		shoppingCart.setShopper(shopper);
 		if (customer != null) {
 			shoppingCart.setBillingAddress(customer.getPreferredBillingAddress());
 			shoppingCart.setShippingAddress(customer.getPreferredShippingAddress());

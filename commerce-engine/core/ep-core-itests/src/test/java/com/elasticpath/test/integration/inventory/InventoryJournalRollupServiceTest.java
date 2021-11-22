@@ -8,7 +8,8 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ import com.elasticpath.test.integration.DirtiesDatabase;
  * Tests the implementation of {@link JournalingInventoryStrategy}.
  */
 public class InventoryJournalRollupServiceTest extends DbTestCase {
-	private final static Logger LOG = Logger.getLogger(InventoryJournalRollupServiceTest.class); 
+	private final static Logger LOG = LogManager.getLogger(InventoryJournalRollupServiceTest.class); 
 	
 	@Autowired private InventoryDao inventoryDao;
 	@Autowired private InventoryJournalDao inventoryJournalDao;

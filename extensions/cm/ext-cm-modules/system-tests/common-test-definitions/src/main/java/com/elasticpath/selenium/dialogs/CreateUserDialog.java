@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -19,7 +20,7 @@ import com.elasticpath.selenium.util.Constants;
  */
 public class CreateUserDialog extends AbstractDialog {
 
-	private static final Logger LOGGER = Logger.getLogger(CreateUserDialog.class);
+	private static final Logger LOGGER = LogManager.getLogger(CreateUserDialog.class);
 
 	/**
 	 * CSS selector used to identify the dialog.

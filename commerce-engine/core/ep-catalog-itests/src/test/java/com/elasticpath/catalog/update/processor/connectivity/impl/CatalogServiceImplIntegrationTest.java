@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.junit.Before;
@@ -339,6 +340,7 @@ public class CatalogServiceImplIntegrationTest extends DbTestCase {
 		projectionEntity.setSchemaVersion("1");
 		projectionEntity.setContent("{}");
 		projectionEntity.setContentHash("contentHash");
+		projectionEntity.setGuid(UUID.randomUUID().toString());
 
 		return projectionEntity;
 	}

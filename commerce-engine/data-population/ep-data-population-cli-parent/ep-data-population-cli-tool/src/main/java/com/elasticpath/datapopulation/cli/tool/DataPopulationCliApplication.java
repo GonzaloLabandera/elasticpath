@@ -5,7 +5,8 @@ package com.elasticpath.datapopulation.cli.tool;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.shell.Bootstrap;
@@ -18,7 +19,7 @@ public class DataPopulationCliApplication {
 	 * The return code to exit the system with from the {@link #main(String[])} method if a {@link DataPopulationCliException} has been thrown.
 	 */
 	public static final int DATA_POPULATION_EXCEPTION_RETURN_CODE = 1;
-	private static final Logger LOG = Logger.getLogger(DataPopulationCliApplication.class);
+	private static final Logger LOG = LogManager.getLogger(DataPopulationCliApplication.class);
 	private DataPopulationCliApplicationInitializer initializer;
 	private DataPopulationCliGlobalConfigurer globalConfiguration;
 

@@ -32,6 +32,7 @@ import com.elasticpath.domain.datapolicy.impl.DataPolicyImpl;
 import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
 import com.elasticpath.service.datapolicy.DataPointService;
@@ -122,6 +123,9 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 	@Autowired
 	@Qualifier("customerService")
 	CustomerService customerService;
+
+	@Autowired
+	AddressService addressService;
 
 	@Autowired
 	BeanFactory beanFactory;
@@ -304,7 +308,7 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 		return segments;
 	}
 
-	protected CustomerSession createCustomerSession(final Customer customer, final Catalog catalog) {
+	protected Shopper createShopper(final Customer customer, final Catalog catalog) {
 		final Shopper shopper = TestShopperFactoryForTestApplication.getInstance().createNewShopperWithMemento();
 		shopper.setCustomer(customer);
 		shopperService.save(shopper);
@@ -315,7 +319,7 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 		final PriceListHelperService priceListHelperService = getBeanFactory().getSingletonBean(ContextIdNames.PRICE_LIST_HELPER_SERVICE, PriceListHelperService.class);
 		final Currency currency = priceListHelperService.getDefaultCurrencyFor(catalog);
 		customerSession.setCurrency(currency);
-		return customerSession;
+		return shopper;
 	}
 
 	protected void setupEnableDataPoliciesSettingValue(final String storeCode, final Boolean enabled) {

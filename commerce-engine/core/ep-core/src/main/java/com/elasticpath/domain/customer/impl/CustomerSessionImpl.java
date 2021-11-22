@@ -6,11 +6,11 @@ package com.elasticpath.domain.customer.impl;
 import java.util.Currency;
 import java.util.Locale;
 
-import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.commons.util.SimpleCache;
+import com.elasticpath.commons.util.impl.SimpleCacheImpl;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.TagSetInvalidationDeterminer;
 import com.elasticpath.domain.pricing.PriceListStack;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.rules.impl.RuleEngineRuleStrategy;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
@@ -35,20 +35,19 @@ public class CustomerSessionImpl implements CustomerSession {
 
 	private Locale locale;
 	private Currency currency;
-	private Shopper shopper;
+
+	private final SimpleCache simpleCache;
 
 	private transient TagSetInvalidationDeterminer priceListStackInvalidationDeterminer;
 	private transient TagSetInvalidationDeterminer promoInvalidationDeterminer;
-
 
 	/**
 	 * Default constructor.
 	 */
 	public CustomerSessionImpl() {
+		simpleCache = new SimpleCacheImpl();
 		setupTagSet();
 	}
-
-	// CustomerSessionTransientData interface
 
 	@Override
 	public Locale getLocale() {
@@ -98,9 +97,7 @@ public class CustomerSessionImpl implements CustomerSession {
 	public TagSet getCustomerTagSet() {
 		return tagSet;
 	}
-	/**
-	 * @param tagSet the customer's {@link TagSet}
-	 */
+
 	@Override
 	public void setCustomerTagSet(final TagSet tagSet) {
 		if (this.getCustomerTagSet() != null) {
@@ -118,45 +115,25 @@ public class CustomerSessionImpl implements CustomerSession {
 
 		if (priceListStackInvalidationDeterminer.needInvalidate(key)) {
 			setPriceListStackValid(false);
-			shopper.getCache().cacheInvalidate(RuleEngineRuleStrategy.CART_RULE_IDS);
-			shopper.getCache().cacheInvalidate(RuleEngineRuleStrategy.CATALOG_RULE_IDS);
+			getCache().cacheInvalidate(RuleEngineRuleStrategy.CART_RULE_IDS);
+			getCache().cacheInvalidate(RuleEngineRuleStrategy.CATALOG_RULE_IDS);
 
 		} else if (promoInvalidationDeterminer.needInvalidate(key)) {
-			shopper.getCache().cacheInvalidate(RuleEngineRuleStrategy.CART_RULE_IDS);
-			shopper.getCache().cacheInvalidate(RuleEngineRuleStrategy.CATALOG_RULE_IDS);
+			getCache().cacheInvalidate(RuleEngineRuleStrategy.CART_RULE_IDS);
+			getCache().cacheInvalidate(RuleEngineRuleStrategy.CATALOG_RULE_IDS);
 		}
 	}
 
-	// CustomerSession interface
-
 	@Override
-	public void setShopper(final Shopper shopper) {
-		if (shopper == null) {
-			throw new EpServiceException("Shopper should not be null.");
-		}
-		this.shopper = shopper;
+	public SimpleCache getCache() {
+		return simpleCache;
 	}
 
-	@Override
-	public Shopper getShopper() {
-		return shopper;
-	}
-
-	/**
-	 * Get the currency of the customer corresponding to the shopping cart.
-	 *
-	 * @return the <code>Currency</code>
-	 */
 	@Override
 	public Currency getCurrency() {
 		return this.currency;
 	}
 
-	/**
-	 * Set the currency of the customer corresponding to the shopping cart.
-	 *
-	 * @param currency the <code>Currency</code>
-	 */
 	@Override
 	public void setCurrency(final Currency currency) {
 		this.currency = currency;

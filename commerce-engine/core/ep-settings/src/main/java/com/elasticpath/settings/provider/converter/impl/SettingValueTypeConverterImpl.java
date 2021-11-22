@@ -11,6 +11,7 @@ import com.elasticpath.settings.MalformedSettingValueException;
 import com.elasticpath.settings.UnexpectedSettingValueTypeException;
 import com.elasticpath.settings.domain.SettingValue;
 import com.elasticpath.settings.provider.converter.SettingValueTypeConverter;
+import com.elasticpath.xpf.connectivity.entity.XPFSettingValue;
 
 /**
  * Implementation of {@link SettingValueTypeConverter} that delegates to a preconfigured map.
@@ -31,6 +32,22 @@ public class SettingValueTypeConverterImpl implements SettingValueTypeConverter 
 		} catch (final ConversionMalformedValueException e) {
 			throw new MalformedSettingValueException(
 					"Unable to convert Setting Value [" + settingValue.getPath() + "] to a value of type [" + settingValue.getValueType() + "]", e);
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T convert(final XPFSettingValue xpfSettingValue) {
+		try {
+			if (xpfSettingValue == null || xpfSettingValue.getValue() == null) {
+				return null;
+			}
+
+			return (T) findTypeConverter(xpfSettingValue.getValueType().getTypeKey()).convert(xpfSettingValue.getValue().toString());
+		} catch (final ConversionMalformedValueException e) {
+			throw new MalformedSettingValueException(
+					"Unable to convert Setting Value [" + xpfSettingValue.getValue() + "] to a value of type ["
+							+ xpfSettingValue.getValueType().getTypeKey() + "]", e);
 		}
 	}
 

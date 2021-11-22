@@ -13,7 +13,6 @@ import org.osgi.service.component.annotations.Reference;
 import com.elasticpath.base.exception.structured.EpStructureErrorMessageException;
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.carts.CartDescriptorEntity;
 import com.elasticpath.rest.definition.carts.CartDescriptorIdentifier;
@@ -53,23 +52,18 @@ implements Repository<CartDescriptorEntity, CartDescriptorIdentifier> {
 
 	@Override
 	public Completable update(final CartDescriptorEntity entity, final CartDescriptorIdentifier identifier) {
-
-
 		String cartGuid = identifier.getCart().getCartId().getValue();
-		ShoppingCart shoppingCart = shoppingCartService.findByGuid(cartGuid);
-		Map<String, String> identifiers = entity.getDynamicProperties();
-		for (Map.Entry<String, String> entry : identifiers.entrySet()) {
-			shoppingCart.setCartDataFieldValue(entry.getKey(), entry.getValue());
-		}
+		ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCart(cartGuid).blockingGet();
+		shoppingCart.getModifierFields().putAll(entity.getDynamicProperties());
+
 		try {
-			getStrategy().validateCreate(shoppingCart);
+			getStrategy().validateCreateOrUpdate(shoppingCart);
 		} catch (EpStructureErrorMessageException exception) {
 			return Completable.error(exceptionTransformer.getResourceOperationFailure(
 					new EpValidationException("Cannot Update Cart Identifier", exception.getStructuredErrorMessages())));
 		}
-
-			shoppingCartService.saveOrUpdate(shoppingCart);
-			return Completable.complete();
+		shoppingCartService.saveOrUpdate(shoppingCart);
+		return Completable.complete();
 	}
 
 
@@ -84,13 +78,13 @@ implements Repository<CartDescriptorEntity, CartDescriptorIdentifier> {
 		return strategy;
 	}
 	private CartDescriptorEntity getCartDescriptors(final CartDescriptorIdentifier identifier) {
-		Map<String, CartData> cartDescriptors =
+		Map<String, String> cartDescriptors =
 				shoppingCartRepository.getCartDescriptors(identifier.getCart().getCartId().getValue());
 
 		CartDescriptorEntity.Builder identifierBuilder = CartDescriptorEntity.builder();
 
-		cartDescriptors.values()
-				.forEach(value -> identifierBuilder.addingProperty(value.getKey(), value.getValue()));
+		cartDescriptors.entrySet()
+				.forEach(entry -> identifierBuilder.addingProperty(entry.getKey(), entry.getValue()));
 
 		return identifierBuilder.build();
 	}

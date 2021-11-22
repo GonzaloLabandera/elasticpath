@@ -5,9 +5,10 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-05-cart-cleanup-jobs.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-05-cart-cleanup-jobs.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
-	<changeSet id="2020-05-cart-cleanup-jobs-recreate-FKs-with-cascade-delete" author="elasticpath" failOnError="true" dbms="mysql, h2">
+	<changeSet id="2020-05-cart-cleanup-jobs-recreate-FKs-with-cascade-delete" author="elasticpath" failOnError="true" dbms="mysql, h2,postgresql">
 		<comment>[PERF-252] Drop and create FKs with CASCADE deletion</comment>
 
 		<!-- Set cascade deletion for TCARTORDERPAYMENTINSTRUMENT -->

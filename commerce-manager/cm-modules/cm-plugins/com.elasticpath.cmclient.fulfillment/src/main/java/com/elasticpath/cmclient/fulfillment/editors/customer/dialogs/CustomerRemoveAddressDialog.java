@@ -3,8 +3,6 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.customer.dialogs;
 
-import java.util.List;
-
 import org.eclipse.jface.dialogs.IDialogLabelKeys;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
@@ -16,7 +14,7 @@ import com.elasticpath.cmclient.fulfillment.util.AddressUtil;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.service.customer.CustomerService;
+import com.elasticpath.service.customer.AddressService;
 
 /**
  * Dialog for removing Customer Addresses.
@@ -32,11 +30,11 @@ public class CustomerRemoveAddressDialog extends MessageDialog {
 
 	private static final int BUTTON_INDEX_OK = 0;
 
-	private static CustomerService customerService;
-
 	private final Customer customer;
 	
 	private final CustomerAddress address;
+
+	private final AddressService addressService;
 
 	/**
 	 * Dialog for confirmation to remove address from a Customer.
@@ -50,6 +48,7 @@ public class CustomerRemoveAddressDialog extends MessageDialog {
 				FulfillmentMessages.get().AddressDialog_RemoveMessage, QUESTION, BUTTONS, 0);
 		this.customer = customer;
 		this.address = address;
+		this.addressService = BeanLocator.getSingletonBean(ContextIdNames.ADDRESS_SERVICE, AddressService.class);
 	}
 	
 	@Override
@@ -60,12 +59,7 @@ public class CustomerRemoveAddressDialog extends MessageDialog {
 					
 		final int result = super.open();
 		if (result == BUTTON_INDEX_OK) {
-			if (customerService == null) {
-				customerService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
-			}
-			final List <CustomerAddress> addresses = customer.getAddresses();
-			addresses.remove(address);
-			customer.setAddresses(addresses);
+			addressService.remove(customer, address);
 		}
 		return result;
 	}

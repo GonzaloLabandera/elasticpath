@@ -18,6 +18,7 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -247,7 +248,15 @@ public final class ShoppingCartStubBuilder {
 					}
 				}
 
-				allowing(cart).getCustomerSession();
+				Shopper shopper = context.mock(Shopper.class);
+
+				allowing(shopper).getCustomerSession();
+				will(returnValue(customerSession));
+
+				allowing(cart).getShopper();
+				will(returnValue(shopper));
+
+				allowing(shopper).getCustomerSession();
 				will(returnValue(customerSession));
 
 			} });

@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.store.StoreAssociationDTO;
 import com.elasticpath.common.dto.store.StoreDTO;
@@ -35,7 +36,7 @@ import com.elasticpath.service.store.StoreService;
  */
 public class StoreExporter extends AbstractExporterImpl<Store, StoreDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(StoreExporter.class);
+	private static final Logger LOG = LogManager.getLogger(StoreExporter.class);
 
 	private StoreService storeService;
 

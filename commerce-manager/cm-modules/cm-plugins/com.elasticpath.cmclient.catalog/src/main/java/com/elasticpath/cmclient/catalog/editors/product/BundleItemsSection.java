@@ -5,8 +5,9 @@ package com.elasticpath.cmclient.catalog.editors.product;
 
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -74,7 +75,7 @@ import com.elasticpath.domain.catalog.SelectionRule;
 
 public class BundleItemsSection extends AbstractPolicyAwareEditorPageSectionPart {
 
-	private static final Logger LOG = Logger.getLogger(BundleItemsSection.class);
+	private static final Logger LOG = LogManager.getLogger(BundleItemsSection.class);
 
 	private static final int COLUMN_WIDTH_QTY = 60;
 
@@ -406,7 +407,12 @@ public class BundleItemsSection extends AbstractPolicyAwareEditorPageSectionPart
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(final SelectionEvent event) {
-				ProductBundleConstituentsDialog dialog = new ProductBundleConstituentsDialog(getShell(), getSelectedBundleConstituent(), true,
+				// If a bundle constituent is not selected then do nothing.
+				BundleConstituent bundleConstituent = getSelectedBundleConstituent();
+				if (bundleConstituent == null) {
+					return;
+				}
+				ProductBundleConstituentsDialog dialog = new ProductBundleConstituentsDialog(getShell(), bundleConstituent, true,
 						getProductBundleModel());
 				if (dialog.open() == Window.OK) {
 					refreshTableViewer();
@@ -435,15 +441,16 @@ public class BundleItemsSection extends AbstractPolicyAwareEditorPageSectionPart
 			}
 		};
 	}
-	
+
 	private BundleConstituent getSelectedBundleConstituent() {
 		IStructuredSelection selection = (IStructuredSelection) productConstituentsTableViewer.getSwtTableViewer().getSelection();
+		// If nothing is selected, return null.
 		if (selection == null || selection.isEmpty()) {
-			return null;
+				return null;
 		}
 		return (BundleConstituent) selection.getFirstElement();
 	}
-	
+
 	private ProductBundle getProductBundleModel() {
 		return (ProductBundle) ((ProductEditor) getEditor()).getModel().getProduct();
 	}

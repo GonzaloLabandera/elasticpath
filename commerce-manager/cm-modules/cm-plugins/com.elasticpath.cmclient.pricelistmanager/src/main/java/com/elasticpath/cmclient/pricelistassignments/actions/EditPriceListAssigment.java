@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.pricelistassignments.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
@@ -21,7 +22,7 @@ import com.elasticpath.common.dto.pricing.PriceListAssignmentsDTO;
  */
 public class EditPriceListAssigment extends AbstractPolicyAwareAction {
 
-	private static final Logger LOG = Logger.getLogger(EditPriceListAssigment.class.getName());
+	private static final Logger LOG = LogManager.getLogger(EditPriceListAssigment.class.getName());
 	
 	private final PriceListAssigmentsSearchView view;
 	

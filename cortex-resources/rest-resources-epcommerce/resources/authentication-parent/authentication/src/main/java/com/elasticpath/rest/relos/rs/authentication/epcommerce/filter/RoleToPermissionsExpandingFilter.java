@@ -21,6 +21,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 import com.elasticpath.base.exception.EpSystemException;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.relos.rs.authentication.request.AddHeadersRequestWrapper;
 import com.elasticpath.rest.relos.rs.authentication.request.ModifiedHeaderRequestWrapper;
 import com.elasticpath.rest.relos.rs.subject.SubjectHeaderConstants;
@@ -72,7 +73,7 @@ public class RoleToPermissionsExpandingFilter implements Filter {
 		String accountSharedId = SubjectHeadersUtil.getAccountSharedIdFromRequest(httpRequest);
 		String accountGuid = null;
 		if (accountSharedId != null) {
-			accountGuid = customerService.findCustomerGuidBySharedId(accountSharedId);
+			accountGuid = customerService.findCustomerGuidBySharedId(accountSharedId, CustomerType.ACCOUNT);
 		}
 
 		return shiroRolesDeterminationService.determineShiroRoles(scope, isAuthenticated, userGuid, accountGuid);

@@ -11,18 +11,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.cache.CacheResult;
-import com.elasticpath.cache.SynchronizedCacheSupport;
+import com.elasticpath.base.cache.CacheResult;
+import com.elasticpath.base.cache.SynchronizedCacheSupport;
+import com.elasticpath.base.cache.impl.SynchronizedCacheSupportImpl;
 
 /**
  * Tests for SynchronizedCacheSupportImpl.
@@ -34,9 +34,7 @@ public class SynchronizedCacheSupportImplTest {
 	private static final int FALLBACK_LOADER_DELAY_MS = 5000;
 	private static final int MAX_TEST_DURATION_SECONDS = 30;
 
-	private final Consumer<Pair<Object, Boolean>> populateCacheFunctionDoNothing = pair -> {
-		// Do nothing
-	};
+	private final BiFunction<Object, Boolean, Boolean> populateCacheFunctionDoNothing = (key, value) -> value;
 	private final Function<Object, CacheResult<Boolean>> checkCacheFunctionAlwaysHit = key -> CacheResult.create(true);
 	private final Function<Object, CacheResult<Boolean>> checkCacheFunctionAlwaysMiss = key -> CacheResult.notPresent();
 
@@ -85,7 +83,10 @@ public class SynchronizedCacheSupportImplTest {
 			}
 			return true;
 		};
-		Consumer<Pair<Object, Boolean>> populateCacheFunction = pair -> cacheContents.set(pair.getValue());
+		BiFunction<Object, Boolean, Boolean> populateCacheFunction = (key, value) -> {
+			cacheContents.set(value);
+			return value;
+		};
 		Function<Object, CacheResult<Boolean>> checkCacheFunction = key -> {
 			if (cacheContents.get() == null) {
 				return CacheResult.notPresent();

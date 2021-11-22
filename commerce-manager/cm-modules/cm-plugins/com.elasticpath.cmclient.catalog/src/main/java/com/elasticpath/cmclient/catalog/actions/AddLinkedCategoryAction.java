@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.catalog.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -38,7 +39,7 @@ public class AddLinkedCategoryAction extends AbstractCatalogViewAction implement
 
 	private static final String ACTION_NAME = "addLinkedCategoryAction"; //$NON-NLS-1$
 
-	private static final Logger LOG = Logger.getLogger(AddLinkedCategoryAction.class);
+	private static final Logger LOG = LogManager.getLogger(AddLinkedCategoryAction.class);
 
 	private Category selectedCategory;
 

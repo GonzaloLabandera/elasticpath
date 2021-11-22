@@ -14,7 +14,8 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
@@ -25,7 +26,7 @@ import com.elasticpath.cmclient.policy.ui.StatePolicyListener;
  * The activator class controls the plug-in life cycle.
  */
 public class PolicyPlugin extends Plugin {
-	private static final Logger LOG = Logger.getLogger(PolicyPlugin.class);
+	private static final Logger LOG = LogManager.getLogger(PolicyPlugin.class);
 	/**
 	 * The plug-in ID.
 	 */

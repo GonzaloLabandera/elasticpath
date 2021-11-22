@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.warehouse.helpers;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.widgets.Display;
 
 import com.elasticpath.cmclient.core.BeanLocator;
@@ -24,7 +25,7 @@ import com.elasticpath.service.order.ReturnAndExchangeService;
  */
 public class OrderReturnSearchRequestJob extends AbstractSearchRequestJob<OrderReturn> {
 
-	private static final Logger LOG = Logger.getLogger(OrderReturnSearchRequestJob.class);
+	private static final Logger LOG = LogManager.getLogger(OrderReturnSearchRequestJob.class);
 
 	private final ReturnAndExchangeService orderReturnService;
 

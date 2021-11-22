@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2021 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-04-add-guid-to-tcatalogprojections-table.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+	<changeSet id="2021-04-add-hash-to-tcatalogprojections-table" author="elasticpath">
+		<addColumn tableName="TCATALOGPROJECTIONS">
+			<column name="GUID" type="VARCHAR(64)" />
+		</addColumn>
+	</changeSet>
+
+	<!-- Add guid to projection table. -->
+	<changeSet id="2021-04-add-guid-to-projection-table" author="elasticpath">
+		<customChange class="liquibase.ext.elasticpath.AddGuidToProjectionTable"/>
+	</changeSet>
+
+	<changeSet id="2021-04-set-projection-table-guid-to-not-null" author="elasticpath">
+		<addNotNullConstraint tableName="TCATALOGPROJECTIONS" columnName="GUID" columnDataType="VARCHAR(64)"/>
+	</changeSet>
+</databaseChangeLog>

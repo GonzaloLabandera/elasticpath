@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
@@ -28,6 +28,7 @@ import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.CustomerAuthenticationService;
 import com.elasticpath.service.CustomerOrderingService;
 import com.elasticpath.service.OrderConfigurationService;
+import com.elasticpath.service.TestAddressService;
 import com.elasticpath.service.shipping.ShippingOptionResult;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shopper.ShopperService;
@@ -48,6 +49,8 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 
 	private ShippingOptionService shippingOptionService;
 
+	private TestAddressService addressService;
+
 	/**
 	 * Creates the shopping cart for given customer with given sku.
 	 *
@@ -59,8 +62,8 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 	@Override
 	public ShoppingCart createShoppingCart(final Store store, final Customer customer, final Map<ProductSku, Integer> skuMap) {
 		final ShoppingTestData shoppingTestData = ShoppingTestData.getInstance();
-		customerAuthenticationService.loginStore(store, customer.getUserId());
-		ShoppingCart shoppingCart = shoppingTestData.getCustomerSession().getShopper().getCurrentShoppingCart();
+		customerAuthenticationService.loginStore(store, customer.getUsername());
+		ShoppingCart shoppingCart = shoppingTestData.getShopper().getCurrentShoppingCart();
 		for (Entry<ProductSku, Integer> entry : skuMap.entrySet()) {
 			cartDirector.addItemToCart(shoppingCart, new ShoppingItemDto(entry.getKey().getSkuCode(), entry.getValue()));
 		}
@@ -97,14 +100,12 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 			return;
 		}
 
-		for (CustomerAddress customerAddress : customer.getAddresses()) {
-			if (streetAddress.equals(customerAddress.getStreet1())) {
-				customerAddressSelector.selectCustomerAddress(shoppingCart, customerAddress);
-				return;
-			}
+		CustomerAddress customerAddressByStreet = addressService.findByCustomerAndStreet1(customer.getUidPk(), streetAddress);
+		if (customerAddressByStreet == null) {
+			throw new EpServiceException("Selected address could not be found");
 		}
 
-		throw new EpServiceException("Selected address could not be found");
+		customerAddressSelector.selectCustomerAddress(shoppingCart, customerAddressByStreet);
 	}
 
 	@Override
@@ -180,4 +181,7 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 		this.shippingOptionService = shippingOptionService;
 	}
 
+	public void setAddressService(final TestAddressService addressService) {
+		this.addressService = addressService;
+	}
 }

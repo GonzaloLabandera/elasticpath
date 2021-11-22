@@ -14,15 +14,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.catalog.Catalog;
-import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.store.Store;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InCatalogProductSkuValidatorTest {
@@ -31,44 +27,29 @@ public class InCatalogProductSkuValidatorTest {
 	private InCatalogProductSkuValidatorImpl validator;
 
 	@Mock
-	private ProductSkuValidationContext context;
+	private XPFProductSku productSku;
 
 	@Mock
-	private Product product;
-
-	@Mock
-	private ProductSku productSku;
-
-	@Mock
-	private Store store;
-
-	@Mock
-	private Catalog catalog;
-
+	private XPFProductSkuValidationContext context;
 	private static final String SKU_CODE = "sku_code";
 
 	@Before
 	public void setUp() {
-		given(productSku.getProduct()).willReturn(product);
-		given(productSku.getSkuCode()).willReturn(SKU_CODE);
-		given(store.getCatalog()).willReturn(catalog);
-		given(context.getStore()).willReturn(store);
-
 		given(context.getProductSku()).willReturn(productSku);
-
+		given(productSku.getCode()).willReturn(SKU_CODE);
 	}
 
 	@Test
 	public void testProductIsNotInCatalog() {
-		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage("item.not.in.store.catalog",
+		XPFStructuredErrorMessage structuredErrorMessage = new XPFStructuredErrorMessage("item.not.in.store.catalog",
 				String.format("Item '%s' is not part of the current store's catalog.", SKU_CODE),
 				ImmutableMap.of("item-code", SKU_CODE));
 
 		// Given
-		given(product.isInCatalog(Mockito.anyObject(), Mockito.anyBoolean())).willReturn(false);
+		given(context.isInStoreCatalog()).willReturn(false);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(structuredErrorMessage);
@@ -77,10 +58,10 @@ public class InCatalogProductSkuValidatorTest {
 	@Test
 	public void testProductIsInCatalog() {
 		// Given
-		given(product.isInCatalog(Mockito.anyObject(), Mockito.anyBoolean())).willReturn(true);
+		given(context.isInStoreCatalog()).willReturn(true);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();

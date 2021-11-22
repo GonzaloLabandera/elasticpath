@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.core.common;
 
 import com.elasticpath.cmclient.core.eventlistener.DigitVerifyListener;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;

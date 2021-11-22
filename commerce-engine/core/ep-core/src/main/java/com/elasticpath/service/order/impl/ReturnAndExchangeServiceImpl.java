@@ -31,7 +31,9 @@ import java.util.Optional;
 import javax.persistence.OptimisticLockException;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.openjpa.persistence.jdbc.FetchMode;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
@@ -109,7 +111,7 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 		"PMD.GodClass"})
 public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceImpl implements ReturnAndExchangeService {
 
-	private static final Logger LOG = Logger.getLogger(ReturnAndExchangeServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ReturnAndExchangeServiceImpl.class);
 	private static final String ERROR_OCCURRED_WHILE_PROCESSING_AN_EXCHANGE = "Error occurred while processing an exchange.";
 
 	/**
@@ -162,6 +164,9 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 	@Override
 	public OrderReturn get(final long orderReturnUid, final FetchGroupLoadTuner loadTuner) {
 		sanityCheck();
+
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
+
 		FetchGroupLoadTuner tuner = loadTuner;
 		if (loadTuner == null) {
 			tuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
@@ -308,11 +313,11 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 		if (shoppingCart == null) {
 
 			final Order order = exchange.getOrder();
-			final CustomerSession customerSession = createCustomerSessionForOrder(order);
-			shoppingCart = createShoppingCartForOrderAndShopper(order, customerSession);
+			final Shopper shopper = createShopperForOrder(order);
+			shoppingCart = createShoppingCartForOrderAndShopper(order, shopper);
 
 			shoppingCart.setExchangeOrderShoppingCart(true);
-			exchange.setExchangeCustomerSession(customerSession);
+			exchange.setExchangeCustomerSession(shopper.getCustomerSession());
 		}
 
 		shoppingCart.setShippingAddress(shippingAddress);
@@ -361,7 +366,7 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 			shoppingCart.setSubtotalDiscountOverride(shippingDiscount);
 		}
 
-		populateShoppingCartData(exchange.getOrder(), shoppingCart);
+		shoppingCart.getModifierFields().putAll(exchange.getOrder().getModifierFields().getMap());
 
 		ShoppingCartPricingSnapshot pricingSnapshotForCart = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshotForCart = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshotForCart);
@@ -370,37 +375,25 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 		return shoppingCart;
 	}
 
-	/**
-	 * Populates the order data from origin order to shopping cart created for exchange.
-	 *
-	 * @param originOrder             the origin order.
-	 * @param shoppingCartForExchange the shopping cart created for exchange.
-	 */
-	private void populateShoppingCartData(final Order originOrder, final ShoppingCart shoppingCartForExchange) {
-		originOrder.getFieldValues().forEach(shoppingCartForExchange::setCartDataFieldValue);
-	}
-
-	private ShoppingCart createShoppingCartForOrderAndShopper(final Order order, final CustomerSession customerSession) {
+	private ShoppingCart createShoppingCartForOrderAndShopper(final Order order, final Shopper shopper) {
 		final ShoppingCart shoppingCart = getPrototypeBean(SHOPPING_CART, ShoppingCart.class);
 		final Store store = getStoreService().findStoreWithCode(order.getStoreCode());
 
-		shoppingCart.setCustomerSession(customerSession);
-		customerSession.setCurrency(order.getCurrency());
-		customerSession.setLocale(order.getLocale());
-
 		shoppingCart.setBillingAddress(order.getBillingAddress());
 		shoppingCart.setStore(store);
+		shoppingCart.setShopper(shopper);
 
 		return shoppingCart;
 	}
 
-	private CustomerSession createCustomerSessionForOrder(final Order order) {
+	private Shopper createShopperForOrder(final Order order) {
 		final Store store = getStoreService().findStoreWithCode(order.getStoreCode());
 		final Shopper shopper = shopperService.findOrCreateShopper(order.getCustomer(), order.getStoreCode());
 		final CustomerSession customerSessionWithShopper = customerSessionService.createWithShopper(shopper);
 		customerSessionWithShopper.setCurrency(order.getCurrency());
 		customerSessionWithShopper.setLocale(order.getLocale());
-		return customerSessionService.initializeCustomerSessionForPricing(customerSessionWithShopper, store.getCode(), order.getCurrency());
+		customerSessionService.initializeCustomerSessionForPricing(customerSessionWithShopper, store.getCode(), order.getCurrency());
+		return shopper;
 	}
 
 	@Override

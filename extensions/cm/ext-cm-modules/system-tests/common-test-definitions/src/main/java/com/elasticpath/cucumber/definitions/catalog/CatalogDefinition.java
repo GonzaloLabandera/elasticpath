@@ -13,9 +13,10 @@ import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
@@ -107,7 +108,7 @@ public class CatalogDefinition {
 	private final static String TRUE = "true";
 	private final CategoryType categoryType;
 	private final AttributeContainer attributeContainer;
-	private static final Logger LOGGER = Logger.getLogger(CatalogDefinition.class);
+	private static final Logger LOGGER = LogManager.getLogger(CatalogDefinition.class);
 	private static final Pattern DATE_PATTERN = Pattern.compile("[A-Za-z]{3}\\s[0-9]{1,2},\\s[0-9]{4}\\s[0-9]+:[0-9]+\\sPM|AM");
 	private static final String DISABLE_DATE_PARAM_NAME = "disableDateTime";
 	private static final String ENABLE_DATE_PARAM_NAME = "enableDateTime";

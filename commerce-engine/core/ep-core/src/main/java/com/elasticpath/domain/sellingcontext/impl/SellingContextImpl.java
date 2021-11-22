@@ -29,7 +29,8 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.FetchAttribute;
 import org.apache.openjpa.persistence.FetchGroup;
@@ -76,7 +77,7 @@ public class SellingContextImpl extends AbstractEntityImpl implements SellingCon
 	 */
 	private static final long serialVersionUID = 5000000001L;
 
-	private static final Logger LOG = Logger.getLogger(SellingContextImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SellingContextImpl.class);
 
 	/**
 	 * Default set of tags used for evaluation.

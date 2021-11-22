@@ -5,7 +5,8 @@ package com.elasticpath.tools.sync.client.controller.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tools.sync.client.controller.exception.ExceptionHandler;
 import com.elasticpath.tools.sync.job.TransactionJobUnit;
@@ -16,7 +17,7 @@ import com.elasticpath.tools.sync.target.result.Summary;
  */
 public class SyncJobObjectEventDistributor extends AbstractObjectEventDistributor {
 
-	private static final Logger LOG = Logger.getLogger(SyncJobObjectEventDistributor.class);
+	private static final Logger LOG = LogManager.getLogger(SyncJobObjectEventDistributor.class);
 	
 	private List<ExceptionHandler> exceptionHandlers;
 	

@@ -1,8 +1,8 @@
 package com.elasticpath.cortex.dce.orders
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
-import static OrderConstants.DESTINATION_LINK
-import static OrderConstants.SHIPPING_PRODUCT
+import static com.elasticpath.cortex.dce.orders.OrderConstants.DESTINATION_LINK
+import static com.elasticpath.cortex.dce.orders.OrderConstants.SHIPPING_PRODUCT
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static org.assertj.core.api.Assertions.assertThat
 

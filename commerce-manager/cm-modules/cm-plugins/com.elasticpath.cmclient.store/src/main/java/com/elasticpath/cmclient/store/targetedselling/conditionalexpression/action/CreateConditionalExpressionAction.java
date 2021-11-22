@@ -6,7 +6,8 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.action;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogLabelKeys;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -35,7 +36,7 @@ import com.elasticpath.tags.domain.ConditionalExpression;
 public class CreateConditionalExpressionAction extends BaseConditionalExpressionAction {
 	
 	/** LOG logger. */
-	private static final Logger LOG = Logger.getLogger(CreateConditionalExpressionAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateConditionalExpressionAction.class);
 	
 	/**
 	 * default constructor for create action.

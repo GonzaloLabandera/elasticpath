@@ -7,7 +7,7 @@ package com.elasticpath.domain.catalogview.impl;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.constants.SeoConstants;
 import com.elasticpath.commons.util.UrlUtility;

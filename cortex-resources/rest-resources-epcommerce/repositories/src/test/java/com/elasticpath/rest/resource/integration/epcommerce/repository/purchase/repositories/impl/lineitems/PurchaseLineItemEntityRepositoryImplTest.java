@@ -147,7 +147,7 @@ public class PurchaseLineItemEntityRepositoryImplTest {
 	 */
 	@Test
 	public void testConvertToEntityOrderSkuForLineItemComponent() {
-		final OrderSku mockOrderSku = mock(OrderSku.class, "componentSku");
+		final OrderSku mockOrderSku = mock(OrderSku.class, RETURNS_DEEP_STUBS);
 		final OrderSku mockParentOrderSku = mock(OrderSku.class, "parentSku");
 		final ProductSku mockProductSku = mock(ProductSku.class);
 		final Product mockProduct = mock(Product.class);
@@ -252,7 +252,7 @@ public class PurchaseLineItemEntityRepositoryImplTest {
 	}
 
 	private OrderSku createMockOrderSku(final Money tax) {
-		final OrderSku orderSku = mock(OrderSku.class);
+		final OrderSku orderSku = mock(OrderSku.class, RETURNS_DEEP_STUBS);
 		final ShoppingItemTaxSnapshot taxSnapshot = mock(ShoppingItemTaxSnapshot.class);
 		final OrderShipment orderShipment = mock(OrderShipment.class);
 

@@ -11,7 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.dataimport.ImportJobStatus;
@@ -22,7 +23,7 @@ import com.elasticpath.service.dataimport.ImportService;
  * A utility class for launching an import job processor.
  */
 public class ImportJobProcessorLauncher {
-	protected static final Logger LOG = Logger.getLogger(ImportJobProcessorLauncher.class);
+	protected static final Logger LOG = LogManager.getLogger(ImportJobProcessorLauncher.class);
 
 
 	private static final int MAX_THREADS_COUNT = 2;

@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.enhance.Reflection;
 import org.apache.openjpa.event.AbstractLifecycleListener;
@@ -67,7 +68,7 @@ public class AuditEntityListener
 		extends AbstractLifecycleListener
 		implements PersistenceEngineOperationListener, InitializingBean {
 
-	private static final Logger LOG = Logger.getLogger(AuditEntityListener.class);
+	private static final Logger LOG = LogManager.getLogger(AuditEntityListener.class);
 	private static final String AUDIT_ENABLED_SYSTEM_PROPERTY = "ep.audit.enabled";
 
 	private static boolean enabledByDefault;
@@ -149,10 +150,10 @@ public class AuditEntityListener
 			return;
 		}
 		PersistenceCapable pcObject = (PersistenceCapable) object;
-		if (pcObject.pcGetStateManager() == null) {
-			saveNewObject((Persistable) object);
-		} else {
+		if (JPAUtil.hasStateManager(pcObject)) {
 			saveUpdatedFields(pcObject);
+		} else {
+			saveNewObject((Persistable) object);
 		}
 	}
 

@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -63,7 +64,7 @@ public class ProductEditor extends AbstractPolicyAwareFormEditor implements Chan
 	 */
 	public static final String PART_ID = ProductEditor.class.getName();
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(ProductEditor.class);
+	private static final Logger LOG = LogManager.getLogger(ProductEditor.class);
 	private static final String NEW_LINE = "\n"; //$NON-NLS-1$
 
 	/**

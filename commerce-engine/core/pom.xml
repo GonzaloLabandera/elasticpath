@@ -47,6 +47,8 @@
 		<module>catalog-update-event-processor-connectivity</module>
 		<module>ep-catalog-itests</module>
 		<module>ep-domain-bulk-handler</module>
+		<module>ep-xpf</module>
+		<module>ep-xpf-test-plugins</module>
 	</modules>
 
 </project>

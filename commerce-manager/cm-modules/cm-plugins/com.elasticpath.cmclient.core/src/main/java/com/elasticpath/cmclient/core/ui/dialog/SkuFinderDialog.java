@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.AssertionFailedException;
@@ -71,7 +72,7 @@ import com.elasticpath.service.search.query.StandardSortBy;
 @SuppressWarnings({ "PMD.ExcessiveImports", "PMD.GodClass" })
 public class SkuFinderDialog extends AbstractEpPriceDialog {
 
-	private static final Logger LOG = Logger.getLogger(SkuFinderDialog.class);
+	private static final Logger LOG = LogManager.getLogger(SkuFinderDialog.class);
 
 	private static final String SKU_FINDER_TABLE = "Sku Finder"; //$NON-NLS-1$
 	private static final int LEFT_PANEL_WIDTH = 280;

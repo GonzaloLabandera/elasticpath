@@ -11,7 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 
 import com.elasticpath.common.pricing.service.PromotedPriceLookupService;
@@ -51,7 +52,7 @@ public class ProductIndexBuilder extends AbstractIndexBuilder { // NOPMD
 
 	private IndexingPipeline<Collection<Long>> productIndexingPipeline;
 
-	private static final Logger LOG = Logger.getLogger(ProductIndexBuilder.class);
+	private static final Logger LOG = LogManager.getLogger(ProductIndexBuilder.class);
 
 	/**
 	 * Returns index build service name.

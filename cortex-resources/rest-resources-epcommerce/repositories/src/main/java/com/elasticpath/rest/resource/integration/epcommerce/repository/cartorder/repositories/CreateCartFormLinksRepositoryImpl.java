@@ -9,14 +9,14 @@ import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.CreateCartFormIdentifier;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 
 /**
  * Repository for cart.
@@ -35,17 +35,17 @@ public class CreateCartFormLinksRepositoryImpl<E extends CartsIdentifier, I exte
 	@Reference(name = "multicartResolutionStrategyListHolder")
 	private MultiCartResolutionStrategyHolder holder;
 
-	@Reference(name = "customerSessionRepository")
-	private CustomerSessionRepository customerSessionRepository;
+	@Reference(name = "shopperRepository")
+	private ShopperRepository shopperRepository;
 
 
 	@Override
 	public Observable<CreateCartFormIdentifier> getElements(final CartsIdentifier identifier) {
 		Subject subject = resourceOperationContext.getSubject();
-		CustomerSession customerSession = customerSessionRepository.findOrCreateCustomerSession().blockingGet();
+		Shopper shopper = shopperRepository.findOrCreateShopper().blockingGet();
 
 		return Observable.fromIterable(holder.getStrategies().stream().filter(strategy
-				-> strategy.isApplicable(subject) && strategy.supportsCreate(subject, customerSession.getShopper(),
+				-> strategy.isApplicable(subject) && strategy.supportsCreate(subject, shopper,
 				identifier.getScope().getValue()))
 				.map(strategy -> CreateCartFormIdentifier.builder()
 						.withCarts(identifier).build()).collect(Collectors.toSet()));

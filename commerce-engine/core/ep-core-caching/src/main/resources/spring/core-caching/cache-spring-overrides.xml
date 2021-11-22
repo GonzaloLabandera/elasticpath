@@ -84,4 +84,12 @@
 	<bean factory-bean="taxCodeServiceProxy" factory-method="bindImplementation">
 		<constructor-arg ref="cachingTaxCodeService"/>
 	</bean>
+
+	<bean factory-bean="attributeValueValidationServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingAttributeValueValidationService"/>
+	</bean>
+
+	<bean factory-bean="modifierFieldValidationServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingModifierFieldValidationService"/>
+	</bean>
 </beans>

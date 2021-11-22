@@ -47,13 +47,10 @@ import com.elasticpath.domain.catalog.impl.PriceTierImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.impl.CustomerGroupImpl;
 import com.elasticpath.domain.discounts.DiscountItemContainer;
 import com.elasticpath.domain.misc.RandomGuid;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
@@ -80,8 +77,6 @@ public class PromotionRuleDelegateImplTest {
 	private static final String PRODUCT_CODE = "1";
 
 	private static final String BRAND_CODE = "brandCode";
-
-	private static final long CUSTOMER_GROUP = 300L;
 
 	private static final long CUSTOMER_UID = 100L;
 
@@ -820,35 +815,6 @@ public class PromotionRuleDelegateImplTest {
 
 		assertFalse(ruleDelegate.cartContainsItemsOfCategory(
 				shoppingCart, discountItemContainer, CATEGORY1_CODE, AT_LEAST_QUANTIFIER, QTY_5 + QTY_3 + 1, DUMMY_EXCEPTION_STR));
-	}
-
-	/**
-	 * Test for: Checks if the customer is in a given group.
-	 */
-	@Test
-	public void testCustomerInGroup() {
-		final CustomerSession customerSession = context.mock(CustomerSession.class);
-		final Shopper shopper = context.mock(Shopper.class);
-		final Customer customer = context.mock(Customer.class);
-		final List<CustomerGroup> customerGroups = new ArrayList<>();
-
-		CustomerGroup customerGroup = new CustomerGroupImpl();
-		customerGroup.setUidPk(CUSTOMER_GROUP);
-		customerGroups.add(customerGroup);
-
-		context.checking(new Expectations() { {
-			allowing(customerSession).getShopper();
-			will(returnValue(shopper));
-
-			allowing(shopper).getCustomer();
-			will(returnValue(customer));
-
-			allowing(customer).getCustomerGroups();
-			will(returnValue(customerGroups));
-		} });
-
-		assertTrue(ruleDelegate.customerInGroup(customerSession, CUSTOMER_GROUP));
-		assertFalse(ruleDelegate.customerInGroup(customerSession, CUSTOMER_GROUP - 1));
 	}
 
 	/**

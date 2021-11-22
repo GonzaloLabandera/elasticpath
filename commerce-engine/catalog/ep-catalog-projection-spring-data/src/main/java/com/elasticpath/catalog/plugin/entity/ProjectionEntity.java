@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.elasticpath.persistence.api.AbstractEntityImpl;
+
 /**
  * Represents projection entity to be saved.
  */
@@ -64,6 +66,10 @@ public class ProjectionEntity {
 	 */
 	private Date disableDateTime;
 
+	/**
+	 * The guid of the projection.
+	 */
+	private String guid;
 
 	/**
 	 * The composite primary key.
@@ -143,6 +149,16 @@ public class ProjectionEntity {
 	@Column(name = "DISABLE_DATE_TIME")
 	public Date getDisableDateTime() {
 		return disableDateTime;
+	}
+
+	@Basic
+	@Column(name = "GUID", length = AbstractEntityImpl.GUID_LENGTH, nullable = false, unique = true)
+	public String getGuid() {
+		return guid;
+	}
+
+	public void setGuid(final String guid) {
+		this.guid = guid;
 	}
 
 	public void setDisableDateTime(final Date disableDateTime) {

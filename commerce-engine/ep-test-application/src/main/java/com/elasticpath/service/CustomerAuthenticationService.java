@@ -14,7 +14,7 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
  */
 public interface CustomerAuthenticationService {
 
-	void loginStore(Store store, String email);
+	void loginStore(Store store, String userName);
 
 	/**
 	 * Set the customer session service.

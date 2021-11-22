@@ -5,7 +5,7 @@ package com.elasticpath.sellingchannel.director.impl;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -241,7 +241,7 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 		rootDto.setSelected(true);
 		rootDto.setSkuCode(rootSku.getSkuCode());
 		rootDto.setShoppingItemUidPk(rootItem.getUidPk());
-		rootDto.setItemFields(rootItem.getFields());
+		rootDto.setItemFields(rootItem.getModifierFields().getMap());
 		rootDto.setQuantity(rootItem.getQuantity());
 		rootDto.setGuid(rootItem.getGuid());
 
@@ -254,7 +254,7 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 				} else {
 					foundDto.setShoppingItemUidPk(childItem.getUidPk());
 					foundDto.setGuid(childItem.getGuid());
-					foundDto.setItemFields(childItem.getFields());
+					foundDto.setItemFields(childItem.getModifierFields().getMap());
 					foundDto.setQuantity(childItem.getQuantity());
 					foundDto.setSelected(true);
 				}

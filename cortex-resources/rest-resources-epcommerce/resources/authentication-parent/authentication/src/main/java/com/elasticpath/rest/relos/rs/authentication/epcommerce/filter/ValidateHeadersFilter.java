@@ -3,13 +3,10 @@
  */
 package com.elasticpath.rest.relos.rs.authentication.epcommerce.filter;
 
-import static com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil.createFailedExecutionResult;
-import static com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil.isValidRoles;
-import static com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil.isValidScopes;
-import static com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil.reportFailure;
-
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -19,17 +16,21 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
+import com.elasticpath.base.exception.structured.EpStructureErrorMessageException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.UserAccountAssociation;
 import com.elasticpath.rest.command.ExecutionResult;
+import com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil;
+import com.elasticpath.rest.relos.rs.authentication.epcommerce.util.ErrorUtil;
 import com.elasticpath.rest.relos.rs.subject.util.SubjectHeadersUtil;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.service.customer.UserAccountAssociationService;
 import com.elasticpath.service.permissions.RoleValidator;
 
@@ -51,6 +52,9 @@ public class ValidateHeadersFilter implements Filter {
 	@Reference
 	private RoleValidator roleValidator;
 
+	@Reference
+	private StoreRepository storeRepository;
+
 	@Override
 	public void init(final FilterConfig filterConfig) throws ServletException {
 		//nothing to do
@@ -68,24 +72,36 @@ public class ValidateHeadersFilter implements Filter {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		final Collection<String> roles = SubjectHeadersUtil.getUserRolesFromRequest(httpRequest);
-		ExecutionResult<Customer> validCustomerRoles = isValidRoles(roles, roleValidator);
-		if (validCustomerRoles.isFailure()) {
-			reportFailure(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, validCustomerRoles);
+		try {
+			AuthenticationUtil.isValidRoles(roles, roleValidator);
+		} catch (EpStructureErrorMessageException exception) {
+			ErrorUtil.reportFailure(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, exception.getStructuredErrorMessages().get(0));
 			return;
 		}
 
 		final Collection<String> scopes = SubjectHeadersUtil.getUserScopesFromRequest(httpRequest);
-		ExecutionResult<Customer> validCustomerScopes = isValidScopes(scopes);
-		if (validCustomerScopes.isFailure()) {
-			reportFailure(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, validCustomerScopes);
+		try {
+			AuthenticationUtil.isValidScopes(scopes);
+		} catch (EpStructureErrorMessageException exception) {
+			ErrorUtil.reportFailure(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, exception.getStructuredErrorMessages().get(0));
+			return;
+		}
+
+		try {
+			final String scope = scopes.stream().findFirst().orElse(null);
+			isValidAssociatedStoreStatus(scope);
+		} catch (EpStructureErrorMessageException exception) {
+			ErrorUtil.reportFailure(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, exception.getStructuredErrorMessages().get(0));
 			return;
 		}
 
 		String accountSharedId = SubjectHeadersUtil.getAccountSharedIdFromRequest(httpRequest);
 		if (StringUtils.isNotBlank(accountSharedId)) {
-			ExecutionResult<Customer> accountValidation = validateAccountSharedId(httpRequest, accountSharedId);
-			if (accountValidation.isFailure()) {
-				reportFailure(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, accountValidation);
+			try {
+				validateAccountSharedId(httpRequest, accountSharedId);
+			} catch (EpStructureErrorMessageException epStructureErrorMessageException) {
+				ErrorUtil.reportFailure(httpResponse, HttpServletResponse.SC_UNAUTHORIZED,
+						epStructureErrorMessageException.getStructuredErrorMessages().get(0));
 				return;
 			}
 		}
@@ -93,14 +109,25 @@ public class ValidateHeadersFilter implements Filter {
 		chain.doFilter(request, response);
 	}
 
-	private ExecutionResult<Customer> validateAccountSharedId(final HttpServletRequest httpRequest, final String accountSharedId) {
+	private void isValidAssociatedStoreStatus(final String scope) {
+		Map<String, String> data = new HashMap<>();
+		data.put("store-code", scope);
+
+		if (!storeRepository.isStoreCodeEnabled(scope).blockingGet()) {
+			throw ErrorUtil.createStructuredErrorMessageException(
+					"store.disabled", "The selected store is disabled or not in an OPEN state.", data);
+		}
+	}
+
+	private void validateAccountSharedId(final HttpServletRequest httpRequest, final String accountSharedId) {
 		ExecutionResult<Customer> accountResult = customerRepository.findCustomerBySharedId(null, accountSharedId);
 		if (accountResult.isFailure()) {
-			return createFailedExecutionResult("authentication.account.not.found", "No account found for the provided shared ID.");
+			throw ErrorUtil.createStructuredErrorMessageException(
+					"authentication.account.not.found", "No account found for the provided shared ID.");
 		}
 
 		if (Customer.STATUS_DISABLED == accountResult.getData().getStatus()) {
-			return createFailedExecutionResult("authentication.account.disabled", "The selected account is disabled.");
+			throw ErrorUtil.createStructuredErrorMessageException("authentication.account.disabled", "The selected account is disabled.");
 		}
 
 		String customerGuid = SubjectHeadersUtil.getUserIdFromRequest(httpRequest);
@@ -108,10 +135,8 @@ public class ValidateHeadersFilter implements Filter {
 				accountResult.getData().getGuid());
 
 		if (associationResult == null) {
-			return createFailedExecutionResult("authentication.account.not.associated", "You are not authorized to shop on behalf of the "
-					+ "selected account.");
+			throw ErrorUtil.createStructuredErrorMessageException(
+					"authentication.account.not.associated", "You are not authorized to shop on behalf of the selected account.");
 		}
-
-		return accountResult;
 	}
 }

@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.rest.chain.Assign;
 import com.elasticpath.rest.chain.ExecutionResultChain;
 import com.elasticpath.rest.command.ExecutionResult;
@@ -18,7 +18,8 @@ import com.elasticpath.rest.relos.rs.events.RoleTransitionEvent;
 import com.elasticpath.rest.relos.rs.events.ScopedEventEntityHandler;
 import com.elasticpath.rest.resource.integration.epcommerce.common.authentication.AuthenticationConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
+import com.elasticpath.service.shoppingcart.ShoppingCartService;
 
 /**
  * Merges the customer session on transition from public to registered role.
@@ -30,19 +31,21 @@ public class MergeCustomerRoleTransitionEventHandler implements ScopedEventEntit
 
 	private static final Logger LOG = LoggerFactory.getLogger(MergeCustomerRoleTransitionEventHandler.class);
 
-
 	@Reference
 	private CustomerRepository customerRepository;
-	@Reference
-	private CustomerSessionRepository customerSessionRepository;
 
+	@Reference
+	private ShopperRepository shopperRepository;
+
+	@Reference
+	private ShoppingCartService shoppingCartService;
 
 	@Override
 	public void handleEvent(final String scope, final RoleTransitionEvent event) {
 		if (isPublicToRegisteredTransition(event)) {
-			String publicUserGuid = event.getOldUserGuid();
+			String anonymousUserGuid = event.getOldUserGuid();
 			String registeredUserGuid = event.getNewUserGuid();
-			ExecutionResult<Void> mergeResult = mergeCustomerSession(scope, publicUserGuid, registeredUserGuid);
+			ExecutionResult<Void> mergeResult = mergeCustomerSession(scope, anonymousUserGuid, registeredUserGuid);
 
 			if (mergeResult.isFailure()) {
 				LOG.error("Error merging cart: {}", mergeResult.getErrorMessage());
@@ -55,15 +58,16 @@ public class MergeCustomerRoleTransitionEventHandler implements ScopedEventEntit
 				&& AuthenticationConstants.REGISTERED_ROLE.equals(event.getNewRole());
 	}
 
-	private ExecutionResult<Void> mergeCustomerSession(final String storeCode, final String donorCustomerGuid,
-														final String recipientCustomerGuid) {
+	private ExecutionResult<Void> mergeCustomerSession(final String storeCode, final String anonymousCustomerGuid,
+														final String registeredCustomerGuid) {
 		return new ExecutionResultChain() {
 			public ExecutionResult<?> build() {
-				Customer recipientCustomer = Assign.ifSuccessful(customerRepository.findCustomerByGuidAndStoreCode(recipientCustomerGuid, storeCode));
-				CustomerSession customerSession =
-						Assign.ifSuccessful(customerSessionRepository.findCustomerSessionByGuidAndStoreCode(donorCustomerGuid, storeCode));
+				Shopper anonymousShopper = shopperRepository.findOrCreateShopper(anonymousCustomerGuid, storeCode).blockingGet();
+				anonymousShopper.setCurrentShoppingCart(shoppingCartService.findOrCreateDefaultCartByShopper(anonymousShopper));
+				Customer registeredCustomer = Assign.ifSuccessful(customerRepository.findCustomerByGuidAndStoreCode(registeredCustomerGuid,
+						storeCode));
 
-				return customerRepository.mergeCustomer(customerSession, recipientCustomer, storeCode);
+				return customerRepository.mergeCustomer(anonymousShopper, registeredCustomer, storeCode);
 			}
 		}.execute();
 	}

@@ -3,10 +3,10 @@
  */
 package com.elasticpath.service.search.impl;
 
+import static com.elasticpath.persistence.api.PersistenceConstants.LIST_PARAMETER_NAME;
+
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.lucene.search.Query;
 
@@ -31,7 +31,9 @@ public class IndexNotificationServiceImpl extends AbstractEpPersistenceServiceIm
 	private QueryComposerFactory queryComposerFactory;
 	
 	private SearchConfigFactory searchConfigFactory;
-	
+
+	private int defaultBatchSize;
+
 	/**
 	 * Add the given {@link IndexNotification} to the notification queue.
 	 * 
@@ -70,9 +72,31 @@ public class IndexNotificationServiceImpl extends AbstractEpPersistenceServiceIm
 		if (indexType == null) {
 			throw new EpServiceException("indexType cannot be null");
 		}
-		final Map<String, Object> parameters = new HashMap<>();
-		parameters.put("type", indexType.getIndexName());
-		return getPersistenceEngine().retrieveByNamedQuery("INDEXNOTIFY_FIND_BY_INDEX_TYPE", parameters);
+
+		return getPersistenceEngine().retrieveByNamedQuery(
+				"INDEXNOTIFY_FIND_BY_INDEX_TYPE", new Object[] { indexType.getIndexName() }, 0, getDefaultBatchSize()
+		);
+	}
+
+	@Override
+	public List<IndexNotification> findLastDeleteAllOrRebuildIndexType(final IndexType indexType) {
+		sanityCheck();
+
+		if (indexType == null) {
+			throw new IllegalArgumentException("indexType cannot be null");
+		}
+
+		return getPersistenceEngine().retrieveByNamedQuery(
+				"INDEXNOTIFY_FIND_BY_INDEX_TYPE_AND_DELETE_ALL_OR_REBUILD",
+				new Object[] { indexType.getIndexName(), UpdateType.REBUILD, UpdateType.DELETE_ALL},
+				0,
+				1
+		);
+	}
+
+	@Override
+	public void removeNotificationByMaxUid(final Long maxUid, final IndexType indexType) {
+		getPersistenceEngine().executeNamedQuery("DELETE_INDEXNOTIFY_BY_MAX_UID_AND_INDEXTYPE", maxUid, indexType.getIndexName());
 	}
 
 	/**
@@ -89,6 +113,13 @@ public class IndexNotificationServiceImpl extends AbstractEpPersistenceServiceIm
 			throw new IllegalArgumentException("indexType and updateType cannot be null");
 		}
 		return getPersistenceEngine().retrieveByNamedQuery("INDEXNOTIFY_FIND_BY_INDEX_AND_UPDATE_TYPE", indexType.getIndexName(), updateType);
+	}
+
+	@Override
+	public void removeNotificationsByUid(final List<Long> indexNotificationUidList) {
+		if (!indexNotificationUidList.isEmpty()) {
+			getPersistenceEngine().executeNamedQueryWithList("DELETE_INDEXNOTIFY_BY_UIDS", LIST_PARAMETER_NAME, indexNotificationUidList);
+		}
 	}
 
 	/**
@@ -189,6 +220,14 @@ public class IndexNotificationServiceImpl extends AbstractEpPersistenceServiceIm
 		notification.setAffectedEntityType("singleUnit");
 		notification.setUpdateType(UpdateType.UPDATE);
 		return notification;
+	}
+
+	public void setDefaultBatchSize(final int defaultBatchSize) {
+		this.defaultBatchSize = defaultBatchSize;
+	}
+
+	protected int getDefaultBatchSize() {
+		return defaultBatchSize;
 	}
 
 }

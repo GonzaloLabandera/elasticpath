@@ -99,14 +99,6 @@ public class ChangeSetMemberDaoImpl implements ChangeSetMemberDao {
 	}
 
 	@Override
-	public Collection<BusinessObjectMetadata> findBusinessObjectMetadataByDescriptor(
-			final BusinessObjectDescriptor businessObjectDescriptor) {
-		return persistenceEngine.retrieveByNamedQuery("FIND_OBJECT_METADATA_BY_OBJ_TYPE_AND_ID",
-				businessObjectDescriptor.getObjectType(),
-				businessObjectDescriptor.getObjectIdentifier());
-	}
-
-	@Override
 	public Collection<BusinessObjectGroupMember> findGroupMembersByGroupId(final String groupId) {
 		return businessObjectGroupDao.findGroupMembersByGroupId(groupId);
 	}

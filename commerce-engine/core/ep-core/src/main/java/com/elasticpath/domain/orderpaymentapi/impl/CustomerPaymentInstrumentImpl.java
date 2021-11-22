@@ -58,7 +58,12 @@ public class CustomerPaymentInstrumentImpl extends AbstractEntityImpl implements
 	@Id
 	@Column(name = "UIDPK")
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = TABLE_NAME)
-	@TableGenerator(name = TABLE_NAME, table = "JPA_GENERATED_KEYS", pkColumnName = "ID", valueColumnName = "LAST_VALUE", pkColumnValue = TABLE_NAME)
+	@TableGenerator(name = TABLE_NAME,
+			table = "JPA_GENERATED_KEYS",
+			pkColumnName = "ID",
+			valueColumnName = "LAST_VALUE",
+			pkColumnValue = TABLE_NAME,
+			allocationSize = HIGH_CONCURRENCY_ALLOCATION_SIZE)
 	public long getUidPk() {
 		return uidPk;
 	}

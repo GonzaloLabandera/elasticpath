@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.Locale;
 
 import io.reactivex.Single;
-import io.reactivex.functions.Predicate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,28 +20,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.exception.structured.EpStructureErrorMessageException;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartPostProcessor;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.shoppingcart.MulticartItemListTypeLocationProvider;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
-import com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
 import com.elasticpath.service.store.StoreService;
 
 /**
@@ -55,7 +47,6 @@ public class B2CMultiCartResolverStrategyImplTest {
 	private static final String ACCOUNT_SHARED_ID = "accountSharedId";
 	private static final String STORE_CODE = "storeCode";
 
-
 	@Mock
 	private ShoppingCartService shoppingCartService;
 
@@ -63,7 +54,7 @@ public class B2CMultiCartResolverStrategyImplTest {
 	private CartPostProcessor cartPostProcessor;
 
 	@Mock
-	private CustomerSessionRepository customerSessionRepository;
+	private ShopperRepository shopperRepository;
 
 	@InjectMocks
 	private ReactiveAdapterImpl reactiveAdapterImpl;
@@ -75,9 +66,6 @@ public class B2CMultiCartResolverStrategyImplTest {
 
 	@Mock
 	private StoreService storeService;
-
-	@Mock
-	private CreateShoppingCartValidationService createShoppingCartValidationService;
 
 	@Mock
 	private ExceptionTransformer exceptionTransformer;
@@ -95,8 +83,7 @@ public class B2CMultiCartResolverStrategyImplTest {
 		strategy.setReactiveAdapter(reactiveAdapterImpl);
 		strategy.setReactiveAdapter(reactiveAdapterImpl);
 		strategy.setCartPostProcessor(cartPostProcessor);
-		strategy.setCreateShoppingCartValidationService(createShoppingCartValidationService);
-		strategy.setCustomerSessionRepository(customerSessionRepository);
+		strategy.setShopperRepository(shopperRepository);
 		strategy.setExceptionTransformer(exceptionTransformer);
 		strategy.setShoppingCartService(shoppingCartService);
 		strategy.setStoreService(storeService);
@@ -177,39 +164,6 @@ public class B2CMultiCartResolverStrategyImplTest {
 	}
 
 	@Test
-	public void testValidateCreate() {
-
-		ShoppingCart mockCart = mockExistingCart();
-
-		ShoppingCartValidationContext mockContext = mock(ShoppingCartValidationContext.class);
-		when(createShoppingCartValidationService.buildContext(mockCart))
-				.thenReturn(mockContext);
-		when(createShoppingCartValidationService.validate(mockContext))
-				.thenReturn(Collections.emptyList());
-
-		//will throw exception to fail test if validation fails.
-		strategy.validateCreate(mockCart);
-
-	}
-
-	@Test(expected = EpStructureErrorMessageException.class)
-	public void testValidateCreateWithException() {
-
-		ShoppingCart mockCart = mockExistingCart();
-
-		ShoppingCartValidationContext mockContext = mock(ShoppingCartValidationContext.class);
-		when(createShoppingCartValidationService.buildContext(mockCart))
-				.thenReturn(mockContext);
-		StructuredErrorMessage errorMessage = mock(StructuredErrorMessage.class);
-		when(createShoppingCartValidationService.validate(mockContext))
-				.thenReturn(Collections.singletonList(errorMessage));
-
-		//will throw exception to fail test if validation fails.
-		strategy.validateCreate(mockCart);
-
-	}
-
-	@Test
 	public void testFindAllCarts() {
 		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORE_CODE.toUpperCase(Locale.getDefault())))
 				.thenReturn(Collections.singletonList(CART_GUID));
@@ -226,10 +180,10 @@ public class B2CMultiCartResolverStrategyImplTest {
 	public void testGetShoppingCart() {
 
 		ShoppingCart mockCart = mockExistingCart();
-		CustomerSession customerSession = mock(CustomerSession.class);
+		Shopper shopper = mock(Shopper.class);
 
-		when(customerSessionRepository.findOrCreateCustomerSession())
-				.thenReturn(Single.just(customerSession));
+		when(shopperRepository.findOrCreateShopper())
+				.thenReturn(Single.just(shopper));
 		when(shoppingCartService.findByGuid(CART_GUID))
 				.thenReturn(mockCart);
 
@@ -261,29 +215,17 @@ public class B2CMultiCartResolverStrategyImplTest {
 	 * Test the behaviour of get default shopping cart guid.
 	 */
 	@Test
-	public void testGetDefaultShoppingCartGuidWhenNotFound() {
-		CustomerSession mockCustomerSession = createMockCustomerSession();
-
-		when(shoppingCartService.findDefaultShoppingCartGuidByCustomerSession(mockCustomerSession)).thenReturn(null);
-		strategy.getDefaultShoppingCartGuid()
-				.test()
-				.assertError(isResourceOperationFailureNotFound());
-
-	}
-
-	/**
-	 * Test the behaviour of get default shopping cart guid.
-	 */
-	@Test
 	public void testGetDefaultShoppingCartGuid() {
-		CustomerSession mockCustomerSession = createMockCustomerSession();
+		Shopper shopper = mock(Shopper.class);
 
-		when(shoppingCartService.findDefaultShoppingCartGuidByCustomerSession(mockCustomerSession)).thenReturn(CART_GUID);
+		when(shopperRepository.findOrCreateShopper())
+				.thenReturn(Single.just(shopper));
+		when(shoppingCartService.findOrCreateDefaultCartGuidByShopper(shopper))
+				.thenReturn(CART_GUID);
 		strategy.getDefaultShoppingCartGuid()
 				.test()
 				.assertNoErrors()
 				.assertValue(CART_GUID);
-
 	}
 
 	private ShoppingCart mockExistingCart() {
@@ -292,18 +234,5 @@ public class B2CMultiCartResolverStrategyImplTest {
 				.thenReturn(mockCart);
 		return mockCart;
 	}
-
-	private CustomerSession createMockCustomerSession() {
-		CustomerSession mockCustomerSession = mock(CustomerSession.class);
-
-		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(mockCustomerSession));
-		return mockCustomerSession;
-	}
-
-	private Predicate<Throwable> isResourceOperationFailureNotFound() {
-		return throwable -> throwable instanceof ResourceOperationFailure
-				&& ResourceStatus.NOT_FOUND.equals(((ResourceOperationFailure) throwable).getResourceStatus());
-	}
-
 
 }

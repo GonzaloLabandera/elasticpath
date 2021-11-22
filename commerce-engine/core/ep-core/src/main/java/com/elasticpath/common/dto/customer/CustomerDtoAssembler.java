@@ -3,9 +3,12 @@
  */
 package com.elasticpath.common.dto.customer;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.AddressDTO;
@@ -18,8 +21,10 @@ import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.service.customer.AccountTreeService;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
+
 
 /**
  * <b>Does not copy credit card numbers.</b> <br>
@@ -27,6 +32,7 @@ import com.elasticpath.service.customer.CustomerService;
  */
 @SuppressWarnings("PMD.GodClass")
 public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Customer> {
+	private static final Logger LOG = LogManager.getLogger(CustomerDtoAssembler.class);
 
 	private static final String EXCEPTION_MESSAGE_PREFIX = "Could not import customer: ";
 
@@ -37,6 +43,8 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 	private CustomerService customerService;
 
 	private AccountTreeService accountTreeService;
+
+	private AddressService addressService;
 
 	@Override
 	public Customer getDomainInstance() {
@@ -94,7 +102,8 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 	}
 
 	private void populateDtoAddresses(final Customer source, final CustomerDTO target) {
-		for (CustomerAddress sourceAddress : source.getAddresses()) {
+		List<CustomerAddress> persistedCustomerAddresses = addressService.findByCustomer(source.getUidPk());
+		for (CustomerAddress sourceAddress : persistedCustomerAddresses) {
 			AddressDTO targetAddress = getAddressDto();
 
 			targetAddress.setCreationDate(sourceAddress.getCreationDate());
@@ -148,14 +157,14 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		ensureAccountParentGuidHasNotChanged(source, target);
 
 		if (StringUtils.isNotEmpty(source.getParentGuid())) {
-			final Customer parent = customerService.findByGuid(source.getParentGuid());
+			final CustomerType parentType = customerService.getCustomerTypeByGuid(source.getParentGuid());
 
-			if (Objects.isNull(parent)) {
+			if (Objects.isNull(parentType)) {
 				throw new EpServiceException(EXCEPTION_MESSAGE_PREFIX + source.getGuid() + " lists parentGuid " + source.getParentGuid()
 						+ " that does not exist.");
 			}
 
-			if (!parent.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			if (!parentType.equals(CustomerType.ACCOUNT)) {
 				throw new EpServiceException(EXCEPTION_MESSAGE_PREFIX + source.getGuid()
 						+ " provides a parentGuid that references a customer that is not an ACCOUNT.");
 			}
@@ -195,13 +204,10 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		// Remove all addresses in the target which are also in the source.
 		// We do it this way since AbstractAddressImpl overrides equals and doesn't use guid.
 		for (AddressDTO sourceAddress : source.getAddresses()) {
-			CustomerAddress targetAddress;
-
-			targetAddress = target.getAddressByGuid(sourceAddress.getGuid());
+			CustomerAddress targetAddress = target.getAddressByGuid(sourceAddress.getGuid());
 
 			if (targetAddress == null) {
 				targetAddress = getCustomerAddress();
-				target.getAddresses().add(targetAddress);
 			}
 
 			targetAddress.setCreationDate(sourceAddress.getCreationDate());
@@ -219,6 +225,12 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 			targetAddress.setSubCountry(sourceAddress.getSubCountry());
 			targetAddress.setZipOrPostalCode(sourceAddress.getZipOrPostalCode());
 			targetAddress.setOrganization(sourceAddress.getOrganization());
+
+			if (target.getTransientAddresses().contains(targetAddress)) {
+				LOG.warn("Duplicate address found and skipped:\n" + targetAddress);
+			} else {
+				target.getTransientAddresses().add(targetAddress);
+			}
 		}
 	}
 
@@ -274,5 +286,9 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 	public void setAccountTreeService(final AccountTreeService accountTreeService) {
 		this.accountTreeService = accountTreeService;
+	}
+
+	public void setAddressService(final AddressService addressService) {
+		this.addressService = addressService;
 	}
 }

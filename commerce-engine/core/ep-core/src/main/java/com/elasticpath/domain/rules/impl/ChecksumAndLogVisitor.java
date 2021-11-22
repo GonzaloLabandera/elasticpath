@@ -4,7 +4,7 @@
 package com.elasticpath.domain.rules.impl;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.Level;
 
 import com.elasticpath.domain.rules.AppliedRule;
 import com.elasticpath.domain.rules.AppliedRule.Visitor;

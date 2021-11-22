@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.domain.attribute.Attribute;
@@ -89,7 +90,7 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 
 	private SynonymGroupService synonymGroupService;
 
-	private static final Logger LOG = Logger.getLogger(CatalogImporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CatalogImporterImpl.class);
 
 	private SavingStrategy<Attribute, AttributeDTO> attributeSavingStrategy;
 

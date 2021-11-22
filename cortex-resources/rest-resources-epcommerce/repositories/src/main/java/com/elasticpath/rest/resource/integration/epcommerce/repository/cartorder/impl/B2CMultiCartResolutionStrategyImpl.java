@@ -15,7 +15,6 @@ import javax.inject.Singleton;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -45,8 +44,8 @@ public class B2CMultiCartResolutionStrategyImpl extends AbstractEpMultiCartStrat
 
 	@Override
 	public Single<ShoppingCart> getShoppingCartSingle(final String cartGuid) {
-		return getCustomerSessionRepository().findOrCreateCustomerSession()
-				.flatMap(customerSession -> getShoppingCartSingle(cartGuid, customerSession));
+		return getShopperRepository().findOrCreateShopper()
+				.flatMap(shopper -> getShoppingCartSingle(cartGuid, shopper));
 	}
 
 	@Override
@@ -59,38 +58,36 @@ public class B2CMultiCartResolutionStrategyImpl extends AbstractEpMultiCartStrat
 
 	@Override
 	public Single<String> getDefaultShoppingCartGuid() {
-		return getCustomerSessionRepository().findOrCreateCustomerSession()
+		return getShopperRepository().findOrCreateShopper()
 				.flatMap(this::getDefaultCartGuid);
 	}
 
 	@CacheResult(uniqueIdentifier = "B2CDefaultCartGuid")
-	private Single<String> getDefaultCartGuid(final CustomerSession customerSession) {
+	private Single<String> getDefaultCartGuid(final Shopper shopper) {
 		return getReactiveAdapter().fromServiceAsSingle(()
-				-> getShoppingCartService().findDefaultShoppingCartGuidByCustomerSession(customerSession));
+				-> getShoppingCartService().findOrCreateDefaultCartGuidByShopper(shopper));
 	}
-
 
 	@Override
 	public Single<ShoppingCart> getDefaultShoppingCart() {
-		return getCustomerSessionRepository().findOrCreateCustomerSession()
+		return getShopperRepository().findOrCreateShopper()
 				.flatMap(this::getDefaultCart);
 	}
 
-
 	@CacheResult(uniqueIdentifier = "B2CCartForCustomerSession")
-	private ShoppingCart getCartForCustomerSession(final CustomerSession customerSession) {
-		final ShoppingCart cart = getShoppingCartService().findOrCreateDefaultCartByCustomerSession(customerSession);
+	private ShoppingCart getCartForShopper(final Shopper shopper) {
+		final ShoppingCart cart = getShoppingCartService().findOrCreateDefaultCartByShopper(shopper);
 
 		final ShoppingCart savedCart = getShoppingCartService().saveIfNotPersisted(cart);
 
-		getCartPostProcessor().postProcessCart(savedCart, customerSession.getShopper(), customerSession);
+		getCartPostProcessor().postProcessCart(savedCart, shopper);
 		return savedCart;
 	}
 
 	@Override
 	@CacheResult(uniqueIdentifier = "B2CDefaultCart")
-	public Single<ShoppingCart> getDefaultCart(final CustomerSession customerSession) {
-		return getReactiveAdapter().fromServiceAsSingle(() -> getCartForCustomerSession(customerSession), DEFAULT_CART_NOT_FOUND);
+	public Single<ShoppingCart> getDefaultCart(final Shopper shopper) {
+		return getReactiveAdapter().fromServiceAsSingle(() -> getCartForShopper(shopper), DEFAULT_CART_NOT_FOUND);
 	}
 
 	@Override
@@ -99,7 +96,7 @@ public class B2CMultiCartResolutionStrategyImpl extends AbstractEpMultiCartStrat
 			return Single.error(ResourceOperationFailure.stateFailure(CREATE_CART_NOT_SUPPORTED));
 		}
 
-		return getCustomerSessionRepository().createCustomerSessionAsSingle()
-				.flatMap(customerSession -> createCartInternal(customerSession, descriptors));
+		return getShopperRepository().findOrCreateShopper()
+				.flatMap(shopper -> createCartInternal(shopper, descriptors));
 	}
 }

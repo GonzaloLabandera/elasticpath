@@ -6,12 +6,13 @@ package com.elasticpath.email.util.impl;
 import java.io.File;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.velocity.exception.VelocityException;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
@@ -34,7 +35,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 @Deprecated
 public class LegacyEmailComposerImpl implements LegacyEmailComposer {
 
-	private static final Logger LOG = Logger.getLogger(LegacyEmailComposerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(LegacyEmailComposerImpl.class);
 
 	private static final String BASE_EMAIL_TEMPLATE_DIR = "email"; // the email folder is hard-coded but the store code is added dynamically
 

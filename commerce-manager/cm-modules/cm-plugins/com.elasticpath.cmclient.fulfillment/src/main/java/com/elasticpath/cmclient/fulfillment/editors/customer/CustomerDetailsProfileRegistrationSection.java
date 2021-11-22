@@ -15,8 +15,9 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -123,7 +124,7 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 
 	private final IWorkbenchPartSite workbenchPartSite;
 
-	private static final Logger LOG = Logger.getLogger(CustomerDetailsProfileRegistrationSection.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerDetailsProfileRegistrationSection.class);
 
 	/**
 	 * Constructor to create a new Section in an editor's FormPage.
@@ -206,20 +207,20 @@ public class CustomerDetailsProfileRegistrationSection extends AbstractCmClientE
 
 	private void addParents(final IEpLayoutData labelData, final IEpLayoutData fieldData) {
 		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileRegistrationSection_ParentHierarchy, labelData);
-		final List<String> pathToRoot = accountTreeService.fetchPathToRoot(customer);
+		final List<String> pathToRoot = accountTreeService.findAncestorGuids(customer.getGuid());
 
 		if (pathToRoot.size() > HIERARCHY_TREESHOLD) {
-			addParents(pathToRoot.get(pathToRoot.size() - 1), fieldData);
+			addParents(pathToRoot.get(0), fieldData);
 			this.mainPane.addLabel("...", fieldData);
 			this.mainPane.addEmptyComponent(null);
 
+			Collections.reverse(pathToRoot);
 			final List<String> nearestChildren = pathToRoot.stream()
 					.limit(MAX_LAST_PARENTS)
 					.collect(Collectors.toList());
 			Collections.reverse(nearestChildren);
 			nearestChildren.forEach(guid -> addParents(guid, fieldData));
 		} else {
-			Collections.reverse(pathToRoot);
 			pathToRoot.forEach(guid -> addParents(guid, fieldData));
 		}
 	}

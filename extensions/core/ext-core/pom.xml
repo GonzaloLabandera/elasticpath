@@ -110,7 +110,9 @@
 						<Import-Package>
 							!*
 						</Import-Package>
-						<!-- include implementation information for VersionLogger -->
+						<!-- include extensions.idx so embedded extensions added to ext-core are found by XPFExtensionLookup -->
+						<Include-Resource>{maven-resources}, META-INF/extensions.idx=target/classes/META-INF/extensions.idx</Include-Resource>
+						<!-- include implementation information for VersionService -->
 						<Implementation-Title>${project.name}</Implementation-Title>
 						<Implementation-Version>${project.version} (${buildNumber})</Implementation-Version>
 						<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>

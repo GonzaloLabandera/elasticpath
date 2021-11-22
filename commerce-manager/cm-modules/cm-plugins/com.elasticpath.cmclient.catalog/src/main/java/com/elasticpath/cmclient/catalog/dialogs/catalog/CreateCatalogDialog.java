@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.catalog.dialogs.catalog;
 
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -45,7 +46,7 @@ public class CreateCatalogDialog extends AbstractEpDialog {
 	private static final int CODE_MAXLENGTH = 64;
 
 	/** The Logger. */
-	protected static final Logger LOG = Logger.getLogger(CreateCatalogDialog.class);
+	protected static final Logger LOG = LogManager.getLogger(CreateCatalogDialog.class);
 
 	private static final String CATALOG_NAME_FIELD_NAME = "name"; //$NON-NLS-1$
 

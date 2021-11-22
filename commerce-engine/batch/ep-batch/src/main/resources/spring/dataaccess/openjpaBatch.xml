@@ -63,7 +63,7 @@ Otherwise, use the beans without "batch" prefix.
 		<property name="queryReaderFactory" ref="queryReaderFactory"/>
 	</bean>
 
-	<bean id="batchTxProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="batchTxProxyTemplate" abstract="true" class="com.elasticpath.transaction.interceptor.TransactionProxyFactoryBeanWithDeadlockRetry">
 		<property name="transactionManager" ref="batchTransactionManager"/>
 		<property name="transactionAttributes">
 			<props>

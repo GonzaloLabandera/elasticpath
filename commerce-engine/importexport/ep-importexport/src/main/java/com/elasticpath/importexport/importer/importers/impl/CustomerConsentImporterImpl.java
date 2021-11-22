@@ -3,7 +3,8 @@
  */
 package com.elasticpath.importexport.importer.importers.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.datapolicy.CustomerConsentDTO;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
@@ -20,7 +21,7 @@ import com.elasticpath.service.datapolicy.DataPolicyService;
  */
 public class CustomerConsentImporterImpl extends AbstractImporterImpl<CustomerConsent, CustomerConsentDTO> {
 
-	private static final Logger LOG = Logger.getLogger(CustomerConsentImporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerConsentImporterImpl.class);
 
 	private DomainAdapter<CustomerConsent, CustomerConsentDTO> customerConsentAdapter;
 

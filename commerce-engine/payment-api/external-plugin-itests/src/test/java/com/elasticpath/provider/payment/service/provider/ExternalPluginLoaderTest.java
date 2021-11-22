@@ -22,6 +22,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.elasticpath.commons.handlers.libjar.LibJarHandlerInitializer;
 import com.elasticpath.plugin.payment.provider.AbstractPaymentProviderPlugin;
 import com.elasticpath.plugin.payment.provider.PaymentProviderPlugin;
 import com.elasticpath.plugin.payment.provider.PluginConfigurationKey;
@@ -37,8 +38,8 @@ public class ExternalPluginLoaderTest extends BasicSpringContextTest {
 	private ExternalPluginLoader externalPluginLoader;
 
 	@BeforeClass
-	public static void setUpLibJarHandler() {
-        LibJarHandlerInitializer.initialize();
+	public static void setUpLibJarHandler() throws NoSuchFieldException, IllegalAccessException {
+		LibJarHandlerInitializer.initialize();
 	}
 
     @After

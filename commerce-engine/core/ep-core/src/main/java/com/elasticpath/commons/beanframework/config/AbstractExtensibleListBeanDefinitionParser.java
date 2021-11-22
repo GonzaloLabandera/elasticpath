@@ -5,7 +5,8 @@ package com.elasticpath.commons.beanframework.config;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -20,7 +21,7 @@ import org.w3c.dom.Element;
  */
 public abstract class AbstractExtensibleListBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
-	private static final Logger LOG = Logger.getLogger(AbstractExtensibleListBeanDefinitionParser.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractExtensibleListBeanDefinitionParser.class);
 
 	/**
 	 * Parses the list of bean references from within the extensible list create tag.
@@ -84,9 +85,8 @@ public abstract class AbstractExtensibleListBeanDefinitionParser extends Abstrac
 				String beanRefName = ((RuntimeBeanReference) beanRef).getBeanName();
 				String beanRefClassName = parserContext.getRegistry().getBeanDefinition(beanRefName).getBeanClassName();
 				if (beanRefClassName == null) {
-					LOG.error("Bean definition [" + beanRefName + "] that is referenced in extensible list could not be found.  It must "
-							+ "be of type "
-							+ targetType.getName());
+					LOG.error("Bean definition [{}] that is referenced in extensible list could not be found.  It must be of type {}", beanRefName,
+							targetType.getName());
 				}
 				Class<?> beanRefClass = ClassUtils.forName(beanRefClassName, classLoader);
 				if (!targetType.isAssignableFrom(beanRefClass)) {

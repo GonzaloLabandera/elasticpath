@@ -16,7 +16,6 @@
 	<name>Catalog Syndication System Test Definitions</name>
 
 	<properties>
-		<dce.version>0.0.0-SNAPSHOT</dce.version>
 	</properties>
 
 	<dependencies>
@@ -96,7 +95,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-jms-test-support</artifactId>
-			<version>${dce.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

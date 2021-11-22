@@ -95,18 +95,8 @@ class CustomerImplBuilderBase<GeneratorT extends CustomerImplBuilderBase<Generat
 		return (GeneratorT) this;
 	}
 
-	public GeneratorT withAddresses(final List<CustomerAddress> aValue) throws EpDomainException {
-		instance.setAddresses(aValue);
-
-		return (GeneratorT) this;
-	}
-
 	public GeneratorT withAddedAddress(final CustomerAddress aValue) throws EpDomainException {
-		if (instance.getAddresses() == null) {
-			instance.setAddresses(new ArrayList<>());
-		}
-
-		instance.getAddresses().add(aValue);
+		instance.getTransientAddresses().add(aValue);
 
 		return (GeneratorT) this;
 	}

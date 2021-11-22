@@ -55,13 +55,13 @@ public class ShoppingCartItemPersistenceIntegrationTest extends AbstractCartInte
 		String key = "TESTKEY";
 		String value = "TESTVALUE";
 
-		shoppingCartItem.setFieldValue(key, value);
+		shoppingCartItem.getModifierFields().put(key, value);
 
 		ShoppingItem persistedCartItem = getShoppingCartItemService().saveOrUpdate(shoppingCartItem);
-		assertThat(persistedCartItem.getFieldValue(key)).isEqualTo(value);
+		assertThat(persistedCartItem.getModifierFields().get(key)).isEqualTo(value);
 
 		ShoppingItem retrievedCartItem = getShoppingCartItemService().findByGuid(persistedCartItem.getGuid(), null);
-		assertThat(retrievedCartItem.getFieldValue(key)).isEqualTo(value);
+		assertThat(retrievedCartItem.getModifierFields().get(key)).isEqualTo(value);
 	}
 	
 	/**

@@ -42,6 +42,12 @@
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-swagger-java</artifactId>
 		</dependency>
+		<!-- This is a transitive dependency of camel-swagger-java. Specifying here to force an override of the slf4j version. -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-ext</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-jackson</artifactId>

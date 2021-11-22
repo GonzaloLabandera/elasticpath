@@ -1220,6 +1220,8 @@ public final class FulfillmentMessages extends BaseMessages {
 
 	public String RefundWizard_IncorrectRefundAmount_Message;
 
+	public String RefundWizard_ValidationError_Title;
+
 	public String RefundWizard_Confirmation_Section;
 
 	public String RefundWizard_PaymentSource_ColumnTitle;
@@ -1541,6 +1543,16 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String CreateAccountWizard_Status;
 
 	// ----------------------------------------------------
+	// Delete Account Wizard
+	// ----------------------------------------------------
+
+	public String DeleteAccountWizard_DeleteAccount_Label;
+	public String ConfirmDeleteAccountMsgBoxTitle;
+	public String ConfirmDeleteAccountMsgBoxText;
+	public String DeleteAccountWarningTitle;
+	public String DeleteAccountWarningText;
+
+	// ----------------------------------------------------
 	// Child Accounts tab.
 	// ----------------------------------------------------
 
@@ -1553,6 +1565,8 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String AccountChildAccountsPage_Add;
 
 	public String AccountChildAccountsPage_Open;
+
+	public String AccountChildAccountsPage_Delete;
 
 	public String AccountChildAccounts_ColumnStatusActive;
 
@@ -1591,6 +1605,7 @@ public final class FulfillmentMessages extends BaseMessages {
 	public String OrderHoldTable_StatusColumn;
 
 	public String OrderHoldTable_ResolvedByColumn;
+
 
 	/**
 	 * Build string for amount and currency displaying.

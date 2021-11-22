@@ -52,6 +52,7 @@ import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.BrandLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ItemType;
@@ -127,6 +128,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		stubGetSingletonBean(ContextIdNames.UTILITY, Utility.class, new UtilityImpl());
 		stubGetSingletonBean(ContextIdNames.SETTINGS_SERVICE, SettingsService.class, new SettingsServiceImpl());
+		stubGetPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class, ModifierFieldsMapWrapper.class);
 
 		TaxAddressAdapter adapter = new TaxAddressAdapter();
 		stubGetBean(ContextIdNames.TAX_ADDRESS_ADAPTER, adapter);
@@ -157,7 +159,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		customerSession.setCurrency(CURRENCY);
 		customerSession.setLocale(DEFAULT_LOCALE);
 
-		shoppingCart.setCustomerSession(customerSession);
+		shoppingCart.setShopper(shopper);
 		shoppingCart.setStore(getMockedStore());
 	}
 

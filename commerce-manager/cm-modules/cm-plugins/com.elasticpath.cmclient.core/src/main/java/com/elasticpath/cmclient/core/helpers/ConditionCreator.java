@@ -1,6 +1,7 @@
 package com.elasticpath.cmclient.core.helpers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.helpers.extenders.EpModelCreator;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
@@ -13,7 +14,7 @@ import com.elasticpath.tags.domain.TagDefinition;
  */
 public final class ConditionCreator {
 
-	private static final Logger LOG = Logger.getLogger(ConditionCreator.class);
+	private static final Logger LOG = LogManager.getLogger(ConditionCreator.class);
 	
 	private ConditionCreator() {
 		// Dummy constructor to satisfy PMD.

@@ -4,18 +4,13 @@
 
 package com.elasticpath.test.persister;
 
-import static com.elasticpath.commons.constants.ContextIdNames.CART_ORDER_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.CHECKOUT_SERVICE;
-import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_SESSION_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.PRICING_SNAPSHOT_SERVICE;
-import static com.elasticpath.commons.constants.ContextIdNames.SHOPPER_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART;
 import static com.elasticpath.commons.constants.ContextIdNames.SHOPPING_CART_SERVICE;
 import static com.elasticpath.commons.constants.ContextIdNames.TAX_SNAPSHOT_SERVICE;
 
-import java.util.Currency;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -23,7 +18,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
@@ -33,10 +28,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.OrderConfigurationService;
-import com.elasticpath.service.cartorder.CartOrderService;
-import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
@@ -55,17 +47,11 @@ public class OrderTestPersister {
 
 	private final ShoppingCartService shoppingCartService;
 
-	private final ShopperService shopperService;
-
-	private final CustomerSessionService customerSessionService;
-
 	private final PricingSnapshotService pricingSnapshotService;
 
 	private final TaxSnapshotService taxSnapshotService;
 
 	private final TestDataPersisterFactory persisterFactory;
-
-	private final CartOrderService cartOrderService;
 
 	private final PostCaptureCheckoutService postCaptureCheckoutService;
 
@@ -78,11 +64,8 @@ public class OrderTestPersister {
 		this.persisterFactory = persisterFactory;
 
 		shoppingCartService = beanFactory.getSingletonBean(SHOPPING_CART_SERVICE, ShoppingCartService.class);
-		shopperService = beanFactory.getSingletonBean(SHOPPER_SERVICE, ShopperService.class);
-		customerSessionService = beanFactory.getSingletonBean(CUSTOMER_SESSION_SERVICE, CustomerSessionService.class);
 		pricingSnapshotService = beanFactory.getSingletonBean(PRICING_SNAPSHOT_SERVICE, PricingSnapshotService.class);
 		taxSnapshotService = beanFactory.getSingletonBean(TAX_SNAPSHOT_SERVICE, TaxSnapshotService.class);
-		cartOrderService = beanFactory.getSingletonBean(CART_ORDER_SERVICE, CartOrderService.class);
 		postCaptureCheckoutService = beanFactory.getSingletonBean(ContextIdNames.POST_CAPTURE_CHECKOUT_SERVICE, PostCaptureCheckoutService.class);
 		orderService = beanFactory.getSingletonBean(ContextIdNames.ORDER_SERVICE, OrderService.class);
 		eventOriginatorHelper = beanFactory.getSingletonBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, EventOriginatorHelper.class);
@@ -93,24 +76,21 @@ public class OrderTestPersister {
 	 *
 	 * @param billingAddress  the billing address
 	 * @param shippingAddress the shipping address
-	 * @param customerSession the customer session the cart belongs to
 	 * @param shippingOption  the shipping option
 	 * @param store           the store the cart is for
 	 * @return the persisted shopping cart
 	 */
-	public ShoppingCart persistEmptyShoppingCart(final Address billingAddress, final Address shippingAddress,
-												 final CustomerSession customerSession, final ShippingOption shippingOption, final Store store) {
-		customerSession.setCurrency(Currency.getInstance(Locale.US));
-
+	public ShoppingCart persistEmptyShoppingCart(final Shopper shopper, final Address billingAddress, final Address shippingAddress,
+												 final ShippingOption shippingOption, final Store store) {
 		final ShoppingCart shoppingCart = beanFactory.getPrototypeBean(SHOPPING_CART, ShoppingCart.class);
 		shoppingCart.initialize();
 		shoppingCart.setBillingAddress(billingAddress);
 		shoppingCart.setShippingAddress(shippingAddress);
-		shoppingCart.setCustomerSession(customerSession);
 		shoppingCart.setStore(store);
 		if (shippingAddress != null) {
 			shoppingCart.setSelectedShippingOption(shippingOption);
 		}
+		shoppingCart.setShopper(shopper);
 		final ShoppingCart persistedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(persistedShoppingCart);
 		return persistedShoppingCart;
@@ -147,20 +127,22 @@ public class OrderTestPersister {
 	 * @return the order
 	 */
 	public Order createOrderForCustomerWithSkusQuantity(final Customer customer, final Store store, final int quantity, final ProductSku... skus) {
-		final CustomerSession customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(customer);
-		final Shopper shopper = customerSession.getShopper();
+		final Shopper shopper = persisterFactory.getStoreTestPersister().persistShopperWithAssociatedEntities(customer);
 
 		final Map<ProductSku, Integer> skuQuantityMap = new HashMap<>();
 		for (ProductSku sku : skus) {
 			skuQuantityMap.put(sku, quantity);
 		}
+
+		CustomerAddress customerAddress = customer.getPreferredBillingAddress();
+		String street1 = customerAddress.getStreet1();
+
 		ShoppingCart shoppingCart = getOrderConfigurationService().createShoppingCart(store, customer, skuQuantityMap);
-		shoppingCart.setShippingAddress(customer.getAddresses().get(0));
+		shoppingCart.setShippingAddress(customerAddress);
 
 		final ShippingOption shippingOption = persisterFactory.getStoreTestPersister().persistDefaultShippingOption(store);
 
-		getOrderConfigurationService().selectCustomerAddressesToShoppingCart(
-				shopper, customer.getAddresses().get(0).getStreet1(), customer.getAddresses().get(0).getStreet1());
+		getOrderConfigurationService().selectCustomerAddressesToShoppingCart(shopper, street1, street1);
 		shoppingCart = getOrderConfigurationService().selectShippingOption(
 				shoppingCart,
 				shippingOption.getDisplayName(shopper.getLocale()).orElse(null));
@@ -170,7 +152,7 @@ public class OrderTestPersister {
 		persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(shoppingCart);
 
 		final boolean throwExceptions = false;
-		CheckoutResults checkoutResults = getCheckoutService().checkout(shoppingCart, taxSnapshot, customerSession, throwExceptions);
+		CheckoutResults checkoutResults = getCheckoutService().checkout(shoppingCart, taxSnapshot, shopper.getCustomerSession(), throwExceptions);
 
 		// only one order should have been created by the checkout service
 		return postCaptureCheckout(checkoutResults.getOrder());

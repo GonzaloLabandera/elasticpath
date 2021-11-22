@@ -6,9 +6,11 @@ package com.elasticpath.cmclient.fulfillment.views.customer;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -29,6 +31,7 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPlugin;
 import com.elasticpath.cmclient.fulfillment.editors.actions.CreateAccountAction;
+import com.elasticpath.cmclient.fulfillment.editors.actions.DeleteAccountAction;
 import com.elasticpath.cmclient.fulfillment.event.AccountEventListener;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
 import com.elasticpath.cmclient.fulfillment.helpers.AccountSearchRequestJob;
@@ -45,7 +48,7 @@ import com.elasticpath.service.search.query.StandardSortBy;
 public class AccountSearchResultsView extends AbstractSortListView implements AccountEventListener {
 	private static final String ACCOUNT_SEARCH_RESULT_TABLE = "Account Search Result Table";
 
-	private static final Logger LOG = Logger.getLogger(AccountSearchResultsView.class);
+	private static final Logger LOG = LogManager.getLogger(AccountSearchResultsView.class);
 
 
 	// table column constants
@@ -205,8 +208,7 @@ public class AccountSearchResultsView extends AbstractSortListView implements Ac
 	@Override
 	protected void initializeTable(final IEpTableViewer epTableViewer) {
 		final int[] widths = new int[]{21, 200, 135, 135, 270};
-		final String[] columnNames = new String[]{
-				org.apache.commons.lang.StringUtils.EMPTY,
+		final String[] columnNames = new String[]{StringUtils.EMPTY,
 				FulfillmentMessages.get().AccountSearchResultsView_SharedId,
 				FulfillmentMessages.get().AccountSearchResultsView_BusinessName,
 				FulfillmentMessages.get().AccountSearchResultsView_BusinessNumber,
@@ -240,23 +242,55 @@ public class AccountSearchResultsView extends AbstractSortListView implements Ac
 		final OpenAccountDetailsEditorAction action = new OpenAccountDetailsEditorAction(getViewer(), this.getSite());
 		addDoubleClickAction(action);
 
-		final AuthorizationService authorizationService = AuthorizationService.getInstance();
+		final Separator customerActionSeparator = new Separator("customerActionSeparator"); //$NON-NLS-1$
+		getToolbarManager().add(customerActionSeparator);
 
+		final AuthorizationService authorizationService = AuthorizationService.getInstance();
 		boolean isAuthorizedToCreateAccounts =
 				authorizationService.isAuthorizedWithPermission(FulfillmentPermissions.CREATE_EDIT_ACCOUNTS);
 
 		final CreateAccountAction createAccountAction = new CreateAccountAction();
 		createAccountAction.setEnabled(isAuthorizedToCreateAccounts);
+		final DeleteAccountAction deleteAccountAction = new DeleteAccountAction(this);
+		deleteAccountAction.setEnabled(false);
 
 		final ActionContributionItem createAccountActionContributionItem = new ActionContributionItem(createAccountAction);
-
-		final Separator customerActionSeparator = new Separator("customerActionSeparator"); //$NON-NLS-1$
-
-		getToolbarManager().add(customerActionSeparator);
+		final ActionContributionItem deleteAccountActionContributionItem = new ActionContributionItem(deleteAccountAction);
 
 		createAccountActionContributionItem.setMode(ActionContributionItem.MODE_FORCE_TEXT);
+		deleteAccountActionContributionItem.setMode(ActionContributionItem.MODE_FORCE_TEXT);
 
 		getToolbarManager().appendToGroup(customerActionSeparator.getGroupName(), createAccountActionContributionItem);
+		getToolbarManager().appendToGroup(customerActionSeparator.getGroupName(), deleteAccountActionContributionItem);
+
+		this.getViewer().addSelectionChangedListener(event -> {
+			final IStructuredSelection strSelection = (IStructuredSelection) event.getSelection();
+			Customer customer = (Customer) strSelection.getFirstElement();
+
+			deleteAccountAction.setEnabled(customer != null);
+		});
+	}
+
+	/**
+	 * Get selected account from list.
+	 * @return Customer
+	 */
+	public Customer getSelectedAccount() {
+		final IStructuredSelection selection = (IStructuredSelection) getViewer().getSelection();
+		Customer customer = null;
+		if (!selection.isEmpty()) {
+			customer = (Customer) selection.getFirstElement();
+		}
+		return customer;
+	}
+
+	/**
+	 * Refresh table data.
+	 */
+	public void refreshTableContent() {
+		if (accountSearchRequestJob != null) {
+			accountSearchRequestJob.executeSearchFromIndex(null, getResultsStartIndex());
+		}
 	}
 
 	@Override

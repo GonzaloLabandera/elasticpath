@@ -3,7 +3,8 @@
  */
 package com.elasticpath.tools.sync.job.descriptor.dao.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tools.sync.client.controller.FileSystemHelper;
 import com.elasticpath.tools.sync.job.descriptor.JobDescriptor;
@@ -15,7 +16,7 @@ import com.elasticpath.tools.sync.job.descriptor.dao.JobDescriptorDao;
  */
 public class JobDescriptorDaoImpl implements JobDescriptorDao {
 
-	private static final Logger LOG = Logger.getLogger(JobDescriptorDaoImpl.class);
+	private static final Logger LOG = LogManager.getLogger(JobDescriptorDaoImpl.class);
 
 	private final String jobDescriptorFileName;
 

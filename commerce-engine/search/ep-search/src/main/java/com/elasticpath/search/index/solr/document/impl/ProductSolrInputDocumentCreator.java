@@ -21,7 +21,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 
@@ -68,7 +69,7 @@ import com.elasticpath.tags.TagSet;
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTask<IndexProduct> {
 
-	private static final Logger LOG = Logger.getLogger(ProductSolrInputDocumentCreator.class);
+	private static final Logger LOG = LogManager.getLogger(ProductSolrInputDocumentCreator.class);
 
 	/** A value that boost the value. */
 	protected static final int FEATURED_RANK_BOOST = 1000;

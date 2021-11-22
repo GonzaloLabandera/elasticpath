@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.datapolicy.CustomerConsentDTO;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
@@ -22,7 +23,7 @@ import com.elasticpath.service.datapolicy.CustomerConsentService;
  */
 public class CustomerConsentExporterImpl extends AbstractExporterImpl<CustomerConsent, CustomerConsentDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(CustomerConsentExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerConsentExporterImpl.class);
 
 	private ImportExportSearcher importExportSearcher;
 

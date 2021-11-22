@@ -3,7 +3,7 @@
  */
 package com.elasticpath.importexport.common.adapters.settings;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.importexport.common.adapters.AbstractDomainAdapterImpl;

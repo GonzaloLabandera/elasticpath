@@ -168,7 +168,7 @@
 		<property name="loadingDefaultSku" value="true"/>
 		<property name="productSkuLoadTuner" ref="PRODUCT_SKU_LOAD_TUNER_ALL"/>
 		<property name="productTypeLoadTuner" ref="PRODUCT_TYPE_LOAD_TUNER_ALL"/>
-		<property name="categoryLoadTuner" ref="CATEGORY_LOAD_TUNER_MASTER_AND_PARENT"/>
+		<property name="categoryLoadTuner" ref="CATEGORY_LOAD_TUNER_LOOKUP"/>
 	</bean>
 
 	<bean id="productLoadTunerForAddToCart"
@@ -269,6 +269,12 @@
 		<property name="loadingMaster" value="true"/>
 	</bean>
 
+	<bean id="CATEGORY_LOAD_TUNER_LOOKUP"
+		  class="com.elasticpath.domain.catalog.impl.CategoryLoadTunerImpl"
+		  scope="singleton" parent="epDomain">
+		<property name="loadingMaster" value="true"/>
+		<property name="loadingAttributeValue" value="true"/>
+	</bean>
 
 	<bean id="CATEGORY_LOAD_TUNER_ALL"
 		  class="com.elasticpath.domain.catalog.impl.CategoryLoadTunerImpl"
@@ -320,6 +326,16 @@
 		 class="com.elasticpath.persistence.support.impl.OrderCriterionImpl"
 		 scope="prototype">
 	 </bean>
+
+	<bean id="customerCriterion"
+		  class="com.elasticpath.persistence.support.impl.CustomerCriterionImpl"
+		  scope="prototype">
+	</bean>
+
+	<bean id="accountCriterion"
+		  class="com.elasticpath.persistence.support.impl.AccountCriterionImpl"
+		  scope="prototype">
+	</bean>
 
 	<bean id="synonymAnalyzer" class="org.apache.lucene.analysis.en.EnglishAnalyzer" />
 

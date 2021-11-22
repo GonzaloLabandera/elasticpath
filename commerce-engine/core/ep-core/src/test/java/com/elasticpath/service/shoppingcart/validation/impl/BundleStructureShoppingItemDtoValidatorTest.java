@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Elastic Path Software Inc., 2018
+ * Copyright (c) Elastic Path Software Inc., 2021
  */
 package com.elasticpath.service.shoppingcart.validation.impl;
 
@@ -17,13 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.common.dto.ShoppingItemDto;
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.catalog.BundleConstituent;
-import com.elasticpath.domain.catalog.ConstituentItem;
-import com.elasticpath.domain.catalog.ProductBundle;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemDtoValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFBundleConstituent;
+import com.elasticpath.xpf.connectivity.entity.XPFProduct;
+import com.elasticpath.xpf.connectivity.entity.XPFProductBundle;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingItem;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleStructureShoppingItemDtoValidatorTest {
@@ -31,50 +31,51 @@ public class BundleStructureShoppingItemDtoValidatorTest {
 	private static final String SKU_CODE = "skuCode";
 
 	@InjectMocks
-	private BundleStructureShoppingItemDtoValidatorImpl validator;
+	private BundleStructureShoppingItemValidatorImpl validator;
 
 	@Mock
-	private ShoppingItemDtoValidationContext context;
+	private XPFShoppingItemValidationContext context;
 
 	@Mock
-	private ProductSku productSku;
+	private XPFProductSku xpfProductSku;
 
 	@Mock
-	private ShoppingItemDto shoppingItemDto;
+	private XPFShoppingItem xpfParentShoppingItemDto;
 
 	@Mock
-	private ShoppingItemDto shoppingItemDto1;
+	private XPFShoppingItem xpfChildShoppingItemDto;
 
 	@Mock
-	private ProductBundle productBundle;
+	private XPFProductBundle xpfProductBundle;
 
 	@Mock
-	private BundleConstituent bundleConstituent;
+	private XPFBundleConstituent xpfBundleConstituent;
 
 	@Mock
-	private ConstituentItem constituentItem;
+	private XPFProduct xpfProduct;
 
 	@Before
 	public void setUp() {
-		given(context.getProductSku()).willReturn(productSku);
-		given(productSku.getProduct()).willReturn(productBundle);
-		given(productSku.getSkuCode()).willReturn(SKU_CODE);
-		given(productBundle.getConstituents()).willReturn(Collections.singletonList(bundleConstituent));
-		given(bundleConstituent.getConstituent()).willReturn(constituentItem);
-		given(constituentItem.isProductSku()).willReturn(true);
-		given(context.getShoppingItemDto()).willReturn(shoppingItemDto);
-		given(shoppingItemDto.getConstituents()).willReturn(Collections.singletonList(shoppingItemDto1));
-		given(shoppingItemDto1.getSkuCode()).willReturn(SKU_CODE);
+		given(context.getShoppingItem()).willReturn(xpfParentShoppingItemDto);
+		given(xpfParentShoppingItemDto.getProductSku()).willReturn(xpfProductSku);
+		given(xpfProductSku.getProduct()).willReturn(xpfProductBundle);
+		given(xpfProductSku.getCode()).willReturn(SKU_CODE);
+		given(xpfProduct.getCode()).willReturn(SKU_CODE);
+		given(xpfProductBundle.isBundle()).willReturn(true);
+		given(xpfProductBundle.getConstituents()).willReturn(Collections.singletonList(xpfBundleConstituent));
+		given(xpfBundleConstituent.getProduct()).willReturn(xpfProduct);
+		given(xpfParentShoppingItemDto.getChildren()).willReturn(Collections.singletonList(xpfChildShoppingItemDto));
+		given(xpfChildShoppingItemDto.getProductSku()).willReturn(xpfProductSku);
 	}
 
 	@Test
 	public void testBundleStructureCorrect() {
 
 		// Given
-		given(constituentItem.getCode()).willReturn(SKU_CODE);
+		given(xpfChildShoppingItemDto.getProductSku().getProduct().getCode()).willReturn(SKU_CODE);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -82,15 +83,15 @@ public class BundleStructureShoppingItemDtoValidatorTest {
 
 	@Test
 	public void testBundleStructureIncorrect() {
-		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage("item.invalid.bundle.structure",
+		XPFStructuredErrorMessage structuredErrorMessage = new XPFStructuredErrorMessage("item.invalid.bundle.structure",
 				"Requested item configuration does not have a valid bundle structure.",
 				ImmutableMap.of("item-code", SKU_CODE));
 
 		// Given
-		given(constituentItem.getCode()).willReturn("skuCode1");
+		given(xpfChildShoppingItemDto.getProductSku().getProduct().getCode()).willReturn("skuCode1");
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(structuredErrorMessage);

@@ -18,7 +18,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

@@ -6,9 +6,10 @@ package com.elasticpath.domain.rules.impl;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,15 +25,23 @@ public class ChecksumAndLogVisitorTest {
 	private final ChecksumAndLogVisitor visitor = new ChecksumAndLogVisitor();
 
 	private final AppliedRule appliedRule = new AppliedRuleImpl();
-	private final TestLog4jLoggingAppender appender = new TestLog4jLoggingAppender();
+	private final TestLog4jLoggingAppender appender = TestLog4jLoggingAppender.newBuilder().build();
+	
+	private static final Logger LOG = (Logger) LogManager.getLogger(PromotionLogSupport.RULECODE.getLoggerName());
+	
 	/**
 	 * Add appender to loggers under test.
 	 */
 	@Before
 	public void setUp() {
-		Logger log = LogManager.getLogger(PromotionLogSupport.RULECODE.getLoggerName());
-		log.setLevel(Level.TRACE);
-		log.addAppender(appender);		
+		appender.start();
+		LOG.addAppender(appender);
+	}
+
+	@After
+	public void tearDown() {
+		appender.stop();
+		LOG.removeAppender(appender);
 	}
 	
 	/**
@@ -40,6 +49,7 @@ public class ChecksumAndLogVisitorTest {
 	 */
 	@Test
 	public void testBasicLoggingAndChecksumming() {
+		
 		appliedRule.setRuleCode(RULE_CODE);
 		
 		// add expectations
@@ -49,7 +59,7 @@ public class ChecksumAndLogVisitorTest {
 		visitor.visit(appliedRule);
 		
 		// ensure all the expectations are met
-		appender.verify();		
+		appender.verify();
 	}
 
 	
@@ -58,6 +68,9 @@ public class ChecksumAndLogVisitorTest {
 	 */
 	@Test
 	public void logMessagesShouldAppearOnOneLine() {
+		
+		LOG.addAppender(appender);
+		
 		appliedRule.setRuleCode(RULE_CODE_WITH_NEWLINES);
 
 		// add expectations

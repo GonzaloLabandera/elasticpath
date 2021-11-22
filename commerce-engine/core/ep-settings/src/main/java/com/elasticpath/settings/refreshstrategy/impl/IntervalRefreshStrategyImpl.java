@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.settings.domain.SettingValue;

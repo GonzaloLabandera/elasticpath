@@ -127,7 +127,7 @@ public class OrderPaymentDataPropagationTest extends DbTestCase {
 
 		shoppingCart = checkoutTestCartBuilder.withScenario(scenario)
 				.withCustomer(customer)
-				.withCustomerSession(shoppingContext.getCustomerSession())
+				.withShopper(shoppingContext.getShopper())
 				.withPhysicalProduct()
 				.build();
 
@@ -279,7 +279,7 @@ public class OrderPaymentDataPropagationTest extends DbTestCase {
 	private Order checkout() {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
-		return checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+		return checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 	}
 
 	private OrderShipment releaseAndCompleteShipment(final Order order, int shipmentIndex) {

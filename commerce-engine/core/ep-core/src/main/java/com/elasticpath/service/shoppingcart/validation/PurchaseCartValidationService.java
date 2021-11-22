@@ -3,28 +3,24 @@
  */
 package com.elasticpath.service.shoppingcart.validation;
 
-import com.elasticpath.domain.cartorder.CartOrder;
+import java.util.Collection;
+
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.store.Store;
 
 /**
  * Service for validating a shopping cart before a purchase.
  */
-public interface PurchaseCartValidationService extends Validator<ShoppingCartValidationContext> {
+public interface PurchaseCartValidationService {
 
 	/**
-	 * Builds validation context.
-	 *
-	 * @param shoppingCart shopping cart
-	 * @param cartOrder cart order
-	 * @return validation context
+	 * Execute the validators for a shopping cart and return any structured error messages.
+	 * @param shoppingCart the shopping cart
+	 * @param shopper the shopper
+	 * @param store the store
+	 * @return the structured error messages
 	 */
-	ShoppingCartValidationContext buildContext(ShoppingCart shoppingCart, CartOrder cartOrder);
-
-	/**
-	 * Builds validation context.
-	 *
-	 * @param shoppingCart shopping cart
-	 * @return validation context
-	 */
-	ShoppingCartValidationContext buildContext(ShoppingCart shoppingCart);
+	Collection<StructuredErrorMessage> validate(ShoppingCart shoppingCart, Shopper shopper, Store store);
 }

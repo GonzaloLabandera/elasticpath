@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -46,7 +47,7 @@ public class ImportJobProcessorImpl implements ImportJobProcessor {
 	/**
 	 * The logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(ImportJobProcessorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ImportJobProcessorImpl.class);
 
 	private ImportNotificationDao importNotificationDao;
 	

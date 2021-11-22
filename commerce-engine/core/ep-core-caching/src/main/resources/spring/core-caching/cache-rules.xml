@@ -63,56 +63,13 @@
 		<constructor-arg value="ruleCodesByRuleUidsCache"/>
 	</bean>
 
-	<!-- Caching rule base by store, catalog and scenario IDs -->
-	<bean id="ruleBaseByScenarioEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-		<property name="name" value="ruleBaseByScenarioCache"/>
-		<property name="cacheManager" ref="epEhcacheManager"/>
-		<property name="timeToLive" value="3600" />
-		<property name="timeToIdle" value="3600" />
-		<property name="maxEntriesLocalHeap" value="200"/>
-	</bean>
-	<bean id="ruleBaseByScenarioCache"
-		  factory-bean="localCacheFactory" factory-method="createCache"
-		  depends-on="ruleBaseByScenarioEhCache">
-		<constructor-arg value="ruleBaseByScenarioCache"/>
-	</bean>
-
-	<!-- Caching changed store rule base  -->
-	<bean id="changedStoreRuleBaseEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-		<property name="name" value="changedStoreRuleBaseCache"/>
-		<property name="cacheManager" ref="epEhcacheManager"/>
-		<property name="timeToLive" value="3600" />
-		<property name="timeToIdle" value="3600" />
-		<property name="maxEntriesLocalHeap" value="200"/>
-	</bean>
-	<bean id="changedStoreRuleBaseCache"
-		  factory-bean="localCacheFactory" factory-method="createCache"
-		  depends-on="changedStoreRuleBaseEhCache">
-		<constructor-arg value="changedStoreRuleBaseCache"/>
-	</bean>
-
-	<!-- Caching changed catalog rule base -->
-	<bean id="changedCatalogRuleBaseEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-		<property name="name" value="changedCatalogRuleBaseCache"/>
-		<property name="cacheManager" ref="epEhcacheManager"/>
-		<property name="timeToLive" value="3600" />
-		<property name="timeToIdle" value="3600" />
-		<property name="maxEntriesLocalHeap" value="200"/>
-	</bean>
-	<bean id="changedCatalogRuleBaseCache"
-		  factory-bean="localCacheFactory" factory-method="createCache"
-		  depends-on="changedCatalogRuleBaseEhCache">
-		<constructor-arg value="changedCatalogRuleBaseCache"/>
-	</bean>
-
-
 	<!-- Caching selling contexts  -->
 	<bean id="sellingContextEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
 		<property name="name" value="sellingContextByCatalogCache"/>
 		<property name="cacheManager" ref="epEhcacheManager"/>
-		<property name="timeToLive" value="3600" />
-		<property name="timeToIdle" value="3600" />
-		<property name="maxEntriesLocalHeap" value="200"/>
+		<property name="timeToLive" value="300" />
+		<property name="timeToIdle" value="300" />
+		<property name="maxEntriesLocalHeap" value="1000"/>
 	</bean>
 	<bean id="sellingContextCache"
 		  factory-bean="localCacheFactory" factory-method="createCache"
@@ -140,9 +97,6 @@
 		<property name="ruleCodeByRuleNameCache" ref="ruleCodeByRuleNameCache" />
 		<property name="ruleCodeByRuleUidCache" ref="ruleCodeByRuleUidCache" />
 		<property name="ruleCodesByRuleUidsCache" ref="ruleCodesByRuleUidsCache" />
-		<property name="ruleBaseByScenarioCache" ref="ruleBaseByScenarioCache" />
-		<property name="changedStoreRuleBaseCache" ref="changedStoreRuleBaseCache" />
-		<property name="changedCatalogRuleBaseCache" ref="changedCatalogRuleBaseCache" />
 		<property name="sellingContextCache" ref="sellingContextCache" />
 		<property name="modifiedDateCache" ref="modifiedDateByUidCache"/>
 	</bean>

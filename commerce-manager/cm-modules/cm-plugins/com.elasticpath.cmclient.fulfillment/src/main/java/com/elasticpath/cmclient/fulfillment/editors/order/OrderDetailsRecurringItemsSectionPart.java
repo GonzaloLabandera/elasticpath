@@ -9,8 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -75,7 +76,7 @@ import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEditorPageSectionPart
 	implements SelectionListener, ISelectionChangedListener {
 
-	private static final Logger LOG = Logger.getLogger(OrderDetailsRecurringItemsSectionPart.class);
+	private static final Logger LOG = LogManager.getLogger(OrderDetailsRecurringItemsSectionPart.class);
 
 	private static final int COLUMN_WIDTH_IMAGE = 21;
 

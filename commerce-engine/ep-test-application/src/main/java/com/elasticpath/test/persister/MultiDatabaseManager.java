@@ -7,8 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import com.elasticpath.test.persister.database.DataSourceInitializer;
  */
 public class MultiDatabaseManager {
 
-	private static final Logger LOG = Logger.getLogger(MultiDatabaseManager.class);
+	private static final Logger LOG = LogManager.getLogger(MultiDatabaseManager.class);
 
 	private final Object lock = new Object();
 	private Map<String, DBConfig> databases = new HashMap<>();

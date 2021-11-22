@@ -11,7 +11,8 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
@@ -38,7 +39,7 @@ import com.elasticpath.selenium.wizards.CreatePriceListAssignmentWizard;
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength"})
 public class PriceListDefinition {
-	private static final Logger LOGGER = Logger.getLogger(AbstractPageObject.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractPageObject.class);
 	private final PriceListManagement priceListManagement;
 	private final PriceListActionToolbar priceListActionToolbar;
 	private final ActivityToolbar activityToolbar;

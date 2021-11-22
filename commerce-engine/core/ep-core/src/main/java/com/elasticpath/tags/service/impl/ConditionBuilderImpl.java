@@ -3,8 +3,9 @@
  */
 package com.elasticpath.tags.service.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.domain.TagDefinition;
@@ -16,7 +17,7 @@ import com.elasticpath.tags.service.TagDefinitionReader;
  */
 public class ConditionBuilderImpl implements ConditionBuilder {
 	
-	private static final Logger LOG = Logger.getLogger(ConditionBuilderImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ConditionBuilderImpl.class);
 	
 	private TagDefinitionReader tagDefinitionReader;
 		

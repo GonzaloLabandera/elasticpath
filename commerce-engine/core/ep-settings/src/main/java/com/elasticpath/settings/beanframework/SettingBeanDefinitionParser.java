@@ -64,7 +64,7 @@ public class SettingBeanDefinitionParser extends AbstractSingleBeanDefinitionPar
 			beanDefinitionBuilder.addPropertyValue("deprecatedSystemPropertyOverrideKey", deprecatedSystemPropertyOverrideKey);
 		}
 
-		beanDefinitionBuilder.addPropertyReference("settingsReader", "settingsReader");
+		beanDefinitionBuilder.addPropertyReference("xpfExtensionLookup", "xpfExtensionLookup");
 		beanDefinitionBuilder.addPropertyReference("settingValueTypeConverter", "settingValueTypeConverter");
 	}
 

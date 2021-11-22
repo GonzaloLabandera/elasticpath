@@ -26,7 +26,6 @@ import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.order.impl.PhysicalOrderShipmentImpl;
 import com.elasticpath.domain.orderpaymentapi.OrderPayment;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -48,8 +47,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 	@Test
 	public void testAddItemToPhysicalOrderShipment() {
 		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
-		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
+		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(shopper, address, address,
 				scenario.getShippingOption(), scenario.getStore());
 
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
@@ -59,7 +57,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		// checkout
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
 		assertEquals("only one order should have been created by the checkout service", 1, ordersList.size());
@@ -125,8 +123,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 	@Test
 	public void testCreateNewShipment() {
 		// construct new shopping cart
-		final Shopper shopper = customerSession.getShopper();
-		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
+		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(shopper, address, address,
 				scenario.getShippingOption(), scenario.getStore());
 
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(1).getDefaultSku().getSkuCode(), 1);
@@ -136,7 +133,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
 		assertEquals("Only one order should have been created by the checkout service", 1, ordersList.size());
@@ -197,8 +194,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 	@Test
 	public void testRemoveItemToPhysicalOrderShipment() {
 		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
-		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
+		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(shopper, address, address,
 				scenario.getShippingOption(), scenario.getStore());
 
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
@@ -208,7 +204,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
 		assertEquals("only one order should have been created by the checkout service", 1, ordersList.size());

@@ -5,10 +5,11 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.2.0.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.2.0.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="7.2.0-add-creation-date-to-customer-profile-value-table" author="elasticpath">
-		<validCheckSum>7:19b44a30e33ae25f14be83259779e6b1</validCheckSum>
+		<validCheckSum>8:2301b2d086ddcc15924e1c81f52b9549</validCheckSum>
 
 		<comment>[PB-3410] Add Created Date to Customer Profile Value</comment>
 
@@ -24,14 +25,15 @@
 		</sql>
 
 		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
-		<sql dbms="h2, hsqldb, oracle">
+		<sql dbms="h2, hsqldb, oracle,postgresql">
 			UPDATE TCUSTOMERPROFILEVALUE
-			   SET TCUSTOMERPROFILEVALUE.CREATION_DATE = (SELECT CREATION_DATE FROM TCUSTOMER cust WHERE cust.UIDPK = TCUSTOMERPROFILEVALUE.CUSTOMER_UID)
-			   WHERE EXISTS (SELECT * FROM TCUSTOMER cust WHERE cust.UIDPK = TCUSTOMERPROFILEVALUE.CUSTOMER_UID);
+			   SET CREATION_DATE = (SELECT CREATION_DATE FROM TCUSTOMER cust WHERE cust.UIDPK = CUSTOMER_UID)
+			   WHERE EXISTS (SELECT * FROM TCUSTOMER cust WHERE cust.UIDPK = CUSTOMER_UID);
 		</sql>
 	</changeSet>
 
 	<changeSet id="7.2.0-add-data-policy-related-tables" author="elasticpath">
+		<validCheckSum>8:1191f6e2dd7b2b8e8eef5b1ded2f126c</validCheckSum>
 		<comment>[PB-3414] Data Policy Domain and Service support</comment>
 
 		<createTable tableName="TDATAPOINT">
@@ -53,7 +55,7 @@
 			<column name="DESCRIPTION_KEY" type="VARCHAR(255)">
 				<constraints nullable="false"/>
 			</column>
-			<column name="REMOVABLE" type="TINYINT">
+			<column name="REMOVABLE" type="BOOLEAN">
 				<constraints nullable="false"/>
 			</column>
 		</createTable>
@@ -151,7 +153,7 @@
 	</changeSet>
 
 	<changeSet id="7.2.0-add-creation-date-to-address-tables" author="elasticpath" context="expand">
-		<validCheckSum>7:49f691ebd09c8d3447afb5ddcd0931cf</validCheckSum>
+		<validCheckSum>8:f7e0e37185aeae2b4e2fc7e8c8ca96ad</validCheckSum>
 
 		<comment>[PB-3411] Add Created and Updated Dates to Address</comment>
 
@@ -180,19 +182,19 @@
 		</sql>
 
 		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
-		<sql dbms="h2, hsqldb, oracle">
+		<sql dbms="h2, hsqldb, oracle,postgresql">
 				UPDATE TADDRESS
-				   SET TADDRESS.CREATION_DATE = (SELECT CREATION_DATE FROM TCUSTOMER cust WHERE cust.UIDPK = TADDRESS.CUSTOMER_UID)
-					 WHERE EXISTS (SELECT * FROM TCUSTOMER cust WHERE cust.UIDPK = TADDRESS.CUSTOMER_UID);
+				   SET CREATION_DATE = (SELECT CREATION_DATE FROM TCUSTOMER cust WHERE cust.UIDPK = CUSTOMER_UID)
+					 WHERE EXISTS (SELECT * FROM TCUSTOMER cust WHERE cust.UIDPK = CUSTOMER_UID);
 				UPDATE TORDERADDRESS
-				   SET TORDERADDRESS.CREATION_DATE = (SELECT CREATED_DATE FROM TORDER ord WHERE ord.ORDER_BILLING_ADDRESS_UID = TORDERADDRESS.UIDPK)
-					 WHERE EXISTS (SELECT * FROM TORDER ord WHERE ord.ORDER_BILLING_ADDRESS_UID = TORDERADDRESS.UIDPK);
+				   SET CREATION_DATE = (SELECT CREATED_DATE FROM TORDER ord WHERE ord.ORDER_BILLING_ADDRESS_UID = UIDPK)
+					 WHERE EXISTS (SELECT * FROM TORDER ord WHERE ord.ORDER_BILLING_ADDRESS_UID = UIDPK);
 		</sql>
 
 	</changeSet>
 
 	<changeSet id="7.2.0-add-creation-date-to-cart-item-and-order-data" author="elasticpath" context="expand">
-		<validCheckSum>7:aee555a19dd54c59532f6d8f2673ffbe</validCheckSum>
+		<validCheckSum>8:bd5ddc146d22a89f0415748d32e03ccc</validCheckSum>
 
 		<comment>[PB-3411] Add Created and Updated dates to OrderData and CartItem</comment>
 
@@ -218,23 +220,23 @@
 		</sql>
 
 		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
-		<sql dbms="h2, hsqldb, oracle">
+		<sql dbms="h2, hsqldb, oracle,postgresql">
 			UPDATE TORDERDATA
-			   SET TORDERDATA.CREATION_DATE = (SELECT CREATED_DATE FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID)
+			   SET CREATION_DATE = (SELECT CREATED_DATE FROM TORDER o WHERE o.UIDPK = ORDER_UID)
 			   WHERE EXISTS (SELECT * FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID);
 			UPDATE TORDERDATA
-			   SET TORDERDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID)
+			   SET LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TORDER o WHERE o.UIDPK = ORDER_UID)
 				 WHERE EXISTS (SELECT * FROM TORDER o WHERE o.UIDPK = TORDERDATA.ORDER_UID);
 		</sql>
 
 		<sql>
-			UPDATE TCARTITEM SET TCARTITEM.CREATION_DATE = TCARTITEM.LAST_MODIFIED_DATE;
+			UPDATE TCARTITEM SET CREATION_DATE = LAST_MODIFIED_DATE;
 		</sql>
 
 	</changeSet>
 
 	<changeSet id="7.2.0-add-creation-date-to-shopping-item-data" author="elasticpath" context="expand">
-		<validCheckSum>7:c316ce58930a17fcb2126d20a90f1d74</validCheckSum>
+		<validCheckSum>8:3c067af93797654866f69a951370c1f7</validCheckSum>
 
 		<comment>[PB-3411] Add Created and Updated dates to Shopping Item Data</comment>
 
@@ -254,12 +256,12 @@
 		</sql>
 
 		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
-		<sql dbms="h2, hsqldb, oracle">
+		<sql dbms="h2, hsqldb, oracle,postgresql">
 			UPDATE TSHOPPINGITEMDATA
-			   SET TSHOPPINGITEMDATA.CREATION_DATE = (SELECT CREATION_DATE FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID)
+			   SET CREATION_DATE = (SELECT CREATION_DATE FROM TCARTITEM i WHERE i.UIDPK = CARTITEM_UID)
 				 WHERE EXISTS (SELECT * FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID);
 			UPDATE TSHOPPINGITEMDATA
-			   SET TSHOPPINGITEMDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID)
+			   SET LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TCARTITEM i WHERE i.UIDPK = CARTITEM_UID)
 				 WHERE EXISTS (SELECT * FROM TCARTITEM i WHERE i.UIDPK = TSHOPPINGITEMDATA.CARTITEM_UID);
 		</sql>
 
@@ -349,7 +351,7 @@
 	</changeSet>
 
 	<changeSet id="7.2.0-add-dates-to-order-item-data" author="elasticpath" context="expand">
-		<validCheckSum>7:89571ab26adbfa4ff39948ec607c60ae</validCheckSum>
+		<validCheckSum>8:92387c3c3927ccb9ab43c0e8cf2cad98</validCheckSum>
 
 		<comment>[PB-3630] Add Created and Last Modified dates to Order Item Data table</comment>
 
@@ -369,14 +371,14 @@
 		</sql>
 
 		<!-- And fallback to the non-performant UPDATE with inner SELECT for the other databases as no choice -->
-		<sql dbms="h2, hsqldb, oracle">
+		<sql dbms="h2, hsqldb, oracle,postgresql">
 			UPDATE TORDERITEMDATA
-			   SET TORDERITEMDATA.CREATION_DATE = (SELECT CREATED_DATE FROM TORDERSKU sku WHERE sku.UIDPK = TORDERITEMDATA.ORDERSKU_UID)
-				 WHERE EXISTS (SELECT * FROM TORDERSKU sku WHERE sku.UIDPK = TORDERITEMDATA.ORDERSKU_UID);
+			   SET CREATION_DATE = (SELECT CREATED_DATE FROM TORDERSKU sku WHERE sku.UIDPK = ORDERSKU_UID)
+				 WHERE EXISTS (SELECT * FROM TORDERSKU sku WHERE sku.UIDPK = ORDERSKU_UID);
 
 			UPDATE TORDERITEMDATA
-			   SET TORDERITEMDATA.LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TORDERSKU sku WHERE sku.UIDPK = TORDERITEMDATA.ORDERSKU_UID)
-				 WHERE EXISTS (SELECT * FROM TORDERSKU sku WHERE sku.UIDPK = TORDERITEMDATA.ORDERSKU_UID)
+			   SET LAST_MODIFIED_DATE = (SELECT LAST_MODIFIED_DATE FROM TORDERSKU sku WHERE sku.UIDPK = ORDERSKU_UID)
+				 WHERE EXISTS (SELECT * FROM TORDERSKU sku WHERE sku.UIDPK = ORDERSKU_UID)
 		</sql>
 	</changeSet>
 </databaseChangeLog>

@@ -3,7 +3,7 @@
  */
 package com.elasticpath.plugin.tax.common;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Extension of the Apache Commons HashCodeBuilder that makes use of the TaxCacheKeyHash instead of the usual hashcode if available.

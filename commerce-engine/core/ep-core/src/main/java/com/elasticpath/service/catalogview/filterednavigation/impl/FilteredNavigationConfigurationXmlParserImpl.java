@@ -8,7 +8,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -24,7 +25,7 @@ import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigation
  * defined by the configuration and populates a given FilteredNavigationConfiguration object.
  */
 public class FilteredNavigationConfigurationXmlParserImpl implements FilteredNavigationConfigurationParser {
-	private static final Logger LOG = Logger.getLogger(FilteredNavigationConfigurationXmlParserImpl.class);
+	private static final Logger LOG = LogManager.getLogger(FilteredNavigationConfigurationXmlParserImpl.class);
 
 	private static final String ATTRIBUTE = "attribute";
 

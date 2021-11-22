@@ -12,6 +12,7 @@
 
 	<import resource="classpath:spring/service/service.xml" />
 	<import resource="classpath*:spring/service/importexport-service.xml"/>
+	<import resource="classpath*:spring/importexport-cli-only.xml"/>
 	<import resource="classpath*:spring/importexport-assemblers.xml" />
 	<import resource="classpath*:spring/importexport-adapters.xml"/>
 	<import resource="classpath*:spring/service/messages.xml" />

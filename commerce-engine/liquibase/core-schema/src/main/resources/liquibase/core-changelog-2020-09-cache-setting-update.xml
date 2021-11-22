@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-cache-setting-update.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-cache-setting-update.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="2020-9-update-cache-refresh-data-key" author="elasticpath">
 		<comment>[PB-8584]Update metadata key name from apiRefreshStrategy to refreshStrategy.</comment>

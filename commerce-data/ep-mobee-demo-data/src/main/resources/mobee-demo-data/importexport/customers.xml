@@ -2736,6 +2736,61 @@
 			<profile_value key="CP_PUNCHOUT_CUSTOMER_KEY" type="AttributeType_ShortText">usertest4</profile_value>
 		</customer_profile>
 	</customer>
+	<customer store_code="MOBEE" shared_id="MOBEE:usertest5@elasticpath.com" guid="usertest5">
+		<customer_type>REGISTERED_USER</customer_type>
+		<status>1</status>
+		<creationDate>2020-06-10T07:37:31-08:00</creationDate>
+		<last_edited>2020-06-10T07:37:45-08:00</last_edited>
+		<username>usertest5@elasticpath.com</username>
+		<password>$2a$08$wzWbPTI70/uA9LB/qAa9Q.YTut3tWOfZU9BC68oECDQESOsEz0V.K</password>
+		<salt/>
+		<first_time_buyer>true</first_time_buyer>
+		<addresses>
+			<address guid="6821909a-78f7-4226-8c49-6d63e1388ab9">
+				<creation_date>2020-06-10T19:45:46-07:00</creation_date>
+				<last_modified_date>2020-06-10T19:45:46-07:00</last_modified_date>
+				<last_name>user1</last_name>
+				<first_name>test1</first_name>
+				<phone_number>7781112111</phone_number>
+				<fax_number></fax_number>
+				<street1>1 Punchout St</street1>
+				<street2></street2>
+				<city>Vancouver</city>
+				<subCountry>BC</subCountry>
+				<zip_postal_code>VVV VVV</zip_postal_code>
+				<country>CA</country>
+				<commercial>false</commercial>
+				<organization>test</organization>
+			</address>
+			<address guid="ec7f0b67-d946-47b1-9a27-77296e47d17n">
+				<creation_date>2020-06-10T19:45:46-07:00</creation_date>
+				<last_modified_date>2020-06-10T19:45:46-07:00</last_modified_date>
+				<last_name>user2</last_name>
+				<first_name>test2</first_name>
+				<phone_number>7781112111</phone_number>
+				<fax_number></fax_number>
+				<street1>2 Punchout St</street1>
+				<street2></street2>
+				<city>Vancouver</city>
+				<subCountry>BC</subCountry>
+				<zip_postal_code>VVV VVV</zip_postal_code>
+				<country>CA</country>
+				<commercial>false</commercial>
+				<organization>test</organization>
+			</address>
+		</addresses>
+		<groups>
+			<group>400</group>
+		</groups>
+		<preferred_shipping_address>02144e52-63fe-40ba-b172-a37858005adn</preferred_shipping_address>
+		<preferred_billing_address>02144e52-63fe-40ba-b172-a37858005adn</preferred_billing_address>
+		<customer_profile>
+			<profile_value key="CP_EMAIL" type="AttributeType_ShortText">usertest4@elasticpath.com</profile_value>
+			<profile_value key="CP_LAST_NAME" type="AttributeType_ShortText">user</profile_value>
+			<profile_value key="CP_FIRST_NAME" type="AttributeType_ShortText">test</profile_value>
+			<profile_value key="CP_PUNCHOUT_CUSTOMER_KEY" type="AttributeType_ShortText">usertest5</profile_value>
+		</customer_profile>
+	</customer>
 	<customer store_code="MOBEE" shared_id="MOBEE:testbuyeradmin@elasticpath.com" guid="testbuyeradminguid">
 		<customer_type>REGISTERED_USER</customer_type>
 		<status>1</status>
@@ -3072,6 +3127,138 @@
 		</groups>
 		<customer_profile>
 			<profile_value key="AP_NAME" type="AttributeType_ShortText">Child6</profile_value>
+			<profile_value key="AP_BUSINESS_NUMBER" type="AttributeType_ShortText">9879879879</profile_value>
+			<profile_value key="AP_PHONE" type="AttributeType_ShortText">6045545556</profile_value>
+			<profile_value key="AP_FAX" type="AttributeType_ShortText">6045555457</profile_value>
+			<profile_value key="AP_TAX_EXEMPTION_ID" type="AttributeType_ShortText">tax2644898</profile_value>
+		</customer_profile>
+	</customer>
+	<customer shared_id="account-delete@abc.com" guid="924cfa36-8730-48aa-b37b-0n60c821b299">
+		<customer_type>ACCOUNT</customer_type>
+		<status>1</status>
+		<creationDate>2017-03-07T00:25:21-08:00</creationDate>
+		<last_edited>2017-03-06T16:28:12-08:00</last_edited>
+		<first_time_buyer>true</first_time_buyer>
+		<addresses>
+			<address guid="FD6B3DAF-0552-BB8A-7F73-2BFB3BD0E08W">
+				<last_name>SomeName123</last_name>
+				<first_name>SomeName123</first_name>
+				<phone_number>(605)222-2222-9999</phone_number>
+				<fax_number>(605)222-2222-9999</fax_number>
+				<street1>2533 Granville St.</street1>
+				<street2></street2>
+				<city>Vancouver</city>
+				<subCountry></subCountry>
+				<zip_postal_code>45435-465</zip_postal_code>
+				<country>GB</country>
+				<commercial>false</commercial>
+			</address>
+		</addresses>
+		<preferred_billing_address>FD6B3DAF-0552-BB8A-7F73-2BFB3BD0E08W</preferred_billing_address>
+		<groups>
+			<group>400</group>
+		</groups>
+		<customer_profile>
+			<profile_value key="AP_NAME" type="AttributeType_ShortText">account-delete</profile_value>
+			<profile_value key="AP_BUSINESS_NUMBER" type="AttributeType_ShortText">9879879879</profile_value>
+			<profile_value key="AP_PHONE" type="AttributeType_ShortText">6045545556</profile_value>
+			<profile_value key="AP_FAX" type="AttributeType_ShortText">6045555457</profile_value>
+			<profile_value key="AP_TAX_EXEMPTION_ID" type="AttributeType_ShortText">tax2644898</profile_value>
+		</customer_profile>
+	</customer>
+	<customer shared_id="child-account-delete@abc.com" guid="924cfa36-8730-48aa-b37b-0n60c821b355" parent_guid="924cfa36-8730-48aa-b37b-0n60c821b299">
+		<customer_type>ACCOUNT</customer_type>
+		<status>1</status>
+		<creationDate>2017-03-07T00:25:21-08:00</creationDate>
+		<last_edited>2017-03-06T16:28:12-08:00</last_edited>
+		<first_time_buyer>true</first_time_buyer>
+		<addresses>
+			<address guid="FD6B3DAF-0552-BB8A-7F73-2BFB3BD0E09M">
+				<last_name>SomeName123-child</last_name>
+				<first_name>SomeName123-child</first_name>
+				<phone_number>(605)222-2222-9999</phone_number>
+				<fax_number>(605)222-2222-9999</fax_number>
+				<street1>2533 Granville St.</street1>
+				<street2></street2>
+				<city>Vancouver</city>
+				<subCountry></subCountry>
+				<zip_postal_code>45435-465</zip_postal_code>
+				<country>GB</country>
+				<commercial>false</commercial>
+			</address>
+		</addresses>
+		<preferred_billing_address>FD6B3DAF-0552-BB8A-7F73-2BFB3BD0E08W</preferred_billing_address>
+		<groups>
+			<group>400</group>
+		</groups>
+		<customer_profile>
+			<profile_value key="AP_NAME" type="AttributeType_ShortText">account-delete</profile_value>
+			<profile_value key="AP_BUSINESS_NUMBER" type="AttributeType_ShortText">9879879879</profile_value>
+			<profile_value key="AP_PHONE" type="AttributeType_ShortText">6045545556</profile_value>
+			<profile_value key="AP_FAX" type="AttributeType_ShortText">6045555457</profile_value>
+			<profile_value key="AP_TAX_EXEMPTION_ID" type="AttributeType_ShortText">tax2644898</profile_value>
+		</customer_profile>
+	</customer>
+	<customer shared_id="account-delete-2@abc.com" guid="924cfa36-8730-48aa-b37b-0n60c821b523">
+		<customer_type>ACCOUNT</customer_type>
+		<status>1</status>
+		<creationDate>2017-03-07T00:25:21-08:00</creationDate>
+		<last_edited>2017-03-06T16:28:12-08:00</last_edited>
+		<first_time_buyer>true</first_time_buyer>
+		<addresses>
+			<address guid="FD6B3DAF-0552-BB8A-7F73-2BFB3BD0E03C">
+				<last_name>SomeName123</last_name>
+				<first_name>SomeName123</first_name>
+				<phone_number>(605)222-2222-9999</phone_number>
+				<fax_number>(605)222-2222-9999</fax_number>
+				<street1>2533 Granville St.</street1>
+				<street2></street2>
+				<city>Vancouver</city>
+				<subCountry></subCountry>
+				<zip_postal_code>45435-465</zip_postal_code>
+				<country>GB</country>
+				<commercial>false</commercial>
+			</address>
+		</addresses>
+		<preferred_billing_address>FD6B3DAF-0552-BB8A-7F73-2BFB3BD0E03C</preferred_billing_address>
+		<groups>
+			<group>400</group>
+		</groups>
+		<customer_profile>
+			<profile_value key="AP_NAME" type="AttributeType_ShortText">account-delete-2</profile_value>
+			<profile_value key="AP_BUSINESS_NUMBER" type="AttributeType_ShortText">9879879879</profile_value>
+			<profile_value key="AP_PHONE" type="AttributeType_ShortText">6045545556</profile_value>
+			<profile_value key="AP_FAX" type="AttributeType_ShortText">6045555457</profile_value>
+			<profile_value key="AP_TAX_EXEMPTION_ID" type="AttributeType_ShortText">tax2644898</profile_value>
+		</customer_profile>
+	</customer>
+	<customer shared_id="child-account-delete-2@abc.com" guid="924cfa36-8730-48aa-b37b-0n60c821b379" parent_guid="924cfa36-8730-48aa-b37b-0n60c821b523">
+		<customer_type>ACCOUNT</customer_type>
+		<status>1</status>
+		<creationDate>2017-03-07T00:25:21-08:00</creationDate>
+		<last_edited>2017-03-06T16:28:12-08:00</last_edited>
+		<first_time_buyer>true</first_time_buyer>
+		<addresses>
+			<address guid="FD6B3DAF-0552-BB8A-7F73-2BFB3BD0E08L">
+				<last_name>SomeName123-child</last_name>
+				<first_name>SomeName123-child</first_name>
+				<phone_number>(605)222-2222-9999</phone_number>
+				<fax_number>(605)222-2222-9999</fax_number>
+				<street1>2533 Granville St.</street1>
+				<street2></street2>
+				<city>Vancouver</city>
+				<subCountry></subCountry>
+				<zip_postal_code>45435-465</zip_postal_code>
+				<country>GB</country>
+				<commercial>false</commercial>
+			</address>
+		</addresses>
+		<preferred_billing_address>FD6B3DAF-0552-BB8A-7F73-2BFB3BD0E08L</preferred_billing_address>
+		<groups>
+			<group>400</group>
+		</groups>
+		<customer_profile>
+			<profile_value key="AP_NAME" type="AttributeType_ShortText">account-delete-2</profile_value>
 			<profile_value key="AP_BUSINESS_NUMBER" type="AttributeType_ShortText">9879879879</profile_value>
 			<profile_value key="AP_PHONE" type="AttributeType_ShortText">6045545556</profile_value>
 			<profile_value key="AP_FAX" type="AttributeType_ShortText">6045555457</profile_value>

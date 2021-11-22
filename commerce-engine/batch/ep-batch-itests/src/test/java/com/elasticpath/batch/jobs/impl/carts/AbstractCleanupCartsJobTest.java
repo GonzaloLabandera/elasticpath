@@ -12,11 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.persistence.EntityManagerFactory;
@@ -51,7 +49,6 @@ import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemRecurringPrice;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartStatus;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
@@ -79,8 +76,6 @@ public abstract class AbstractCleanupCartsJobTest<ENT> extends DbTestCase {
 	private static final String COUNT_CART_ORDER_PAYMENT_INSTRUMENTS_SQL = "SELECT count(*) FROM TCARTORDERPAYMENTINSTRUMENT %s";
 	private static final String COUNT_SHOPPING_ITEM_RECURRING_PRICES_SQL = "SELECT count(*) FROM TSHOPPINGITEMRECURRINGPRICE %s";
 	private static final String COUNT_SHOPPING_ITEMS_SQL = "SELECT count(*) FROM TCARTITEM %s";
-	private static final String COUNT_SHOPPING_ITEM_DATA_SQL = "SELECT count(*) FROM TSHOPPINGITEMDATA %s";
-	private static final String COUNT_CART_DATA_SQL = "SELECT count(*) FROM TCARTDATA %s";
 	private static final String COUNT_CART_ORDER_COUPONS_SQL = "SELECT count(*) FROM TCARTORDERCOUPON %s";
 
 	private static final Currency CAD_CURRENCY = Currency.getInstance(Locale.CANADA);
@@ -291,7 +286,6 @@ public abstract class AbstractCleanupCartsJobTest<ENT> extends DbTestCase {
 	private void assertDependencies(final String cartGuid, final int expectedNumberOfRecords) {
 
 		int expectedFiveTimesMore = expectedNumberOfRecords * MULTIPLIER_FIVE;
-		int expectedTwiceMore = expectedNumberOfRecords * MULTIPLIER_TWO;
 
 		String whereSQL = "";
 
@@ -307,10 +301,6 @@ public abstract class AbstractCleanupCartsJobTest<ENT> extends DbTestCase {
 				.as(format("The list of created shopping item recurring prices must be %d", expectedFiveTimesMore))
 				.isEqualTo(expectedFiveTimesMore);
 
-		assertThat(getCountForQuery(format(COUNT_SHOPPING_ITEM_DATA_SQL, whereSQL)))
-				.as(format("The list of created shopping item data must be %d", expectedTwiceMore))
-				.isEqualTo(expectedTwiceMore);
-
 		whereSQL = "";
 		if (cartGuid != null) {
 			StringBuilder queryBuffer = new StringBuilder("ci INNER JOIN TSHOPPINGCART cart ON ci.SHOPPING_CART_UID = cart.UIDPK")
@@ -323,12 +313,6 @@ public abstract class AbstractCleanupCartsJobTest<ENT> extends DbTestCase {
 		assertThat(getCountForQuery(format(COUNT_SHOPPING_ITEMS_SQL, whereSQL)))
 				.as(format("The list of created shopping items must be %d", expectedFiveTimesMore))
 				.isEqualTo(expectedFiveTimesMore);
-
-		whereSQL = getFormattedWhereSQL("WHERE SHOPPING_CART_UID IN (SELECT UIDPK FROM TSHOPPINGCART WHERE GUID = '%s')", cartGuid);
-
-		assertThat(getCountForQuery(format(COUNT_CART_DATA_SQL, whereSQL)))
-				.as(format("The list of created cart data must be %d", expectedTwiceMore))
-				.isEqualTo(expectedTwiceMore);
 	}
 
 	private long getCountForQuery(final String sqlQuery) {
@@ -379,8 +363,6 @@ public abstract class AbstractCleanupCartsJobTest<ENT> extends DbTestCase {
 		shoppingCartMemento.setLastModifiedDate(new Date());
 		shoppingCartMemento.setDefault(false);
 
-		persistCartData(shoppingCartMemento);
-
 		saveShoppingCart(shoppingCartMemento);
 
 		//must post-update the LDM because it's always set to the current date after calling saveOrUpdate
@@ -400,17 +382,6 @@ public abstract class AbstractCleanupCartsJobTest<ENT> extends DbTestCase {
 
 	private <T extends Persistable> T saveOrUpdate(final T entity) {
 		return getPersistenceEngine().saveOrUpdate(entity);
-	}
-
-	private void persistCartData(final ShoppingCartMemento shoppingCartMemento) {
-		Map<String, CartData> cartDataMap = new HashMap<>();
-		CartData cartData1 = new CartData("cdKey1", "cdValue1");
-		CartData cartData2 = new CartData("cdKey2", "cdValue2");
-
-		cartDataMap.put(cartData1.getKey(), cartData1);
-		cartDataMap.put(cartData2.getKey(), cartData2);
-
-		shoppingCartMemento.setCartData(cartDataMap);
 	}
 
 	private void persistShoppingItemsWithData(final ShoppingCartMemento shoppingCartMemento) {
@@ -440,7 +411,7 @@ public abstract class AbstractCleanupCartsJobTest<ENT> extends DbTestCase {
 
 		for (int i = 0; i < 2; i++) {
 			AbstractShoppingItemImpl shoppingItem = new ShoppingItemImpl();
-			shoppingItem.setFieldValue(UUID.randomUUID().toString(), "shopping item value");
+			shoppingItem.getModifierFields().put(UUID.randomUUID().toString(), "shopping item value");
 			shoppingItem.setShoppingItemRecurringPriceAssembler(shoppingItemRecurringPriceAssembler);
 			shoppingItem.setPrice(1, priceObjectToBeAssembled);
 			shoppingItem.initialize();

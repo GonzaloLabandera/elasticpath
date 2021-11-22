@@ -7,7 +7,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 
@@ -27,7 +28,7 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
  * Implementation of CartOrderService, CartOrder should not be used in versions of EP prior to 6.4.
  */
 public class CartOrderServiceImpl implements CartOrderService {
-	private static final Logger LOG = Logger.getLogger(CartOrderServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CartOrderServiceImpl.class);
 
 	private CustomerAddressDao addressDao;
 	private CartOrderDao cartOrderDao;

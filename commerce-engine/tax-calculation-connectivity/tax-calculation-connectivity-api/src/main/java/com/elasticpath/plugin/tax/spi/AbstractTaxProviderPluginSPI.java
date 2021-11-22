@@ -3,8 +3,9 @@
  */
 package com.elasticpath.plugin.tax.spi;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.plugin.tax.TaxProviderPluginInvoker;
 import com.elasticpath.plugin.tax.capability.TaxCalculationCapability;
@@ -19,7 +20,7 @@ import com.elasticpath.plugin.tax.exception.TaxCalculationServiceException;
  */
 public abstract class AbstractTaxProviderPluginSPI implements TaxProviderPluginInvoker {
 
-	private static final Logger LOG = Logger.getLogger(AbstractTaxProviderPluginSPI.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractTaxProviderPluginSPI.class);
 
 	@Override
 	public <T extends TaxProviderCapability> T getCapability(final Class<T> capability) {

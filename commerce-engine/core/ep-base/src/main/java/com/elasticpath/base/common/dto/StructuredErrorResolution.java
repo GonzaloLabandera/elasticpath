@@ -3,6 +3,9 @@
  */
 package com.elasticpath.base.common.dto;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * Holds information on how to resolve an error.
  */
@@ -27,5 +30,31 @@ public class StructuredErrorResolution {
 
 	public String getGuid() {
 		return guid;
+	}
+
+	@Override
+	public boolean equals(final Object other) {
+		if (this == other) {
+			return true;
+		}
+
+		if (other == null || getClass() != other.getClass()) {
+			return false;
+		}
+
+		StructuredErrorResolution that = (StructuredErrorResolution) other;
+
+		return new EqualsBuilder()
+				.append(domain, that.domain)
+				.append(guid, that.guid)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder()
+				.append(domain)
+				.append(guid)
+				.toHashCode();
 	}
 }

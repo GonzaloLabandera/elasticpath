@@ -1,13 +1,14 @@
 package com.elasticpath.cortex.dce
 
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.LogManager
 
 /**
  * Simple properties manager class to keep the loading of configuration file in one place.
  */
 class PropertyManager {
 
-	private static final Logger LOGGER = Logger.getLogger(PropertyManager.class);
+	private static final Logger LOGGER = LogManager.getLogger(PropertyManager.class);
 
 	/** Singleton instance. **/
 	private static PropertyManager instance = null;

@@ -42,7 +42,6 @@ import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.store.Store;
@@ -51,7 +50,7 @@ import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.definition.base.CostEntity;
 import com.elasticpath.rest.definition.prices.OfferPriceRangeEntity;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.price.PriceRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
@@ -90,9 +89,7 @@ public class PriceRepositoryImplTest {
 	@Mock
 	private ShoppingItemDto mockShoppingItemDto;
 	@Mock
-	private CustomerSessionRepository mockCustomerSessionRepository;
-	@Mock
-	private CustomerSession mockCustomerSession;
+	private ShopperRepository mockShopperRepository;
 	@Mock
 	private Shopper mockShopper;
 	@Mock
@@ -124,7 +121,7 @@ public class PriceRepositoryImplTest {
 
 	@Before
 	public void setUp() {
-		priceRepository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository, mockCustomerSessionRepository,
+		priceRepository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository, mockShopperRepository,
 				mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository, reactiveAdapterImpl, coreBeanFactory,
 				storeService, storeProductService, moneyTransformer);
 	}
@@ -410,8 +407,7 @@ public class PriceRepositoryImplTest {
 	}
 
 	private void setupMockStore() {
-		when(mockCustomerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(mockCustomerSession));
-		when(mockCustomerSession.getShopper()).thenReturn(mockShopper);
+		when(mockShopperRepository.findOrCreateShopper()).thenReturn(Single.just(mockShopper));
 		when(mockShopper.getStoreCode()).thenReturn(STORE_CODE);
 		when(mockStoreRepository.findStoreAsSingle(STORE_CODE)).thenReturn(Single.just(mockStore));
 	}
@@ -446,7 +442,7 @@ public class PriceRepositoryImplTest {
 
 	private PriceRepository  priceRepositoryWithMultiSkuProductAndPrices(final StoreProductRepository storeProductRepository) {
 		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
-				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
+				mockShopperRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
 				reactiveAdapterImpl, coreBeanFactory, storeService, storeProductService, moneyTransformer) {
 			@Override
 			public Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
@@ -495,7 +491,7 @@ public class PriceRepositoryImplTest {
 			final StoreProductRepository storeProductRepository) {
 
 		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
-				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
+				mockShopperRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
 				reactiveAdapterImpl, coreBeanFactory, storeService, storeProductService, moneyTransformer) {
 			@Override
 			public Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
@@ -526,7 +522,7 @@ public class PriceRepositoryImplTest {
 
 	private PriceRepository priceRepositoryWithNoSalePrice(final StoreProductRepository storeProductRepository) {
 		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
-				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
+				mockShopperRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
 				reactiveAdapterImpl, coreBeanFactory, storeService, storeProductService, moneyTransformer) {
 			@Override
 			public Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
@@ -560,7 +556,7 @@ public class PriceRepositoryImplTest {
 
 	private PriceRepository priceRepositoryWithMissingPricesForSomeSkus(final StoreProductRepository storeProductRepository) {
 		PriceRepository repository = new PriceRepositoryImpl(mockShoppingItemDtoFactory, mockStoreRepository,
-				mockCustomerSessionRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
+				mockShopperRepository, mockPriceLookupFacade, mockProductSkuRepository, storeProductRepository,
 				reactiveAdapterImpl, coreBeanFactory, storeService, storeProductService, moneyTransformer) {
 			@Override
 			public Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
@@ -599,8 +595,7 @@ public class PriceRepositoryImplTest {
 	}
 
 	private void mockGetActiveSkusMethodCalls() {
-		when(mockCustomerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(mockCustomerSession));
-		when(mockCustomerSession.getShopper()).thenReturn(mockShopper);
+		when(mockShopperRepository.findOrCreateShopper()).thenReturn(Single.just(mockShopper));
 		when(mockShopper.getStoreCode()).thenReturn("mobee");
 		when(storeService.findStoreWithCode("mobee")).thenReturn(mockStore);
 		when(coreBeanFactory.getPrototypeBean(ContextIdNames.PRICE, Price.class)).thenReturn(new PriceImpl());

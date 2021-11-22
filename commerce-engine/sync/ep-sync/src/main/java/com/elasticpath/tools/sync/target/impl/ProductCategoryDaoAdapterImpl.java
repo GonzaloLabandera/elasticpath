@@ -8,7 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.Category;
@@ -26,7 +27,7 @@ import com.elasticpath.tools.sync.target.AssociatedDaoAdapter;
 // ---- DOCProductCategoryDaoApadterImpl
 public class ProductCategoryDaoAdapterImpl extends AbstractDaoAdapter<ProductCategory> implements AssociatedDaoAdapter<ProductCategory> {
 
-	private static final Logger LOG = Logger.getLogger(ProductCategoryDaoAdapterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ProductCategoryDaoAdapterImpl.class);
 
 	private ProductCategoryService productCategoryService;
 

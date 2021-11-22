@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -46,7 +47,7 @@ import com.elasticpath.service.search.solr.SolrManager;
 @SuppressWarnings("PMD.GodClass")
 public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 
-	private static final Logger LOG = Logger.getLogger(IndexBuildServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(IndexBuildServiceImpl.class);
 
 	private SolrManager solrManager;
 
@@ -59,6 +60,8 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	private IndexBuildPolicyContextFactory indexBuildPolicyContextFactory;
 
 	private Predicate<IndexType> searchIndexExistencePredicate;
+
+	private int maxIndexBuildIteration;
 
 	/**
 	 * Finds all deleted uids.
@@ -142,11 +145,13 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 
 		boolean documentsWerePublished;
 		if (rebuild) {
+			final IndexNotificationProcessor indexNotificationProcessor = indexBuilder.getIndexNotificationProcessor();
 			// just find notifications for indexType and then clear this notifications then buildFinished(..) called
-			indexBuilder.getIndexNotificationProcessor().findAllNewNotifications(indexType);
-
+			List<IndexNotification> notification = indexNotificationProcessor.findLastDeleteAllOrRebuildIndexType(indexType);
 			documentsWerePublished = rebuildInternal(indexBuilder, solrClient);
-
+			if (!notification.isEmpty()) {
+				indexNotificationProcessor.removeNotificationByMaxUidAndIndexType(notification.get(0).getUidPk(), indexType);
+			}
 		} else {
 			documentsWerePublished = buildInternal(indexBuilder, solrClient);
 		}
@@ -175,13 +180,10 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		return indexType -> {
 			final IndexBuilder indexBuilder = getIndexBuilder(indexType);
 			final IndexNotificationProcessor indexNotificationProcessor = indexBuilder.getIndexNotificationProcessor();
-			final List<IndexNotification> notifications = indexNotificationProcessor.findAllNewNotifications(indexBuilder.getIndexType());
-			for (final IndexNotification notification : notifications) {
-				if (notification.getUpdateType() == UpdateType.REBUILD) {
-					return true;
-				}
-			}
-			return false;
+
+			final List<IndexNotification> notifications = indexNotificationProcessor.findLastDeleteAllOrRebuildIndexType(indexBuilder.getIndexType());
+
+			return !notifications.isEmpty();
 		};
 	}
 
@@ -196,21 +198,41 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		final Date lastBuildDate = getLastBuildDate(indexBuilder.getIndexType());
 
 		// add or update the corresponding documents in the index for products that were added or updated since the last build
-		final List<Long> addedOrModifiedUids = findAddedOrModifiedUidsInternal(indexBuilder, lastBuildDate);
+		List<Long> addedOrModifiedUids;
+		Collection<Long> deletedUids;
+		int runner = 0;
 
-		// delete the corresponding documents in the index for products that were deleted since the last build
-		final Collection<Long> deletedUids = findDeletedUidsInternal(indexBuilder, lastBuildDate);
+		final IndexNotificationProcessor indexNotificationProcessor = indexBuilder.getIndexNotificationProcessor();
 
-		if (addedOrModifiedUids.isEmpty() && deletedUids.isEmpty()) {
-			return false;
-		}
+		List<IndexNotification> indexNotificationList;
+		do {
+			indexNotificationList = indexNotificationProcessor.getNotifications(indexBuilder.getIndexType());
 
-		onIndexUpdatingInternal(indexBuilder, solrClient);
+			addedOrModifiedUids = findAddedOrModifiedUidsInternal(indexBuilder, lastBuildDate);
 
-		publishBatch(indexBuilder, solrClient, addedOrModifiedUids);
+			if (addedOrModifiedUids.isEmpty()) {
+				break;
+			}
 
-		deleteDocumentInIndex(indexBuilder, deletedUids);
-		return true;
+			// delete the corresponding documents in the index for products that were deleted since the last build
+			deletedUids = findDeletedUidsInternal(indexBuilder, lastBuildDate);
+
+			if (addedOrModifiedUids.isEmpty() && deletedUids.isEmpty()) {
+				return false;
+			}
+
+			onIndexUpdatingInternal(indexBuilder, solrClient);
+
+			publishBatch(indexBuilder, solrClient, addedOrModifiedUids);
+
+			deleteDocumentInIndex(indexBuilder, deletedUids);
+
+			indexNotificationProcessor.removeStoredNotifications();
+
+			runner++;
+		} while (!indexNotificationList.isEmpty() && runner < getMaxIndexBuildIteration());
+
+		return runner > 0;
 	}
 
 	/**
@@ -287,8 +309,6 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		if (documentsWerePublished) {
 			onIndexUpdatedInternal(indexBuilder, client);
 		}
-		final IndexNotificationProcessor indexNotificationProcessor = indexBuilder.getIndexNotificationProcessor();
-		indexNotificationProcessor.removeStoredNotifications();
 		IndexType indexType = indexBuilder.getIndexType();
 		synchronized (indexType) {
 			setLastBuildDate(indexType);
@@ -490,4 +510,11 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		this.searchIndexExistencePredicate = searchIndexExistencePredicate;
 	}
 
+	public void setMaxIndexBuildIteration(final int maxIndexBuildIteration) {
+		this.maxIndexBuildIteration = maxIndexBuildIteration;
+	}
+
+	protected int getMaxIndexBuildIteration() {
+		return maxIndexBuildIteration;
+	}
 }

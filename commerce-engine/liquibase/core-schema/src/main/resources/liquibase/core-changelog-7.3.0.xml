@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.3.0.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.3.0.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="7.3.0-update-Boolean-setting-definitions-to-boolean" author="elasticpath">
 		<comment>Updates all Setting Definitions of type 'boolean' to type 'Boolean'</comment>
@@ -428,11 +429,12 @@
 		<addNotNullConstraint tableName="TORDERSKU" columnName="BUNDLE_CONSTITUENT" columnDataType="boolean"/>
 	</changeSet>
 
-	<changeSet id="7.3.0-populate-bundle-constituent-column-values" author="elasticpath" context="migrate-data" dbms="mysql,mssql,oracle">
+	<changeSet id="7.3.0-populate-bundle-constituent-column-values" author="elasticpath" context="migrate-data" dbms="mysql,mssql,oracle,postgresql">
+		<validCheckSum>8:c7c4ad956f91303ffba3d52562ae2d39</validCheckSum>
 		<comment>This might not cover all migration scenarios. For example, a Bundle Line Item with a Dependent Line Item as its child.</comment>
 
 		<sql>update TCARTITEM
-			set BUNDLE_CONSTITUENT = 1
+			set BUNDLE_CONSTITUENT = '1'
 			where PARENT_ITEM_UID IN (select parent.UIDPK
 										 from (select SKU_GUID, UIDPK FROM TCARTITEM) parent
 										 inner join (select GUID, PRODUCT_UID from TPRODUCTSKU) ps on parent.SKU_GUID = ps.GUID
@@ -440,7 +442,7 @@
 										 where p.TYPE like '%Bundle%')
 		</sql>
 		<sql>update TORDERSKU
-			set BUNDLE_CONSTITUENT = 1
+			set BUNDLE_CONSTITUENT = '1'
 			where UIDPK IN (select parentjoin.CHILD_UID
 							from (select CHILD_UID, PARENT_UID from TORDERSKUPARENT) parentjoin
 							   inner join (select UIDPK, SKU_GUID from TORDERSKU) parent on parentjoin.PARENT_UID = parent.UIDPK
@@ -450,7 +452,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="7.3.0-clear-shopping-cart-uid-off-of-cart-items-with-parents" author="elasticpath" context="migrate-data" dbms="mysql,mssql,oracle">
+	<changeSet id="7.3.0-clear-shopping-cart-uid-off-of-cart-items-with-parents" author="elasticpath" context="migrate-data">
 		<sql>
 			UPDATE TCARTITEM
 			SET SHOPPING_CART_UID = NULL

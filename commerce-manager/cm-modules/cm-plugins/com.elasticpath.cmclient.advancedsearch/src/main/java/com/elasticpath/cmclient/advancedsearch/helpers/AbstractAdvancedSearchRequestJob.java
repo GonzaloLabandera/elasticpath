@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -33,7 +34,7 @@ import com.elasticpath.service.search.solr.IndexUtility;
  */
 public abstract class AbstractAdvancedSearchRequestJob<T extends Persistable> {
 
-	private static final Logger LOG = Logger.getLogger(AbstractAdvancedSearchRequestJob.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractAdvancedSearchRequestJob.class);
 
 	private final AdvancedSearchJob advancedSearchJob = new AdvancedSearchJob(Display.getDefault());
 

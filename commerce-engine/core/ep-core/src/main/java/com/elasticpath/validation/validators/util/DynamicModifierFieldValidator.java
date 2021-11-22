@@ -1,12 +1,13 @@
 /*
  * Copyright © 2016 Elastic Path Software Inc. All rights reserved.
  */
-
 package com.elasticpath.validation.validators.util;
 
 import java.util.Set;
-import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
+import com.elasticpath.cache.Cache;
+import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.validation.defs.AbstractConstraintDef;
 import com.elasticpath.validation.defs.LengthDef;
@@ -16,7 +17,7 @@ import com.elasticpath.validation.defs.NotBlankDef;
  * Validator used for validation of dynamic fields, like {@link ModifierField}.
  * It uses Hibernate implementation because of the ability to add constraints programmatically.
  */
-public class DynamicModifierFieldValidator extends ConstraintValidator<DynamicModifierField> {
+public class DynamicModifierFieldValidator extends AbstractConstraintValidator<DynamicModifierField> {
 
 	private final boolean isRequiredSuppression;
 
@@ -25,35 +26,33 @@ public class DynamicModifierFieldValidator extends ConstraintValidator<DynamicMo
 	 * Initializes required Hibernate structures.
 	 *
 	 * @param isRequiredSuppression flag indicates whether required constraint should be applied or not.
+	 * @param requiredValidatorCache a cache for "is required" dynamic value validators
+	 * @param completeValidatorCache a cache for "complete" dynamic value validators
 	 */
-	public DynamicModifierFieldValidator(final boolean isRequiredSuppression) {
-		super(DynamicModifierField.class);
+	public DynamicModifierFieldValidator(final boolean isRequiredSuppression,
+										 final Cache<Pair<Object, Set<String>>, Validator> requiredValidatorCache,
+										 final Cache<Pair<Object, Set<String>>, Validator> completeValidatorCache) {
+		super(DynamicModifierField.class, requiredValidatorCache, completeValidatorCache);
 		this.isRequiredSuppression = isRequiredSuppression;
 	}
 
-	/**
-	 * Validate dynamic field.
-	 *
-	 * @param fieldToValidate a field to validate.
-	 * @return a set of {@link ConstraintViolation} instances or empty set.
-	 */
-	public Set<ConstraintViolation<DynamicModifierField>> validate(final DynamicModifierField fieldToValidate) {
+	@Override
+	public Validator getIsRequiredValidator(final DynamicModifierField dynamicValue) {
+		initHibernateValidator();
+		addIsRequiredConstraint(dynamicValue);
+		return getValidatorWithCurrentConstraints();
+	}
 
-		addIsRequiredConstraint(fieldToValidate);
-
-		Set<ConstraintViolation<DynamicModifierField>> violations = validateWithCurrentConstraints(fieldToValidate);
-		if (!violations.isEmpty()) {
-			return violations;
-		}
-
-		addAdditionalConstraints(fieldToValidate);
-
-		return validateWithCurrentConstraints(fieldToValidate);
+	@Override
+	public Validator getCompleteValidator(final DynamicModifierField dynamicValue) {
+		initHibernateValidator();
+		addAdditionalConstraints(dynamicValue);
+		return getValidatorWithCurrentConstraints();
 	}
 
 	private void addIsRequiredConstraint(final DynamicModifierField fieldToValidate) {
 		final String fieldName = fieldToValidate.getFieldName();
-		final ModifierField referentField = fieldToValidate.getReferentField();
+		final ModifierField referentField = fieldToValidate.getValueTypeDefinition();
 
 		if (referentField.isRequired() && !isRequiredSuppression) {
 			getConstraintMappingContext().constraint(
@@ -64,7 +63,7 @@ public class DynamicModifierFieldValidator extends ConstraintValidator<DynamicMo
 
 	private void addAdditionalConstraints(final DynamicModifierField fieldToValidate) {
 		final String fieldName = fieldToValidate.getFieldName();
-		final ModifierField referentField = fieldToValidate.getReferentField();
+		final ModifierField referentField = fieldToValidate.getValueTypeDefinition();
 		final AbstractConstraintDef<?>[] typeConstraintDefs =
 				referentField.getFieldType().getConstraintDefs().orElse(new AbstractConstraintDef<?>[]{});
 
@@ -76,7 +75,7 @@ public class DynamicModifierFieldValidator extends ConstraintValidator<DynamicMo
 		}
 
 		// Additional constraints based on field type. Each field may contain one or more constraint definitions
-		final String[] validFieldOptions = fieldToValidate.getValidOptions().orElse(new String[]{});
+		final String[] validFieldOptions = fieldToValidate.getValidOptions().toArray(new String[0]);
 		for (AbstractConstraintDef<?> constraintDef : typeConstraintDefs) {
 			constraintDef.validFieldOptions(validFieldOptions);
 			constraintDef.fieldName(fieldName);
@@ -84,12 +83,9 @@ public class DynamicModifierFieldValidator extends ConstraintValidator<DynamicMo
 		}
 	}
 
-	private Set<ConstraintViolation<DynamicModifierField>> validateWithCurrentConstraints(
-			final DynamicModifierField fieldToValidate) {
-
+	private Validator getValidatorWithCurrentConstraints() {
 		return getConfiguration().addMapping(getConstraintMapping())
 				.buildValidatorFactory()
-				.getValidator()
-				.validate(fieldToValidate);
+				.getValidator();
 	}
 }

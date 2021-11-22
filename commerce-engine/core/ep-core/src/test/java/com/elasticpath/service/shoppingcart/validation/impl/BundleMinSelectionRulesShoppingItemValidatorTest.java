@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
@@ -17,14 +18,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.domain.catalog.ProductBundle;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.SelectionRule;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.entity.XPFProductBundle;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingItem;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleMinSelectionRulesShoppingItemValidatorTest {
@@ -35,36 +34,30 @@ public class BundleMinSelectionRulesShoppingItemValidatorTest {
 	private BundleMinSelectionRulesShoppingItemValidatorImpl validator;
 
 	@Mock
-	private ProductSkuLookup productSkuLookup;
+	private XPFShoppingItemValidationContext context;
 
 	@Mock
-	private ShoppingItemValidationContext context;
+	private XPFProductSku productSku;
 
 	@Mock
-	private ProductSku productSku;
+	private XPFShoppingItem bundleShoppingItem;
 
 	@Mock
-	private ShoppingItem bundleShoppingItem;
+	private XPFShoppingItem constituentShoppingItem1;
 
 	@Mock
-	private ShoppingItem constituentShoppingItem1;
+	private XPFShoppingItem constituentShoppingItem2;
 
 	@Mock
-	private ShoppingItem constituentShoppingItem2;
-
-	@Mock
-	private ProductBundle productBundle;
-
-	@Mock
-	private SelectionRule selectionRule;
+	private XPFProductBundle productBundle;
 
 	@Before
 	public void setUp() {
-		given(context.getProductSku()).willReturn(productSku);
+		given(context.getShoppingItem()).willReturn(bundleShoppingItem);
+		given(bundleShoppingItem.getProductSku()).willReturn(productSku);
 		given(productSku.getProduct()).willReturn(productBundle);
-		given(productSku.getSkuCode()).willReturn(SKU_CODE);
-		given(productBundle.getSelectionRule()).willReturn(selectionRule);
-		given(selectionRule.getParameter()).willReturn(2);
+		given(productSku.getCode()).willReturn(SKU_CODE);
+		given(productBundle.getMinConstituentSelections()).willReturn(2L);
 		given(context.getShoppingItem()).willReturn(bundleShoppingItem);
 	}
 
@@ -72,10 +65,10 @@ public class BundleMinSelectionRulesShoppingItemValidatorTest {
 	public void testBundleConstituentsCorrect() {
 
 		// Given
-		given(bundleShoppingItem.getBundleItems(productSkuLookup)).willReturn(Arrays.asList(constituentShoppingItem1, constituentShoppingItem2));
+		given(bundleShoppingItem.getChildren()).willReturn(Arrays.asList(constituentShoppingItem1, constituentShoppingItem2));
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -83,7 +76,7 @@ public class BundleMinSelectionRulesShoppingItemValidatorTest {
 
 	@Test
 	public void testBundleConstituentsLessThanMin() {
-		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO,
+		XPFStructuredErrorMessage structuredErrorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO,
 				"bundle.does.not.contain.min.constituents",
 				"Bundle does not contain the minimum number of required bundle constituents.",
 				ImmutableMap.of("item-code", SKU_CODE,
@@ -92,10 +85,10 @@ public class BundleMinSelectionRulesShoppingItemValidatorTest {
 				));
 
 		// Given
-		given(bundleShoppingItem.getBundleItems(productSkuLookup)).willReturn(Arrays.asList(constituentShoppingItem1));
+		given(bundleShoppingItem.getChildren()).willReturn(Collections.singletonList(constituentShoppingItem1));
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(structuredErrorMessage);

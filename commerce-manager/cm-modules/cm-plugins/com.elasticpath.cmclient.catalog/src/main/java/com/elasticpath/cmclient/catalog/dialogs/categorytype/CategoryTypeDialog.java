@@ -36,7 +36,7 @@ import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
 import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.service.catalog.CategoryTypeService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**ChangeSetObjects
  * Add/Edit category type dialog.

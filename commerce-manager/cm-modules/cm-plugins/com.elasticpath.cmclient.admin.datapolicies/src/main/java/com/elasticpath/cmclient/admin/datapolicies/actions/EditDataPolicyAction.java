@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.admin.datapolicies.actions;
 
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -21,7 +22,7 @@ import com.elasticpath.domain.datapolicy.DataPolicy;
  */
 public class EditDataPolicyAction extends Action {
 
-	private static final Logger LOG = Logger.getLogger(EditDataPolicyAction.class);
+	private static final Logger LOG = LogManager.getLogger(EditDataPolicyAction.class);
 
 	private final DataPolicyListView listView;
 

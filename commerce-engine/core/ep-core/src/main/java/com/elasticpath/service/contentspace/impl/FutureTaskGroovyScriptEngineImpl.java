@@ -8,7 +8,8 @@ import java.util.concurrent.FutureTask;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cache.SimpleTimeoutCache;
 
@@ -19,7 +20,7 @@ import com.elasticpath.cache.SimpleTimeoutCache;
  */
 public class FutureTaskGroovyScriptEngineImpl extends AbstractGroovyScriptEngineImpl {
 
-	private static final Logger LOG = Logger.getLogger(FutureTaskGroovyScriptEngineImpl.class);
+	private static final Logger LOG = LogManager.getLogger(FutureTaskGroovyScriptEngineImpl.class);
 
 	private final GroovyShell groovyShell = new GroovyShell();
 

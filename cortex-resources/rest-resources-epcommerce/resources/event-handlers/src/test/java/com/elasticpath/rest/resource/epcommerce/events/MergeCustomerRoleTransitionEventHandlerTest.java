@@ -5,26 +5,25 @@ package com.elasticpath.rest.resource.epcommerce.events;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.common.authentication.AuthenticationConstants.PUBLIC_ROLENAME;
 import static com.elasticpath.rest.resource.integration.epcommerce.common.authentication.AuthenticationConstants.REGISTERED_ROLE;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.relos.rs.events.RoleTransitionEvent;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
+import com.elasticpath.service.shoppingcart.ShoppingCartService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MergeCustomerRoleTransitionEventHandlerTest {
@@ -38,16 +37,19 @@ public class MergeCustomerRoleTransitionEventHandlerTest {
 	private CustomerRepository customerRepository;
 
 	@Mock
+	private ShopperRepository shopperRepository;
+
+	@Mock
+	private ShoppingCartService shoppingCartService;
+
+	@Mock
 	private RoleTransitionEvent mockRoleTransitionEvent;
 
 	@Mock
-	private Customer mockRecipientCustomer;
+	private Shopper mockAnonymousShopper;
 
 	@Mock
-	private CustomerSessionRepository mockCustomerSessionRepository;
-
-	@Mock
-	private CustomerSession mockCustomerSession;
+	private Customer mockRegisteredCustomer;
 
 	@InjectMocks
 	private MergeCustomerRoleTransitionEventHandler classToTest;
@@ -66,30 +68,32 @@ public class MergeCustomerRoleTransitionEventHandlerTest {
 		verify(mockRoleTransitionEvent, never()).getNewUserGuid();
 	}
 
-
 	@Test
 	public void shouldMergeAnonymousToRegisteredCustomerSession() throws Exception {
 		mockRoleTransition();
 		mockGUIDTransition();
 
-		ExecutionResult<CustomerSession> customerSession = ExecutionResultFactory.createReadOK(mockCustomerSession);
-		ExecutionResult<Object> mergedCustomerSession = ExecutionResultFactory.createUpdateOK();
+		ExecutionResult<Object> mergedResultOk = ExecutionResultFactory.createUpdateOK();
 
-		when(mockCustomerSessionRepository.findCustomerSessionByGuidAndStoreCode(anyString(), anyString())).thenReturn(customerSession);
-
-		when(customerRepository.mergeCustomer(mockCustomerSession, mockRecipientCustomer, SCOPE)).thenReturn(mergedCustomerSession);
+		when(customerRepository.findCustomerByGuidAndStoreCode(NEW_USER_GUID, SCOPE))
+				.thenReturn(ExecutionResultFactory.createReadOK(mockRegisteredCustomer));
+		when(shopperRepository.findOrCreateShopper(OLD_USER_GUID, SCOPE))
+				.thenReturn(Single.just(mockAnonymousShopper));
+		when(shoppingCartService.findOrCreateDefaultCartByShopper(mockAnonymousShopper))
+				.thenReturn(null);
+		when(customerRepository.mergeCustomer(mockAnonymousShopper, mockRegisteredCustomer, SCOPE))
+				.thenReturn(mergedResultOk);
 
 		classToTest.handleEvent(SCOPE, mockRoleTransitionEvent);
 
 		verify(mockRoleTransitionEvent).getNewUserGuid();
 		verify(mockRoleTransitionEvent).getOldUserGuid();
 		verify(customerRepository).findCustomerByGuidAndStoreCode(NEW_USER_GUID, SCOPE);
-		verify(mockCustomerSessionRepository).findCustomerSessionByGuidAndStoreCode(OLD_USER_GUID, SCOPE);
-		verify(customerRepository).mergeCustomer(any(CustomerSession.class), any(Customer.class), any(String.class));
+		verify(customerRepository).mergeCustomer(mockAnonymousShopper, mockRegisteredCustomer, SCOPE);
 	}
 
 	private void mockGUIDTransition() {
-		ExecutionResult<Customer> recipientCustomer = ExecutionResultFactory.createReadOK(mockRecipientCustomer);
+		ExecutionResult<Customer> recipientCustomer = ExecutionResultFactory.createReadOK(mockRegisteredCustomer);
 		when(mockRoleTransitionEvent.getOldUserGuid()).thenReturn(OLD_USER_GUID);
 		when(mockRoleTransitionEvent.getNewUserGuid()).thenReturn(NEW_USER_GUID);
 		when(customerRepository.findCustomerByGuidAndStoreCode(NEW_USER_GUID, SCOPE)).thenReturn(recipientCustomer);

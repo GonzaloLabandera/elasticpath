@@ -9,8 +9,9 @@ package com.elasticpath.cmclient.pricelistmanager.editors;
 import java.util.Collection;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -47,7 +48,7 @@ import com.elasticpath.domain.pricing.exceptions.DuplicateBaseAmountException;
  * PriceListDescriptors as well as showing PLD summary information and attributes.
  */
 public class PriceListEditor extends AbstractPolicyAwareFormEditor implements ChangeSetMemberSelectionProvider, BaseAmountChangedEventListener {
-	private static final Logger LOG = Logger.getLogger(PriceListEditor.class);
+	private static final Logger LOG = LogManager.getLogger(PriceListEditor.class);
 
 	private PriceListEditorController controller;
 

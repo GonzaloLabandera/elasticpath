@@ -7,7 +7,8 @@ package com.elasticpath.cmclient.admin.users.views;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.Separator;
@@ -55,7 +56,7 @@ import com.elasticpath.service.search.query.StandardSortBy;
  */
 @SuppressWarnings({ "PMD.GodClass" })
 public class UserListView extends AbstractSortListView implements AdminUsersEventListener {
-	private static final Logger LOG = Logger.getLogger(UserListView.class);
+	private static final Logger LOG = LogManager.getLogger(UserListView.class);
 
 	/** The view ID. */
 	public static final String VIEW_ID = "com.elasticpath.cmclient.admin.users.views.UserListView"; //$NON-NLS-1$

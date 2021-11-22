@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.customer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.ui.PartInitException;
 
 import com.elasticpath.cmclient.core.service.AuthorizationService;
@@ -23,7 +24,7 @@ public class AccountDetailsEditor extends CustomerDetailsEditor {
 	 */
 	public static final String ID_EDITOR = AccountDetailsEditor.class.getName();
 
-	private static final Logger LOG = Logger.getLogger(AccountDetailsEditor.class);
+	private static final Logger LOG = LogManager.getLogger(AccountDetailsEditor.class);
 
 	@Override
 	protected void addPages() {

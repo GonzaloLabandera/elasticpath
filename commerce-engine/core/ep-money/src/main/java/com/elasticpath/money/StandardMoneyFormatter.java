@@ -11,8 +11,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Out of the box behavior for money formatting.
@@ -26,7 +27,7 @@ import org.apache.log4j.Logger;
  */
 public class StandardMoneyFormatter implements MoneyFormatter  {
 
-	private static final Logger LOG = Logger.getLogger(StandardMoneyFormatter.class);
+	private static final Logger LOG = LogManager.getLogger(StandardMoneyFormatter.class);
 
 	private static final long serialVersionUID = -5237562692825280136L;
 	private static final int DEFAULT_FRACTION_DIGITS = 2;

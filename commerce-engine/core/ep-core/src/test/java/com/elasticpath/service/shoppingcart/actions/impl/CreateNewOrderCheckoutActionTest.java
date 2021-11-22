@@ -4,9 +4,12 @@
 
 package com.elasticpath.service.shoppingcart.actions.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
@@ -141,5 +145,32 @@ public class CreateNewOrderCheckoutActionTest {
 				exchange);
 
 		assertEquals("Unexpected Order populated on CheckoutActionContext", order, checkoutActionContext.getOrder());
+	}
+
+	@Test
+	public void verifyOrderIsStillPopulatedOnContextIfPopulateOrderFailsOnNonExchangeOrder() {
+		// Given an order is initially created by the checkout action
+		when(orderFactory.createAndPersistNewEmptyOrder(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(order);
+
+		// And an exception is thrown when the order is populated by populateOrder() using the OrderFactory
+		final EpDomainException expectedException = new EpDomainException("Throwing Deliberate Error");
+		doThrow(expectedException).when(orderFactory)
+				.fillInNewOrderFromShoppingCart(any(), any(), any(), any(), any());
+
+		final PreCaptureCheckoutActionContext checkoutActionContext = new PreCaptureCheckoutActionContextImpl(
+				shoppingCart,
+				taxSnapshot,
+				customerSession,
+				false,
+				false,
+				null,
+				null);
+
+		// When the checkout action is executed, then the expected exception should be thrown
+		assertThatThrownBy(() -> checkoutAction.execute(checkoutActionContext))
+				.isSameAs(expectedException);
+
+		// And the order is still set on the context
+		assertThat(checkoutActionContext.getOrder()).isSameAs(order);
 	}
 }

@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -103,7 +104,7 @@ ISelectionChangedListener, IDoubleClickListener, StatePolicyTarget {
 	private EditorTableSelectionProvider editorTableSelectionProvider;
 
 	private final InternalObjectRegistryListener objectRegistryListener = new InternalObjectRegistryListener();
-	private static final Logger LOG = Logger.getLogger(AbstractPolicyAwareEpTableSection.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractPolicyAwareEpTableSection.class);
 
 
 	/**

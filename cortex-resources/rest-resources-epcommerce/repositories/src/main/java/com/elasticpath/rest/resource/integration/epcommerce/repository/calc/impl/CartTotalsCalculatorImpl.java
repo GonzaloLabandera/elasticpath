@@ -16,17 +16,23 @@ import io.reactivex.Single;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.structured.EpValidationException;
+import com.elasticpath.common.pricing.service.PriceLookupFacade;
+import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
+import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.calc.CartTotalsCalculator;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.tax.TaxCalculationResult;
 
 /**
@@ -36,7 +42,7 @@ import com.elasticpath.service.tax.TaxCalculationResult;
  * <p>
  * Since totals include discounts, please use the enriched ShoppingCart for all
  * totals calculations.  See {@link CartOrderRepository#getEnrichedShoppingCart(String, String,
- *                                    com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository.FindCartOrder)}.
+ * com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository.FindCartOrder)}.
  * NOTE: Please do not call ShoppingCartImpl.fireRules() directly.  Enriched cart will handle this for you.
  */
 @Singleton
@@ -47,6 +53,8 @@ public class CartTotalsCalculatorImpl implements CartTotalsCalculator {
 	private final PricingSnapshotRepository pricingSnapshotRepository;
 	private final ExceptionTransformer exceptionTransformer;
 	private final ProductSkuLookup productSkuLookup;
+	private final StoreService storeService;
+	private final PriceLookupFacade priceLookupFacade;
 
 	/**
 	 * Constructor.
@@ -55,17 +63,24 @@ public class CartTotalsCalculatorImpl implements CartTotalsCalculator {
 	 * @param pricingSnapshotRepository the pricing snapshot repository
 	 * @param exceptionTransformer      the exception transformer
 	 * @param productSkuLookup          the product sku lookup
+	 * @param storeService              the store service
+	 * @param priceLookupFacade         the price lookup facade
 	 */
 	@Inject
-	CartTotalsCalculatorImpl(
+	@SuppressWarnings({"checkstyle:parameternumber"})
+	public CartTotalsCalculatorImpl(
 			@Named("cartOrderRepository") final CartOrderRepository cartOrderRepository,
 			@Named("pricingSnapshotRepository") final PricingSnapshotRepository pricingSnapshotRepository,
 			@Named("exceptionTransformer") final ExceptionTransformer exceptionTransformer,
-			@Named("productSkuLookup") final ProductSkuLookup productSkuLookup) {
+			@Named("productSkuLookup") final ProductSkuLookup productSkuLookup,
+			@Named("storeService") final StoreService storeService,
+			@Named("priceLookupFacade") final PriceLookupFacade priceLookupFacade) {
 		this.cartOrderRepository = cartOrderRepository;
 		this.pricingSnapshotRepository = pricingSnapshotRepository;
 		this.exceptionTransformer = exceptionTransformer;
 		this.productSkuLookup = productSkuLookup;
+		this.storeService = storeService;
+		this.priceLookupFacade = priceLookupFacade;
 	}
 
 	@Override
@@ -110,24 +125,18 @@ public class CartTotalsCalculatorImpl implements CartTotalsCalculator {
 	}
 
 	@Override
+	@CacheResult
 	public boolean shoppingItemHasPrice(final String storeCode, final String shoppingCartGuid, final String cartItemGuid) {
-		return cartOrderRepository.getEnrichedShoppingCart(storeCode, shoppingCartGuid, BY_CART_GUID)
-				.flatMap(shoppingCart -> getShoppingItemPricingSnapshot(shoppingCart, cartItemGuid))
-				.map(ShoppingItemPricingSnapshot::hasPrice)
-				.blockingGet();
-	}
+		ShoppingCart shoppingCart = cartOrderRepository.getEnrichedShoppingCart(storeCode, shoppingCartGuid, BY_CART_GUID).blockingGet();
+		final Shopper shopper = shoppingCart.getShopper();
 
-	/**
-	 * Get shopping item pricing snapshot for a shopping cart and cart item guid, or an error if the item doesn't have a price.
-	 *
-	 * @param shoppingCart the shopping cart
-	 * @param cartItemGuid the cart item guid
-	 * @return shopping item pricing snapshot
-	 */
-	protected Single<ShoppingItemPricingSnapshot> getShoppingItemPricingSnapshot(final ShoppingCart shoppingCart, final String cartItemGuid) {
-		return pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart)
-				.map(shoppingCartPricingSnapshot -> shoppingCartPricingSnapshot.getShoppingItemPricingSnapshot(
-						shoppingCart.getCartItemByGuid(cartItemGuid)));
+		final String productSkuGuid = shoppingCart.getShoppingItemByGuid(cartItemGuid).getSkuGuid();
+
+		final ProductSku productSku = productSkuLookup.findByGuid(productSkuGuid);
+
+		Store store = storeService.findStoreWithCode(storeCode);
+
+		return priceLookupFacade.hasPriceForSku(productSku, store, shopper);
 	}
 
 	/**

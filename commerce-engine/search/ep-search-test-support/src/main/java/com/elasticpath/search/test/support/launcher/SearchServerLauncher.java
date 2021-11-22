@@ -15,7 +15,8 @@ import java.util.function.Supplier;
 import javax.annotation.PostConstruct;
 import javax.servlet.DispatcherType;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.servlet.SolrDispatchFilter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -37,7 +38,7 @@ import com.elasticpath.test.support.portscanner.FreePortScanner;
  */
 public class SearchServerLauncher {
 
-	private static final Logger LOG = Logger.getLogger(SearchServerLauncher.class);
+	private static final Logger LOG = LogManager.getLogger(SearchServerLauncher.class);
 
 	private static final String SEARCHSERVER_CONTEXT = "/searchserver";
 

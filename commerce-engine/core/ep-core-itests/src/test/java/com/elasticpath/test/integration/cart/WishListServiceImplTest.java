@@ -13,12 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.WishList;
-import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
@@ -129,11 +126,6 @@ public class WishListServiceImplTest extends BasicSpringContextTest {
 		Shopper shopper = TestShopperFactoryForTestApplication.getInstance().createNewShopperWithMemento();
 		shopper.setCustomer(customer);
 		shopper = shopperService.save(shopper);
-
-		final CustomerSession custSession = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
-		custSession.setShopper(shopper);
-		final CustomerSessionService customerSessionService = getBeanFactory().getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE,
-				CustomerSessionService.class);
 
 		final WishList wishList = createWishList();
 		wishList.setGuid(Utils.uniqueCode("WL-"));

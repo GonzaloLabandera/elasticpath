@@ -120,17 +120,17 @@ public class OrderEventType extends AbstractExtensibleEnum<OrderEventType> imple
 	public static final int ORDER_ACCEPTED_ORDINAL = 12;
 
 	/**
-	 * Signals that an order has been accepted for fulfilment.
+	 * Signals that an order has had all holds resolved.
 	 */
 	public static final OrderEventType ORDER_ACCEPTED = new OrderEventType(ORDER_ACCEPTED_ORDINAL, "ORDER_ACCEPTED");
 
-	/** Ordinal constant for ORDER_HOLDS_RESOLVED. */
-	public static final int ORDER_HOLDS_RESOLVED_ORDINAL = 13;
+	/** Ordinal constant for ORDER_HOLD_UPDATE. */
+	public static final int ORDER_HOLD_UPDATE_ORDINAL = 13;
 
 	/**
-	 * Signals that an order has been resolved from hold.
+	 * Signals that an order hold needs to be resolved or marked unresolvable.
 	 */
-	public static final OrderEventType ORDER_HOLDS_RESOLVED = new OrderEventType(ORDER_HOLDS_RESOLVED_ORDINAL, "ORDER_HOLDS_RESOLVED");
+	public static final OrderEventType ORDER_HOLD_UPDATE = new OrderEventType(ORDER_HOLD_UPDATE_ORDINAL, "ORDER_HOLD_UPDATE");
 
 	/** Ordinal constant for ORDER_FAILED. */
 	public static final int ORDER_FAILED_ORDINAL = 14;

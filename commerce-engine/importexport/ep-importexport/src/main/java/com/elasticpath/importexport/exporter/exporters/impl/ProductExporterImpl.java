@@ -9,7 +9,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
@@ -50,7 +51,7 @@ public class ProductExporterImpl extends AbstractExporterImpl<Product, ProductDT
 	 */
 	public static final String DIRECT_ONLY = "DIRECT_ONLY";
 
-	private static final Logger LOG = Logger.getLogger(ProductExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ProductExporterImpl.class);
 
 	/**
 	 * {@inheritDoc} throws RuntimeException can be thrown if product uid list could not be initialized.

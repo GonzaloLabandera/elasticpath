@@ -3,7 +3,8 @@
  */
 package com.elasticpath.tools.sync.merge.configuration.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.catalog.ProductCategory;
 import com.elasticpath.persistence.api.Persistable;
@@ -15,7 +16,7 @@ import com.elasticpath.tools.sync.exception.SyncToolConfigurationException;
  */
 public class ProductCategoryLocator extends AbstractEntityLocator {
 	
-	private static final Logger LOG = Logger.getLogger(ProductCategoryLocator.class);
+	private static final Logger LOG = LogManager.getLogger(ProductCategoryLocator.class);
 	
 	private ProductCategoryService productCategoryService;
 

@@ -26,10 +26,12 @@ public class LifecycleEventFilterTest {
 	public void testThatSameEventsAreDuplicate() {
 		boolean duplicate;
 
-		duplicate = lifecycleEventFilter.isDuplicate(EventActionEnum.UPDATED, entityClass1, GUID_1);
+		duplicate = lifecycleEventFilter.wasPreviouslyProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
 		assertThat(duplicate).isFalse();
 
-		duplicate = lifecycleEventFilter.isDuplicate(EventActionEnum.UPDATED, entityClass1, GUID_1);
+		lifecycleEventFilter.trackProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
+
+		duplicate = lifecycleEventFilter.wasPreviouslyProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
 		assertThat(duplicate).isTrue();
 	}
 
@@ -37,10 +39,12 @@ public class LifecycleEventFilterTest {
 	public void testThatCreatedAndUpdatedEventsAreDuplicate() {
 		boolean duplicate;
 
-		duplicate = lifecycleEventFilter.isDuplicate(EventActionEnum.UPDATED, entityClass1, GUID_1);
+		duplicate = lifecycleEventFilter.wasPreviouslyProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
 		assertThat(duplicate).isFalse();
 
-		duplicate = lifecycleEventFilter.isDuplicate(EventActionEnum.CREATED, entityClass1, GUID_1);
+		lifecycleEventFilter.trackProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
+
+		duplicate = lifecycleEventFilter.wasPreviouslyProcessed(EventActionEnum.CREATED, entityClass1, GUID_1);
 		assertThat(duplicate).isTrue();
 	}
 
@@ -48,10 +52,12 @@ public class LifecycleEventFilterTest {
 	public void testThatDifferentEventsAreNotDuplicates() {
 		boolean duplicate;
 
-		duplicate = lifecycleEventFilter.isDuplicate(EventActionEnum.UPDATED, entityClass1, GUID_1);
+		duplicate = lifecycleEventFilter.wasPreviouslyProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
 		assertThat(duplicate).isFalse();
 
-		duplicate = lifecycleEventFilter.isDuplicate(EventActionEnum.UPDATED, entityClass1, GUID_2);
+		lifecycleEventFilter.trackProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
+
+		duplicate = lifecycleEventFilter.wasPreviouslyProcessed(EventActionEnum.UPDATED, entityClass1, GUID_2);
 		assertThat(duplicate).isFalse();
 	}
 
@@ -59,12 +65,13 @@ public class LifecycleEventFilterTest {
 	public void testThatSameEventsInDifferentTransactionsAreNotDuplicates() throws Exception {
 		boolean duplicate;
 
-		duplicate = lifecycleEventFilter.isDuplicate(EventActionEnum.UPDATED, entityClass1, GUID_1);
+		duplicate = lifecycleEventFilter.wasPreviouslyProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
 		assertThat(duplicate).isFalse();
 
+		lifecycleEventFilter.trackProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
 		lifecycleEventFilter.beginTransaction();
 
-		duplicate = lifecycleEventFilter.isDuplicate(EventActionEnum.UPDATED, entityClass1, GUID_1);
+		duplicate = lifecycleEventFilter.wasPreviouslyProcessed(EventActionEnum.UPDATED, entityClass1, GUID_1);
 		assertThat(duplicate).isFalse();
 	}
 }

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.validation.domain.ValidationError;
 import com.elasticpath.validation.domain.ValidationResult;

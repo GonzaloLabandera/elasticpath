@@ -10,7 +10,8 @@ import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -31,7 +32,7 @@ import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
  */
 public class CreateOrderPaymentInstrumentsCheckoutAction implements ReversibleCheckoutAction {
 
-	private static final Logger LOG = Logger.getLogger(CreateOrderPaymentInstrumentsCheckoutAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateOrderPaymentInstrumentsCheckoutAction.class);
 
 	private OrderPaymentInstrumentService orderPaymentInstrumentService;
 	private FilteredPaymentInstrumentService filteredPaymentInstrumentService;

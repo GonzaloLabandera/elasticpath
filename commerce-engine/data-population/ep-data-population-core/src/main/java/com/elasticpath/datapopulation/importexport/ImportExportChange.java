@@ -13,7 +13,8 @@ import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.client.Index;
 
@@ -43,7 +44,7 @@ public class ImportExportChange implements CustomTaskChange {
 	 * Currently this name is not configurable.
 	 */
 	public static final String IMPORT_CONFIGURATION_FILE = "importconfiguration.xml";
-	private static final Logger LOG = Logger.getLogger(ImportExportChange.class);
+	private static final Logger LOG = LogManager.getLogger(ImportExportChange.class);
 	private String dataSet;
 	private String dataDirectory;
 	private String importExportDirectory;

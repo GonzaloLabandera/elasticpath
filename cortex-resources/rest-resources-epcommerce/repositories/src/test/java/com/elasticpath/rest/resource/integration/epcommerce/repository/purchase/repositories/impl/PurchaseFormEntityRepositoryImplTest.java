@@ -20,6 +20,7 @@ import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -35,7 +36,7 @@ import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.PurchaseRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.service.impl.CartHasItemsServiceImpl;
 
@@ -56,7 +57,7 @@ public class PurchaseFormEntityRepositoryImplTest {
 	private PricingSnapshotRepository pricingSnapshotRepository;
 
 	@Mock
-	private CustomerSessionRepository sessionRepository;
+	private ShopperRepository shopperRepository;
 
 	@Mock
 	private PurchaseRepository purchaseRepository;
@@ -135,6 +136,8 @@ public class PurchaseFormEntityRepositoryImplTest {
 		CartOrder cartOrder = mock(CartOrder.class);
 		ShoppingCartTaxSnapshot taxSnapshot = mock(ShoppingCartTaxSnapshot.class);
 		CustomerSession customerSession = mock(CustomerSession.class);
+		Shopper shopper = mock(Shopper.class);
+		when(shopper.getCustomerSession()).thenReturn(customerSession);
 		CheckoutResults checkoutResults = mock(CheckoutResults.class);
 		ShoppingCart shoppingCart = createShoppingCart(shoppingCartIsEmpty);
 
@@ -144,7 +147,7 @@ public class PurchaseFormEntityRepositoryImplTest {
 
 		when(cartOrderRepository.getEnrichedShoppingCart(SCOPE.getValue(), cartOrder)).thenReturn(Single.just(shoppingCart));
 
-		when(sessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(customerSession));
+		when(shopperRepository.findOrCreateShopper()).thenReturn(Single.just(shopper));
 
 		when(pricingSnapshotRepository.getShoppingCartTaxSnapshot(shoppingCart)).thenReturn(Single.just(taxSnapshot));
 

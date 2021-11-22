@@ -39,6 +39,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.addresses
 import com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.validator.AddressValidator;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
+import com.elasticpath.service.customer.AddressService;
 
 /**
  * Test for {@link AddressRepositoryImpl}.
@@ -61,6 +62,8 @@ public class AddressRepositoryImplTest {
 	private static final String COUNTRY = "CA";
 	private static final String PHONE_NUMBER = "6041234567";
 	private static final String ORGANIZATION = "Elastic Path";
+	private static final long CUSTOMER_UIDPK = 1L;
+	private static final long ACCOUNT_UIDPK = 1L;
 
 	@Mock
 	private AddressValidator addressValidator;
@@ -109,6 +112,8 @@ public class AddressRepositoryImplTest {
 
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
+	@Mock
+	private AddressService addressService;
 
 
 	@Before
@@ -122,10 +127,13 @@ public class AddressRepositoryImplTest {
 		when(customerRepository.getCustomer(CUSTOMER_ID)).thenReturn(Single.just(customer));
 		when(customerRepository.update(customer)).thenReturn(Single.just(customer));
 		when(customerRepository.update(account)).thenReturn(Single.just(account));
-		when(customer.getAddressByGuid(ADDRESS_ID)).thenReturn(customerAddress);
+		when(customer.getUidPk()).thenReturn(CUSTOMER_UIDPK);
+		when(account.getUidPk()).thenReturn(ACCOUNT_UIDPK);
 		when(customerAddress.getGuid()).thenReturn(ADDRESS_ID);
-		when(customer.getAddresses()).thenReturn(customerAddressList);
-		when(account.getAddressByGuid(ADDRESS_ID)).thenReturn(customerAddress);
+		when(addressService.findByCustomer(CUSTOMER_UIDPK)).thenReturn(customerAddressList);
+		when(addressService.findByCustomerAndAddressGuid(CUSTOMER_UIDPK, ADDRESS_ID)).thenReturn(customerAddress);
+		when(addressService.findByCustomerAndAddressGuid(ACCOUNT_UIDPK, ADDRESS_ID)).thenReturn(customerAddress);
+		when(addressService.remove(customer, customerAddress)).thenReturn(customer);
 		when(supportedIdentifier.getAccountAddresses()).thenReturn(accountAddressesIdentifier);
 		when(conversionService.convert(customerAddress, AddressEntity.class)).thenReturn(addressEntity);
 		when(conversionService.convert(addressEntity, CustomerAddress.class)).thenReturn(customerAddress);
@@ -207,6 +215,8 @@ public class AddressRepositoryImplTest {
 
 	@Test
 	public void getExistingAddressMatchingAddressSuccessful() {
+		when(addressService.findByAddress(customer.getUidPk(), customerAddress)).thenReturn(customerAddress);
+
 		Optional<CustomerAddress> existingAddressMatchingAddress = addressRepository.getExistingAddressMatchingAddress(customerAddress, customer);
 		assertThat(existingAddressMatchingAddress.isPresent()).isTrue();
 		assertThat(existingAddressMatchingAddress.get()).isEqualTo(customerAddress);

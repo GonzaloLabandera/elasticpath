@@ -16,8 +16,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.DisplayValue;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -72,7 +73,7 @@ public class ProductAdapter extends AbstractDomainAdapterImpl<Product, ProductDT
 
 	private TimeService timeService;
 
-	private static final Logger LOG = Logger.getLogger(ProductAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(ProductAdapter.class);
 
 	/**
 	 *

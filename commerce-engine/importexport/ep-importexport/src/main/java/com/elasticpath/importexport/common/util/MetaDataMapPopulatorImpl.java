@@ -3,7 +3,7 @@
  */
 package com.elasticpath.importexport.common.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.ThreadLocalMap;
 import com.elasticpath.commons.enums.OperationEnum;

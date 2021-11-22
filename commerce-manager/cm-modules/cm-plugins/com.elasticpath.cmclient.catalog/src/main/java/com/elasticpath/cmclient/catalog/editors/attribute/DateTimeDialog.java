@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.catalog.editors.attribute;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -26,7 +27,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
  * Create the DateTime input dialog window.
  */
 public class DateTimeDialog extends AbstractEpDialog implements IValueRetriever {
-	private static final Logger LOG = Logger.getLogger(DateTimeDialog.class); 
+	private static final Logger LOG = LogManager.getLogger(DateTimeDialog.class); 
 	private Date value;
 
 	private IEpDateTimePicker valueText;

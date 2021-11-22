@@ -23,16 +23,19 @@ public class QueryBuilder extends DBConnector {
 	 * @param schemaVersion      projection schema version
 	 * @param contentHash        projection content hash
 	 * @param content            projection JSON content
+	 * @param guid               projection guid
 	 */
 	//	CHECKSTYLE:OFF: checkstyle:too many parameters
+	@SuppressWarnings("PMD.ExcessiveParameterList")
 	public void createProjection(
 			final String type, final String store, final String code, final String version, final String projectionDateTime, final int deleted,
-			final String schemaVersion, final String contentHash, final String content) {
+			final String schemaVersion, final String contentHash, final String content, final String guid) {
 		String query;
-		query = "INSERT INTO TCATALOGPROJECTIONS (TYPE, STORE, CODE, VERSION, PROJECTION_DATE_TIME, DELETED, SCHEMA_VERSION, CONTENT_HASH, CONTENT) "
+		query = "INSERT INTO TCATALOGPROJECTIONS "
+				+ "(TYPE, STORE, CODE, VERSION, PROJECTION_DATE_TIME, DELETED, SCHEMA_VERSION, CONTENT_HASH, CONTENT, GUID) "
 				+ "VALUES ('" + type + QUERY_DELIMITER + store + QUERY_DELIMITER + code + QUERY_DELIMITER + version
-				+ QUERY_DELIMITER + projectionDateTime + QUERY_DELIMITER
-				+ deleted + QUERY_DELIMITER + schemaVersion + QUERY_DELIMITER + contentHash + QUERY_DELIMITER + content + "');";
+				+ QUERY_DELIMITER + projectionDateTime + "'," + (deleted != 0) + ",'" + schemaVersion + QUERY_DELIMITER + contentHash
+				+ QUERY_DELIMITER + content + QUERY_DELIMITER + guid + "');";
 		executeUpdateQuery(query);
 	}
 
@@ -78,7 +81,7 @@ public class QueryBuilder extends DBConnector {
 				+ "CODE = '" + code + UPDATE_QUERY_DELIMITER
 				+ "VERSION = '" + version + UPDATE_QUERY_DELIMITER
 				+ "PROJECTION_DATE_TIME = '" + projectionDateTime + UPDATE_QUERY_DELIMITER
-				+ "DELETED = '" + deleted + UPDATE_QUERY_DELIMITER
+				+ "DELETED = " + (deleted != 0) + ","
 				+ "SCHEMA_VERSION = '" + schema + UPDATE_QUERY_DELIMITER
 				+ "CONTENT_HASH = '" + hash + UPDATE_QUERY_DELIMITER
 				+ "CONTENT = '" + projectionContent + "'"

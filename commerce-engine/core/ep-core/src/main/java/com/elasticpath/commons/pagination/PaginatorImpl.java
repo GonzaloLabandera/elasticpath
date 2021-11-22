@@ -6,7 +6,7 @@ package com.elasticpath.commons.pagination;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.elasticpath.commons.pagination.impl.PageImpl;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;

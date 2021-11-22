@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.core;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarContributionItem;
@@ -33,7 +34,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 	private IWorkbenchAction reloadEditorAction;
 	private ActionContributionItem reloadViewItem;
 
-	private static final Logger LOG = Logger.getLogger(ApplicationActionBarAdvisor.class);
+	private static final Logger LOG = LogManager.getLogger(ApplicationActionBarAdvisor.class);
 
 	/**
 	 * Constructor.

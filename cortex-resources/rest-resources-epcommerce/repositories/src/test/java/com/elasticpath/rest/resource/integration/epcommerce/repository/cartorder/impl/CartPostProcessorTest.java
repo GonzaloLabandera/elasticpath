@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.cartorder.CartOrderService;
@@ -32,9 +31,6 @@ public class CartPostProcessorTest {
 	private CartOrderService cartOrderService;
 
 	@Mock(answer = RETURNS_SMART_NULLS)
-	private CustomerSession customerSession;
-
-	@Mock(answer = RETURNS_SMART_NULLS)
 	private Shopper shopper;
 
 	@Mock(answer = RETURNS_DEEP_STUBS)
@@ -46,7 +42,7 @@ public class CartPostProcessorTest {
 	@Test
 	public void testPostProcessCartWhenCartIsNull() {
 
-		cartPostProcessor.postProcessCart(null, shopper, customerSession);
+		cartPostProcessor.postProcessCart(null, shopper);
 
 		verify(shoppingCartRefresher, never()).refresh(any(ShoppingCart.class));
 		verify(cartOrderService, never()).createOrderIfPossible(null);
@@ -55,16 +51,15 @@ public class CartPostProcessorTest {
 	@Test
 	public void shouldUpdateShopperPriorToProcessing() {
 
-		cartPostProcessor.postProcessCart(cart, shopper, customerSession);
+		cartPostProcessor.postProcessCart(cart, shopper);
 
-		verify(shopper, atLeastOnce()).updateTransientDataWith(customerSession);
 		verify(shopper, atLeastOnce()).setCurrentShoppingCart(cart);
 	}
 
 	@Test
 	public void shouldCreateIfNotExists() {
 
-		cartPostProcessor.postProcessCart(cart, shopper, customerSession);
+		cartPostProcessor.postProcessCart(cart, shopper);
 
 		verify(cartOrderService).createOrderIfPossible(cart);
 	}

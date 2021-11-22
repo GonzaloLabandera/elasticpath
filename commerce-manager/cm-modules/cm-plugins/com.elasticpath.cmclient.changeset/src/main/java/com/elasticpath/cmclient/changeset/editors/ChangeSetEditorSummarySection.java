@@ -7,7 +7,7 @@ import java.util.Date;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;

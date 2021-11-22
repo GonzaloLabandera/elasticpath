@@ -11,7 +11,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -29,7 +30,7 @@ import com.elasticpath.service.misc.TimeService;
  */
 @SuppressWarnings("rawtypes")
 public class ExpiredProjectionJobRunner implements ApplicationListener, Runnable {
-	private static final Logger LOGGER = Logger.getLogger(ExpiredProjectionJobRunner.class);
+	private static final Logger LOGGER = LogManager.getLogger(ExpiredProjectionJobRunner.class);
 
 	private final Job job;
 	private final JobLauncher jobLauncher;

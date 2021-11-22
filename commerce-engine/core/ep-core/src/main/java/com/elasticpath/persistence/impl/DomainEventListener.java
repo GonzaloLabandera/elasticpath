@@ -5,7 +5,8 @@ package com.elasticpath.persistence.impl;
 
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.event.AbstractLifecycleListener;
 import org.apache.openjpa.event.LifecycleEvent;
@@ -33,7 +34,7 @@ import com.elasticpath.settings.SettingsReader;
 public class DomainEventListener extends AbstractLifecycleListener
 		implements PostPersistListener, UpdateListener, LifecycleEventManager.ListenerAdapter, TransactionListener {
 
-	private static final Logger LOG = Logger.getLogger(DomainEventListener.class);
+	private static final Logger LOGGER = LogManager.getLogger(DomainEventListener.class);
 
 	private BeanFactory beanFactory;
 	private volatile JpaPersistenceEngine persistenceEngine;
@@ -122,15 +123,16 @@ public class DomainEventListener extends AbstractLifecycleListener
 	private void handleEvent(final LifecycleEvent event, final EventActionEnum eventAction) {
 		final String entityGuid = getGuid(event);
 		if (eventTypeFactory.isSupported(event.getSource().getClass(), eventAction)
-				&& !lifecycleEventFilter.isDuplicate(eventAction, (Class<PersistenceCapable>) event.getSource().getClass(), entityGuid)
+				&& !lifecycleEventFilter.wasPreviouslyProcessed(eventAction, (Class<PersistenceCapable>) event.getSource().getClass(), entityGuid)
 				&& JPAUtil.isDirty((PersistenceCapable) event.getSource(), getPersistenceEngine())) {
-			EventType eventType = eventTypeFactory.getEventType(event.getSource().getClass(), eventAction);
+			lifecycleEventFilter.trackProcessed(eventAction, (Class<PersistenceCapable>) event.getSource().getClass(), entityGuid);
 
+			EventType eventType = eventTypeFactory.getEventType(event.getSource().getClass(), eventAction);
 			recordDomainEvent(eventType, entityGuid);
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Domain event message recorded: "
-						+ eventAction + " " + event.getSource().getClass() + " with GUID " + entityGuid);
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Domain event message recorded: {} {} with GUID {}", eventAction,
+						event.getSource().getClass(), entityGuid);
 			}
 		}
 	}

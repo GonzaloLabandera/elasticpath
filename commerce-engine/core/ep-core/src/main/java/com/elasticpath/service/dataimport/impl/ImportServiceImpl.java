@@ -16,7 +16,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.google.common.base.Strings;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.pricing.service.PriceListHelperService;
@@ -59,7 +60,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	/**
 	 * The logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(ImportServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ImportServiceImpl.class);
 
 	private CatalogService catalogService;
 
@@ -589,8 +590,6 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		final List<CategoryType> categoryTypes = getPersistenceEngine().retrieveByNamedQuery("CATEGORY_TYPE_BY_CATALOG_EAGER", catalogUid);
 
 		for (final CategoryType categoryType : categoryTypes) {
-			// getPersistenceEngine().initialize(categoryType.getAttributeGroup().getAttributeGroupAttributes());
-
 			final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_CATEGORY, ImportDataType.class);
 			importDataType.init(categoryType);
 			importDataTypes.put(importDataType.getName(), importDataType);
@@ -602,8 +601,6 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 
 		for (final ProductType productType : productTypes) {
 			if (productType.isMultiSku()) {
-				// getPersistenceEngine().initialize(productType.getSkuAttributeGroup().getAttributeGroupAttributes());
-
 				final ImportDataType importDataType = getPrototypeBean(ContextIdNames.IMPORT_DATA_TYPE_PRODUCT_SKU, ImportDataType.class);
 				importDataType.init(productType);
 				importDataTypes.put(importDataType.getName(), importDataType);

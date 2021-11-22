@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.openjpa.persistence.DataCache;
 
 import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
@@ -135,7 +136,13 @@ public class BusinessObjectGroupMemberImpl extends AbstractEntityImpl implements
 
 	@Override
 	public String toString() {
-		return getGroupId() + "=" + getObjectType() + ":" + getObjectIdentifier();
+		return new ToStringBuilder(this)
+				.append("objectType", objectType)
+				.append("objectIdentifier", objectIdentifier)
+				.append("groupId", groupId)
+				.append("guid", guid)
+				.append("uid", uidPk)
+				.build();
 	}
 
 	@Override

@@ -2,7 +2,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-                   logicalFilePath="com/elasticpath/core/db/core-changelog-6.15.0.xml">
+                   logicalFilePath="com/elasticpath/core/db/core-changelog-6.15.0.xml"
+                   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
     <!-- Reminder:
         - Table names cannot exceed 30 characters (Oracle limitation)
@@ -14,32 +15,37 @@
         - Using <preCondition> ? Consider adding onUpdateSql="TEST", but understand how it plays with updateSQL!
     -->
     <changeSet id="6.15.0-tax-related-customer-profile-attributes" author="elasticpath" context="expand">
+		<validCheckSum>8:754e4f1f30a211fa7da08e5b13a06cc0</validCheckSum>
         <comment>[PB-1079] [PB-1080] Tax Related customer profile attributes</comment>
         <insert tableName="TATTRIBUTE">
             <column name="UIDPK" valueNumeric="613"/>
             <column name="ATTRIBUTE_KEY" value="CP_BUSINESS_NUMBER"/>
-            <column name="LOCALE_DEPENDANT" valueNumeric="0"/>
+            <column name="LOCALE_DEPENDANT" value="0"/>
             <column name="ATTRIBUTE_TYPE" valueNumeric="1"/>
             <column name="NAME" value="Business Number"/>
-            <column name="REQUIRED" valueNumeric="0"/>
-            <column name="VALUE_LOOKUP_ENABLED" valueNumeric="0"/>
+            <column name="REQUIRED" value="0"/>
+            <column name="VALUE_LOOKUP_ENABLED" value="0"/>
             <column name="ATTRIBUTE_USAGE" valueNumeric="4"/>
-            <column name="SYSTEM" valueNumeric="1"/>
-            <column name="ATTR_GLOBAL" valueNumeric="0"/>
+            <column name="SYSTEM" value="1"/>
+            <column name="ATTR_GLOBAL" value="0"/>
         </insert>
         <insert tableName="TATTRIBUTE">
             <column name="UIDPK" valueNumeric="614"/>
             <column name="ATTRIBUTE_KEY" value="CP_TAX_EXEMPTION_ID"/>
-            <column name="LOCALE_DEPENDANT" valueNumeric="0"/>
+            <column name="LOCALE_DEPENDANT" value="0"/>
             <column name="ATTRIBUTE_TYPE" valueNumeric="1"/>
             <column name="NAME" value="Tax Exemption ID"/>
-            <column name="REQUIRED" valueNumeric="0"/>
-            <column name="VALUE_LOOKUP_ENABLED" valueNumeric="0"/>
+            <column name="REQUIRED" value="0"/>
+            <column name="VALUE_LOOKUP_ENABLED" value="0"/>
             <column name="ATTRIBUTE_USAGE" valueNumeric="4"/>
-            <column name="SYSTEM" valueNumeric="1"/>
-            <column name="ATTR_GLOBAL" valueNumeric="0"/>
+            <column name="SYSTEM" value="1"/>
+            <column name="ATTR_GLOBAL" value="0"/>
         </insert>
     </changeSet>
 
+	<changeSet id="6.15.0-liquibase-3.4.2-upgrade" author="elasticpath" context="expand">
+		<comment>[PB-9387] Increase DATABASECHANGELOG ID field to VARCHAR(255)</comment>
+		<modifyDataType tableName="DATABASECHANGELOG" columnName="ID" newDataType="VARCHAR(255)"/>
+	</changeSet>
 
 </databaseChangeLog>

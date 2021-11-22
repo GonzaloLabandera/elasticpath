@@ -40,7 +40,7 @@ public class OAuth2AccessTokenRepositoryImpl implements OAuth2AccessTokenReposit
 	 * @param coreBeanFactory the core bean factory.
 	 */
 	@Inject
-	OAuth2AccessTokenRepositoryImpl(
+	public OAuth2AccessTokenRepositoryImpl(
 			@Named("oAuth2AccessTokenService") final OAuth2AccessTokenService tokenService,
 			@Named("coreBeanFactory") final BeanFactory coreBeanFactory) {
 		this.tokenService = tokenService;

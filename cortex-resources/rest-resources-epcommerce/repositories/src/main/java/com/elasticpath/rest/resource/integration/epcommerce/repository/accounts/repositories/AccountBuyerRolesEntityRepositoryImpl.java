@@ -4,6 +4,8 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.accounts.repositories;
 
+import java.util.Set;
+
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -26,7 +28,8 @@ public class AccountBuyerRolesEntityRepositoryImpl<E extends AccountBuyerRolesEn
 	@Override
 	public Single<AccountBuyerRolesEntity> findOne(final AccountBuyerRolesIdentifier identifier) {
 		final AccountBuyerRolesEntity.Builder builder = AccountBuyerRolesEntity.builder();
-		builder.addingRoles(String.valueOf(roleToPermissionsMappingService.getDefinedRoleKeys()));
+		final Set<String> definedRoleKeys = roleToPermissionsMappingService.getDefinedRoleKeys();
+		builder.addingRoles(definedRoleKeys.toArray(new String[definedRoleKeys.size()]));
 		return Single.just(builder.build());
 	}
 

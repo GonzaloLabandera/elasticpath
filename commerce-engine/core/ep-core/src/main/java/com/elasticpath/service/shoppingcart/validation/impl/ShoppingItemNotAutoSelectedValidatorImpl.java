@@ -7,41 +7,60 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.google.common.collect.ImmutableMap;
+import org.pf4j.Extension;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.domain.catalog.ProductBundle;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidator;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.annotations.XPFEmbedded;
+import com.elasticpath.xpf.connectivity.annontation.XPFAssignment;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.entity.XPFBundleConstituent;
+import com.elasticpath.xpf.connectivity.entity.XPFProductBundle;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingItem;
+import com.elasticpath.xpf.connectivity.extension.XPFExtensionPointImpl;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingItemValidator;
 
 /**
  * Ensure that item is not added as a result of auto-selected bundle constituents.
  */
-public class ShoppingItemNotAutoSelectedValidatorImpl implements ShoppingItemValidator {
+@SuppressWarnings("checkstyle:magicnumber")
+@Extension
+@XPFEmbedded
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_SHOPPING_ITEM_AT_REMOVE_FROM_CART, priority = 1010)
+public class ShoppingItemNotAutoSelectedValidatorImpl extends XPFExtensionPointImpl implements ShoppingItemValidator {
 
 	private static final String MESSAGE_ID = "cart.item.auto.selected.in.bundle";
 
 	@Override
-	public Collection<StructuredErrorMessage> validate(final ShoppingItemValidationContext context) {
-		if (context.getParentProductSku() != null && context.getParentProductSku().getProduct() instanceof ProductBundle) {
-			ProductBundle productBundle = (ProductBundle) context.getParentProductSku().getProduct();
-			if (isValidatedItemAutoSelectableConstituent(context.getProductSku(), productBundle)) {
-				return Collections.singletonList(createErrorMessage(context.getProductSku().getSkuCode()));
+	public Collection<XPFStructuredErrorMessage> validate(final XPFShoppingItemValidationContext context) {
+		XPFShoppingItem parentShoppingItem = context.getParentShoppingItem();
+		if (parentShoppingItem != null && parentShoppingItem.getProductSku() != null
+				&& parentShoppingItem.getProductSku().getProduct() instanceof XPFProductBundle) {
+			XPFProductBundle productBundle = (XPFProductBundle) parentShoppingItem.getProductSku().getProduct();
+			if (isValidatedItemAutoSelectableConstituent(context.getShoppingItem().getProductSku(), productBundle)) {
+				return Collections.singletonList(createErrorMessage(context.getShoppingItem().getProductSku().getCode()));
 			}
 		}
 		return Collections.emptyList();
 	}
 
-	private boolean isValidatedItemAutoSelectableConstituent(final ProductSku productSku, final ProductBundle productBundle) {
-		return productBundle.getConstituents()
-				.stream()
-				.filter(productBundle::isConstituentAutoSelectable)
-				.anyMatch(bundleConstituent -> productSku.equals(bundleConstituent.getConstituent().getProductSku()));
+	private boolean isValidatedItemAutoSelectableConstituent(final XPFProductSku productSku, final XPFProductBundle productBundle) {
+		for (XPFBundleConstituent constituent : productBundle.getConstituents()) {
+			if (constituent.getProductSku() != null && productSku.getCode().equals(constituent.getProductSku().getCode())) {
+				return true;
+			}
+
+			if (constituent.getProduct() != null && productSku.getProduct().getCode().equals(constituent.getProduct().getCode())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	private StructuredErrorMessage createErrorMessage(final String skuCode) {
-		return new StructuredErrorMessage(StructuredErrorMessageType.ERROR, MESSAGE_ID,
+	private XPFStructuredErrorMessage createErrorMessage(final String skuCode) {
+		return new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.ERROR, MESSAGE_ID,
 				String.format("Item '%s' is a bundle constituent that was automatically selected.", skuCode),
 				ImmutableMap.of("item-code", skuCode));
 	}

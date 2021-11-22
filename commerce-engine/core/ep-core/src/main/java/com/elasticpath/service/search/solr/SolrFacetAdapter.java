@@ -7,7 +7,7 @@ import static com.elasticpath.commons.constants.ContextIdNames.PRICE_LIST_STACK;
 import static com.elasticpath.service.search.solr.FacetConstants.BRAND;
 import static com.elasticpath.service.search.solr.FacetConstants.CATEGORY;
 import static com.elasticpath.service.search.solr.FacetConstants.PRICE;
-import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,8 +21,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -69,9 +70,9 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 /**
  * Converts between EP's filters and Solr's facets and back again.
  */
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports"})
 public class SolrFacetAdapter {
-	private static final Logger LOG = Logger.getLogger(SolrFacetAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(SolrFacetAdapter.class);
 
 	private static final String EXCLUDE_TAG = "{!ex=%s}%s";
 
@@ -79,8 +80,6 @@ public class SolrFacetAdapter {
 	private static final String BETWEEN_TO = " TO ";
 	private static final char CURLY_BRACKET = '}';
 	private static final String ASTERISK = "*";
-
-	private FilteredNavigationConfiguration config;
 
 	private FilteredNavigationConfigurationLoader fncLoader;
 
@@ -126,26 +125,26 @@ public class SolrFacetAdapter {
 				catalogCode = ((CatalogAwareSearchCriteria) searchCriteria).getCatalogCode();
 			}
 
-			config = this.getFilteredNavigationConfiguration(storeCode);
+			FilteredNavigationConfiguration config = this.getFilteredNavigationConfiguration(storeCode);
 
-			addBrandFacets(query, queryLookup, filterLookup);
+			addBrandFacets(config, query, queryLookup, filterLookup);
 
 			if (catalogCode != null) {
 				Long categoryUid = searchCriteria instanceof ProductSearchCriteria
 						? ((ProductSearchCriteria) searchCriteria).getDirectCategoryUid() : null;
-				addCategoryFacets(query, catalogCode, queryLookup, filterLookup, categoryUid);
+				addCategoryFacets(config, query, catalogCode, queryLookup, filterLookup, categoryUid);
 			}
 
-			addFacetValues(query, locale, queryLookup, filterLookup);
+			addFacetValues(config, query, locale, queryLookup, filterLookup);
 
-			addPriceFacets(query, catalogCode, searchCriteria.getCurrency(), queryLookup, filterLookup,
+			addPriceFacets(config, query, catalogCode, searchCriteria.getCurrency(), queryLookup, filterLookup,
 					searchCriteria.getSearchHint(PRICE_LIST_STACK));
 
-			addRangeFacets(query, locale, queryLookup, filterLookup);
+			addRangeFacets(config, query, locale, queryLookup, filterLookup);
 
-			addSkuOptionFacets(query, locale, queryLookup, filterLookup);
+			addSkuOptionFacets(config, query, locale, queryLookup, filterLookup);
 
-			addSizeFacets(query, queryLookup, filterLookup);
+			addSizeFacets(config, query, queryLookup, filterLookup);
 		}
 	}
 
@@ -251,7 +250,8 @@ public class SolrFacetAdapter {
 		query.addFacetQuery(tagQuery);
 	}
 
-	private void addSizeFacets(final SolrQuery query, final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
+	private void addSizeFacets(final FilteredNavigationConfiguration config, final SolrQuery query, final Map<String, String> queryLookup,
+							   final Map<String, Filter<?>> filterLookup) {
 		Collection<SizeRangeFilter> sizeRangeFilters = config.getAllSizeRangeFilters().values();
 
 		sizeRangeFilters.forEach(sizeRangeFilter -> {
@@ -260,8 +260,8 @@ public class SolrFacetAdapter {
 		});
 	}
 
-	private void addSkuOptionFacets(final SolrQuery query, final Locale locale, final Map<String, String> queryLookup,
-									final Map<String, Filter<?>> filterLookup) {
+	private void addSkuOptionFacets(final FilteredNavigationConfiguration config, final SolrQuery query, final Locale locale,
+									final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
 		Collection<SkuOptionValueFilter> skuOptionValueFilters = config.getAllSkuOptionValueFilters().values();
 		skuOptionValueFilters.forEach(skuOptionValueFilter -> {
 			String guid = config.getSkuOptionGuidMap().get(skuOptionValueFilter.getSkuOptionValue().getSkuOption().getOptionKey());
@@ -270,8 +270,8 @@ public class SolrFacetAdapter {
 		});
 	}
 
-	private void addRangeFacets(final SolrQuery query, final Locale locale, final Map<String, String> queryLookup,
-								final Map<String, Filter<?>> filterLookup) {
+	private void addRangeFacets(final FilteredNavigationConfiguration config, final SolrQuery query, final Locale locale,
+								final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
 		Collection<AttributeRangeFilter> attrRangeFilters = config.getAllAttributeRanges().values();
 		// don't want filters for locales we aren't searching for
 		// remove filters that do nothing (filter then filters nothing)
@@ -285,7 +285,8 @@ public class SolrFacetAdapter {
 				});
 	}
 
-	private void addPriceFacets(final SolrQuery query, final String catalogCode, final Currency currency, final Map<String, String> queryLookup,
+	private void addPriceFacets(final FilteredNavigationConfiguration config, final SolrQuery query, final String catalogCode,
+								final Currency currency, final Map<String, String> queryLookup,
 								final Map<String, Filter<?>> filterLookup, final SearchHint<PriceListStack> priceListStackHint) {
 		if (catalogCode == null || currency == null) {
 			return;
@@ -316,8 +317,8 @@ public class SolrFacetAdapter {
 				});
 	}
 
-	private void addFacetValues(final SolrQuery query, final Locale locale, final Map<String, String> queryLookup,
-								final Map<String, Filter<?>> filterLookup) {
+	private void addFacetValues(final FilteredNavigationConfiguration config, final SolrQuery query, final Locale locale,
+								final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
 		Collection<AttributeValueFilter> attrValueFilters = config.getAllAttributeSimpleValues().values();
 		// remove the filters used as unique keys - they don't have attribute values
 		// don't want to filter for locales we aren't searching for
@@ -339,11 +340,13 @@ public class SolrFacetAdapter {
 	/**
 	 * Adds the Brand facets to the given query.
 	 *
+	 * @param config       the filtered navigation configuration
 	 * @param query        the query
 	 * @param queryLookup  map keyed on filter id with a value containing the solr query filter
 	 * @param filterLookup map keyed on solr query filter with a value containing the filter
 	 */
-	void addBrandFacets(final SolrQuery query, final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
+	void addBrandFacets(final FilteredNavigationConfiguration config, final SolrQuery query, final Map<String, String> queryLookup,
+						final Map<String, Filter<?>> filterLookup) {
 		String guid = config.getOthersGuidMap().get(BRAND);
 		config.getBrandFilters().forEach(brandFilter ->
 				addLuceneQuery(query, brandFilter, constructBrandFilterQuery(brandFilter).toString(), guid, queryLookup, filterLookup));
@@ -352,14 +355,15 @@ public class SolrFacetAdapter {
 	/**
 	 * Adds the Category facets to the given query.
 	 *
+	 * @param config       the filtered navigation configuration
 	 * @param query         the query
 	 * @param catalogCode   the catalog code
 	 * @param queryLookup   map keyed on filter id with a value containing the solr query filter
 	 * @param filterLookup  map keyed on solr query filter with a value containing the filter
 	 * @param categoryUid   the category uid used for a product search criteria, null otherwise
 	 */
-	void addCategoryFacets(final SolrQuery query, final String catalogCode, final Map<String, String> queryLookup,
-						   final Map<String, Filter<?>> filterLookup, final Long categoryUid) {
+	void addCategoryFacets(final FilteredNavigationConfiguration config, final SolrQuery query, final String catalogCode,
+						   final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup, final Long categoryUid) {
 		String guid = config.getOthersGuidMap().get(CATEGORY);
 		if (categoryUid == null) {
 			config.getCategoryFilters().forEach(categoryFilter ->
@@ -642,13 +646,5 @@ public class SolrFacetAdapter {
 
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-	}
-
-	public FilteredNavigationConfiguration getConfig() {
-		return config;
-	}
-
-	public void setConfig(final FilteredNavigationConfiguration config) {
-		this.config = config;
 	}
 }

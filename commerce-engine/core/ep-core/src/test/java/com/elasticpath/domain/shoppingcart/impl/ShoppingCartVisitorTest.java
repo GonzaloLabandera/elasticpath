@@ -45,11 +45,11 @@ public class ShoppingCartVisitorTest {
 		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMemento();
 		final CustomerSession customerSession = TestCustomerSessionFactory.getInstance().createNewCustomerSessionWithContext(shopper);
 		final Customer customer = mock(Customer.class);
-		customerSession.getShopper().setCustomer(customer);
+		shopper.setCustomer(customer);
 		customerSession.setCurrency(CAD);
 		customerSession.setLocale(LOCALE);
 
-		shoppingCart = TestShoppingCartFactory.getInstance().createNewCartWithMemento(customerSession.getShopper(), new StoreImpl());
+		shoppingCart = TestShoppingCartFactory.getInstance().createNewCartWithMemento(shopper, new StoreImpl());
 	}
 
 	@Test

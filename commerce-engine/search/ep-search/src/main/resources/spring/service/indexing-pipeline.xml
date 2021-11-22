@@ -134,8 +134,6 @@
 			fixed-delay="2500" />
 		<task:scheduled ref="categoryIndexingPipeline" method="periodicMonitor"
 			fixed-delay="2500" />
-		<task:scheduled ref="customerIndexingPipeline" method="periodicMonitor"
-			fixed-delay="2500" />
 		<task:scheduled ref="ruleIndexingPipeline" method="periodicMonitor"
 			fixed-delay="2500" />
 	</task:scheduled-tasks>
@@ -478,91 +476,6 @@
 				class="com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl" />
 		</property>
 	</bean>
-
-
-	<!-- Customer Indexing Pipeline -->
-
-	<bean id="customerIndexingPipeline" init-method="initialize"
-		destroy-method="destroy"
-		class="com.elasticpath.search.index.pipeline.impl.IndexingPipelineImpl">
-		<property name="indexType">
-			<value type="com.elasticpath.service.search.IndexType">CUSTOMER</value>
-		</property>
-		<property name="stages">
-			<util:list>
-				<ref bean="batchingGroupingStage"/>
-				<ref bean="customerLoadingStage"/>
-				<ref bean="customerDocumentCreatorStage"/>
-				<ref bean="customerDocumentPublishingStage"/>
-			</util:list>
-		</property>
-		<property name="indexingStatistics" ref="indexingStats" />
-		<property name="timeService" ref="timeService" />
-		<property name="indexBuildStatusUpdater" ref="indexBuildStatusUpdater" />
-	</bean>
-
-	<bean id="customerDocumentPublishingStage"
-		class="com.elasticpath.search.index.pipeline.impl.DocumentPublishingStage">
-		<property name="solrManager" ref="solrManager" />
-		<property name="indexType">
-			<value type="com.elasticpath.service.search.IndexType">CUSTOMER</value>
-		</property>
-	</bean>
-
-	<!-- Loading Related : Customer solrDocumentPublisher -->
-
-	<bean id="customerLoadingTaskFactory"
-		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
-		<property name="targetBeanName">
-			<idref bean="batchCustomerLoader" />
-		</property>
-	</bean>
-
-	<bean id="customerLoadingStage"
-		class="com.elasticpath.search.index.pipeline.impl.EntityLoadingStage">
-		<property name="loaderFactory" ref="customerLoadingTaskFactory" />
-		<property name="taskExecutor" ref="entityLoaderTaskExecutor" />
-	</bean>
-
-	<bean id="batchCustomerLoader"
-		class="com.elasticpath.search.index.loader.impl.BatchCustomerLoader"
-		scope="prototype">
-		<property name="customerService" ref="customerService" />
-		<property name="pipelinePerformance">
-			<!-- pass in a black hole PipelinePerformance for integration tests.. -->
-			<bean
-				class="com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl" />
-		</property>
-	</bean>
-
-	<!-- Document Creation Related : Customer -->
-
-	<bean id="customerDocumentCreatorTaskFactory"
-		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
-		<property name="targetBeanName">
-			<idref bean="customerSolrInputDocumentCreator" />
-		</property>
-	</bean>
-
-	<bean id="customerDocumentCreatorStage"
-		class="com.elasticpath.search.index.pipeline.impl.DocumentCreatingStage"
-		scope="prototype">
-		<property name="documentCreatorFactory" ref="customerDocumentCreatorTaskFactory" />
-		<property name="taskExecutor" ref="documentCreatorTaskExecutor" />
-	</bean>
-
-	<bean id="customerSolrInputDocumentCreator"
-		class="com.elasticpath.search.index.solr.document.impl.CustomerSolrInputDocumentCreator"
-		scope="prototype">
-		<property name="analyzer" ref="analyzer" />
-		<property name="pipelinePerformance">
-			<!-- pass in a black hole PipelinePerformance for integration tests.. -->
-			<bean
-				class="com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl" />
-		</property>
-	</bean>
-
-	<!-- Document Publishing Related : Customer -->
 
 	<!-- Rule Indexing Pipeline -->
 

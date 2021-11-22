@@ -16,7 +16,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -148,7 +149,7 @@ public class OrderEditor extends AbstractPageObject {
 	private static final List<String> RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES = Arrays.asList("Dummy Value", BUNDLE_NAME_COLUMN_NAME,
 			SKU_CODE_COLUMN_NAME, PRODUCT_NAME_COLUMN_NAME, SKU_OPTION_COLUMN_NAME, LIST_PRICE_COLUMN_NAME, SALE_PRICE_COLUMN_NAME,
 			QUANTITY_COLUMN_NAME, DISCOUNT_COLUMN_NAME, TOTAL_PRICE_COLUMN_NAME, PAYMENT_SCHEDULE_COLUMN_NAME);
-	private static final Logger LOGGER = Logger.getLogger(OrderEditor.class);
+	private static final Logger LOGGER = LogManager.getLogger(OrderEditor.class);
 	private static final String PHYSICAL_SHIPMENT_ITEM_ROW_CSS = EDITOR_PANE_PARENT_CSS
 			+ "div[parent-widget-id='Order Details Physical Shipment Table'][widget-type='table_row']";
 	private static final String E_SHIPMENT_ITEM_ROW_CSS = EDITOR_PANE_PARENT_CSS

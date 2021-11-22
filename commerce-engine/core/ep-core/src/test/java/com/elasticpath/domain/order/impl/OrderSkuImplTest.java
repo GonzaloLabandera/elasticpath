@@ -32,7 +32,7 @@ import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.cmuser.impl.CmUserImpl;
-import com.elasticpath.domain.impl.AbstractItemData;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.shoppingcart.PriceCalculator;
 import com.elasticpath.money.Money;
@@ -100,6 +100,8 @@ public class OrderSkuImplTest {
 		recurringPriceAssembler.setPaymentScheduleHelper(paymentScheduleHelper);
 		expectationsFactory.allowingBeanFactoryGetSingletonBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER,
 				ShoppingItemRecurringPriceAssembler.class, recurringPriceAssembler);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER,
+				ModifierFieldsMapWrapper.class, ModifierFieldsMapWrapper.class);
 	}
 
 	@After
@@ -603,10 +605,10 @@ public class OrderSkuImplTest {
 		final String key = "Record";
 		final String value = "Test Data";
 		OrderSkuImpl item = createOrderSkuImpl();
-		AbstractItemData itemData = item.createItemData(key, value);
+		item.getModifierFields().put(key, value);
 
-		assertEquals(key, itemData.getKey());
-		assertEquals(value, itemData.getValue());
+		assertTrue(item.getModifierFields().getMap().containsKey(key));
+		assertEquals(value, item.getModifierFields().get(key));
 	}
 
 }

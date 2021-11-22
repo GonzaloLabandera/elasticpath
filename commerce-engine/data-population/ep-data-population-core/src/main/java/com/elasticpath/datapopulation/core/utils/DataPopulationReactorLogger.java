@@ -5,7 +5,8 @@ package com.elasticpath.datapopulation.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fusesource.jansi.Ansi;
 
 import com.elasticpath.datapopulation.core.action.DataPopulationAction;
@@ -15,7 +16,7 @@ import com.elasticpath.datapopulation.core.context.DataPopulationContext;
  * Utility methods for logging progress of the data population process.
  */
 public final class DataPopulationReactorLogger {
-	private static final Logger LOG = Logger.getLogger(DataPopulationReactorLogger.class);
+	private static final Logger LOG = LogManager.getLogger(DataPopulationReactorLogger.class);
 	private static final int WIDTH = 100;
 	private static final String EXECUTION_LOG_TITLE = "Elastic Path Data Population";
 	private static final int SEPARATOR_LENGTH = 2;

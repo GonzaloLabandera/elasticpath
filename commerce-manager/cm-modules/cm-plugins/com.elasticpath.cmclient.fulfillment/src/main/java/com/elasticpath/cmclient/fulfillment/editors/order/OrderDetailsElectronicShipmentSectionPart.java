@@ -53,7 +53,8 @@ import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Represents the UI of an order shipment.
@@ -61,7 +62,7 @@ import org.apache.log4j.Logger;
 public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientEditorPageSectionPart implements SelectionListener,
 		ISelectionChangedListener {
 
-	private static final Logger LOG = Logger.getLogger(OrderDetailsElectronicShipmentSectionPart.class);
+	private static final Logger LOG = LogManager.getLogger(OrderDetailsElectronicShipmentSectionPart.class);
 
 	private static final int COLUMN_WIDTH_IMAGE = 21;
 

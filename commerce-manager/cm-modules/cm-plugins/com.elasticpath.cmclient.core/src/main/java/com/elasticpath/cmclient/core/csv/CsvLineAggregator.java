@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.core.csv;
 
 import java.io.StringWriter;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 
 import au.com.bytecode.opencsv.CSVWriter;

@@ -3,7 +3,8 @@
  */
 package com.elasticpath.service.shopper.dao;
 
-import com.elasticpath.domain.customer.Customer;
+import java.util.List;
+
 import com.elasticpath.domain.shopper.ShopperMemento;
 
 
@@ -36,31 +37,13 @@ public interface ShopperDao {
 	void remove(ShopperMemento shopperMemento);
 
 	/**
-	 * Finds the ShopperMemento based on customer and store code.
-	 *
-	 * @param customer the {@link Customer} that this Shopper belongs to.
-	 * @param storeCode the storeCode of the Store this Shopper belongs to.
-	 * @return ShopperMemento if found, otherwise null.
-	 */
-	ShopperMemento findByCustomerAndStoreCode(Customer customer, String storeCode);
-	
-	/**
 	 * Finds the ShopperMemento based on customer guid and store code.
 	 *
 	 * @param customerGuid the customer guid that this Shopper belongs to.
 	 * @param storeCode the storeCode of the Store this Shopper belongs to.
 	 * @return ShopperMemento if found, otherwise null.
 	 */
-	ShopperMemento findByCustomerGuidAndStoreCode(String customerGuid, String storeCode);
-
-	/**
-	 * Finds the ShopperMemento by customer, account, and store.
-	 * @param customer The customer.
-	 * @param account The account.
-	 * @param storeCode The store code.
-	 * @return The ShopperMememnto or null if none found.
-	 */
-	ShopperMemento findByCustomerAccountAndStore(Customer customer, Customer account, String storeCode);
+	ShopperMemento findByCustomerGuidAndStore(String customerGuid, String storeCode);
 
 	/**
 	 * Finds a ShopperMemento by Customer guid, account ID, and store code.
@@ -72,28 +55,18 @@ public interface ShopperDao {
 	ShopperMemento findByCustomerGuidAccountSharedIdAndStore(String customerGuid, String accountSharedId, String storeCode);
 
 	/**
-	 * Finds a ShopperMemento by customer user ID, Account Shared ID, and store code.
-	 * @param customerSharedId The customer ID.
-	 * @param accountSharedId The Account Shared ID.
-	 * @param storeCode The store code.
-	 * @return ShopperMemento or null if none found.
+	 * Finds ShopperMementos based on customer guid.
+	 *
+	 * @param customerGuid the customer guid that the shoppers belongs to.
+	 * @return list of ShopperMementos
 	 */
-	ShopperMemento findByCustomerSharedIdAndAccountSharedIdAndStore(String customerSharedId, String accountSharedId, String storeCode);
+	List<ShopperMemento> findByCustomerGuid(String customerGuid);
 
 	/**
-	 * Finds the ShopperMemento based on customer guid.
+	 * Finds ShopperMementos based on account guid.
 	 *
-	 * @param customerGuid the customer guid  that this Shopper belongs to.
-	 * @return ShopperMemento if found, otherwise null.
+	 * @param accountGuid the account guid that the shoppers belongs to.
+	 * @return list of ShopperMementos
 	 */
-	ShopperMemento findByCustomerGuid(String customerGuid);
-
-	/**
-	 * Finds the ShopperMemento based on customer id and store code.
-	 *
-	 * @param customerSharedId the customer id that this Shopper belongs to.
-	 * @param storeCode the storeCode of the Store this Shopper belongs to.
-	 * @return ShopperMemento if found, otherwise null.
-	 */
-	ShopperMemento findByCustomerSharedIdAndStore(String customerSharedId, String storeCode);
+	List<ShopperMemento> findByAccountGuid(String accountGuid);
 }

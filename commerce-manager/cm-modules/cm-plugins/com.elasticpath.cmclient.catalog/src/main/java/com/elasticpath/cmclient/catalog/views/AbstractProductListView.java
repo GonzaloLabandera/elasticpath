@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.catalog.views;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -61,7 +62,7 @@ import com.elasticpath.service.search.query.ProductSearchCriteria;
 public abstract class AbstractProductListView extends AbstractSortListView implements ProductListener,
 	StatePolicyTarget, ObjectRegistryListener, ChangeSetMemberSelectionProvider {
 
-	private static final Logger LOG = Logger.getLogger(AbstractProductListView.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractProductListView.class);
 
 	private ProductSearchCriteria searchCriteria;
 

@@ -16,13 +16,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
@@ -33,9 +33,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.SolrParams;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.ElasticPath;
-import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalogview.AttributeFilter;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
@@ -47,14 +46,16 @@ import com.elasticpath.domain.catalogview.PriceFilter;
 import com.elasticpath.domain.catalogview.SizeRangeFilter;
 import com.elasticpath.domain.catalogview.SkuOptionValueFilter;
 import com.elasticpath.domain.misc.SearchConfig;
+import com.elasticpath.domain.search.Facet;
 import com.elasticpath.persistence.api.EpPersistenceException;
-import com.elasticpath.service.catalog.CatalogService;
+import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration;
+import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader;
+import com.elasticpath.service.search.StoreAwareSearchCriteria;
 import com.elasticpath.service.search.index.QueryComposer;
 import com.elasticpath.service.search.index.QueryComposerFactory;
 import com.elasticpath.service.search.query.KeywordSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
 import com.elasticpath.service.search.solr.query.SolrIndexSearchResult;
-import com.elasticpath.service.store.StoreService;
 
 /**
  * Data access for the SOLR index.
@@ -62,29 +63,27 @@ import com.elasticpath.service.store.StoreService;
 @SuppressWarnings("PMD.GodClass")
 public class SolrIndexSearcherImpl {
 
-	private static final Logger LOG = Logger.getLogger(SolrIndexSearcherImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SolrIndexSearcherImpl.class);
 
 	private static final Set<String> SIZES = ImmutableSet.of(SolrIndexConstants.WEIGHT, SolrIndexConstants.HEIGHT, SolrIndexConstants.LENGTH,
 			SolrIndexConstants.WIDTH);
 
 	private static final Pattern RANGE_REGEX_PATTERN = Pattern
 			.compile("[\\[\\{](?:\\w+|\\d+\\.\\d+|\\*)\\s+TO\\s+(?:\\w+|\\d+\\.\\d+|\\*)[\\]\\}]");
-	private final Map<String, Catalog> storeCodeToCatalogCodeMap = new ConcurrentHashMap<>();
 	private SolrProvider solrProvider;
 	private SolrQueryFactory solrQueryFactory;
-	private ElasticPath elasticPath;
-	private SolrFacetAdapter solrFacetAdapter;
+	private BeanFactory beanFactory;
 	private QueryComposerFactory queryComposerFactory;
 	private IndexUtility indexUtility;
-	private boolean retrieveCatalogFromCache = true;
+	private FilteredNavigationConfigurationLoader filteredNavigationConfigurationLoader;
 
 	/**
 	 * Searches an index (determined by the type of the search criteria).
 	 * The results are only those on the first page.
 	 *
 	 * @param searchCriteria the search criteria
-	 * @param maxResults     the maximum results to return (maximum per page).
-	 * @param searchResult   the search result object to populate.
+	 * @param maxResults     the maximum results to return (maximum per page)
+	 * @param searchResult   the search result object to populate
 	 */
 	public void search(final SearchCriteria searchCriteria, final int maxResults, final SolrIndexSearchResult searchResult) {
 		search(searchCriteria, 0, maxResults, searchResult);
@@ -100,8 +99,8 @@ public class SolrIndexSearcherImpl {
 	 *
 	 * @param searchCriteria the search criteria
 	 * @param startIndex     the initial index to display results for
-	 * @param maxResults     the maximum results to return from given start index (maximum per page).
-	 * @param searchResult   the search result object to populate.
+	 * @param maxResults     the maximum results to return from given start index (maximum per page)
+	 * @param searchResult   the search result object to populate
 	 */
 	public void search(final SearchCriteria searchCriteria, final int startIndex, final int maxResults,
 					   final SolrIndexSearchResult searchResult) {
@@ -121,9 +120,17 @@ public class SolrIndexSearcherImpl {
 			LOG.debug("Generated query: " + solrQuery);
 		}
 
+		Map<String, Facet> facetMap = null;
+		if (searchCriteria instanceof StoreAwareSearchCriteria) {
+			StoreAwareSearchCriteria storeAwareSearchCriteria = (StoreAwareSearchCriteria) searchCriteria;
+			FilteredNavigationConfiguration filteredNavigationConfiguration =
+					filteredNavigationConfigurationLoader.loadFilteredNavigationConfiguration(storeAwareSearchCriteria.getStoreCode());
+			facetMap = filteredNavigationConfiguration.getFacetMap();
+		}
+
 		// get the SOLR server and do the search
 		final SolrClient client = solrProvider.getServer(searchCriteria.getIndexType());
-		doUidSearch(client, solrQuery, searchResult, filterLookup);
+		doUidSearch(client, solrQuery, searchResult, filterLookup, facetMap);
 
 		// If we don't have any results try again with a 'fuzzy search'
 		if (searchResult.getLastNumFound() == 0 && !searchCriteria.isFuzzySearchDisabled()) {
@@ -138,7 +145,7 @@ public class SolrIndexSearcherImpl {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Generated fuzzy query: " + solrQuery);
 			}
-			doUidSearch(client, solrQuery, searchResult, filterLookup);
+			doUidSearch(client, solrQuery, searchResult, filterLookup, facetMap);
 		}
 
 		// make sure the results numFound doesn't exceed the max return number
@@ -158,13 +165,14 @@ public class SolrIndexSearcherImpl {
 	 * @param query        the query to search with
 	 * @param searchResult the search result to modify
 	 * @param filterLookup map keyed on solr query filter with a value containing the filter
+	 * @param facetMap     the facet map
 	 */
 	private void doUidSearch(final SolrClient client, final SolrParams query, final SolrIndexSearchResult searchResult,
-							 final Map<String, Filter<?>> filterLookup) {
+							 final Map<String, Filter<?>> filterLookup, final Map<String, Facet> facetMap) {
 		try {
 			final QueryRequest queryRequest = new QueryRequest(query);
 			queryRequest.setMethod(METHOD.POST);
-			parseResponseDocument(queryRequest.process(client), searchResult, filterLookup);
+			parseResponseDocument(queryRequest.process(client), searchResult, filterLookup, facetMap);
 		} catch (final SolrServerException | IOException e) {
 			if (client instanceof HttpSolrClient) {
 				LOG.error("Error executing search. Solr Manager url : " + ((HttpSolrClient) client).getBaseURL(), e);
@@ -174,7 +182,7 @@ public class SolrIndexSearcherImpl {
 	}
 
 	private void parseResponseDocument(final QueryResponse response, final SolrIndexSearchResult searchResult,
-									   final Map<String, Filter<?>> filterLookup) {
+									   final Map<String, Filter<?>> filterLookup, final Map<String, Facet> facetMap) {
 		List<Long> objectUidList = Collections.emptyList();
 		if (response.getResults() == null) {
 			searchResult.setNumFound(0);
@@ -190,15 +198,15 @@ public class SolrIndexSearcherImpl {
 		searchResult.setResultUids(objectUidList);
 
 		if (!searchResult.isRememberOptions()) {
-			parseFacetInformation(response, searchResult, filterLookup);
+			parseFacetInformation(response, searchResult, filterLookup, facetMap);
 		}
 	}
 
 	private void parseFacetInformation(final QueryResponse response, final SolrIndexSearchResult searchResult,
-									   final Map<String, Filter<?>> filterLookup) {
+									   final Map<String, Filter<?>> filterLookup, final Map<String, Facet> facetMap) {
 		final Map<String, Integer> facetQueries = response.getFacetQuery();
 		if (facetQueries != null) {
-			parseFacetQueries(searchResult, facetQueries, filterLookup);
+			parseFacetQueries(searchResult, facetQueries, filterLookup, facetMap);
 		}
 	}
 
@@ -208,9 +216,10 @@ public class SolrIndexSearcherImpl {
 	 * @param searchResult search result
 	 * @param facetQueries facet queries
 	 * @param filterLookup map keyed on solr query filter with a value containing the filter
+	 * @param facetMap     the facet map
 	 */
 	void parseFacetQueries(final SolrIndexSearchResult searchResult, final Map<String, Integer> facetQueries,
-						   final Map<String, Filter<?>> filterLookup) {
+						   final Map<String, Filter<?>> filterLookup, final Map<String, Facet> facetMap) {
 		final List<FilterOption<PriceFilter>> priceFilterOptions = new ArrayList<>(facetQueries.size());
 		final List<FilterOption<AttributeValueFilter>> attributeValueFilterOptions = new ArrayList<>(facetQueries.size());
 		final List<FilterOption<AttributeRangeFilter>> attributeRangeFilterOptions = new ArrayList<>();
@@ -251,9 +260,7 @@ public class SolrIndexSearcherImpl {
 		searchResult.setAttributeRangeFilterOptions(createAttributeFilterMap(attributeRangeFilterOptions));
 		searchResult.setCategoryFilterOptions(categoryFilters);
 		searchResult.setBrandFilterOptions(brandFilters);
-		if (solrFacetAdapter != null) {
-			searchResult.setFacetMap(solrFacetAdapter.getConfig().getFacetMap());
-		}
+		searchResult.setFacetMap(facetMap);
 	}
 
 	private void addCategoryFilter(final Map<String, Filter<?>> filterLookup, final List<FilterOption<CategoryFilter>> categoryFilters,
@@ -387,66 +394,6 @@ public class SolrIndexSearcherImpl {
 		return queryToCheck.startsWith(fieldPrefix);
 	}
 
-	/**
-	 * Get the <code>Catalog</code> associated with the <code>Store</code> that is represented by the given StoreCode.
-	 *
-	 * @param storeCode the store code
-	 * @return the requested Catalog
-	 */
-	protected Catalog getStoreCatalog(final String storeCode) {
-		Catalog catalog;
-		if (isRetrieveCatalogFromCache() && getStoreCodeToCatalogCodeMap().containsKey(storeCode)) {
-			catalog = getStoreCodeToCatalogCodeMap().get(storeCode);
-		} else {
-			final String catalogCode = getStoreService().getCatalogCodeForStore(storeCode);
-			catalog = getCatalogService().findByCode(catalogCode);
-			getStoreCodeToCatalogCodeMap().put(storeCode, catalog);
-		}
-		return catalog;
-	}
-
-	/**
-	 * if retrieve catalog from cache.
-	 *
-	 * @return true if setting is true to get catalog from cache
-	 */
-	public boolean isRetrieveCatalogFromCache() {
-		return retrieveCatalogFromCache;
-	}
-
-	/**
-	 * Set the value of retrieve catalog from cache.
-	 *
-	 * @param retrieveCatalogFromCache the retrieve catalog from cache
-	 */
-	public void setRetrieveCatalogFromCache(final boolean retrieveCatalogFromCache) {
-		this.retrieveCatalogFromCache = retrieveCatalogFromCache;
-	}
-
-	/**
-	 * Get the store to catalog map.
-	 *
-	 * @return the store to catalog map.
-	 */
-	protected Map<String, Catalog> getStoreCodeToCatalogCodeMap() {
-		return storeCodeToCatalogCodeMap;
-	}
-
-	/**
-	 * @return Store Service
-	 */
-	protected StoreService getStoreService() {
-		return elasticPath.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
-	}
-
-	/**
-	 * @return Catalog service
-	 */
-	protected CatalogService getCatalogService() {
-		return elasticPath.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
-	}
-
-
 	private <T extends AttributeFilter<T>> Map<String, List<FilterOption<T>>> createAttributeFilterMap(
 			final List<FilterOption<T>> attributeFilterOptions) {
 		final Map<String, List<FilterOption<T>>> resultMap = new LinkedHashMap<>(
@@ -470,7 +417,7 @@ public class SolrIndexSearcherImpl {
 
 	private <T extends Filter<T>> FilterOption<T> constructFilterOption(final int hitsNumber, final T filter) {
 		@SuppressWarnings("unchecked")
-		final FilterOption<T> filterOption = elasticPath.getPrototypeBean(ContextIdNames.FILTER_OPTION, FilterOption.class);
+		final FilterOption<T> filterOption = beanFactory.getPrototypeBean(ContextIdNames.FILTER_OPTION, FilterOption.class);
 		filterOption.setHitsNumber(hitsNumber);
 		filterOption.setFilter(filter);
 		return filterOption;
@@ -485,22 +432,8 @@ public class SolrIndexSearcherImpl {
 		this.solrQueryFactory = solrQueryFactory;
 	}
 
-	/**
-	 * Sets the {@link ElasticPath} instance to use.
-	 *
-	 * @param elasticPath the {@link ElasticPath} instance to use
-	 */
-	public void setElasticPath(final ElasticPath elasticPath) {
-		this.elasticPath = elasticPath;
-	}
-
-	/**
-	 * Sets the {@link SolrFacetAdapter} instance to use.
-	 *
-	 * @param solrFacetAdapter the {@link SolrFacetAdapter} instance to use
-	 */
-	public void setSolrFacetAdapter(final SolrFacetAdapter solrFacetAdapter) {
-		this.solrFacetAdapter = solrFacetAdapter;
+	public void setBeanFactory(final BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 	/**
@@ -528,5 +461,13 @@ public class SolrIndexSearcherImpl {
 	 */
 	public void setIndexUtility(final IndexUtility indexUtility) {
 		this.indexUtility = indexUtility;
+	}
+
+	protected FilteredNavigationConfigurationLoader getFilteredNavigationConfigurationLoader() {
+		return filteredNavigationConfigurationLoader;
+	}
+
+	public void setFilteredNavigationConfigurationLoader(final FilteredNavigationConfigurationLoader filteredNavigationConfigurationLoader) {
+		this.filteredNavigationConfigurationLoader = filteredNavigationConfigurationLoader;
 	}
 }

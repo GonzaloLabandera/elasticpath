@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-06-common-shared-identifier-users-accounts.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-06-common-shared-identifier-users-accounts.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<!-- Add the new columns -->
 	<changeSet id="PB-8250 Shared ID and Username for customers and accounts" author="elasticpath">
@@ -62,6 +63,26 @@
 		<dropTable tableName="TSHARED_ID"/>
 	</changeSet>
 
+	<changeSet id="PB-8250 Eliminate duplicate for customers for the same story - Postgres" author="elasticpath" context="migrate-data" dbms="postgresql">
+		<createTable tableName="TSHARED_ID">
+			<column name="UIDPK" type="BIGINT"/>
+			<column name="SHARED_ID" type="VARCHAR(255)"/>
+		</createTable>
+		<sql>
+			INSERT INTO TSHARED_ID
+			SELECT UIDPK, concat(SHARED_ID, floor(random() * 100))
+			FROM TCUSTOMER
+			WHERE SHARED_ID IN (SELECT SHARED_ID FROM TCUSTOMER GROUP BY SHARED_ID, CUSTOMER_TYPE HAVING count(*) > 1);
+		</sql>
+		<sql>
+			UPDATE TCUSTOMER
+			SET SHARED_ID = ts.SHARED_ID
+			FROM TCUSTOMER tc
+			JOIN TSHARED_ID ts ON tc.UIDPK = ts.UIDPK
+		</sql>
+		<dropTable tableName="TSHARED_ID"/>
+	</changeSet>
+
 	<changeSet id="PB-8250 Eliminate duplicate for customers for the same story Oracle db" author="elasticpath" context="migrate-data" dbms="oracle">
 		<createTable tableName="TSHARED_ID">
 			<column name="UIDPK" type="BIGINT"/>
@@ -84,21 +105,45 @@
 		<dropTable tableName="TSHARED_ID"/>
 	</changeSet>
 
-	<changeSet id="PB-8250 Migrate Data to USERNAME" author="elasticpath" context="migrate-data">
+	<changeSet id="PB-8250 Migrate Data to USERNAME" author="elasticpath" context="migrate-data" dbms="mysql, oracle">
+
+		<validCheckSum>ANY</validCheckSum>
+
 		<sql>
 			UPDATE TCUSTOMERAUTHENTICATION ta
 				SET ta.USERNAME = (
 					select USER_ID
 					from TCUSTOMER tc
-					where ta.UIDPK = tc.UIDPK
+					where ta.UIDPK = tc.AUTHENTICATION_UID
 			        AND tc.CUSTOMER_TYPE != 'ACCOUNT'
 				)
 				where exists (
 					select *
 					from TCUSTOMER tc
-					where ta.UIDPK = tc.UIDPK
+					where ta.UIDPK = tc.AUTHENTICATION_UID
 			        AND tc.CUSTOMER_TYPE != 'ACCOUNT'
 				)
+		</sql>
+	</changeSet>
+	<changeSet id="PB-8250 Migrate Data to USERNAME - Postgresql" author="elasticpath" context="migrate-data" dbms="postgresql">
+
+		<validCheckSum>ANY</validCheckSum>
+
+		<sql>
+			UPDATE TCUSTOMERAUTHENTICATION
+			SET USERNAME = (
+					select USER_ID
+					from TCUSTOMER tc
+					where ta.UIDPK = tc.AUTHENTICATION_UID
+					AND tc.CUSTOMER_TYPE != 'ACCOUNT'
+				)
+			FROM TCUSTOMERAUTHENTICATION ta
+			WHERE EXISTS (
+				select *
+				from TCUSTOMER tc
+				where ta.UIDPK = tc.AUTHENTICATION_UID
+				AND tc.CUSTOMER_TYPE != 'ACCOUNT'
+			)
 		</sql>
 	</changeSet>
 

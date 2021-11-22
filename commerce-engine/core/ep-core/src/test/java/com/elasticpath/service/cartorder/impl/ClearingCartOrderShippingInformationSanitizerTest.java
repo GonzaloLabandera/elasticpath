@@ -251,7 +251,6 @@ public class ClearingCartOrderShippingInformationSanitizerTest {
 		assertThat(cartOrder.getShippingOptionCode()).as(SHIPPING_OPTION_CODE_SHOULD_BE_CLEARED).isNull();
 		assertThat(cartOrderWasUpdated).as(CART_ORDER_SHOULD_BE_CHANGED).isTrue();
 
-		verify(cart).getCustomerSession();
 		verify(customerSessionService).createWithShopper(shopper);
 		verify(customerSession).setLocale(Locale.getDefault());
 		verify(customerAddressDao).findByGuid(SHIPPING_ADDRESS_GUID);
@@ -269,7 +268,7 @@ public class ClearingCartOrderShippingInformationSanitizerTest {
 		store.setDefaultCurrency(CURRENCY);
 
 		when(shopper.getStoreCode()).thenReturn(STORE_CODE);
-		when(cart.getCustomerSession()).thenReturn(null);
+		when(shopper.getCustomerSession()).thenReturn(null);
 		when(customerSessionService.createWithShopper(shopper)).thenReturn(customerSession);
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(store);
 	}
@@ -344,7 +343,7 @@ public class ClearingCartOrderShippingInformationSanitizerTest {
 
 	private ShoppingCart mockShoppingCart(final Address address) {
 		when(cart.getShopper()).thenReturn(shopper);
-		when(cart.getCustomerSession()).thenReturn(mock(CustomerSession.class));
+		when(shopper.getCustomerSession()).thenReturn(mock(CustomerSession.class));
 		when(shopper.getCurrentShoppingCart()).thenReturn(cart);
 		doNothing().when(cart).setShippingAddress(address);
 		return cart;

@@ -15,6 +15,7 @@ import com.elasticpath.domain.changeset.ChangeSetMember;
 import com.elasticpath.domain.changeset.ChangeSetObjectStatus;
 import com.elasticpath.domain.changeset.ChangeSetUserView;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
+import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
 import com.elasticpath.persistence.api.LoadTuner;
 
 /**
@@ -42,14 +43,14 @@ public interface ChangeSetService {
 
 	/**
 	 * Adds a new member object to a change set using the object descriptor.
-	 *
-	 * @param changeSetGuid the change set code, it cannot be null.
+	 *  @param changeSetGuid the change set code, it cannot be null.
 	 * @param objectDescriptor the descriptor, it cannot be null.
-	 * @param metadata the meta data map, it could be null if no meta data is applied for the business object
-	 * @param resolveMetadata indicate whether the metadata should be resolved
-	 */
-	void addObjectToChangeSet(String changeSetGuid, BusinessObjectDescriptor objectDescriptor,
-			Map<String, String> metadata, boolean resolveMetadata);
+     * @param metadata the meta data map, it could be null if no meta data is applied for the business object
+     * @param resolveMetadata indicate whether the metadata should be resolved
+     * @return the object group member if created and added to the changeset.
+     */
+	BusinessObjectGroupMember addObjectToChangeSet(String changeSetGuid, BusinessObjectDescriptor objectDescriptor,
+                                                   Map<String, String> metadata, boolean resolveMetadata);
 
 	/**
 	 * Removes a member object from the change set specified by its code.

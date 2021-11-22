@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider;
 import java.util.Arrays;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.core.tablelableprovider.AbstractTableLabelProviderDecorator;
 import com.elasticpath.cmclient.core.tablelableprovider.ExtensibleTableLabelProvider;

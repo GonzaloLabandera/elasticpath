@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2021 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-06-change-toutboxmessage-uidpk-to-bigint.xml">
+
+	<changeSet id="2021-06-change-toutboxmessage-uidpk-to-bigint" author="elasticpath">
+		<modifyDataType tableName="TOUTBOXMESSAGE" columnName="UIDPK" newDataType="BIGINT" />
+	</changeSet>
+</databaseChangeLog>

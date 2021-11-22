@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.policy.ui;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartService;

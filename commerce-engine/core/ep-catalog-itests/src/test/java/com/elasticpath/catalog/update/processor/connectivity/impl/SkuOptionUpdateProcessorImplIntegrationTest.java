@@ -18,7 +18,8 @@ import java.util.Optional;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,7 @@ import com.elasticpath.test.util.Utils;
 @DirtiesDatabase
 public class SkuOptionUpdateProcessorImplIntegrationTest extends DbTestCase {
 
-	private static final Logger LOGGER = Logger.getLogger(SkuOptionUpdateProcessorImplIntegrationTest.class);
+	private static final Logger LOGGER = LogManager.getLogger(SkuOptionUpdateProcessorImplIntegrationTest.class);
 
 	private static final String SKU_OPTION_KEY = "optionKey";
 	private static final String SKU_DISPLAY_NAME = "displayName";

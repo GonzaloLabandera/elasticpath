@@ -32,17 +32,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.base.cache.CacheResult;
 import com.elasticpath.cache.Cache;
-import com.elasticpath.cache.CacheResult;
-import com.elasticpath.caching.core.CodeUidDateCacheKey;
-import com.elasticpath.domain.catalog.Catalog;
-import com.elasticpath.domain.catalog.impl.CatalogImpl;
-import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.rules.Rule;
-import com.elasticpath.domain.rules.impl.EpRuleBaseImpl;
 import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
-import com.elasticpath.domain.store.Store;
-import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.SellingContextRuleSummary;
 
@@ -64,12 +57,6 @@ public class CachingRuleServiceImplTest {
 	private Cache<Long, String> ruleCodeByRuleUidCache;
 	@Mock
 	private Cache<Collection<Long>, Collection<String>> ruleCodesByRuleUidsCache;
-	@Mock
-	private Cache<Collection<Long>, EpRuleBase> ruleBaseByScenarioCache;
-	@Mock
-	private Cache<CodeUidDateCacheKey, EpRuleBase> changedStoreRuleBaseCache;
-	@Mock
-	private Cache<CodeUidDateCacheKey, EpRuleBase> changedCatalogRuleBaseCache;
 	@Mock
 	private Cache<SellingContextCacheKey, List<SellingContextRuleSummary>> sellingContextCache;
 	@Mock
@@ -420,44 +407,6 @@ public class CachingRuleServiceImplTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldFindRuleBaseByScenario() {
-		final int scenarioId = 1;
-		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
-
-		final Store store = new StoreImpl();
-		store.setUidPk(1L);
-
-		final Catalog catalog = new CatalogImpl();
-		catalog.setUidPk(2L);
-
-		Collection<Long> cacheKey = Arrays.asList(store.getUidPk(), catalog.getUidPk(), (long) scenarioId);
-
-		when(ruleBaseByScenarioCache.get(eq(cacheKey), any(Function.class))).thenReturn(expectedRuleBase);
-
-		EpRuleBase actualRuleBase = fixture.findRuleBaseByScenario(store, catalog, scenarioId);
-
-		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void shouldFindChangedStoreRuleBase() {
-		final int scenarioId = 1;
-		final Date date = new Date();
-
-		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
-
-		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
-
-		when(changedStoreRuleBaseCache.get(eq(cacheKey), any(Function.class))).thenReturn(expectedRuleBase);
-
-		EpRuleBase actualRuleBase = fixture.findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
-
-		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
 	public void shouldModifiedDate() {
 		final Date date = new Date();
 
@@ -466,23 +415,6 @@ public class CachingRuleServiceImplTest {
 		Date modifiedDateForRule = fixture.getModifiedDateForRuleBase(RULE_UIDPK);
 
 		assertThat(modifiedDateForRule).isEqualTo(date);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void shouldFindChangedCatalogRuleBase() {
-		final int scenarioId = 1;
-		final Date date = new Date();
-
-		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
-
-		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
-
-		when(changedCatalogRuleBaseCache.get(eq(cacheKey), any(Function.class))).thenReturn(expectedRuleBase);
-
-		EpRuleBase actualRuleBase = fixture.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
-
-		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
 	}
 
 	@SuppressWarnings("unchecked")

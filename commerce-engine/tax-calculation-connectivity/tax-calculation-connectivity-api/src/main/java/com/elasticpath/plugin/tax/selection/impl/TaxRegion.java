@@ -3,7 +3,7 @@
  */
 package com.elasticpath.plugin.tax.selection.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.plugin.tax.domain.TaxAddress;
 

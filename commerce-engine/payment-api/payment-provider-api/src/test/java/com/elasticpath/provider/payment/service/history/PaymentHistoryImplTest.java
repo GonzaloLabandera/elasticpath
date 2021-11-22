@@ -27,7 +27,8 @@ import java.util.Map;
 import java.util.Random;
 
 import com.google.common.collect.Multimap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +57,7 @@ import com.elasticpath.provider.payment.service.instrument.OrderPaymentInstrumen
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentHistoryImplTest {
 
-	private static final Logger LOG = Logger.getLogger(PaymentHistoryImplTest.class);
+	private static final Logger LOG = LogManager.getLogger(PaymentHistoryImplTest.class);
 
 	private static final String CURRENCY_CODE = "CAD";
 

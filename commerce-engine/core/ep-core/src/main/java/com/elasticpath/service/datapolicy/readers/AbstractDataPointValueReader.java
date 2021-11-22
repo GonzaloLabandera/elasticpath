@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.datapolicy.DataPoint;
@@ -91,9 +91,7 @@ public abstract class AbstractDataPointValueReader implements DataPointValueRead
 	//remove all fields from the supported fields map that do not exist in the list of data point keys
 	private Map<String, String> dataPointKeysToDbFields(final Collection<String> dataPointKeys) {
 		//create a copy of the default supported fields
-		Map<String, String> selectedSupportedFields = new HashMap<>();
-		selectedSupportedFields.putAll(getSupportedFields());
-
+		Map<String, String> selectedSupportedFields = new HashMap<>(getSupportedFields());
 		selectedSupportedFields.keySet().retainAll(dataPointKeys);
 
 		return selectedSupportedFields;
@@ -192,12 +190,12 @@ public abstract class AbstractDataPointValueReader implements DataPointValueRead
 	private void createDataPointValuesForMatchingKeys(final Object[] row,
 													  final String customerGuid,
 													  final DataPoint dataPoint,
-		final List<DataPointValue> dataPointValues, final Set<String> processedDataKeys) {
-
+													  final List<DataPointValue> dataPointValues,
+													  final Set<String> processedDataKeys) {
 		//iterate through attributes and find the one that matches current data point key
 		for (int i = ATTRIBUTE_NAME_ROW_INDEX; i < row.length; i = i + 2) {
 			//if attribute name matches data point key, create a DataPointValue instance
-			if (dataPoint.getDataKey().equals(String.valueOf(row[i]))) {
+			if (rawDataHasDataPoint(dataPoint.getDataKey(), row[i])) {
 
 				DataPointValue dpv = createDataPointValueFromRawData(dataPoint, customerGuid, row, i);
 
@@ -205,6 +203,23 @@ public abstract class AbstractDataPointValueReader implements DataPointValueRead
 				processedDataKeys.add(dataPoint.getDataKey());
 			}
 		}
+	}
+
+	private boolean rawDataHasDataPoint(final String dataPointKey, final Object rawDataKey) {
+		String rawDataKeyAsString = StringUtils.defaultString(rawDataKeyToString(rawDataKey), "");
+
+		//checking whether rawDataKey exists in a db column or as a JSON field (checking against "POSSIBLE_DP_KEY":"
+		return dataPointKey.equals(rawDataKeyAsString)
+				|| rawDataKeyAsString.contains("\"" + dataPointKey + "\":\"");
+	}
+
+	/**
+	 * Cast or convert raw data key.
+	 * @param rawDataKey the raw data key.
+	 * @return cast or converted raw data key
+	 */
+	protected String rawDataKeyToString(final Object rawDataKey) {
+		return (String) rawDataKey;
 	}
 
 	//create data point value with default values

@@ -5,20 +5,26 @@ package com.elasticpath.settings.provider.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.settings.MalformedSettingValueException;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
 import com.elasticpath.settings.provider.converter.SettingValueTypeConverter;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.connectivity.context.XPFSettingValueRetrievalContext;
+import com.elasticpath.xpf.connectivity.entity.XPFSettingValue;
+import com.elasticpath.xpf.connectivity.extensionpoint.SettingValueRetrievalStrategy;
 
 /**
  * Test class for {@link com.elasticpath.settings.provider.SettingValueProvider}.
@@ -30,31 +36,41 @@ public class SettingValueProviderImplTest {
 
 	private SettingValueProviderImpl<?> settingValueProvider;
 
-	private final SettingsReader settingsReader = mock(SettingsReader.class);
+	private final XPFExtensionLookup extensionLookup = mock(XPFExtensionLookup.class);
 
-	private final SettingValue settingValue = mock(SettingValue.class);
+	private final XPFSettingValue settingValue = mock(XPFSettingValue.class);
+
+	private final SettingValueRetrievalStrategy settingValueRetrievalStrategy = mock(SettingValueRetrievalStrategy.class);
+
+	@SuppressWarnings("unchecked")
+	private final SettingValueTypeConverter typeConverter = mock(SettingValueTypeConverter.class);
 
 	@Before
 	public void setUp() {
 		settingValueProvider = new SettingValueProviderImpl<>();
-		settingValueProvider.setSettingsReader(settingsReader);
+		settingValueProvider.setXpfExtensionLookup(extensionLookup);
 
 		settingValueProvider.setPath(PATH);
 
-		// Dummy Type Converter for unit tests. This is preferable to mocking as it allows each test to define the expected value for the
-		// SettingValue.getValue()
-		settingValueProvider.setSettingValueTypeConverter(new SettingValueTypeConverter() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public <T> T convert(final SettingValue settingValue) {
-				return (T) settingValue.getValue();
-			}
-		});
+
+		when(extensionLookup.getMultipleExtensions(any(), any(), any())).thenReturn(Collections.singletonList(settingValueRetrievalStrategy));
+	}
+
+	@Test
+	public void verifyGetWithNoSettingsThrowsEpServiceException() {
+		settingValueProvider.setSettingValueTypeConverter(typeConverter);
+		settingValueProvider.setContext(CONTEXT);
+		when(settingValueRetrievalStrategy.getSettingValue(any())).thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> settingValueProvider.get(CONTEXT))
+				.isInstanceOf(EpServiceException.class)
+		.hasMessage("No setting value retrieval strategies were unable to find a value for path and context: 'COMMERCE/ITEST/SETTINGS/mockSetting',"
+				+ " '" + CONTEXT + "'");
 	}
 
 	@Test
 	public void verifyGetWithNoSettingsReaderThrowsIllegalStateException() {
-		settingValueProvider.setSettingsReader(null);
+		settingValueProvider.setXpfExtensionLookup(null);
 
 		assertThatThrownBy(() -> settingValueProvider.get())
 				.isInstanceOf(IllegalStateException.class);
@@ -79,9 +95,10 @@ public class SettingValueProviderImplTest {
 	@Test
 	public void verifyGetWithPathAndNoContextCallsSettingsReader() {
 		final String expected = UUID.randomUUID().toString();
-
-		when(settingsReader.getSettingValue(PATH)).thenReturn(settingValue);
-		when(settingValue.getValue()).thenReturn(expected);
+		settingValueProvider.setSettingValueTypeConverter(typeConverter);
+		settingValueProvider.setContext(CONTEXT);
+		when(settingValueRetrievalStrategy.getSettingValue(any())).thenReturn(Optional.of(settingValue));
+		when(typeConverter.convert(settingValue)).thenReturn(expected);
 
 		assertThat(settingValueProvider.get())
 				.as("Expected the SettingValue's value to be returned by the provider")
@@ -91,11 +108,11 @@ public class SettingValueProviderImplTest {
 	@Test
 	public void verifyGetWithPathAndContextCallsSettingsReader() {
 		final String expected = UUID.randomUUID().toString();
-
+		settingValueProvider.setSettingValueTypeConverter(typeConverter);
 		settingValueProvider.setContext(CONTEXT);
 
-		when(settingsReader.getSettingValue(PATH, CONTEXT)).thenReturn(settingValue);
-		when(settingValue.getValue()).thenReturn(expected);
+		when(settingValueRetrievalStrategy.getSettingValue(new XPFSettingValueRetrievalContext(PATH, CONTEXT))).thenReturn(Optional.of(settingValue));
+		when(typeConverter.convert(settingValue)).thenReturn(expected);
 
 		assertThat(settingValueProvider.get())
 				.as("Expected the SettingValue's value to be returned by the provider")
@@ -105,72 +122,74 @@ public class SettingValueProviderImplTest {
 	@Test
 	public void verifySettingValueConverterReturnsCorrectValueType() {
 		final BigDecimal expected = new BigDecimal("123.4");
-
-		final SettingValue bigDecimalSettingValue = mock(SettingValue.class, "bigDecimalTypeSettingValue");
-
-		@SuppressWarnings("unchecked") final SettingValueTypeConverter typeConverter = mock(SettingValueTypeConverter.class);
-
-		when(settingsReader.getSettingValue(PATH)).thenReturn(bigDecimalSettingValue);
-		when(typeConverter.convert(bigDecimalSettingValue)).thenReturn(expected);
+		final XPFSettingValue bigDecimalSettingValue = mock(XPFSettingValue.class, "bigDecimalTypeSettingValue");
 
 		settingValueProvider.setSettingValueTypeConverter(typeConverter);
-		settingValueProvider.get();
+		settingValueProvider.setContext(CONTEXT);
+		when(settingValueRetrievalStrategy.getSettingValue(new XPFSettingValueRetrievalContext(PATH, CONTEXT)))
+				.thenReturn(Optional.of(bigDecimalSettingValue));
+		when(typeConverter.convert(bigDecimalSettingValue)).thenReturn(expected);
+
+		assertThat(settingValueProvider.get())
+				.as("Expected the correct value type  to be returned by the provider")
+				.isEqualTo(expected);
 	}
 
 	@Test
 	public void verifyGetPropagatesUnexpectedSettingValueTypeExceptionsFromConverter() {
-		final SettingValueTypeConverter typeConverter = mock(SettingValueTypeConverter.class);
-
-		when(settingsReader.getSettingValue(PATH)).thenReturn(settingValue);
-		doThrow(MalformedSettingValueException.class).when(typeConverter).convert(settingValue);
-
 		settingValueProvider.setSettingValueTypeConverter(typeConverter);
+		settingValueProvider.setContext(CONTEXT);
+		when(settingValueRetrievalStrategy.getSettingValue(new XPFSettingValueRetrievalContext(PATH, CONTEXT))).thenReturn(Optional.of(settingValue));
+		doThrow(MalformedSettingValueException.class).when(typeConverter).convert(settingValue);
 
 		assertThatThrownBy(() -> settingValueProvider.get())
 				.isInstanceOf(MalformedSettingValueException.class);
 	}
 
 	@Test
-	public void verifyGetWithContextUsedWhenContextNotConfigured() throws Exception {
+	public void verifyGetWithContextUsedWhenContextNotConfigured() {
 		final String expected = UUID.randomUUID().toString();
-
-		when(settingsReader.getSettingValue(PATH, CONTEXT)).thenReturn(settingValue);
-		when(settingValue.getValue()).thenReturn(expected);
+		settingValueProvider.setSettingValueTypeConverter(typeConverter);
+		settingValueProvider.setContext(null);
+		when(settingValueRetrievalStrategy.getSettingValue(new XPFSettingValueRetrievalContext(PATH, CONTEXT))).thenReturn(Optional.of(settingValue));
+		when(typeConverter.convert(settingValue)).thenReturn(expected);
 
 		assertThat(settingValueProvider.get(CONTEXT))
-				.as("Expected the context value to be used to determine the setting value")
+				.as("Expected the context value input to be used to determine the setting value")
 				.isEqualTo(expected);
 	}
 
 	@Test
-	public void verifyGetWithContextOverridesSetContext() throws Exception {
+	public void verifyGetWithContextOverridesSetContext() {
 		final String overrideContext = "CONTEXT2";
 		final String expected = UUID.randomUUID().toString();
 
 		settingValueProvider.setContext(CONTEXT);
-
-		when(settingsReader.getSettingValue(PATH, overrideContext)).thenReturn(settingValue);
-		when(settingValue.getValue()).thenReturn(expected);
+		settingValueProvider.setSettingValueTypeConverter(typeConverter);
+		when(settingValueRetrievalStrategy.getSettingValue(new XPFSettingValueRetrievalContext(PATH, overrideContext)))
+				.thenReturn(Optional.of(settingValue));
+		when(typeConverter.convert(settingValue)).thenReturn(expected);
 
 		assertThat(settingValueProvider.get(overrideContext))
-				.as("Expected the context value to be used to determine the setting value")
+				.as("Expected the context value input to be used to determine the setting value")
 				.isEqualTo(expected);
 	}
 
 	@Test
-	public void verifySystemPropertyOverrideValueIsApplied() throws Exception {
+	public void verifySystemPropertyOverrideValueIsApplied() {
 		final String overrideKey = "overrideKey";
 		final String overrideValue = "overrideValue";
 
 		System.setProperty(overrideKey, overrideValue);
 		settingValueProvider.setSystemPropertyOverrideKey(overrideKey);
+		settingValueProvider.setSettingValueTypeConverter(typeConverter);
 
-		when(settingsReader.getSettingValue(PATH, CONTEXT)).thenReturn(settingValue);
-		when(settingValue.getValue()).thenReturn("originalValue");
+		when(settingValueRetrievalStrategy.getSettingValue(new XPFSettingValueRetrievalContext(PATH, CONTEXT))).thenReturn(Optional.of(settingValue));
+		XPFSettingValue overrideSettingValue = new XPFSettingValue(overrideValue, settingValue.getValueType());
+		when(typeConverter.convert(overrideSettingValue)).thenReturn(overrideValue);
 
 		assertThat(settingValueProvider.get(CONTEXT))
-				.as("Expected the context value to be used to determine the setting value")
+				.as("Expected the system override value to be returned")
 				.isEqualTo(overrideValue);
 	}
-
 }

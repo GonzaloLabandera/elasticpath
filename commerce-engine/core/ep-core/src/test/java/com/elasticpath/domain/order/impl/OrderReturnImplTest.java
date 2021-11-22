@@ -44,6 +44,7 @@ import com.elasticpath.domain.cmuser.impl.CmUserImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderReturn;
@@ -129,6 +130,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 		super.setUp();
 		stubGetSingletonBean(ContextIdNames.PRODUCT_SKU_LOOKUP, ProductSkuLookup.class, productSkuLookup);
 		stubGetPrototypeBean(ContextIdNames.PRICE, Price.class, PriceImpl.class);
+		stubGetPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class, ModifierFieldsMapWrapper.class);
 
 		storeService = context.mock(StoreService.class);
 		stubGetSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class, storeService);

@@ -3,8 +3,6 @@
  */
 package com.elasticpath.validation.validators.util;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import com.elasticpath.domain.attribute.Attribute;
@@ -12,15 +10,13 @@ import com.elasticpath.domain.attribute.Attribute;
 /**
  * A wrapper class for {@link Attribute} used in dynamic validation.
  */
-public class DynamicAttributeValue {
+public class DynamicAttributeValue extends DynamicValue<Attribute> {
 	private final String valueToValidate;
 	private final String attributeKey;
-	private final Attribute attribute;
-	private final String[] validOptions;
 
 	/**
-	 * Custom constructor.
-	 *  @param attributeKey    the key of the field being validated.
+	 * Constructor.
+	 * @param attributeKey    the key of the field being validated.
 	 * @param valueToValidate field value to validate.
 	 * @param attribute       the referent attribute.
 	 * @param validOptions    the set of valid options if applicable
@@ -29,13 +25,9 @@ public class DynamicAttributeValue {
 			final String valueToValidate,
 			final Attribute attribute,
 			final Set<String> validOptions) {
-
+		super(attribute, validOptions);
 		this.attributeKey = attributeKey;
 		this.valueToValidate = valueToValidate;
-		this.attribute = attribute;
-
-		Objects.requireNonNull(validOptions);
-		this.validOptions = validOptions.toArray(new String[] {});
 	}
 
 	/**
@@ -46,7 +38,7 @@ public class DynamicAttributeValue {
 	 * String array with zero or more invalid options.
 	 */
 	public String[] getInvalidOptions() {
-		return MultiOptionHandler.getInvalidOptions(valueToValidate, validOptions);
+		return MultiOptionHandler.getInvalidOptions(valueToValidate, getValidOptions().toArray(new String[0]));
 	}
 
 	/**
@@ -59,18 +51,4 @@ public class DynamicAttributeValue {
 		return attributeKey;
 	}
 
-	/**
-	 * Get valid field options, if any.
-	 * Applicable to {@link com.elasticpath.domain.modifier.ModifierType#PICK_SINGLE_OPTION} and
-	 * {@link com.elasticpath.domain.modifier.ModifierType#PICK_MULTI_OPTION} field types.
-	 *
-	 * @return an array of valid options, if available or empty array.
-	 */
-	public Optional<String[]> getValidOptions() {
-		return Optional.ofNullable(validOptions);
-	}
-
-	public Attribute getAttribute() {
-		return attribute;
-	}
 }

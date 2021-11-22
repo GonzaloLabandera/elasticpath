@@ -11,7 +11,8 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.exception.runtime.ImportRuntimeException;
 import com.elasticpath.importexport.common.manifest.Manifest;
@@ -24,7 +25,7 @@ import com.elasticpath.importexport.importer.unpackager.Unpackager;
  */
 public class NullUnpackagerImpl implements Unpackager {
 	
-	private static final Logger LOG = Logger.getLogger(NullUnpackagerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(NullUnpackagerImpl.class);
 
 	private Queue<String> queue;
 

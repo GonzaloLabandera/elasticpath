@@ -27,7 +27,7 @@ public final class Markers {
 	/**
 	 * Marker for finding sql queries.
 	 */
-	public static final String SQL_STATEMENT_MARKER = "executing (batch )?prepstmnt ";
+	public static final String SQL_STATEMENT_MARKER = "(executing)?(batching)? (batch )?prepstmnt ";
 	/** Marker for finding batch prepared statements. */
 	public static final String SQL_BATCH_STATEMENT_MARKER = "executing batch prepstmnt ";
 	/** Marker for finding both regular and batch prepared statements. */
@@ -36,6 +36,16 @@ public final class Markers {
 	 * Marker for finding jpa eager relations.
 	 */
 	public static final String EAGER_RELATIONS_MARKER = "Eager relations: ";
+
+	/**
+	 * Marker for finding batched inserts.
+	 */
+	public static final String BATCHING_PREPSTMT_MARKER = "batching prepstmnt";
+
+	/**
+	 * Marker for finding executed batched inserts.
+	 */
+	public static final String EXECUTING_BATCH_PREPSTMT_MARKER = "executing batch prepstmnt";
 
 	private Markers() {
 		//constants class

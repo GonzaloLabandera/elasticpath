@@ -17,7 +17,7 @@ import java.util.Optional;
 import cucumber.api.java.en.Then;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.definitions.api.helpers.ContextDrivenStepsHelper;
 import com.elasticpath.definitions.api.helpers.StepsHelper;

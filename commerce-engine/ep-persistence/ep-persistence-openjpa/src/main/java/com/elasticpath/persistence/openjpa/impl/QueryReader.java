@@ -157,6 +157,24 @@ public class QueryReader {
 	}
 
 	/**
+	 * @see com.elasticpath.persistence.api.PersistenceEngine#retrieveByNamedNativeQuery(String, Class, Object...)
+	 *
+	 * @param nativeQueryName the native query name
+	 * @param resultClass the result class
+	 * @param parameters the parameters
+	 * @param <T> the result type
+	 * @return the result list
+	 */
+	public <T> List<T> retrieveByNamedNativeQuery(final String nativeQueryName, final Class<?> resultClass, final Object... parameters) {
+
+		return getNamedQueryExecutor()
+				.withQueryName(nativeQueryName)
+				.withResultClass(resultClass)
+				.withParameters(parameters)
+				.executeAndReturnResultList();
+	}
+
+	/**
 	 * @see com.elasticpath.persistence.api.PersistenceEngine#retrieveByNamedQuery(String, FlushMode, Object...)
 	 *
 	 * @param <T> the object's type to retrieve
@@ -285,6 +303,27 @@ public class QueryReader {
 			.withParameters(parameters)
 			.withParameterValues(values)
 			.executeAndReturnResultList();
+	}
+
+	/**
+	 * @see com.elasticpath.persistence.api.PersistenceEngine#retrieveByNamedNativeQueryWithList
+	 *
+	 * @param queryName the native query name
+	 * @param resultClass the result class
+	 * @param values the list values
+	 * @param parameters the parameters
+	 * @param <T> the result type
+	 * @param <E> the value type
+	 * @return the result list
+	 */
+	public <T, E> List<T> retrieveByNamedNativeQueryWithList(final String queryName, final Class<?> resultClass, final Collection<E> values,
+															 final Object... parameters) {
+		return getNamedQueryWithListExecutor()
+				.withQueryName(queryName)
+				.withResultClass(resultClass)
+				.withParameters(parameters)
+				.withParameterValues(values)
+				.executeAndReturnResultList();
 	}
 
 	/**

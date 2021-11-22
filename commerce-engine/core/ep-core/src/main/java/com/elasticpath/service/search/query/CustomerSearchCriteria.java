@@ -303,7 +303,7 @@ public class CustomerSearchCriteria extends AbstractSearchCriteriaImpl {
 	 */
 	@Override
 	public IndexType getIndexType() {
-		return IndexType.CUSTOMER;
+		return null;
 	}
 
 	/**

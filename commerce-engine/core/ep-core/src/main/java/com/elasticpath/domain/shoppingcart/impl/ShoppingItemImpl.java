@@ -6,13 +6,10 @@ package com.elasticpath.domain.shoppingcart.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,7 +18,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
@@ -41,7 +37,6 @@ import org.apache.openjpa.persistence.jdbc.ElementForeignKey;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 
 import com.elasticpath.domain.DatabaseCreationDate;
-import com.elasticpath.domain.impl.AbstractItemData;
 import com.elasticpath.domain.impl.AbstractShoppingItemImpl;
 import com.elasticpath.domain.shoppingcart.ExchangeItem;
 import com.elasticpath.domain.shoppingcart.ItemType;
@@ -91,8 +86,6 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 
 	private List<ShoppingItem> childItems = new ArrayList<>();
 	
-	private Map<String, AbstractItemData> fieldValues = new HashMap<>();
-	
 	private Long cartUid;
 
 	private Set<ShoppingItemRecurringPrice> recurringPrices = new HashSet<>();
@@ -106,33 +99,6 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 	private Long parentItemUid;
 
 	private ItemType itemType = ItemType.SIMPLE;
-
-	/**
-	 * Internal JPA method to get Item Data.
-	 * @return the item data
-	 */
-	@OneToMany(targetEntity = ShoppingItemData.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-	@MapKey(name = "key")
-	@ElementJoinColumn(name = FK_COLUMN_NAME, nullable = false)
-	@ElementForeignKey
-	@ElementDependent
-	@Override
-	protected Map<String, AbstractItemData> getItemData() {
-		return this.fieldValues;
-	}
-	
-	/**
-	 * Sets the {@code ShoppingItemData} - for JPA.
-	 * @param itemData the cart item data
-	 */
-	protected void setItemData(final Map<String, AbstractItemData> itemData) {
-		this.fieldValues = itemData;
-	}
-
-	@Override
-	protected AbstractItemData createItemData(final String name, final String value) {
-		return new ShoppingItemData(name, value);
-	}
 
 	/**
 	 * Internal accessor used by JPA.
@@ -211,7 +177,12 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 	@Id
 	@Column(name = "UIDPK")
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = TABLE_NAME)
-	@TableGenerator(name = TABLE_NAME, table = "JPA_GENERATED_KEYS", pkColumnName = "ID", valueColumnName = "LAST_VALUE", pkColumnValue = TABLE_NAME)
+	@TableGenerator(name = TABLE_NAME,
+			table = "JPA_GENERATED_KEYS",
+			pkColumnName = "ID",
+			valueColumnName = "LAST_VALUE",
+			pkColumnValue = TABLE_NAME,
+			allocationSize = HIGH_CONCURRENCY_ALLOCATION_SIZE)
 	public long getUidPk() {
 		return this.uidPk;
 	}

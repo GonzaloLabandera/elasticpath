@@ -113,7 +113,7 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 	public void ensurePaymentTransactionsOnMixedCartAreReversedOnCheckoutRollback() {
 		try {
 			ShoppingCart shoppingCart = checkoutTestCartBuilder
-					.withCustomerSession(shoppingContext.getCustomerSession())
+					.withShopper(shoppingContext.getShopper())
 					.withElectronicProduct()
 					.withPhysicalProduct()
 					.build();
@@ -121,7 +121,7 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 			final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 			final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(),
+			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot,
 					true);
 			fail("The order should fail with an exception on checkout.");
 		} catch (EpServiceException e) {
@@ -151,14 +151,14 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 	public void ensurePaymentTransactionsOnCartWithPhysicalProductAreReversedOnCheckoutRollback() {
 		try {
 			ShoppingCart shoppingCart = checkoutTestCartBuilder
-					.withCustomerSession(shoppingContext.getCustomerSession())
+					.withShopper(shoppingContext.getShopper())
 					.withPhysicalProduct()
 					.build();
 
 			final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 			final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 			fail("The order should fail with an exception on checkout.");
 		} catch (EpServiceException e) {
 			// ignore exception
@@ -181,14 +181,14 @@ public class PaymentTransactionCheckoutRollbackTest extends BasicSpringContextTe
 	public void ensurePaymentTransactionsOnCartWithElectronicProductAreReversedOnCheckoutRollback() {
 		try {
 			ShoppingCart shoppingCart = checkoutTestCartBuilder
-					.withCustomerSession(shoppingContext.getCustomerSession())
+					.withShopper(shoppingContext.getShopper())
 					.withElectronicProduct()
 					.build();
 
 			final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 			final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+			checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 			fail("The order should fail with an exception on checkout.");
 		} catch (EpServiceException e) {
 			// ignore exception

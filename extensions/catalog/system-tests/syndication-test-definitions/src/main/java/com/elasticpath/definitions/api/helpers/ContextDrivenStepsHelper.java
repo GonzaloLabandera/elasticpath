@@ -7,8 +7,9 @@ import java.util.Optional;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.definitions.stateobjects.Context;
 import com.elasticpath.definitions.utils.DataHelper;
@@ -18,7 +19,7 @@ import com.elasticpath.definitions.utils.DataHelper;
  */
 public class ContextDrivenStepsHelper {
 
-	private static final Logger LOGGER = Logger.getLogger(ContextDrivenStepsHelper.class);
+	private static final Logger LOGGER = LogManager.getLogger(ContextDrivenStepsHelper.class);
 	private final Context context;
 	private Response response;
 

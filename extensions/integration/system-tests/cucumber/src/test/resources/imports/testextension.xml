@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<extensions>
+	<extension guid="43a62961-a4e3-4194-81be-f3ecd8d221ed">
+		<extension_point_key>VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART_READ</extension_point_key>
+		<extension_class>com.elasticpath.service.shoppingcart.validation.impl.ProductSkuDatesValidatorImpl</extension_class>
+		<priority>10</priority>
+		<default_selector_mode>DEFAULT_ALL</default_selector_mode>
+	</extension>
+</extensions>

@@ -129,22 +129,14 @@
 				WHERE c.uidPk = ?1
 			</query>
         </named-query>
-        <named-query name="CUSTOMER_FIND_BY_SHAREDID_IN_STORES">
-			<query>
-				SELECT c
-				FROM CustomerImpl c, StoreImpl st
-				WHERE c.storeCode = st.code
-				AND c.sharedId = ?1
-				AND st.uidPk IN (:list)
-			</query>
-        </named-query>
-		<named-query name="CUSTOMER_FIND_BY_SHAREDID">
-			<query>
-				SELECT c
-				FROM CustomerImpl c
-				where c.sharedId = ?1
-			</query>
-		</named-query>
+		<named-query name="CUSTOMER_FIND_BY_SHAREDID_AND_TYPE">
+		<query>
+			SELECT c
+			FROM CustomerImpl c
+			WHERE c.sharedId = ?1
+			AND c.customerType = ?2
+		</query>
+	</named-query>
 		<named-query name="CUSTOMER_GUID_SELECT_BY_SHAREDID">
 			<query>
 				SELECT c.guid
@@ -270,6 +262,7 @@
 			SELECT c.guid
 			FROM CustomerImpl AS c
 			WHERE c.parentGuid IN (:guidsThisLevel)
+			ORDER BY c.sharedId ASC
 		</query>
 	</named-query>
 
@@ -281,6 +274,53 @@
 			AND c.parentGuid IS NOT NULL
 		</query>
 	</named-query>
+	<named-query name="CUSTOMER_FIND_BY_GUIDS">
+		<query>
+			SELECT c
+			FROM CustomerImpl c
+			WHERE c.guid IN (:list)
+		</query>
+	</named-query>
 
+
+	<named-query name="SELECT_CUSTOMER_CLOSURE_DEPTH">
+		<query>
+			SELECT MAX(cc.ancestorDepth) + 1
+			FROM CustomerClosureImpl AS cc
+			WHERE cc.descendantGuid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="SELECT_DESCENDANT">
+		<query>
+			SELECT cc.descendantGuid
+			FROM CustomerClosureImpl as cc
+			WHERE cc.ancestorGuid = ?1
+		</query>
+	</named-query>
+	
+	<named-query name="SELECT_ANCESTOR">
+		<query>
+			SELECT cc.ancestorGuid
+			FROM CustomerClosureImpl as cc
+			WHERE cc.descendantGuid = ?1
+			ORDER BY cc.ancestorDepth
+		</query>
+	</named-query>
+	
+	<named-query name="SELECT_ACCOUNT_CLOSURE_DUPLICATE">
+		<query>
+			SELECT cc
+			FROM CustomerClosureImpl as cc
+			WHERE cc.descendantGuid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="DELETE_ACCOUNT_CLOSURE_BY_DESCENDANT_GUID">
+		<query>
+			DELETE FROM CustomerClosureImpl AS cc
+			WHERE cc.descendantGuid = ?1
+		</query>
+	</named-query>
 </entity-mappings>
 

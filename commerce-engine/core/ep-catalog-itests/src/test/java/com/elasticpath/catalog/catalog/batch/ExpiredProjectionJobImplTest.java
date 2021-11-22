@@ -7,6 +7,7 @@ package com.elasticpath.catalog.catalog.batch;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
@@ -98,6 +99,7 @@ public class ExpiredProjectionJobImplTest extends DbTestCase {
 		projectionEntity.setProjectionDateTime(new Date());
 		projectionEntity.setDisableDateTime(expiredDate);
 		projectionEntity.setContentHash(Utils.uniqueCode(HASH_CODE));
+		projectionEntity.setGuid(UUID.randomUUID().toString());
 
 		projectionRepository.save(projectionEntity);
 

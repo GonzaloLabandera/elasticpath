@@ -11,7 +11,8 @@ import java.io.OutputStream;
 import java.net.URL;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -19,7 +20,7 @@ import org.springframework.util.ResourceUtils;
  */
 public final class DpResourceUtils {
 
-	private static final Logger LOG = Logger.getLogger(DpResourceUtils.class);
+	private static final Logger LOG = LogManager.getLogger(DpResourceUtils.class);
 
 	/**
 	 * This class is intended as as a static utility class, so it is not intended to be instantiated.

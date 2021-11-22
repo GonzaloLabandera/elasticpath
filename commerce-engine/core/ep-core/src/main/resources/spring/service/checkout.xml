@@ -121,7 +121,7 @@
 	</bean>
 
 	<bean id="validationCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.ValidationCheckoutAction">
-		<property name="validationService" ref="purchaseCartValidationService"/>
+		<property name="purchaseCartValidationService" ref="purchaseCartValidationService"/>
 	</bean>
 
 	<bean id="updateCustomerCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.UpdateCustomerCheckoutAction">
@@ -150,16 +150,10 @@
 		<property name="eventOriginatorHelper" ref="eventOriginatorHelper"/>
 	</bean>
 
-	<bean id="populateOrderDataCheckoutAction" parent="populateOrderDataCheckoutActionTemplate"
+	<bean id="populateOrderDataCheckoutAction"
 		  class="com.elasticpath.service.shoppingcart.actions.impl.PopulateOrderDataCheckoutAction">
-		<!--  Override orderDataProperties map to specify CheckoutActionContext data that should be copied to OrderData during checkout
-		<property name="orderDataProperties">
-			<map>
-				<entry key="customerSampleProperty" value="shoppingCart.shopper.customer.sampleProperty"/>
-				...
-			</map>
-		</property>
-		-->
+		<property name="xpfExtensionLookup" ref="xpfExtensionLookup"/>
+		<property name="xpfShoppingCartConverter" ref="xpfShoppingCartConverter"/>
 	</bean>
 
 	<bean id="updateLimitedUsageNumbersCheckoutAction"
@@ -188,9 +182,9 @@
 
 	<bean id="evaluateOrderHoldStrategiesCheckoutAction"
 		  class="com.elasticpath.service.shoppingcart.actions.impl.EvaluateOrderHoldStrategiesCheckoutAction">
-		<property name="orderHoldStrategyList" ref="orderHoldStrategyList"/>
 		<property name="orderService" ref="orderService" />
 		<property name="orderHoldService" ref="orderHoldService" />
+		<property name="orderHoldStrategyXPFBridge" ref="orderHoldStrategyXPFBridge"/>
 	</bean>
 
 	<bean id="createNewOrderEventCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.CreateNewOrderEventCheckoutAction">
@@ -273,29 +267,8 @@
 		<ref bean="createGiftCertificatesCheckoutAction" />
 	</extensibleList:create>
 
-	<!-- Order Hold Strategies -->
-	<bean id="holdAllOrdersOrderHoldStrategy"
-		  class="com.elasticpath.service.shoppingcart.actions.HoldAllOrdersOrderHoldStrategyImpl">
-		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="holdStrategyProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore"/>
-		</property>
-		<property name="holdPermissionProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStoreResolvePermission"/>
-		</property>
-	</bean>
-
-	<extensibleList:create id="orderHoldStrategyListParent" overridableId="orderHoldStrategyList"
-						   valueType="com.elasticpath.service.shoppingcart.actions.OrderHoldStrategy">
-		<ref bean="holdAllOrdersOrderHoldStrategy"/>
-	</extensibleList:create>
-
-	<bean id="populateOrderDataCheckoutActionTemplate" abstract="true"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.PopulateOrderDataCheckoutAction">
-		<property name="orderDataProperties">
-			<map/>
-		</property>
-	</bean>
+	<settings:setting id="holdStrategyProvider" path="COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore"/>
+	<settings:setting id="holdPermissionProvider" path="COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStoreResolvePermission"/>
 
 	<util:constant id="physicalShipmentType" static-field="com.elasticpath.domain.shipping.ShipmentType.PHYSICAL"/>
 	<util:constant id="electronicShipmentType" static-field="com.elasticpath.domain.shipping.ShipmentType.ELECTRONIC"/>

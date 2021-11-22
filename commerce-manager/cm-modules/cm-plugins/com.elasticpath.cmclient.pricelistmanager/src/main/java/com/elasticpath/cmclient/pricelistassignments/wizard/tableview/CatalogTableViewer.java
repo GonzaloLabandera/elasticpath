@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -50,7 +51,7 @@ public class CatalogTableViewer {
 	
 	private static final int ICON_COLUMN_INDEX = 0;
 	
-	private static final Logger LOG = Logger
+	private static final Logger LOG = LogManager
 			.getLogger(CatalogTableViewer.class);
 	
 	private final ChangeSelectionController changeSelectionController = new ChangeSelectionController();

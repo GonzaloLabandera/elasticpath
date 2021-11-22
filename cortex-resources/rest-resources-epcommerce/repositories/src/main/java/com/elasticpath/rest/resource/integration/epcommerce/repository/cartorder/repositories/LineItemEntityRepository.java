@@ -81,7 +81,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	 */
 	protected Single<LineItemEntity> buildLineItemEntity(final String cartId, final String lineItemId, final ShoppingItem shoppingItem,
 														 final String itemId) {
-		Map<String, String> fields = shoppingItem.getFields();
+		Map<String, String> fields = shoppingItem.getModifierFields().getMap();
 		Single<LineItemConfigurationEntity> lineItemConfigurationEntity;
 		if (fields == null) {
 			lineItemConfigurationEntity = Single.just(LineItemConfigurationEntity.builder().build());
@@ -251,7 +251,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 				.map(LineItemConfigurationEntity::getDynamicProperties)
 				.orElse(Collections.emptyMap());
 
-		shoppingItem.mergeFieldValues(fields);
+		shoppingItem.getModifierFields().putAll(fields);
 
 		return shoppingCartRepository.updateCartItem(shoppingCart, shoppingItem, skuCode, updatedLineItemEntity.getQuantity());
 	}

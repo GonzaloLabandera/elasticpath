@@ -3,8 +3,9 @@
  */
 package com.elasticpath.plugin.tax.selection.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.plugin.tax.TaxProviderPluginInvoker;
 import com.elasticpath.plugin.tax.domain.TaxItemContainer;
@@ -18,7 +19,7 @@ import com.elasticpath.plugin.tax.selection.TaxProviderSelector;
  */
 public class TaxProviderSelectorImpl implements TaxProviderSelector {
 
-	private static final Logger LOG = Logger.getLogger(TaxProviderSelectorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(TaxProviderSelectorImpl.class);
 	
 	private TaxProviderSelectionStrategy taxProviderSelectionStrategy;
 	private TaxProviderPluginInvoker returnTaxProvider;

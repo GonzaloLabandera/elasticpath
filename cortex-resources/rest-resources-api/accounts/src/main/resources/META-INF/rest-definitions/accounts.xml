@@ -97,10 +97,10 @@ have the required permissions..
 		</relationship>
 
 		<relationship>
-			<name>account-buyer-roles-from-account</name>
-			<description><![CDATA[Link from accounts to the account's buyer roles.]]></description>
+			<name>references-to-buyer-roles</name>
+			<description><![CDATA[Link to list of buyer roles from references.]]></description>
 			<rel>buyerroles</rel>
-			<from>accounts</from>
+			<from>references.references</from>
 			<to>account-buyer-roles</to>
 		</relationship>
 

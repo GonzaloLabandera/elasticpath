@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core.helpers;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
@@ -20,7 +21,7 @@ import com.elasticpath.service.catalog.CategoryLookup;
  */
 public class CategorySearchRequestJob extends AbstractSearchRequestJob<Category> {
 
-	private static final Logger LOG = Logger.getLogger(CategorySearchRequestJob.class);
+	private static final Logger LOG = LogManager.getLogger(CategorySearchRequestJob.class);
 
 	private final CategoryLookup categoryLookup;
 

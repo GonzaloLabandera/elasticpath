@@ -10,16 +10,17 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Operations to assist when working with a <code>SearchConfig</code>.
  */
 public final class SearchConfigUtils {
 
-	private static final Logger LOG = Logger.getLogger(SearchConfigUtils.class);
+	private static final Logger LOG = LogManager.getLogger(SearchConfigUtils.class);
 	
 	/**
 	 * The delimiter between config elements in a string.

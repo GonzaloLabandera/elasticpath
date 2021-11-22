@@ -9,10 +9,11 @@ import static java.lang.System.identityHashCode;
 import java.util.Locale;
 import java.util.function.Supplier;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import com.elasticpath.base.cache.CacheResult;
 import com.elasticpath.cache.Cache;
-import com.elasticpath.cache.CacheResult;
 import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
 import com.elasticpath.shipping.connectivity.dto.ShippableItemContainer;
 import com.elasticpath.shipping.connectivity.dto.ShippingAddress;
@@ -29,7 +30,7 @@ import com.elasticpath.shipping.connectivity.service.cache.ShippingCalculationRe
  * make use of the priced result as long as none of the cart items, pricing etc., has changed in the meantime.
  */
 public class CachingShippingCalculationServiceImpl implements ShippingCalculationService {
-	private static final Logger LOG = Logger.getLogger(CachingShippingCalculationServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CachingShippingCalculationServiceImpl.class);
 
 	private Cache<ShippingCalculationResultCacheKey, ShippingCalculationResult> cache;
 	private Supplier<ShippingCalculationResultCacheKeyBuilder> cacheKeyBuilderSupplier;

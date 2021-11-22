@@ -14,7 +14,8 @@ import java.util.stream.StreamSupport;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,7 @@ import com.elasticpath.test.persister.testscenarios.MultiCategoryScenario;
 @DirtiesDatabase
 public class BulkCategoryIntegrationTest extends DbTestCase {
 
-	private static final Logger LOGGER = Logger.getLogger(BulkCategoryIntegrationTest.class);
+	private static final Logger LOGGER = LogManager.getLogger(BulkCategoryIntegrationTest.class);
 
 	private static final String CATALOG_MESSAGING_CAMEL_CONTEXT = "ep-catalog-messaging";
 	private static final String JMS_CATALOG_ENDPOINT = "jms:topic:VirtualTopic.ep.catalog";

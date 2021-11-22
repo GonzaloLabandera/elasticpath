@@ -11,7 +11,8 @@ import java.util.Map;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
 /**
@@ -21,7 +22,7 @@ import org.json.simple.JSONObject;
 
 public final class RawJsonTestFacade {
 
-	private static final Logger LOGGER = Logger.getLogger(RawJsonTestFacade.class);
+	private static final Logger LOGGER = LogManager.getLogger(RawJsonTestFacade.class);
 	private static final String UNABLE_TO_FIND_VALUE_MESSAGE = "Unable to find value: ";
 	private static final String FOR_PATH_MESSAGE = " for path: ";
 

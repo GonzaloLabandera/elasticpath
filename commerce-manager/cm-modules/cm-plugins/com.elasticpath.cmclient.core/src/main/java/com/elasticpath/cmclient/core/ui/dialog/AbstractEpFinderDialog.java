@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.core.ui.dialog;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.AggregateValidationStatus;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
@@ -60,7 +61,7 @@ public abstract class AbstractEpFinderDialog extends AbstractEpDialog implements
 	/**
 	 * The logger.
 	 */
-	protected static final Logger LOG = Logger.getLogger(AbstractEpFinderDialog.class);
+	protected static final Logger LOG = LogManager.getLogger(AbstractEpFinderDialog.class);
 
 	private IEpTableViewer resultTableViewer;
 

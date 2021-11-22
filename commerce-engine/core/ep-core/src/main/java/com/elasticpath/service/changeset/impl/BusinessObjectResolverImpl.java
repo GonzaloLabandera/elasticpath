@@ -15,7 +15,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -28,7 +29,7 @@ import com.elasticpath.service.changeset.ObjectGuidResolver;
  * For use in resolving BusinessObjectDescriptors from Entities or DTOs.
  */
 public class BusinessObjectResolverImpl implements BusinessObjectResolver {
-	private static final Logger LOG = Logger.getLogger(BusinessObjectResolverImpl.class);
+	private static final Logger LOG = LogManager.getLogger(BusinessObjectResolverImpl.class);
 
 	private BidiMap objectTypes;
 

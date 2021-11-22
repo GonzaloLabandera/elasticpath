@@ -7,7 +7,7 @@ package com.elasticpath.rest.resource.navigations.relationship;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;

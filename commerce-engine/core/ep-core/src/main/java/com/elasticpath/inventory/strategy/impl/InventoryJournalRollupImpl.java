@@ -26,6 +26,9 @@ public class InventoryJournalRollupImpl implements InventoryJournalRollup {
 	/** */
 	private int quantityOnHandDelta;
 
+	private String skuCode;
+	private long warehouseUid;
+
 	/**
 	 * Default constructor.
 	 */
@@ -47,6 +50,14 @@ public class InventoryJournalRollupImpl implements InventoryJournalRollup {
 		this.quantityOnHandDelta = (int) quantityOnHandDelta;
 	}
 
+	public void setSkuCode(final String skuCode) {
+		this.skuCode = skuCode;
+	}
+
+	public void setWarehouseUid(final long warehouseUid) {
+		this.warehouseUid = warehouseUid;
+	}
+
 	@Override
 	public int getQuantityOnHandDelta() {
 		return this.quantityOnHandDelta;
@@ -59,6 +70,9 @@ public class InventoryJournalRollupImpl implements InventoryJournalRollup {
 
 	@Override
 	public InventoryKey getInventoryKey() {
+		if (inventoryKey == null) {
+			this.inventoryKey = new InventoryKey(skuCode, warehouseUid);
+		}
 		return inventoryKey;
 	}
 

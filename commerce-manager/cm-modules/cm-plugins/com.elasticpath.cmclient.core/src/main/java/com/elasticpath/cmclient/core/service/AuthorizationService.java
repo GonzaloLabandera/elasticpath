@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +36,7 @@ import com.elasticpath.persistence.api.Persistable;
  */
 @SuppressWarnings({ "PMD.GodClass" })
 public final class AuthorizationService {
-	private static final Logger LOG = Logger.getLogger(AuthorizationService.class);
+	private static final Logger LOG = LogManager.getLogger(AuthorizationService.class);
 
 	/** Map of UserPermission identifying String to UserPermission object. * */
 	private final Map<String, UserPermission> userPermissions = new HashMap<String, UserPermission>();

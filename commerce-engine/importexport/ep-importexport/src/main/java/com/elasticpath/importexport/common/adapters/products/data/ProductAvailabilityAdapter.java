@@ -5,7 +5,8 @@ package com.elasticpath.importexport.common.adapters.products.data;
 
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.Product;
@@ -20,7 +21,7 @@ import com.elasticpath.importexport.common.util.Message;
  */
 public class ProductAvailabilityAdapter extends AbstractDomainAdapterImpl<Product, ProductAvailabilityDTO> {
 	
-	private static final Logger LOG = Logger.getLogger(ProductAvailabilityAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(ProductAvailabilityAdapter.class);
 
 	@Override
 	public void populateDomain(final ProductAvailabilityDTO source, final Product target) {

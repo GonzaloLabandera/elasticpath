@@ -28,6 +28,7 @@ import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
@@ -345,9 +346,10 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 	private OrderSku extractOrderSku(final ProductSku productSku, final Order order, final Store store, final CmUser cmUser) {
 
-		CustomerSession session = ShoppingTestData.getInstance().getCustomerSession();
+		Shopper shopper = ShoppingTestData.getInstance().getShopper();
+		CustomerSession session = shopper.getCustomerSession();
 		session.setCurrency(order.getCurrency());
-		Price price = priceLookupFacade.getPromotedPriceForSku(productSku, store, session.getShopper());
+		Price price = priceLookupFacade.getPromotedPriceForSku(productSku, store, shopper);
 		if (price == null) {
 			throw new EpServiceException("There is no price for the product with productSku code:" + STRING_NEW_LINE + productSku.getSkuCode()
 												+ SPACE + "in the currency:" + SPACE + order.getCurrency().getCurrencyCode() + STRING_NEW_LINE

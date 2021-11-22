@@ -81,20 +81,20 @@ public class ExportCustomerSteps {
 						.withRunNumber(runNumber++)
 						.build();
 
-		final ArrayList<Long> createdCustomerUids = new ArrayList<>(
-				Collections2.transform(CustomerSteps.getPersistedCustomers(), new Function<Customer, Long>() {
+		final ArrayList<String> createdCustomerGuids = new ArrayList<>(
+				Collections2.transform(CustomerSteps.getPersistedCustomers(), new Function<Customer, String>() {
 					@Override
-					public Long apply(final Customer customer) {
-						return customer.getUidPk();
+					public String apply(final Customer customer) {
+						return customer.getGuid();
 					}
 				})
 		);
 
-		final SolrIndexSearchResult<Long> customerSearchResult = new SolrIndexSearchResult<>();
+		final SolrIndexSearchResult<String> customerSearchResult = new SolrIndexSearchResult<>();
 		customerSearchResult.setEpQueryType(EPQueryType.CUSTOMER);
-		customerSearchResult.setResultUids(createdCustomerUids);
+		customerSearchResult.setResultUids(createdCustomerGuids);
 
-		when(epQLSearchEngine.<Long>search(CUSTOMER_SEARCH_QUERY)).thenReturn(customerSearchResult);
+		when(epQLSearchEngine.<String>search(CUSTOMER_SEARCH_QUERY)).thenReturn(customerSearchResult);
 
 		final ExportConfiguration exportConfiguration =
 				ExportConfigurationBuilder.newInstance()

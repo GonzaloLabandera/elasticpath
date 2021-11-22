@@ -109,10 +109,14 @@
 	<bean id="abstractDataPointValueRemover" class="com.elasticpath.service.datapolicy.removers.AbstractDataPointValueRemover" abstract="true">
 		<property name="dataPointValueService" ref="dataPointValueService"/>
 	</bean>
+	<bean id="abstractJsonDataPointValueRemover" class="com.elasticpath.service.datapolicy.removers.AbstractJsonDataPointValueRemover" abstract="true"
+		  parent="abstractDataPointValueRemover">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+	</bean>
 
 	<!-- implementations -->
 	<bean id="cartGiftCertificateFieldRemover" class="com.elasticpath.service.datapolicy.removers.CartGiftCertificateFieldRemover"
-		  parent="abstractDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
+		  parent="abstractJsonDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
 
 	<bean id="customerBillingAddressFieldRemover" class="com.elasticpath.service.datapolicy.removers.CustomerBillingAddressFieldRemover"
 		  parent="abstractDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
@@ -127,10 +131,10 @@
 		  parent="abstractDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
 
 	<bean id="orderDataValueRemover" class="com.elasticpath.service.datapolicy.removers.OrderDataValueRemover"
-		  parent="abstractDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
+		  parent="abstractJsonDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
 
 	<bean id="orderGiftCertificateFieldRemover" class="com.elasticpath.service.datapolicy.removers.OrderGiftCertificateFieldRemover"
-		  parent="abstractDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
+		  parent="abstractJsonDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
 
 	<bean id="orderIPAddressRemover" class="com.elasticpath.service.datapolicy.removers.OrderIPAddressRemover"
 		  parent="abstractDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>

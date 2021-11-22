@@ -6,8 +6,9 @@ package com.elasticpath.domain.geoip.provider.impl;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.geoip.provider.DomainNameResolver;
@@ -22,7 +23,7 @@ import com.elasticpath.domain.geoip.provider.DomainNameResolver;
 */
 public class DomainNameResolverImpl implements DomainNameResolver {
 	
-	private static final Logger LOG = Logger.getLogger(DomainNameResolverImpl.class);
+	private static final Logger LOG = LogManager.getLogger(DomainNameResolverImpl.class);
 	
 	/**
 	 * Get The first and second level domain names if it allowed by java security manager, see InetAddress for more details.

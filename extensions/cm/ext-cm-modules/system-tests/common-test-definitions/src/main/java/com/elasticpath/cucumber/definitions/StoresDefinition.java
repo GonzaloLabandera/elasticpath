@@ -12,8 +12,9 @@ import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.AddEditProfileAttributePolicyDialog;
@@ -40,7 +41,7 @@ import com.elasticpath.selenium.util.Utility;
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class StoresDefinition {
-	private static final Logger LOGGER = Logger.getLogger(StoresDefinition.class);
+	private static final Logger LOGGER = LogManager.getLogger(StoresDefinition.class);
 	private static final String PROFILE_ATTRIBUTE_POLICIES = "Profile Attribute Policies";
 
 	public static final String FACET = "Facet";

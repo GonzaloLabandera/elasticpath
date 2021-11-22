@@ -16,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
-import com.elasticpath.domain.customer.Address;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFAddress;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShippingAddressShoppingCartValidatorTest {
@@ -31,27 +31,27 @@ public class ShippingAddressShoppingCartValidatorTest {
 	private ShippingAddressShoppingCartValidatorImpl validator;
 
 	@Mock
-	private ShoppingCart shoppingCart;
+	private XPFShoppingCart shoppingCart;
 
 	@Mock
-	private ShoppingCartValidationContext context;
+	private XPFShoppingCartValidationContext context;
 
 	@Mock
-	private Address shippingAddress;
+	private XPFAddress shippingAddress;
 
 	@Before
 	public void setUp() throws Exception {
 		given(context.getShoppingCart()).willReturn(shoppingCart);
-		given(shoppingCart.requiresShipping()).willReturn(true);
+		given(shoppingCart.isRequiresShipping()).willReturn(true);
 	}
 
 	@Test
 	public void testShippingNoAddressSpecifiedNotShippableItem() {
 		// Given
-		given(shoppingCart.requiresShipping()).willReturn(false);
+		given(shoppingCart.isRequiresShipping()).willReturn(false);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -63,7 +63,7 @@ public class ShippingAddressShoppingCartValidatorTest {
 		given(shoppingCart.getShippingAddress()).willReturn(shippingAddress);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -75,12 +75,12 @@ public class ShippingAddressShoppingCartValidatorTest {
 		given(shoppingCart.getShippingAddress()).willReturn(null);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
-		StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, "need.shipping.address",
+		XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO, "need.shipping.address",
 				"Shipping address must be specified.", Collections.emptyMap(),
-				new StructuredErrorResolution(ShoppingCart.class, SHOPPING_CART_GUID));
+				new XPFStructuredErrorResolution(XPFShoppingCart.class, SHOPPING_CART_GUID));
 		assertThat(messageCollections).containsOnly(errorMessage);
 	}
 }

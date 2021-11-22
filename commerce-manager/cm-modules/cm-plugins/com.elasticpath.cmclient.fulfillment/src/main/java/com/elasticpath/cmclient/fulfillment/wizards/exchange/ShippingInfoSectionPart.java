@@ -36,6 +36,7 @@ import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.tax.TaxJurisdiction;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.tax.TaxJurisdictionService;
 import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
@@ -70,6 +71,7 @@ class ShippingInfoSectionPart extends AbstractCmClientFormSectionPart {
 
 	private final String defaultAddressPrompt = FulfillmentMessages.get().ExchangeWizard_SelectAddress_Combo;
 	private final String defaultMethodPrompt = FulfillmentMessages.get().ExchangeWizard_SelectShippingMethod_Combo;
+	private final AddressService addressService;
 
 	/**
 	 * The Constructor.
@@ -82,6 +84,7 @@ class ShippingInfoSectionPart extends AbstractCmClientFormSectionPart {
 		super(parent, toolkit, parentPage.getDataBindingContext(), ExpandableComposite.TITLE_BAR);
 		this.parentPage = parentPage;
 		taxJurisdictionService = BeanLocator.getSingletonBean(ContextIdNames.TAX_JURISDICTION_SERVICE, TaxJurisdictionService.class);
+		this.addressService = BeanLocator.getSingletonBean(ContextIdNames.ADDRESS_SERVICE, AddressService.class);
 	}
 
 	@Override
@@ -100,7 +103,8 @@ class ShippingInfoSectionPart extends AbstractCmClientFormSectionPart {
 
 	@Override
 	protected void populateControls() {
-		List<CustomerAddress> addresses = parentPage.getOrder().getCustomer().getAddresses();
+		List<CustomerAddress> addresses = addressService.findByCustomer(parentPage.getOrder().getCustomer().getUidPk());
+
 		addressCombo.add(defaultAddressPrompt);
 		addressCombo.select(0);
 		for (CustomerAddress customerAddress : addresses) {

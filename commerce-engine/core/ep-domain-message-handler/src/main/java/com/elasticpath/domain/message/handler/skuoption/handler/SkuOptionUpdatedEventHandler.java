@@ -3,7 +3,8 @@
  */
 package com.elasticpath.domain.message.handler.skuoption.handler;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.update.processor.capabilities.SkuOptionUpdateProcessor;
 import com.elasticpath.domain.message.handler.EventMessageHandler;
@@ -16,7 +17,7 @@ import com.elasticpath.messaging.EventMessage;
  */
 public class SkuOptionUpdatedEventHandler implements EventMessageHandler {
 
-	private static final Logger LOGGER = Logger.getLogger(SkuOptionUpdatedEventHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(SkuOptionUpdatedEventHandler.class);
 
 	private final EventMessageHandlerHelper<SkuOption> eventMessageHandlerHelper;
 	private final SkuOptionUpdateProcessor skuOptionUpdateProcessor;

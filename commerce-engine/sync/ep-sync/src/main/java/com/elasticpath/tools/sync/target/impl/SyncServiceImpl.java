@@ -5,7 +5,8 @@ package com.elasticpath.tools.sync.target.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.tools.sync.exception.SyncToolConfigurationException;
@@ -27,7 +28,7 @@ import com.elasticpath.tools.sync.target.result.SyncErrorResultItem;
 public class SyncServiceImpl implements SyncService {
 	private static final String PROCESS_JOB_ENTRY_EXCEPTION = "Unable to process job entry";
 
-	private static final Logger LOG = Logger.getLogger(SyncServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SyncServiceImpl.class);
 
 	private DaoAdapterFactory daoAdapterFactory;
 

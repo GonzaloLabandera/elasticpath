@@ -16,34 +16,32 @@ public interface AccountTreeService {
 	/**
 	 * Add a child to an account.
 	 *
-	 * @param parent the parent account.
-	 * @param child  the Customer object of the child to add.
-	 * @throws IllegalArgumentException if the parent or child are not of type ACCOUNT, or if adding this child would create a circular relationship
-	 *                                  in the tree, or if the child already has a parent.
+	 * @param accountGuid The guid of the child account.
+	 * @param parentAccountGuid The guid of the parent account.
 	 * @throws EpServiceException       on db error.
 	 */
-	void parent(Customer parent, Customer child) throws IllegalArgumentException, EpServiceException;
+	void insertClosures(String accountGuid, String parentAccountGuid) throws EpServiceException;
 
 	/**
 	 * Fetch a list of GUIDs for all members of the subtree under the provided Account. Makes no guarantee as to the ordering of the returned GUIDs.
 	 *
-	 * @param root the root of the tree.
+	 * @param accountGuid the root account guid of the tree.
 	 * @return the list of guids of the tree members.
 	 * @throws IllegalArgumentException if the root customer is not of type ACCOUNT.
 	 * @throws EpServiceException       on db error.
 	 */
-	List<String> fetchSubtree(Customer root) throws IllegalArgumentException, EpServiceException;
+	List<String> findDescendantGuids(String accountGuid) throws IllegalArgumentException, EpServiceException;
 
 	/**
 	 * Fetch the path of guids to the root account for this account.
 	 *
-	 * @param account the account for which we want to fetch root.
+	 * @param accountGuid the account guid for which we want to fetch ancestors.
 	 * @return the list of guids of accounts from the provided account up to and including the root. The list returned is ordered
 	 * from direct parent -> root.
 	 * @throws IllegalArgumentException if the provided Customer is not of type Account.
 	 * @throws EpServiceException       on db error.
 	 */
-	List<String> fetchPathToRoot(Customer account) throws IllegalArgumentException, EpServiceException;
+	List<String> findAncestorGuids(String accountGuid) throws IllegalArgumentException, EpServiceException;
 
 	/**
 	 * Fetch the GUIDS of all direct children of the given account.
@@ -58,14 +56,14 @@ public interface AccountTreeService {
 	/**
 	 * Fetch the GUIDS of all direct children of the given account.
 	 *
-	 * @param accountId the Account Id for which we want to fetch children for.
+	 * @param accountGuid the Account Guid for which we want to fetch children for.
 	 * @param pageStartIndex the page start index.
 	 * @param pageSize the number of results per page.
 	 * @return the list of GUIDS for all direct children of the account.
 	 * @throws IllegalArgumentException if the provided Customer is not of type Account.
 	 * @throws EpServiceException       on db error.
 	 */
-	List<String> fetchChildAccountGuidsPaginated(String accountId, int pageStartIndex, int pageSize);
+	List<String> findChildGuidsPaginated(String accountGuid, int pageStartIndex, int pageSize);
 
 	/**
 	 * Fetch the GUID of the parent account for the account specified by the supplied GUID.
@@ -74,4 +72,10 @@ public interface AccountTreeService {
 	 * @return The parent guid.
 	 */
 	Optional<String> fetchParentAccountGuidByChildGuid(String accountGuid);
+
+	/**
+	 * Remove the closure by account guid.
+	 * @param accountGuid the guid of the account.
+	 */
+	void remove(String accountGuid);
 }

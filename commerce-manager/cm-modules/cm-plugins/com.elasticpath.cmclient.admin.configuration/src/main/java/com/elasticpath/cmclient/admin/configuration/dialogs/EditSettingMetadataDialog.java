@@ -3,8 +3,9 @@
  */
 package com.elasticpath.cmclient.admin.configuration.dialogs;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -38,7 +39,7 @@ import com.elasticpath.settings.domain.SettingMetadata;
 public class EditSettingMetadataDialog extends AbstractEpDialog {
 
 	/** The logger. */
-	protected static final Logger LOG = Logger.getLogger(EditSettingMetadataDialog.class);
+	protected static final Logger LOG = LogManager.getLogger(EditSettingMetadataDialog.class);
 	
 	private final SettingDefinition settingDefinition;
 	

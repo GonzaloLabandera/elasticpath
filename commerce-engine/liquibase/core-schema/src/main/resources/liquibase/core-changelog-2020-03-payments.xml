@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-03-payments.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-03-payments.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="2020-03-payment-configurations-payment-provider-config" author="elasticpath" context="migrate-data">
 		<comment>Fill payment provider config.</comment>
@@ -28,7 +29,7 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="2020-03-payment-configurations-payment-provider-config-data" author="elasticpath" context="migrate-data" dbms="mysql,h2">
+	<changeSet id="2020-03-payment-configurations-payment-provider-config-data" author="elasticpath" context="migrate-data" dbms="mysql,h2,postgresql">
 		<comment>Fill payment provider config data.</comment>
 		<sql>
 			INSERT INTO TPAYMENTPROVIDERCONFIGDATA (UIDPK, PAYMENTPROVIDERCONFIG_UID, CONFIG_KEY, CONFIG_DATA)
@@ -140,7 +141,7 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="2020-03-payment-configurations-insert-all-authorizations" author="elasticpath" context="migrate-data" dbms="mysql">
+	<changeSet id="2020-03-payment-configurations-insert-all-authorizations" author="elasticpath" context="migrate-data" dbms="mysql,postgresql">
 		<comment>Insert all authorizations.</comment>
 		<sql>
 			INSERT INTO TORDERPAYMENTS
@@ -202,7 +203,7 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="2020-03-payment-configurations-insert-all-GC-authorizations" author="elasticpath" context="migrate-data" dbms="mysql">
+	<changeSet id="2020-03-payment-configurations-insert-all-GC-authorizations" author="elasticpath" context="migrate-data" dbms="mysql,postgresql">
 		<comment>Insert all GC authorizations.</comment>
 		<sql>
 			INSERT INTO TORDERPAYMENTS
@@ -283,6 +284,18 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="2020-03-postgresql-payment-create-order-payment-instruments-for-all-authorizations" author="elasticpath" context="migrate-data"
+			   dbms="postgresql">
+		<comment>Create order payment instruments for all authorizations.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTINSTRUMENT (UIDPK, GUID, PAYMENT_INSTRUMENT_GUID, LIMIT_AMOUNT, ORDER_NUMBER, CURRENCY_CODE)
+			SELECT PI.UIDPK, uuid_generate_v4(), PI.GUID, 0.00, P.ORDER_NUMBER, P.CURRENCY_CODE
+			FROM TORDERPAYMENTS P
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+		</sql>
+	</changeSet>
+
 	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTINSTRUMENT" author="elasticpath"
 			   context="migrate-data">
 		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTINSTRUMENT table.</comment>
@@ -317,6 +330,35 @@
 			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
 			AND RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID &lt;=> P.ORDERSHIPMENT_UID
 			AND RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-postgresql-payment-configurations-match-reverse-authorizations-by-shipment-number-and-amount" author="elasticpath"
+			   context="migrate-data" dbms="postgresql">
+		<comment>Match reverse authorizations by shipment number and amount.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CANCEL_RESERVE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			PI.GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTPAYMENTINSTRUMENT OPPI ON OPPI.ORDERPAYMENT_UID = P.UIDPK
+			JOIN TPAYMENTINSTRUMENT PI ON PI.UIDPK = OPPI.PAYMENTINSTRUMENT_UID
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE P.TRANSACTION_TYPE = 'Authorization Reversal'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND NOT (RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID IS DISTINCT FROM P.ORDERSHIPMENT_UID)
 			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
 			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization';
 		</sql>
@@ -442,6 +484,47 @@
 		<dropTable tableName="PARENTGUID"/>
 	</changeSet>
 
+	<changeSet id="2020-03-postgresql-payment-configurations-match-captures-by-shipment-number" author="elasticpath" context="migrate-data"
+			   dbms="postgresql">
+		<comment>Match captures by shipment number.</comment>
+		<createTable tableName="PARENTGUID">
+			<column name="GUID" type="varchar(255)"/>
+			<column name="PARENT_ORDER_PAYMENT_GUID" type="varchar(255)"/>
+		</createTable>
+		<sql>
+			INSERT INTO PARENTGUID SELECT GUID, PARENT_ORDER_PAYMENT_GUID FROM TORDERPAYMENTS WHERE PARENT_ORDER_PAYMENT_GUID IS NOT NULL;
+		</sql>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CHARGE' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID
+			JOIN TORDERPAYMENTS T ON T.UIDPK = TP.UIDPK AND T.TYPE = 'RESERVE'
+			LEFT JOIN PARENTGUID G on G.PARENT_ORDER_PAYMENT_GUID = T.GUID
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE
+			NOT (RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID IS DISTINCT FROM P.ORDERSHIPMENT_UID)
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization'
+			AND
+			P.TRANSACTION_TYPE = 'Capture'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND G.GUID is NULL;
+		</sql>
+		<dropTable tableName="PARENTGUID"/>
+	</changeSet>
+
 	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-match-captures" author="elasticpath"
 			   context="migrate-data">
 		<comment>Update JPA_GENERATED_KEYS for TORDERPAYMENTS table.</comment>
@@ -504,6 +587,35 @@
 			WHERE P.TRANSACTION_TYPE = 'Credit'
 			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
 			AND decode( RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID, P.ORDERSHIPMENT_UID, 1, 0 ) = 1
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Capture';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-postgresql-payment-configurations-match-credits-by-shipment-number" author="elasticpath" context="migrate-data"
+			   dbms="postgresql">
+		<comment>Match credits by shipment number.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT P.UIDPK,
+			P.CREATED_DATE,
+			'CREDIT' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID
+			JOIN TORDERPAYMENTS T ON T.UIDPK = TP.UIDPK AND T.TYPE = 'CHARGE'
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE P.TRANSACTION_TYPE = 'Credit'
+			AND P.PAYMENT_GATEWAY = 'PAYMENT_TOKEN'
+			AND NOT (RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID IS DISTINCT FROM P.ORDERSHIPMENT_UID)
 			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
 			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Capture';
 		</sql>
@@ -573,6 +685,33 @@
 			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Capture';
 		</sql>
 	</changeSet>
+	<changeSet id="2020-03-postgresql-payment-configurations-match-manual-credits-by-order-number" author="elasticpath" context="migrate-data"
+			   dbms="postgresql">
+		<comment>Match manual credits by order number.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			'MANUAL_CREDIT' AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			T.CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTS T ON T.TYPE = 'CHARGE' AND O.ORDER_NUMBER = T.ORDER_NUMBER
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE P.TRANSACTION_TYPE = 'Credit' AND P.PAYMENT_GATEWAY = 'RETURN_AND_EXCHANGE'
+			AND NOT (RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID IS DISTINCT FROM P.ORDERSHIPMENT_UID)
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Capture';
+		</sql>
+	</changeSet>
 
 	<changeSet id="2020-03-payment-configurations-update-JPA_GENERATED_KEYS-for-TORDERPAYMENTS-match-manual-credits" author="elasticpath"
 			   context="migrate-data">
@@ -622,8 +761,7 @@
 			FROM TORDERPAYMENT P
 			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
 			JOIN TORDERPAYMENTS T ON T.TYPE = 'RESERVE'
-			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID AND TP.UIDPK = T.UIDPK AND P.AUTHORIZATION_CODE =
-			TP.AUTHORIZATION_CODE
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID AND TP.UIDPK = T.UIDPK AND P.AUTHORIZATION_CODE = TP.AUTHORIZATION_CODE
 			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT
 			WHERE P.TRANSACTION_TYPE != 'Authorization' AND P.PAYMENT_GATEWAY = 'GIFT_CERTIFICATE'
 			AND RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID &lt;=> P.ORDERSHIPMENT_UID
@@ -661,6 +799,39 @@
 			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
 			WHERE P.TRANSACTION_TYPE != 'Authorization' AND P.PAYMENT_GATEWAY = 'GIFT_CERTIFICATE'
 			AND decode( RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID, P.ORDERSHIPMENT_UID, 1, 0 ) = 1
+			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
+			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization';
+		</sql>
+	</changeSet>
+
+	<changeSet id="2020-03-postgresql-payment-configurations-insert-all-GC-captures-and-reverse-authorizations-by-authorization-code" author="elasticpath"
+			   context="migrate-data" dbms="postgresql">
+		<comment>Insert all GC captures and reverse authorizations by authorization code.</comment>
+		<sql>
+			INSERT INTO TORDERPAYMENTS
+			SELECT
+			P.UIDPK,
+			P.CREATED_DATE,
+			CASE
+			WHEN P.TRANSACTION_TYPE = 'Capture' THEN 'CHARGE'
+			ELSE 'CANCEL_RESERVE'
+			END AS TYPE,
+			P.STATUS,
+			O.ORDER_NUMBER,
+			P.AMOUNT,
+			P.CURRENCY AS CURRENCY_CODE,
+			T.PAYMENT_INSTRUMENT_GUID AS PAYMENT_INSTRUMENT_GUID,
+			CONCAT('GUID-', P.UIDPK) AS GUID,
+			CONCAT('GUID-', RESERVATIONORDERPAYMENT.UIDPK) AS PARENT_ORDER_PAYMENT_GUID,
+			TRUE AS IS_ORIGINAL_PI
+			FROM TORDERPAYMENT P
+			JOIN TORDER O ON O.UIDPK = P.ORDER_UID
+			JOIN TORDERPAYMENTS T ON T.TYPE = 'RESERVE'
+			JOIN TORDERPAYMENT TP ON P.ORDERSHIPMENT_UID = TP.ORDERSHIPMENT_UID AND TP.UIDPK = T.UIDPK AND P.AUTHORIZATION_CODE =
+			TP.AUTHORIZATION_CODE
+			JOIN TORDERPAYMENT RESERVATIONORDERPAYMENT ON RESERVATIONORDERPAYMENT.ORDER_UID = P.ORDER_UID
+			WHERE P.TRANSACTION_TYPE != 'Authorization' AND P.PAYMENT_GATEWAY = 'GIFT_CERTIFICATE'
+			AND NOT (RESERVATIONORDERPAYMENT.ORDERSHIPMENT_UID IS DISTINCT FROM P.ORDERSHIPMENT_UID)
 			AND RESERVATIONORDERPAYMENT.PAYMENT_GATEWAY = P.PAYMENT_GATEWAY
 			AND RESERVATIONORDERPAYMENT.TRANSACTION_TYPE = 'Authorization';
 		</sql>

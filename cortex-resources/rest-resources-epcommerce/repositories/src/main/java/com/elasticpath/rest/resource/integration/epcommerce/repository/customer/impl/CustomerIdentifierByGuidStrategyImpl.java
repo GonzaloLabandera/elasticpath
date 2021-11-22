@@ -10,6 +10,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerIdentifierStrategy;
@@ -37,12 +38,12 @@ public class CustomerIdentifierByGuidStrategyImpl implements CustomerIdentifierS
 	}
 
 	@Override
-	public ExecutionResult<Boolean> isCustomerExists(final String userId, final String storeCode, final String customerIdentifierKey) {
+	public ExecutionResult<Boolean> isCustomerExists(final String userId, final CustomerType customerType, final String customerIdentifierKey) {
 		return customerRepository.isCustomerGuidExists(userId);
 	}
 
 	@Override
-	public ExecutionResult<String> deriveCustomerGuid(final String userId, final String storeCode, final String customerIdentifierKey) {
+	public ExecutionResult<String> deriveCustomerGuid(final String userId, final CustomerType customerType, final String customerIdentifierKey) {
 		ExecutionResult<Boolean> executionResult = customerRepository.isCustomerGuidExists(userId);
 		if (executionResult.isFailure()) {
 			return ExecutionResultFactory.createNotFound();

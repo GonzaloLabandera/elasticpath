@@ -33,9 +33,6 @@ public class LimitedUsagePromotionConditionImpl extends AbstractRuleElementImpl 
 	
 	private static final String[] PARAMETER_KEYS = new String[] { RuleParameter.ALLOWED_LIMIT, RuleParameter.LIMITED_USAGE_PROMOTION_ID };
 
-	/** Set of <code>RuleExcetion</code> allowed for this <code>RuleAction</code>. */
-	// private static final RuleExceptionType[] ALLOWED_EXCEPTIONS = new RuleExceptionType[] {};
-
 	/**
 	 * Returns the <code>RuleElementType</code> associated with this <code>RuleElement</code> subclass. The <code>RuleElementType</code>'s
 	 * property key must match this class' discriminator-value and the spring context bean id for this <code>RuleElement</code> implementation.
@@ -79,7 +76,6 @@ public class LimitedUsagePromotionConditionImpl extends AbstractRuleElementImpl 
 	@Transient
 	public RuleExceptionType[] getAllowedExceptions() {
 		return null;
-		// return (RuleExceptionType[]) ALLOWED_EXCEPTIONS.clone();
 	}
 
 	/**

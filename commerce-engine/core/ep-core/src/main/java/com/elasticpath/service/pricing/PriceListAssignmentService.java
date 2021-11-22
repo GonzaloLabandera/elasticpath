@@ -68,8 +68,7 @@ public interface PriceListAssignmentService {
 	 * @param includeHidden To include hidden price list assignments or not 
 	 * @return list of all matching PriceListAssignments
 	 */
-	List<PriceListAssignment> listByCatalogAndCurrencyCode(String catalogCode, String currencyCode,
-			boolean includeHidden);
+	List<PriceListAssignment> listByCatalogAndCurrencyCode(String catalogCode, String currencyCode, boolean includeHidden);
 	
 	/**
 	 * Lists the PriceListAssignments by partial catalog and price list names
@@ -120,6 +119,14 @@ public interface PriceListAssignmentService {
 	 * 
 	 */
 	List<PriceListAssignment> listByCatalog(String catalogCode);
+
+	/**
+	 * Lists the PriceListAssignments by catalog and that are not hidden.
+	 *
+	 * @param catalogCode the Catalog that has assigned PriceListAssignments
+	 * @return list of all matching PriceListAssignments (lite version)
+	 */
+	List<PriceListAssignment> listByCatalogLite(String catalogCode);
 	
 	/**
 	 * Lists the PriceListAssignments by catalog code.

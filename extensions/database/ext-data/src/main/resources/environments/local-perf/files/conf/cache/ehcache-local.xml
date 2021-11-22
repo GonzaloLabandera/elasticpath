@@ -80,20 +80,6 @@
 		   statistics="true"
 	/>
 
-	<cache name="groovyConditionCache"
-		   timeToIdleSeconds="${ep.local.cache.timeout}"
-		   timeToLiveSeconds="${ep.local.cache.timeout}"
-		   maxEntriesLocalHeap="10000"
-		   statistics="true"
-	/>
-
-	<cache name="groovyEvaluationCache"
-		   timeToIdleSeconds="${ep.local.cache.timeout}"
-		   timeToLiveSeconds="${ep.local.cache.timeout}"
-		   maxEntriesLocalHeap="10000"
-		   statistics="true"
-	/>
-
 	<cache name="groovyScriptCache"
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
@@ -234,6 +220,12 @@
 		   statistics="true"
 	/>
 
+	<cache name="sellingContextByCatalogCache"
+		   timeToIdleSeconds="${ep.local.cache.timeout}"
+		   timeToLiveSeconds="${ep.local.cache.timeout}"
+		   maxEntriesLocalHeap="1000"
+		   statistics="true"
+	/>
 
 </ehcache>
 

@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import com.elasticpath.base.cache.CacheResult;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
 import com.elasticpath.cache.CacheLoader;
-import com.elasticpath.cache.CacheResult;
 import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -26,7 +27,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
  */
 @SuppressWarnings("PMD.GodClass")
 public class CachingProductSkuLookupImpl implements ProductSkuLookup, MutableCachingService<ProductSku> {
-	private static final Logger LOG = Logger.getLogger(CachingProductSkuLookupImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CachingProductSkuLookupImpl.class);
 
 	private final CacheLoader<String, Long> productUidBySkuGuidCacheLoader = new ProductUidBySkuIdentifierCacheLoader(
 			identifiers -> getFallbackProductSkuLookup().findByGuids(identifiers), ProductSku::getGuid, this::cacheSkuIds);

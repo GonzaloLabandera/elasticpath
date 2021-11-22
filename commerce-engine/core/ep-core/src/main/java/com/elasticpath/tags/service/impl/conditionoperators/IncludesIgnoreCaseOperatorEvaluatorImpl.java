@@ -5,7 +5,7 @@ package com.elasticpath.tags.service.impl.conditionoperators;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 import com.elasticpath.tags.service.ConditionOperatorEvaluator;
 

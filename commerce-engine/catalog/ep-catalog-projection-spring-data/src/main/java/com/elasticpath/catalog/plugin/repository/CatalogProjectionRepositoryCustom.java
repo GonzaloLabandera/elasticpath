@@ -94,4 +94,12 @@ public interface CatalogProjectionRepositoryCustom {
 	 * @return a nearest date projections to expire.
 	 */
 	Optional<Date> extractNearestExpiredTime(Date currentDate);
+
+	/**
+	 * Deletes all ProjectionEntities with given type.
+	 *
+	 * @param type of ProjectionEntity to remove.
+	 * @return count of removed ProjectionEntity.
+	 */
+	int deleteAllProjectionsInBatchByType(String type);
 }

@@ -6,10 +6,10 @@
 		<artifactId>ext-batch-parent</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>ext-batch-webapp</artifactId>
 	<packaging>war</packaging>
-	<name>Extension Batch Server Web Application</name>
+	<name>Batch Web Application</name>
 
 	<dependencies>
 		<dependency>
@@ -45,117 +45,127 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>catalog-update-event-processor-connectivity</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-operational-insights-message-consumer</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-web</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.tomcat.maven</groupId>
-					<artifactId>tomcat8-maven-plugin</artifactId>
-					<configuration>
-						<path>${ep.batch.context}</path>
-						<port>${ep.batch.tomcat.port.http}</port>
-						<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
-						<systemProperties>
-							<ep.search.replica.url>${ep.search.url}</ep.search.replica.url>
-							<epdb.username>${epdb.username}</epdb.username>
-							<epdb.password>${epdb.password}</epdb.password>
-							<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
-							<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
-							<epdb.url>${epdb.url}</epdb.url>
-							<epdb.ro.url>${epdb.ro.url}</epdb.ro.url>
-							<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
-							<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
-							<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
-							<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
-							<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
-							<ep.jms.type>${ep.jms.type}</ep.jms.type>
-							<ep.jms.url>${ep.jms.url}</ep.jms.url>
-							<ep.catalog.batch.database.drop.script>${ep.catalog.batch.database.drop.script}</ep.catalog.batch.database.drop.script>
-							<ep.catalog.batch.database.create.script>${ep.catalog.batch.database.create.script}</ep.catalog.batch.database.create.script>
-							<ep.catalog.batch.script.separator>${ep.catalog.batch.script.separator}</ep.catalog.batch.script.separator>
-						</systemProperties>
-					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.activemq</groupId>
-							<artifactId>activemq-pool</artifactId>
-							<version>${org.apache.activemq.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.activemq</groupId>
-							<artifactId>activemq-jms-pool</artifactId>
-							<version>${org.apache.activemq.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.activemq</groupId>
-							<artifactId>activemq-client</artifactId>
-							<version>${org.apache.activemq.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.fusesource.hawtbuf</groupId>
-							<artifactId>hawtbuf</artifactId>
-							<version>${hawtbuf.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.camel</groupId>
-							<artifactId>camel-jms</artifactId>
-							<version>${org.apache.camel.version}</version>
-							<exclusions>
-								<exclusion>
-									<groupId>org.apache.geronimo.specs</groupId>
-									<artifactId>geronimo-jms_2.0_spec</artifactId>
-								</exclusion>
-							</exclusions>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.camel</groupId>
-							<artifactId>camel-core</artifactId>
-							<version>${org.apache.camel.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>commons-pool</groupId>
-							<artifactId>commons-pool</artifactId>
-							<version>1.6</version>
-						</dependency>
-						<!-- Include JDBC driver dependency -->
-						<dependency>
-							<groupId>${epdb.maven.groupId}</groupId>
-							<artifactId>${epdb.maven.artifactId}</artifactId>
-							<version>${epdb.maven.version}</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<artifactId>maven-war-plugin</artifactId>
-					<configuration>
-						<escapeString>\</escapeString>
-						<webResources>
-							<resource>
-								<directory>src/main/webapp</directory>
-								<filtering>true</filtering>
-								<includes>
-									<include>**/log4j.properties</include>
-								</includes>
-							</resource>
-							<resource>
-								<directory>src/main/webapp</directory>
-								<filtering>false</filtering>
-								<excludes>
-									<exclude>**/log4j.properties</exclude>
-								</excludes>
-							</resource>
-						</webResources>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>com.google.code.maven-replacer-plugin</groupId>
-					<artifactId>maven-replacer-plugin</artifactId>
-					<version>${maven-replacer-plugin.version}</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+				<configuration>
+					<path>${ep.batch.context}</path>
+					<port>${ep.batch.tomcat.port.http}</port>
+					<contextFile>${project.build.directory}/${project.build.finalName}/META-INF/context.xml</contextFile>
+					<systemProperties>
+						<ep.search.replica.url>${ep.search.url}</ep.search.replica.url>
+						<epdb.username>${epdb.username}</epdb.username>
+						<epdb.password>${epdb.password}</epdb.password>
+						<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
+						<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+						<epdb.url>${epdb.url}</epdb.url>
+						<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+						<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+						<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+						<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+						<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+						<ep.jms.type>${ep.jms.type}</ep.jms.type>
+						<ep.jms.url>${ep.jms.url}</ep.jms.url>
+						<ep.catalog.batch.database.drop.script>${ep.catalog.batch.database.drop.script}</ep.catalog.batch.database.drop.script>
+						<ep.catalog.batch.database.create.script>${ep.catalog.batch.database.create.script}</ep.catalog.batch.database.create.script>
+						<ep.catalog.batch.script.separator>${ep.catalog.batch.script.separator}</ep.catalog.batch.script.separator>
+						<ep.plugins.folder>${project.basedir}/../../plugins/ext-plugin-config/target/plugins</ep.plugins.folder>
+					</systemProperties>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.activemq</groupId>
+						<artifactId>activemq-pool</artifactId>
+						<version>${org.apache.activemq.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.activemq</groupId>
+						<artifactId>activemq-jms-pool</artifactId>
+						<version>${org.apache.activemq.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.activemq</groupId>
+						<artifactId>activemq-client</artifactId>
+						<version>${org.apache.activemq.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.fusesource.hawtbuf</groupId>
+						<artifactId>hawtbuf</artifactId>
+						<version>${hawtbuf.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.camel</groupId>
+						<artifactId>camel-jms</artifactId>
+						<version>${org.apache.camel.version}</version>
+						<exclusions>
+							<exclusion>
+								<groupId>org.apache.geronimo.specs</groupId>
+								<artifactId>geronimo-jms_2.0_spec</artifactId>
+							</exclusion>
+						</exclusions>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.camel</groupId>
+						<artifactId>camel-core</artifactId>
+						<version>${org.apache.camel.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>commons-pool</groupId>
+						<artifactId>commons-pool</artifactId>
+						<version>1.6</version>
+					</dependency>
+					<!-- Include JDBC driver dependency -->
+					<dependency>
+						<groupId>${epdb.maven.groupId}</groupId>
+						<artifactId>${epdb.maven.artifactId}</artifactId>
+						<version>${epdb.maven.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<escapeString>\</escapeString>
+					<webResources>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>false</filtering>
+						</resource>
+					</webResources>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${ep.release.version}</Implementation-Version>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>maven-replacer-plugin</artifactId>
+			</plugin>
+		</plugins>
 	</build>
 
 	<profiles>
@@ -170,24 +180,33 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-war-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>manifest</goal>
+								</goals>
+							</execution>
+						</executions>
 						<configuration>
 						<escapeString>\</escapeString>
 							<webResources>
 								<resource>
-									<directory>src/main/webapp</directory>
+									<directory>src/main/filtered-resources</directory>
 									<filtering>true</filtering>
-									<includes>
-										<include>**/log4j.properties</include>
-									</includes>
 								</resource>
 								<resource>
 									<directory>src/main/webapp</directory>
 									<filtering>false</filtering>
-									<excludes>
-										<exclude>**/log4j.properties</exclude>
-									</excludes>
 								</resource>
 							</webResources>
+							<archive>
+								<manifestEntries>
+									<Implementation-Version>${ep.release.version}</Implementation-Version>
+									<Implementation-Title>${project.name}</Implementation-Title>
+									<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+								</manifestEntries>
+							</archive>
 						</configuration>
 					</plugin>
 				</plugins>

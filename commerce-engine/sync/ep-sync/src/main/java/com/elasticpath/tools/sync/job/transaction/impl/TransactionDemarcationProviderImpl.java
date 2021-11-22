@@ -5,7 +5,8 @@ package com.elasticpath.tools.sync.job.transaction.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tools.sync.job.descriptor.TransactionJobDescriptorEntry;
 import com.elasticpath.tools.sync.job.transaction.TransactionDemarcationProvider;
@@ -17,7 +18,7 @@ import com.elasticpath.tools.sync.job.transaction.TransactionSettings;
  */
 public class TransactionDemarcationProviderImpl implements TransactionDemarcationProvider {
 	
-	private static final Logger LOG = Logger.getLogger(TransactionDemarcationProviderImpl.class);
+	private static final Logger LOG = LogManager.getLogger(TransactionDemarcationProviderImpl.class);
 	
 	private TransactionIteratorFactory transactionIteratorFactory;
 	

@@ -6,7 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.transfor
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil.createShipmentDetailsId;
 
 import io.reactivex.Maybe;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.cartorder.CartOrder;

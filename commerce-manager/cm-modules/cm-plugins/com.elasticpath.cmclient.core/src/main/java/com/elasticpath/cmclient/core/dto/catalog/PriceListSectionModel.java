@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.core.dto.catalog;
 
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.domain.catalog.Catalog;
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.io.Serializable;
 import java.util.Comparator;

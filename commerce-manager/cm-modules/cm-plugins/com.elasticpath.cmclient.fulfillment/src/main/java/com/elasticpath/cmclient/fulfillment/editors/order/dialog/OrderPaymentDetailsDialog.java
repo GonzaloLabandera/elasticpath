@@ -7,7 +7,7 @@ package com.elasticpath.cmclient.fulfillment.editors.order.dialog;
 import java.util.Arrays;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.IStructuredContentProvider;

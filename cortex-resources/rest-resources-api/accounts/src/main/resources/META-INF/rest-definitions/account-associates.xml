@@ -79,7 +79,7 @@
 		<relationship>
 			<name>add-account-associate-by-email-form-from-account-associates</name>
 			<description><![CDATA[Link to add account associate by email form from account associates.]]></description>
-			<rel>add-associate-form</rel>
+			<rel>addassociateform</rel>
 			<from>associates</from>
 			<to>add-associate-form</to>
 		</relationship>

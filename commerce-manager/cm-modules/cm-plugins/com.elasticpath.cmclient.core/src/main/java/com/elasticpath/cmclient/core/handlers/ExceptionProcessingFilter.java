@@ -12,14 +12,15 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Filter that will catch all RuntimeExceptions for the reason of logging them with log4j.
  */
 public class ExceptionProcessingFilter implements Filter {
 
-	private static final Logger LOG = Logger.getLogger(ExceptionProcessingFilter.class);
+	private static final Logger LOG = LogManager.getLogger(ExceptionProcessingFilter.class);
 
 	@Override
 	public void init(final FilterConfig filterConfig) {

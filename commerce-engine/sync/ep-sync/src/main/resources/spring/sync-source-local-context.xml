@@ -17,6 +17,7 @@
 	-->
 	<context:property-placeholder ignore-resource-not-found="true" system-properties-mode="OVERRIDE"
 		location="
+		    classpath:module.properties,
 			file:/etc/ep/ep.properties,
 			file:/ep/conf/ep.properties,
 			file:/ep/conf/ep.datasync.properties,
@@ -150,4 +151,9 @@
 		<constructor-arg ref="cachingProductSkuLookup"/>
 	</bean>
 
+	<bean id="versionService" class="com.elasticpath.commons.util.impl.VersionService" init-method="init" >
+		<property name="applicationVendor" value="${ep.release.vendor:undefined}" />
+		<property name="applicationName" value="${ep.release.title.author:undefined}" />
+		<property name="applicationVersion" value="${ep.release.version:undefined}" />
+	</bean>
 </beans>

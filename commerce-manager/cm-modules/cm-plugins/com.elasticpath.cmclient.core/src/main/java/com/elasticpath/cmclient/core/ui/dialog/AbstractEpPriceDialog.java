@@ -11,8 +11,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -72,7 +73,7 @@ public abstract class AbstractEpPriceDialog extends AbstractCatalogObjectFinderD
 	/**
 	 * Logger.
 	 */
-	protected  static final Logger LOG = Logger.getLogger(AbstractEpPriceDialog.class);
+	protected  static final Logger LOG = LogManager.getLogger(AbstractEpPriceDialog.class);
 	
 	/**
 	 * Get the price list helper service.

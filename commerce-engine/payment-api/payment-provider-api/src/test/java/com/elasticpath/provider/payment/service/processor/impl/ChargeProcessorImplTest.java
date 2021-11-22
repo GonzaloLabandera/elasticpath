@@ -9,8 +9,10 @@ import static com.elasticpath.plugin.payment.provider.dto.TransactionType.CHARGE
 import static com.elasticpath.plugin.payment.provider.dto.TransactionType.RESERVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -123,7 +125,7 @@ public class ChargeProcessorImplTest extends AbstractProcessorImplTestBase {
 			return new PaymentAPIResponse(Collections.singletonList(reservationEvent), true);
 		});
 		when(reservationProcessor.reserveToSimulateModify(any(MoneyDTO.class), any(OrderPaymentInstrumentDTO.class),
-				anyMap(), any(OrderContext.class))).thenAnswer((Answer<PaymentAPIResponse>) invocation -> {
+				anyMap(), any(OrderContext.class), anyInt())).thenAnswer((Answer<PaymentAPIResponse>) invocation -> {
 					final MoneyDTO amount = (MoneyDTO) invocation.getArguments()[0];
 					final OrderPaymentInstrumentDTO instrument = (OrderPaymentInstrumentDTO) invocation.getArguments()[1];
 					final PaymentEvent reservationEvent = createReservationEvent(instrument, amount);
@@ -265,6 +267,16 @@ public class ChargeProcessorImplTest extends AbstractProcessorImplTestBase {
 				.extracting(PaymentEvent::getAmount)
 				.extracting(MoneyDTO::getAmount)
 				.containsExactly(TEN.getAmount());
+	}
+
+	@Test
+	public void checkRereservationCount() {
+		final ChargeRequest chargeRequest = createChargeRequestSupportedByReservationEventsInPaymentHistory(THIRTY, THIRTY);
+		simulateChargeSuccessInPaymentHistory(chargeRequest, FIFTY);
+
+		testee.chargePayment(chargeRequest);
+
+		verify(reservationProcessor).reserveToSimulateModify(any(), any(), any(), any(), eq(2));
 	}
 
 	@Test

@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.test.common.exception.DataSourceInitializerException;
 import com.elasticpath.test.persister.TestConfig;
@@ -29,7 +30,7 @@ import com.elasticpath.test.persister.TestConfig;
  */
 public abstract class AbstractDataSourceInitializer implements DataSourceInitializer {
 
-	private static final Logger LOG = Logger.getLogger(AbstractDataSourceInitializer.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractDataSourceInitializer.class);
 
 	protected final String rdbms;
 

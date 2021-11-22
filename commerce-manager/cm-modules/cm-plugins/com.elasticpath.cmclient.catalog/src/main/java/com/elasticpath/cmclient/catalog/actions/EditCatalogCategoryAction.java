@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.catalog.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
@@ -31,7 +32,7 @@ import com.elasticpath.service.changeset.ChangeSetService;
  */
 public class EditCatalogCategoryAction extends AbstractCatalogViewAction {
 
-	private static final Logger LOG = Logger.getLogger(EditCatalogCategoryAction.class);
+	private static final Logger LOG = LogManager.getLogger(EditCatalogCategoryAction.class);
 
 	private Object catalogCategory;
 

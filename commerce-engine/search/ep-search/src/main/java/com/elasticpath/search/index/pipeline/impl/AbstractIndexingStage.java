@@ -5,7 +5,8 @@ package com.elasticpath.search.index.pipeline.impl;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -25,7 +26,7 @@ import com.elasticpath.search.index.pipeline.stats.PipelinePerformance;
  * @param <OUT> an output payload, passed as input to the next {@code IndexingStage}.
  */
 public abstract class AbstractIndexingStage<IN, OUT> implements IndexingStage<IN, OUT> {
-	private static final Logger LOG = Logger.getLogger(AbstractIndexingStage.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractIndexingStage.class);
 	private IndexingStage<OUT, ?> nextStage;
 
 	private PipelinePerformance performance;

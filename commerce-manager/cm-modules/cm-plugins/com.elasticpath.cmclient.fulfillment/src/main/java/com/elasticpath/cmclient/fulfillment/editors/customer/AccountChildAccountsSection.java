@@ -3,9 +3,13 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.customer;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -14,6 +18,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -74,9 +79,11 @@ public class AccountChildAccountsSection extends AbstractCmClientEditorPageSecti
 
 	private Button openAccountProfileButton;
 
+	private Button deleteChildAccountButton;
+
 	private final IWorkbenchPartSite workbenchPartSite;
 
-	private static final Logger LOG = Logger.getLogger(AccountChildAccountsSection.class);
+	private static final Logger LOG = LogManager.getLogger(AccountChildAccountsSection.class);
 
 	private final AccountTreeService accountTreeService;
 
@@ -130,6 +137,7 @@ public class AccountChildAccountsSection extends AbstractCmClientEditorPageSecti
 				AccountChildAccountsSection.this.selectedChild =
 						(Customer) ((IStructuredSelection) event.getSelection()).getFirstElement();
 				this.openAccountProfileButton.setEnabled(true);
+				this.deleteChildAccountButton.setEnabled(true);
 			}
 		});
 		this.tableViewer = epTableViewer.getSwtTableViewer();
@@ -147,6 +155,41 @@ public class AccountChildAccountsSection extends AbstractCmClientEditorPageSecti
 		openAccountProfileButton.addSelectionListener(createChildAccountsButtonListener());
 		this.openAccountProfileButton.setEnabled(false);
 
+		this.deleteChildAccountButton = buttonsPane.addPushButton(FulfillmentMessages.get().AccountChildAccountsPage_Delete, EpState.EDITABLE,
+				buttonData);
+		this.deleteChildAccountButton.addSelectionListener(deleteAccountButtonListener());
+		this.deleteChildAccountButton.setEnabled(false);
+	}
+
+	private SelectionListener deleteAccountButtonListener() {
+		return new SelectionListener() {
+			@Override
+			public void widgetDefaultSelected(final SelectionEvent event) {
+				//not used
+			}
+
+			@Override
+			public void widgetSelected(final SelectionEvent event) {
+				Object selectedObject = ((IStructuredSelection) tableViewer.getSelection()).getFirstElement();
+				Customer account = (Customer) selectedObject;
+
+				List<String> descendantGuids = accountTreeService.findDescendantGuids(account.getGuid());
+				descendantGuids.add(account.getGuid());
+
+				if (customerService.countAssociatedOrders(descendantGuids) > 0) {
+					MessageDialog.openInformation(null, FulfillmentMessages.get().DeleteAccountWarningTitle,
+							FulfillmentMessages.get().DeleteAccountWarningText);
+				} else {
+					boolean confirmed = MessageDialog.openConfirm(null, FulfillmentMessages.get().ConfirmDeleteAccountMsgBoxTitle,
+							NLS.bind(FulfillmentMessages.get().ConfirmDeleteAccountMsgBoxText, descendantGuids.size()));
+
+					if (confirmed) {
+						customerService.remove(account);
+						tableViewer.refresh();
+					}
+				}
+			}
+		};
 	}
 
 	private SelectionListener createOpenAccountButtonListener() {

@@ -119,7 +119,7 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 		shoppingContextPersister.persist(shoppingContext);
 
 		checkoutTestCartBuilder.withScenario(scenario)
-				.withCustomerSession(shoppingContext.getCustomerSession());
+				.withShopper(shoppingContext.getShopper());
 		originator = new EventOriginatorHelperImpl().getSystemOriginator();
 		checkoutHelper = new CheckoutHelper(getTac());
 	}
@@ -392,6 +392,6 @@ public class PaymentCheckoutTest extends BasicSpringContextTest {
 	}
 
 	private Order checkout(final ShoppingCart shoppingCart, final ShoppingCartTaxSnapshot taxSnapshot) {
-		return checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+		return checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 	}
 }

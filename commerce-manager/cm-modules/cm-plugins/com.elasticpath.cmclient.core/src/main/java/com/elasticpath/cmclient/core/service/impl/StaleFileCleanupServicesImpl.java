@@ -13,7 +13,8 @@ import java.nio.file.attribute.FileTime;
 import java.time.Duration;
 import java.time.Instant;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.util.FileSystemUtil;
 
@@ -22,7 +23,7 @@ import com.elasticpath.cmclient.core.util.FileSystemUtil;
  */
 public class StaleFileCleanupServicesImpl {
 
-	private static final Logger LOG = Logger.getLogger(StaleFileCleanupServicesImpl.class);
+	private static final Logger LOG = LogManager.getLogger(StaleFileCleanupServicesImpl.class);
 
 	/**
 	 * The Age of files (in hours) to remove.

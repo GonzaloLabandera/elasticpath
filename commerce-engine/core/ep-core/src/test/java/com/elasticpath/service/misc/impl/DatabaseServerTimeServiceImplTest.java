@@ -3,10 +3,15 @@
  */
 package com.elasticpath.service.misc.impl;
 
+import static com.elasticpath.service.misc.impl.DatabaseServerTimeServiceImpl.POSTGRESQL_TIME_RETRIEVE_QUERY;
+import static com.elasticpath.service.misc.impl.DatabaseServerTimeServiceImpl.TIME_RETRIEVE_QUERY;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,19 +23,16 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.api.PersistenceSession;
 import com.elasticpath.persistence.api.Query;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
+import com.elasticpath.persistence.openjpa.support.JPAUtil;
 
 /**
  * Test <code>DatabaseServerTimeServiceImpl</code>.
  */
 @SuppressWarnings("unchecked")
 public class DatabaseServerTimeServiceImplTest {
-
-	private static final String TIME_RETRIEVE_QUERY = "SELECT LOCALTIMESTAMP FROM DUAL";
 
 	private static final long THRESHOLD = 1000;
 
@@ -39,10 +41,11 @@ public class DatabaseServerTimeServiceImplTest {
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
-	private BeanFactoryExpectationsFactory expectationsFactory;
 	private PersistenceEngine mockPersistenceEngine;
 	private PersistenceSession mockPersistenceSession;
 	private Query<Date> mockQuery;
+	private DatabaseMetaData mockMetaData;
+	private Connection mockConnection;
 
 	/**
 	 * Prepares for a test.
@@ -51,14 +54,23 @@ public class DatabaseServerTimeServiceImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		final BeanFactory beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		mockPersistenceEngine = context.mock(PersistenceEngine.class);
 		mockPersistenceSession = context.mock(PersistenceSession.class);
+		mockConnection = context.mock(Connection.class);
+		mockMetaData = context.mock(DatabaseMetaData.class);
+
 		context.checking(new Expectations() {
 			{
 				allowing(mockPersistenceEngine).getPersistenceSession();
 				will(returnValue(mockPersistenceSession));
+
+				allowing(mockPersistenceEngine).getConnection();
+				will(returnValue(mockConnection));
+
+				allowing(mockConnection).getMetaData();
+				will(returnValue(mockMetaData));
+
+				allowing(mockConnection).close();
 			}
 		});
 
@@ -67,13 +79,15 @@ public class DatabaseServerTimeServiceImplTest {
 	}
 
 	/**
-	 * Cleans up after a test.
-	 *
-	 * @throws Exception on error
+	 * Close mock connection.
 	 */
 	@After
-	public void tearDown() throws Exception {
-		expectationsFactory.close();
+	public void tearDown() {
+		try {
+			mockConnection.close();
+		} catch (SQLException exception) {
+			//do nothing
+		}
 	}
 
 	/**
@@ -86,6 +100,9 @@ public class DatabaseServerTimeServiceImplTest {
 			{
 				oneOf(mockPersistenceSession).createSQLQuery(TIME_RETRIEVE_QUERY);
 				will(returnValue(mockQuery));
+
+				allowing(mockMetaData).getDatabaseProductName();
+				will(returnValue("someDb"));
 			}
 		});
 
@@ -112,6 +129,9 @@ public class DatabaseServerTimeServiceImplTest {
 			{
 				oneOf(mockPersistenceSession).createSQLQuery(TIME_RETRIEVE_QUERY);
 				will(returnValue(mockQuery));
+
+				allowing(mockMetaData).getDatabaseProductName();
+				will(returnValue("someDb"));
 			}
 		});
 
@@ -144,6 +164,9 @@ public class DatabaseServerTimeServiceImplTest {
 			{
 				oneOf(mockPersistenceSession).createSQLQuery(TIME_RETRIEVE_QUERY);
 				will(returnValue(mockQuery));
+
+				allowing(mockMetaData).getDatabaseProductName();
+				will(returnValue("someDb"));
 			}
 		});
 
@@ -163,5 +186,33 @@ public class DatabaseServerTimeServiceImplTest {
 		assertTrue(currentTime.after(minThreshold));
 		final Date maxThreshold = new Date(now.getTime() + THRESHOLD);
 		assertTrue(currentTime.before(maxThreshold));
+	}
+
+	/**
+	 * Test getting the current date and time using the database time service.
+	 */
+	@Test
+	public void testGetCurrentTimeFromPostgresDb() throws Exception {
+		mockQuery = context.mock(Query.class);
+		context.checking(new Expectations() {
+			{
+				oneOf(mockPersistenceSession).createSQLQuery(POSTGRESQL_TIME_RETRIEVE_QUERY);
+				will(returnValue(mockQuery));
+
+				allowing(mockMetaData).getDatabaseProductName();
+				will(returnValue(JPAUtil.POSTGRESQL_DB_TYPE));
+			}
+		});
+
+		final List<Date> results = new ArrayList<>();
+		final Date now = new Date();
+		results.add(now);
+		context.checking(new Expectations() {
+			{
+				allowing(mockQuery).list();
+				will(returnValue(results));
+			}
+		});
+		assertSame(now, this.timeService.getCurrentTime());
 	}
 }

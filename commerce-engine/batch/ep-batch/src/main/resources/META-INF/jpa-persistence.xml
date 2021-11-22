@@ -9,5 +9,7 @@
 		<mapping-file>META-INF/batch-cleanup-expired-oauthtoken-job-orm.xml</mapping-file>
 		<mapping-file>META-INF/batch-cleanup-expired-failed-orders-job-queries-orm.xml</mapping-file>
 		<mapping-file>META-INF/relay-outbox-message-job-queries-orm.xml</mapping-file>
+
+		<validation-mode>NONE</validation-mode>
 	</persistence-unit>
 </persistence>

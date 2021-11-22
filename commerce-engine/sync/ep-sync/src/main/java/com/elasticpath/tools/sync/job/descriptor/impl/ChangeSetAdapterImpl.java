@@ -9,7 +9,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
@@ -30,7 +31,7 @@ import com.elasticpath.tools.sync.job.descriptor.TransactionJobDescriptorEntry;
  */
 public class ChangeSetAdapterImpl implements SourceSyncRequestAdapter {
 
-	private static final Logger LOG = Logger.getLogger(ChangeSetAdapterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetAdapterImpl.class);
 
 	private ChangeSetManagementService changeSetManagementService;
 

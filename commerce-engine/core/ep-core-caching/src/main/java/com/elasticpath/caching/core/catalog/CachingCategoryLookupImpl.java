@@ -14,9 +14,9 @@ import java.util.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import com.elasticpath.base.cache.CacheResult;
 import com.elasticpath.cache.Cache;
 import com.elasticpath.cache.CacheLoader;
-import com.elasticpath.cache.CacheResult;
 import com.elasticpath.caching.core.MutableCachingService;
 import com.elasticpath.commons.util.CategoryGuidUtil;
 import com.elasticpath.domain.catalog.Catalog;

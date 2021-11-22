@@ -6,7 +6,7 @@ package com.elasticpath.inventory.log.impl;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.inventory.InventoryKey;
 

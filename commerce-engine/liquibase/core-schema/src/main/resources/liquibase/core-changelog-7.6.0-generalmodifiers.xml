@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.6.0-generalmodifiers.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.6.0-generalmodifiers.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="7.6.0-generalmodifiers" author="elasticpath">
 
@@ -157,124 +158,176 @@
 
 	</changeSet>
 	<changeSet id="7.6.0-generalmodifiers-migration" author="elasticpath">
-
+		<validCheckSum>7:36c75a3ba9e004969038f744c0180d04</validCheckSum>
 		<!-- Migrate data from cartitemmodifier to modifier -->
 		<sql
-				dbms="mysql, oracle, h2"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into TMODIFIERGROUP(UIDPK,CODE) SELECT UIDPK,CODE from TCARTITEMMODIFIERGROUP
+				stripComments="true">INSERT INTO TMODIFIERGROUP(UIDPK,CODE) SELECT UIDPK,CODE FROM TCARTITEMMODIFIERGROUP
 			<comment>Copy cart item modifier groups</comment>
 		</sql>
 
 		<sql
-				dbms="mysql, oracle, h2"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into TMODIFIERGROUPLDF(UIDPK,LOCALE,DISPLAY_NAME, MODIFIER_GROUP_UID)
+				stripComments="true">INSERT INTO TMODIFIERGROUPLDF(UIDPK,LOCALE,DISPLAY_NAME, MODIFIER_GROUP_UID)
 			SELECT UIDPK,LOCALE,DISPLAY_NAME, CART_ITEM_MODIFIER_GROUP_UID FROM TCARTITEMMODIFIERGROUPLDF
 			<comment>Copy cart item modifier group ldf</comment>
 		</sql>
 
 		<sql
-				dbms="mysql, oracle, h2"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into TMODIFIERFIELD(UIDPK,CODE,REQUIRED, ORDERING, MAX_SIZE, ATTRIBUTE_TYPE, MODIFIER_GROUP_UID)
+				stripComments="true">INSERT INTO TMODIFIERFIELD(UIDPK, CODE, REQUIRED, ORDERING, MAX_SIZE, ATTRIBUTE_TYPE, MODIFIER_GROUP_UID)
 			SELECT UIDPK,CODE,REQUIRED, ORDERING, MAX_SIZE, ATTRIBUTE_TYPE, CART_ITEM_MODIFIER_GROUP_UID FROM TCARTITEMMODIFIERFIELD
 			<comment>Copy cart item modifier field</comment>
 		</sql>
 
 		<sql
-				dbms="mysql, oracle, h2"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into TMODIFIERFIELDLDF(UIDPK, LOCALE, DISPLAY_NAME, MODIFIER_FIELD_UID)
+				stripComments="true">INSERT INTO TMODIFIERFIELDLDF(UIDPK, LOCALE, DISPLAY_NAME, MODIFIER_FIELD_UID)
 			SELECT UIDPK, LOCALE, DISPLAY_NAME, CART_ITEM_MODIFIER_FIELD_UID FROM TCARTITEMMODIFIERFIELDLDF
 			<comment>Copy cart item modifier field ldf</comment>
 		</sql>
 		<sql
-				dbms="mysql, oracle, h2"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into TMODIFIERFIELDOPTION(UIDPK, OPTION_VALUE, ORDERING, MODIFIER_FIELD_UID)
+				stripComments="true">INSERT INTO TMODIFIERFIELDOPTION(UIDPK, OPTION_VALUE, ORDERING, MODIFIER_FIELD_UID)
 			SELECT UIDPK, OPTION_VALUE, ORDERING, CART_ITEM_MODIFIER_FIELD_UID FROM TCARTITEMMODIFIERFIELDOPTION
 			<comment>Copy cart item modifier option</comment>
 		</sql>
 
 		<sql
-				dbms="mysql, oracle, h2"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into TMODIFIERFIELDOPTNLDF(UIDPK, LOCALE, DISPLAY_NAME, MOD_FIELD_OPTION_UID)
+				stripComments="true">INSERT INTO TMODIFIERFIELDOPTNLDF(UIDPK, LOCALE, DISPLAY_NAME, MOD_FIELD_OPTION_UID)
 			SELECT UIDPK, LOCALE, DISPLAY_NAME, CART_ITEM_MOD_FIELD_OPTION_UID FROM TCARTITEMMODIFIERFIELDOPTNLDF
 			<comment>Copy cart item modifier option ldf</comment>
 		</sql>
 		<sql
-				dbms="mysql, oracle, h2"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into TPRODTYPEMODIFIERGRP(PRODUCT_TYPE_UID,MOD_GRP_UID)
+				stripComments="true">INSERT INTO TPRODTYPEMODIFIERGRP(PRODUCT_TYPE_UID,MOD_GRP_UID)
 			SELECT PRODUCT_TYPE_UID, CART_ITEM_MOD_GRP_UID  FROM TPRODTYPECARTITEMMODIFIERGRP
 			<comment>Copy cart item modifier option ldf</comment>
 		</sql>
 
 		<!-- Insert LAST_VALUE in JPA_GENERATED_KEYS for new tables -->
+		<!-- JPA_GENERATED_KEYS columns must be quoted with backticks for MySQL 8.0 -->
+		<sql
+				dbms="mysql"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,`LAST_VALUE`)
+			SELECT 'TMODIFIERGROUP', `LAST_VALUE` FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERGROUP'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,`LAST_VALUE`)
+			SELECT 'TMODIFIERGROUPLDF', `LAST_VALUE` FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERGROUPLDF'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,`LAST_VALUE`)
+			SELECT 'TMODIFIERFIELDLDF', `LAST_VALUE` FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERFIELDLDF'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,`LAST_VALUE`)
+			SELECT 'TMODIFIERFIELD', `LAST_VALUE` FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERFIELD'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,`LAST_VALUE`)
+			SELECT 'TMODIFIERFIELDOPTION', `LAST_VALUE` FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERFIELDOPTION'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,`LAST_VALUE`)
+			SELECT 'TMODIFIERFIELDOPTNLDF', `LAST_VALUE` FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERFIELDOPTNLDF'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,`LAST_VALUE`)
+			SELECT 'TPRODTYPEMODIFIERGRP', `LAST_VALUE` FROM JPA_GENERATED_KEYS WHERE ID='TPRODTYPECARTITEMMODIFIERGRP'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		
+		<!-- Unquoted column names for other DBs -->
 
 		<sql
-				dbms="mysql, oracle, h2"
+				dbms="oracle, h2, postgresql"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
-			SELECT 'TMODIFIERGROUP', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERGROUP'
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERGROUP', LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERGROUP'
 			<comment>insert jpa generate key</comment>
 		</sql>
 		<sql
-				dbms="mysql, oracle, h2"
+				dbms="oracle, h2, postgresql"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
-			SELECT 'TMODIFIERGROUPLDF', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERGROUPLDF'
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERGROUPLDF', LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERGROUPLDF'
 			<comment>insert jpa generate key</comment>
 		</sql>
 		<sql
-				dbms="mysql, oracle, h2"
+				dbms="oracle, h2, postgresql"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
-			SELECT 'TMODIFIERFIELDLDF', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERFIELDLDF'
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERFIELDLDF', LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERFIELDLDF'
 			<comment>insert jpa generate key</comment>
 		</sql>
 		<sql
-				dbms="mysql, oracle, h2"
+				dbms="oracle, h2, postgresql"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
-			SELECT 'TMODIFIERFIELD', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERFIELD'
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERFIELD', LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERFIELD'
 			<comment>insert jpa generate key</comment>
 		</sql>
 		<sql
-				dbms="mysql, oracle, h2"
+				dbms="oracle, h2, postgresql"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
-			SELECT 'TMODIFIERFIELDOPTION', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERFIELDOPTION'
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERFIELDOPTION', LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERFIELDOPTION'
 			<comment>insert jpa generate key</comment>
 		</sql>
 		<sql
-				dbms="mysql, oracle, h2"
+				dbms="oracle, h2, postgresql"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
-			SELECT 'TMODIFIERFIELDOPTNLDF', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERFIELDOPTNLDF'
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERFIELDOPTNLDF', LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID='TCARTITEMMODIFIERFIELDOPTNLDF'
 			<comment>insert jpa generate key</comment>
 		</sql>
 		<sql
-				dbms="mysql, oracle, h2"
+				dbms="oracle, h2, postgresql"
 				endDelimiter="\nGO"
 				splitStatements="true"
-				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
-			SELECT 'TPRODTYPEMODIFIERGRP', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TPRODTYPECARTITEMMODIFIERGRP'
+				stripComments="true">INSERT INTO JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TPRODTYPEMODIFIERGRP', LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID='TPRODTYPECARTITEMMODIFIERGRP'
 			<comment>insert jpa generate key</comment>
 		</sql>
 

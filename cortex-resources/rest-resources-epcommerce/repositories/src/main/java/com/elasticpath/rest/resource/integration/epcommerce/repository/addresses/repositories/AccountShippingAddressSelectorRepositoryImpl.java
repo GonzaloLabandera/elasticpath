@@ -170,7 +170,7 @@ public class AccountShippingAddressSelectorRepositoryImpl<
 	}
 
 	private Single<Customer> updateAccountPreferredAddress(final Customer account, final String addressGuid) {
-		final CustomerAddress customerAddress = account.getAddressByGuid(addressGuid);
+		final CustomerAddress customerAddress = addressRepository.getExistingAddressByGuid(addressGuid, account).blockingGet();
 		account.setPreferredShippingAddress(customerAddress);
 		return customerRepository.update(account);
 	}

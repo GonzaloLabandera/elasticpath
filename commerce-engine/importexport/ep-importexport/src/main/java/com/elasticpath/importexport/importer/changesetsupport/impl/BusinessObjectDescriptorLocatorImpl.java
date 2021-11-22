@@ -6,7 +6,8 @@ package com.elasticpath.importexport.importer.changesetsupport.impl;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -22,7 +23,7 @@ import com.elasticpath.importexport.importer.changesetsupport.ObjectDescriptorPo
  */
 public class BusinessObjectDescriptorLocatorImpl implements BusinessObjectDescriptorLocator {
 	
-	private static final Logger LOG = Logger.getLogger(BusinessObjectDescriptorLocatorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(BusinessObjectDescriptorLocatorImpl.class);
 	
 	
 	private Map<Class<Dto>, ObjectDescriptorPopulator> objectDescriptorInfoMap;

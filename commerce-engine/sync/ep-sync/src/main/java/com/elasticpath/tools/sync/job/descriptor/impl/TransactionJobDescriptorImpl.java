@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.elasticpath.tools.sync.job.descriptor.TransactionJobDescriptor;
 import com.elasticpath.tools.sync.job.descriptor.TransactionJobDescriptorEntry;

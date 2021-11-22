@@ -45,9 +45,9 @@ import com.elasticpath.domain.discounts.ShoppingCartDiscountItemContainer;
 import com.elasticpath.domain.discounts.impl.ShoppingCartDiscountItemContainerImpl;
 import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.rules.impl.EpRuleBaseImpl;
 import com.elasticpath.domain.sellingcontext.SellingContext;
-import com.elasticpath.service.rules.SellingContextRuleSummary;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -55,6 +55,7 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.rules.PromotionRuleDelegate;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.RuleSetService;
+import com.elasticpath.service.rules.SellingContextRuleSummary;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.service.ConditionEvaluatorService;
 import com.elasticpath.test.factory.RuleSetTestUtility;
@@ -102,6 +103,9 @@ public class EpRuleEngineTest {
 
 	@Mock
 	private SellingContext sellingContext;
+
+	@Mock
+	private RuleSetLoadTuner ruleSetLoadTuner;
 
 	@Mock
 	private RuleEngineSessionFactory ruleEngineSessionFactory;
@@ -408,7 +412,7 @@ public class EpRuleEngineTest {
 		// When
 		ruleEngine.setPromotionRuleDelegate(mockDelegate);
 
-		ruleEngine.fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
+		ruleEngine.fireOrderPromotionRules(shoppingCart, customerSession);
 
 		// Then
 		verify(mockDelegate, atLeastOnce()).cartContainsProduct(eq(shoppingCart), anyString(), anyString(), anyInt(), anyString());
@@ -418,8 +422,8 @@ public class EpRuleEngineTest {
 	private RuleSetService createMockRuleSetService(final RuleSet catalogRuleSet, final RuleSet orderRuleSet) {
 		final RuleSetService mockRuleSetService = mock(RuleSetService.class, String.format("rule set service %d", System.nanoTime()));
 
-		when(mockRuleSetService.findByScenarioId(PRODUCT_RULESET_ID)).thenReturn(catalogRuleSet);
-		when(mockRuleSetService.findByScenarioId(ORDER_RULESET_ID)).thenReturn(orderRuleSet);
+		when(mockRuleSetService.findByScenarioId(PRODUCT_RULESET_ID, ruleSetLoadTuner)).thenReturn(catalogRuleSet);
+		when(mockRuleSetService.findByScenarioId(ORDER_RULESET_ID, ruleSetLoadTuner)).thenReturn(orderRuleSet);
 
 		return mockRuleSetService;
 	}
@@ -430,7 +434,6 @@ public class EpRuleEngineTest {
 
 	private ShoppingCart createMockShoppingCart(final String currencyCode) {
 		final ShoppingCart shoppingCart = mock(ShoppingCart.class);
-		when(shoppingCart.getCustomerSession()).thenReturn(customerSession);
 
 		final Currency currency = Currency.getInstance(currencyCode);
 		when(customerSession.getCurrency()).thenReturn(currency);
@@ -463,8 +466,9 @@ public class EpRuleEngineTest {
 		final ShopperMemento shopperMemento = mock(ShopperMemento.class);
 
 		when(shopper.getTagSet()).thenReturn(tagSet);
-		when(shopper.getCache()).thenReturn(simpleCache);
+		when(customerSession.getCache()).thenReturn(simpleCache);
 		when(shopper.getShopperMemento()).thenReturn(shopperMemento);
+		when(shopper.getCustomerSession()).thenReturn(customerSession);
 
 		when(shopperMemento.getStoreCode()).thenReturn(STORE_CODE);
 
@@ -504,6 +508,7 @@ public class EpRuleEngineTest {
 		when(beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_CART_DISCOUNT_ITEM_CONTAINER, ShoppingCartDiscountItemContainer.class))
 				.thenReturn(shoppingCartDiscountItemContainer);
 		when(beanFactory.getPrototypeBean(ContextIdNames.EP_RULE_BASE, EpRuleBase.class)).thenReturn(epRuleBase);
+		when(beanFactory.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class)).thenReturn(ruleSetLoadTuner);
 
 	}
 

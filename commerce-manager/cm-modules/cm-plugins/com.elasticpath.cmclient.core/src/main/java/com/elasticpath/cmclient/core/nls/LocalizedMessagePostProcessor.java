@@ -9,7 +9,8 @@ import java.util.HashSet;
 import java.util.MissingResourceException;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.internal.lifecycle.UITestUtil;
 
@@ -19,7 +20,7 @@ import com.elasticpath.cmclient.core.helpers.TestIdMapManager;
  * Localize message post-processor. For Processing and returning NLS localized messages.
  */
 public final class LocalizedMessagePostProcessor {
-	private static final Logger LOG = Logger.getLogger(LocalizedMessagePostProcessor.class);
+	private static final Logger LOG = LogManager.getLogger(LocalizedMessagePostProcessor.class);
 
 	private static Set<Class> convertedClasses = new HashSet<>();
 

@@ -8,7 +8,7 @@ import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.money.Money;
 import com.elasticpath.repository.Repository;
@@ -17,7 +17,7 @@ import com.elasticpath.rest.definition.discounts.DiscountEntity;
 import com.elasticpath.rest.definition.discounts.DiscountForCartIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTransformer;
 
 /**
@@ -31,7 +31,7 @@ public class DiscountsEntityForCartRepositoryImpl<E extends DiscountEntity, I ex
 		implements Repository<DiscountEntity, DiscountForCartIdentifier> {
 
 	private CartOrderRepository cartOrderRepository;
-	private CustomerSessionRepository customerSessionRepository;
+	private ShopperRepository shopperRepository;
 	private MoneyTransformer moneyTransformer;
 	private PricingSnapshotRepository pricingSnapshotRepository;
 
@@ -43,18 +43,18 @@ public class DiscountsEntityForCartRepositoryImpl<E extends DiscountEntity, I ex
 
 		Single<Money> subtotalDiscountMoney = getSubtotalDiscountMoney(scope, cartId);
 
-		Single<CustomerSession> customerSession = customerSessionRepository.findOrCreateCustomerSession();
+		Single<Shopper> shopper = shopperRepository.findOrCreateShopper();
 
-		return getCostEntity(subtotalDiscountMoney, customerSession)
+		return getCostEntity(subtotalDiscountMoney, shopper)
 				.map(costEntity -> DiscountEntity.builder()
 						.addingDiscount(costEntity)
 						.withCartId(cartId)
 						.build());
 	}
 
-	private Single<CostEntity> getCostEntity(final Single<Money> subtotalDiscountMoney, final Single<CustomerSession> customerSession) {
-		return customerSession.zipWith(subtotalDiscountMoney,
-				(session, money) -> moneyTransformer.transformToEntity(money, session.getLocale()));
+	private Single<CostEntity> getCostEntity(final Single<Money> subtotalDiscountMoney, final Single<Shopper> shopper) {
+		return shopper.zipWith(subtotalDiscountMoney,
+				(thisShopper, money) -> moneyTransformer.transformToEntity(money, thisShopper.getLocale()));
 	}
 
 	private Single<Money> getSubtotalDiscountMoney(final String scope, final String cartId) {
@@ -69,8 +69,8 @@ public class DiscountsEntityForCartRepositoryImpl<E extends DiscountEntity, I ex
 	}
 
 	@Reference
-	public void setCustomerSessionRepository(final CustomerSessionRepository customerSessionRepository) {
-		this.customerSessionRepository = customerSessionRepository;
+	public void setShopperRepository(final ShopperRepository shopperRepository) {
+		this.shopperRepository = shopperRepository;
 	}
 
 	@Reference

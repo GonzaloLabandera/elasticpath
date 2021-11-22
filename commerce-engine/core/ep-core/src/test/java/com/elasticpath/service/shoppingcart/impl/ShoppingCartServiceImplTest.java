@@ -26,6 +26,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.modifier.impl.ModifierFieldImpl;
@@ -36,7 +37,6 @@ import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl;
 import com.elasticpath.domain.store.impl.StoreImpl;
@@ -102,7 +102,8 @@ public class ShoppingCartServiceImplTest {
 
 		// Since AbstractEpDomainImpl does not support set method on Elasticpath object, we have to directly mock beanFactory in ElasticpathImpl.
 		when(beanFactory.getPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class)).thenReturn(new ShoppingCartMementoImpl());
-
+		when(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.thenReturn(new ModifierFieldsMapWrapper());
 		when(elasticpath.getPrototypeBean(ContextIdNames.SHOPPING_CART, ShoppingCart.class)).thenReturn(new ShoppingCartImpl());
 		when(timeService.getCurrentTime()).thenReturn(new Date());
 	}
@@ -212,24 +213,19 @@ public class ShoppingCartServiceImplTest {
 
 		when(storeService.findStoreWithCode(store.getCode())).thenReturn(store);
 
-		final ShoppingCart loadedCart = shoppingCartServiceImpl.findOrCreateByShopper(shopper);
+		final ShoppingCart loadedCart = shoppingCartServiceImpl.findOrCreateDefaultCartByShopper(shopper);
 		assertSame("Shopping Cart should have its store loaded", store, loadedCart.getStore());
 	}
 
 	@Test
 	public void testTouch() {
-		final ShoppingCartMemento memento = new ShoppingCartMementoImpl();
-		memento.setGuid("memento-guid");
+		String cartGuid = "memento-guid";
+		Date currenDate = new Date();
 
-		final ShoppingCartMemento updatedShoppingCartMemento = new ShoppingCartMementoImpl();
+		when(timeService.getCurrentTime()).thenReturn(currenDate);
 
-		when(persistenceEngine.retrieveByNamedQuery(ShoppingCartServiceImpl.SHOPPING_CART_FIND_BY_GUID_EAGER, memento.getGuid()))
-				.thenReturn(Collections.singletonList(memento));
-
-		when(persistenceEngine.saveOrUpdate(memento)).thenReturn(updatedShoppingCartMemento);
-
-		shoppingCartServiceImpl.touch(memento.getGuid());
-		assertNotNull("Last modified date should be set before update", memento.getLastModifiedDate());
+		shoppingCartServiceImpl.touch(cartGuid);
+		verify(persistenceEngine).executeNamedQuery("TOUCH_THE_CART", currenDate, cartGuid);
 	}
 
 	@Test
@@ -287,7 +283,7 @@ public class ShoppingCartServiceImplTest {
 		memento.setGuid(GUID);
 		memento.setStoreCode(store.getCode());
 		memento.setShopper(shopper);
-		memento.setCartDataFieldValue("code1", "value1");
+		memento.getModifierFields().put("code1", "value1");
 
 		when(persistenceEngine.retrieveByNamedQuery(ShoppingCartServiceImpl.SHOPPING_CART_FIND_BY_GUID_EAGER, GUID))
 				.thenReturn(Collections.singletonList(memento));
@@ -295,10 +291,10 @@ public class ShoppingCartServiceImplTest {
 		when(shopperService.get(shopper.getUidPk())).thenReturn(shopper);
 		when(storeService.findStoreWithCode(store.getCode())).thenReturn(store);
 
-		Map<String, CartData> cartDataMap = shoppingCartServiceImpl.getCartDescriptors(memento.getGuid());
+		Map<String, String> cartDataMap = shoppingCartServiceImpl.getCartDescriptors(memento.getGuid());
 
-		assertEquals("value1", cartDataMap.get("code1").getValue());
-		assertEquals(null, cartDataMap.get("code2").getValue());
-		assertEquals("defaultValue", cartDataMap.get("code3").getValue());
+		assertEquals("value1", cartDataMap.get("code1"));
+		assertEquals(null, cartDataMap.get("code2"));
+		assertEquals("defaultValue", cartDataMap.get("code3"));
 	}
 }

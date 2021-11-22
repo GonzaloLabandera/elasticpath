@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2021 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-03-remove-customer-index.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+	<changeSet id="core-changelog-2021-03-remove-customer-from-tindexbuildstatus" author="elasticpath">
+		<delete tableName="TINDEXBUILDSTATUS" >
+			<where> index_type='customer' </where>
+		</delete>
+	</changeSet>
+
+	<changeSet id="core-changelog-2021-03-remove-customer-from-tindexnotify" author="elasticpath">
+		<delete tableName="TINDEXNOTIFY" >
+			<where> index_type='customer' </where>
+		</delete>
+	</changeSet>
+
+</databaseChangeLog>

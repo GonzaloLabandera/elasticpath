@@ -3,7 +3,8 @@
  */
 package com.elasticpath.domain.message.handler.category.handler;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.update.processor.capabilities.CategoryUpdateProcessor;
 import com.elasticpath.domain.catalog.Category;
@@ -16,7 +17,7 @@ import com.elasticpath.messaging.EventMessage;
  */
 public class CategoryUpdatedEventHandler implements EventMessageHandler {
 
-	private static final Logger LOGGER = Logger.getLogger(CategoryUpdatedEventHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(CategoryUpdatedEventHandler.class);
 
 	private final EventMessageHandlerHelper<Category> eventMessageHandlerHelper;
 	private final CategoryUpdateProcessor categoryUpdateProcessor;

@@ -22,8 +22,9 @@ import java.util.Optional;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import io.restassured.response.Response;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.definitions.stateobjects.Context;
 import com.elasticpath.definitions.testobjects.SingleCategoryApiResponse;
@@ -41,7 +42,7 @@ import com.elasticpath.selenium.util.Utility;
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessiveParameterList",
 		"PMD.ExcessiveImports", "PMD.ExcessiveMethodLength"})
 public class CategoryDefinition {
-	private static final Logger LOG = Logger.getLogger(CategoryDefinition.class);
+	private static final Logger LOG = LogManager.getLogger(CategoryDefinition.class);
 	private static final String FIRST_LANG_KEY = "firstLanguageLocale";
 	private static final String SECOND_LANG_KEY = "secondLanguageLocale";
 	private static final String FIRST_LANG_FULL = "firstLanguage";

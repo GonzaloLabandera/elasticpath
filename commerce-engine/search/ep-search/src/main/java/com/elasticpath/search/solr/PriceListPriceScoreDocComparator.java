@@ -9,7 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.LeafReaderContext;
@@ -69,7 +70,7 @@ class PriceListPriceScoreDocComparator extends SimpleFieldComparator<String>  {
 	 */
 	private static final String PRICE_LIST_SEPARATOR = "#";
 
-	private static final Logger LOG = Logger.getLogger(PriceListPriceScoreDocComparator.class);
+	private static final Logger LOG = LogManager.getLogger(PriceListPriceScoreDocComparator.class);
 
 	private static final String MARKER_PREFIX = SolrIndexConstants.PRICE_SORT;
 

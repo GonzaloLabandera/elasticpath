@@ -13,6 +13,7 @@ import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 
 import com.elasticpath.commons.handlers.libjar.LibJarURLStreamHandlerService;
+import com.elasticpath.commons.handlers.libjar.LibJarUtil;
 
 /**
  * Bundle activator for registering {@link LibJarURLStreamHandlerService}.
@@ -25,7 +26,7 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(final BundleContext context) {
 		final Hashtable<String, String[]> properties = new Hashtable<>();
-		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[]{LibJarURLStreamHandlerService.LIB_JAR_PROTOCOL});
+		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[]{LibJarUtil.LIB_JAR_PROTOCOL});
 		registration = context.registerService(URLStreamHandlerService.class, new LibJarURLStreamHandlerService(), properties);
 	}
 

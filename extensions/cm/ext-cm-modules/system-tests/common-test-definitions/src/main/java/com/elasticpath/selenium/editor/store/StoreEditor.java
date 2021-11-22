@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -25,7 +26,7 @@ import com.elasticpath.selenium.util.Constants;
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class StoreEditor extends AbstractPageObject {
-	private static final Logger LOGGER = Logger.getLogger(AbstractPageObject.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractPageObject.class);
 	private static final String DIV_ADMIN_STORES_MESSAGES = "div[automation-id='com.elasticpath.cmclient.admin.stores.AdminStoresMessages";
 	private static final String DIV_COLUMN_ID_S = "div[column-id='%s']";
 

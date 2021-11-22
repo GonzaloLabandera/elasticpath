@@ -16,7 +16,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -40,7 +41,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
  */
 @SuppressWarnings("PMD.GodClass")
 public class TopSellerServiceImpl extends AbstractEpPersistenceServiceImpl implements TopSellerService {
-	private static final Logger LOG = Logger.getLogger(TopSellerServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(TopSellerServiceImpl.class);
 
 	private PropertiesDao propertiesDao;
 

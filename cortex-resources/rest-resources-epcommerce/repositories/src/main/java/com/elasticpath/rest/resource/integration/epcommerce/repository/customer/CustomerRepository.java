@@ -10,7 +10,8 @@ import io.reactivex.Single;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.dto.CustomerDTO;
@@ -28,8 +29,8 @@ public interface CustomerRepository {
 	Customer createNewCustomerEntity();
 
 	/**
-	 * Finds customer by username and store code.
-	 * If search is by accountSharedId storeCode is passed as null.
+	 * Find single session user based on shared ID, and assigns the passed store code.
+	 * If store code is null, searches for account.
 	 *
 	 * @param storeCode store code.
 	 * @param sharedId  shared Id.
@@ -38,16 +39,16 @@ public interface CustomerRepository {
 	ExecutionResult<Customer> findCustomerBySharedId(String storeCode, String sharedId);
 
 	/**
-	 * Find user by user id from customerDTO or if it does not exist, will create new one by values from customerDTO
+	 * Find user by shared id from customerDTO or if it does not exist, will create new one by values from customerDTO
 	 * and associate with account.
 	 *
 	 * @param customerDTO     {@link CustomerDTO}
 	 * @param scope           scope
-	 * @param userId          user id
-	 * @param accountSharedId account shared id
+	 * @param sharedId        user shared ID
+	 * @param accountSharedId account shared ID
 	 * @return {@link ExecutionResult<Customer>}
 	 */
-	ExecutionResult<Customer> findOrCreateUser(CustomerDTO customerDTO, String scope, String userId, String accountSharedId);
+	ExecutionResult<Customer> findOrCreateUser(CustomerDTO customerDTO, String scope, String sharedId, String accountSharedId);
 
 	/**
 	 * Finds customers by profile attribute key value pair.
@@ -78,22 +79,22 @@ public interface CustomerRepository {
 	/**
 	 * Checks whether a customer exists with given shared ID and store code.
 	 *
-	 * @param storeCode the store code
-	 * @param sharedId  the customer shared ID
+	 * @param customerType the customer type
+	 * @param sharedId     the customer shared ID
 	 * @return success if customer exists.
 	 */
-	ExecutionResult<Boolean> isCustomerExistsBySharedIdAndStoreCode(String storeCode, String sharedId);
+	ExecutionResult<Boolean> isCustomerExistsBySharedIdAndStoreCode(CustomerType customerType, String sharedId);
 
 	/**
 	 * Finds customer's guid by shared id and store code.
 	 *
-	 * @param storeCode             the store Code
+	 * @param customerType          the customer type
 	 * @param sharedId              the customer shared ID
 	 * @param customerIdentifierKey customerIdentifierKey added to fix CacheResult annotation conflict with
 	 *                              findCustomerGuidByProfileAttributeKeyAndValue
 	 * @return Customer's guid.
 	 */
-	ExecutionResult<String> findCustomerGuidBySharedId(String storeCode, String sharedId, String customerIdentifierKey);
+	ExecutionResult<String> findCustomerGuidBySharedId(CustomerType customerType, String sharedId, String customerIdentifierKey);
 
 	/**
 	 * Finds customer's guid by profile attribute key value pair.
@@ -147,14 +148,14 @@ public interface CustomerRepository {
 	Completable updateCustomer(Customer customer);
 
 	/**
-	 * Merge anonymous to registered customer.
+	 * Merge single session to registered customer.
 	 *
-	 * @param customerSession    the customer session
-	 * @param recipientCustomer  the recipient customer guid
+	 * @param singleSessionShopper the single session shopper
+	 * @param registeredCustomer the registered customer
 	 * @param validatedStoreCode the validated store code
 	 * @return an execution result based on whether the merge was successful
 	 */
-	ExecutionResult<Object> mergeCustomer(CustomerSession customerSession, Customer recipientCustomer,
+	ExecutionResult<Object> mergeCustomer(Shopper singleSessionShopper, Customer registeredCustomer,
 										  String validatedStoreCode);
 
 	/**

@@ -6,8 +6,9 @@ package com.elasticpath.cmclient.core.ui.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -23,7 +24,7 @@ import com.elasticpath.persistence.api.Entity;
  */
 public class EditorUtil {
 
-	private static final Logger LOG = Logger.getLogger(EditorUtil.class);
+	private static final Logger LOG = LogManager.getLogger(EditorUtil.class);
 
 	/**
 	 * Close editor by given editor guid and id.

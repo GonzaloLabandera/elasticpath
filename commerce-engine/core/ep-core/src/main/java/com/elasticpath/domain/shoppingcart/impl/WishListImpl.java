@@ -5,7 +5,6 @@ package com.elasticpath.domain.shoppingcart.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -122,11 +121,7 @@ public class WishListImpl extends AbstractShoppingListImpl implements WishList {
 	public ShoppingItem addItem(final ShoppingItem item) {
 		ShoppingItem newItem = getPrototypeBean(ContextIdNames.SHOPPING_ITEM, ShoppingItem.class);
 		newItem.setSkuGuid(item.getSkuGuid());
-
-		Map<String, String> fields = item.getFields();
-		for (final Map.Entry<String, String> fieldEntry : fields.entrySet()) {
-			newItem.setFieldValue(fieldEntry.getKey(), fieldEntry.getValue());
-		}
+		newItem.getModifierFields().putAll(item.getModifierFields().getMap());
 
 		getAllItems().add(newItem);
 		return newItem;

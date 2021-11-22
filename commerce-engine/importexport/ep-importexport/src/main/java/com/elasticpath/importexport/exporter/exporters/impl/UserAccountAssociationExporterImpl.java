@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.customer.UserAccountAssociationDTO;
 import com.elasticpath.domain.customer.CustomerType;
@@ -27,7 +28,7 @@ public class UserAccountAssociationExporterImpl extends AbstractExporterImpl<Use
 
 	private CustomerService customerService;
 
-	private static final Logger LOG = Logger.getLogger(UserAccountAssociationExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(UserAccountAssociationExporterImpl.class);
 
 	private DomainAdapter<UserAccountAssociation, UserAccountAssociationDTO> userAccountAssociationAdapter;
 

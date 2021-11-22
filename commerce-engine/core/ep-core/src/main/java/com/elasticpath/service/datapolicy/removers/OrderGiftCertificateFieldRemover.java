@@ -4,16 +4,19 @@
 
 package com.elasticpath.service.datapolicy.removers;
 
-import java.util.Collection;
-
-import com.elasticpath.commons.util.Pair;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
-import com.elasticpath.service.datapolicy.impl.DataPointValue;
 
 /**
  * The order GC value remover.
  */
-public class OrderGiftCertificateFieldRemover extends AbstractDataPointValueRemover {
+public class OrderGiftCertificateFieldRemover extends AbstractJsonDataPointValueRemover {
+
+	/** Query for fetching order modifier fields. */
+	protected static final String SELECT_MODIFIER_FIELDS_JPQL =
+			"SELECT ordSku.uidPk, ordSku.modifierFields FROM OrderSkuImpl ordSku WHERE ordSku.uidPk IN (:list)";
+	/** The statement for updating order modifier fields. */
+	protected static final String UPDATE_MODIFIER_FIELDS_JPQL =
+			"UPDATE OrderSkuImpl ordSku SET ordSku.modifierFields=?1 WHERE ordSku.uidPk=?2";
 
 	@Override
 	public String getSupportedLocation() {
@@ -21,21 +24,12 @@ public class OrderGiftCertificateFieldRemover extends AbstractDataPointValueRemo
 	}
 
 	@Override
-	public Pair<String, String> getJPQLUpdate() {
-		return new Pair<>("OrderItemData", "oItemData");
+	protected String getSelectModifierFieldsJPQL() {
+		return SELECT_MODIFIER_FIELDS_JPQL;
 	}
 
 	@Override
-	protected String getRemoveQuery(final Collection<DataPointValue> dataPointValues) {
-		Pair<String, String> entityAliasPair = getJPQLUpdate();
-
-		String entity = entityAliasPair.getFirst();
-		String alias = entityAliasPair.getSecond();
-
-		String deleteQuery = "DELETE FROM " + entity + " " + alias;
-
-		return new StringBuilder(deleteQuery).append(' ')
-			.append(getWhereClauseForEntity(alias))
-			.toString();
+	protected String getUpdateModifierFieldsJPQL() {
+		return UPDATE_MODIFIER_FIELDS_JPQL;
 	}
 }

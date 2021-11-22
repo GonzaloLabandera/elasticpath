@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.exception.ConfigurationException;
 import com.elasticpath.importexport.common.types.JobType;
@@ -28,7 +29,7 @@ public class ExporterFactoryImpl implements ExporterFactory {
 
 	private Map<JobType, List<JobType>> availableOptionalJobMap;
 
-	private static final Logger LOG = Logger.getLogger(ExporterFactoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ExporterFactoryImpl.class);
 
 	private ExporterConfiguration exporterConfiguration;
 

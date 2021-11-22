@@ -6,7 +6,7 @@
  */
 package com.elasticpath.persistence;
 
-import org.apache.commons.lang.CharUtils;
+import org.apache.commons.lang3.CharUtils;
 
 /**
  * A char2string and string2char converter.

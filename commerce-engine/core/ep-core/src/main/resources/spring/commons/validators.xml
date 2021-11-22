@@ -50,4 +50,8 @@
 		</property>
 	</bean>
 
+	<bean class="com.elasticpath.service.shoppingcart.validation.impl.CartModifierValidator" scope="prototype"/>
+
+	<bean class="com.elasticpath.service.shoppingcart.validation.impl.SuperInventoryValidator" scope="prototype"/>
+
 </beans>

@@ -3,14 +3,12 @@
  */
 package com.elasticpath.service.shoppingcart.validation.impl;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
-import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
-import com.google.common.collect.ImmutableSet;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+
+import java.util.Collection;
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,16 +16,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFCustomer;
+import com.elasticpath.xpf.connectivity.entity.XPFShopper;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmailAddressShoppingCartValidatorImplTest {
-
-	private static final String RESERVED_EMAIL = "reserved@reserved.com";
 
 	private static final String GUID = "GUID";
 
@@ -35,25 +33,25 @@ public class EmailAddressShoppingCartValidatorImplTest {
 	private EmailAddressShoppingCartValidatorImpl validator;
 
 	@Mock
-	private ShoppingCartValidationContext context;
+	private XPFShoppingCartValidationContext context;
 
 	@Mock
-	private Shopper shopper;
+	private XPFShopper shopper;
 
 	@Mock
-	private Customer customer;
+	private XPFCustomer customer;
 
 	@Mock
-	private ShoppingCart shoppingCart;
+	private XPFShoppingCart shoppingCart;
 
 	@Before
 	public void setUp() throws Exception {
 
-		validator.setReservedEmails(ImmutableSet.of(RESERVED_EMAIL));
+		validator = new EmailAddressShoppingCartValidatorImpl();
 
 		given(context.getShoppingCart()).willReturn(shoppingCart);
 		given(shoppingCart.getShopper()).willReturn(shopper);
-		given(shopper.getCustomer()).willReturn(customer);
+		given(shopper.getUser()).willReturn(customer);
 		given(customer.getGuid()).willReturn(GUID);
 	}
 
@@ -63,7 +61,7 @@ public class EmailAddressShoppingCartValidatorImplTest {
 		given(customer.getEmail()).willReturn("info@some.com");
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -71,15 +69,15 @@ public class EmailAddressShoppingCartValidatorImplTest {
 
 	@Test
 	public void testEmailNotSet() {
-		StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, "need.email",
+		XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO, "need.email",
 				"Customer email address must be specified.", Collections.emptyMap(),
-				new StructuredErrorResolution(Customer.class, GUID));
+				new XPFStructuredErrorResolution(XPFCustomer.class, GUID));
 
 		// Given
 		given(customer.getEmail()).willReturn(null);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(errorMessage);
@@ -88,32 +86,15 @@ public class EmailAddressShoppingCartValidatorImplTest {
 	@Test
 	public void testEmailSetButIncorrect() {
 
-		StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, "need.email",
+		XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO, "need.email",
 				"Customer email address must be specified.", Collections.emptyMap(),
-				new StructuredErrorResolution(Customer.class, GUID));
+				new XPFStructuredErrorResolution(XPFCustomer.class, GUID));
 
 		// Given
 		given(customer.getEmail()).willReturn("k.boom.info");
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
-
-		// Then
-		assertThat(messageCollections).containsOnly(errorMessage);
-	}
-
-	@Test
-	public void testEmailSetButReserved() {
-
-		StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, "need.email",
-				"Customer email address must be specified.", Collections.emptyMap(),
-				new StructuredErrorResolution(Customer.class, GUID));
-
-		// Given
-		given(customer.getEmail()).willReturn(RESERVED_EMAIL);
-
-		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(errorMessage);

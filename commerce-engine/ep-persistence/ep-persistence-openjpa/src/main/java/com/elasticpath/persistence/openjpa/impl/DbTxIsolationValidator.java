@@ -7,7 +7,8 @@ package com.elasticpath.persistence.openjpa.impl;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.jdbc.IsolationLevel;
 
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -17,7 +18,7 @@ import com.elasticpath.persistence.api.PersistenceEngine;
  * The level must be READ_COMMITTED otherwise an exception is thrown.
  */
 public class DbTxIsolationValidator {
-	private static final Logger LOG = Logger.getLogger(DbTxIsolationValidator.class);
+	private static final Logger LOG = LogManager.getLogger(DbTxIsolationValidator.class);
 
 	private PersistenceEngine persistenceEngine;
 

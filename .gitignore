@@ -25,6 +25,9 @@ db-*.log
 lock.
 tmlog.lck
 tmlog*.log
+hs_err_*.log
+replay_pid*.log
+*.jar
 
 # Ignored directories #
 .idea/

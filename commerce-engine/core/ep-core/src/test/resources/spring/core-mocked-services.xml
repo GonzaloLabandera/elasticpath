@@ -56,6 +56,9 @@
 	<bean id="orderEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
 	</bean>
+	<bean id="xpfPluginFactory" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
+		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
+	</bean>
 
 	<!-- Short-circuit endpoints to avoid settings framework call -->
 	<bean id="customerEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
@@ -121,12 +124,17 @@
 
 	<bean id="dummyPaymentProviderPlugin" class="com.elasticpath.service.payment.provider.DummyPaymentProviderPluginImpl"/>
 
+	<bean id="xpfExtensionsResolver" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean"/>
+
 	<!--
 		It is required to override persistenceEngineTarget bean, defined in openjpa.xml,
 		because a db connection is required for verification of the TX isolation level but
 		there is none since this is not an integration test.
 	-->
-	<bean id="persistenceEngineTarget" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl"/>
+	<bean id="persistenceEngineTarget" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl" />
+	<!-- in real life, PaymentScheduleHelperImpl.init() will be called but that would trigger a db call which doesn't work when running
+	CoreSpringXmlVerificationTest -->
+	<bean id="paymentScheduleHelper" class="com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl"/>
 
 	<alias alias="readOnlyEntityManagerFactory" name="entityManagerFactory"/>
 

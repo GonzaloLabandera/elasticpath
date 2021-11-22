@@ -19,6 +19,8 @@ import org.springframework.core.convert.ConversionService;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
+import com.elasticpath.rest.cache.CacheRemove;
+import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.definition.addresses.AccountAddressFormIdentifier;
 import com.elasticpath.rest.definition.addresses.AccountAddressIdentifier;
 import com.elasticpath.rest.definition.addresses.AccountAddressesIdentifier;
@@ -37,12 +39,13 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.addresses
 import com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.validator.AddressValidator;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
+import com.elasticpath.service.customer.AddressService;
 
 /**
  * Implementation of Address repository.
  */
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
-@Component
+@SuppressWarnings({"PMD.GodClass"})
+@Component(property = {"name=addressRepository"})
 public class AddressRepositoryImpl implements AddressRepository {
 
 	/**
@@ -61,6 +64,8 @@ public class AddressRepositoryImpl implements AddressRepository {
 
 	private ConversionService conversionService;
 
+	private AddressService addressService;
+
 	@Override
 	public Completable update(final String customerGuid, final String addressGuid, final AddressEntity addressEntity) {
 		return addressValidator.validate(addressEntity)
@@ -70,9 +75,11 @@ public class AddressRepositoryImpl implements AddressRepository {
 								.flatMapCompletable(address -> customerRepository.updateAddress(customer, address))));
 	}
 
+	@CacheResult
 	@Override
 	public Single<CustomerAddress> getExistingAddressByGuid(final String addressGuid, final Customer customer) {
-		return reactiveAdapter.fromNullableAsSingle(() -> customer.getAddressByGuid(addressGuid), ADDRESS_NOT_FOUND);
+		return reactiveAdapter.fromNullableAsSingle(() ->
+				addressService.findByCustomerAndAddressGuid(customer.getUidPk(), addressGuid), ADDRESS_NOT_FOUND);
 	}
 
 	@Override
@@ -85,7 +92,7 @@ public class AddressRepositoryImpl implements AddressRepository {
 	@Override
 	public Observable<CustomerAddress> findAllAddresses(final String customerGuid) {
 		return customerRepository.getCustomer(customerGuid)
-				.flatMapObservable(customer -> Observable.fromIterable(customer.getAddresses()));
+				.flatMapObservable(customer -> Observable.fromIterable(addressService.findByCustomer(customer.getUidPk())));
 	}
 
 	@Override
@@ -102,9 +109,11 @@ public class AddressRepositoryImpl implements AddressRepository {
 				.flatMap(updatedCustomer -> getExistingAddressByGuid(address.getGuid(), updatedCustomer));
 	}
 
+	@CacheResult
 	@Override
 	public Optional<CustomerAddress> getExistingAddressMatchingAddress(final CustomerAddress customerAddress, final Customer customer) {
-		return customer.getAddresses().stream().filter(existingAddress -> existingAddress.equals(customerAddress)).findFirst();
+		CustomerAddress existingAddress = addressService.findByAddress(customer.getUidPk(), customerAddress);
+		return Optional.ofNullable(existingAddress);
 	}
 
 	@Override
@@ -237,9 +246,9 @@ public class AddressRepositoryImpl implements AddressRepository {
 	 * @param address  address
 	 * @return the customer
 	 */
+	@CacheRemove(typesToInvalidate = {CustomerAddress.class})
 	protected Single<Customer> removeCustomerAddress(final Customer customer, final CustomerAddress address) {
-		customer.removeAddress(address);
-		return customerRepository.update(customer);
+		return reactiveAdapter.fromServiceAsSingle(() -> addressService.remove(customer, address));
 	}
 
 	/**
@@ -432,5 +441,10 @@ public class AddressRepositoryImpl implements AddressRepository {
 	@Reference
 	public void setCartOrdersDefaultAddressPopulator(final CartOrdersDefaultAddressPopulator cartOrdersDefaultAddressPopulator) {
 		this.cartOrdersDefaultAddressPopulator = cartOrdersDefaultAddressPopulator;
+	}
+
+	@Reference
+	public void setAddressService(final AddressService addressService) {
+		this.addressService = addressService;
 	}
 }

@@ -5,7 +5,8 @@ package com.elasticpath.test.integration.inventory;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.inventory.InventoryKey;
 import com.elasticpath.inventory.domain.InventoryJournal;
@@ -19,7 +20,7 @@ import com.elasticpath.inventory.strategy.impl.InventoryJournalRollupServiceImpl
  * This is for the first thread.
  */
 public class SyncedInventoryJournalRollupServiceImpl1 extends InventoryJournalRollupServiceImpl implements SyncedInventoryJournalRollupService {
-	private static final Logger LOG = Logger.getLogger(SyncedInventoryJournalRollupServiceImpl1.class); 
+	private static final Logger LOG = LogManager.getLogger(SyncedInventoryJournalRollupServiceImpl1.class); 
 	
 	@Override
 	public void processRollup(final InventoryKey inventoryKey, final LockWrapper lockWrapper) {

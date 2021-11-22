@@ -8,7 +8,7 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.valueOf;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.singletonMap;
-import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -1072,9 +1072,9 @@ public class JavaConditionEvaluatorServiceImplTest {
 		});
 
 		JavaConditionEvaluatorServiceImpl cachingEvaluator = new JavaConditionEvaluatorServiceImpl();
-		cachingEvaluator.setDecomposedConditionCache(decomposedConditionCache);
 
 		GroovyConditionDSLBuilderImpl conditionDSLBuilder = new GroovyConditionDSLBuilderImpl();
+		conditionDSLBuilder.setDecomposedConditionCache(decomposedConditionCache);
 		TagDefinitionReader tagDefinitionReader = mock(TagDefinitionReader.class);
 		conditionDSLBuilder.setTagDefinitionReader(tagDefinitionReader);
 		ConditionValidationFacade validationFacade = mock(ConditionValidationFacade.class);

@@ -6,7 +6,6 @@ package com.elasticpath.service.shoppingcart;
 import java.util.List;
 import java.util.Locale;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
@@ -26,7 +25,6 @@ public interface WishListService {
 	 * @return the wish list found
 	 */
 	WishList get(long uid);
-
 
 	/**
 	 * Add all items in the wish list.
@@ -70,14 +68,6 @@ public interface WishListService {
 	 * @return the wish list found
 	 */
 	WishList findOrCreateWishListByShopper(Shopper shopper);
-
-	/**
-	 * Find the wish list with prices.
-	 *
-	 * @param customerSession the customer session
-	 * @return the wish list found
-	 */
-	WishList findOrCreateWishListWithPrice(CustomerSession customerSession);
 
 	/**
 	 * Find the wishlist from its guid.

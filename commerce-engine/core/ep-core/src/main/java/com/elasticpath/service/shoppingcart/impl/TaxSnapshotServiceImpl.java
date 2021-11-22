@@ -87,7 +87,7 @@ public class TaxSnapshotServiceImpl implements TaxSnapshotService {
 	 * @param cartPricingSnapshot the cart pricing snapshot
 	 */
 	protected void updateTaxCalculationResult(final ShoppingCartImpl shoppingCart, final ShoppingCartPricingSnapshot cartPricingSnapshot) {
-		TaxCalculationResult taxCalculationResult = getNewTaxCalculationResult(shoppingCart.getCustomerSession().getCurrency());
+		TaxCalculationResult taxCalculationResult = getNewTaxCalculationResult(shoppingCart.getShopper().getCustomerSession().getCurrency());
 
 		final List<OrderSku> physicalCartItems = new ArrayList<>();
 		final List<OrderSku> electronicCartItems = new ArrayList<>();
@@ -122,7 +122,7 @@ public class TaxSnapshotServiceImpl implements TaxSnapshotService {
 			discountByShoppingItem,
 			electronicCartItems,
 			getTaxAddressAdapter().toTaxAddress(shoppingCart.getElectronicTaxAddress()),
-			Money.valueOf(BigDecimal.ZERO, shoppingCart.getCustomerSession().getCurrency()));
+			Money.valueOf(BigDecimal.ZERO, shoppingCart.getShopper().getCustomerSession().getCurrency()));
 
 		shoppingCart.setTaxCalculationResult(taxCalculationResult);
 	}
@@ -163,7 +163,7 @@ public class TaxSnapshotServiceImpl implements TaxSnapshotService {
 
 		final TaxOperationContext taxOperationContext = TaxOperationContextBuilder
 			.newBuilder()
-			.withCurrency(shoppingCart.getCustomerSession().getCurrency())
+			.withCurrency(shoppingCart.getShopper().getCustomerSession().getCurrency())
 			.withTaxDocumentId(StringTaxDocumentId.fromString(shoppingCart.getGuid()))
 			.withCustomerCode(shoppingCart.getShopper().getCustomer().getUserId())
 			.withTaxJournalType(TaxJournalType.PURCHASE)

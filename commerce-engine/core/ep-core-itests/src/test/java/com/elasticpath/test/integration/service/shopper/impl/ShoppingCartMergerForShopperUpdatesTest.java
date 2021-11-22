@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.shopper.impl.ShoppingCartMergerForShopperUpdates;
@@ -49,23 +48,48 @@ public class ShoppingCartMergerForShopperUpdatesTest extends AbstractCartIntegra
 	@DirtiesDatabase
 	@Test
 	public void testMergingCartsKeepsTheCartAssociatedWithTheCustomerAccountNotTheAnonymouslyCreatedCart() {
-		CustomerSession registeredCustomerSession = createCustomerSession();
-		ShoppingCart registeredShoppingCart = createShoppingCart(registeredCustomerSession);
+		Shopper registeredShopper = createShopper();
+		ShoppingCart registeredShoppingCart = createShoppingCart(registeredShopper);
+		registeredShopper.setCurrentShoppingCart(registeredShoppingCart);
 		shoppingCartService.saveOrUpdate(registeredShoppingCart);
 
-		CustomerSession anonymousCustomerSession = createCustomerSession();
-		Shopper anonymousShopper = anonymousCustomerSession.getShopper();
-		ShoppingCart anonymousShoppingCart = createShoppingCart(anonymousCustomerSession);
+		Shopper anonymousShopper = createShopper();
+		ShoppingCart anonymousShoppingCart = createShoppingCart(anonymousShopper);
 		anonymousShopper.setCurrentShoppingCart(anonymousShoppingCart);
-
 		shoppingCartService.saveOrUpdate(anonymousShoppingCart);
 
-		shoppingCartMergerForShopperUpdates.invalidateShopper(registeredCustomerSession, anonymousShopper);
+		shoppingCartMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		// assert that the shopper is using the registered account shopping cart and not the anonymous one
-		ShoppingCart actualShoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(registeredCustomerSession);
+		ShoppingCart actualShoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(registeredShopper);
 		assertEquals("The shopping cart used going forward is the one that was associated with the registered account, not the anonymous cart.",
 				registeredShoppingCart.getGuid(),
+				actualShoppingCart.getGuid());
+	}
+
+	/**
+	 * The imported customers do not have created carts, thus before merging, the cart must be persisted.
+	 * The test is validating merging anonymous cart to the imported registered account.
+	 */
+	@DirtiesDatabase
+	@Test
+	public void testMergingAnonymousAndImportedRegisteredUserCarts() {
+		Shopper registeredShopper = createShopper();
+		ShoppingCart registeredShoppingCart = createShoppingCart(registeredShopper);
+		registeredShopper.setCurrentShoppingCart(registeredShoppingCart);
+		registeredShopper.setStoreCode(registeredShoppingCart.getStore().getCode());
+
+		Shopper anonymousShopper = createShopper();
+		ShoppingCart anonymousShoppingCart = createShoppingCart(anonymousShopper);
+		anonymousShopper.setCurrentShoppingCart(anonymousShoppingCart);
+		shoppingCartService.saveOrUpdate(anonymousShoppingCart);
+
+		shoppingCartMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
+
+		// assert that the shopper is using the registered account shopping cart and not the anonymous one
+		ShoppingCart actualShoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(registeredShopper);
+		assertEquals("The shopping cart used going forward is the one that was associated with the registered account, not the anonymous cart.",
+				registeredShopper.getCurrentShoppingCart().getGuid(),
 				actualShoppingCart.getGuid());
 	}
 }

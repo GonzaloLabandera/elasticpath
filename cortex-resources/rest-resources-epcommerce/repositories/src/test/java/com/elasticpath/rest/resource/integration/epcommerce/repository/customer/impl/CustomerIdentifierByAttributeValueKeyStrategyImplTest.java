@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
@@ -26,7 +27,6 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 
 	private static final String VALID_USER_ID = "punchoutCustomer";
 	private static final String INVALID_USER_ID = "invalidValue";
-	private static final String VALID_STORE_CODE = "TestStore";
 	private static final String VALID_CUSTOMER_IDENTIFIER_KEY = "ATTRIBUTE_VALUE:CP_PUNCHOUT_CUSTOMER_KEY";
 	private static final String CUSTOMER_GUID = "customerGuid";
 
@@ -44,8 +44,8 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 		when(customerRepository.getCustomerCountByProfileAttributeKeyAndValue(VALID_CUSTOMER_IDENTIFIER_KEY.split(":")[1], VALID_USER_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(1L));
 
-		ExecutionResult<Boolean> executionResult =
-				customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(VALID_USER_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+		ExecutionResult<Boolean> executionResult = customerIdentifierByAttributeValueKeyStrategy
+						.isCustomerExists(VALID_USER_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertTrue(executionResult.isSuccessful());
 	}
 
@@ -60,8 +60,8 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 		when(customerRepository.getCustomerCountByProfileAttributeKeyAndValue(customerIdentifierKey, VALID_USER_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(0L));
 
-		ExecutionResult<Boolean> executionResult =
-				customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(VALID_USER_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+		ExecutionResult<Boolean> executionResult = customerIdentifierByAttributeValueKeyStrategy
+						.isCustomerExists(VALID_USER_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 
 		String errorMessage = CustomerIdentifierByAttributeValueKeyStrategyImpl.prepareNoCustomerFoundError(customerIdentifierKey, VALID_USER_ID);
 
@@ -78,8 +78,8 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 		when(customerRepository.getCustomerCountByProfileAttributeKeyAndValue(getKeyFieldStringFromCustomerIdentifierKey(), VALID_USER_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(2L));
 
-		ExecutionResult<Boolean> executionResult =
-				customerIdentifierByAttributeValueKeyStrategy.isCustomerExists(VALID_USER_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+		ExecutionResult<Boolean> executionResult = customerIdentifierByAttributeValueKeyStrategy
+						.isCustomerExists(VALID_USER_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 
 		String errorMessage =
 				CustomerIdentifierByAttributeValueKeyStrategyImpl.prepareMultipleCustomersFoundError(getKeyFieldStringFromCustomerIdentifierKey(),
@@ -98,7 +98,8 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 				.thenReturn(ExecutionResultFactory.createReadOK(CUSTOMER_GUID));
 
 		ExecutionResult<String> executionResult =
-				customerIdentifierByAttributeValueKeyStrategy.deriveCustomerGuid(VALID_USER_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+				customerIdentifierByAttributeValueKeyStrategy
+						.deriveCustomerGuid(VALID_USER_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 
 		assertTrue(executionResult.isSuccessful());
 		assertEquals(CUSTOMER_GUID, executionResult.getData());
@@ -114,7 +115,8 @@ public class CustomerIdentifierByAttributeValueKeyStrategyImplTest {
 				.thenReturn(ExecutionResultFactory.createNotFound());
 
 		ExecutionResult<String> executionResult =
-				customerIdentifierByAttributeValueKeyStrategy.deriveCustomerGuid(INVALID_USER_ID, VALID_STORE_CODE, VALID_CUSTOMER_IDENTIFIER_KEY);
+				customerIdentifierByAttributeValueKeyStrategy
+						.deriveCustomerGuid(INVALID_USER_ID, CustomerType.REGISTERED_USER, VALID_CUSTOMER_IDENTIFIER_KEY);
 		assertFalse(executionResult.isSuccessful());
 		assertEquals(CustomerIdentifierByAttributeValueKeyStrategyImpl.prepareNoCustomerFoundError(customerIdentifierKey, INVALID_USER_ID),
 				executionResult.getErrorMessage());

@@ -11,7 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
@@ -29,7 +30,7 @@ import com.elasticpath.service.reporting.ReportService;
 @SuppressWarnings({ "PMD.CyclomaticComplexity", "restriction", "nls" })
 public class OrdersByStatusReportServiceImpl {
 
-	private static final Logger LOG = Logger.getLogger(OrdersByStatusReportServiceImpl.class.getName());
+	private static final Logger LOG = LogManager.getLogger(OrdersByStatusReportServiceImpl.class.getName());
 
 	private ReportService reportService;
 

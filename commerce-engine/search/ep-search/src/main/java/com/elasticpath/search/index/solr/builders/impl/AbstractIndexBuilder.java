@@ -5,7 +5,7 @@ package com.elasticpath.search.index.solr.builders.impl;
 
 import java.util.List;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.solr.client.solrj.SolrClient;
 
 import com.elasticpath.search.IndexNotificationProcessor;

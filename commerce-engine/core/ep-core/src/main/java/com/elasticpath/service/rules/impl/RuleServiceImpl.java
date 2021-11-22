@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -468,64 +468,6 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 					"Inconsistent data, found more than 1 item, expected 1 with store %1$s, "
 							+ "catalog %2$s and scenario %3$d", store, catalog == null ? "null" : catalog.getCode(), scenarioId));
 			// CHECKSTYLE:ON
-		}
-		return result.get(0);
-	}
-
-	/**
-	 * Finds the {@link EpRuleBase} for the given {@code storeCode} and {@code scenarioId} where
-	 * the rule base has changed since the given {@link Date}. If a rule base has not changed
-	 * since the given date, {@code null} will be returned. If the rule base does not exist
-	 * {@code null} will also be returned. Store rules do not have a catalog set.
-	 *
-	 * @param storeCode  the store code to use
-	 * @param scenarioId the scenario ID of the rule base
-	 * @param date       the date from which changes should be recognized
-	 * @return a rule base if it exists and was modified
-	 * @throws EpServiceException in case of any errors
-	 */
-	@Override
-	public EpRuleBase findChangedStoreRuleBases(final String storeCode, final int scenarioId, final Date date) {
-		sanityCheck();
-		final List<EpRuleBase> result = getPersistenceEngine().retrieveByNamedQuery("EP_RULE_BASE_FIND_CHANGED_STORECODE_SCENARIO",
-				storeCode,
-				scenarioId,
-				date);
-		if (result == null || result.isEmpty()) {
-			return null;
-		} else if (result.size() > 1) {
-			throw new EpServiceException(String.format(
-					"Inconsistent data, found more than 1 item, expected 1 with store code %1$s, "
-							+ "no catalog and scenario %2$d", storeCode, scenarioId));
-		}
-		return result.get(0);
-	}
-
-	/**
-	 * Finds the {@link EpRuleBase} for the given {@code catalogCode} and {@code scenarioId} where
-	 * the rule base has changed since the given {@link Date}. If a rule base has not changed
-	 * since the given date, {@code null} will be returned. If the rule base does not exist
-	 * {@code null} will also be returned. Catalog rules do not have a store set.
-	 *
-	 * @param catalogCode the catalog code to use
-	 * @param scenarioId  the scenario ID of the rule base
-	 * @param date        the date from which changes should be recognized
-	 * @return a rule base if it exists and was modified
-	 * @throws EpServiceException in case of any errors
-	 */
-	@Override
-	public EpRuleBase findChangedCatalogRuleBases(final String catalogCode, final int scenarioId, final Date date) {
-		sanityCheck();
-		final List<EpRuleBase> result = getPersistenceEngine().retrieveByNamedQuery("EP_RULE_BASE_FIND_CHANGED_CATALOGCODE_SCENARIO",
-				catalogCode,
-				scenarioId,
-				date);
-		if (result == null || result.isEmpty()) {
-			return null;
-		} else if (result.size() > 1) {
-			throw new EpServiceException(String.format(
-					"Inconsistent data, found more than 1 item, expected 1 with catalog code %1$s, "
-							+ "no catalog and scenario %2$d", catalogCode, scenarioId));
 		}
 		return result.get(0);
 	}

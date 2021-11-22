@@ -16,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
-import com.elasticpath.domain.customer.Address;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFAddress;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BillingAddressShoppingCartValidatorTest {
@@ -32,13 +32,13 @@ public class BillingAddressShoppingCartValidatorTest {
 	private BillingAddressShoppingCartValidatorImpl validator;
 
 	@Mock
-	private Address address;
+	private XPFAddress address;
 
 	@Mock
-	private ShoppingCart shoppingCart;
+	private XPFShoppingCart shoppingCart;
 
 	@Mock
-	private ShoppingCartValidationContext context;
+	private XPFShoppingCartValidationContext context;
 
 	@Before
 	public void setUp() throws Exception {
@@ -52,7 +52,7 @@ public class BillingAddressShoppingCartValidatorTest {
 		given(shoppingCart.getBillingAddress()).willReturn(address);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -65,12 +65,12 @@ public class BillingAddressShoppingCartValidatorTest {
 		given(shoppingCart.getBillingAddress()).willReturn(null);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
-		StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, "need.billing.address",
+		XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO, "need.billing.address",
 				"Billing address must be specified.", Collections.emptyMap(),
-				new StructuredErrorResolution(ShoppingCart.class, shoppingCart.getGuid()));
+				new XPFStructuredErrorResolution(XPFShoppingCart.class, shoppingCart.getGuid()));
 		assertThat(messageCollections).containsOnly(errorMessage);
 	}
 

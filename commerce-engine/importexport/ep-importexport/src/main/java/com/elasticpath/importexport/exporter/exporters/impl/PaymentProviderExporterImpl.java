@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.paymentprovider.PaymentProviderDTO;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -24,7 +25,7 @@ import com.elasticpath.service.orderpaymentapi.management.PaymentProviderConfigM
  */
 public class PaymentProviderExporterImpl extends AbstractExporterImpl<PaymentProviderConfigDomainProxy, PaymentProviderDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(PaymentProviderExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PaymentProviderExporterImpl.class);
 
 	private ImportExportSearcher importExportSearcher;
 

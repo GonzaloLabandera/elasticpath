@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.search.IndexBuildStatus;
 import com.elasticpath.search.index.pipeline.IndexingPipeline;
@@ -44,7 +45,7 @@ import com.elasticpath.service.search.IndexType;
  */
 public class IndexingPipelineImpl implements IndexingPipeline<Collection<Long>> {
 
-	private static final Logger LOG = Logger.getLogger(IndexingPipelineImpl.class);
+	private static final Logger LOG = LogManager.getLogger(IndexingPipelineImpl.class);
 
 	private List<IndexingStage<?, ?>> stages = new ArrayList<>();
 

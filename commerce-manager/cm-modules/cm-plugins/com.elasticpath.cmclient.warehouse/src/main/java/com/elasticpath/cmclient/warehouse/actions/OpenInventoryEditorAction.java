@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.warehouse.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.osgi.util.NLS;
@@ -21,7 +22,7 @@ import com.elasticpath.domain.catalog.ProductSku;
  */
 public class OpenInventoryEditorAction extends Action {
 
-	private static final Logger LOG = Logger.getLogger(OpenInventoryEditorAction.class);
+	private static final Logger LOG = LogManager.getLogger(OpenInventoryEditorAction.class);
 
 	private final ProductSku productSku;
 

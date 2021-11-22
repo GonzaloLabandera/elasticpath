@@ -15,11 +15,6 @@
 			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 	">
 
-	<!-- pulled from openjpa-osgi-wrapper.jar -
-	   MUST BE imported before ep-core/spring/service/service.xml and before first DB call is made,
-	   otherwise external ehcache.xml will never be properly loaded.
-	   OpenJpa framework tries to pull a query from cache and if cache is not initialized,  it will create one.-->
-	<import resource="classpath:spring/openjpa-osgi-wrapper/ehcache-jmx.xml" />
 	<!-- pulled from ep-core.jar -->
 	<import resource="classpath:spring/service/service.xml" />
 

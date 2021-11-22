@@ -36,6 +36,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
@@ -82,6 +83,7 @@ public class ShoppingCartDiscountItemContainerImplTest extends AbstractCatalogDa
 		container.setShippableItemPredicate(new ShippableItemPredicate<>(productSkuLookup));
 
 		stubGetPrototypeBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMemento.class, ShoppingCartMementoImpl.class);
+		stubGetPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class, ModifierFieldsMapWrapper.class);
 	}
 
 	/**

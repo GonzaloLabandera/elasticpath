@@ -29,7 +29,7 @@ public class InitializeShopperRoleTransitionEventHandler implements ScopedEventE
 	@Override
 	public void handleEvent(final String scope, final RoleTransitionEvent event) {
 			final String customerGuid = event.getNewUserGuid();
-			shoppingCartRepository.getShoppingCartForCustomer(customerGuid, scope).subscribe(
+			shoppingCartRepository.getDefaultShoppingCartForCustomer(customerGuid, scope).subscribe(
 					cart -> { },
 					error -> LOG.error("Error initializing shopper for customer guid: {}", customerGuid));
 	}

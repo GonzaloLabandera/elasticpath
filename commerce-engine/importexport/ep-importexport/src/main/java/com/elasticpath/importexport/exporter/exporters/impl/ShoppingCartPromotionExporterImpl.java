@@ -14,7 +14,8 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -41,7 +42,7 @@ public class ShoppingCartPromotionExporterImpl extends AbstractExporterImpl<Rule
 
 	private PromotionAdapter promotionAdapter;
 
-	private static final Logger LOG = Logger.getLogger(ShoppingCartPromotionExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ShoppingCartPromotionExporterImpl.class);
 
 	/**
 	 * {@inheritDoc} throws RuntimeException can be thrown if rule UID list could not be initialized.

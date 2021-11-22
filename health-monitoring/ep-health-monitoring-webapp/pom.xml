@@ -29,48 +29,33 @@
 	</dependencies>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.tomcat.maven</groupId>
-					<artifactId>tomcat8-maven-plugin</artifactId>
-					<configuration>
-						<path>${ep.health.monitoring.context}</path>
-						<port>${ep.health.monitoring.tomcat.port.http}</port>
-						<systemProperties>
-							<ep.search.replica.url>${ep.search.url}</ep.search.replica.url>
-						</systemProperties>
-					</configuration>
-				</plugin>
-				<plugin>
-					<artifactId>maven-war-plugin</artifactId>
-					<configuration>
-						<webResources>
-							<resource>
-								<directory>src/main/webapp</directory>
-								<filtering>true</filtering>
-								<includes>
-									<include>**/log4j.properties</include>
-								</includes>
-							</resource>
-							<resource>
-								<directory>src/main/webapp</directory>
-								<filtering>false</filtering>
-								<excludes>
-									<exclude>**/log4j.properties</exclude>
-								</excludes>
-							</resource>
-						</webResources>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>com.google.code.maven-replacer-plugin</groupId>
-					<artifactId>maven-replacer-plugin</artifactId>
-					<version>${maven-replacer-plugin.version}</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+				<configuration>
+					<path>${ep.health.monitoring.context}</path>
+					<port>${ep.health.monitoring.tomcat.port.http}</port>
+					<systemProperties>
+						<ep.search.replica.url>${ep.search.url}</ep.search.replica.url>
+					</systemProperties>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<webResources>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>false</filtering>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>maven-replacer-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -98,17 +83,7 @@
 							<webResources>
 								<resource>
 									<directory>src/main/webapp</directory>
-									<filtering>true</filtering>
-									<includes>
-										<include>**/log4j.properties</include>
-									</includes>
-								</resource>
-								<resource>
-									<directory>src/main/webapp</directory>
 									<filtering>false</filtering>
-									<excludes>
-										<exclude>**/log4j.properties</exclude>
-									</excludes>
 								</resource>
 							</webResources>
 						</configuration>

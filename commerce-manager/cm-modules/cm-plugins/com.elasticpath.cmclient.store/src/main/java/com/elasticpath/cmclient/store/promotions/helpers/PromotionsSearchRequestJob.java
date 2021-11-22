@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.store.promotions.helpers;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.event.EventType;
@@ -21,7 +22,7 @@ import com.elasticpath.service.rules.RuleService;
  */
 public class PromotionsSearchRequestJob extends AbstractSearchRequestJob<Rule> {
 	
-	private static final Logger LOG = Logger.getLogger(PromotionsSearchRequestJob.class);
+	private static final Logger LOG = LogManager.getLogger(PromotionsSearchRequestJob.class);
 	
 	private final RuleService ruleService;
 

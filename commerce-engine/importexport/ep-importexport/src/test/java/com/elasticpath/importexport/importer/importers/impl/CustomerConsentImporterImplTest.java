@@ -14,10 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,7 +73,7 @@ public class CustomerConsentImporterImplTest {
 	private Appender mockAppender;
 
 	@Captor
-	private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
+	private ArgumentCaptor<LogEvent> captorLoggingEvent;
 
 	private SavingStrategy<CustomerConsent, CustomerConsentDTO> mockSavingStrategy;
 
@@ -82,9 +84,9 @@ public class CustomerConsentImporterImplTest {
 	public void setUp() {
 		customerConsentImporterImpl.setStatusHolder(new ImportStatusHolder());
 
-		Logger root = Logger.getRootLogger();
-		root.addAppender(mockAppender);
-		root.setLevel(Level.INFO);
+		when(mockAppender.getName()).thenReturn("mockAppender");
+		when(mockAppender.isStarted()).thenReturn(true);
+		((Logger) LogManager.getRootLogger()).addAppender(mockAppender);
 
 		mockSavingStrategy = AbstractSavingStrategy.createStrategy(ImportStrategyType.INSERT, new SavingManager<CustomerConsent>() {
 			@Override
@@ -97,6 +99,11 @@ public class CustomerConsentImporterImplTest {
 				return null;
 			}
 		});
+	}
+	
+	@After
+	public void tearDown() {
+		((Logger) LogManager.getRootLogger()).removeAppender(mockAppender);
 	}
 
 	/**
@@ -124,9 +131,9 @@ public class CustomerConsentImporterImplTest {
 		customerConsentImporterImpl.initialize(new ImportContext(importConfiguration), mockSavingStrategy);
 		boolean status = customerConsentImporterImpl.executeImport(createCustomerConsentDTO());
 
-		mockAppender.doAppend(captorLoggingEvent.capture());
+		mockAppender.append(captorLoggingEvent.capture());
 
-		List<LoggingEvent> loggingEvent = captorLoggingEvent.getAllValues();
+		List<LogEvent> loggingEvent = captorLoggingEvent.getAllValues();
 
 		assertThat(customerConsentImporterImpl.getImportedObjectName())
 				.isEqualTo(CustomerConsentDTO.ROOT_ELEMENT);
@@ -153,14 +160,14 @@ public class CustomerConsentImporterImplTest {
 		customerConsentImporterImpl.initialize(new ImportContext(importConfiguration), mockSavingStrategy);
 		boolean status = customerConsentImporterImpl.executeImport(createCustomerConsentDTO());
 
-		verify(mockAppender).doAppend(captorLoggingEvent.capture());
+		verify(mockAppender).append(captorLoggingEvent.capture());
 
-		LoggingEvent loggingEvent = captorLoggingEvent.getAllValues().get(0);
+		LogEvent loggingEvent = captorLoggingEvent.getAllValues().get(0);
 
 		assertThat(status)
 				.isFalse();
 		assertThat(loggingEvent.getMessage().toString())
-				.isEqualTo("Message[jobType=<null>,code=IE-31300,params={CUSTOMER_CONSENT_GUID},exception=<null>]");
+				.isEqualTo("Message[jobType=<null>,code=IE-31300,params={CUSTOMER_CONSENT_GUID},exception=null]");
 		assertThat(loggingEvent.getLevel())
 				.isEqualTo(Level.WARN);
 	}
@@ -180,14 +187,14 @@ public class CustomerConsentImporterImplTest {
 		customerConsentImporterImpl.initialize(new ImportContext(importConfiguration), mockSavingStrategy);
 		boolean status = customerConsentImporterImpl.executeImport(createCustomerConsentDTO());
 
-		verify(mockAppender).doAppend(captorLoggingEvent.capture());
+		verify(mockAppender).append(captorLoggingEvent.capture());
 
-		LoggingEvent loggingEvent = captorLoggingEvent.getAllValues().get(0);
+		LogEvent loggingEvent = captorLoggingEvent.getAllValues().get(0);
 
 		assertThat(status)
 				.isFalse();
 		assertThat(loggingEvent.getMessage().toString())
-				.isEqualTo("Message[jobType=<null>,code=IE-31302,params={CUSTOMER_CONSENT_GUID,DATA_POLICY_GUID},exception=<null>]");
+				.isEqualTo("Message[jobType=<null>,code=IE-31302,params={CUSTOMER_CONSENT_GUID,DATA_POLICY_GUID},exception=null]");
 		assertThat(loggingEvent.getLevel())
 				.isEqualTo(Level.WARN);
 	}
@@ -206,14 +213,14 @@ public class CustomerConsentImporterImplTest {
 		customerConsentImporterImpl.initialize(new ImportContext(importConfiguration), mockSavingStrategy);
 		boolean status = customerConsentImporterImpl.executeImport(createCustomerConsentDTO());
 
-		verify(mockAppender).doAppend(captorLoggingEvent.capture());
+		verify(mockAppender).append(captorLoggingEvent.capture());
 
-		LoggingEvent loggingEvent = captorLoggingEvent.getAllValues().get(0);
+		LogEvent loggingEvent = captorLoggingEvent.getAllValues().get(0);
 
 		assertThat(status)
 				.isFalse();
 		assertThat(loggingEvent.getMessage().toString())
-				.isEqualTo("Message[jobType=<null>,code=IE-31301,params={CUSTOMER_CONSENT_GUID,CUSTOMER_GUID},exception=<null>]");
+				.isEqualTo("Message[jobType=<null>,code=IE-31301,params={CUSTOMER_CONSENT_GUID,CUSTOMER_GUID},exception=null]");
 		assertThat(loggingEvent.getLevel())
 				.isEqualTo(Level.WARN);
 	}

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>references</name>
+
+		<plan>
+			<name>read-references</name>
+			<description><![CDATA[Read some information for user.]]></description>
+			<step>
+				<description><![CDATA[Read countries and buyer roles..]]></description>
+				<start>references</start>
+				<follow-link>{references-rel}</follow-link>
+				<result>references</result>
+			</step>
+		</plan>
+	</family>
+</definitions>

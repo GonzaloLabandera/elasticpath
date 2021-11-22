@@ -623,6 +623,14 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.service.customer.CustomerProfileAttributeService. */
 	public static final String CUSTOMER_PROFILE_ATTRIBUTE_SERVICE = "customerProfileAttributeService";
 
+	/** bean id for implementation of com.elasticpath.persistence.support.impl.CustomerCriterionImpl. */
+	public static final String CUSTOMER_CRITERION = "customerCriterion";
+
+	/** bean id for implementation of com.elasticpath.persistence.support.impl.AccountCriterionImpl. */
+	public static final String ACCOUNT_CRITERION = "accountCriterion";
+
+	/** bean id for implementation of com.elasticpath.sellingchannel.inventory.impl.ProductInventoryShoppingServiceImpl. */
+	public static final String PRODUCT_INVENTORY_SHOPPING_SERVICE = "productInventoryShoppingService";
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	// Content Wrapper Repository
@@ -1657,25 +1665,6 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl. */
 	public static final String CUSTOMER_CONSENT = "customerConsent";
-	/**
-	 * Bean id for Shopping cart validation context.
-	 */
-	public static final String SHOPPING_CART_VALIDATION_CONTEXT = "shoppingCartValidationContext";
-
-	/**
-	 * Bean id for Shopping item validation context.
-	 */
-	public static final String SHOPPING_ITEM_VALIDATION_CONTEXT = "shoppingItemValidationContext";
-
-	/**
-	 * Bean id for Shopping item validation context.
-	 */
-	public static final String SHOPPING_ITEM_DTO_VALIDATION_CONTEXT = "shoppingItemDtoValidationContext";
-
-	/**
-	 * Bean id for Product sku validation context.
-	 */
-	public static final String PRODUCT_SKU_VALIDATION_CONTEXT = "productSkuValidationContext";
 
 	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl. */
 	public static final String CUSTOMER_CONSENT_HISTORY = "customerConsentHistory";
@@ -1849,6 +1838,24 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.service.permissions.RoleToPermissionsMappingService. */
 	public static final String ROLE_TO_PERMISSION_MAPPING_SERVICE = "roleToPermissionMappingService";
+
+	/** bean id for implementation of com.elasticpath.service.customer.AddressService. */
+	public static final String ADDRESS_SERVICE = "addressService";
+
+	/** bean id for obtaining an instance of com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper. */
+	public static final String MODIFIER_FIELDS_MAP_WRAPPER = "modifierFieldsMapWrapper";
+
+	/** bean id for implementation of com.elasticpath.domain.CustomerClosure. */
+	public static final String CUSTOMER_CLOSURE = "customerClosure";
+
+	/** bean id for implementation of {@link com.elasticpath.commons.util.impl.VersionService}. */
+	public static final String VERSION_SERVICE = "versionService";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.rules.RuleSetLoadTuner}. */
+	public static final String RULE_SET_LOAD_TUNER = "ruleSetLoadTuner";
+
+	/** bean id for implementation of {@link com.elasticpath.xpf.context.builders.ProductSkuValidationContextBuilder}. */
+	public static final String PRODUCT_SKU_VALIDATION_CONTEXT_BUILDER = "xpfProductSkuValidationContextBuilder";
 
 	private ContextIdNames() {
 		// Do not instantiate this class

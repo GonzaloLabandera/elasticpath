@@ -61,7 +61,7 @@ public interface PreCaptureCheckoutActionContext extends CheckoutActionContext {
 	List<OrderHold> getOrderHolds();
 
 	/**
-	 * Add a potential order hold to this context for later evaluation by an {@link OrderHoldStrategy}.
+	 * Add a potential order hold to this context for later evaluation.
 	 *
 	 * @param orderHold - the potential order hold to add to this context for later evaluation
 	 */

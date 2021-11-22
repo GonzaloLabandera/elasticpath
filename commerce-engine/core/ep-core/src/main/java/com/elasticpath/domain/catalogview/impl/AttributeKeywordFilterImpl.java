@@ -10,8 +10,9 @@ import java.util.Map;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.SeoConstants;
@@ -40,7 +41,7 @@ public class AttributeKeywordFilterImpl extends AbstractFilterImpl<AttributeKeyw
 	
 	private String displayName;
 
-	private static final Logger LOG = Logger.getLogger(AttributeKeywordFilterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AttributeKeywordFilterImpl.class);
 	
 	private String alias;
 

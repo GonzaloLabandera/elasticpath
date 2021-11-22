@@ -6,7 +6,7 @@ package com.elasticpath.domain.shoppingcart;
 import java.util.Map;
 
 import com.elasticpath.domain.DatabaseLastModifiedDate;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartStatus;
 
 /**
@@ -54,7 +54,9 @@ public interface ShoppingCartMemento extends ShoppingList, DatabaseLastModifiedD
 	 *
 	 * @param name The name of the field to assign.
 	 * @param value The value to assign to the field.
+	 * @deprecated use {@link #getModifierFields().put()}
 	 */
+	@Deprecated
 	void setCartDataFieldValue(String name, String value);
 
 	/**
@@ -63,21 +65,19 @@ public interface ShoppingCartMemento extends ShoppingList, DatabaseLastModifiedD
 	 *
 	 * @param name The name of the field.
 	 * @return The current value of the field or null.
+	 * @deprecated use {@link #getModifierFields().get()}
 	 */
+	@Deprecated
 	String getCartDataFieldValue(String name);
 
 
 	/**
 	 * Gets the cart data for the cart.
 	 * @return the cart data.
+	 * @deprecated use {@link #getModifierFields().getMap()}
 	 */
-	Map<String, CartData> getCartData();
-
-	/**
-	 * Sets the cart data for the cart.
-	 * @param cartData the cart data
-	 */
-	void setCartData(Map<String, CartData> cartData);
+	@Deprecated
+	Map<String, String> getCartData();
 
 	/**
 	 * Whether this cart is the default cart for the shopper.
@@ -91,4 +91,9 @@ public interface ShoppingCartMemento extends ShoppingList, DatabaseLastModifiedD
 	 */
 	void setDefault(boolean isDefaultCart);
 
+	/**
+	 * Returns the map wrapper with cart modifier fields.
+	 * @return {@link ModifierFieldsMapWrapper};
+	 */
+	ModifierFieldsMapWrapper getModifierFields();
 }

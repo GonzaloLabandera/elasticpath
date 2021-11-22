@@ -8,7 +8,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

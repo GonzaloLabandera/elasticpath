@@ -8,8 +8,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -35,6 +36,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.cmclient.store.views.IStoreMarketingInnerTab;
 import com.elasticpath.service.catalog.CatalogService;
@@ -54,7 +56,7 @@ public class PromotionsSearchTab implements SelectionListener, IStoreMarketingIn
 	 */
 	public static final String ID_PROMOTIONS_SEARCH_VIEW = PromotionsSearchTab.class.getName();
 
-	private static final Logger LOG = Logger.getLogger(PromotionsSearchTab.class);
+	private static final Logger LOG = LogManager.getLogger(PromotionsSearchTab.class);
 
 	// The maximum length of text for codes
 	private static final int CODE_TEXT_LENGTH = 100;
@@ -475,7 +477,9 @@ public class PromotionsSearchTab implements SelectionListener, IStoreMarketingIn
 		searchCriteria.setStoreCodes(storeCodes.asSet());
 
 		final RuleSetService ruleSetService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
-		final RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO);
+		final RuleSetLoadTuner ruleSetLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER,
+				RuleSetLoadTuner.class);
+		final RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO, ruleSetLoadTuner);
 		searchCriteria.setRuleSetUid(String.valueOf(ruleSet.getUidPk()));
 	}
 
@@ -493,7 +497,9 @@ public class PromotionsSearchTab implements SelectionListener, IStoreMarketingIn
 		}
 
 		final RuleSetService ruleSetService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
-		final RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO);
+		final RuleSetLoadTuner ruleSetLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER,
+				RuleSetLoadTuner.class);
+		final RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO, ruleSetLoadTuner);
 		searchCriteria.setRuleSetUid(String.valueOf(ruleSet.getUidPk()));
 	}
 

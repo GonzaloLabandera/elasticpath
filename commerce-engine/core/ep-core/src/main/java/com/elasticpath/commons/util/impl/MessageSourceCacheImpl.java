@@ -15,8 +15,9 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 
@@ -32,7 +33,7 @@ import com.elasticpath.commons.util.MessageSourceCache;
 @SuppressWarnings("PMD.GodClass")
 public class MessageSourceCacheImpl implements MessageSourceCache, InvalidatableCache {
 
-	private static final Logger LOG = Logger.getLogger(MessageSourceCacheImpl.class);
+	private static final Logger LOG = LogManager.getLogger(MessageSourceCacheImpl.class);
 
 	private static final String DEFAULT = "default";
 	private static final String SEPARATOR = "_";

@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -177,19 +177,8 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testGetAddresses() {
-		final List<CustomerAddress> addresses = customerImpl.getAddresses();
+		final List<CustomerAddress> addresses = customerImpl.getTransientAddresses();
 		assertThat(addresses).isEmpty();
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.CustomerImpl.setAddresss(List)'.
-	 */
-	@Test
-	public void testSetAddresses() {
-		final List<CustomerAddress> addressList = new ArrayList<>();
-		customerImpl.setAddresses(addressList);
-		final List<CustomerAddress> savedAddresses = customerImpl.getAddresses();
-		assertThat(savedAddresses).isEqualTo(addressList);
 	}
 
 	/**
@@ -199,7 +188,7 @@ public class CustomerImplTest {
 	public void testAddAddress() {
 		final CustomerAddress address = new CustomerAddressImpl();
 		customerImpl.addAddress(address);
-		final List<CustomerAddress> savedAddresses = customerImpl.getAddresses();
+		final List<CustomerAddress> savedAddresses = customerImpl.getTransientAddresses();
 		assertThat(savedAddresses).contains(address);
 	}
 
@@ -219,7 +208,7 @@ public class CustomerImplTest {
 		final CustomerAddress address = new CustomerAddressImpl();
 		customerImpl.addAddress(address);
 		customerImpl.removeAddress(address);
-		final List<CustomerAddress> savedAddresses = customerImpl.getAddresses();
+		final List<CustomerAddress> savedAddresses = customerImpl.getTransientAddresses();
 		assertThat(savedAddresses).doesNotContain(address);
 	}
 
@@ -418,45 +407,6 @@ public class CustomerImplTest {
 	public void testSetCompany() {
 		this.customerImpl.setCompany(null);
 		assertThat(this.customerImpl.getCompany()).isNull();
-	}
-
-	/** When setting the preferred billing address, it should be in the list of addresses. */
-	@Test
-	public void testSetPreferredBillingIsInAddresses() {
-		CustomerAddress address = new CustomerAddressImpl();
-		assertThat(customerImpl.getAddresses()).doesNotContain(address);
-
-		customerImpl.setPreferredBillingAddress(address);
-		assertThat(customerImpl.getAddresses())
-			.as("Preferred address should a part of customer addresses")
-			.contains(address);
-	}
-
-	/** When setting the preferred shipping address, it should be in the list of addresses. */
-	@Test
-	public void testSetPreferredShippingIsInAddresses() {
-		CustomerAddress address = new CustomerAddressImpl();
-		assertThat(customerImpl.getAddresses()).doesNotContain(address);
-
-		customerImpl.setPreferredShippingAddress(address);
-		assertThat(customerImpl.getAddresses())
-			.as("Preferred address should a part of customer addresses")
-			.contains(address);
-	}
-
-	/** Test get address by Id method. */
-	@Test
-	public void testGetAddressById() {
-		CustomerAddress address1 = new CustomerAddressImpl();
-		address1.setUidPk(1);
-		address1.setCity("Burnaby");
-		CustomerAddress address2 = new CustomerAddressImpl();
-		address2.setUidPk(2);
-		address2.setCity("Vancouver");
-		customerImpl.addAddress(address1);
-		customerImpl.addAddress(address2);
-		assertThat(customerImpl.getAddressByUid(1)).isEqualTo(address1);
-		assertThat(customerImpl.getAddressByUid(2)).isEqualTo(address2);
 	}
 
 	/**

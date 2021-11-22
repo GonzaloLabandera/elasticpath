@@ -6,7 +6,7 @@ package com.elasticpath.validation.validators.impl;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerType;

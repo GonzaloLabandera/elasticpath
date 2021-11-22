@@ -11,7 +11,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.window.Window;
 import org.eclipse.rap.rwt.internal.lifecycle.LifeCycleUtil;
 import org.eclipse.rap.rwt.service.ServerPushSession;
@@ -31,7 +32,7 @@ import com.elasticpath.settings.domain.SettingValue;
  * Manages last access to ui threads, for locking purposes.
  */
 public class ApplicationLockManager {
-	private static final Logger LOG = Logger.getLogger(ApplicationLockManager.class);
+	private static final Logger LOG = LogManager.getLogger(ApplicationLockManager.class);
 
 	private static final long SECONDS_IN_MS = 1000L;
 	private static final long MINUTES_IN_SECONDS = 60L;

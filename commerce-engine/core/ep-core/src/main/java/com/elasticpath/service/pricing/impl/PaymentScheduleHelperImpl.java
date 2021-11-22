@@ -25,7 +25,7 @@ public class PaymentScheduleHelperImpl implements PaymentScheduleHelper {
 	private SkuOption frequencyOption;
 	private SkuOptionService skuOptionService;
 	private BeanFactory beanFactory;
-	
+
 	/**
 	 * The option key to be used for accessing the sku options values for a payment schedule.
 	 * 
@@ -36,6 +36,13 @@ public class PaymentScheduleHelperImpl implements PaymentScheduleHelper {
 	 * The sku option value for skus that do not have recurring pricing, but the product type has recurring pricing.
 	 */
 	public static final String PAY_NOW_OPTION_VALUE_KEY = "NA";
+
+	/**
+	 * Init.
+	 */
+	public void init() {
+		frequencyOption = skuOptionService.findByKey(FREQUENCY_OPTION_KEY);
+	}
 	
 	/**
 	 * {@inheritDoc} The payment schedule will be created based on the sku option values. The implementation caches
@@ -124,9 +131,6 @@ public class PaymentScheduleHelperImpl implements PaymentScheduleHelper {
 	}
 	
 	private SkuOption getFrequencyOption() {
-		if (frequencyOption == null) {
-			frequencyOption = skuOptionService.findByKey(FREQUENCY_OPTION_KEY);
-		}
 		return frequencyOption;
 	}
 	

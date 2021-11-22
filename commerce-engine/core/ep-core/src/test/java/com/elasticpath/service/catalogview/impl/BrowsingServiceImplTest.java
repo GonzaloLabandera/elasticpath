@@ -150,12 +150,6 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 
 		mockCustomerSession = getContext().mock(CustomerSession.class);
 		mockShoppingCart = getContext().mock(ShoppingCart.class);
-		getContext().checking(new Expectations() {
-			{
-				allowing(mockShoppingCart).setCustomerSession(mockCustomerSession);
-				atLeast(1).of(mockCustomerSession).setShopper(with(any(Shopper.class)));
-			}
-		});
 
 		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMementoAndCustomerAndCustomerSessionAndShoppingCart(null,
 				mockCustomerSession, mockShoppingCart);

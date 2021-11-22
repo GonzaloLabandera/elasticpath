@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<bean id="xpfAttributeConverter" class="com.elasticpath.xpf.converters.AttributeConverter" >
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil" />
+	</bean>
+
+	<bean id="xpfAttributeValueConverter" class="com.elasticpath.xpf.converters.AttributeValueConverter" >
+		<property name="xpfAttributeConverter" ref="xpfAttributeConverter"/>
+	</bean>
+
+	<bean id="xpfCatalogConverter" class="com.elasticpath.xpf.converters.CatalogConverter" />
+
+	<bean id="xpfCategoryConverter" class="com.elasticpath.xpf.converters.CategoryConverter" >
+		<property name="xpfCatalogConverter" ref="xpfCatalogConverter"/>
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil" />
+	</bean>
+
+	<bean id="xpfCustomerConverter" class="com.elasticpath.xpf.converters.CustomerConverter">
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil" />
+	</bean>
+
+	<bean id="xpfPriceConverter" class="com.elasticpath.xpf.converters.PriceConverter" />
+
+	<bean id="xpfProductSkuOptionConverter" class="com.elasticpath.xpf.converters.ProductSkuOptionConverter" >
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil" />
+	</bean>
+
+	<bean id="xpfProductSkuOptionValueConverter" class="com.elasticpath.xpf.converters.ProductSkuOptionValueConverter" >
+		<property name="xpfProductSkuOptionConverter" ref="xpfProductSkuOptionConverter"/>
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil" />
+	</bean>
+
+	<bean id="xpfStoreConverter" class="com.elasticpath.xpf.converters.StoreConverter">
+		<property name="xpfCatalogConverter" ref="xpfCatalogConverter" />
+		<property name="xpfCartTypeConverter" ref="xpfCartTypeConverter" />
+	</bean>
+
+	<bean id="xpfSessionConverter" class="com.elasticpath.xpf.converters.SessionConverter" />
+
+	<bean id="xpfShopperConverter" class="com.elasticpath.xpf.converters.ShopperConverter" >
+		<property name="xpfStoreConverter" ref="xpfStoreConverter"/>
+		<property name="xpfSessionConverter" ref="xpfSessionConverter"/>
+		<property name="xpfCustomerConverter" ref="xpfCustomerConverter"/>
+		<property name="storeService" ref="storeService"/>
+	</bean>
+
+	<bean id="xpfProductConverter" class="com.elasticpath.xpf.converters.ProductConverter">
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil" />
+		<property name="xpfCategoryConverter" ref="xpfCategoryConverter" />
+		<property name="xpfProductTypeConverter" ref="xpfProductTypeConverter" />
+	</bean>
+
+	<bean id="xpfProductSkuConverter" class="com.elasticpath.xpf.converters.ProductSkuConverter">
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil" />
+		<property name="xpfProductSkuOptionValueConverter" ref="xpfProductSkuOptionValueConverter" />
+		<property name="xpfProductConverter" ref="xpfProductConverter"/>
+		<property name="xpfProductBundleConverter" ref="xpfProductBundleConverter"/>
+	</bean>
+
+	<bean id="xpfBundleConstituentConverter" class="com.elasticpath.xpf.converters.BundleConstituentConverter">
+		<property name="xpfProductConverter" ref="xpfProductConverter"/>
+		<property name="xpfProductSkuConverter" ref="xpfProductSkuConverter"/>
+	</bean>
+
+	<bean id="xpfProductBundleConverter" class="com.elasticpath.xpf.converters.ProductBundleConverter">
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil" />
+		<property name="xpfCategoryConverter" ref="xpfCategoryConverter" />
+		<property name="xpfBundleConstituentConverter" ref="xpfBundleConstituentConverter" />
+		 <property name="xpfProductTypeConverter" ref="xpfProductTypeConverter" />
+	</bean>
+
+	<bean id="xpfProductSkuValidationContextBuilder" class="com.elasticpath.xpf.context.builders.impl.ProductSkuValidationContextBuilderImpl">
+		<property name="xpfProductSkuConverter" ref="xpfProductSkuConverter"/>
+		<property name="xpfShopperConverter" ref="xpfShopperConverter"/>
+		<property name="xpfPriceConverter" ref="xpfPriceConverter"/>
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil"/>
+		<property name="priceLookupFacade" ref="priceLookupFacade"/>
+	</bean>
+
+	<bean id="xpfHttpTagSetContextBuilder" class="com.elasticpath.xpf.context.builders.impl.HttpTagSetContextBuilderImpl">
+		<property name="storeService" ref="storeService"/>
+		<property name="storeConverter" ref="xpfStoreConverter"/>
+ 	</bean>
+
+	<bean id="xpfShoppingCartValidationContextBuilder" class="com.elasticpath.xpf.context.builders.impl.ShoppingCartValidationContextBuilderImpl">
+		<property name="shoppingCartConverter" ref="xpfShoppingCartConverter"/>
+		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
+		<property name="shippingOptionService" ref="shippingOptionService"/>
+		<property name="xpfShippingOptionConverter" ref="xpfShippingOptionConverter"/>
+	</bean>
+
+	<bean id="xpfShoppingItemConverter" class="com.elasticpath.xpf.converters.ShoppingItemConverter">
+		<property name="productSkuLookup" ref="productSkuLookup"/>
+		<property name="productSkuConverter" ref="xpfProductSkuConverter"/>
+	</bean>
+
+	<bean id="xpfShoppingCartConverter" class="com.elasticpath.xpf.converters.ShoppingCartConverter">
+		<property name="xpfShoppingItemConverter" ref="xpfShoppingItemConverter"/>
+		<property name="xpfAddressConverter" ref="xpfAddressConverter"/>
+		<property name="xpfContactConverter" ref="xpfContactConverter"/>
+		<property name="xpfShippingOptionConverter" ref="xpfShippingOptionConverter"/>
+		<property name="xpfShopperConverter" ref="xpfShopperConverter"/>
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="xpfShoppingItemDtoConverter" class="com.elasticpath.xpf.converters.ShoppingItemDtoConverter">
+		<property name="productSkuConverter" ref="xpfProductSkuConverter"/>
+		<property name="productSkuLookup" ref="productSkuLookup"/>
+	</bean>
+
+	<bean id="xpfShoppingItemValidationContextBuilder" class="com.elasticpath.xpf.context.builders.impl.ShoppingItemValidationContextBuilderImpl">
+		<property name="xpfProductSkuConverter" ref="xpfProductSkuConverter"/>
+		<property name="xpfShopperConverter" ref="xpfShopperConverter"/>
+		<property name="xpfShoppingCartConverter" ref="xpfShoppingCartConverter"/>
+		<property name="xpfShoppingItemConverter" ref="xpfShoppingItemConverter"/>
+		<property name="xpfShoppingItemDtoConverter" ref="xpfShoppingItemDtoConverter"/>
+		<property name="xpfPriceConverter" ref="xpfPriceConverter"/>
+		<property name="xpfXPFConverterUtil" ref="xpfXPFConverterUtil"/>
+		<property name="productSkuLookup" ref="productSkuLookup"/>
+		<property name="priceLookupFacade" ref="priceLookupFacade"/>
+		<property name="xpfShoppingItemValidationContextBuilder" ref="xpfShoppingItemValidationContextBuilder" />
+	</bean>
+
+	<bean id="xpfXPFConverterUtil" class="com.elasticpath.xpf.converters.XPFConverterUtil">
+		<property name="xpfAttributeValueConverter" ref="xpfAttributeValueConverter"/>
+		<property name="xpfProductSkuValidationContextBuilder" ref="xpfProductSkuValidationContextBuilder"/>
+		<property name="storeService" ref="storeService" />
+	</bean>
+
+	<bean id="xpfAddressConverter" class="com.elasticpath.xpf.converters.AddressConverter">
+	</bean>
+
+	<bean id="xpfContactConverter" class="com.elasticpath.xpf.converters.ContactConverter">
+	</bean>
+
+	<bean id="xpfSettingValueConverter" class="com.elasticpath.xpf.converters.SettingValueConverter"/>
+
+	<bean id="xpfShippingOptionConverter" class="com.elasticpath.xpf.converters.ShippingOptionConverter" />
+
+	<bean id="xpfModifierFieldConverter" class="com.elasticpath.xpf.converters.ModifierFieldConverter" >
+		<property name="xpfModifierFieldOptionConverter" ref="xpfModifierFieldOptionConverter" />
+ 	</bean>
+
+	<bean id="xpfModifierGroupConverter" class="com.elasticpath.xpf.converters.ModifierGroupConverter">
+		<property name="xpfModifierFieldConverter" ref="xpfModifierFieldConverter" />
+	</bean>
+
+	<bean id="xpfCartTypeConverter" class="com.elasticpath.xpf.converters.CartTypeConverter">
+		<property name="xpfModifierGroupConverter" ref="xpfModifierGroupConverter" />
+	</bean>
+
+	<bean id="xpfModifierFieldOptionConverter" class="com.elasticpath.xpf.converters.ModifierFieldOptionConverter" />
+
+	<bean id="xpfProductTypeConverter" class="com.elasticpath.xpf.converters.ProductTypeConverter">
+		<property name="xpfModifierGroupConverter" ref="xpfModifierGroupConverter" />
+	</bean>
+
+	<bean id="structuredErrorMessageConverter" class="com.elasticpath.xpf.converters.StructuredErrorMessageConverter">
+		<property name="structuredErrorMessageTypeConverter" ref="structuredErrorMessageTypeConverter" />
+		<property name="structuredErrorResolutionConverter" ref="structuredErrorResolutionConverter" />
+	</bean>
+
+	<bean id="structuredErrorMessageTypeConverter" class="com.elasticpath.xpf.converters.StructuredErrorMessageTypeConverter">
+	</bean>
+
+	<bean id="structuredErrorResolutionConverter" class="com.elasticpath.xpf.converters.StructuredErrorResolutionConverter">
+	</bean>
+
+	<bean id="xpfStructuredErrorMessageConverter" class="com.elasticpath.xpf.converters.XPFStructuredErrorMessageConverter">
+		<property name="xpfStructuredErrorMessageTypeConverter" ref="xpfStructuredErrorMessageTypeConverter" />
+		<property name="xpfStructuredErrorResolutionConverter" ref="xpfStructuredErrorResolutionConverter" />
+	</bean>
+
+	<bean id="xpfStructuredErrorMessageTypeConverter" class="com.elasticpath.xpf.converters.XPFStructuredErrorMessageTypeConverter">
+	</bean>
+
+	<bean id="xpfStructuredErrorResolutionConverter" class="com.elasticpath.xpf.converters.XPFStructuredErrorResolutionConverter">
+	</bean>
+
+	<bean id="xpfOrderHoldConverter" class="com.elasticpath.xpf.converters.OrderHoldConverter">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+</beans>

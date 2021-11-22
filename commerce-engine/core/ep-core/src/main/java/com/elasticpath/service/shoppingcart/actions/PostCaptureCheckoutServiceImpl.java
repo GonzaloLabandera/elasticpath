@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 
@@ -17,7 +18,7 @@ import com.elasticpath.base.exception.EpServiceException;
  */
 public class PostCaptureCheckoutServiceImpl implements PostCaptureCheckoutService {
 
-	private static final Logger LOG = Logger.getLogger(PostCaptureCheckoutServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PostCaptureCheckoutServiceImpl.class);
 
 	private List<ReversiblePostCaptureCheckoutAction> reversiblePostCaptureCheckoutActions;
 

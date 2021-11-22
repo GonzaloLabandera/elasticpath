@@ -5,7 +5,8 @@ package com.elasticpath.catalog.update.processor.connectivity.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.entity.fieldmetadata.FieldMetadata;
 import com.elasticpath.catalog.spi.CatalogProjectionPluginProvider;
@@ -20,7 +21,7 @@ import com.elasticpath.domain.modifier.ModifierGroup;
  */
 public class ModifierGroupUpdateProcessorImpl implements ModifierGroupUpdateProcessor {
 
-	private static final Logger LOGGER = Logger.getLogger(ModifierGroupUpdateProcessorImpl.class);
+	private static final Logger LOGGER = LogManager.getLogger(ModifierGroupUpdateProcessorImpl.class);
 
 	private final ProjectionService<ModifierGroup, FieldMetadata> projectionService;
 	private final FieldMetadataWriterRepository repository;
@@ -41,7 +42,7 @@ public class ModifierGroupUpdateProcessorImpl implements ModifierGroupUpdateProc
 
 	@Override
 	public void processModifierGroupCreated(final ModifierGroup modifierGroup) {
-		LOGGER.debug("ModifierGroup created: " + modifierGroup.getGuid());
+		LOGGER.debug("ModifierGroup created: {}", modifierGroup.getGuid());
 
 		final List<FieldMetadata> fieldMetadata = projectionService.buildAllStoresProjections(modifierGroup);
 		fieldMetadata.forEach(repository::write);
@@ -49,7 +50,7 @@ public class ModifierGroupUpdateProcessorImpl implements ModifierGroupUpdateProc
 
 	@Override
 	public void processModifierGroupUpdated(final ModifierGroup modifierGroup) {
-		LOGGER.debug("ModifierGroup updated: " + modifierGroup.getGuid());
+		LOGGER.debug("ModifierGroup updated: {}", modifierGroup.getGuid());
 
 		final List<FieldMetadata> fieldMetadata = projectionService.buildAllStoresProjections(modifierGroup);
 		fieldMetadata.forEach(repository::write);
@@ -57,7 +58,7 @@ public class ModifierGroupUpdateProcessorImpl implements ModifierGroupUpdateProc
 
 	@Override
 	public void processModifierGroupDeleted(final String guid) {
-		LOGGER.debug("ModifierGroup deleted: " + guid);
+		LOGGER.debug("ModifierGroup deleted: {}", guid);
 
 		repository.delete(guid);
 	}

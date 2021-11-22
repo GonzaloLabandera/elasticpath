@@ -65,7 +65,7 @@ public class DomainEventListenerTest {
 	@Before
 	public void setUp() throws Exception {
 		when(eventTypeFactory.isSupported(any(), any())).thenReturn(true);
-		when(lifecycleEventFilter.isDuplicate(any(), any(), any())).thenReturn(false);
+		when(lifecycleEventFilter.wasPreviouslyProcessed(any(), any(), any())).thenReturn(false);
 		when(entity.pcIsDirty()).thenReturn(true);
 		when(entity.getGuid()).thenReturn(SOME_GUID);
 		when(beanFactory.getSingletonBean(ContextIdNames.OUTBOX_MESSAGE_SERVICE, OutboxMessageService.class))

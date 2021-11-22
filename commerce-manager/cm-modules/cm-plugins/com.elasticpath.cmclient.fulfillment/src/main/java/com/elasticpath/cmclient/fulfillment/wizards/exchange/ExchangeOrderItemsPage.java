@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.fulfillment.wizards.exchange;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -47,7 +48,7 @@ public class ExchangeOrderItemsPage extends AbstractEPWizardPage<ExchangeModel> 
 	/**
 	 * The logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(ExchangeOrderItemsPage.class);
+	private static final Logger LOG = LogManager.getLogger(ExchangeOrderItemsPage.class);
 
 	private static final int CONTENT_MAX_HEIGHT = 550;
 	private static final int BOTTOM_MARGIN = 30;

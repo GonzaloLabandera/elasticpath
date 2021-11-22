@@ -59,7 +59,7 @@ public class RuleEngineRuleStrategy {
 	 */
 	public List<Long> evaluateApplicableRules(final ShoppingCart shoppingCart) {
 		final Shopper shopper = shoppingCart.getShopper();
-		final SimpleCache simpleCache = shopper.getCache();
+		final SimpleCache simpleCache = shopper.getCustomerSession().getCache();
 
 		if (!simpleCache.isInvalidated(CART_RULE_IDS)) {
 			return simpleCache.getItem(CART_RULE_IDS);
@@ -103,7 +103,7 @@ public class RuleEngineRuleStrategy {
 	}
 
 	private void cacheRuleIdsWithKey(final Shopper shopper, final List<Long> ruleIds) {
-		shopper.getCache().putItem(CART_RULE_IDS, ruleIds);
+		shopper.getCustomerSession().getCache().putItem(CART_RULE_IDS, ruleIds);
 	}
 
 	/**

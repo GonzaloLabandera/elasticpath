@@ -47,6 +47,7 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.shipping.PhysicalOrderShipmentShippingCostRefresher;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
@@ -76,6 +77,8 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 
 	private final Composite mainPane; //NOPMD
 
+	private final AddressService addressService;
+
 	/**
 	 * Constructor.
 	 *
@@ -91,6 +94,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		this.order = (Order) editor.getModel();
 		this.editor = editor;
 		this.mainPane = mainPane;
+		this.addressService = BeanLocator.getSingletonBean(ContextIdNames.ADDRESS_SERVICE, AddressService.class);
 		this.addressList = initializeAddressList();
 	}
 
@@ -98,11 +102,14 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		final List<Address> shipmentAddressList = new ArrayList<>();
 		shipmentAddressList.add(shipment.getShipmentAddress());
 
+		long customerOrAccountId;
 		if (order.getAccount() == null) {
-			shipmentAddressList.addAll(order.getCustomer().getAddresses());
+			customerOrAccountId = order.getCustomer().getUidPk();
 		} else {
-			shipmentAddressList.addAll(order.getAccount().getAddresses());
+			customerOrAccountId = order.getAccount().getUidPk();
 		}
+
+		shipmentAddressList.addAll(addressService.findByCustomer(customerOrAccountId));
 
 		List<Address> resultShipmentAddressList = new ArrayList<>();
 		for (Address address : shipmentAddressList) {

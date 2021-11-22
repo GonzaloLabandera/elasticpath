@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.exception.EpBindException;
 import com.elasticpath.commons.exception.EpTooLongBindException;

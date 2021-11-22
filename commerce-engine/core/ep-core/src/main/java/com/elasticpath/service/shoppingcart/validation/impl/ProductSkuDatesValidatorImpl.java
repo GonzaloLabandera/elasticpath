@@ -3,24 +3,37 @@
  */
 package com.elasticpath.service.shoppingcart.validation.impl;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Locale;
 
 import com.google.common.collect.ImmutableMap;
+import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidator;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.annotations.XPFEmbedded;
+import com.elasticpath.xpf.connectivity.annontation.XPFAssignment;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.extension.XPFExtensionPointImpl;
+import com.elasticpath.xpf.connectivity.extensionpoint.ProductSkuValidator;
 
 /**
  * Validator to check that the product sku is within dates.
  */
-public class ProductSkuDatesValidatorImpl implements ProductSkuValidator {
+@SuppressWarnings("checkstyle:magicnumber")
+@Extension
+@XPFEmbedded
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART_READ, priority = 1010)
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_CHECKOUT, priority = 1010)
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART, priority = 1010)
+public class ProductSkuDatesValidatorImpl extends XPFExtensionPointImpl implements ProductSkuValidator {
 
 	/**
 	 * Message id for this items no longer available.
@@ -32,37 +45,32 @@ public class ProductSkuDatesValidatorImpl implements ProductSkuValidator {
 	 */
 	private static final String MESSAGE_ID_NOT_YET_AVAILABLE = "item.not.yet.available";
 
+	@Autowired
 	private TimeService timeService;
 
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m", Locale.US);
+	private final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+			.withLocale(Locale.US)
+			.withZone(ZoneId.systemDefault());
 
 	@Override
-	public Collection<StructuredErrorMessage> validate(final ProductSkuValidationContext context) {
-		Date currentDate = timeService.getCurrentTime();
+	public Collection<XPFStructuredErrorMessage> validate(final XPFProductSkuValidationContext context) {
+		Instant currentDate = timeService.getCurrentTime().toInstant();
 
-		Date startDate = context.getProductSku().getEffectiveStartDate();
-		if (startDate != null && startDate.after(currentDate)) {
-			return Collections.singletonList(new StructuredErrorMessage(MESSAGE_ID_NOT_YET_AVAILABLE,
-					String.format("Item '%s' is not yet available for purchase", context.getProductSku().getSkuCode()),
-					ImmutableMap.of("item-code", context.getProductSku().getSkuCode(), "available-date", dateFormat.format(startDate))));
+		Instant startDate = context.getProductSku().getEffectiveStartDate();
+		if (startDate != null && startDate.isAfter(currentDate)) {
+			return Collections.singletonList(new XPFStructuredErrorMessage(MESSAGE_ID_NOT_YET_AVAILABLE,
+					String.format("Item '%s' is not yet available for purchase", context.getProductSku().getCode()),
+					ImmutableMap.of("item-code", context.getProductSku().getCode(), "available-date", formatter.format(startDate))));
 		}
 
-		Date endDate = context.getProductSku().getEffectiveEndDate();
-		if (endDate != null && endDate.before(currentDate)) {
-			return Collections.singletonList(new StructuredErrorMessage(MESSAGE_ID_NO_LONGER_AVAILABLE,
-					String.format("Item '%s' is no longer available for purchase", context.getProductSku().getSkuCode()),
-					ImmutableMap.of("item-code", context.getProductSku().getSkuCode(), "expiry-date", dateFormat.format(endDate))));
+		Instant endDate = context.getProductSku().getEffectiveEndDate();
+		if (endDate != null && endDate.isBefore(currentDate)) {
+			return Collections.singletonList(new XPFStructuredErrorMessage(MESSAGE_ID_NO_LONGER_AVAILABLE,
+					String.format("Item '%s' is no longer available for purchase", context.getProductSku().getCode()),
+					ImmutableMap.of("item-code", context.getProductSku().getCode(), "expiry-date", formatter.format(endDate))));
 		}
 
 		return Collections.emptyList();
 
-	}
-
-	protected TimeService getTimeService() {
-		return timeService;
-	}
-
-	public void setTimeService(final TimeService timeService) {
-		this.timeService = timeService;
 	}
 }

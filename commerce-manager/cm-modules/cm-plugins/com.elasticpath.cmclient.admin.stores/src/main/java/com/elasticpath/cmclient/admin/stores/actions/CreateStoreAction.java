@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin.stores.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -21,7 +22,7 @@ import com.elasticpath.cmclient.core.helpers.store.StoreEditorModel;
 public class CreateStoreAction extends Action {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(CreateStoreAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateStoreAction.class);
 
 	private final IWorkbenchPartSite site;
 

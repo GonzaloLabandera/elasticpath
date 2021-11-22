@@ -11,7 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ import com.elasticpath.test.util.Utils;
  */
 public class CartOrderServiceImplTest extends DbTestCase {
 
-	private static final Logger LOG = Logger.getLogger(CartOrderServiceImplTest.class);
+	private static final Logger LOG = LogManager.getLogger(CartOrderServiceImplTest.class);
 
 	private static final String INVALID_SHIPPING_OPTION_CODE = "INVALID_SHIPPING_OPTION_CODE";
 
@@ -482,7 +483,6 @@ public class CartOrderServiceImplTest extends DbTestCase {
 		shoppingCart.setShopper(shopper);
 		shoppingCart.setStore(store);
 		shoppingCart.getShoppingCartMemento().setGuid(cartGuid);
-		shoppingCart.setCustomerSession(customerSession);
 		shopper.setCurrentShoppingCart(shoppingCart);
 		return shoppingCartService.saveOrUpdate(shoppingCart);
 	}

@@ -17,6 +17,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessageType;
+import com.elasticpath.base.common.dto.StructuredErrorResolution;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 import com.elasticpath.validation.validators.util.DynamicModifierField;
 
@@ -39,17 +41,22 @@ public class ConstraintViolationTransformerImpl implements ConstraintViolationTr
 
 	@Override
 	public <T> List<StructuredErrorMessage> transform(final Set<ConstraintViolation<T>> errors) {
+		return transform(errors, null);
+	}
+
+	@Override
+	public <T> List<StructuredErrorMessage> transform(final Set<ConstraintViolation<T>> errors, final StructuredErrorResolution resolution) {
 		if (CollectionUtils.isEmpty(errors)) {
 			return Collections.emptyList();
 		}
 
 		return errors.stream()
-				.map(this::transform)
+				.map(constraintViolation -> transform(constraintViolation, resolution))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
 	}
 
-	private <T> StructuredErrorMessage transform(final ConstraintViolation<T> constraintViolation) {
+	private <T> StructuredErrorMessage transform(final ConstraintViolation<T> constraintViolation, final StructuredErrorResolution resolution) {
 		String constraintViolationId = constraintViolation.getMessageTemplate();
 
 		if (constraintViolationId.equalsIgnoreCase(constraintViolation.getMessage())) {
@@ -95,7 +102,7 @@ public class ConstraintViolationTransformerImpl implements ConstraintViolationTr
 			getInvalidValuesFromConstraintViolations(constraintViolation, data);
 		}
 
-		return new StructuredErrorMessage(messageId, debugMessage, data);
+		return new StructuredErrorMessage(StructuredErrorMessageType.ERROR, messageId, debugMessage, data, resolution);
 	}
 
 	private <T> void getInvalidValuesFromConstraintViolations(final ConstraintViolation<T> constraintViolation, final Map<String, String> data) {

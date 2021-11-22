@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.cache.Cache;
 import com.elasticpath.tags.Tag;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.domain.Condition;
@@ -27,11 +27,10 @@ import com.elasticpath.tags.service.ConditionOperatorEvaluator;
  * Evaluates conditions strings that are expressed in tag framework DSL format.
  */
 public class JavaConditionEvaluatorServiceImpl implements ConditionEvaluatorService {
-	private static final Logger LOG = Logger.getLogger(JavaConditionEvaluatorServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(JavaConditionEvaluatorServiceImpl.class);
 
 	private ConditionDSLBuilder conditionDSLBuilder;
 	private Map<String, ConditionOperatorEvaluator> conditionOperatorEvaluators;
-	private Cache<String, LogicalOperator> decomposedConditionCache;
 
 	@Override
 	public boolean evaluateConditionOnTags(final TagSet tags, final ConditionalExpression condition) {
@@ -49,8 +48,8 @@ public class JavaConditionEvaluatorServiceImpl implements ConditionEvaluatorServ
 		if (condition.getConditionString().isEmpty()) {
 			return true;
 		}
-		LogicalOperator logicalOperatorTree = decomposedConditionCache.get(
-				condition.getConditionString(), key -> conditionDSLBuilder.getLogicalOperationTree(key));
+		LogicalOperator logicalOperatorTree = conditionDSLBuilder.getLogicalOperationTree(condition.getConditionString());
+
 		boolean result = evaluateLogicalOperatorOnMap(tagMap, logicalOperatorTree);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Evaluated condition " + condition.getConditionString() + " with tagSet " + tagMap + " for result " + result);
@@ -134,13 +133,5 @@ public class JavaConditionEvaluatorServiceImpl implements ConditionEvaluatorServ
 	public void setConditionOperatorEvaluators(final Collection<ConditionOperatorEvaluator> conditionOperatorEvaluators) {
 		this.conditionOperatorEvaluators = conditionOperatorEvaluators.stream()
 				.collect(Collectors.toMap(ConditionOperatorEvaluator::getOperator, Function.identity()));
-	}
-
-	protected Cache<String, LogicalOperator> getDecomposedConditionCache() {
-		return decomposedConditionCache;
-	}
-
-	public void setDecomposedConditionCache(final Cache<String, LogicalOperator> decomposedConditionCache) {
-		this.decomposedConditionCache = decomposedConditionCache;
 	}
 }

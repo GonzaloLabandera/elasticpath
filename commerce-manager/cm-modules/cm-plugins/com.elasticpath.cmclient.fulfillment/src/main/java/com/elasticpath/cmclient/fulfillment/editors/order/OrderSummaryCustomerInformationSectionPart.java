@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.order;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -45,7 +46,7 @@ import com.elasticpath.cmclient.core.adapters.EmailHyperlinkAdapter;
  */
 public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClientEditorPageSectionPart implements IPropertyListener {
 
-	private static final Logger LOG = Logger.getLogger(OrderSummaryCustomerInformationSectionPart.class);
+	private static final Logger LOG = LogManager.getLogger(OrderSummaryCustomerInformationSectionPart.class);
 
 	private IEpLayoutComposite mainPane;
 

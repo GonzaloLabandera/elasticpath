@@ -4,13 +4,17 @@
 
 package com.elasticpath.service.datapolicy.readers;
 
+import static com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.toJSON;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.elasticpath.commons.util.Pair;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
+import com.elasticpath.service.datapolicy.impl.DataPointValue;
 
 /**
  * A data point value reader for any cart gift certificate field.
@@ -35,20 +39,18 @@ public class CartGiftCertificateFieldReader extends AbstractDataPointValueReader
 	@Override
 	public String getReadQuery(final Collection<String> dataPointKeys) {
 
-		String query = "SELECT itemData.uidPk,itemData.creationDate,itemData.lastModifiedDate,itemData.key,itemData.value"
+		String query = "SELECT items.uidPk,items.creationDate,items.lastModifiedDate,items.modifierFields"
 			.concat(" FROM #TABLE#")
 			.concat(" INNER JOIN #cartAlias#.allItems items")
-			.concat(" INNER JOIN items.itemData itemData")
 			.concat(" WHERE #shopperAlias#.uidPk = #cartAlias#.shopperUid")
-			.concat(" AND #shopperAlias#.customer.guid = ?1")
-			.concat(" AND itemData.key IN (:#paramList#)");
+			.concat(" AND #shopperAlias#.customer.guid = ?1");
 
 		return finalizedJPQLQuerys(query);
 	}
 
 	@Override
 	protected String[] getJPQLSearchList() {
-		return new String[]{"#TABLE#", "#cartAlias#", "#shopperAlias#", "#paramList#"};
+		return new String[]{"#TABLE#", "#cartAlias#", "#shopperAlias#"};
 	}
 
 	@Override
@@ -60,7 +62,7 @@ public class CartGiftCertificateFieldReader extends AbstractDataPointValueReader
 		String cartAlias = cartClassAndAliasPair.getSecond();
 		String shopperAlias = shopperClassAndAliasPair.getSecond();
 
-		return new String[]{getCSVFromTables(entityClassAndAliasPairs), cartAlias, shopperAlias, PARAMETER_LIST_NAME};
+		return new String[]{getCSVFromTables(entityClassAndAliasPairs), cartAlias, shopperAlias};
 	}
 
 	@Override
@@ -85,5 +87,19 @@ public class CartGiftCertificateFieldReader extends AbstractDataPointValueReader
 	@Override
 	public List<Pair<String, String>> getEntityClassAndAliasPairs() {
 		return Arrays.asList(CART_CLASS_ALIAS_PAIR, SHOPPER_CLASS_ALIAS_PAIR);
+	}
+
+	@Override
+	protected void setValue(final DataPointValue dpv, final Object[] row, final int attributeValueIndex) {
+		ModifierFieldsMapWrapper modifierFields = (ModifierFieldsMapWrapper) row[attributeValueIndex];
+
+		if (modifierFields != null) {
+			dpv.setValue(modifierFields.get(dpv.getKey()));
+		}
+	}
+
+	@Override
+	protected String rawDataKeyToString(final Object rawDataKey) {
+		return toJSON((ModifierFieldsMapWrapper) rawDataKey);
 	}
 }

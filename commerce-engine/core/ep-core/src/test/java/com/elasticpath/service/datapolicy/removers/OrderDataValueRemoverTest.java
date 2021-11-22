@@ -4,8 +4,11 @@
 
 package com.elasticpath.service.datapolicy.removers;
 
-import org.junit.runner.RunWith;
 
+import static com.elasticpath.service.datapolicy.removers.OrderDataValueRemover.SELECT_MODIFIER_FIELDS_JPQL;
+import static com.elasticpath.service.datapolicy.removers.OrderDataValueRemover.UPDATE_MODIFIER_FIELDS_JPQL;
+
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -13,7 +16,7 @@ import com.elasticpath.service.datapolicy.DataPointLocationEnum;
 
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 @RunWith(MockitoJUnitRunner.class)
-public class OrderDataValueRemoverTest extends AbstractDataPointValueRemoverTest {
+public class OrderDataValueRemoverTest extends AbstractJsonDataPointValueRemoverTest {
 
 	private static final String LOCATION = DataPointLocationEnum.ORDER_DATA.getName();
 
@@ -21,17 +24,22 @@ public class OrderDataValueRemoverTest extends AbstractDataPointValueRemoverTest
 	private OrderDataValueRemover remover;
 
 	@Override
-	protected String getLocation() {
-		return LOCATION;
-	}
-
-	@Override
 	protected AbstractDataPointValueRemover getRemover() {
 		return remover;
 	}
 
 	@Override
-	protected String getExpectedRemoveQuery(final boolean updateMoreFields) {
-		return "DELETE FROM OrderDataImpl data WHERE data.uidPk IN (:uidpks)";
+	protected String getLocation() {
+		return LOCATION;
+	}
+
+	@Override
+	protected String getSelectModifierFieldsJPQL() {
+		return SELECT_MODIFIER_FIELDS_JPQL;
+	}
+
+	@Override
+	protected String getUpdateModifierFieldsJPQL() {
+		return UPDATE_MODIFIER_FIELDS_JPQL;
 	}
 }

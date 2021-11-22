@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin.taxes.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -22,7 +23,7 @@ import com.elasticpath.domain.tax.TaxRegion;
 public class CreateTaxCategoryAction extends Action {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(CreateTaxCategoryAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateTaxCategoryAction.class);
 
 	/** Tax Categories table view. */
 	private final IEpTableViewer tableView;

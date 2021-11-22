@@ -150,6 +150,8 @@ public final class CoreMessages {
 
 	public String AbstractEpDialog_ButtonOK;
 
+	public String AbstractEpDialog_ButtonClose;
+
 	public String CreditCardControl_StartDateNotLessExpiryDate;
 
 	public String CreditCardControl_StartDateGreaterCurrentDate;
@@ -556,6 +558,16 @@ public final class CoreMessages {
 	public String ChangePaginationDialog_WindowTitle;
 	public String ChangePaginationDialog_Description;
 	public String ChangePaginationDialog_ResultsPerPage;
+
+	public String AboutApplicationDialog_Title;
+	public String AboutApplicationDialog_WindowTitle;
+	public String AboutApplicationDialog_Description;
+	public String AboutApplicationDialog_ApplicationTitle;
+	public String AboutApplicationDialog_Vendor;
+	public String AboutApplicationDialog_Version;
+	public String AboutApplicationDialog_SystemMetrics;
+	public String AboutApplicationDialog_SystemMetrics_Name_Heading;
+	public String AboutApplicationDialog_SystemMetrics_Values_Heading;
 
 	public String ChangeTimezoneDialog_Title;
 	public String ChangeTimezoneDialog_WindowTitle;

@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.rest.definition.carts.AddToCartFormsIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
@@ -26,7 +25,7 @@ import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 
 /**
  * Test for {@link AddToCartFormsLinksRepository}.
@@ -44,9 +43,8 @@ public class AddToCartFormsLinksRepositoryTest {
 	private MultiCartResolutionStrategy strategy;
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
-
 	@Mock
-	private CustomerSessionRepository customerSessionRepository;
+	private ShopperRepository shopperRepository;
 
 	@Test
 	public void testFindElements() {
@@ -62,13 +60,11 @@ public class AddToCartFormsLinksRepositoryTest {
 		when(holder.getStrategies()).thenReturn(Collections.singletonList(strategy));
 
 		when(strategy.isApplicable(subject)).thenReturn(true);
-		CustomerSession customerSession = mock(CustomerSession.class);
 		Shopper shopper = mock(Shopper.class);
 
-		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(customerSession));
+		when(shopperRepository.findOrCreateShopper()).thenReturn(Single.just(shopper));
 
 		when(strategy.supportsCreate(subject, shopper, SCOPE)).thenReturn(true);
-		when(customerSession.getShopper()).thenReturn(shopper);
 
 		repository.getElements(itemIdentifier)
 				.test()
@@ -91,13 +87,11 @@ public class AddToCartFormsLinksRepositoryTest {
 		when(holder.getStrategies()).thenReturn(Collections.singletonList(strategy));
 
 		when(strategy.isApplicable(subject)).thenReturn(true);
-		CustomerSession customerSession = mock(CustomerSession.class);
 		Shopper shopper = mock(Shopper.class);
 
-		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(customerSession));
+		when(shopperRepository.findOrCreateShopper()).thenReturn(Single.just(shopper));
 
 		when(strategy.supportsCreate(subject, shopper, SCOPE)).thenReturn(false);
-		when(customerSession.getShopper()).thenReturn(shopper);
 
 		repository.getElements(itemIdentifier)
 				.test()

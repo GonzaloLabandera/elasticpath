@@ -5,7 +5,7 @@ package com.elasticpath.rest.resource.offers.prototypes;
 
 import com.google.common.collect.ImmutableList;
 import io.reactivex.Single;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.rest.definition.items.CodesEntity;
 import com.elasticpath.rest.definition.offers.BatchOffersLookupFormResource;

@@ -10,7 +10,8 @@ import java.util.Date;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.UnhandledAlertException;
@@ -29,7 +30,7 @@ import com.elasticpath.selenium.util.Utility;
  */
 public class TestBase {
 	private boolean screenShotTaken;
-	private static final Logger LOGGER = Logger.getLogger(TestBase.class);
+	private static final Logger LOGGER = LogManager.getLogger(TestBase.class);
 	private ProblemOccurredDialog problemOccurredDialog;
 	private static final String MIME_TYPE_IMAGE = "image/png";
 	private LogEntries driverLogEntries;

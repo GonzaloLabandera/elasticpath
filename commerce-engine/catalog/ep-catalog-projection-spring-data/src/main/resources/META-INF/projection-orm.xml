@@ -70,5 +70,20 @@
 				WHERE p.disableDateTime > ?1 and p.disableDateTime IS NOT NULL
 			</query>
 		</named-query>
+
+		<named-query name="FIND_CATALOG_PROJECTION_GUIDS_BY_TYPE" >
+			<query>
+				SELECT p.guid
+				FROM ProjectionEntity p
+				WHERE p.projectionId.type = ?1 AND p.guid IS NOT NULL
+			</query>
+		</named-query>
+
+		<named-query name="DELETE_CATALOG_PROJECTION_BY_PROJECTION_GUID">
+			<query>
+				DELETE FROM ProjectionEntity p WHERE p.guid IN (:list)
+			</query>
+		</named-query>
+
 	</entity>
 </entity-mappings>

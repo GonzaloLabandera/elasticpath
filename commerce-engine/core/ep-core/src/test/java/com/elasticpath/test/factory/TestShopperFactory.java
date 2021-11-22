@@ -79,8 +79,7 @@ public final class TestShopperFactory {
 			final ShoppingCart shoppingCart) {
 		Shopper shopper = createNewShopperWithMementoAndCustomerAndShoppingCart(
 				customer, shoppingCart);
-		shopper.updateTransientDataWith(customerSession);
-		customerSession.setShopper(shopper);
+		shopper.setCustomerSession(customerSession);
 		return shopper;
 	}
 

@@ -21,6 +21,10 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-base</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
 		</dependency>
@@ -31,7 +35,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-jms-test-support</artifactId>
-			<version>${dce.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

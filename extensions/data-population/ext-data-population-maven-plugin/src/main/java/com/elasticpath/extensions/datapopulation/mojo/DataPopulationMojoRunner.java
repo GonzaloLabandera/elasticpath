@@ -6,10 +6,10 @@ package com.elasticpath.extensions.datapopulation.mojo;
 import java.io.File;
 import java.util.stream.Stream;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -139,13 +139,13 @@ public class DataPopulationMojoRunner extends AbstractMojo {
     }
 
     private void configureLog4j() {
-        Logger rootLogger = Logger.getRootLogger();
+		// Cast to the concrete Logger so we can add the appender
+		if (!((Logger) LogManager.getRootLogger()).getAppenders().isEmpty()) {
+			return;
+		}
 
-        if (rootLogger.getAllAppenders().hasMoreElements()) {
-            return;
-        }
-
-        rootLogger.setLevel(Level.WARN);
-        rootLogger.addAppender(new ConsoleAppender(new PatternLayout("[%p] %m%n")));
+		PatternLayout patternLayout = PatternLayout.newBuilder().withPattern("[%p] %m%n").build();
+		ConsoleAppender consoleAppender = ConsoleAppender.newBuilder().setLayout(patternLayout).build();
+		((Logger) LogManager.getRootLogger()).addAppender(consoleAppender);
     }
 }

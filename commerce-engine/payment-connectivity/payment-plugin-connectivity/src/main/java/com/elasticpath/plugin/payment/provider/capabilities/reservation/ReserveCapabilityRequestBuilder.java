@@ -18,6 +18,7 @@ public final class ReserveCapabilityRequestBuilder {
 	private Map<String, String> paymentInstrumentData;
 	private Map<String, String> customRequestData;
 	private OrderContext orderContext;
+	private int reserveCount;
 
 	private ReserveCapabilityRequestBuilder() {
 	}
@@ -76,6 +77,17 @@ public final class ReserveCapabilityRequestBuilder {
 	}
 
 	/**
+	 * Configures builder to build with rereserve count.
+	 *
+	 * @param reserveCount the rereserve count
+	 * @return the builder
+	 */
+	public ReserveCapabilityRequestBuilder withRereserveCount(final int reserveCount) {
+		this.reserveCount = reserveCount;
+		return this;
+	}
+
+	/**
 	 * Build payment capability request.
 	 *
 	 * @param request request prototype
@@ -98,6 +110,7 @@ public final class ReserveCapabilityRequestBuilder {
 		request.setPaymentInstrumentData(paymentInstrumentData);
 		request.setCustomRequestData(customRequestData);
 		request.setOrderContext(orderContext);
+		request.setRereserveCount(reserveCount);
 		return request;
 	}
 }

@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.search.FacetDTO;
 import com.elasticpath.domain.search.Facet;
@@ -22,7 +23,7 @@ import com.elasticpath.service.search.FacetService;
  */
 public class FacetExporter extends AbstractExporterImpl<Facet, FacetDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(FacetExporter.class);
+	private static final Logger LOG = LogManager.getLogger(FacetExporter.class);
 
 	private List<String> facetGuids;
 

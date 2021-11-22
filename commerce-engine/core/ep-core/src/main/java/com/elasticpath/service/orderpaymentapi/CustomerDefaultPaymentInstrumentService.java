@@ -26,6 +26,14 @@ public interface CustomerDefaultPaymentInstrumentService {
 	CustomerPaymentInstrument getDefaultForCustomer(Customer customer);
 
 	/**
+	 * Get default {@link CustomerPaymentInstrument} associated with {@link Customer} guid.
+	 *
+	 * @param customerGuid the {@link Customer} guid
+	 * @return default {@link CustomerPaymentInstrument}
+	 */
+	CustomerPaymentInstrument getDefaultForCustomerGuid(String customerGuid);
+
+	/**
 	 * Checks if this {@link Customer} has associated default {@link CustomerPaymentInstrument}.
 	 *
 	 * @param customer the {@link Customer} entity

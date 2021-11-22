@@ -58,10 +58,7 @@ public final class TestCustomerSessionFactory {
 	 */
 	public CustomerSession createNewCustomerSessionWithContext(final Shopper shopper) {
 		final CustomerSession customerSession = new CustomerSessionImpl();
-
-		customerSession.setShopper(shopper);
-		shopper.updateTransientDataWith(customerSession);
-
+		shopper.setCustomerSession(customerSession);
 		return customerSession;
 	}
 }

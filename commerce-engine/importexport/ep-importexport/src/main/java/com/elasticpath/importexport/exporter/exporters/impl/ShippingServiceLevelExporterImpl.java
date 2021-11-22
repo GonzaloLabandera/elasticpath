@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
@@ -26,7 +27,7 @@ import com.elasticpath.service.shipping.ShippingServiceLevelService;
  */
 public class ShippingServiceLevelExporterImpl extends AbstractExporterImpl<ShippingServiceLevel, ShippingServiceLevelDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(ShippingServiceLevelExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ShippingServiceLevelExporterImpl.class);
 
 	private ImportExportSearcher importExportSearcher;
 	private ShippingServiceLevelService shippingServiceLevelService;

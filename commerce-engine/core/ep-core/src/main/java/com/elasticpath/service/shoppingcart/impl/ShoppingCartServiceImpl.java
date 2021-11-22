@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.shopper.Shopper;
@@ -29,7 +29,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
@@ -43,7 +42,7 @@ import com.elasticpath.service.store.StoreService;
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl implements ShoppingCartService {
 	private static final String LIST_PARAMETER = "list";
-	private static final Logger LOG = Logger.getLogger(ShoppingCartServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ShoppingCartServiceImpl.class);
 
 	/** OpenJPA Query Name. */
 	protected static final String SHOPPING_CART_FIND_BY_GUID_EAGER = "SHOPPING_CART_FIND_BY_GUID_EAGER";
@@ -240,14 +239,19 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	}
 
 	@Override
-	public Map<String, CartData> getCartDescriptors(final String cartGuid) {
+	public Map<String, String> getCartDescriptors(final String cartGuid) {
 		ShoppingCart cartByGuid = findByGuid(cartGuid);
-		List<ModifierField> modifierFields = cartByGuid.getModifierFields();
-		Map<String, CartData> cartDataMap = cartByGuid.getCartData();
-		Map<String, CartData> cartDescriptorMap = new HashMap<>();
+		Map<String, String> cartDescriptorMap = new HashMap<>();
 
-		modifierFields.forEach(modifierField -> updateCartDescriptorMap(cartDataMap, cartDescriptorMap, modifierField));
+		Store store = cartByGuid.getStore();
 
+		if (store != null) {
+			List<ModifierField> modifierFields = store.getModifierFields();
+			Map<String, String> cartDataMap = cartByGuid.getModifierFields().getMap();
+
+
+			modifierFields.forEach(modifierField -> updateCartDescriptorMap(cartDataMap, cartDescriptorMap, modifierField));
+		}
 		return cartDescriptorMap;
 	}
 
@@ -261,18 +265,16 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	 * @param cartDescriptorMap cartDescriptorMap to be prepared with obtained key,value entry.
 	 * @param modifierField Modifier field for which the value needs to be obtained
 	 */
-	private void updateCartDescriptorMap(final Map<String, CartData> cartDataMap, final Map<String, CartData> cartDescriptorMap,
+	private void updateCartDescriptorMap(final Map<String, String> cartDataMap, final Map<String, String> cartDescriptorMap,
 			final ModifierField modifierField) {
-		CartData cartData;
+		String cartDataValue = null;
 		if (cartDataMap.containsKey(modifierField.getCode())) {
-			cartData = cartDataMap.get(modifierField.getCode());
+			cartDataValue = cartDataMap.get(modifierField.getCode());
 		} else if (StringUtils.isNotBlank(modifierField.getDefaultCartValue())) {
-			cartData = new CartData(modifierField.getCode(), modifierField.getDefaultCartValue());
-		} else {
-			cartData = new CartData(modifierField.getCode(), null);
+			cartDataValue = modifierField.getDefaultCartValue();
 		}
 
-		cartDescriptorMap.put(modifierField.getCode(), cartData);
+		cartDescriptorMap.put(modifierField.getCode(), cartDataValue);
 	}
 
 	@Override
@@ -318,12 +320,12 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	}
 
 	@Override
-	public String findDefaultShoppingCartGuidByCustomerSession(final CustomerSession customerSession) throws EpServiceException {
+	public String findOrCreateDefaultCartGuidByShopper(final Shopper shopper) throws EpServiceException {
 
 		final List<String> cartGuids = getPersistenceEngine().retrieveByNamedQuery("DEFAULT_SHOPPING_CARTGUID_FIND_BY_SHOPPER_UID",
-			new Object[]{customerSession.getShopper().getUidPk()}, 0, 1);
+			new Object[]{shopper.getUidPk()}, 0, 1);
 		if (cartGuids.isEmpty()) {
-			ShoppingCart shoppingCart = findOrCreateDefaultCartByCustomerSession(customerSession);
+			ShoppingCart shoppingCart = findOrCreateDefaultCartByShopper(shopper);
 
 			// Call via getShoppingCartService necessary so that a transaction can be started
 			getShoppingCartService().saveIfNotPersisted(shoppingCart);
@@ -340,10 +342,8 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 
 	}
 
-
-	@Deprecated
 	@Override
-	public ShoppingCart findOrCreateByShopper(final Shopper shopper) throws EpServiceException {
+	public ShoppingCart findOrCreateDefaultCartByShopper(final Shopper shopper) throws EpServiceException {
 
 		final List<ShoppingCartMemento> carts = getPersistenceEngine()
 			.withLoadTuners(getLoadTuners())
@@ -354,7 +354,10 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 
 		restoreDependents(shoppingCartMemento);
 
-		return createShoppingCart(shopper, shoppingCartMemento);
+		ShoppingCart shoppingCart = createShoppingCart(shopper, shoppingCartMemento);
+		shoppingCart.setDefault(true);
+		initializeDefaultCartModifierFields(shoppingCart);
+		return shoppingCart;
 	}
 
 	/**
@@ -375,25 +378,12 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 		return SHOPPING_CART_FIND_BY_GUID_EAGER;
 	}
 
-	@Override
-	public ShoppingCart findOrCreateDefaultCartByCustomerSession(final CustomerSession customerSession) throws EpServiceException {
-		try {
-			return findOrCreateDefaultCartByCustomerSessionInternal(customerSession);
-		} catch (EpServiceException e) {
-			// Retry the cart lookup operation in case an exception was thrown due to a race condition
-			// where another thread or service created the default cart at the same time.
-			return findOrCreateDefaultCartByCustomerSessionInternal(customerSession);
-		}
-	}
-
-	private ShoppingCart findOrCreateDefaultCartByCustomerSessionInternal(final CustomerSession customerSession) throws EpServiceException {
-		ShoppingCart shoppingCart = findOrCreateByShopper(customerSession.getShopper());
-		shoppingCart.setCustomerSession(customerSession);
-		shoppingCart.setDefault(true);
+	private void initializeDefaultCartModifierFields(final ShoppingCart shoppingCart) {
+		final Map<String, String> cartModifierFields = new HashMap<>();
 		getModifierFieldsWithDefaultValues(shoppingCart)
-				.forEach(modifierField -> updateCartDataFieldValueForDefaultCart(shoppingCart, modifierField));
+				.forEach(modifierField -> updateCartDataFieldValueForDefaultCart(shoppingCart, modifierField, cartModifierFields));
 
-		return shoppingCart;
+		shoppingCart.getModifierFields().putAll(cartModifierFields);
 	}
 
 	/**
@@ -403,21 +393,17 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	 * @param shoppingCart shoppingCart for which the cartData is to be set.
 	 * @param modifierField modifierField for which the cartData value is to be derived and set.
 	 */
-	private void updateCartDataFieldValueForDefaultCart(final ShoppingCart shoppingCart, final ModifierField modifierField) {
-		CartData cartData = shoppingCart.getCartData().get(modifierField.getCode());
-		String finalFieldValue = Optional.ofNullable(cartData)
-				.map(CartData::getValue)
-				.orElseGet(modifierField::getDefaultCartValue);
+	private void updateCartDataFieldValueForDefaultCart(final ShoppingCart shoppingCart, final ModifierField modifierField,
+														final Map<String, String> cartModifierFields) {
+		String cartDataValue = shoppingCart.getModifierFields().get(modifierField.getCode());
+		String finalFieldValue = StringUtils.defaultIfEmpty(cartDataValue, modifierField.getDefaultCartValue());
 
-		shoppingCart.setCartDataFieldValue(modifierField.getCode(), finalFieldValue);
+		cartModifierFields.put(modifierField.getCode(), finalFieldValue);
 	}
 
 	@Override
-	public ShoppingCart createByCustomerSession(final CustomerSession customerSession) {
-		ShoppingCart shoppingCart = createShoppingCart(customerSession.getShopper(), null);
-		shoppingCart.setShopper(customerSession.getShopper());
-		return shoppingCart;
-
+	public ShoppingCart createByShopper(final Shopper shopper) {
+		return createShoppingCart(shopper, null);
 	}
 
 	@Override
@@ -457,12 +443,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 
 	@Override
 	public void touch(final String cartGuid) {
-		ShoppingCartMemento memento = loadShoppingCartMemento(cartGuid);
-		if (memento != null) {
-			memento.setLastModifiedDate(getTimeService().getCurrentTime());
-		}
-
-		getPersistenceEngine().saveOrUpdate(memento);
+		getPersistenceEngine().executeNamedQuery("TOUCH_THE_CART", getTimeService().getCurrentTime(), cartGuid);
 	}
 
 	@Override
@@ -528,25 +509,17 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	}
 
 	@Override
-	public Map<String, List<CartData>> findCartDataForCarts(final List<String> cartGuids) {
+	public Map<String, List<Map<String, String>>> findCartDataForCarts(final List<String> cartGuids) {
 
-		Map<String, List<CartData>> result = new HashMap<>();
+		Map<String, List<Map<String, String>>> result = new HashMap<>();
 		List<Object[]> data = getPersistenceEngine().retrieveByNamedQueryWithList("FIND_CART_DATA_FOR_CARTS", "list", cartGuids);
-		data.forEach(objects -> {
+		data.forEach(row -> {
 
-			Object key = objects[0];
-			Object value = objects[1];
-			if (!(key instanceof String) || !(value instanceof CartData)) {
-				throw new EpServiceException("Data retrieved from database not in correct format");
-			}
-			String cartGuid = (String) key;
-			CartData cartData = (CartData) value;
-			List<CartData> cartDataList = result.get(cartGuid);
-			if (cartDataList == null) {
-				cartDataList = new ArrayList<>();
-			}
-			cartDataList.add(cartData);
-			result.put(cartGuid, cartDataList);
+			String cartGuid = (String) row[0];
+			ModifierFieldsMapWrapper cartModifierFields = (ModifierFieldsMapWrapper) row[1];
+
+			List<Map<String, String>> cartDataList = result.computeIfAbsent(cartGuid, key -> new ArrayList<>());
+			cartDataList.add(cartModifierFields.getMap());
 
 		});
 		return result;

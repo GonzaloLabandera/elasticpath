@@ -9,7 +9,7 @@ import static com.elasticpath.cmclient.admin.stores.editors.sortattributes.SortA
 import static com.elasticpath.cmclient.admin.stores.editors.sortattributes.SortAttributeTable.SORT_ATTRIBUTE_KEY_COLUMN;
 import static com.elasticpath.cmclient.admin.stores.editors.sortattributes.SortAttributeTable.SORT_ATTRIBUTE_TYPE_COLUMN;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;

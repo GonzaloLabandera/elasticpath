@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.elasticpath.extensions</groupId>
+		<artifactId>commerce-system-tests</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>performance-tests-parent</artifactId>
+	<version>0.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Performance Testing Framework Parent</name>
+
+	<modules>
+		<module>metabase-processor-plugin</module>
+		<module>metabase</module>
+		<module>definitions</module>
+	</modules>
+
+	<properties>
+		<ep.jms.host>localhost</ep.jms.host>
+		<ep.jms.port.tcp>61616</ep.jms.port.tcp>
+		<ep.jms.type>org.apache.activemq.pool.PooledConnectionFactory</ep.jms.type>
+		<ep.jms.factory>org.apache.activemq.jndi.JNDIReferenceFactory</ep.jms.factory>
+		<ep.jndi.factory>org.apache.tomcat.jdbc.pool.DataSourceFactory</ep.jndi.factory>
+		<ep.jms.url>tcp://${ep.jms.host}:${ep.jms.port.tcp}</ep.jms.url>
+	</properties>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven.javadoc.plugin.version}</version>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<!-- Make sure integration/system tests don't run during unit test phase. The failsafe plugin will take care of them -->
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

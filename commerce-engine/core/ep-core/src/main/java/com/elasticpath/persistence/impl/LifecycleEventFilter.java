@@ -50,24 +50,35 @@ public class LifecycleEventFilter {
 	}
 
 	/**
-	 * Determines if the lifecycle event has already been received.
+	 * Determines if the lifecycle event has already been processed.
 	 *
 	 * @param entityChangeType the type of change detected
 	 * @param entityClass the entity class
 	 * @param entityGuid the entity object guid
 	 * @return true if the lifecycle event has been seen before
 	 */
-	public boolean isDuplicate(final EventActionEnum entityChangeType, final Class<PersistenceCapable> entityClass, final String entityGuid) {
+	public boolean wasPreviouslyProcessed(final EventActionEnum entityChangeType, final Class<PersistenceCapable> entityClass,
+										  final String entityGuid) {
 		Set<LifecycleEventIdentifier> previousEvents = lifecycleEventsTL.get();
 		if (previousEvents == null) {
 			throw new EpServiceException("Attempt to call isDuplicate before transaction was started.");
 		}
 		LifecycleEventIdentifier lifecycleEventIdentifier = new LifecycleEventIdentifier(entityChangeType.getEventActionGroup(),
 				entityClass, entityGuid);
-		if (previousEvents.contains(lifecycleEventIdentifier)) {
-			return true;
-		}
+		return previousEvents.contains(lifecycleEventIdentifier);
+	}
+
+	/**
+	 * Indicates that the lifecycle event has been processed.
+	 *
+	 * @param entityChangeType the type of change detected
+	 * @param entityClass the entity class
+	 * @param entityGuid the entity object guid
+	 */
+	public void trackProcessed(final EventActionEnum entityChangeType, final Class<PersistenceCapable> entityClass, final String entityGuid) {
+		Set<LifecycleEventIdentifier> previousEvents = lifecycleEventsTL.get();
+		LifecycleEventIdentifier lifecycleEventIdentifier = new LifecycleEventIdentifier(entityChangeType.getEventActionGroup(),
+				entityClass, entityGuid);
 		previousEvents.add(lifecycleEventIdentifier);
-		return false;
 	}
 }

@@ -5,7 +5,8 @@ package com.elasticpath.catalog.batch.job;
 
 import static com.elasticpath.catalog.batch.CatalogJobRunnerImpl.CLEAN_UP_DATABASE_FLAG;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -18,7 +19,7 @@ import com.elasticpath.catalog.spi.service.CatalogService;
  */
 public class DatabaseCleanupTasklet implements Tasklet {
 
-	private static final Logger LOGGER = Logger.getLogger(DatabaseCleanupTasklet.class);
+	private static final Logger LOGGER = LogManager.getLogger(DatabaseCleanupTasklet.class);
 
 	private final CatalogService catalogService;
 	private final String projectionType;

@@ -9,8 +9,8 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<context:component-scan base-package="cucumber.runtime.java.spring"/>
 	<context:component-scan base-package="checkout"/>
 
-
 	<import resource="classpath:integration-core-context.xml"/>
+	<import resource="classpath:ep-test-application.xml" />
 	<import resource="classpath:integration-checkout-context.xml"/>
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/ep-itest-plugin.xml"/>
 	<import resource="classpath:persisters.xml"/>

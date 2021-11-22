@@ -120,7 +120,7 @@ Feature: Cart operations
   Scenario Outline: Don't allow deletion of cart line items that were added as a result of auto-selected bundle constituents
       Given I have item with code <ITEM_CODE> in my cart with quantity 2
       When I try to delete dependent lineitem from the cart
-      Then the HTTP status is conflict
+      Then the HTTP status code is 400
       And Structured error message contains:
         | Item 'physicalItemFromBundleWithPhysicalAndDigitalComponents_sku' is a bundle constituent that was automatically selected. |
 

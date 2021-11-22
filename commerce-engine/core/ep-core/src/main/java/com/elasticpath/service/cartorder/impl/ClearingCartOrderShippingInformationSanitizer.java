@@ -9,7 +9,8 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -33,7 +34,7 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
  * Implementation of {@link CartOrderShippingInformationSanitizer} that sets invalid GUIDs to null.
  */
 public class ClearingCartOrderShippingInformationSanitizer implements CartOrderShippingInformationSanitizer {
-	private static final Logger LOG = Logger.getLogger(ClearingCartOrderShippingInformationSanitizer.class);
+	private static final Logger LOG = LogManager.getLogger(ClearingCartOrderShippingInformationSanitizer.class);
 
 	private ShippingOptionService shippingOptionService;
 	private ShoppingCartService shoppingCartService;
@@ -107,7 +108,7 @@ public class ClearingCartOrderShippingInformationSanitizer implements CartOrderS
 			shopper.setCurrentShoppingCart(shoppingCart);
 		}
 
-		if (shoppingCart.getCustomerSession() == null) {
+		if (shopper.getCustomerSession() == null) {
 
 			final String storeCode = shopper.getStoreCode();
 			CustomerSession result = getCustomerSessionService().createWithShopper(shopper);

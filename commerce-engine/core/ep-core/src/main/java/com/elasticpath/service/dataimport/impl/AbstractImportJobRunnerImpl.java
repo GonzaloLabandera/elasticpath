@@ -16,7 +16,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -73,7 +74,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 
 	private static final String CAN_NOT_UPDATE_MESSAGE = "Cannot update entity because it does not exist";
 
-	private static final Logger LOG = Logger.getLogger(AbstractImportJobRunnerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractImportJobRunnerImpl.class);
 
 	private static final int TOTAL_ERRORS_MAX = 100;
 
@@ -298,7 +299,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 			final InvalidCatalogCodeMessage message) {
 
 		Object[] args = createImportFaultArgs(importField, colNum, row);
-		List<Object> list = Arrays.asList(args);
+		List<Object> list = new ArrayList<>(Arrays.asList(args));
 		list.addAll(message.getParameters());
 		return list.toArray();
 	}

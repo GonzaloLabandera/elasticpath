@@ -10,8 +10,9 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.collections.list.TreeList;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -57,7 +58,7 @@ public class VirtualCatalogDialog extends AbstractPolicyAwareDialog implements O
 	private static final int CODE_MAXLENGTH = 64;
 
 	/** The Logger. */
-	protected static final Logger LOG = Logger.getLogger(VirtualCatalogDialog.class);
+	protected static final Logger LOG = LogManager.getLogger(VirtualCatalogDialog.class);
 
 	private static final String CATALOG_NAME_FIELD_NAME = "name"; //$NON-NLS-1$
 

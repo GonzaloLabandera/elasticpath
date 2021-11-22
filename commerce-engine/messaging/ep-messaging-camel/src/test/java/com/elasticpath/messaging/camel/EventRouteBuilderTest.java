@@ -9,7 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.JndiRegistry;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +27,7 @@ import com.elasticpath.messaging.factory.impl.EventMessageFactoryImpl;
  */
 public class EventRouteBuilderTest extends AbstractCamelRouteBuilderTest<EventMessage, EventMessageObjectMapperImpl> {
 
-	private static final Logger LOG = Logger.getLogger(EventRouteBuilderTest.class);
+	private static final Logger LOG = LogManager.getLogger(EventRouteBuilderTest.class);
 
 	private static final String INCOMING_ENDPOINT_URI = "direct:orderEvents";
 

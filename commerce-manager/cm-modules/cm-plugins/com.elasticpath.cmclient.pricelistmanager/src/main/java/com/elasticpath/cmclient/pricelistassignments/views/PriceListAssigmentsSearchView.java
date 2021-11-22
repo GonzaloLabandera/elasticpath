@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.pricelistassignments.views;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 
@@ -46,7 +47,7 @@ public class PriceListAssigmentsSearchView extends AbstractCreateEditDeleteToolb
 					PriceListManagerImageRegistry.IMAGE_PRICE_LIST_ASSIGN_ADD				
 					);
 	
-	private static final Logger LOG = Logger.getLogger(PriceListAssigmentsSearchView.class);
+	private static final Logger LOG = LogManager.getLogger(PriceListAssigmentsSearchView.class);
 	
 	/** The View ID. */
 	public static final String VIEW_ID = "com.elasticpath.cmclient.pricelistassignments.views.PriceListAssigmentsSearchView";

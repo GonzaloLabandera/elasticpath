@@ -3,10 +3,10 @@
  */
 package com.elasticpath.epcoretool;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -44,7 +44,7 @@ public class EmbeddedEpCore {
 
 	private XmlBeanFactory beanFactory;
 
-	private static final Logger LOGGER = Logger.getRootLogger();
+	private static final Logger LOGGER = (Logger) LogManager.getRootLogger();
 
 	/**
 	 * The constructor for this will fully initialize a Spring application context with the beans in epcore in it and get the database ready to go.
@@ -220,14 +220,14 @@ public class EmbeddedEpCore {
 	 * Configure log4j.
 	 */
 	private void configureLog4j() {
-
-		if (LOGGER.getAllAppenders().hasMoreElements()) {
+		
+		if (!LOGGER.getAppenders().isEmpty()) {
 			return;
 		}
-
-		LOGGER.setLevel(Level.WARN);
-		LOGGER.addAppender(new ConsoleAppender(new PatternLayout("%-5p [%t]: %m%n")));
-
+		
+		PatternLayout patternLayout = PatternLayout.newBuilder().withPattern("%-5p [%t]: %m%n").build();
+		ConsoleAppender consoleAppender = ConsoleAppender.newBuilder().setLayout(patternLayout).build();
+		LOGGER.addAppender(consoleAppender);
 	}
 
 	/**

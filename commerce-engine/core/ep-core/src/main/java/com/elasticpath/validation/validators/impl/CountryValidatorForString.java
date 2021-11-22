@@ -7,7 +7,7 @@ import java.util.Set;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.domain.misc.Geography;
 import com.elasticpath.validation.constraints.ValidCountry;

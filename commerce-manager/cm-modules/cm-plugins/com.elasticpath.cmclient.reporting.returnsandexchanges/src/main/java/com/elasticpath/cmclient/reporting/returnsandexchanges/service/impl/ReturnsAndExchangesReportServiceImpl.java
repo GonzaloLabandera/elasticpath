@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
@@ -34,7 +35,7 @@ import com.elasticpath.service.reporting.ReportService;
  */
 public class ReturnsAndExchangesReportServiceImpl {
 
-	private static final Logger LOG = Logger.getLogger(ReturnsAndExchangesReportServiceImpl.class.getName());
+	private static final Logger LOG = LogManager.getLogger(ReturnsAndExchangesReportServiceImpl.class.getName());
 
 	// Order return sku query result indexes
 	private static final int DB_ORDER_RETURN_SKU_INDEX = 0;

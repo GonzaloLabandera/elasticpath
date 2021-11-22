@@ -7,6 +7,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SKU_CODE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.mock;
 
@@ -23,18 +24,23 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.carts.LineItemEntity;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.StructuredErrorMessageTransformer;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
-import com.elasticpath.service.shoppingcart.validation.impl.AddProductSkuToCartValidationServiceImpl;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.extensionpoint.ProductSkuValidator;
+import com.elasticpath.xpf.context.builders.impl.ProductSkuValidationContextBuilderImpl;
+import com.elasticpath.xpf.converters.StructuredErrorMessageConverter;
+import com.elasticpath.xpf.impl.XPFExtensionSelectorByStoreCode;
 
 /**
  * Tests {@link AddToCartAdvisorServiceImpl}.
@@ -49,14 +55,11 @@ public class AddToCartAdvisorServiceImplTest {
 	private ProductSkuRepository productSkuRepository;
 
 	@Mock
-	private AddProductSkuToCartValidationServiceImpl addToCartValidationService;
-
-	@Mock
 	private StructuredErrorMessageTransformer structuredErrorMessageTransformer;
 
 	@Mock
-	private CustomerSessionRepository customerSessionRepository;
-	
+	private ShopperRepository shopperRepository;
+
 	@Mock
 	private StoreRepository storeRepository;
 
@@ -64,26 +67,31 @@ public class AddToCartAdvisorServiceImplTest {
 	private ProductSku productSku;
 
 	@Mock
-	private ProductSkuValidationContext validationContext;
-	
-	@Mock
-	private CustomerSession customerSession;
-	
+	private Shopper shopper;
+
 	@Mock
 	private Store store;
 
 	@Mock
-	private Shopper shopper;
+	private XPFExtensionLookup extensionLookup;
+
+	@Mock
+	private ProductSkuValidationContextBuilderImpl productSkuValidationContextBuilder;
+
+	@Mock
+	private XPFProductSkuValidationContext context;
+
+	@Mock
+	private StructuredErrorMessageConverter structuredErrorMessageConverter;
 
 	@Before
 	public void setup() {
-
-		when(customerSessionRepository.findOrCreateCustomerSession()).thenReturn(Single.just(customerSession));
-		when(customerSession.getShopper()).thenReturn(shopper);
+		when(shopperRepository.findOrCreateShopper()).thenReturn(Single.just(shopper));
 		when(storeRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
 		when(productSkuRepository.getProductSkuWithAttributesByCode(SKU_CODE)).thenReturn(Single.just(productSku));
 		when(productSku.getSkuCode()).thenReturn(SKU_CODE);
-		when(addToCartValidationService.buildContext(any(), any(), any(), any())).thenReturn(validationContext);
+		when(productSkuValidationContextBuilder.build(productSku, null, shopper, store)).thenReturn(context);
+		when(store.getCode()).thenReturn("store_code");
 	}
 
 	/**
@@ -91,9 +99,10 @@ public class AddToCartAdvisorServiceImplTest {
 	 */
 	@Test
 	public void shouldBeTrueWhenItemIsPurchasable() {
-
-		when(addToCartValidationService.validate(validationContext))
-				.thenReturn(Collections.emptyList());
+		when(extensionLookup.getMultipleExtensions(eq(ProductSkuValidator.class),
+				eq(XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART_READ),
+				any(XPFExtensionSelectorByStoreCode.class)))
+				.thenReturn(Collections.singletonList(context -> Collections.emptyList()));
 
 		when(structuredErrorMessageTransformer.transform(Collections.emptyList(), SKU_CODE))
 				.thenReturn(Collections.emptyList());
@@ -110,10 +119,18 @@ public class AddToCartAdvisorServiceImplTest {
 	@Test
 	public void shouldBeFalseWhenItemIsNotPurchasable() {
 
-		ImmutableList<StructuredErrorMessage> errorList = ImmutableList.of(new StructuredErrorMessage("error", "message", Collections.emptyMap()));
+		XPFStructuredErrorMessage xpfStructuredErrorMessage = new XPFStructuredErrorMessage("error", "message", Collections.emptyMap());
+		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage("error", "message", Collections.emptyMap());
 
-		when(addToCartValidationService.validate(validationContext))
-				.thenReturn(errorList);
+		when(extensionLookup.getMultipleExtensions(eq(ProductSkuValidator.class),
+				eq(XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART_READ),
+				any(XPFExtensionSelectorByStoreCode.class)))
+				.thenReturn(Collections.singletonList(context ->
+						ImmutableList.of(xpfStructuredErrorMessage)));
+
+		ImmutableList<StructuredErrorMessage> errorList = ImmutableList.of(structuredErrorMessage);
+
+		when(structuredErrorMessageConverter.convert(xpfStructuredErrorMessage)).thenReturn(structuredErrorMessage);
 
 		when(structuredErrorMessageTransformer.transform(errorList, SKU_CODE))
 				.thenReturn(ImmutableList.of(Message.builder()
@@ -123,7 +140,6 @@ public class AddToCartAdvisorServiceImplTest {
 				.test()
 				.assertNoErrors()
 				.assertValueCount(1);
-
 	}
 
 	@Test

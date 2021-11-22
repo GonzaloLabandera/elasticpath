@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,6 +35,8 @@ import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.ElementDependent;
 import org.apache.openjpa.persistence.Externalizer;
@@ -53,6 +56,8 @@ import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.misc.SupportedCurrency;
 import com.elasticpath.domain.misc.SupportedLocale;
+import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
@@ -373,7 +378,7 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 	 */
 	@Basic
 	@Externalizer("toString")
-	@Factory("org.apache.commons.lang.LocaleUtils.toLocale")
+	@Factory("org.apache.commons.lang3.LocaleUtils.toLocale")
 	@Column(name = "DEFAULT_LOCALE", length = LENGTH_20)
 	protected Locale getDefaultLocaleInternal() {
 		return defaultLocale;
@@ -863,11 +868,11 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 	 */
 	@Override
 	public String toString() {
-		final StringBuilder sbf = new StringBuilder();
-		sbf.append("==> STORE FIELDS <==\n==> Code:").append(this.getCode());
-		sbf.append("\n==> Tax Jurisdictions:").append(this.getTaxJurisdictions());
-		sbf.append("\n==> Default Currency:").append(this.getDefaultCurrency());
-		return sbf.toString();
+		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+				.append("code", this.code)
+				.append("taxJurisdictions", this.taxJurisdictions)
+				.append("defaultCurrency", this.defaultCurrency)
+				.toString();
 	}
 
 	/**
@@ -1106,5 +1111,16 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 	@Override
 	public void setB2CSingleSessionRole(final String b2CSingleSessionRole) {
 		this.b2CSingleSessionRole = b2CSingleSessionRole;
+	}
+
+	@Override
+	public List<ModifierField> getModifierFields() {
+		List<ModifierGroup> modifierGroups = getShoppingCartTypes().stream()
+				.flatMap(cartType -> cartType.getModifiers().stream())
+				.collect(Collectors.toList());
+
+		return modifierGroups.stream()
+				.flatMap(modifierGroup -> modifierGroup.getModifierFields().stream())
+				.collect(Collectors.toList());
 	}
 }

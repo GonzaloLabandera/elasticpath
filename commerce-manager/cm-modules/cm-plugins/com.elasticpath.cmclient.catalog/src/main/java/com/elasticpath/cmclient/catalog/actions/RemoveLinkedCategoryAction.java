@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -48,7 +49,7 @@ import com.elasticpath.service.changeset.ChangeSetMemberAction;
 @SuppressWarnings({ "PMD.PrematureDeclaration" })
 public class RemoveLinkedCategoryAction extends AbstractCatalogViewAction implements IRunnableWithProgress, ObjectRegistryListener {
 
-	private static final Logger LOG = Logger.getLogger(RemoveLinkedCategoryAction.class);
+	private static final Logger LOG = LogManager.getLogger(RemoveLinkedCategoryAction.class);
 
 	private Category category;
 

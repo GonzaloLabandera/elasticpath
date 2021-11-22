@@ -31,7 +31,6 @@
 	</util:list>
 
 	<util:list id="indexBuildTriggers">
-		<ref bean="customerBuildIndexTrigger"/>
 		<ref bean="productBuildIndexTrigger"/>
 		<ref bean="categoryBuildIndexTrigger"/>
 		<ref bean="promotionBuildIndexTrigger"/>

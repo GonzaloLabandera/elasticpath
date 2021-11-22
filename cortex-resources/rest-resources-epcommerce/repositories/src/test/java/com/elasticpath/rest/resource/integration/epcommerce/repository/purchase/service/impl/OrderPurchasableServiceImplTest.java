@@ -15,20 +15,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.StructuredErrorMessageTransformer;
 import com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
+import com.elasticpath.service.store.StoreService;
 
 /**
  * Unit tests for {@link OrderPurchasableServiceImpl}.
@@ -65,9 +65,6 @@ public class OrderPurchasableServiceImplTest {
 	private CartOrderRepository cartOrderRepository;
 
 	@Mock
-	private PurchaseCartValidationService validationService;
-
-	@Mock
 	private StructuredErrorMessageTransformer messageConverter;
 
 	@Mock
@@ -77,7 +74,13 @@ public class OrderPurchasableServiceImplTest {
 	private ShoppingCart shoppingCart;
 
 	@Mock
-	private ShoppingCartValidationContext context;
+	private Store store;
+
+	@Mock
+	private PurchaseCartValidationService purchaseCartValidationService;
+
+	@Mock
+	private StoreService storeService;
 
 
 	@Before
@@ -87,14 +90,15 @@ public class OrderPurchasableServiceImplTest {
 		given(cartOrderRepository.getEnrichedShoppingCart(SCOPE, cartOrder))
 				.willReturn(Single.just(shoppingCart));
 
-		given((shoppingCart).getGuid()).willReturn(SHOPPING_CART_ID);
-		given(validationService.buildContext(Matchers.anyObject(), Matchers.anyObject())).willReturn(context);
+		given(shoppingCart.getGuid()).willReturn(SHOPPING_CART_ID);
+
+		given(storeService.findStoreWithCode(SCOPE)).willReturn(store);
 	}
 
 	@Test
 	public void testOrderIsPurchasable() {
 		// Given
-		given(validationService.validate(context))
+		given(purchaseCartValidationService.validate(shoppingCart, shoppingCart.getShopper(), store))
 				.willReturn(Collections.emptyList());
 
 		// When
@@ -104,18 +108,15 @@ public class OrderPurchasableServiceImplTest {
 				.test()
 				.assertNoErrors()
 				.assertValueCount(0);
-
-
 	}
 
 	@Test
 	public void testOrderIsNotPurchasable() {
 		// Given
-		given(validationService.validate(context))
+		given(purchaseCartValidationService.validate(shoppingCart, shoppingCart.getShopper(), store))
 				.willReturn(ImmutableList.of(STRUCTURED_ERROR_MESSAGE));
 		given(messageConverter.transform(ImmutableList.of(STRUCTURED_ERROR_MESSAGE), SHOPPING_CART_ID))
 				.willReturn(ImmutableList.of(MESSAGE));
-
 
 		// When
 		service.validateOrderPurchasable(ORDER)
@@ -125,8 +126,5 @@ public class OrderPurchasableServiceImplTest {
 				.assertNoErrors()
 				.assertValueCount(1)
 				.assertValue(MESSAGE);
-
-
 	}
-
 }

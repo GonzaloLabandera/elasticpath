@@ -322,7 +322,7 @@
    <field name="brandCodeNonLC" type="codeNonLowerCase" indexed="true" multiValued="true"/>
    <field name="brandCodeForDismax" type="codeForDismax" indexed="true" multiValued="true"/>
    <field name="productCode" type="code" indexed="true" multiValued="false"/>
-   <field name="productSkuCode" type="textTight" indexed="true" stored="false" multiValued="true"/>
+   <field name="productSkuCode" type="code" indexed="true" stored="false" multiValued="true"/>
    <field name="featured" type="boolean" indexed="true" stored="false"/>
    <field name="salesCount" type="sint" indexed="true" stored="false"/>
    <field name="catalogCode" type="code" indexed="true" stored="false" multiValued="true"/>

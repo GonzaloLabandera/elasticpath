@@ -130,4 +130,11 @@
 		</properties>
 	</payment_provider_configuration>
 
+	<payment_provider_configuration guid="charge-fails-payment-provider-config" status="ACTIVE">
+		<name>Charge Fails</name>
+		<payment_provider_id>smartPathPaymentProviderPlugin</payment_provider_id>
+		<properties>
+			<property key="CHARGE">FAILS</property>
+		</properties>
+	</payment_provider_configuration>
 </payment_providers>

@@ -120,17 +120,20 @@ public class PriceListAssignmentDaoImpl implements PriceListAssignmentDao {
 		}
 		return priceListAssignments;
 	}
-	
+
+	@Override
+	public List<PriceListAssignment> listByCatalogLite(final String catalogCode) {
+		return getPersistenceEngine().retrieveByNamedQuery(
+				"PRICE_LIST_ASSIGNMENTS_CATALOG_CODE_VISIBLE_ONLY_LITE", catalogCode
+		);
+	}
+
 	@Override
 	public List<PriceListAssignment> listByPriceList(final String priceListGuid) {
-		List<PriceListAssignment> priceListAssignments = getPersistenceEngine().retrieveByNamedQuery("PRICE_LIST_ASSIGNMENTS_PRICE_LIST_GUID",
-				priceListGuid);
-		if (priceListAssignments.isEmpty()) {
-				return Collections.emptyList();
-		}
-		return priceListAssignments;		
+		return getPersistenceEngine().retrieveByNamedQuery(
+				"PRICE_LIST_ASSIGNMENTS_PRICE_LIST_GUID", priceListGuid
+		);
 	}
-	
 
 	@Override
 	public List<PriceListAssignment> listByCatalog(final Catalog catalog, final boolean includeHidden) {

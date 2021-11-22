@@ -65,7 +65,12 @@ public class PriceListAssignmentServiceImpl implements
 	public List<PriceListAssignment> listByCatalog(final String catalogCode) {
 		return dao.listByCatalog(catalogCode, false);
 	}
-	
+
+	@Override
+	public List<PriceListAssignment> listByCatalogLite(final String catalogCode) {
+		return dao.listByCatalogLite(catalogCode);
+	}
+
 	@Override
 	public List<PriceListAssignment> listByCatalog(final String catalogCode, final boolean includeHidden) {
 		return dao.listByCatalog(catalogCode, includeHidden);

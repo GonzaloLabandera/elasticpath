@@ -377,10 +377,10 @@
   <jmx/>
 
   	<!-- include master/slave replication settings -->
-	<xi:include href="file:/etc/ep/cmuser.solr.replication.config.xml" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<xi:include href="../replication/cmuser.solr.replication.config.xml" xmlns:xi="http://www.w3.org/2001/XInclude">
 		<xi:fallback>
 			<!-- Currently this reference is relative to the CWD. As of SOLR 3.1 it will be relative to the current XML file's directory -->
-			<xi:include href="file:../replication/cmuser.solr.replication.config.xml" xmlns:xi="http://www.w3.org/2001/XInclude">
+			<xi:include href="../cmuser.solr.replication.config.xml" xmlns:xi="http://www.w3.org/2001/XInclude">
 				<!-- Silent fallback if no external configuration found -->
 				<xi:fallback />
 			</xi:include>

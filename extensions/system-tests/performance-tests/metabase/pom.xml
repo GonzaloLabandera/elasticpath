@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.elasticpath.extensions</groupId>
+		<artifactId>performance-tests-parent</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>performance-metabase</artifactId>
+	<packaging>pom</packaging>
+
+	<name>Performance Metabase</name>
+	<description>A database for storing performance results</description>
+
+	<properties>
+		<perf-reports.jdbc.url/>
+		<perf-reports.jdbcDriverClass/>
+		<perf-reports.db.username/>
+		<perf-reports.db.password/>
+	</properties>
+	<profiles>
+		<profile>
+			<id>init-postgresql-metabase</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>${maven-resources-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>filter</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>resources</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<escapeWindowsPaths>false</escapeWindowsPaths>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>com.elasticpath.extensions</groupId>
+						<artifactId>metabase-processor-plugin</artifactId>
+						<version>${project.version}</version>
+						<configuration>
+							<jdbcUrl>${perf-reports.jdbc.url}</jdbcUrl>
+							<jdbcDriverClass>${perf-reports.jdbcDriverClass}</jdbcDriverClass>
+							<jdbcUsername>${perf-reports.db.username}</jdbcUsername>
+							<jdbcPassword>${perf-reports.db.password}</jdbcPassword>
+							<skip>${skipAllTests}</skip>
+						</configuration>
+						<executions>
+							<execution>
+								<id>create-metabase-table</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>create-metabase-table</goal>
+								</goals>
+								<configuration>
+									<sqlInitFilePath>${project.build.outputDirectory}/sql/postgresql-metabase-init.sql</sqlInitFilePath>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

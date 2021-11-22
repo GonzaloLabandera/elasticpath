@@ -78,4 +78,8 @@
 	<bean id="shoppingCartTaxTestVerifier" class="com.elasticpath.tax.ShoppingCartTaxTestVerifier"/>
 
 	<bean id="orderTaxTestVerifier" class="com.elasticpath.tax.OrderTaxTestVerifier"/>
+
+	<bean id="addressServiceTarget" parent="addressServiceTargetTemplate"
+		  class="com.elasticpath.service.impl.TestAddressServiceImpl"
+		  abstract="true"/>
 </beans>

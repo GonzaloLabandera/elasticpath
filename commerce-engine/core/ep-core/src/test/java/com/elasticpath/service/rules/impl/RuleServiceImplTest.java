@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.awaitility.Duration;
 
 import com.elasticpath.base.exception.EpServiceException;

@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.tax.TaxCodeDTO;
 import com.elasticpath.domain.tax.TaxCode;
@@ -23,7 +24,7 @@ import com.elasticpath.service.tax.TaxCodeService;
  */
 public class TaxCodeExporter extends AbstractExporterImpl<TaxCode, TaxCodeDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(TaxCodeExporter.class);
+	private static final Logger LOG = LogManager.getLogger(TaxCodeExporter.class);
 
 	private TaxCodeService taxCodeService;
 

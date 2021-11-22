@@ -3,14 +3,15 @@
  */
 package com.elasticpath.commons.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Manages when a set time interval has past. 
  */
 public class IntervalTimer {
 	
-	private static final Logger LOG = Logger.getLogger(IntervalTimer.class);
+	private static final Logger LOG = LogManager.getLogger(IntervalTimer.class);
 	
 	private long startPoint;
 	private final long intervalMillis;

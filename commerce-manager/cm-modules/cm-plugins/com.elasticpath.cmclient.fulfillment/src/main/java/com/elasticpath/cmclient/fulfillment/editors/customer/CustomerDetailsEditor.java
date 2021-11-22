@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.fulfillment.editors.customer;
 import java.util.Collection;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IEditorInput;
@@ -47,7 +48,7 @@ public class CustomerDetailsEditor extends AbstractCmClientFormEditor {
 	 */
 	public static final String ID_EDITOR = CustomerDetailsEditor.class.getName();
 
-	private static final Logger LOG = Logger.getLogger(CustomerDetailsEditor.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerDetailsEditor.class);
 
 	private CustomerService customerService;
 

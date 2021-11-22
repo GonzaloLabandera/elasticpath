@@ -5,7 +5,7 @@ package com.elasticpath.plugin.tax.selection.impl;
 
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.plugin.tax.TaxProviderPluginInvoker;
 

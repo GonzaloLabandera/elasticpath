@@ -3,7 +3,8 @@
  */
 package com.elasticpath.service.catalogview.filterednavigation.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom.Element;
 
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -20,7 +21,7 @@ public class AttributeKeywordFilterXmlElementParserImpl extends AbstractFilterXm
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
 	
-	private static final Logger LOG = Logger.getLogger(AttributeKeywordFilterXmlElementParserImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AttributeKeywordFilterXmlElementParserImpl.class);
 	
 	private static final String ATTRIBUTE_KEY = "key";
 

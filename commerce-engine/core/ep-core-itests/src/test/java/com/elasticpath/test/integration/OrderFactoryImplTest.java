@@ -14,7 +14,6 @@ import java.util.Locale;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
@@ -175,9 +174,6 @@ public class OrderFactoryImplTest extends DbTestCase {
 
 		final CustomerSession customerSession = shoppingContext.getCustomerSession();
 		customerSession.setCurrency(Currency.getInstance(Locale.US));
-
-		// FIXME: Remove once shoppingCart does not delegate back to CustomerSession.
-		shoppingCart.setCustomerSession(customerSession);
 
 		shoppingCart.initialize();
 		shoppingCart.setBillingAddress(getBillingAddress());

@@ -10,7 +10,8 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.Product;
@@ -28,7 +29,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
  * instead of cached.
  */
 public class ProductSkuLookupImpl implements ProductSkuLookup {
-	private static final Logger LOG = Logger.getLogger(ProductSkuLookupImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ProductSkuLookupImpl.class);
 	private static final String DUPLICATE_GUID_ERR_MSG = "Inconsistent data -- duplicate guid:";
 
 	private PersistenceEngine persistenceEngine;

@@ -84,7 +84,7 @@ public class PostCaptureCheckoutServiceImplITest extends BasicSpringContextTest 
 		shoppingContextPersister.persist(shoppingContext);
 
 		checkoutTestCartBuilder.withScenario(scenario)
-				.withCustomerSession(shoppingContext.getCustomerSession());
+				.withShopper(shoppingContext.getShopper());
 
 		checkoutHelper = new CheckoutHelper(getTac());
 	}

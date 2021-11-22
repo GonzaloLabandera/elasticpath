@@ -10,8 +10,9 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.util.AssetRepository;
@@ -39,7 +40,7 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 	/**
 	 * The logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(ImportJobCleanupProcessorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ImportJobCleanupProcessorImpl.class);
 
 	private static final long MILLI = 1000;
 	private static final long ONE_DAY_MILLIS = 24 * 60 * 60 * MILLI;

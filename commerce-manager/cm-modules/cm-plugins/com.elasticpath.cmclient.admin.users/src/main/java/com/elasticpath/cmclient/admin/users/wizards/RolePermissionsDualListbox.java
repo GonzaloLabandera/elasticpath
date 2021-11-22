@@ -13,8 +13,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -51,7 +52,7 @@ import com.elasticpath.domain.cmuser.UserRole;
 @SuppressWarnings({"PMD.GodClass"})
 public class RolePermissionsDualListbox {
 
-	private static final Logger LOG = Logger.getLogger(RolePermissionsDualListbox.class);
+	private static final Logger LOG = LogManager.getLogger(RolePermissionsDualListbox.class);
 
 	private static final int NUM_COLUMNS = 3;
 

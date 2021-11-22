@@ -10,6 +10,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerIdentifierStrategy;
@@ -37,13 +38,13 @@ public class CustomerIdentifierBySharedIdStrategyImpl implements CustomerIdentif
 	}
 
 	@Override
-	public ExecutionResult<Boolean> isCustomerExists(final String sharedId, final String storeCode, final String customerIdentifierKey) {
-		return customerRepository.isCustomerExistsBySharedIdAndStoreCode(storeCode, sharedId);
+	public ExecutionResult<Boolean> isCustomerExists(final String sharedId, final CustomerType customerType, final String customerIdentifierKey) {
+		return customerRepository.isCustomerExistsBySharedIdAndStoreCode(customerType, sharedId);
 	}
 
 	@Override
-	public ExecutionResult<String> deriveCustomerGuid(final String sharedId, final String storeCode, final String customerIdentifierKey) {
-		return customerRepository.findCustomerGuidBySharedId(storeCode, sharedId, customerIdentifierKey);
+	public ExecutionResult<String> deriveCustomerGuid(final String sharedId, final CustomerType customerType, final String customerIdentifierKey) {
+		return customerRepository.findCustomerGuidBySharedId(customerType, sharedId, customerIdentifierKey);
 	}
 
 	@Override

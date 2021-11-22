@@ -15,13 +15,11 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.CouponConfig;
@@ -35,7 +33,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.rules.CouponConfigService;
 import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.RuleService;
-import com.elasticpath.test.factory.TestCustomerSessionFactory;
+import com.elasticpath.test.factory.TestShopperFactory;
 
 /**
  * Tests {@code PromotionRuleDelegateImpl} without extending elastic path test case.
@@ -83,9 +81,9 @@ public class PromotionRuleDelegateImplNewTest {
 	}
 
 	private Shopper createShopper() {
-		final CustomerSession session = TestCustomerSessionFactory.getInstance().createNewCustomerSession();
-		session.getShopper().setCustomer(new CustomerImpl());
-		return session.getShopper();
+		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMemento();
+		shopper.setCustomer(new CustomerImpl());
+		return shopper;
 	}
 
 	/**

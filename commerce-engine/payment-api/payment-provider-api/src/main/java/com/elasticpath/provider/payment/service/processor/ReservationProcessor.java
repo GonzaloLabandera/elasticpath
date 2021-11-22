@@ -31,8 +31,9 @@ public interface ReservationProcessor {
 	 * @param paymentInstrument the instrument on which to make reservation
 	 * @param customRequestData additional data to be passed to payment provider
 	 * @param orderContext context of the current order
+	 * @param rereserveCount amount additional reservations
 	 * @return list of payment events
 	 */
 	PaymentAPIResponse reserveToSimulateModify(MoneyDTO amount, OrderPaymentInstrumentDTO paymentInstrument,
-											   Map<String, String> customRequestData, OrderContext orderContext);
+											   Map<String, String> customRequestData, OrderContext orderContext, int rereserveCount);
 }

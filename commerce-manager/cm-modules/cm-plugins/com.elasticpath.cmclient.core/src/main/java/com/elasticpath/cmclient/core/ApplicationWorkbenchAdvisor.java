@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.core;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.rap.rwt.internal.lifecycle.UITestUtil;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -36,7 +37,7 @@ public class ApplicationWorkbenchAdvisor extends WorkbenchAdvisor {
 	/**
 	 * The extension's permissions element.
 	 */
-	private static final Logger LOG = Logger.getLogger(ApplicationWorkbenchAdvisor.class);
+	private static final Logger LOG = LogManager.getLogger(ApplicationWorkbenchAdvisor.class);
 	private WorkbenchWindow window;
 	private ICoolBarManager coolBarManager;
 	private PerspectiveService perspectiveService;

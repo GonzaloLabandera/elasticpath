@@ -41,7 +41,7 @@ public class OrderDirectorImpl implements OrderDirector {
 
 		for (final OrderSku orderSku : shipmentSkus) {
 			final OrderItemDto orderItemDto = orderItemAssembler.createOrderItemDto(orderSku, shipment);
-			orderItemDto.setItemFields(orderSku.getFields());
+			orderItemDto.setItemFields(orderSku.getModifierFields().getMap());
 			orderItemDtoList.add(orderItemDto);
 			setPricesAndInventories(orderItemDto);
 		}

@@ -36,16 +36,7 @@
 	</distributionManagement>
 
 	<properties>
-		<bval.version>0.4</bval.version>
-		<bcprov-jdk14.version>131</bcprov-jdk14.version>
-		<bcmail-jdk14.version>136</bcmail-jdk14.version>
-		<servicemix.commons-collections.version>3.2.1_3</servicemix.commons-collections.version>
-		<commons-poi.version>3.0.1-FINAL</commons-poi.version>
-		<servicemix.ehcache.version>2.6.0_2</servicemix.ehcache.version>
-		<wstx-asl.version>3.2.9</wstx-asl.version>
 
-		<!-- maven plugins -->
-		<antrun-plugin.version>1.7</antrun-plugin.version>
 	</properties>
 
 	<build>
@@ -83,6 +74,7 @@
 				<configuration>
 					<rebuildBundle>true</rebuildBundle>
 					<instructions>
+						<_fixupmessages>"Classes found in the wrong directory";is:=warning</_fixupmessages>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
 						<Embed-Directory>${dependency.directory}</Embed-Directory>
@@ -107,6 +99,7 @@
 							javax.validation,
 							javax.validation.metadata,
 							javax.validation.groups,
+							javax.servlet.http,
 							javax.xml.*;resolution:=optional,
 							com.elasticpath.cache,
 							com.elasticpath.cache.impl,
@@ -114,6 +107,7 @@
 							com.elasticpath.messaging,
 							com.elasticpath.messaging.factory,
 							com.elasticpath.persistence.api.*,
+							com.elasticpath.domain.misc.types,
 							com.elasticpath.commons.beanframework,
 							com.elasticpath.commons.beanframework.impl,
 							com.elasticpath.commons.beanframework.spring,
@@ -125,7 +119,14 @@
 							com.elasticpath.shipping.connectivity.service,
 							com.fasterxml.jackson.core,
 							com.fasterxml.jackson.databind,
-							com.google.common.*,
+							com.google.common.base,
+							com.google.common.cache,
+							com.google.common.collect,
+							com.google.common.hash,
+							com.google.common.io,
+							com.google.common.math,
+							com.google.common.primitives,
+							com.google.common.util.concurrent,
 							net.sf.ehcache.*,
 							net.sf.ehcache.management,
 							org.aopalliance.*,
@@ -174,7 +175,7 @@
 							org.w3c.dom.ranges.*,
 							org.w3c.dom.traversal.*,
 							org.xml.*;resolution:=optional,
-							org.apache.log4j,
+							org.apache.logging.log4j,
 							org.slf4j,
 							org.apache.openjpa.jdbc.kernel,
 							org.apache.openjpa.persistence.query,
@@ -243,6 +244,7 @@
 							com.elasticpath.commons.constants;x-internal:=true,
 							com.elasticpath.settings.refreshstrategy.impl;x-internal:=true,
 							com.elasticpath.settings.domain.impl;x-internal:=true,
+							com.antkorwin.xsync,
 							com.sun.el.*,
 							org.apache.solr.client.solrj,
 							org.apache.lucene.search,
@@ -259,7 +261,7 @@
 							com.elasticpath.osgi.bnd.plugins.SpringConfigurationAnalyzerPlugin;config-location=spring/service
 						</_plugin>
 						<Include-Resource>{maven-resources}, target/dependencies/ext-core/</Include-Resource>
-						<!-- need to include implementation information for VersionLogger -->
+						<!-- need to include implementation information for VersionService -->
 						<Implementation-Title>${project.name}</Implementation-Title>
 						<Implementation-Version>${dce.version}</Implementation-Version>
 						<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
@@ -299,12 +301,10 @@
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.ehcache</artifactId>
-			<version>${servicemix.ehcache.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.bval</groupId>
 			<artifactId>org.apache.bval.bundle</artifactId>
-			<version>${bval.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-beanutils</groupId>
@@ -319,7 +319,6 @@
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.commons-collections</artifactId>
-			<version>${servicemix.commons-collections.version}</version>
 		</dependency>
 		<!-- 0-SNAPSHOT seems to pull the version relative to the project it is in so explicitly specifying the version of core, ql and so here seems to be necessary -->
 		<dependency>
@@ -487,6 +486,10 @@
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
 				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-slf4j-impl</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>jcl-over-slf4j</artifactId>
 				</exclusion>
@@ -605,6 +608,14 @@
 					<artifactId>log4j</artifactId>
 				</exclusion>
 				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-core</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>javax.servlet</groupId>
 					<artifactId>javax.servlet-api</artifactId>
 				</exclusion>
@@ -619,24 +630,38 @@
 					<groupId>log4j</groupId>
 					<artifactId>log4j</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-core</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>${commons-poi.version}</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
 					<artifactId>log4j</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-core</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.woodstox</groupId>
 			<artifactId>wstx-asl</artifactId>
-			<version>${wstx-asl.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

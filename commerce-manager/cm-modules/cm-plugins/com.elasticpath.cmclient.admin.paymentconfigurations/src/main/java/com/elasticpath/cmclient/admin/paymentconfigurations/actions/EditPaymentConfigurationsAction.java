@@ -1,6 +1,7 @@
 package com.elasticpath.cmclient.admin.paymentconfigurations.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -15,7 +16,7 @@ import com.elasticpath.service.orderpaymentapi.management.PaymentProviderConfigM
  */
 public class EditPaymentConfigurationsAction extends Action {
 
-	private static final Logger LOG = Logger.getLogger(EditPaymentConfigurationsAction.class);
+	private static final Logger LOG = LogManager.getLogger(EditPaymentConfigurationsAction.class);
 
 	private final PaymentConfigurationsListView listView;
 

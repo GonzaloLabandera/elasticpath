@@ -34,6 +34,7 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.impl.OrderAddressImpl;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
 import com.elasticpath.persister.Persister;
 import com.elasticpath.service.catalog.GiftCertificateService;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
@@ -82,7 +83,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		checkoutTestCartBuilder
 			.withScenario(scenario)
 			.withCustomer(customer)
-			.withCustomerSession(shoppingContext.getCustomerSession());
+			.withShopper(shoppingContext.getShopper());
 	}
 
 	//tests for readers
@@ -110,7 +111,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 		ShoppingCart cart = checkoutTestCartBuilder
 			.withGiftCertificateProduct("Sender", recipientName, "email@xx.com" )
-			.withCustomerSession(shoppingContext.getCustomerSession())
+			.withShopper(shoppingContext.getShopper())
 			.build();
 
 		shoppingCartService.saveOrUpdate(cart);
@@ -131,6 +132,9 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 		CustomerAddress custBillingAddress = new CustomerAddressImpl();
 		fillAddressInstance(custBillingAddress);
+
+		custBillingAddress.setCustomerUidPk(customer.getUidPk());
+		addressService.save(custBillingAddress);
 
 		customer.setPreferredBillingAddress(custBillingAddress);
 		customerService.update(customer);
@@ -153,6 +157,8 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		CustomerAddress custShippingAddress = new CustomerAddressImpl();
 		fillAddressInstance(custShippingAddress);
 
+		custShippingAddress.setCustomerUidPk(customer.getUidPk());
+		addressService.save(custShippingAddress);
 		customer.setPreferredShippingAddress(custShippingAddress);
 		customerService.update(customer);
 
@@ -213,7 +219,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 		Order order = createOrderWithGiftCertificateProduct(false);
 
-		order.setFieldValue(dataPointKey, expectedDataPointValue);
+		order.getModifierFields().put(dataPointKey, expectedDataPointValue);
 		orderService.update(order);
 
 		Map<String, Collection<DataPoint>> customerGuidToDataPoints = createMapWithDataPoints(DATA_POINT_NAME, dataPointKey,
@@ -305,13 +311,13 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 		ShoppingCart cart = checkoutTestCartBuilder
 			.withGiftCertificateProduct("Sender", expectedDataPointValue, "email@xx.com" )
-			.withCustomerSession(shoppingContext.getCustomerSession())
+			.withShopper(shoppingContext.getShopper())
 			.build();
 
 		cart.setDefault(true);
 		shoppingCartService.saveOrUpdate(cart);
 
-		DataPointValue dataPointValue = createDataPointValueForRemoval(200002L,
+		DataPointValue dataPointValue = createDataPointValueForRemoval(((ShoppingCartMementoHolder) cart).getShoppingCartMemento().getUidPk(),
 			DataPointLocationEnum.CART_GIFT_CERTIFICATE.getName(), dataPointKey, null);
 
 		assertThat(getCartGiftCertificateFieldValue(cart, dataPointKey))
@@ -324,7 +330,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 			.as("The data point values must be deleted")
 			.isEqualTo(1);
 
-		ShoppingCart updatedCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(shoppingContext.getCustomerSession());
+		ShoppingCart updatedCart = shoppingCartService.findOrCreateDefaultCartByShopper(shoppingContext.getShopper());
 
 		assertThat(getCartGiftCertificateFieldValue(updatedCart,dataPointKey))
 			.as("The field must be null")
@@ -339,6 +345,8 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 		CustomerAddress custBillingAddress = new CustomerAddressImpl();
 		fillAddressInstance(custBillingAddress);
+		custBillingAddress.setCustomerUidPk(customer.getUidPk());
+		addressService.save(custBillingAddress);
 
 		customer.setPreferredBillingAddress(custBillingAddress);
 		customerService.update(customer);
@@ -371,6 +379,8 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 		CustomerAddress custShippingAddress = new CustomerAddressImpl();
 		fillAddressInstance(custShippingAddress);
+		custShippingAddress.setCustomerUidPk(customer.getUidPk());
+		addressService.save(custShippingAddress);
 
 		customer.setPreferredShippingAddress(custShippingAddress);
 		customerService.update(customer);
@@ -462,33 +472,71 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 	@Test
 	@DirtiesDatabase
-	public void shouldDeleteOrderData() {
+	public void shouldDeleteOrderDataPointValuesFromAllOrders() {
 		String dataPointKey = "ORDER_DATA_KEY";
 		String expectedDataPointValue = "Order Data Value";
 
-		Order order = createOrderWithGiftCertificateProduct(false);
+		//create 2 orders with different number of modifier fields -
+		// order 1 will have only DPK field, while order 2 will have a DPK field and a random one
+		Order order1 = createOrderWithGiftCertificateProduct(false);
 
-		order.setFieldValue(dataPointKey, expectedDataPointValue);
-		order = orderService.update(order);
+		order1.getModifierFields().put(dataPointKey, expectedDataPointValue);
+		order1 = orderService.update(order1);
 
-		assertThat(order.getFieldValue(dataPointKey))
+		assertThat(order1.getModifierFields().getMap())
+				.as("The number of modifier fields doesn't match expected")
+				.hasSize(1);
+
+		assertThat(order1.getModifierFields().get(dataPointKey))
 			.as("The current and expected data point values must be equal")
 			.isEqualTo(expectedDataPointValue);
 
-		DataPointValue dataPointValue = createDataPointValueForRemoval(1L,
-			DataPointLocationEnum.ORDER_DATA.getName(), dataPointKey, null);
+		// Order 2
+		Order order2 = createOrderWithGiftCertificateProduct(false);
 
-		int numOfDeleteValues = dataPointValueService.removeValues(Collections.singletonList(dataPointValue));
+		order2.getModifierFields().put(dataPointKey, expectedDataPointValue);
 
-		assertThat(numOfDeleteValues)
+		String order2ModifierFielKey = "order2Key2";
+		String order2ModifierFielValue = "order2Value2";
+		order2.getModifierFields().put(order2ModifierFielKey, order2ModifierFielValue);
+
+		order2 = orderService.update(order2);
+
+		assertThat(order2.getModifierFields().getMap())
+				.as("The number of modifier fields doesn't match expected")
+				.hasSize(2);
+
+		assertThat(order2.getModifierFields().get(dataPointKey))
+				.as("The current and expected data point values must be equal")
+				.isEqualTo(expectedDataPointValue);
+
+
+		Map<String, Collection<DataPoint>> customerGuidToDataPoints = createMapWithDataPoints(DATA_POINT_NAME, dataPointKey,
+				DataPointLocationEnum.ORDER_DATA.getName());
+
+		Collection<DataPointValue> dataPointValues = dataPointValueService.getValues(customerGuidToDataPoints);
+
+		int numOfDeletedValues = dataPointValueService.removeValues(dataPointValues);
+
+		assertThat(numOfDeletedValues)
 			.as("The data point values must be deleted")
-			.isEqualTo(1);
+			.isEqualTo(2);
 
-		Order updatedOrder = orderService.findOrderByOrderNumber(order.getOrderNumber());
+		Order updatedOrder1 = orderService.findOrderByOrderNumber(order1.getOrderNumber());
 
-		assertThat(updatedOrder.getFieldValue(dataPointKey))
+		assertThat(updatedOrder1.getModifierFields().get(dataPointKey))
 			.as("The field must be null")
 			.isNull();
+
+		Order updatedOrder2 = orderService.findOrderByOrderNumber(order2.getOrderNumber());
+
+		assertThat(updatedOrder2.getModifierFields().getMap())
+				.as("The number of modifier fields doesn't match expected")
+				.hasSize(1);
+
+		assertThat(updatedOrder2.getModifierFields().get(order2ModifierFielKey))
+				.as("The current and expected data point values must be equal")
+				.isEqualTo(order2ModifierFielValue);
 	}
 
 
@@ -500,7 +548,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 
 		//given an order with a gift certificate product
 		Order createdOrder = createOrderWithGiftCertificateProduct(true);
-		String orderGiftCertificateSenderName = createdOrder.getAllShipments().get(0).getShipmentOrderSkus().iterator().next().getFieldValue(dataPointKey);
+		String orderGiftCertificateSenderName = createdOrder.getAllShipments().get(0).getShipmentOrderSkus().iterator().next().getModifierFields().get(dataPointKey);
 
 		assertThat(orderGiftCertificateSenderName)
 			.as("The current and expected data point values must be equal")
@@ -523,7 +571,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 			.isEqualTo(1);
 
 		createdOrder = orderService.findOrderByOrderNumber(createdOrder.getOrderNumber());
-		orderGiftCertificateSenderName = createdOrder.getAllShipments().get(0).getShipmentOrderSkus().iterator().next().getFieldValue(dataPointKey);
+		orderGiftCertificateSenderName = createdOrder.getAllShipments().get(0).getShipmentOrderSkus().iterator().next().getModifierFields().get(dataPointKey);
 
 		assertThat(orderGiftCertificateSenderName)
 			.as("The field must be null")
@@ -574,7 +622,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		return dataPointValue;
 	}
 	private String getCartGiftCertificateFieldValue(final ShoppingCart cart, final String fieldName) {
-		return cart.getRootShoppingItems().iterator().next().getFieldValue(fieldName);
+		return cart.getRootShoppingItems().iterator().next().getModifierFields().get(fieldName);
 	}
 
 	private void fillAddressInstance(final Address addressInstance) {

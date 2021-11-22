@@ -3,7 +3,7 @@
  */
 package com.elasticpath.importexport.importer.changesetsupport.impl;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;

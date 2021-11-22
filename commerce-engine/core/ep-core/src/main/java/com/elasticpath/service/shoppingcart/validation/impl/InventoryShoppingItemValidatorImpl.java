@@ -7,83 +7,98 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.google.common.collect.ImmutableMap;
+import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
-import com.elasticpath.common.dto.InventoryDetails;
-import com.elasticpath.domain.catalog.InventoryCalculator;
+import com.elasticpath.common.dto.SkuInventoryDetails;
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.domain.store.Warehouse;
-import com.elasticpath.service.catalog.ProductInventoryManagementService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidator;
+import com.elasticpath.domain.store.Store;
+import com.elasticpath.sellingchannel.inventory.ProductInventoryShoppingService;
+import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.store.StoreService;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.annotations.XPFEmbedded;
+import com.elasticpath.xpf.connectivity.annontation.XPFAssignment;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFOperationEnum;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingItem;
+import com.elasticpath.xpf.connectivity.extension.XPFExtensionPointImpl;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingItemValidator;
 
 /**
  * Ensure that there is still sufficient inventory for the quantity specified on the item in the cart.
  */
-public class InventoryShoppingItemValidatorImpl extends SuperInventoryValidator implements ShoppingItemValidator {
+@SuppressWarnings("checkstyle:magicnumber")
+@Extension
+@XPFEmbedded
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_SHOPPING_ITEM_AT_ADD_TO_CART, priority = 1060)
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_SHOPPING_ITEM_AT_CHECKOUT, priority = 1040)
+public class InventoryShoppingItemValidatorImpl extends XPFExtensionPointImpl implements ShoppingItemValidator {
 
 	private static final String MESSAGE_ID = "item.insufficient.inventory";
 
-	private InventoryCalculator inventoryCalculator;
-	private ProductInventoryManagementService productInventoryManagementService;
+	@Autowired
+	private BeanFactory beanFactory;
+	@Autowired
+	private ProductSkuLookup productSkuLookup;
+	@Autowired
+	private SuperInventoryValidator superInventoryValidator;
 
 	@Override
-	public Collection<StructuredErrorMessage> validate(final ShoppingItemValidationContext context) {
-		final ProductSku productSku = context.getProductSku();
+	public Collection<XPFStructuredErrorMessage> validate(final XPFShoppingItemValidationContext context) {
+		final ProductSku productSku = productSkuLookup.findBySkuCode(context.getShoppingItem().getProductSku().getCode());
 
-		if (availabilityIndependentOfInventory(productSku)) {
+		if (superInventoryValidator.availabilityIndependentOfInventory(productSku)) {
 			return Collections.emptyList();
 		}
 
-		final ShoppingCart shoppingCart = context.getShoppingCart();
+		final ProductInventoryShoppingService productInventoryShoppingService =
+				beanFactory.getSingletonBean(ContextIdNames.PRODUCT_INVENTORY_SHOPPING_SERVICE, ProductInventoryShoppingService.class);
+		final StoreService storeService = beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class);
+		final XPFShoppingCart shoppingCart = context.getShoppingCart();
 
-		final long neededQuantity = shoppingCart.getCartItemsBySkuGuid(productSku.getGuid()).stream()
-				.mapToLong(ShoppingItem::getQuantity)
-				.sum();
-
-		long quantityInStock = 0;
-
-		for (Warehouse warehouse : context.getStore().getWarehouses()) {
-			final long warehouseUId = warehouse.getUidPk();
-
-			final InventoryDetails inventoryDetails = inventoryCalculator.getInventoryDetails(productInventoryManagementService, productSku,
-					warehouseUId);
-
-			quantityInStock += inventoryDetails.getAvailableQuantityInStock();
+		final Store store = storeService.findStoreWithCode(context.getShoppingCart().getShopper().getStore().getCode());
+		long neededQuantity = context.getShoppingItem().getQuantity();
+		if (context.getOperation() != XPFOperationEnum.UPDATE) {
+			neededQuantity += shoppingCart.getLineItems()
+					.stream()
+					.filter(item -> !item.getGuid().equals(context.getShoppingItem().getGuid()))
+					.filter(item -> item.getProductSku().getCode().equals(context.getShoppingItem().getProductSku().getCode()))
+					.mapToLong(XPFShoppingItem::getQuantity)
+					.sum();
 		}
 
+		long quantityInStock = 0;
+		final SkuInventoryDetails skuInventoryDetails = productInventoryShoppingService.getSkuInventoryDetails(productSku, store);
+		quantityInStock += skuInventoryDetails.getAvailableQuantityInStock();
+
 		if (quantityInStock < neededQuantity) {
-			StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.ERROR, MESSAGE_ID,
-					String.format("Item '%s' only has %d available but %d were requested.", productSku.getSkuCode(),
-							quantityInStock, neededQuantity),
-					ImmutableMap.of("item-code", productSku.getSkuCode(),
-							"quantity-requested", String.format("%d", neededQuantity),
-							"inventory-available", String.format("%d", quantityInStock)),
-					new StructuredErrorResolution(ShoppingItem.class, context.getShoppingItem().getGuid()));
+			XPFStructuredErrorMessage.XPFStructuredErrorMessageBuilder xpfStructuredErrorMessageBuilder = XPFStructuredErrorMessage.builder()
+					.withType(XPFStructuredErrorMessageType.ERROR)
+					.withMessageId(MESSAGE_ID)
+					.withDebugMessage(String.format("Item '%s' only has %d available but %d were requested.", productSku.getSkuCode(),
+							quantityInStock, neededQuantity))
+					.withData(ImmutableMap.of("item-code", productSku.getSkuCode(),
+							"inventory-available", String.format("%d", quantityInStock),
+							"quantity-requested", String.format("%d", neededQuantity)
+					));
+			if (context.getShoppingItem().getGuid() != null) {
+				xpfStructuredErrorMessageBuilder.withResolution(new XPFStructuredErrorResolution(ShoppingItem.class,
+						context.getShoppingItem().getGuid()));
+			}
+
+			XPFStructuredErrorMessage errorMessage = xpfStructuredErrorMessageBuilder.build();
+
 			return Collections.singletonList(errorMessage);
 		}
 
 		return Collections.emptyList();
 	}
-
-	protected InventoryCalculator getInventoryCalculator() {
-		return inventoryCalculator;
-	}
-
-	public void setInventoryCalculator(final InventoryCalculator inventoryCalculator) {
-		this.inventoryCalculator = inventoryCalculator;
-	}
-
-	protected ProductInventoryManagementService getProductInventoryManagementService() {
-		return productInventoryManagementService;
-	}
-
-	public void setProductInventoryManagementService(final ProductInventoryManagementService productInventoryManagementService) {
-		this.productInventoryManagementService = productInventoryManagementService;
-	}
-
 }

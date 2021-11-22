@@ -17,6 +17,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 import javax.persistence.EntityNotFoundException;
 
@@ -27,7 +28,8 @@ import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultMessage;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +75,7 @@ import com.elasticpath.test.util.Utils;
 @DirtiesDatabase
 public class CatalogBatchIntegrationTest extends DbTestCase {
 
-	private static final Logger LOGGER = Logger.getLogger(CatalogBatchIntegrationTest.class);
+	private static final Logger LOGGER = LogManager.getLogger(CatalogBatchIntegrationTest.class);
 
 	private static final String OPTION = "option";
 	private static final String STORE = "store";
@@ -427,6 +429,7 @@ public class CatalogBatchIntegrationTest extends DbTestCase {
 		projectionEntity.setProjectionId(projectionId);
 		projectionEntity.setProjectionDateTime(new Date());
 		projectionEntity.setContentHash(Utils.uniqueCode(HASH_CODE));
+		projectionEntity.setGuid(UUID.randomUUID().toString());
 
 		projectionRepository.save(projectionEntity);
 

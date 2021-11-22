@@ -3,7 +3,8 @@
  */
 package com.elasticpath.tools.sync.job.dao.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tools.sync.client.controller.FileSystemHelper;
 import com.elasticpath.tools.sync.job.TransactionJob;
@@ -15,7 +16,7 @@ import com.elasticpath.tools.sync.processing.SerializableObjectListener;
  */
 public class TransactionJobDaoImpl implements TransactionJobDao {
 
-	private static final Logger LOG = Logger.getLogger(TransactionJobDaoImpl.class);
+	private static final Logger LOG = LogManager.getLogger(TransactionJobDaoImpl.class);
 
 	private final String jobUnitFileName;
 

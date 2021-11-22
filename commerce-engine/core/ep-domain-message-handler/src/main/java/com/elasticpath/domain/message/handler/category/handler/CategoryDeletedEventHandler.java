@@ -3,7 +3,8 @@
  */
 package com.elasticpath.domain.message.handler.category.handler;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.update.processor.capabilities.CategoryUpdateProcessor;
 import com.elasticpath.domain.message.handler.EventMessageHandler;
@@ -15,7 +16,7 @@ import com.elasticpath.messaging.EventMessage;
  */
 public class CategoryDeletedEventHandler implements EventMessageHandler {
 
-	private static final Logger LOGGER = Logger.getLogger(CategoryDeletedEventHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(CategoryDeletedEventHandler.class);
 
 	private final CategoryUpdateProcessor categoryUpdateProcessor;
 	private final LinkedCategoryEventMessageHelper linkedCategoryEventMessageHelper;

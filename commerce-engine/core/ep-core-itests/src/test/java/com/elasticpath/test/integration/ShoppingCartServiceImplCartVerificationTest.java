@@ -11,7 +11,7 @@ import java.util.Locale;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
@@ -32,8 +32,8 @@ public class ShoppingCartServiceImplCartVerificationTest extends AbstractCartInt
 	@DirtiesDatabase
 	@Test
 	public void testShoppingCartExists() {
-		CustomerSession customerSession = createCustomerSession();
-		ShoppingCart shoppingCart = createShoppingCart(customerSession);
+		Shopper shopper = createShopper();
+		ShoppingCart shoppingCart = createShoppingCart(shopper);
 		ShoppingCart updatedCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		assertTrue("The shoppingCart should exist.", shoppingCartService.shoppingCartExists(updatedCart.getGuid()));
 	}
@@ -48,8 +48,8 @@ public class ShoppingCartServiceImplCartVerificationTest extends AbstractCartInt
 	@Test
 	public void testShoppingCartExistsForStore() {
 		Store store = ((SimpleStoreScenario)getTac().getScenario(SimpleStoreScenario.class)).getStore();
-		CustomerSession customerSession = createCustomerSession();
-		ShoppingCart shoppingCart = createShoppingCart(customerSession);
+		Shopper shopper = createShopper();
+		ShoppingCart shoppingCart = createShoppingCart(shopper);
 		ShoppingCart updatedCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		assertTrue("The shoppingCart with store code should exist.", 
 				shoppingCartService.shoppingCartExistsForStore(updatedCart.getGuid(), store.getCode()));
@@ -59,8 +59,8 @@ public class ShoppingCartServiceImplCartVerificationTest extends AbstractCartInt
 	@Test
 	public void expectShoppingCartExistsForStoreCodeWithCaseInsensitivity() {
 		Store store = ((SimpleStoreScenario)getTac().getScenario(SimpleStoreScenario.class)).getStore();
-		CustomerSession customerSession = createCustomerSession();
-		ShoppingCart shoppingCart = createShoppingCart(customerSession);
+		Shopper shopper = createShopper();
+		ShoppingCart shoppingCart = createShoppingCart(shopper);
 		ShoppingCart updatedCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		String caseDifferingStoreCode = createCaseDifferingStoreCode(store.getCode());
 		assertTrue("The shoppingCart with store code should exist.", 
@@ -78,8 +78,8 @@ public class ShoppingCartServiceImplCartVerificationTest extends AbstractCartInt
 	@DirtiesDatabase
 	@Test
 	public void testShoppingCartExistsForStoreWithNonExistentStoreCode() {
-		CustomerSession customerSession = createCustomerSession();
-		ShoppingCart shoppingCart = createShoppingCart(customerSession);
+		Shopper shopper = createShopper();
+		ShoppingCart shoppingCart = createShoppingCart(shopper);
 		ShoppingCart updatedCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		assertFalse("The shoppingCart with store code should not exist.", 
 				shoppingCartService.shoppingCartExistsForStore(updatedCart.getGuid(), NONEXISTENT_STORECODE));

@@ -6,7 +6,7 @@ package com.elasticpath.test.persister.testscenarios;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
 
@@ -17,7 +17,7 @@ public class CustomerScenario extends AbstractScenario {
 
 	private CustomerAddress address;
 
-	private CustomerSession customerSession;
+	private Shopper shopper;
 
 	@Override
 	public void initialize() {
@@ -26,8 +26,8 @@ public class CustomerScenario extends AbstractScenario {
 
 		store = getDataPersisterFactory().getStoreTestPersister().persistDefaultStore(catalog, warehouse);
 		customer = getDataPersisterFactory().getStoreTestPersister().createDefaultCustomer(store);
-		address = customer.getAddresses().get(0);
-		customerSession = getDataPersisterFactory().getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(customer);
+		address = customer.getPreferredBillingAddress();
+		shopper = getDataPersisterFactory().getStoreTestPersister().persistShopperWithAssociatedEntities(customer);
 	}
 
 	/**
@@ -45,9 +45,9 @@ public class CustomerScenario extends AbstractScenario {
 	}
 
 	/**
-	 * @return the customerSession
+	 * @return the shopper
 	 */
-	public CustomerSession getCustomerSession() {
-		return customerSession;
+	public Shopper getShopper() {
+		return shopper;
 	}
 }

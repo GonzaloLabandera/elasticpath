@@ -261,6 +261,7 @@
     
     <bean id="ruleSetLocator" class="com.elasticpath.tools.sync.merge.configuration.impl.RuleSetLocatorImpl">
 		<property name="ruleSetService" ref="ruleSetService"/>
+		<property name="beanFactory" ref="coreBeanFactory"/>
     </bean>
     
     <bean id="ruleLocator" class="com.elasticpath.tools.sync.merge.configuration.impl.RuleLocatorImpl">

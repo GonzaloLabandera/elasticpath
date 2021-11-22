@@ -16,7 +16,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Helper class for handling dates formats in the tests.
@@ -27,7 +28,7 @@ public final class DataHelper {
 	 * Pattern which corresponds to date format used in CM UI.
 	 */
 	public static final Pattern CM_UI_DATE_PATTERN = Pattern.compile("[A-Za-z]{3}\\s[0-9]{1,2},\\s[0-9]{4}\\s[0-9]+:[0-9]+\\s[A-Z]{2}");
-	private static final Logger LOG = Logger.getLogger(DataHelper.class);
+	private static final Logger LOG = LogManager.getLogger(DataHelper.class);
 	private static final String MESSAGE = "Could not parse date ";
 	/**
 	 * Date format used in CM UI.

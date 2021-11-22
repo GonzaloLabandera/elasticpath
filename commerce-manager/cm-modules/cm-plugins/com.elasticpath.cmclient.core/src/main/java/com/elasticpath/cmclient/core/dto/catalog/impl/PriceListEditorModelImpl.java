@@ -17,8 +17,8 @@ import com.elasticpath.common.dto.category.ChangeSetObjectsImpl;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * Default implementation of PriceListEditorModel. The model manages a snapshot of a Price List retrieved from the database, along

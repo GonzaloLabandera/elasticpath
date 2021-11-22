@@ -4,28 +4,31 @@
 package com.elasticpath.service.shoppingcart.validation.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFCustomer;
+import com.elasticpath.xpf.connectivity.entity.XPFShopper;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
+import com.elasticpath.xpf.connectivity.entity.XPFStore;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UniqueCartDataValidatorImplTest {
@@ -42,87 +45,92 @@ public class UniqueCartDataValidatorImplTest {
 	private UniqueCartDataValidatorImpl validator;
 
 	@Mock
-	private ShoppingCartValidationContext context;
+	private XPFShoppingCartValidationContext context;
 
 	@Mock
 	private ShoppingCartService shoppingCartService;
 
-	@Mock
-	private ShoppingCart shoppingCart;
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private XPFShoppingCart shoppingCart;
 
 	@Mock
-	private Shopper shopper;
+	private XPFShopper shopper;
 
 	@Mock
-	private Customer customer;
+	private XPFCustomer account;
 
 	@Mock
-	private Customer account;
+	private XPFCustomer customer;
+
+	@Mock
+	private BeanFactory beanFactory;
+
+	@Mock
+	private XPFStore store;
 
 	@Before
 	public void setUp() {
-
 		when(context.getShoppingCart()).thenReturn(shoppingCart);
 		when(shoppingCart.getShopper()).thenReturn(shopper);
-		when(shopper.getCustomer()).thenReturn(customer);
+		when(shopper.getUser()).thenReturn(customer);
 		when(shopper.getAccount()).thenReturn(account);
 		when(customer.getGuid()).thenReturn(CUSTOMER_GUID);
 		when(account.getSharedId()).thenReturn(ACCOUNT_SHARED_ID);
-		when(shopper.getStoreCode()).thenReturn(STORECODE);
+		when(shopper.getStore()).thenReturn(store);
+		when(store.getCode()).thenReturn(STORECODE);
 		when(shoppingCart.getGuid()).thenReturn(CURRENTCARTGUID);
+		when(beanFactory.getSingletonBean(ContextIdNames.SHOPPING_CART_SERVICE, ShoppingCartService.class))
+				.thenReturn(shoppingCartService);
 	}
 
 	@Test
 	public void testValidateWithConflict() {
 
-		CartData otherCartData = mock(CartData.class);
-		CartData cartData = mock(CartData.class);
+		Map<String, String> otherCartData = new HashMap<>();
+		otherCartData.put(NAME, VALUE);
 
-		when(shoppingCart.getCartData()).thenReturn(Collections.singletonMap(NAME, cartData));
+		Map<String, String> cartData = new HashMap<>();
+		cartData.put(NAME, VALUE);
+
+		when(shoppingCart.getModifierFields()).thenReturn(cartData);
 
 		List<String> otherCartGuids = Collections.singletonList(OTHERCARTGUID);
 		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(otherCartGuids);
 
-		List<CartData> otherCartDataList = Collections.singletonList(otherCartData);
-		Map<String, List<CartData>> otherCartDatas = Collections.singletonMap(OTHERCARTGUID, otherCartDataList);
+		List<Map<String, String>> otherCartDataList = Collections.singletonList(otherCartData);
+		Map<String, List<Map<String, String>>> otherCartDatas = Collections.singletonMap(OTHERCARTGUID, otherCartDataList);
 
 		when(shoppingCartService.findCartDataForCarts(otherCartGuids))
 				.thenReturn(otherCartDatas);
 
-		when(cartData.getValue()).thenReturn(VALUE);
-		when(otherCartData.getValue()).thenReturn(VALUE);
-		when(otherCartData.getKey()).thenReturn(NAME);
-
-		Collection<StructuredErrorMessage> result = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> result = validator.validate(context);
 
 		assertThat(result).isNotEmpty();
-
 	}
 
 	@Test
 	public void testValidateWithoutConflict() {
 
-		CartData otherCartData = mock(CartData.class);
-		CartData cartData = mock(CartData.class);
+		Map<String, String> otherCartData = new HashMap<>();
+		otherCartData.put(NAME, "otherValue");
 
-		when(shoppingCart.getCartData()).thenReturn(Collections.singletonMap(NAME, cartData));
+		Map<String, String> cartData = new HashMap<>();
+		cartData.put(NAME, VALUE);
+
+		when(shoppingCart.getModifierFields()).thenReturn(cartData);
 
 		List<String> otherCartGuids = Collections.singletonList(OTHERCARTGUID);
 		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(otherCartGuids);
 
-		List<CartData> otherCartDataList = Collections.singletonList(otherCartData);
-		Map<String, List<CartData>> otherCartDatas = Collections.singletonMap(OTHERCARTGUID, otherCartDataList);
+		List<Map<String, String>> otherCartDataList = Collections.singletonList(otherCartData);
+		Map<String, List<Map<String, String>>> otherCartDatas = Collections.singletonMap(OTHERCARTGUID, otherCartDataList);
 
 		when(shoppingCartService.findCartDataForCarts(otherCartGuids))
 				.thenReturn(otherCartDatas);
 
-		when(cartData.getValue()).thenReturn(VALUE);
-		when(otherCartData.getKey()).thenReturn(NAME);
-		when(otherCartData.getValue()).thenReturn("otherValue");
-
-		Collection<StructuredErrorMessage> result = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> result = validator.validate(context);
 
 		assertThat(result).isEmpty();
 	}
@@ -130,9 +138,9 @@ public class UniqueCartDataValidatorImplTest {
 	@Test
 	public void testValidateWhenOtherCartHasNoCartData() {
 
-		CartData cartData = mock(CartData.class);
+		Map<String, String> cartData = new HashMap<>();
 
-		when(shoppingCart.getCartData()).thenReturn(Collections.singletonMap(NAME, cartData));
+		when(shoppingCart.getModifierFields()).thenReturn(cartData);
 
 		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(Collections.singletonList(OTHERCARTGUID));
@@ -141,27 +149,28 @@ public class UniqueCartDataValidatorImplTest {
 		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(otherCartGuids);
 
-		List<CartData> otherCartDataList = Collections.emptyList();
-		Map<String, List<CartData>> otherCartDatas = Collections.singletonMap(OTHERCARTGUID, otherCartDataList);
+		List<Map<String, String>> otherCartDataList = Collections.emptyList();
+		Map<String, List<Map<String, String>>> otherCartDatas = Collections.singletonMap(OTHERCARTGUID, otherCartDataList);
 
 		when(shoppingCartService.findCartDataForCarts(otherCartGuids))
 				.thenReturn(otherCartDatas);
 
-		Collection<StructuredErrorMessage> result = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> result = validator.validate(context);
 
 		assertThat(result).isEmpty();
 	}
+
 	@Test
 	public void testCreateWithNoOtherCarts() {
 
-		CartData cartData = mock(CartData.class);
+		Map<String, String> cartData = new HashMap<>();
 
-		when(shoppingCart.getCartData()).thenReturn(Collections.singletonMap(NAME, cartData));
+		when(shoppingCart.getModifierFields()).thenReturn(cartData);
 
 		when(shoppingCartService.findByCustomerAndStore(CUSTOMER_GUID, ACCOUNT_SHARED_ID, STORECODE))
 				.thenReturn(Collections.emptyList());
 
-		Collection<StructuredErrorMessage> result = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> result = validator.validate(context);
 
 		assertThat(result).isEmpty();
 	}

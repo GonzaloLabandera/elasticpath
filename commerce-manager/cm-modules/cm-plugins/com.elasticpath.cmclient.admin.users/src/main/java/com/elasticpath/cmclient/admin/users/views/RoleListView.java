@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.admin.users.views;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.Separator;
@@ -40,7 +41,7 @@ import com.elasticpath.service.cmuser.UserRoleService;
  * View to show and allow the manipulation of the available Roles in CM.
  */
 public class RoleListView extends AbstractListView {
-	private static final Logger LOG = Logger.getLogger(RoleListView.class);
+	private static final Logger LOG = LogManager.getLogger(RoleListView.class);
 
 	/** The View's ID. */
 	public static final String VIEW_ID = "com.elasticpath.cmclient.admin.users.views.RoleListView"; //$NON-NLS-1$

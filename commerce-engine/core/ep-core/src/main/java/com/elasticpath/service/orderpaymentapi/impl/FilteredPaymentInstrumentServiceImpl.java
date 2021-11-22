@@ -60,6 +60,17 @@ public class FilteredPaymentInstrumentServiceImpl implements FilteredPaymentInst
 	}
 
 	@Override
+	public CustomerPaymentInstrument findDefaultPaymentInstrumentForCustomerGuidAndStore(final String customerGuid, final String storeCode) {
+		final CustomerPaymentInstrument customerDefaultPaymentInstrument =
+				customerDefaultPaymentInstrumentService.getDefaultForCustomerGuid(customerGuid);
+
+		return Optional.ofNullable(customerDefaultPaymentInstrument)
+				.filter(customerPaymentInstrument -> isPaymentInstrumentAvailableInStore(customerPaymentInstrument.getPaymentInstrumentGuid(),
+						storeCode))
+				.orElse(null);
+	}
+
+	@Override
 	public CustomerPaymentInstrument findDefaultPaymentInstrumentForCustomerAndStore(final Customer customer, final String storeCode) {
 		final CustomerPaymentInstrument customerDefaultPaymentInstrument = customerDefaultPaymentInstrumentService.getDefaultForCustomer(customer);
 
@@ -72,8 +83,14 @@ public class FilteredPaymentInstrumentServiceImpl implements FilteredPaymentInst
 	@Override
 	public Collection<CartOrderPaymentInstrument> findCartOrderPaymentInstrumentsForCartOrderAndStore(final CartOrder cartOrder,
 																									  final String storeCode) {
-		final Collection<CartOrderPaymentInstrument> cartOrderPaymentInstruments = cartOrderPaymentInstrumentService.findByCartOrder(cartOrder);
+		return findCartOrderPaymentInstrumentsForCartOrderGuidAndStore(cartOrder.getGuid(), storeCode);
+	}
 
+	@Override
+	public Collection<CartOrderPaymentInstrument> findCartOrderPaymentInstrumentsForCartOrderGuidAndStore(final String cartOrderGuid,
+																										  final String storeCode) {
+		final Collection<CartOrderPaymentInstrument> cartOrderPaymentInstruments =
+				cartOrderPaymentInstrumentService.findByCartOrderGuid(cartOrderGuid);
 		return filterCartOrderPaymentInstrumentsByStore(cartOrderPaymentInstruments, storeCode);
 	}
 

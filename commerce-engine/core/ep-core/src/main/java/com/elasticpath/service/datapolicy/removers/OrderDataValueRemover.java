@@ -4,16 +4,16 @@
 
 package com.elasticpath.service.datapolicy.removers;
 
-import java.util.Collection;
-
-import com.elasticpath.commons.util.Pair;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
-import com.elasticpath.service.datapolicy.impl.DataPointValue;
 
 /**
  * The order data value remover.
  */
-public class OrderDataValueRemover extends AbstractDataPointValueRemover {
+public class OrderDataValueRemover extends AbstractJsonDataPointValueRemover {
+	/** Query for fetching order modifier fields. */
+	protected static final String SELECT_MODIFIER_FIELDS_JPQL = "SELECT ord.uidPk, ord.modifierFields FROM OrderImpl ord WHERE ord.uidPk IN (:list)";
+	/** The statement for updating order modifier fields. */
+	protected static final String UPDATE_MODIFIER_FIELDS_JPQL = "UPDATE OrderImpl ord SET ord.modifierFields=?1 WHERE ord.uidPk=?2";
 
 	@Override
 	public String getSupportedLocation() {
@@ -21,21 +21,12 @@ public class OrderDataValueRemover extends AbstractDataPointValueRemover {
 	}
 
 	@Override
-	public Pair<String, String> getJPQLUpdate() {
-		return new Pair<>("OrderDataImpl", "data");
+	protected String getSelectModifierFieldsJPQL() {
+		return SELECT_MODIFIER_FIELDS_JPQL;
 	}
 
 	@Override
-	protected String getRemoveQuery(final Collection<DataPointValue> dataPointValues) {
-		Pair<String, String> entityAliasPair = getJPQLUpdate();
-
-		String entity = entityAliasPair.getFirst();
-		String alias = entityAliasPair.getSecond();
-
-		String deleteQuery = "DELETE FROM " + entity + " " + alias;
-
-		return new StringBuilder(deleteQuery).append(' ')
-			.append(getWhereClauseForEntity(alias))
-			.toString();
+	protected String getUpdateModifierFieldsJPQL() {
+		return UPDATE_MODIFIER_FIELDS_JPQL;
 	}
 }

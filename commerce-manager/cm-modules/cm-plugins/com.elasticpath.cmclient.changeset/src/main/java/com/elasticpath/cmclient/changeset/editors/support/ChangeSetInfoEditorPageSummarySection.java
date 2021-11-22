@@ -7,8 +7,9 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -42,7 +43,7 @@ import com.elasticpath.cmclient.core.adapters.EmailHyperlinkAdapter;
  * A page section for displaying info on a change set.
  */
 public class ChangeSetInfoEditorPageSummarySection extends AbstractCmClientEditorPageSectionPart {
-	private static final Logger LOG = Logger.getLogger(ChangeSetInfoEditorPageSummarySection.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetInfoEditorPageSummarySection.class);
 	
 	private static final int LAYOUT_COLUMNS = 3;
 

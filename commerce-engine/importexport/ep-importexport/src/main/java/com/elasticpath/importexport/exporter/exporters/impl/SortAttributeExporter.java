@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.sort.SortAttributeDTO;
 import com.elasticpath.domain.search.SortAttribute;
@@ -22,7 +23,7 @@ import com.elasticpath.service.search.SortAttributeService;
  */
 public class SortAttributeExporter extends AbstractExporterImpl<SortAttribute, SortAttributeDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(SortAttributeExporter.class);
+	private static final Logger LOG = LogManager.getLogger(SortAttributeExporter.class);
 
 	private List<String> sortAttributeGuids;
 

@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.admin.stores.editors.facets;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 

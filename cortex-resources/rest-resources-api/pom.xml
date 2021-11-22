@@ -58,6 +58,7 @@
 		<module>unreleased-plans</module>
 		<module>wishlists</module>
 		<module>accounts</module>
+		<module>references</module>
 	</modules>
 
 	<dependencies>

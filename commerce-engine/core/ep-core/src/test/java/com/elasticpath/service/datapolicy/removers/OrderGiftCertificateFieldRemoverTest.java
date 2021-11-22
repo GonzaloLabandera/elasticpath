@@ -4,8 +4,10 @@
 
 package com.elasticpath.service.datapolicy.removers;
 
-import org.junit.runner.RunWith;
+import static com.elasticpath.service.datapolicy.removers.OrderGiftCertificateFieldRemover.SELECT_MODIFIER_FIELDS_JPQL;
+import static com.elasticpath.service.datapolicy.removers.OrderGiftCertificateFieldRemover.UPDATE_MODIFIER_FIELDS_JPQL;
 
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -13,7 +15,7 @@ import com.elasticpath.service.datapolicy.DataPointLocationEnum;
 
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 @RunWith(MockitoJUnitRunner.class)
-public class OrderGiftCertificateFieldRemoverTest extends AbstractDataPointValueRemoverTest {
+public class OrderGiftCertificateFieldRemoverTest extends AbstractJsonDataPointValueRemoverTest {
 
 	private static final String LOCATION = DataPointLocationEnum.ORDER_GIFT_CERTIFICATE.getName();
 
@@ -21,27 +23,22 @@ public class OrderGiftCertificateFieldRemoverTest extends AbstractDataPointValue
 	private OrderGiftCertificateFieldRemover remover;
 
 	@Override
-	protected String getLocation() {
-		return LOCATION;
-	}
-
-	@Override
 	protected AbstractDataPointValueRemover getRemover() {
 		return remover;
 	}
 
 	@Override
-	protected String getDPV1Field() {
-		return "recipientName";
+	protected String getLocation() {
+		return LOCATION;
 	}
 
 	@Override
-	protected String getDPV2Field() {
-		return "recipientEmail";
+	protected String getSelectModifierFieldsJPQL() {
+		return SELECT_MODIFIER_FIELDS_JPQL;
 	}
 
 	@Override
-	protected String getExpectedRemoveQuery(final boolean updateMoreFields) {
-		return "DELETE FROM OrderItemData oItemData WHERE oItemData.uidPk IN (:uidpks)";
+	protected String getUpdateModifierFieldsJPQL() {
+		return UPDATE_MODIFIER_FIELDS_JPQL;
 	}
 }

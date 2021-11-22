@@ -18,7 +18,7 @@ import liquibase.statement.core.InsertStatement;
  * Replace {@link InsertSetGenerator} to fix generating inserts without values.
  * It should be in the package "liquibase.sqlgenerator.ext" to automatically registered.
  */
-@SuppressWarnings("squid:S1149")
+@SuppressWarnings({"squid:S1149", "rawtypes"})
 public class UpdatedInsertSetGenerator extends InsertSetGenerator {
 	private InsertGenerator myGenerator = new InsertGenerator();
 

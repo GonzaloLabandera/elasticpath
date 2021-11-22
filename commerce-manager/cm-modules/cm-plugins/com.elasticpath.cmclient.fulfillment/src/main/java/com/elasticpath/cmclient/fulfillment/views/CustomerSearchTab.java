@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.fulfillment.views;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -178,7 +178,6 @@ public class CustomerSearchTab implements ISearchTab {
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_Username, StandardSortBy.USERNAME);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_FirstName, StandardSortBy.FIRST_NAME);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_LastName, StandardSortBy.LAST_NAME);
-		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_TelephoneNum, StandardSortBy.PHONE);
 	}
 	
 	/**

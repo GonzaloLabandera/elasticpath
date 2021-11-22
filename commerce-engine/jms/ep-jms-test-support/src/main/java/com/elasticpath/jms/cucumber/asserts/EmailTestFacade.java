@@ -7,7 +7,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,7 +21,7 @@ import org.jsoup.select.Elements;
 @SuppressWarnings("PMD.UseUtilityClass")
 public final class EmailTestFacade {
 
-	private static final Logger LOGGER = Logger.getLogger(EmailTestFacade.class);
+	private static final Logger LOGGER = LogManager.getLogger(EmailTestFacade.class);
 
 	/**
 	 * Private constructor.

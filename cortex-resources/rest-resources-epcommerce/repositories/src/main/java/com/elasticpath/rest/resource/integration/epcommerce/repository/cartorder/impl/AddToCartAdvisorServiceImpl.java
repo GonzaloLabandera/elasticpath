@@ -3,31 +3,39 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.shopper.ShopperReference;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.carts.LineItemEntity;
 import com.elasticpath.rest.resource.StructuredErrorMessageIdConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.StructuredErrorMessageTransformer;
 import com.elasticpath.rest.schema.StructuredMessageTypes;
-import com.elasticpath.service.shoppingcart.validation.AddProductSkuToCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.extensionpoint.ProductSkuValidator;
+import com.elasticpath.xpf.context.builders.ProductSkuValidationContextBuilder;
+import com.elasticpath.xpf.converters.StructuredErrorMessageConverter;
+import com.elasticpath.xpf.impl.XPFExtensionSelectorByStoreCode;
 
 /**
  * Shopping Item Validation Service.
@@ -37,33 +45,39 @@ import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationConte
 public class AddToCartAdvisorServiceImpl implements AddToCartAdvisorService {
 
 	private final ProductSkuRepository productSkuRepository;
-	private final AddProductSkuToCartValidationService addToCartValidationService;
+	private final ProductSkuValidationContextBuilder productSkuValidationContextBuilder;
 	private final StructuredErrorMessageTransformer structuredErrorMessageTransformer;
-	private final CustomerSessionRepository customerSessionRepository;
+	private final ShopperRepository shopperRepository;
 	private final StoreRepository storeRepository;
-
+	private final XPFExtensionLookup extensionLookup;
+	private final StructuredErrorMessageConverter structuredErrorMessageConverter;
 	/**
 	 * Constructor.
-	 *
-	 * @param productSkuRepository              the product sku repository
-	 * @param addToCartValidationService        the add to cart validation service
-	 * @param structuredErrorMessageTransformer the structured error message transformer
-	 * @param customerSessionRepository         the customer session repository
-	 * @param storeRepository                   the store repository
+	 * @param productSkuRepository               the product sku repository
+	 * @param productSkuValidationContextBuilder the product sku validation context builder
+	 * @param structuredErrorMessageTransformer  the structured error message transformer
+	 * @param shopperRepository                  the shopper repository
+	 * @param storeRepository                    the store repository
+	 * @param extensionLookup                    the extension lookup
+	 * @param structuredErrorMessageConverter    the structured error message converter
 	 */
 	@Inject
 	@SuppressWarnings({"checkstyle:parameternumber"})
 	public AddToCartAdvisorServiceImpl(
 			@Named("productSkuRepository") final ProductSkuRepository productSkuRepository,
-			@Named("addProductSkuToCartValidationService") final AddProductSkuToCartValidationService addToCartValidationService,
+			@Named("xpfProductSkuValidationContextBuilder") final ProductSkuValidationContextBuilder productSkuValidationContextBuilder,
 			@Named("structuredErrorMessageTransformer") final StructuredErrorMessageTransformer structuredErrorMessageTransformer,
-			@Named("customerSessionRepository") final CustomerSessionRepository customerSessionRepository,
-			@Named("storeRepository") final StoreRepository storeRepository) {
+			@Named("shopperRepository") final ShopperRepository shopperRepository,
+			@Named("storeRepository") final StoreRepository storeRepository,
+			@Named("xpfExtensionLookup") final XPFExtensionLookup extensionLookup,
+			@Named("structuredErrorMessageConverter") final StructuredErrorMessageConverter structuredErrorMessageConverter) {
 		this.productSkuRepository = productSkuRepository;
-		this.addToCartValidationService = addToCartValidationService;
+		this.productSkuValidationContextBuilder = productSkuValidationContextBuilder;
 		this.structuredErrorMessageTransformer = structuredErrorMessageTransformer;
-		this.customerSessionRepository = customerSessionRepository;
+		this.shopperRepository = shopperRepository;
 		this.storeRepository = storeRepository;
+		this.extensionLookup = extensionLookup;
+		this.structuredErrorMessageConverter = structuredErrorMessageConverter;
 	}
 
 	@Override
@@ -75,15 +89,25 @@ public class AddToCartAdvisorServiceImpl implements AddToCartAdvisorService {
 	@Override
 	public Observable<Message> validateItemPurchasable(final String scope, final ProductSku productSku,
 													   final ProductSku parentProductSku) {
-		return customerSessionRepository.findOrCreateCustomerSession()
-				.map(ShopperReference::getShopper)
+		return shopperRepository.findOrCreateShopper()
 				.flatMapObservable(shopper -> storeRepository.findStoreAsSingle(scope)
-						.flatMapObservable(store -> {
-							ProductSkuValidationContext context = addToCartValidationService.buildContext(productSku, parentProductSku,
-									store, shopper);
-							return Observable.fromIterable(structuredErrorMessageTransformer.transform(ImmutableList.copyOf(addToCartValidationService
-									.validate(context)), productSku.getSkuCode()));
-						}));
+						.flatMapObservable(store ->
+								Observable.fromIterable(structuredErrorMessageTransformer.transform(
+										validateItems(
+												productSkuValidationContextBuilder.build(productSku, parentProductSku, shopper, store),
+												store),
+										productSku.getSkuCode()))));
+	}
+
+	private List<StructuredErrorMessage> validateItems(final XPFProductSkuValidationContext context, final Store store) {
+		return extensionLookup.getMultipleExtensions(ProductSkuValidator.class,
+				XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART_READ,
+				new XPFExtensionSelectorByStoreCode(store.getCode()))
+				.stream()
+				.map(strategy -> strategy.validate(context))
+				.flatMap(Collection::stream)
+				.map(structuredErrorMessageConverter::convert)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -99,7 +123,7 @@ public class AddToCartAdvisorServiceImpl implements AddToCartAdvisorService {
 	/**
 	 * Get structured error message.
 	 *
-	 * @return the message
+	 * @return the messageProductSkuConverter
 	 */
 	private Completable getInvalidQuantityErrorMessage() {
 		Map<String, String> data = ImmutableMap.of("field-name", "quantity");

@@ -48,10 +48,6 @@ public class DbStatement implements Serializable {
 		return exeTimeMs;
 	}
 
-	public void setExeTimeMs(final long exeTimeMs) {
-		this.exeTimeMs = exeTimeMs;
-	}
-
 	@Override
 	public boolean equals(final Object otherSQLQuery) {
 		return EqualsBuilder.reflectionEquals(this, otherSQLQuery, false);

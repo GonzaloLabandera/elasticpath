@@ -12,9 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableList;
-
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -24,14 +23,19 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.sellingchannel.director.CartDirectorService;
-import com.elasticpath.service.shoppingcart.CantDeleteAutoselectableBundleItemsException;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.ShoppingItemService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
-import com.elasticpath.service.shoppingcart.validation.RemoveShoppingItemFromCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.entity.XPFOperationEnum;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingItemValidator;
+import com.elasticpath.xpf.context.builders.ShoppingItemValidationContextBuilder;
+import com.elasticpath.xpf.converters.StructuredErrorMessageConverter;
+import com.elasticpath.xpf.impl.XPFExtensionSelectorByStoreCode;
 
 /**
  * Service which wraps CartDirector's shopping cart update functionality within Container managed
@@ -45,9 +49,11 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	private WishListService wishListService;
 	private ShoppingCartService shoppingCartService;
 	private PricingSnapshotService pricingSnapshotService;
-	private RemoveShoppingItemFromCartValidationService removeShoppingItemFromCartValidationService;
 	private ShoppingItemService shoppingItemService;
+	private XPFExtensionLookup extensionLookup;
 
+	private ShoppingItemValidationContextBuilder shoppingItemValidationContextBuilder;
+	private StructuredErrorMessageConverter structuredErrorMessageConverter;
 
 	@Override
 	public ShoppingItem addItemToCart(final ShoppingCart shoppingCart, final ShoppingItemDto dto) {
@@ -97,8 +103,6 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 
 		return new StructuredErrorMessage(messageId, debugMessage, errorData);
 	}
-
-
 
 	@Override
 	public ShoppingCart updateCartItem(final ShoppingCart shoppingCart, final long itemId, final ShoppingItemDto dto) {
@@ -157,13 +161,32 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	}
 
 	private void validateCartItemBeforeDeletion(final ShoppingCart shoppingCart, final String itemGuid) {
-		final ShoppingItemValidationContext validationContext = removeShoppingItemFromCartValidationService.buildContext(shoppingCart,
-				shoppingCart.getCartItemByGuid(itemGuid));
-		Collection<StructuredErrorMessage> validationMessages = removeShoppingItemFromCartValidationService.validate(validationContext);
-		if (!validationMessages.isEmpty()) {
-			throw new CantDeleteAutoselectableBundleItemsException("Remove item from cart validation failure.",
-					ImmutableList.copyOf(validationMessages));
+		ShoppingItem shoppingItem = shoppingCart.getCartItemByGuid(itemGuid);
+
+		ShoppingItem parentShoppingItem = null;
+		if (shoppingItem.getParentItemUid() != null) {
+			parentShoppingItem = shoppingCart.getCartItemById(shoppingItem.getParentItemUid());
 		}
+
+		final XPFShoppingItemValidationContext context =
+				shoppingItemValidationContextBuilder.build(shoppingCart, shoppingItem, parentShoppingItem, XPFOperationEnum.DELETE);
+		final Collection<StructuredErrorMessage> validationMessages = executeValidators(shoppingCart, context);
+		if (!validationMessages.isEmpty()) {
+			throw new EpValidationException("Remove item from cart validation failure", validationMessages);
+		}
+	}
+
+	private Collection<StructuredErrorMessage> executeValidators(final ShoppingCart shoppingCart,
+																 final XPFShoppingItemValidationContext context) {
+		List<ShoppingItemValidator> validators = extensionLookup.getMultipleExtensions(
+				ShoppingItemValidator.class,
+				XPFExtensionPointEnum.VALIDATE_SHOPPING_ITEM_AT_REMOVE_FROM_CART,
+				new XPFExtensionSelectorByStoreCode(shoppingCart.getStore().getCode()));
+		return validators.stream()
+				.map(strategy -> strategy.validate(context))
+				.flatMap(Collection::stream)
+				.map(structuredErrorMessageConverter::convert)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -226,7 +249,7 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	 */
 	protected ShoppingCart saveShoppingCart(final ShoppingCart shoppingCart) {
 		getCartDirector().reorderItems(shoppingCart);
-		getPricingSnapshotService().getPricingSnapshotForCart(shoppingCart);
+		pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		return getShoppingCartService().saveOrUpdate(shoppingCart);
 	}
 
@@ -262,16 +285,35 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 		this.pricingSnapshotService = pricingSnapshotService;
 	}
 
-	public void setRemoveShoppingItemFromCartValidationService(
-			final RemoveShoppingItemFromCartValidationService removeShoppingItemFromCartValidationService) {
-		this.removeShoppingItemFromCartValidationService = removeShoppingItemFromCartValidationService;
-	}
-
 	public ShoppingItemService getShoppingItemService() {
 		return shoppingItemService;
 	}
 
 	public void setShoppingItemService(final ShoppingItemService shoppingItemService) {
 		this.shoppingItemService = shoppingItemService;
+	}
+
+	protected XPFExtensionLookup getExtensionLookup() {
+		return extensionLookup;
+	}
+
+	public void setExtensionLookup(final XPFExtensionLookup extensionLookup) {
+		this.extensionLookup = extensionLookup;
+	}
+
+	protected ShoppingItemValidationContextBuilder getShoppingItemValidationContextBuilder() {
+		return shoppingItemValidationContextBuilder;
+	}
+
+	public void setShoppingItemValidationContextBuilder(final ShoppingItemValidationContextBuilder shoppingItemValidationContextBuilder) {
+		this.shoppingItemValidationContextBuilder = shoppingItemValidationContextBuilder;
+	}
+
+	protected StructuredErrorMessageConverter getStructuredErrorMessageConverter() {
+		return structuredErrorMessageConverter;
+	}
+
+	public void setStructuredErrorMessageConverter(final StructuredErrorMessageConverter structuredErrorMessageConverter) {
+		this.structuredErrorMessageConverter = structuredErrorMessageConverter;
 	}
 }

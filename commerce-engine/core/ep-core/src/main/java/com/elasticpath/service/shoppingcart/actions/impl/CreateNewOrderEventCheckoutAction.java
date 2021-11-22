@@ -6,7 +6,8 @@ package com.elasticpath.service.shoppingcart.actions.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.core.messaging.order.OrderEventType;
@@ -28,7 +29,7 @@ public class CreateNewOrderEventCheckoutAction implements ReversibleCheckoutActi
 
 	private EventMessagePublisher eventMessagePublisher;
 
-	private static final Logger LOG = Logger.getLogger(CreateNewOrderEventCheckoutAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateNewOrderEventCheckoutAction.class);
 
 	@Override
 	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {

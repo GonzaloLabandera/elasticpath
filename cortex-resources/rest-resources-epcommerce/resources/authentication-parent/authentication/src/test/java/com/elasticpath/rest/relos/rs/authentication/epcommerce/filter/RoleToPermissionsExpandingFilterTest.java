@@ -22,6 +22,7 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.relos.rs.subject.SubjectHeaderConstants;
 import com.elasticpath.service.auth.ShiroRolesDeterminationService;
 import com.elasticpath.service.customer.CustomerService;
@@ -58,7 +59,7 @@ public class RoleToPermissionsExpandingFilterTest {
 		mockRequest.addHeader(SubjectHeaderConstants.USER_SCOPE, SCOPE);
 		mockRequest.addHeader(SubjectHeaderConstants.USER_ID, USER_GUID);
 
-		when(customerService.findCustomerGuidBySharedId(ACCOUNT_SHARED_ID)).thenReturn(ACCOUNT_GUID);
+		when(customerService.findCustomerGuidBySharedId(ACCOUNT_SHARED_ID, CustomerType.ACCOUNT)).thenReturn(ACCOUNT_GUID);
 	}
 
 	/**

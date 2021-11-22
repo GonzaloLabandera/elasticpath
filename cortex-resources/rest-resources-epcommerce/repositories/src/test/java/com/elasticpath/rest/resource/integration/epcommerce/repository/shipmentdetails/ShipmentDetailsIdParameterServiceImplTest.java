@@ -3,7 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil.createShipmentDetailsId;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.when;
@@ -11,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,9 +47,6 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 	private CartOrderRepository cartOrderRepository;
 
 	@Mock
-	private ShipmentDetailsService shipmentDetailsService;
-
-	@Mock
 	private ResourceOperationContext resourceOperationContext;
 
 	@Mock
@@ -63,8 +58,6 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 		for (int i = 0; i < NUM_OF_IDS; i++) {
 			String cartId = String.valueOf(i);
 			cartIds.add(cartId);
-			when(shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, cartId))
-					.thenReturn(Maybe.just(createShipmentDetailsId(cartId, ShipmentDetailsConstants.SHIPMENT_TYPE)));
 		}
 
 		when(cartOrderRepository.findCartOrderGuidsByCustomer(SCOPE, USER_ID)).thenReturn(Observable.fromIterable(cartIds));
@@ -104,21 +97,4 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 				.assertNoValues();
 	}
 
-	@Test
-	public void verifyFindShipmentDetailsIdReturnsEmptyWhenOrderIsNotShippable() {
-		List<String> cartIds = new ArrayList<>(NUM_OF_IDS);
-		for (int i = 0; i < NUM_OF_IDS; i++) {
-			String cartId = String.valueOf(i);
-			cartIds.add(cartId);
-			when(shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, cartId))
-					.thenReturn(Maybe.empty());
-		}
-
-		when(cartOrderRepository.findCartOrderGuidsByCustomer(SCOPE, USER_ID)).thenReturn(Observable.fromIterable(cartIds));
-
-		shipmentDetailsIdParameterService.findShipmentDetailsIds(SCOPE, USER_ID)
-				.test()
-				.assertNoErrors()
-				.assertNoValues();
-	}
 }

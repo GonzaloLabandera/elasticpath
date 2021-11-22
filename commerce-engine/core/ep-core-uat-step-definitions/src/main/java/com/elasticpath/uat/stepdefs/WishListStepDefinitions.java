@@ -15,7 +15,6 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.builder.WishListBuilder;
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.shoppingcart.WishListMessage;
@@ -109,8 +108,7 @@ public class WishListStepDefinitions {
 		Customer addedCustomer = customerService.add(customer);
 		customerHolder.set(addedCustomer);
 
-		final CustomerSession customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(addedCustomer);
-		return customerSession.getShopper();
+		return persisterFactory.getStoreTestPersister().persistShopperWithAssociatedEntities(addedCustomer);
 	}
 
 }

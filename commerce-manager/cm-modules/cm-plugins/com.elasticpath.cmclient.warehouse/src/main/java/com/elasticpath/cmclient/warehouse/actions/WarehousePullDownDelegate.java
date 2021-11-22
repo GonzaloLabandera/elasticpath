@@ -7,7 +7,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -26,7 +27,7 @@ import com.elasticpath.domain.store.Warehouse;
 public class WarehousePullDownDelegate extends AbstractDynamicPullDownActionDelegate<SwitchWarehouseAction, Warehouse>
 		implements IPerspectiveListener, WarehouseListener {
 
-	private static final Logger LOG = Logger.getLogger(WarehousePullDownDelegate.class);
+	private static final Logger LOG = LogManager.getLogger(WarehousePullDownDelegate.class);
 
 	@Override
 	protected void preInitialize(final IWorkbenchWindow workbenchWindow) {

@@ -5,8 +5,11 @@ package com.elasticpath.datapopulation.core.service.liquibase;
 
 import java.util.Map;
 
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
+
+import com.elasticpath.datapopulation.core.changelog.StandardChangeLogHistoryService;
 
 /**
  * DpCliSpringLiquibase is an extension of Liquibase's {@link SpringLiquibase} which allows a Liquibase changelog file to be run from within a
@@ -33,6 +36,9 @@ public class DpServiceSpringLiquibase extends SpringLiquibase {
 
 		// Next switch the flag on so that the Liquibase update runs
 		setShouldRun(true);
+
+		// Register our custom change log history service
+		ChangeLogHistoryServiceFactory.getInstance().register(new StandardChangeLogHistoryService());
 
 		// Finally we can call the entry point normally called by Spring; this performs the update.
 		try {

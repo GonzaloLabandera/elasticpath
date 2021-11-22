@@ -5,7 +5,8 @@ package com.elasticpath.search.searchengine;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.ql.parser.EpQLParseException;
@@ -19,7 +20,7 @@ import com.elasticpath.ql.parser.TargetLanguage;
  */
 public class EpQLSearchEngineImpl implements EpQLSearchEngine {
 
-	private static final Logger LOG = Logger.getLogger(EpQLSearchEngineImpl.class);
+	private static final Logger LOG = LogManager.getLogger(EpQLSearchEngineImpl.class);
 
 	private EpQueryParser epQueryParser;
 

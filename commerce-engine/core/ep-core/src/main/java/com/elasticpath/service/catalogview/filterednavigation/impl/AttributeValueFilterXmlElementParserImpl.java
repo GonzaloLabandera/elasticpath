@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom.Element;
 
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -28,7 +29,7 @@ public class AttributeValueFilterXmlElementParserImpl extends AbstractFilterXmlE
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
 	
-	private static final Logger LOG = Logger.getLogger(AttributeValueFilterXmlElementParserImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AttributeValueFilterXmlElementParserImpl.class);
 
 	private static final String VALUE = "value";
 

@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
@@ -26,7 +27,7 @@ public class PermissionsExtensionPoint {
 	 */
 	private static final String AUTHORIZATIONS_EXT_ID = "authorizations"; //$NON-NLS-1$
 
-	private static final Logger LOG = Logger.getLogger(Permission.class);
+	private static final Logger LOG = LogManager.getLogger(Permission.class);
 
 	/** The extension's permissions element. */
 	public static final String TAG_PERMISSIONS = "permissions"; //$NON-NLS-1$

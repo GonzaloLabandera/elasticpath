@@ -5,7 +5,8 @@ package com.elasticpath.tags.service.impl;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.converter.ConversionMalformedValueException;
 import com.elasticpath.converter.StringToTypeConverter;
@@ -21,7 +22,7 @@ public class TagTypeValueConverterImpl implements TagTypeValueConverter {
 
 	private Map<String, StringToTypeConverter<?>> typeConverterMap;
 
-	private static final Logger LOG = Logger.getLogger(TagTypeValueConverterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(TagTypeValueConverterImpl.class);
 
 	@Override
 	public Object convertValueTypeToTagJavaType(final TagDefinition tagDefinition, final String tagValue) {

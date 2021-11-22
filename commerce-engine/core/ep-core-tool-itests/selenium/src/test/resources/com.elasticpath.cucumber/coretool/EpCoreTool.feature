@@ -2,12 +2,9 @@
 Feature: EP core tool
 
   Scenario: Rebuild all search indexes
-    Given I sign in to CM as admin user
-    And I go to Configuration
-    When I go to Search Indexes
-    Then the status of all indexes should be Complete
+    Given the DB status of all indexes should be COMPLETE
     When I run the ep core tool to rebuild the indexes
-    Then the status of all indexes should be Rebuild
+    Then the DB status of all indexes should be REBUILD_IN_PROGRESS
 
 
   @resetPassword

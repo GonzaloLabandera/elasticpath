@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -20,7 +21,7 @@ import org.eclipse.ui.PlatformUI;
  */
 public class HideActionSetRunnable implements Runnable {
 
-	private static final Logger LOG = Logger.getLogger(HideActionSetRunnable.class);
+	private static final Logger LOG = LogManager.getLogger(HideActionSetRunnable.class);
 	private final Set<String> actionSetIds = new HashSet<>();
 	private final HideCondition hideCondition;
 

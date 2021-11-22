@@ -3,29 +3,37 @@
  */
 package com.elasticpath.settings.provider.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import java.util.List;
+import java.util.Optional;
 
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
-import com.elasticpath.settings.impl.OverridingSettingValueImpl;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.settings.provider.SettingValueProvider;
 import com.elasticpath.settings.provider.converter.SettingValueTypeConverter;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.connectivity.context.XPFSettingValueRetrievalContext;
+import com.elasticpath.xpf.connectivity.entity.XPFSettingValue;
+import com.elasticpath.xpf.connectivity.extensionpoint.SettingValueRetrievalStrategy;
+import com.elasticpath.xpf.impl.XPFExtensionSelectorAny;
 
 /**
- * Implementation of {@link SettingValueProvider} that delegates to a {@link SettingsReader}.
+ * Implementation of {@link SettingValueProvider} that delegates to a {@link com.elasticpath.settings.SettingsReader}.
  *
  * @param <T> the type of value expected to be provided
  */
 public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 
-	private static final Logger LOG = Logger.getLogger(SettingValueProviderImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SettingValueProviderImpl.class);
 
 	private String path;
 
 	private String context;
 
-	private SettingsReader settingsReader;
+	private XPFExtensionLookup xpfExtensionLookup;
 
 	private SettingValueTypeConverter settingValueTypeConverter;
 
@@ -44,7 +52,7 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 	public T get(final String context) {
 		verifyDependencies();
 
-		SettingValue settingValue = getSettingValue(context);
+		XPFSettingValue settingValue = getSettingValue(context);
 
 		if (systemPropertyOverrideKey != null || deprecatedSystemPropertyOverrideKey != null) {
 			settingValue = applyPossibleSystemPropertyOverride(settingValue);
@@ -53,23 +61,33 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 		return getSettingValueTypeConverter().convert(settingValue);
 	}
 
-	@SuppressWarnings("PMD.ConfusingTernary")
-	private SettingValue getSettingValue(final String context) {
+	private XPFSettingValue getSettingValue(final String context) {
+		String settingValueContext = deriveSettingValueContext(context);
 
-		SettingValue settingValue;
+		XPFSettingValueRetrievalContext settingValueRetrievalContext = new XPFSettingValueRetrievalContext(getPath(), settingValueContext);
 
-		if (!StringUtils.isBlank(context)) {
-			settingValue = getSettingsReader().getSettingValue(getPath(), context);
-		} else if (!StringUtils.isBlank(getContext())) {
-			settingValue = getSettingsReader().getSettingValue(getPath(), getContext());
-		} else {
-			settingValue = getSettingsReader().getSettingValue(getPath());
-		}
+		return getSettingValueRetrievalStrategyList().stream()
+				.map(strategy -> strategy.getSettingValue(settingValueRetrievalContext))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.findFirst()
+				.orElseThrow(() -> new EpServiceException("No setting value retrieval strategies were unable to find a value for path and context: '"
+						+ path + "', '" + context + "'"));
 
-		return settingValue;
 	}
 
-	private SettingValue applyPossibleSystemPropertyOverride(final SettingValue settingValue) {
+	@SuppressWarnings("PMD.ConfusingTernary")
+	private String deriveSettingValueContext(final String context) {
+		String settingValueContext = null;
+		if (!StringUtils.isBlank(context)) {
+			settingValueContext = context;
+		} else if (!StringUtils.isBlank(getContext())) {
+			settingValueContext = getContext();
+		}
+		return settingValueContext;
+	}
+
+	private XPFSettingValue applyPossibleSystemPropertyOverride(final XPFSettingValue settingValue) {
 		if (StringUtils.isNotEmpty(deprecatedSystemPropertyOverrideKey)) {
 			String overrideValue = System.getProperty(deprecatedSystemPropertyOverrideKey);
 
@@ -98,14 +116,14 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 		}
 
 		if (systemPropertyOverrideValue != null) {
-			return new OverridingSettingValueImpl(settingValue, systemPropertyOverrideValue);
+			return new XPFSettingValue(systemPropertyOverrideValue, settingValue.getValueType());
 		}
 		return settingValue;
 	}
 
 	private void verifyDependencies() {
-		if (getSettingsReader() == null) {
-			throw new IllegalStateException("settingsReader field must not be null");
+		if (getXpfExtensionLookup() == null) {
+			throw new IllegalStateException("ExtensionLookup field must not be null");
 		}
 
 		if (getSettingValueTypeConverter() == null) {
@@ -115,6 +133,11 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 		if (getPath() == null) {
 			throw new IllegalStateException("path field must not be null");
 		}
+	}
+
+	private List<SettingValueRetrievalStrategy> getSettingValueRetrievalStrategyList() {
+		return xpfExtensionLookup.getMultipleExtensions(SettingValueRetrievalStrategy.class,
+				XPFExtensionPointEnum.SETTING_VALUE_RETRIEVAL, new XPFExtensionSelectorAny());
 	}
 
 	public void setPath(final String path) {
@@ -133,14 +156,6 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 		return context;
 	}
 
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
-	}
-
 	public void setSettingValueTypeConverter(final SettingValueTypeConverter settingValueTypeConverter) {
 		this.settingValueTypeConverter = settingValueTypeConverter;
 	}
@@ -155,5 +170,13 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 
 	public void setDeprecatedSystemPropertyOverrideKey(final String deprecatedSystemPropertyOverrideKey) {
 		this.deprecatedSystemPropertyOverrideKey = deprecatedSystemPropertyOverrideKey;
+	}
+
+	public XPFExtensionLookup getXpfExtensionLookup() {
+		return xpfExtensionLookup;
+	}
+
+	public void setXpfExtensionLookup(final XPFExtensionLookup xpfExtensionLookup) {
+		this.xpfExtensionLookup = xpfExtensionLookup;
 	}
 }

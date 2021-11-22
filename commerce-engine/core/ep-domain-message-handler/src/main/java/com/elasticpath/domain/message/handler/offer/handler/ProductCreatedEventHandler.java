@@ -3,7 +3,8 @@
  */
 package com.elasticpath.domain.message.handler.offer.handler;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.update.processor.capabilities.ProductUpdateProcessor;
 import com.elasticpath.domain.catalog.Product;
@@ -16,7 +17,7 @@ import com.elasticpath.messaging.EventMessage;
  */
 public class ProductCreatedEventHandler implements EventMessageHandler {
 
-	private static final Logger LOGGER = Logger.getLogger(ProductCreatedEventHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(ProductCreatedEventHandler.class);
 
 	private final EventMessageHandlerHelper<Product> eventMessageHandlerHelper;
 	private final ProductUpdateProcessor productUpdateProcessor;

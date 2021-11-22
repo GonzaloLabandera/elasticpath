@@ -3,8 +3,9 @@
  */
 package com.elasticpath.domain.dataimport.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EpBindException;
@@ -19,6 +20,7 @@ import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.misc.Geography;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.persistence.api.Persistable;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.dataimport.ImportGuidHelper;
 
 /**
@@ -28,7 +30,7 @@ import com.elasticpath.service.dataimport.ImportGuidHelper;
 public class ImportDataTypeCustomerAddressImpl extends AbstractImportDataTypeImpl {
 	private static final String MSG_EXPECTING_A_CUSTOMER = "Expecting a customer.";
 
-	private static final Logger LOG = Logger.getLogger(ImportDataTypeCustomerAddressImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ImportDataTypeCustomerAddressImpl.class);
 
 	/**
 	 * Serial version ID.
@@ -498,23 +500,25 @@ public class ImportDataTypeCustomerAddressImpl extends AbstractImportDataTypeImp
 	/**
 	 * Add or update this CustomerAddress in the Customer object.
 	 *
-	 * @param entity the entity
-	 * @param object the value object
+	 * @param srcCustomerEntity the source customer entity
+	 * @param importedCustomerAddressObject the value object
 	 */
 	@Override
-	public void saveOrUpdate(final Entity entity, final Persistable object) {
+	public void saveOrUpdate(final Entity srcCustomerEntity, final Persistable importedCustomerAddressObject) {
 		final String methodSignature = "ImportDataTypeCustomerAddressImpl.saveOrUpdate(Entity, ValueObject)";
-		final Customer srcCustomer = (Customer) entity;
-		final CustomerAddress importedAddress = (CustomerAddress) object;
+		final Customer srcCustomer = (Customer) srcCustomerEntity;
+		final CustomerAddress importedAddress = (CustomerAddress) importedCustomerAddressObject;
+		AddressService addressService = getSingletonBean(ContextIdNames.ADDRESS_SERVICE, AddressService.class);
 
 		// Find out if this address already exists
-		CustomerAddress existingAddress = srcCustomer.getAddressByGuid(importedAddress.getGuid());
+		CustomerAddress existingAddress = addressService.findByCustomerAndAddressGuid(srcCustomer.getUidPk(), importedAddress.getGuid());
 		// add it
 		if (existingAddress == null) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(methodSignature + " adding CustomerAddress guid=" + importedAddress.getGuid());
 			}
-			srcCustomer.addAddress(importedAddress);
+			importedAddress.setCustomerUidPk(srcCustomer.getUidPk());
+			addressService.save(importedAddress);
 			return;
 		}
 		// update it

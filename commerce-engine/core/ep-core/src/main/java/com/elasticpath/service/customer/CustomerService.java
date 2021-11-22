@@ -16,6 +16,8 @@ import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.service.EpPersistenceService;
+import com.elasticpath.service.search.query.AccountSearchCriteria;
+import com.elasticpath.service.search.query.CustomerSearchCriteria;
 
 /**
  * Provide customer-related business service.
@@ -168,10 +170,10 @@ public interface CustomerService extends EpPersistenceService {
 	 * Checks whether a customer exists with the given sharedId and store code.
 	 *
 	 * @param sharedId the sharedId
-	 * @param storeCode the store code
+	 * @param customerType the customer type
 	 * @return true if customer exists
 	 */
-	boolean isCustomerExistsBySharedIdAndStoreCode(String sharedId, String storeCode);
+	boolean isCustomerExistsBySharedId(String sharedId, CustomerType customerType);
 
 	/**
 	 * Checks whether customer exists with profile attribute key value pair.
@@ -184,21 +186,13 @@ public interface CustomerService extends EpPersistenceService {
 	Long getCustomerCountByProfileAttributeKeyAndValue(String profileAttributeKey, String profileAttributeValue);
 
 	/**
-	 * Finds customer's guid by shared id and store code.
+	 * Finds customer's guid by shared id and customer type.
 	 *
 	 * @param sharedId customer shared ID
-	 * @param storeCode the store Code
+	 * @param customerType the customer type
 	 * @return Customer's guid.
 	 */
-	String findCustomerGuidBySharedId(String sharedId, String storeCode);
-
-	/**
-	 * Finds customer's guid by shared id.
-	 *
-	 * @param sharedId customer shared ID
-	 * @return Customer's guid.
-	 */
-	String findCustomerGuidBySharedId(String sharedId);
+	String findCustomerGuidBySharedId(String sharedId, CustomerType customerType);
 
 	/**
 	 * Finds customer's guid based on attribute value for the passed attribute key.
@@ -281,26 +275,6 @@ public interface CustomerService extends EpPersistenceService {
 	 * @throws EpServiceException in case of any errors.
 	 */
 	void setCustomerDefaultGroup(Customer customer);
-
-	/**
-	 * Find the account with the given shared ID.
-	 *
-	 * @param sharedId the account shared ID
-	 * @return the account with the given shared ID
-	 * @throws EpServiceException - in case of any errors
-	 */
-	Customer findBySharedId(String sharedId) throws EpServiceException;
-
-	/**
-	 * Find the customer with the given shared ID.
-	 * If it cannot find the customer in the given store, also look within the store's associated stores.
-	 *
-	 * @param sharedId the customer shared ID
-	 * @param storeCode the store to search in
-	 * @return the customers with the given shared ID
-	 * @throws EpServiceException - in case of any errors
-	 */
-	Customer findBySharedId(String sharedId, String storeCode) throws EpServiceException;
 
 	/**
 	 * Adds the given customer.
@@ -404,4 +378,77 @@ public interface CustomerService extends EpPersistenceService {
 	 * @return customer without addresses.
 	 */
 	Customer removeAllAddresses(Customer customer);
+
+	/**
+	 * Returns the number of orders associated to the list of account's GUID.
+	 * @param customerGuids the list of account's GUID
+	 * @return the number of orders
+	 */
+	long countAssociatedOrders(Collection<String> customerGuids);
+
+	/**
+	 * Remove the account.
+	 * @param customer the customer GUID
+	 */
+	void remove(Customer customer);
+
+	/**
+	 * Find customers by search criteria.
+	 *
+	 * @param searchCriteria the search criteria
+	 * @param startIndex start index
+	 * @param pagination the pagination
+	 * @return the customers list
+	 */
+	List<Customer> findCustomersBySearchCriteria(CustomerSearchCriteria searchCriteria, int startIndex, int pagination);
+
+	/**
+	 * Get count of customers by search criteria.
+	 *
+	 * @param searchCriteria the search criteria
+	 * @return the count
+	 */
+	long getCustomerCountBySearchCriteria(CustomerSearchCriteria searchCriteria);
+
+	/**
+	 * Find accounts by search criteria.
+	 *
+	 * @param searchCriteria the search criteria
+	 * @param startIndex start index
+	 * @param pagination the pagination
+	 * @return the customers list
+	 */
+	List<Customer> findAccountsBySearchCriteria(AccountSearchCriteria searchCriteria, int startIndex, int pagination);
+
+	/**
+	 * Get count of accounts by search criteria.
+	 *
+	 * @param searchCriteria the search criteria
+	 * @return the count
+	 */
+	long getAccountCountBySearchCriteria(AccountSearchCriteria searchCriteria);
+
+	/**
+	 * Save updated customers.
+	 * @param customers the updated customers to save
+	 */
+	void updateCustomers(List<Customer> customers);
+
+	/**
+	 * Find customers by GUIDs.
+	 *
+	 * @param customerGuids the list of GUIDs.
+	 * @return the list of {@link Customer} or empty list.
+	 */
+	List<Customer> findByGuids(Collection<String> customerGuids);
+
+	/**
+	 * Find the customer with the given shared ID and customer type.
+	 *
+	 * @param sharedId the customer shared ID
+	 * @param customerType the customer type
+	 * @return the customer with the given shared ID and customer type
+	 * @throws EpServiceException - in case of any errors
+	 */
+	Customer findBySharedId(String sharedId, CustomerType customerType) throws EpServiceException;
 }

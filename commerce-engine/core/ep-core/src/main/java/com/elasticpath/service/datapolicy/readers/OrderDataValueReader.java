@@ -4,20 +4,25 @@
 
 package com.elasticpath.service.datapolicy.readers;
 
+import static com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.toJSON;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.elasticpath.commons.util.Pair;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
+import com.elasticpath.service.datapolicy.impl.DataPointValue;
 
 /**
  * A data point value reader for any order data value.
  */
 public class OrderDataValueReader extends AbstractDataPointValueReader {
 
-	private static final Pair<String, String> ENTITY_CLASS_ALIAS_PAIR = Pair.of("OrderImpl", "o");
+	//don't use "order" for alias - it's a db keyword
+	private static final Pair<String, String> ENTITY_CLASS_ALIAS_PAIR = Pair.of("OrderImpl", "ord");
 
 	@Override
 	public String getSupportedLocation() {
@@ -27,18 +32,16 @@ public class OrderDataValueReader extends AbstractDataPointValueReader {
 	@Override
 	public String getReadQuery(final Collection<String> dataPointKeys) {
 
-		String query =  "SELECT oData.uidPk,oData.creationDate,oData.lastModifiedDate,oData.key,oData.value"
+		String query =  "SELECT #alias#.uidPk,#alias#.createdDate,#alias#.lastModifiedDate,#alias#.modifierFields"
 			.concat(" FROM #TABLE#")
-			.concat(" INNER JOIN #alias#.orderDataInternal oData")
-			.concat(" WHERE #alias#.customer.guid = ?1")
-			.concat(" AND oData.key IN (:#paramList#)");
+			.concat(" WHERE #alias#.customer.guid = ?1");
 
 		return finalizedJPQLQuerys(query);
 	}
 
 	@Override
 	protected String[] getJPQLSearchList() {
-		return new String[]{"#TABLE#", "#alias#", "#paramList#"};
+		return new String[]{"#TABLE#", "#alias#"};
 	}
 
 	@Override
@@ -46,7 +49,7 @@ public class OrderDataValueReader extends AbstractDataPointValueReader {
 		List<Pair<String, String>> entityClassAndAliasPairs = getEntityClassAndAliasPairs();
 		String entityAlias = entityClassAndAliasPairs.get(0).getSecond();
 
-		return new String[]{getCSVFromTables(entityClassAndAliasPairs), entityAlias, PARAMETER_LIST_NAME};
+		return new String[]{getCSVFromTables(entityClassAndAliasPairs), entityAlias};
 	}
 
 	/**
@@ -73,5 +76,19 @@ public class OrderDataValueReader extends AbstractDataPointValueReader {
 	@Override
 	public List<Pair<String, String>> getEntityClassAndAliasPairs() {
 		return Arrays.asList(ENTITY_CLASS_ALIAS_PAIR);
+	}
+
+	@Override
+	protected void setValue(final DataPointValue dpv, final Object[] row, final int attributeValueIndex) {
+		ModifierFieldsMapWrapper modifierFields = (ModifierFieldsMapWrapper) row[attributeValueIndex];
+
+		if (modifierFields != null) {
+			dpv.setValue(modifierFields.get(dpv.getKey()));
+		}
+	}
+
+	@Override
+	protected String rawDataKeyToString(final Object rawDataKey) {
+		return toJSON((ModifierFieldsMapWrapper) rawDataKey);
 	}
 }

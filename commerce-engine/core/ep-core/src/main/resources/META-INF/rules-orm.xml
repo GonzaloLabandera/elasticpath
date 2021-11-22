@@ -2,26 +2,6 @@
 <entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
 
     <!-- Named queries for EpRuleBaseImpl -->
-		<named-query name="EP_RULE_BASE_FIND_CHANGED_CATALOGCODE_SCENARIO">
-			<query>
-				SELECT rb
-				FROM EpRuleBaseImpl rb
-				WHERE rb.catalog.code = ?1
-				AND rb.store IS NULL
-				AND rb.scenarioId = ?2
-				AND rb.lastModifiedDate &gt;= ?3
-			</query>
-		</named-query>
-		<named-query name="EP_RULE_BASE_FIND_CHANGED_STORECODE_SCENARIO">
-			<query>
-				SELECT rb
-				FROM EpRuleBaseImpl rb
-				WHERE rb.store.code = ?1
-				AND rb.catalog IS NULL
-				AND rb.scenarioId = ?2
-				AND rb.lastModifiedDate &gt;= ?3
-			</query>
-		</named-query>
 		<named-query name="EP_RULE_BASE_FIND_BY_STORE_SCENARIO">
 			<query>
 				SELECT rb
@@ -284,12 +264,6 @@
 		</named-query>
 
     <!-- Named queries for RuleSetImpl -->
-		<named-query name="RULESET_SELECT_ALL">
-			<query>
-				SELECT rs
-				FROM RuleSetImpl rs
-			</query>
-		</named-query>
 		<named-query name="RULE_SET_SELECT_BY_MODIFIED_DATE">
 			<query>
 				SELECT rs

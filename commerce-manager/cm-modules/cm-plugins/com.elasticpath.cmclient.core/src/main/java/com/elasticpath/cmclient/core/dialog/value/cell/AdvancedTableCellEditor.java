@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core.dialog.value.cell;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -47,7 +48,7 @@ import com.elasticpath.commons.util.Pair;
 @SuppressWarnings({ "PMD.GodClass" })
 public class AdvancedTableCellEditor extends DialogCellEditor {
 	
-	private static final Logger LOG = Logger.getLogger(AdvancedTableCellEditor.class);
+	private static final Logger LOG = LogManager.getLogger(AdvancedTableCellEditor.class);
 	
 	private final IStructuredContentProvider contentProvider;
 	

@@ -39,7 +39,6 @@
 		<property name="indexTypesMap">
 			<map>
 				<entry key="product" value="product"/>
-				<entry key="customer" value="customer"/>
 				<entry key="category" value="category"/>
 				<!-- We don't like order indexes in the tests... not sure why. -->
 				<!-- 				<entry key="order" value="order" /> -->

@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Brand;
@@ -39,7 +40,7 @@ public class CatalogExporterImpl extends AbstractExporterImpl<Catalog, CatalogDT
 	
 	private ImportExportSearcher importExportSearcher;
 
-	private static final Logger LOG = Logger.getLogger(CatalogExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CatalogExporterImpl.class);
 
 	@Override
 	protected void initializeExporter(final ExportContext context) {

@@ -5,7 +5,8 @@ package com.elasticpath.commons.util.impl;
 
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 
@@ -19,7 +20,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
  */
 public class StoreMessageSourceImpl implements StoreMessageSource {
 
-	private static final Logger LOG = Logger.getLogger(StoreMessageSourceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(StoreMessageSourceImpl.class);
 
 	private static final String NOT_FOUND = null;
 

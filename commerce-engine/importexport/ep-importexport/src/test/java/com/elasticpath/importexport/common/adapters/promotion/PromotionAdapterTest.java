@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang3.LocaleUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +39,7 @@ import com.elasticpath.domain.rules.RuleElement;
 import com.elasticpath.domain.rules.RuleElementType;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.rules.impl.CartAnySkuAmountDiscountActionImpl;
 import com.elasticpath.domain.rules.impl.CartAnySkuPercentDiscountActionImpl;
 import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
@@ -99,6 +100,9 @@ public class PromotionAdapterTest {
 
 	@Mock
 	private LocalizedPropertyValue value2;
+
+	@Mock
+	private RuleSetLoadTuner mockRuleSetLoadTuner;
 
 	private final DisplayValue displayValue1 = new DisplayValue("fr", "frValue");
 
@@ -523,6 +527,9 @@ public class PromotionAdapterTest {
 	 */
 	@Test
 	public void testPopulateRuleSet() {
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class))
+				.thenReturn(mockRuleSetLoadTuner);
+
 		final PromotionDTO promotionDTO = new PromotionDTO();
 		promotionDTO.setType(PromotionAdapter.SHOPPING_CART_TYPE);
 
@@ -530,18 +537,18 @@ public class PromotionAdapterTest {
 		promotionAdapter.setRuleSetService(ruleSetService);
 		final RuleSet ruleSet = new RuleSetImpl();
 
-		when(ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO)).thenReturn(ruleSet);
+		when(ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO, mockRuleSetLoadTuner)).thenReturn(ruleSet);
 
 		promotionAdapter.populateRuleSet(promotionDTO, rule);
 
 		promotionDTO.setType(PromotionAdapter.CATALOG_TYPE);
 
-		when(ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO)).thenReturn(ruleSet);
+		when(ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO, mockRuleSetLoadTuner)).thenReturn(ruleSet);
 
 		promotionAdapter.populateRuleSet(promotionDTO, rule);
 
-		verify(ruleSetService).findByScenarioId(RuleScenarios.CART_SCENARIO);
-		verify(ruleSetService).findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO);
+		verify(ruleSetService).findByScenarioId(RuleScenarios.CART_SCENARIO, mockRuleSetLoadTuner);
+		verify(ruleSetService).findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO, mockRuleSetLoadTuner);
 		verify(rule, times(2)).setRuleSet(ruleSet);
 	}
 

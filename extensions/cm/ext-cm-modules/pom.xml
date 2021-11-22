@@ -26,7 +26,7 @@
 
 	<properties>
 		<tycho.version>1.0.0</tycho.version>
-		<tycho.target-platform>cm-rap32</tycho.target-platform>
+		<tycho.target-platform>cm-rap</tycho.target-platform>
 		<tycho.target-platform.version>${project.version}</tycho.target-platform.version>
 		<pmd.cmclient.ruleset>rulesets/pmd-elasticpath-cmclient-rules.xml</pmd.cmclient.ruleset>
 		<checkstyle.suppressions.location>cm-ruleset/checkstyle-cmclient-suppressions.xml</checkstyle.suppressions.location>
@@ -42,7 +42,7 @@
 			<layout>p2</layout>
 		</repository>
 		<repository>
-			<id>OxygenRepository</id>
+			<id>EclipseReleasesRepository</id>
 			<url>http://download.eclipse.org/releases/photon</url>
 			<layout>p2</layout>
 		</repository>

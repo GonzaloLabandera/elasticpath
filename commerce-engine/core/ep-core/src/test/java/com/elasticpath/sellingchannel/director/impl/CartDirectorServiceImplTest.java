@@ -8,7 +8,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -16,20 +15,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.common.collect.ImmutableList;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.assertj.core.util.Lists;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -40,33 +39,43 @@ import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.sellingchannel.director.CartDirector;
-import com.elasticpath.service.shoppingcart.CantDeleteAutoselectableBundleItemsException;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.ShoppingItemService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
-import com.elasticpath.service.shoppingcart.validation.RemoveShoppingItemFromCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFOperationEnum;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingItemValidator;
+import com.elasticpath.xpf.context.builders.ShoppingItemValidationContextBuilder;
+import com.elasticpath.xpf.converters.StructuredErrorMessageConverter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CartDirectorServiceImplTest {
 
+	private static final String ITEM_GUID_1 = "itemGuid1";
+	private static final String ITEM_GUID_2 = "itemGuid2";
 	private static final String SKU_CODE = "skuCode";
 	private static final String SKU_CODE_2 = "skuCode2";
-	private static final String WISHLIST_LINE_ITEM_GUID = "WISHLIST_LINE_ITEM_GUID";
-	private static final String CART_LINE_ITEM_GUID = "CART_LINE_ITEM_GUID";
+	private static final String WISHLIST_LINE_ITEM_GUID = "wishlistLineItemGuid";
+	private static final String CART_LINE_ITEM_GUID = "cartLineItemGuid";
 
 	@Mock private CartDirector cartDirector;
 	@Mock private ShoppingCartService shoppingCartService;
 	@Mock private WishListService wishListService;
 	@Mock private ShoppingItemService shoppingItemService;
 	@Mock private ShoppingCart shoppingCart;
+	@Mock private ShoppingItem shoppingItem;
 	@Mock private Shopper shopper;
 	@Mock private Store store;
 	@Mock private WishList wishList;
 	@Mock private PricingSnapshotService pricingSnapshotService;
-	@Mock private RemoveShoppingItemFromCartValidationService removeShoppingItemFromCartValidationService;
+	@Mock private XPFExtensionLookup extensionLookup;
+	@Mock private ShoppingItemValidationContextBuilder shoppingItemValidationContextBuilder;
+	@Mock private StructuredErrorMessageConverter structuredErrorMessageConverter;
+	@Mock private XPFShoppingItemValidationContext shoppingItemValidationContext;
 
 	@InjectMocks
 	private CartDirectorServiceImpl service;
@@ -208,30 +217,33 @@ public class CartDirectorServiceImplTest {
 
 	@Test
 	public void testRemoveItemFromCartHappyPath() {
-		final String itemId1 = "12345";
-		final String itemId2 = "54321";
-
-		when(removeShoppingItemFromCartValidationService.buildContext(any(), any())).thenReturn(mock(ShoppingItemValidationContext.class));
+		when(shoppingCart.getCartItemByGuid(ITEM_GUID_1)).thenReturn(shoppingItem);
+		when(shoppingCart.getCartItemByGuid(ITEM_GUID_2)).thenReturn(shoppingItem);
+		when(shoppingCart.getStore()).thenReturn(store);
+		when(shoppingItem.getParentItemUid()).thenReturn(1L);
 
 		// When
-		service.removeItemsFromCart(shoppingCart, itemId1, itemId2);
+		service.removeItemsFromCart(shoppingCart, ITEM_GUID_1, ITEM_GUID_2);
 
-		verify(shoppingItemService).deleteItemsByGuids(itemId1, itemId2);
-		verify(removeShoppingItemFromCartValidationService, times(2)).buildContext(eq(shoppingCart), any());
-		verify(removeShoppingItemFromCartValidationService, times(2)).validate(isA(ShoppingItemValidationContext.class));
-
+		verify(shoppingItemService).deleteItemsByGuids(ITEM_GUID_1, ITEM_GUID_2);
+		verify(shoppingItemValidationContextBuilder, times(2)).build(any(ShoppingCart.class), any(ShoppingItem.class), eq(null),
+				eq(XPFOperationEnum.DELETE));
 	}
 
 	@Test
 	public void testRemoveItemFromCartValidationFails() {
-		Collection<StructuredErrorMessage> validationMessages = new ArrayList<>();
-		validationMessages.add(new StructuredErrorMessage("messageId", "debug message", null));
-
-		when(removeShoppingItemFromCartValidationService.validate(any())).thenReturn(validationMessages);
+		when(shoppingCart.getCartItemByGuid(any(String.class))).thenReturn(mock(ShoppingItem.class));
+		when(shoppingCart.getStore()).thenReturn(store);
+		when(shoppingItemValidationContextBuilder.build(any(ShoppingCart.class), any(ShoppingItem.class), eq(null), eq(XPFOperationEnum.DELETE)))
+				.thenReturn(shoppingItemValidationContext);
+		when(extensionLookup.getMultipleExtensions(eq(ShoppingItemValidator.class), any(), any()))
+				.thenReturn(Collections.singletonList(validationContext ->
+						ImmutableList.of(new XPFStructuredErrorMessage("error", "message", Collections.emptyMap()))));
+		when(structuredErrorMessageConverter.convert(any())).thenReturn(new StructuredErrorMessage("error", "message", Collections.emptyMap()));
 
 		assertThatThrownBy(()->service.removeItemsFromCart(shoppingCart, ""))
-				.isInstanceOf(CantDeleteAutoselectableBundleItemsException.class)
-				.hasMessage("Remove item from cart validation failure.");
+				.isInstanceOf(EpValidationException.class)
+				.hasMessage("Remove item from cart validation failure: [error,error,message,{}]");
 	}
 
 	@Test
@@ -319,9 +331,11 @@ public class CartDirectorServiceImplTest {
 	@Test
 	public void testMoveItemFromCartToWishList() {
 		ShoppingItemImpl shoppingItem = new ShoppingItemImpl();
-
+		shoppingItem.setGuid(CART_LINE_ITEM_GUID);
+		when(shoppingCart.getCartItemByGuid(any())).thenReturn(mock(ShoppingItem.class));
 		when(shoppingCart.getShopper()).thenReturn(shopper);
 		when(shoppingCart.getShoppingItemByGuid(CART_LINE_ITEM_GUID)).thenReturn(shoppingItem);
+		when(shoppingCart.getStore()).thenReturn(store);
 		when(wishListService.findOrCreateWishListByShopper(shopper)).thenReturn(wishList);
 		when(wishListService.addItem(wishList, shoppingItem)).thenReturn(new AddToWishlistResult(shoppingItem, true));
 

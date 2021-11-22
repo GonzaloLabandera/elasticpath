@@ -71,5 +71,17 @@
 	<include file="liquibase/core-changelog-2020-10-create-outbox.xml" />
 	<include file="liquibase/core-changelog-2020-10-default-b2c-roles-for-store.xml" />
 	<include file="liquibase/core-changelog-2020-09-search-master-customer-indexing.xml"/>
-
+	<include file="liquibase/core-changelog-2020-11-user-account-associations-cascade-delete.xml"/>
+	<include file="liquibase/core-changelog-2021-02-account-hierarchy-closure-table.xml"/>
+	<include file="liquibase/core-changelog-2021-01-data-fields-as-json-clob.xml" />
+	<include file="liquibase/core-changelog-2021-02-index-replacement-for-TINVENTORYJOURNAL-table.xml"/>
+	<include file="liquibase/core-changelog-2021-03-add-index-to-tindexnotify-table.xml" />
+	<include file="liquibase/core-changelog-2021-03-remove-customer-index.xml" />
+	<include file="liquibase/core-changelog-2021-04-cascade-shopper-account.xml" />
+	<include file="liquibase/core-changelog-2020-10-recreate-catalog-history-FK-with-cascade-delete.xml" />
+	<include file="liquibase/core-changelog-2021-04-add-guid-to-tcatalogprojections-table.xml" />
+	<include file="liquibase/core-changelog-2021-06-change-toutboxmessage-uidpk-to-bigint.xml" />
+	<include file="liquibase/core-changelog-2021-06-add_primary_key_on_jpa_generated_keys_id_field.xml" />
+	<include file="liquibase/core-changelog-2021-08-postgres-store-code-function-index.xml" />
+	<include file="liquibase/core-changelog-2021-09-create-indices-on-FK-columns.xml" />
 </databaseChangeLog>

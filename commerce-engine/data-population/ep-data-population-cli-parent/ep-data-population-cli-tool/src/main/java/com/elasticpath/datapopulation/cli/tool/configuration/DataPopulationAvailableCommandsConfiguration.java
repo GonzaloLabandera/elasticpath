@@ -12,7 +12,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.prefs.CsvPreference;
 
@@ -24,7 +25,7 @@ import com.elasticpath.datapopulation.core.utils.DpUtils;
  * typically from the data-population.properties file.
  */
 public class DataPopulationAvailableCommandsConfiguration {
-	private static final Logger LOG = Logger.getLogger(DataPopulationAvailableCommandsConfiguration.class);
+	private static final Logger LOG = LogManager.getLogger(DataPopulationAvailableCommandsConfiguration.class);
 
 	private String availableCommandsString;
 	private String unavailableCommandsString;

@@ -3,10 +3,6 @@
  */
 package com.elasticpath.rest.relos.rs.authentication.epcommerce.filter;
 
-import static com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil.createFailedExecutionResult;
-import static com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil.readBase64EncodedJson;
-import static com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil.reportFailure;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
@@ -21,18 +17,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.Multimap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
+import com.elasticpath.base.exception.structured.EpStructureErrorMessageException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerRoleMapper;
 import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.BrokenChainException;
-import com.elasticpath.rest.chain.Ensure;
-import com.elasticpath.rest.command.ExecutionResult;
+import com.elasticpath.rest.relos.rs.authentication.epcommerce.util.AuthenticationUtil;
+import com.elasticpath.rest.relos.rs.authentication.epcommerce.util.ErrorUtil;
 import com.elasticpath.rest.relos.rs.authentication.request.AddHeadersRequestWrapper;
 import com.elasticpath.rest.relos.rs.authentication.request.ModifiedHeaderRequestWrapper;
 import com.elasticpath.rest.relos.rs.subject.SubjectHeaderConstants;
@@ -92,8 +88,8 @@ public class UserIdFallbackFilter implements Filter {
 
 			httpRequest = populateUserIdHeader(user, httpRequest);
 			httpRequest = populatePublicUserRole(httpRequest);
-		} catch (final BrokenChainException exception) {
-			reportFailure(httpResponse, HttpServletResponse.SC_BAD_REQUEST, getFailureExecutionResult(exception));
+		} catch (final EpStructureErrorMessageException exception) {
+			ErrorUtil.reportFailure(httpResponse, HttpServletResponse.SC_BAD_REQUEST, exception.getStructuredErrorMessages().get(0));
 			return;
 		}
 
@@ -107,18 +103,18 @@ public class UserIdFallbackFilter implements Filter {
 		return new AddHeadersRequestWrapper(httpRequest, headers);
 	}
 
-	private ExecutionResult<Customer> getFailureExecutionResult(final BrokenChainException exception) {
-		return exception.getBrokenResult();
-	}
-
 	private Customer getFallbackUser(final HttpServletRequest httpRequest, final String encodedMetadata) {
-		final JsonObject metadata = readBase64EncodedJson(encodedMetadata);
-		Ensure.isTrue(Objects.nonNull(metadata), createFailedExecutionResult("authentication.invalid.JWT.metadata",
-				"Error decoding payload " + encodedMetadata));
+		final JsonObject metadata = AuthenticationUtil.readBase64EncodedJson(encodedMetadata);
+		if (Objects.isNull(metadata)) {
+			throw ErrorUtil.createStructuredErrorMessageException("authentication.invalid.JWT.metadata",
+					"Error decoding payload " + encodedMetadata);
+		}
 
 		final String userId = metadata.getString("user-id", null);
-		Ensure.isTrue(StringUtils.isNotEmpty(userId), createFailedExecutionResult("JWT.token.missing.sub.and.user-id",
-				"JWT token must contain either a sub claim or user-id metadata"));
+		if (StringUtils.isEmpty(userId)) {
+			throw ErrorUtil.createStructuredErrorMessageException("JWT.token.missing.sub.and.user-id",
+					"JWT token must contain either a sub claim or user-id metadata");
+		}
 
 		final String scope = findUserScope(httpRequest);
 		final CustomerDTO customerDTO = createCustomerDTO(metadata, scope);

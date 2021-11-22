@@ -15,7 +15,8 @@ import java.util.Set;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Brand;
@@ -33,7 +34,7 @@ import com.elasticpath.service.catalogview.FilterFactory;
  */
 public class AdvancedSearchConfigurationProviderImpl implements AdvancedSearchConfigurationProvider {
 	
-	private static final Logger LOG = Logger.getLogger(AdvancedSearchConfigurationProviderImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AdvancedSearchConfigurationProviderImpl.class);
 
 	/** The filter factory instance that uses the advanced search configuration loader. */
 	private FilterFactory filterFactory;

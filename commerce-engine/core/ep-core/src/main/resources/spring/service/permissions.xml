@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Elastic Path Software Inc. All rights reserved.
+  -->
+
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:extensibleList="http://www.elasticpath.com/schema/extensibleList"
+		xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+				http://www.elasticpath.com/schema/extensibleList http://www.elasticpath.com/schema/extensibleList/extensibleList.xsd
+		">
+
+
+	<bean id="publicPermission" class="java.lang.String">
+		<constructor-arg value="PUBLIC" />
+	</bean>
+
+	<bean id="registeredPermission" class="java.lang.String">
+		<constructor-arg value="REGISTERED" />
+	</bean>
+
+	<bean id="readCustomCartsPermission" class="java.lang.String">
+		<constructor-arg value="READ_CUSTOM_CARTS" />
+	</bean>
+
+	<bean id="checkoutWithoutApprovalPermission" class="java.lang.String">
+		<constructor-arg value="CHECKOUT_WITHOUT_APPROVAL" />
+	</bean>
+
+	<bean id="modifyCartsPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_CARTS" />
+	</bean>
+
+	<bean id="viewPricesPermission" class="java.lang.String">
+		<constructor-arg value="READ_PRICES" />
+	</bean>
+
+	<bean id="modifyAccountsPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_ACCOUNTS" />
+	</bean>
+
+	<bean id="modifyAccountAddressesPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_ACCOUNT_ADDRESSES" />
+	</bean>
+
+	<bean id="modifyAccountPaymentInstrumentsPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_ACCOUNT_PAYMENT_INSTRUMENTS" />
+	</bean>
+
+	<bean id="modifyAccountAssociatesPermission" class="java.lang.String">
+		<constructor-arg value="MODIFY_ACCOUNT_ASSOCIATES" />
+	</bean>
+
+	<!-- Create lists of permissions that a role maps to -->
+	<extensibleList:create id="buyerRolePermissions" overridableId="buyerRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="registeredPermission" />
+		<ref bean="viewPricesPermission" />
+		<ref bean="modifyCartsPermission" />
+		<ref bean="readCustomCartsPermission" />
+		<ref bean="checkoutWithoutApprovalPermission" />
+	</extensibleList:create>
+
+	<extensibleList:create id="buyerAdminRolePermissions" overridableId="buyerAdminRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="registeredPermission" />
+		<ref bean="viewPricesPermission" />
+		<ref bean="modifyCartsPermission" />
+		<ref bean="readCustomCartsPermission" />
+		<ref bean="checkoutWithoutApprovalPermission" />
+		<ref bean="modifyAccountsPermission" />
+		<ref bean="modifyAccountAddressesPermission" />
+		<ref bean="modifyAccountPaymentInstrumentsPermission" />
+		<ref bean="modifyAccountAssociatesPermission" />
+	</extensibleList:create>
+
+	<extensibleList:create id="singleSessionBuyerRolePermissions" overridableId="singleSessionBuyerRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="viewPricesPermission" />
+		<ref bean="modifyCartsPermission" />
+		<ref bean="checkoutWithoutApprovalPermission" />
+	</extensibleList:create>
+
+	<extensibleList:create id="catalogBrowserRolePermissions" overridableId="catalogBrowserRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="registeredPermission" />
+		<ref bean="viewPricesPermission" />
+	</extensibleList:create>
+
+	<extensibleList:create id="limitedCatalogBrowserRolePermissions" overridableId="limitedCatalogBrowserRolePermissionsList" valueType="java.lang.String">
+		<ref bean="publicPermission" />
+		<ref bean="registeredPermission" />
+	</extensibleList:create>
+
+	<!-- Map the permission sets to role names -->
+	<util:map id="roleToPermissionsMap" map-class="java.util.LinkedHashMap" key-type="java.lang.String" value-type="java.util.List">
+		<entry key="SINGLE_SESSION_BUYER" value-ref="singleSessionBuyerRolePermissionsList" />
+		<entry key="LIMITED_CATALOG_BROWSER" value-ref="limitedCatalogBrowserRolePermissionsList" />
+		<entry key="CATALOG_BROWSER" value-ref="catalogBrowserRolePermissionsList" />
+		<entry key="BUYER" value-ref="buyerRolePermissionsList" />
+		<entry key="BUYER_ADMIN" value-ref="buyerAdminRolePermissionsList" />
+	</util:map>
+
+</beans>

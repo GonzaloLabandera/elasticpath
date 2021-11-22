@@ -13,6 +13,7 @@ import com.elasticpath.domain.rules.RuleAction;
 import com.elasticpath.domain.rules.RuleParameter;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.catalog.CatalogService;
 import com.elasticpath.service.rules.RuleService;
@@ -80,7 +81,9 @@ public class PromotionTestPersister {
 			throw new TestApplicationException("Catalog with name " + catalogCode + " doesn't exists in DB.");
 		}
 
-		final Rule promotionRule = createPromotion(promotionName, ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO));
+		RuleSetLoadTuner ruleSetLoadTuner = beanFactory.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class);
+		RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO, ruleSetLoadTuner);
+		final Rule promotionRule = createPromotion(promotionName, ruleSet);
 		promotionRule.setCatalog(catalog);
 		return promotionRule;
 	}
@@ -98,8 +101,9 @@ public class PromotionTestPersister {
 		if (catalog == null) {
 			throw new TestApplicationException("Catalog with name " + catalogCode + " doesn't exists in DB.");
 		}
-		final Rule promotionRule = createPromotion(promotionName, promoCode,
-				ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO), false);
+		RuleSetLoadTuner ruleSetLoadTuner = beanFactory.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class);
+		RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO, ruleSetLoadTuner);
+		final Rule promotionRule = createPromotion(promotionName, promoCode, ruleSet, false);
 		promotionRule.setCatalog(catalog);
 		return promotionRule;
 	}
@@ -112,7 +116,9 @@ public class PromotionTestPersister {
 	 * @return configured rule instance
 	 */
 	public Rule createLimitedUsagePromotion(final String promotionName, final String storeCode) {
-		final Rule promotionRule = createPromotion(promotionName, ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO));
+		RuleSetLoadTuner ruleSetLoadTuner = beanFactory.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class);
+		RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO, ruleSetLoadTuner);
+		final Rule promotionRule = createPromotion(promotionName, ruleSet);
 
 		return promotionRule;
 	}
@@ -132,8 +138,9 @@ public class PromotionTestPersister {
 			throw new TestApplicationException("Store with code " + storeCode + " doesn't exists in DB.");
 		}
 
-		final Rule promotionRule = createPromotion(promotionName, code,
-				ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO), false);
+		RuleSetLoadTuner ruleSetLoadTuner = beanFactory.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class);
+		RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO, ruleSetLoadTuner);
+		final Rule promotionRule = createPromotion(promotionName, code, ruleSet, false);
 
 		promotionRule.setStore(store);
 		promotionRule.setCatalog(store.getCatalog());
@@ -156,8 +163,9 @@ public class PromotionTestPersister {
 			throw new TestApplicationException("Store with code " + storeCode + " doesn't exists in DB.");
 		}
 
-		final Rule promotionRule = createPromotion(promotionName, code,
-				ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO), couponEnabled);
+		RuleSetLoadTuner ruleSetLoadTuner = beanFactory.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class);
+		RuleSet ruleSet = ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO, ruleSetLoadTuner);
+		final Rule promotionRule = createPromotion(promotionName, code, ruleSet, couponEnabled);
 
 		promotionRule.setStore(store);
 		promotionRule.setCatalog(store.getCatalog());

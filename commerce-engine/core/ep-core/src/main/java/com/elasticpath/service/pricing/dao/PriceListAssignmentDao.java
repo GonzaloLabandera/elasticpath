@@ -67,8 +67,15 @@ public interface PriceListAssignmentDao {
 	 * @return list of all matching PriceListAssignments
 	 */
 	List<PriceListAssignment> listByCatalog(String catalogCode, boolean includeHidden);
-	
-	
+
+	/**
+	 * Lists the lite version of PriceListAssignments by catalog.
+	 *
+	 * @param catalogCode the Catalog that has assigned PriceListAssignments
+	 * @return list of all matching PriceListAssignments
+	 */
+	List<PriceListAssignment> listByCatalogLite(String catalogCode);
+
 	/**
 	 * Lists the PriceListAssignments by price list guid.
 	 * 
@@ -103,5 +110,6 @@ public interface PriceListAssignmentDao {
 	 * @return list of catalog guids that have PLAs (both hidden and non-hidden) assigned
 	 */
 	List<String> listAssignedCatalogsGuids();
-	
+
+
 }

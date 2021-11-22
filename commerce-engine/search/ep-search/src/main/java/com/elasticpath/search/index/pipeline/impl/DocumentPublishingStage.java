@@ -3,7 +3,8 @@
  */
 package com.elasticpath.search.index.pipeline.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.elasticpath.search.index.pipeline.IndexingStage;
@@ -19,7 +20,7 @@ import com.elasticpath.service.search.solr.SolrManager;
  */
 public class DocumentPublishingStage implements IndexingStage<SolrInputDocument, Long> {
 
-	private static final Logger LOG = Logger.getLogger(DocumentPublishingStage.class);
+	private static final Logger LOG = LogManager.getLogger(DocumentPublishingStage.class);
 
 	private SolrManager solrManager;
 

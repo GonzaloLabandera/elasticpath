@@ -9,17 +9,15 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.validation.ConstraintViolation;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import org.apache.commons.lang3.ArrayUtils;
-
+import com.elasticpath.cache.impl.AlwaysMissCache;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierFieldOption;
 import com.elasticpath.domain.modifier.ModifierType;
@@ -30,11 +28,10 @@ import com.elasticpath.domain.modifier.ModifierType;
 @RunWith(MockitoJUnitRunner.class)
 public class DynamicModifierFieldValidatorTest {
 
-	@InjectMocks
-	private final DynamicModifierFieldValidator validatorWithNoSuppression = new DynamicModifierFieldValidator(false);
-
-	@InjectMocks
-	private final DynamicModifierFieldValidator validatorWithSuppression = new DynamicModifierFieldValidator(true);
+	private static final int MIN_SIZE = 0;
+	private static final int SHORT_MAX_SIZE = 5;
+	private static final int MEDIUM_MAX_SIZE = 10;
+	private static final int LONG_MAX_SIZE = 20;
 
 	@Mock
 	private ModifierField referentField;
@@ -45,10 +42,10 @@ public class DynamicModifierFieldValidatorTest {
 	@Mock
 	private ModifierFieldOption cartItemModifierFieldOption2;
 
-	private static final int MIN_SIZE = 0;
-	private static final int SHORT_MAX_SIZE = 5;
-	private static final int MEDIUM_MAX_SIZE = 10;
-	private static final int LONG_MAX_SIZE = 20;
+	private final DynamicModifierFieldValidator validatorWithNoSuppression = new DynamicModifierFieldValidator(false,
+			new AlwaysMissCache<>(), new AlwaysMissCache<>());
+	private final DynamicModifierFieldValidator validatorWithSuppression = new DynamicModifierFieldValidator(true,
+			new AlwaysMissCache<>(), new AlwaysMissCache<>());
 
 	/**
 	 * A required field should give a constraint violation when given an empty value.

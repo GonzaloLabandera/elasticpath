@@ -14,7 +14,8 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeValue;
@@ -48,7 +49,7 @@ public class CategoryExporterImpl extends AbstractExporterImpl<Category, Categor
 
 	private ImportExportSearcher importExportSearcher;
 
-	private static final Logger LOG = Logger.getLogger(CategoryExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CategoryExporterImpl.class);
 
 	@Override
 	protected void initializeExporter(final ExportContext context) throws ConfigurationException {

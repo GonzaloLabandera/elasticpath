@@ -99,6 +99,7 @@
 								com.google.common.annotations,
 								org.aspectj.runtime.reflect,
 								com.elasticpath.rest.id.transform.type,
+								com.elasticpath.domain.misc.types,
 								com.sun.el,
 								*
 							</Import-Package>

@@ -6,28 +6,27 @@ package com.elasticpath.service.shoppingcart.validation.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 
 import com.google.common.collect.ImmutableMap;
-
-import org.apache.commons.lang.time.DateUtils;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductSkuDatesValidatorTest {
@@ -38,23 +37,25 @@ public class ProductSkuDatesValidatorTest {
 
 	private static final int DAYS_DELTA = 5;
 
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m", Locale.US);
+	private final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+			.withLocale(Locale.US)
+			.withZone(ZoneId.systemDefault());
 
 	@InjectMocks
 	private ProductSkuDatesValidatorImpl validator;
 
 	@Mock
-	private ProductSkuValidationContext context;
+	private XPFProductSkuValidationContext context;
 
 	@Mock
-	private ProductSku productSku;
+	private XPFProductSku productSku;
 
 	@Mock
 	private TimeService timeService;
 
 	@Before
 	public void setUp() {
-		given(productSku.getSkuCode()).willReturn(SKU_CODE);
+		given(productSku.getCode()).willReturn(SKU_CODE);
 
 		given(context.getProductSku()).willReturn(productSku);
 
@@ -65,47 +66,47 @@ public class ProductSkuDatesValidatorTest {
 	@Test
 	public void testProductNotYetAvailable() {
 		// Given
-		Date startDate = DateUtils.addDays(NOW, DAYS_DELTA);
+		Instant startDate = Instant.now().plus(DAYS_DELTA, ChronoUnit.DAYS);
 		given(productSku.getEffectiveStartDate()).willReturn(startDate);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
-		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage("item.not.yet.available",
+		XPFStructuredErrorMessage structuredErrorMessage = new XPFStructuredErrorMessage("item.not.yet.available",
 				String.format("Item '%s' is not yet available for purchase", SKU_CODE),
-				ImmutableMap.of("item-code", SKU_CODE, "available-date", dateFormat.format(startDate)));
+				ImmutableMap.of("item-code", SKU_CODE, "available-date", formatter.format(startDate)));
 		assertThat(messageCollections).containsOnly(structuredErrorMessage);
 	}
 
 	@Test
 	public void testProductNoLongerAvailable() {
 		// Given
-		Date startDate = DateUtils.addDays(NOW, -(DAYS_DELTA + DAYS_DELTA));
-		Date endDate = DateUtils.addDays(NOW, -DAYS_DELTA);
+		Instant startDate = Instant.now().plus(-(DAYS_DELTA + DAYS_DELTA), ChronoUnit.DAYS);
+		Instant endDate = Instant.now().plus(-DAYS_DELTA, ChronoUnit.DAYS);
 		given(productSku.getEffectiveStartDate()).willReturn(startDate);
 		given(productSku.getEffectiveEndDate()).willReturn(endDate);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
-		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage("item.no.longer.available",
+		XPFStructuredErrorMessage structuredErrorMessage = new XPFStructuredErrorMessage("item.no.longer.available",
 				String.format("Item '%s' is no longer available for purchase", SKU_CODE),
-				ImmutableMap.of("item-code", SKU_CODE, "expiry-date", dateFormat.format(endDate)));
+				ImmutableMap.of("item-code", SKU_CODE, "expiry-date", formatter.format(endDate)));
 		assertThat(messageCollections).containsOnly(structuredErrorMessage);
 	}
 
 	@Test
 	public void testProductSkuDatesAretWithinRange() {
 		// Given
-		Date startDate = DateUtils.addDays(NOW, -DAYS_DELTA);
-		Date endDate = DateUtils.addDays(NOW, DAYS_DELTA);
+		Instant startDate = Instant.now().plus(-DAYS_DELTA, ChronoUnit.DAYS);
+		Instant endDate = Instant.now().plus(DAYS_DELTA, ChronoUnit.DAYS);
 		given(productSku.getEffectiveStartDate()).willReturn(startDate);
 		given(productSku.getEffectiveEndDate()).willReturn(endDate);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();

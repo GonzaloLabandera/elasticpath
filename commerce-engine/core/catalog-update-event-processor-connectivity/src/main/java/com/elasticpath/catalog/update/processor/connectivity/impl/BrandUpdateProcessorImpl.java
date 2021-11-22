@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.spi.CatalogProjectionPluginProvider;
 import com.elasticpath.catalog.spi.capabilities.BrandWriterRepository;
@@ -37,7 +38,7 @@ public class BrandUpdateProcessorImpl implements BrandUpdateProcessor {
 	 */
 	public static final String PRODUCTS = "products";
 
-	private static final Logger LOGGER = Logger.getLogger(BrandUpdateProcessorImpl.class);
+	private static final Logger LOGGER = LogManager.getLogger(BrandUpdateProcessorImpl.class);
 
 	private final ProjectionService<Brand, com.elasticpath.catalog.entity.brand.Brand> projectionService;
 	private final BrandWriterRepository repository;
@@ -74,7 +75,7 @@ public class BrandUpdateProcessorImpl implements BrandUpdateProcessor {
 
 	@Override
 	public void processBrandCreated(final Brand brand) {
-		LOGGER.debug("Brand created: " + brand.getGuid());
+		LOGGER.debug("Brand created: {}", brand.getGuid());
 
 		final List<com.elasticpath.catalog.entity.brand.Brand> brands = projectionService.buildAllStoresProjections(brand);
 		brands.forEach(repository::write);
@@ -82,7 +83,7 @@ public class BrandUpdateProcessorImpl implements BrandUpdateProcessor {
 
 	@Override
 	public void processBrandUpdated(final Brand brand) {
-		LOGGER.debug("Brand updated: " + brand.getGuid());
+		LOGGER.debug("Brand updated: {}", brand.getGuid());
 
 		final List<com.elasticpath.catalog.entity.brand.Brand> brands = projectionService.buildAllStoresProjections(brand);
 
@@ -118,7 +119,7 @@ public class BrandUpdateProcessorImpl implements BrandUpdateProcessor {
 
 	@Override
 	public void processBrandDeleted(final String guid) {
-		LOGGER.debug("Brand deleted: " + guid);
+		LOGGER.debug("Brand deleted: {}", guid);
 
 		repository.delete(guid);
 	}

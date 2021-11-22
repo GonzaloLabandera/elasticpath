@@ -9,7 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * DBConnector class.
@@ -21,7 +22,7 @@ public class DBConnector {
 	Connection connection;
 	PreparedStatement preparedStatement;
 	PropertyManager propertyManager = PropertyManager.getInstance();
-	private static final Logger LOGGER = Logger.getLogger(DBConnector.class);
+	private static final Logger LOGGER = LogManager.getLogger(DBConnector.class);
 
 	/**
 	 * Creates connection.

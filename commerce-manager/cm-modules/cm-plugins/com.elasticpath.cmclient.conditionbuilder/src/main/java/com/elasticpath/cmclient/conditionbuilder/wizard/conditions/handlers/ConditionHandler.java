@@ -3,8 +3,9 @@
  */
 package com.elasticpath.cmclient.conditionbuilder.wizard.conditions.handlers;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -24,7 +25,7 @@ import com.elasticpath.tags.service.InvalidConditionTreeException;
  */
 public class ConditionHandler {
 
-	private static final Logger LOG = Logger.getLogger(ConditionHandler.class);
+	private static final Logger LOG = LogManager.getLogger(ConditionHandler.class);
 	
 	private final ConditionDSLBuilder conditionDSLBuilder;
 

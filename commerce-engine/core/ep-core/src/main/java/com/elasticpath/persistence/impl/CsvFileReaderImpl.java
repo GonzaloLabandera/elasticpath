@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.com.bytecode.opencsv.CSVReader;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.util.AssetRepository;
 import com.elasticpath.commons.util.csv.CSVFileUtil;

@@ -35,6 +35,7 @@ public class NamedQueryExecutor<T extends Persistable> extends AbstractQueryExec
 	private Integer firstResult;
 	private Integer maxResults;
 	private Boolean ignoreChanges;
+	private Class<?> resultClass;
 
 	/**
 	 * Set query name.
@@ -121,15 +122,29 @@ public class NamedQueryExecutor<T extends Persistable> extends AbstractQueryExec
 		return this;
 	}
 
+	/**
+	 * Use provided class to wrap raw data.
+	 *
+	 * @param resultClass the class to wrap raw data with.
+	 * @return the current instance of {@link NamedQueryExecutor}
+	 */
+	public NamedQueryExecutor withResultClass(final Class<?> resultClass) {
+		this.resultClass = resultClass;
+
+		return this;
+	}
+
 	@Override
 	public String getQuery() {
 		return queryName;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "PMD.NPathComplexity"})
 	public List<T> executeMultiResultQuery(final EntityManager entityManager) {
-		OpenJPAQuery namedQuery = OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName));
+		OpenJPAQuery namedQuery = resultClass == null
+				? OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName))
+				: OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName, resultClass));
 
 		if (ArrayUtils.isNotEmpty(arrayParameters)) {
 			namedQuery.setParameters(arrayParameters);

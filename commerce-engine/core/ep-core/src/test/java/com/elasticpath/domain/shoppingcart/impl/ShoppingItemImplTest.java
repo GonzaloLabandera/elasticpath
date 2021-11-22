@@ -4,22 +4,29 @@
 package com.elasticpath.domain.shoppingcart.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Currency;
 import java.util.stream.Collectors;
 
-import org.jmock.Expectations;
-import org.jmock.auto.Mock;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Rule;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
-import com.elasticpath.domain.impl.AbstractItemData;
+import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.shoppingcart.PriceCalculator;
 import com.elasticpath.money.Money;
 import com.elasticpath.service.catalog.ProductSkuLookup;
@@ -27,6 +34,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 /**
  * Tests the {@code ShoppingItemImpl} class.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ShoppingItemImplTest {
 	private static final Currency USD = Currency.getInstance("USD");
 	private static final long CART_UID = 123456L;
@@ -34,26 +42,33 @@ public class ShoppingItemImplTest {
 	private static final int SCALE_3 = 3;
 	private static final int SCALE_4 = 4;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
-	@Mock private ProductSkuLookup productSkuLookup;
+	@Mock
+	private ProductSkuLookup productSkuLookup;
+	@Mock
+	private BeanFactory beanFactory;
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
 
 	private int uid;
+
+	@Before
+	public void init() {
+		elasticPath.setBeanFactory(beanFactory);
+
+		when(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.thenReturn(new ModifierFieldsMapWrapper());
+
+	}
 
 	private ShoppingItemImpl createShoppingItem() {
 		final ShoppingItemImpl shoppingItem = new ShoppingItemImpl();
 
 		final String skuGuid = "ProductSku-" + ++uid;
-		final ProductSku productSku = context.mock(ProductSku.class, skuGuid);
-		context.checking(new Expectations() {
-			{
-				allowing(productSku).getGuid(); will(returnValue(skuGuid));
-				allowing(productSku);
+		final ProductSku productSku = mock(ProductSku.class, Answers.RETURNS_DEEP_STUBS);
 
-				allowing(productSkuLookup).findByGuid(skuGuid); will(returnValue(productSku));
-			}
-		});
+		when(productSku.getGuid()).thenReturn(skuGuid);
+		when(productSkuLookup.findByGuid(skuGuid)).thenReturn(productSku);
+
 		shoppingItem.setSkuGuid(productSku.getGuid());
 
 		return shoppingItem;
@@ -223,10 +238,10 @@ public class ShoppingItemImplTest {
 		final String key = "Record";
 		final String value = "Test Data";
 		ShoppingItemImpl item = createShoppingItem();
-		AbstractItemData itemData = item.createItemData(key, value);
+		item.getModifierFields().put(key, value);
 
-		assertEquals(key, itemData.getKey());
-		assertEquals(value, itemData.getValue());
+		assertTrue(item.getModifierFields().getMap().containsKey(key));
+		assertEquals(value, item.getModifierFields().get(key));
 	}
 
 	/**

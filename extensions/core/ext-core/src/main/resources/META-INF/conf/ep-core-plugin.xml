@@ -55,5 +55,5 @@
 	<!-- Add Bean Definitions and Overrides Here -->
 
 	<!-- Log the extension version number on startup -->
-	<bean id="versionLoggerExt" class="com.elasticpath.extensions.commons.util.impl.VersionLoggerExt" init-method="init"/>
+	<bean id="versionServiceExt" class="com.elasticpath.extensions.commons.util.impl.VersionServiceExt" parent="versionService"/>
 </beans>

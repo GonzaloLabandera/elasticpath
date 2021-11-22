@@ -70,7 +70,6 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.InventoryAuditImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderHold;
@@ -158,8 +157,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 	private CustomerAddress address;
 
-	private CustomerSession customerSession;
-
 	private SimpleStoreScenario scenario;
 
 	private TestDataPersisterFactory persisterFactory;
@@ -244,8 +241,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		customer = persisterFactory.getStoreTestPersister().createDefaultCustomer(store);
 		address = persisterFactory.getStoreTestPersister().createCustomerAddress("Bond", "James", "1234 Pine Street", "", "Vancouver", "CA", "BC",
 				"V6J5G4", "891312345007");
-		customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(customer);
-		shopper = customerSession.getShopper();
+		shopper = persisterFactory.getStoreTestPersister().persistShopperWithAssociatedEntities(customer);
 		reversibleCheckoutActions = getBeanFactory().getSingletonBean("reversibleActions", List.class);
 
 		checkoutHelper = new CheckoutHelper(getTac());
@@ -290,7 +286,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		product.setAvailabilityCriteria(AVAILABLE_WHEN_IN_STOCK);
 
 		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
 		assertNotNull("Shopping cart should contain items", shoppingCart.getRootShoppingItems());
@@ -303,7 +298,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -331,8 +326,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		reversibleCheckoutActions.add(failingAction);
 
 		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
-		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
+		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(shopper, address, address,
 				scenario.getShippingOption(), scenario.getStore());
 
 		ProductSku productSku = product.getDefaultSku();
@@ -348,7 +342,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession);
+		checkoutService.checkout(shoppingCart, taxSnapshot, shopper.getCustomerSession());
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -368,7 +362,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testCancelOrder() {
 		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
 
@@ -417,7 +410,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testCancelShipment() {
 		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
 
@@ -425,7 +417,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -472,7 +464,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	public void testAugmentShipmentTotal() {
 		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
 
@@ -480,7 +471,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
 		assertThat(ordersList).as("only one order should have been created by the checkout service").hasSize(1);
@@ -551,7 +542,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		PaymentProviderPluginForIntegrationTesting.removeCapability(getClass(), ModifyCapability.class);
 
 		// construct new shopping cart
-		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
 
@@ -559,7 +549,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
 		assertThat(ordersList).as("Only one order should have been created by the checkout service").hasSize(1);
@@ -858,7 +848,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private Order createOrder() {
-		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
+		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(shopper, address, address,
 				scenario.getShippingOption(), scenario.getStore());
 		ShoppingItemDto dto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, dto);
@@ -869,7 +859,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		List<Order> ordersList;
 		// only one order should have been created by the checkout service
@@ -885,7 +875,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testHoldAndReleaseHoldOnOrder() {
 		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
 		// checkout
@@ -894,7 +883,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
@@ -955,7 +944,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		assertThat(inventoryDto.getQuantityOnHand()).isEqualTo(qty5);
 		assertThat(product.getAvailabilityCriteria()).isEqualTo(availabilityCriteria);
 
-		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
+		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(shopper, address, address,
 				scenario.getShippingOption(), scenario.getStore());
 		ShoppingItemDto dto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 2);
 		cartDirector.addItemToCart(shoppingCart, dto);
@@ -964,7 +953,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 
 		inventoryDto = productInventoryManagementService.getInventory(
 				inventoryDto.getSkuCode(), inventoryDto.getWarehouseUid());
@@ -1312,14 +1301,13 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	public void heldOrderCreatedAndReleasedInDetachedState() {
 		// Given
-		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
 		// When
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartWithHold(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartWithHold(shoppingCart, taxSnapshot, shopper.getCustomerSession(), true);
 
 		// Then
 		// only one order should have been created by the checkout
@@ -1377,11 +1365,11 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, true);
+		checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, true);
 	}
 
 	private ShoppingCart givenASimpleShoppingCart() {
-		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
+		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(shopper, address, address,
 				scenario.getShippingOption(), scenario.getStore());
 		ShoppingItemDto shoppingItemDto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDto);

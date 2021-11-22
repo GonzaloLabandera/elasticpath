@@ -5,15 +5,10 @@ package com.elasticpath.domain.customer;
 
 import java.util.Currency;
 
-import com.elasticpath.domain.shopper.ShopperReference;
-
-
 /**
- * A customer session keeps track of information about customers
- * who may not be logged in (using cookies).
- *
+ * A customer session keeps track of request-specific information that is primarily passed to Cortex via request headers.
  */
-public interface CustomerSession extends CustomerSessionTransientData, ShopperReference {
+public interface CustomerSession extends CustomerSessionTransientData {
 	/**
 	 * Get the currency of the customer corresponding to the shopping cart.
 	 *

@@ -49,6 +49,7 @@ import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shipping.PhysicalOrderShipmentShippingCostRefresher;
 import com.elasticpath.service.shipping.ShippingOptionService;
@@ -108,6 +109,7 @@ public class MoveItemDialog extends AbstractEpDialog {
 
 	private PricingSnapshotService pricingSnapshotService;
 	private TaxSnapshotService taxSnapshotService;
+	private final AddressService addressService;
 
 	private OrderSkuSubtotalCalculator orderSkuSubtotalCalculator;
 	private PhysicalOrderShipmentShippingCostRefresher physicalOrderShipmentShippingCostRefresher;
@@ -138,6 +140,7 @@ public class MoveItemDialog extends AbstractEpDialog {
 		this.bindingContext = new DataBindingContext();
 		this.orderAddresses = new ArrayList<>();
 		this.existingShipments = new ArrayList<>();
+		this.addressService = BeanLocator.getSingletonBean(ContextIdNames.ADDRESS_SERVICE, AddressService.class);
 	}
 
 	@Override
@@ -310,8 +313,10 @@ public class MoveItemDialog extends AbstractEpDialog {
 			this.newShipmentRadio.setSelection(true);
 		}
 
+		List<CustomerAddress> customerAddresses = addressService.findByCustomer(order.getCustomer().getUidPk());
+
 		// populate existing address combo, customer addresses
-		for (CustomerAddress customerAddress : this.order.getCustomer().getAddresses()) {
+		for (CustomerAddress customerAddress : customerAddresses) {
 			OrderAddress orderAddress = BeanLocator.getPrototypeBean(ContextIdNames.ORDER_ADDRESS, OrderAddress.class);
 			orderAddress.copyFrom(customerAddress);
 

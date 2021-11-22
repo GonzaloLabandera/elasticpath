@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.changeset;
 
 import java.lang.reflect.Field;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;

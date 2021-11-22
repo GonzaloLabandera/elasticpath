@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.entity.attribute.Attribute;
 import com.elasticpath.catalog.spi.CatalogProjectionPluginProvider;
@@ -32,7 +33,7 @@ import com.elasticpath.service.catalog.ProductSkuService;
  */
 public class AttributeUpdateProcessorImpl implements AttributeUpdateProcessor {
 
-	private static final Logger LOGGER = Logger.getLogger(AttributeUpdateProcessorImpl.class);
+	private static final Logger LOGGER = LogManager.getLogger(AttributeUpdateProcessorImpl.class);
 	private static final String PRODUCTS = "products";
 	private final ProjectionService<com.elasticpath.domain.attribute.Attribute, Attribute> projectionService;
 	private final AttributeWriterRepository repository;
@@ -78,7 +79,7 @@ public class AttributeUpdateProcessorImpl implements AttributeUpdateProcessor {
 
 	@Override
 	public void processAttributeCreated(final com.elasticpath.domain.attribute.Attribute attribute) {
-		LOGGER.debug("Attribute created: " + attribute.getGuid());
+		LOGGER.debug("Attribute created: {}", attribute.getGuid());
 
 		final List<Attribute> attributes = projectionService.buildAllStoresProjections(attribute);
 		attributes.forEach(repository::write);
@@ -86,7 +87,7 @@ public class AttributeUpdateProcessorImpl implements AttributeUpdateProcessor {
 
 	@Override
 	public void processAttributeUpdated(final com.elasticpath.domain.attribute.Attribute attribute) {
-		LOGGER.debug("Attribute updated: " + attribute.getGuid());
+		LOGGER.debug("Attribute updated: {}", attribute.getGuid());
 		boolean attributeIsUpdated = false;
 		final List<Attribute> attributes = projectionService.buildAllStoresProjections(attribute);
 		for (Attribute attributeProjections : attributes) {
@@ -104,7 +105,7 @@ public class AttributeUpdateProcessorImpl implements AttributeUpdateProcessor {
 
 	@Override
 	public void processAttributeDeleted(final String guid) {
-		LOGGER.debug("Attribute deleted: " + guid);
+		LOGGER.debug("Attribute deleted: {}", guid);
 
 		repository.delete(guid);
 	}

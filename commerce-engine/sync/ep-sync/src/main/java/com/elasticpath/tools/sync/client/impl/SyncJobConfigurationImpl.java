@@ -9,8 +9,8 @@ import java.util.Date;
 import java.util.Objects;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import com.elasticpath.tools.sync.client.SyncJobConfiguration;
 

@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.dynamiccontent.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
@@ -17,7 +18,7 @@ import com.elasticpath.cmclient.store.targetedselling.dynamiccontent.wizard.NewD
 public class CreateDynamicContentAction extends AbstractBaseDynamicContentAction {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(CreateDynamicContentAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateDynamicContentAction.class);
 
 	/**
 	 * The constructor.

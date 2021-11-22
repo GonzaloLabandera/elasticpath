@@ -12,8 +12,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.service.ClientInfo;
 
@@ -26,7 +27,7 @@ import com.elasticpath.service.misc.TimeService;
  * Provides an uniform way to display date & date time all across cm client.
  */
 public class UIDateTimeUtilImpl implements UIDateTimeUtil {
-	private static final Logger LOG = Logger.getLogger(UIDateTimeUtilImpl.class);
+	private static final Logger LOG = LogManager.getLogger(UIDateTimeUtilImpl.class);
 
 	private static final int MINUTES_TO_HOURS = 60;
 

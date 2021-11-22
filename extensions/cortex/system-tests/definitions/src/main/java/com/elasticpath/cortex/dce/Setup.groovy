@@ -1,6 +1,6 @@
 package com.elasticpath.cortex.dce
 
-import static ClasspathFluentRelosClientFactory.createClient
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.createClient
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 
 import java.nio.file.Files
@@ -9,11 +9,12 @@ import java.nio.file.Paths
 import cucumber.api.Scenario
 import cucumber.api.java.After
 import cucumber.api.java.Before
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.LogManager
 
 class Setup {
 
-	private static final Logger LOGGER = Logger.getLogger(Setup.class)
+	private static final Logger LOGGER = LogManager.getLogger(Setup.class)
 	private String cortexFileName
 	private static String cortexLogFolderPath
 	private static boolean propBuildDirExists

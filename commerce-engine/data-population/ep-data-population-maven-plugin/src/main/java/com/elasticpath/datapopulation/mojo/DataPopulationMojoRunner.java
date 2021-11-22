@@ -5,10 +5,10 @@ package com.elasticpath.datapopulation.mojo;
 
 import java.io.File;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -29,7 +29,7 @@ import com.elasticpath.datapopulation.core.context.configurer.FilterActionConfig
 @Mojo(name = "run", defaultPhase = LifecyclePhase.INSTALL)
 public class DataPopulationMojoRunner extends AbstractMojo {
 
-	private static final Logger LOGGER = Logger.getRootLogger();
+	private static final Logger LOGGER = (Logger) LogManager.getRootLogger();
 	private BeanFactory beanFactory;
 
 	@Parameter(property = "command", required = true)
@@ -106,11 +106,12 @@ public class DataPopulationMojoRunner extends AbstractMojo {
 	}
 
 	private void configureLog4j() {
-		if (LOGGER.getAllAppenders().hasMoreElements()) {
+		if (!LOGGER.getAppenders().isEmpty()) {
 			return;
 		}
 
-		LOGGER.setLevel(Level.WARN);
-		LOGGER.addAppender(new ConsoleAppender(new PatternLayout("[%p] %m%n")));
+		PatternLayout patternLayout = PatternLayout.newBuilder().withPattern("[%p] %m%n").build();
+		ConsoleAppender consoleAppender = ConsoleAppender.newBuilder().setLayout(patternLayout).build();
+		LOGGER.addAppender(consoleAppender);
 	}
 }

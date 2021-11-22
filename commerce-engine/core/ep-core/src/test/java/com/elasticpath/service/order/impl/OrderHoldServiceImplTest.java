@@ -102,7 +102,7 @@ public class OrderHoldServiceImplTest {
 	@Test
 	public void markHoldUnresolvable() {
 		EventMessage eventMessage = mock(EventMessage.class);
-		when(eventMessageFactory.createEventMessage(eq(OrderEventType.ORDER_HOLDS_RESOLVED), eq(ORDER_NUMBER), any())).thenReturn(eventMessage);
+		when(eventMessageFactory.createEventMessage(eq(OrderEventType.ORDER_HOLD_UPDATE), eq(ORDER_NUMBER), any())).thenReturn(eventMessage);
 
 		when(order.getOrderNumber()).thenReturn(ORDER_NUMBER);
 		when(order.getUidPk()).thenReturn(ORDER_UID);
@@ -130,7 +130,7 @@ public class OrderHoldServiceImplTest {
 	@Test
 	public void resolveHold() {
 		EventMessage eventMessage = mock(EventMessage.class);
-		when(eventMessageFactory.createEventMessage(eq(OrderEventType.ORDER_HOLDS_RESOLVED), eq(ORDER_NUMBER), any())).thenReturn(eventMessage);
+		when(eventMessageFactory.createEventMessage(eq(OrderEventType.ORDER_HOLD_UPDATE), eq(ORDER_NUMBER), any())).thenReturn(eventMessage);
 
 		when(order.getOrderNumber()).thenReturn(ORDER_NUMBER);
 		when(order.getUidPk()).thenReturn(ORDER_UID);

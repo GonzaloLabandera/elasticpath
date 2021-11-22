@@ -7,9 +7,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.cmuser.CmUser;
+import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
@@ -227,4 +229,11 @@ public interface StoreService extends EpPersistenceService {
 	 * @return the pick delay timestamp
 	 */
 	Date calculateCurrentPickDelayTimestamp(String storeCode);
+
+	/**
+	 * Returns a set of unique locales across all enabled, open stores.
+	 *
+	 * @return set of unique locales across all enabled, open stores
+	 */
+	Set<SupportedLocale> findAllEnabledStoreLocales();
 }

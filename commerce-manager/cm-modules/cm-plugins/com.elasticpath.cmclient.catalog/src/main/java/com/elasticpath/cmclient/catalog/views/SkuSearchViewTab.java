@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -55,7 +56,7 @@ public class SkuSearchViewTab extends AbstractCatalogSearchViewTab implements Se
 	 */
 	public static final String VIEW_ID = SkuSearchViewTab.class.getName();
 
-	private static final transient Logger LOG = Logger.getLogger(SkuSearchViewTab.class);
+	private static final transient Logger LOG = LogManager.getLogger(SkuSearchViewTab.class);
 
 	private static final int NORMAL_TEXT_LENGTH = 255;
 

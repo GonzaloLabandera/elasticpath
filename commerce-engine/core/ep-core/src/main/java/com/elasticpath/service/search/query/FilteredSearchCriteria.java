@@ -11,8 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.NullArgumentException;
-
 import com.elasticpath.service.search.AbstractSearchCriteriaImpl;
 import com.elasticpath.service.search.IndexType;
 
@@ -184,7 +182,7 @@ public class FilteredSearchCriteria<T extends SearchCriteria> extends AbstractSe
 	 */
 	public void setRelationship(final Relationship relationship) {
 		if (relationship == null) {
-			throw new NullArgumentException("relationship");
+			throw new IllegalArgumentException("relationship");
 		}
 		this.relationship = relationship;
 	}

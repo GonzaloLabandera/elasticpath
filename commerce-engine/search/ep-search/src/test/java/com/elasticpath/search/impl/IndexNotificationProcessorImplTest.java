@@ -70,54 +70,6 @@ public class IndexNotificationProcessorImplTest {
 		indexNotificationProcessorImpl.setIndexNotificationService(mockIndexNotificationService);
 	}
 
-	/**
-	 * Test that collapsing of notifications happens correctly.
-	 */
-	@Test
-	public void testRebuildOverridesUpdate() {
-
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockUpdateNotification, mockRebuildNotification)));
-			}
-		});
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType), Arrays.asList(mockRebuildNotification));
-	}
-
-	@Test
-	public void testDeleteAllOveridesUpdate() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockUpdateNotification, mockDeleteAllNotification)));
-			}
-		});
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType), Arrays.asList(mockDeleteAllNotification));
-	}
-
-	@Test
-	public void testDeleteAllOverridesRebuildBecauseItWasRegisteredLater() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockRebuildNotification, mockDeleteAllNotification)));
-			}
-		});
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType), Arrays.asList(mockDeleteAllNotification));
-	}
-
-	@Test
-	public void testRebuildOverridesDeleteAllBecauseItWasRegisteredLater() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockDeleteAllNotification, mockRebuildNotification)));
-			}
-		});
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType), Arrays.asList(mockRebuildNotification));
-	}
-
 	@Test
 	public void testNoOverridesHere() {
 		context.checking(new Expectations() {
@@ -126,60 +78,37 @@ public class IndexNotificationProcessorImplTest {
 				will(returnValue(Arrays.asList(mockDeleteNotification, mockUpdateNotification)));
 			}
 		});
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType),
+		assertEquals(indexNotificationProcessorImpl.getNotifications(indexType),
 				Arrays.asList(mockDeleteNotification, mockUpdateNotification));
 	}
 
-	@Test
-	public void testREbuildOverrideBothDeleteAndUpdate() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockDeleteNotification, mockUpdateNotification, mockRebuildNotification)));
-			}
-		});
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType), Arrays.asList(mockRebuildNotification));
-	}
-
-	@Test
-	public void testRebuildOverridesDeleteButNotUpdateAsItWasRegisteredAfter() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockDeleteNotification, mockRebuildNotification, mockUpdateNotification)));
-			}
-		});
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType),
-				Arrays.asList(mockRebuildNotification, mockUpdateNotification));
-	}
-
 	/**
-	 * Test method for {@link IndexNotificationProcessorImpl#findAllNewNotifications(IndexType)}
+	 * Test method for {@link IndexNotificationProcessorImpl#getNotifications(IndexType)}
 	 * with a {@code null}.
 	 */
 	@Test(expected = EpSystemException.class)
 	public void testFindAllNewNotificationsWithNull() {
-		indexNotificationProcessorImpl.findAllNewNotifications(null);
+		indexNotificationProcessorImpl.getNotifications(null);
 	}
 
 	/**
-	 * Test method for {@link IndexNotificationProcessorImpl#findAllNewNotifications(IndexType)}.
+	 * Test method for {@link IndexNotificationProcessorImpl#getNotifications(IndexType)}.
 	 */
 	@Test
-	public void testFindAllNewNotifications() {
+	public void testFindAllNotifications() {
 		context.checking(new Expectations() {
 			{
 				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockUpdateNotification, mockRebuildNotification)));
+				will(returnValue(Arrays.asList(mockUpdateNotification, mockDeleteNotification)));
 			}
 		});
 
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType), Arrays.asList(mockRebuildNotification));
+		assertEquals(indexNotificationProcessorImpl.getNotifications(indexType), Arrays.asList(mockUpdateNotification, mockDeleteNotification));
 	}
 
 	/**
 	 * Test method for {@link IndexNotificationProcessorImpl#getNotifications()} when
-	 * {@link IndexNotificationProcessorImpl#findAllNewNotifications(IndexType)} is called.
+	 * {@link IndexNotificationProcessorImpl#getNotifications(IndexType)} is called.
 	 */
 	@Test
 	public void testGetNotificationsWithFindAllNewNotifications() {
@@ -190,110 +119,13 @@ public class IndexNotificationProcessorImplTest {
 		context.checking(new Expectations() {
 			{
 				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockUpdateNotification, mockRebuildNotification)));
+				will(returnValue(Arrays.asList(mockRebuildNotification)));
 			}
 		});
 
 		// now after we run through, this should different
 		final List<IndexNotification> notificationList = Arrays.asList(mockRebuildNotification);
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType), notificationList);
+		assertEquals(indexNotificationProcessorImpl.getNotifications(indexType), notificationList);
 		assertEquals(indexNotificationProcessorImpl.getNotifications(), notificationList);
-	}
-
-	/**
-	 * Test method for {@link IndexNotificationProcessorImpl#getNotifications()} when
-	 * {@link IndexNotificationProcessorImpl#findAllNewRawNotifications(IndexType)} is called.
-	 */
-	@Test
-	public void testGetNotificationsWithFindAllNewRawNotifications() {
-		// first this should be empty
-		assertNotNull(NEVER_BE_EMPTY, indexNotificationProcessorImpl.getNotifications());
-		assertTrue(indexNotificationProcessorImpl.getNotifications().isEmpty());
-
-		final List<IndexNotification> rawList = Arrays.asList(mockUpdateNotification, mockRebuildNotification);
-		final List<IndexNotification> actualList = Arrays.asList(mockRebuildNotification);
-
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockUpdateNotification, mockRebuildNotification)));
-			}
-		});
-
-		// now after we run through, this should different
-		assertEquals(indexNotificationProcessorImpl.findAllNewRawNotifications(indexType), rawList);
-		assertEquals(indexNotificationProcessorImpl.getNotifications(), actualList);
-	}
-
-	/**
-	 * Test method for {@link IndexNotificationProcessorImpl#findAllNewRawNotifications(IndexType)}
-	 * with a {@code null}.
-	 */
-	@Test(expected = EpSystemException.class)
-	public void testFindAllNewRawNotificationsWithNull() {
-		indexNotificationProcessorImpl.findAllNewRawNotifications(null);
-	}
-
-	/**
-	 * Test method for {@link IndexNotificationProcessorImpl#findAllNewRawNotifications(IndexType)}.
-	 */
-	@Test
-	public void testFindAllNewRawNotifications() {
-		final List<IndexNotification> notList = Arrays.asList(mockUpdateNotification, mockRebuildNotification);
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(notList));
-			}
-		});
-		assertEquals(indexNotificationProcessorImpl.findAllNewRawNotifications(indexType), notList);
-	}
-
-	/**
-	 * Test method for {@link IndexNotificationProcessorImpl#getRawNotifications()} when
-	 * {@link IndexNotificationProcessorImpl#findAllNewRawNotifications(IndexType)} is called.
-	 */
-	@Test
-	public void testGetRawNotificationsWithFindAllNewRawNotifications() {
-		// first this should be empty
-		assertNotNull(NEVER_BE_EMPTY, indexNotificationProcessorImpl.getRawNotifications());
-		assertTrue(indexNotificationProcessorImpl.getRawNotifications().isEmpty());
-
-		final List<IndexNotification> notList = Arrays.asList(mockUpdateNotification, mockRebuildNotification);
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(notList));
-			}
-		});
-
-		// now after we run through, this should different
-		assertEquals(indexNotificationProcessorImpl.findAllNewRawNotifications(indexType), notList);
-		assertEquals(indexNotificationProcessorImpl.getRawNotifications(), notList);
-	}
-
-	/**
-	 * Test method for {@link IndexNotificationProcessorImpl#getRawNotifications()} when
-	 * {@link IndexNotificationProcessorImpl#findAllNewNotifications(IndexType)} is called.
-	 */
-	@Test
-	public void testGetRawNotificationsWithFindAllNewNotifications() {
-		// first this should be empty
-		assertNotNull(NEVER_BE_EMPTY, indexNotificationProcessorImpl.getRawNotifications());
-		assertTrue(indexNotificationProcessorImpl.getRawNotifications().isEmpty());
-
-		final List<IndexNotification> rawList = Arrays.asList(mockUpdateNotification, mockRebuildNotification);
-		final List<IndexNotification> actualList = Arrays.asList(mockRebuildNotification);
-
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexNotificationService).findByIndexType(indexType);
-				will(returnValue(Arrays.asList(mockUpdateNotification, mockRebuildNotification)));
-			}
-		});
-
-		// now after we run through, this should different
-		assertEquals(indexNotificationProcessorImpl.findAllNewNotifications(indexType), actualList);
-		assertEquals(indexNotificationProcessorImpl.getRawNotifications(), rawList);
 	}
 }

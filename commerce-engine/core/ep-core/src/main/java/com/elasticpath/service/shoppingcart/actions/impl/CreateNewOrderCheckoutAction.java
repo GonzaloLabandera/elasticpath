@@ -4,7 +4,8 @@
 
 package com.elasticpath.service.shoppingcart.actions.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.core.messaging.order.OrderEventType;
@@ -22,8 +23,10 @@ import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 /**
  * CheckoutAction to create a new order from the shopping cart.
  */
+
 public class CreateNewOrderCheckoutAction implements ReversibleCheckoutAction, PostCaptureOrderFailureCheckoutAction {
-	private static final Logger LOG = Logger.getLogger(CreateNewOrderCheckoutAction.class);
+
+	private static final Logger LOG = LogManager.getLogger(CreateNewOrderCheckoutAction.class);
 
 	private OrderFactory orderFactory;
 
@@ -40,14 +43,17 @@ public class CreateNewOrderCheckoutAction implements ReversibleCheckoutAction, P
 				context.isOrderExchange(),
 				context.isAwaitExchangeCompletion());
 
-		context.setOrder(populateOrder(context, newOrder));
+		// Set the newly created order on the context before calling populateOrder()
+		// so that if populateOrder() fails, the order is already on the context and rollback() can call Order#failOrder
+		context.setOrder(newOrder);
+		populateOrder(context, newOrder);
 	}
 
 	/**
 	 * Given an empty order, populates the empty order with the appropriate values
 	 * from the PreCaptureCheckoutActionContext.
 	 *
-	 * @param context the {@link PreCaptureCheckoutActionContext}
+	 * @param context    the {@link PreCaptureCheckoutActionContext}
 	 * @param emptyOrder an empty {@link Order}
 	 * @return the populated Order.
 	 */
@@ -64,11 +70,11 @@ public class CreateNewOrderCheckoutAction implements ReversibleCheckoutAction, P
 		}
 
 		return orderFactory.fillInNewOrderFromShoppingCart(
-					emptyOrder,
-					context.getShopper().getCustomer(),
-					context.getCustomerSession(),
-					context.getShoppingCart(),
-					context.getShoppingCartTaxSnapshot());
+				emptyOrder,
+				context.getShopper().getCustomer(),
+				context.getCustomerSession(),
+				context.getShoppingCart(),
+				context.getShoppingCartTaxSnapshot());
 	}
 
 	@Override
@@ -98,7 +104,7 @@ public class CreateNewOrderCheckoutAction implements ReversibleCheckoutAction, P
 	/**
 	 * Publishes an ORDER_FAILED event to the order event topic.
 	 *
-	 * @param orderNumber    the order id associated with the event
+	 * @param orderNumber the order id associated with the event
 	 */
 	protected void publishOrderFailedEvent(final String orderNumber) {
 		try {

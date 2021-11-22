@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.IntFunction;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -56,7 +57,7 @@ import com.elasticpath.domain.order.OrderSku;
  */
 public class OrderItemFieldValueCompositeFactory  {
 
-	private static final Logger LOG = Logger.getLogger(OrderItemFieldValueCompositeFactory.class);
+	private static final Logger LOG = LogManager.getLogger(OrderItemFieldValueCompositeFactory.class);
 
 	private static final int TABLE_HEIGHT_HINT = 110;
 	private static final int KEY_SIZE = 160;
@@ -450,12 +451,12 @@ public class OrderItemFieldValueCompositeFactory  {
 		
 		@Override
 		public Map<String, String> getFieldValues() {
-			return order.getFieldValues();
+			return order.getModifierFields().getMap();
 		}
 
 		@Override
 		public void setFieldValue(final String key, final String value) {
-			order.setFieldValue(key, value);
+			order.getModifierFields().put(key, value);
 		}
 	}
 }

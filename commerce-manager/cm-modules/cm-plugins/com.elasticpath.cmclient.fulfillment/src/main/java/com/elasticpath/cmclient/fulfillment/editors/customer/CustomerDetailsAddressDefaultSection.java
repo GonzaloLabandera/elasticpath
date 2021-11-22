@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.fulfillment.editors.customer;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -55,6 +55,7 @@ public class CustomerDetailsAddressDefaultSection extends AbstractCmClientEditor
 	private transient IEpLayoutComposite mainPane;
 
 	private transient EpState authorization;
+	private final transient List<CustomerAddress> addressList;
 
 	/**
 	 * Constructor to create a new Section in an editor's FormPage.
@@ -66,6 +67,7 @@ public class CustomerDetailsAddressDefaultSection extends AbstractCmClientEditor
 		super(formPage, editor, ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
 		this.customer = (Customer) editor.getModel();
 		this.listener = editor;
+		this.addressList = this.customer.getTransientAddresses();
 	}
 
 	@Override
@@ -111,7 +113,7 @@ public class CustomerDetailsAddressDefaultSection extends AbstractCmClientEditor
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
 				int index = shippingCombo.getSelectionIndex();
 				if (index > -1) {
-					Address selectedAddress = customer.getAddresses().get(index);
+					Address selectedAddress = addressList.get(index);
 					customer.setPreferredShippingAddress((CustomerAddress) selectedAddress);
 				}
 				return Status.OK_STATUS;
@@ -124,7 +126,7 @@ public class CustomerDetailsAddressDefaultSection extends AbstractCmClientEditor
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
 				int index = billingCombo.getSelectionIndex();
 				if (index > -1) {
-					Address selectedAddress = customer.getAddresses().get(index);
+					Address selectedAddress = addressList.get(index);
 					customer.setPreferredBillingAddress((CustomerAddress) selectedAddress);
 				}
 				return Status.OK_STATUS;
@@ -138,13 +140,12 @@ public class CustomerDetailsAddressDefaultSection extends AbstractCmClientEditor
 	protected void populateControls() {
 		this.shippingCombo.removeAll();
 		this.billingCombo.removeAll();
-		final List< ? > addressList = this.customer.getAddresses();
 		final Address preferShipping = this.customer.getPreferredShippingAddress();
 		final Address preferBilling = this.customer.getPreferredBillingAddress();
 		Address address = null;
 		final int addressListSize = addressList.size();
 		for (int i = 0; i < addressListSize; i++) {
-			address = (Address) addressList.get(i);
+			address = addressList.get(i);
 			this.shippingCombo.add(formatAddressLabel(address));
 			if (preferShipping != null && StringUtils.equals(preferShipping.getGuid(), address.getGuid())) {
 				this.shippingCombo.select(this.shippingCombo.getItemCount() - 1);
@@ -152,7 +153,7 @@ public class CustomerDetailsAddressDefaultSection extends AbstractCmClientEditor
 		}
 
 		for (int i = 0; i < addressListSize; i++) {
-			address = (Address) addressList.get(i);
+			address = addressList.get(i);
 			this.billingCombo.add(formatAddressLabel(address));
 			if (preferBilling != null && StringUtils.equals(preferBilling.getGuid(), address.getGuid())) {
 				this.billingCombo.select(this.billingCombo.getItemCount() - 1);

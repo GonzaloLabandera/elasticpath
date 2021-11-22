@@ -10,7 +10,8 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ExpectedBodyTypeException;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.message.handler.EventMessageHandler;
 import com.elasticpath.domain.message.handler.EventMessageHandlerFactory;
@@ -22,7 +23,7 @@ import com.elasticpath.messaging.EventMessage;
  */
 public class DomainEventMessageProcessor implements Processor {
 
-	private static final Logger LOGGER = Logger.getLogger(DomainEventMessageProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(DomainEventMessageProcessor.class);
 
 	private final EventMessageHandlerFactory eventMessageHandlerFactory;
 

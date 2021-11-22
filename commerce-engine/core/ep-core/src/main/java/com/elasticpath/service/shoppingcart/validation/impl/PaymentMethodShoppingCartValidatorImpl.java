@@ -5,85 +5,80 @@ package com.elasticpath.service.shoppingcart.validation.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
+import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.elasticpath.base.GloballyIdentifiable;
 import com.elasticpath.domain.cartorder.CartOrder;
-import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
-import com.elasticpath.service.orderpaymentapi.CartOrderPaymentInstrumentService;
+import com.elasticpath.domain.orderpaymentapi.CustomerPaymentInstrument;
 import com.elasticpath.service.orderpaymentapi.FilteredPaymentInstrumentService;
-import com.elasticpath.service.shoppingcart.PricingSnapshotService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidator;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.annotations.XPFEmbedded;
+import com.elasticpath.xpf.connectivity.annontation.XPFAssignment;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFShopper;
+import com.elasticpath.xpf.connectivity.extension.XPFExtensionPointImpl;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingCartValidator;
 
 /**
  * Determines if a valid payment method has been specified.
  */
-public class PaymentMethodShoppingCartValidatorImpl implements ShoppingCartValidator {
+@SuppressWarnings("checkstyle:magicnumber")
+@Extension
+@XPFEmbedded
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_SHOPPING_CART_AT_CHECKOUT, priority = 1060)
+public class PaymentMethodShoppingCartValidatorImpl extends XPFExtensionPointImpl implements ShoppingCartValidator {
 
 	/**
 	 * Message id for this validation.
 	 */
 	public static final String MESSAGE_ID = "need.payment.method";
 
-	private PricingSnapshotService pricingSnapshotService;
-
-	private CartOrderPaymentInstrumentService cartOrderPaymentInstrumentService;
-
+	@Autowired
 	private FilteredPaymentInstrumentService filteredPaymentInstrumentService;
 
 	@Override
-	public Collection<StructuredErrorMessage> validate(final ShoppingCartValidationContext context) {
-		// We don't have a cart order to check once we're in the ValidationCheckoutAction.
-		if (context.getCartOrder() == null) {
-			return Collections.emptyList();
-		}
-
-		final ShoppingCart shoppingCart = context.getShoppingCart();
-		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
-
-		// If payment required
-		if (pricingSnapshot.getSubtotal().signum() > 0 || pricingSnapshot.getShippingCost().getAmount().signum() > 0) {
-			CartOrder cartOrder = context.getCartOrder();
-			Customer customer = shoppingCart.getCustomer();
-			String storeCode = context.getShoppingCart().getStore().getCode();
-			if (filteredPaymentInstrumentService.findCartOrderPaymentInstrumentsForCartOrderAndStore(cartOrder, storeCode).isEmpty()
-					&& filteredPaymentInstrumentService.findDefaultPaymentInstrumentForCustomerAndStore(
-					customer, storeCode) == null) {
-				StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, MESSAGE_ID,
+	public Collection<XPFStructuredErrorMessage> validate(final XPFShoppingCartValidationContext context) {
+		if (context.isPaymentRequired()) {
+			XPFShopper shopper = context.getShoppingCart().getShopper();
+			Set<String> selectedPaymentInstrumentGuids;
+			if (shopper.getAccount() == null) {
+				selectedPaymentInstrumentGuids = getSelectedPaymentInstrumentGuids(context.getShoppingCart().getCartOrderGuid(),
+						shopper.getStore().getCode(), shopper.getUser().getGuid());
+			} else {
+				selectedPaymentInstrumentGuids = getSelectedPaymentInstrumentGuids(context.getShoppingCart().getCartOrderGuid(),
+						shopper.getStore().getCode(), shopper.getAccount().getGuid());
+			}
+			// If payment required
+			if (context.isPaymentRequired() && selectedPaymentInstrumentGuids.isEmpty()) {
+				XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO, MESSAGE_ID,
 						"Payment method must be specified.", Collections.emptyMap(),
-						new StructuredErrorResolution(CartOrder.class, cartOrder.getGuid()));
+						new XPFStructuredErrorResolution(CartOrder.class, context.getShoppingCart().getCartOrderGuid()));
 				return Collections.singletonList(errorMessage);
 			}
 		}
-
 		return Collections.emptyList();
 	}
 
-	protected PricingSnapshotService getPricingSnapshotService() {
-		return pricingSnapshotService;
+	private Set<String> getSelectedPaymentInstrumentGuids(final String cartOrderGuid, final String storeCode, final String customerGuid) {
+		Set<String> paymentInstrumentGuids =
+				filteredPaymentInstrumentService.findCartOrderPaymentInstrumentsForCartOrderGuidAndStore(cartOrderGuid, storeCode).stream()
+						.map(GloballyIdentifiable::getGuid)
+						.collect(Collectors.toSet());
+
+		CustomerPaymentInstrument defaultPaymentInstrument =
+				filteredPaymentInstrumentService.findDefaultPaymentInstrumentForCustomerGuidAndStore(customerGuid, storeCode);
+		if (defaultPaymentInstrument != null) {
+			paymentInstrumentGuids.add(defaultPaymentInstrument.getGuid());
+		}
+
+		return paymentInstrumentGuids;
 	}
 
-	public void setPricingSnapshotService(final PricingSnapshotService pricingSnapshotService) {
-		this.pricingSnapshotService = pricingSnapshotService;
-	}
-
-	protected CartOrderPaymentInstrumentService getCartOrderPaymentInstrumentService() {
-		return cartOrderPaymentInstrumentService;
-	}
-
-	public void setCartOrderPaymentInstrumentService(final CartOrderPaymentInstrumentService cartOrderPaymentInstrumentService) {
-		this.cartOrderPaymentInstrumentService = cartOrderPaymentInstrumentService;
-	}
-
-	public FilteredPaymentInstrumentService getFilteredPaymentInstrumentService() {
-		return filteredPaymentInstrumentService;
-	}
-
-	public void setFilteredPaymentInstrumentService(final FilteredPaymentInstrumentService filteredPaymentInstrumentService) {
-		this.filteredPaymentInstrumentService = filteredPaymentInstrumentService;
-	}
 }

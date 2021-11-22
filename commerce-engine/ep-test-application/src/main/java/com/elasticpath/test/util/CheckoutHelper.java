@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
@@ -29,6 +29,7 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shipping.Region;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -136,22 +137,22 @@ public class CheckoutHelper {
 	/**
 	 * Checkout a shopping cart with default billing info, payment info, and shipping info.
 	 *
-	 * @param customerSession {@link CustomerSession}.
+	 * @param shopper {@link Shopper}.
 	 * @return {@link CheckoutResults}.
 	 */
-	public CheckoutResults checkoutWithDefaultInfo(final CustomerSession customerSession) {
-		return checkoutWithDefaultInfo(customerSession.getShopper().getCurrentShoppingCart(), customerSession);
+	public CheckoutResults checkoutWithDefaultInfo(final Shopper shopper) {
+		return checkoutWithDefaultInfo(shopper.getCurrentShoppingCart(), shopper.getCustomerSession());
 	}
 
 	/**
 	 * Checkout a shopping cart with default payment info but override selected shipping option
 	 *
-	 * @param customerSession    {@link CustomerSession}.
+	 * @param shopper {@link Shopper}.
 	 * @param shippingOptionName service option name (not code) specified
 	 * @return {@link CheckoutResults}.
 	 */
-	public CheckoutResults checkoutWithDefaultInfoOverrideShipping(final CustomerSession customerSession, final String shippingOptionName) {
-		final ShoppingCart shoppingCart = customerSession.getShopper().getCurrentShoppingCart();
+	public CheckoutResults checkoutWithDefaultInfoOverrideShipping(final Shopper shopper, final String shippingOptionName) {
+		final ShoppingCart shoppingCart = shopper.getCurrentShoppingCart();
 		paymentInstrumentPersister.persistPaymentInstrument(shoppingCart);
 
 		List<ShippingOption> defaultShippingOptions = getShippingOptionsFromCart(shoppingCart);
@@ -173,7 +174,7 @@ public class CheckoutHelper {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
-		CheckoutResults checkoutResults = checkoutCartWithoutHolds(shoppingCart, taxSnapshot, customerSession, false);
+		CheckoutResults checkoutResults = checkoutCartWithoutHolds(shoppingCart, taxSnapshot, shopper.getCustomerSession(), false);
 		checkoutResults.setOrder(finalizeOrder(checkoutResults.getOrder()));
 		return checkoutResults;
 	}
@@ -291,13 +292,10 @@ public class CheckoutHelper {
 	 *
 	 * @param shoppingCart - the cart to checkout
 	 * @param taxSnapshot - the tax snapshot for the cart
-	 * @param customerSession - the customers current session
-	 *
 	 * @return the finalized order
 	 */
-	public Order checkoutCartAndFinalizeOrderWithoutHolds(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot,
-			CustomerSession customerSession) {
-		return checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, customerSession, false);
+	public Order checkoutCartAndFinalizeOrderWithoutHolds(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot) {
+		return checkoutCartAndFinalizeOrderWithoutHolds(shoppingCart, taxSnapshot, false);
 	}
 
 	/**
@@ -305,16 +303,15 @@ public class CheckoutHelper {
 	 *
 	 * @param shoppingCart - the cart to checkout
 	 * @param taxSnapshot - the tax snapshot for the cart
-	 * @param customerSession - the customers current session
 	 * @param throwExceptions - if any encountered exceptions should be rethrown
 	 *
 	 * @return the finalized order
 	 */
 	public Order checkoutCartAndFinalizeOrder(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot,
-			CustomerSession customerSession, boolean throwExceptions) {
+											  boolean throwExceptions) {
 
 		CheckoutResults checkoutResult = checkoutService.checkout(
-				shoppingCart, taxSnapshot, customerSession, throwExceptions);
+				shoppingCart, taxSnapshot, shoppingCart.getShopper().getCustomerSession(), throwExceptions);
 		Order postCaptureOrder =  orderService.findOrderByOrderNumber(checkoutResult.getOrder().getOrderNumber());
 		postCaptureOrder.setModifiedBy(eventOriginatorHelper.getSystemOriginator());
 		return postCaptureCheckout(postCaptureOrder);
@@ -325,16 +322,15 @@ public class CheckoutHelper {
 	 *
 	 * @param shoppingCart - the cart to checkout
 	 * @param taxSnapshot - the tax snapshot for the cart
-	 * @param customerSession - the customers current session
 	 * @param throwExceptions - if any encountered exceptions should be rethrown
 	 *
 	 * @return the finalized order
 	 */
 	public Order checkoutCartAndFinalizeOrderWithoutHolds(ShoppingCart shoppingCart, ShoppingCartTaxSnapshot taxSnapshot,
-			CustomerSession customerSession, boolean throwExceptions) {
+														  boolean throwExceptions) {
 
 		return checkoutCartAndFinalizeOrder(shoppingCart, taxSnapshot,
-				customerSession, throwExceptions);
+				throwExceptions);
 	}
 
 	/**

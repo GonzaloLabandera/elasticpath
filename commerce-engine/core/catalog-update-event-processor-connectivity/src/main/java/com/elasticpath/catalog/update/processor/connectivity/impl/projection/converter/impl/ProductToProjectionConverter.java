@@ -23,7 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.CatalogReaderCapability;
 import com.elasticpath.catalog.entity.AvailabilityRules;
@@ -87,7 +88,7 @@ import com.elasticpath.settings.SettingsReader;
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessiveParameterList"})
 public class ProductToProjectionConverter implements Converter<Product, Offer> {
 
-	private static final Logger LOGGER = Logger.getLogger(ProductToProjectionConverter.class);
+	private static final Logger LOGGER = LogManager.getLogger(ProductToProjectionConverter.class);
 	private static final int NONE_QUANTITY = 0;
 	private static final int ITEM_QUANTITY = 1;
 	private static final String GMT = "GMT";

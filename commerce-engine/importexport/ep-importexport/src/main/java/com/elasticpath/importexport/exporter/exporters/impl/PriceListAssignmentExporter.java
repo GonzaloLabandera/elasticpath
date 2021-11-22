@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.pricing.PriceListAssignment;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -32,7 +33,7 @@ public class PriceListAssignmentExporter extends AbstractExporterImpl<PriceListA
 
 	private List<String> plaGuids;
 
-	private static final Logger LOG = Logger.getLogger(PriceListAssignmentExporter.class);
+	private static final Logger LOG = LogManager.getLogger(PriceListAssignmentExporter.class);
 
 	@Override
 	protected List<PriceListAssignment> findByIDs(final List<String> subList) {

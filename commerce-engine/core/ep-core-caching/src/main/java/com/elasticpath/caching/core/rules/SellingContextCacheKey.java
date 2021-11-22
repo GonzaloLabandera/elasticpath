@@ -91,6 +91,6 @@ public class SellingContextCacheKey {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(scenarioId);
+		return Objects.hash(scenarioId, storeCode, catalogCode);
 	}
 }

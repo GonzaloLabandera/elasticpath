@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.delivery.wizard.tabletooltip;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.swt.widgets.TableItem;
 
 import com.elasticpath.cmclient.core.controlcontribution.AbstractTableTooltip;

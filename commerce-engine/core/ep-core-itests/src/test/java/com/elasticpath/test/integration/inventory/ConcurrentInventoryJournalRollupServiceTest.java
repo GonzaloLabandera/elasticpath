@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ import com.elasticpath.test.integration.DirtiesDatabase;
  */
 public class ConcurrentInventoryJournalRollupServiceTest extends DbTestCase {
 
-	private final static Logger LOG = Logger.getLogger(ConcurrentInventoryJournalRollupServiceTest.class); 
+	private final static Logger LOG = LogManager.getLogger(ConcurrentInventoryJournalRollupServiceTest.class); 
 	
 	@Autowired private InventoryDao inventoryDao;
 	@Autowired private InventoryJournalDao inventoryJournalDao;

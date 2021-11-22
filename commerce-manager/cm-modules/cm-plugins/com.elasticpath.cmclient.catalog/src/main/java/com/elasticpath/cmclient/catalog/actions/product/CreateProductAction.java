@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.catalog.actions.product;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
@@ -16,7 +17,7 @@ import com.elasticpath.domain.catalog.Category;
  */
 public class CreateProductAction extends AbstractCreateProductAction {
 
-	private static final Logger LOG = Logger.getLogger(CreateProductAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateProductAction.class);
 		
 	/** Constructor. */
 	public CreateProductAction() {

@@ -11,7 +11,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.Interval;
 import org.junit.Test;
 
@@ -28,7 +29,7 @@ import com.elasticpath.test.integration.DirtiesDatabase;
  * Test that the import job running correctly during concurrent modifications.
  */
 public class ImportJobInteractionTest extends ImportJobTestCase {
-	private static final Logger log = Logger.getLogger(ImportJobInteractionTest.class);
+	private static final Logger log = LogManager.getLogger(ImportJobInteractionTest.class);
 
 	/**
 	 * Tests that in case of import cancellation some data gets skipped.

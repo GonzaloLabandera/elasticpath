@@ -3,15 +3,19 @@
  */
 package com.elasticpath.service.misc.impl;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.api.PersistenceSession;
 import com.elasticpath.persistence.api.Query;
+import com.elasticpath.persistence.openjpa.support.JPAUtil;
 import com.elasticpath.service.misc.TimeService;
 
 /**
@@ -19,9 +23,17 @@ import com.elasticpath.service.misc.TimeService;
  */
 public class DatabaseServerTimeServiceImpl implements TimeService {
 
-	private static final Logger LOG = Logger.getLogger(DatabaseServerTimeServiceImpl.class);
-	private static final String TIME_RETRIEVE_QUERY = "SELECT LOCALTIMESTAMP FROM DUAL";
+	private static final Logger LOG = LogManager.getLogger(DatabaseServerTimeServiceImpl.class);
+	/**
+	 * Non-Postgresql query for retrieving db time.
+	 */
+	protected static final String TIME_RETRIEVE_QUERY = "SELECT LOCALTIMESTAMP FROM DUAL";
+	/**
+	 * Postgresql query for retrieving db time.
+	 */
+	protected static final String POSTGRESQL_TIME_RETRIEVE_QUERY = "SELECT LOCALTIMESTAMP";
 
+	private String databaseType;
 	private PersistenceEngine persistenceEngine;
 
 	/**
@@ -39,14 +51,14 @@ public class DatabaseServerTimeServiceImpl implements TimeService {
 			LOG.warn("Will use application server timestamp instead.");
 			now = new Date();
 		}
-		
+
 		// WARNING: Do no close the session in this method, since this service may
 		// get injected in other services which still need to use the session.
 		// This won't cause a session leak, since this service is always in a transaction proxy.
-		
+
 		return now;
 	}
-	
+
 	/**
 	 * Return current database time.
 	 *
@@ -54,9 +66,9 @@ public class DatabaseServerTimeServiceImpl implements TimeService {
 	 */
 	protected Date executeTimeQuery() {
 		final PersistenceSession session = getPersistenceEngine().getPersistenceSession();
-		final Query<Date> query = session.createSQLQuery(getTimeRetrieveQuery());
+		final Query<Object> query = session.createSQLQuery(getTimeRetrieveQuery());
 
-		final List<Date> results = query.list();
+		final List<Object> results = query.list();
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Got " + results.size() + " rows for time query: " + getTimeRetrieveQuery());
@@ -67,7 +79,26 @@ public class DatabaseServerTimeServiceImpl implements TimeService {
 		}
 
 		// Get the current date/time from the first result
-		return results.get(0);
+		Object objDate = results.get(0);
+		if (objDate instanceof LocalDateTime) {
+			return Date.from(((LocalDateTime) objDate).atZone(ZoneId.systemDefault()).toInstant());
+		}
+
+		return (Date) objDate;
+	}
+
+	/**
+	 * Gets the type of database that is currently being used by the persistence engine.
+	 *
+	 * @return The database type returned from the database connection.
+	 */
+	private String getDatabaseType() {
+		// Get the database type from the database connection if it has not yet been set
+		if (databaseType == null) {
+			databaseType = JPAUtil.getDatabaseType(getPersistenceEngine());
+		}
+
+		return databaseType;
 	}
 
 	protected PersistenceEngine getPersistenceEngine() {
@@ -78,7 +109,17 @@ public class DatabaseServerTimeServiceImpl implements TimeService {
 		this.persistenceEngine = persistenceEngine;
 	}
 
+	/**
+	 * Get the time query baased on db type.
+	 *
+	 * @return the time query
+	 */
 	protected String getTimeRetrieveQuery() {
+		String currentDatabaseType = getDatabaseType();
+		if (JPAUtil.POSTGRESQL_DB_TYPE.equals(currentDatabaseType)) {
+			return POSTGRESQL_TIME_RETRIEVE_QUERY;
+		}
+
 		return TIME_RETRIEVE_QUERY;
 	}
 }

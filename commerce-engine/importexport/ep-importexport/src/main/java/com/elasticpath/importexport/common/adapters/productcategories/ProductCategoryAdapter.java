@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -29,7 +30,7 @@ import com.elasticpath.importexport.common.util.Message;
  */
 public class ProductCategoryAdapter extends AbstractDomainAdapterImpl<Product, ProductCategoriesDTO> {
 
-	private static final Logger LOG = Logger.getLogger(ProductCategoryAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(ProductCategoryAdapter.class);
 
 	@Override
 	public ProductCategoriesDTO createDtoObject() {

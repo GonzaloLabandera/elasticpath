@@ -11,7 +11,7 @@
 	<artifactId>ext-importexport-cli</artifactId>
 	<packaging>pom</packaging>
 
-	<name>Extension Import/Export Tool CLI</name>
+	<name>Import/Export Tool CLI</name>
 
 	<properties>
 		<data.location>${project.build.directory}/exported/data</data.location>
@@ -173,6 +173,19 @@
 					<descriptors>
 						<descriptor>src/main/assembly/importexport-as-a-zip.xml</descriptor>
 					</descriptors>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${ep.release.version}</Implementation-Version>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+					</archive>
 				</configuration>
 			</plugin>
 		</plugins>

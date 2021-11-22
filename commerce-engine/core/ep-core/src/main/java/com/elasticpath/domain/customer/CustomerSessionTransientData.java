@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import com.elasticpath.commons.listeners.TagSetListener;
 import com.elasticpath.domain.pricing.PriceListStack;
+import com.elasticpath.domain.shopper.SimpleCacheProvider;
 import com.elasticpath.tags.TagSet;
 
 /**
@@ -20,7 +21,7 @@ import com.elasticpath.tags.TagSet;
  * Note this is a marker interface to identify the object when performing the
  * copying.
  */
-public interface CustomerSessionTransientData extends Serializable, TagSetListener {
+public interface CustomerSessionTransientData extends Serializable, TagSetListener, SimpleCacheProvider {
 
 	/**
 	 * Get the locale of the customer corresponding to the shopping cart.

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>references</name>
+		<resource>
+			<name>references</name>
+			<description><![CDATA[Provides the references.]]></description>
+			<uri>{base.family}</uri>
+			<entity>reference</entity>
+		</resource>
+
+		<relationship>
+			<name>root-to-references</name>
+			<description><![CDATA[References can be discovered at the root.]]></description>
+			<rel>references</rel>
+			<from>base.root</from>
+			<to>references</to>
+		</relationship>
+
+		<relationship>
+			<name>references-to-countries</name>
+			<description><![CDATA[Link to list of countries from references.]]></description>
+			<rel>countries</rel>
+			<from>references</from>
+			<to>geographies.countries</to>
+		</relationship>
+
+		<entity>
+			<name>reference</name>
+			<description><![CDATA[Describes a reference.]]></description>
+		</entity>
+	</family>
+</definitions>

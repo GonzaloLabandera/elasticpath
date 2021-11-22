@@ -8,7 +8,8 @@ import java.sql.PreparedStatement;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.health.monitoring.Status;
 import com.elasticpath.health.monitoring.StatusType;
@@ -18,7 +19,7 @@ import com.elasticpath.health.monitoring.StatusType;
  */
 public class DatabaseStatusTargetImpl extends AbstractStatusCheckerTarget {
 
-	private static final Logger LOG = Logger.getLogger(DatabaseStatusTargetImpl.class);
+	private static final Logger LOG = LogManager.getLogger(DatabaseStatusTargetImpl.class);
 
 	private static final int NANOSECONDS_IN_1_MS = 1000000;
 

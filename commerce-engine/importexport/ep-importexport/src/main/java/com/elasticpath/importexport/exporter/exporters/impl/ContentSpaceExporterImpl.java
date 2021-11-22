@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.contentspace.ContentSpace;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -24,7 +25,7 @@ import com.elasticpath.service.contentspace.ContentSpaceService;
  */
 public class ContentSpaceExporterImpl extends AbstractExporterImpl<ContentSpace, ContentSpaceDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(ContentSpaceExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ContentSpaceExporterImpl.class);
 
 	private ImportExportSearcher importExportSearcher;
 	private ContentSpaceService contentSpaceService;

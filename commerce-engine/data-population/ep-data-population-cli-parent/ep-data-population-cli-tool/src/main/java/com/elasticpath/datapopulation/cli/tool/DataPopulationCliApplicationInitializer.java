@@ -8,7 +8,8 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
@@ -63,7 +64,7 @@ public class DataPopulationCliApplicationInitializer {
 	 * {@link #DATA_POPULATION_WORKING_DIRECTORY_VARIABLE} environment variable.
 	 */
 	protected static final String DEFAULT_WORKING_DIRECTORY_SUBPATH = "tmp";
-	private static final Logger LOG = Logger.getLogger(DataPopulationCliApplicationInitializer.class);
+	private static final Logger LOG = LogManager.getLogger(DataPopulationCliApplicationInitializer.class);
 	private GenericApplicationContext applicationContext;
 	private boolean initialized;
 

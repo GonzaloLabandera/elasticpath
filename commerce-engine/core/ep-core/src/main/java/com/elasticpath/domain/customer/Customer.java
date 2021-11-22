@@ -205,18 +205,14 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 
 	/**
 	 * Gets the <code>CustomerAddress</code>es associated with this <code>Customer</code>.
+	 * This method is intended for adding addresses different than preferred billing and shipping ones, only during the import process.
+	 *
+	 * To set preferred billing and shipping addresses use {@link #setPreferredBillingAddress(CustomerAddress)} and
+	 * {@link #setPreferredShippingAddress(CustomerAddress)} methods.
 	 *
 	 * @return the list of addresses.
 	 */
-	@Valid
-	List<CustomerAddress> getAddresses();
-
-	/**
-	 * Sets the <code>CustomerAddress</code>es associated with this <code>Customer</code>.
-	 *
-	 * @param addresses the new list of addresses.
-	 */
-	void setAddresses(List<CustomerAddress> addresses);
+	List<CustomerAddress> getTransientAddresses();
 
 	/**
 	 * Adds an <code>CustomerAddress</code> to the list of addresses.
@@ -241,15 +237,16 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 
 	/**
 	 * Get the preferred billing address .This {@link Address} will be added to the list of known addresses for the
-	 * customer, i.e. it will be added to {@link #getAddresses()}.
+	 * customer, i.e. it will be added to {@link #getTransientAddresses()}.
 	 *
 	 * @return the preferred shipping address
 	 */
+	@Valid
 	CustomerAddress getPreferredBillingAddress();
 
 	/**
 	 * Set the preferred shipping address. This {@link Address} will be added to the list of known addresses for the
-	 * customer, i.e. it will be added to {@link #getAddresses()}.
+	 * customer, i.e. it will be added to {@link #getTransientAddresses()}.
 	 *
 	 * @param address the <code>CustomerAddress</code>
 	 */
@@ -260,6 +257,7 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 *
 	 * @return the preferred shipping address
 	 */
+	@Valid
 	CustomerAddress getPreferredShippingAddress();
 
 	/**
@@ -433,15 +431,6 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * @param status the custome's status.
 	 */
 	void setStatus(int status);
-
-	/**
-	 * Returns the customer's address with the matching UID. <br>
-	 * If no matching address is found then null is returned.
-	 *
-	 * @param addressUid the uidPk of the address to be retrieved
-	 * @return a <code>CustomerAddress</code> or <code>null</code> if no matching address is found
-	 */
-	CustomerAddress getAddressByUid(long addressUid);
 
 	/**
 	 * Returns the customer's address with the matching GUID. <br>

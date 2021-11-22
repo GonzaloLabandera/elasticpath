@@ -29,23 +29,27 @@ public class PopulateCustomerType implements CustomTaskChange {
 	private static final int DEFAULT_BATCH_SIZE = 1000;
 
 	protected static final String SELECT_ANONYMOUS_CUSTOMERS =
-			" SELECT CUSTOMER_UID "
+			" SELECT TC.UIDPK "
 			+ "FROM TCUSTOMER TC "
 			+ "INNER JOIN TCUSTOMERPROFILEVALUE TCP ON TC.UIDPK = TCP.CUSTOMER_UID "
 			+ "AND TC.CUSTOMER_TYPE IS NULL "
-			+ "AND TCP.LOCALIZED_ATTRIBUTE_KEY='CP_ANONYMOUS_CUST' "
-			+ "AND TCP.BOOLEAN_VALUE=1";
+			+ "AND TCP.LOCALIZED_ATTRIBUTE_KEY = 'CP_ANONYMOUS_CUST' "
+			+ "AND TCP.BOOLEAN_VALUE = '1'";
 
 	protected static final String SELECT_REGISTERED_CUSTOMERS =
-			" SELECT CUSTOMER_UID "
+			" SELECT TC.UIDPK "
 			+ "FROM TCUSTOMER TC "
 			+ "INNER JOIN TCUSTOMERPROFILEVALUE TCP ON TC.UIDPK = TCP.CUSTOMER_UID "
 			+ "AND TC.CUSTOMER_TYPE IS NULL "
-			+ "AND TCP.LOCALIZED_ATTRIBUTE_KEY='CP_ANONYMOUS_CUST' "
-			+ "AND TCP.BOOLEAN_VALUE=0";
+			+ "AND TCP.LOCALIZED_ATTRIBUTE_KEY = 'CP_ANONYMOUS_CUST' "
+			+ "AND TCP.BOOLEAN_VALUE = '0'";
 
-	protected static final String UPDATE_TO_SINGLE_SESSION_USER = "UPDATE TCUSTOMER SET CUSTOMER_TYPE='SINGLE_SESSION_USER' WHERE UIDPK = ?";
-	protected static final String UPDATE_TO_REGISTERED_USER = "UPDATE TCUSTOMER SET CUSTOMER_TYPE='REGISTERED_USER' WHERE UIDPK = ?";
+	// find customers that were missed due to no CP_ANONYMOUS_CUST attribute see https://elasticpath.atlassian.net/browse/PB-9377
+	protected static final String SELECT_CUSTOMERS_WITHOUT_CUSTOMER_TYPE_ATTRIBUTE =
+			"SELECT TC.UIDPK FROM TCUSTOMER TC WHERE TC.CUSTOMER_TYPE IS NULL";
+
+	protected static final String UPDATE_TO_SINGLE_SESSION_USER = "UPDATE TCUSTOMER SET CUSTOMER_TYPE = 'SINGLE_SESSION_USER' WHERE UIDPK = ?";
+	protected static final String UPDATE_TO_REGISTERED_USER = "UPDATE TCUSTOMER SET CUSTOMER_TYPE = 'REGISTERED_USER' WHERE UIDPK = ?";
 
 	private int batchSize;
 
@@ -72,6 +76,7 @@ public class PopulateCustomerType implements CustomTaskChange {
 
 		migrateCustomers(connection, SELECT_ANONYMOUS_CUSTOMERS, UPDATE_TO_SINGLE_SESSION_USER);
 		migrateCustomers(connection, SELECT_REGISTERED_CUSTOMERS, UPDATE_TO_REGISTERED_USER);
+		migrateCustomers(connection, SELECT_CUSTOMERS_WITHOUT_CUSTOMER_TYPE_ATTRIBUTE, UPDATE_TO_REGISTERED_USER);
 
 		long totalElapsedTime = System.currentTimeMillis() - startTime;
 		LOG.info(String.format("Customer type migration completed. Total time: %d", totalElapsedTime));

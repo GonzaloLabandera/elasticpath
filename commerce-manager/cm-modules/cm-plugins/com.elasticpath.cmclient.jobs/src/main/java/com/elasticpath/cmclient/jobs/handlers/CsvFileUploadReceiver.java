@@ -11,7 +11,8 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.rap.fileupload.DiskFileUploadReceiver;
 import org.eclipse.rap.fileupload.FileDetails;
@@ -28,7 +29,7 @@ import com.elasticpath.commons.util.AssetRepository;
  */
 public class CsvFileUploadReceiver extends DiskFileUploadReceiver {
 
-	private static final Logger LOG = Logger.getLogger(CsvFileUploadReceiver.class);
+	private static final Logger LOG = LogManager.getLogger(CsvFileUploadReceiver.class);
 	private final AssetRepository assetRepository = BeanLocator.getSingletonBean("assetRepository", AssetRepository.class);
 
 	private final Display display;

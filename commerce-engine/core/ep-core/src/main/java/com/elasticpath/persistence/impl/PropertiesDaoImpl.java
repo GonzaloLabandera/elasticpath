@@ -13,7 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -30,7 +31,7 @@ import com.elasticpath.service.environment.EnvironmentInfoService;
  */
 @Deprecated
 public class PropertiesDaoImpl implements PropertiesDao {
-	private static final Logger LOG = Logger.getLogger(PropertiesDaoImpl.class.getName());
+	private static final Logger LOG = LogManager.getLogger(PropertiesDaoImpl.class.getName());
 
 	/** File name suffix for properties files. */
 	public static final String PROPERTIES_SUFFIX = ".properties";

@@ -9,7 +9,6 @@ import java.util.Collection;
 import com.elasticpath.commons.util.Pair;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
 import com.elasticpath.service.datapolicy.impl.DataPointValue;
-import com.elasticpath.service.search.IndexType;
 
 /**
  * The customer profile value remover.
@@ -38,10 +37,5 @@ public class CustomerProfileValueRemover extends AbstractDataPointValueRemover {
 		return new StringBuilder(deleteQuery).append(' ')
 			.append(getWhereClauseForEntity(alias))
 			.toString();
-	}
-
-	@Override
-	protected IndexType getIndexType() {
-		return IndexType.CUSTOMER;
 	}
 }

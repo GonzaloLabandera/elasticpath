@@ -3,6 +3,11 @@
  */
 package com.elasticpath.performancetools.queryanalyzer.utils;
 
+import static com.elasticpath.performancetools.queryanalyzer.utils.Defaults.CSV_OUTPUT_FILE_EXTENSION;
+import static com.elasticpath.performancetools.queryanalyzer.utils.Defaults.JSON_OUTPUT_FILE_EXTENSION;
+import static com.elasticpath.performancetools.queryanalyzer.utils.Patterns.TIMESTAMP_FORMAT_PATTERN;
+import static com.elasticpath.performancetools.queryanalyzer.utils.SystemProperties.PRINT_JSON_TO_CONSOLE_ONLY_SYSTEM_PROPERTY;
+import static com.elasticpath.performancetools.queryanalyzer.utils.SystemProperties.RESULT_STATS_FILE_FORMAT_SYSTEM_PROPERTY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
@@ -14,9 +19,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import com.elasticpath.performancetools.queryanalyzer.beans.JPAQuery;
 import com.elasticpath.performancetools.queryanalyzer.beans.Operation;
@@ -24,24 +28,25 @@ import com.elasticpath.performancetools.queryanalyzer.beans.Operation;
 /**
  * Test for {@link Utils}.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class UtilsTest {
+	@Before
+	public void init() {
+		System.getProperties().remove(RESULT_STATS_FILE_FORMAT_SYSTEM_PROPERTY);
+	}
 
 	@After
 	public void clean() {
-		System.getProperties().remove(SystemProperties.OUTPUT_JSON_FILE_PATH_SYSTEM_PROPERTY);
-		System.getProperties().remove(SystemProperties.PRINT_JSON_TO_CONSOLE_ONLY_SYSTEM_PROPERTY);
+		System.getProperties().remove(PRINT_JSON_TO_CONSOLE_ONLY_SYSTEM_PROPERTY);
 	}
 
 	@Test
 	public void shouldGetOutputJSONFileReferenceUsingSystemPropertyWhenEnabled() {
-		final String currentFolder = getClass().getClassLoader().getResource(".").getPath();
-		System.setProperty(SystemProperties.OUTPUT_JSON_FILE_PATH_SYSTEM_PROPERTY, currentFolder + "db_statistics.json");
-
-		final File actualOutputJSONFileReference = Utils.getOutputJSONFileIfEnabled();
+		final File actualOutputJSONFileReference = Utils.getOutputFileIfEnabled(JSON_OUTPUT_FILE_EXTENSION);
 
 		assertThat(actualOutputJSONFileReference)
 				.isNotNull();
+		assertThat(actualOutputJSONFileReference.getName().endsWith(JSON_OUTPUT_FILE_EXTENSION))
+				.isTrue();
 	}
 
 	@Test
@@ -49,7 +54,7 @@ public class UtilsTest {
 		final String currentFolder = getClass().getClassLoader().getResource(".").getPath();
 		System.setProperty("user.home", currentFolder);
 
-		final File actualOutputJSONFileReference = Utils.getOutputJSONFileIfEnabled();
+		final File actualOutputJSONFileReference = Utils.getOutputFileIfEnabled(JSON_OUTPUT_FILE_EXTENSION);
 
 		assertThat(actualOutputJSONFileReference)
 				.isNotNull();
@@ -57,9 +62,9 @@ public class UtilsTest {
 
 	@Test
 	public void shouldNotGetOutputJSONFileReferenceWhenDisabled() {
-		System.setProperty(SystemProperties.PRINT_JSON_TO_CONSOLE_ONLY_SYSTEM_PROPERTY, "1");
+		System.setProperty(PRINT_JSON_TO_CONSOLE_ONLY_SYSTEM_PROPERTY, "1");
 
-		final File actualOutputJSONFileReference = Utils.getOutputJSONFileIfEnabled();
+		final File actualOutputJSONFileReference = Utils.getOutputFileIfEnabled(JSON_OUTPUT_FILE_EXTENSION);
 
 		assertThat(actualOutputJSONFileReference)
 				.isNull();
@@ -93,7 +98,7 @@ public class UtilsTest {
 		final Operation operation = new Operation("ADVISE_READ", "uri3");
 
 		Utils.setOperationTimestamp(matcher, operation, false);
-		final Date expectedTimestamp = new SimpleDateFormat(Utils.DATE_FORMAT_PATTERN, Locale.getDefault()).parse("2016-06-14 09:49:32,919");
+		final Date expectedTimestamp = new SimpleDateFormat(TIMESTAMP_FORMAT_PATTERN, Locale.getDefault()).parse("2016-06-14 09:49:32,919");
 
 		assertThat(operation.getStartedAt())
 				.isEqualTo(expectedTimestamp);
@@ -167,5 +172,21 @@ public class UtilsTest {
 				.isEqualTo(expectedQuery);
 
 		bufferedReader.close();
+	}
+
+	@Test
+	public void shoudReturnOutputFileExtensionIfSetAsSysProperty() {
+		System.setProperty(RESULT_STATS_FILE_FORMAT_SYSTEM_PROPERTY, CSV_OUTPUT_FILE_EXTENSION);
+
+		assertThat(Utils.getOutputFileExtension())
+				.isEqualTo(CSV_OUTPUT_FILE_EXTENSION);
+
+	}
+
+	@Test
+	public void shoudReturnDefaultOutputFileExtension() {
+		assertThat(Utils.getOutputFileExtension())
+				.isEqualTo(JSON_OUTPUT_FILE_EXTENSION);
+
 	}
 }

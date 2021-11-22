@@ -52,6 +52,7 @@
 							com.elasticpath.plugin.*,
 							com.elasticpath.messaging.*,
 							com.elasticpath.core.messaging.*,
+							com.elasticpath.systeminfo.messaging.*,
 							com.elasticpath.repo.*,
 							com.elasticpath.health.monitoring.*,
 							com.elasticpath.domain.rules.impl;x-internal:=true,
@@ -72,6 +73,9 @@
 							com.elasticpath.provider.payment.service.*,
 							com.elasticpath.provider.payment.workflow.*,
 							com.elasticpath.provider.payment.domain.*,
+							com.elasticpath.xpf.*,
+							com.elasticpath.xpf.connectivity.*,
+							com.elasticpath.xpf.connectivity.context.*,
 							*.impl,
 							!com.elasticpath.*,
 							*
@@ -240,6 +244,10 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core-gift-certificate-messaging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-operational-insights-message-consumer</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>

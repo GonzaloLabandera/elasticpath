@@ -37,13 +37,6 @@
 	</modules>
 
 	<properties>
-		<io.cucumber.version>2.4.0</io.cucumber.version>
-		<cucumber-groovy.version>2.0.1</cucumber-groovy.version>
-
-		<ep.health.monitoring.version>1.1.2.20171228014437-844ef</ep.health.monitoring.version>
-
-		<org.apache.commons.pool2.version>2.4.2</org.apache.commons.pool2.version>
-
 		<bundle.environment>prod-bundles</bundle.environment>
 		<!--In production environments bundle.location can be set via the modules.properties mechanism or by passing a system property to the app server. -->
 		<bundle.location/>
@@ -55,22 +48,6 @@
 		<!-- See http://jira.codehaus.org/browse/MINVOKER-118 -->
 		<archetype-invoker-release-repository-id>cannot be blank</archetype-invoker-release-repository-id>
 		<!-- See http://jira.codehaus.org/browse/MINVOKER-118 -->
-
-		<org.apache.servicemix.commons.configuration.version>1.9_2</org.apache.servicemix.commons.configuration.version>
-		<felix.shell.version>1.4.3</felix.shell.version>
-		<felix.shell.remote.version>1.1.2</felix.shell.remote.version>
-		<httpcore.version>4.3.3</httpcore.version>
-		<javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
-		<junit.version>4.12</junit.version>
-
-		<!-- plugins -->
-		<gmaven.plugin.version>1.5</gmaven.plugin.version>
-		<!-- 2.8.0-01 and later require maven-compiler-plugin 3.0 or higher -->
-		<groovy.eclipse.compiler.plugin.version>2.9.2-04</groovy.eclipse.compiler.plugin.version>
-		<maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
-		<properties.plugin.version>1.0-alpha-2</properties.plugin.version>
-		<maven-sling-plugin.version>2.1.0</maven-sling-plugin.version>
-		<trinidad.plugin.version>20120309</trinidad.plugin.version>
 
 		<war-plugin-directory>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/plugins</war-plugin-directory>
 		<war-bundle-directory>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/bundles</war-bundle-directory>
@@ -111,52 +88,9 @@
 		<ep.product.attribute.filter.enable>true</ep.product.attribute.filter.enable>
 		<ep.localeUrlTool.localeControllerUrl>locale.ep</ep.localeUrlTool.localeControllerUrl>
 
-		<!-- Logging properties -->
-		<ep.log.to>CONSOLE, FILE</ep.log.to>
-		<!-- log4j -->
-		<ep.log.to.logback><![CDATA[<appender-ref ref="CONSOLE" /><appender-ref ref="FILE" />]]></ep.log.to.logback>
-		<!-- logback -->
-		<ep.log.level>INFO</ep.log.level>
-		<!-- ep.log.dir is relative to where appserver is started -->
-		<ep.log.dir>target/logs</ep.log.dir>
-
-		<!-- Quartz Jobs -->
-		<ep.cm.triggers.topseller>
-			topSellerSchedulingTriggers<!-- disabled -->
-		</ep.cm.triggers.topseller>
-		<ep.cm.triggers.productrecommendation>
-			productRecommendationScheduling<!-- disabled -->
-		</ep.cm.triggers.productrecommendation>
-		<ep.cm.triggers.auto.shipmentrelease>
-			releaseShipmentSchedulingTriggers<!-- disabled -->
-		</ep.cm.triggers.auto.shipmentrelease>
-		<ep.search.triggers.index>
-			indexBuildTriggers<!-- disabled -->
-		</ep.search.triggers.index>
-		<ep.search.triggers.rulecompile>
-			ruleCompileTriggers<!-- disabled -->
-		</ep.search.triggers.rulecompile>
-		<ep.cm.triggers.searchterms.aggregator>
-			disabled<!-- searchTermsAggregatorTriggers -->
-		</ep.cm.triggers.searchterms.aggregator>
-
-		<ep.cm.topseller.delay>30000</ep.cm.topseller.delay>
-		<ep.cm.topseller.interval>30000</ep.cm.topseller.interval>
-		<ep.cm.productrecommendation.delay>30000</ep.cm.productrecommendation.delay>
-		<ep.cm.productrecommendation.interval>30000</ep.cm.productrecommendation.interval>
-		<ep.cm.searchterms.aggregator.delay>30000</ep.cm.searchterms.aggregator.delay>
-		<ep.cm.searchterms.aggregator.interval>30000</ep.cm.searchterms.aggregator.interval>
-
-		<!-- GeoIP -->
-		<ep.geoip.provider>
-			demo
-		</ep.geoip.provider>
-
 		<!-- Default webapp ports for deploying in a single Tomcat container -->
 		<ep.search.tomcat.port.http>8080</ep.search.tomcat.port.http>
 		<ep.cortex.tomcat.port.http>8080</ep.cortex.tomcat.port.http>
-
-		<jsr305.version>3.0.1</jsr305.version>
 	</properties>
 
 	<profiles>
@@ -194,7 +128,6 @@
 				<artifactId>geronimo-jms_1.1_spec</artifactId>
 				<version>${org.apache.geronimo.specs.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>io.cucumber</groupId>
 				<artifactId>cucumber-java</artifactId>

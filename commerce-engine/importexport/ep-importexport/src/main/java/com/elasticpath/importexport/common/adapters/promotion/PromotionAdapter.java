@@ -13,7 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang3.LocaleUtils;
 
 import com.elasticpath.common.dto.DisplayValue;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -25,6 +25,7 @@ import com.elasticpath.domain.rules.RuleAction;
 import com.elasticpath.domain.rules.RuleElement;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.rules.impl.AbstractRuleImpl;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.domain.store.Store;
@@ -244,7 +245,8 @@ public class PromotionAdapter extends AbstractDomainAdapterImpl<Rule, PromotionD
 			throw new PopulationRollbackException("IE-10703", type);
 		}
 
-		RuleSet ruleSet = ruleSetService.findByScenarioId(scenarioId);
+		RuleSetLoadTuner ruleSetLoadTuner = getBeanFactory().getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER, RuleSetLoadTuner.class);
+		RuleSet ruleSet = ruleSetService.findByScenarioId(scenarioId, ruleSetLoadTuner);
 		target.setRuleSet(ruleSet);
 	}
 

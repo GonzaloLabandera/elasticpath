@@ -10,7 +10,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -60,7 +61,7 @@ public class ManageTaxValuesDialog extends AbstractEpDialog {
 	private static final int MARGIN = 4;
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(ManageTaxValuesDialog.class);
+	private static final Logger LOG = LogManager.getLogger(ManageTaxValuesDialog.class);
 
 	/** UI constants. */
 	private static final int TAX_CODES_WIDTH = 70;

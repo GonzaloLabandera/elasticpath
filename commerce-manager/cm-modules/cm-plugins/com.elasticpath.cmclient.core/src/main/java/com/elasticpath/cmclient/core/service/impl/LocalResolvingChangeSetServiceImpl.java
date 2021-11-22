@@ -17,6 +17,7 @@ import com.elasticpath.domain.changeset.ChangeSetMember;
 import com.elasticpath.domain.changeset.ChangeSetObjectStatus;
 import com.elasticpath.domain.changeset.ChangeSetUserView;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
+import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.changeset.BusinessObjectResolver;
 import com.elasticpath.service.changeset.ChangeSetPolicyException;
@@ -111,17 +112,19 @@ public class LocalResolvingChangeSetServiceImpl implements ChangeSetService {
 
 	/**
 	 * Adds a new member object to a change set using the object descriptor.
-	 *
-	 * @param changeSetGuid the change set code, it cannot be null.
+	 *  @param changeSetGuid the change set code, it cannot be null.
 	 * @param objectDescriptor the descriptor, it cannot be null.
-	 * @param objectMetadata the meta data map, it could be null if no meta data is applied for the business object
-	 * @param resolveMetadata whether to resolve metadata
-	 */
-	public void addObjectToChangeSet(final String changeSetGuid, final BusinessObjectDescriptor objectDescriptor,
-			final Map<String, String> objectMetadata, final boolean resolveMetadata) {
-		getChangeSetServiceDelegate().addObjectToChangeSet(changeSetGuid, objectDescriptor, objectMetadata, resolveMetadata);
+     * @param objectMetadata the meta data map, it could be null if no meta data is applied for the business object
+     * @param resolveMetadata whether to resolve metadata
+     * @return the group member is newly created, false otherwise
+     */
+	public BusinessObjectGroupMember addObjectToChangeSet(final String changeSetGuid, final BusinessObjectDescriptor objectDescriptor,
+                                                          final Map<String, String> objectMetadata, final boolean resolveMetadata) {
+		BusinessObjectGroupMember groupMember =
+				getChangeSetServiceDelegate().addObjectToChangeSet(changeSetGuid, objectDescriptor, objectMetadata, resolveMetadata);
 		ObjectRegistry.getInstance().fireEvent(ChangeSetHelper.OBJECT_REG_ACTIVE_CHANGE_SET);
-	}
+        return groupMember;
+    }
 
 	/**
 	 * Finds change set member by business object.

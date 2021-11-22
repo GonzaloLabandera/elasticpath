@@ -236,9 +236,6 @@
 	<reference id="attributeValueTransformer"
 			   interface="com.elasticpath.rest.resource.integration.epcommerce.transform.AttributeValueTransformer"/>
 
-	<reference id="addProductSkuToCartValidationService"
-			   interface="com.elasticpath.service.shoppingcart.validation.AddProductSkuToCartValidationService"/>
-
 	<reference id="purchaseCartValidationService"
 			   interface="com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService"/>
 
@@ -269,9 +266,6 @@
 	<reference id="filteredPaymentInstrumentService"
 			   interface="com.elasticpath.service.orderpaymentapi.FilteredPaymentInstrumentService"/>
 
-	<reference id="createCartValidationService"
-			   interface="com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService"/>
-
 	<reference id="settingsReader"
 			   interface="com.elasticpath.settings.SettingsReader"/>
 
@@ -281,8 +275,20 @@
 	<reference id="productAvailabilityService"
 			 interface="com.elasticpath.service.catalogview.ProductAvailabilityService"/>
 
-	<!-- export services -->
+	<reference id="addressService"
+			   interface="com.elasticpath.service.customer.AddressService"/>
 
+	<reference id="xpfExtensionLookup" interface="com.elasticpath.xpf.XPFExtensionLookup"/>
+
+	<reference id="xpfShoppingCartValidationContextBuilder" interface="com.elasticpath.xpf.context.builders.ShoppingCartValidationContextBuilder"/>
+
+	<reference id="xpfHttpTagSetContextBuilder" interface="com.elasticpath.xpf.context.builders.HttpTagSetContextBuilder"/>
+
+	<reference id="xpfProductSkuValidationContextBuilder" interface="com.elasticpath.xpf.context.builders.ProductSkuValidationContextBuilder"/>
+
+	<reference id="productRecommendationXPFBridge" interface="com.elasticpath.xpf.bridges.ProductRecommendationXPFBridge"/>
+
+	<!-- export services -->
 	<service ref="paginatedResultTransformer"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.pagination.PaginatedResultTransformer"/>
 
@@ -307,8 +313,8 @@
 	<service ref="customerRepository"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository"/>
 
-	<service ref="customerSessionRepository"
-			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository"/>
+	<service ref="shopperRepository"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository"/>
 
 	<service ref="dataPolicyRepository"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.DataPolicyRepository"/>
@@ -412,6 +418,9 @@
 	<service ref="itemRecommendationsRepository"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.item.recommendations.ItemRecommendationsRepository"/>
 
+	<service ref="offerRecommendationsRepository"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.offer.recommendations.OfferRecommendationsRepository"/>
+
 	<service ref="couponRepository"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponRepository"/>
 
@@ -441,9 +450,6 @@
 			 interface="com.elasticpath.rest.cache.CacheKeyVariants"/>
 
 	<service ref="customerCacheKeyVariants"
-			 interface="com.elasticpath.rest.cache.CacheKeyVariants"/>
-
-	<service ref="customerSessionCacheKeyVariants"
 			 interface="com.elasticpath.rest.cache.CacheKeyVariants"/>
 
 	<service ref="shoppingCartCacheKeyVariants"

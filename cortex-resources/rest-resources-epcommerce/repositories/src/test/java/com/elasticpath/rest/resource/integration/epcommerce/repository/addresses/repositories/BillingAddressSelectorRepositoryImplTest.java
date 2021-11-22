@@ -32,6 +32,7 @@ import com.elasticpath.rest.definition.addresses.BillingAddressesIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.AddressRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.selector.SelectStatus;
@@ -55,6 +56,9 @@ public class BillingAddressSelectorRepositoryImplTest {
 
 	@Mock
 	private CustomerRepository customerRepository;
+
+	@Mock
+	private AddressRepository addressRepository;
 
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
@@ -176,6 +180,7 @@ public class BillingAddressSelectorRepositoryImplTest {
 
 		BillingAddressSelectorChoiceIdentifier billingAddressSelectorChoiceIdentifier = mock(BillingAddressSelectorChoiceIdentifier.class);
 		Observable<String> cartOrderGuidObservable = Observable.just(CART_ORDER_GUID);
+		when(addressRepository.getExistingAddressByGuid(ADDRESS1, customer)).thenReturn(Single.just(customerAddress));
 		when(billingAddressSelectorChoiceIdentifier.getBillingAddressSelector()).thenReturn(billingAddressSelectorIdentifier);
 		when(billingAddressSelectorChoiceIdentifier.getAddress()).thenReturn(address1Identifier);
 		when(customerRepository.update(customer)).thenReturn(Single.just(customer));

@@ -21,6 +21,7 @@
 		<module>rest-resources-api</module>
 		<module>rest-resources</module>
 		<module>rest-resources-epcommerce</module>
+		<module>cortex-itests</module>
     </modules>
 
 	<organization>
@@ -34,14 +35,6 @@
 	</issueManagement>
 
 	<properties>
-		<!--Groovy-->
-		<groovy-all.version>2.4.15</groovy-all.version>
-		<groovy-eclipse-batch.version>2.4.15-01</groovy-eclipse-batch.version>
-		<groovy-eclipse-compiler.version>2.9.2-04</groovy-eclipse-compiler.version>
-
-		<!-- maven plugins -->
-		<sling-plugin.version>2.1.0</sling-plugin.version>
-
 		<!--Jacoco-->
 		<jacoco.instruction.covered-ratio>0.90</jacoco.instruction.covered-ratio>
 		<jacoco.branch.covered-ratio>0.90</jacoco.branch.covered-ratio>
@@ -66,7 +59,7 @@
 						<plugin>
 							<groupId>org.apache.sling</groupId>
 							<artifactId>maven-sling-plugin</artifactId>
-							<version>${sling-plugin.version}</version>
+							<version>${maven-sling-plugin.version}</version>
 						</plugin>
 					</plugins>
 				</pluginManagement>

@@ -3,7 +3,8 @@
  */
 package com.elasticpath.tools.sync.job.descriptor.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.service.changeset.ChangeSetPolicy;
@@ -18,7 +19,7 @@ import com.elasticpath.tools.sync.merge.configuration.EntityLocator;
  */
 public class CommandResolverImpl implements CommandResolver {
 
-	private static final Logger LOG = Logger.getLogger(CommandResolverImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CommandResolverImpl.class);
 
 	private EntityLocator entityLocator;
 

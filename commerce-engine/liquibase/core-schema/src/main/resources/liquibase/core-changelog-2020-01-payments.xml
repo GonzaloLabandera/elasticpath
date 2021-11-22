@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-01-payments.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-01-payments.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="2020-01-create-order-payment-instrument-table" author="elasticpath" context="pre-app-upgrade">
 		<comment>Create the Order Payment Instrument Table</comment>

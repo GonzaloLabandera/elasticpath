@@ -19,13 +19,12 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.ProductSkuService;
-import com.elasticpath.service.store.StoreService;
 import com.elasticpath.test.persister.TestDataPersisterFactory;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 
@@ -39,22 +38,19 @@ public class CheckoutTestCartBuilder {
 
 	private CustomerAddress address;
 
-	private CustomerSession customerSession;
+	private Shopper shopper;
 
 	private SimpleStoreScenario scenario;
 
 	private final List<ShoppingItemDto> shoppingItemDtos = new ArrayList<>();
 
-	private Map<String, String> cartData = new HashMap<>();
+	private final Map<String, String> cartData = new HashMap<>();
 
 	@Autowired
 	private TestDataPersisterFactory persisterFactory;
 
 	@Autowired
 	private CartDirector cartDirector;
-
-	@Autowired
-	private StoreService storeService;
 
 	@Autowired
 	private ProductService productService;
@@ -79,12 +75,12 @@ public class CheckoutTestCartBuilder {
 	}
 
 	/**
-	 * Set the customer session.
-	 * @param customerSession the session.
+	 * Set the shopper.
+	 * @param shopper the shopper.
 	 * @return the checkout test cart builder
 	 */
-	public CheckoutTestCartBuilder withCustomerSession(final CustomerSession customerSession) {
-		this.customerSession = customerSession;
+	public CheckoutTestCartBuilder withShopper(final Shopper shopper) {
+		this.shopper = shopper;
 		return this;
 	}
 
@@ -262,9 +258,9 @@ public class CheckoutTestCartBuilder {
 	 * @return the shopping cart
 	 */
 	public ShoppingCart build() {
-		final ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-																											scenario.getShippingOption(), store);
-		cartData.forEach(shoppingCart::setCartDataFieldValue);
+		final ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(shopper, address, address,
+				scenario.getShippingOption(), store);
+		shoppingCart.getModifierFields().putAll(cartData);
 
 		for (final ShoppingItemDto dto : shoppingItemDtos) {
 			cartDirector.addItemToCart(shoppingCart, dto);

@@ -7,8 +7,10 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
@@ -22,16 +24,12 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableMap;
-
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.internal.stubbing.answers.ReturnsArgumentAt;
@@ -48,6 +46,7 @@ import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.CartItem;
@@ -57,7 +56,8 @@ import com.elasticpath.money.Money;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
 import com.elasticpath.service.catalog.DependentItemLookup;
 import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.elasticpath.service.shoppingcart.validation.AddOrUpdateShoppingItemDtoToCartValidationService;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.context.builders.impl.ShoppingItemValidationContextBuilderImpl;
 
 /**
  * Tests the {@code CartDirectorImpl} in isolation.
@@ -106,8 +106,12 @@ public class CartDirectorImplTest {
 	private DependentItemLookup dependentItemLookup;
 	@Mock
 	private ShoppingItemDtoFactory shoppingItemDtoFactory;
-	@SuppressWarnings("PMD.UnusedPrivateField")
-	@Mock private AddOrUpdateShoppingItemDtoToCartValidationService validationService;
+
+	@Mock
+	private XPFExtensionLookup extensionLookup;
+
+	@Mock
+	private ShoppingItemValidationContextBuilderImpl contextConverter;
 
 	private final List<ShoppingItem> itemsInCart = new ArrayList<>();
 	private Integer changeQuantityArgument;
@@ -119,7 +123,8 @@ public class CartDirectorImplTest {
 		cartDirector.setPriceLookupFacade(priceLookupFacade);
 		cartDirector.setDependentItemLookup(dependentItemLookup);
 		cartDirector.setShoppingItemDtoFactory(shoppingItemDtoFactory);
-		cartDirector.setValidationService(validationService);
+		cartDirector.setContextBuilder(contextConverter);
+		cartDirector.setExtensionLookup(extensionLookup);
 
 		// Configure class under test to ignore irrelevant code branches
 		doNothing().when(cartDirector).priceShoppingItemWithAdjustments(any(ShoppingCart.class), any(ShoppingItem.class));
@@ -128,6 +133,11 @@ public class CartDirectorImplTest {
 			changeQuantityArgument = (Integer) invocationOnMock.getArguments()[1];
 			return (ShoppingItem) invocationOnMock.getArguments()[0];
 		}).when(cartDirector).changeQuantityForCartItem(any(ShoppingItem.class), anyInt(), any(ShoppingCart.class));
+
+		doNothing().when(cartDirector)
+				.validateShoppingItemDto(any(ShoppingCart.class), any(ShoppingItemDto.class), isNull(), anyBoolean());
+		doNothing().when(cartDirector)
+				.validateShoppingItemDto(any(ShoppingCart.class), any(ShoppingItemDto.class), any(ShoppingItem.class), anyBoolean());
 
 		// Dependency and parameter mocking
 		itemsInCart.add(shoppingItemAlreadyInCart);
@@ -148,6 +158,9 @@ public class CartDirectorImplTest {
 
 		given(shoppingCart.addShoppingCartItem(any(ShoppingItem.class))).willAnswer(new ReturnsArgumentAt(0));
 		given(dependentItemLookup.findDependentItemsForSku(eq(store), any(ProductSku.class))).willReturn(emptyMap());
+
+		given(addedShoppingItem.getModifierFields()).willReturn(new ModifierFieldsMapWrapper());
+		given(shoppingItemAlreadyInCart.getModifierFields()).willReturn(new ModifierFieldsMapWrapper());
 	}
 
 	/**
@@ -187,6 +200,7 @@ public class CartDirectorImplTest {
 
 		when(shoppingItemAlreadyInCart.getGuid()).thenReturn(SHOPPING_ITEM_GUID);
 		when(shoppingItemAssembler.createShoppingItem(dto)).thenReturn(updatedShoppingItem);
+		when(updatedShoppingItem.getModifierFields()).thenReturn(new ModifierFieldsMapWrapper());
 
 		doReturn(shoppingItemAlreadyInCart).when(shoppingCart).getCartItemById(itemUid);
 
@@ -215,6 +229,7 @@ public class CartDirectorImplTest {
 		given(dependentProductSkuToAdd.getProduct().getMinOrderQty()).willReturn(1);
 		given(shoppingItemDtoFactory.createDto(DEPENDENT_SKU_CODE, PARENT_ITEM_QUANTITY)).willReturn(dependentShoppingItemDto);
 		given(shoppingItemAssembler.createShoppingItem(dependentShoppingItemDto)).willReturn(dependentShoppingItem);
+		given(dependentShoppingItem.getModifierFields()).willReturn(new ModifierFieldsMapWrapper());
 
 		cartDirector.addDependentItemsToParentItem(shoppingCart, addedShoppingItem);
 
@@ -414,10 +429,11 @@ public class CartDirectorImplTest {
 		given(newShoppingItem.getSkuGuid()).willReturn(SKU_GUID);
 		given(shoppingItemAssembler.createShoppingItem(shoppingItemDto)).willReturn(newShoppingItem);
 		given(shoppingCart.getCartItemById(CART_ITEM_UID)).willReturn(shoppingItemAlreadyInCart);
+		given(newShoppingItem.getModifierFields()).willReturn(new ModifierFieldsMapWrapper());
 
 		cartDirector.updateCartItem(shoppingCart, CART_ITEM_UID, shoppingItemDto);
 
-		assertThat(shoppingItemAlreadyInCart.getFields())
+		assertThat(shoppingItemAlreadyInCart.getModifierFields().getMap())
 				.as("Fields should have been copied over.")
 				.isEqualTo(shoppingItemDto.getItemFields());
 	}
@@ -442,14 +458,7 @@ public class CartDirectorImplTest {
 	}
 
 	private void givenItemHasFieldWithValue(final ShoppingItem mockShoppingItem, final String key, final String value) {
-		Map<String, String> fieldsMap = mockShoppingItem.getFields();
-
-		if (fieldsMap == null || fieldsMap.isEmpty()) {
-			fieldsMap = new HashMap<>();
-			given(mockShoppingItem.getFields()).willReturn(fieldsMap);
-		}
-
-		fieldsMap.put(key, value);
+		mockShoppingItem.getModifierFields().put(key, value);
 	}
 
 	private void verifyQuantityChanged(final Integer targetQuantity) {

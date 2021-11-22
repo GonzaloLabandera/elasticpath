@@ -5,7 +5,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.5.1.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.5.1.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="7.5.1-trusted-traits-setting" author="elasticpath" >
 		<comment>Adds a setting to control whether trusted traits are allowed.</comment>
@@ -82,8 +83,8 @@
 	</changeSet>
 
 	<changeSet id="7.5.1-add-projection-entity-related-table" author="elasticpath">
-		<comment>[PB-4358] Adds table for persist ProjectionEntity
-		</comment>
+		<validCheckSum>8:b633ee0c9f20df129406b54b2b1b1129</validCheckSum>
+		<comment>[PB-4358] Adds table for persist ProjectionEntity</comment>
 
 		<createTable tableName="TCATALOGPROJECTIONS">
 			<column name="TYPE" type="VARCHAR(64)">
@@ -101,7 +102,7 @@
 			<column name="PROJECTION_DATE_TIME" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
 				<constraints nullable="false"/>
 			</column>
-			<column name="DELETED" type="TINYINT">
+			<column name="DELETED" type="BOOLEAN">
 				<constraints nullable="false"/>
 			</column>
 			<column name="SCHEMA_VERSION" type="VARCHAR(64)">

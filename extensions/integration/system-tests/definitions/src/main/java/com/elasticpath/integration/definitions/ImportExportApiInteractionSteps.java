@@ -146,6 +146,17 @@ public class ImportExportApiInteractionSteps {
 	}
 
 	/**
+	 * Ensure that the summary contains expected number of failures.
+	 * @param expectedValue the expected number of failures
+	 */
+	@Then("^summary contains (\\d+) failures$")
+	public void summaryHasFailures(final int expectedValue) {
+		assertThat(client.countFailuresInSummary())
+				.as("Expected summary object to contain no failure messages.")
+				.isEqualTo(expectedValue);
+	}
+
+	/**
 	 * Ensure that the summary contains no failures.
 	 */
 	@Then("^summary contains no failures$")

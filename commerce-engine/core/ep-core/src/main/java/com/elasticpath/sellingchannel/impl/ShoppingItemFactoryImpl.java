@@ -5,7 +5,7 @@ package com.elasticpath.sellingchannel.impl;
 
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -34,7 +34,7 @@ public class ShoppingItemFactoryImpl implements ShoppingItemFactory {
 
 		shoppingItem.setPrice(quantity, price);
 		shoppingItem.setOrdering(ordering);
-		shoppingItem.mergeFieldValues(itemFields);
+		shoppingItem.getModifierFields().putAll(itemFields);
 
 		return shoppingItem;
 	}

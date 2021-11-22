@@ -5,7 +5,7 @@ package com.elasticpath.plugin.tax.builder;
 
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.plugin.tax.domain.TaxExemption;
 import com.elasticpath.plugin.tax.domain.impl.TaxExemptionImpl;

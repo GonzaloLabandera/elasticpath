@@ -16,10 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmptyShoppingCartValidatorImplTest {
@@ -28,10 +28,10 @@ public class EmptyShoppingCartValidatorImplTest {
 	private EmptyShoppingCartValidatorImpl validator;
 
 	@Mock
-	private ShoppingCartValidationContext context;
+	private XPFShoppingCartValidationContext context;
 
 	@Mock
-	private ShoppingCart shoppingCart;
+	private XPFShoppingCart shoppingCart;
 
 	@Before
 	public void setUp() throws Exception {
@@ -41,10 +41,10 @@ public class EmptyShoppingCartValidatorImplTest {
 	@Test
 	public void testCartNotEmpty() {
 		// Given
-		given(shoppingCart.isEmpty()).willReturn(false);
+		given(shoppingCart.getLineItems()).willReturn(Collections.singletonList(null));
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -52,14 +52,14 @@ public class EmptyShoppingCartValidatorImplTest {
 
 	@Test
 	public void testCartEmpty() {
-		StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, "cart.empty",
+		XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO, "cart.empty",
 				"Shopping cart is empty.", Collections.emptyMap());
 
 		// Given
-		given(shoppingCart.isEmpty()).willReturn(true);
+		given(shoppingCart.getLineItems()).willReturn(Collections.emptyList());
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(errorMessage);

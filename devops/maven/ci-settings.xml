@@ -9,6 +9,20 @@
 			<url>PROJECT_REPOSITORY_GROUP_URL</url>
 			<mirrorOf>external:*</mirrorOf>
 		</mirror>
+		<mirror>
+			<id>eclipse-p2-rap</id>
+			<mirrorOf>http://download.eclipse.org/rt/rap/3.5</mirrorOf>
+			<url>http://download.eclipse.org/rt/rap/3.5</url>
+			<layout>p2</layout>
+			<mirrorOfLayouts>p2</mirrorOfLayouts>
+		</mirror>
+		<mirror>
+			<id>eclipse-p2-release</id>
+			<mirrorOf>http://download.eclipse.org/releases/photon</mirrorOf>
+			<url>http://download.eclipse.org/releases/photon</url>
+			<layout>p2</layout>
+			<mirrorOfLayouts>p2</mirrorOfLayouts>
+		</mirror>
 	</mirrors>
 
 	<activeProfiles>

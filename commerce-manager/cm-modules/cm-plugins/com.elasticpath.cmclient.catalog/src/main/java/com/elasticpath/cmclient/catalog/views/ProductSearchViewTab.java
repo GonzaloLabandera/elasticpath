@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.catalog.views;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -37,7 +38,7 @@ import com.elasticpath.service.search.query.StandardSortBy;
  */
 public class ProductSearchViewTab extends AbstractCatalogSearchViewTab implements SelectionListener, CatalogListener {
 	
-	private static final transient Logger LOG = Logger.getLogger(ProductSearchViewTab.class);
+	private static final transient Logger LOG = LogManager.getLogger(ProductSearchViewTab.class);
 
 	private static final int NORMAL_TEXT_LENGTH = 255;
 

@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.changeset.actions;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import com.elasticpath.cmclient.changeset.ChangeSetPermissions;

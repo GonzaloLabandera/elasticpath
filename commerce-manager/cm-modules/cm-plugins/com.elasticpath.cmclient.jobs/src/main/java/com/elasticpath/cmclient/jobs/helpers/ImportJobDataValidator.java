@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.jobs.helpers;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -24,7 +25,7 @@ public class ImportJobDataValidator {
 
 	private final ImportJobDataValidatorProc validator;
 
-	private static final Logger LOG = Logger.getLogger(ImportJobDataValidator.class);
+	private static final Logger LOG = LogManager.getLogger(ImportJobDataValidator.class);
 	
 	/**
 	 * constructor.
@@ -55,15 +56,11 @@ public class ImportJobDataValidator {
 			new ProgressMonitorDialog(shell).run(true, false, validator);
 		} catch (final InvocationTargetException e) {
 			StringBuffer sBuffer = new StringBuffer(JobsMessages.get().RunWizard_UnexpectedError).
-					append("\n").append(e.getTargetException().getMessage()); //$NON-NLS-1$
+					append("\n").append(e.getCause().getMessage()); //$NON-NLS-1$
 			MessageDialog.openError(shell, JobsMessages.get().RunWizard_UnexpectedError, sBuffer.toString());
-			
-			Throwable target = e.getTargetException();
-			if (target == null) {
-				LOG.error(e.getClass() + " with message " + e.getMessage()); //$NON-NLS-1$
-			} else {
-				LOG.error(target.getClass() + " with message " + target.getMessage()); //$NON-NLS-1$
-			}
+
+			LOG.error(e.getClass() + " with message " + e.getMessage(), e); //$NON-NLS-1$
+
 			return false;
 		} catch (EpFileManagerException fme) {
 			MessageDialog.openError(shell, JobsMessages.get().RunWizard_UnexpectedError, fme.getMessage());

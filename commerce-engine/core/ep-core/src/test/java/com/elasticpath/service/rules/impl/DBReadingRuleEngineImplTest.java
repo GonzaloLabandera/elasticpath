@@ -7,8 +7,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Calendar;
 import java.util.Date;
 
+import org.jmock.States;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,6 +25,7 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.rules.RuleService;
 
 /**
@@ -31,7 +34,9 @@ import com.elasticpath.service.rules.RuleService;
 public class DBReadingRuleEngineImplTest {
 
 	private static final String CODE = "some code";
-	public static final long UID = 2000001L;
+	private static final long UID = 2000001L;
+	private static final int YEAR = 2020;
+	private static final String SECOND_STEP = "second-step";
 
 	private DBReadingRuleEngineImpl ruleEngine;
 
@@ -43,7 +48,9 @@ public class DBReadingRuleEngineImplTest {
 	};
 
 	private RuleService mockRuleService;
-	
+
+	private TimeService mockTimeService;
+
 	private InternalKnowledgeBase mockOldRuleBase;
 	
 	private InternalKnowledgeBase mockNewRuleBase;
@@ -66,6 +73,15 @@ public class DBReadingRuleEngineImplTest {
 		ruleEngine = new DBReadingRuleEngineImpl();
 		mockRuleService = context.mock(RuleService.class);
 		ruleEngine.setRuleService(mockRuleService);
+		mockTimeService = context.mock(TimeService.class);
+		ruleEngine.setTimeService(mockTimeService);
+		context.checking(new Expectations() {
+			{
+				allowing(mockTimeService).getCurrentTime();
+				will(returnValue(new Date()));
+			}
+		});
+
 		mockOldRuleBase = context.mock(InternalKnowledgeBase.class, "old rule base");
 		mockNewRuleBase = context.mock(InternalKnowledgeBase.class, "new rule base");
 
@@ -169,9 +185,6 @@ public class DBReadingRuleEngineImplTest {
 
 				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
 				will(returnValue(date));
-
-				oneOf(mockRuleService).findChangedStoreRuleBases(CODE, RuleScenarios.CART_SCENARIO, date);
-				will(returnValue(null));
 			}
 		});
 		assertTrue(ruleEngine.getCartRuleBase(store) instanceof InternalKnowledgeBase);
@@ -184,6 +197,7 @@ public class DBReadingRuleEngineImplTest {
 	@Test
 	public void testCartRuleCachedAndUpdated() {
 		final Store store = mockStore;
+		final States state = context.states("invocation-step");
 
 		final InternalKnowledgeBase ruleBase = mockOldRuleBase;
 		final EpRuleBase mockEpRuleBase = context.mock(EpRuleBase.class);
@@ -193,38 +207,36 @@ public class DBReadingRuleEngineImplTest {
 				allowing(mockEpRuleBase).getRuleBase();
 				will(returnValue(ruleBase));
 
-
 				allowing(mockRuleService).findRuleBaseByScenario(store, null, RuleScenarios.CART_SCENARIO);
-
 				will(returnValue(epRuleBase));
+				when(state.isNot(SECOND_STEP));
 			}
 		});
 		ruleEngine.getCartRuleBase(store);
 
+		state.become(SECOND_STEP);
 		final InternalKnowledgeBase updatedRuleBase = mockNewRuleBase;
 		final EpRuleBase mockUpdatedEpRuleBase = context.mock(EpRuleBase.class, "updated rule base");
-		final EpRuleBase updatedEpRuleBase = mockUpdatedEpRuleBase;
-		context.checking(new Expectations() {
-			{
-				allowing(mockUpdatedEpRuleBase).getRuleBase();
-				will(returnValue(updatedRuleBase));
-			}
-		});
-
-		final Date date = new Date();
+		final Calendar oldCalendar = Calendar.getInstance();
+		oldCalendar.set(YEAR, Calendar.JANUARY, 1);
+		final Calendar newCalendar = Calendar.getInstance();
+		newCalendar.set(YEAR, Calendar.FEBRUARY, 1);
 		context.checking(new Expectations() {
 			{
 				allowing(epRuleBase).getUidPk();
 				will(returnValue(UID));
 
 				allowing(mockEpRuleBase).getLastModifiedDate();
-				will(returnValue(date));
+				will(returnValue(oldCalendar.getTime()));
 
 				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
-				will(returnValue(date));
+				will(returnValue(newCalendar.getTime()));
 
-				oneOf(mockRuleService).findChangedStoreRuleBases(CODE, RuleScenarios.CART_SCENARIO, date);
-				will(returnValue(updatedEpRuleBase));
+				allowing(mockUpdatedEpRuleBase).getRuleBase();
+				will(returnValue(updatedRuleBase));
+
+				allowing(mockRuleService).findRuleBaseByScenario(store, null, RuleScenarios.CART_SCENARIO);
+				will(returnValue(mockUpdatedEpRuleBase));
 			}
 		});
 		assertSame(updatedRuleBase, ruleEngine.getCartRuleBase(store));
@@ -302,11 +314,11 @@ public class DBReadingRuleEngineImplTest {
 				allowing(epRuleBase).getUidPk();
 				will(returnValue(UID));
 
-				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
+				allowing(epRuleBase).getLastModifiedDate();
 				will(returnValue(date));
 
-				oneOf(mockRuleService).findChangedCatalogRuleBases(CODE, RuleScenarios.CATALOG_BROWSE_SCENARIO, date);
-				will(returnValue(null));
+				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
+				will(returnValue(date));
 			}
 		});
 		assertTrue(ruleEngine.getCatalogRuleBase(store) instanceof InternalKnowledgeBase);
@@ -320,6 +332,7 @@ public class DBReadingRuleEngineImplTest {
 	public void testCatalogRuleCachedAndUpdated() {
 		final Store store = mockStore;
 		final Catalog catalog = mockCatalog;
+		final States state = context.states("invocation-step");
 
 		final InternalKnowledgeBase ruleBase = mockOldRuleBase;
 		final EpRuleBase mockEpRuleBase = context.mock(EpRuleBase.class);
@@ -329,34 +342,36 @@ public class DBReadingRuleEngineImplTest {
 				allowing(mockEpRuleBase).getRuleBase();
 				will(returnValue(ruleBase));
 
-
 				allowing(mockRuleService).findRuleBaseByScenario(null, catalog, RuleScenarios.CATALOG_BROWSE_SCENARIO);
 				will(returnValue(epRuleBase));
+				when(state.isNot(SECOND_STEP));
 			}
 		});
 		ruleEngine.getCatalogRuleBase(store);
 
+		state.become(SECOND_STEP);
 		final InternalKnowledgeBase updatedRuleBase = mockNewRuleBase;
 		final EpRuleBase mockUpdatedEpRuleBase = context.mock(EpRuleBase.class, "updated rule base");
-		final EpRuleBase updatedEpRuleBase = mockUpdatedEpRuleBase;
-		context.checking(new Expectations() {
-			{
-				allowing(mockUpdatedEpRuleBase).getRuleBase();
-				will(returnValue(updatedRuleBase));
-			}
-		});
-
-		final Date date = new Date();
+		final Calendar oldCalendar = Calendar.getInstance();
+		oldCalendar.set(YEAR, Calendar.JANUARY, 1);
+		final Calendar newCalendar = Calendar.getInstance();
+		newCalendar.set(YEAR, Calendar.FEBRUARY, 1);
 		context.checking(new Expectations() {
 			{
 				allowing(epRuleBase).getUidPk();
 				will(returnValue(UID));
 
-				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
-				will(returnValue(date));
+				allowing(epRuleBase).getLastModifiedDate();
+				will(returnValue(oldCalendar.getTime()));
 
-				oneOf(mockRuleService).findChangedCatalogRuleBases(CODE, RuleScenarios.CATALOG_BROWSE_SCENARIO, date);
-				will(returnValue(updatedEpRuleBase));
+				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
+				will(returnValue(newCalendar.getTime()));
+
+				allowing(mockUpdatedEpRuleBase).getRuleBase();
+				will(returnValue(updatedRuleBase));
+
+				allowing(mockRuleService).findRuleBaseByScenario(null, catalog, RuleScenarios.CATALOG_BROWSE_SCENARIO);
+				will(returnValue(mockUpdatedEpRuleBase));
 			}
 		});
 		assertSame(updatedRuleBase, ruleEngine.getCatalogRuleBase(store));

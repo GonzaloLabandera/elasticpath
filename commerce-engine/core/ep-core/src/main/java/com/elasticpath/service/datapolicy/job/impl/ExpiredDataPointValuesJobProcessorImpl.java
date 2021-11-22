@@ -10,7 +10,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.domain.datapolicy.DataPolicy;
@@ -29,7 +30,7 @@ import com.elasticpath.service.misc.TimeService;
  */
 public class ExpiredDataPointValuesJobProcessorImpl implements DataPointValueJob {
 
-	private static final Logger LOG = Logger.getLogger(ExpiredDataPointValuesJobProcessorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ExpiredDataPointValuesJobProcessorImpl.class);
 	private DataPointValueService dataPointValueService;
 	private DataPointService dataPointService;
 	private TimeService timeService;

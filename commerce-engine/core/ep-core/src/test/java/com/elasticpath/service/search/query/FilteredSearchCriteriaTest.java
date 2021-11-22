@@ -15,7 +15,6 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang.NullArgumentException;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
@@ -81,7 +80,7 @@ public class FilteredSearchCriteriaTest {
 		context.checking(new Expectations() {
 			{
 				allowing(mockSearchCriteria3).getIndexType();
-				will(returnValue(IndexType.CUSTOMER));
+				will(returnValue(IndexType.SKU));
 			}
 		});
 		final SearchCriteria searchCriteria3 = mockSearchCriteria3;
@@ -185,8 +184,8 @@ public class FilteredSearchCriteriaTest {
 		
 		try {
 			searchCriteria.setRelationship(null);
-			fail("NullArgumentException expected");
-		} catch (NullArgumentException e) {
+			fail("IllegalArgumentException expected");
+		} catch (IllegalArgumentException e) {
 			assertNotNull(e);
 		}
 	}

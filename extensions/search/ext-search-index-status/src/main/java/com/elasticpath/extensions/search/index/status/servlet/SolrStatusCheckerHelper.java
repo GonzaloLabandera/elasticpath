@@ -14,7 +14,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -26,7 +27,7 @@ import org.xml.sax.InputSource;
  */
 public final class SolrStatusCheckerHelper {
 
-	private static final Logger LOG = Logger.getLogger(SolrStatusCheckerHelper.class);
+	private static final Logger LOG = LogManager.getLogger(SolrStatusCheckerHelper.class);
 
 	private static final String SOLR_QUERY_STRING = "/product/select?q=*:*";
 

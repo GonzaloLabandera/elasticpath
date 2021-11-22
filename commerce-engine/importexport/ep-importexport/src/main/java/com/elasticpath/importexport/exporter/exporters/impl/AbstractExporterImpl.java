@@ -13,7 +13,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.commons.util.impl.JaxbUtils;
@@ -44,7 +45,7 @@ public abstract class AbstractExporterImpl<DOMAIN extends Persistable, DTO exten
 
 	private static final String XML_ENCODING_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
 
-	private static final Logger LOG = Logger.getLogger(AbstractExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractExporterImpl.class);
 
 	private List<DependentExporter<? extends Persistable, ? extends Dto, DTO>> dependentExporterList =
 		new ArrayList<>();

@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.SortedMap;
 
 import com.google.common.base.Strings;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom.Element;
 
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -29,7 +30,7 @@ public class AttributeRangeFilterXmlElementParserImpl extends AbstractRangeFilte
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
 
-	private static final Logger LOG = Logger.getLogger(AttributeRangeFilterXmlElementParserImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AttributeRangeFilterXmlElementParserImpl.class);
 
 	private static final String ATTRIBUTE_KEY = "key";
 

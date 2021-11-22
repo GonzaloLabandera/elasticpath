@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.jobs.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -19,7 +20,7 @@ import com.elasticpath.cmclient.jobs.views.CustomerJobListView;
  */
 public class ViewCustomerImportJobs extends Action implements IWorkbenchWindowPulldownDelegate {
 
-	private static final Logger LOG = Logger.getLogger(ViewCustomerImportJobs.class);
+	private static final Logger LOG = LogManager.getLogger(ViewCustomerImportJobs.class);
 	
 	private IWorkbenchWindow window;
 

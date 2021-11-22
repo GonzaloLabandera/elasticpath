@@ -183,7 +183,7 @@
 				</repository>
 				<repository>
 					<id>springframework-milestone</id>
-					<url>http://maven.springframework.org/milestone/</url>
+					<url>https://maven.springframework.org/milestone/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>
@@ -194,16 +194,6 @@
 				<repository>
 					<id>adobe-public</id>
 					<url>http://repo.adobe.com/nexus/content/groups/public/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>groovy-maven</id>
-					<url>https://dl.bintray.com/groovy/maven/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>
@@ -295,7 +285,7 @@
 				</pluginRepository>
 				<pluginRepository>
 					<id>springframework-milestone</id>
-					<url>http://maven.springframework.org/milestone/</url>
+					<url>https://maven.springframework.org/milestone/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>
@@ -306,16 +296,6 @@
 				<pluginRepository>
 					<id>adobe-public</id>
 					<url>http://repo.adobe.com/nexus/content/groups/public/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
-					<id>groovy-maven</id>
-					<url>https://dl.bintray.com/groovy/maven/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>

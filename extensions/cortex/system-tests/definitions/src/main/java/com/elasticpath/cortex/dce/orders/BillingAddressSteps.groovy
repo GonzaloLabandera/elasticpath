@@ -1,6 +1,6 @@
 package com.elasticpath.cortex.dce.orders
 
-import static OrderConstants.BILLING_ADDRESS_LINK
+import static com.elasticpath.cortex.dce.orders.OrderConstants.BILLING_ADDRESS_LINK
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static org.assertj.core.api.Assertions.assertThat

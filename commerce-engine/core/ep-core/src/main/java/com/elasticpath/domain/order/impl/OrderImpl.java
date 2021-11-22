@@ -3,6 +3,8 @@
  */
 package com.elasticpath.domain.order.impl;
 
+import static com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.loadModifierFieldsIfRequired;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
@@ -32,8 +34,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.PostLoad;
@@ -46,9 +48,9 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.DataCache;
-import org.apache.openjpa.persistence.ElementDependent;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.FetchAttribute;
@@ -70,10 +72,11 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.impl.AbstractListenableEntityImpl;
+import com.elasticpath.domain.misc.types.Modifiable;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.ElectronicOrderShipment;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
-import com.elasticpath.domain.order.OrderData;
 import com.elasticpath.domain.order.OrderEvent;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnStatus;
@@ -157,14 +160,16 @@ import com.elasticpath.service.order.ReturnAndExchangeService;
 @DataCache(enabled = false)
 @SuppressWarnings({ "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessiveImports",
 	"PMD.CyclomaticComplexity", "PMD.CouplingBetweenObjects", "PMD.AvoidDuplicateLiterals", "PMD.ExcessivePublicCount",
-	"PMD.GodClass" })
-public class OrderImpl extends AbstractListenableEntityImpl implements Order, PropertyChangeListener, RecalculableObject, ListenableProperties {
+	"PMD.GodClass", "PMD.TooManyMethods", "fb-contrib:CC_CYCLOMATIC_COMPLEXITY"  })
+public class OrderImpl extends AbstractListenableEntityImpl
+		implements Order, PropertyChangeListener, RecalculableObject, ListenableProperties, Modifiable {
+
 	/**
 	 * Serial version id.
 	 */
 	private static final long serialVersionUID = 5000000001L;
 
-	private static final Logger LOG = Logger.getLogger(OrderImpl.class);
+	private static final Logger LOG = LogManager.getLogger(OrderImpl.class);
 
 	private Date createdDate;
 
@@ -229,9 +234,10 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	private String orderSource;
 
 	private String cartOrderGuid;
-	private Map<String, OrderData> orderData = new HashMap<>();
 	private TaxExemption taxExemption;
 	private String taxExemptionId;
+	private ModifierFieldsMapWrapper modifierFields;
+	private Boolean hasModifiers = Boolean.FALSE;
 
 	/**
 	 * Gets the external order source.
@@ -591,11 +597,19 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	/**
 	 * Sets up all the shipments after load or update occurs on order object.
 	 */
-	@PostLoad
 	@PostUpdate
 	protected void initializeOrderAndOrderShipments() {
 		enableRecalculation();
 		registerPropertyListeners();
+	}
+
+	/**
+	 * Mark "modifierFields" field as loaded and initialize order and order shipments.
+	 */
+	@PostLoad
+	public void postLoadCallback() {
+		loadModifierFieldsIfRequired(this);
+		initializeOrderAndOrderShipments();
 	}
 
 	/**
@@ -705,7 +719,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	@Override
 	@Persistent
 	@Externalizer("toString")
-	@Factory("org.apache.commons.lang.LocaleUtils.toLocale")
+	@Factory("org.apache.commons.lang3.LocaleUtils.toLocale")
 	@Column(name = "LOCALE", length = LOCALE_LENGTH, nullable = false)
 	public Locale getLocale() {
 		return locale;
@@ -1103,7 +1117,12 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	@Id
 	@Column(name = "UIDPK")
 	@GeneratedValue(strategy = GenerationType.TABLE, generator = TABLE_NAME)
-	@TableGenerator(name = TABLE_NAME, table = "JPA_GENERATED_KEYS", pkColumnName = "ID", valueColumnName = "LAST_VALUE", pkColumnValue = TABLE_NAME)
+	@TableGenerator(name = TABLE_NAME,
+			table = "JPA_GENERATED_KEYS",
+			pkColumnName = "ID",
+			valueColumnName = "LAST_VALUE",
+			pkColumnValue = TABLE_NAME,
+			allocationSize = HIGH_CONCURRENCY_ALLOCATION_SIZE)
 	public long getUidPk() {
 		return uidPk;
 	}
@@ -1169,7 +1188,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 			taxExemption = TaxExemptionBuilder
 					.newBuilder()
 					.withTaxExemptionId(taxExemptionId)
-					.withDataFields(getFieldValues())
+					.withDataFields(getModifierFields().getMap())
 					.build();
 		}
 		return taxExemption;
@@ -1182,20 +1201,32 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 			setTaxExemptionId(null);
 
 			//Reset all data fields with the TaxExemption prefix
-			for (Map.Entry<String, String> dataField : getFieldValues().entrySet()) {
+			Set<Map.Entry<String, String>> dataFields = getModifierFields().entrySet();
+			List<String> taxExemptionFieldsToRemove = new ArrayList<>(dataFields.size());
+
+			for (Map.Entry<String, String> dataField : dataFields) {
 				if (dataField.getKey().startsWith(TaxExemptionBuilder.PREFIX)) {
 					// The order data is related to tax exemption
-					this.removeFieldValue(dataField.getKey());
+					taxExemptionFieldsToRemove.add(dataField.getKey());
 				}
 			}
+
+			getModifierFields().removeAll(taxExemptionFieldsToRemove);
+
 			return;
 		}
 
 		setTaxExemptionId(taxExemption.getExemptionId());
-		for (Map.Entry<String, String> dataField : taxExemption.getAllData().entrySet()) {
+
+		Map<String, String> taxExemptionData = taxExemption.getAllData();
+		Map<String, String> taxExemptionFieldsToAdd = new HashMap<>(taxExemptionData.size());
+
+		for (Map.Entry<String, String> dataField : taxExemptionData.entrySet()) {
 			// Add the TaxExemption Prefix to distinguish between other data values
-			this.setFieldValue(TaxExemptionBuilder.PREFIX + dataField.getKey(), dataField.getValue());
+			taxExemptionFieldsToAdd.put(TaxExemptionBuilder.PREFIX + dataField.getKey(), dataField.getValue());
 		}
+
+		getModifierFields().putAll(taxExemptionFieldsToAdd);
 	}
 
 	/**
@@ -1663,72 +1694,45 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 		return results;
 	}
 
-	/**
-	 * Sets the {@code OrderData} - for JPA.
-	 * @param orderData the order data
-	 */
-	protected void setOrderDataInternal(final Map<String, OrderData> orderData) {
-		this.orderData = orderData;
-	}
-
-	/**
-	 * Internal JPA method to get Order Data.
-	 * @return the order data
-	 */
-	@OneToMany(targetEntity = OrderDataImpl.class, cascade =  {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.DETACH},
-			fetch = FetchType.EAGER)
-	@MapKey(name = "key")
-	@ElementJoinColumn(name = "ORDER_UID", nullable = false)
-	@ElementForeignKey(name = "FK_TORDERDATA_ORDER_UID")
-	@ElementDependent
-	protected Map<String, OrderData> getOrderDataInternal() {
-		return this.orderData;
-	}
-
+	@Lob
+	@Persistent(fetch = FetchType.LAZY)
+	@Column(name = "MODIFIER_FIELDS")
+	@Externalizer("com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.toJSON")
+	@Factory("com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.fromJSON")
 	@Override
-	@Transient
-	public String getFieldValue(final String key) {
-		return getFieldValues().get(key);
-	}
-
-	@Override
-	public void setFieldValue(final String name, final String value) {
-		OrderData datum = getOrderDataInternal().get(name);
-		if (datum == null) {
-			datum = createOrderDatum(name, value);
-			getOrderDataInternal().put(name, datum);
-		} else {
-			datum.setValue(value);
+	public ModifierFieldsMapWrapper getModifierFields() {
+		if (modifierFields == null) {
+			modifierFields = getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class);
+		} else if (!modifierFields.getMap().isEmpty()) {
+			//this ensures proper setting of the "hasModifiers" flag and must be called here
+			setHasModifiers(true);
 		}
-	}
-
-	@Override
-	public void removeFieldValue(final String propertyKey) {
-		getOrderDataInternal().remove(propertyKey);
+		return modifierFields;
 	}
 
 	/**
-	 * Factory method for OrderData instances.  Override this method in an extension class if you need to change
-	 * the OrderData implementation class.
+	 * Set modifier fields.
 	 *
-	 * @param name the data's key
-	 * @param value the data's value
-	 *
-	 * @return A newly constructed OrderData object with the given key and value
+	 * @param newModifierFields the new modifier fields to set.
 	 */
-	protected OrderData createOrderDatum(final String name, final String value) {
-		return new OrderDataImpl(name, value);
+	public void setModifierFields(final ModifierFieldsMapWrapper newModifierFields) {
+		this.modifierFields = newModifierFields;
 	}
 
-	@Transient
 	@Override
-	public Map<String, String> getFieldValues() {
-		HashMap<String, String> fieldValues = new HashMap<>(getOrderDataInternal().size());
-		for (OrderData data : getOrderDataInternal().values()) {
-			fieldValues.put(data.getKey(), data.getValue());
-		}
+	@Basic
+	@Column(name = "HAS_MODIFIERS")
+	public Boolean getHasModifiers() {
+		return hasModifiers;
+	}
 
-		return Collections.unmodifiableMap(fieldValues);
+	/**
+	 * Set a flag whether entity has modifier fields.
+	 *
+	 * @param hasModifiers the flag.
+	 */
+	public void setHasModifiers(final Boolean hasModifiers) {
+		this.hasModifiers = hasModifiers;
 	}
 
 	@Override
@@ -1749,5 +1753,26 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 		return getElectronicShipments().stream()
 				.flatMap(eShipment -> eShipment.getShipmentOrderSkus().stream())
 				.anyMatch(OrderSku::isGiftCertificate);
+	}
+
+	@Override
+	@Transient
+	public String getFieldValue(final String name) {
+		return getModifierFields().get(name);
+	}
+
+	@Override
+	public void setFieldValue(final String name, final String value) {
+		getModifierFields().put(name, value);
+	}
+
+	@Override
+	public void removeFieldValue(final String propertyKey) {
+		getModifierFields().remove(propertyKey);
+	}
+
+	@Override
+	public Map<String, String> getFieldValues() {
+		return getModifierFields().getMap();
 	}
 }

@@ -7,7 +7,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import com.elasticpath.search.index.pipeline.AbstractIndexingTask;
@@ -21,7 +22,7 @@ import com.elasticpath.search.index.pipeline.EntityLoadingTask;
  */
 public abstract class AbstractEntityLoader<ENTITY> extends AbstractIndexingTask<ENTITY> implements EntityLoadingTask<ENTITY> {
 
-	private static final Logger LOG = Logger.getLogger(AbstractEntityLoader.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractEntityLoader.class);
 
 	private Set<Long> uidsToLoad;
 

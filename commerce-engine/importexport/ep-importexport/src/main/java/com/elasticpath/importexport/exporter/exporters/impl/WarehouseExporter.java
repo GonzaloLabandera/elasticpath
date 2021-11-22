@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.warehouse.WarehouseDTO;
 import com.elasticpath.domain.store.Warehouse;
@@ -23,7 +24,7 @@ import com.elasticpath.service.store.WarehouseService;
  */
 public class WarehouseExporter extends AbstractExporterImpl<Warehouse, WarehouseDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(WarehouseExporter.class);
+	private static final Logger LOG = LogManager.getLogger(WarehouseExporter.class);
 
 	private ImportExportSearcher importExportSearcher;
 

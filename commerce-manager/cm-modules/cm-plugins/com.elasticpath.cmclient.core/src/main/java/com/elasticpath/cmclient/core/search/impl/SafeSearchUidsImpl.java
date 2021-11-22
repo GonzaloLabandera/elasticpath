@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.search.SafeSearchUids;
 import com.elasticpath.persistence.api.Persistable;
@@ -22,7 +23,7 @@ import com.elasticpath.persistence.api.Persistable;
  */
 public class SafeSearchUidsImpl implements SafeSearchUids {
 	
-	private static final transient Logger LOG = Logger.getLogger(SafeSearchUidsImpl.class);
+	private static final transient Logger LOG = LogManager.getLogger(SafeSearchUidsImpl.class);
 
 	private static final Long PERMISSION_ENFORCER = -1L;
 

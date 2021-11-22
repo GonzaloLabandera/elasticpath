@@ -445,6 +445,5 @@ public abstract class AbstractWrappedProductImpl implements Product, ProductWrap
 	@Override
 	public void validateRequiredAttributes(final Set<Locale> allLocales) {
 		getWrappedProduct().validateRequiredAttributes(allLocales);
-		
 	}
 }

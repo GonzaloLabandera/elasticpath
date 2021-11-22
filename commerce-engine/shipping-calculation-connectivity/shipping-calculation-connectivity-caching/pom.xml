@@ -42,8 +42,12 @@
 			<artifactId>junit</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
@@ -83,7 +87,7 @@
 					<instructions>
 						<Import-Package>
 							org.apache.commons.lang3.builder,
-							org.apache.log4j,
+							org.apache.logging.log4j,
 							org.springframework.cache.ehcache,
 							com.elasticpath.cache,
 							com.elasticpath.cache.impl,
@@ -93,6 +97,7 @@
 							com.elasticpath.settings.beanframework,
 							com.elasticpath.shipping.connectivity.dto,
 							com.elasticpath.shipping.connectivity.service,
+							com.elasticpath.base.cache,
 							!*
 						</Import-Package>
 					</instructions>

@@ -9,7 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -29,7 +30,7 @@ import com.elasticpath.persistence.api.Persistable;
  */
 public abstract class AbstractImporterImpl<DOMAIN extends Persistable, DTO extends Dto> implements Importer<DOMAIN, DTO> {
 
-	private static final Logger LOG = Logger.getLogger(AbstractImporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractImporterImpl.class);
 
 	private static final int DEFAULT_COMMIT_UNIT = 100;
 

@@ -518,8 +518,11 @@
 	</bean>
 
 	<bean id="customerImporter" class="com.elasticpath.importexport.importer.importers.impl.CustomerImporter" parent="abstractImporter">
+		<property name="persistenceEngine" ref="persistenceEngine" />
 		<property name="customerService" ref="customerService" />
+		<property name="addressService" ref="addressService" />
 		<property name="customerAdapter" ref="customerAdapter" />
+		<property name="accountTreeService" ref="accountTreeService" />
 		<property name="schemaPath" value="schema/schemaCustomer.xsd" />
 	</bean>
 
@@ -1838,27 +1841,6 @@
 	<import resource="classpath:spring/core-caching/cache-core.xml"/>
 	<import resource="classpath:spring/core-caching/cache-catalog.xml"/>
 	<import resource="classpath:spring/core-caching/cache-tax.xml"/>
-
-	<bean id="ehCacheFactory" class="com.elasticpath.cache.factory.impl.EhcacheCacheFactory">
-		<property name="cacheManager" ref="epEhcacheManager"/>
-	</bean>
-
-	<bean id="applicationName" class="java.lang.String">
-		<constructor-arg value="ImportExport"/>
-	</bean>
-
-	<alias name="defaultCacheManager" alias="epCoreEhcacheManager"/>
-	<alias name="defaultCacheManager" alias="epEhcacheManager"/>
-
-	<bean id="ehCacheConfigurationLoader" class="com.elasticpath.commons.util.EhcacheConfigurationLoader">
-		<property name="pathname" value="${ep.external.importexport.ehcache.xml.path:classpath:/ehcache-importexport.xml}"/>
-	</bean>
-
-	<bean id="defaultCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" destroy-method="destroy">
-		<property name="cacheManagerName" value="#{applicationName}-CacheManager"/>
-		<property name="shared" value="true"/>
-		<property name="configLocation" value="#{ehCacheConfigurationLoader.resource}"/>
-	</bean>
 
 	<bean id="delegatingMutableCachingService" class="com.elasticpath.caching.core.impl.DelegatingMutableCachingServiceImpl">
 		<property name="cachingServices" ref="mutableCachingServiceMap"/>

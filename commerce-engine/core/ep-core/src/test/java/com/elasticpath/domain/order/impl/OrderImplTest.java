@@ -36,6 +36,8 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.impl.EventOriginatorImpl;
+import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.ElectronicOrderShipment;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
@@ -93,6 +95,8 @@ public class OrderImplTest {
 
 	@Mock
 	private BeanFactory beanFactory;
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
 
 	private static final double ALLOWABLE_ERROR = 0.0000001;
 
@@ -103,8 +107,11 @@ public class OrderImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
+		elasticPath.setBeanFactory(beanFactory);
 
 		when(beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class)).thenReturn(storeService);
+		when(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.thenReturn(new ModifierFieldsMapWrapper());
 
 		when(storeService.findStoreWithCode(getMockedStore().getCode())).thenReturn(getMockedStore());
 
@@ -767,21 +774,21 @@ public class OrderImplTest {
 	public void testOrderDataLazyInstantiation() {
 		Order order = createTestOrder();
 
-		assertThat(order.getFieldValue(FOO))
+		assertThat(order.getModifierFields().get(FOO))
 				.as("Getter of non-existent order data key should return null")
 				.isNull();
-		assertThat(order.getFieldValues()).isEmpty();
+		assertThat(order.getModifierFields().getMap()).isEmpty();
 	}
 
 	@Test
 	public void testOrderData() {
 		Order order = createTestOrder();
-		order.setFieldValue(FOO, BAR);
+		order.getModifierFields().put(FOO, BAR);
 
-		assertThat(order.getFieldValue(FOO))
+		assertThat(order.getModifierFields().get(FOO))
 				.as("Getter/Setters should work as expected")
 				.isEqualTo(BAR);
-		assertThat(order.getFieldValues())
+		assertThat(order.getModifierFields().getMap())
 				.as("Map getter should also work")
 				.containsOnly(entry(FOO, BAR));
 	}

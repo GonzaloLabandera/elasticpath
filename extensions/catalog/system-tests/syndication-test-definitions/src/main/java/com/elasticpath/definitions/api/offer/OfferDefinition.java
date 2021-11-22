@@ -33,9 +33,10 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import io.restassured.response.Response;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hamcrest.Matcher;
 
 import com.elasticpath.definitions.api.helpers.Constants;
@@ -64,7 +65,7 @@ import com.elasticpath.selenium.util.Utility;
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessiveParameterList"})
 public class OfferDefinition {
-	private static final Logger LOG = Logger.getLogger(OfferDefinition.class);
+	private static final Logger LOG = LogManager.getLogger(OfferDefinition.class);
 	private static final String NOT_SOLD_SEPARATELY = "NOT_SOLD_SEPARATELY";
 	private static final String MINIMUM_ORDER_QUANTITY = "MINIMUM_ORDER_QUANTITY";
 	private static final String OFFER_TYPE = "OFFER_TYPE";

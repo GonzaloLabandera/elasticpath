@@ -41,7 +41,7 @@ public class InventoryFacadeImplTest {
 		final Map<String, InventoryStrategy> strategies = Collections.singletonMap("nonMatchingId", context.mock(InventoryStrategy.class));
 		facade.setStrategies(strategies);
 
-		facade.init();
+		facade.getSelectedInventoryStrategy();
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class InventoryFacadeImplTest {
 		final Map<String, InventoryStrategy> strategies = Collections.singletonMap(INVENTORY_STRATEGY_ID, inventoryStrategy);
 		facade.setStrategies(strategies);
 
-		facade.init();
+		facade.getSelectedInventoryStrategy();
 
 		assertEquals("Unexpected InventoryStrategy selected", inventoryStrategy, facade.getSelectedInventoryStrategy());
 	}

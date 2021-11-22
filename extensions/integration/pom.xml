@@ -11,6 +11,10 @@
 	<artifactId>ext-integration-parent</artifactId>
 	<packaging>pom</packaging>
 
+	<properties>
+		<war-plugin-directory>${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/plugins</war-plugin-directory>
+	</properties>
+
 	<name>Extension Integration Server Parent</name>
 
 	<modules>

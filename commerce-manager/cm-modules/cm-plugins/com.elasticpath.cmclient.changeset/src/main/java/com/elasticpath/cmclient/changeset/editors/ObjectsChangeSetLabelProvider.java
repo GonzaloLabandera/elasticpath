@@ -7,7 +7,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -28,7 +29,7 @@ import com.elasticpath.service.cmuser.CmUserService;
  * A label provider for the change set members table.
  */
 public class ObjectsChangeSetLabelProvider extends LabelProvider implements ITableLabelProvider {
-	private static final Logger LOG = Logger.getLogger(ObjectsChangeSetLabelProvider.class);
+	private static final Logger LOG = LogManager.getLogger(ObjectsChangeSetLabelProvider.class);
 	
 	private static final int OBJECT_SELECTED_CHECKBOX_COLUMN = 0;
 	private static final int ACTION_TYPE_COLUMN = 1;

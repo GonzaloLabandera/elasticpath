@@ -3,7 +3,8 @@
  */
 package com.elasticpath.service.contentspace;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A factory to create a new instance of the renderer
@@ -11,7 +12,7 @@ import org.apache.log4j.Logger;
  */
 public class RendererFactory {
 
-	private static final Logger LOG = Logger.getLogger(RendererFactory.class);
+	private static final Logger LOG = LogManager.getLogger(RendererFactory.class);
 
 	private static RendererFactory renderFactory;
 	private Class<? extends Renderer> rendererClass;

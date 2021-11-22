@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.store.targetedselling.delivery.wizard.tableview
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -44,7 +45,7 @@ public class DynamicContentTableViwer {
 	
 	private static final int ICON_COLUMN_INDEX = 0;
 	
-	private static final Logger LOG = Logger
+	private static final Logger LOG = LogManager
 			.getLogger(DynamicContentTableViwer.class);
 	
 	private TableItem currentSelectedRow;

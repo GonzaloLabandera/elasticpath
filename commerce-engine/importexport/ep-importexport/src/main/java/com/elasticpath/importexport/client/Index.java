@@ -6,8 +6,6 @@ package com.elasticpath.importexport.client;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Locale;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,12 +14,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.or.ObjectRenderer;
-import org.apache.log4j.spi.LoggerRepository;
-import org.apache.log4j.spi.RendererSupport;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.importexport.common.ImportExportContextIdNames;
@@ -29,7 +24,6 @@ import com.elasticpath.importexport.common.exception.ConfigurationException;
 import com.elasticpath.importexport.common.exception.runtime.ImportRuntimeException;
 import com.elasticpath.importexport.common.summary.Summary;
 import com.elasticpath.importexport.common.summary.impl.SimpleSummaryLayout;
-import com.elasticpath.importexport.common.util.Message;
 import com.elasticpath.importexport.common.util.MessageResolver;
 import com.elasticpath.importexport.common.util.MetaDataMapPopulator;
 import com.elasticpath.importexport.exporter.controller.ExportController;
@@ -44,7 +38,7 @@ public class Index {
 	private static final String HELP_STRING = "-i [-c importconfiguration.xml] [-g changeSetGuid] [-s stage1|stage2]\n"
 			+ "-e searchconfiguration.xml [-c exportconfiguration.xml] [-l locale] [-p importexporttool.config]";
 
-	private static final Logger LOG = Logger.getLogger(Index.class);
+	private static final Logger LOG = LogManager.getLogger(Index.class);
 
 	private final EngineInitialization engine;
 
@@ -76,7 +70,7 @@ public class Index {
 	public Index() {
 		engine = EngineInitialization.getInstance();
 		messageResolver = engine.getBeanFactory().getSingletonBean("messageResolver", MessageResolver.class);
-		configureLogRendering();
+
 		LOG.info("Engine Initialization...");
 	}
 
@@ -281,28 +275,4 @@ public class Index {
 		return index;
 	}
 
-	private void configureLogRendering() {
-		LoggerRepository loggerRepository = LogManager.getLoggerRepository();
-		if (loggerRepository instanceof RendererSupport) {
-			((RendererSupport) loggerRepository).setRenderer(Message.class, new ObjectRenderer() {
-
-				@Override
-				public String doRender(final Object message) {
-					Message theMessage = (Message) message;
-					return messageResolver.resolve(theMessage) + getExceptionInfo(theMessage.getException());
-				}
-
-				private String getExceptionInfo(final Throwable exception) {
-					if (exception == null) {
-						return "";
-					}
-					StringWriter stringWriter = new StringWriter();
-					stringWriter.write(". Associated exception: ");
-					exception.printStackTrace(new PrintWriter(stringWriter));
-					return stringWriter.toString();
-				}
-
-			});
-		}
-	}
 }

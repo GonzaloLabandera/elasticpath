@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import com.elasticpath.base.GloballyIdentifiable;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shopper.ShopperReference;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.store.Store;
@@ -35,7 +34,7 @@ import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
 import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
@@ -55,7 +54,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	private static final Logger LOG = LoggerFactory.getLogger(WishlistRepositoryImpl.class);
 
 	private final WishListService wishListService;
-	private final CustomerSessionRepository customerSessionRepository;
+	private final ShopperRepository shopperRepository;
 	private final ItemRepository itemRepository;
 	private final ProductSkuRepository productSkuRepository;
 	private final StoreRepository storeRepository;
@@ -66,7 +65,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	 * Constructor.
 	 *
 	 * @param wishListService           the wishlistService
-	 * @param customerSessionRepository the customer session repo
+	 * @param shopperRepository         the shopper repo
 	 * @param itemRepository            the item repo
 	 * @param productSkuRepository      the product sku repo
 	 * @param storeRepository           the store repo
@@ -74,17 +73,16 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	 * @param reactiveAdapter           the reactive adapter
 	 */
 	@Inject
-	WishlistRepositoryImpl(
+	public WishlistRepositoryImpl(
 			@Named("wishListService") final WishListService wishListService,
-			@Named("customerSessionRepository") final CustomerSessionRepository customerSessionRepository,
+			@Named("shopperRepository") final ShopperRepository shopperRepository,
 			@Named("itemRepository") final ItemRepository itemRepository,
 			@Named("productSkuRepository") final ProductSkuRepository productSkuRepository,
 			@Named("storeRepository") final StoreRepository storeRepository,
 			@Named("resourceOperationContext") final ResourceOperationContext resourceOperationContext,
 			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
-
 		this.wishListService = wishListService;
-		this.customerSessionRepository = customerSessionRepository;
+		this.shopperRepository = shopperRepository;
 		this.itemRepository = itemRepository;
 		this.storeRepository = storeRepository;
 		this.resourceOperationContext = resourceOperationContext;
@@ -96,8 +94,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	@CacheResult
 	public Observable<String> getWishlistIds(final String customerGuid, final String storeCode) {
 		LOG.trace("finding by customer");
-		return customerSessionRepository.findCustomerSessionByGuidAndStoreCodeAsSingle(customerGuid, storeCode)
-				.map(ShopperReference::getShopper)
+		return shopperRepository.findOrCreateShopper(customerGuid, storeCode)
 				.flatMapObservable(shopper -> getWishlistInternal(shopper)
 						.map(GloballyIdentifiable::getGuid)
 						.toObservable());
@@ -172,9 +169,9 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 
 	@Override
 	@CacheResult
-	public Maybe<WishList> findWishlistsContainingItem(final Map<String, String> itemIdMap) {
-		return customerSessionRepository.findOrCreateCustomerSession()
-				.flatMap(customerSession -> getWishlistInternal(customerSession.getShopper()))
+	public Maybe<WishList> findWishlistsContainingItem(final String storeCode, final Map<String, String> itemIdMap) {
+		return shopperRepository.findOrCreateShopper(resourceOperationContext.getUserIdentifier(), storeCode)
+				.flatMap(this::getWishlistInternal)
 				.flatMapMaybe(filterWishlist(itemIdMap))
 				.filter(Objects::nonNull);
 	}

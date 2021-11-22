@@ -282,11 +282,16 @@ public class PolicyAwareAttributesViewPart extends DefaultStatePolicyDelegateImp
 
 	@Override
 	public void widgetSelected(final SelectionEvent event) {
+		final IStructuredSelection selection = (IStructuredSelection) attributesTableViewer.getSwtTableViewer().getSelection();
+		// If nothing is selected then return.
+		if (selection == null || selection.isEmpty()) {
+			return;
+		}
+
 		if (event.getSource() == editButton) {
 			dialogService.createEditorDialog();
 		}
 		if (event.getSource() == resetButton) {
-			final IStructuredSelection selection = (IStructuredSelection) attributesTableViewer.getSwtTableViewer().getSelection();
 			final AttributeValue attr = (AttributeValue) selection.getFirstElement();
 			clearAttributeValue(attr);
 			attr.setValue(null);

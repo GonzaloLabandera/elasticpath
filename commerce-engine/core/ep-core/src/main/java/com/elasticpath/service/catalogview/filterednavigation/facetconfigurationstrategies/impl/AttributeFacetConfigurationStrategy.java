@@ -13,9 +13,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.search.RangeFacet;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -40,7 +41,7 @@ import com.elasticpath.service.catalogview.filterednavigation.facetconfiguration
  * Attribute facet configuration strategy.
  */
 public class AttributeFacetConfigurationStrategy implements FacetConfigurationStrategy {
-	private static final Logger LOG = Logger.getLogger(AttributeFacetConfigurationStrategy.class);
+	private static final Logger LOG = LogManager.getLogger(AttributeFacetConfigurationStrategy.class);
 	private static final String LOWER_BOUND_GREATER_THAN_UPPER_BOUND_ERROR =
 			"Range facet lower bound %f is higher than upper bound %f for Facet with uidpk %d%n";
 

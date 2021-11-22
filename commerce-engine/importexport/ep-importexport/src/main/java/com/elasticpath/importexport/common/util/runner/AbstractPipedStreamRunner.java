@@ -9,7 +9,8 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.exception.runtime.EngineRuntimeException;
 
@@ -18,7 +19,7 @@ import com.elasticpath.importexport.common.exception.runtime.EngineRuntimeExcept
  */
 public abstract class AbstractPipedStreamRunner implements Runnable, PipedStreamRunner {
 	
-	private static final Logger LOG = Logger.getLogger(AbstractPipedStreamRunner.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractPipedStreamRunner.class);
 	
 	/*
 	 * Output stream is used by some job processing chain link to fill data into.

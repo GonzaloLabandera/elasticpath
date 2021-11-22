@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.cmuser.CmUserDTO;
 import com.elasticpath.domain.catalog.Catalog;
@@ -30,7 +31,7 @@ import com.elasticpath.service.cmuser.CmUserService;
  */
 public class CmUserExporter extends AbstractExporterImpl<CmUser, CmUserDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(CmUserExporter.class);
+	private static final Logger LOG = LogManager.getLogger(CmUserExporter.class);
 
 	private CmUserService cmUserService;
 	

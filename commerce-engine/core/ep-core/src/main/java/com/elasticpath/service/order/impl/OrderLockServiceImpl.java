@@ -6,7 +6,8 @@ package com.elasticpath.service.order.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -26,7 +27,7 @@ import com.elasticpath.service.order.OrderService;
  */
 public class OrderLockServiceImpl extends AbstractEpPersistenceServiceImpl implements OrderLockService {
 
-	private static final Logger LOG = Logger.getLogger(OrderLockServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(OrderLockServiceImpl.class);
 	
 	private TimeService timeService;
 

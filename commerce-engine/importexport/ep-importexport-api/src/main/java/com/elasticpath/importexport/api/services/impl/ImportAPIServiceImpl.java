@@ -6,17 +6,16 @@ package com.elasticpath.importexport.api.services.impl;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.ThreadLocalMap;
 import com.elasticpath.importexport.api.services.ImportAPIService;
 import com.elasticpath.importexport.common.configuration.ConfigurationLoader;
 import com.elasticpath.importexport.common.exception.ConfigurationException;
-import com.elasticpath.importexport.common.logging.IESummaryAppender;
 import com.elasticpath.importexport.common.summary.Summary;
-import com.elasticpath.importexport.common.summary.SummaryLogger;
 import com.elasticpath.importexport.common.summary.impl.SummaryImpl;
+import com.elasticpath.importexport.common.util.LogAppenderUtil;
 import com.elasticpath.importexport.common.util.Message;
 import com.elasticpath.importexport.common.util.MetaDataMapPopulator;
 import com.elasticpath.importexport.importer.configuration.ImportConfiguration;
@@ -27,7 +26,7 @@ import com.elasticpath.importexport.importer.controller.ImportStage;
  * Service for consuming Import/Export imports as an InputStream.
  */
 public class ImportAPIServiceImpl implements ImportAPIService {
-	private static final Logger LOG = Logger.getLogger(ImportAPIServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ImportAPIServiceImpl.class);
 	private static final String IMPORT_CONFIGURATION_FILE = "importconfiguration.xml";
 
 	private ConfigurationLoader configurationLoader;
@@ -64,32 +63,11 @@ public class ImportAPIServiceImpl implements ImportAPIService {
 
 		LOG.debug(new Message("IE-30005", Boolean.toString(importConfiguration.isXmlValidation())));
 
-		Appender summaryAppender = attachSummary(context);
+		LogAppenderUtil.initializeSummary(context);
 
 		importStage.execute(inputStream, context);
 
-		return detachSummary(summaryAppender, context);
-	}
-
-	/**
-	 * Create summary object for this export process, associate it with IESummaryAppender to get control over logging. All import-related application
-	 * messages will be collected in summary.
-	 * @return IESummaryAppender to deassociate it from log4j later
-	 */
-	private IESummaryAppender attachSummary(final ImportContext importContext) {
-		IESummaryAppender summaryAppender = new IESummaryAppender();
-		SummaryLogger summary = new SummaryImpl();
-		summaryAppender.setSummaryLogger(summary);
-		Logger.getRootLogger().addAppender(summaryAppender);
-		importContext.setSummary(summary);
-		return summaryAppender;
-	}
-
-	private Summary detachSummary(final Appender summaryAppender, final ImportContext importContext) {
-		Summary summary = importContext.getSummary();
-		importContext.setSummary(null);
-		Logger.getRootLogger().removeAppender(summaryAppender);
-		return summary;
+		return LogAppenderUtil.detachSummary(context);
 	}
 
 	protected ConfigurationLoader getConfigurationLoader() {

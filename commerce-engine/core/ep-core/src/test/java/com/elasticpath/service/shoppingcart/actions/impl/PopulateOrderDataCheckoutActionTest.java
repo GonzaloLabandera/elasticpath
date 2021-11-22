@@ -4,178 +4,228 @@
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
-import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.impl.OrderImpl;
 import com.elasticpath.domain.order.impl.OrderReturnImpl;
-import com.elasticpath.domain.shopper.impl.ShopperImpl;
-import com.elasticpath.domain.shopper.impl.ShopperMementoImpl;
-import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.impl.CartItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContextImpl;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
+import com.elasticpath.xpf.connectivity.extensionpoint.OrderDataPopulator;
+import com.elasticpath.xpf.converters.ShoppingCartConverter;
 
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyFields"})
+@RunWith(MockitoJUnitRunner.class)
 public class PopulateOrderDataCheckoutActionTest {
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
-	private final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-	private final ShoppingCartPricingSnapshot pricingSnapshot = context.mock(ShoppingCartPricingSnapshot.class);
-	private final ShoppingCartTaxSnapshot taxSnapshot = context.mock(ShoppingCartTaxSnapshot.class);
-	private final ShopperImpl shopper = new ShopperImpl();
-	private final Customer customer = context.mock(Customer.class);
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private ShoppingCart shoppingCart;
+	@Mock
+	private XPFShoppingCart xpfShoppingCart;
+	@Mock
+	private ShoppingCartTaxSnapshot taxSnapshot;
+	@Mock
+	private OrderDataPopulator orderDataPopulator1;
+	@Mock
+	private OrderDataPopulator orderDataPopulator2;
+	@Mock
+	private XPFExtensionLookup xpfExtensionLookup;
+	@Mock
+	private ShoppingCartConverter xpfShoppingCartConverter;
+	@Mock
+	private CustomerSession customerSession;
+	@Mock
+	private Shopper shopper;
+
+
+	List<OrderDataPopulator> orderDataPopulators = new ArrayList<>();
+
+	private static final String STORE_CODE = "storecode";
+	private final ModifierFieldsMapWrapper modifierFieldsMapWrapper = new ModifierFieldsMapWrapper();
 	private final ProductSku sku = new ProductSkuImpl();
 	private final OrderReturnImpl exchange = new OrderReturnImpl();
 	private final CartItem item = new ShoppingItemImpl();
 	private final Order order = new OrderImpl();
-	private final PromotionRecordContainer promotionRecordContainer = context.mock(PromotionRecordContainer.class);
 
+	@InjectMocks
 	private PopulateOrderDataCheckoutAction checkoutAction;
+
 	private PreCaptureCheckoutActionContextImpl checkoutContext;
 
+	@Mock
+	private BeanFactory beanFactory;
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
+
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
+		elasticPath.setBeanFactory(beanFactory);
+
 		sku.initialize();
 		sku.setSkuCode("SKU");
 		item.setSkuGuid(sku.getGuid());
-		shopper.setShopperMemento(new ShopperMementoImpl());
-		shopper.setCustomer(customer);
-		shopper.setGuid(UUID.randomUUID().toString());
-		shopper.getCache().putItem("FOO", "BAR");
-
-		context.checking(new Expectations() {
-			{
-				allowing(shoppingCart).getShopper();
-				will(returnValue(shopper));
-
-				allowing(shoppingCart).getRootShoppingItems();
-				will(returnValue(Collections.singletonList(item)));
-
-				allowing(pricingSnapshot).getPromotionRecordContainer();
-				will(returnValue(promotionRecordContainer));
-
-				allowing(taxSnapshot).getShoppingCartPricingSnapshot();
-				will(returnValue(pricingSnapshot));
-			}
-		});
 
 		final boolean isOrderExchange = false;
 		final boolean awaitExchangeCompletion = false;
 		checkoutContext = new PreCaptureCheckoutActionContextImpl(shoppingCart,
-														taxSnapshot,
-														null, isOrderExchange, awaitExchangeCompletion, exchange, null);
+				taxSnapshot,
+				customerSession, isOrderExchange, awaitExchangeCompletion, exchange, null);
 		checkoutContext.setOrder(order);
 
-		checkoutAction = new PopulateOrderDataCheckoutAction();
-	}
+		orderDataPopulators.add(orderDataPopulator1);
+		orderDataPopulators.add(orderDataPopulator2);
 
-	@Test
-	public void verifyExecuteHappyPathWithSimpleIndexedAndMappedProperties() {
-		// Given
-		checkoutAction.setOrderDataProperties(createSampleOrderDataProperties());
+		when(shoppingCart.getRootShoppingItems()).thenReturn(Collections.singletonList(item));
+		when(shoppingCart.getModifierFields()).thenReturn(modifierFieldsMapWrapper);
+		when(shoppingCart.getShopper()).thenReturn(shopper);
+		when(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.thenAnswer(invocation -> new ModifierFieldsMapWrapper());
+		when(xpfExtensionLookup.getMultipleExtensions(eq(OrderDataPopulator.class),
+				any(), any())).thenReturn(orderDataPopulators);
+		when(shoppingCart.getStore().getCode()).thenReturn(STORE_CODE);
+		checkoutAction.setXpfShoppingCartConverter(xpfShoppingCartConverter);
+		when(xpfShoppingCartConverter.convert(shoppingCart)).thenReturn(xpfShoppingCart);
 
-		// When
-		checkoutAction.execute(checkoutContext);
-
-		// Then
-		Map<String, String> orderData = order.getFieldValues();
-		assertEquals("Indexed properties should be copied into OrderData", sku.getGuid(), orderData.get("skuGuid"));
-		assertEquals("Mapped properties should be copied into OrderData", "BAR", orderData.get("foo"));
-	}
-
-	@Test
-	public void verifyExecuteWithNullValuedProperty() {
-		// Given
-		checkoutAction.setOrderDataProperties(Collections.singletonMap("missing", "shoppingCart.shopper.cache.item(MISSING)"));
-
-		// When
-		checkoutAction.execute(checkoutContext);
-
-		// Then
-		Map<String, String> orderData = order.getFieldValues();
-		assertFalse("Field should not exist in map", orderData.containsKey("missing"));
-	}
-
-	@Test(expected = EpServiceException.class)
-	public void verifyExecutePukesIfUnknownPropertyIsSpecified() {
-		// Given
-		checkoutAction.setOrderDataProperties(Collections.singletonMap("unknown", "shoppingCart.idonthavethisproperty"));
-
-		// When
-		checkoutAction.execute(checkoutContext);
-
-		// Then - an exception should be thrown
-	}
-
-	@Test
-	public void verifyExecuteWithAMapImportsAllTheMapPropertiesIntoTheOrderData() {
-		// Given
-		final Map<String, Long> limitedUsagePromotionRuleCodes = new HashMap<>();
-		limitedUsagePromotionRuleCodes.put("foo", 1L);
-		limitedUsagePromotionRuleCodes.put("bar", 2L);
-
-		checkoutAction.setOrderDataProperties(
-				Collections.singletonMap("ruleCodes",
-						"shoppingCartTaxSnapshot.shoppingCartPricingSnapshot.promotionRecordContainer.limitedUsagePromotionRuleCodes"));
-
-		// Expectations
-		context.checking(new Expectations() {
-			{
-				allowing(promotionRecordContainer).getLimitedUsagePromotionRuleCodes();
-				will(returnValue(limitedUsagePromotionRuleCodes));
-			}
-		});
-
-		// When
-		checkoutAction.execute(checkoutContext);
-
-		// Then
-		Map<String, String> expected = new HashMap<>();
-		expected.put("ruleCodes.foo", "1");
-		expected.put("ruleCodes.bar", "2");
-		assertEquals("Should have copied the values from the limitedUsagePromotionRuleCodes map into the order data",
-				expected, order.getFieldValues());
 	}
 
 	@Test
 	public void testRollback() {
 		// Given
-		checkoutAction.setOrderDataProperties(createSampleOrderDataProperties());
+		final Map<String, String> orderPopulatorOrderData = new HashMap<>();
+		orderPopulatorOrderData.put("xpfProperty", "xpfData");
+		when(orderDataPopulator1.collectOrderData(any())).thenReturn(orderPopulatorOrderData);
 
 		// When
 		checkoutAction.execute(checkoutContext);
 		checkoutAction.rollback(checkoutContext);
 
 		// Then
-		Map<String, String> orderData = order.getFieldValues();
+		Map<String, String> orderData = order.getModifierFields().getMap();
 		assertEquals("Order Data should have been rolled back", Collections.emptyMap(), orderData);
 	}
 
-	private Map<String, String> createSampleOrderDataProperties() {
-		Map<String, String> orderDataProperties = new HashMap<>();
-		orderDataProperties.put("skuGuid", "shoppingCart.rootShoppingItems[0].skuGuid");      // Indexed Property
-		orderDataProperties.put("foo", "shoppingCart.shopper.cache.item(FOO)");           // Mapped Property
+	@Test
+	public void verifyExecuteWithOrderPopulatorPropertiesIntoTheOrderData() {
+		// Given
+		Map<String, String> expected = new HashMap<>();
+		expected.put("xpfProperty", "xpfData");
+		when(orderDataPopulator1.collectOrderData(any())).thenReturn(expected);
 
-		return orderDataProperties;
+		// When
+		checkoutAction.execute(checkoutContext);
+
+		// Then
+		assertEquals("Should have copied the values from the orderDataPopulator into the order data",
+				expected, order.getModifierFields().getMap());
+	}
+
+	@Test
+	public void verifyExecuteWithNoOrderDataPopulators() {
+		// Given
+		Map<String, String> expected = new HashMap<>();
+		List<OrderDataPopulator> emptyOrderDataPopulators = new ArrayList<>();
+		when(xpfExtensionLookup.getMultipleExtensions(eq(OrderDataPopulator.class),
+				any(), any())).thenReturn(emptyOrderDataPopulators);
+
+		// When
+		checkoutAction.execute(checkoutContext);
+
+		// Then
+		assertEquals("Order data should be empty",
+				expected, order.getModifierFields().getMap());
+	}
+
+	@Test
+	public void testExecuteWithMinInputs() {
+		// Given
+		Map<String, String> expected = new HashMap<>();
+		when(orderDataPopulator1.collectOrderData(any())).thenReturn(expected);
+
+		// When
+		checkoutAction.execute(checkoutContext);
+
+		// Then
+		assertEquals("Order data should be empty",
+				expected, order.getModifierFields().getMap());
+	}
+
+	@Test
+	public void verifyHigherPriorityPopulatorsShouldOverrideValuesSetByLowerPriorityPopulators() {
+		// Given
+		final Map<String, String> orderPopulatorOrderData1 = new HashMap<>();
+		orderPopulatorOrderData1.put("xpfProperty1", "expectedData");
+
+		when(orderDataPopulator1.collectOrderData(any())).thenReturn(orderPopulatorOrderData1);
+
+		final Map<String, String> orderPopulatorOrderData2 = new HashMap<>();
+		orderPopulatorOrderData2.put("xpfProperty1", "attemptedOverrrideValue");
+		orderPopulatorOrderData2.put("xpfProperty2", "expectedData");
+		orderPopulatorOrderData2.put("xpfProperty3", "expectedData");
+
+		when(orderDataPopulator2.collectOrderData(any())).thenReturn(orderPopulatorOrderData2);
+
+		// When
+		checkoutAction.execute(checkoutContext);
+
+		// Then
+		Map<String, String> expected = new HashMap<>();
+		expected.put("xpfProperty1", "expectedData");
+		expected.put("xpfProperty2", "expectedData");
+		expected.put("xpfProperty3", "expectedData");
+		assertEquals("OrderDataPopulator with higher priority should not be overwritten",
+				expected, order.getModifierFields().getMap());
+	}
+
+	@Test
+	public void verifyOtherPopulatorsContinueIfAnExceptionIsThrownByAnEarlierExtension() {
+		when(orderDataPopulator1.collectOrderData(any())).thenThrow(new RuntimeException());
+
+		final Map<String, String> orderPopulatorOrderData2 = new HashMap<>();
+		orderPopulatorOrderData2.put("xpfProperty1", "expectedData");
+		orderPopulatorOrderData2.put("xpfProperty2", "expectedData");
+		orderPopulatorOrderData2.put("xpfProperty3", "expectedData");
+
+		when(orderDataPopulator2.collectOrderData(any())).thenReturn(orderPopulatorOrderData2);
+
+		// When
+		checkoutAction.execute(checkoutContext);
+
+		// Then
+		Map<String, String> expected = new HashMap<>();
+		expected.put("xpfProperty1", "expectedData");
+		expected.put("xpfProperty2", "expectedData");
+		expected.put("xpfProperty3", "expectedData");
+		assertEquals("OrderDataPopulator with higher priority should not be overwritten",
+				expected, order.getModifierFields().getMap());
 	}
 
 }

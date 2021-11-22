@@ -8,8 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
@@ -27,7 +28,7 @@ import com.elasticpath.importexport.common.util.Message;
 public class CatalogAdapter extends AbstractDomainAdapterImpl<Catalog, CatalogDTO> {
 
 	private static final String UNSUPPORTED_LOCALE_MESSAGE = "IE-10011";
-	private static final Logger LOG = Logger.getLogger(CatalogAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(CatalogAdapter.class);
 
 	@Override
 	public void populateDTO(final Catalog catalog, final CatalogDTO catalogDTO) {

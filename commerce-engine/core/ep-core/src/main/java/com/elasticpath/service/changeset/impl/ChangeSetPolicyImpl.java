@@ -14,7 +14,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.domain.changeset.ChangeSetStateCode;
@@ -32,7 +33,7 @@ import com.elasticpath.service.objectgroup.dao.BusinessObjectGroupDao;
  */
 public class ChangeSetPolicyImpl implements ChangeSetPolicy {
 	
-	private static final Logger LOG = Logger.getLogger(ChangeSetPolicyImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetPolicyImpl.class);
 
 	private BusinessObjectResolver businessObjectResolver;
 	

@@ -18,7 +18,8 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.command.ActiveMQBytesMessage;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -30,7 +31,7 @@ import com.elasticpath.jms.test.support.JmsTestConsumer;
  */
 public class ActiveMqTestConsumer implements JmsTestConsumer {
 
-	private static final Logger LOGGER = Logger.getLogger(ActiveMqTestConsumer.class);
+	private static final Logger LOGGER = LogManager.getLogger(ActiveMqTestConsumer.class);
 
 	private static final String READ_TIMEOUT_PROPERTY = "jms.read.timeout";
 	private static final long LOOP_TIMEOUT = 100;
@@ -55,7 +56,7 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 		try {
 			initializeConnection(factory, channelType, channelName);
 		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
+			LOGGER.error(e.getMessage(), e);
 			closeConnection();
 		}
 	}
@@ -64,10 +65,12 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 	public void drain() {
 
 		List<Message> messages = getMessages(LOOP_TIMEOUT);
-		for (Message message : messages) {
-			LOGGER.debug("deleting message: " + message);
+		if (LOGGER.isTraceEnabled()) {
+			for (Message message : messages) {
+				LOGGER.trace("deleting message: " + message);
+			}
+			LOGGER.trace("done - deleting messages");
 		}
-		LOGGER.debug("done - deleting messages");
 	}
 
 	@Override
@@ -89,11 +92,14 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 
 				JSONObject jsonObject = (JSONObject) obj;
 				jsonObjectList.add(jsonObject);
-				LOGGER.debug("jsonObject: " + jsonObject);
+
+				if (LOGGER.isTraceEnabled()) {
+					LOGGER.trace("jsonObject: " + jsonObject);
+				}
 			}
 
 		} catch (Exception e) {
-			LOGGER.debug(e.getMessage());
+			LOGGER.error(e.getMessage(), e);
 		}
 		return jsonObjectList;
 	}
@@ -113,11 +119,13 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 			for (Message message : messages) {
 				TextMessage txtMessage = (TextMessage) message;
 				txtMessageList.add(txtMessage);
-				LOGGER.debug("txtMessage: " + txtMessage);
+				if (LOGGER.isTraceEnabled()) {
+					LOGGER.trace("txtMessage: " + txtMessage);
+				}
 			}
 
 		} catch (Exception e) {
-			LOGGER.debug(e.getMessage());
+			LOGGER.error(e.getMessage(), e);
 		}
 		return txtMessageList;
 	}
@@ -143,11 +151,13 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 				Object obj = parser.parse(msg);
 				JSONObject jsonObject = (JSONObject) obj;
 				jsonObjectList.add(jsonObject);
-				LOGGER.debug("jsonObject: " + jsonObject);
+				if (LOGGER.isTraceEnabled()) {
+					LOGGER.trace("jsonObject: " + jsonObject);
+				}
 			}
 
 		} catch (Exception e) {
-			LOGGER.debug(e.getMessage());
+			LOGGER.error(e.getMessage(), e);
 		}
 		return jsonObjectList;
 	}
@@ -162,7 +172,7 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 			}
 
 		} catch (JMSException e) {
-			LOGGER.debug(e.getMessage());
+			LOGGER.error(e.getMessage(), e);
 		}
 		return messages;
 	}
@@ -193,7 +203,9 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 	}
 
 	private void closeConnection() {
-		LOGGER.debug("Closing ActiveMQ consumer");
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("Closing ActiveMQ consumer");
+		}
 		try {
 			if (messageConsumer != null) {
 				messageConsumer.close();
@@ -206,7 +218,7 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 			}
 
 		} catch (Exception e) {
-			LOGGER.debug(e.getMessage());
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 

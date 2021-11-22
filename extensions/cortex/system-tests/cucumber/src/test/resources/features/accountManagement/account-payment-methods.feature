@@ -39,6 +39,7 @@ Feature: Payment methods on account
       | Reverse Unsupported Config              |
       | Single Reserve Per PI Happy Path Config |
       | Reserve Fails                           |
+      | Charge Fails                            |
 
   Scenario: BUYER_ADMIN can access Payment Method from Profile Payment Instrument
     Given I navigate links defaultprofile -> accounts

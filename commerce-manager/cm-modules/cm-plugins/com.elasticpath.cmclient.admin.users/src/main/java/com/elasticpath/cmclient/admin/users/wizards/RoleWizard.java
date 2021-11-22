@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin.users.wizards;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
 
 import com.elasticpath.cmclient.admin.users.AdminUsersImageRegistry;
@@ -18,7 +19,7 @@ import com.elasticpath.service.cmuser.UserRoleService;
  * The wizard for creating and editing CM Roles.
  */
 public class RoleWizard extends AbstractEpWizard<UserRole> {
-	private static final Logger LOG = Logger.getLogger(RoleWizard.class);
+	private static final Logger LOG = LogManager.getLogger(RoleWizard.class);
 
 	private final String title;
 

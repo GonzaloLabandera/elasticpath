@@ -10,11 +10,6 @@
             http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 	">
 
-	<!-- pulled from openjpa-osgi-wrapper.jar -
-	   MUST BE imported before ep-core/spring/service/service.xml in search-webapp and before first DB call is made,
-	   otherwise external ehcache.xml will never be properly loaded.
-	   OpenJpa framework tries to pull a query from cache and if cache is not initialized,  it will create one.-->
-	<import resource="classpath:spring/openjpa-osgi-wrapper/ehcache-jmx.xml" />
 	<!-- pulled from ep-core.jar -->
 	<import resource="classpath:spring/service/service.xml" />
 	<!-- pulled from search.jar -->
@@ -97,12 +92,6 @@
 		<property name="categoryIndexingPipeline" ref="categoryIndexingPipeline" />
 	</bean>
 
-	<bean id="customerIndexBuilder" parent="abstractIndexBuilder"
-		class="com.elasticpath.search.index.solr.builders.impl.CustomerIndexBuilder">
-		<property name="customerService" ref="customerService" />
-		<property name="customerIndexingPipeline" ref="customerIndexingPipeline" />
-	</bean>
-
 	<bean id="promotionIndexBuilder" parent="abstractIndexBuilder"
 		class="com.elasticpath.search.index.solr.builders.impl.PromotionIndexBuilder">
 		<property name="ruleService" ref="ruleService" />
@@ -127,9 +116,6 @@
 		</entry>
 		<entry key="category">
 			<ref bean="categoryIndexBuilder" />
-		</entry>
-		<entry key="customer">
-			<ref bean="customerIndexBuilder" />
 		</entry>
 		<entry key="promotion">
 			<ref bean="promotionIndexBuilder" />
@@ -204,6 +190,7 @@
 		<property name="indexBuildPolicyContextFactory" ref="indexBuildPolicyContextFactory" />
 		<property name="indexBuildStatusUpdater" ref="indexBuildStatusUpdater" />
 		<property name="searchIndexExistencePredicate" ref="searchIndexExistencePredicate" />
+		<property name="maxIndexBuildIteration" value="100"/>
 	</bean>
 
 	<bean id="indexBuildPolicy"
@@ -222,7 +209,6 @@
 	<util:map id="indexTypeSystemPropertyKeyMap" key-type="com.elasticpath.service.search.IndexType" value-type="java.lang.String">
 		<entry key="#{T(com.elasticpath.service.search.IndexType).CATEGORY}" value="#{T(com.elasticpath.service.search.solr.SolrIndexConstants).CATEGORY_INDEX_DIR_PROPERTY}"/>
 		<entry key="#{T(com.elasticpath.service.search.IndexType).CMUSER}" value="#{T(com.elasticpath.service.search.solr.SolrIndexConstants).CMUSER_INDEX_DIR_PROPERTY}"/>
-		<entry key="#{T(com.elasticpath.service.search.IndexType).CUSTOMER}" value="#{T(com.elasticpath.service.search.solr.SolrIndexConstants).CUSTOMER_INDEX_DIR_PROPERTY}"/>
 		<entry key="#{T(com.elasticpath.service.search.IndexType).PRODUCT}" value="#{T(com.elasticpath.service.search.solr.SolrIndexConstants).PRODUCT_INDEX_DIR_PROPERTY}"/>
 		<entry key="#{T(com.elasticpath.service.search.IndexType).PROMOTION}" value="#{T(com.elasticpath.service.search.solr.SolrIndexConstants).PROMOTION_INDEX_DIR_PROPERTY}"/>
 		<entry key="#{T(com.elasticpath.service.search.IndexType).SKU}" value="#{T(com.elasticpath.service.search.solr.SolrIndexConstants).SKU_INDEX_DIR_PROPERTY}"/>
@@ -238,7 +224,6 @@
 			<util:map key-type="com.elasticpath.service.search.IndexType" value-type="java.lang.String">
 				<entry key="#{T(com.elasticpath.service.search.IndexType).CATEGORY}" value="data/index-category"/>
 				<entry key="#{T(com.elasticpath.service.search.IndexType).CMUSER}" value="data/index-cmuser"/>
-				<entry key="#{T(com.elasticpath.service.search.IndexType).CUSTOMER}" value="data/index-customer"/>
 				<entry key="#{T(com.elasticpath.service.search.IndexType).PRODUCT}" value="data/index-product"/>
 				<entry key="#{T(com.elasticpath.service.search.IndexType).PROMOTION}" value="data/index-promotion"/>
 				<entry key="#{T(com.elasticpath.service.search.IndexType).SKU}" value="data/index-sku"/>

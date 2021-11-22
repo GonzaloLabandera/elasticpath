@@ -13,7 +13,8 @@ import java.util.Map;
 
 import javax.persistence.OptimisticLockException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -54,7 +55,7 @@ public abstract class AbstractCmClientFormEditor extends FormEditor implements I
 
 	private DataBindingContext bindingContext;
 
-	private static final Logger LOG = Logger.getLogger(AbstractCmClientFormEditor.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractCmClientFormEditor.class);
 
 	private final List<String> formPageIdList = new ArrayList<String>();
 	private final Map<String, Object> customData = new HashMap<>();

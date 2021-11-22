@@ -21,7 +21,8 @@ import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.DataFormat;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 @SuppressWarnings("PMD.TooManyStaticImports")
 public class ChangeSetManagementServiceImplTest extends BasicSpringContextTest {
 
-	private static final Logger LOG = Logger.getLogger(ChangeSetManagementServiceImplTest.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetManagementServiceImplTest.class);
 
 	private static final int TEST_CHANGE_SET_NUMBER = 3;
 

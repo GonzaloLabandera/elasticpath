@@ -4,6 +4,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer;
 
 import com.elasticpath.domain.customer.Customer;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.command.ExecutionResult;
 
 /**
@@ -15,23 +16,23 @@ public interface CustomerIdentifierStrategy {
 	 * Checks if a customer exists for the given parameters.
 	 *
 	 * @param userId userId of the customer
-	 * @param storeCode store code
+	 * @param customerType customer type
 	 * @param customerIdentifierKey customer attribute key by which the customer existence is to be determined
 	 *
 	 * @return true if customer exists for the given parameters.
 	 */
-	ExecutionResult<Boolean> isCustomerExists(String userId, String storeCode, String customerIdentifierKey);
+	ExecutionResult<Boolean> isCustomerExists(String userId, CustomerType customerType, String customerIdentifierKey);
 
 	/**
 	 * Derives the customer's guid as per given parameters.
 	 *
 	 * @param userId userId of the customer
-	 * @param storeCode store code
+	 * @param customerType customer type
 	 * @param customerIdentifierKey customer attribute key by which the customer existence is to be determined
 	 *
 	 * @return customer's guid derived as per given parameters.
 	 */
-	ExecutionResult<String> deriveCustomerGuid(String userId, String storeCode, String customerIdentifierKey);
+	ExecutionResult<String> deriveCustomerGuid(String userId, CustomerType customerType, String customerIdentifierKey);
 
 	/**
 	 * Returns the customer identifier key field obtained from settings.

@@ -5,7 +5,8 @@ package com.elasticpath.commons.util.impl;
 
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.util.CacheInvalidationStrategy;
 import com.elasticpath.commons.util.InvalidatableCache;
@@ -17,7 +18,7 @@ import com.elasticpath.commons.util.InvalidatableCache;
 public class TriggeredCacheInvalidationStrategyImpl implements CacheInvalidationStrategy {
 
 	private Set<InvalidatableCache> caches;
-	private static final Logger LOG = Logger.getLogger(TriggeredCacheInvalidationStrategyImpl.class);
+	private static final Logger LOG = LogManager.getLogger(TriggeredCacheInvalidationStrategyImpl.class);
 
 	@Override
 	public void invalidateCaches() {

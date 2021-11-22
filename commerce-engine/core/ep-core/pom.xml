@@ -73,6 +73,11 @@
 
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-xpf</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-test-support</artifactId>
 		</dependency>
 
@@ -310,10 +315,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
@@ -333,9 +334,15 @@
 		</dependency>
 
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>stax</groupId>
 			<artifactId>stax</artifactId>
@@ -479,8 +486,8 @@
 
 		<!-- solrj uses slf4j, these help communicate with log4j -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -552,6 +559,18 @@
 			<artifactId>slf4j-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.antkorwin</groupId>
+			<artifactId>xsync</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -571,11 +590,16 @@
 			<plugin>
 				<groupId>org.apache.openjpa</groupId>
 				<artifactId>openjpa-maven-plugin</artifactId>
+				<configuration>
+					<includes>
+						com/elasticpath/**/domain/**/*.class
+					</includes>
+				</configuration>
 				<dependencies>
 					<dependency>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-log4j12</artifactId>
-						<version>${slf4j.version}</version>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-slf4j-impl</artifactId>
+						<version>${log4j.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -681,6 +705,8 @@
 							com.elasticpath.commons.beanframework.spring,
 							!*
 						</Import-Package>
+						<Include-Resource>{maven-resources}, META-INF/extensions.idx=target/classes/META-INF/extensions.idx,
+							target/classes/plugin.properties</Include-Resource>
 						<Implementation-Build>${buildNumber}</Implementation-Build>
 						<Implementation-Version>${project.version} (r ${buildNumber} )</Implementation-Version>
 						<Bundle-Activator>com.elasticpath.commons.handlers.osgi.Activator</Bundle-Activator>

@@ -138,7 +138,7 @@ public class AccountSearchCriteria extends AbstractSearchCriteriaImpl {
 	 */
 	@Override
 	public IndexType getIndexType() {
-		return IndexType.CUSTOMER;
+		return null;
 	}
 
 

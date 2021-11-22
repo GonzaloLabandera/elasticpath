@@ -3,7 +3,7 @@
  */
 package com.elasticpath.domain.builder.customer;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -107,20 +107,20 @@ public class CustomerAddressBuilder implements DomainObjectBuilder<CustomerAddre
     @Override
     public CustomerAddress build() {
     	CustomerAddress customerAddress = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddress.class);
-		customerAddress.setGuid((String) ObjectUtils.defaultIfNull(guid, "testGuid"));
-		customerAddress.setUidPk((Long) ObjectUtils.defaultIfNull(uidPk, 0L));
-		customerAddress.setFirstName((String) ObjectUtils.defaultIfNull(firstName, "James"));
-		customerAddress.setLastName((String) ObjectUtils.defaultIfNull(lastName, "Bond"));
-        customerAddress.setCity((String) ObjectUtils.defaultIfNull(city, "Vancouver"));
-        customerAddress.setCountry((String) ObjectUtils.defaultIfNull(country, "CA"));
-        customerAddress.setSubCountry((String) ObjectUtils.defaultIfNull(subCountry, "BC"));
-        customerAddress.setStreet1((String) ObjectUtils.defaultIfNull(street1, "1 Test Street"));
-        customerAddress.setStreet2((String) ObjectUtils.defaultIfNull(street2, "Street2"));
-        customerAddress.setCommercialAddress((Boolean) ObjectUtils.defaultIfNull(commercialAddress, Boolean.FALSE));
-        customerAddress.setZipOrPostalCode((String) ObjectUtils.defaultIfNull(zipOrPostalCode, "V1V 0C0"));
-        customerAddress.setOrganization((String) ObjectUtils.defaultIfNull(organization, "Organization"));
-        customerAddress.setPhoneNumber((String) ObjectUtils.defaultIfNull(phoneNumber, "6045555555"));
-        customerAddress.setFaxNumber((String) ObjectUtils.defaultIfNull(faxNumber, "6045555555"));
+		customerAddress.setGuid(ObjectUtils.defaultIfNull(guid, "testGuid"));
+		customerAddress.setUidPk(ObjectUtils.defaultIfNull(uidPk, 0L));
+		customerAddress.setFirstName(ObjectUtils.defaultIfNull(firstName, "James"));
+		customerAddress.setLastName(ObjectUtils.defaultIfNull(lastName, "Bond"));
+        customerAddress.setCity(ObjectUtils.defaultIfNull(city, "Vancouver"));
+        customerAddress.setCountry(ObjectUtils.defaultIfNull(country, "CA"));
+        customerAddress.setSubCountry(ObjectUtils.defaultIfNull(subCountry, "BC"));
+        customerAddress.setStreet1(ObjectUtils.defaultIfNull(street1, "1 Test Street"));
+        customerAddress.setStreet2(ObjectUtils.defaultIfNull(street2, "Street2"));
+        customerAddress.setCommercialAddress(ObjectUtils.defaultIfNull(commercialAddress, Boolean.FALSE));
+        customerAddress.setZipOrPostalCode(ObjectUtils.defaultIfNull(zipOrPostalCode, "V1V 0C0"));
+        customerAddress.setOrganization(ObjectUtils.defaultIfNull(organization, "Organization"));
+        customerAddress.setPhoneNumber(ObjectUtils.defaultIfNull(phoneNumber, "6045555555"));
+        customerAddress.setFaxNumber(ObjectUtils.defaultIfNull(faxNumber, "6045555555"));
 
         return customerAddress;
     }

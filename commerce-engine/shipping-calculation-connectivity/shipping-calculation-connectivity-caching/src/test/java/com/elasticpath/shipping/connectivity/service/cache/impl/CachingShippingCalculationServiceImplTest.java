@@ -30,8 +30,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
 
+import com.elasticpath.base.cache.CacheResult;
 import com.elasticpath.cache.Cache;
-import com.elasticpath.cache.CacheResult;
 import com.elasticpath.cache.impl.AbstractCacheAdapter;
 import com.elasticpath.money.Money;
 import com.elasticpath.shipping.connectivity.dto.PricedShippableItem;
@@ -438,8 +438,9 @@ public class CachingShippingCalculationServiceImplTest {
 		}
 
 		@Override
-		public void put(final ShippingCalculationResultCacheKey key, final ShippingCalculationResult value) {
+		public ShippingCalculationResult put(final ShippingCalculationResultCacheKey key, final ShippingCalculationResult value) {
 			cacheMap.put(key, value);
+			return value;
 		}
 
 		@Override

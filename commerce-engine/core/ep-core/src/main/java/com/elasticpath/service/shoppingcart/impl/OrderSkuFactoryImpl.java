@@ -94,7 +94,7 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 		}
 
 		orderSku.setOrdering(ordering);
-		orderSku.mergeFieldValues(itemFields);
+		orderSku.getModifierFields().putAll(itemFields);
 
 		return orderSku;
 	}
@@ -233,10 +233,7 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 	 * @param orderSku the order sku into which the data should be copied
 	 */
 	protected void copyData(final ShoppingItem cartItem, final OrderSku orderSku) {
-		Map<String, String> itemData = cartItem.getFields();
-		for (final Entry<String, String> entry : itemData.entrySet()) {
-			orderSku.setFieldValue(entry.getKey(), entry.getValue());
-		}
+		orderSku.getModifierFields().putAll(cartItem.getModifierFields().getMap());
 	}
 
 	/**

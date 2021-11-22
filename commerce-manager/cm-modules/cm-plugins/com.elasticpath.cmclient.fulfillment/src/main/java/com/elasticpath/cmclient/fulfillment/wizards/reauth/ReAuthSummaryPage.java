@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.fulfillment.wizards.reauth;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.viewers.ArrayContentProvider;

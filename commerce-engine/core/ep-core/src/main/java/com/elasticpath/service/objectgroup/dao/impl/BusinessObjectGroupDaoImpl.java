@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.pagination.DirectedSortingField;
@@ -214,11 +214,11 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 	}
 
 	@Override
-	public BusinessObjectGroupMember findGroupMemberByObjectDescriptor(final BusinessObjectDescriptor objectDescriptor) {
-		List<BusinessObjectGroupMember> result = persistenceEngine.retrieveByNamedQuery("FIND_OBJECT_MEMBER_BY_OBJ_TYPE_AND_ID",
+	public BusinessObjectGroupMember findGroupMemberByGroupIdObjectDescriptor(final String groupId,
+                                                                              final BusinessObjectDescriptor objectDescriptor) {
+		List<BusinessObjectGroupMember> result = persistenceEngine.retrieveByNamedQuery("FIND_OBJECT_MEMBER_BY_GROUPID_OBJ_TYPE_AND_ID",
 				FlushMode.AUTO, true,
-				new Object[] {objectDescriptor.getObjectType(),
-				objectDescriptor.getObjectIdentifier()});
+				new Object[] {groupId, objectDescriptor.getObjectType(), objectDescriptor.getObjectIdentifier()});
 		if (CollectionUtils.isNotEmpty(result)) {
 			return result.get(0);
 		}

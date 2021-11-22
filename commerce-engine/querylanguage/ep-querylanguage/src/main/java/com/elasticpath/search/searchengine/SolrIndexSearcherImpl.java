@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
@@ -34,7 +35,7 @@ import com.elasticpath.service.search.solr.SolrProvider;
  */
 public class SolrIndexSearcherImpl implements IndexSearcher {
 
-	private static final Logger LOG = Logger.getLogger(SolrIndexSearcherImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SolrIndexSearcherImpl.class);
 
 	private static final String STANDARD_REQUEST_HANDLER = "standard";
 

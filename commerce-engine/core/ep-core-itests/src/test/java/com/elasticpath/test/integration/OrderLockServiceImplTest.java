@@ -13,7 +13,8 @@ import java.util.Date;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +39,7 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class OrderLockServiceImplTest extends BasicSpringContextTest {
 
-	private static final Logger LOG = Logger.getLogger(OrderLockServiceImplTest.class);
+	private static final Logger LOG = LogManager.getLogger(OrderLockServiceImplTest.class);
 
 	@Autowired
 	private OrderLockService orderLockService;
@@ -79,14 +80,16 @@ public class OrderLockServiceImplTest extends BasicSpringContextTest {
 				.build();
 		customerService.add(testCustomer);
 
-		final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(testCustomer)
+		final ShoppingContext shoppingContext = shoppingContextBuilder
+				.withCustomer(testCustomer)
+				.withStoreCode(scenario.getStore().getCode())
 				.build();
 
 		shoppingContextPersister.persist(shoppingContext);
 		
 		checkoutTestCartBuilder
 				.withScenario(scenario)
-				.withCustomerSession(shoppingContext.getCustomerSession());
+				.withShopper(shoppingContext.getShopper());
 
 		orderBuilder
 				.withCheckoutTestCartBuilder(checkoutTestCartBuilder)

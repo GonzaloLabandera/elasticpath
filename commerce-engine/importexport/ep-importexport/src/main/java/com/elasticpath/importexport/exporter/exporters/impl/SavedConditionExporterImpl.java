@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
 import com.elasticpath.importexport.common.dto.tag.ConditionalExpressionDTO;
@@ -25,7 +26,7 @@ import com.elasticpath.tags.service.TagConditionService;
  */
 public class SavedConditionExporterImpl extends AbstractExporterImpl<ConditionalExpression, ConditionalExpressionDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(SavedConditionExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SavedConditionExporterImpl.class);
 
 	private ImportExportSearcher importExportSearcher;
 	private TagConditionService tagConditionService;

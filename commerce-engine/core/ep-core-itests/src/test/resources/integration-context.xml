@@ -42,7 +42,6 @@
 		<property name="indexTypesMap">
 			<map>
 				<entry key="product" value="product" />
-				<entry key="customer" value="customer" />
 				<entry key="category" value="category" />
 				<!-- We don't like order indexes in the tests... not sure why. -->
 <!-- 				<entry key="order" value="order" /> -->
@@ -72,6 +71,17 @@
 				<property name="inventoryJournalDao" ref="inventoryJournalDao" />
 				<property name="inventoryJournalLockDao" ref="inventoryJournalLockDao" />
 				<property name="beanFactory" ref="coreBeanFactory"/>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- Replace parent with "txProxyTemplateWithoutDeadlockRetry" to see DeadlockTest fail -->
+	<bean id="deadlockService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.test.integration.deadlock.DeadlockService">
+				<property name="customerService" ref="customerService"/>
+				<property name="shopperService" ref="shopperService"/>
+				<property name="persistenceEngine" ref="persistenceEngine"/>
 			</bean>
 		</property>
 	</bean>

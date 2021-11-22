@@ -8,7 +8,8 @@ import javax.sql.DataSource;
 
 import liquibase.exception.LiquibaseException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.datapopulation.core.exceptions.LiquibaseActionException;
 import com.elasticpath.datapopulation.core.service.liquibase.DpServiceSpringLiquibase;
@@ -19,7 +20,7 @@ import com.elasticpath.datapopulation.core.utils.DpUtils;
  * Service to execute a Liquibase change log against the configured database.
  */
 public class LiquibaseService {
-	private static final Logger LOG = Logger.getLogger(LiquibaseService.class);
+	private static final Logger LOG = LogManager.getLogger(LiquibaseService.class);
 
 	private DpServiceSpringLiquibase standardSpringLiquibaseConfiguration;
 

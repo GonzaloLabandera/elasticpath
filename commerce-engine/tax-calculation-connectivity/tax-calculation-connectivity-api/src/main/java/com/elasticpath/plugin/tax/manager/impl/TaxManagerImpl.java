@@ -4,7 +4,7 @@
 package com.elasticpath.plugin.tax.manager.impl;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.plugin.tax.TaxProviderPluginInvoker;
 import com.elasticpath.plugin.tax.capability.StorageCapability;

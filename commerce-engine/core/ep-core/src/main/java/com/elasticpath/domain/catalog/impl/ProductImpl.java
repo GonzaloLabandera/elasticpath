@@ -43,8 +43,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.ElementDependent;
 import org.apache.openjpa.persistence.ElementType;
 import org.apache.openjpa.persistence.FetchAttribute;
@@ -115,7 +116,7 @@ public class ProductImpl extends AbstractLegacyEntityImpl implements Product, Pr
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
 
-	private static final Logger LOG = Logger.getLogger(ProductImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ProductImpl.class);
 
 	/** The name of the table & generator to use for persistence. */
 	public static final String TABLE_NAME = "TPRODUCT";

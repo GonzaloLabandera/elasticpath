@@ -16,7 +16,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tools.sync.exception.SyncToolRuntimeException;
 import com.elasticpath.tools.sync.merge.MergeFilter;
@@ -28,7 +29,7 @@ import com.elasticpath.tools.sync.utils.SyncUtils;
  */
 public class JPAPersistentStateLocatorImpl implements PersistentStateLocator {
 
-	private static final Logger LOG = Logger.getLogger(JPAPersistentStateLocatorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(JPAPersistentStateLocatorImpl.class);
 
 	private SyncUtils syncUtils;
 	

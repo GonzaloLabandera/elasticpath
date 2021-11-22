@@ -38,16 +38,3 @@ Feature: Import store
     And database should not contain any stores wired with payment provider configuration with guid 23457
     And database should contain payment provider configuration with guid 23456 and status ACTIVE
     And database should contain payment provider configuration with guid 23457 and status DRAFT
-
-  Scenario: Import Reserved Modifier Field for Cart Type
-    Given the modifier groups import data has been emptied out
-    And the stores import data has been emptied out
-    And the following modifier groups are imported using importexport
-      | code      | displayName | fieldCode | fieldType | maxSize | required | fieldDisplayName |
-      | multicart | multicart   | user-id   | ShortText | 25      | false    | user-id          |
-    And the stores to import of
-      | code  | globalization                    | url                                      | name  | state | type | catalog | display_out_of_stock | email_sender_name               | email_sender_address            | store_admin_email          | credit_card_cvv2_enabled | store_full_credit_cards | locales     | currencies | tax_codes   | credit_card_types     | payment_provider_configurations | cart_type_name | cart_type_guid | cart_type_modifier_group | authenticated role  | unauthenticated role |
-      | MOBEE | CAD;en;UTF-8;BC;CA;Europe/London | https://mobee.elasticpath.com/storefront | Mobee | 200   | B2B  | Mobile  | true                 | CustomerService@elasticpath.com | CustomerService@elasticpath.com | StoreAdmin@elasticpath.com | true                     | false                   | fr;fr_ca;en | CAD;EUR    | 502;501;500 | American Express;Visa | 23456                           | SHOPPING_CART  | carttypeguid   | multicart                | BUYER               | SINGLE_SESSION_BUYER |
-    When importing stores with the importexport tool
-    Then the follow failures are in stores importing summary
-    | Error creating CART_TYPE carttypeguid for Store MOBEE: the modifier group field "user-id" is a reserved field and can not be used on cart type configurations.  Please choose a different key and re-import. |

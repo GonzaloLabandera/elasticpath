@@ -16,7 +16,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
@@ -47,7 +48,7 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 @SuppressWarnings("PMD.GodClass")
 public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscountItemContainer {
 
-	private static final Logger LOG = Logger.getLogger(ShoppingCartDiscountItemContainerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ShoppingCartDiscountItemContainerImpl.class);
 
 	private Currency currency;
 	private ShoppingCart cart;

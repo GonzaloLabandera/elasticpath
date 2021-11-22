@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.dynamiccontent.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
@@ -26,7 +27,7 @@ import com.elasticpath.service.targetedselling.DynamicContentDeliveryService;
 public class DeleteDynamicContentAction extends AbstractBaseDynamicContentAction {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(DeleteDynamicContentAction.class);
+	private static final Logger LOG = LogManager.getLogger(DeleteDynamicContentAction.class);
 
 	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	private final DynamicContentService dynamicContentService = BeanLocator

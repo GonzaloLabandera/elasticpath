@@ -6,7 +6,8 @@ package com.elasticpath.persistence.impl;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.persistence.SkuConfigurationDao;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -16,7 +17,7 @@ import com.elasticpath.persistence.api.PersistenceEngine;
  */
 public class SkuConfigurationDaoImpl implements SkuConfigurationDao {
 
-	private static final Logger LOG = Logger.getLogger(SkuConfigurationDaoImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SkuConfigurationDaoImpl.class);
 
 	private PersistenceEngine persistenceEngine;
 

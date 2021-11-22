@@ -28,9 +28,9 @@ import com.elasticpath.service.datapolicy.impl.DataPointValue;
  * Common test class for all data point value readers.
  */
 public abstract class AbstractDataPointValueReaderTest {
-	private static final Long UIDPK = 1L;
-	private static final Date CREATED_DATE = new Date();
-	private static final Date LAST_MODIFIED_DATE = new Date();
+	protected static final Long UIDPK = 1L;
+	protected static final Date CREATED_DATE = new Date();
+	protected static final Date LAST_MODIFIED_DATE = new Date();
 
 	protected static final String CUSTOMER_GUID = "guid";
 

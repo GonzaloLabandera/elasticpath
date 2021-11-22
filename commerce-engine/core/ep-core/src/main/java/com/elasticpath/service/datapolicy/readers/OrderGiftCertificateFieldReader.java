@@ -4,13 +4,17 @@
 
 package com.elasticpath.service.datapolicy.readers;
 
+import static com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.toJSON;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.elasticpath.commons.util.Pair;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
+import com.elasticpath.service.datapolicy.impl.DataPointValue;
 
 /**
  * A data point value reader for any order item gift certificate field.
@@ -29,13 +33,11 @@ public class OrderGiftCertificateFieldReader extends AbstractDataPointValueReade
 	@Override
 	public String getReadQuery(final Collection<String> dataPointKeys) {
 
-		String query = "SELECT oItemData.uidPk, oItemData.creationDate, oItemData.lastModifiedDate, oItemData.key, oItemData.value"
+		String query = "SELECT skus.uidPk, skus.createdDate, skus.lastModifiedDate, skus.modifierFields"
 			.concat(" FROM #TABLE#")
 			.concat(" JOIN #alias#.shipments shipments")
 			.concat(" JOIN shipments.shipmentOrderSkusInternal skus")
-			.concat(" JOIN skus.itemData oItemData")
-			.concat(" WHERE #alias#.customer.guid = ?1")
-			.concat(" AND oItemData.key IN (:#paramList#)");
+			.concat(" WHERE #alias#.customer.guid = ?1");
 
 		return finalizedJPQLQuerys(query);
 	}
@@ -46,7 +48,7 @@ public class OrderGiftCertificateFieldReader extends AbstractDataPointValueReade
 
 	@Override
 	protected String[] getJPQLSearchList() {
-		return new String[]{"#TABLE#", "#alias#", "#paramList#"};
+		return new String[]{"#TABLE#", "#alias#"};
 	}
 
 	@Override
@@ -54,7 +56,7 @@ public class OrderGiftCertificateFieldReader extends AbstractDataPointValueReade
 		List<Pair<String, String>> entityClassAndAliasPairs = getEntityClassAndAliasPairs();
 		String entityAlias = entityClassAndAliasPairs.get(0).getSecond();
 
-		return new String[]{getCSVFromTables(entityClassAndAliasPairs), entityAlias, PARAMETER_LIST_NAME};
+		return new String[]{getCSVFromTables(entityClassAndAliasPairs), entityAlias};
 	}
 
 	@Override
@@ -74,5 +76,19 @@ public class OrderGiftCertificateFieldReader extends AbstractDataPointValueReade
 	@Override
 	public boolean validateKey(final String dataKey) {
 		return getDataPointValueService().validateKey(dataKey, getNamedValidationQuery());
+	}
+
+	@Override
+	protected void setValue(final DataPointValue dpv, final Object[] row, final int attributeValueIndex) {
+		ModifierFieldsMapWrapper modifierFields = (ModifierFieldsMapWrapper) row[attributeValueIndex];
+
+		if (modifierFields != null) {
+			dpv.setValue(modifierFields.get(dpv.getKey()));
+		}
+	}
+
+	@Override
+	protected String rawDataKeyToString(final Object rawDataKey) {
+		return toJSON((ModifierFieldsMapWrapper) rawDataKey);
 	}
 }

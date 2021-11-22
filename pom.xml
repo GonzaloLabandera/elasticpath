@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>120</version>
+		<version>124</version>
 		<relativePath/>
 	</parent>
 
@@ -21,21 +21,59 @@
 	<version>0.0.0-SNAPSHOT</version>
 
 	<properties>
-		<!-- Start of plugin properties (plugins cannot use the dependency management/properties of the BOM) -->
-		<org.apache.ant.version>1.7.1</org.apache.ant.version>
-		<org.apache.camel.version>2.23.4</org.apache.camel.version>
-		<hamcrest.version>1.3</hamcrest.version>
-
-		<api-platform.version>1.45.0.1eb89ea7a5</api-platform.version>
-
+		<!-- Elastic Path release version -->
+		<ep.release.version>8.3.0</ep.release.version>
+		<!-- Elastic Path dependency versions -->
+		<api-platform.version>1.46.0.2d06f00d07</api-platform.version>
 		<cmclient.version>0.0.0-SNAPSHOT</cmclient.version>
 		<cortex.ep.integration.version>0.0.0-SNAPSHOT</cortex.ep.integration.version>
-
+		<dce.version>0.0.0-SNAPSHOT</dce.version>
+		<ep.commerce.data.version>0.0.0-SNAPSHOT</ep.commerce.data.version>
+		<ep.data.population.version>0.0.0-SNAPSHOT</ep.data.population.version>
+		<!-- Third-party dependency versions (sorted alphabetically) -->
+		<com.h2database.version>1.4.200</com.h2database.version>
 		<commons.pool.version>1.6</commons.pool.version>
+		<cucable-plugin.version>1.8.0</cucable-plugin.version>
+		<cucumber-groovy.version>2.0.1</cucumber-groovy.version>
+		<felix.shell.remote.version>1.1.2</felix.shell.remote.version>
+		<felix.shell.version>1.4.3</felix.shell.version>
+		<groovy.eclipse.batch.version>2.4.21-01</groovy.eclipse.batch.version>
+		<groovy.eclipse.compiler.version>2.9.2-01</groovy.eclipse.compiler.version>
+		<hamcrest.version>1.3</hamcrest.version>
 		<hawtbuf.version>1.9</hawtbuf.version>
-		<!-- End of plugin properties -->
+		<io.cucumber.version>2.4.0</io.cucumber.version>
+		<jaxb.version>2.3.0</jaxb.version>
+		<log4j.version>2.13.3</log4j.version>
+		<org.apache.ant.version>1.7.1</org.apache.ant.version>
+		<org.apache.camel.version>2.23.4</org.apache.camel.version>
+		<org.apache.commons.pool2.version>2.4.2</org.apache.commons.pool2.version>
+		<org.apache.openjpa.version>2.4.0-ep2.4</org.apache.openjpa.version>
+		<org.liquibase.version>3.10.3</org.liquibase.version>
+		<slf4j.version>1.7.26</slf4j.version>
+		<tomcatLogging.version>9.0.0.M6</tomcatLogging.version>
 
-		<org.apache.activemq.version>5.16.0</org.apache.activemq.version>
+		<!-- Third-party plugin versions (sorted alphabetically) -->
+		<cargo.plugin.version>1.6.8</cargo.plugin.version>
+		<gmaven.plugin.version>1.5</gmaven.plugin.version>
+		<jacoco-plugin.version>0.7.5.201505241946</jacoco-plugin.version>
+		<keytool.maven.plugin.version>1.0</keytool.maven.plugin.version>
+		<lifecycle-mapping-plugin.version>1.0.0</lifecycle-mapping-plugin.version>
+		<maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
+		<maven-replacer-plugin.version>1.4.1</maven-replacer-plugin.version>
+		<maven-resources-plugin.version>2.6</maven-resources-plugin.version>
+		<maven-sling-plugin.version>2.1.0</maven-sling-plugin.version>
+		<!-- DONT upgrade to 2.8.2 which will fail deploy -->
+		<maven.deploy.plugin.version>2.8</maven.deploy.plugin.version>
+		<maven.invoker.plugin.version>3.2.1</maven.invoker.plugin.version>
+		<maven.release.plugin.version>2.4</maven.release.plugin.version>
+		<maven.shade.plugin.version>3.2.1</maven.shade.plugin.version>
+		<org.apache.activemq.version>5.16.1</org.apache.activemq.version>
+		<ph.javacc.maven.plugin.version>4.1.4</ph.javacc.maven.plugin.version>
+		<properties.plugin.version>1.0-alpha-2</properties.plugin.version>
+		<tomcat.maven.plugin.version>3.0.ep1.2</tomcat.maven.plugin.version>
+		<tycho.version>1.0.0</tycho.version>
+		<maven.plugin.plugin.version>3.5</maven.plugin.plugin.version>
+
 		<!-- Default webapp ports when deployed in a single Tomcat container -->
 		<!-- NOTE: Deprecated because webapps are more stable if deployed in separate Tomcat containers -->
 		<!--       Use port assignments from ep-developer profile instead for development -->
@@ -52,8 +90,6 @@
 		<ep.mock.tomcat.port.http>8080</ep.mock.tomcat.port.http>
 
 		<!--Jacoco-->
-		<jacoco-plugin.version>0.7.5.201505241946</jacoco-plugin.version>
-
 		<jacoco.instruction.covered-ratio>0</jacoco.instruction.covered-ratio>
 		<jacoco.branch.covered-ratio>0</jacoco.branch.covered-ratio>
 		<jacoco.line.covered-ratio>0</jacoco.line.covered-ratio>
@@ -64,18 +100,8 @@
 		<!-- Properties from commerce engine module which is shared with extensions -->
 		<java.version>1.8</java.version>
 
-		<!-- Versions of dependencies used throughout the product (sorted alphabetically) -->
-		<com.h2database.version>1.4.200</com.h2database.version>
-		<keytool.maven.plugin.version>1.0</keytool.maven.plugin.version>
-		<maven.release.plugin.version>2.4</maven.release.plugin.version>
-		<org.apache.openjpa.version>2.4.0-ep2.3</org.apache.openjpa.version>
-		<org.liquibase.version>3.4.2</org.liquibase.version>
-		<slf4j.version>1.7.25</slf4j.version>
-		<tomcat.maven.plugin.version>3.0.ep1.2</tomcat.maven.plugin.version>
-		<tomcatLogging.version>8.5.2</tomcatLogging.version>
-		<cargo.plugin.version>1.6.8</cargo.plugin.version>
-
-		<trinidad.plugin.version>20120309</trinidad.plugin.version>
+		<!-- Control whether Java compilation warnings are reported as errors. -->
+		<javac.werror>-Werror</javac.werror>
 
 		<!-- If you are going to overwrite some values with your .m2 settings file or change these values in the grandparent (or any other method you have for modifying these properties) you'll have to call mvn -f stores/snapitup-populate-database/pom.xml
 					process-resources -P update-settings because some settings like the port numbers are stored within your database and you'll have to update them for the changes to be picked up. -->
@@ -119,7 +145,7 @@
 		<ep.cortex.uri.prefix /> <!-- empty by default -->
 
 		<!-- Logging properties -->
-		<ep.log.to>CONSOLE, FILE</ep.log.to> <!-- log4j -->
+		<ep.log.to><![CDATA[<AppenderRef ref="CONSOLE" /><AppenderRef ref="FILE" />]]></ep.log.to> <!-- log4j2 -->
 		<ep.log.to.logback><![CDATA[<appender-ref ref="CONSOLE" /><appender-ref ref="FILE" />]]></ep.log.to.logback> <!-- logback -->
 		<ep.log.level>INFO</ep.log.level>
 		<!-- ep.log.dir is relative to where appserver is started -->
@@ -155,12 +181,6 @@
 		<!-- Required for newer versions of maven when OSGi is involved -->
 		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
 
-		<maven.shade.plugin.version>3.2.1</maven.shade.plugin.version>
-
-		<!-- Commerce Data and Data Population -->
-		<ep.data.population.version>0.0.0-SNAPSHOT</ep.data.population.version>
-		<ep.commerce.data.version>0.0.0-SNAPSHOT</ep.commerce.data.version>
-
 		<!-- Health Monitor Properties -->
 		<ep.health.monitoring.context>/healthcheck</ep.health.monitoring.context>
 		<m2eclipse.wtp.contextRoot>${ep.health.monitoring.context}</m2eclipse.wtp.contextRoot>
@@ -178,19 +198,7 @@
 		<checkstyle.itest.ruleset>rulesets/checkstyle-elasticpath-itest-rules.xml</checkstyle.itest.ruleset>
 		<pmd.ruleset>rulesets/pmd-elasticpath-rules.xml</pmd.ruleset>
 		<pmd.itest.ruleset>rulesets/pmd-elasticpath-itest-rules.xml</pmd.itest.ruleset>
-
-		<jaxb.version>2.3.0</jaxb.version>
-
-		<lifecycle-mapping-plugin.version>1.0.0</lifecycle-mapping-plugin.version>
-		<maven-replacer-plugin.version>1.4.1</maven-replacer-plugin.version>
-		<maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
-		<maven-resources-plugin.version>2.6</maven-resources-plugin.version>
-		<cucable-plugin.version>1.8.0</cucable-plugin.version>
-		<groovy.eclipse.compiler.version>2.9.2-04</groovy.eclipse.compiler.version>
-		<groovy.eclipse.batch.version>2.4.15-01</groovy.eclipse.batch.version>
-		<ph.javacc.maven.plugin.version>4.1.4</ph.javacc.maven.plugin.version>
-		<overriding-maven-invoker-plugin.version>3.2.1</overriding-maven-invoker-plugin.version>
-		<maven.invoker.plugin.version>${overriding-maven-invoker-plugin.version}</maven.invoker.plugin.version>
+		<banned.dependencies.enforcer.skip>true</banned.dependencies.enforcer.skip>
 	</properties>
 
 	<modules>
@@ -202,7 +210,8 @@
 		<module>extensions</module>
 		<module>health-monitoring</module>
 		<module>test-tools</module>
-    </modules>
+		<module>operational-insights</module>
+	</modules>
 
 	<dependencyManagement>
 		<dependencies>
@@ -228,6 +237,18 @@
 	</distributionManagement>
 
 	<profiles>
+		<profile>
+			<id>activeInIdea</id>
+			<activation>
+				<property>
+					<name>idea.maven.embedder.version</name>
+				</property>
+			</activation>
+			<properties>
+				<!-- Disable -Werror when using within intellij -->
+				<javac.werror></javac.werror>
+			</properties>
+		</profile>
 		<profile>
 			<id>ep-developer</id>
 			<properties>
@@ -331,11 +352,11 @@
 				  avoid build contamination. DO NOT USE this configuration in production. -->
 			<properties>
 				<!-- The expected mysql db driver version. -->
-				<epdb.maven.version.overriding.for.mysql>8.0.22</epdb.maven.version.overriding.for.mysql>
+				<epdb.maven.version.overriding.for.mysql>8.0.25</epdb.maven.version.overriding.for.mysql>
 				<!-- Overriding the db version property -->
 				<epdb.maven.version>${epdb.maven.version.overriding.for.mysql}</epdb.maven.version>
 
-				<epdb.synctarget.jdbc.driver>com.mysql.jdbc.Driver</epdb.synctarget.jdbc.driver>
+				<epdb.synctarget.jdbc.driver>com.mysql.cj.jdbc.Driver</epdb.synctarget.jdbc.driver>
 				<epdb.synctarget.host>127.0.0.1</epdb.synctarget.host>
 				<epdb.synctarget.port>3306</epdb.synctarget.port>
 				<epdb.synctarget.schemaname>COMMERCEDB_TARGET</epdb.synctarget.schemaname>
@@ -360,6 +381,15 @@
 				<epdb.maven.groupId>com.oracle.database.jdbc</epdb.maven.groupId>
 				<epdb.maven.artifactId>ojdbc8</epdb.maven.artifactId>
 				<epdb.maven.version>${epdb.maven.version.overriding.for.oracle}</epdb.maven.version>
+			</properties>
+		</profile>
+		<profile>
+			<id>enable-banned-dependencies-enforcer</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<banned.dependencies.enforcer.skip>false</banned.dependencies.enforcer.skip>
 			</properties>
 		</profile>
 	</profiles>
@@ -414,11 +444,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<configuration>
-						<source>1.8</source>
-						<target>1.8</target>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
 						<fork>true</fork>
 						<compilerArgs combine.self="override">
-							<arg>-Werror</arg>
+							<arg>${javac.werror}</arg>
 							<arg>-Xlint:all,-deprecation,-options,-path,-processing</arg>
 						</compilerArgs>
 						<showWarnings>true</showWarnings>
@@ -663,6 +693,44 @@
 					<groupId>org.codehaus.cargo</groupId>
 					<artifactId>cargo-maven2-plugin</artifactId>
 					<version>${cargo.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>enforce-banned-dependencies</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<bannedDependencies>
+										<excludes>
+											<exclude>log4j:log4j</exclude>
+										</excludes>
+										<searchTransitive>true</searchTransitive>
+									</bannedDependencies>
+								</rules>
+								<fail>true</fail>
+								<skip>${banned.dependencies.enforcer.skip}</skip>
+							</configuration>
+						</execution>
+						<execution>
+							<id>enforce-plugin-versions</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<requirePluginVersions>
+										<message>All plugins must be pinned to an explicit version</message>
+										<unCheckedPluginList>com.elasticpath.tools:ep-core-tool,org.eclipse.tycho:tycho-p2-plugin,org.eclipse.tycho:tycho-compiler-plugin,org.eclipse.tycho:tycho-p2-repository-plugin,com.elasticpath.extensions:metabase-processor-plugin,com.elasticpath.extensions:ext-data-population-maven-plugin</unCheckedPluginList>
+									</requirePluginVersions>
+								</rules>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

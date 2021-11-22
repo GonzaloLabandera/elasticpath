@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.service.ClientInfo;
 import org.eclipse.rap.rwt.service.UISession;
@@ -29,6 +30,7 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.handlers.libjar.LibJarURLStreamHandlerService;
+import com.elasticpath.commons.handlers.libjar.LibJarUtil;
 import com.elasticpath.domain.misc.PropertyBased;
 import com.elasticpath.service.remote.ResourceRetrievalService;
 
@@ -37,7 +39,7 @@ import com.elasticpath.service.remote.ResourceRetrievalService;
  */
 public class CorePlugin extends AbstractUIPlugin {
 
-	private static final Logger LOG = Logger.getLogger(CorePlugin.class);
+	private static final Logger LOG = LogManager.getLogger(CorePlugin.class);
 	/**
 	 * The plug-in ID.
 	 */
@@ -67,7 +69,7 @@ public class CorePlugin extends AbstractUIPlugin {
 	@SuppressWarnings({"squid:S1149"})
 	private void registerLibJarURLStreamHandlerService(final BundleContext context) {
 		final Hashtable<String, String[]> properties = new Hashtable<>();
-		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[]{LibJarURLStreamHandlerService.LIB_JAR_PROTOCOL});
+		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[]{LibJarUtil.LIB_JAR_PROTOCOL});
 		libJarRegistration = context.registerService(URLStreamHandlerService.class, new LibJarURLStreamHandlerService(), properties);
 	}
 

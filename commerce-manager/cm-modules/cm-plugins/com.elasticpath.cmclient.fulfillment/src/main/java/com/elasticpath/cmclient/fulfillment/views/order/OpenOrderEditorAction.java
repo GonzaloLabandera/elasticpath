@@ -3,8 +3,9 @@
  */
 package com.elasticpath.cmclient.fulfillment.views.order;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -26,7 +27,7 @@ import com.elasticpath.domain.order.OrderAddress;
  */
 public class OpenOrderEditorAction extends Action implements IDoubleClickListener {
 
-	private static final Logger LOG = Logger.getLogger(OpenOrderEditorAction.class);
+	private static final Logger LOG = LogManager.getLogger(OpenOrderEditorAction.class);
 
 	private final TableViewer viewer;
 

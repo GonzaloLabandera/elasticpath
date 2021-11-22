@@ -4,7 +4,8 @@
  */
 package com.elasticpath.cmclient.warehouse.views.orderreturn;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -34,7 +35,7 @@ import com.elasticpath.domain.order.OrderReturnType;
  * View to show and allow the manipulation of the available Users in CM.
  */
 public class OrderReturnSearchResultsView extends AbstractListView implements OrderReturnEventListener {
-	private static final Logger LOG = Logger.getLogger(OrderReturnSearchResultsView.class);
+	private static final Logger LOG = LogManager.getLogger(OrderReturnSearchResultsView.class);
 
 	/** The view ID. */
 	public static final String VIEW_ID = OrderReturnSearchResultsView.class.getName();

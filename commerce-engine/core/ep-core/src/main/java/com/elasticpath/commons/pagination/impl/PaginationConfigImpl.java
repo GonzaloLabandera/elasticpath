@@ -3,7 +3,7 @@
  */
 package com.elasticpath.commons.pagination.impl;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.elasticpath.commons.pagination.DirectedSortingField;
 import com.elasticpath.commons.pagination.PaginationConfig;

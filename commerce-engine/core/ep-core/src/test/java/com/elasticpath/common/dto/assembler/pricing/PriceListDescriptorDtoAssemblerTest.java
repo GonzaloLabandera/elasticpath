@@ -5,7 +5,7 @@ package com.elasticpath.common.dto.assembler.pricing;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;

@@ -10,7 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.ql.parser.EpQLFieldType;
 import com.elasticpath.ql.parser.EpQLTerm;
@@ -25,7 +26,7 @@ import com.elasticpath.service.search.index.Analyzer;
  */
 public class LuceneValueResolver implements EpQLValueResolver {
 
-	private static final Logger LOG = Logger.getLogger(LuceneValueResolver.class);
+	private static final Logger LOG = LogManager.getLogger(LuceneValueResolver.class);
 
 	private Analyzer analyzer;
 

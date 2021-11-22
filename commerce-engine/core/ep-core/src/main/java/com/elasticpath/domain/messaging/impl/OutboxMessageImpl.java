@@ -53,7 +53,8 @@ public class OutboxMessageImpl extends AbstractPersistableImpl implements Outbox
 			table = "JPA_GENERATED_KEYS",
 			pkColumnName = "ID",
 			valueColumnName = "LAST_VALUE",
-			pkColumnValue = TABLE_NAME)
+			pkColumnValue = TABLE_NAME,
+			allocationSize = HIGH_CONCURRENCY_ALLOCATION_SIZE)
 	public long getUidPk() {
 		return uidPk;
 	}

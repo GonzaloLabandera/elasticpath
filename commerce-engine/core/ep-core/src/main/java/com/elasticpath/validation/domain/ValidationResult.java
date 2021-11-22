@@ -5,7 +5,7 @@ package com.elasticpath.validation.domain;
 
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Object that describes the result of validation.

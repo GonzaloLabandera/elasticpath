@@ -8,7 +8,8 @@ package com.elasticpath.cmclient.core.views;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
@@ -56,7 +57,7 @@ import com.elasticpath.cmclient.core.ui.framework.impl.EpTableViewer;
 @SuppressWarnings({"PMD.GodClass"})
 public abstract class AbstractPageNavigationListView<T> extends AbstractCmClientView implements PaginationChangeListener, PaginationSupport {
 
-	private static final Logger LOG = Logger.getLogger(AbstractPageNavigationListView.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractPageNavigationListView.class);
 
 	/**
 	 *

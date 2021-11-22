@@ -6,8 +6,9 @@ package com.elasticpath.cmclient.core.csv;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -24,7 +25,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
  */
 public class ChunkedBaseAmountDTOItemReader extends AbstractPagingItemReader<BaseAmountDTO> implements StepExecutionListener {
 
-	private static final Logger LOG = Logger.getLogger(ChunkedBaseAmountDTOItemReader.class);
+	private static final Logger LOG = LogManager.getLogger(ChunkedBaseAmountDTOItemReader.class);
 	private PriceListService priceListService;
 	private BaseAmountFilterExt filter;
 	private String priceListGuid;

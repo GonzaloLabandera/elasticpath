@@ -108,19 +108,6 @@ Feature: Shipping Options
       | DIGITAL_ITEM  | TO_THE_DELIVERIES                  |
       | Tetris Heaven | defaultcart -> order -> deliveries |
 
-  Scenario Outline:  Shipping option cannot be accessed if there are no physical items in the cart
-    Given I add item <PHYSICAL_ITEM> to the cart
-    And I add item <DIGITAL_ITEM> to the cart
-    And I navigate links <TO_THE_CHOSEN_SHIPPING_OPTION>
-    And save the shipping option uri
-    When I delete item <PHYSICAL_ITEM> from my cart
-    And attempt to access the previously selected shipping option
-    Then the HTTP status is forbidden
-
-    Examples:
-      | PHYSICAL_ITEM   | DIGITAL_ITEM  | TO_THE_CHOSEN_SHIPPING_OPTION                                                             |
-      | Samsung Headset | Tetris Heaven | defaultcart -> order -> deliveries -> element -> shippingoptioninfo -> selector -> chosen |
-
   Scenario Outline:  Shipping option is persisted in purchase
     Given I add item <PHYSICAL_ITEM> to the cart
     And I navigate links <TO_THE_SHIPPING_OPTION_CHOSEN>

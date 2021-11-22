@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.warehouse.views;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.AggregateValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
@@ -46,7 +47,7 @@ import com.elasticpath.cmclient.warehouse.perspective.WarehousePerspectiveFactor
 
 public class SearchView extends AbstractCmClientView implements SelectionListener, ControlModificationListener {
 
-	private static final Logger LOG = Logger.getLogger(SearchView.class);
+	private static final Logger LOG = LogManager.getLogger(SearchView.class);
 
 	/**
 	 * SearchView ID specified in the plugin.xml file. It is the same as the class name

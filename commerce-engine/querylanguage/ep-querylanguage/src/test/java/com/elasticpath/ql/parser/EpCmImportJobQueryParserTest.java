@@ -11,7 +11,7 @@ import static com.elasticpath.ql.asserts.ParseAssert.assertParseSuccessfull;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -4,80 +4,52 @@
 package com.elasticpath.service.shoppingcart.validation.impl;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.common.pricing.service.PriceLookupFacade;
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.catalog.BundleConstituent;
-import com.elasticpath.domain.catalog.ConstituentItem;
-import com.elasticpath.domain.catalog.ProductBundle;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidator;
+import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.annotations.XPFEmbedded;
+import com.elasticpath.xpf.connectivity.annontation.XPFAssignment;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.extension.XPFExtensionPointImpl;
+import com.elasticpath.xpf.connectivity.extensionpoint.ProductSkuValidator;
+import com.elasticpath.xpf.impl.XPFExtensionSelectorByStoreCode;
 
 /**
  * Delegates the validation of auto-selectable bundle constituents.
  */
-public class AutoSelectableBundleConstituentDelegateValidatorImpl
-	extends AbstractAggregateValidator<ProductSkuValidationContext, ProductSkuValidationContext>
-		implements ProductSkuValidator {
+@SuppressWarnings("checkstyle:magicnumber")
+@Extension
+@XPFEmbedded
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART_READ, priority = 1070)
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART, priority = 1060)
+public class AutoSelectableBundleConstituentDelegateValidatorImpl extends XPFExtensionPointImpl implements ProductSkuValidator {
 
-	private BeanFactory beanFactory;
-	private PriceLookupFacade priceLookupFacade;
+	@Autowired
+	private XPFExtensionLookup extensionLookup;
 
 	@Override
-	public Collection<StructuredErrorMessage> validate(final ProductSkuValidationContext context) {
-		return getFilteredConstituents(context).stream()
-				.map(item -> buildConstituentContext(context, item))
-				.map(super::validate)
+	public Collection<XPFStructuredErrorMessage> validate(final XPFProductSkuValidationContext context) {
+		return context.getChildren()
+				.stream()
+				.map(this::validateInternal)
 				.flatMap(Collection::stream)
 				.collect(Collectors.toList());
 	}
 
-	private Collection<ConstituentItem> getFilteredConstituents(final ProductSkuValidationContext context) {
-		if (context.getProductSku().getProduct() instanceof ProductBundle) {
-			ProductBundle bundle = (ProductBundle) context.getProductSku().getProduct();
+	private Collection<XPFStructuredErrorMessage> validateInternal(final XPFProductSkuValidationContext context) {
+		XPFExtensionSelectorByStoreCode selector = new XPFExtensionSelectorByStoreCode(context.getShopper().getStore().getCode());
+		List<ProductSkuValidator> extensions = extensionLookup.getMultipleExtensions(ProductSkuValidator.class,
+				XPFExtensionPointEnum.VALIDATE_PRODUCT_SKU_AT_ADD_TO_CART_READ, selector);
 
-			return bundle.getConstituents().stream()
-					.filter(bundle::isConstituentAutoSelectable)
-					.map(BundleConstituent::getConstituent)
-					.collect(Collectors.toList());
-		}
-		return Collections.emptyList();
-	}
-
-	/**
-	 * Creates a new validation context for the validation of constituent.
-	 * @param context the original context.
-	 * @param item the constituent item.
-	 * @return the new validation context.
-	 */
-	protected ProductSkuValidationContext buildConstituentContext(final ProductSkuValidationContext context, final ConstituentItem item) {
-		ProductSkuValidationContext constituentContext = beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU_VALIDATION_CONTEXT,
-				ProductSkuValidationContext.class);
-		constituentContext.setProductSku(item.getProductSku());
-		constituentContext.setParentProductSku(context.getProductSku());
-		constituentContext.setShopper(context.getShopper());
-		constituentContext.setStore(context.getStore());
-		constituentContext.setPromotedPrice(priceLookupFacade.getPromotedPriceForSku(item.getProductSku(), context.getStore(), context.getShopper()));
-		return constituentContext;
-	}
-
-	protected BeanFactory getBeanFactory() {
-		return beanFactory;
-	}
-
-	public void setBeanFactory(final BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
-	}
-
-	protected PriceLookupFacade getPriceLookupFacade() {
-		return priceLookupFacade;
-	}
-
-	public void setPriceLookupFacade(final PriceLookupFacade priceLookupFacade) {
-		this.priceLookupFacade = priceLookupFacade;
+		return extensions.stream()
+				.map(strategy -> strategy.validate(context))
+				.flatMap(Collection::stream)
+				.collect(Collectors.toList());
 	}
 }

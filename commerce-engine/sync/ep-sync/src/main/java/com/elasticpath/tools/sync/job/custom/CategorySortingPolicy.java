@@ -3,7 +3,8 @@
  */
 package com.elasticpath.tools.sync.job.custom;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.util.SimpleCache;
 import com.elasticpath.commons.util.impl.SimpleCacheImpl;
@@ -21,7 +22,7 @@ import com.elasticpath.tools.sync.merge.configuration.EntityLocator;
  */
 public class CategorySortingPolicy implements SortingPolicy {
 
-	private static final Logger LOG = Logger.getLogger(CategorySortingPolicy.class);
+	private static final Logger LOG = LogManager.getLogger(CategorySortingPolicy.class);
 
 	private SyncBeanFactory syncBeanFactory;
 

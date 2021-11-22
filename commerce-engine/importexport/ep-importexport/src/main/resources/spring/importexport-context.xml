@@ -17,7 +17,7 @@
 
 	<import resource="service/importexport-service.xml" />
 
-	<import resource="importexport-filebasedconfig.xml" />
+	<import resource="importexport-cli-only.xml" />
 
 	<import resource="service/messages.xml" />
 

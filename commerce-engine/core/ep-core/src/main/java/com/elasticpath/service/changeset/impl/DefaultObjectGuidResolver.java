@@ -3,7 +3,8 @@
  */
 package com.elasticpath.service.changeset.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.service.changeset.ObjectGuidResolver;
@@ -13,7 +14,7 @@ import com.elasticpath.service.changeset.ObjectGuidResolver;
  */
 public class DefaultObjectGuidResolver implements ObjectGuidResolver {
 	
-	private static final Logger LOG = Logger.getLogger(DefaultObjectGuidResolver.class);
+	private static final Logger LOG = LogManager.getLogger(DefaultObjectGuidResolver.class);
 
 	@Override
 	public String resolveGuid(final Object object) {

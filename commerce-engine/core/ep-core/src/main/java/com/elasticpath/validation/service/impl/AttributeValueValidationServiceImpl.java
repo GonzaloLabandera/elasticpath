@@ -11,13 +11,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
 import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.MapUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.cache.Cache;
+import com.elasticpath.cache.impl.AlwaysMissCache;
+import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 import com.elasticpath.validation.service.AttributeValueValidationService;
@@ -33,7 +36,15 @@ public class AttributeValueValidationServiceImpl implements AttributeValueValida
 
 	@Override
 	public List<StructuredErrorMessage> validate(final Map<String, String> valuesToValidate,
-			final Map<Attribute, Set<String>> referentAllowedValues) {
+												 final Map<Attribute, Set<String>> referentAllowedValues) {
+		return validateWithCache(valuesToValidate, referentAllowedValues, new AlwaysMissCache<>(), new AlwaysMissCache<>());
+	}
+
+	@Override
+	public List<StructuredErrorMessage> validateWithCache(final Map<String, String> valuesToValidate,
+														  final Map<Attribute, Set<String>> referentAllowedValues,
+														  final Cache<Pair<Object, Set<String>>, Validator> requiredValidatorCache,
+														  final Cache<Pair<Object, Set<String>>, Validator> completeValidatorCache) {
 
 		Objects.requireNonNull(valuesToValidate, "No attribute values were provided to validate.");
 
@@ -58,7 +69,7 @@ public class AttributeValueValidationServiceImpl implements AttributeValueValida
 					attributeValueToValidate, referentAttribute,
 					Optional.ofNullable(referentAllowedValues.get(referentAttribute)).orElse(Collections.emptySet()));
 
-			violations.addAll(getDynamicAttributeValueValidator()
+			violations.addAll(getDynamicAttributeValueValidator(requiredValidatorCache, completeValidatorCache)
 					.validate(dynamicAttributeValue));
 		}
 
@@ -67,14 +78,17 @@ public class AttributeValueValidationServiceImpl implements AttributeValueValida
 
 	/**
 	 * Protected for extension.
+	 * @param requiredValidatorCache a cache for "is required" dynamic value validators
+	 * @param completeValidatorCache a cache for "complete" dynamic value validators
 	 * @return the validator
 	 */
-	protected DynamicAttributeValueValidator getDynamicAttributeValueValidator() {
-		return new DynamicAttributeValueValidator();
+	protected DynamicAttributeValueValidator getDynamicAttributeValueValidator(
+			final Cache<Pair<Object, Set<String>>, Validator> requiredValidatorCache,
+			final Cache<Pair<Object, Set<String>>, Validator> completeValidatorCache) {
+		return new DynamicAttributeValueValidator(requiredValidatorCache, completeValidatorCache);
 	}
 
 	public void setConstraintViolationTransformer(final ConstraintViolationTransformer constraintViolationTransformer) {
 		this.constraintViolationTransformer = constraintViolationTransformer;
 	}
-
 }

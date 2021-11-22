@@ -69,9 +69,10 @@ public interface WishlistRepository {
 	 * Gets the list of wishlist guids for the customer that contain the given item.
 	 *
 	 * @param itemIdMap the item id map
+	 * @param storeCode the store
 	 * @return a list of wishlists for the customer that contain the item
 	 */
-	Maybe<WishList> findWishlistsContainingItem(Map<String, String> itemIdMap);
+	Maybe<WishList> findWishlistsContainingItem(String storeCode, Map<String, String> itemIdMap);
 
 	/**
 	 * Get the default wishlist id.

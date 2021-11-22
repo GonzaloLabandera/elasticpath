@@ -4,7 +4,6 @@
 package com.elasticpath.service.pricing;
 
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.store.Store;
 
 /**
@@ -31,12 +30,4 @@ public interface SessionPriceListLifecycle {
 	 */
 	void refreshPriceListStack(CustomerSession customerSession, Store store);
 
-	/**
-	 * Refreshes the PriceListStack on the Shopper if necessary.
-	 * Subsequent calls to refresh the PriceListStack will have no effect
-	 * while the pricing context (TagSet) of the Shopper remains the constant.
-	 * @param shopper The shopper.
-	 * @param catalogCode  The catalog that the shopper is in.
-	 */
-	void refreshPriceListStack(Shopper shopper, String catalogCode);
 }

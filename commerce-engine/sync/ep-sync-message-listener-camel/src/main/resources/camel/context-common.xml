@@ -19,4 +19,13 @@
 			<camel:property key="CamelLogDebugBodyMaxChars" value="0"/>
 		</camel:properties>
 	</camel:camelContext>
+
+	<bean id="operationalInsightsConfigurationRequestEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean" abstract="true">
+		<property name="uri" value="stub:topic:ep.insights.configuration"/>
+	</bean>
+
+	<bean id="operationalInsightsRuntimeRequestEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean" abstract="true">
+		<property name="uri" value="stub:topic:ep.insights.runtime"/>
+	</bean>
+
 </beans>

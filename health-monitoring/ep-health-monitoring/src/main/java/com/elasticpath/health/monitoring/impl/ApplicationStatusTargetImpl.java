@@ -3,7 +3,8 @@
  */
 package com.elasticpath.health.monitoring.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -17,7 +18,7 @@ import com.elasticpath.health.monitoring.StatusType;
  */
 public class ApplicationStatusTargetImpl extends AbstractStatusCheckerTarget implements ApplicationContextAware, StatusCheckerTarget {
 
-	private static final Logger LOG = Logger.getLogger(ApplicationStatusTargetImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ApplicationStatusTargetImpl.class);
 
 	private ApplicationContext applicationContext;
 

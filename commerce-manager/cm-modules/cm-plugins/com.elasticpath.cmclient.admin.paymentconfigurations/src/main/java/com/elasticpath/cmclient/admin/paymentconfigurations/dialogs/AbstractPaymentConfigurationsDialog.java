@@ -15,7 +15,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.list.ComputedList;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -87,7 +88,7 @@ public abstract class AbstractPaymentConfigurationsDialog extends AbstractEpDial
 	/**
 	 * Logger.
 	 */
-	protected static final Logger LOG = Logger.getLogger(AbstractPaymentConfigurationsDialog.class);
+	protected static final Logger LOG = LogManager.getLogger(AbstractPaymentConfigurationsDialog.class);
 
 	private static final int TEXT_FIELD_LIMIT = 255;
 

@@ -16,7 +16,8 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.health.monitoring.Status;
 import com.elasticpath.health.monitoring.StatusType;
@@ -28,7 +29,7 @@ import com.elasticpath.health.monitoring.StatusType;
 @SuppressWarnings({"PMD.GodClass"})
 public class WebServiceStatusCheckerTargetImpl extends AbstractStatusCheckerTarget {
 
-	private static final Logger LOG = Logger.getLogger(WebServiceStatusCheckerTargetImpl.class);
+	private static final Logger LOG = LogManager.getLogger(WebServiceStatusCheckerTargetImpl.class);
 
 	private static final String METHOD_GET = "GET";
 

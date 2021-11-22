@@ -9,18 +9,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Set;
-
 import javax.validation.ConstraintViolation;
 
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.cache.impl.AlwaysMissCache;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
 
@@ -34,8 +32,8 @@ public class DynamicAttributeValueValidatorTest {
 	private static final String DATE_VALUE = "2016-08-18";
 	private static final String DATE_TIME_VALUE = "2016-08-18T10:15:30+04:00";
 
-	@InjectMocks
-	private final DynamicAttributeValueValidator dynamicAttributeValueValidator = new DynamicAttributeValueValidator();
+	private final DynamicAttributeValueValidator dynamicAttributeValueValidator = new DynamicAttributeValueValidator(
+			new AlwaysMissCache<>(), new AlwaysMissCache<>());
 
 	@Mock
 	private Attribute referentAttribute;

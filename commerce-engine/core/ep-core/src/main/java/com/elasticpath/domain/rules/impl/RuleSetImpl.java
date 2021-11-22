@@ -146,7 +146,7 @@ public class RuleSetImpl extends AbstractEntityImpl implements RuleSet {
 	 * @return the rules
 	 */
 	@Override
-	@OneToMany(targetEntity = PromotionRuleImpl.class, fetch = FetchType.EAGER)
+	@OneToMany(targetEntity = PromotionRuleImpl.class, fetch = FetchType.LAZY)
 	@ElementJoinColumn(name = "RULE_SET_UID")
 	public Set<Rule> getRules() {
 		return this.rules;

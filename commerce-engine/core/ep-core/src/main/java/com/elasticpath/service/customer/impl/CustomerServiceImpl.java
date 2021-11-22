@@ -3,14 +3,18 @@
  */
 package com.elasticpath.service.customer.impl;
 
+import static com.elasticpath.commons.constants.ContextIdNames.ACCOUNT_CRITERION;
+import static com.elasticpath.commons.constants.ContextIdNames.CUSTOMER_CRITERION;
+import static com.elasticpath.commons.constants.ContextIdNames.FETCH_GROUP_LOAD_TUNER;
+import static com.elasticpath.persistence.api.PersistenceConstants.LIST_PARAMETER_NAME;
 import static java.util.Arrays.asList;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +24,7 @@ import javax.validation.Validator;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.openjpa.persistence.jdbc.FetchMode;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
@@ -41,12 +46,24 @@ import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
+import com.elasticpath.persistence.api.FlushMode;
+import com.elasticpath.persistence.api.LoadTuner;
+import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.support.AccountCriterion;
+import com.elasticpath.persistence.support.CustomerCriterion;
+import com.elasticpath.persistence.support.FetchGroupConstants;
+import com.elasticpath.persistence.support.impl.CriteriaQuery;
+import com.elasticpath.service.customer.AccountTreeService;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.dao.CustomerAddressDao;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.orderpaymentapi.OrderPaymentApiCleanupService;
+import com.elasticpath.service.order.OrderService;
+import com.elasticpath.service.orderpaymentapi.CustomerPaymentInstrumentService;
+import com.elasticpath.service.search.query.AccountSearchCriteria;
+import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.validation.ConstraintViolationTransformer;
@@ -55,7 +72,8 @@ import com.elasticpath.validation.service.CustomerConstraintValidationService;
 /**
  * The default implementation of <code>CustomerService</code>.
  */
-@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength", "PMD.NPathComplexity"})
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyMethods", "PMD.GodClass",
+		"PMD.ExcessiveClassLength", "PMD.NPathComplexity", "PMD.ExcessiveImports"})
 public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implements CustomerService {
 
 	private static final String USER_ACCOUNT_NOT_ACTIVE = "purchase.user.account.not.active";
@@ -66,7 +84,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	private StoreService storeService;
 
-	private static final String LIST_PLACEHOLDER = "list";
+	private AddressService addressService;
 
 	private CustomerAddressDao customerAddressDao;
 
@@ -76,13 +94,15 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	private EventMessagePublisher eventMessagePublisher;
 
-	private OrderPaymentApiCleanupService orderPaymentApiCleanupService;
-
 	private static final String NEW_PASSWORD_KEY = "newPassword";
 
 	private Validator validator;
 
 	private CustomerConstraintValidationService customerConstraintValidationService;
+
+	private CustomerPaymentInstrumentService customerPaymentInstrumentService;
+
+	private OrderService orderService;
 
 	// Turn off line too long PMD warning
 	private ConstraintViolationTransformer constraintViolationTransformer; //NOPMD
@@ -139,8 +159,16 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		// update customer object
 		customer.setCreationDate(now);
 
+		saveCustomerWithAddresses(customer);
 		// persist the customer
 		getPersistenceEngine().save(customer);
+
+		final AccountTreeService accountTreeService = getAccountTreeService();
+
+		// persist a record for the closure table
+		if (customer.getParentGuid() != null) {
+			accountTreeService.insertClosures(customer.getGuid(), customer.getParentGuid());
+		}
 
 		// send confirmation email and update index
 		sendCustomerEventAndUpdateIndex(customer);
@@ -187,10 +215,56 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 		checkConstraintViolations(customerViolations);
 
-		defaultCustomerAddressesCheck(customer);
 		defaultCustomerGroupCheck(customer);
 
-		return getPersistenceEngine().update(customer);
+		return saveCustomerWithAddresses(customer);
+	}
+
+	/*
+		Customer addresses are no longer maintained by OpenJPA and must be saved using AddressService.
+		CM and import/export still requires Customer.addresses field as a transfer medium.
+	 */
+	private Customer saveCustomerWithAddresses(final Customer customer) {
+		Set<CustomerAddress> addressesToSave = new HashSet<>(customer.getTransientAddresses());
+
+		CustomerAddress preferredBillingAddress = resetPreferredAddressIfRequired(customer, addressesToSave, true);
+		CustomerAddress preferredShippingAddress = resetPreferredAddressIfRequired(customer, addressesToSave, false);
+
+		Customer persistedCustomer = getPersistenceEngine().saveOrUpdate(customer);
+		//customer must be saved to db before saving addresses
+		getPersistenceEngine().flush();
+
+		if (!addressesToSave.isEmpty()) {
+			CustomerAddress[] arrayOfAddresses = new CustomerAddress[addressesToSave.size()];
+			addressesToSave.forEach(address -> address.setCustomerUidPk(persistedCustomer.getUidPk()));
+			addressService.save(addressesToSave.toArray(arrayOfAddresses));
+		}
+
+		persistedCustomer.setPreferredShippingAddress(preferredShippingAddress);
+		persistedCustomer.setPreferredBillingAddress(preferredBillingAddress);
+
+		return getPersistenceEngine().saveOrUpdate(persistedCustomer);
+	}
+
+	private CustomerAddress resetPreferredAddressIfRequired(final Customer customer, final Set<CustomerAddress> addressesToSave,
+															final boolean isBillingAddress) {
+		CustomerAddress address;
+
+		if (isBillingAddress) {
+			address = customer.getPreferredBillingAddress();
+			if (address != null && !address.isPersisted()) {
+				customer.setPreferredBillingAddress(null);
+				addressesToSave.add(address);
+			}
+		} else {
+			address = customer.getPreferredShippingAddress();
+			if (address != null && !address.isPersisted()) {
+				customer.setPreferredShippingAddress(null);
+				addressesToSave.add(address);
+			}
+		}
+
+		return address;
 	}
 
 	private Set<ConstraintViolation<Customer>> validatePasswordAndUsername(final Customer customer, final boolean shouldSetPassword) {
@@ -229,21 +303,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	/**
-	 * Check the customer's preferred/default addresses to see if they've been removed. If they have, then remove the default address reference.
-	 *
-	 * @param customer the customer to check default addresses.
-	 * @throws EpServiceException in case of any errors.
-	 */
-	private void defaultCustomerAddressesCheck(final Customer customer) throws EpServiceException {
-		if (!customer.getAddresses().contains(customer.getPreferredBillingAddress())) {
-			customer.setPreferredBillingAddress(null);
-		}
-		if (!customer.getAddresses().contains(customer.getPreferredShippingAddress())) {
-			customer.setPreferredShippingAddress(null);
-		}
-	}
-
-	/**
 	 * Adds a customer to the default customer group (ensuring that they have the default role).
 	 *
 	 * @param customer the customer upon which to set the default group
@@ -252,17 +311,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	@Override
 	public void setCustomerDefaultGroup(final Customer customer) throws EpServiceException {
 		defaultCustomerGroupCheck(customer);
-	}
-
-	/**
-	 * Deletes the customer.
-	 *
-	 * @param customer the customer to remove
-	 * @throws EpServiceException - in case of any errors
-	 */
-	public void remove(final Customer customer) throws EpServiceException {
-
-		orderPaymentApiCleanupService.removeByCustomer(customer);
 	}
 
 	/**
@@ -369,7 +417,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 		Set<Long> storeUids = getAssociatedStoreUids(store);
 		final List<Customer> customers =
-				getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_USERNAME_IN_STORES", LIST_PLACEHOLDER, storeUids, username);
+				getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_USERNAME_IN_STORES", LIST_PARAMETER_NAME, storeUids, username);
 
 		return getCustomerForStoreOrNewest(customers, store);
 	}
@@ -390,7 +438,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 		return getPersistenceEngine().
 				retrieveByNamedQueryWithList("CUSTOMER_GUID_FIND_BY_USERNAME_IN_STORES",
-						LIST_PLACEHOLDER,
+						LIST_PARAMETER_NAME,
 						storeUids,
 						customer.getUsername(),
 						customer.getGuid()).size() > 0;
@@ -404,7 +452,8 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	@Override
 	public CustomerType getCustomerTypeByGuid(final String guid) {
-		List<CustomerType> customerTypes = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_TYPE_SELECT_BY_GUID", guid);
+		List<CustomerType> customerTypes = getPersistenceEngine()
+				.retrieveByNamedQuery("CUSTOMER_TYPE_SELECT_BY_GUID", FlushMode.COMMIT, true, new Object[]{guid});
 		if (customerTypes.isEmpty()) {
 			return null;
 		}
@@ -423,8 +472,8 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	@Override
-	public boolean isCustomerExistsBySharedIdAndStoreCode(final String sharedId, final String storeCode) {
-		return (findBySharedId(sharedId, storeCode) != null);
+	public boolean isCustomerExistsBySharedId(final String sharedId, final CustomerType customerType) {
+		return (findBySharedId(sharedId, customerType) != null);
 	}
 
 	@Override
@@ -436,21 +485,9 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	@Override
-	public String findCustomerGuidBySharedId(final String sharedId, final String storeCode) {
-		Customer customer = findBySharedId(sharedId, storeCode);
+	public String findCustomerGuidBySharedId(final String sharedId, final CustomerType customerType) {
+		Customer customer = findBySharedId(sharedId, customerType);
 		return (customer == null ? null : customer.getGuid());
-	}
-
-	@Override
-	public String findCustomerGuidBySharedId(final String sharedId) {
-		final List<String> customerGuids = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_GUID_SELECT_BY_SHAREDID", sharedId);
-		if (customerGuids.size() > 1) {
-			throw new EpServiceException("Inconsistent data -- duplicate shared id:" + sharedId);
-		}
-
-		return customerGuids.isEmpty()
-				? null
-				: customerGuids.get(0);
 	}
 
 	@Override
@@ -479,46 +516,14 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	@Override
-	public Customer findBySharedId(final String sharedId) throws EpServiceException {
+	public Customer findBySharedId(final String sharedId, final CustomerType customerType) throws EpServiceException {
 		sanityCheck();
-		if (sharedId == null) {
-			throw new EpServiceException("Cannot retrieve customer without sharedId");
+		if (sharedId == null || customerType == null) {
+			throw new EpServiceException("Cannot retrieve customer without sharedId and customerType");
 		}
 
-		final List<Customer> customers = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_FIND_BY_SHAREDID", sharedId);
+		final List<Customer> customers = getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_FIND_BY_SHAREDID_AND_TYPE", sharedId, customerType);
 		return customers.isEmpty() ? null : customers.get(0);
-
-	}
-
-	/**
-	 * Find the customer with the given sharedId associated with the store. If it cannot find the customer in the given store, returns oldest record
-	 * from the store's associated stores.
-	 *
-	 * @param sharedId  the customer sharedId
-	 * @param storeCode the store to search in
-	 * @return the customers with the given sharedId.
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public Customer findBySharedId(final String sharedId, final String storeCode) throws EpServiceException {
-		sanityCheck();
-		if (sharedId == null || storeCode == null) {
-			throw new EpServiceException("Cannot retrieve customer without sharedId and store");
-		}
-
-		Store store = storeService.findStoreWithCode(storeCode);
-		if (store == null) {
-			throw new EpServiceException("Store with code " + storeCode + " not found.");
-		}
-
-		Set<Long> storeUids = getAssociatedStoreUids(store);
-
-		final List<Customer> allResults = getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_SHAREDID_IN_STORES",
-				LIST_PLACEHOLDER,
-				storeUids,
-				sharedId);
-
-		return getCustomerForStoreOrNewest(allResults, store);
 	}
 
 	@Override
@@ -571,7 +576,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	@Override
 	public void resetPassword(final String sharedId, final String storeCode) throws SharedIdNonExistException {
-		Customer customer = findBySharedId(sharedId, storeCode);
+		Customer customer = findBySharedId(sharedId, CustomerType.REGISTERED_USER);
 
 		if (customer == null) {
 			throw new SharedIdNonExistException("The given shared id doesn't exist: " + sharedId + " In store: " + storeCode);
@@ -659,7 +664,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 			return Collections.emptyList();
 		}
 
-		return getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_UIDS", LIST_PLACEHOLDER, customerUids);
+		return getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_UIDS", LIST_PARAMETER_NAME, customerUids);
 	}
 
 	/**
@@ -753,10 +758,8 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	@Override
 	public Customer addOrUpdateAddress(final Customer customer, final CustomerAddress address) {
-		validateCustomerAddress(address);
-		Customer freshCustomer = get(customer.getUidPk());
-		addOrUpdateCustomerAddress(freshCustomer, address);
-		return update(freshCustomer);
+		addOrUpdateCustomerAddress(customer, address);
+		return update(customer);
 	}
 
 	/**
@@ -774,31 +777,32 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	@Override
 	public Customer addOrUpdateCustomerBillingAddress(final Customer customer, final CustomerAddress address) {
-		Customer freshCustomer = get(customer.getUidPk());
-		final CustomerAddress updatedAddress = addOrUpdateCustomerAddress(freshCustomer, address);
-		freshCustomer.setPreferredBillingAddress(updatedAddress);
-		return update(freshCustomer);
+		final CustomerAddress updatedAddress = addOrUpdateCustomerAddress(customer, address);
+		customer.setPreferredBillingAddress(updatedAddress);
+		return update(customer);
 	}
 
 	@Override
 	public Customer addOrUpdateCustomerShippingAddress(final Customer customer, final CustomerAddress address) {
-		Customer freshCustomer = get(customer.getUidPk());
-		final CustomerAddress updatedAddress = addOrUpdateCustomerAddress(freshCustomer, address);
-		freshCustomer.setPreferredShippingAddress(updatedAddress);
-		return update(freshCustomer);
+		final CustomerAddress updatedAddress = addOrUpdateCustomerAddress(customer, address);
+		customer.setPreferredShippingAddress(updatedAddress);
+		return update(customer);
 	}
 
 	private CustomerAddress addOrUpdateCustomerAddress(final Customer customer, final CustomerAddress address) {
-		if (address.getUidPk() == 0) {
-			customer.addAddress(address);
+		if (!address.isPersisted()) {
+			address.setCustomerUidPk(customer.getUidPk());
+			addressService.save(address);
 			return address;
 		}
 
-		CustomerAddress customerAddress = customer.getAddressByUid(address.getUidPk());
+		CustomerAddress customerAddress = addressService.findByCustomerAndAddressUid(customer.getUidPk(), address.getUidPk());
 		if (customerAddress == null) {
 			throw new EpDomainException("Address with uid " + address.getUidPk() + " was not found in the customer's address list");
 		}
 		customerAddress.copyFrom(address);
+		addressService.save(customerAddress);
+
 		return customerAddress;
 	}
 
@@ -875,16 +879,176 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	@Override
 	public Customer removeAllAddresses(final Customer customer) {
-
-		customer.setPreferredShippingAddress(null);
-		customer.setPreferredBillingAddress(null);
-
-		customer.getAddresses().forEach(getPersistenceEngine()::delete);
-		getPersistenceEngine().flush();
-
-		customer.setAddresses(new ArrayList<>());
-		return customer;
+		return addressService.removeAllByCustomer(customer);
 	}
+
+	@Override
+	public long countAssociatedOrders(final Collection<String> customerGuids) {
+		return customerGuids.stream().map(guid -> orderService.findOrderByAccountGuid(guid, true)).mapToLong(List::size).sum();
+	}
+
+	@Override
+	public void remove(final Customer customer) {
+		sanityCheck();
+		if (customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
+			final AccountTreeService accountTreeService = getAccountTreeService();
+
+			List<String> descendantGuids = accountTreeService.findDescendantGuids(customer.getGuid());
+			Collections.reverse(descendantGuids);
+			descendantGuids.add(customer.getGuid());
+
+			if (countAssociatedOrders(descendantGuids) > 0) {
+				throw new EpServiceException("Account cannot be deleted - the account or its children has associated orders");
+			}
+
+			for (String accountGuid : descendantGuids) {
+				final Customer account = findByGuid(accountGuid);
+
+				customerPaymentInstrumentService.findByCustomer(account)
+						.forEach(customerPaymentInstrument -> customerPaymentInstrumentService.remove(customerPaymentInstrument));
+
+				getPersistenceEngine().delete(account);
+			}
+		} else {
+			getPersistenceEngine().delete(customer);
+		}
+	}
+
+	protected AccountTreeService getAccountTreeService() {
+		return getSingletonBean(ContextIdNames.ACCOUNT_TREE_SERVICE, AccountTreeService.class);
+	}
+
+	@Override
+	public long getCustomerCountBySearchCriteria(final CustomerSearchCriteria searchCriteria) {
+		sanityCheck();
+		final CustomerCriterion customerCriterion = getPrototypeBean(CUSTOMER_CRITERION, CustomerCriterion.class);
+		Collection<String> storeCodes = new LinkedList<>();
+		CriteriaQuery query = customerCriterion.getCustomerSearchCriteria(searchCriteria, storeCodes, CustomerCriterion.ResultType.COUNT);
+
+		FetchGroupLoadTuner loadTuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
+		loadTuner.addFetchGroup(FetchGroupConstants.DEFAULT);
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
+
+		return getCustomerCountByQueryAndStoreCodes(query, storeCodes, loadTuner);
+	}
+
+	@Override
+	public long getAccountCountBySearchCriteria(final AccountSearchCriteria searchCriteria) {
+		sanityCheck();
+		final AccountCriterion customerCriterion = getPrototypeBean(ACCOUNT_CRITERION, AccountCriterion.class);
+		CriteriaQuery query = customerCriterion.getAccountSearchCriteria(searchCriteria, AccountCriterion.ResultType.COUNT);
+
+		FetchGroupLoadTuner loadTuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
+		loadTuner.addFetchGroup(FetchGroupConstants.DEFAULT);
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
+
+		return getCustomerCountByQueryAndStoreCodes(query, new LinkedList<>(), loadTuner);
+	}
+
+	@Override
+	public List<Customer> findCustomersBySearchCriteria(final CustomerSearchCriteria searchCriteria, final int start,
+			final int pagination) {
+		sanityCheck();
+
+		FetchGroupLoadTuner loadTuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
+		loadTuner.addFetchGroup(FetchGroupConstants.DEFAULT);
+
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
+
+		final CustomerCriterion customerCriterion = getPrototypeBean(CUSTOMER_CRITERION, CustomerCriterion.class);
+		Collection<String> storeCodes = new LinkedList<>();
+		CriteriaQuery query = customerCriterion.getCustomerSearchCriteria(searchCriteria, storeCodes, CustomerCriterion.ResultType.ENTITY);
+
+		return getCustomersByQuery(query, storeCodes, loadTuner, start, pagination);
+	}
+
+	@Override
+	public List<Customer> findAccountsBySearchCriteria(final AccountSearchCriteria searchCriteria, final int start,
+														final int pagination) {
+		sanityCheck();
+
+		FetchGroupLoadTuner loadTuner = getPrototypeBean(FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
+		loadTuner.addFetchGroup(FetchGroupConstants.DEFAULT);
+
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
+
+		final AccountCriterion accountCriterion = getPrototypeBean(ACCOUNT_CRITERION, AccountCriterion.class);
+		CriteriaQuery query = accountCriterion.getAccountSearchCriteria(searchCriteria, AccountCriterion.ResultType.ENTITY);
+
+		return getCustomersByQuery(query, new LinkedList<>(), loadTuner, start, pagination);
+	}
+
+	@Override
+	public void updateCustomers(final List<Customer> customers) {
+		customers.forEach(getPersistenceEngine()::saveOrUpdate);
+	}
+
+	@Override
+	public List<Customer> findByGuids(final Collection<String> customerGuids) {
+		if (CollectionUtils.isEmpty(customerGuids)) {
+			return Collections.emptyList();
+		}
+
+		return getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_GUIDS", LIST_PARAMETER_NAME, customerGuids,
+				null, 0, customerGuids.size());
+	}
+
+	/**
+	 * Get customer count by search query.
+	 *
+	 * @param query the customer search query.
+	 * @param storeCodes the storecodes
+	 * @param loadTuner the load tuner
+	 * @return the list of customer matching the given query.
+	 */
+	protected long getCustomerCountByQueryAndStoreCodes(final CriteriaQuery query, final Collection<String> storeCodes, final LoadTuner loadTuner) {
+		List<Long> customerCount;
+
+		if (query.getParameters().isEmpty() && storeCodes.isEmpty()) {
+			customerCount = getPersistenceEngineWithLoadTuner(loadTuner).retrieve(query.getQuery());
+		} else if (storeCodes.isEmpty()) {
+			customerCount = getPersistenceEngineWithLoadTuner(loadTuner)
+					.retrieve(query.getQuery(), query.getParameters().toArray());
+		} else {
+			customerCount = getPersistenceEngineWithLoadTuner(loadTuner)
+					.retrieveWithList(query.getQuery(), "storeList", storeCodes,
+							query.getParameters().toArray(), 0, Integer.MAX_VALUE);
+		}
+
+		return customerCount.get(0);
+	}
+
+	/**
+	 * Find customers by search query using the given load tuner.
+	 *
+	 * @param query      the customer search query.
+	 * @param storeCodes the storecodes
+	 * @param loadTuner  the load tuner
+	 * @param start      the starting record to search
+	 * @param maxResults the max results to be returned
+	 * @return the list of customer matching the given query.
+	 */
+	protected List<Customer> getCustomersByQuery(final CriteriaQuery query, final Collection<String> storeCodes, final LoadTuner loadTuner,
+												 final int start, final int maxResults) {
+		List<Customer> customerList;
+		if (query.getParameters().isEmpty() && storeCodes.isEmpty()) {
+			customerList = getPersistenceEngineWithLoadTuner(loadTuner)
+					.retrieve(query.getQuery(), start, maxResults);
+		} else if (storeCodes.isEmpty()) {
+			customerList = getPersistenceEngineWithLoadTuner(loadTuner)
+					.retrieve(query.getQuery(), query.getParameters().toArray(), start, maxResults);
+		} else {
+			customerList = getPersistenceEngineWithLoadTuner(loadTuner)
+					.retrieveWithList(query.getQuery(), "storeList", storeCodes, query.getParameters().toArray(), start, maxResults);
+		}
+		return customerList;
+	}
+
+
+	private PersistenceEngine getPersistenceEngineWithLoadTuner(final LoadTuner loadTuner) {
+		return getPersistenceEngine().withLoadTuners(loadTuner);
+	}
+
 
 	public void setSettingsReader(final SettingsReader settingsReader) {
 		this.settingsReader = settingsReader;
@@ -910,7 +1074,23 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		return eventMessagePublisher;
 	}
 
-	public void setOrderPaymentApiCleanupService(final OrderPaymentApiCleanupService orderPaymentApiCleanupService) {
-		this.orderPaymentApiCleanupService = orderPaymentApiCleanupService;
+	protected CustomerPaymentInstrumentService getCustomerPaymentInstrumentService() {
+		return customerPaymentInstrumentService;
+	}
+
+	public void setCustomerPaymentInstrumentService(final CustomerPaymentInstrumentService customerPaymentInstrumentService) {
+		this.customerPaymentInstrumentService = customerPaymentInstrumentService;
+	}
+
+	protected OrderService getOrderService() {
+		return orderService;
+	}
+
+	public void setOrderService(final OrderService orderService) {
+		this.orderService = orderService;
+	}
+
+	public void setAddressService(final AddressService addressService) {
+		this.addressService = addressService;
 	}
 }

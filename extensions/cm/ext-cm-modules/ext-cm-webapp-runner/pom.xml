@@ -84,6 +84,7 @@
 						<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
 						<ep.jms.type>${ep.jms.type}</ep.jms.type>
 						<ep.jms.url>${ep.jms.url}</ep.jms.url>
+						<ep.plugins.folder>${project.basedir}/../../../plugins/ext-plugin-config/target/plugins</ep.plugins.folder>
 					</systemProperties>
 				</configuration>
 				<dependencies>

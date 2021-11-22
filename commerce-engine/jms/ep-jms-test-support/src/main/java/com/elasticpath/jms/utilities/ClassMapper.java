@@ -14,7 +14,8 @@ import java.util.function.Predicate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
 /**
@@ -24,7 +25,7 @@ import org.json.simple.JSONObject;
  */
 public class ClassMapper<T> {
 
-	private static final Logger LOGGER = Logger.getLogger(ClassMapper.class);
+	private static final Logger LOGGER = LogManager.getLogger(ClassMapper.class);
 	private final List<T> rootClassList = new ArrayList<>();
 
 	/**

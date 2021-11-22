@@ -50,7 +50,8 @@ public class WishlistsForItemRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnNotFoundWhenWishlistsContainingItemReturnNotFound() {
-		when(wishlistRepository.findWishlistsContainingItem(ITEM_ID_MAP)).thenReturn(Maybe.error(ResourceOperationFailure.notFound(NOT_FOUND)));
+		when(wishlistRepository.findWishlistsContainingItem(SCOPE, ITEM_ID_MAP))
+				.thenReturn(Maybe.error(ResourceOperationFailure.notFound(NOT_FOUND)));
 
 		repository.getElements(itemIdentifier)
 				.test()
@@ -59,7 +60,7 @@ public class WishlistsForItemRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnWishlistIdentifier() {
-		when(wishlistRepository.findWishlistsContainingItem(ITEM_ID_MAP)).thenReturn(Maybe.just(wishList));
+		when(wishlistRepository.findWishlistsContainingItem(SCOPE, ITEM_ID_MAP)).thenReturn(Maybe.just(wishList));
 		when(wishList.getStoreCode()).thenReturn(SCOPE);
 		when(wishList.getGuid()).thenReturn(WISHLIST_ID);
 

@@ -10,8 +10,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.plugin.tax.TaxProviderPluginInvoker;
 import com.elasticpath.plugin.tax.capability.StorageCapability;
@@ -36,7 +37,7 @@ import com.elasticpath.plugin.tax.selection.impl.MapTaxProviderSelector;
 public class ReturnTaxProviderPlugin extends AbstractCompositeTaxProviderPlugin implements TaxCalculationCapability,
 		TaxExemptionCapability, StorageCapability {
 
-	private static final Logger LOG = Logger.getLogger(ReturnTaxProviderPlugin.class);
+	private static final Logger LOG = LogManager.getLogger(ReturnTaxProviderPlugin.class);
 	
 	/**
 	 * Return Tax Provider name.

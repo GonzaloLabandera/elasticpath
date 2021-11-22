@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -24,7 +25,7 @@ import com.elasticpath.persistence.api.EpPersistenceException;
  */
 public class XmlParserImpl implements XmlParser {
 
-	private static final Logger LOG = Logger.getLogger(XmlParserImpl.class);
+	private static final Logger LOG = LogManager.getLogger(XmlParserImpl.class);
 
 	private static final XmlSectionParser DEFAULT_PARSER = new DefaultConfigSectionParser();
 

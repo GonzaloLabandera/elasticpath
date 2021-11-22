@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.admin.stores.editors.sortattributes;
 
-import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.util.Collection;
 import java.util.HashMap;

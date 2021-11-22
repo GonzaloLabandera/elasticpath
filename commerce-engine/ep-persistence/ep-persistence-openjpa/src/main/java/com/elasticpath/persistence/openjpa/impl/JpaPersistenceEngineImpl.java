@@ -44,6 +44,7 @@ import com.elasticpath.persistence.api.PersistenceSessionFactory;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngineInternal;
 import com.elasticpath.persistence.openjpa.JpaPersistenceSession;
 import com.elasticpath.persistence.openjpa.PersistenceInterceptor;
+import com.elasticpath.persistence.openjpa.support.JPAUtil;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 
 /**
@@ -300,6 +301,17 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 	@Override
 	public <T> List<T> retrieveByNamedQuery(final String queryName, final Object... parameters) {
 		return queryReader.retrieveByNamedQuery(queryName, parameters);
+	}
+
+	@Override
+	public <T> List<T> retrieveByNamedNativeQuery(final String nativeQueryName, final Class<?> resultClass, final Object... parameters) {
+		return queryReader.retrieveByNamedNativeQuery(nativeQueryName, resultClass, parameters);
+	}
+
+	@Override
+	public <T, E> List<T> retrieveByNamedNativeQueryWithList(final String queryName, final Class<?> resultClass, final Collection<E> values,
+															 final Object... parameters) {
+		return queryReader.retrieveByNamedNativeQueryWithList(queryName, resultClass, values, parameters);
 	}
 
 	@Override
@@ -666,6 +678,41 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 		for (List<E> subListOfValues : listOfSubListsOfValues) {
 			query.setParameters(parameters);
 			query.setParameter(listParameterName, subListOfValues);
+
+			ChangeType changeType = getChangeTypeFor(query);
+			fireBeginBulkOperationEvent(queryName, query, parameters, changeType);
+			try {
+				result += query.executeUpdate();
+			} finally {
+				fireEndBulkOperationEvent(changeType);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public <E> int executeNamedNativeQueryWithList(final String queryName, final Collection<E> values, final Object... parameters) {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("executing named native query " + queryName);
+		}
+
+		String nativeQueryTemplate = JPAUtil.getNativeQueryStringByQueryName(entityManager, queryName);
+
+		List<List<E>> listOfSubListsOfValues  = splitCollection(values);
+
+		int result = 0;
+
+		for (List<E> subListOfValues : listOfSubListsOfValues) {
+			Object[] listValues = subListOfValues.toArray();
+			String modifiedRawNativeQueryString = JPAUtil.expandListParameterForNativeQuery(nativeQueryTemplate, listValues.length);
+
+			Object[] newArrayParameters = new Object[listValues.length + parameters.length];
+			System.arraycopy(listValues, 0, newArrayParameters, 0, listValues.length);
+			System.arraycopy(parameters, 0, newArrayParameters, listValues.length, parameters.length);
+
+			OpenJPAQuery query = OpenJPAPersistence.cast(entityManager.createNativeQuery(modifiedRawNativeQueryString));
+			query.setParameters(newArrayParameters);
 
 			ChangeType changeType = getChangeTypeFor(query);
 			fireBeginBulkOperationEvent(queryName, query, parameters, changeType);

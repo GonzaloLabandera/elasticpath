@@ -18,7 +18,6 @@
 	</description>
 
 	<properties>
-		<groovy.http-builder>0.7.1</groovy.http-builder>
 		<ep.rest.authtype>OAuth2</ep.rest.authtype>
 
 		<!-- Cortex properties -->
@@ -126,7 +125,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-jms-test-support</artifactId>
-			<version>${dce.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
@@ -174,12 +172,12 @@
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-compiler</artifactId>
-						<version>2.9.2-04</version>
+						<version>${groovy.eclipse.compiler.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-batch</artifactId>
-						<version>2.4.15-01</version>
+						<version>${groovy.eclipse.batch.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

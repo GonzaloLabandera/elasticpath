@@ -3,7 +3,6 @@
  */
 package com.elasticpath.service.shopper.impl;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
@@ -24,17 +23,17 @@ public final class WishListMergerForShopperUpdates implements CustomerSessionSho
 	}
 
 	@Override
-	public void invalidateShopper(final CustomerSession customerSession, final Shopper invalidShopper) {
+	public void invalidateShopper(final Shopper invalidShopper, final Shopper newShopper) {
 		
-		final WishList currentWishList = wishListService.findOrCreateWishListByShopper(customerSession.getShopper());
+		final WishList newWishList = wishListService.findOrCreateWishListByShopper(newShopper);
 		final WishList invalidatedWishList = wishListService.findOrCreateWishListByShopper(invalidShopper);
 		
-		if (invalidatedWishList.equals(currentWishList)) {
+		if (invalidatedWishList.equals(newWishList)) {
 			return;
 		}
 		
-		wishListService.addAllItems(currentWishList, invalidatedWishList.getAllItems());
-		wishListService.save(currentWishList);
+		wishListService.addAllItems(newWishList, invalidatedWishList.getAllItems());
+		wishListService.save(newWishList);
 
 		wishListService.remove(invalidatedWishList);
 	}

@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
@@ -87,7 +88,9 @@ public class CatalogBrowseView extends AbstractCmClientView implements ChangeSet
 		public Object[] getElements() {
 			final CatalogService catalogService = BeanLocator.getSingletonBean(ContextIdNames.CATALOG_SERVICE, CatalogService.class);
 
-			final List<Catalog> catalogList = catalogService.findAllCatalogs();
+			// This suddenly started breaking as I investigated a 'connection already closed' issue.
+			// Is this a start-up time race condition?
+			final List<Catalog> catalogList = new ArrayList<>(catalogService.findAllCatalogs());
 			AuthorizationService.getInstance().filterAuthorizedCatalogs(catalogList);
 			Collections.sort(catalogList, new CatalogBrowseNameSorter());
 			return catalogList.toArray(new Catalog[catalogList.size()]);
@@ -99,7 +102,7 @@ public class CatalogBrowseView extends AbstractCmClientView implements ChangeSet
 	 */
 	public static final String VIEW_ID = CatalogBrowseView.class.getName();
 
-	private static final Logger LOG = Logger.getLogger(CatalogBrowseView.class);
+	private static final Logger LOG = LogManager.getLogger(CatalogBrowseView.class);
 
 	private final Locale locale = CorePlugin.getDefault().getDefaultLocale();
 	

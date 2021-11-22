@@ -17,7 +17,8 @@ import java.util.function.Predicate;
 import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -46,7 +47,7 @@ import com.elasticpath.shipping.connectivity.service.ShippingCalculationService;
  */
 @SuppressWarnings("PMD.GodClass") // TODO this is a legitimate god class. Recommend refactoring as part of cart concurrency/perf initiative.
 public class PricingSnapshotServiceImpl implements PricingSnapshotService {
-	private static final Logger LOG = Logger.getLogger(PricingSnapshotServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PricingSnapshotServiceImpl.class);
 
 	private EpRuleEngine ruleEngine;
 	private BeanFactory beanFactory;
@@ -100,11 +101,11 @@ public class PricingSnapshotServiceImpl implements PricingSnapshotService {
 			getCartDirector().refresh(shoppingCart);
 			storeCatalogPromotionRecords(shoppingCart, shoppingCart, promotionRecordContainer);
 
-			getRuleEngine().fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
+			getRuleEngine().fireOrderPromotionRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
 
 			calculatePrePromotionShippingPrices(shoppingCart, shoppingCart);
 
-			getRuleEngine().fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+			getRuleEngine().fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
 
 			// Discount Record Container contains two separate collections that denote rule application:
 			// 1. The set of rules that were applicable to this cart/order (includes rules that were superseded by better promos)

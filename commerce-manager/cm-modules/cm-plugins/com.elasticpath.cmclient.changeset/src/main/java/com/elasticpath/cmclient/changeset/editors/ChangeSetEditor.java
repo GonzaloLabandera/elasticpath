@@ -7,9 +7,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -39,7 +40,7 @@ import com.elasticpath.service.changeset.ChangeSetManagementService;
  */
 public class ChangeSetEditor extends AbstractPolicyAwareFormEditor implements ChangeSetEventListener {
 	
-	private static final Logger LOG = Logger.getLogger(ChangeSetEditor.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetEditor.class);
 	private final ChangeSetHelper changeSetHelper = BeanLocator.getSingletonBean(ChangeSetHelper.BEAN_ID, ChangeSetHelper.class);
 	/**
 	 * The editor ID.

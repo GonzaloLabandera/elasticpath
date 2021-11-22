@@ -5,7 +5,8 @@ package com.elasticpath.tools.sync.merge.configuration.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.tools.sync.exception.SyncToolConfigurationException;
@@ -21,7 +22,7 @@ public class EntityLocatorDelegateImpl extends AbstractEntityLocator {
 	private static final String AT_CONFIGURATION = " at configuration";
 	private static final String COULD_NOT_FIND = "Could not find ";
 	private List<EntityLocator> entityLocators;
-	private static final Logger LOG = Logger.getLogger(EntityLocatorDelegateImpl.class);
+	private static final Logger LOG = LogManager.getLogger(EntityLocatorDelegateImpl.class);
 
 	/**
 	 * Set the list of entity locators.

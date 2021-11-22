@@ -16,16 +16,11 @@
 	<description> Contains the MANIFEST-first tycho modules, separated from the pom-first modules.</description>
 
 	<properties>
-		<tycho.version>1.0.0</tycho.version>
-		<tycho.target-platform>cm-rap32</tycho.target-platform>
+		<tycho.target-platform>cm-rap</tycho.target-platform>
 		<tycho.target-platform.version>${project.version}</tycho.target-platform.version>
 		<pmd.cmclient.ruleset>rulesets/pmd-elasticpath-cmclient-rules.xml</pmd.cmclient.ruleset>
 		<checkstyle.ruleset>rulesets/checkstyle-elasticpath-rules.xml</checkstyle.ruleset>
 		<checkstyle.suppressions.location>cm-ruleset/checkstyle-cmclient-suppressions.xml</checkstyle.suppressions.location>
-		<solr.version>4.5.1</solr.version>
-		<sling-plugin.version>2.1.0</sling-plugin.version>
-		<org.apache.batic.version>1.6.0.v201011041432</org.apache.batic.version>
-		<org.eclipse.emf.version>2.12.0.v20160420-0247</org.eclipse.emf.version>
 	</properties>
 
 	<repositories>
@@ -35,7 +30,7 @@
 			<layout>p2</layout>
 		</repository>
 		<repository>
-			<id>OxygenRepository</id>
+			<id>EclipseReleasesRepository</id>
 			<url>http://download.eclipse.org/releases/photon</url>
 			<layout>p2</layout>
 		</repository>
@@ -266,7 +261,7 @@
 					<plugin>
 						<groupId>org.apache.sling</groupId>
 						<artifactId>maven-sling-plugin</artifactId>
-						<version>${sling-plugin.version}</version>
+						<version>${maven-sling-plugin.version}</version>
 						<executions>
 							<execution>
 								<id>uninstall-bundle</id>

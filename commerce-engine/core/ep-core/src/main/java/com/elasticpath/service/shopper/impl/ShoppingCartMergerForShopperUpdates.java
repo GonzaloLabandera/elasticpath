@@ -3,9 +3,9 @@
  */
 package com.elasticpath.service.shopper.impl;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
 import com.elasticpath.service.shoppingcart.ShoppingCartMerger;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
@@ -29,24 +29,21 @@ public final class ShoppingCartMergerForShopperUpdates implements CustomerSessio
 	}
 
 	@Override
-	public void invalidateShopper(final CustomerSession customerSession, final Shopper invalidShopper) {
-		final Shopper currentShopper = customerSession.getShopper();
-		if (currentShopper.equals(invalidShopper)) {
-			copyTransientData(currentShopper, invalidShopper);
+	public void invalidateShopper(final Shopper invalidShopper, final Shopper newShopper) {
+		if (newShopper.equals(invalidShopper)) {
+			copyTransientData(newShopper, invalidShopper);
 			return;
 		}
 
-		final ShoppingCart anonymousCart = invalidShopper.getCurrentShoppingCart();
-		mergeCartIntoCustomerSession(anonymousCart, customerSession);
-	}
+		final ShoppingCart invalidShoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(invalidShopper);
+		final ShoppingCart newShoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(newShopper);
+		if (!((ShoppingCartMementoHolder) newShoppingCart).getShoppingCartMemento().isPersisted()) {
+			shoppingCartService.saveOrUpdate(newShoppingCart);
+		}
 
-	private void mergeCartIntoCustomerSession(final ShoppingCart cart, final CustomerSession customerSession) {
-		final Shopper currentShopper = customerSession.getShopper();
-		final ShoppingCart preExistingPersistedCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
+		final ShoppingCart mergedShoppingCart = shoppingCartMerger.merge(newShoppingCart, invalidShoppingCart);
 
-		final ShoppingCart mergedShoppingCart = shoppingCartMerger.merge(preExistingPersistedCart, cart);
-
-		attachCartToShopperAndPersist(currentShopper, mergedShoppingCart);
+		attachCartToShopperAndPersist(newShopper, mergedShoppingCart);
 	}
 
 	private void copyTransientData(final Shopper currentShopper, final Shopper invalidShopper) {

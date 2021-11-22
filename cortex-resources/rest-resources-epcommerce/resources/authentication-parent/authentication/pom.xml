@@ -25,6 +25,10 @@
 			<artifactId>ep-rest-repositories-epcommerce</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.elasticpath.rest</groupId>
+			<artifactId>ep-rest-json-jackson</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
 			<artifactId>ep-rs-authentication-api</artifactId>
 		</dependency>

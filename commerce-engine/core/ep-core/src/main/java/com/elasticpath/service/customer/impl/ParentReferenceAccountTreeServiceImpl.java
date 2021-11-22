@@ -3,16 +3,16 @@
  */
 package com.elasticpath.service.customer.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerType;
+import com.elasticpath.domain.customer.CustomerClosure;
+import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.customer.AccountTreeService;
 import com.elasticpath.service.customer.CustomerService;
 
@@ -24,70 +24,79 @@ public class ParentReferenceAccountTreeServiceImpl implements AccountTreeService
 	private static final String ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS = "ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS";
 	private static final String LIST_PARAM_NAME = "guidsThisLevel";
 	private CustomerService customerService;
+	private BeanFactory beanFactory;
+	private PersistenceEngine persistenceEngine;
 
 	@Override
-	public void parent(final Customer parent, final Customer child) throws IllegalArgumentException, EpServiceException {
-		validateAccounts(parent, child);
-		child.setParentGuid(parent.getGuid());
-		customerService.update(child);
+	public void insertClosures(final String accountGuid, final String parentAccountGuid) throws EpServiceException {
+
+		validateAccounts(parentAccountGuid, accountGuid);
+
+		duplicateAncestorClosures(accountGuid, parentAccountGuid);
+		saveNewClosure(accountGuid, parentAccountGuid);
 	}
 
-	@Override
-	public List<String> fetchSubtree(final Customer root) throws IllegalArgumentException, EpServiceException {
-		checkCustomerType(root);
-		final List<String> subtreeGuids = new ArrayList<>();
-		fetchSubtree(Collections.singletonList(root.getGuid()), subtreeGuids);
-		return subtreeGuids;
+	private void saveNewClosure(final String accountGuid, final String parentAccountGuid) {
+		long ancestorDepth = getAncestorDepth(parentAccountGuid);
+
+		CustomerClosure customerClosure = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_CLOSURE, CustomerClosure.class);
+		customerClosure.setAncestorGuid(parentAccountGuid);
+		customerClosure.setDescendantGuid(accountGuid);
+		customerClosure.setAncestorDepth(ancestorDepth);
+
+		persistenceEngine.save(customerClosure);
 	}
 
-	private void fetchSubtree(final List<String> parentGuids, final List<String> subtreeGuids) {
-		final List<String> childrenGuids = getChildrenGuids(parentGuids);
-		if (!childrenGuids.isEmpty()) {
-			subtreeGuids.addAll(childrenGuids);
-			fetchSubtree(childrenGuids, subtreeGuids);
+	private void duplicateAncestorClosures(final String accountGuid, final String parentAccountGuid) {
+		final List<CustomerClosure> customerClosuresForDuplicating = persistenceEngine
+				.retrieveByNamedQuery("SELECT_ACCOUNT_CLOSURE_DUPLICATE", parentAccountGuid);
+
+		for (CustomerClosure customerClosure : customerClosuresForDuplicating) {
+
+			CustomerClosure customerClosureNew = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER_CLOSURE, CustomerClosure.class);
+			customerClosureNew.setDescendantGuid(accountGuid);
+			customerClosureNew.setAncestorGuid(customerClosure.getAncestorGuid());
+			customerClosureNew.setAncestorDepth(customerClosure.getAncestorDepth());
+
+			persistenceEngine.save(customerClosureNew);
 		}
 	}
 
-	@Override
-	public List<String> fetchPathToRoot(final Customer account) throws IllegalArgumentException, EpServiceException {
-		checkCustomerType(account);
-		final List<String> pathToRoot = new ArrayList<>();
-		fetchPathToRoot(account.getGuid(), pathToRoot);
-		return pathToRoot;
+	private long getAncestorDepth(final String parentAccountGuid) {
+		final List<Long> depthList = persistenceEngine.retrieveByNamedQuery("SELECT_CUSTOMER_CLOSURE_DEPTH", parentAccountGuid);
+		if (!depthList.isEmpty() && depthList.get(0) != null) {
+			return depthList.get(0);
+		}
+		return 0;
 	}
 
-	private void fetchPathToRoot(final String childGuid, final List<String> pathToRoot) {
-		final Optional<String> parentGuid = fetchParentAccountGuidByChildGuid(childGuid);
-		if (parentGuid.isPresent()) {
-			pathToRoot.add(parentGuid.get());
-			fetchPathToRoot(parentGuid.get(), pathToRoot);
-		}
+	@Override
+	public List<String> findDescendantGuids(final String accountGuid) throws IllegalArgumentException, EpServiceException {
+		return persistenceEngine.retrieveByNamedQuery("SELECT_DESCENDANT", accountGuid);
+	}
+
+	@Override
+	public List<String> findAncestorGuids(final String accountGuid) throws IllegalArgumentException, EpServiceException {
+		return persistenceEngine.retrieveByNamedQuery("SELECT_ANCESTOR", accountGuid);
 	}
 
 	@Override
 	public List<String> fetchChildAccountGuids(final Customer account) throws IllegalArgumentException, EpServiceException {
-		checkCustomerType(account);
 		return getChildrenGuids(Collections.singletonList(account.getGuid()));
 	}
 
 	@Override
-	public List<String> fetchChildAccountGuidsPaginated(final String accountId, final int pageStartIndex, final int pageSize) {
+	public List<String> findChildGuidsPaginated(final String accountGuid, final int pageStartIndex, final int pageSize) {
 		return customerService.getPersistenceEngine().retrieveByNamedQueryWithList(ACCOUNT_CHILDREN_GUIDS_BY_PARENT_GUIDS,
 				LIST_PARAM_NAME,
-				Collections.singletonList(accountId),
+				Collections.singletonList(accountGuid),
 				new Object[]{},
 				pageStartIndex, pageSize);
 	}
 
-	private void validateAccounts(final Customer parent, final Customer child) throws IllegalArgumentException {
-		checkCustomerType(parent);
-		checkCustomerType(child);
-		if (StringUtils.isNotEmpty(child.getParentGuid())) {
-			throw new IllegalArgumentException("The child customer already has a parent.");
-		}
-		final List<String> pathToRoot = new ArrayList<>();
-		fetchPathToRoot(parent.getGuid(), pathToRoot);
-		if (isRootOfTree(child.getGuid(), pathToRoot)) {
+	private void validateAccounts(final String parent, final String child) throws IllegalArgumentException {
+		final List<String> pathToRoot = findAncestorGuids(parent);
+		if (isRootOfTree(child, pathToRoot)) {
 			throw new IllegalArgumentException("The child customer is a root of the parents' tree");
 		}
 	}
@@ -112,15 +121,14 @@ public class ParentReferenceAccountTreeServiceImpl implements AccountTreeService
 				: Optional.of(guids.get(0));
 	}
 
+	@Override
+	public void remove(final String accountGuid) {
+		persistenceEngine.executeNamedQuery("DELETE_ACCOUNT_CLOSURE_BY_DESCENDANT_GUID", accountGuid);
+	}
+
 	private void validateParentGuid(final List<String> parentGuidList) {
 		if (parentGuidList.size() > 1) {
 			throw new EpServiceException("Inconsistent data -- duplicate GUIDs exist -- " + parentGuidList.get(0));
-		}
-	}
-
-	private void checkCustomerType(final Customer customer) throws IllegalArgumentException {
-		if (!customer.getCustomerType().equals(CustomerType.ACCOUNT)) {
-			throw new IllegalArgumentException("This customer is not of type ACCOUNT.");
 		}
 	}
 
@@ -130,5 +138,21 @@ public class ParentReferenceAccountTreeServiceImpl implements AccountTreeService
 
 	public void setCustomerService(final CustomerService customerService) {
 		this.customerService = customerService;
+	}
+
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+
+	public void setBeanFactory(final BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+	protected PersistenceEngine getPersistenceEngine() {
+		return persistenceEngine;
+	}
+
+	public void setPersistenceEngine(final PersistenceEngine persistenceEngine) {
+		this.persistenceEngine = persistenceEngine;
 	}
 }

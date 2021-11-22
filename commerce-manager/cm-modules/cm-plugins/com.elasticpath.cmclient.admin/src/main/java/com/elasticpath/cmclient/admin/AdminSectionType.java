@@ -9,7 +9,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
@@ -21,7 +22,7 @@ import com.elasticpath.cmclient.core.util.InitializationGuard;
  * plugin, so this class knows how to parse such an element.
  */
 public class AdminSectionType {
-	private static final Logger LOG = Logger.getLogger(AdminSectionType.class);
+	private static final Logger LOG = LogManager.getLogger(AdminSectionType.class);
 
 	private static final String EXTENSION_NAME = "adminSections"; //$NON-NLS-1$
 

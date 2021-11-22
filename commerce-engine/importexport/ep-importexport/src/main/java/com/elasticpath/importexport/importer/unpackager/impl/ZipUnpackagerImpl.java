@@ -11,7 +11,8 @@ import java.util.Queue;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.exception.runtime.ImportRuntimeException;
 import com.elasticpath.importexport.common.manifest.Manifest;
@@ -24,7 +25,7 @@ import com.elasticpath.importexport.importer.unpackager.Unpackager;
  */
 public class ZipUnpackagerImpl implements Unpackager {
 
-	private static final Logger LOG = Logger.getLogger(ZipUnpackagerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ZipUnpackagerImpl.class);
 	
 	private ZipFile zipFile;
 

@@ -5,14 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.DataTable
 import cucumber.api.java.en.Then
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.LogManager
 
 import com.elasticpath.CucumberDTO.Facet
 import com.elasticpath.cortexTestObjects.Facets
 
 class FacetsSteps {
 
-	private static final Logger LOGGER = Logger.getLogger(FacetsSteps.class)
+	private static final Logger LOGGER = LogManager.getLogger(FacetsSteps.class)
 	static final int SLEEP_ONE_SECONDS_IN_MILLIS = 1000
 
 	@Then('^the expected facet choice list matches the following list$')
@@ -32,7 +33,9 @@ class FacetsSteps {
 					if (it.rel == "choice" || it.rel == "chosen") {
 						client.GET(it.href)
 								.description()
-						LOGGER.debug(attempts + " ..... actual values ..." + client["value"] + "count:" + client["count"])
+						if (LOGGER.isTraceEnabled()) {
+							LOGGER.trace(attempts + " ..... actual values ..." + client["value"] + "count:" + client["count"])
+						}
 						if (client["count"] == facet.getCount() && client["value"] == facet.getValue()) {
 							return isExist = true
 
@@ -40,10 +43,14 @@ class FacetsSteps {
 					}
 				}
 				if (isExist) {
-					LOGGER.debug(attempts + " ..... found ..." + facet.value + ":" + facet.count)
+					if (LOGGER.isTraceEnabled()) {
+						LOGGER.trace(attempts + " ..... found ..." + facet.value + ":" + facet.count)
+					}
 					break
 				}
-				LOGGER.debug(attempts + " .....Unable to find..." + facet.value + ":" + facet.count)
+				if (LOGGER.isTraceEnabled()) {
+					LOGGER.trace(attempts + " .....Unable to find..." + facet.value + ":" + facet.count)
+				}
 				sleep(SLEEP_ONE_SECONDS_IN_MILLIS)
 				attempts++;
 			}

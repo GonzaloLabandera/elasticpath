@@ -263,6 +263,29 @@ public interface PersistenceEngine {
 	<T> List<T> retrieveByNamedQuery(String queryName, Object... parameters);
 
 	/**
+	 * Retrieve a list of persistent instances with the specified  named native query.
+	 *
+	 * @param nativeQueryName the native query name
+	 * @param resultClass The result class, used for mapping SQL columns to Java fields.
+	 *                    The SQL field name must have a matching Java setter method e.g.
+	 *                    In a query SELECT p.SKU_CODE skuCode FROM TPRODUCTSKU p, "skuCode" must
+	 *                    have a matching "setSkuCode" method in the result class.
+	 * @param parameters An array of parameters. As in JPQL, the SQL params are also labeled with "?<INDEX>" e.g.
+	 *                   "?1". When dealing with list parameters, as in FIELD IN (?1), the parameters method
+	 *                   may contain another array, representing IN values. It is also important to maintain the correct position
+	 *                   of value array within the "parameters" array to match the index position in the query.
+	 *
+	 *                   For example
+	 *                   SELECT t.UIDPK FROM table t WHERE t.PRODUCT_UID = ?1 and t.SKU_CODE IN (?2)
+	 *
+	 *                   The "parameters" array will look like
+	 *                   new Object[] {SOME_PRODUCT_UID, new String[]{"SKU_CODE1", "SKU_CODE2"}}
+	 * @param <T> The result type
+	 * @return a list of persistent instances
+	 */
+	<T> List<T> retrieveByNamedNativeQuery(String nativeQueryName, Class<?> resultClass, Object... parameters);
+
+	/**
 	 * Retrieve a list of persistent instances with the specified named query, using the given FlushMode.
 	 *
 	 * @param <T> the object's type to retrieve
@@ -350,6 +373,18 @@ public interface PersistenceEngine {
 	<T, E> List<T> retrieveByNamedQueryWithList(String queryName, String listParameterName, Collection<E> values, Object... parameters);
 
 	/**
+	 * Retrieve a list of persistent instances with the specified  named native query.
+	 *
+	 * @param nativeQueryName the native query name
+	 * @param resultClass @see #retrieveByNativeNamedQuery
+	 * @param values the collection of values
+	 * @param parameters @see #retrieveByNativeNamedQuery
+	 * @param <T> result type
+	 * @param <E> value type
+	 * @return a list of persistent instances
+	 */
+	<T, E> List<T> retrieveByNamedNativeQueryWithList(String nativeQueryName, Class<?> resultClass, Collection<E> values, Object... parameters);
+	/**
 	 * Retrieve a list of persistent instances with the specified named query.
 	 *
 	 * @param <T> the object's type to retrieve
@@ -384,6 +419,18 @@ public interface PersistenceEngine {
 	 * @return the number of entities updated or deleted
 	 */
 	<E> int executeNamedQueryWithList(String queryName, String listParameterName, Collection<E> values, Object... parameters);
+
+	/**
+	 * Execute an update or delete named native query.
+	 * The first parameter must be a list of values.
+	 *
+	 * @param <E> the type of values used in the query
+	 * @param queryName the named native query
+	 * @param values the collection of values
+	 * @param parameters the parameters to be used with the given query
+	 * @return the number of entities updated or deleted
+	 */
+	<E> int executeNamedNativeQueryWithList(String queryName, Collection<E> values, Object... parameters);
 
 	/**
 	 * Execute dynamic update/delete query.

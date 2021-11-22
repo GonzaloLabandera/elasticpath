@@ -23,8 +23,6 @@
 	<properties>
 		<ep.mock.host>localhost</ep.mock.host>
 		<ep.mock.url>http://${ep.mock.host}:${ep.mock.tomcat.port.http}${ep.mock.context}</ep.mock.url>
-
-		<cargo.plugin.version>1.6.8</cargo.plugin.version>
 	</properties>
 
 	<dependencies>
@@ -52,8 +50,8 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

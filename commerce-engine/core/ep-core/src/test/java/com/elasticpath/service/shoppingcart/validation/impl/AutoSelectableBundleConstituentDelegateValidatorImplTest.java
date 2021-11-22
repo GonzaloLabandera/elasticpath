@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -20,18 +21,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.common.pricing.service.PriceLookupFacade;
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.catalog.BundleConstituent;
-import com.elasticpath.domain.catalog.ConstituentItem;
-import com.elasticpath.domain.catalog.Price;
-import com.elasticpath.domain.catalog.ProductBundle;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.store.Store;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFPrice;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
+import com.elasticpath.xpf.connectivity.entity.XPFShopper;
+import com.elasticpath.xpf.connectivity.entity.XPFStore;
+import com.elasticpath.xpf.connectivity.extensionpoint.ProductSkuValidator;
 
 /**
  * Unit tests for {@link AutoSelectableBundleConstituentDelegateValidatorImpl}.
@@ -49,11 +46,7 @@ public class AutoSelectableBundleConstituentDelegateValidatorImplTest {
 
 	private static final String BRANCH_SKU_CODE_2 = "BRANCH_SKU_CODE_2";
 
-	private static final String SHOPPER_KEY = "SHOPPER_KEY";
-
 	private static final String STORE_CODE_KEY = "STORE_CODE_KEY";
-
-	private static final String SHOPPER_GUID = "SHOPPER_GUID";
 
 	private static final String STORE_CODE = "STORE_CODE";
 
@@ -61,48 +54,33 @@ public class AutoSelectableBundleConstituentDelegateValidatorImplTest {
 	private AutoSelectableBundleConstituentDelegateValidatorImpl validator;
 
 	@Mock
-	private BeanFactory beanFactory;
+	private XPFExtensionLookup extensionLookup;
 
 	@Mock
-	private ProductBundle rootBundle;
+	private XPFProductSku rootProductSku, branchProductSku1, branchProductSku2;
 
 	@Mock
-	private BundleConstituent branchConstituent1, branchConstituent2;
+	private XPFPrice price;
 
 	@Mock
-	private ConstituentItem branchConstituentItem1, branchConstituentItem2;
+	private XPFStore store;
 
 	@Mock
-	private ProductSku rootProductSku, branchProductSku1, branchProductSku2;
-
-	@Mock
-	private Price price;
-
-	@Mock
-	private Store store;
-
-	@Mock
-	private Shopper shopper;
-
-	@Mock
-	private PriceLookupFacade priceLookupFacade;
+	private XPFShopper shopper;
 
 	@Test
 	public void testTreeWithNestedBundles() {
 		// Given
-		given(beanFactory.getPrototypeBean(ContextIdNames.PRODUCT_SKU_VALIDATION_CONTEXT, ProductSkuValidationContext.class))
-				.willAnswer(invocation -> new ProductSkuValidationContextImpl());
-		given(priceLookupFacade.getPromotedPriceForSku(any(ProductSku.class), eq(store), eq(shopper))).willReturn(price);
-
-		validator.setValidators(Collections.singleton(context -> ImmutableList.of(
-				new StructuredErrorMessage(ERROR_ID, ERROR_MESSAGE, ImmutableMap.of(
-						SKU_CODE_KEY, context.getProductSku().getSkuCode(),
-						SHOPPER_KEY, context.getShopper().getGuid(),
-						STORE_CODE_KEY, context.getStore().getCode())))));
-
-
-		given(shopper.getGuid()).willReturn(SHOPPER_GUID);
 		given(store.getCode()).willReturn(STORE_CODE);
+		given(branchProductSku1.getCode()).willReturn(BRANCH_SKU_CODE_1);
+		given(branchProductSku2.getCode()).willReturn(BRANCH_SKU_CODE_2);
+		given(shopper.getStore()).willReturn(store);
+
+		given(extensionLookup.getMultipleExtensions(eq(ProductSkuValidator.class), any(), any()))
+				.willReturn(Collections.singletonList(context -> ImmutableList.of(
+						new XPFStructuredErrorMessage(ERROR_ID, ERROR_MESSAGE, ImmutableMap.of(
+								SKU_CODE_KEY, context.getProductSku().getCode(),
+								STORE_CODE_KEY, STORE_CODE)))));
 
 		/*
 					rootBundle
@@ -112,39 +90,28 @@ public class AutoSelectableBundleConstituentDelegateValidatorImplTest {
 			leafBundle1		leafBundle2
 
 		 */
-		givenBundleTreeStructure();
-
-		// Conditions on each node
-		given(rootBundle.isConstituentAutoSelectable(branchConstituent1)).willReturn(true);
-		given(rootBundle.isConstituentAutoSelectable(branchConstituent2)).willReturn(true);
-
-		final ProductSkuValidationContext context = new ProductSkuValidationContextImpl();
-		context.setProductSku(rootProductSku);
-		context.setStore(store);
-		context.setShopper(shopper);
 
 		// When
-		Collection<StructuredErrorMessage> errorMessages = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> errorMessages = validator.validate(givenBundleTreeStructure());
 
 		// Then
 		assertThat(errorMessages)
-				.extracting(StructuredErrorMessage::getData)
-				.extracting(SKU_CODE_KEY, SHOPPER_KEY, STORE_CODE_KEY)
+				.extracting(XPFStructuredErrorMessage::getData)
+				.extracting(SKU_CODE_KEY, STORE_CODE_KEY)
 				.containsExactlyInAnyOrder(
-						tuple(BRANCH_SKU_CODE_1, SHOPPER_GUID, STORE_CODE),
-						tuple(BRANCH_SKU_CODE_2, SHOPPER_GUID, STORE_CODE)
+						tuple(BRANCH_SKU_CODE_1, STORE_CODE),
+						tuple(BRANCH_SKU_CODE_2, STORE_CODE)
 				);
 	}
 
-	private void givenBundleTreeStructure() {
-		given(rootProductSku.getProduct()).willReturn(rootBundle);
-		given(rootBundle.getConstituents()).willReturn(ImmutableList.of(branchConstituent1, branchConstituent2));
-		given(branchConstituent1.getConstituent()).willReturn(branchConstituentItem1);
-		given(branchConstituent2.getConstituent()).willReturn(branchConstituentItem2);
-		given(branchConstituentItem1.getProductSku()).willReturn(branchProductSku1);
-		given(branchConstituentItem2.getProductSku()).willReturn(branchProductSku2);
+	private XPFProductSkuValidationContext givenBundleTreeStructure() {
 
-		given(branchProductSku1.getSkuCode()).willReturn(BRANCH_SKU_CODE_1);
-		given(branchProductSku2.getSkuCode()).willReturn(BRANCH_SKU_CODE_2);
+		final XPFProductSkuValidationContext branchBundle1 =
+				new XPFProductSkuValidationContext(branchProductSku1, rootProductSku, shopper, price, true, Collections.emptyList());
+		final XPFProductSkuValidationContext branchBundle2 =
+				new XPFProductSkuValidationContext(branchProductSku2, rootProductSku, shopper, price, true, Collections.emptyList());
+
+		return new XPFProductSkuValidationContext(rootProductSku, null, shopper, price, true, Arrays.asList(branchBundle1,
+				branchBundle2));
 	}
 }

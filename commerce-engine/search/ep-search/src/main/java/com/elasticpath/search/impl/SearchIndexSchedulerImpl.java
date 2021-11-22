@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.Trigger;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
@@ -21,7 +22,7 @@ public class SearchIndexSchedulerImpl extends SchedulerFactoryBean {
 
 	private static final String EP_SEARCH_MODE = "ep.search.mode";
 
-	private static final Logger LOG = Logger.getLogger(SearchIndexSchedulerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SearchIndexSchedulerImpl.class);
 
 	private List<Trigger> fallbackSearchTriggers;
 

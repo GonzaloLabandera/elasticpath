@@ -9,8 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -58,7 +59,7 @@ public class TaxValueDialog extends AbstractEpDialog {
 	/**
 	 * The logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(TaxValueDialog.class);
+	private static final Logger LOG = LogManager.getLogger(TaxValueDialog.class);
 
 	/**
 	 * This dialog's title. Depends from whether this is create or edit dialog

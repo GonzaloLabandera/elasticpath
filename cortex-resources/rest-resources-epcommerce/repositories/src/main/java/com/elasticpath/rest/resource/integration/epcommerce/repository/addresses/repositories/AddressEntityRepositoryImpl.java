@@ -89,7 +89,8 @@ public class AddressEntityRepositoryImpl<E extends AddressEntity, I extends Addr
 	protected Single<SubmitResult<AddressIdentifier>> createNewAddress(final AddressEntity addressEntity, final IdentifierPart<String> scope) {
 		String userIdentifier = resourceOperationContext.getUserIdentifier();
 		Customer customer = customerRepository.getCustomer(userIdentifier).blockingGet();
-		CustomerAddress customerAddress = addressRepository.convertAddressEntityToCustomerAddress(addressEntity);
+		CustomerAddress customerAddress = convertAddressEntityToCustomerAddress(addressEntity);
+		customerAddress.setCustomerUidPk(customer.getUidPk());
 
 		Optional<CustomerAddress> existingAddressOptional = addressRepository.getExistingAddressMatchingAddress(customerAddress,
 				customer);
@@ -137,6 +138,16 @@ public class AddressEntityRepositoryImpl<E extends AddressEntity, I extends Addr
 						? SubmitStatus.CREATED
 						: SubmitStatus.EXISTING)
 				.build();
+	}
+
+	/**
+	 * Converts AddressEntity to CustomerAddress.
+	 *
+	 * @param addressEntity addressEntity
+	 * @return customer address
+	 */
+	protected CustomerAddress convertAddressEntityToCustomerAddress(final AddressEntity addressEntity) {
+		return addressRepository.convertAddressEntityToCustomerAddress(addressEntity);
 	}
 
 	@Reference

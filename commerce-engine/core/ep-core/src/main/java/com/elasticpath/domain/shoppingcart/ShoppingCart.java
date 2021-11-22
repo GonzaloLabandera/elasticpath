@@ -18,11 +18,9 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.StoreObject;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.plugin.tax.domain.TaxExemption;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
@@ -37,27 +35,6 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 * @return the guid.
 	 */
 	String getGuid();
-
-	/**
-	 * Return the <code>CustomerSession</code>. instance. Customer sessions track information about sessions where the customer may not be logged
-	 * in.
-	 *
-	 * @return the <code>CustomerSession</code> instance
- 	 * @deprecated {@link CustomerSession}s should be attached to {@link ShoppingCart}s through {@link com.elasticpath.domain.shopper.Shopper}
-	 * Use ShoppingCart.
-	 */
-	@Deprecated
-	CustomerSession getCustomerSession();
-
-	/**
-	 * Set the <code>CustomerSession</code>. instance. Customer sessions track information about sessions where the customer may not be logged in.
-	 *
-	 * @param customerSession the <code>CustomerSession</code> instance
-	 * @deprecated {@link CustomerSession}s should be attached to {@link ShoppingCart}s through {@link Shopper}.
-	 * To attach a {@link CustomerSession} to a {@link ShoppingCart}, use this.setShopper(customerSession.getShopper().
-	 */
-	@Deprecated
-	void setCustomerSession(CustomerSession customerSession);
 
 	/**
 	 * Get the products in the shopping cart.
@@ -523,7 +500,9 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 *
 	 * @param name The name of the field to assign.
 	 * @param value The value to assign to the field.
+	 * @deprecated use {@link #getModifierFields().put()}
 	 */
+	@Deprecated
 	void setCartDataFieldValue(String name, String value);
 
 	/**
@@ -544,30 +523,25 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 *
 	 * @param name The name of the field.
 	 * @return The current value of the field or null.
+	 * @deprecated use {@link #getModifierFields().get()}
 	 */
+	@Deprecated
 	String getCartDataFieldValue(String name);
 
 
 	/**
 	 * Gets the context data for the shopping cart.
 	 * @return the item data.
+	 * @deprecated use {@link #getModifierFields().getMap()}
 	 */
-	Map<String, CartData> getCartData();
+	@Deprecated
+	Map<String, String> getCartData();
 
 	/**
-	 * Creates context data for the shopping cart.
-	 * @param name the name.
-	 * @param value the value.
-	 * @return the data.
+	 * Returns the map wrapper with cart modifier fields.
+	 * @return {@link ModifierFieldsMapWrapper}
 	 */
-	CartData createCartData(String name, String value);
-
-	/**
-	 * Gets Modifier fields associated with this store.
-	 *
-	 * @return list of modifier fields
-	 */
-	List<ModifierField> getModifierFields();
+	ModifierFieldsMapWrapper getModifierFields();
 
 	/**
 	 * Gets account if it presents, user in other case.

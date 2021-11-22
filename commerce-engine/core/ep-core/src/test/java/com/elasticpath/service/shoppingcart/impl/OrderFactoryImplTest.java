@@ -37,6 +37,8 @@ import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
+import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.impl.OrderAddressImpl;
@@ -106,6 +108,9 @@ public class OrderFactoryImplTest {
 	private Store store;
 	private Customer mockAccount;
 
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
+
 	/**
 	 * Setup required for each test.
 	 *
@@ -113,6 +118,8 @@ public class OrderFactoryImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
+		elasticPath.setBeanFactory(beanFactory);
+
 		orderFactory = new OrderFactoryImpl();
 		orderFactory.setBeanFactory(beanFactory);
 		orderFactory.setOrderService(orderService);
@@ -145,6 +152,8 @@ public class OrderFactoryImplTest {
 		mockBeanFactoryPrototypeExpectation(beanFactory, ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR, ShipmentTypeShoppingCartVisitor.class,
 				shoppingCartVisitor);
 		mockBeanFactoryPrototypeExpectation(beanFactory, ContextIdNames.APPLIED_RULE, AppliedRule.class, AppliedRuleImpl.class);
+		mockBeanFactoryPrototypeExpectation(beanFactory, ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class,
+				ModifierFieldsMapWrapper.class);
 	}
 
 	/**
@@ -204,7 +213,7 @@ public class OrderFactoryImplTest {
 		Order order = setupOrder();
 
 		mockAccount = mock(Customer.class);
-		Shopper shopper = customerSession.getShopper();
+		Shopper shopper = shoppingCart.getShopper();
 		shopper.setAccount(mockAccount);
 
 		final Order persistedOrder = orderFactory.createAndPersistNewEmptyOrder(
@@ -305,10 +314,7 @@ public class OrderFactoryImplTest {
 
 	private ShoppingCartImpl createShoppingCart() {
 		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMemento();
-		final ShoppingCartImpl cart = TestShoppingCartFactory.getInstance().createNewCartWithMemento(shopper, store);
-		when(customerSession.getShopper()).thenReturn(shopper);
-		cart.setCustomerSession(customerSession);
-		return cart;
+		return TestShoppingCartFactory.getInstance().createNewCartWithMemento(shopper, store);
 	}
 
 	private CustomerAddress addBillingAddressToCart(final ShoppingCart shoppingCart) {

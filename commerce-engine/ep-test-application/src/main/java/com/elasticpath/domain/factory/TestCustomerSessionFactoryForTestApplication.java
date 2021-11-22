@@ -66,13 +66,11 @@ public final class TestCustomerSessionFactoryForTestApplication {
 	 */
 	public CustomerSession createNewCustomerSessionWithContext(final Shopper shopper) {
 		final CustomerSession customerSession = new CustomerSessionImpl();
-
-		customerSession.setShopper(shopper);
 		customerSession.setLocale(Locale.CANADA);
 		TagSet tagSet = new TagSet();
 		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(new Date().getTime()));
 		customerSession.setCustomerTagSet(tagSet);
-		shopper.updateTransientDataWith(customerSession);
+		shopper.setCustomerSession(customerSession);
 
 		return customerSession;
 	}

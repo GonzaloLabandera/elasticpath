@@ -15,8 +15,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import au.com.bytecode.opencsv.CSVReader;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -56,7 +57,7 @@ import com.elasticpath.tags.service.SelectableTagValueProvider;
  */
 public abstract class AbstractExternalCSVSelectableTagValueProvider<VALUE> implements SelectableTagValueProvider<VALUE>, ResourceLoaderAware {
 	
-	private static final Logger LOG = Logger.getLogger(AbstractExternalCSVSelectableTagValueProvider.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractExternalCSVSelectableTagValueProvider.class);
 	
 	private static final String DOT = ".";
 	

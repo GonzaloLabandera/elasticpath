@@ -7,7 +7,8 @@ package com.elasticpath.cmclient.pricelistmanager.actions;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,7 +32,7 @@ import com.elasticpath.cmclient.pricelistmanager.views.PriceListSearchResultsVie
  */
 public class CsvExportPricelistAction extends AbstractPolicyAwareAction {
 
-	private static final Logger LOG = Logger.getLogger(CsvExportPricelistAction.class.getName());
+	private static final Logger LOG = LogManager.getLogger(CsvExportPricelistAction.class.getName());
 
 	private final PriceListSearchResultsView view;
 

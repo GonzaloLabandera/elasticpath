@@ -9,7 +9,6 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -19,7 +18,6 @@ import com.elasticpath.rest.identity.Subject;
  * Strategies for resolving multi-carts.
  */
 public interface MultiCartResolutionStrategy {
-
 
 	/**
 	 * Is the strategy applicable for the subject.
@@ -38,7 +36,6 @@ public interface MultiCartResolutionStrategy {
 	 */
 	Observable<String> findAllCarts(String customerGuid, String accountSharedId, String storeCode, Subject subject);
 
-
 	/**
 	 * Get shopping cart.
 	 * @param cartGuid the cart guid.
@@ -56,11 +53,11 @@ public interface MultiCartResolutionStrategy {
 	boolean supportsCreate(Subject subject, Shopper shopper, String storeCode);
 
 	/**
-	 * Does the strategy support creating a cart with the given identifiers.
+	 * Does the strategy support creating ot updating a cart with the given identifiers.
 	 * @param shoppingCart the shopper.
 	 *
 	 */
-	void validateCreate(ShoppingCart shoppingCart);
+	void validateCreateOrUpdate(ShoppingCart shoppingCart);
 
 	/**
 	 * Get the modifier fields.
@@ -83,10 +80,10 @@ public interface MultiCartResolutionStrategy {
 
 	/**
 	 * Gets the default shopping cart for the customer session.
-	 * @param customerSession the customer session.
+	 * @param shopper the shopper.
 	 * @return the default cart for the customer session.
 	 */
-	Single<ShoppingCart> getDefaultCart(CustomerSession customerSession);
+	Single<ShoppingCart> getDefaultCart(Shopper shopper);
 
 	/**
 	 * Creates a new non-default cart.

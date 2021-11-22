@@ -3,7 +3,8 @@
  */
 package com.elasticpath.domain.message.handler.fieldmetadata.handler;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.catalog.update.processor.capabilities.ModifierGroupUpdateProcessor;
 import com.elasticpath.domain.message.handler.EventMessageHandler;
@@ -16,7 +17,7 @@ import com.elasticpath.messaging.EventMessage;
  */
 public class ModifierGroupUpdatedEventHandler implements EventMessageHandler {
 
-	private static final Logger LOGGER = Logger.getLogger(ModifierGroupUpdatedEventHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(ModifierGroupUpdatedEventHandler.class);
 
 	private final EventMessageHandlerHelper<ModifierGroup> eventMessageHandlerHelper;
 	private final ModifierGroupUpdateProcessor cartItemModifierGroupUpdateProcessor;

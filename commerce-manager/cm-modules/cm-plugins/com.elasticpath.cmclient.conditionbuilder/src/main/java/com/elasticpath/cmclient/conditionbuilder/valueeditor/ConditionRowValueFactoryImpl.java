@@ -5,8 +5,9 @@ package com.elasticpath.cmclient.conditionbuilder.valueeditor;
 
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -61,7 +62,7 @@ import com.elasticpath.validation.domain.ValidationResult;
 @SuppressWarnings({"PMD.ShortClassName", "PMD.GodClass"})
 public class ConditionRowValueFactoryImpl implements ConditionRowValueFactory {
 
-	private static final Logger LOG = Logger.getLogger(ConditionRowValueFactoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ConditionRowValueFactoryImpl.class);
 
 	private static final int SPACING_CELLS_IN_LINE_COMPOSITE = 1;
 	private static final int EDIT_BUTTON_SIZE = 17;

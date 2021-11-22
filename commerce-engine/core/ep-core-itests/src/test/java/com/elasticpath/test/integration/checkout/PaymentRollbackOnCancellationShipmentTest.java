@@ -99,7 +99,7 @@ public class PaymentRollbackOnCancellationShipmentTest extends BasicSpringContex
 		shoppingContextPersister.persist(shoppingContext);
 
 		checkoutTestCartBuilder.withScenario(scenario)
-				.withCustomerSession(shoppingContext.getCustomerSession());
+				.withShopper(shoppingContext.getShopper());
 
 		checkoutHelper = new CheckoutHelper(getTac());
 	}
@@ -116,7 +116,7 @@ public class PaymentRollbackOnCancellationShipmentTest extends BasicSpringContex
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		Order order = checkoutHelper.checkoutCartAndFinalizeOrderWithoutHolds(
-				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), true);
+				shoppingCart, taxSnapshot, true);
 
 		try {
 			completePhysicalShipmentsForOrder(order);

@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang3.LocaleUtils;
 
 import com.elasticpath.common.dto.DisplayValue;
 import com.elasticpath.commons.constants.ContextIdNames;

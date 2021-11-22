@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.jobs.wizards;
 
 import java.io.File;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.runtime.IStatus;
@@ -76,7 +77,7 @@ public class ImportJobDetailsPage extends WizardPage {
 	private final int type;
 	private final Display display;
 
-	private static final Logger LOG = Logger.getLogger(ImportJobDetailsPage.class);
+	private static final Logger LOG = LogManager.getLogger(ImportJobDetailsPage.class);
 
 	private final ServerPushSession pushSession = new ServerPushSession();
 

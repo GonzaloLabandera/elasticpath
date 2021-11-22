@@ -1,0 +1,5 @@
+SELECT date_executed,epc_version,application,cuke_scenario,total_db_selects,total_db_inserts,total_db_updates,total_db_deletes,total_db_time,commit_hash FROM cucumber_performance_results WHERE jenkins_job_id = (SELECT max(jenkins_job_id) FROM cucumber_performance_results WHERE epc_version='v1') and epc_version='v1'
+UNION
+SELECT date_executed,epc_version,application,cuke_scenario,total_db_selects,total_db_inserts,total_db_updates,total_db_deletes,total_db_time,commit_hash FROM cucumber_performance_results WHERE jenkins_job_id = (SELECT max(jenkins_job_id) FROM cucumber_performance_results WHERE epc_version='v2') and epc_version='v2'
+UNION
+SELECT date_executed,epc_version,application,cuke_scenario,total_db_selects,total_db_inserts,total_db_updates,total_db_deletes,total_db_time,commit_hash FROM cucumber_performance_results WHERE jenkins_job_id = (SELECT max(jenkins_job_id) FROM cucumber_performance_results WHERE epc_version='v3') and epc_version='v3'

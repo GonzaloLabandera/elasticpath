@@ -18,6 +18,7 @@ public class ReserveCapabilityRequest implements PaymentCapabilityRequest {
 	private Map<String, String> customRequestData;
 	private Map<String, String> pluginConfigData;
 	private OrderContext orderContext;
+	private int rereserveCount;
 
 	/**
 	 * Gets amount.
@@ -35,6 +36,14 @@ public class ReserveCapabilityRequest implements PaymentCapabilityRequest {
 	 */
 	public void setAmount(final MoneyDTO amount) {
 		this.amount = amount;
+	}
+
+	public int getRereserveCount() {
+		return rereserveCount;
+	}
+
+	public void setRereserveCount(final int rereserveCount) {
+		this.rereserveCount = rereserveCount;
 	}
 
 	@Override

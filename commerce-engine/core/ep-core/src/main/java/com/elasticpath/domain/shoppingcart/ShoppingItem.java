@@ -11,6 +11,7 @@ import java.util.Map;
 import com.elasticpath.commons.tree.TreeNode;
 import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.catalog.Price;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 
@@ -112,7 +113,9 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLa
 	 *
 	 * @param name The name of the field to assign.
 	 * @param value The value to assign to the field.
+	 * @deprecated use {@link #getModifierFields().put()}
 	 */
+	@Deprecated
 	void setFieldValue(String name, String value);
 	
 	/**
@@ -121,13 +124,23 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLa
 	 *
 	 * @param name The name of the field.
 	 * @return The current value of the field or null.
+	 * @deprecated use {@link #getModifierFields().get()}
 	 */
+	@Deprecated
 	String getFieldValue(String name);
 	
 	/**
 	 * @return unmodifiable map of all key/value data field pairs
+	 * @deprecated use {@link #getModifierFields()} instead
 	 */
+	@Deprecated
 	Map<String, String> getFields();
+
+	/**
+	 * Returns the map wrapper with cart item modifier fields.
+	 * @return {@link ModifierFieldsMapWrapper};
+	 */
+	ModifierFieldsMapWrapper getModifierFields();
 
 	/**
 	 * Returns the error message for this item.
@@ -204,7 +217,9 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLa
 	 * Sets field values.
 	 * 
 	 * @param itemFields item fields
+	 * @deprecated use {@link #getModifierFields().putAll()}
 	 */
+	@Deprecated
 	void mergeFieldValues(Map<String, String> itemFields);
 
 	/**

@@ -11,9 +11,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableList;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
@@ -36,8 +35,14 @@ import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
 import com.elasticpath.service.catalog.DependentItemLookup;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.shoppingcart.validation.AddOrUpdateShoppingItemDtoToCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemDtoValidationContext;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.entity.XPFOperationEnum;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingItemValidator;
+import com.elasticpath.xpf.context.builders.ShoppingItemValidationContextBuilder;
+import com.elasticpath.xpf.converters.StructuredErrorMessageConverter;
+import com.elasticpath.xpf.impl.XPFExtensionSelectorByStoreCode;
 
 /**
  * Business domain delegate of the functionality required to add a cart item to a shopping cart. This object is delegated to from the CartDirector.
@@ -45,7 +50,7 @@ import com.elasticpath.service.shoppingcart.validation.ShoppingItemDtoValidation
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class CartDirectorImpl implements CartDirector {
 
-	private static final Logger LOG = Logger.getLogger(CartDirectorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CartDirectorImpl.class);
 
 	private ProductSkuLookup productSkuLookup;
 
@@ -59,7 +64,11 @@ public class CartDirectorImpl implements CartDirector {
 
 	private DependentItemLookup dependentItemLookup;
 
-	private AddOrUpdateShoppingItemDtoToCartValidationService validationService;
+	private XPFExtensionLookup extensionLookup;
+
+	private ShoppingItemValidationContextBuilder contextBuilder;
+
+	private StructuredErrorMessageConverter structuredErrorMessageConverter;
 
 	/**
 	 * @param shoppingItem The shoppingItem to add.
@@ -297,9 +306,9 @@ public class CartDirectorImpl implements CartDirector {
 		final List<ShoppingItem> itemsBySkuGuid = shoppingCart.getCartItemsBySkuGuid(shoppingItem.getSkuGuid());
 
 		// Matching items must have matching field values
-		final Map<String, String> fields = shoppingItem.getFields();
+		final Map<String, String> fields = shoppingItem.getModifierFields().getMap();
 		final List<ShoppingItem> existingItems = itemsBySkuGuid.stream()
-			.filter(existingItem -> fields.equals(existingItem.getFields()))
+			.filter(existingItem -> fields.equals(existingItem.getModifierFields().getMap()))
 			.collect(Collectors.toList());
 
 		for (final ShoppingItem existingItem : existingItems) {
@@ -383,15 +392,29 @@ public class CartDirectorImpl implements CartDirector {
 	 * @param isUpdate indicates whether item is being updated or not
 	 */
 	protected void validateShoppingItemDto(final ShoppingCart shoppingCart, final ShoppingItemDto shoppingItemDto,
-										 final ShoppingItem parentShoppingItem, final boolean isUpdate) {
+										   final ShoppingItem parentShoppingItem, final boolean isUpdate) {
 
-		final ShoppingItemDtoValidationContext context = validationService.buildContext(shoppingCart, shoppingItemDto, parentShoppingItem, isUpdate);
-
-		Collection<StructuredErrorMessage> commerceMessageList = validationService.validate(context);
-
-		if (!commerceMessageList.isEmpty()) {
-			throw new EpValidationException("CartItem validation failure.", ImmutableList.copyOf(commerceMessageList));
+		XPFOperationEnum operation = isUpdate ? XPFOperationEnum.UPDATE : XPFOperationEnum.ADD;
+		final XPFShoppingItemValidationContext context = contextBuilder.build(shoppingCart, shoppingItemDto, parentShoppingItem, operation);
+		final Collection<StructuredErrorMessage> validationMessages = contextBuilder.getAllContextsStream(context)
+				.flatMap(shoppingItemContext -> executeValidators(shoppingCart, shoppingItemContext).stream())
+				.collect(Collectors.toList());
+		if (!validationMessages.isEmpty()) {
+			throw new EpValidationException("CartItem validation failure.", validationMessages);
 		}
+	}
+
+	private Collection<StructuredErrorMessage> executeValidators(final ShoppingCart shoppingCart,
+																 final XPFShoppingItemValidationContext context) {
+		List<ShoppingItemValidator> validators = extensionLookup.getMultipleExtensions(
+				ShoppingItemValidator.class,
+				XPFExtensionPointEnum.VALIDATE_SHOPPING_ITEM_AT_ADD_TO_CART,
+				new XPFExtensionSelectorByStoreCode(shoppingCart.getStore().getCode()));
+		return validators.stream()
+				.map(strategy -> strategy.validate(context))
+				.flatMap(Collection::stream)
+				.map(structuredErrorMessageConverter::convert)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -460,14 +483,6 @@ public class CartDirectorImpl implements CartDirector {
 		this.timeService = timeService;
 	}
 
-	public AddOrUpdateShoppingItemDtoToCartValidationService getValidationService() {
-		return validationService;
-	}
-
-	public void setValidationService(final AddOrUpdateShoppingItemDtoToCartValidationService validationService) {
-		this.validationService = validationService;
-	}
-
 	@Override
 	public boolean itemsAreEqual(final ShoppingItem shoppingItem, final ShoppingItem existingItem) {
 		if (existingItem.isMultiSku(productSkuLookup)) {
@@ -484,5 +499,25 @@ public class CartDirectorImpl implements CartDirector {
 
 	public void setDependentItemLookup(final DependentItemLookup dependentItemLookup) {
 		this.dependentItemLookup = dependentItemLookup;
+	}
+
+	protected XPFExtensionLookup getExtensionLookup() {
+		return extensionLookup;
+	}
+
+	public void setExtensionLookup(final XPFExtensionLookup extensionLookup) {
+		this.extensionLookup = extensionLookup;
+	}
+
+	protected ShoppingItemValidationContextBuilder getContextBuilder() {
+		return contextBuilder;
+	}
+
+	public void setContextBuilder(final ShoppingItemValidationContextBuilder contextBuilder) {
+		this.contextBuilder = contextBuilder;
+	}
+
+	public void setStructuredErrorMessageConverter(final StructuredErrorMessageConverter structuredErrorMessageConverter) {
+		this.structuredErrorMessageConverter = structuredErrorMessageConverter;
 	}
 }

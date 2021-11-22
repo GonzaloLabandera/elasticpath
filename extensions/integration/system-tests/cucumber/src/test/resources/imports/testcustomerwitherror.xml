@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<customers>
+	<customer guid="CUSTOMER_FAILURE" shared_id="CUSTOMER_FAILURE" store_code="INVALID_STORE_CODE">
+		<customer_type>REGISTERED_USER</customer_type>
+		<status>1</status>
+		<creationDate>2019-06-26T14:34:11-07:00</creationDate>
+		<last_edited>2019-06-26T14:34:11-07:00</last_edited>
+		<username>customer1@ep.com</username>
+		<password>20cc66a6c298bb60cdf120c2c3bf174fafc978dc67f6df9ec6b73f0aa5c01380</password>
+		<salt>48c9c625c35c3264c69c7d5f9be1e48c28f73be1ec343a8d6283eeaeb3fb2653</salt>
+		<first_time_buyer>true</first_time_buyer>
+		<addresses>
+			<address guid="CUSTOMER1_ADDRESS">
+				<creation_date>2019-06-26T14:34:11-07:00</creation_date>
+				<last_modified_date>2019-06-26T14:34:11-07:00</last_modified_date>
+				<last_name>1</last_name>
+				<first_name>CUSTOMER</first_name>
+				<street1>123 Test St</street1>
+				<street2></street2>
+				<city>Vancouver</city>
+				<subCountry>BC</subCountry>
+				<zip_postal_code>V1H 1T1</zip_postal_code>
+				<country>CA</country>
+				<commercial>false</commercial>
+			</address>
+		</addresses>
+		<groups>
+			<group>400</group>
+		</groups>
+		<preferred_shipping_address>CUSTOMER1_ADDRESS</preferred_shipping_address>
+		<preferred_billing_address>CUSTOMER1_ADDRESS</preferred_billing_address>
+		<customer_profile>
+			<profile_value key="CP_FIRST_NAME" type="AttributeType_ShortText" creation_date="2019-06-26T14:34:11-07:00">CUSTOMER</profile_value>
+			<profile_value key="CP_LAST_NAME" type="AttributeType_ShortText" creation_date="2019-06-26T14:34:11-07:00">1</profile_value>
+			<profile_value key="CP_EMAIL" type="AttributeType_ShortText" creation_date="2019-06-26T14:34:11-07:00">customer1@ep.com</profile_value>
+		</customer_profile>
+	</customer>
+</customers>

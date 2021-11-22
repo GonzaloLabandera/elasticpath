@@ -8,7 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -59,7 +60,7 @@ import com.elasticpath.service.tax.TaxJurisdictionService;
 public class TaxJurisdictionDialog extends AbstractEpDialog {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(TaxJurisdictionDialog.class);
+	private static final Logger LOG = LogManager.getLogger(TaxJurisdictionDialog.class);
 
 	private static final String TAX_CATEGORIES_TABLE = "Tax Categories"; //$NON-NLS-1$
 

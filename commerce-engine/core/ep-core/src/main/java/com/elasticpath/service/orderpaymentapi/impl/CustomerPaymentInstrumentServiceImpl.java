@@ -30,6 +30,7 @@ public class CustomerPaymentInstrumentServiceImpl extends AbstractEpPersistenceS
 				"DELETE_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER_PAYMENT_INSTRUMENT",
 				customerPaymentInstrument.getUidPk());
 		getPersistenceEngine().delete(customerPaymentInstrument);
+		getPersistenceEngine().flush();
 	}
 
 	@Override

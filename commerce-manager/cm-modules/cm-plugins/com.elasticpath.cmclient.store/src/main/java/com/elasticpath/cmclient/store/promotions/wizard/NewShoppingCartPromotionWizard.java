@@ -26,6 +26,7 @@ import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleCondition;
 import com.elasticpath.domain.rules.RuleElementType;
 import com.elasticpath.domain.rules.RuleScenarios;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.service.changeset.ChangeSetMemberAction;
 import com.elasticpath.service.rules.CouponConfigService;
@@ -180,9 +181,11 @@ public class NewShoppingCartPromotionWizard extends AbstractEPCampaignWizard<Rul
 		SellingContext sellingContext = BeanLocator.getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 
 		final RuleSetService ruleSetService = BeanLocator.getSingletonBean(ContextIdNames.RULE_SET_SERVICE, RuleSetService.class);
+		final RuleSetLoadTuner ruleSetLoadTuner = BeanLocator.getPrototypeBean(ContextIdNames.RULE_SET_LOAD_TUNER,
+				RuleSetLoadTuner.class);
 
 		model = BeanLocator.getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
-		model.setRuleSet(ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO));
+		model.setRuleSet(ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO, ruleSetLoadTuner));
 		model.setEnabled(true);
 		model.setSellingContext(sellingContext);
 

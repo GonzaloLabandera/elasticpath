@@ -5,10 +5,21 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-remove-customer-session-artifacts.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-remove-customer-session-artifacts.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+	<changeSet id="2020-07-cleanup-customer-session-setting-metadata" author="elasticpath" failOnError="true">
+		<comment>Deleted customer session setting metadata</comment>
+
+		<delete tableName="TSETTINGMETADATA">
+			<where>SETTING_DEFINITION_UID IN (SELECT UIDPK FROM TSETTINGDEFINITION WHERE PATH = 'COMMERCE/SYSTEM/SESSIONCLEANUP/maxHistory'
+				OR PATH = 'COMMERCE/SYSTEM/SESSIONCLEANUP/batchSize')
+			</where>
+		</delete>
+	</changeSet>
 
 	<changeSet id="2020-07-cleanup-customer-session-artifacts" author="elasticpath" failOnError="true">
-		<comment>[PERF-332] Deleted customer session cleanup job settings, TCUSTOMERSESSION table and JPA generated keys entry</comment>
+		<comment>Deleted customer session cleanup job settings, TCUSTOMERSESSION table and JPA generated keys entry</comment>
 
 		<delete tableName="TSETTINGDEFINITION">
 			<where>PATH = 'COMMERCE/SYSTEM/SESSIONCLEANUP/maxHistory'</where>

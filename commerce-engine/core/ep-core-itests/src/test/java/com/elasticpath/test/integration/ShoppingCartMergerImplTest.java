@@ -11,6 +11,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,9 @@ import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
+import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
 import com.elasticpath.domain.rules.CouponConfig;
 import com.elasticpath.domain.rules.CouponUsageType;
@@ -32,6 +35,7 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.money.Money;
 import com.elasticpath.sellingchannel.ShoppingItemFactory;
@@ -39,6 +43,7 @@ import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartMerger;
 import com.elasticpath.service.shoppingcart.impl.ShoppingCartMergerImpl;
@@ -87,19 +92,25 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 	private ShoppingItem siCameraWithWarranty;
 
 	private ShoppingCartMergerImpl merger;
-	private CartDirector cartDirector;
 	private ShoppingCartSimpleStoreScenario scenario;
 	private Shopper currentShopper;
 	private Shopper previousShopper;
-	private ShoppingItemFactory shoppingItemFactory;
 	private CatalogTestPersister catalogPersister;
 	private CustomerSession currentCustomerSession;
 	private CustomerSession previousCustomerSession;
 
 	@Autowired
+	private ShoppingItemFactory shoppingItemFactory;
+	@Autowired
+	private CartDirector cartDirector;
+	@Autowired
 	private ProductService productService;
 	@Autowired
 	private ProductSkuLookup productSkuLookup;
+	@Autowired
+	private ShopperService shopperService;
+	@Autowired
+	private CustomerService customerService;
 
 	/**
 	 * Setup the tests.
@@ -111,7 +122,6 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		// - we mock out the price lookup facade to keep the test as simple as possible, as
 		//   price isn't important in the merging case.
 		merger = (ShoppingCartMergerImpl) getBeanFactory().getSingletonBean("shoppingCartMerger", ShoppingCartMerger.class);
-		cartDirector = getBeanFactory().getSingletonBean("cartDirector", CartDirector.class);
 		merger.setCartDirector(cartDirector);
 
 		scenario = getTac().useScenario(ShoppingCartSimpleStoreScenario.class);
@@ -119,8 +129,8 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		currentCustomerSession = createCustomerSession();
 		previousCustomerSession = createCustomerSession();
 
-		currentShopper = createShopper(currentCustomerSession);
-		previousShopper = createShopper(previousCustomerSession);
+		currentShopper = createShopper(currentCustomerSession, CustomerType.REGISTERED_USER);
+		previousShopper = createShopper(previousCustomerSession, CustomerType.SINGLE_SESSION_USER);
 
 		final StoreTestPersister storePersister = getTac().getPersistersFactory().getStoreTestPersister();
 		final TaxCodeService taxCodeService = getBeanFactory().getSingletonBean(ContextIdNames.TAX_CODE_SERVICE, TaxCodeService.class);
@@ -153,8 +163,6 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		cameraWarrantySku = cameraWarranty.getDefaultSku();
 
 		// Create shopping items that we'll be putting into the cart.
-		shoppingItemFactory = getBeanFactory().getSingletonBean("shoppingItemFactory", ShoppingItemFactory.class);
-
 		Currency currency = TestDataPersisterFactory.DEFAULT_CURRENCY;
 		PriceImpl price = new PriceImpl();
 		price.setCurrency(currency);
@@ -175,19 +183,30 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 	private CustomerSession createCustomerSession() {
 		final CustomerSession customerSession = new CustomerSessionImpl();
 		customerSession.setCurrency(TestDataPersisterFactory.DEFAULT_CURRENCY);
+		customerSession.setLocale(Locale.CANADA);
 		TagSet tagSet = new TagSet();
 		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(new Date().getTime()));
 		customerSession.setCustomerTagSet(tagSet);
 		return customerSession;
 	}
 
-	private Shopper createShopper(final CustomerSession customerSession) {
-		final ShopperService shopperService = getBeanFactory().getSingletonBean(ContextIdNames.SHOPPER_SERVICE, ShopperService.class);
-
-		final Shopper shopper = shopperService.createAndSaveShopper(scenario.getStore().getCode());
-		customerSession.setShopper(shopper);
-		shopper.updateTransientDataWith(customerSession);
+	private Shopper createShopper(final CustomerSession customerSession, final CustomerType customerType) {
+		Customer customer = createPersistedCustomer(customerType, scenario.getStore());
+		Shopper shopper = shopperService.findOrCreateShopper(customer, scenario.getStore().getCode());
+		shopper.setCustomerSession(customerSession);
 		return shopper;
+	}
+
+	private Customer createPersistedCustomer(final CustomerType customerType, final Store store) {
+		final Customer customer = getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
+		customer.setSharedId("shared-id-" + customer.getGuid());
+		customer.setCustomerType(customerType);
+		customer.setEmail("email");
+		customer.setFirstName("Test");
+		customer.setLastName("Test");
+		customer.setStoreCode(store.getCode());
+
+		return customerService.add(customer);
 	}
 
 	private ShoppingCart buildShoppingCart(final String cartName, final ShoppingItem... items) {
@@ -200,10 +219,10 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		if (cartName.equals(CURRENT_CART_NAME)) {
 			currentShopper.setCurrentShoppingCart(shoppingCart);
-			shoppingCart.setCustomerSession(currentCustomerSession);
+			shoppingCart.setShopper(currentShopper);
 		} else {
 			previousShopper.setCurrentShoppingCart(shoppingCart);
-			shoppingCart.setCustomerSession(previousCustomerSession);
+			shoppingCart.setShopper(previousShopper);
 		}
 
 		return shoppingCart;
@@ -303,10 +322,10 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 	public void testMergeKeepsBothMultiSkuProducts() {
 		final String nameField = "name";
 
-		siCfgMultiSkuItem1.setFieldValue(nameField, "bob");
+		siCfgMultiSkuItem1.getModifierFields().put(nameField, "bob");
 		final ShoppingCart currentCart = buildShoppingCart(CURRENT_CART_NAME, siCfgMultiSkuItem1);
 
-		siCfgMultiSkuItem2.setFieldValue(nameField, "jill");
+		siCfgMultiSkuItem2.getModifierFields().put(nameField, "jill");
 		final ShoppingCart previousCart = buildShoppingCart(PREVIOUS_CART_NAME, siCfgMultiSkuItem2);
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
@@ -318,10 +337,10 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 				.isEqualTo(2);
 
 		assertItemAndQuantity(mergedList, 0, multiSkuItemSku, 1);
-		assertThat(mergedList.get(0).getFieldValue(nameField)).isSameAs("bob");
+		assertThat(mergedList.get(0).getModifierFields().get(nameField)).isSameAs("bob");
 
 		assertItemAndQuantity(mergedList, 1, multiSkuItemSku, 1);
-		assertThat(mergedList.get(1).getFieldValue(nameField)).isSameAs("jill");
+		assertThat(mergedList.get(1).getModifierFields().get(nameField)).isSameAs("jill");
 	}
 
 
@@ -368,7 +387,6 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		sku.initialize();
 		cameraBagCard.setDefaultSku(sku);
 
-		final ProductService productService = getBeanFactory().getSingletonBean(ContextIdNames.PRODUCT_SERVICE, ProductService.class);
 		cameraBagCard = (ProductBundle) productService.saveOrUpdate(cameraBagCard);
 
 		bundleCameraBagCard = shoppingItemFactory.createShoppingItem(cameraBagCard.getDefaultSku(), null, 1, 1, null);

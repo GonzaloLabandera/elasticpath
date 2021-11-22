@@ -8,7 +8,8 @@ package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.act
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
@@ -47,7 +48,7 @@ import com.elasticpath.tags.service.TagConditionService;
 public class DeleteConditionalExpressionAction extends BaseConditionalExpressionAction {
 	
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(DeleteConditionalExpressionAction.class);
+	private static final Logger LOG = LogManager.getLogger(DeleteConditionalExpressionAction.class);
 
 	private final SellingContextService sellingContextService = BeanLocator
 			.getSingletonBean(ContextIdNames.SELLING_CONTEXT_SERVICE, SellingContextService.class);

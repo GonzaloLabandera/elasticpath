@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.core.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPage;
@@ -19,7 +20,7 @@ import com.elasticpath.cmclient.core.EpAuthorizationException;
  */
 public abstract class AbstractShowViewAction implements IWorkbenchWindowActionDelegate {
 
-	private static final Logger LOG = Logger.getLogger(AbstractShowViewAction.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractShowViewAction.class);
 	private IWorkbenchWindow window;
 	
 	

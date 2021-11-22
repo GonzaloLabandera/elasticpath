@@ -6,7 +6,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-update-shoppingcart-default-value.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-09-update-shoppingcart-default-value.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
 	<changeSet id="update-shoppingcart-default-value" author="elasticpath" >
 
@@ -16,15 +17,16 @@
 	</changeSet>
 
 	<changeSet id="add-defaultcart-unique-constraint-data-migration"
-			   author="elasticpath" context="migrate-data" dbms="mysql,oracle">
+			   author="elasticpath" context="migrate-data" dbms="mysql,oracle,postgresql">
+		<validCheckSum>8:c646ad3bdfe97f12f772d98cb283d749</validCheckSum>
 		<comment>set default cart to null for inactive and non default carts</comment>
 		<update tableName="TSHOPPINGCART">
 			<column name="DEFAULTCART" value="null"/>
-			<where>STATUS = 'INACTIVE' OR DEFAULTCART = 0</where>
+			<where>STATUS = 'INACTIVE' OR DEFAULTCART = '0'</where>
 		</update>
 	</changeSet>
 
-	<changeSet id="add-defaultcart-unique-constraint" author="elasticpath" dbms="mysql,h2">
+	<changeSet id="add-defaultcart-unique-constraint" author="elasticpath" dbms="mysql,h2,postgresql">
 		<addUniqueConstraint tableName="TSHOPPINGCART" columnNames="SHOPPER_UID,DEFAULTCART" constraintName="UNIQ_SHOPPER_DEFAULTCART" />
 	</changeSet>
 

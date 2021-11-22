@@ -15,7 +15,7 @@ public class QueryAnalyzerImplTest {
 
 	private QueryAnalyzerImpl queryAnalyzer;
 	private static final String FORMAT = "test%sTest";
-	private static final char EXPECTED_QUOTATION_MARK = '"';
+	private static final char ESCAPE_CHARACTER = '\\';
 
 	@Before
 	public void setUp() {
@@ -26,10 +26,13 @@ public class QueryAnalyzerImplTest {
 	 * Test method for {@link QueryAnalyzerImpl#analyze(String)}.
 	 */
 	@Test
-	public void testAnalyzeQuotedString() {
+	public void testEscapeSolrQueryCharacters() {
 		String[] illegalCharacters = new String[] {
+				"+",
+				"-",
+				"!",
+				":",
 				";",
-				" -",
 				"(",
 				")",
 				"[",
@@ -38,48 +41,29 @@ public class QueryAnalyzerImplTest {
 				"}",
 				"^",
 				"\"",
-				"~",
-				":"
-			};
-
-		for (String illegalCharacter : illegalCharacters) {
-			String value = String.format(FORMAT, illegalCharacter);
-			String analyze = queryAnalyzer.analyze(value);
-
-			assertThat(analyze.charAt(0)).as("expected " + illegalCharacter + " to be in quotation marks").isEqualTo(EXPECTED_QUOTATION_MARK);
-		}
-	}
-
-	@Test
-	public void testAnalyzeEscapedString() {
-		String[] illegalCharacters = new String[] {
-				"\\;",
-				"\\(",
-				"\\)",
-				"\\[",
-				"\\]",
-				"\\{",
-				"\\}",
-				"\\^",
-				"\\\"",
-				"\\~"
+				"*",
+				"?",
+				"|",
+				"&",
+				"/",
+				"~"
 		};
 
 		for (String illegalCharacter : illegalCharacters) {
 			String value = String.format(FORMAT, illegalCharacter);
 			String analyze = queryAnalyzer.analyze(value);
-
-			assertThat(analyze.charAt(analyze.indexOf(illegalCharacter)))
-					.as("expected " + illegalCharacter + " to be in proceeded by escape character in `" + analyze + "`")
-					.isEqualTo('\\');
-			assertThat(analyze.charAt(0))
-					.as("expected no quotation mark at beginning of string")
-					.isNotEqualTo('"');
+			assertThat(analyze.charAt(analyze.indexOf(illegalCharacter) - 1))
+					.as("expected " + illegalCharacter + " to be escaped")
+					.isEqualTo(ESCAPE_CHARACTER);
 		}
+
+		assertThat(queryAnalyzer.analyze("test\\Test"))
+				.as("expected \\ to be escaped")
+				.isEqualTo("test\\\\Test");
 	}
 
 	@Test
-	public void testStringNotEscaped() {
+	public void testValidStringNotEscaped() {
 		String analyze = queryAnalyzer.analyze("test");
 		assertThat(analyze).isEqualToIgnoringCase("test");
 	}

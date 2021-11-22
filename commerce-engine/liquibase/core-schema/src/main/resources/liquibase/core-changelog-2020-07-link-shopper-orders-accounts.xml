@@ -5,7 +5,9 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-link-shopper-orders-accounts.xml">
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-07-link-shopper-orders-accounts.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
 	<changeSet id="PB-8335-link-shopper-with-accounts" author="elasticpath">
 		<comment>Link TSHOPPER with accounts.</comment>
 		<!-- Create a new nullable column to hold the guid with a foreign key constraint against TCUSTOMER -->

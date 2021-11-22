@@ -6,8 +6,9 @@
  */
 package com.elasticpath.cmclient.pricelistmanager.actions;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -21,7 +22,7 @@ import com.elasticpath.cmclient.pricelistmanager.views.PriceListSearchResultsVie
  * the PriceListSearchResultsView.
  */
 public class OpenPriceListSearchResultsViewAction extends Action implements PriceListSearchEventListener {
-	private static final Logger LOG = Logger.getLogger(OpenPriceListSearchResultsViewAction.class);
+	private static final Logger LOG = LogManager.getLogger(OpenPriceListSearchResultsViewAction.class);
 	
 	@Override
 	public void run() {

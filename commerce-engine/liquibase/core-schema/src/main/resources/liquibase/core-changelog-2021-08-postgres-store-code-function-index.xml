@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2021
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-08-postgres-store-code-function-index.xml">
+
+	<changeSet id="2021-08-postgres-store-code-function-index" author="elasticpath" failOnError="true" dbms="postgresql">
+		<comment>Case insensitive unique index on store code column in postgresql db</comment>
+
+		<createIndex tableName="TSTORE" indexName="TSTORECODE_UNIQUE_INSENSITIVE" unique="true">
+			<column name="UPPER(STORECODE)"/>
+		</createIndex>
+	</changeSet>
+</databaseChangeLog>

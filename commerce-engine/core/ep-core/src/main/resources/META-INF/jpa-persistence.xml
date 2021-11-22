@@ -42,6 +42,7 @@
 		<mapping-file>META-INF/orderpayment-orm.xml</mapping-file>
 		<mapping-file>META-INF/orderhold-orm.xml</mapping-file>
 		<mapping-file>META-INF/outbox-orm.xml</mapping-file>
+		<mapping-file>META-INF/address-orm.xml</mapping-file>
 
 		<class>com.elasticpath.domain.attribute.impl.AbstractAttributeValueImpl</class>
 		<class>com.elasticpath.domain.attribute.impl.AttributeGroupAttributeImpl</class>
@@ -106,7 +107,6 @@
 		<class>com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderAddressImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderImpl</class>
-		<class>com.elasticpath.domain.order.impl.OrderDataImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderEventImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderLockImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderReturnImpl</class>
@@ -166,7 +166,6 @@
 		<class>com.elasticpath.domain.search.query.impl.SearchTermsActivitySummaryImpl</class>
 		<class>com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl</class>
 		<class>com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl</class>
-		<class>com.elasticpath.domain.shoppingcart.impl.CartData</class>
 		<class>com.elasticpath.domain.shoppingcart.CartType</class>
 		<class>com.elasticpath.domain.skuconfiguration.impl.JpaAdaptorOfSkuOptionValueImpl</class>
 		<class>com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl</class>
@@ -204,10 +203,7 @@
 		<class>com.elasticpath.domain.audit.impl.SingleChangeOperationImpl</class>
 		<class>com.elasticpath.domain.audit.impl.BulkChangeOperationImpl</class>
 		<class>com.elasticpath.domain.audit.impl.DataChangedImpl</class>
-		<class>com.elasticpath.domain.shoppingcart.impl.ShoppingItemData</class>
-		<class>com.elasticpath.domain.impl.AbstractItemData</class>
 		<class>com.elasticpath.domain.impl.AbstractShoppingItemImpl</class>
-		<class>com.elasticpath.domain.order.impl.OrderItemData</class>
 		<class>com.elasticpath.domain.auth.impl.OAuth2AccessTokenMementoImpl</class>
 		<class>com.elasticpath.domain.auth.OAuth2AuthenticationMemento</class>
 		<class>com.elasticpath.domain.auth.ClientAuthenticationMemento</class>
@@ -215,6 +211,7 @@
 		<class>com.elasticpath.domain.customer.impl.StoreCustomerAttributeImpl</class>
 		<class>com.elasticpath.domain.customer.impl.AttributePolicyImpl</class>
 		<class>com.elasticpath.domain.messaging.impl.OutboxMessageImpl</class>
+		<class>com.elasticpath.domain.customer.impl.CustomerClosureImpl</class>
 
 		<!-- tagging framework start -->
 
@@ -316,7 +313,7 @@
 			<property name="openjpa.DetachState" value="loaded(DetachedStateField=true,AccessUnloaded=false)"/>
 			<property name="openjpa.Multithreaded" value="true"/>
 			<property name="openjpa.AutoDetach" value="close, commit, nontx-read"/>
-			<property name="openjpa.jdbc.DBDictionary" value="batchLimit=100, SupportsSubselect=true, SupportsCorrelatedSubselect=false"/>
+			<property name="openjpa.jdbc.DBDictionary" value="batchLimit=100, SupportsSubselect=true"/>
 			<!-- Uncomment the section below to enable data caching, comment them out to disable -->
 			<property name="openjpa.DataCache" value="true"/>
 			<property name="openjpa.RemoteCommitProvider" value="sjvm"/>

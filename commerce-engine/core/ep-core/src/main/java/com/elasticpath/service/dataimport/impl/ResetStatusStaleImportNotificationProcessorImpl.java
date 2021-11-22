@@ -3,7 +3,8 @@
  */
 package com.elasticpath.service.dataimport.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.dataimport.ImportNotification;
 import com.elasticpath.domain.dataimport.ImportNotificationState;
@@ -15,7 +16,7 @@ import com.elasticpath.service.dataimport.dao.ImportNotificationDao;
  */
 public class ResetStatusStaleImportNotificationProcessorImpl implements StaleImportNotificationProcessor {
 
-	private static final Logger LOG = Logger.getLogger(ResetStatusStaleImportNotificationProcessorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ResetStatusStaleImportNotificationProcessorImpl.class);
 	
 	private ImportNotificationDao importNotificationDao;
 

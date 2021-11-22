@@ -80,6 +80,7 @@
 					<port>${ep.mock.tomcat.port.http}</port>
 					<systemProperties>
 						<ep.mock.port.http>${ep.mock.tomcat.port.http}</ep.mock.port.http>
+						<ep.plugins.folder>${project.basedir}/../../plugins/ext-plugin-config/target/plugins</ep.plugins.folder>
 					</systemProperties>
 				</configuration>
 			</plugin>
@@ -93,15 +94,13 @@
 							<directory>src/main/webapp</directory>
 							<filtering>true</filtering>
 							<includes>
-								<include>**/log4j.properties</include>
+								<include>**/log4j2.xml</include>
 							</includes>
 						</resource>
 						<resource>
 							<directory>src/main/webapp</directory>
 							<filtering>false</filtering>
-							<excludes>
-								<exclude>**/log4j.properties</exclude>
-							</excludes>
+							<exclude>**/log4j2.xml</exclude>
 						</resource>
 					</webResources>
 				</configuration>

@@ -38,8 +38,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.lib.jdbc.ReportingSQLException;
 import org.apache.openjpa.persistence.PersistenceException;
 import org.apache.openjpa.persistence.jdbc.FetchMode;
@@ -120,7 +121,7 @@ import com.elasticpath.service.tax.TaxOperationService;
 @SuppressWarnings({"PMD.ExcessiveClassLength", "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.GodClass"})
 public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implements OrderService {
 
-	private static final Logger LOG = Logger.getLogger(OrderServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(OrderServiceImpl.class);
 	/**
 	 * Key represented in order event data section, which refers to id of cm user who modifies the order.
 	 */

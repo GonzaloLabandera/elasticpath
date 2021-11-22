@@ -5,14 +5,15 @@ package com.elasticpath.catalog.bulk.exception;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Implementation of {@link Processor} for processing of exceptions from Bulk events consumers.
  */
 public class BulkExceptionHandler implements Processor {
 
-	private static final Logger LOGGER = Logger.getLogger(BulkExceptionHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(BulkExceptionHandler.class);
 
 	@Override
 	public void process(final Exchange exchange) {

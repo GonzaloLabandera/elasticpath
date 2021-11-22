@@ -84,7 +84,6 @@ Feature: Facet Configuration
       | value         | count |
       | $30 to $60    | 8     |
       | Below $10     | 9     |
-      | $60 and Above | 9     |
       | $10 to $30    | 19    |
 
   @cleanupDisabledFacet

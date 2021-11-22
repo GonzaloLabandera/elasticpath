@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 /**
  * Tests the {@link OracleInsertSetGenerator}.
  */
+@SuppressWarnings({"unchecked","rawtypes"})
 @RunWith(MockitoJUnitRunner.class)
 public class OracleInsertSetGeneratorTest {
 	private static final int BATCH_SIZE = 2;

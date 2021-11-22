@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.conditionbuilder.editor;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.forms.editor.FormPage;

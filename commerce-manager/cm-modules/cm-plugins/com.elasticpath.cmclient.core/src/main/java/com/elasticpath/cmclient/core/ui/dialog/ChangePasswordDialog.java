@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.core.ui.dialog;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -45,7 +46,7 @@ import com.elasticpath.service.cmuser.CmUserService;
  */
 public class ChangePasswordDialog extends AbstractEpDialog implements ModifyListener {
 
-	private static final Logger LOG = Logger.getLogger(ChangePasswordDialog.class);
+	private static final Logger LOG = LogManager.getLogger(ChangePasswordDialog.class);
 
 	private final CmUserService cmUserService;
 

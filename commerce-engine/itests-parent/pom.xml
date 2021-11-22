@@ -68,6 +68,9 @@
 								<include>**/Test*.java</include>
 								<include>**/*Test.java</include>
 							</includes>
+							<systemPropertyVariables>
+								<ep.plugins.folder>${project.basedir}/target/plugins</ep.plugins.folder>
+							</systemPropertyVariables>
 						</configuration>
 						<executions>
 							<execution>

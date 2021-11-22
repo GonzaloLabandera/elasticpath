@@ -19,7 +19,6 @@ import org.junit.Test;
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.cartorder.impl.CartOrderImpl;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.cartorder.CartOrderService;
@@ -36,8 +35,6 @@ public class CartOrderCouponsMergerForShopperUpdatesTest {
 
 	private CartOrderCouponsMergerForShopperUpdates cartOrderCouponsMergerForShopperUpdates;
 
-	private CustomerSession customerSession;
-
 	private final CartOrder cartOrderWithCoupons = new CartOrderImpl();
 
 	private final CartOrder emptyCartOrder = new CartOrderImpl();
@@ -52,7 +49,6 @@ public class CartOrderCouponsMergerForShopperUpdatesTest {
 	public void setUp() throws Exception {
 		cartOrderWithCoupons.addCoupons(Arrays.asList(COUPON_CODES));
 		cartOrderService = context.mock(CartOrderService.class);
-		customerSession = context.mock(CustomerSession.class);
 		cartOrderCouponsMergerForShopperUpdates = new CartOrderCouponsMergerForShopperUpdates(cartOrderService);
 
 		context.checking(new Expectations() {
@@ -76,9 +72,7 @@ public class CartOrderCouponsMergerForShopperUpdatesTest {
 			}
 		});
 
-		arrangeCustomerSessionToReturnShopper(registeredShopper);
-
-		cartOrderCouponsMergerForShopperUpdates.invalidateShopper(customerSession, anonymousShopper);
+		cartOrderCouponsMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		assertThat(emptyCartOrder.getCouponCodes(), hasItems(COUPON_CODES));
 	}
@@ -95,22 +89,11 @@ public class CartOrderCouponsMergerForShopperUpdatesTest {
 			}
 		});
 
-		arrangeCustomerSessionToReturnShopper(registeredShopper);
-
-		cartOrderCouponsMergerForShopperUpdates.invalidateShopper(customerSession, anonymousShopper);
+		cartOrderCouponsMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		assertThat(emptyCartOrder.getCouponCodes(), not(hasItems(COUPON_CODES)));
 	}
 
-
-	private void arrangeCustomerSessionToReturnShopper(final Shopper shopper) {
-		context.checking(new Expectations() {
-			{
-				allowing(customerSession).getShopper();
-				will(returnValue(shopper));
-			}
-		});
-	}
 
 	private Shopper createShopper(final String shopperName, final CartOrder cartOrder) {
 

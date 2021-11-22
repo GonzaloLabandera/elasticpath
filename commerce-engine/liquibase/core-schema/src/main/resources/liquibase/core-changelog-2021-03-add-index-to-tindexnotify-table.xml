@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2021 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-03-add-index-to-tindexnotify-table.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+	<changeSet id="2021-03-add-index-to-tindexnotify-table" author="elasticpath">
+		<createIndex tableName="TINDEXNOTIFY" indexName="I_INDEX_TYPE_UPDATE_TYPE">
+			<column name="INDEX_TYPE"/>
+			<column name="UPDATE_TYPE"/>
+		</createIndex>
+
+	</changeSet>
+</databaseChangeLog>

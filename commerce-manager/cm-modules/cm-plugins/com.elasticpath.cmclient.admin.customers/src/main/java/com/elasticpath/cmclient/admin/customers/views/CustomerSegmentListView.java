@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.Separator;
@@ -47,7 +48,7 @@ public class CustomerSegmentListView extends AbstractListView implements Custome
 
 	private static final String CUSTOMER_SEGMENT_LIST_TABLE = "Customer Segment List"; //$NON-NLS-1$
 
-	private static final Logger LOG = Logger.getLogger(CustomerSegmentListView.class);
+	private static final Logger LOG = LogManager.getLogger(CustomerSegmentListView.class);
 
 	// Column indices
 	private static final int INDEX_SEGMENT_IMAGE = 0;

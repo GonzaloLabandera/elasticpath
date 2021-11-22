@@ -280,13 +280,13 @@ public class ModifyReservationProcessorImpl extends AbstractProcessor implements
 		final OrderPaymentInstrumentDTO instrumentDTO = reservationEvent.getOrderPaymentInstrumentDTO();
 		final MoneyDTO deltaAmount = getMoneyDtoCalculator().minus(newAmount, reservationEvent.getAmount());
 		if (getMoneyDtoCalculator().isPositive(deltaAmount)) {
-			final ReserveRequest reservationRequest = createReservationRequest(instrumentDTO, deltaAmount, modifyRequest);
+			final ReserveRequest reservationRequest = createReserveRequest(Collections.singletonList(instrumentDTO), deltaAmount, modifyRequest);
 			return getPaymentAPIWorkflow().reserve(reservationRequest).getEvents();
 		} else {
 			final List<PaymentEvent> paymentEvents = new ArrayList<>();
 			if (paymentProvider.getCapability(CancelCapability.class).isPresent()) {
 				final PaymentAPIResponse reservationResponse = reservationProcessor.reserveToSimulateModify(newAmount, instrumentDTO,
-						modifyRequest.getCustomRequestData(), modifyRequest.getOrderContext());
+						modifyRequest.getCustomRequestData(), modifyRequest.getOrderContext(), calculateReservationCount(modifyRequest));
 				paymentEvents.addAll(reservationResponse.getEvents());
 				if (reservationResponse.isSuccess()) {
 					final CancelReservationRequest cancelRequest = createCancelReservationRequest(modifyRequest, reservationEvent);
@@ -312,25 +312,6 @@ public class ModifyReservationProcessorImpl extends AbstractProcessor implements
 		final MoneyDTO refundedAmount = getPaymentHistory().getRefundedAmount(paymentEvents);
 		final MoneyDTO originalOrderAmount = getMoneyDtoCalculator().plus(orderAmount, refundedAmount);
 		return getMoneyDtoCalculator().compare(modifyRequest.getAmount(), originalOrderAmount) <= 0;
-	}
-
-	/**
-	 * Creates Payment API reservation request.
-	 *
-	 * @param instrument        order payment instrument
-	 * @param amount            amount to reserve
-	 * @param paymentAPIRequest original Payment API modification request
-	 * @return Payment API reservation request
-	 */
-	protected ReserveRequest createReservationRequest(final OrderPaymentInstrumentDTO instrument,
-													  final MoneyDTO amount,
-													  final PaymentAPIRequest paymentAPIRequest) {
-		return ReserveRequestBuilder.builder()
-				.withSelectedOrderPaymentInstruments(Collections.singletonList(instrument))
-				.withAmount(amount)
-				.withOrderContext(paymentAPIRequest.getOrderContext())
-				.withCustomRequestData(paymentAPIRequest.getCustomRequestData())
-				.build(getBeanFactory());
 	}
 
 	/**
@@ -432,13 +413,21 @@ public class ModifyReservationProcessorImpl extends AbstractProcessor implements
 	 */
 	protected ReserveRequest createReserveRequest(final List<OrderPaymentInstrumentDTO> instruments,
 												  final MoneyDTO amount,
-												  final PaymentAPIRequest paymentAPIRequest) {
+												  final ModifyReservationRequest paymentAPIRequest) {
 		return ReserveRequestBuilder.builder()
 				.withSelectedOrderPaymentInstruments(instruments)
 				.withAmount(amount)
 				.withOrderContext(paymentAPIRequest.getOrderContext())
 				.withCustomRequestData(paymentAPIRequest.getCustomRequestData())
+				.withRereserveCount(Math.toIntExact(calculateReservationCount(paymentAPIRequest)))
 				.build(getBeanFactory());
 	}
 
+	private int calculateReservationCount(final ModifyReservationRequest modifyRequest) {
+		return Math.toIntExact(modifyRequest.getLedger()
+				.stream()
+				.filter(payment -> payment.getPaymentType() == TransactionType.RESERVE
+						|| payment.getPaymentType() == TransactionType.MODIFY_RESERVE)
+				.count());
+	}
 }

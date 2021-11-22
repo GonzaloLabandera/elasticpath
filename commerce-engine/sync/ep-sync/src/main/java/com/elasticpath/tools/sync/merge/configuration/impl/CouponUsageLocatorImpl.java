@@ -3,7 +3,7 @@
  */
 package com.elasticpath.tools.sync.merge.configuration.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.rules.CouponUsage;

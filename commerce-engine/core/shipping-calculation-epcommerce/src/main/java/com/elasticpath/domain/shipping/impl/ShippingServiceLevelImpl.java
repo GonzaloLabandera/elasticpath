@@ -25,7 +25,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.Dependent;
 import org.apache.openjpa.persistence.ElementDependent;
@@ -69,7 +70,7 @@ public class ShippingServiceLevelImpl extends AbstractLegacyEntityImpl implement
 	 */
 	private static final long serialVersionUID = 5000000001L;
 
-	private static final Logger LOG = Logger.getLogger(ShippingServiceLevelImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ShippingServiceLevelImpl.class);
 
 	/**
 	 * The name of the table & generator to use for persistence.

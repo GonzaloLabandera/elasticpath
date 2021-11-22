@@ -78,7 +78,7 @@
 									org.w3c.dom.ranges,
 									org.xmlpull.mxp1,
 									org.xmlpull.v1,
-									org.slf4j;org.slf4j.spi;org.slf4j.helpers;version=1.7.25,
+									org.slf4j;org.slf4j.spi;org.slf4j.helpers;version=1.7.26,
 									com.elasticpath.plugin.payment.provider,
 									com.elasticpath.plugin.payment.provider.annotations,
 									com.elasticpath.plugin.payment.provider.capabilities,
@@ -102,6 +102,7 @@
 				Added because spring does a class load for javax.inject rather than an import-package -->
 				<entry key="org.osgi.framework.bootdelegation"
 						value="javax.inject,
+								javax.jms,
 								javax.validation,
 								javax.validation.bootstrap,
 								javax.validation.spi,
@@ -109,10 +110,13 @@
 								javax.validation.executable,
 								javax.validation.constraints,
 								javax.validation.constraintvalidation,
-								sun.util.calendar,
+								javax.management,
+ 								sun.util.calendar,
 								sun.misc,
 								sun.reflect,
-								oracle.sql"/>
+								oracle.sql,
+								org.apache.activemq.pool,
+								org.apache.activemq.jms.pool"/>
 
 				<!-- Added to prevent role transition event handler from quietly getting blacklisted due to timeout -->
 				<entry key="org.apache.felix.eventadmin.Timeout" value="0"/>

@@ -15,6 +15,7 @@ import com.elasticpath.domain.ShoppingItemContainer;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.event.EventOriginator;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.rules.AppliedRule;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
@@ -660,7 +661,9 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 *
 	 * @param name The name of the field.
 	 * @return The current value of the field or null.
+	 * @deprecated use {@link #getModifierFields().get()}.
 	 */
+	@Deprecated
 	String getFieldValue(String name);
 
 	/**
@@ -668,20 +671,32 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 *
 	 * @param name  The name of the field to assign.
 	 * @param value The value to assign to the field.
+	 * @deprecated use {@link #getModifierFields().put()}.
 	 */
+	@Deprecated
 	void setFieldValue(String name, String value);
 
 	/**
 	 * Assigns {@code value} to {@code name}. Any previous value is replaced.
 	 *
 	 * @param propertyKey The name of the field to remove.
+	 * @deprecated use {@link #getModifierFields().remove()}.
 	 */
+	@Deprecated
 	void removeFieldValue(String propertyKey);
 
 	/**
 	 * @return An immutable map containing all key/value data field pairs
+	 * @deprecated use {@link #getModifierFields()}.
 	 */
+	@Deprecated
 	Map<String, String> getFieldValues();
+
+	/**
+	 * Returns the map wrapper with order modifier fields.
+	 * @return {@link ModifierFieldsMapWrapper};
+	 */
+	ModifierFieldsMapWrapper getModifierFields();
 
 	/**
 	 * Sums up future order shipment amounts.
@@ -695,5 +710,4 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	 * @return true, if gift certificate shipment exists
 	 */
 	boolean hasGiftCertificateShipment();
-
 }

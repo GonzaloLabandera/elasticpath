@@ -33,6 +33,7 @@ import com.elasticpath.rest.definition.addresses.ShippingAddressesIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.AddressRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.selector.SelectStatus;
@@ -56,6 +57,9 @@ public class ShippingAddressSelectorRepositoryImplTest {
 
 	@Mock
 	private CustomerRepository customerRepository;
+
+	@Mock
+	private AddressRepository addressRepository;
 
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
@@ -177,6 +181,7 @@ public class ShippingAddressSelectorRepositoryImplTest {
 	public void testSelector() {
 		Observable<String> cartOrderGuidObservable = Observable.just(CART_ORDER_GUID);
 		ShippingAddressSelectorChoiceIdentifier shippingAddressSelectorChoiceIdentifier = mock(ShippingAddressSelectorChoiceIdentifier.class);
+		when(addressRepository.getExistingAddressByGuid(ADDRESS1, customer)).thenReturn(Single.just(customerAddress));
 		when(shippingAddressSelectorChoiceIdentifier.getShippingAddressSelector()).thenReturn(shippingAddressSelectorIdentifier);
 		when(shippingAddressSelectorChoiceIdentifier.getAddress()).thenReturn(address1Identifier);
 		when(customerRepository.update(customer)).thenReturn(Single.just(customer));

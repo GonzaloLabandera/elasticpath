@@ -6,14 +6,15 @@ package com.elasticpath.datapopulation.cli.tool.validators;
 import java.lang.reflect.Method;
 
 import com.google.common.base.Predicate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A {@link Predicate} which validates whether a {@link Method} is valid to be invoked by
  * {@link com.elasticpath.datapopulation.cli.tool.DataPopulationCliApplication as a global configuration method.
  */
 public class GlobalConfigurationMethodValidator implements Predicate<Method> {
-	private static final Logger LOG = Logger.getLogger(GlobalConfigurationMethodValidator.class);
+	private static final Logger LOG = LogManager.getLogger(GlobalConfigurationMethodValidator.class);
 
 	/**
 	 * Checks whether the {@link Method} is either a zero-arg method, or contains 1 parameter and that parameter is either a

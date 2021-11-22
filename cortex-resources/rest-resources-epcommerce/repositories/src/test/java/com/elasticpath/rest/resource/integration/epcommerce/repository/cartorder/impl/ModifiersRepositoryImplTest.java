@@ -7,11 +7,10 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -32,6 +32,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierFieldOption;
 import com.elasticpath.domain.modifier.ModifierGroup;
@@ -110,7 +111,7 @@ public class ModifiersRepositoryImplTest {
 	@Mock
 	private ShoppingCart shoppingCart;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private ShoppingItem shoppingItem;
 
 	@Mock
@@ -125,7 +126,7 @@ public class ModifiersRepositoryImplTest {
 	@Mock
 	private Order order;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private OrderSku orderSku;
 
 	private final List<ModifierField> modifierFields = buildFields();
@@ -262,7 +263,7 @@ public class ModifiersRepositoryImplTest {
 				.willReturn(shoppingItem);
 		given(shoppingItem.getSkuGuid())
 				.willReturn(SKU_GUID);
-		given(shoppingItem.getFields())
+		given(shoppingItem.getModifierFields().getMap())
 				.willReturn(shoppingItemData);
 
 		given(productSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID))
@@ -300,7 +301,7 @@ public class ModifiersRepositoryImplTest {
 				.willReturn(orderSku);
 		given(orderSku.getSkuGuid())
 				.willReturn(SKU_GUID);
-		given(orderSku.getFields())
+		given(orderSku.getModifierFields().getMap())
 				.willReturn(shoppingItemData);
 
 		given(productSkuRepository.getProductSkuWithAttributesByGuid(SKU_GUID))
@@ -347,7 +348,10 @@ public class ModifiersRepositoryImplTest {
 		itemMap.put(FIELD_CODE3, StringUtils.EMPTY);
 		itemMap.put(FIELD_CODE4, null);
 		when(mockShoppingItem.getSkuGuid()).thenReturn(SKU_GUID);
-		when(mockShoppingItem.getFields()).thenReturn(itemMap);
+
+		ModifierFieldsMapWrapper modifierFields = new ModifierFieldsMapWrapper();
+		modifierFields.putAll(itemMap);
+		when(mockShoppingItem.getModifierFields()).thenReturn(modifierFields);
 
 		// when
 		modifiersRepository.findMissingRequiredFieldCodesByShoppingItem(mockShoppingItem)

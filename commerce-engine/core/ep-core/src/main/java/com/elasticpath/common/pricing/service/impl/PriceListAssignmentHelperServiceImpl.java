@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.common.dto.assembler.pricing.PriceListAssignmentsDtoAssembler;
 import com.elasticpath.common.dto.pricing.PriceListAssignmentsDTO;
@@ -152,9 +152,9 @@ public class PriceListAssignmentHelperServiceImpl implements PriceListAssignment
 		List<PriceListAssignmentsDTO> resultList = new LinkedList<>();
 		List<PriceListAssignmentsDTO> priceListAssignments;
 		for (Catalog catalog : catalogList) {
-			priceListAssignments = 
+			priceListAssignments =
 				priceListAssignmentsDtoAssembler.assembleDto(
-					priceListAssignmentService.listByCatalog(catalog.getCode()));
+					priceListAssignmentService.listByCatalogLite(catalog.getCode()));
 			resultList.addAll(filterByCmUser(cmUser, priceListAssignments));
 		}
 		return resultList;
@@ -165,6 +165,6 @@ public class PriceListAssignmentHelperServiceImpl implements PriceListAssignment
 		return priceListAssignmentService;
 	}
 
-	
-	
+
+
 }

@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.core.helpers.store;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.core.CoreMessages;

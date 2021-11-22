@@ -13,7 +13,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -57,7 +58,7 @@ import com.elasticpath.service.store.WarehouseService;
  * Represents the UI for the customer registration report parameter section.
  */
 public class InventoryLowStockReportSection extends AbstractReportSection {
-	private static final Logger LOG = Logger.getLogger(InventoryLowStockReportSection.class);
+	private static final Logger LOG = LogManager.getLogger(InventoryLowStockReportSection.class);
 
 	private CCombo warehouseCombo;
 	

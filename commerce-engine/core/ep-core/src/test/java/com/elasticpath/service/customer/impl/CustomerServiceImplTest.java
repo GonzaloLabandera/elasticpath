@@ -3,20 +3,19 @@
  */
 package com.elasticpath.service.customer.impl;
 
+import static java.lang.Integer.MAX_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -29,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -49,7 +47,6 @@ import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerMessageIds;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.order.OrderAddress;
-import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
@@ -58,6 +55,8 @@ import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
+import com.elasticpath.persistence.support.impl.CriteriaQuery;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.misc.TimeService;
@@ -84,11 +83,11 @@ public class CustomerServiceImplTest {
 	private static final String ID_EXISTS_ERROR_MESSAGE = "Customer with the given shared Id already exists";
 	private static final long USER_UIDPK = 1L;
 	private static final String LIST = "list";
-	private static final String CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID_AND_STORE = "Cannot retrieve customer without sharedId and store";
-	private static final String CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID = "Cannot retrieve customer without sharedId";
+	private static final String CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID = "Cannot retrieve customer without sharedId and customerType";
 	private static final String ADDRESS_FIRST_NAME = "AddressFirstname";
 	private static final String ADDRESS_LAST_NAME = "AddressLastName";
 	private static final String ADDRESS_PHONE_NUMBER = "OneTwoThreeFourFive";
+	private static final String CUSTOMER_QUERY = "CUSTOMER_QUERY";
 
 	@Spy
 	@InjectMocks
@@ -101,11 +100,13 @@ public class CustomerServiceImplTest {
 	@Mock
 	private TimeService timeService;
 	@Mock
+	private AddressService addressService;
+	@Mock
 	private PersistenceEngine persistenceEngine;
 	@Mock
-	private FetchPlanHelper fetchPlanHelper;
+	private PersistenceEngine persistenceEngineWithLoadTuner;
 	@Mock
-	private Store store;
+	private FetchPlanHelper fetchPlanHelper;
 	@Mock
 	private EventMessageFactory eventMessageFactory;
 	@Mock
@@ -122,20 +123,21 @@ public class CustomerServiceImplTest {
 	private OrderAddress billingAddress;
 	@Mock
 	private ElasticPath elasticPath;
+	@Mock
+	private CriteriaQuery customerQuery;
+	@Mock
+	private LoadTuner loadTuner;
 
 	@Before
 	public void setUp() {
 		when(customerGroupService.getDefaultGroup()).thenReturn(mock(CustomerGroup.class));
-		when(storeService.findStoreWithCode(TEST_STORE_CODE)).thenReturn(store);
 		when(timeService.getCurrentTime()).thenReturn(new Date());
-
-		when(store.getCode()).thenReturn(TEST_STORE_CODE);
-		when(store.getUidPk()).thenReturn(1L);
 
 		when(customer.getGuid()).thenReturn(USER_GUID);
 		when(customer.getSharedId()).thenReturn(SHARED_ID);
 		when(customer.getStoreCode()).thenReturn(TEST_STORE_CODE);
 		when(customer.getUidPk()).thenReturn(USER_UIDPK);
+		when(customerQuery.getQuery()).thenReturn(CUSTOMER_QUERY);
 
 
 		Mockito.<Class<Customer>>when(elasticPath.getBeanImplClass(ContextIdNames.CUSTOMER)).thenReturn(Customer.class);
@@ -150,6 +152,7 @@ public class CustomerServiceImplTest {
 		when(customer.getCustomerType()).thenReturn(CustomerType.REGISTERED_USER);
 		when(storeService.findValidStoreCode(TEST_STORE_CODE)).thenReturn(TEST_STORE_CODE);
 		when(eventMessageFactory.createEventMessage(any(EventType.class), any(String.class), eq(null))).thenReturn(mock(EventMessage.class));
+		when(persistenceEngine.saveOrUpdate(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.add(customer)).isEqualTo(customer);
 
@@ -164,7 +167,8 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void addAnonymousCustomerDelegatesAndReturnsCustomer() {
-        when(customer.getCustomerType()).thenReturn(CustomerType.SINGLE_SESSION_USER);
+		when(customer.getCustomerType()).thenReturn(CustomerType.SINGLE_SESSION_USER);
+		when(persistenceEngine.saveOrUpdate(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.add(customer)).isEqualTo(customer);
 
@@ -190,14 +194,12 @@ public class CustomerServiceImplTest {
 	@Test
 	public void updateAnonymousCustomerUpdatesAndReturnsCustomer() {
 		when(customer.getCustomerType()).thenReturn(CustomerType.SINGLE_SESSION_USER);
-		when(persistenceEngine.update(customer)).thenReturn(customer);
+		when(persistenceEngine.saveOrUpdate(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.update(customer)).isEqualTo(customer);
 
-		verify(customer).setPreferredBillingAddress(null);
-		verify(customer).setPreferredShippingAddress(null);
 		verify(customerConstraintValidationService).validate(customer);
-	 	verify(persistenceEngine).update(customer);
+	 	verify(persistenceEngine, times(2)).saveOrUpdate(customer);
 	}
 
 	/**
@@ -206,12 +208,12 @@ public class CustomerServiceImplTest {
 	@Test
 	public void updateNonAnonymousCustomerUpdatesAndReturnsCustomer() {
 		when(customer.getCustomerType()).thenReturn(CustomerType.REGISTERED_USER);
-		when(persistenceEngine.update(customer)).thenReturn(customer);
+		when(persistenceEngine.saveOrUpdate(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.update(customer)).isEqualTo(customer);
 
 		verify(customerConstraintValidationService).validate(customer);
-		verify(persistenceEngine).update(customer);
+		verify(persistenceEngine, times(2)).saveOrUpdate(customer);
 	}
 
 	/**
@@ -367,7 +369,7 @@ public class CustomerServiceImplTest {
 		assertThatThrownBy(() -> customerServiceImpl.resetPassword(SHARED_ID, TEST_STORE_CODE))
 				.isInstanceOf(SharedIdNonExistException.class)
 				.hasMessage("The given shared id doesn't exist: " + SHARED_ID + " In store: " + TEST_STORE_CODE);
-		verify(customerServiceImpl).findBySharedId(SHARED_ID, TEST_STORE_CODE);
+		verify(customerServiceImpl).findBySharedId(SHARED_ID, CustomerType.REGISTERED_USER);
 	}
 
 	/**
@@ -376,11 +378,11 @@ public class CustomerServiceImplTest {
 	@Test
 	public void resetPasswordFindsCustomerAndResetsPassword() {
 		when(elasticPath.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class)).thenReturn(customerServiceImpl);
-		doReturn(customer).when(customerServiceImpl).findBySharedId(SHARED_ID, TEST_STORE_CODE);
+		doReturn(customer).when(customerServiceImpl).findBySharedId(SHARED_ID, CustomerType.REGISTERED_USER);
 		doReturn(customer).when(customerServiceImpl).auditableResetPassword(customer);
 
 		customerServiceImpl.resetPassword(SHARED_ID, TEST_STORE_CODE);
-		verify(customerServiceImpl).findBySharedId(SHARED_ID, TEST_STORE_CODE);
+		verify(customerServiceImpl).findBySharedId(SHARED_ID, CustomerType.REGISTERED_USER);
 		verify(customerServiceImpl).auditableResetPassword(customer);
 	}
 
@@ -456,34 +458,14 @@ public class CustomerServiceImplTest {
 	 * Adding or updating address with a valid input address adds the address to the given customer, updates the customer, and returns the customer.
 	 */
 	@Test
-	public void addOrUpdateAddressWithValidAddressUpdatesAndReturnsCustomer() {
+	public void addOrUpdateCustomerAddressWithValidAddressUpdatesAndReturnsCustomer() {
 		CustomerAddress customerAddress = mock(CustomerAddress.class);
-
-		doNothing().when(customerServiceImpl).validateCustomerAddress(customerAddress);
-		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
 		doReturn(customer).when(customerServiceImpl).update(customer);
-		when(customerAddress.getUidPk()).thenReturn(0L);
 
 		assertThat(customerServiceImpl.addOrUpdateAddress(customer, customerAddress)).isEqualTo(customer);
 
-		verify(customerServiceImpl).validateCustomerAddress(customerAddress);
-		verify(customer).addAddress(customerAddress);
+		verify(addressService).save(customerAddress);
 		verify(customerServiceImpl).update(customer);
-	}
-
-	/**
-	 * Adding or updating an address with an invalid address throws an EpValidationException.
-	 */
-	@Test
-	public void addOrUpdateAddressWithInvalidAddressThrowsException() {
-		CustomerAddress customerAddress = mock(CustomerAddress.class);
-
-		Throwable exception = new EpValidationException("Address validation failure.", Collections.emptyList());
-
-		doThrow(exception).when(customerServiceImpl).validateCustomerAddress(customerAddress);
-
-		assertThatThrownBy(() -> customerServiceImpl.addOrUpdateAddress(customer, customerAddress))
-				.isEqualTo(exception);
 	}
 
 	/**
@@ -493,12 +475,10 @@ public class CustomerServiceImplTest {
 	@Test
 	public void addOrUpdateCustomerShippingAddressWithNewAddressCreatesAndSetsAddressAndReturnsCustomer() {
 		CustomerAddress customerAddress = mock(CustomerAddress.class);
-		when(customerAddress.getUidPk()).thenReturn(0L);
-		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
 		doReturn(customer).when(customerServiceImpl).update(customer);
 
 		assertThat(customerServiceImpl.addOrUpdateCustomerShippingAddress(customer, customerAddress)).isEqualTo(customer);
-		verify(customer).addAddress(customerAddress);
+		verify(addressService).save(customerAddress);
 		verify(customer).setPreferredShippingAddress(customerAddress);
 		verify(customerServiceImpl).update(customer);
 	}
@@ -510,9 +490,9 @@ public class CustomerServiceImplTest {
 	public void addOrUpdateCustomerShippingAddressWithExistingAddressUpdatesAndReturnsCustomer() {
 		final long addressUid = 1L;
 		CustomerAddress customerAddress = mock(CustomerAddress.class);
+		when(customerAddress.isPersisted()).thenReturn(true);
 		when(customerAddress.getUidPk()).thenReturn(addressUid);
-		when(customer.getAddressByUid(addressUid)).thenReturn(customerAddress);
-		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
+		when(addressService.findByCustomerAndAddressUid(USER_UIDPK, addressUid)).thenReturn(customerAddress);
 		doReturn(customer).when(customerServiceImpl).update(customer);
 
 		assertThat(customerServiceImpl.addOrUpdateCustomerShippingAddress(customer, customerAddress)).isEqualTo(customer);
@@ -528,9 +508,9 @@ public class CustomerServiceImplTest {
 	public void addOrUpdateCustomerShippingAddressWithNonExistentAddressUidThrowsException() {
 		final long addressUid = 1L;
 		CustomerAddress customerAddress = mock(CustomerAddress.class);
+		when(customerAddress.isPersisted()).thenReturn(true);
 		when(customerAddress.getUidPk()).thenReturn(addressUid);
-		when(customer.getAddressByUid(addressUid)).thenReturn(null);
-		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
+		when(addressService.findByCustomerAndAddressUid(USER_UIDPK, addressUid)).thenReturn(null);
 
 		assertThatThrownBy(() -> customerServiceImpl.addOrUpdateCustomerShippingAddress(customer, customerAddress))
 				.isInstanceOf(EpDomainException.class)
@@ -544,12 +524,10 @@ public class CustomerServiceImplTest {
 	@Test
 	public void addOrUpdateCustomerBillingAddressWithNewAddressUpdatesAndReturnsCustomer() {
 		CustomerAddress customerAddress = mock(CustomerAddress.class);
-		when(customerAddress.getUidPk()).thenReturn(0L);
-		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
 		doReturn(customer).when(customerServiceImpl).update(customer);
 
 		assertThat(customerServiceImpl.addOrUpdateCustomerBillingAddress(customer, customerAddress)).isEqualTo(customer);
-		verify(customer).addAddress(customerAddress);
+		verify(addressService).save(customerAddress);
 		verify(customer).setPreferredBillingAddress(customerAddress);
 		verify(customerServiceImpl).update(customer);
 	}
@@ -562,9 +540,9 @@ public class CustomerServiceImplTest {
 	public void addOrUpdateCustomerBillingAddressWithExistingAddressUpdatesAndReturnsCustomer() {
 		final long addressUid = 1L;
 		CustomerAddress customerAddress = mock(CustomerAddress.class);
+		when(customerAddress.isPersisted()).thenReturn(true);
 		when(customerAddress.getUidPk()).thenReturn(addressUid);
-		when(customer.getAddressByUid(addressUid)).thenReturn(customerAddress);
-		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
+		when(addressService.findByCustomerAndAddressUid(USER_UIDPK, addressUid)).thenReturn(customerAddress);
 		doReturn(customer).when(customerServiceImpl).update(customer);
 
 		assertThat(customerServiceImpl.addOrUpdateCustomerBillingAddress(customer, customerAddress)).isEqualTo(customer);
@@ -581,9 +559,9 @@ public class CustomerServiceImplTest {
 	public void addOrUpdateCustomerBillingAddressWithNonExistentAddressUidThrowsException() {
 		final long addressUid = 1L;
 		CustomerAddress customerAddress = mock(CustomerAddress.class);
+		when(customerAddress.isPersisted()).thenReturn(true);
 		when(customerAddress.getUidPk()).thenReturn(addressUid);
-		when(customer.getAddressByUid(addressUid)).thenReturn(null);
-		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
+		when(addressService.findByCustomerAndAddressUid(USER_UIDPK, addressUid)).thenReturn(null);
 
 		assertThatThrownBy(() -> customerServiceImpl.addOrUpdateCustomerBillingAddress(customer, customerAddress))
 				.isInstanceOf(EpDomainException.class)
@@ -591,68 +569,22 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Finding by shared id with a null shared id throws an EpServiceException with an appropriate message.
+	 * Finding by shared id with a null customer type throws an EpServiceException with an appropriate message.
 	 */
 	@Test
-	public void findBySharedIdWithNullSharedIdThrowsException() {
-		assertThatThrownBy(() -> customerServiceImpl.findBySharedId(null))
+	public void findBySharedIdWithNullCustomerTypeThrowsException() {
+		assertThatThrownBy(() -> customerServiceImpl.findBySharedId(SHARED_ID, null))
 				.isInstanceOf(EpServiceException.class)
 				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID);
 	}
 
-	/**
-	 * Finding by shared id with a null shared id throws an EpServiceException with an appropriate message.
-	 */
 	@Test
 	public void findBySharedId() {
-		when(persistenceEngine.retrieveByNamedQuery("CUSTOMER_FIND_BY_SHAREDID", SHARED_ID)).thenReturn(Collections.singletonList(customer));
-		assertThat(customerServiceImpl.findBySharedId(SHARED_ID)).isEqualTo(customer);
+		when(persistenceEngine.retrieveByNamedQuery("CUSTOMER_FIND_BY_SHAREDID_AND_TYPE", SHARED_ID, CustomerType.ACCOUNT))
+				.thenReturn(Collections.singletonList(customer));
+		assertThat(customerServiceImpl.findBySharedId(SHARED_ID, CustomerType.ACCOUNT)).isEqualTo(customer);
 	}
 
-	/**
-	 * Finding by shared id with a null shared id and valid store code throws an EpServiceException with an appropriate message.
-	 */
-	@Test
-	public void findBySharedIdWithStoreCodeAndNullSharedIdThrowsException() {
-		assertThatThrownBy(() -> customerServiceImpl.findBySharedId(null, TEST_STORE_CODE))
-				.isInstanceOf(EpServiceException.class)
-				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_SHARED_ID_AND_STORE);
-	}
-
-	/**
-	 * Finding by shared id with an invalid store code throws an EpServiceException with an appropriate message.
-	 */
-	@Test
-	public void findBySharedIdWithInvalidStoreCodeThrowsException() {
-		when(storeService.findStoreWithCode(TEST_STORE_CODE)).thenReturn(null);
-		assertThatThrownBy(() -> customerServiceImpl.findBySharedId(SHARED_ID, TEST_STORE_CODE))
-				.isInstanceOf(EpServiceException.class)
-				.hasMessage("Store with code " + TEST_STORE_CODE + " not found.");
-	}
-
-	/**
-	 * Finding by shared id returns the corresponding customer when the input shared id corresponds to a customer in the given store.
-	 */
-	@Test
-	public void findBySharedIdWithValidSharedIdReturnsCorrespondingCustomer() {
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.singletonList(customer));
-
-		assertThat(customerServiceImpl.findBySharedId(SHARED_ID, TEST_STORE_CODE)).isEqualTo(customer);
-		verify(storeService).findStoreWithCode(TEST_STORE_CODE);
-	}
-
-	/**
-	 * Finding by shared id returns null when the input shared id does not correspond to a customer in the given store.
-	 */
-	@Test
-	public void findBySharedIdReturnsNullWhenNoStoreCorrespondsToTheGivenStoreCode() {
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.emptyList());
-
-		assertThat(customerServiceImpl.findBySharedId(SHARED_ID, TEST_STORE_CODE)).isEqualTo(null);
-		verify(storeService).findStoreWithCode(TEST_STORE_CODE);
-	}
 
 	/**
 	 * Verifying a customer with disabled status throws a UserStatusInactiveException.
@@ -743,6 +675,36 @@ public class CustomerServiceImplTest {
 
 		verify(customer, never()).setFirstName(ADDRESS_FIRST_NAME);
 		verify(customer, never()).setLastName(ADDRESS_LAST_NAME);
+	}
+
+	/**
+	 * Finding customers with a query to the persistence engine and returns the resulting list of customers.
+	 */
+	@Test
+	public void testGetCustomersByQuery() {
+		int start = 0;
+		int maxResults = MAX_VALUE;
+
+		when(this.persistenceEngine.withLoadTuners(loadTuner)).thenReturn(persistenceEngineWithLoadTuner);
+		when(this.persistenceEngineWithLoadTuner.retrieve(customerQuery.getQuery(), start, maxResults))
+				.thenReturn(Collections.singletonList(customer));
+
+		assertThat(customerServiceImpl.getCustomersByQuery(customerQuery, Collections.EMPTY_LIST, loadTuner, start, maxResults))
+			.isEqualTo(Collections.singletonList(customer));
+	}
+
+	/**
+	 * Finding customers with a query to the persistence engine and returns the resulting list of customers.
+	 */
+	@Test
+	public void testGetCustomerCountByQuery() {
+		Long count = 1L;
+
+		when(this.persistenceEngine.withLoadTuners(loadTuner)).thenReturn(persistenceEngineWithLoadTuner);
+		when(this.persistenceEngineWithLoadTuner.retrieve(customerQuery.getQuery())).thenReturn(Collections.singletonList(count));
+
+		assertThat(customerServiceImpl.getCustomerCountByQueryAndStoreCodes(customerQuery, Collections.EMPTY_LIST, loadTuner))
+				.isEqualTo(count);
 	}
 
 	/**

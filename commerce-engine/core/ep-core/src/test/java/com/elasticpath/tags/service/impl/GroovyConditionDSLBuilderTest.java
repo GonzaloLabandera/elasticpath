@@ -174,14 +174,14 @@ public class GroovyConditionDSLBuilderTest  {
 
 		String conditionString = " { AND { CART_SUBTOTAL.equalTo (-100.0G) }  } ";
 
-		LogicalOperator root = cBuilder.getLogicalOperationTree(conditionString);
+		LogicalOperator root = cBuilder.createLogicalOperatorFromDSL(conditionString);
 		String result = cBuilder.getConditionalDSLString(root);
 		assertEquals(conditionString, result);
 
 		conditionString = " { AND { CART_SUBTOTAL.equalTo (100.0G) }  { "
 				+ "OR { SELLING_CHANNEL.equalTo 'UKSTORE' }  { SELLING_CHANNEL.equalTo 'USASTORE' }  }  } ";
 
-		root = cBuilder.getLogicalOperationTree(conditionString);
+		root = cBuilder.createLogicalOperatorFromDSL(conditionString);
 
 		assertNull(root.getParentLogicalOperator());
 		
@@ -193,7 +193,7 @@ public class GroovyConditionDSLBuilderTest  {
 				+ " { OR { CATEGORIES_VISITED.includes 'PANASONIC' }  { CATEGORIES_VISITED.includesIgnoreCase 'SONY' }  } " 
 				+	" { AND { CUSTOMER_AGE_YEARS.lessThan (50i) }  }  } ";
 		
-		root = cBuilder.getLogicalOperationTree(conditionString);
+		root = cBuilder.createLogicalOperatorFromDSL(conditionString);
 		
 		assertNull(root.getParentLogicalOperator());
 		
@@ -216,7 +216,7 @@ public class GroovyConditionDSLBuilderTest  {
 		String incorrectConditionString = " { AND { CART_SUBTOTAL.equalTo '-100' }  } ";
 
 		boolean exceptionThrown = false;
-		LogicalOperator root = cBuilder.getLogicalOperationTree(incorrectConditionString);			
+		LogicalOperator root = cBuilder.createLogicalOperatorFromDSL(incorrectConditionString);
 		String result = cBuilder.getConditionalDSLString(root);	
 		assertFalse(incorrectConditionString.equals(result));
 				
@@ -225,7 +225,7 @@ public class GroovyConditionDSLBuilderTest  {
 
 		exceptionThrown = false;
 		try {
-		cBuilder.getLogicalOperationTree(incorrectConditionString);			
+		cBuilder.createLogicalOperatorFromDSL(incorrectConditionString);
 		} catch (Exception exception) {
 				exceptionThrown = true;
 		}
@@ -236,7 +236,7 @@ public class GroovyConditionDSLBuilderTest  {
 
 		exceptionThrown = false;
 		try {
-		cBuilder.getLogicalOperationTree(incorrectConditionString);			
+		cBuilder.createLogicalOperatorFromDSL(incorrectConditionString);
 		} catch (Exception exception) {
 				exceptionThrown = true;
 		}

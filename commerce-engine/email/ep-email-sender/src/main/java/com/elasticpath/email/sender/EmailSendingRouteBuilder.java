@@ -13,14 +13,15 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.spi.DataFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Configures a route to send email messages corresponding to {@link com.elasticpath.email.EmailDto EmailDto} instances.
  */
 public class EmailSendingRouteBuilder extends RouteBuilder {
 
-	private static final Logger LOGGER = Logger.getLogger(EmailSendingRouteBuilder.class);
+	private static final Logger LOGGER = LogManager.getLogger(EmailSendingRouteBuilder.class);
 
 	private Endpoint incomingEndpoint;
 	private DataFormat emailDataFormat;

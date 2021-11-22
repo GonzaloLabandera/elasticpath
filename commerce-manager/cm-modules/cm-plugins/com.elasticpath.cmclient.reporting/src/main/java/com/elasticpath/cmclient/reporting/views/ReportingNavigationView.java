@@ -11,7 +11,8 @@ import java.util.Map;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.reporting.common.SavedReportParameters;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -47,7 +48,7 @@ import com.elasticpath.cmclient.reporting.service.CmReportService;
  */
 public class ReportingNavigationView extends ViewPart implements SelectionListener, IRunnableWithProgress {
 
-	private static final Logger LOG = Logger.getLogger(ReportingNavigationView.class);
+	private static final Logger LOG = LogManager.getLogger(ReportingNavigationView.class);
 
 	/** View ID. */
 	public static final String VIEW_ID = ReportingNavigationView.class.getName();

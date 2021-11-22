@@ -4,8 +4,6 @@
 package com.elasticpath.domain.testcontext;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -34,10 +32,10 @@ public class ShoppingTestData {
 	private ShoppingCartService shoppingCartService;
 	private OrderService orderService;
 
-	private TestCustomerSession customerSession;
+	private TestShopper testShopper;
 
 	/* Wish there was another way, but time is short and some of our tests need a second CustomerSession. */
-	private TestCustomerSession secondaryCustomerSession;
+	private TestShopper secondaryTestShopper;
 
 	private Store store;
 	private Order order;
@@ -49,12 +47,19 @@ public class ShoppingTestData {
 		return instance;
 	}
 
-	public CustomerSession getCustomerSession() {
-		return customerSession.getRealCustomerSession();
+	public Shopper getShopper() {
+		return testShopper.getShopper();
 	}
 
-	public void setCustomerSession(CustomerSession customerSession) {
-		this.customerSession = new TestCustomerSessionImpl(customerSession, shoppingCartService);
+	public void setShopper(Shopper shopper) {
+		this.testShopper = new TestShopperImpl(shopper, shoppingCartService);
+	}
+
+	public Shopper getSecondaryShopper() {
+		return secondaryTestShopper.getShopper();
+	}
+	public void setSecondaryShopper(final Shopper secondaryShopper) {
+		this.secondaryTestShopper = new TestShopperImpl(secondaryShopper, shoppingCartService);
 	}
 
 	public Store getStore() {
@@ -80,20 +85,6 @@ public class ShoppingTestData {
 		instance = new ShoppingTestData();
 	}
 
-    /**
-     * @return the secondaryCustomerSession
-     */
-    public CustomerSession getSecondaryCustomerSession() {
-        return secondaryCustomerSession.getRealCustomerSession();
-    }
-
-    /**
-     * @param secondaryCustomerSession the secondaryCustomerSession to set
-     */
-    public void setSecondaryCustomerSession(final CustomerSession secondaryCustomerSession) {
-        this.secondaryCustomerSession = new TestCustomerSessionImpl(secondaryCustomerSession, shoppingCartService);
-    }
-
 	/**
 	 * Initialize {@link ShoppingCartService} and {@link OrderService} services.
 	 *
@@ -113,39 +104,33 @@ public class ShoppingTestData {
 	}
 
 	public Order getCompletedOrder() {
-		return getCompletedOrder(customerSession);
+		return getCompletedOrder(testShopper);
 	}
 
 	public Order getSecondaryCompletedOrder() {
-		return getCompletedOrder(secondaryCustomerSession);
+		return getCompletedOrder(secondaryTestShopper);
 	}
 
 	//fetching completed order via OrderService, instead relying on volatile shopping cart, prevents intermittent failures
 	// (shipment item subtotal can be null due to cached/non-initialized value)
-	private Order getCompletedOrder(final TestCustomerSession customerSession) {
-		return orderService.findOrderByOrderNumber(customerSession.getCompletedOrderNumber());
+	private Order getCompletedOrder(final TestShopper testShopper) {
+		return orderService.findOrderByOrderNumber(testShopper.getCompletedOrderNumber());
 	}
 
-	private interface TestCustomerSession extends CustomerSession {
+	private interface TestShopper {
 		String getCompletedOrderNumber();
 		void setCompletedOrderNumber(String completedOrderNumber);
-
-		CustomerSession getRealCustomerSession();
+		Shopper getShopper();
 	}
 
-	private static class TestCustomerSessionImpl extends CustomerSessionImpl implements TestCustomerSession {
-		/**
-		 * Serial version id.
-		 */
-		private static final long serialVersionUID = 6000000001L;
-
-		private final CustomerSession realCustomerSession;
+	private static class TestShopperImpl implements TestShopper {
+		private final Shopper shopper;
 		private final ShoppingCartService shoppingCartService;
 
 		private String completedOrderNumber;
 
-		public TestCustomerSessionImpl(final CustomerSession customerSession, final ShoppingCartService shoppingCartService) {
-			this.realCustomerSession = customerSession;
+		TestShopperImpl(final Shopper shopper, final ShoppingCartService shoppingCartService) {
+			this.shopper = shopper;
 			this.shoppingCartService = shoppingCartService;
 		}
 
@@ -161,16 +146,16 @@ public class ShoppingTestData {
 		}
 
 		@Override
-		public CustomerSession getRealCustomerSession() {
-			return refreshCartIfRequired();
+		public Shopper getShopper() {
+			refreshCartIfRequired();
+			return shopper;
 		}
 
-		/*
-	  The cart must be refreshed upon checkout. Also, completed order's order number must be preserved as well
-	  so the fresh completed order is always retrieved.
-	 */
-		private CustomerSession refreshCartIfRequired() {
-			Shopper shopper = this.realCustomerSession.getShopper();
+		/**
+		  The cart must be refreshed upon checkout. Also, completed order's order number must be preserved as well
+		  so the fresh completed order is always retrieved.
+		 **/
+		private void refreshCartIfRequired() {
 			ShoppingCart shoppingCart = shopper.getCurrentShoppingCart();
 
 			if (!shoppingCart.isActive()) {
@@ -179,14 +164,10 @@ public class ShoppingTestData {
 
 				setCompletedOrderNumber(completedOrderNumber);
 
-				shoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(realCustomerSession);
+				shoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(shopper);
 				shoppingCartService.saveIfNotPersisted(shoppingCart);
 				shopper.setCurrentShoppingCart(shoppingCart);
 			}
-
-			//calling getCompletedOrder(CustomerSession) will always return a non-null value
-			//the intention is to avoid additional global fields so returning null, when order number is not required, is fine
-			return realCustomerSession;
 		}
 	}
 

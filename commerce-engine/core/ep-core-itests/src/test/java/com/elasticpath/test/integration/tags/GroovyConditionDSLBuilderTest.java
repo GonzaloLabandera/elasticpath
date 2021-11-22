@@ -16,8 +16,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +41,7 @@ import com.elasticpath.validation.domain.ValidationResult;
  */
 public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 	
-	private static final Logger LOG = Logger.getLogger(GroovyConditionDSLBuilderTest.class);
+	private static final Logger LOG = LogManager.getLogger(GroovyConditionDSLBuilderTest.class);
 	
 	private GroovyConditionDSLBuilderImpl groovyDSLBuilder;
 

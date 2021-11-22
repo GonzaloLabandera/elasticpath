@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:camel="http://camel.apache.org/schema/spring"
+		xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+		">
+
+	<camel:camelContext id="ep-operational-insights-message-consumer" xmlns="http://camel.apache.org/schema/spring"
+						threadNamePattern="Camel (#camelId#) thread ##counter#">
+		<routeBuilder ref="operationalInsightsRouteBuilder"/>
+	</camel:camelContext>
+
+	<bean id="operationalInsightsConfigurationRequestEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean" abstract="true">
+		<property name="uri" value="jms:topic:ep.insights.configuration"/>
+	</bean>
+
+	<bean id="operationalInsightsRuntimeRequestEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean" abstract="true">
+		<property name="uri" value="jms:topic:ep.insights.runtime"/>
+	</bean>
+
+	<bean id="operationalInsightsDeadLetterExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean" abstract="true">
+		<property name="uri" value="direct:/dev/null"/>
+	</bean>
+
+	<bean id="operationalInsightsRouteBuilderTemplate"
+		  class="com.elasticpath.insights.messaging.OperationalInsightsMessageConsumerRouteBuilder"
+		  abstract="true">
+		<property name="configurationRequestEndpoint">
+			<bean parent="operationalInsightsConfigurationRequestEndpoint">
+				<property name="camelContextId" value="ep-operational-insights-message-consumer"/>
+			</bean>
+		</property>
+		<property name="runtimeRequestEndpoint">
+			<bean parent="operationalInsightsRuntimeRequestEndpoint">
+				<property name="camelContextId" value="ep-operational-insights-message-consumer"/>
+			</bean>
+		</property>
+		<property name="insightsService" ref="insightsService"/>
+	</bean>
+
+	<bean id="operationalInsightsRouteBuilder" parent="operationalInsightsRouteBuilderTemplate"/>
+
+</beans>

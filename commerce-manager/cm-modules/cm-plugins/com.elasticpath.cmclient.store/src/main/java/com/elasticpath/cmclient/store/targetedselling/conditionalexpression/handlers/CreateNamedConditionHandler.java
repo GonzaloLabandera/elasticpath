@@ -6,7 +6,8 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.handlers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -41,7 +42,7 @@ import com.elasticpath.tags.domain.ConditionalExpression;
 public class CreateNamedConditionHandler extends AbstractPolicyAwareHandler {
 	
 	/** LOG logger. */
-	private static final Logger LOG = Logger.getLogger(CreateNamedConditionHandler.class);
+	private static final Logger LOG = LogManager.getLogger(CreateNamedConditionHandler.class);
 	
 	private final PolicyActionContainer handlerContainer = addPolicyActionContainer("createConditionalExpressionHandler"); //$NON-NLS-1$	
 

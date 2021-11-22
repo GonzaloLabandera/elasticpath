@@ -72,7 +72,7 @@ public class CleanupStepDefinitionsHelper {
 	public void setUpFailedOrder(final DataTable dataTable) {
 		setUpShippingServiceLevels();
 		customerHolder.set(tac.getPersistersFactory().getStoreTestPersister().createDefaultCustomer(storeHolder.get()));
-		shoppingCartStepDefinitionsHelper.setShippingAddress(customerHolder.get().getAddresses().get(0));
+		shoppingCartStepDefinitionsHelper.setShippingAddress(customerHolder.get().getPreferredShippingAddress());
 		shoppingCartStepDefinitionsHelper.setDeliveryOption(SHIPPING_SERVICE_LEVEL_CODE);
 		shoppingCartStepDefinitionsHelper.purchaseItems(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 		Order order = orderHolder.get();

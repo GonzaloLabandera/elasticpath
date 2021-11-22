@@ -6,6 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE_IDENTIFIER_PART;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -16,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +28,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.base.exception.structured.EpStructureErrorMessageException;
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.carts.CartDescriptorEntity;
 import com.elasticpath.rest.definition.carts.CartDescriptorIdentifier;
@@ -81,12 +82,9 @@ public class CartDescriptorRepositoryImplTest {
 
 	@Test
 	public void testFindOneWithIdentifierData() {
-		Map<String, CartData> cartDescriptors = new HashMap<>();
-		CartData value = mock(CartData.class);
-		when(value.getKey()).thenReturn(TEST_NAME);
-		when(value.getValue()).thenReturn(TEST_VALUE);
+		Map<String, String> cartDescriptors = new HashMap<>();
 
-		cartDescriptors.put(TEST_NAME, value);
+		cartDescriptors.put(TEST_NAME, TEST_VALUE);
 
 		when(shoppingCartRepository.getCartDescriptors(CART_GUID))
 				.thenReturn(cartDescriptors);
@@ -114,16 +112,16 @@ public class CartDescriptorRepositoryImplTest {
 				.build());
 
 		CartDescriptorEntity entity = mock(CartDescriptorEntity.class);
-		ShoppingCart cart = mock(ShoppingCart.class);
+		ShoppingCart cart = mock(ShoppingCart.class, RETURNS_DEEP_STUBS);
 
-		when(shoppingCartService.findByGuid(CART_GUID)).thenReturn(cart);
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(cart));
 		when(resourceOperationContext.getSubject()).thenReturn(subject);
 		when(strategy.isApplicable(subject)).thenReturn(true);
 
 		repository.update(entity, identifier)
 				.test()
 				.assertNoErrors();
-		verify(strategy, times(1)).validateCreate(cart);
+		verify(strategy, times(1)).validateCreateOrUpdate(cart);
 		verify(shoppingCartService, times(1)).saveOrUpdate(cart);
 	}
 
@@ -136,12 +134,12 @@ public class CartDescriptorRepositoryImplTest {
 				.build());
 
 		CartDescriptorEntity entity = mock(CartDescriptorEntity.class);
-		ShoppingCart cart = mock(ShoppingCart.class);
+		ShoppingCart cart = mock(ShoppingCart.class, RETURNS_DEEP_STUBS);
 
-		when(shoppingCartService.findByGuid(CART_GUID)).thenReturn(cart);
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(cart));
 		when(resourceOperationContext.getSubject()).thenReturn(subject);
 		when(strategy.isApplicable(subject)).thenReturn(true);
-		doThrow(new EpStructureErrorMessageException("err", null)).when(strategy).validateCreate(cart);
+		doThrow(new EpStructureErrorMessageException("err", null)).when(strategy).validateCreateOrUpdate(cart);
 		when(exceptionTransformer.getResourceOperationFailure(any(EpValidationException.class)))
 				.thenReturn(ResourceOperationFailure.badRequestBody());
 

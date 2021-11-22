@@ -7,7 +7,8 @@ import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
@@ -31,7 +32,7 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
  */
 public class AttributeFieldResolver implements EpQLFieldResolver {
 
-	private static final Logger LOG = Logger.getLogger(AttributeFieldResolver.class);
+	private static final Logger LOG = LogManager.getLogger(AttributeFieldResolver.class);
 
 	private static final String INEXISTING_ATTRIBUTE = "INEXISTING_ATTRIBUTE_777_st"; // to reduce the possibility that attribute exist.
 

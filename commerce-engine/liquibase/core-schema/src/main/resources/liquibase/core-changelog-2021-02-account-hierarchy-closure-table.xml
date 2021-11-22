@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2021 Elastic Path Software Inc. All rights reserved.
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-02-account-hierarchy-closure-table.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+<changeSet id="2021-02-create-closure-table" author="elasticpath">
+		<validCheckSum>8:3bb2cc81e705125cd55e11ac2017e8b4</validCheckSum>
+		<createTable tableName="TCUSTOMERCLOSURE">
+			<column name="UIDPK" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="ANCESTOR_GUID" type="varchar(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="DESCENDANT_GUID" type="varchar(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ANCESTOR_DEPTH" type="tinyint">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint baseTableName="TCUSTOMERCLOSURE" baseColumnNames="ANCESTOR_GUID"
+								 constraintName="TCUSTOMERCLOSURE_IBFK_1" referencedTableName="TCUSTOMER"
+								 referencedColumnNames="GUID" onDelete="CASCADE"/>
+
+		<addForeignKeyConstraint baseTableName="TCUSTOMERCLOSURE" baseColumnNames="DESCENDANT_GUID"
+								 constraintName="TCUSTOMERCLOSURE_IBFK_2" referencedTableName="TCUSTOMER"
+								 referencedColumnNames="GUID" onDelete="CASCADE"/>
+
+		<createIndex tableName="TCUSTOMERCLOSURE" indexName="I_CC_ANCESTOR">
+			<column name="ANCESTOR_GUID"/>
+		</createIndex>
+		
+		<createIndex tableName="TCUSTOMERCLOSURE" indexName="I_CC_DESCENDANT">
+			<column name="DESCENDANT_GUID"/>
+		</createIndex>
+
+		<createIndex tableName="TCUSTOMERCLOSURE" indexName="I_CC_DEPTH">
+			<column name="ANCESTOR_DEPTH"/>
+		</createIndex>
+
+		<customChange class="liquibase.ext.elasticpath.PopulateCustomerClosure"/>
+	</changeSet>
+</databaseChangeLog>

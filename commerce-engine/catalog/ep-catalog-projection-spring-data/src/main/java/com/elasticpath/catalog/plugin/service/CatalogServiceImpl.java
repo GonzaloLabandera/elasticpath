@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.openjpa.persistence.EntityExistsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -348,8 +348,7 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Override
 	public int removeAll(final String type) {
-		historyRepository.deleteAllByHistoryIdType(type);
-		return projectionRepository.deleteAllByProjectionIdType(type);
+		return projectionRepository.deleteAllProjectionsInBatchByType(type);
 	}
 
 	/**
@@ -593,5 +592,6 @@ public class CatalogServiceImpl implements CatalogService {
 		oldProjectionEntity.setContentHash(updatedProjectionEntity.getContentHash());
 		oldProjectionEntity.setContent(updatedProjectionEntity.getContent());
 		oldProjectionEntity.setDisableDateTime(updatedProjectionEntity.getDisableDateTime());
+		oldProjectionEntity.setGuid(updatedProjectionEntity.getGuid());
 	}
 }

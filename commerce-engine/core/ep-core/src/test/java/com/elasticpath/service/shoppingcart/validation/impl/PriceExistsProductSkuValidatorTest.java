@@ -8,34 +8,35 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Collection;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableMap;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.catalog.impl.BundleIdentifierImpl;
-import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.context.XPFProductSkuValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFPrice;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PriceExistsProductSkuValidatorTest {
 
 	private static final String SKU_CODE = "sku_code";
+	private static final String PARENT_SKU_CODE = "parent_sku_code";
 
 	@InjectMocks
 	private PriceExistsProductSkuValidatorImpl validator;
 
 	@Mock
-	private ProductSkuValidationContext context;
+	private XPFProductSkuValidationContext context;
 
 	@Mock
 	private Product product;
@@ -50,13 +51,30 @@ public class PriceExistsProductSkuValidatorTest {
 	private ProductSku parentProductSku;
 
 	@Mock
-	private Price price;
+	private XPFProductSku contextProductSku;
+
+	@Mock
+	private XPFProductSku contextParentProductSku;
+
+	@Mock
+	private XPFPrice price;
+
+	@Mock
+	private ProductSkuLookup productSkuLookup;
 
 	@Before
 	public void setUp() {
+
+		given(context.getProductSku()).willReturn(contextProductSku);
+		given(context.getParentProductSku()).willReturn(contextParentProductSku);
+
+		given(contextProductSku.getCode()).willReturn(SKU_CODE);
+		given(contextParentProductSku.getCode()).willReturn(PARENT_SKU_CODE);
+
+		given(productSkuLookup.findBySkuCode(SKU_CODE)).willReturn(productSku);
+		given(productSkuLookup.findBySkuCode(PARENT_SKU_CODE)).willReturn(parentProductSku);
+
 		given(calculatedProductBundle.isCalculated()).willReturn(true);
-		given(productSku.getSkuCode()).willReturn(SKU_CODE);
-		given(context.getProductSku()).willReturn(productSku);
 
 		validator.setBundleIdentifier(new BundleIdentifierImpl());
 	}
@@ -68,7 +86,7 @@ public class PriceExistsProductSkuValidatorTest {
 		given(context.getPromotedPrice()).willReturn(price);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Than
 		assertThat(messageCollections).isEmpty();
@@ -76,14 +94,14 @@ public class PriceExistsProductSkuValidatorTest {
 
 	@Test
 	public void testProductPriceDoesNotExist() {
-		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage("item.missing.price",
+		XPFStructuredErrorMessage structuredErrorMessage = new XPFStructuredErrorMessage("item.missing.price",
 				String.format("Item '%s' does not have a price.", SKU_CODE),
 				ImmutableMap.of("item-code", SKU_CODE));
 		// Given
 		given(productSku.getProduct()).willReturn(product);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(structuredErrorMessage);
@@ -95,7 +113,7 @@ public class PriceExistsProductSkuValidatorTest {
 		given(productSku.getProduct()).willReturn(calculatedProductBundle);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -104,11 +122,11 @@ public class PriceExistsProductSkuValidatorTest {
 	@Test
 	public void testProductPriceDoesNotExistForBundleWithParentAssignedBundle() {
 		// Given
-		given(context.getParentProductSku()).willReturn(parentProductSku);
+		given(context.getParentProductSku()).willReturn(contextParentProductSku);
 		given(productSku.getProduct()).willReturn(calculatedProductBundle);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();

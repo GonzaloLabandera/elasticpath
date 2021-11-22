@@ -12,7 +12,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -46,7 +47,7 @@ public final class CurrencySelectionDualListBox extends AbstractEpDualListBoxCon
 
 	}
 
-	private static final Logger LOG = Logger.getLogger(CurrencySelectionDualListBox.class);
+	private static final Logger LOG = LogManager.getLogger(CurrencySelectionDualListBox.class);
 
 	/**
 	 * Constructor.

@@ -6,8 +6,8 @@ package com.elasticpath.commons.util;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Holds a pair of objects.

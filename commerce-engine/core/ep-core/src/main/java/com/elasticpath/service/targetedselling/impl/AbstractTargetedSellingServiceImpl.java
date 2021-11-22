@@ -5,7 +5,7 @@ package com.elasticpath.service.targetedselling.impl;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.persistence.api.Entity;

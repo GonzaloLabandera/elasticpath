@@ -12,7 +12,7 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

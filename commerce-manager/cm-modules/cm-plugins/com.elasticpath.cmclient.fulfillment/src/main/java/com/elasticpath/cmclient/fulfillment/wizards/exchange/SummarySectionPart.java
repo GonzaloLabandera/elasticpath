@@ -11,7 +11,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Currency;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -51,7 +52,7 @@ class SummarySectionPart extends AbstractCmClientFormSectionPart {
 	/**
 	 * The logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(SummarySectionPart.class);
+	private static final Logger LOG = LogManager.getLogger(SummarySectionPart.class);
 
 	private static final int HORIZONTAL_SPAN = 3;
 

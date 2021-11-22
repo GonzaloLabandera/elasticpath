@@ -8,12 +8,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.authentication.jaas.AuthorityGranter;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.service.catalogview.StoreConfig;
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.service.customer.CustomerService;
 
 /**
@@ -21,9 +22,7 @@ import com.elasticpath.service.customer.CustomerService;
  * role names that should be granted to this principal from the Customer object.
  */
 public class CustomerAuthorityGranterImpl implements AuthorityGranter {
-	private static final Logger LOG = Logger.getLogger(CustomerAuthorityGranterImpl.class);
-
-	private StoreConfig storeConfig;
+	private static final Logger LOG = LogManager.getLogger(CustomerAuthorityGranterImpl.class);
 
 	private CustomerService customerService;
 
@@ -46,7 +45,7 @@ public class CustomerAuthorityGranterImpl implements AuthorityGranter {
 	public Set<String> grant(final Principal principal) {
 		Set<String> rtnSet = new HashSet<>();
 		String sharedId = principal.getName();
-		Customer customer = customerService.findBySharedId(sharedId, storeConfig.getStoreCode());
+		Customer customer = customerService.findBySharedId(sharedId, CustomerType.REGISTERED_USER);
 		if (customer == null) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("No customer found with name " + sharedId);
@@ -64,15 +63,6 @@ public class CustomerAuthorityGranterImpl implements AuthorityGranter {
 			}
 		}
 		return rtnSet;
-	}
-
-	/**
-	 * Set the store configuration object.
-	 * 
-	 * @param storeConfig the storeConfig to set
-	 */
-	public void setStoreConfig(final StoreConfig storeConfig) {
-		this.storeConfig = storeConfig;
 	}
 
 }

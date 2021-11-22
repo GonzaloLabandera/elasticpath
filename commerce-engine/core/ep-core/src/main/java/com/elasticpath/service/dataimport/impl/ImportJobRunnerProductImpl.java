@@ -6,7 +6,8 @@ package com.elasticpath.service.dataimport.impl;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -33,7 +34,7 @@ import com.elasticpath.service.search.IndexType;
  * An import runner to import products.
  */
 public class ImportJobRunnerProductImpl extends AbstractImportJobRunnerImpl {
-	private static final Logger LOG = Logger.getLogger(ImportJobRunnerProductImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ImportJobRunnerProductImpl.class);
 
 	private IndexNotificationService indexNotificationService;
 	

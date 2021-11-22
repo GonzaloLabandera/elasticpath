@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.datapolicy.DataPolicy;
@@ -73,7 +72,7 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 	@Test
 	public void testMergingCustomerConsentsFromAnonymouslyAcceptedConsentsToCustomerAccount() {
 		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
-		CustomerSession registeredCustomerSession = createCustomerSession(registeredCustomer, scenario.getCatalog());
+		Shopper registeredShopper = createShopper(registeredCustomer, scenario.getCatalog());
 
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_CODE1, registeredCustomer, dataPolicy1);
 
@@ -81,14 +80,13 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 				.hasSize(1);
 
 		Customer anonymousCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.SINGLE_SESSION_USER);
-		CustomerSession anonymousCustomerSession = createCustomerSession(anonymousCustomer, scenario.getCatalog());
-		Shopper anonymousShopper = anonymousCustomerSession.getShopper();
+		Shopper anonymousShopper = createShopper(anonymousCustomer, scenario.getCatalog());
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_CODE2, anonymousCustomer, dataPolicy2);
 
 		assertThat(customerConsentService.findActiveConsentsByCustomerGuid(anonymousCustomer.getGuid()))
 				.hasSize(1);
 
-		customerConsentMergerForShopperUpdates.invalidateShopper(registeredCustomerSession, anonymousShopper);
+		customerConsentMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		assertThat(customerConsentService.findActiveConsentsByCustomerGuid(registeredCustomer.getGuid()))
 				.hasSize(2);
@@ -106,7 +104,7 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 	@Test
 	public void testNotMergingCustomerConsentsFromRegisteredAccountAcceptedConsentsToAnotherCustomerAccount() {
 		Customer secondRegisteredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
-		CustomerSession secondRegisteredCustomerSession = createCustomerSession(secondRegisteredCustomer, scenario.getCatalog());
+		Shopper secondRegisteredShopper = createShopper(secondRegisteredCustomer, scenario.getCatalog());
 
 		createAndSaveCustomerConsent(DATA_POLICY_UNIQUE_CODE, secondRegisteredCustomer);
 
@@ -114,14 +112,13 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 				.hasSize(1);
 
 		Customer originalRegisteredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.REGISTERED_USER);
-		CustomerSession originalRegisteredCustomerSession = createCustomerSession(originalRegisteredCustomer, scenario.getCatalog());
-		Shopper originalRegisteredShopper = originalRegisteredCustomerSession.getShopper();
+		Shopper originalRegisteredShopper = createShopper(originalRegisteredCustomer, scenario.getCatalog());
 		createAndSaveCustomerConsent(DATA_POLICY_UNIQUE_CODE2, originalRegisteredCustomer);
 
 		assertThat(customerConsentService.findActiveConsentsByCustomerGuid(originalRegisteredCustomer.getGuid()))
 				.hasSize(1);
 
-		customerConsentMergerForShopperUpdates.invalidateShopper(secondRegisteredCustomerSession, originalRegisteredShopper);
+		customerConsentMergerForShopperUpdates.invalidateShopper(originalRegisteredShopper, secondRegisteredShopper);
 
 		assertThat(customerConsentService.findActiveConsentsByCustomerGuid(secondRegisteredCustomer.getGuid()))
 				.hasSize(1);
@@ -130,8 +127,6 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 				.hasSize(1);
 
 	}
-
-
 
 	/**
 	 * Test that the correct customer consents are attached to the registered account after logging in.<br>
@@ -143,7 +138,7 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 	@Test
 	public void testMergingCustomerConsentsFromAnonymouslyAcceptedConsentsToCustomerAccountWithHistory() {
 		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
-		CustomerSession registeredCustomerSession = createCustomerSession(registeredCustomer, scenario.getCatalog());
+		Shopper registeredShopper = createShopper(registeredCustomer, scenario.getCatalog());
 
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_CODE1, registeredCustomer, dataPolicy1);
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_CODE2, registeredCustomer, dataPolicy2);
@@ -152,8 +147,7 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 				.hasSize(2);
 
 		Customer anonymousCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.SINGLE_SESSION_USER);
-		CustomerSession anonymousCustomerSession = createCustomerSession(anonymousCustomer, scenario.getCatalog());
-		Shopper anonymousShopper = anonymousCustomerSession.getShopper();
+		Shopper anonymousShopper = createShopper(anonymousCustomer, scenario.getCatalog());
 
 		CustomerConsent consent1 = createAndSaveCustomerConsent(CUSTOMER_CONSENT_CODE3, anonymousCustomer, dataPolicy1);
 		CustomerConsent consent2 = createAndSaveCustomerConsent(CUSTOMER_CONSENT_CODE4, anonymousCustomer, dataPolicy2);
@@ -161,7 +155,7 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 		assertThat(customerConsentService.findActiveConsentsByCustomerGuid(anonymousCustomer.getGuid()))
 				.hasSize(2);
 
-		customerConsentMergerForShopperUpdates.invalidateShopper(registeredCustomerSession, anonymousShopper);
+		customerConsentMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		assertThat(customerConsentService.findActiveConsentsByCustomerGuid(registeredCustomer.getGuid()))
 				.containsExactlyInAnyOrder(consent1, consent2);
@@ -184,11 +178,10 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 	@Test
 	public void testMergingCustomerConsentsFromAnonymouslyAcceptedConsentsToCustomerAccountWithHistoryMixedInserts() {
 		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, CustomerType.REGISTERED_USER);
-		CustomerSession registeredCustomerSession = createCustomerSession(registeredCustomer, scenario.getCatalog());
+		Shopper registeredShopper = createShopper(registeredCustomer, scenario.getCatalog());
 
 		Customer anonymousCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, CustomerType.SINGLE_SESSION_USER);
-		CustomerSession anonymousCustomerSession = createCustomerSession(anonymousCustomer, scenario.getCatalog());
-		Shopper anonymousShopper = anonymousCustomerSession.getShopper();
+		Shopper anonymousShopper = createShopper(anonymousCustomer, scenario.getCatalog());
 
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_CODE2, registeredCustomer, dataPolicy2);
 		createAndSaveCustomerConsent(CUSTOMER_CONSENT_CODE3, anonymousCustomer, dataPolicy1);
@@ -207,7 +200,7 @@ public class CustomerConsentMergerForShopperUpdatesTest extends AbstractDataPoli
 		assertThat(customerConsentService.findHistoryByCustomerGuid(registeredCustomer.getGuid()))
 				.hasSize(3);
 
-		customerConsentMergerForShopperUpdates.invalidateShopper(registeredCustomerSession, anonymousShopper);
+		customerConsentMergerForShopperUpdates.invalidateShopper(anonymousShopper, registeredShopper);
 
 		assertThat(customerConsentService.findActiveConsentsByCustomerGuid(registeredCustomer.getGuid()))
 				.containsExactlyInAnyOrder(consent1, consent2);

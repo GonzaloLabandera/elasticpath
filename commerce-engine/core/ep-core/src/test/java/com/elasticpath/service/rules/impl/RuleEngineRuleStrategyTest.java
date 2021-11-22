@@ -17,19 +17,19 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.util.SimpleCache;
 import com.elasticpath.domain.catalog.Catalog;
+import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.sellingcontext.SellingContext;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.rules.SellingContextRuleSummary;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.ShopperMemento;
+import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.service.rules.SellingContextRuleSummary;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.domain.TagDictionary;
 import com.elasticpath.tags.service.ConditionEvaluatorService;
@@ -58,6 +58,9 @@ public class RuleEngineRuleStrategyTest {
 	private Shopper shopper;
 
 	@Mock
+	private CustomerSession customerSession;
+
+	@Mock
 	private ShoppingCart shoppingCart;
 
 	@Mock
@@ -78,9 +81,11 @@ public class RuleEngineRuleStrategyTest {
 	@Before
 	public void setup() {
 		when(shoppingCart.getShopper()).thenReturn(shopper);
-		when(shopper.getCache()).thenReturn(simpleCache);
 		when(shopper.getShopperMemento()).thenReturn(shopperMemento);
 		when(shopper.getTagSet()).thenReturn(tagSet);
+		when(shopper.getCustomerSession()).thenReturn(customerSession);
+
+		when(customerSession.getCache()).thenReturn(simpleCache);
 
 		when(shopperMemento.getStoreCode()).thenReturn(STORE_CODE);
 

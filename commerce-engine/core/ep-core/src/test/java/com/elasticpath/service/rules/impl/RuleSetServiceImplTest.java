@@ -22,6 +22,7 @@ import com.elasticpath.domain.rules.RuleAction;
 import com.elasticpath.domain.rules.RuleParameter;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
+import com.elasticpath.domain.rules.RuleSetLoadTuner;
 import com.elasticpath.domain.rules.impl.CartSubtotalAmountDiscountActionImpl;
 import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
 import com.elasticpath.domain.rules.impl.RuleParameterImpl;
@@ -39,6 +40,8 @@ public class RuleSetServiceImplTest extends AbstractEPServiceTestCase {
 
 	private RuleSetService ruleSetService;
 
+	private RuleSetLoadTuner ruleSetLoadTuner;
+
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
@@ -47,6 +50,8 @@ public class RuleSetServiceImplTest extends AbstractEPServiceTestCase {
 
 		stubGetPrototypeBean(ContextIdNames.RULE_SCENARIOS, RuleScenarios.class, RuleScenariosImpl.class);
 		stubGetPrototypeBean(ContextIdNames.RULE_SET, RuleSet.class, RuleSetImpl.class);
+
+		ruleSetLoadTuner = context.mock(RuleSetLoadTuner.class);
 	}
 
 
@@ -224,11 +229,14 @@ public class RuleSetServiceImplTest extends AbstractEPServiceTestCase {
 		// expectations
 		context.checking(new Expectations() {
 			{
+				allowing(getMockPersistenceEngine()).withLoadTuners(ruleSetLoadTuner);
+				will(returnValue(getMockPersistenceEngine()));
+
 				allowing(getMockPersistenceEngine()).retrieveByNamedQuery(with(any(String.class)), with(any(Object[].class)));
 				will(returnValue(ruleSetList));
 			}
 		});
-		final RuleSet loadedRuleSet = ruleSetService.findByScenarioId(uid);
+		final RuleSet loadedRuleSet = ruleSetService.findByScenarioId(uid, ruleSetLoadTuner);
 		assertSame(ruleSet, loadedRuleSet);
 	}
 
@@ -283,11 +291,14 @@ public class RuleSetServiceImplTest extends AbstractEPServiceTestCase {
 		// expectations
 		context.checking(new Expectations() {
 			{
+				allowing(getMockPersistenceEngine()).withLoadTuners(ruleSetLoadTuner);
+				will(returnValue(getMockPersistenceEngine()));
+
 				allowing(getMockPersistenceEngine()).retrieveByNamedQuery("RULESET_FIND_BY_NAME", name);
 				will(returnValue(ruleSetList));
 			}
 		});
-		final RuleSet loadedRuleSet = ruleSetService.findByName(name);
+		final RuleSet loadedRuleSet = ruleSetService.findByName(name, ruleSetLoadTuner);
 		assertSame(ruleSet, loadedRuleSet);
 	}
 

@@ -6,11 +6,15 @@ package com.elasticpath.service.datapolicy.readers;
 
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
 
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
@@ -31,7 +35,6 @@ public class OrderGiftCertificateFieldReaderTest extends AbstractDataPointValueR
 	protected String getLocation() {
 		return LOCATION;
 	}
-
 
 	@Override
 	protected AbstractDataPointValueReader getReader() {
@@ -62,12 +65,20 @@ public class OrderGiftCertificateFieldReaderTest extends AbstractDataPointValueR
 	@Override
 	protected String getExpectedReadQuery(final String... dataPointKeys) {
 
-		return "SELECT oItemData.uidPk, oItemData.creationDate, oItemData.lastModifiedDate, oItemData.key, oItemData.value"
+		return "SELECT skus.uidPk, skus.createdDate, skus.lastModifiedDate, skus.modifierFields"
 			.concat(" FROM OrderImpl o")
 			.concat(" JOIN o.shipments shipments")
 			.concat(" JOIN shipments.shipmentOrderSkusInternal skus")
-			.concat(" JOIN skus.itemData oItemData")
-			.concat(" WHERE o.customer.guid = ?1")
-			.concat(" AND oItemData.key IN (:dataPointKeys)");
+			.concat(" WHERE o.customer.guid = ?1");
+	}
+
+	@Override
+	protected List<Object[]> getRawData(final boolean shouldIncludeFieldValue) {
+		ModifierFieldsMapWrapper modifierFields = new ModifierFieldsMapWrapper();
+		modifierFields.put(DATAPOINT_1_KEY, DATAPOINT_1_DB_VALUE);
+
+		Object[] rawData = new Object[]{UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, modifierFields};
+
+		return Collections.singletonList(rawData);
 	}
 }

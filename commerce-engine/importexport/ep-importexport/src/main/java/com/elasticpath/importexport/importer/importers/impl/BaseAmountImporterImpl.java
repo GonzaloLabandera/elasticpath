@@ -5,7 +5,7 @@ package com.elasticpath.importexport.importer.importers.impl;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.pricing.service.BaseAmountFilter;

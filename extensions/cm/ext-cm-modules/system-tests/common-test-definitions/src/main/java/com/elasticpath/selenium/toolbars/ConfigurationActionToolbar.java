@@ -2,7 +2,8 @@ package com.elasticpath.selenium.toolbars;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -59,7 +60,7 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 			+ ".DataPoliciesAdminSection_DataPolicies']";
 	private static final String PAYMENT_CONFIGURATIONS_CSS = "div[automation-id='com.elasticpath.cmclient.admin.paymentconfigurations"
 			+ ".AdminPaymentConfigurationMessages.PaymentConfigsAdminItemCompositeFactory_Admin']";
-	private static final Logger LOGGER = Logger.getLogger(ConfigurationActionToolbar.class);
+	private static final Logger LOGGER = LogManager.getLogger(ConfigurationActionToolbar.class);
 
 	/**
 	 * Constructor.

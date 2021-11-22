@@ -43,7 +43,7 @@
 	<util:list id="entityManagerLifecycleListeners">
 		<ref bean="databaseTimestampsEntityListener"/>
 		<ref bean="objectDeletedEntityListener"/>
-		<ref bean="changeSetPersistenceListener"/>
+		<ref bean="changeSetPersistenceListener"/>  <!-- Must also be registered in entityManagerTransactionListeners -->
 		<ref bean="persistablePostLoadListener"/>
 		<ref bean="auditEntityListener"/>    <!-- Must also be registered in the PersistenceEngine -->
 		<ref bean="domainEventListener"/>
@@ -51,6 +51,7 @@
 
 	<util:list id="entityManagerTransactionListeners">
 		<ref bean="domainEventListener"/>
+		<ref bean="changeSetPersistenceListener"/>
 	</util:list>
 
 	<bean id="databaseTimestampsEntityListener" class="com.elasticpath.persistence.impl.DatabaseTimestampsEntityListener">
@@ -123,7 +124,17 @@
 				<value>com.elasticpath.domain.objectgroup.impl.BusinessObjectGroupMemberImpl</value>
 				<value>com.elasticpath.domain.objectgroup.impl.BusinessObjectMetadataImpl</value>
 				<value>com.elasticpath.domain.pricing.impl.BaseAmountImpl</value>
+				<value>com.elasticpath.domain.messaging.impl.OutboxMessageImpl</value>
+				<value>com.elasticpath.domain.search.impl.IndexNotificationImpl</value>
+				<value>com.elasticpath.domain.dataimport.impl.ImportNotificationMetadataImpl</value>
+				<value>com.elasticpath.domain.dataimport.impl.ImportJobStatusImpl</value>
+				<value>com.elasticpath.domain.dataimport.impl.ImportBadRowImpl</value>
+				<value>com.elasticpath.domain.dataimport.impl.ImportFaultImpl</value>
+				<value>com.elasticpath.domain.dataimport.impl.ImportNotificationImpl</value>
 			</set>
+		</property>
+		<property name="lifecycleEventFilter">
+			<bean class="com.elasticpath.persistence.impl.LifecycleEventFilter"/>
 		</property>
 	</bean>
 

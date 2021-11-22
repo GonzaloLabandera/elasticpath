@@ -8,10 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.service.EpPersistenceService;
 
 /**
@@ -50,7 +48,7 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @param cartGuid the cart.
 	 * @return the map of cartData descriptors. map.
 	 */
-	Map<String, CartData> getCartDescriptors(String cartGuid);
+	Map<String, String> getCartDescriptors(String cartGuid);
 
 	/**
 	 * This method retrieves the shopping cart corresponding to the given guid.<br/>
@@ -65,36 +63,20 @@ public interface ShoppingCartService extends EpPersistenceService {
 	ShoppingCart findByGuid(String guid) throws EpServiceException;
 
 	/**
-	 * This method retrieves the shopping cart corresponding to the given Shopper<br/>
-	 * Note that the result of this method is not yet a valid ShoppingCart. Calling code needs to call 
-	 * setCustomerSession() and then calculateShoppingCartTaxAndBeforeTaxPrices() in order to ensure that the
-	 * taxes and totals are calculated.
+	 * This method retrieves the shopping cart corresponding to the given Shopper.
 	 *
 	 * @param shopper the shopping context that defines the shopping cart.
-	 * @return the shopping cart corresponding to the shopping context or an empty cart if no matching cart can be found
-	 * @throws EpServiceException - in case of any errors
-	 * @deprecated use findOrCreateByCustomerSession instead
-	 */
-	@Deprecated
-	ShoppingCart findOrCreateByShopper(Shopper shopper) throws EpServiceException;
-
-	/**
-	 * This method retrieves the shopping cart corresponding to the given CustomerSession (which implies a Shopper)<br/>
-	 * Note that the result of this method is not yet a valid ShoppingCart. Calling code needs to call
-	 * calculateShoppingCartTaxAndBeforeTaxPrices() in order to ensure that the taxes and totals are calculated.
-	 *
-	 * @param customerSession customer sessions
-	 * @return the shopping cart corresponding to the shopping context or an empty cart if no matching cart can be found
+	 * @return the default shopping cart corresponding to the shopper
 	 * @throws EpServiceException - in case of any errors
 	 */
-	ShoppingCart findOrCreateDefaultCartByCustomerSession(CustomerSession customerSession) throws EpServiceException;
+	ShoppingCart findOrCreateDefaultCartByShopper(Shopper shopper) throws EpServiceException;
 
 	/**
-	 * Creates a shopping cart for a customer session.
-	 * @param customerSession the customer session.
+	 * Creates a shopping cart for a shopper.
+	 * @param shopper the shopper.
 	 * @return an empty shopping cart.
 	 */
-	ShoppingCart createByCustomerSession(CustomerSession customerSession);
+	ShoppingCart createByShopper(Shopper shopper);
 
 	/**
 	 * "Touches" the cart by setting the last modified date on the given cart to the current date.
@@ -165,12 +147,12 @@ public interface ShoppingCartService extends EpPersistenceService {
 	boolean isPersisted(ShoppingCart shoppingCart);
 
 	/**
-	 * Finds the default (active) shopping cart guid for the given Customer Session.
-	 * @param customerSession the customer session.
+	 * Finds the default (active) shopping cart guid for the given Shopper.
+	 * @param shopper the shopper
 	 * @return the shopping cart guid of the default cart.
 	 * @throws EpServiceException - in case of any errors
 	 */
-	String findDefaultShoppingCartGuidByCustomerSession(CustomerSession customerSession) throws EpServiceException;
+	String findOrCreateDefaultCartGuidByShopper(Shopper shopper) throws EpServiceException;
 
 	/**
 	 *  Finds the store code for the given cart guid.
@@ -184,7 +166,7 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @param cartGuids the cart guids.
 	 * @return the list of maps of cartdatas.
 	 */
-	Map<String, List<CartData>> findCartDataForCarts(List<String> cartGuids);
+	Map<String, List<Map<String, String>>> findCartDataForCarts(List<String> cartGuids);
 
 	/**
 	 * Change cart's state so it is no longer associated

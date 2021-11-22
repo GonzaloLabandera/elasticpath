@@ -13,15 +13,15 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.catalog.BundleConstituent;
-import com.elasticpath.domain.catalog.ConstituentItem;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.entity.XPFBundleConstituent;
+import com.elasticpath.xpf.connectivity.entity.XPFProductBundle;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingItem;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShoppingItemNotAutoSelectedValidatorImplTest {
@@ -31,39 +31,45 @@ public class ShoppingItemNotAutoSelectedValidatorImplTest {
 
 	private final ShoppingItemNotAutoSelectedValidatorImpl validator = new ShoppingItemNotAutoSelectedValidatorImpl();
 
-	@InjectMocks
-	private ShoppingItemValidationContextImpl context;
-
-	@Mock(name = "parentProductSku")
-	private ProductSku parentProductSku;
-
-	@Mock(name = "productSku")
-	private ProductSku productSku;
+	@Mock
+	private XPFShoppingItemValidationContext context;
 
 	@Mock
-	private ProductBundleImpl productBundle;
+	private XPFProductSku parentProductSku;
 
 	@Mock
-	private BundleConstituent bundleConstituent;
+	private XPFProductSku productSku;
 
 	@Mock
-	private ConstituentItem constituentItem;
+	private XPFProductBundle productBundle;
+
+	@Mock
+	private XPFBundleConstituent bundleConstituent;
+
+	@Mock
+	private XPFShoppingItem xpfShoppingItem;
+
+	@Mock
+	private XPFShoppingItem xpfParentShoppingItem;
 
 	@Before
 	public void setUp() {
-		when(productSku.getSkuCode()).thenReturn(PRODUCT_SKU);
+		when(context.getShoppingItem()).thenReturn(xpfShoppingItem);
+		when(productSku.getCode()).thenReturn(PRODUCT_SKU);
+		when(xpfShoppingItem.getProductSku()).thenReturn(productSku);
 		when(parentProductSku.getProduct()).thenReturn(productBundle);
 		when(productBundle.getConstituents()).thenReturn(Collections.singletonList(bundleConstituent));
-		when(productBundle.isConstituentAutoSelectable(bundleConstituent)).thenReturn(true);
-		when(bundleConstituent.getConstituent()).thenReturn(constituentItem);
-		when(constituentItem.getProductSku()).thenReturn(productSku);
+		when(bundleConstituent.getProductSku()).thenReturn(productSku);
 	}
 
 	@Test
 	public void testValidateWithError() {
-		Collection<StructuredErrorMessage> validationMessages = validator.validate(context);
+		when(context.getParentShoppingItem()).thenReturn(xpfParentShoppingItem);
+		when(xpfParentShoppingItem.getProductSku()).thenReturn(parentProductSku);
+
+		Collection<XPFStructuredErrorMessage> validationMessages = validator.validate(context);
 		assertThat(validationMessages).hasSize(1);
-		StructuredErrorMessage validationMessage = validationMessages.iterator().next();
+		XPFStructuredErrorMessage validationMessage = validationMessages.iterator().next();
 		assertThat(validationMessage.getMessageId()).isEqualTo(MESSAGE_ID);
 		assertThat(validationMessage.getData().get("item-code")).isEqualTo(PRODUCT_SKU);
 		assertThat(validationMessage.getDebugMessage()).isEqualTo("Item '" + PRODUCT_SKU + "' is a bundle constituent that was automatically "
@@ -72,9 +78,10 @@ public class ShoppingItemNotAutoSelectedValidatorImplTest {
 
 	@Test
 	public void testValidateNoError() {
-		context.setParentProductSku(null);
+		when(context.getParentShoppingItem()).thenReturn(xpfParentShoppingItem);
+		when(xpfParentShoppingItem.getProductSku()).thenReturn(null);
 
-		Collection<StructuredErrorMessage> validationMessages = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> validationMessages = validator.validate(context);
 		assertThat(validationMessages).isEmpty();
 	}
 

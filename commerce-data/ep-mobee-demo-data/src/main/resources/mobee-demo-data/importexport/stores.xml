@@ -245,6 +245,7 @@
         <payment_provider_configuration_guid>email-required-payment-provider-config</payment_provider_configuration_guid>
         <payment_provider_configuration_guid>single-reserve-per-pi-happy-path-payment-provider-config</payment_provider_configuration_guid>
         <payment_provider_configuration_guid>reserve-fails-payment-provider-config</payment_provider_configuration_guid>
+        <payment_provider_configuration_guid>charge-fails-payment-provider-config</payment_provider_configuration_guid>
     </payment_provider_configurations>
 </store>
 

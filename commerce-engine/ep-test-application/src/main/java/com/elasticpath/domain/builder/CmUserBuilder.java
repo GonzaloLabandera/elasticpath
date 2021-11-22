@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -85,12 +85,12 @@ public class CmUserBuilder implements DomainObjectBuilder<CmUser> {
 		final CmUser cmUser = beanFactory.getPrototypeBean(ContextIdNames.CMUSER, CmUser.class);
 		cmUser.initialize();
 
-		cmUser.setEmail((String) ObjectUtils.defaultIfNull(email, "john.smith@elasticpath.com"));
-		cmUser.setUserName((String) ObjectUtils.defaultIfNull(userName, getDefaultUserName()));
-		cmUser.setFirstName((String) ObjectUtils.defaultIfNull(firstName, "James"));
-		cmUser.setLastName((String) ObjectUtils.defaultIfNull(lastName, "Bond"));
-		cmUser.setPassword((String) ObjectUtils.defaultIfNull(password, "password1"));
-		cmUser.setCreationDate((Date) ObjectUtils.defaultIfNull(creationDate, new Date()));
+		cmUser.setEmail(ObjectUtils.defaultIfNull(email, "john.smith@elasticpath.com"));
+		cmUser.setUserName(ObjectUtils.defaultIfNull(userName, getDefaultUserName()));
+		cmUser.setFirstName(ObjectUtils.defaultIfNull(firstName, "James"));
+		cmUser.setLastName(ObjectUtils.defaultIfNull(lastName, "Bond"));
+		cmUser.setPassword(ObjectUtils.defaultIfNull(password, "password1"));
+		cmUser.setCreationDate(ObjectUtils.defaultIfNull(creationDate, new Date()));
 
 		for (final String currentUserRoleName : cmUserRoles) {
 			if (currentUserRoleName != null) {

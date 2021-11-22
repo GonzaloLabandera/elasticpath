@@ -298,34 +298,6 @@ public interface RuleService extends EpPersistenceService  {
 	EpRuleBase findRuleBaseByScenario(Store store, Catalog catalog, int scenarioId);
 
 	/**
-	 * Finds the {@link EpRuleBase} for the given {@code storeCode} and {@code scenarioId} where
-	 * the rule base has changed since the given {@link Date}. If a rule base has not changed
-	 * since the given date, {@code null} will be returned. If the rule base does not exist
-	 * {@code null} will also be returned. Store rules do not have a catalog set.
-	 *
-	 * @param storeCode  the store code to use
-	 * @param scenarioId the scenario ID of the rule base
-	 * @param date       the date from which changes should be recognized
-	 * @return a rule base if it exists and was modified
-	 * @throws EpServiceException in case of any errors
-	 */
-	EpRuleBase findChangedStoreRuleBases(String storeCode, int scenarioId, Date date);
-
-	/**
-	 * Finds the {@link EpRuleBase} for the given {@code catalogCode} and {@code scenarioId} where
-	 * the rule base has changed since the given {@link Date}. If a rule base has not changed
-	 * since the given date, {@code null} will be returned. If the rule base does not exist
-	 * {@code null} will also be returned. Catalog rules do not have a store set.
-	 *
-	 * @param catalogCode the catalog code to use
-	 * @param scenarioId  the scenario ID of the rule base
-	 * @param date        the date from which changes should be recognized
-	 * @return a rule base if it exists and was modified
-	 * @throws EpServiceException in case of any errors
-	 */
-	EpRuleBase findChangedCatalogRuleBases(String catalogCode, int scenarioId, Date date);
-
-	/**
 	 * Saves the given {@link EpRuleBase}. The given object should never be referenced again, as
 	 * the result object may be a different object.
 	 *

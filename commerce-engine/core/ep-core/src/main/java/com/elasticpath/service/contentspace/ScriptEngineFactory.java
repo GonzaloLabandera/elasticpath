@@ -6,7 +6,8 @@ package com.elasticpath.service.contentspace;
 import java.text.MessageFormat;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *	ScriptEngineFactory create instance of ScriptEngine depends 
@@ -14,7 +15,7 @@ import org.apache.log4j.Logger;
  */
 public class ScriptEngineFactory {
 	
-	private static final Logger LOG = Logger.getLogger(ScriptEngineFactory.class);	
+	private static final Logger LOG = LogManager.getLogger(ScriptEngineFactory.class);	
 	
 	private Map<String, ? extends ScriptEngine> values;
 

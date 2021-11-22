@@ -25,7 +25,7 @@ import com.elasticpath.service.shoppingcart.ShoppingCartService;
  */
 public class ProductSkuChecker {
 
-	private final CustomerSession customerSession;
+	private final Shopper shopper;
 	private final PriceLookupFacade priceLookupFacade;
 	private final Store store;
 
@@ -41,17 +41,16 @@ public class ProductSkuChecker {
 		final Customer customer = order.getCustomer();
 
 		final ShopperService shopperService = BeanLocator.getSingletonBean(ContextIdNames.SHOPPER_SERVICE, ShopperService.class);
-		Shopper shopper = shopperService.findOrCreateShopper(customer, store.getCode());
+		shopper = shopperService.findOrCreateShopper(customer, store.getCode());
 
 		final CustomerSessionService customerSessionService = BeanLocator.getSingletonBean(ContextIdNames.CUSTOMER_SESSION_SERVICE,
 				CustomerSessionService.class);
-		CustomerSession customerSessionWithShopper = customerSessionService.createWithShopper(shopper);
-		customerSession = customerSessionService.initializeCustomerSessionForPricing(customerSessionWithShopper, 
-				store.getCode(), order.getCurrency());
+		CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
+		customerSessionService.initializeCustomerSessionForPricing(customerSession, store.getCode(), order.getCurrency());
 
 		final ShoppingCartService shoppingCartService = BeanLocator.getSingletonBean(ContextIdNames.SHOPPING_CART_SERVICE, ShoppingCartService.class);
-		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateByShopper(customerSession.getShopper());
-		customerSession.getShopper().setCurrentShoppingCart(shoppingCart);
+		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(shopper);
+		shopper.setCurrentShoppingCart(shoppingCart);
 	}
 
 	/**
@@ -61,22 +60,22 @@ public class ProductSkuChecker {
 	 * @return True if the given ProductSku has a recurring pricing scheme.
 	 */
 	public boolean isRecurringSku(final ProductSku sku) {
-		final Price price = getPriceLookupFacade().getPromotedPriceForSku(sku, getStore(), getCustomerSession().getShopper());
+		final Price price = getPriceLookupFacade().getPromotedPriceForSku(sku, getStore(), getShopper());
 		if (price != null && price.getPricingScheme() != null) {
 			return CollectionUtils.isNotEmpty(price.getPricingScheme().getRecurringSchedules());
 		}
 		return false;
 	}
 
-	private CustomerSession getCustomerSession() {
-		return customerSession;
+	protected Shopper getShopper() {
+		return shopper;
 	}
 
-	private PriceLookupFacade getPriceLookupFacade() {
+	protected PriceLookupFacade getPriceLookupFacade() {
 		return priceLookupFacade;
 	}
 
-	private Store getStore() {
+	protected Store getStore() {
 		return store;
 	}
 

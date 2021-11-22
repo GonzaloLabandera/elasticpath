@@ -64,6 +64,11 @@
 
 	<alias alias="readOnlyEntityManagerFactory" name="entityManagerFactory"/>
 
+	<!-- Override the xpfExtensionRegistrar -->
+	<bean id="xpfExtensionRegistrar" class="com.elasticpath.epcoretool.LazyLoadedXPFExtensionRegistrar">
+		<property name="pluginManager" ref="pluginManager" />
+	</bean>
+
     <context:property-placeholder ignore-resource-not-found="true" system-properties-mode="OVERRIDE"
         location="
                   classpath*:META-INF/elasticpath/conf/spring/plugin.properties,

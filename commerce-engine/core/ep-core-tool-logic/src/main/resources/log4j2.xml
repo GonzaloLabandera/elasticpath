@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5p %t %d{ISO8601} %l - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.elasticpath" level="info" additivity="false">
+			<AppenderRef ref="CONSOLE" />
+		</Logger>
+		<Root level="info">
+			<AppenderRef ref="CONSOLE" />
+		</Root>
+	</Loggers>
+</Configuration>

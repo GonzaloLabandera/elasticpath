@@ -6,7 +6,7 @@ package com.elasticpath.cmclient.store.promotions;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.core.BeanLocator;
 import com.elasticpath.cmclient.core.promotions.CouponValidator;

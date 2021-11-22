@@ -9,7 +9,8 @@ import java.util.Collection;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.EmailValidator;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -29,7 +30,7 @@ import com.elasticpath.validation.service.ValidationEngine;
  */
 public class SpringExpressionValidationEngineImpl implements ValidationEngine {
 
-	private static final Logger LOG = Logger.getLogger(SpringExpressionValidationEngineImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SpringExpressionValidationEngineImpl.class);
 
 	private final ExpressionParser expressionParser = new SpelExpressionParser();
 

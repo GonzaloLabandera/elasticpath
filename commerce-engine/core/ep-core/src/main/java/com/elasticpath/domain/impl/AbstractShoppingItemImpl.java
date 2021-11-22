@@ -1,23 +1,22 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2016
  */
-/**
- * 
- */
 package com.elasticpath.domain.impl;
+
+import static com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.loadModifierFieldsIfRequired;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
@@ -26,7 +25,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
@@ -46,6 +46,8 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
+import com.elasticpath.domain.misc.types.Modifiable;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.shoppingcart.ShoppingCartVisitor;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
@@ -92,14 +94,14 @@ import com.elasticpath.service.shoppingcart.impl.ItemPricing;
 })
 @SuppressWarnings("PMD.GodClass")
 public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl implements ShoppingItem, ShoppingItemPricingSnapshot,
-	ShoppingItemTaxSnapshot, DatabaseLastModifiedDate {
+	ShoppingItemTaxSnapshot, DatabaseLastModifiedDate, Modifiable {
 
 	/**
 	 * Serial version id.
 	 */
 	private static final long serialVersionUID = 5000000002L;
 
-	private static final Logger LOG = Logger.getLogger(AbstractShoppingItemImpl.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractShoppingItemImpl.class);
 
 	private static final int DEFAULT_NUM_FRACTIONAL_DIGITS = 2;
 
@@ -133,6 +135,10 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	private String guid;
 
 	private boolean bundleConstituent;
+
+	private ModifierFieldsMapWrapper modifierFields;
+
+	private Boolean hasModifiers = Boolean.FALSE;
 
 	/**
 	 * Return the guid.
@@ -726,44 +732,6 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 		this.errorMessage = errorMessage;
 	}
 	
-	/**
-	 * Sets field values.
-	 * 
-	 * @param itemFields item fields
-	 */
-	@Override
-	public void mergeFieldValues(final Map<String, String> itemFields) {
-		if (itemFields != null) {
-			for (Map.Entry<String, String> fieldEntry : itemFields.entrySet()) {
-				setFieldValue(fieldEntry.getKey(), fieldEntry.getValue());
-			}
-		}
-	}
-
-	/**
-	 * Accesses the field for {@code name} and returns the current value. If the field has not been set
-	 * then will return null.
-	 *
-	 * @param name The name of the field.
-	 * @return The current value of the field or null.
-	 */
-	@Override
-	@Transient
-	public String getFieldValue(final String name) {
-		AbstractItemData data = getItemData().get(name);
-		if (data == null) {
-			return null;
-		}
-		return data.getValue();
-	}
-	
-	/**
-	 * Internal JPA method to get Item Data.
-	 * @return the item data
-	 */
-	@Transient
-	protected abstract Map<String, AbstractItemData> getItemData();
-	
 	@Override
 	@Transient
 	public boolean isConfigurable(final ProductSkuLookup productSkuLookup) {
@@ -789,7 +757,7 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	public boolean isSameMultiSkuItem(final ProductSkuLookup productSkuLookup, final ShoppingItem comparisonItem) {
 		return getProductType(productSkuLookup).isMultiSku()
 				&& Objects.equals(getSkuGuid(), comparisonItem.getSkuGuid())
-				&& getFields().equals(comparisonItem.getFields());
+				&& getFields().equals(comparisonItem.getModifierFields().getMap());
 	}
 
 	@Override
@@ -797,22 +765,9 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	public boolean isSameConfigurableItem(final ProductSkuLookup productSkuLookup, final ShoppingItem comparisonItem) {
 		return getProductType(productSkuLookup).isConfigurable()
 				&& Objects.equals(getSkuGuid(), comparisonItem.getSkuGuid())
-				&& getFields().equals(comparisonItem.getFields());
+				&& getFields().equals(comparisonItem.getModifierFields().getMap());
 	}
 	
-	/**
-	 * @return map of all key/value data field pairs
-	 */
-	@Override
-	@Transient
-	public Map<String, String> getFields() {
-		Map<String, String> fields = new HashMap<>();
-		for (String key : getItemData().keySet()) {
-			fields.put(key, getItemData().get(key).getValue());
-		}
-		return Collections.unmodifiableMap(fields);
-	}
-
 	/**
 	 * Sets the ordering of this shopping item.
 	 * 
@@ -868,7 +823,6 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	/**
 	 * Creates the price field from the ShoppingItem fields: listUnitPrice, saleUnitPrice, promotedUnitPrice, and recurringPrices.  
 	 */
-	@PostLoad
 	@PostUpdate
 	protected void assemblePrice() {
 		Price assembledPrice = getPrototypeBean(ContextIdNames.PRICE, Price.class);
@@ -974,26 +928,6 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 		return this;
 	}
 
-	@Override
-	public void setFieldValue(final String name, final String value) {
-		AbstractItemData itemData;
-		if (getItemData().containsKey(name)) {
-			itemData = getItemData().get(name);
-			itemData.setValue(value);
-		} else {
-			itemData = createItemData(name, value);
-			getItemData().put(name, itemData);
-		}
-	}
-
-	/**
-	 * Create a new item data record.
-	 * @param name the name
-	 * @param value the value
-	 * @return the record
-	 */
-	protected abstract AbstractItemData createItemData(String name, String value);
-
 	@Basic
 	@Column(name = "BUNDLE_CONSTITUENT", nullable = false)
 	@Override
@@ -1014,5 +948,75 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 		return product instanceof ProductBundle && ((ProductBundle) product).isCalculated();
 	}
 
+	@Lob
+	@Persistent(fetch = FetchType.LAZY)
+	@Column(name = "MODIFIER_FIELDS")
+	@Externalizer("com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.toJSON")
+	@Factory("com.elasticpath.persistence.openjpa.util.ModifierFieldsMapper.fromJSON")
+	@Override
+	public ModifierFieldsMapWrapper getModifierFields() {
+		if (modifierFields == null) {
+			modifierFields = getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class);
+		} else if (!modifierFields.getMap().isEmpty()) {
+			//this ensures proper setting of the "hasModifiers" flag and must be called here
+			setHasModifiers(true);
+		}
+		return modifierFields;
+	}
 
+	/**
+	 * Set modifier fields.
+	 *
+	 * @param newModifierFields the new modifier fields to set.
+	 */
+	public void setModifierFields(final ModifierFieldsMapWrapper newModifierFields) {
+		this.modifierFields = newModifierFields;
+	}
+
+	@Override
+	@Basic
+	@Column(name = "HAS_MODIFIERS")
+	public Boolean getHasModifiers() {
+		return hasModifiers;
+	}
+
+	/**
+	 * Set a flag whether entity has modifier fields.
+	 *
+	 * @param hasModifiers the flag.
+	 */
+	public void setHasModifiers(final Boolean hasModifiers) {
+		this.hasModifiers = hasModifiers;
+	}
+
+	@Override
+	@Transient
+	public Map<String, String> getFields() {
+		return getModifierFields().getMap();
+	}
+
+	@Override
+	public void setFieldValue(final String name, final String value) {
+		getModifierFields().put(name, value);
+	}
+
+	@Override
+	@Transient
+	public String getFieldValue(final String name) {
+		return getModifierFields().get(name);
+	}
+
+	@Override
+	public void mergeFieldValues(final Map<String, String> fieldsToMerge) {
+		getModifierFields().putAll(fieldsToMerge);
+	}
+
+	/**
+	 * Mark "modifierFields" field as loaded and assemble price.
+	 */
+	@PostLoad
+	public void postLoadCallback() {
+		loadModifierFieldsIfRequired(this);
+		assemblePrice();
+	}
 }

@@ -8,7 +8,8 @@ import java.util.concurrent.FutureTask;
 
 import groovy.lang.Script;
 import net.sf.ehcache.Element;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
 /**
@@ -18,7 +19,7 @@ import org.codehaus.groovy.runtime.InvokerHelper;
  */
 public final class GroovyUtility {
 
-	private static final Logger LOG = Logger.getLogger(GroovyUtility.class);
+	private static final Logger LOG = LogManager.getLogger(GroovyUtility.class);
 
 	private GroovyUtility() { }
 

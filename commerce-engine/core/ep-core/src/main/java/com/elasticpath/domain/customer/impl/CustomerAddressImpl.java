@@ -3,6 +3,7 @@
  */
 package com.elasticpath.domain.customer.impl;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.openjpa.persistence.DataCache;
 
 import com.elasticpath.domain.customer.CustomerAddress;
@@ -32,6 +35,7 @@ public class CustomerAddressImpl extends AbstractAddressImpl implements Customer
 	public static final String TABLE_NAME = "TADDRESS";
 	
 	private long uidPk;
+	private Long customerUidPk;
 
 	/**
 	 * Gets the unique identifier for this domain model object.
@@ -56,6 +60,44 @@ public class CustomerAddressImpl extends AbstractAddressImpl implements Customer
 	@Override
 	public void setUidPk(final long uidPk) {
 		this.uidPk = uidPk;
-	}	
+	}
 
+	//customer-address relationship is no longer maintained by CustomerImpl; all address-related operations are handled via AddressService
+	@Override
+	@Basic
+	@Column(name = "CUSTOMER_UID")
+	public Long getCustomerUidPk() {
+		return customerUidPk;
+	}
+
+	@Override
+	public void setCustomerUidPk(final Long customerUidPk) {
+		this.customerUidPk = customerUidPk;
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder()
+				.appendSuper(super.hashCode())
+				.append(customerUidPk)
+				.toHashCode();
+	}
+
+	@Override
+	public boolean equals(final Object other) {
+		if (this == other) {
+			return true;
+		}
+
+		if (other == null || getClass() != other.getClass()) {
+			return false;
+		}
+
+		CustomerAddressImpl that = (CustomerAddressImpl) other;
+
+		return new EqualsBuilder()
+				.appendSuper(super.equals(other))
+				.append(customerUidPk, that.customerUidPk)
+				.isEquals();
+	}
 }

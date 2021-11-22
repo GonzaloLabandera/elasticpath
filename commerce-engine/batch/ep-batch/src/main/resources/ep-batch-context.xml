@@ -8,6 +8,14 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
+	<!-- "spring/openjpa-osgi-wrapper/ehcache-jmx.xml" must be imported before
+	"ep-core/spring/service/service.xml" so that the imported beans are defined
+	before the first DB call is made, otherwise the external ehcache.xml won't loaded properly.
+	The OpenJPA framework tries to access the cache and if cache is not initialized, it creates
+	one automatically, which leads to a conflict when ehcache-jmx.xml tries to create a cache
+	with the same name. -->
+	<import resource="classpath:spring/openjpa-osgi-wrapper/ehcache-jmx.xml" />
+
 	<!-- From CE jars -->
 	<import resource="classpath:spring/dataaccess/openjpa/openjpa.xml" />
 	<!-- required by productQueryComposer in spring/dataaccess/dao.xml -->

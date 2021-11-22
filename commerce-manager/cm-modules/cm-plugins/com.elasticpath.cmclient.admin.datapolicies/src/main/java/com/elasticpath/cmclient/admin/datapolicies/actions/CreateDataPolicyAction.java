@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin.datapolicies.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -20,7 +21,7 @@ import com.elasticpath.domain.datapolicy.DataPolicy;
  */
 public class CreateDataPolicyAction extends Action {
 
-	private static final Logger LOG = Logger.getLogger(CreateDataPolicyAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateDataPolicyAction.class);
 
 	private final DataPolicyListView listView;
 

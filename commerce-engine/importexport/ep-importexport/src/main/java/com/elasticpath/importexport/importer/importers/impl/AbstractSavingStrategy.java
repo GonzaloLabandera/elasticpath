@@ -6,7 +6,8 @@ package com.elasticpath.importexport.importer.importers.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
@@ -25,7 +26,7 @@ import com.elasticpath.persistence.api.Persistable;
 @SuppressWarnings("PMD.GodClass")
 public abstract class AbstractSavingStrategy<DOMAIN extends Persistable, DTO extends Dto> implements SavingStrategy<DOMAIN, DTO> {
 
-	private static final Logger LOG = Logger.getLogger(AbstractSavingStrategy.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractSavingStrategy.class);
 
 	private static final DefaultLifecycleListener DEFAULT_LIFECYCLE_LISTENER = new DefaultLifecycleListener();
 

@@ -1,5 +1,6 @@
 package com.elasticpath.coretool;
 
+import static com.elasticpath.base.util.ProcessBuilderUtils.execWithRedirectedErrorStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
@@ -12,7 +13,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.selenium.domainobjects.ReplaceString;
 import com.elasticpath.selenium.framework.util.PropertyManager;
@@ -30,7 +32,7 @@ public class CoreTool {
 	private final String coreToolCliPath;
 	private static final String CORE_TOOL_FILE_NAME = "coreTool.sh";
 	private URL loc;
-	private static final Logger LOGGER = Logger.getLogger(SyncConfig.class);
+	private static final Logger LOGGER = LogManager.getLogger(SyncConfig.class);
 	private final ReplaceString replaceString;
 	private static boolean isConfigUpdated;
 
@@ -113,12 +115,12 @@ public class CoreTool {
 		BufferedReader bufferedReader = null;
 		try {
 			loc = getClass().getClassLoader().getResource(CORE_TOOL_FILE_NAME);
-			Runtime.getRuntime().exec("chmod 777 " + loc.getPath()).waitFor();
-			Runtime.getRuntime().exec("chmod 777 " + coreToolCliPath + "/epcoretool.sh").waitFor();
+			execWithRedirectedErrorStream("chmod 777 " + loc.getPath()).waitFor();
+			execWithRedirectedErrorStream("chmod 777 " + coreToolCliPath + "/epcoretool.sh").waitFor();
 			String[] cmd = {loc.getPath(), resourseFolderPath + "/" + propertyManager.getProperty("ep.core.tool.cli"), coreToolCommand};
 			LOGGER.info("cmd ...... : " + resourseFolderPath + "/" + propertyManager.getProperty("ep.core.tool.cli")
 					+ "coreToolCommand: " + coreToolCommand);
-			process = Runtime.getRuntime().exec(cmd);
+			process = execWithRedirectedErrorStream(cmd);
 
 			bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 

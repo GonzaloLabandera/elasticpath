@@ -27,6 +27,15 @@ Feature: Catalog Search
       | productCode | productSku |
       | alien       | alien_sku  |
 
+  Scenario Outline: Product & Bundle search by product sku
+    When I search for product by sku <productSku>
+    Then Product with code <productCode> and sku <productSku> should appear in result
+    And Bundle code <bundleCode> should appear in result
+
+    Examples:
+      | productCode | productSku   | bundleCode |
+      | GA19920     | GA19920_sku  | GM38829    |
+
   Scenario Outline: Bundle search by bundle code
     When I search for bundle by code <bundleCode>
     Then Bundle code <bundleCode> should appear in result

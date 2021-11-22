@@ -24,7 +24,7 @@ class ProductAssociationQueryBuilder {
 	public ProductAssociationQuery buildSearchQuery(final ProductAssociationSearchCriteria criteria) {
 		criteria.optimize();
 
-		StringBuilder queryBuffer = new StringBuilder("SELECT pa FROM ProductAssociationImpl pa");
+		StringBuilder queryBuffer = new StringBuilder("SELECT DISTINCT pa FROM ProductAssociationImpl pa");
 		appendForCatalogOnly(criteria, queryBuffer);
 		List<Object> parameterList = buildWhereClause(criteria, queryBuffer);
 
@@ -43,7 +43,7 @@ class ProductAssociationQueryBuilder {
 	public ProductAssociationQuery buildCountQuery(final ProductAssociationSearchCriteria criteria) {
 		criteria.optimize();
 
-		StringBuilder queryBuffer = new StringBuilder("SELECT COUNT(pa.uidPk) FROM ProductAssociationImpl pa");
+		StringBuilder queryBuffer = new StringBuilder("SELECT COUNT(DISTINCT pa.uidPk) FROM ProductAssociationImpl pa");
 		appendForCatalogOnly(criteria, queryBuffer);
 		List<Object> parameterList = buildWhereClause(criteria, queryBuffer);
 

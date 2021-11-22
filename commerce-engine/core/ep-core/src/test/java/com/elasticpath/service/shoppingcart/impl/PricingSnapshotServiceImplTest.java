@@ -4,7 +4,6 @@
 package com.elasticpath.service.shoppingcart.impl;
 
 import static java.util.Collections.singletonList;
-
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -19,16 +18,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import com.google.common.collect.Iterables;
+import org.apache.logging.log4j.Logger;
 import org.jmock.Expectations;
 import org.jmock.api.Invocation;
 import org.jmock.auto.Mock;
 import org.jmock.lib.action.CustomAction;
-
-import com.google.common.collect.Iterables;
-
-import org.apache.log4j.Logger;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.Price;
@@ -152,8 +149,8 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 					}
 				});
 
-				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
-				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
 
 				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
 				will(returnValue(pricedShippableItemContainer));
@@ -211,8 +208,8 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 				allowing(taxCalculationResult).applyTaxes(with(any(Collection.class)));
 
 				allowing(cartDirector).refresh(shoppingCart);
-				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
-				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
 
 				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
 				will(returnValue(pricedShippableItemContainer));
@@ -241,8 +238,8 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 		context.checking(new Expectations() {
 			{
 				allowing(cartDirector).refresh(shoppingCart);
-				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
-				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
 				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
 				will(returnValue(pricedShippableItemContainer));
 				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
@@ -290,8 +287,8 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 		context.checking(new Expectations() {
 			{
 				allowing(cartDirector).refresh(shoppingCart);
-				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
-				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
 				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
 				will(returnValue(pricedShippableItemContainer));
 				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
@@ -325,8 +322,8 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 		context.checking(new Expectations() {
 			{
 				allowing(cartDirector).refresh(shoppingCart);
-				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
-				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getShopper().getCustomerSession());
 				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
 				will(returnValue(pricedShippableItemContainer));
 				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);

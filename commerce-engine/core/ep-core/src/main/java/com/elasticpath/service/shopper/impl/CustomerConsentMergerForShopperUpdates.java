@@ -3,7 +3,6 @@
  */
 package com.elasticpath.service.shopper.impl;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
@@ -31,12 +30,11 @@ public final class CustomerConsentMergerForShopperUpdates implements CustomerSes
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void invalidateShopper(final CustomerSession customerSession, final Shopper invalidShopper) {
+	public void invalidateShopper(final Shopper invalidShopper, final Shopper newShopper) {
 		if (CustomerType.REGISTERED_USER == invalidShopper.getCustomer().getCustomerType()) {
 			return;
 		}
 
-		customerConsentService.updateCustomerGuids(invalidShopper.getCustomer().getGuid(), customerSession.getShopper()
-				.getCustomer().getGuid());
+		customerConsentService.updateCustomerGuids(invalidShopper.getCustomer().getGuid(), newShopper.getCustomer().getGuid());
 	}
 }

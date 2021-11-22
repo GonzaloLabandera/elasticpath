@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -37,7 +38,7 @@ public class CsvChunkedPriceListExportService implements PriceListExportService 
 	private static final String PRICE_LIST_CURRENCY_CODE = "com.elasticpath.etl.batch.csv.price.list.currency"; //$NON-NLS-1$
 	private static final String PRICING_LOCALE = "com.elasticpath.etl.batch.csv.pricing.locale"; //$NON-NLS-1$
 	private static final String PRICE_LIST_OUTPUT_FILE = "com.elasticpath.etl.batch.csv.price.list.output.file"; //$NON-NLS-1$
-	private static final Logger LOG = Logger.getLogger(CsvChunkedPriceListExportService.class);
+	private static final Logger LOG = LogManager.getLogger(CsvChunkedPriceListExportService.class);
 	private static final String EXTENSION_CSV = ".csv"; //$NON-NLS-1$
 
 	private PriceListEditorControllerImpl plController;

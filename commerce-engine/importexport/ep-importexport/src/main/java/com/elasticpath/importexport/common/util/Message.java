@@ -5,9 +5,11 @@ package com.elasticpath.importexport.common.util;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.elasticpath.importexport.common.types.JobType;
 
@@ -211,7 +213,7 @@ public class Message {
 				.append("jobType", jobType)
 				.append("code", code)
 				.append("params", params, true)
-				.append("exception", exception)
+				.append("exception", Optional.ofNullable(exception).map(ExceptionUtils::getStackTrace).orElse("null"))
 				.build();
 	}
 }

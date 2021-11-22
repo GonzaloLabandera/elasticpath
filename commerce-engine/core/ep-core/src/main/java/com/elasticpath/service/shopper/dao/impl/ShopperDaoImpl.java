@@ -9,7 +9,6 @@ import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.domain.shopper.impl.ShopperMementoImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -43,24 +42,17 @@ public class ShopperDaoImpl implements ShopperDao {
 	}
 
 	@Override
-	public ShopperMemento findByCustomerAndStoreCode(final Customer customer, final String storeCode) {
-		return findByCustomerGuidAndStoreCode(customer.getGuid(), storeCode);
+	public List<ShopperMemento> findByCustomerGuid(final String customerGuid) {
+		return persistenceEngine.<ShopperMemento>retrieveByNamedQuery("FIND_SHOPPER_BY_CUSTOMER_GUID", customerGuid);
 	}
 
 	@Override
-	public ShopperMemento findByCustomerAccountAndStore(final Customer customer, final Customer account, final String storeCode) {
-		return findByCustomerGuidAccountSharedIdAndStore(customer.getGuid(), account.getSharedId(), storeCode);
+	public List<ShopperMemento> findByAccountGuid(final String accountGuid) {
+		return persistenceEngine.<ShopperMemento>retrieveByNamedQuery("FIND_SHOPPER_BY_ACCOUNT_GUID", accountGuid);
 	}
 
 	@Override
-	public ShopperMemento findByCustomerGuid(final String customerGuid) {
-		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery("FIND_SHOPPER_BY_CUSTOMER_GUID", customerGuid);
-
-		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
-	}
-
-	@Override
-	public ShopperMemento findByCustomerGuidAndStoreCode(final String customerGuid, final String storeCode) {
+	public ShopperMemento findByCustomerGuidAndStore(final String customerGuid, final String storeCode) {
 		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery("FIND_SHOPPER_BY_CUSTOMER_GUID_AND_STORECODE",
 																									customerGuid, storeCode);
 		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
@@ -73,25 +65,6 @@ public class ShopperDaoImpl implements ShopperDao {
 				"FIND_SHOPPER_BY_CUSTOMER_GUID_ACCOUNT_ID_AND_STORECODE",
 				customerGuid, accountSharedId, storeCode);
 
-		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
-	}
-
-	@Override
-	public ShopperMemento findByCustomerSharedIdAndStore(final String customerSharedId, final String storeCode) {
-		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery(
-				"FIND_SHOPPER_BY_CUSTOMER_SHAREDID_AND_STORECODE",
-				customerSharedId,
-				storeCode);
-
-		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
-	}
-
-	@Override
-	public ShopperMemento findByCustomerSharedIdAndAccountSharedIdAndStore(final String customerSharedId, final String accountSharedId,
-																		final String storeCode) {
-		final List<ShopperMemento> results = persistenceEngine.<ShopperMemento>retrieveByNamedQuery(
-				"FIND_SHOPPER_BY_CUSTOMER_ID_ACCOUNT_ID_AND_STORECODE",
-				customerSharedId, accountSharedId, storeCode);
 		return (ShopperMemento) CollectionUtils.find(results, Objects::nonNull);
 	}
 

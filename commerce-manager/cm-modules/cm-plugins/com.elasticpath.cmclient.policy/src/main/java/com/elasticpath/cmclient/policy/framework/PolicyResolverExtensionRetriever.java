@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.policy.framework;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -17,7 +18,7 @@ import com.elasticpath.cmclient.policy.StatePolicyResolver;
  */
 public final class PolicyResolverExtensionRetriever {
 
-	private static final Logger LOG = Logger.getLogger(PolicyResolverExtensionRetriever.class);
+	private static final Logger LOG = LogManager.getLogger(PolicyResolverExtensionRetriever.class);
 	
 	private static final String EXTENSION_STATE_POLICY_RESOLVER = "statePolicyResolver"; //$NON-NLS-1$
 

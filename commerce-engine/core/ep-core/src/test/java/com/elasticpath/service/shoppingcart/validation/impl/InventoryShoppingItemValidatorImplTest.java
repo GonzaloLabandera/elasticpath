@@ -3,16 +3,14 @@
  */
 package com.elasticpath.service.shoppingcart.validation.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-
 import static com.elasticpath.domain.catalog.AvailabilityCriteria.ALWAYS_AVAILABLE;
 import static com.elasticpath.domain.catalog.AvailabilityCriteria.AVAILABLE_FOR_BACK_ORDER;
 import static com.elasticpath.domain.catalog.AvailabilityCriteria.AVAILABLE_FOR_PRE_ORDER;
 import static com.elasticpath.domain.catalog.AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
@@ -20,31 +18,38 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.common.dto.InventoryDetails;
-import com.elasticpath.domain.catalog.InventoryCalculator;
+import com.elasticpath.common.dto.SkuInventoryDetails;
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.domain.store.Warehouse;
-import com.elasticpath.service.catalog.ProductInventoryManagementService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
+import com.elasticpath.sellingchannel.inventory.ProductInventoryShoppingService;
+import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.store.StoreService;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingItemValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.entity.XPFProductSku;
+import com.elasticpath.xpf.connectivity.entity.XPFShopper;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingItem;
+import com.elasticpath.xpf.connectivity.entity.XPFStore;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("PMD.UnusedPrivateField")
 public class InventoryShoppingItemValidatorImplTest {
 
 	private static final String SKU_CODE = "sku_code";
 
 	private static final String SKU_GUID = "sku_guid";
 
-	private static final long WAREHOUSE_ID = 1232365;
+	private static final String STORE_CODE = "store_code";
 
-	private static final int REQUESTED_QUANTITY = 10;
+	private static final long REQUESTED_QUANTITY = 10L;
 
 	private static final int ENOUGH_AVAILABLE = 15;
 
@@ -56,60 +61,77 @@ public class InventoryShoppingItemValidatorImplTest {
 	private InventoryShoppingItemValidatorImpl validator;
 
 	@Mock
-	private InventoryCalculator inventoryCalculator;
-
-	@Mock
-	private ShoppingItem shoppingItem;
-
-	@Mock
-	private ProductInventoryManagementService productInventoryManagementService;
+	private ProductInventoryShoppingService productInventoryShoppingService;
 
 	@Mock
 	private Store store;
 
 	@Mock
-	private ProductSku productSku;
-
-	@Mock
 	private Product product;
 
 	@Mock
-	private Warehouse warehouse;
+	private ProductSku productSku;
 
 	@Mock
-	private ShoppingCart shoppingCart;
+	private XPFStore xpfStore;
 
 	@Mock
-	private InventoryDetails inventoryDetails;
+	private XPFProductSku xpfProductSku;
 
-	private ShoppingItemValidationContext context;
+	@Mock
+	private XPFShoppingCart shoppingCart;
+
+	@Mock
+	private XPFShopper xpfShopper;
+
+	@Mock
+	private XPFShoppingItem xpfShoppingItem;
+
+	@Mock
+	private XPFShoppingItemValidationContext context;
+
+	@Mock
+	private SkuInventoryDetails inventoryDetails;
+
+	@Mock
+	private ProductSkuLookup productSkuLookup;
+
+	@Mock
+	private StoreService storeService;
+
+	@Spy
+	private SuperInventoryValidator superInventoryValidator;
+
+	@Mock
+	private BeanFactory beanFactory;
 
 	@Before
 	public void setUp() throws Exception {
-		context = new ShoppingItemValidationContextImpl();
+		given(productSkuLookup.findBySkuCode(SKU_CODE)).willReturn(productSku);
 
-		context.setProductSku(productSku);
-		context.setStore(store);
-		context.setShoppingItem(shoppingItem);
-		context.setShoppingCart(shoppingCart);
+		given(context.getShoppingItem()).willReturn(xpfShoppingItem);
+		given(xpfShoppingItem.getProductSku()).willReturn(xpfProductSku);
+		given(context.getShoppingCart()).willReturn(shoppingCart);
+		given(context.getShoppingCart().getShopper()).willReturn(xpfShopper);
+		given(xpfShopper.getStore()).willReturn(xpfStore);
+		given(xpfStore.getCode()).willReturn(STORE_CODE);
 
-		given(shoppingCart.getCartItemsBySkuGuid(SKU_GUID)).willReturn(Collections.singletonList(shoppingItem));
+		given(storeService.findStoreWithCode(STORE_CODE)).willReturn(store);
+
+		given(xpfShoppingItem.getQuantity()).willReturn(REQUESTED_QUANTITY);
+		given(xpfProductSku.getCode()).willReturn(SKU_CODE);
 
 		given(productSku.isShippable()).willReturn(true);
-		given(productSku.getSkuCode()).willReturn(SKU_CODE);
-		given(productSku.getGuid()).willReturn(SKU_GUID);
-
-		given(shoppingItem.getQuantity()).willReturn(REQUESTED_QUANTITY);
-
-		given(inventoryCalculator.getInventoryDetails(productInventoryManagementService, productSku, WAREHOUSE_ID)).willReturn(inventoryDetails);
-
-		given(warehouse.getUidPk()).willReturn(WAREHOUSE_ID);
-
-		given(store.getWarehouses()).willReturn(Collections.singletonList(warehouse));
+		given(productSku.getSkuCode()).willReturn(SKU_GUID);
+		given(productInventoryShoppingService.getSkuInventoryDetails(productSku, store)).willReturn(inventoryDetails);
 
 		given(productSku.getProduct()).willReturn(product);
 
 		given(product.getAvailabilityCriteria()).willReturn(AVAILABLE_WHEN_IN_STOCK);
+		given(beanFactory.getSingletonBean(ContextIdNames.PRODUCT_INVENTORY_SHOPPING_SERVICE, ProductInventoryShoppingService.class))
+				.willReturn(productInventoryShoppingService);
+		given(beanFactory.getSingletonBean(ContextIdNames.STORE_SERVICE, StoreService.class))
+				.willReturn(storeService);
 	}
 
 	@Test
@@ -118,7 +140,7 @@ public class InventoryShoppingItemValidatorImplTest {
 		given(inventoryDetails.getAvailableQuantityInStock()).willReturn(ENOUGH_AVAILABLE);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -126,8 +148,8 @@ public class InventoryShoppingItemValidatorImplTest {
 
 	@Test
 	public void testNotEnoughInventory() {
-		StructuredErrorMessage errorMessage =
-				new StructuredErrorMessage(StructuredErrorMessageType.ERROR, MESSAGE_ID,
+		XPFStructuredErrorMessage errorMessage =
+				new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.ERROR, MESSAGE_ID,
 						String.format("Item '%s' only has %d available but %d were requested.",
 								productSku.getSkuCode(), NOT_ENOUGH_AVAILABLE, REQUESTED_QUANTITY),
 						ImmutableMap.of("item-code", productSku.getSkuCode(),
@@ -138,7 +160,7 @@ public class InventoryShoppingItemValidatorImplTest {
 		given(inventoryDetails.getAvailableQuantityInStock()).willReturn(NOT_ENOUGH_AVAILABLE);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).containsOnly(errorMessage);
@@ -151,7 +173,7 @@ public class InventoryShoppingItemValidatorImplTest {
 		given(product.getAvailabilityCriteria()).willReturn(ALWAYS_AVAILABLE);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -164,7 +186,7 @@ public class InventoryShoppingItemValidatorImplTest {
 		given(product.getAvailabilityCriteria()).willReturn(AVAILABLE_FOR_PRE_ORDER);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();
@@ -177,7 +199,7 @@ public class InventoryShoppingItemValidatorImplTest {
 		given(product.getAvailabilityCriteria()).willReturn(AVAILABLE_FOR_BACK_ORDER);
 
 		// When
-		Collection<StructuredErrorMessage> messageCollections = validator.validate(context);
+		Collection<XPFStructuredErrorMessage> messageCollections = validator.validate(context);
 
 		// Then
 		assertThat(messageCollections).isEmpty();

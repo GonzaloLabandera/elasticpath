@@ -4,7 +4,8 @@
 package com.elasticpath.tools.sync.merge.configuration.impl;
 
 import org.apache.commons.collections.map.LRUMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.util.Pair;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
@@ -26,7 +27,7 @@ public abstract class AbstractEntityLocator implements EntityLocator {
 
 	private LRUMap refCache;
 
-	private static final Logger LOG = Logger.getLogger(AbstractEntityLocator.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractEntityLocator.class);
 
 
 	/**

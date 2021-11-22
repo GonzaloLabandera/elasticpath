@@ -33,7 +33,7 @@ Feature: Children Account Management
 		When I search and open account editor for shared ID <sharedId>
 		And I select Child Accounts tab in the Customer Editor
 		Then Child Accounts table contains first level <firstLevelChild> child
-		And Child Accounts table does not contain second level <secondLevelChild> child
+		And Child Accounts table does not contain <secondLevelChild> child
 
 		Examples:
 			| sharedId              | firstLevelChild | secondLevelChild |
@@ -65,4 +65,12 @@ Feature: Children Account Management
 			| sharedId              |
 			| SomeBusiness5@abc.com |
 
+	Scenario Outline: Delete child account
+      When I search and open account editor for shared ID <sharedId>
+      And I select Child Accounts tab in the Customer Editor
+      And I delete <child> child
+      Then Child Accounts table does not contain <child> child
 
+      Examples:
+        | sharedId               | child          |
+        | account-delete@abc.com | account-delete |

@@ -21,7 +21,7 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.openjpa.persistence.ElementDependent;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
@@ -244,7 +244,7 @@ public class CatalogImpl extends AbstractLegacyEntityImpl implements Catalog {
 	 */
 	@Persistent(optional = false)
 	@Externalizer("toString")
-	@Factory("org.apache.commons.lang.LocaleUtils.toLocale")
+	@Factory("org.apache.commons.lang3.LocaleUtils.toLocale")
 	@Column(name = "DEFAULT_LOCALE", length = LENGTH_20)
 	protected Locale getDefaultLocaleInternal() {
 		return defaultLocale;

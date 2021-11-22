@@ -9,8 +9,9 @@ import java.util.Locale;
 import java.util.SortedSet;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 
@@ -36,7 +37,7 @@ import com.elasticpath.domain.contentspace.ParameterValue;
 public class NewDynamicContentWizardParametersPage extends AbstractPolicyAwareWizardPage<DynamicContent> 
 	implements IValueChangedListener<ParameterValue> {
 
-	private static final Logger LOG = Logger.getLogger(NewDynamicContentWizardParametersPage.class);
+	private static final Logger LOG = LogManager.getLogger(NewDynamicContentWizardParametersPage.class);
 
 	private ParametersTableSection parametersViewPart;
 

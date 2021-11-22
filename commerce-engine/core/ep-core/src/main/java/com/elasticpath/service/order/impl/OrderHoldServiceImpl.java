@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
@@ -32,7 +33,7 @@ import com.elasticpath.service.order.OrderService;
  */
 public class OrderHoldServiceImpl extends AbstractEpPersistenceServiceImpl implements OrderHoldService {
 
-	private static final Logger LOG = Logger.getLogger(OrderHoldServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(OrderHoldServiceImpl.class);
 
 	private static final String CM_USERNAME = "cm_username";
 	private static final String ORDERHOLD_GUID = "orderhold_guid";
@@ -87,7 +88,7 @@ public class OrderHoldServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	@Override
 	public void markHoldUnresolvable(final Order order, final OrderHold orderHold, final String cmUserName, final String comment) {
 		if (orderContainsHold(order, orderHold)) {
-			sendEvent(OrderEventType.ORDER_HOLDS_RESOLVED,
+			sendEvent(OrderEventType.ORDER_HOLD_UPDATE,
 					order.getOrderNumber(),
 					ImmutableMap.of(
 							ORDERHOLD_GUID, orderHold.getGuid(),
@@ -97,7 +98,7 @@ public class OrderHoldServiceImpl extends AbstractEpPersistenceServiceImpl imple
 					)
 			);
 		} else {
-			LOG.error("An attempt was made to reject an order hold that did not belong to the order [" + order.getUidPk() + "]");
+			LOG.error("An attempt was made to reject an order hold that did not belong to the order [{}]", order.getUidPk());
 			throw new EpServiceException("An attempt was made to reject an order hold that did not belong to the order [" + order.getUidPk() + "]");
 		}
 	}
@@ -105,7 +106,7 @@ public class OrderHoldServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	@Override
 	public void markHoldResolved(final Order order, final OrderHold orderHold, final String cmUserName, final String comment) {
 		if (orderContainsHold(order, orderHold)) {
-			sendEvent(OrderEventType.ORDER_HOLDS_RESOLVED,
+			sendEvent(OrderEventType.ORDER_HOLD_UPDATE,
 					order.getOrderNumber(),
 					ImmutableMap.of(
 							ORDERHOLD_GUID, orderHold.getGuid(),
@@ -115,7 +116,7 @@ public class OrderHoldServiceImpl extends AbstractEpPersistenceServiceImpl imple
 					)
 			);
 		} else {
-			LOG.error("An attempt was made to approve an order hold that did not belong to the order [" + order.getUidPk() + "]");
+			LOG.error("An attempt was made to approve an order hold that did not belong to the order [{}]", order.getUidPk());
 			throw new EpServiceException("An attempt was made to approve an order hold that did not belong to the order [" + order.getUidPk() + "]");
 		}
 	}

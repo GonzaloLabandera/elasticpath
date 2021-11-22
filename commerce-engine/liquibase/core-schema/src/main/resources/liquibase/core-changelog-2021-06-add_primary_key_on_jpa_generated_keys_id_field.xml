@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2021
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-06-add_primary_key_on_jpa_generated_keys_id_field.xml">
+
+	<changeSet id="2021-04-cascade-shopper-account" author="elasticpath" failOnError="true">
+		<comment>[PB-9592] Add primary key on JPA_GENERATED_KEYS ID field</comment>
+
+		<addPrimaryKey columnNames="ID" constraintName="PK_JPA_GENERATED_KEYS" tableName="JPA_GENERATED_KEYS" />
+
+	</changeSet>
+</databaseChangeLog>

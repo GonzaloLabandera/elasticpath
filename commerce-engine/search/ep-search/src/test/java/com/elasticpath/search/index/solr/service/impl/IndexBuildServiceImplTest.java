@@ -18,9 +18,7 @@ import java.util.Map;
 import org.apache.solr.client.solrj.SolrClient;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
-import org.jmock.api.Invocation;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.action.CustomAction;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,7 +37,6 @@ import com.elasticpath.search.index.solr.builders.IndexBuilder;
 import com.elasticpath.search.index.solr.builders.impl.AbstractIndexBuilder;
 import com.elasticpath.search.index.solr.builders.impl.IndexBuilderFactoryImpl;
 import com.elasticpath.search.index.solr.service.IndexBuildPolicy;
-import com.elasticpath.search.index.solr.service.IndexBuildPolicyContext;
 import com.elasticpath.search.index.solr.service.IndexBuildPolicyContextFactory;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexType;
@@ -59,6 +56,7 @@ public class IndexBuildServiceImplTest {
 	private static final String ALL_SCHEDULED_DELETES_MUST_BE_FLUSHED = "All scheduled deletes must be flushed.";
 
 	private static final String ALL_SCHEDULED_DOCUMENT_CHANGES_MUST_BE_FLUSHED = "All scheduled document changes must be flushed.";
+	public static final String WILDCARD = "*:*";
 
 	private IndexBuildServiceImpl indexBuildService;
 
@@ -130,17 +128,6 @@ public class IndexBuildServiceImplTest {
 		indexBuildService.setIndexingStatistics(new IndexingStatsImpl());
 
 		mockIndexBuildPolicyFactory = context.mock(IndexBuildPolicyContextFactory.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockIndexBuildPolicyFactory).createIndexBuildPolicyContext();
-				will(new CustomAction("Creates new IndexBuildPolicyContext instances") {
-					@Override
-					public Object invoke(final Invocation invocation) throws Throwable {
-						return new IndexBuildPolicyContext();
-					}
-				});
-			}
-		});
 		indexBuildService.setIndexBuildPolicyContextFactory(mockIndexBuildPolicyFactory);
 		indexBuildService.setSearchIndexExistencePredicate(indexType -> true);
 	}
@@ -215,20 +202,12 @@ public class IndexBuildServiceImplTest {
 	 * Test method for 'com.elasticpath.service.index.impl.AbstractIndexBuildServiceImpl.buildIndex()'.
 	 */
 	@Test
-	public void testBuildIndex() {
+	public void testBuildIndex() throws Exception {
 		final IndexBuildStatus buildIndexStatus = new IndexBuildStatusImpl();
 		final TestSolrDocumentPublisher publisher = new TestSolrDocumentPublisher();
 
 		buildIndexStatus.setLastBuildDate(new Date());
 		buildIndexStatus.setIndexType(IndexType.PRODUCT);
-		context.checking(new Expectations() {
-			{
-				oneOf(mockIndexBuildStatusDao).get(indexType);
-				will(returnValue(buildIndexStatus));
-				allowing(mockIndexBuildStatusDao).saveOrUpdate(with(any(IndexBuildStatus.class)));
-				will(returnValue(buildIndexStatus));
-			}
-		});
 
 		final IndexNotification mockIndexNot1 = context.mock(IndexNotification.class);
 		context.checking(new Expectations() {
@@ -250,7 +229,7 @@ public class IndexBuildServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				Sequence sequence = context.sequence("index notification sequence");
-				oneOf(mockIndexNotificationProcessor).findAllNewNotifications(indexType);
+				oneOf(mockIndexNotificationProcessor).getNotifications(indexType);
 				will(returnValue(indexNotificationList));
 				inSequence(sequence);
 				allowing(mockIndexNotificationProcessor).getNotifications();
@@ -258,11 +237,25 @@ public class IndexBuildServiceImplTest {
 				inSequence(sequence);
 				oneOf(mockIndexNotificationProcessor).removeStoredNotifications();
 
+
+				allowing(mockIndexNotificationProcessor).findLastDeleteAllOrRebuildIndexType(indexType);
+				will(returnValue(Collections.emptyList()));
+
 				oneOf(mockSolrManager).getServer(with(any(IndexType.class)));
 				will(returnValue(mockSolrServer));
 				atLeast(1).of(mockSolrManager).getDocumentPublisher(with(any(IndexType.class)));
 				will(returnValue(publisher));
 
+				IndexBuildStatusUpdater mockIndexBuildStatusUpdater = context.mock(IndexBuildStatusUpdater.class);
+				indexBuildService.setIndexBuildStatusUpdater(mockIndexBuildStatusUpdater);
+
+				allowing(mockIndexBuildStatusUpdater).wasRebuildInProgress(indexType);
+				will(returnValue(false));
+
+				allowing(mockIndexBuildStatusUpdater).getInitialIndexStatus(indexType);
+				will(returnValue(buildIndexStatus));
+
+				allowing(mockIndexBuildStatusUpdater).enqueue(with(any(IndexBuildStatus.class)));
 			}
 		});
 
@@ -278,7 +271,7 @@ public class IndexBuildServiceImplTest {
 	 * Tests that the rebuild will be invoked if there is a REBUILD update type in the list of notifications.
 	 */
 	@Test
-	public void testRebuildIndex() throws Exception {
+	public void testRebuildIndex() {
 		final IndexBuildStatus buildIndexStatus = new IndexBuildStatusImpl();
 		final TestSolrDocumentPublisher publisher = new TestSolrDocumentPublisher();
 		buildIndexStatus.setLastBuildDate(new Date());
@@ -288,9 +281,10 @@ public class IndexBuildServiceImplTest {
 		final IndexNotification mockIndexNot2 = context.mock(IndexNotification.class, "second index notification");
 		context.checking(new Expectations() {
 			{
+				allowing(mockIndexNotificationProcessor).findLastDeleteAllOrRebuildIndexType(indexType);
+				will(returnValue(Collections.emptyList()));
+
 				oneOf(mockIndexBuildStatusDao).get(indexType);
-				will(returnValue(buildIndexStatus));
-				allowing(mockIndexBuildStatusDao).saveOrUpdate(with(any(IndexBuildStatus.class)));
 				will(returnValue(buildIndexStatus));
 
 				allowing(mockIndexNot1).getUpdateType();
@@ -303,15 +297,13 @@ public class IndexBuildServiceImplTest {
 				will(returnValue("another value"));
 				Sequence sequence = context.sequence("index notification sequence");
 				final List<IndexNotification> indexNotificationList = Arrays.asList(mockIndexNot1, mockIndexNot2);
-				allowing(mockIndexNotificationProcessor).findAllNewNotifications(indexType);
+				allowing(mockIndexNotificationProcessor).getNotifications(indexType);
 				will(returnValue(indexNotificationList));
 				inSequence(sequence);
 				allowing(mockIndexNotificationProcessor).getNotifications();
 				will(returnValue(indexNotificationList));
 				inSequence(sequence);
 				oneOf(mockIndexNotificationProcessor).removeStoredNotifications();
-
-				oneOf(mockSolrServer).deleteByQuery("*:*");
 
 				oneOf(mockSolrManager).getServer(with(any(IndexType.class)));
 				will(returnValue(mockSolrServer));
@@ -349,11 +341,12 @@ public class IndexBuildServiceImplTest {
 				will(returnValue(true));
 				allowing(mockIndexBuildStatusUpdater).enqueue(with(any(IndexBuildStatus.class)));
 
-				oneOf(mockIndexNotificationProcessor).removeStoredNotifications();
-				allowing(mockIndexNotificationProcessor).findAllNewNotifications(indexType);
+				allowing(mockIndexNotificationProcessor).getNotifications(indexType);
+				will(returnValue(Collections.emptyList()));
+				allowing(mockIndexNotificationProcessor).findLastDeleteAllOrRebuildIndexType(indexType);
 				will(returnValue(Collections.emptyList()));
 
-				allowing(mockSolrServer).deleteByQuery("*:*");
+				allowing(mockSolrServer).deleteByQuery(WILDCARD);
 
 				allowing(mockSolrManager).getServer(with(any(IndexType.class)));
 				will(returnValue(mockSolrServer));
@@ -381,14 +374,14 @@ public class IndexBuildServiceImplTest {
 				allowing(mockIndexBuildStatusDao).saveOrUpdate(with(any(IndexBuildStatus.class)));
 				will(returnValue(buildIndexStatus));
 
-				oneOf(mockIndexNotificationProcessor).removeStoredNotifications();
-
-				allowing(mockIndexNotificationProcessor).findAllNewNotifications(indexType);
+				allowing(mockIndexNotificationProcessor).getNotifications(indexType);
 				will(returnValue(Collections.emptyList()));
 				allowing(mockIndexNotificationProcessor).getNotifications();
 				will(returnValue(Collections.emptyList()));
+				allowing(mockIndexNotificationProcessor).findLastDeleteAllOrRebuildIndexType(indexType);
+				will(returnValue(Collections.emptyList()));
 
-				oneOf(mockSolrServer).deleteByQuery("*:*");
+				oneOf(mockSolrServer).deleteByQuery(WILDCARD);
 
 				oneOf(mockSolrManager).getServer(with(any(IndexType.class)));
 				will(returnValue(mockSolrServer));

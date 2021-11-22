@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.cache.Cache;
@@ -153,12 +154,11 @@ public class CachingPriceListAssignmentServiceImplTest {
 	}
 
 	@Test
-	public void verifyListByCatalogCodeCallsFallbackService() {
-		when(fallbackService.listByCatalog(CATALOG_CODE)).thenReturn(notCachedPriceListAssignments);
+	public void verifyListByCatalogCodeCallslistByCatalogFallbackService() {
+		CachingPriceListAssignmentServiceImpl cachingPriceListAssignmentServiceSpy = getCachingPriceListAssignmentServiceSpy();
 
-		assertThat(cachingPriceListAssignmentService.listByCatalog(CATALOG_CODE)).isEqualTo(notCachedPriceListAssignments);
-
-		verify(fallbackService).listByCatalog(CATALOG_CODE);
+		cachingPriceListAssignmentServiceSpy.listByCatalog(CATALOG_CODE);
+		verify(cachingPriceListAssignmentServiceSpy).listByCatalog(CATALOG_CODE);
 	}
 
 	@Test
@@ -168,6 +168,13 @@ public class CachingPriceListAssignmentServiceImplTest {
 		assertThat(cachingPriceListAssignmentService.listByCatalog(CATALOG_CODE, INCLUDE_HIDDEN)).isEqualTo(notCachedPriceListAssignments);
 
 		verify(fallbackService).listByCatalog(CATALOG_CODE, INCLUDE_HIDDEN);
+	}
+
+	private CachingPriceListAssignmentServiceImpl getCachingPriceListAssignmentServiceSpy() {
+		CachingPriceListAssignmentServiceImpl cachingPriceListAssignmentServiceSpy = Mockito.spy(new CachingPriceListAssignmentServiceImpl());
+		cachingPriceListAssignmentServiceSpy.setFallbackService(fallbackService);
+		cachingPriceListAssignmentServiceSpy.setPriceListAssignmentCache(priceListAssignmentsByCatalogAndCurrencyCodeCache);
+		return cachingPriceListAssignmentServiceSpy;
 	}
 
 	@Test

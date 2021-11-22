@@ -3,26 +3,34 @@
  */
 package com.elasticpath.service.shoppingcart.validation.impl;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Named;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.modifier.ModifierField;
-import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.validation.service.ModifierFieldValidationService;
+import com.elasticpath.xpf.connectivity.entity.XPFModifierField;
+import com.elasticpath.xpf.connectivity.entity.XPFModifierGroup;
 
 /**
  * Base class for Modifier*Validator classes.
  */
 public class CartModifierValidator {
+
+	@Autowired
+	@Named("cachedModifierFieldValidationService")
 	private ModifierFieldValidationService modifierFieldValidationService;
 
-	private Set<ModifierField> getModifierFields(final Set<ModifierGroup> cartItemModifierGroups) {
-		return cartItemModifierGroups.stream().map(ModifierGroup::getModifierFields)
-				.flatMap(Set::stream)
+	private Set<XPFModifierField> getModifierFields(final Set<XPFModifierGroup> cartItemModifierGroups) {
+		return cartItemModifierGroups.stream().map(XPFModifierGroup::getModifierFields)
+				.flatMap(Collection::stream)
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
@@ -33,16 +41,11 @@ public class CartModifierValidator {
 	 * @return list of structured error messages
 	 */
 	protected List<StructuredErrorMessage> baseValidate(final Map<String, String> itemsToValidate,
-			final Set<ModifierGroup> cartItemModifierGroups) {
-		return modifierFieldValidationService.validate(itemsToValidate,
-				getModifierFields(cartItemModifierGroups));
+			final Set<XPFModifierGroup> cartItemModifierGroups) {
+		return modifierFieldValidationService.validate(itemsToValidate, getModifierFields(cartItemModifierGroups), null);
 	}
 
-	protected ModifierFieldValidationService getModifierFieldValidationService() {
-		return modifierFieldValidationService;
-	}
-
-	public void setModifierFieldValidationService(final ModifierFieldValidationService modifierFieldValidationService) {
+	void setModifierFieldValidationService(final ModifierFieldValidationService modifierFieldValidationService) {
 		this.modifierFieldValidationService = modifierFieldValidationService;
 	}
 }

@@ -30,6 +30,7 @@ public final class JPAQuery implements Serializable {
 	private final List<DbStatement> sqlUpdates = new LinkedList<>();
 	private final List<DbStatement> sqlDeletes = new LinkedList<>();
 	private final List<DbStatement> sqlInserts = new LinkedList<>();
+	private int executedAndBatchedSqlInserts;
 	private Date startedAt;
 
 	/**
@@ -72,6 +73,10 @@ public final class JPAQuery implements Serializable {
 		return sqlInserts;
 	}
 
+	public int getExecutedAndBatchedSqlInserts() {
+		return executedAndBatchedSqlInserts;
+	}
+
 	public Date getStartedAt() {
 		return startedAt;
 	}
@@ -94,10 +99,34 @@ public final class JPAQuery implements Serializable {
 			this.sqlQueries.add(new SQLQuery(statement, exeTimeMillis));
 		} else if (lowerCaseStatement.startsWith("update")) {
 			this.sqlUpdates.add(new DbStatement(statement, exeTimeMillis));
-		} else if (lowerCaseStatement.startsWith("insert")) {
-			this.sqlInserts.add(new DbStatement(statement, exeTimeMillis));
 		} else  {
 			this.sqlDeletes.add(new DbStatement(statement, exeTimeMillis));
+		}
+	}
+
+	/**
+	 * Performance tests require "normalized" number of the insert statements being/about to be executed.
+	 * The dedicated counter contains a sum of all statements identified by "executing prepstmnt" and "batching prepstmnt" strings.
+	 *
+	 * Conversely, another counter counts insert statements identified by "executing prepstmnt" and "executing batch prepstmnt" strings.
+	 *
+	 * This method ensures both situations and correctly updates the counters.
+	 *
+	 * @param statement the SQL insert statement string
+	 * @param exeTimeMillis the statement's execution time
+	 * @param isBatching is batching insert statement (batching prepstmnt" )
+	 * @param isExecuteBatch is executing batch insert statement (executing batch prepstmnt)
+	 */
+	public void addInsertStatement(final String statement, final long exeTimeMillis, final boolean isBatching, final boolean isExecuteBatch) {
+		//real inserts are identified with "executing batch prepstmnt" (isExecuteBatch flag) or
+		// "executing prepstmnt" (both isExecuteBatch and isBatching flags are false)
+		if (isExecuteBatch) {
+			this.sqlInserts.add(new DbStatement(statement, exeTimeMillis));
+		} else if (isBatching) {
+			this.executedAndBatchedSqlInserts++;
+		} else {
+			this.sqlInserts.add(new DbStatement(statement, exeTimeMillis));
+			this.executedAndBatchedSqlInserts++;
 		}
 	}
 	/**

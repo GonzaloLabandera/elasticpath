@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.admin.users.wizards;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.swt.layout.FillLayout;
@@ -28,7 +29,7 @@ import com.elasticpath.service.cmuser.CmUserService;
  * The User Details wizard page.
  */
 public class UserDetailsPage extends AbstractEPWizardPage<CmUser> {
-	private static final Logger LOG = Logger.getLogger(UserDetailsPage.class);
+	private static final Logger LOG = LogManager.getLogger(UserDetailsPage.class);
 
 	private final CmUser cmUser;
 

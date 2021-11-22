@@ -12,9 +12,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
@@ -47,7 +48,7 @@ implements TaxCalculationResult {
 	private Money beforeTaxSubTotalWithoutDiscount;
 	private TaxDocument taxDocument;
 
-	private static final Logger LOG = Logger.getLogger(
+	private static final Logger LOG = LogManager.getLogger(
 			TaxCalculationResultImpl.class);
 
 	/**

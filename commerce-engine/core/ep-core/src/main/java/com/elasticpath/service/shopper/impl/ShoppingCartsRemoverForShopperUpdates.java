@@ -3,7 +3,6 @@
  */
 package com.elasticpath.service.shopper.impl;
 
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
@@ -24,12 +23,11 @@ public final class ShoppingCartsRemoverForShopperUpdates implements CustomerSess
 	}
 
 	@Override
-	public void invalidateShopper(final CustomerSession customerSession, final Shopper anonymousShopper) {
-		final Shopper currentShopper = customerSession.getShopper();
-		if (currentShopper.equals(anonymousShopper)) {
+	public void invalidateShopper(final Shopper oldShopper, final Shopper newShopper) {
+		if (newShopper.equals(oldShopper)) {
 			return;
 		}
-		shoppingCartService.deleteAllShoppingCartsByShopperUid(anonymousShopper.getUidPk());
+		shoppingCartService.deleteAllShoppingCartsByShopperUid(oldShopper.getUidPk());
 	}
 }
 

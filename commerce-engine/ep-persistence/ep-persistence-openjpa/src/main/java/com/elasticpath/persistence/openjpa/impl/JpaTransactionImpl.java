@@ -4,7 +4,8 @@
 package com.elasticpath.persistence.openjpa.impl;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
@@ -18,7 +19,7 @@ import com.elasticpath.persistence.api.Transaction;
  */
 public class JpaTransactionImpl implements Transaction {
 
-    private static final Logger LOG = Logger.getLogger(JpaTransactionImpl.class);
+    private static final Logger LOG = LogManager.getLogger(JpaTransactionImpl.class);
 
 	private final PlatformTransactionManager txManager;
 	private final TransactionStatus txStatus;

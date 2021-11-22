@@ -11,8 +11,10 @@ import static com.elasticpath.plugin.payment.provider.dto.TransactionType.MODIFY
 import static com.elasticpath.plugin.payment.provider.dto.TransactionType.RESERVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -166,12 +168,13 @@ public class ModifyReservationProcessorImplTest extends AbstractProcessorImplTes
 	}
 
 	private void mockReserveToSimulateModifySuccess() {
-		when(reservationProcessor.reserveToSimulateModify(any(), any(), any(), any())).thenAnswer((Answer<PaymentAPIResponse>) invocation -> {
-			final MoneyDTO amount = (MoneyDTO) invocation.getArguments() [0];
-			final OrderPaymentInstrumentDTO instrument = (OrderPaymentInstrumentDTO) invocation.getArguments() [1];
-			final PaymentEvent reservationEvent = createReservationEvent(instrument, amount);
-			return new PaymentAPIResponse(Collections.singletonList(reservationEvent), true);
-		});
+		when(reservationProcessor.reserveToSimulateModify(any(), any(), any(), any(), anyInt()))
+				.thenAnswer((Answer<PaymentAPIResponse>) invocation -> {
+					final MoneyDTO amount = (MoneyDTO) invocation.getArguments()[0];
+					final OrderPaymentInstrumentDTO instrument = (OrderPaymentInstrumentDTO) invocation.getArguments()[1];
+					final PaymentEvent reservationEvent = createReservationEvent(instrument, amount);
+					return new PaymentAPIResponse(Collections.singletonList(reservationEvent), true);
+				});
 	}
 
 	private void mockReservationCapabilityFailure() {
@@ -184,13 +187,14 @@ public class ModifyReservationProcessorImplTest extends AbstractProcessorImplTes
 	}
 
 	private void mockReserveToSimulateModifyFailure() {
-		when(reservationProcessor.reserveToSimulateModify(any(), any(), any(), any())).thenAnswer((Answer<PaymentAPIResponse>) invocation -> {
-			final MoneyDTO amount = (MoneyDTO) invocation.getArguments()[0];
-			final OrderPaymentInstrumentDTO instrument = (OrderPaymentInstrumentDTO) invocation.getArguments()[1];
-			final PaymentEvent reservationEvent = createReservationEvent(instrument, amount);
-			reservationEvent.setPaymentStatus(FAILED);
-			return new PaymentAPIResponse(Collections.singletonList(reservationEvent), false);
-		});
+		when(reservationProcessor.reserveToSimulateModify(any(), any(), any(), any(), anyInt()))
+				.thenAnswer((Answer<PaymentAPIResponse>) invocation -> {
+					final MoneyDTO amount = (MoneyDTO) invocation.getArguments()[0];
+					final OrderPaymentInstrumentDTO instrument = (OrderPaymentInstrumentDTO) invocation.getArguments()[1];
+					final PaymentEvent reservationEvent = createReservationEvent(instrument, amount);
+					reservationEvent.setPaymentStatus(FAILED);
+					return new PaymentAPIResponse(Collections.singletonList(reservationEvent), false);
+				});
 	}
 
 	private void mockCancelCapabilitySuccess() {
@@ -210,11 +214,10 @@ public class ModifyReservationProcessorImplTest extends AbstractProcessorImplTes
 	private ReserveRequest getCapturedReserveToSimulateModifyArguments() {
 		final ArgumentCaptor<MoneyDTO> amountCaptor = ArgumentCaptor.forClass(MoneyDTO.class);
 		final ArgumentCaptor<OrderPaymentInstrumentDTO> instrumentCaptor = ArgumentCaptor.forClass(OrderPaymentInstrumentDTO.class);
-		@SuppressWarnings("unchecked")
-		final ArgumentCaptor<Map<String, String>> customRequestDataCaptor = ArgumentCaptor.forClass(Map.class);
+		@SuppressWarnings("unchecked") final ArgumentCaptor<Map<String, String>> customRequestDataCaptor = ArgumentCaptor.forClass(Map.class);
 		final ArgumentCaptor<OrderContext> orderContextCaptor = ArgumentCaptor.forClass(OrderContext.class);
 		verify(reservationProcessor).reserveToSimulateModify(amountCaptor.capture(), instrumentCaptor.capture(), customRequestDataCaptor.capture(),
-				orderContextCaptor.capture());
+				orderContextCaptor.capture(), anyInt());
 		return ReserveRequestBuilder.builder()
 				.withAmount(amountCaptor.getValue())
 				.withSelectedOrderPaymentInstruments(Collections.singletonList(instrumentCaptor.getValue()))
@@ -413,6 +416,17 @@ public class ModifyReservationProcessorImplTest extends AbstractProcessorImplTes
 		assertThat(response.getEvents())
 				.extracting(PaymentEvent::getPaymentStatus)
 				.containsExactly(APPROVED);
+	}
+
+	@Test
+	public void checkRereservationCount() {
+		when(capablePaymentProvider.getCapability(ModifyCapability.class)).thenReturn(Optional.empty());
+		mockCancelCapabilitySuccess();
+		mockReserveToSimulateModifySuccess();
+
+		testee.modifyReservation(createModifyReservationRequest(THREE));
+
+		verify(reservationProcessor).reserveToSimulateModify(any(), any(), any(), any(), eq(1));
 	}
 
 	@Test

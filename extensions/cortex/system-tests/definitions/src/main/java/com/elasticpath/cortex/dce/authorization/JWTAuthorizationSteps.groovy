@@ -15,7 +15,7 @@ import cucumber.api.DataTable
 import cucumber.api.java.en.Given
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 
 class JWTAuthorizationSteps {
 

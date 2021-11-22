@@ -3,6 +3,7 @@
  */
 package com.elasticpath.performancetools.queryanalyzer.utils;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,12 +37,22 @@ public final class StatementProcessor {
 
 		if (matcher.find()) {
 
-			final String sqlStatement = reformatSQLStatement(matcher.group(2));
+			final String sqlStatement = reformatSQLStatement(matcher.group(4));
 
 			long sqlStatementExeTimeMs = getSQLStatementExeTimeMillis(lastProcessedLine);
 
 			//JPA query always precedes SQL one and it's never null
-			jpaQuery.addStatement(sqlStatement, sqlStatementExeTimeMs);
+			String lowerCasedSqlStatement = sqlStatement.toLowerCase(Locale.getDefault());
+			String lowerCasedStatementBuffer = statementBuffer.toString().toLowerCase(Locale.getDefault());
+
+			if (lowerCasedSqlStatement.startsWith("insert")) {
+				boolean isBatching = lowerCasedStatementBuffer.contains(Markers.BATCHING_PREPSTMT_MARKER);
+				boolean isExecuteBatch = lowerCasedStatementBuffer.contains(Markers.EXECUTING_BATCH_PREPSTMT_MARKER);
+
+				jpaQuery.addInsertStatement(sqlStatement, sqlStatementExeTimeMs, isBatching, isExecuteBatch);
+			} else {
+				jpaQuery.addStatement(sqlStatement, sqlStatementExeTimeMs);
+			}
 		}
 	}
 

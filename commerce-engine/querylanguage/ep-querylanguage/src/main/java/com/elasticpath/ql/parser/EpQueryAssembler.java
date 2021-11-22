@@ -6,7 +6,8 @@ package com.elasticpath.ql.parser;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.ql.parser.fieldresolver.EpQLFieldResolver;
 import com.elasticpath.ql.parser.gen.ParseException;
@@ -24,7 +25,7 @@ import com.elasticpath.ql.parser.valueresolver.EpQLValueResolver;
  */
 @SuppressWarnings("PMD.CyclomaticComplexity")
 public class EpQueryAssembler {
-	private static final Logger LOG = Logger.getLogger(EpQueryAssembler.class);
+	private static final Logger LOG = LogManager.getLogger(EpQueryAssembler.class);
 
 	private Map<EPQueryType, AbstractEpQLCustomConfiguration> epQLObjectConfigurationMap;
 

@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.store.promotions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
 import com.elasticpath.cmclient.core.nls.BaseMessages;
@@ -24,7 +25,7 @@ public final class PromotionsMessages extends BaseMessages {
 	/**
 	 * LOG logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(PromotionsMessages.class);
+	private static final Logger LOG = LogManager.getLogger(PromotionsMessages.class);
 
 
 

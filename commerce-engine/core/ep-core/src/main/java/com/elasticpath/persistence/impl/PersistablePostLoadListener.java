@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.event.LifecycleEvent;
 import org.apache.openjpa.event.LoadListener;
 import org.springframework.beans.factory.BeanCreationException;
@@ -29,7 +30,7 @@ import com.elasticpath.persistence.api.support.PersistablePostLoadStrategy;
  * on OpenJPA entities with spring injected beans.
  */
 public class PersistablePostLoadListener implements LoadListener {
-	private static final Logger LOG = Logger.getLogger(PersistablePostLoadListener.class);
+	private static final Logger LOG = LogManager.getLogger(PersistablePostLoadListener.class);
 
 	private List<PersistablePostLoadStrategy<? extends Persistable>> postLoadStrategies;
 	private List<String> postLoadStrategyIds;

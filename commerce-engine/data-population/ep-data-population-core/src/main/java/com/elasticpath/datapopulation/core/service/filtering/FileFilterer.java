@@ -25,7 +25,8 @@ import java.util.TreeMap;
 import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -80,7 +81,7 @@ public class FileFilterer {
 	 * {@link com.elasticpath.datapopulation.core.service.filtering.helper.impl.PropertyPlaceholderStringValueResolver} internally.
 	 */
 	protected static final Map<String, Integer> SYSTEM_PROPERTIES_MODE_MAP = Collections.unmodifiableMap(createSystemPropertiesModeMap());
-	private static final Logger LOG = Logger.getLogger(FileFilterer.class);
+	private static final Logger LOG = LogManager.getLogger(FileFilterer.class);
 	private final String placeholderPrefix;
 	private final String placeholderSuffix;
 

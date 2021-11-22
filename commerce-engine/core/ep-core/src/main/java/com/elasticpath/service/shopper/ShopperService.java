@@ -14,8 +14,8 @@ public interface ShopperService {
 	/**
 	 * Finds a Shopper for this given customer.  If none found, then create one.
 	 *
-	 * @param customer Customer to use.
-	 * @param storeCode the storeCode
+	 * @param customer the customer
+	 * @param storeCode the store code
 	 * @return Shopper
 	 */
 	Shopper findOrCreateShopper(Customer customer, String storeCode);
@@ -23,65 +23,31 @@ public interface ShopperService {
 	/**
 	 * Finds a Shopper for this given customer and account.  If none found, then create one.
 	 *
-	 * @param customer Customer to use.
-	 * @param account Account to use.
-	 * @param storeCode the storeCode
+	 * @param customer the customer
+	 * @param account the account
+	 * @param storeCode the store code
 	 * @return Shopper
 	 */
 	Shopper findOrCreateShopper(Customer customer, Customer account, String storeCode);
 
 	/**
-	 * Finds a Shopper for this given customerGuid.
+	 * Finds a Shopper for this given customer.  If none found, then create one.
 	 *
-	 * @param customerGuid Customer to use.
-	 * @return Shopper
-	 */
-	Shopper findByCustomerGuid(String customerGuid);
-
-	/**
-	 * Finds a Shopper for this given customerGuid and account shared ID.
-	 *
-	 * @param customerGuid Customer to use.
-	 * @param accountSharedId Account shared ID.
-	 * @param storeCode The store code.
-	 * @return Shopper
-	 */
-	Shopper findByCustomerGuidAndAccountSharedIdAndStore(String customerGuid, String accountSharedId, String storeCode);
-
-	/**
-	 * Finds a Shopper for given customer guid and store code.
-	 *
-	 * @param customerGuid Customer GUID.
-	 * @param storeCode Store code.
-	 * @return Shopper
-	 */
-	Shopper findByCustomerGuidAndStoreCode(String customerGuid, String storeCode);
-	/**
-	 * Finds a Shopper for this given customerSharedId.
-	 *
-	 * @param customerSharedId Customer SharedId to use.
+	 * @param customerGuid the customer GUID
 	 * @param storeCode the storeCode
 	 * @return Shopper
 	 */
-	Shopper findByCustomerSharedIdAndStoreCode(String customerSharedId, String storeCode);
+	Shopper findOrCreateShopper(String customerGuid, String storeCode);
 
 	/**
-	 * Finds a Shopper for this given customerSharedId and accountSharedId.
+	 * Finds a Shopper for this given customer and account.  If none found, then create one.
 	 *
-	 * @param customerSharedId Customer ID to use.
-	 * @param accountSharedId the account shared ID to use.
-	 * @param storeCode The store code.
+	 * @param customerGuid the customer GUID
+	 * @param accountSharedId the account shared ID
+	 * @param storeCode the store code
 	 * @return Shopper
 	 */
-	Shopper findByCustomerSharedIdAndAccountSharedIdAndStore(String customerSharedId, String accountSharedId, String storeCode);
-
-	/**
-     * Create and save the {@Shopper}.
-     *
-	 * @param storeCode the storeCode.
-     * @return the {@link Shopper} created
-     */
-	Shopper createAndSaveShopper(String storeCode);
+	Shopper findOrCreateShopper(String customerGuid, String accountSharedId, String storeCode);
 
 	/**
 	 * Get the shopper by uidPk.

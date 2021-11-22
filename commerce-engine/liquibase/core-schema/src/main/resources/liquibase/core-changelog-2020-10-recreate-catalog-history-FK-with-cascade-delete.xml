@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2020-10-recreate-catalog-history-FK-with-cascade-delete.xml"
+				   objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+	<changeSet id="2020-10-recreate-catalog-history-FK-with-cascade-delete" author="elasticpath" failOnError="true">
+		<comment>[SUP-591] Batch Catalog Syndication -
+			When all offers (45K records) are deleted at once during BUILD_ALL_PROJECTIONS build Batch throws OOM
+		</comment>
+
+		<dropForeignKeyConstraint constraintName="TCATALOGHISTORY_FK" 	 baseTableName="TCATALOGHISTORY" />
+		<addForeignKeyConstraint constraintName="TCATALOGHISTORY_FK" 	 onDelete="CASCADE"
+								 baseTableName="TCATALOGHISTORY" 		 referencedTableName="TCATALOGPROJECTIONS"
+								 baseColumnNames="TYPE, STORE, CODE"   	 referencedColumnNames="TYPE, STORE, CODE"/>
+	</changeSet>
+
+</databaseChangeLog>

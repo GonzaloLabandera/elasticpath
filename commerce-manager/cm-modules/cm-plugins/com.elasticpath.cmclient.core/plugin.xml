@@ -126,6 +126,12 @@
                    id="com.elasticpath.cmclient.core.topMenus.ChangePassword"
                    label="%changePassword.menuLabel">
            </command>
+		   <separator name="com.elasticpath.cmclient.core.toolbar" visible="true"/>
+		   <command
+				   commandId="com.elasticpath.cmclient.core.commands.AboutApplication"
+				   id="com.elasticpath.cmclient.core.topMenus.AboutApplication"
+				   label="%aboutApplication.menuLabel">
+		   </command>
            <separator name="com.elasticpath.cmclient.core.toolbar" visible="true"/>
            <command
                    commandId="com.elasticpath.cmclient.core.commands.Docs"
@@ -162,6 +168,12 @@
             id="com.elasticpath.cmclient.core.commands.ChangePagination"
             name="%changePagination.commandName">
       </command>
+	   <command
+			   categoryId="com.elasticpath.cmclient.core.categories.preferences"
+			   description="%aboutApplication.commandDescription"
+			   id="com.elasticpath.cmclient.core.commands.AboutApplication"
+			   name="%aboutApplication.commandName">
+	   </command>
        <command
                categoryId="com.elasticpath.cmclient.core.categories.preferences"
                description="%changeTimezone.label"
@@ -194,6 +206,9 @@
       <image
             commandId="com.elasticpath.cmclient.core.commands.ChangePagination">
       </image>
+	   <image
+			   commandId="com.elasticpath.cmclient.core.commands.AboutApplication">
+	   </image>
        <image
                commandId="com.elasticpath.cmclient.core.commands.ChangeTimezone">
        </image>
@@ -287,6 +302,11 @@
             class="com.elasticpath.cmclient.core.handlers.ChangePaginationHandler"
             commandId="com.elasticpath.cmclient.core.commands.ChangePagination">
       </handler>
+
+	   <handler
+			   class="com.elasticpath.cmclient.core.handlers.AboutApplicationHandler"
+			   commandId="com.elasticpath.cmclient.core.commands.AboutApplication">
+	   </handler>
 
        <handler
                class="com.elasticpath.cmclient.core.handlers.ChangeTimezoneHandler"

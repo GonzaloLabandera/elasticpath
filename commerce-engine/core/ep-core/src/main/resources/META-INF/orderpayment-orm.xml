@@ -44,20 +44,25 @@
 		</query>
 	</named-query>
 
-	<named-query name="FIND_CART_ORDER_PAYMENT_INSTRUMENTS_BY_CART_ORDER_ALL">
+	<named-query name="FIND_CART_ORDER_PAYMENT_INSTRUMENTS_BY_CART_ORDER_GUID">
 		<query>
 			SELECT copi
 			FROM CartOrderPaymentInstrumentImpl copi
-			WHERE copi.cartOrderUid = ?1
+			WHERE copi.cartOrderUid IN (
+				SELECT co.uidPk
+				FROM CartOrderImpl co
+				WHERE co.guid = ?1
+			)
 		</query>
 	</named-query>
+
 	<named-query name="DELETE_ALL_CART_ORDER_PAYMENT_INSTRUMENTS_BY_SHOPPING_CART_GUID">
 		<query>
 			DELETE FROM CartOrderPaymentInstrumentImpl copi
 			WHERE copi.cartOrderUid IN (
-			SELECT co.uidPk
-			FROM CartOrderImpl co
-			WHERE co.shoppingCartGuidInternal = ?1
+				SELECT co.uidPk
+				FROM CartOrderImpl co
+				WHERE co.shoppingCartGuidInternal = ?1
 			)
 		</query>
 	</named-query>
@@ -193,11 +198,23 @@
 		</query>
 	</named-query>
 
-	<named-query name="FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER">
+	<named-query name="FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER_UID">
 		<query>
 			SELECT cdpi
 			FROM CustomerDefaultPaymentInstrumentImpl cdpi
 			WHERE cdpi.customerUid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="FIND_CUSTOMER_DEFAULT_PAYMENT_INSTRUMENT_BY_CUSTOMER_GUID">
+		<query>
+			SELECT cdpi
+			FROM CustomerDefaultPaymentInstrumentImpl cdpi
+			WHERE cdpi.customerUid IN (
+				SELECT c.uidPk
+				FROM CustomerImpl c
+				WHERE c.guid = ?1
+			)
 		</query>
 	</named-query>
 

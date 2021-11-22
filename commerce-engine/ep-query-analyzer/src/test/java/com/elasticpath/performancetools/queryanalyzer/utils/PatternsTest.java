@@ -16,6 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PatternsTest {
+	private static final int FOUR = 4;
 
 	@Test
 	public void shouldMatchJPAQueryPattern() {
@@ -41,7 +42,7 @@ public class PatternsTest {
 		assertThat(matcher.find())
 				.isTrue();
 
-		assertThat(matcher.group(2).trim())
+		assertThat(matcher.group(FOUR).trim())
 				.isEqualTo("SELECT t0.GUID");
 	}
 

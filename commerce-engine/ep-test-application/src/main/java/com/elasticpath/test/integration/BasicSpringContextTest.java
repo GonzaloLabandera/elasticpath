@@ -9,7 +9,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.test.spring.CamelSpringRunner;
 import org.apache.camel.test.spring.CamelTestContextBootstrapper;
 import org.apache.camel.test.spring.UseAdviceWith;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Rule;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
@@ -24,7 +25,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.test.integration.junit.DatabaseHandlingTestExecutionListener;
-import com.elasticpath.test.integration.junit.LoggingMDCInitializerTestExecutionListener;
+import com.elasticpath.test.integration.junit.LoggingThreadContextInitializerTestExecutionListener;
 import com.elasticpath.test.persister.TestApplicationContext;
 import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 
@@ -37,7 +38,7 @@ import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 @ContextConfiguration("/integration-context.xml")
 @SuppressWarnings("PMD.AbstractNaming")
 @TestExecutionListeners({
-		LoggingMDCInitializerTestExecutionListener.class,
+		LoggingThreadContextInitializerTestExecutionListener.class,
 		JmsRegistrationTestExecutionListener.class,
 		DatabaseHandlingTestExecutionListener.class,
 		DependencyInjectionTestExecutionListener.class,
@@ -47,7 +48,7 @@ import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 @DirtiesContext
 public abstract class BasicSpringContextTest {
 
-	private static final Logger LOGGER = Logger.getLogger(BasicSpringContextTest.class);
+	private static final Logger LOGGER = LogManager.getLogger(BasicSpringContextTest.class);
 
 	@Rule
 	public CamelContextTestRule resource = new CamelContextTestRule();

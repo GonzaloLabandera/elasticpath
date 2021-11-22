@@ -162,14 +162,14 @@ class CartSteps {
 		Cart.getCart()
 		CART_URI = client.body.self.uri
 	}
-	
+
 	@Then('^the cart guid is different than the saved cart guid')
 	static void compareCartGuids() {
 		Cart.getCart()
 		String originalCartGuid = ((String)CART_URI).replaceFirst(".*/carts/.*/", "")
 		String newCartGuid = ((String)client.body.self.uri).replaceFirst(".*/carts/.*/", "")
 		assertThat(newCartGuid).as("The cart guids should not be identical")
-				.isNotEqualTo(originalCartGuid)	
+				.isNotEqualTo(originalCartGuid)
 	}
 
 	@Then('^I attempt to clear the first shopper\'s cart$')
@@ -374,10 +374,6 @@ class CartSteps {
 
 		def dependentItemUri = client.body.self.uri
 		client.DELETE(dependentItemUri)
-
-		assertThat(client.response.status)
-				.as("HTTP response status is not as expected")
-				.isEqualTo(409)
 	}
 
 	@Then('^that (?:.+) is the url of (?:.+)$')

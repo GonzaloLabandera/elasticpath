@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.AddressDTO;
@@ -17,6 +18,7 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.service.customer.AddressService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.test.persister.TestApplicationContext;
 import com.elasticpath.test.util.Utils;
@@ -42,6 +44,9 @@ public class CustomerStepDefinitionsHelper {
 
 	@Autowired
 	private CustomerAddressBuilder customerAddressBuilder;
+
+	@Autowired
+	private AddressService addressService;
 
 	/**
 	 * Gets a default persisted customer for a store.
@@ -81,6 +86,7 @@ public class CustomerStepDefinitionsHelper {
 	public void addAddresses(final List<AddressDTO> addressDtos) {
 
 		Customer customer = customerHolder.get();
+		boolean shouldUpdate = false;
 
 		for (AddressDTO addressDto : addressDtos) {
 			CustomerAddress customerAddress = customerAddressBuilder
@@ -97,18 +103,23 @@ public class CustomerStepDefinitionsHelper {
 					.withFaxNumber(addressDto.getFaxNumber())
 					.withPhoneNumber(addressDto.getPhoneNumber())
 					.build();
-			customer.addAddress(customerAddress);
+			customerAddress.setCustomerUidPk(customer.getUidPk());
+			addressService.save(customerAddress);
 
 			if (customer.getPreferredBillingAddress() == null) {
 				customer.setPreferredBillingAddress(customerAddress);
+				shouldUpdate = true;
 			}
 
 			if (customer.getPreferredShippingAddress() == null) {
 				customer.setPreferredShippingAddress(customerAddress);
+				shouldUpdate = true;
 			}
 		}
 
-		customerHolder.set(customerService.update(customer));
+		if (shouldUpdate) {
+			customerHolder.set(customerService.update(customer));
+		}
 	}
 
 	/**
@@ -119,14 +130,14 @@ public class CustomerStepDefinitionsHelper {
 	 * @return a matched address if found, otherwise, return null
 	 */
 	public CustomerAddress getAddress(final String subCountry, final String country) {
-
-		for (CustomerAddress customerAddress : customerHolder.get().getAddresses()) {
-			if (customerAddress.getCountry().equals(country) && customerAddress.getSubCountry().equals(subCountry)) {
-				return customerAddress;
-			}
+		List<CustomerAddress> customerAddressesByCountryAndSubCountry = addressService
+				.findByCustomerCountryAndSubCountry(customerHolder.get().getUidPk(), country, subCountry);
+		if (CollectionUtils.isEmpty(customerAddressesByCountryAndSubCountry)) {
+			return null;
 		}
 
-		return null;
+		//take any first address matching country and sub-country
+		return customerAddressesByCountryAndSubCountry.get(0);
 	}
 
 	/**

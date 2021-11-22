@@ -7,7 +7,8 @@ import java.lang.reflect.Method;
 import java.util.Map.Entry;
 import javax.persistence.MapKey;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.tools.sync.exception.SyncToolRuntimeException;
 import com.elasticpath.tools.sync.utils.SyncUtils;
@@ -16,7 +17,7 @@ import com.elasticpath.tools.sync.utils.SyncUtils;
  * Provides reflection based methods for data population.
  */
 public class SyncUtilsImpl implements SyncUtils {
-	private static final Logger LOG = Logger.getLogger(SyncUtilsImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SyncUtilsImpl.class);
 	
 	private static final String IS_PREFIX = "is";
 

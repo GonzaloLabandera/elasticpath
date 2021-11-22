@@ -13,11 +13,13 @@ import java.util.Map;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
+import com.elasticpath.cache.Cache;
 import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.domain.LogicalOperator;
 import com.elasticpath.tags.domain.TagDefinition;
@@ -33,13 +35,15 @@ import com.elasticpath.validation.domain.ValidationResult;
  * Builds Groovy implementation of {@link ConditionDSLBuilder}.
  */
 public class GroovyConditionDSLBuilderImpl implements ConditionDSLBuilder {
-	private static final Logger LOG = Logger.getLogger(GroovyConditionDSLBuilderImpl.class);
+	private static final Logger LOG = LogManager.getLogger(GroovyConditionDSLBuilderImpl.class);
 
 	private static final String TAG_DEFINITIONS_MAP_VARIABLE_NAME = "tagDefinitionsMap";
 
 	private TagDefinitionReader tagDefinitionReader;
 
 	private ConditionValidationFacade validationFacade;
+
+	private Cache<String, LogicalOperator> decomposedConditionCache;
 
 	/**
 	 * initializes groovy shell by providing map of tag definitions as a
@@ -61,7 +65,7 @@ public class GroovyConditionDSLBuilderImpl implements ConditionDSLBuilder {
 	}
 
 	/**
-	 * Builds logical operator tree. A {@link LogicalOperator} can contain other logical operators or conditions.
+	 * Retrieves a logical operator tree from the cache or build one if it does not exist.
 	 *
 	 * @param dslString a DSL representation of logical operator
 	 * @return a logical operator which represents the given dslString, returns null
@@ -69,6 +73,27 @@ public class GroovyConditionDSLBuilderImpl implements ConditionDSLBuilder {
 	 */
 	@Override
 	public LogicalOperator getLogicalOperationTree(final String dslString) {
+		if (StringUtils.isEmpty(dslString)) {
+			return null;
+		}
+
+		// Add this workaround for now while investigating issue regarding cache being null.
+		if (decomposedConditionCache == null) {
+			return createLogicalOperatorFromDSL(dslString);
+		}
+
+		String checksum = DigestUtils.md5Hex(dslString).toUpperCase();
+		return decomposedConditionCache.get(checksum, key -> createLogicalOperatorFromDSL(dslString));
+	}
+
+	/**
+	 * Builds logical operator tree. A {@link LogicalOperator} can contain other logical operators or conditions.
+	 *
+	 * @param dslString a DSL representation of logical operator
+	 * @return a logical operator which represents the given dslString, returns null
+	 * if there is a service exception or dsl string is not valid
+	 */
+	protected LogicalOperator createLogicalOperatorFromDSL(final String dslString) {
 		if (StringUtils.isEmpty(dslString)) {
 			return null;
 		}
@@ -236,5 +261,13 @@ public class GroovyConditionDSLBuilderImpl implements ConditionDSLBuilder {
 	 */
 	public void setValidationFacade(final ConditionValidationFacade validationFacade) {
 		this.validationFacade = validationFacade;
+	}
+
+	protected Cache<String, LogicalOperator> getDecomposedConditionCache() {
+		return decomposedConditionCache;
+	}
+
+	public void setDecomposedConditionCache(final Cache<String, LogicalOperator> decomposedConditionCache) {
+		this.decomposedConditionCache = decomposedConditionCache;
 	}
 }

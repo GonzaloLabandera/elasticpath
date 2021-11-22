@@ -2,16 +2,6 @@
 <entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
 
     <!-- Named queries for ShopperMementoImpl -->
-	<named-query name="FIND_SHOPPER_BY_CUSTOMER_SHAREDID_AND_STORECODE">
-		<query>
-			SELECT s
-			FROM ShopperMementoImpl s
-			WHERE s.customer.sharedId = ?1
-			AND UPPER(s.storeCode) = UPPER(?2)
-			AND s.account IS NULL
-			ORDER BY s.uidPk
-		</query>
-	</named-query>
 	<named-query name="FIND_SHOPPER_BY_CUSTOMER_GUID_AND_STORECODE">
 		<query>
 			SELECT s
@@ -31,21 +21,20 @@
 			AND s.account.sharedId = ?2
 		</query>
 	</named-query>
-	<named-query name="FIND_SHOPPER_BY_CUSTOMER_ID_ACCOUNT_ID_AND_STORECODE">
-		<query>
-			SELECT s
-			FROM ShopperMementoImpl s
-			WHERE s.customer.sharedId = ?1
-			AND UPPER(s.storeCode) = UPPER(?3)
-			AND s.account.sharedId = ?2
-		</query>
-	</named-query>
 	<named-query name="FIND_SHOPPER_BY_CUSTOMER_GUID">
 		<query>
 			SELECT s
 			FROM ShopperMementoImpl s
 			WHERE s.customer.guid = ?1
 			AND s.account IS NULL
+			ORDER BY s.uidPk
+		</query>
+	</named-query>
+	<named-query name="FIND_SHOPPER_BY_ACCOUNT_GUID">
+		<query>
+			SELECT s
+			FROM ShopperMementoImpl s
+			WHERE s.account.guid = ?1
 			ORDER BY s.uidPk
 		</query>
 	</named-query>

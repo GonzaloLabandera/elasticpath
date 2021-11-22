@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -31,7 +32,7 @@ import com.elasticpath.service.catalog.ProductInventoryManagementService;
  */
 public class InventorySkuAdapter extends AbstractDomainAdapterImpl<ProductSku, InventorySkuDTO> {
 	
-	private static final Logger LOG = Logger.getLogger(InventorySkuAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(InventorySkuAdapter.class);
 	
 	private final ProductInventoryManagementService productInventoryManagementService;
 

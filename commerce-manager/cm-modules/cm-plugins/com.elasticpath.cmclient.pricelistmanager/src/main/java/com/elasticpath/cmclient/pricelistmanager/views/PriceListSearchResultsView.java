@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.pricelistmanager.views;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
@@ -70,7 +71,7 @@ public class PriceListSearchResultsView extends AbstractCreateEditDeleteToolbar<
 			PriceListManagerMessages.get().PriceListCsvExport_Action,
 			PriceListManagerImageRegistry.IMAGE_CSV_EXPORT, Display.getDefault());
 	
-	private static final Logger LOG = Logger.getLogger(PriceListSearchResultsView.class);
+	private static final Logger LOG = LogManager.getLogger(PriceListSearchResultsView.class);
 	/** The View ID. */
 	public static final String VIEW_ID = "com.elasticpath.cmclient.pricelistmanager.views.PriceListSearchResultsView";
 

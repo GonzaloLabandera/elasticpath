@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.edi
 
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -34,7 +35,7 @@ import com.elasticpath.tags.domain.LogicalOperator;
 @SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class AbstractConditionBuilderSection extends AbstractPolicyAwareEditorPageSectionPart {
 	
-	private static final Logger LOG = Logger.getLogger(AbstractConditionBuilderSection.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractConditionBuilderSection.class);
 	
 	private final ConditionHandler conditionHandler = new ConditionHandler();
 

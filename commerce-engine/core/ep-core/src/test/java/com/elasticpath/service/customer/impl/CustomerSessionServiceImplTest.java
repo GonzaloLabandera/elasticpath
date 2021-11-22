@@ -107,50 +107,47 @@ public class CustomerSessionServiceImplTest {
 	}
 
 	@Test
-	public void shouldDeleteAnonymousShopperWhenAnonymousAndRegisteredShoppersAreDifferent() {
-		CustomerSession anonymousCustomerSession = new CustomerSessionImpl();
-		Shopper anonymousShopper = createShopper("anonymousShopperGuid");
-		anonymousCustomerSession.setShopper(anonymousShopper);
+	public void shouldDeleteSingleSessionShopperWhenShoppersAreDifferent() {
+		CustomerSession singleSessionCustomerSession = new CustomerSessionImpl();
+		Shopper singleSessionShopper = createShopper("singleSessionShopperGuid", singleSessionCustomerSession);
 
 		Customer registeredCustomer = new CustomerImpl();
-		Shopper registeredShopper = createShopper("registerShopperGuid");
+		Shopper registeredShopper = createShopper("registerShopperGuid", null);
 
 		when(shopperService.findOrCreateShopper(registeredCustomer, STORE_CODE)).thenReturn(registeredShopper);
+		customerSessionService.changeFromSingleSessionToRegisteredCustomer(singleSessionShopper, registeredCustomer, STORE_CODE);
 
-		customerSessionService.changeFromAnonymousToRegisteredCustomer(anonymousCustomerSession, registeredCustomer, STORE_CODE);
-
-		verify(shopperService).remove(anonymousShopper);
+		verify(shopperService).remove(singleSessionShopper);
 		verify(shopperService).save(registeredShopper);
-		verify(cartMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
-		verify(wishlistMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
-		verify(customerConsentMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
+		verify(cartMerger).invalidateShopper(singleSessionShopper, registeredShopper);
+		verify(wishlistMerger).invalidateShopper(singleSessionShopper, registeredShopper);
+		verify(customerConsentMerger).invalidateShopper(singleSessionShopper, registeredShopper);
 	}
 
 	@Test
-	public void shouldNotDeleteAnonymousShopperWhenAnonymousAndRegisteredShoppersAreSame() {
-		CustomerSession anonymousCustomerSession = new CustomerSessionImpl();
-		Shopper anonymousShopper = createShopper("anonymousShopperGuid");
-		anonymousCustomerSession.setShopper(anonymousShopper);
+	public void shouldNotDeleteSingleSessionShopperWhenShoppersAreSame() {
+		CustomerSession singleSessionCustomerSession = new CustomerSessionImpl();
+		Shopper singleSessionShopper = createShopper("singleSessionShopperGuid", singleSessionCustomerSession);
 
 		Customer registeredCustomer = new CustomerImpl();
-		Shopper registeredShopper = anonymousShopper;
 
-		when(shopperService.findOrCreateShopper(registeredCustomer, STORE_CODE)).thenReturn(registeredShopper);
+		when(shopperService.findOrCreateShopper(registeredCustomer, STORE_CODE)).thenReturn(singleSessionShopper);
 
-		customerSessionService.changeFromAnonymousToRegisteredCustomer(anonymousCustomerSession, registeredCustomer, STORE_CODE);
+		customerSessionService.changeFromSingleSessionToRegisteredCustomer(singleSessionShopper, registeredCustomer, STORE_CODE);
 
-		verify(shopperService, never()).remove(anonymousShopper);
-		verify(shopperService).save(registeredShopper);
-		verify(cartMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
-		verify(wishlistMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
-		verify(customerConsentMerger).invalidateShopper(anonymousCustomerSession, anonymousShopper);
+		verify(shopperService, never()).remove(singleSessionShopper);
+		verify(shopperService).save(singleSessionShopper);
+		verify(cartMerger).invalidateShopper(singleSessionShopper, singleSessionShopper);
+		verify(wishlistMerger).invalidateShopper(singleSessionShopper, singleSessionShopper);
+		verify(customerConsentMerger).invalidateShopper(singleSessionShopper, singleSessionShopper);
 	}
 
-	private Shopper createShopper(final String shopperGuid) {
+	private Shopper createShopper(final String shopperGuid, final CustomerSession customerSession) {
 		Shopper shopper = new ShopperImpl();
 		ShopperMemento shopperMemento = new ShopperMementoImpl();
 		shopper.setShopperMemento(shopperMemento);
 		shopper.setGuid(shopperGuid);
+		shopper.setCustomerSession(customerSession);
 
 		return shopper;
 	}

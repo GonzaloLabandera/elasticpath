@@ -10,10 +10,11 @@ import java.util.Comparator;
 import java.util.Currency;
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.validator.EmailValidator;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -86,7 +87,7 @@ public final class EpValidatorFactory {
 	/**
 	 * The logger.
 	 */
-	private static final Logger LOG = Logger.getLogger(EpValidatorFactory.class);
+	private static final Logger LOG = LogManager.getLogger(EpValidatorFactory.class);
 
 	// limit to (-)200,000,000 as there are problems with validating the spinner values when Integer.MAX_VALUE is used
 	private static final int MAX_INTEGER_VALUE = 200000000;

@@ -8,8 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
@@ -43,7 +44,7 @@ import com.elasticpath.service.misc.TimeService;
 @SuppressWarnings("PMD.GodClass")
 public class ChangeSetManagementServiceImpl implements ChangeSetManagementService {
 
-	private static final Logger LOG = Logger.getLogger(ChangeSetManagementServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetManagementServiceImpl.class);
 
 	private ChangeSetDao changeSetDao;
 	private TimeService timeService;

@@ -6,7 +6,8 @@ package com.elasticpath.service.dataimport.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.ImportConstants;
@@ -33,7 +34,7 @@ import com.elasticpath.service.order.OrderAllocationProcessor;
  */
 public class ImportJobRunnerInventoryImpl extends AbstractImportJobRunnerImpl {
 
-	private static final Logger LOG = Logger.getLogger(ImportJobRunnerInventoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ImportJobRunnerInventoryImpl.class);
 
 	private final ProductInventoryManagementService pims;
 

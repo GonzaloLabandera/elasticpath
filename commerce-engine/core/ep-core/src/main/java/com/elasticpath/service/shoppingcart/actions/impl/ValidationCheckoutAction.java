@@ -11,31 +11,29 @@ import com.elasticpath.service.shoppingcart.actions.CheckoutAction;
 import com.elasticpath.service.shoppingcart.actions.PreCaptureCheckoutActionContext;
 import com.elasticpath.service.shoppingcart.actions.exception.CheckoutValidationException;
 import com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
 
 /**
  * Checkout action for validating the shopping cart state.
  */
 public class ValidationCheckoutAction implements CheckoutAction {
 
-	private PurchaseCartValidationService validationService;
+	private PurchaseCartValidationService purchaseCartValidationService;
 
 	@Override
 	public void execute(final PreCaptureCheckoutActionContext context) throws EpSystemException {
-		ShoppingCartValidationContext validationContext = validationService.buildContext(context.getShoppingCart());
-
-		Collection<StructuredErrorMessage> errorMessages = validationService.validate(validationContext);
+		final Collection<StructuredErrorMessage> errorMessages = purchaseCartValidationService.validate(context.getShoppingCart(),
+				context.getShopper(), context.getShoppingCart().getStore());
 
 		if (!errorMessages.isEmpty()) {
 			throw new CheckoutValidationException(errorMessages);
 		}
 	}
 
-	protected PurchaseCartValidationService getValidationService() {
-		return validationService;
+	protected PurchaseCartValidationService getPurchaseCartValidationService() {
+		return purchaseCartValidationService;
 	}
 
-	public void setValidationService(final PurchaseCartValidationService validationService) {
-		this.validationService = validationService;
+	public void setPurchaseCartValidationService(final PurchaseCartValidationService purchaseCartValidationService) {
+		this.purchaseCartValidationService = purchaseCartValidationService;
 	}
 }

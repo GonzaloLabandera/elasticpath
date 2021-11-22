@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -41,7 +42,7 @@ public class ShippableItemPopulatorVisitorImplTest {
 
 	private static final Map<String, String> FIELD_MAP = ImmutableMap.of("key1", "value1", "key2", "value2");
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private ShoppingItem shoppingItem;
 
 	@Mock
@@ -61,7 +62,7 @@ public class ShippableItemPopulatorVisitorImplTest {
 		when(shoppingItem.getGuid()).thenReturn(SHOPPING_ITEM_GUID);
 		when(shoppingItem.getSkuGuid()).thenReturn(SKU_GUID);
 		when(shoppingItem.getQuantity()).thenReturn(QUANTITY);
-		when(shoppingItem.getFields()).thenReturn(FIELD_MAP);
+		when(shoppingItem.getModifierFields().getMap()).thenReturn(FIELD_MAP);
 
 		when(productSku.getWeight()).thenReturn(WEIGHT);
 		when(productSku.getHeight()).thenReturn(HEIGHT);

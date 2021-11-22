@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		">
+
+	<util:list id="sensitiveJvmArgKeyWordList">
+		<value>password</value>
+	</util:list>
+
+	<bean id="insightsService" class="com.elasticpath.insights.service.impl.InsightsServiceImpl">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+		<property name="nativeDatabaseQueryServiceManager" ref="nativeDatabaseQueryServiceManager"/>
+		<property name="timeService" ref="timeService"/>
+		<property name="connectionFactory" ref="jmsConnectionFactory"/>
+		<property name="oshi">
+			<bean class="oshi.SystemInfo"/>
+		</property>
+		<property name="sensitiveJvmArgKeyWords" ref="sensitiveJvmArgKeyWordList"/>
+	</bean>
+
+	<bean id="mysqlNativeDatabaseQueryService" class="com.elasticpath.insights.service.impl.MySQLNativeDatabaseQueryServiceImpl">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+	</bean>
+
+	<bean id="postgresqlNativeDatabaseQueryService" class="com.elasticpath.insights.service.impl.PostgreSQLNativeDatabaseQueryServiceImpl">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+	</bean>
+
+	<bean id="oracleNativeDatabaseQueryService" class="com.elasticpath.insights.service.impl.OracleNativeDatabaseQueryServiceImpl">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+	</bean>
+
+	<bean id="nativeDatabaseQueryServiceManager" class="com.elasticpath.insights.service.NativeDatabaseQueryServiceManager"
+		  init-method="init">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+		<property name="dataServiceMap">
+			<map>
+				<entry key="#{T(com.elasticpath.persistence.openjpa.support.JPAUtil).MYSQL_DB_TYPE}" value-ref="mysqlNativeDatabaseQueryService"/>
+				<entry key="#{T(com.elasticpath.persistence.openjpa.support.JPAUtil).POSTGRESQL_DB_TYPE}" value-ref="postgresqlNativeDatabaseQueryService"/>
+				<entry key="#{T(com.elasticpath.persistence.openjpa.support.JPAUtil).ORACLE_DB_TYPE}" value-ref="oracleNativeDatabaseQueryService"/>
+			</map>
+		</property>
+	</bean>
+
+</beans>

@@ -13,7 +13,7 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.common.pricing.service.BaseAmountFilter;
 import com.elasticpath.domain.pricing.BaseAmount;

@@ -8,7 +8,8 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.test.common.exception.DataSourceInitializerException;
 
@@ -16,7 +17,7 @@ import com.elasticpath.test.common.exception.DataSourceInitializerException;
  * MSSQL implementation of AbstractDataSourceInitializer.
  */
 public class SqlServerDataSourceInitializerImpl extends AbstractDataSourceInitializer {
-	private static final Logger LOG = Logger.getLogger(SqlServerDataSourceInitializerImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SqlServerDataSourceInitializerImpl.class);
 
 	/**
 	 * Constructor.

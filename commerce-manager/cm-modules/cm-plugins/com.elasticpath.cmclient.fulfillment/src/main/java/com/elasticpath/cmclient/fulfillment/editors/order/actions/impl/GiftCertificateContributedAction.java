@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.fulfillment.editors.order.actions.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -37,7 +38,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
  */
 public class GiftCertificateContributedAction extends AbstractContributedAction {
 
-	private static final Logger LOG = Logger.getLogger(GiftCertificateContributedAction.class);
+	private static final Logger LOG = LogManager.getLogger(GiftCertificateContributedAction.class);
 
 	private final ManagedModelFactory<String, String> managedModelFactory = new ManagedModelFactoryImpl();
 

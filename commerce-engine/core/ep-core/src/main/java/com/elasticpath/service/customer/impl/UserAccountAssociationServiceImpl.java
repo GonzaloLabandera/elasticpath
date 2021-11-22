@@ -58,6 +58,7 @@ public class UserAccountAssociationServiceImpl extends AbstractEpPersistenceServ
 	@Override
 	public void remove(final UserAccountAssociation userAccountAssociation) {
 		getPersistenceEngine().delete(userAccountAssociation);
+		getPersistenceEngine().flush();
 	}
 
 	@Override

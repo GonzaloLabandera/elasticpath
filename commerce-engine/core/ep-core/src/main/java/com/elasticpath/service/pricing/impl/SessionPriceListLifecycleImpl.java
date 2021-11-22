@@ -6,10 +6,8 @@ package com.elasticpath.service.pricing.impl;
 import java.util.Currency;
 
 import com.elasticpath.common.pricing.service.PriceListLookupService;
-import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.pricing.PriceListStack;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.pricing.SessionPriceListLifecycle;
 import com.elasticpath.tags.TagSet;
@@ -24,18 +22,12 @@ public class SessionPriceListLifecycleImpl implements SessionPriceListLifecycle 
 
 	@Override
 	public void refreshPriceListStack(final CustomerSession customerSession, final Store store) {
-		final Catalog catalog = store.getCatalog();
-		String catalogCode = catalog.getCode();
-		refreshPriceListStack(customerSession.getShopper(), catalogCode);
-	}
-
-	@Override
-	public void refreshPriceListStack(final Shopper shopper, final String catalogCode) {
-		if (!shopper.isPriceListStackValid()) {
-			Currency currency = shopper.getCurrency();
-			TagSet customerTagSet = shopper.getTagSet();
+		String catalogCode = store.getCatalog().getCode();
+		if (!customerSession.isPriceListStackValid()) {
+			Currency currency = customerSession.getCurrency();
+			TagSet customerTagSet = customerSession.getCustomerTagSet();
 			PriceListStack priceListStack = priceListLookupService.getPriceListStack(catalogCode, currency, customerTagSet);
-			shopper.setPriceListStack(priceListStack);
+			customerSession.setPriceListStack(priceListStack);
 		}
 	}
 

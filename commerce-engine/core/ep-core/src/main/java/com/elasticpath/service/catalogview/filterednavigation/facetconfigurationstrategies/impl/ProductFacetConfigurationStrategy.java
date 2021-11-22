@@ -22,8 +22,9 @@ import java.util.SortedSet;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.search.RangeFacet;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -51,7 +52,7 @@ import com.elasticpath.service.store.StoreService;
  * Product facet configuration strategy.
  */
 public class ProductFacetConfigurationStrategy implements FacetConfigurationStrategy {
-	private static final Logger LOG = Logger.getLogger(ProductFacetConfigurationStrategy.class);
+	private static final Logger LOG = LogManager.getLogger(ProductFacetConfigurationStrategy.class);
 	private static final String LOWER_BOUND_GREATER_THAN_UPPER_BOUND_ERROR =
 			"Range facet lower bound %f is higher than upper bound %f for Facet with uidpk %d%n";
 

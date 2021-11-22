@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.cmclient.core.CmSingletonUtil;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -19,7 +20,7 @@ import org.eclipse.core.runtime.Platform;
  * Manages the cached report types.
  */
 public class ReportTypeManager {
-	private static final Logger LOG = Logger.getLogger(ReportTypeManager.class);
+	private static final Logger LOG = LogManager.getLogger(ReportTypeManager.class);
 
 	private  List<ReportType> cachedTypes;
 

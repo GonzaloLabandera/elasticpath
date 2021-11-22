@@ -14,7 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.persistence.api.EpPersistenceException;
@@ -30,7 +31,7 @@ import com.elasticpath.settings.domain.SettingValue;
  */
 public class SettingsServiceImpl implements SettingsService {
 
-	private static final Logger LOG = Logger.getLogger(SettingsServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SettingsServiceImpl.class);
 
 	private static final String NO_CONTEXT = null;
 

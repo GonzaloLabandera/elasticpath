@@ -165,6 +165,12 @@
     <importer type="TAGGROUP">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>
     </importer>
+	<importer type="MODIFIERGROUP">
+		<importstrategy>INSERT_OR_UPDATE</importstrategy>
+	</importer>
+	<importer type="MODIFIERGROUPFILTER">
+		<importstrategy>INSERT_OR_UPDATE</importstrategy>
+	</importer>
   </importstrategy>
   <packager type="NONE"/>
   <retrieval>

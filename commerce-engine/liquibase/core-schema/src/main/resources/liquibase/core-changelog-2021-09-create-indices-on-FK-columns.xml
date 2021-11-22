@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2021
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+		   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-09-create-indices-on-FK-columns.xml">
+
+	<changeSet id="2021-09-create-FK-indices" author="elasticpath">
+		<createIndex tableName="TAPPLIEDRULECOUPONCODE" indexName="I_TARCC_APPLIED_RULE_UID">
+			<column name="APPLIED_RULE_UID"/>
+		</createIndex>
+		<createIndex tableName="TCHANGEOPERATION" indexName="I_TCO_CHANGE_TRANSACTION_UID">
+			<column name="CHANGE_TRANSACTION_UID"/>
+		</createIndex>
+		<createIndex tableName="TCHANGETRANSACTIONMETADATA" indexName="I_TCTXMD_CHNG_TRANSACTION_UID">
+			<column name="CHANGE_TRANSACTION_UID"/>
+		</createIndex>
+		<createIndex tableName="TCOUPON" indexName="I_TCOUPON_COUPON_CONFIG_UID">
+			<column name="COUPON_CONFIG_UID"/>
+		</createIndex>
+		<createIndex tableName="TCSDYNAMICCONTENTDELIVERY" indexName="I_TCSDCD_CSDC_CONTENT_UID">
+			<column name="CSDC_CONTENT_UID"/>
+		</createIndex>
+		<createIndex tableName="TCSDYNAMICCONTENTDELIVERY" indexName="I_TCSDCD_SELLING_CONTEXT_GUID">
+			<column name="SELLING_CONTEXT_GUID"/>
+		</createIndex>
+		<createIndex tableName="TCSPARAMETERVALUE" indexName="I_TCSPV_CSDYNAMICCONTENT_UID">
+			<column name="CSDYNAMICCONTENT_UID"/>
+		</createIndex>
+		<createIndex tableName="TCSPARAMETERVALUELDF" indexName="I_TCSPVLDF_CSPARAMVALUE_UID">
+			<column name="CSPARAMETERVALUE_UID"/>
+		</createIndex>
+		<createIndex tableName="TCUSTOMERCONSENTHISTORY" indexName="I_TCCH_DATAPOLICY_UID">
+			<column name="DATAPOLICY_UID"/>
+		</createIndex>
+		<createIndex tableName="TCUSTOMERCONSENTHISTORY" indexName="I_TCCH_CUSTOMER_GUID">
+			<column name="CUSTOMER_GUID"/>
+		</createIndex>
+		<createIndex tableName="TDATACHANGED" indexName="I_TDC_CHANGE_OPERATION_UID">
+			<column name="CHANGE_OPERATION_UID"/>
+		</createIndex>
+		<createIndex tableName="TOAUTHACCESSTOKEN" indexName="I_TOAUTHAT_CUSTOMER_GUID">
+			<column name="CUSTOMER_GUID"/>
+		</createIndex>
+		<createIndex tableName="TPASSWORDHISTORY" indexName="I_TPWDHISTORY_CM_USER_UID">
+			<column name="CM_USER_UID"/>
+		</createIndex>
+		<createIndex tableName="TPRICELISTASSIGNMENT" indexName="I_TPLSTASSIGN_SELLING_CTX_UID">
+			<column name="SELLING_CTX_UID"/>
+		</createIndex>
+		<createIndex tableName="TRULE" indexName="I_TRULE_SELLING_CTX_UID">
+			<column name="SELLING_CTX_UID"/>
+		</createIndex>
+		<createIndex tableName="TSEARCHTERMSACTIVITY" indexName="I_TSRCHTA_SEARCH_TERM_UID">
+			<column name="SEARCH_TERM_UID"/>
+		</createIndex>
+		<createIndex tableName="TSELLINGCONTEXTCONDITION" indexName="I_TSELLCTXCOND_SELL_CTX_UID">
+			<column name="SELLING_CONTEXT_UID"/>
+		</createIndex>
+		<createIndex tableName="TSETTINGVALUE" indexName="I_TSETTINGVAL_SETTING_DEF_UID">
+			<column name="SETTING_DEFINITION_UID"/>
+		</createIndex>
+		<createIndex tableName="TSORTLOCALIZEDNAME" indexName="I_TSORTLOCNAME_SORT_ATTR_UID">
+			<column name="SORT_ATTRIBUTE_UID"/>
+		</createIndex>
+		<createIndex tableName="TTAGDEFINITION" indexName="I_TTAGDEF_TAGGROUP_UID">
+			<column name="TAGGROUP_UID"/>
+		</createIndex>
+		<createIndex tableName="TTAGDEFINITION" indexName="I_TTAGDEF_TAGVALUETYPE_GUID">
+			<column name="TAGVALUETYPE_GUID"/>
+		</createIndex>
+		<createIndex tableName="TWISHLIST" indexName="I_TWISHLIST_STORECODE">
+			<column name="STORECODE"/>
+		</createIndex>
+		<createIndex tableName="TCARTORDERPAYMENTINSTRUMENT" indexName="I_TCOPAYINS_CART_ORDER_UID">
+			<column name="CART_ORDER_UID"/>
+		</createIndex>
+		<createIndex tableName="TCUSTOMERPAYMENTINSTRUMENT" indexName="I_TCUSTPAYMINS_CUSTOMER_UID">
+			<column name="CUSTOMER_UID"/>
+		</createIndex>
+		<createIndex tableName="TMODIFIERFIELD" indexName="I_TCUSTPI_MODIFIER_GROUP_UID">
+			<column name="MODIFIER_GROUP_UID"/>
+		</createIndex>
+		<createIndex tableName="TMODIFIERFIELDLDF" indexName="I_TMFLDLDF_MODIFIER_FIELD_UID">
+			<column name="MODIFIER_FIELD_UID"/>
+		</createIndex>
+		<createIndex tableName="TMODIFIERFIELDOPTION" indexName="I_TMFLDOPT_MODIFIER_FIELD_UID">
+			<column name="MODIFIER_FIELD_UID"/>
+		</createIndex>
+		<createIndex tableName="TMODIFIERFIELDOPTNLDF" indexName="I_TMFOLDF_MOD_FIELD_OPTN_UID">
+			<column name="MOD_FIELD_OPTION_UID"/>
+		</createIndex>
+		<createIndex tableName="TMODIFIERGROUPLDF" indexName="I_TMGRPLDF_MODIFIER_GROUP_UID">
+			<column name="MODIFIER_GROUP_UID"/>
+		</createIndex>
+		<createIndex tableName="TORDERHOLD" indexName="I_TORDERHOLD_ORDER_UID">
+			<column name="ORDER_UID"/>
+		</createIndex>
+		<createIndex tableName="TORDERPAYMENT" indexName="I_TORDERPAYMENT_ORDER_NUMBER">
+			<column name="ORDER_NUMBER"/>
+		</createIndex>
+		<createIndex tableName="TORDERPAYMENTDATA" indexName="I_TORDPAYDATA_ORDER_PAY_UID">
+			<column name="ORDER_PAYMENT_UID"/>
+		</createIndex>
+		<createIndex tableName="TORDERPAYMENTINSTRUMENT" indexName="I_TORDPAYINS_ORDER_NUMBER">
+			<column name="ORDER_NUMBER"/>
+		</createIndex>
+		<createIndex tableName="TPAYMENTINSTRUMENT" indexName="I_TPAYINS_PAYPROVIDERCFG_UID">
+			<column name="PAYMENTPROVIDERCONFIG_UID"/>
+		</createIndex>
+		<createIndex tableName="TPAYMENTINSTRUMENTDATA" indexName="I_TPAYINS_PAYINS_UID">
+			<column name="PAYMENTINSTRUMENT_UID"/>
+		</createIndex>
+		<createIndex tableName="TPAYMENTPROVIDERCONFIGDATA" indexName="I_TPAYPROVCFGD_PAYPROVCFG_UID">
+			<column name="PAYMENTPROVIDERCONFIG_UID"/>
+		</createIndex>
+		<createIndex tableName="TPRODTYPEMODIFIERGRP" indexName="I_TPTYPEMODGRP_PROD_TYPE_UID">
+			<column name="PRODUCT_TYPE_UID"/>
+		</createIndex>
+		<createIndex tableName="TPRODTYPEMODIFIERGRP" indexName="I_TPTYPEMODGRP_MOD_GRP_UID">
+			<column name="MOD_GRP_UID"/>
+		</createIndex>
+		<createIndex tableName="TSTOREPAYMENTPROVIDERCONFIG" indexName="I_TSTOREPAYPROVCFG_STORECODE">
+			<column name="STORECODE"/>
+		</createIndex>
+	</changeSet>
+
+	<!-- the following changes are applicable only to existing db containing BATCH_ tables, created by the batch server at startup -->
+	<changeSet id="2021-09-create-FK-BATCH_JOB_EXECUTION-index" author="elasticpath" runAlways="true">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<tableExists tableName="BATCH_JOB_EXECUTION"/>
+				<not>
+					<indexExists tableName="BATCH_JOB_EXECUTION" columnNames="JOB_INSTANCE_ID"/>
+				</not>
+			</and>
+
+		</preConditions>
+
+		<createIndex tableName="BATCH_JOB_EXECUTION" indexName="I_BATCH_JOB_EXE_JOB_INST_ID">
+			<column name="JOB_INSTANCE_ID"/>
+		</createIndex>
+	</changeSet>
+	<changeSet id="2021-09-create-FK-BATCH_JOB_EXECUTION_PARAMS-index" author="elasticpath" runAlways="true">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<tableExists tableName="BATCH_JOB_EXECUTION_PARAMS"/>
+				<not>
+					<indexExists tableName="BATCH_JOB_EXECUTION_PARAMS" columnNames="JOB_EXECUTION_ID"/>
+				</not>
+			</and>
+
+		</preConditions>
+
+		<createIndex tableName="BATCH_JOB_EXECUTION_PARAMS" indexName="I_BCH_JOB_EXE_PRM_JOB_EXE_ID">
+			<column name="JOB_EXECUTION_ID"/>
+		</createIndex>
+	</changeSet>
+	<changeSet id="2021-09-create-FK-BATCH_STEP_EXECUTION-index" author="elasticpath" runAlways="true">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<tableExists tableName="BATCH_STEP_EXECUTION"/>
+				<not>
+					<indexExists tableName="BATCH_STEP_EXECUTION" columnNames="JOB_EXECUTION_ID"/>
+				</not>
+			</and>
+
+		</preConditions>
+
+		<createIndex tableName="BATCH_STEP_EXECUTION" indexName="I_BCH_STEP_EXE_PRM_JOB_EXE_ID">
+			<column name="JOB_EXECUTION_ID"/>
+		</createIndex>
+	</changeSet>
+</databaseChangeLog>

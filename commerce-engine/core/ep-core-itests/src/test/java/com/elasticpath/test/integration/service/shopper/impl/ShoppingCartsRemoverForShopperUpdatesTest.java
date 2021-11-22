@@ -8,10 +8,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,15 +19,14 @@ import com.elasticpath.domain.builder.shopper.ShoppingContext;
 import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.domain.order.Order;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.persister.ShoppingContextPersister;
-import com.elasticpath.plugin.payment.provider.capabilities.PaymentCapabilityResponse;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.shopper.impl.ShoppingCartsRemoverForShopperUpdates;
@@ -74,9 +71,12 @@ public class ShoppingCartsRemoverForShopperUpdatesTest extends AbstractCartInteg
 	@Test
 	public void shouldNotRemoveShoppingCartWhenAnonymousAndRegisteredShoppersAreSame() {
 		ShoppingCart shoppingCart = createShoppingCart(CustomerType.REGISTERED_USER);
-		CustomerSession session = shoppingCart.getCustomerSession();
 
-		testee.invalidateShopper(session, session.getShopper());
+		// Both shoppers intentionally refer to the same object
+		Shopper anonymousShopper = shoppingCart.getShopper();
+		Shopper registeredShopper = shoppingCart.getShopper();
+
+		testee.invalidateShopper(anonymousShopper, registeredShopper);
 
 		ShoppingCart persistedCart = shoppingCartService.findByGuid(shoppingCart.getGuid());
 		assertNotNull("Shopping cart shouldn't have been removed.", persistedCart);
@@ -124,9 +124,9 @@ public class ShoppingCartsRemoverForShopperUpdatesTest extends AbstractCartInteg
 		assertThat(updatedAnonymousActiveShoppingCart.getRootShoppingItems()).isNotEmpty();
 
 		Customer registeredCustomer = createCustomer(CustomerType.REGISTERED_USER);
-		CustomerSession registeredSession = createCustomerSession(registeredCustomer);
+		Shopper registeredShopper = createShopper(registeredCustomer);
 
-		testee.invalidateShopper(registeredSession, anonymousActiveShoppingCart.getShopper());
+		testee.invalidateShopper(anonymousActiveShoppingCart.getShopper(), registeredShopper);
 
 		//all anonymous carts should be deleted
 		assertAllAnonymousCartsAreDeleted(anonymousActiveShoppingCart.getShopper().getUidPk());
@@ -144,13 +144,6 @@ public class ShoppingCartsRemoverForShopperUpdatesTest extends AbstractCartInteg
 		assertThat(result).isEmpty();
 	}
 
-	private ShoppingCart findNewActiveCartWithSession(final String newActiveCartGuid, final CustomerSession customerSession) {
-		ShoppingCart activeShoppingCart = shoppingCartService.findByGuid(newActiveCartGuid);
-		activeShoppingCart.setCustomerSession(customerSession);
-
-		return activeShoppingCart;
-	}
-
 	private Customer createCustomer(final CustomerType customerType) {
 		final StoreTestPersister storeTestPersister = getTac().getPersistersFactory().getStoreTestPersister();
 		Customer customer = storeTestPersister.createDefaultCustomer(scenario.getStore());
@@ -166,10 +159,10 @@ public class ShoppingCartsRemoverForShopperUpdatesTest extends AbstractCartInteg
 				.build();
 		shoppingContextPersister.persist(shoppingContext);
 
-		CustomerSession customerSession = shoppingContext.getCustomerSession();
+		Shopper shopper = shoppingContext.getShopper();
 
-		final ShoppingCart shoppingCart = super.createShoppingCart(customerSession);
-		shoppingCart.setBillingAddress(customerSession.getShopper().getCustomer().getPreferredBillingAddress());
+		final ShoppingCart shoppingCart = super.createShoppingCart(shopper);
+		shoppingCart.setBillingAddress(shopper.getCustomer().getPreferredBillingAddress());
 
 		final ShoppingCart persistedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		paymentInstrumentPersister.persistPaymentInstrument(persistedShoppingCart);
@@ -179,15 +172,6 @@ public class ShoppingCartsRemoverForShopperUpdatesTest extends AbstractCartInteg
 	private Order checkout(final ShoppingCart shoppingCart) {
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
-		return checkoutService.checkout(shoppingCart, taxSnapshot, shoppingCart.getCustomerSession(), true).getOrder();
+		return checkoutService.checkout(shoppingCart, taxSnapshot, shoppingCart.getShopper().getCustomerSession(), true).getOrder();
 	}
-
-	private PaymentCapabilityResponse createResponse(final String dataKey) {
-		PaymentCapabilityResponse response = new PaymentCapabilityResponse();
-		response.setData(ImmutableMap.of(dataKey, ""));
-		response.setProcessedDateTime(LocalDateTime.now());
-		response.setRequestHold(false);
-		return response;
-	}
-
 }

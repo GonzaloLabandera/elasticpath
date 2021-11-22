@@ -4,6 +4,7 @@
 package com.elasticpath.domain.shopper;
 
 import com.elasticpath.base.GloballyIdentifiable;
+import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shoppingcart.ShopperBrowsingActivity;
 import com.elasticpath.persistence.api.Persistable;
 
@@ -12,7 +13,7 @@ import com.elasticpath.persistence.api.Persistable;
  * related to the shopper, e.g. shopping carts, wish lists, etc.
  */
 public interface Shopper extends ShoppingRequisiteData, CustomerAccessor, 
-		ShoppingCartAccessor, WishListAccessor, SimpleCacheProvider, UpdateShopperTransientData, Persistable, GloballyIdentifiable {
+		ShoppingCartAccessor, WishListAccessor, Persistable, GloballyIdentifiable {
 
 	/**
 	 * Gets the {@link ShopperMemento} for this Shopper.
@@ -33,4 +34,17 @@ public interface Shopper extends ShoppingRequisiteData, CustomerAccessor,
 	 */
 	ShopperBrowsingActivity getBrowsingActivity();
 
+	/**
+	 * Updates transient data on {@link Shopper} that comes from {@link CustomerSession}.
+	 *
+	 * @param customerSession {@link CustomerSession} which contains the transient data that {@link Shopper} requires.
+	 */
+	void setCustomerSession(CustomerSession customerSession);
+
+	/**
+	 * Returns the {@link CustomerSession} stored on the Shopper. Should only be used by ShoppingCart.
+	 *
+	 * @return {@link CustomerSession}
+	 */
+	CustomerSession getCustomerSession();
 }

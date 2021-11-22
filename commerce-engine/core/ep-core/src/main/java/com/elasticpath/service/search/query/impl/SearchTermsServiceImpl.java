@@ -10,7 +10,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.orm.jpa.JpaSystemException;
 
 import com.elasticpath.base.exception.EpSystemException;
@@ -31,7 +32,7 @@ public class SearchTermsServiceImpl implements SearchTermsService {
 
 	private static final String CANNOT_SERIALIZE_THE_OBJECT_INTO_JSON = "Cannot serialize the object into JSON";
 
-	private static final Logger LOG = Logger.getLogger(SearchTermsServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SearchTermsServiceImpl.class);
 
 	private SearchTermsMementoDao searchTermsMementoDao;
 	private ObjectMapper objectMapper;

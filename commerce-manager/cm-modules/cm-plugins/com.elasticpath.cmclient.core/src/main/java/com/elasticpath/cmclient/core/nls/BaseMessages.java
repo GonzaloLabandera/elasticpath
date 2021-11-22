@@ -9,7 +9,8 @@ import java.util.Map;
 import com.elasticpath.commons.util.extenum.ExtensibleEnum;
 import com.elasticpath.cmclient.core.util.InitializationGuard;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 
@@ -22,7 +23,7 @@ public class BaseMessages {
     /**
      * LOG logger.
      */
-    private static final Logger LOG = Logger.getLogger(BaseMessages.class);
+    private static final Logger LOG = LogManager.getLogger(BaseMessages.class);
 
 
     private final InitializationGuard enumGuard = new InitializationGuard();

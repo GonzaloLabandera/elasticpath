@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.changeset.helpers;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.changeset.helpers.EditorEventObserver.IEditorCondition;
 import com.elasticpath.cmclient.changeset.support.SupportedComponent;

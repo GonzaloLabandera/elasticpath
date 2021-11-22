@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.order.dialog;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -52,6 +52,8 @@ public class OrderAddEditAddressDialog extends AbstractEpDialog {
 	private Text firstNameText;
 
 	private Text lastNameText;
+
+	private Text organizationText;
 
 	private Text address1Text;
 
@@ -165,6 +167,7 @@ public class OrderAddEditAddressDialog extends AbstractEpDialog {
 
 		firstNameText.setText(StringUtils.defaultString(address.getFirstName()));
 		lastNameText.setText(StringUtils.defaultString(address.getLastName()));
+		organizationText.setText(StringUtils.defaultString(address.getOrganization()));
 		address1Text.setText(address.getStreet1());
 		stateCountryManager.selectStateCombo(address.getSubCountry());
 
@@ -189,6 +192,9 @@ public class OrderAddEditAddressDialog extends AbstractEpDialog {
 		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_LastName, labelData);
 		lastNameText = dialogComposite.addTextField(authorization, fieldData);
 
+		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_Organization, labelData);
+		organizationText = dialogComposite.addTextField(authorization, fieldData);
+
 		dialogComposite.addLabelBoldRequired(FulfillmentMessages.get().AddressDialog_AddressLine1, authorization, labelData);
 		address1Text = dialogComposite.addTextField(authorization, fieldData);
 
@@ -209,7 +215,7 @@ public class OrderAddEditAddressDialog extends AbstractEpDialog {
 		countryCombo = dialogComposite.addComboBox(authorization, fieldData);
 		stateCountryManager.setCountryCombo(countryCombo);
 
-		dialogComposite.addLabelBoldRequired(FulfillmentMessages.get().AddressDialog_Phone, authorization, labelData);
+		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_Phone, labelData);
 		phoneText = dialogComposite.addTextField(authorization, fieldData);
 
 		dialogComposite.addLabelBold(FulfillmentMessages.get().AddressDialog_Fax, labelData);
@@ -237,6 +243,10 @@ public class OrderAddEditAddressDialog extends AbstractEpDialog {
 
 		// LastName
 		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.lastNameText, this.addressProxy, "lastName", //$NON-NLS-1$
+				null, null, hideDecorationOnFirstValidation);
+
+		// Organization
+		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.organizationText, this.addressProxy, "organization", //$NON-NLS-1$
 				null, null, hideDecorationOnFirstValidation);
 
 		// Street Line 1
@@ -283,7 +293,7 @@ public class OrderAddEditAddressDialog extends AbstractEpDialog {
 
 		// Phone
 		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.phoneText, this.addressProxy, "phoneNumber", //$NON-NLS-1$
-				EpValidatorFactory.PHONE_REQUIRED, null, hideDecorationOnFirstValidation);
+				EpValidatorFactory.PHONE_IGNORE_SPACES, null, hideDecorationOnFirstValidation);
 
 		// Fax
 		EpControlBindingProvider.getInstance().bind(this.bindingContext, this.faxText, this.addressProxy, "faxNumber", //$NON-NLS-1$

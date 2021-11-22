@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -28,6 +29,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.cartorder.CartOrderService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
@@ -47,18 +49,31 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	private SimpleStoreScenario scenario;
 	private TestDataPersisterFactory persisterFactory;
 
-	/** The main object under test. */
-	@Autowired private ShoppingCartService shoppingCartService;
+	/**
+	 * The main object under test.
+	 */
+	@Autowired
+	private ShoppingCartService shoppingCartService;
 
-	@Autowired private ShopperService shopperService;
-	@Autowired private CustomerSessionService customerSessionService;
-	@Autowired private CartDirector cartDirector;
-	@Autowired private CustomerService customerService;
-	@Autowired private CartOrderService cartOrderService;
-	@Autowired private ProductSkuLookup productSkuLookup;
+	@Autowired
+	private ShopperService shopperService;
+	@Autowired
+	private CustomerSessionService customerSessionService;
+	@Autowired
+	private CartDirector cartDirector;
+	@Autowired
+	private CustomerService customerService;
+	@Autowired
+	private CartOrderService cartOrderService;
+	@Autowired
+	private ProductSkuLookup productSkuLookup;
+	@Autowired
+	private BeanFactory beanFactory;
+
 
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
+	 *
 	 * @throws Exception when exception
 	 */
 	@Before
@@ -100,8 +115,8 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCart retrievedShoppingCart = shoppingCartService.findByGuid(shoppingCart.getGuid());
 		assertThat(retrievedShoppingCart.getGuid()).isEqualTo(shoppingCart.getGuid());
 		assertThat(retrievedShoppingCart)
-			.as("Should be distinct objects")
-			.isNotSameAs(shoppingCart);
+				.as("Should be distinct objects")
+				.isNotSameAs(shoppingCart);
 	}
 
 	/**
@@ -116,8 +131,8 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		final ShoppingCart retrievedShoppingCart = shoppingCartService.findByGuid(shoppingCart.getGuid());
 		assertThat(retrievedShoppingCart.getGuid()).isEqualTo(shoppingCart.getGuid());
 		assertThat(shoppingCart)
-			.as("Should be distinct objects")
-			.isNotSameAs(retrievedShoppingCart);
+				.as("Should be distinct objects")
+				.isNotSameAs(retrievedShoppingCart);
 	}
 
 	/**
@@ -130,7 +145,7 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		shoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 
 		final Product product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
-			scenario.getCategory(), scenario.getWarehouse());
+				scenario.getCategory(), scenario.getWarehouse());
 		final ShoppingItemDto dto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 2);
 		cartDirector.addItemToCart(shoppingCart, dto);
 		final ShoppingCart updatedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
@@ -150,22 +165,22 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		ShoppingCart shoppingCart = createShoppingCart();
 		shoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		final Product product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
-			scenario.getCategory(), scenario.getWarehouse());
+				scenario.getCategory(), scenario.getWarehouse());
 		final String skuCode = product.getDefaultSku().getSkuCode();
 		cartDirector.addItemToCart(shoppingCart, new ShoppingItemDto(skuCode, 2));
 		final Product product2 = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
-			scenario.getCategory(), scenario.getWarehouse());
+				scenario.getCategory(), scenario.getWarehouse());
 		final String skuCode2 = product2.getDefaultSku().getSkuCode();
 		cartDirector.addItemToCart(shoppingCart, new ShoppingItemDto(skuCode2, 1));
 
 		final ShoppingCart updatedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 		assertThat(updatedShoppingCart.getRootShoppingItems())
-			.hasSize(2)
-			.allSatisfy(cartItem -> {
-				assertThat(cartItem).isNotNull();
-				assertThat(cartItem.getUidPk()).isGreaterThan(0);
-				assertThat(cartItem.getSkuGuid()).isNotNull();
-			});
+				.hasSize(2)
+				.allSatisfy(cartItem -> {
+					assertThat(cartItem).isNotNull();
+					assertThat(cartItem.getUidPk()).isGreaterThan(0);
+					assertThat(cartItem.getSkuGuid()).isNotNull();
+				});
 	}
 
 	/**
@@ -180,36 +195,36 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 
 
 		final Product product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
-			scenario.getCategory(), scenario.getWarehouse());
+				scenario.getCategory(), scenario.getWarehouse());
 		final String skuCode = product.getDefaultSku().getSkuCode();
 		cartDirector.addItemToCart(shoppingCart, new ShoppingItemDto(skuCode, 2));
 		final ShoppingCart updatedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 
 		assertThat(updatedShoppingCart.getRootShoppingItems())
-			.hasSize(1)
-			.allSatisfy(cartItem -> {
-				assertThat(cartItem).isNotNull();
-				assertThat(cartItem.getUidPk()).isGreaterThan(0);
-				assertThat(cartItem.getSkuGuid()).isNotNull();
-			});
+				.hasSize(1)
+				.allSatisfy(cartItem -> {
+					assertThat(cartItem).isNotNull();
+					assertThat(cartItem.getUidPk()).isGreaterThan(0);
+					assertThat(cartItem.getSkuGuid()).isNotNull();
+				});
 
 		final Product product2 = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
-			scenario.getCategory(), scenario.getWarehouse());
+				scenario.getCategory(), scenario.getWarehouse());
 		final String skuCodeProduct2 = product2.getDefaultSku().getSkuCode();
 		cartDirector.addItemToCart(shoppingCart, new ShoppingItemDto(skuCodeProduct2, 1));
 
 		assertThat(updatedShoppingCart.getRootShoppingItems())
-			.anySatisfy(item -> item.getSkuGuid().equals(product2.getDefaultSku().getGuid()));
+				.anySatisfy(item -> item.getSkuGuid().equals(product2.getDefaultSku().getGuid()));
 
 		final ShoppingCart updatedTwiceShoppingCart = shoppingCartService.saveOrUpdate(updatedShoppingCart);
 
 		assertThat(updatedTwiceShoppingCart.getRootShoppingItems())
-			.hasSize(2)
-			.allSatisfy(cartItem -> {
-				assertThat(cartItem).isNotNull();
-				assertThat(cartItem.getUidPk()).isGreaterThan(0);
-				assertThat(cartItem.getSkuGuid()).isNotNull();
-			});
+				.hasSize(2)
+				.allSatisfy(cartItem -> {
+					assertThat(cartItem).isNotNull();
+					assertThat(cartItem.getUidPk()).isGreaterThan(0);
+					assertThat(cartItem.getSkuGuid()).isNotNull();
+				});
 	}
 
 	/**
@@ -222,7 +237,7 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		shoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 
 		final Product product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
-			scenario.getCategory(), scenario.getWarehouse());
+				scenario.getCategory(), scenario.getWarehouse());
 		final String skuCode = product.getDefaultSku().getSkuCode();
 		cartDirector.addItemToCart(shoppingCart, new ShoppingItemDto(skuCode, 1));
 
@@ -249,13 +264,13 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	private ShoppingCart createShoppingCart() {
 		Currency currency = Currency.getInstance("USD");
 
-		final Shopper shopper = shopperService.createAndSaveShopper(scenario.getStore().getCode());
+		Shopper shopper = shopperService.findOrCreateShopper(createPersistedCustomer(), scenario.getStore().getCode());
+
 		CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
 		customerSession.setCurrency(currency);
 		customerSession.setLocale(Locale.ENGLISH);
-		customerSession = customerSessionService.initializeCustomerSessionForPricing(customerSession, scenario.getStore().getCode(),
-				currency);
-		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
+		customerSessionService.initializeCustomerSessionForPricing(customerSession, scenario.getStore().getCode(), currency);
+		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(shopper);
 		shoppingCart.setStore(scenario.getStore());
 		((ShoppingCartMementoHolder) shoppingCart).getShoppingCartMemento().setGuid(Utils.uniqueCode("CART-"));
 		return shoppingCart;
@@ -286,7 +301,7 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		shoppingCart.clearItems();
 
 		final Product multiSkuProduct = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
-			scenario.getCategory(), scenario.getWarehouse());
+				scenario.getCategory(), scenario.getWarehouse());
 		final ProductSku defaultSku = multiSkuProduct.getDefaultSku();
 
 		final String skuCode = defaultSku.getSkuCode();
@@ -323,7 +338,9 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		}
 	}
 
-	/** */
+	/**
+	 *
+	 */
 	@DirtiesDatabase
 	@Test
 	public void testFindByGuidWhenCartHasShoppingItems() {
@@ -342,15 +359,15 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testFindShoppingCartGuidsByCustomerAndStore() {
-		final Customer savedCustomer = createSavedCustomer();
-		final Customer savedAccount = createSavedAccount();
-		final ShoppingCart savedShoppingCart1 = createSavedShoppingCart(savedCustomer, null);
-		final ShoppingCart savedShoppingCart2 = createSavedShoppingCart(savedCustomer, null);
-		final ShoppingCart savedShoppingCart3 = createSavedShoppingCart(savedCustomer, savedAccount);
+		final Customer customer1 = createSavedCustomer();
+		final Customer customer2 = createSavedCustomer();
+		final Customer account = createSavedAccount();
+		final ShoppingCart savedShoppingCart1 = createSavedShoppingCart(customer1, null);
+		final ShoppingCart savedShoppingCart2 = createSavedShoppingCart(customer1, account);
+		final ShoppingCart savedShoppingCart3 = createSavedShoppingCart(customer2, null);
 
-		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), null, scenario.getStore().getCode());
-		assertThat(guids)
-			.containsExactlyInAnyOrder(savedShoppingCart1.getGuid(), savedShoppingCart2.getGuid());
+		List<String> guids = shoppingCartService.findByCustomerAndStore(customer1.getGuid(), null, scenario.getStore().getCode());
+		assertThat(guids).containsExactlyInAnyOrder(savedShoppingCart1.getGuid());
 	}
 
 	/**
@@ -359,16 +376,16 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testFindShoppingCartGuidsByCustomerAndAccountAndStore() {
-		final Customer savedCustomer = createSavedCustomer();
-		final Customer savedAccount = createSavedAccount();
-		final ShoppingCart savedShoppingCart1 = createSavedShoppingCart(savedCustomer, savedAccount);
-		final ShoppingCart savedShoppingCart2 = createSavedShoppingCart(savedCustomer, savedAccount);
-		final ShoppingCart savedShoppingCart3 = createSavedShoppingCart(savedCustomer, null);
+		final Customer customer1 = createSavedCustomer();
+		final Customer customer2 = createSavedCustomer();
+		final Customer account = createSavedAccount();
+		final ShoppingCart savedShoppingCart1 = createSavedShoppingCart(customer1, account);
+		final ShoppingCart savedShoppingCart2 = createSavedShoppingCart(customer1, null);
+		final ShoppingCart savedShoppingCart3 = createSavedShoppingCart(customer2, account);
 
-		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), savedAccount.getSharedId(),
+		List<String> guids = shoppingCartService.findByCustomerAndStore(customer1.getGuid(), account.getSharedId(),
 				scenario.getStore().getCode());
-		assertThat(guids)
-				.containsExactlyInAnyOrder(savedShoppingCart1.getGuid(), savedShoppingCart2.getGuid());
+		assertThat(guids).containsExactlyInAnyOrder(savedShoppingCart1.getGuid());
 	}
 
 	/**
@@ -383,7 +400,7 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		createSavedShoppingCart(savedCustomer, null);
 
 		// Store doesn't exist.
-		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), null,"BAD_STORE_CODE");
+		List<String> guids = shoppingCartService.findByCustomerAndStore(savedCustomer.getGuid(), null, "BAD_STORE_CODE");
 		assertThat(guids).isEmpty();
 	}
 
@@ -420,10 +437,10 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void ensureDeleteAllShoppingCartsByShopperUidCorrectlyHandlesAssociatedCartOrders() {
-		final Customer savedCustomer = createSavedCustomer();
-		ShoppingCart cartWithCartOrderToDelete = createSavedShoppingCart(savedCustomer, null);
-		ShoppingCart cartWithoutCartOrderToKeep = createSavedShoppingCart(savedCustomer, null);
-		ShoppingCart cartWithCartOrderToKeep = createSavedShoppingCart(savedCustomer, null);
+		final Customer customer1 = createSavedCustomer();
+		final Customer customer2 = createSavedCustomer();
+		ShoppingCart cartWithCartOrderToDelete = createSavedShoppingCart(customer1, null);
+		ShoppingCart cartWithCartOrderToKeep = createSavedShoppingCart(customer2, null);
 
 		shoppingCartService.deleteAllShoppingCartsByShopperUid(cartWithCartOrderToDelete.getShopper().getUidPk());
 
@@ -431,7 +448,6 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		assertThat(cartOrderService.findByShoppingCartGuid(cartWithCartOrderToDelete.getGuid())).isNull();
 		assertThat(shoppingCartService.shoppingCartExists(cartWithCartOrderToKeep.getGuid())).isTrue();
 		assertThat(cartOrderService.findByShoppingCartGuid(cartWithCartOrderToKeep.getGuid())).isNotNull();
-		assertThat(shoppingCartService.shoppingCartExists(cartWithoutCartOrderToKeep.getGuid())).isTrue();
 	}
 
 	private Customer createSavedCustomer() {
@@ -452,21 +468,37 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private ShoppingCart createSavedShoppingCart(final Customer savedCustomer, final Customer savedAccount) {
-		final Shopper savedShopper = shopperService.createAndSaveShopper(scenario.getStore().getCode());
+		Shopper savedShopper;
+		if (savedAccount == null) {
+			savedShopper = shopperService.findOrCreateShopper(savedCustomer, scenario.getStore().getCode());
+		} else {
+			savedShopper = shopperService.findOrCreateShopper(savedCustomer, savedAccount, scenario.getStore().getCode());
+		}
 		final CustomerSession customerSession = customerSessionService.createWithShopper(savedShopper);
 		customerSession.setCurrency(Currency.getInstance("USD"));
-		savedShopper.setCustomer(savedCustomer);
-		savedShopper.setAccount(savedAccount);
-		shopperService.save(savedShopper);
 
-		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
-		shoppingCart.setStore(scenario.getStore());
-		((ShoppingCartMementoHolder) shoppingCart).getShoppingCartMemento().setGuid(Utils.uniqueCode("CART-"));
+		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByShopper(savedShopper);
 		final ShoppingCart persistedShoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 
 		persisterFactory.getPaymentInstrumentPersister().persistPaymentInstrument(persistedShoppingCart);
 
 		return persistedShoppingCart;
+	}
+
+	private Customer createPersistedCustomer() {
+		return createPersistedCustomer("sharedID", "email", scenario.getStore());
+	}
+
+	private Customer createPersistedCustomer(final String sharedId, final String email, final Store store) {
+		final Customer customer = beanFactory.getPrototypeBean(ContextIdNames.CUSTOMER, Customer.class);
+		customer.setSharedId(sharedId);
+		customer.setCustomerType(CustomerType.REGISTERED_USER);
+		customer.setEmail(email);
+		customer.setFirstName("Test");
+		customer.setLastName("Test");
+		customer.setStoreCode(store.getCode());
+
+		return customerService.add(customer);
 	}
 
 	/**
@@ -487,13 +519,12 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testFindShoppingCartGuidByCustomerSession() {
+	public void testFindOrCreateDefaultCartGuidByShopper() {
 		ShoppingCart shoppingCart = createShoppingCart();
 		shoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 
-		String cartGuid = shoppingCartService.findDefaultShoppingCartGuidByCustomerSession(shoppingCart.getCustomerSession());
+		String cartGuid = shoppingCartService.findOrCreateDefaultCartGuidByShopper(shoppingCart.getShopper());
 		assertThat(cartGuid).isEqualTo(shoppingCart.getGuid());
 	}
-
 
 }

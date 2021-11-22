@@ -10,7 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -31,7 +32,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
  */
 public class StoreCurrencySelectionDualListBox extends AbstractEpDualListBoxControl<StoreEditorModel> {
 
-	private static final Logger LOG = Logger.getLogger(StoreCurrencySelectionDualListBox.class);
+	private static final Logger LOG = LogManager.getLogger(StoreCurrencySelectionDualListBox.class);
 
 	private RemoveListener<Currency> removeListener;
 

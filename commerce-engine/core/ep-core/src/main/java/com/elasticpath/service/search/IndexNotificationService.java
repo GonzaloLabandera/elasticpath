@@ -71,4 +71,25 @@ public interface IndexNotificationService extends EpPersistenceService {
 	 * @return a collection of index notifications
 	 */
 	Collection<IndexNotification> findByIndexAndUpdateType(IndexType indexType, UpdateType updateType);
+
+	/**
+	 * Removed notications based in uidPk.
+	 * @param indexNotificationUidList the list of uids to remove.
+	 */
+	void removeNotificationsByUid(List<Long> indexNotificationUidList);
+
+	/**
+	 * Find the last indexnotification with rebuild/delete all.
+	 * @param indexType the index type.
+	 * @return list of notification.
+	 */
+	List<IndexNotification> findLastDeleteAllOrRebuildIndexType(IndexType indexType);
+
+	/**
+	 * Remove notifications based on the max uid and index type.
+	 *
+	 * @param maxUid the max uid
+	 * @param indexType the index type
+	 */
+	void removeNotificationByMaxUid(Long maxUid, IndexType indexType);
 }

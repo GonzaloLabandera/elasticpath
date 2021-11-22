@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -130,16 +130,16 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
         setIfNotNull(customer::setUidPk, uidPk);
         setIfNotNull(customer::setGuid, guid);
         setIfNotNull(customer::setSharedId, sharedId);
-		customer.setEmail((String) ObjectUtils.defaultIfNull(email, "john.smith@elasticpath.com"));
-		customer.setUsername((String) ObjectUtils.defaultIfNull(username, "john.smith@elasticpath.com"));
-		customer.setPreferredLocale((Locale) ObjectUtils.defaultIfNull(preferredLocale, Locale.ENGLISH));
-        customer.setFirstName((String) ObjectUtils.defaultIfNull(firstName, "James"));
-        customer.setLastName((String) ObjectUtils.defaultIfNull(lastName, "Bond"));
-        customer.setCreationDate((Date) ObjectUtils.defaultIfNull(creationDate, new Date()));
-        customer.setStatus((Integer) ObjectUtils.defaultIfNull(status, Customer.STATUS_ACTIVE));
-        customer.setClearTextPassword((String) ObjectUtils.defaultIfNull(clearTextPassword, "password"));
-        customer.setStoreCode((String) ObjectUtils.defaultIfNull(storeCode, "storeCode"));
-        customer.setCustomerType((CustomerType) ObjectUtils.defaultIfNull(customerType, CustomerType.REGISTERED_USER));
+		customer.setEmail(ObjectUtils.defaultIfNull(email, "john.smith@elasticpath.com"));
+		customer.setUsername(ObjectUtils.defaultIfNull(username, "john.smith@elasticpath.com"));
+		customer.setPreferredLocale(ObjectUtils.defaultIfNull(preferredLocale, Locale.ENGLISH));
+        customer.setFirstName(ObjectUtils.defaultIfNull(firstName, "James"));
+        customer.setLastName(ObjectUtils.defaultIfNull(lastName, "Bond"));
+        customer.setCreationDate(ObjectUtils.defaultIfNull(creationDate, new Date()));
+        customer.setStatus(ObjectUtils.defaultIfNull(status, Customer.STATUS_ACTIVE));
+        customer.setClearTextPassword(ObjectUtils.defaultIfNull(clearTextPassword, "password"));
+        customer.setStoreCode(ObjectUtils.defaultIfNull(storeCode, "storeCode"));
+        customer.setCustomerType(ObjectUtils.defaultIfNull(customerType, CustomerType.REGISTERED_USER));
         customer.setPhoneNumber(phone);
 
         if (customerGroups != null) {

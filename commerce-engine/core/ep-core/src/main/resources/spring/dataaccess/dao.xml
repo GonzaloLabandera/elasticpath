@@ -124,10 +124,9 @@
 		<property name="solrProvider" ref="solrManager"/>
 		<property name="queryComposerFactory" ref="queryComposerFactory"/>
 		<property name="solrQueryFactory" ref="cachedSolrQueryFactory"/>
-		<property name="elasticPath" ref="elasticPath"/>
-		<property name="solrFacetAdapter" ref="solrFacetAdapter"/>
+		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="indexUtility" ref="indexUtility"/>
-		<property name="retrieveCatalogFromCache" value="true"/>
+		<property name="filteredNavigationConfigurationLoader" ref="cachedFacetConfigurationLoader"/>
 	</bean>
 
 	<bean id="luceneRawQueryComposer" class="com.elasticpath.service.search.solr.query.LuceneRawQueryComposerImpl" parent="abstractQueryComposer">
@@ -278,7 +277,6 @@
 		<property name="indexTypesMap">
 			<map>
 				<entry key="product" value="product"/>
-				<entry key="customer" value="customer"/>
 				<entry key="category" value="category"/>
 				<entry key="order" value="order"/>
 				<entry key="orderreturn" value="orderreturn"/>

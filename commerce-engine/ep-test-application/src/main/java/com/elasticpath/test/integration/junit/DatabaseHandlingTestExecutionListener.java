@@ -3,7 +3,8 @@
  */
 package com.elasticpath.test.integration.junit;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
@@ -15,7 +16,7 @@ import com.elasticpath.test.support.jndi.JndiContextManager;
  */
 public class DatabaseHandlingTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Logger LOG = Logger.getLogger(DatabaseHandlingTestExecutionListener.class);
+	private static final Logger LOG = LogManager.getLogger(DatabaseHandlingTestExecutionListener.class);
 
 	private final JndiContextManager jndiContextManager;
 

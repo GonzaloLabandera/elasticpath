@@ -3,7 +3,7 @@
  */
 package com.elasticpath.importexport.common.adapters.products.data;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.DigitalAsset;

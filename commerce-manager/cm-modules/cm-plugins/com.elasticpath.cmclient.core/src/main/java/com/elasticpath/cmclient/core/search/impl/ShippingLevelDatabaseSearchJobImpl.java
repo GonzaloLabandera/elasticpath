@@ -5,7 +5,8 @@ package com.elasticpath.cmclient.core.search.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -24,7 +25,7 @@ import com.elasticpath.service.shipping.ShippingServiceLevelService;
  */
 public class ShippingLevelDatabaseSearchJobImpl extends AbstractSearchJobImpl implements SearchJob {
 
-	private static final Logger LOG = Logger.getLogger(ShippingLevelDatabaseSearchJobImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ShippingLevelDatabaseSearchJobImpl.class);
 	private static final int COUNT_UNITS_WORK = 2;
 	private static final int SEARCH_UNITS_WORK = 5;
 	private static final int FIRE_ITEMS_WORK = 1;

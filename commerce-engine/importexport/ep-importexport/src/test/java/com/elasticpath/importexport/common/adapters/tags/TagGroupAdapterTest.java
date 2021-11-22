@@ -19,8 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -43,7 +43,7 @@ import com.elasticpath.tags.domain.impl.TagGroupImpl;
 public class TagGroupAdapterTest {
 
 	private static final String LANGUAGE = "en";
-	private static final String INVALID_LANGUAGE = "foo";
+	private static final String INVALID_LANGUAGE = "invalid_language";
 	private static final Locale LANGUAGE_LOCALE = LocaleUtils.toLocale(LANGUAGE);
 	private static final String TAG_GROUP_CODE = "TAG_GROUP_CODE";
 	private static final String TAG_GROUP_DISPLAY_NAME = "TAG_GROUP_DISPLAY_NAME";

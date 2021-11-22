@@ -23,7 +23,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.ElementDependent;
 import org.apache.openjpa.persistence.ElementType;
 import org.apache.openjpa.persistence.FetchAttribute;
@@ -89,7 +90,7 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 })
 @SuppressWarnings({ "PMD.AvoidDuplicateLiterals", "PMD.GodClass" })
 public class CategoryImpl extends AbstractCategoryImpl {
-	private static final Logger LOG = Logger.getLogger(CategoryImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CategoryImpl.class);
 
 	/**
 	 * Serial version id.

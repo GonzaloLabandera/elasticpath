@@ -7,7 +7,8 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.solr.SolrIndexConstants;
@@ -17,7 +18,7 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
  */
 public class SolrConfigSystemPropertySetter {
 
-	private static final Logger LOG = Logger.getLogger(SolrConfigSystemPropertySetter.class);
+	private static final Logger LOG = LogManager.getLogger(SolrConfigSystemPropertySetter.class);
 
 	private String configurationRootPath;
 

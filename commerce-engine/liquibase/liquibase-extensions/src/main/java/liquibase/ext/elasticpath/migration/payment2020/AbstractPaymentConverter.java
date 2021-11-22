@@ -14,16 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import liquibase.change.custom.CustomSqlChange;
 import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertSetStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.ext.elasticpath.AbstractEpCustomSqlChange;
 
 /**
  * Fills target tables from a given select query.
@@ -31,10 +28,11 @@ import liquibase.statement.core.InsertStatement;
  * Lets we have "select column_a, column_b from table" select query. Target table_a uses column_a, target table_b uses column_b
  * and foreign key of table_b refers to table_a.
  */
-public abstract class AbstractPaymentConverter implements CustomSqlChange {
+public abstract class AbstractPaymentConverter extends AbstractEpCustomSqlChange {
 	private static final String VALUE_RETURNED_BY_DB_WITH_UNEXPECTED_TYPE = "Value returned by DB with unexpected type: ";
-	private static final String CONNECTION_ERROR = "Unable to get connection from database";
-	private static final String QUERY_RETRIEVE_LATEST_UIDPK_FOR_TARGE_TABLE = "SELECT LAST_VALUE FROM JPA_GENERATED_KEYS WHERE ID = '%s'";
+	private static final String TABLE_JPA_GENERATED_KEYS = "JPA_GENERATED_KEYS";
+	private static final String COLUMN_LAST_VALUE = "LAST_VALUE";
+	private static final String QUERY_RETRIEVE_LATEST_UIDPK_FOR_TARGET_TABLE = "SELECT %s FROM %s WHERE ID = '%s'";
 	private static final long DEFAULT_MIN_UIDPK_VALUE = 200000L;
 
 	private Map<String, Long> uidpks = new HashMap<>();
@@ -42,12 +40,10 @@ public abstract class AbstractPaymentConverter implements CustomSqlChange {
 
 	@Override
 	public SqlStatement[] generateStatements(final Database database) throws CustomChangeException {
-		if (!(database.getConnection() instanceof JdbcConnection)) {
-			throw new UnexpectedLiquibaseException(CONNECTION_ERROR);
-		}
+		super.init(database);
 
 		initInsertStatements(database.getDefaultCatalogName(), database.getDefaultSchema().getSchemaName());
-		initUIDPKs(database);
+		initUIDPKs();
 
 		try {
 			prepareInsertStatements(database);
@@ -130,9 +126,9 @@ public abstract class AbstractPaymentConverter implements CustomSqlChange {
 		uidpks.replaceAll((k, v) -> ++v);
 	}
 
-	private void initUIDPKs(final Database database) throws CustomChangeException {
+	private void initUIDPKs() throws CustomChangeException {
 		for (final String table : getTargetTables()) {
-			uidpks.put(table, getLatestUIDPKForTable(database, table));
+			uidpks.put(table, getLatestUIDPKForTable(table));
 		}
 	}
 
@@ -140,22 +136,23 @@ public abstract class AbstractPaymentConverter implements CustomSqlChange {
 	 * Sets last primary key value for target table by obtaining it from JPA_GENERATED_KEYS table.
 	 * Sets value to default if there is not such value in the database.
 	 *
-	 * @param database encapsulates database support.
 	 * @param table    is target table.
 	 * @return latest UIDPK for table
 	 * @throws CustomChangeException in case exception during obtaining data from database.
 	 */
-	private Long getLatestUIDPKForTable(final Database database, final String table) throws CustomChangeException {
-		final JdbcConnection connection = (JdbcConnection) database.getConnection();
-		final Object uidpkCurrentValue = getSingleValueFromDB(connection,
-				String.format(QUERY_RETRIEVE_LATEST_UIDPK_FOR_TARGE_TABLE, table));
+	private Long getLatestUIDPKForTable(final String table) throws CustomChangeException {
+		final String formattedQuery = String.format(QUERY_RETRIEVE_LATEST_UIDPK_FOR_TARGET_TABLE,
+				quoteColumnNames(COLUMN_LAST_VALUE),
+				quoteTableName(TABLE_JPA_GENERATED_KEYS), table);
+
+		final Object uidpkCurrentValue = getSingleValueFromDB(formattedQuery);
 
 		return Optional.ofNullable(uidpkCurrentValue)
 				.map(this::getLong)
 				.orElse(DEFAULT_MIN_UIDPK_VALUE);
 	}
 
-	private Object getSingleValueFromDB(final JdbcConnection connection, final String sql) throws CustomChangeException {
+	private Object getSingleValueFromDB(final String sql) throws CustomChangeException {
 		try (final PreparedStatement statement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
 			try (final ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {

@@ -6,6 +6,7 @@
 			cachingAllowed="true"
 			cacheMaxSize="${ep.tomcat.maxcachesize}"
 	/>
+
 	<Resource name="jdbc/epjndi"
 		auth="Container"
 		scope="Shareable"
@@ -39,16 +40,17 @@
 		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
 		url="${epdb.synctarget.url}"
 	  />
+
 	<Resource auth="Container"
-		name="jms/JMSConnectionFactory"
-		type="${ep.jms.type}"
-		maxConnections="25"
-		maximumActiveSessionPerConnection="25"
-		idleTimeout="10000"
-		description="JMS Connection Factory"
-		factory="${ep.jms.factory}"
-		brokerURL="failover:${ep.jms.url}"
-		/>
+			  name="jms/JMSConnectionFactory"
+			  type="${ep.jms.type}"
+			  description="JMS Connection Factory"
+			  factory="${ep.jms.factory}"
+			  brokerURL="failover:(${ep.jms.url})?maxReconnectAttempts=2&amp;jms.prefetchPolicy.all=20"
+			  poolMaxConnections="1"
+			  poolMaximumActiveSessionPerConnection="200"
+			  poolIdleTimeout="10000"
+	/>
 
 </Context>
 

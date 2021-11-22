@@ -36,14 +36,13 @@ public class CustomerSessionTagSetFactory {
 	 * @param userTraitTransformer The customer session tagger.
 	 */
 	@Inject
-	CustomerSessionTagSetFactory(
+	public CustomerSessionTagSetFactory(
 			@Named("resourceOperationContext")
 			final ResourceOperationContext resourceOperationContext,
 			@Named("customerTagStrategyRegistry")
 			final CustomerTagStrategyRegistry tagStrategyRegistry,
 			@Named("userTraitsToTagSetTransformer")
 			final UserTraitsToTagSetTransformer userTraitTransformer) {
-
 		this.resourceOperationContext = resourceOperationContext;
 		this.tagStrategyRegistry = tagStrategyRegistry;
 		this.userTraitTransformer = userTraitTransformer;

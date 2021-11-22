@@ -17,12 +17,10 @@ import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableMap;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -30,6 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.impl.ShoppingItemDtoFactoryImpl;
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Price;
@@ -47,7 +46,9 @@ import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.catalog.impl.SelectionRuleImpl;
+import com.elasticpath.domain.impl.ElasticPathImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
@@ -118,13 +119,19 @@ public class ShoppingItemAssemblerImplTest {
 	@InjectMocks
 	private ShoppingItemAssemblerImpl assembler;
 
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
 	/**
 	 * Set up required before each test.
 	 */
 	@Before
 	public void setUp() {
+		elasticPath.setBeanFactory(beanFactory);
+
 		given(beanFactory.getPrototypeBean("productConstituent", ProductConstituent.class))
 				.will(invocationOnMock -> new ProductConstituentImpl());
+		given(beanFactory.getPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class))
+				.will(invocationOnMock -> new ModifierFieldsMapWrapper());
 
 		// Yes, this is horrible, but I can only refactor this test so far before I kill myself.
 		ShoppingItemDtoFactoryImpl shoppingItemDtoFactory = new ShoppingItemDtoFactoryImpl();
@@ -696,9 +703,9 @@ public class ShoppingItemAssemblerImplTest {
 		};
 
 		assembler.createShoppingItemTree(bundle, bundleDto, shoppingItem, 1);
-		assertEquals(1, shoppingItem.getChildShoppingItems().get(0).getFields().size());
-		assertTrue(shoppingItem.getChildShoppingItems().get(0).getFields().containsKey(ITEM_FIELD_1_KEY));
-		assertEquals(ITEM_FIELD_1_VALUE, shoppingItem.getChildShoppingItems().get(0).getFields().get(ITEM_FIELD_1_KEY));
+		assertEquals(1, shoppingItem.getChildShoppingItems().get(0).getModifierFields().getMap().size());
+		assertTrue(shoppingItem.getChildShoppingItems().get(0).getModifierFields().getMap().containsKey(ITEM_FIELD_1_KEY));
+		assertEquals(ITEM_FIELD_1_VALUE, shoppingItem.getChildShoppingItems().get(0).getModifierFields().get(ITEM_FIELD_1_KEY));
 	}
 
 	private Product createProductWithSkuCode(final String productCode, final String skuCode) {

@@ -5,7 +5,7 @@ package com.elasticpath.importexport.common.util;
 
 import java.util.Locale;
 
-import org.apache.commons.lang.LocaleUtils;
+import org.apache.commons.lang3.LocaleUtils;
 
 /**
  * Utilities for I/E.

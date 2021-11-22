@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="FILE"
+			fileName="${user.home}/ep/logs/ep-datasync.log"
+			append="false">
+			<PatternLayout pattern="[EP-DataSync] %-5p %t %d{ISO8601} %c - %m%n" />
+		</File>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="[EP-DataSync] %-5p %t %d{ISO8601} %c - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.elasticpath" level="${ep.log.level}" additivity="false">
+			${ep.log.to}
+		</Logger>
+		<Logger name="com.elasticpath.extensions" level="${ep.log.level}" additivity="false">
+			${ep.log.to}
+		</Logger>
+		<Root level="warn">
+			${ep.log.to}
+		</Root>
+	</Loggers>
+</Configuration>

@@ -4,8 +4,11 @@
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Lists;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.core.messaging.giftcertificate.GiftCertificateEventType;
@@ -69,7 +72,7 @@ public class CreateGiftCertificatesCheckoutAction implements ReversiblePostCaptu
 
 	private void sendGiftCertificateCreatedEvent(final Order order, final Set<OrderSku> orderSkus) {
 		orderSkus.forEach(orderSku -> {
-			final Map<String, String> gcFields = orderSku.getFields();
+			final Map<String, String> gcFields = orderSku.getModifierFields().getMap();
 			final PriceCalculator priceCalculator = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku).getPriceCalc();
 			final Map<String, Object> data = new HashMap<>(8);
 			data.put("orderLocale", order.getLocale());
@@ -103,7 +106,7 @@ public class CreateGiftCertificatesCheckoutAction implements ReversiblePostCaptu
 	 * @param orderSku The GiftCertificate to rollback.
 	 */
 	private void rollbackGiftCertificate(final OrderSku orderSku) {
-		String gcCode = orderSku.getFieldValue(GiftCertificate.KEY_CODE);
+		String gcCode = orderSku.getModifierFields().get(GiftCertificate.KEY_CODE);
 		if (gcCode == null) {
 			return;
 		}
@@ -112,8 +115,9 @@ public class CreateGiftCertificatesCheckoutAction implements ReversiblePostCaptu
 			return;
 		}
 		giftCertificateService.removeGiftCertificate(giftCertificate.getUidPk());
-		orderSku.setFieldValue(GiftCertificate.KEY_CODE, null);
-		orderSku.setFieldValue(GiftCertificate.KEY_SENDER_EMAIL, null);
+
+		List<String> modifierFieldsToRemove = Lists.newArrayList(GiftCertificate.KEY_CODE, GiftCertificate.KEY_SENDER_EMAIL);
+		orderSku.getModifierFields().removeAll(modifierFieldsToRemove);
 	}
 
 	/**
@@ -124,17 +128,13 @@ public class CreateGiftCertificatesCheckoutAction implements ReversiblePostCaptu
 	 * @param giftCertificateMap map the order sku to the gift certificate created from it
 	 */
 	protected void updateOrderSkus(final Order order, final Map<OrderSku, GiftCertificate> giftCertificateMap) {
-		for (final OrderShipment orderShipment : order.getAllShipments()) {
-			for (final OrderSku orderSku : orderShipment.getShipmentOrderSkus()) {
-				for (final Map.Entry<OrderSku, GiftCertificate> entry : giftCertificateMap.entrySet()) {
-					if (orderSku.equals(entry.getKey())) {
-						final GiftCertificate giftCertificate = entry.getValue();
-						orderSku.setFieldValue(GiftCertificate.KEY_CODE, giftCertificate.getGiftCertificateCode());
-						orderSku.setFieldValue(GiftCertificate.KEY_GUID, giftCertificate.getGuid());
-						orderSku.setFieldValue(GiftCertificate.KEY_SENDER_EMAIL, giftCertificate.getPurchaser().getEmail());
-					}
-				}
-			}
+		for (final Map.Entry<OrderSku, GiftCertificate> entry : giftCertificateMap.entrySet()) {
+			final OrderSku orderSku = entry.getKey();
+			final GiftCertificate giftCertificate = entry.getValue();
+
+			orderSku.getModifierFields().put(GiftCertificate.KEY_CODE, giftCertificate.getGiftCertificateCode());
+			orderSku.getModifierFields().put(GiftCertificate.KEY_GUID, giftCertificate.getGuid());
+			orderSku.getModifierFields().put(GiftCertificate.KEY_SENDER_EMAIL, giftCertificate.getPurchaser().getEmail());
 		}
 	}
 

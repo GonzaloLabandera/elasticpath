@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 

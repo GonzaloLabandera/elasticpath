@@ -64,13 +64,14 @@ public class SessionPriceListLifecycleImplTest {
 				will(returnValue(catalog));
 				allowing(catalog).getCode();
 				will(returnValue(CATALOG_CODE));
-				allowing(customerSession).getShopper();
-				will(returnValue(shopper));
 
-				allowing(shopper).getCurrency();
+				allowing(customerSession).getCurrency();
 				will(returnValue(currency));
-				allowing(shopper).getTagSet();
+				allowing(customerSession).getCustomerTagSet();
 				will(returnValue(tagSet));
+
+				allowing(shopper).getCustomerSession();
+				will(returnValue(customerSession));
 			}
 		});
 	}
@@ -80,7 +81,7 @@ public class SessionPriceListLifecycleImplTest {
 		final PriceListStack priceListStack = new PriceListStackImpl();
 		context.checking(new Expectations() {
 			{
-				allowing(shopper).isPriceListStackValid();
+				allowing(customerSession).isPriceListStackValid();
 				will(returnValue(false));
 
 				// Really all I want to check is that this collaborator
@@ -89,7 +90,7 @@ public class SessionPriceListLifecycleImplTest {
 				will(returnValue(priceListStack));
 
 				// Then the price list on the session is updated.
-				oneOf(shopper).setPriceListStack(priceListStack);
+				oneOf(customerSession).setPriceListStack(priceListStack);
 			}
 		});
 
@@ -103,53 +104,14 @@ public class SessionPriceListLifecycleImplTest {
 		final PriceListStack priceListStack = new PriceListStackImpl();
 		context.checking(new Expectations() {
 			{
-				allowing(shopper).isPriceListStackValid();
+				allowing(customerSession).isPriceListStackValid();
 				will(returnValue(true));
 
 				never(priceListLookupService).getPriceListStack(
 						with(any(String.class)), with(any(Currency.class)), with(any(TagSet.class)));
-				never(shopper).setPriceListStack(priceListStack);
+				never(customerSession).setPriceListStack(priceListStack);
 			}
 		});
 		sessionPriceListLifecycle.refreshPriceListStack(customerSession, store);
-	}
-
-	@Test
-	public void testShopperRefreshPriceListStack() throws Exception {
-		final PriceListStack priceListStack = new PriceListStackImpl();
-		context.checking(new Expectations() {
-			{
-				allowing(shopper).isPriceListStackValid();
-				will(returnValue(false));
-
-				// Really all I want to check is that this collaborator
-				// is called and that the price list stack is updated (see below).
-				allowing(priceListLookupService).getPriceListStack(CATALOG_CODE, currency, tagSet);
-				will(returnValue(priceListStack));
-
-				// Then the price list on the session is updated.
-				oneOf(shopper).setPriceListStack(priceListStack);
-			}
-		});
-
-		// When the price list stack is refreshed.
-		sessionPriceListLifecycle.refreshPriceListStack(shopper, CATALOG_CODE);
-		context.assertIsSatisfied();
-	}
-
-	@Test
-	public void testShopperNoRefreshWhenPriceListStackIsUpToDate() {
-		final PriceListStack priceListStack = new PriceListStackImpl();
-		context.checking(new Expectations() {
-			{
-				allowing(shopper).isPriceListStackValid();
-				will(returnValue(true));
-
-				never(priceListLookupService).getPriceListStack(
-						with(any(String.class)), with(any(Currency.class)), with(any(TagSet.class)));
-				never(shopper).setPriceListStack(priceListStack);
-			}
-		});
-		sessionPriceListLifecycle.refreshPriceListStack(shopper, CATALOG_CODE);
 	}
 }

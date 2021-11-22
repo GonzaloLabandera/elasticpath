@@ -376,7 +376,7 @@ public class CalculatedBundleShoppingItemPriceBuilderTest {
 		Shopper shopper = new ShopperImpl();
 		shopper.setShopperMemento(shopperMemento);
 		shopper.setGuid("SHOPPER_GUID");
-		shopper.updateTransientDataWith(customerSession);
+		shopper.setCustomerSession(customerSession);
 		return shopper;
 	}
 

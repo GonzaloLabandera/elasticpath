@@ -143,7 +143,10 @@ public final class Operation implements Serializable {
 		if (startedAt != null) {
 			this.totalOpDurationMs = finishedAt.getTime() - startedAt.getTime();
 		} else if (!jpaQueries.isEmpty()) {
-			this.totalOpDurationMs = finishedAt.getTime() - ((LinkedList<JPAQuery>) jpaQueries).getFirst().getStartedAt().getTime();
+			Date firstJpaQueryStartAt = ((LinkedList<JPAQuery>) jpaQueries).getFirst().getStartedAt();
+			if (firstJpaQueryStartAt != null) {
+				this.totalOpDurationMs = finishedAt.getTime() - firstJpaQueryStartAt.getTime();
+			}
 		}
 	}
 

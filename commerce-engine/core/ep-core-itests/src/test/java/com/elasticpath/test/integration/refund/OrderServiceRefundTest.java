@@ -25,7 +25,6 @@ import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.builder.shopper.ShoppingContext;
 import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
@@ -40,8 +39,8 @@ import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
-import com.elasticpath.test.integration.checkout.OrderPaymentValidator;
 import com.elasticpath.test.integration.checkout.OrderPaymentMatcherFactory;
+import com.elasticpath.test.integration.checkout.OrderPaymentValidator;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 
 /**
@@ -98,10 +97,8 @@ public class OrderServiceRefundTest extends BasicSpringContextTest {
 
 		shoppingContextPersister.persist(shoppingContext);
 
-		final CustomerSession customerSession = shoppingContext.getCustomerSession();
-
 		checkoutTestCartBuilder.withScenario(scenario)
-				.withCustomerSession(customerSession);
+				.withShopper(shoppingContext.getShopper());
 
 		orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
 				.withShoppingContext(shoppingContext);

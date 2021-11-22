@@ -45,7 +45,7 @@ public enum EPQueryType {
 	TAXJURISDICTION("TaxJurisdiction", TargetLanguage.JPQL),
 
 	/** Query type for customers. */
-	CUSTOMER("Customer", TargetLanguage.LUCENE),
+	CUSTOMER("Customer", TargetLanguage.SQL),
 
 	/** Query type for customer profile attributes. */
 	CUSTOMERPROFILEATTRIBUTE("CustomerProfileAttribute", TargetLanguage.JPQL),

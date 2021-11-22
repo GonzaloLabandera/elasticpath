@@ -13,7 +13,7 @@ import com.elasticpath.importexport.common.dto.pricing.ProductPricesDTO;
  */
 public class ProductPricesAdapter extends AbstractDomainAdapterImpl<Product, ProductPricesDTO> {
 
-	// private static final Logger LOG = Logger.getLogger(ProductPricesAdapter.class);
+	// private static final Logger LOG = LogManager.getLogger(ProductPricesAdapter.class);
 
 	@Override
 	public void populateDTO(final Product product, final ProductPricesDTO productPrices) {

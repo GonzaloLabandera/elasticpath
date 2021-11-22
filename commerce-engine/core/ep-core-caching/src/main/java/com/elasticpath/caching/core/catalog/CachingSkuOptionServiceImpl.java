@@ -3,13 +3,14 @@
  */
 package com.elasticpath.caching.core.catalog;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
+import com.antkorwin.xsync.XSync;
+
+import com.elasticpath.base.cache.CacheResult;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
 import com.elasticpath.caching.core.MutableCachingService;
@@ -24,29 +25,48 @@ import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 
 /**
  * Caching version of the sku option service.
+ *
+ * The caching implemented in this service is unique and different comparing to other caching services because the cached SKU options
+ * are consumed during loading of product types and sku option values from the db.
+ *
+ * OpenJPA will always return a new instance of the same SKU option and option values, flooding the memory with numerous copies.
+ * The problem aggravates when a sku option has thousands of values.
+ * The SkuOption <-> SkuOptionValue relations form a huge tree of copies that eventually lead to OutOfMemory error.
+ *
+ * Using <strong>ProductTypePostLoadStrategy</strong> and <strong>ProductSkuOptionValuePostLoadStrategy</strong> strategies
+ * the loading of product types and sku option values is redirected first to this service to obtain cached values.
+ *
+ * The service uses a single cache for storing sku options by key and product type id.
+ *
+ * Using two caches caused a performance degradation, thus the choice of using a single cache, at the expense of explict casting where required,
+ * is justifiable.
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl implements SkuOptionService, MutableCachingService<SkuOption> {
+
+	private final ProductTypeSkuOptionCacheCoheranceEnforcer cacheProductTypeOptionsBiConsumer = new ProductTypeSkuOptionCacheCoheranceEnforcer();
+	private final XSync<String> skuOptionsSync = new XSync<>();
 
 	private SkuOptionService fallbackSkuOptionService;
 	private ProductTypeDao productTypeDao;
 	private CachedInstanceDetachmentStrategy detachmentStrategy;
 
-	private Cache<SkuOptionCacheKey, SkuOption> skuOptionsCache;
+	/* This cache stores a single SkuOption per option key and a set of sku options per product type uid.
+	   Splitting it into 2 different caches will result in performance degradation.
+	 */
+	private Cache<Object, Object> skuOptionsCache;
 
 	/**
-	 * Initialize skuOption cache.
+	 * Initialize skuOptions cache.
 	 */
 	public void init() {
 		List<ProductType> productTypes = productTypeDao.list();
+		productTypes.forEach(productType -> {
+			Set<SkuOption> skuOptions = productType.getSkuOptions();
 
-		Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap = new HashMap<>();
-
-		for (ProductType productType : productTypes) {
-			cacheSkuOptionsInMap(skuOptionToCacheKeyMap, productType.getSkuOptions(), productType.getUidPk());
-		}
-
-		flushSkuOptionsToCache(skuOptionToCacheKeyMap);
+			detachSkuOptionsAndCache(productType.getUidPk(), skuOptions);
+			skuOptions.forEach(skuOption -> detachSkuOptionAndCache(skuOption.getOptionKey(), skuOption));
+		});
 	}
 
 	@Override
@@ -91,8 +111,7 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 
 	@Override
 	public SkuOption findByKey(final String key) throws EpServiceException {
-		final SkuOptionCacheKey cacheKey = SkuOptionCacheKey.of(key);
-		return skuOptionsCache.get(cacheKey, thisKey -> fallbackSkuOptionService.findByKey(key));
+		return (SkuOption) skuOptionsCache.get(key, theKey -> fallbackGetByKey(key));
 	}
 
 	@Override
@@ -156,22 +175,11 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set<SkuOption> findByProductTypeUid(final Long productTypeUid) {
-		SkuOptionCacheKey cacheKey = SkuOptionCacheKey.of(productTypeUid);
-
-		Collection<SkuOption> skuOptions = skuOptionsCache.getAllByPartialKey(cacheKey);
-
-		if (null == skuOptions) {
-			skuOptions = fallbackSkuOptionService.findByProductTypeUid(productTypeUid);
-
-			Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap = new HashMap<>();
-
-			cacheSkuOptionsInMap(skuOptionToCacheKeyMap, skuOptions, productTypeUid);
-
-			flushSkuOptionsToCache(skuOptionToCacheKeyMap);
-		}
-
-		return new HashSet<>(skuOptions);
+		return (Set<SkuOption>) skuOptionsCache.get(productTypeUid,
+				theKey -> fallbackSkuOptionService.findByProductTypeUid(productTypeUid),
+				cacheProductTypeOptionsBiConsumer);
 	}
 
 	@Override
@@ -195,7 +203,7 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 	}
 
 
-	public void setSkuOptionsCache(final Cache<SkuOptionCacheKey, SkuOption> skuOptionsCache) {
+	public void setSkuOptionsCache(final Cache<Object, Object> skuOptionsCache) {
 		this.skuOptionsCache = skuOptionsCache;
 	}
 
@@ -215,36 +223,26 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 		return productTypeDao;
 	}
 
-	protected Cache<SkuOptionCacheKey, SkuOption> getSkuOptionsCache() {
+	protected Cache<Object, Object> getSkuOptionsCache() {
 		return skuOptionsCache;
 	}
-
-	private void cacheSkuOptionsInMap(final Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap, final Collection<SkuOption> skuOptions,
-									  final Long productTypeUid) {
-
-		skuOptions
-				.forEach(skuOption ->
-						skuOptionToCacheKeyMap.computeIfAbsent(skuOption, val -> SkuOptionCacheKey.of(skuOption.getOptionKey()))
-								.withProductTypeUid(productTypeUid)
-
-				);
+	public void setDetachmentStrategy(final CachedInstanceDetachmentStrategy detachmentStrategy) {
+		this.detachmentStrategy = detachmentStrategy;
 	}
 
-	private void flushSkuOptionsToCache(final Map<SkuOption, SkuOptionCacheKey> skuOptionToCacheKeyMap) {
-		skuOptionToCacheKeyMap.forEach((skuOption, cacheKey) -> detachAndCache(cacheKey, skuOption));
-
-		//don't wait for GC - SKU options may contain thousands of SKU values or there could be thousands of options (or any combination)
-		skuOptionToCacheKeyMap.clear();
+	private SkuOption fallbackGetByKey(final String key) {
+		SkuOption skuOption = fallbackSkuOptionService.findByKey(key);
+		return detachSingleSkuOption(skuOption);
 	}
 
 	@Override
-	public void cache(final SkuOption entity) {
-		detachAndCache(SkuOptionCacheKey.of(entity.getOptionKey()), entity);
+	public void cache(final SkuOption skuOption) {
+		detachSkuOptionAndCache(skuOption.getOptionKey(), skuOption);
 	}
 
 	@Override
-	public void invalidate(final SkuOption entity) {
-		skuOptionsCache.remove(SkuOptionCacheKey.of(entity.getOptionKey()));
+	public void invalidate(final SkuOption skuOption) {
+		skuOptionsCache.remove(skuOption.getOptionKey());
 	}
 
 	@Override
@@ -252,21 +250,67 @@ public class CachingSkuOptionServiceImpl extends AbstractEpPersistenceServiceImp
 		skuOptionsCache.removeAll();
 	}
 
-	private void detachAndCache(final SkuOptionCacheKey cacheKey, final SkuOption skuOption) {
-		detachSkuOptionsAndValues(skuOption);
-		skuOptionsCache.put(cacheKey, skuOption);
+	private void detachSkuOptionAndCache(final String skuOptionKey, final SkuOption skuOption) {
+		detachSingleSkuOption(skuOption);
+		skuOptionsCache.put(skuOptionKey, skuOption);
 	}
 
-	private void detachSkuOptionsAndValues(final SkuOption skuOption) {
-		if (skuOption != null) {
-			detachmentStrategy.detach(skuOption);
-			skuOption.getOptionValues().forEach(
-					skuOptionValue -> detachmentStrategy.detach(skuOptionValue)
-			);
+	private void detachSkuOptionsAndCache(final Long productTypeUid, final Set<SkuOption> skuOptions) {
+		detachSkuOptions(skuOptions);
+		skuOptionsCache.put(productTypeUid, skuOptions);
+	}
+
+	private void detachSkuOptions(final Set<SkuOption> skuOptions) {
+		if (skuOptions != null) {
+			skuOptions.forEach(this::detachSingleSkuOption);
 		}
 	}
 
-	public void setDetachmentStrategy(final CachedInstanceDetachmentStrategy detachmentStrategy) {
-		this.detachmentStrategy = detachmentStrategy;
+	private SkuOption detachSingleSkuOption(final SkuOption skuOption) {
+		if (skuOption != null) {
+			detachmentStrategy.detach(skuOption);
+			skuOption.getOptionValues().forEach(detachmentStrategy::detach);
+		}
+
+		return skuOption;
+	}
+
+	/**
+	 * This function properly caches product type sku options.
+	 *
+	 * The <strong>apply</strong> method returns a new set with cached SKU options to avoid flooding the memory with duplicate options.
+	 */
+	private class ProductTypeSkuOptionCacheCoheranceEnforcer implements BiFunction<Object, Object, Object> {
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Object apply(final Object productTypeUid, final Object fallbackProductTypeSkuOptionsObj) {
+			Set<SkuOption> fallbackProdTypeSkuOptions = (Set<SkuOption>) fallbackProductTypeSkuOptionsObj;
+
+			Set<SkuOption> productTypeSkuOptionsToCache = new HashSet<>(fallbackProdTypeSkuOptions.size());
+
+			for (SkuOption skuOption : fallbackProdTypeSkuOptions) {
+				String skuOptionKey = skuOption.getOptionKey();
+
+				/* the synchronization ensures that 2 different product types have the same reference to a common sku option
+				   during multi-thread access
+				 */
+				skuOptionsSync.execute(skuOptionKey, () -> {
+					CacheResult<Object> cachedSkuOptionResult = skuOptionsCache.get(skuOptionKey);
+
+					if (cachedSkuOptionResult.isPresent()) {
+						productTypeSkuOptionsToCache.add((SkuOption) cachedSkuOptionResult.get());
+					} else {
+						detachSingleSkuOption(skuOption);
+						skuOptionsCache.put(skuOptionKey, skuOption);
+						productTypeSkuOptionsToCache.add(skuOption);
+					}
+				});
+			}
+			skuOptionsCache.put(productTypeUid, productTypeSkuOptionsToCache);
+
+			//it's very important to return a set with **cached** options instead the original one to avoid flooding the memory with option copies
+			return productTypeSkuOptionsToCache;
+		}
 	}
 }

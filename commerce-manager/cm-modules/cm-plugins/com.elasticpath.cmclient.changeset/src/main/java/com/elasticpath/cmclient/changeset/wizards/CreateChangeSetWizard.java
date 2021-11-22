@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.changeset.wizards;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.changeset.ChangeSetImageRegistry;
 import com.elasticpath.cmclient.changeset.ChangeSetMessages;

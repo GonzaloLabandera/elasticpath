@@ -3,8 +3,9 @@
  */
 package com.elasticpath.cmclient.changeset.actions;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -33,7 +34,7 @@ import com.elasticpath.service.changeset.ChangeSetManagementService;
  */
 public class DeleteChangeSetAction extends Action {
 
-	private static final Logger LOG = Logger.getLogger(DeleteChangeSetAction.class);
+	private static final Logger LOG = LogManager.getLogger(DeleteChangeSetAction.class);
 	
 	private final ChangeSetsView changeSetsView;
 	private final IWorkbenchPartSite workbenchPartSite;

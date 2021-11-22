@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.core.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Event;
@@ -19,7 +20,7 @@ import com.elasticpath.cmclient.core.handlers.ApplicationErrorHandler;
  */
 public abstract class AbstractAuthorizedAction extends Action {
 
-	private static final Logger LOG = Logger.getLogger(AbstractAuthorizedAction.class);
+	private static final Logger LOG = LogManager.getLogger(AbstractAuthorizedAction.class);
 	
 	/**
 	 * Creates a new action with no text and no image.

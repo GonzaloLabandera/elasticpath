@@ -20,7 +20,8 @@ Feature: HAL format
       | self            |
       | defaultcart     |
       | newaccountform  |
-      | countries  |
+      | countries       |
+	  | references      |
 
   Scenario: Check the HAL format in navigations
     When I open navigations in HAL format

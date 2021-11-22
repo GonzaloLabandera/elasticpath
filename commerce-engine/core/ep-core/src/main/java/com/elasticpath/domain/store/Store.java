@@ -12,6 +12,7 @@ import java.util.TimeZone;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
+import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.TaxJurisdiction;
@@ -458,4 +459,11 @@ public interface Store extends Persistable, Comparable<Store> {
 	 * @param b2CSingleSessionRole the B2C role.
 	 */
 	void setB2CSingleSessionRole(String b2CSingleSessionRole);
+
+	/**
+	 * Gets Modifier fields associated with this store.
+	 *
+	 * @return list of modifier fields
+	 */
+	List<ModifierField> getModifierFields();
 }

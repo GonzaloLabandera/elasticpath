@@ -127,7 +127,8 @@ public class ReservationProcessorImplTest extends AbstractProcessorImplTestBase 
 		when(paymentHistory.getAvailableReservedAmount(any())).thenReturn(reserveRequest.getAmount());
 
 		final PaymentAPIResponse response = testee.reserveToSimulateModify(reserveRequest.getAmount(),
-				reserveRequest.getSelectedOrderPaymentInstruments().get(0), reserveRequest.getCustomRequestData(), reserveRequest.getOrderContext());
+				reserveRequest.getSelectedOrderPaymentInstruments().get(0), reserveRequest.getCustomRequestData(), reserveRequest.getOrderContext(),
+				0);
 
 		checkReservationResponse(response);
 	}
@@ -139,7 +140,8 @@ public class ReservationProcessorImplTest extends AbstractProcessorImplTestBase 
 		when(paymentHistory.getAvailableReservedAmount(any())).thenReturn(reserveRequest.getAmount());
 
 		final PaymentAPIResponse response = testee.reserveToSimulateModify(reserveRequest.getAmount(),
-				reserveRequest.getSelectedOrderPaymentInstruments().get(0), reserveRequest.getCustomRequestData(), reserveRequest.getOrderContext());
+				reserveRequest.getSelectedOrderPaymentInstruments().get(0), reserveRequest.getCustomRequestData(), reserveRequest.getOrderContext(),
+				0);
 
 		assertThat(response.getEvents().size()).isEqualTo(1);
 		assertThat(response.isSuccess()).isTrue();
@@ -157,7 +159,8 @@ public class ReservationProcessorImplTest extends AbstractProcessorImplTestBase 
 		when(paymentHistory.getAvailableReservedAmount(any())).thenReturn(createMoney(BigDecimal.ZERO));
 
 		final PaymentAPIResponse response = testee.reserveToSimulateModify(reserveRequest.getAmount(),
-				reserveRequest.getSelectedOrderPaymentInstruments().get(0), reserveRequest.getCustomRequestData(), reserveRequest.getOrderContext());
+				reserveRequest.getSelectedOrderPaymentInstruments().get(0), reserveRequest.getCustomRequestData(), reserveRequest.getOrderContext(),
+				0);
 
 		assertThat(response.getEvents().size()).isEqualTo(1);
 		assertThat(response.isSuccess()).isFalse();

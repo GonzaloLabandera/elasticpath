@@ -19,7 +19,6 @@
 		<module>authentication-parent</module>
 		<module>event-handlers</module>
 		<module>personalization</module>
-		<module>subject-lookups</module>
 		<module>hds-support</module>
 	</modules>
 

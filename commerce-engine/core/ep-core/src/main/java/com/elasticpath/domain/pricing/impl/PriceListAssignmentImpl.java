@@ -18,19 +18,20 @@ import javax.persistence.TableGenerator;
 
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
+import com.elasticpath.domain.impl.AbstractLegacyEntityImpl;
 import com.elasticpath.domain.pricing.PriceListAssignment;
 import com.elasticpath.domain.pricing.PriceListDescriptor;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.domain.sellingcontext.impl.SellingContextImpl;
-import com.elasticpath.persistence.api.AbstractEntityImpl;
 
 /** @see com.elasticpath.domain.pricing.PriceListAssignment */
+@SuppressWarnings("PMD.ExcessiveParameterList")
 @Entity
 @Table(name = PriceListAssignmentImpl.TABLE_NAME)
-public class PriceListAssignmentImpl extends AbstractEntityImpl implements
-		PriceListAssignment {
+public class PriceListAssignmentImpl extends AbstractLegacyEntityImpl implements PriceListAssignment {
 
 	private static final long serialVersionUID = 88128686384224929L;
 
@@ -54,7 +55,45 @@ public class PriceListAssignmentImpl extends AbstractEntityImpl implements
 	private boolean hidden;
 
 	private String guid;
-	
+
+	/**
+	 * Constructor.
+	 *
+	 * @param plaGuid the priceListAssignment guid.
+	 * @param plaName the priceListAssignment name.
+	 * @param plaDescription the priceListAssignment description.
+	 * @param plaPriority the priceListAssignment priority.
+	 * @param plGuid the priceList guid.
+	 * @param plName the priceListN name.
+	 * @param catGuid the category guid.
+	 * @param catName the category name.
+	 * @param plCurrencyCode the priceListCurrency code.
+	 * @param plaIsHidden the priceListAssignment hidden value.
+	 */
+	@SuppressWarnings("checkstyle:parameternumber")
+	public PriceListAssignmentImpl(final String plaGuid, final String plaName, final String plaDescription, final int plaPriority,
+								   final String plGuid, final String plName, final long catGuid, final String catName,
+								   final String plCurrencyCode, final boolean plaIsHidden) {
+
+
+		catalog = getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
+		priceListDescriptor = getPrototypeBean(ContextIdNames.PRICE_LIST_DESCRIPTOR, PriceListDescriptor.class);
+
+		this.guid = plaGuid;
+		this.name = plaName;
+
+		this.description = plaDescription;
+		this.priority = plaPriority;
+		this.catalog.setGuid(Long.toString(catGuid));
+		this.catalog.setName(catName);
+
+		this.priceListDescriptor.setGuid(plGuid);
+		this.priceListDescriptor.setName(plName);
+		this.priceListDescriptor.setCurrencyCode(plCurrencyCode);
+
+		this.hidden = plaIsHidden;
+	}
+
 	@Override
 	@Id
 	@Column(name = "UIDPK")

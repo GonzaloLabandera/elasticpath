@@ -1,0 +1,13 @@
+-- SQL to drop the current db schema if exists.
+DROP SCHEMA IF EXISTS "${data.population.schemaname}" CASCADE;
+-- SQL to create a new db schema
+CREATE SCHEMA "${data.population.schemaname}";
+
+-- varchar type alteration
+ALTER TYPE varchar OWNER TO "${data.population.username}";
+
+DROP CAST IF EXISTS (character varying AS bigint);
+CREATE CAST (character varying AS bigint) WITH INOUT AS IMPLICIT;
+
+-- required for using UUID functions in Liquibase scripts
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

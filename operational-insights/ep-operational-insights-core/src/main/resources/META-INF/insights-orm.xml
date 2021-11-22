@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+	<named-native-query name="REVENUE_SINCE_DATE">
+		<query>
+			SELECT STORECODE storeCode, CURRENCY currencyCode, DATE(CREATED_DATE) orderDate, SUM(TOTAL) bookedRevenue, COUNT(ORDER_NUMBER) orderCount
+			FROM TORDER
+			WHERE CREATED_DATE >= ?
+			GROUP BY STORECODE, CURRENCY, DATE(CREATED_DATE)
+			ORDER BY DATE(CREATED_DATE), STORECODE, CURRENCY
+		</query>
+	</named-native-query>
+	<named-native-query name="REVENUE_SINCE_DATE_ORACLE">
+		<query>
+			SELECT STORECODE storeCode, CURRENCY currencyCode, TRUNC(CREATED_DATE) orderDate, SUM(TOTAL) bookedRevenue, COUNT(ORDER_NUMBER) orderCount
+			FROM TORDER
+			WHERE CREATED_DATE >= ?
+			GROUP BY STORECODE, CURRENCY, TRUNC(CREATED_DATE)
+			ORDER BY TRUNC(CREATED_DATE), STORECODE, CURRENCY
+		</query>
+	</named-native-query>
+</entity-mappings>

@@ -243,7 +243,7 @@ public class ReturnTaxOperationServiceImpl implements ReturnTaxOperationService 
 				convertToPrice(orderReturnSku, currency),
 				1,
 				orderReturnSku.getOrderSku().getOrdering(),
-				orderReturnSku.getOrderSku().getFields());
+				orderReturnSku.getOrderSku().getModifierFields().getMap());
 
 		orderSku.setGuid(orderReturnSku.getGuid());
 

@@ -4,7 +4,8 @@
 
 package com.elasticpath.orderprocessing.orderhold.messaging.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.event.EventOriginatorHelper;
@@ -28,7 +29,7 @@ import com.elasticpath.service.order.OrderService;
  */
 public class HoldResolutionMessageProcessorImpl implements HoldResolutionMessageProcessor {
 
-	private static final Logger LOG = Logger.getLogger(HoldResolutionMessageProcessorImpl.class);
+	private static final Logger LOG = LogManager.getLogger(HoldResolutionMessageProcessorImpl.class);
 
 	private OrderLockService orderLockService;
 	private OrderService orderService;
@@ -42,15 +43,14 @@ public class HoldResolutionMessageProcessorImpl implements HoldResolutionMessage
 
 		if (!isResolved(context.getOrderHoldStatus())
 				&& !isUnresolvable(context.getOrderHoldStatus())) {
-			LOG.warn("Cannot resolve order hold [" + context.getOrderHold().getGuid() + "] with unknown status ["
-					+ context.getOrderHoldStatus() + "].  Message will be ignored.");
+			LOG.warn("Cannot resolve order hold [{}] with unknown status [{}].  Message will be ignored.", context.getOrderHold().getGuid(),
+					context.getOrderHoldStatus());
 			return;
 		}
 
 		if (!hasPermission(context.getCmUser(), context.getOrderHold())) {
-			LOG.warn("User [" + context.getCmUser().getUsername() + "] does not have permission ["
-					+ context.getOrderHold().getPermission() + ")]to resolve hold for order ["
-					+ context.getOrder().getOrderNumber() + "].  Message will be ignored.");
+			LOG.warn("User [{}] does not have permission [{}] to resolve hold for order [{}].  Message will be ignored.",
+					context.getCmUser().getUsername(), context.getOrderHold().getPermission(), context.getOrder().getOrderNumber());
 			return;
 		}
 
@@ -59,8 +59,8 @@ public class HoldResolutionMessageProcessorImpl implements HoldResolutionMessage
 
 			//make sure that this order wasn't resolved by another ORDER_HOLDS_RESOLVED message before we could grab the lock
 			if (!isOnHold(context.getOrder())) {
-				LOG.warn("Cannot resolve order hold [" + context.getOrderHold().getGuid() + "] as order ["
-						+ context.getOrder().getOrderNumber() + "] is no longer on hold.  Message will be ignored.");
+				LOG.warn("Cannot resolve order hold [{}] as order [{}] is no longer on hold.  Message will be ignored.",
+						context.getOrderHold().getGuid(), context.getOrder().getOrderNumber());
 				return;
 			}
 

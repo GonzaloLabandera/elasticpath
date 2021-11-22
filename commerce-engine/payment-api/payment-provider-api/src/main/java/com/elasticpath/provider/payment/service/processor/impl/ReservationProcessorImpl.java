@@ -112,12 +112,14 @@ public class ReservationProcessorImpl extends AbstractProcessor implements Reser
 
 	@Override
 	public PaymentAPIResponse reserveToSimulateModify(final MoneyDTO amount, final OrderPaymentInstrumentDTO paymentInstrument,
-													  final Map<String, String> customRequestData, final OrderContext orderContext) {
+													  final Map<String, String> customRequestData, final OrderContext orderContext,
+													  final int rereserveCount) {
 		final ReserveRequest reserveRequest = ReserveRequestBuilder.builder()
 				.withAmount(amount)
 				.withSelectedOrderPaymentInstruments(Collections.singletonList(paymentInstrument))
 				.withCustomRequestData(customRequestData)
 				.withOrderContext(orderContext)
+				.withRereserveCount(rereserveCount)
 				.build(getBeanFactory());
 		final PaymentEvent paymentEvent = getPaymentProvider(paymentInstrument.getPaymentInstrument().getPaymentProviderConfigurationGuid())
 				.getCapability(ReserveCapability.class)
@@ -181,7 +183,7 @@ public class ReservationProcessorImpl extends AbstractProcessor implements Reser
 	 * @return payment event
 	 */
 	protected PaymentEvent executeCapability(final ReserveCapability capability,
-											 final PaymentAPIRequest paymentAPIRequest,
+											 final ReserveRequest paymentAPIRequest,
 											 final OrderPaymentInstrumentDTO instrument,
 											 final MoneyDTO amount) {
 		try {
@@ -213,7 +215,7 @@ public class ReservationProcessorImpl extends AbstractProcessor implements Reser
 	 * @param amount            actual reservation amount
 	 * @return reservation plugin capability request
 	 */
-	protected ReserveCapabilityRequest createReserveCapabilityRequest(final PaymentAPIRequest paymentAPIRequest,
+	protected ReserveCapabilityRequest createReserveCapabilityRequest(final ReserveRequest paymentAPIRequest,
 																	  final OrderPaymentInstrumentDTO instrument,
 																	  final MoneyDTO amount) {
 		return ReserveCapabilityRequestBuilder.builder()
@@ -221,6 +223,7 @@ public class ReservationProcessorImpl extends AbstractProcessor implements Reser
 				.withAmount(amount)
 				.withPaymentInstrumentData(instrument.getPaymentInstrument().getData())
 				.withOrderContext(paymentAPIRequest.getOrderContext())
+				.withRereserveCount(paymentAPIRequest.getRereserveCount())
 				.build(getBeanFactory().getPrototypeBean(RESERVE_CAPABILITY_REQUEST, ReserveCapabilityRequest.class));
 	}
 

@@ -23,7 +23,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Predicate;
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +36,7 @@ import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shopper.ShopperReference;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
@@ -47,7 +45,7 @@ import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.definition.prices.OfferPriceRangeEntity;
 import com.elasticpath.rest.definition.prices.PriceRangeEntity;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.price.PriceRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
@@ -77,7 +75,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 
 	private final ShoppingItemDtoFactory shoppingItemDtoFactory;
 	private final StoreRepository storeRepository;
-	private final CustomerSessionRepository customerSessionRepository;
+	private final ShopperRepository shopperRepository;
 	private final PriceLookupFacade priceLookupFacade;
 	private final ProductSkuRepository productSkuRepository;
 	private final ReactiveAdapter reactiveAdapter;
@@ -104,7 +102,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 	 *
 	 * @param shoppingItemDtoFactory    		shopping item dto factory
 	 * @param storeRepository           		store repository
-	 * @param customerSessionRepository 		customer session repository
+	 * @param shopperRepository         		shopper repository
 	 * @param priceLookupFacade         		price lookup facade
 	 * @param productSkuRepository      		product sku repository
 	 * @param storeProductRepository    		store product repository
@@ -116,10 +114,10 @@ public class PriceRepositoryImpl implements PriceRepository {
 	 */
 	@SuppressWarnings({"PMD.ExcessiveParameterList", "checkstyle:parameternumber"})
 	@Inject
-	PriceRepositoryImpl(
+	public PriceRepositoryImpl(
 			@Named("shoppingItemDtoFactory") final ShoppingItemDtoFactory shoppingItemDtoFactory,
 			@Named("storeRepository") final StoreRepository storeRepository,
-			@Named("customerSessionRepository") final CustomerSessionRepository customerSessionRepository,
+			@Named("shopperRepository") final ShopperRepository shopperRepository,
 			@Named("priceLookupFacade") final PriceLookupFacade priceLookupFacade,
 			@Named("productSkuRepository") final ProductSkuRepository productSkuRepository,
 			@Named("storeProductRepository") final StoreProductRepository storeProductRepository,
@@ -128,10 +126,9 @@ public class PriceRepositoryImpl implements PriceRepository {
 			@Named("storeService") final StoreService storeService,
 			@Named("storeProductService") final StoreProductService storeProductService,
 			@Named("moneyTransformer") final MoneyTransformer moneyTransformer) {
-
 		this.shoppingItemDtoFactory = shoppingItemDtoFactory;
 		this.storeRepository = storeRepository;
-		this.customerSessionRepository = customerSessionRepository;
+		this.shopperRepository = shopperRepository;
 		this.priceLookupFacade = priceLookupFacade;
 		this.productSkuRepository = productSkuRepository;
 		this.reactiveAdapter = reactiveAdapter;
@@ -141,7 +138,6 @@ public class PriceRepositoryImpl implements PriceRepository {
 		this.storeProductService = storeProductService;
 		this.moneyTransformer = moneyTransformer;
 	}
-
 
 	@Override
 	@CacheResult(uniqueIdentifier = "getPrice")
@@ -205,8 +201,8 @@ public class PriceRepositoryImpl implements PriceRepository {
 	}
 
 	private Map<String, ProductSku> getAvailableSkus(final Product product) {
-		CustomerSession customerSession = customerSessionRepository.findOrCreateCustomerSession().blockingGet();
-		Store store = storeService.findStoreWithCode(customerSession.getShopper().getStoreCode());
+		Shopper shopper = shopperRepository.findOrCreateShopper().blockingGet();
+		Store store = storeService.findStoreWithCode(shopper.getStoreCode());
 		StoreProduct storeProduct = storeProductService.getProductForStore(product, store);
 		Map<String, ProductSku> productSkuMap = product.getProductSkus();
 
@@ -240,8 +236,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 	 * @return the price.
 	 */
 	protected Maybe<Price> getStorePriceForSku(final String storeCode, final String skuCode) {
-		return customerSessionRepository.findOrCreateCustomerSession()
-				.map(ShopperReference::getShopper)
+		return shopperRepository.findOrCreateShopper()
 				.flatMapMaybe(shopper -> Single.just(shoppingItemDtoFactory.createDto(skuCode, SINGLE_QTY))
 						.flatMapMaybe(shoppingItemDto -> getPriceFromShoppingItemDto(storeCode, shopper, shoppingItemDto, skuCode)));
 	}
@@ -286,8 +281,7 @@ public class PriceRepositoryImpl implements PriceRepository {
 	}
 
 	private Single<Price> getPriceUsingPromotedPrice(final Product product) {
-		return customerSessionRepository.findOrCreateCustomerSession()
-				.map(ShopperReference::getShopper)
+		return shopperRepository.findOrCreateShopper()
 				.flatMap(shopper -> storeRepository.findStoreAsSingle(shopper.getStoreCode())
 						.flatMap(store -> getPriceSingleForProduct(product, shopper, store)));
 	}

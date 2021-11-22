@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.customer.CustomerType;
 import com.elasticpath.rest.definition.accounts.AccountEntity;
 import com.elasticpath.rest.definition.accounts.AccountIdentifier;
 import com.elasticpath.rest.definition.profiles.ProfileIdentifier;
@@ -52,7 +53,7 @@ public class SelectedAccountFromProfileLinksRepositoryImplTest {
 		when(resourceOperationContext.getSubject().getAttributes()).thenReturn(Collections.singletonList(subjectAttribute));
 		when(subjectAttribute.getType()).thenReturn("ACCOUNT_SHARED_ID");
 		when(subjectAttribute.getValue()).thenReturn(ACCOUNT_SHARED_ID);
-		when(customerService.findCustomerGuidBySharedId(ACCOUNT_SHARED_ID)).thenReturn(ACCOUNT_GUID);
+		when(customerService.findCustomerGuidBySharedId(ACCOUNT_SHARED_ID, CustomerType.ACCOUNT)).thenReturn(ACCOUNT_GUID);
 	}
 
 	@Test
@@ -60,6 +61,6 @@ public class SelectedAccountFromProfileLinksRepositoryImplTest {
 		final TestObserver<AccountIdentifier> testObserver = repository.getElements(profileIdentifier).test();
 		testObserver.assertComplete();
 		testObserver.assertNoErrors();
-		verify(customerService).findCustomerGuidBySharedId(ACCOUNT_SHARED_ID);
+		verify(customerService).findCustomerGuidBySharedId(ACCOUNT_SHARED_ID, CustomerType.ACCOUNT);
 	}
 }

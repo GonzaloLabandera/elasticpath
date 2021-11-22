@@ -11,7 +11,8 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.common.pricing.service.BaseAmountFilter;
@@ -34,7 +35,7 @@ import com.elasticpath.service.pricing.PriceListDescriptorService;
  */
 public class PriceListExporterImpl extends AbstractExporterImpl<PriceListDescriptor, PriceListDescriptorDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(PriceListExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PriceListExporterImpl.class);
 
 	private List<String> priceListGUIDs = Collections.emptyList();
 

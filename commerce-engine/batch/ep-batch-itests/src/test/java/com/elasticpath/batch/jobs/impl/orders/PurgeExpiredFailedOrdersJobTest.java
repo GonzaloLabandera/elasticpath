@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManagerFactory;
 
-import org.apache.commons.lang.mutable.MutableLong;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.openjpa.persistence.OpenJPAEntityManagerFactorySPI;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.junit.Test;
@@ -47,7 +47,6 @@ public class PurgeExpiredFailedOrdersJobTest extends DbTestCase {
 	private static final TableDTO[] TABLES_BY_ORDER_UID = new TableDTO[]{
 			new TableDTO("TORDERAUDIT"),
 			new TableDTO("TAPPLIEDRULE"),
-			new TableDTO("TORDERDATA"),
 			new TableDTO("TORDERSKU", "", 3),
 			new TableDTO("TORDERLOCK"),
 			new TableDTO("TORDERRETURN"),
@@ -68,7 +67,6 @@ public class PurgeExpiredFailedOrdersJobTest extends DbTestCase {
 	};
 
 	private static final TableDTO[] TABLES_BY_ORDER_SKU_UID = new TableDTO[]{
-			new TableDTO("TORDERITEMDATA", "ORDERSKU_UID"),
 			new TableDTO("TORDERSKUPARENT", "CHILD_UID", 2),
 			new TableDTO("TORDERSKUPARENT", "PARENT_UID", 2),
 			new TableDTO("TSHOPPINGITEMRECURRINGPRICE", "ORDERSKU_UID")};
@@ -220,14 +218,6 @@ public class PurgeExpiredFailedOrdersJobTest extends DbTestCase {
 
 		doInTransaction(status -> testPersistenceEngine.executeNativeQuery(appliedRuleInsertQuery));
 
-		//order data
-		String orderDataInsertQuery = format("INSERT INTO TORDERDATA "
-						+ "(UIDPK, ORDER_UID, ITEM_KEY) "
-						+ "VALUES (%d, %d, 'AC/DC')",
-				uidPk, uidPk);
-
-		doInTransaction(status -> testPersistenceEngine.executeNativeQuery(orderDataInsertQuery));
-
 		//CM USER
 		String cmUserInsertQuery = format("INSERT INTO TCMUSER "
 						+ "(UIDPK, GUID, USER_NAME, EMAIL, PASSWORD, CREATION_DATE) "
@@ -325,14 +315,6 @@ public class PurgeExpiredFailedOrdersJobTest extends DbTestCase {
 				uidPk, UUID.randomUUID(), uidPk, uidPk);
 
 		doInTransaction(status -> testPersistenceEngine.executeNativeQuery(orderReturnSkuInsertQuery));
-
-		//order item data
-		String orderItemDataInsertQuery = format("INSERT INTO TORDERITEMDATA "
-						+ "(UIDPK, ORDERSKU_UID, ITEM_KEY) "
-						+ "VALUES (%d, %d, 'order item data')",
-				uidPk, sku3UidPk);
-
-		doInTransaction(status -> testPersistenceEngine.executeNativeQuery(orderItemDataInsertQuery));
 
 		//create 3-level structure => parent -> child (parent) -> child
 

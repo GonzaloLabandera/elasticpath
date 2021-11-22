@@ -5,31 +5,38 @@ package com.elasticpath.service.shoppingcart.validation.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.EmailValidator;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.pf4j.Extension;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.common.dto.StructuredErrorMessageType;
-import com.elasticpath.base.common.dto.StructuredErrorResolution;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidator;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.annotations.XPFEmbedded;
+import com.elasticpath.xpf.connectivity.annontation.XPFAssignment;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessage;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorMessageType;
+import com.elasticpath.xpf.connectivity.dto.XPFStructuredErrorResolution;
+import com.elasticpath.xpf.connectivity.entity.XPFCustomer;
+import com.elasticpath.xpf.connectivity.entity.XPFShopper;
+import com.elasticpath.xpf.connectivity.entity.XPFShoppingCart;
+import com.elasticpath.xpf.connectivity.extension.XPFExtensionPointImpl;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingCartValidator;
 
 /**
  * Determines if a valid email address has been provided.
  */
-public class EmailAddressShoppingCartValidatorImpl implements ShoppingCartValidator {
+@SuppressWarnings("checkstyle:magicnumber")
+@Extension
+@XPFEmbedded
+@XPFAssignment(extensionPoint = XPFExtensionPointEnum.VALIDATE_SHOPPING_CART_AT_CHECKOUT, priority = 1030)
+public class EmailAddressShoppingCartValidatorImpl extends XPFExtensionPointImpl implements ShoppingCartValidator {
 
 	/**
 	 * Message id for this validation.
 	 */
 	public static final String MESSAGE_ID = "need.email";
-
-	private Set<String> reservedEmails;
 
 	/**
 	 * Validates customer email address.
@@ -39,12 +46,12 @@ public class EmailAddressShoppingCartValidatorImpl implements ShoppingCartValida
 	 * empty collection if the validation is successful.
 	 */
 	@Override
-	public Collection<StructuredErrorMessage> validate(final ShoppingCartValidationContext context) {
-		ShoppingCart shoppingCart = context.getShoppingCart();
+	public Collection<XPFStructuredErrorMessage> validate(final XPFShoppingCartValidationContext context) {
+		XPFShoppingCart shoppingCart = context.getShoppingCart();
 
-		Shopper shopper = shoppingCart.getShopper();
+		XPFShopper shopper = shoppingCart.getShopper();
 
-		Customer customer = shopper.getCustomer();
+		XPFCustomer customer = shopper.getUser();
 
 		String email = customer.getEmail();
 
@@ -52,9 +59,9 @@ public class EmailAddressShoppingCartValidatorImpl implements ShoppingCartValida
 			return Collections.emptyList();
 		}
 
-		StructuredErrorMessage errorMessage = new StructuredErrorMessage(StructuredErrorMessageType.NEEDINFO, MESSAGE_ID,
+		XPFStructuredErrorMessage errorMessage = new XPFStructuredErrorMessage(XPFStructuredErrorMessageType.NEEDINFO, MESSAGE_ID,
 				"Customer email address must be specified.", Collections.emptyMap(),
-				new StructuredErrorResolution(Customer.class, customer.getGuid()));
+				new XPFStructuredErrorResolution(Customer.class, customer.getGuid()));
 		return Collections.singletonList(errorMessage);
 	}
 
@@ -65,15 +72,6 @@ public class EmailAddressShoppingCartValidatorImpl implements ShoppingCartValida
 	 * @return true if the email is valid
 	 */
 	protected boolean isValidEmail(final String emailAddress) {
-		return StringUtils.isNotBlank(emailAddress) && EmailValidator.getInstance().isValid(emailAddress)
-				&& !reservedEmails.contains(emailAddress);
-	}
-
-	protected Set<String> getReservedEmails() {
-		return reservedEmails;
-	}
-
-	public void setReservedEmails(final Set<String> reservedEmails) {
-		this.reservedEmails = reservedEmails;
+		return StringUtils.isNotBlank(emailAddress) && EmailValidator.getInstance().isValid(emailAddress);
 	}
 }

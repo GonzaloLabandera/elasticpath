@@ -101,11 +101,13 @@ public class ChangeSetServiceImplTest {
 		BusinessObjectGroupMember businessObjectGroupMember1 = new BusinessObjectGroupMemberImpl();
 		businessObjectGroupMember1.setObjectIdentifier("100000");
 		businessObjectGroupMember1.setObjectType("Product");
+		businessObjectGroupMember1.setGroupId(changeSetGuid);
 		groupMembers.add(businessObjectGroupMember1);
 
 		BusinessObjectGroupMember businessObjectGroupMember2 = new BusinessObjectGroupMemberImpl();
 		businessObjectGroupMember2.setObjectIdentifier("100001");
 		businessObjectGroupMember2.setObjectType("Product");
+		businessObjectGroupMember2.setGroupId(changeSetGuid);
 		groupMembers.add(businessObjectGroupMember2);
 
 		final Map<String, String> map = new HashMap<>();
@@ -130,7 +132,8 @@ public class ChangeSetServiceImplTest {
 			oneOf(changeSetPolicy).resolveMetaData(with(any(BusinessObjectDescriptor.class)));
 			will(returnValue(map));
 
-			oneOf(changeSetMemberDao).findBusinessObjectMetadataByDescriptor(with(any(BusinessObjectDescriptor.class)));
+			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndDescriptor(
+					with(changeSetGuid), with(any(BusinessObjectDescriptor.class)));
 			will(returnValue(new ArrayList<BusinessObjectMetadata>()));
 
 			oneOf(beanFactory).getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_METADATA, BusinessObjectMetadata.class);

@@ -19,7 +19,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.ObjectFactory;
 
 import com.elasticpath.domain.search.IndexBuildStatus;
@@ -41,7 +42,7 @@ import com.elasticpath.service.search.IndexType;
  */
 public class IndexBuildStatusUpdater {
 
-	private static final Logger LOG = Logger.getLogger(IndexBuildStatusUpdater.class);
+	private static final Logger LOG = LogManager.getLogger(IndexBuildStatusUpdater.class);
 	
 	private static final long POLLING_INTERVAL_IN_MILLISECONDS = 500L;
 	
@@ -49,7 +50,7 @@ public class IndexBuildStatusUpdater {
 
 	private final BlockingQueue<IndexBuildStatus> waitingQueue = new LinkedBlockingDeque<>();
 	
-	private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+	private ScheduledExecutorService executorService;
 	
 	private GuardedIndexBuildStatusDao guardedIndexBuildStatusDao;
 
@@ -69,8 +70,14 @@ public class IndexBuildStatusUpdater {
 	 * internal <code>Queue</code> and passes it to the internal <code>IndexBuildStatusDao</code>.
 	 */
 	public void initialize() {
-		executorService.scheduleWithFixedDelay(new UpdateProcessor(),
-		0, POLLING_INTERVAL_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+		if (executorService == null) {
+			waitingQueue.clear();  // this supports test scenarios
+			executorService = Executors.newSingleThreadScheduledExecutor();
+			executorService.scheduleWithFixedDelay(new UpdateProcessor(),
+					0, POLLING_INTERVAL_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+		} else {
+			LOG.debug("Scheduled executor service is already initialized");
+		}
 	}
 
 	/**
@@ -139,16 +146,22 @@ public class IndexBuildStatusUpdater {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Shutting down IndexBuildStatusUpdater");
 		}
-		executorService.shutdown();
-		try {
-			if (!executorService.awaitTermination(MAX_TERMINATION_TIME_IN_SECONDS, TimeUnit.SECONDS)) {
-				executorService.shutdownNow(); // Cancel currently executing tasks
+		if (executorService == null) {
+			LOG.debug("Scheduled executor service is already shutdown");
+		} else {
+			executorService.shutdown();
+			try {
+				if (!executorService.awaitTermination(MAX_TERMINATION_TIME_IN_SECONDS, TimeUnit.SECONDS)) {
+					executorService.shutdownNow(); // Cancel currently executing tasks
+				}
+			} catch (InterruptedException ie) {
+				// (Re-)Cancel if current thread also interrupted
+				executorService.shutdownNow();
+				// Preserve interrupt status
+				Thread.currentThread().interrupt();
+			} finally {
+				executorService = null;
 			}
-		} catch (InterruptedException ie) {
-			// (Re-)Cancel if current thread also interrupted
-			executorService.shutdownNow();
-			// Preserve interrupt status
-			Thread.currentThread().interrupt();
 		}
 	}
 

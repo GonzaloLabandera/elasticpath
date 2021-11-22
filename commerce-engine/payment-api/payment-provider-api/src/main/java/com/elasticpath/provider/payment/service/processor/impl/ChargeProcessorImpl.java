@@ -204,7 +204,7 @@ public class ChargeProcessorImpl extends AbstractProcessor implements ChargeProc
 					final Map<String, String> customRequestData = chargeRequest.getCustomRequestData();
 					final OrderContext orderContext = chargeRequest.getOrderContext();
 					final PaymentAPIResponse reservationResponse = reservationProcessor.reserveToSimulateModify(
-							toBeReserved, instrumentDTO, customRequestData, orderContext);
+							toBeReserved, instrumentDTO, customRequestData, orderContext, calculateReservationCount(chargeRequest));
 					paymentEvents.addAll(reservationResponse.getEvents());
 				}
 				getMoneyDtoCalculator().resetToZero(toBeCharged);
@@ -216,6 +216,14 @@ public class ChargeProcessorImpl extends AbstractProcessor implements ChargeProc
 		}
 
 		return paymentEvents;
+	}
+
+	private int calculateReservationCount(final ChargeRequest request) {
+		return Math.toIntExact(request.getLedger()
+				.stream()
+				.filter(payment -> payment.getPaymentType() == TransactionType.RESERVE
+						|| payment.getPaymentType() == TransactionType.MODIFY_RESERVE)
+				.count());
 	}
 
 	private void processFailedRequest(final MoneyDTO toBeCharged, final PaymentEvent reservationEvent, final ChargeRequest chargeRequest,

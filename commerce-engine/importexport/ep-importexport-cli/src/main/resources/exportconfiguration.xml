@@ -30,8 +30,7 @@
    <exporter type="PAYMENTPROVIDER"/>
    <exporter type="WAREHOUSE"/>
    
-   <exporter type="CUSTOMER">
-   </exporter>
+   <exporter type="CUSTOMER"/>
    <exporter type="CUSTOMERPROFILE_ATTRIBUTE"/>
    <exporter type="CUSTOMER_GROUP"/>
    <exporter type="STORE"/>
@@ -56,9 +55,11 @@
    <exporter type="ATTRIBUTE_POLICY"/>
    
    <exporter type="TAGGROUP"/>
+   <exporter type="MODIFIERGROUP"/>
+   <exporter type="MODIFIERGROUPFILTER"/>
 
   <exporter type="USERACCOUNTASSOCIATION"/>
- 
+
   </exporters>
   <packager type="NONE"/>
   <delivery>

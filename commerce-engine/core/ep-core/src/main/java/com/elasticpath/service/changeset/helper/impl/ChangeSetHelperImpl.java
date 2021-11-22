@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
@@ -26,7 +27,7 @@ import com.elasticpath.service.changeset.helper.ChangeSetHelper;
  */
 public class ChangeSetHelperImpl implements ChangeSetHelper {
 
-	private static final Logger LOG = Logger.getLogger(ChangeSetHelperImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetHelperImpl.class);
 
 	private ElasticPath elasticpath;
 

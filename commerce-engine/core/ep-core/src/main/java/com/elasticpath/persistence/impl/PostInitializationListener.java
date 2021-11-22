@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.event.AttachListener;
 import org.apache.openjpa.event.LifecycleEvent;
 import org.apache.openjpa.event.LoadListener;
@@ -36,7 +37,7 @@ import com.elasticpath.persistence.api.support.PostInitializationStrategy;
  * They are not invoked during the PostRefresh event.
  */
 public class PostInitializationListener implements LoadListener, AttachListener, PersistListener {
-	private static final Logger LOG = Logger.getLogger(PostInitializationListener.class);
+	private static final Logger LOG = LogManager.getLogger(PostInitializationListener.class);
 
 	private List<PostInitializationStrategy<? extends Persistable>> postInitStrategies;
 	private List<String> postInitStrategyIds;

@@ -21,7 +21,8 @@ import java.util.stream.StreamSupport;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Before;
@@ -64,7 +65,7 @@ import com.elasticpath.test.integration.DirtiesDatabase;
 @DirtiesDatabase
 public class CategoryUpdateProcessorImplIntegrationTest extends DbTestCase {
 
-	private static final Logger LOGGER = Logger.getLogger(CategoryUpdateProcessorImplIntegrationTest.class);
+	private static final Logger LOGGER = LogManager.getLogger(CategoryUpdateProcessorImplIntegrationTest.class);
 
 	private static final String CATEGORY_CODE = "code";
 	private static final String CATEGORY_TYPE = "categoryType";

@@ -6,7 +6,7 @@ package com.elasticpath.rest.resource.navigations.prototype;
 
 import io.reactivex.Single;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.rest.definition.navigations.CategoryCodeEntity;
 import com.elasticpath.rest.definition.navigations.NavigationLookupFormResource;

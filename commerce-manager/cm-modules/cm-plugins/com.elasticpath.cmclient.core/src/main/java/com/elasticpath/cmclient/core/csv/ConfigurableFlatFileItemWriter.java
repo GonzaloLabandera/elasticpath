@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -22,7 +23,7 @@ import com.elasticpath.common.dto.pricing.BaseAmountDTO;
  */
 public class ConfigurableFlatFileItemWriter extends FlatFileItemWriter<BaseAmountDTO> implements StepExecutionListener {
 
-	private static final Logger LOG = Logger.getLogger(ConfigurableFlatFileItemWriter.class);
+	private static final Logger LOG = LogManager.getLogger(ConfigurableFlatFileItemWriter.class);
 
 	// Clone the resource (also stored in FlatFileItemWriter) here so that we can see it for validation and logging.
 	private Resource fileResource;

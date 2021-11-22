@@ -1,0 +1,1220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>com.elasticpath.extensions</groupId>
+		<artifactId>performance-tests-parent</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>performance-cucumber-tests</artifactId>
+	<version>0.0.0-SNAPSHOT</version>
+	<name>EP ∷ Performance Tests</name>
+
+	<description>
+		Elastic Path REST - Performance Cucumber Integration Tests.
+	</description>
+
+	<properties>
+		<perf-reports.jdbc.url/>
+		<perf-reports.jdbcDriverClass/>
+		<perf-reports.db.username/>
+		<perf-reports.db.password/>
+
+		<epdb.jdbc.driver>org.h2.Driver</epdb.jdbc.driver>
+		<epdb.username>sa</epdb.username>
+		<epdb.password>sa</epdb.password>
+		<epdb.validation.query>SELECT 1</epdb.validation.query>
+
+		<database.output.folder>${project.build.directory}/database</database.output.folder>
+		<result.stats.folder.path>${project.build.directory}/dbstats</result.stats.folder.path>
+		<report.folder.path>${project.build.directory}/performance-html-report</report.folder.path>
+		<performance.metabase.dump.file>${database.output.folder}/performance-metabase.dump</performance.metabase.dump.file>
+		<release.report.base.url>https://s3-us-west-2.amazonaws.com/cucumber-performance-test-results/</release.report.base.url>
+		<!--<cargo.jvmargs.batch>-ea -Dep.catalog.batch.database.drop.script=CLASSPATH:org/springframework/batch/core/schema-drop-h2.sql -Dep.catalog.batch.database.create.script=CLASSPATH:org/springframework/batch/core/schema-h2.sql</cargo.jvmargs.batch>-->
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>run-performance-tests</id>
+			<!--
+				Runs performance tests and generates CSV and JSON files under "target/dbstats" folder.
+				This is a default profile, required for further comparisons (see other profiles below).
+
+				What profile does:
+
+				1. Prepares necessary resources (local H2 db with MOBEE data, reserve ports, etc)
+				2. Starts ActiveMQ, Cortex, integration, batch, and search servers
+				3. Runs cucumber tests
+				4. Generates performance statistics in the form of CSV and JSON files and stores them under "target/dbstats" folder
+			-->
+			<properties>
+				<charset.encoding>UTF-8</charset.encoding>
+				<ep.jms.port.tcp>${ep.activemq.dynamic.itests.port}</ep.jms.port.tcp>
+				<ep.activemq.url>${ep.jms.url}</ep.activemq.url>
+				<ep.activemq.configUri>broker:(${ep.activemq.url})?useJmx=false&amp;persistent=false&amp;useShutdownHook=false&amp;brokerName=${ep.jms.host}${ep.jms.port.tcp}</ep.activemq.configUri>
+
+				<datasource.url>jdbc:h2:file:${database.output.folder}/COMMONTESTDB;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE</datasource.url>
+
+				<ep.catalog.batch.database.drop.script>CLASSPATH:org/springframework/batch/core/schema-drop-h2.sql</ep.catalog.batch.database.drop.script>
+				<ep.catalog.batch.database.create.script>CLASSPATH:org/springframework/batch/core/schema-h2.sql</ep.catalog.batch.database.create.script>
+				<ep.systemtest.smtp.host>mail-disabled-for-tests</ep.systemtest.smtp.host>
+
+				<epdb.url>${datasource.url}</epdb.url>
+
+				<!-- override the db uid/pwd to the values for the local h2 db -->
+				<epdb.systemtest.username>${epdb.username}</epdb.systemtest.username>
+				<epdb.systemtest.password>${epdb.password}</epdb.systemtest.password>
+
+				<!--Cortex settings -->
+				<cortex.initial.jvmargs>-ea -XX:+HeapDumpOnOutOfMemoryError -Dfelix.fileinstall.dir=${project.build.testOutputDirectory}/cortex/system/config -DenableTrustedSubjectHeaderMode=${enableTrustedSubjectHeaderMode}</cortex.initial.jvmargs>
+				<cortex.jmx.jvmargs>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${ep.cortex.jmx.port} -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false</cortex.jmx.jvmargs>
+				<cortex.external.ehcache.config.path.jvmargs>-Dep.external.ehcache.xml.path=${project.build.testOutputDirectory}/ehcache-cucumber.xml</cortex.external.ehcache.config.path.jvmargs>
+				<cortex.logback.threshold.jvmargs>-Dep.logback.console.threshold</cortex.logback.threshold.jvmargs>
+
+				<cortex.cargo.jvmargs>${cortex.initial.jvmargs} ${cortex.jmx.jvmargs} ${cortex.external.ehcache.config.path.jvmargs} ${cortex.logback.threshold.jvmargs}</cortex.cargo.jvmargs>
+
+				<enableTrustedSubjectHeaderMode>false</enableTrustedSubjectHeaderMode>
+
+				<ep.cortex.fixture.logger>INFO</ep.cortex.fixture.logger>
+				<ep.cortex.jmx.port>6969</ep.cortex.jmx.port>
+				<ep.cortex.host>localhost</ep.cortex.host>
+				<ep.cortex.contextUrl>/cortex</ep.cortex.contextUrl>
+				<ep.cortex.uri.prefix/><!-- empty by default -->
+				<ep.cortex.url>http://${ep.cortex.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.cortex.url>
+				<ep.cortex.port.http>${ep.cortex.itest.port.http}</ep.cortex.port.http>
+
+				<ep.rest.authtype>OAuth2</ep.rest.authtype>
+				<ep.rest.baseurl>${ep.cortex.url}</ep.rest.baseurl>
+
+				<ep.studio.contextUrl>/studio</ep.studio.contextUrl>
+				<!-- Search Server Settings -->
+				<cargo.jvmargs.search>-ea</cargo.jvmargs.search>
+
+				<ep.search.host>localhost</ep.search.host>
+				<ep.search.contextUrl>/searchserver</ep.search.contextUrl>
+				<ep.search.port.http>${ep.search.itest.port.http}</ep.search.port.http>
+				<ep.search.url>http://${ep.search.host}:${ep.search.port.http}${ep.search.contextUrl}</ep.search.url>
+				<ep.search.server.url>${ep.search.url}</ep.search.server.url>
+				<ep.search.mode>PRIMARY</ep.search.mode>
+
+				<!-- Integration Server Settings -->
+				<integration.initial.jvmargs>-ea -Dep.changesets.enabled=true -Dep.smtp.host=${ep.systemtest.smtp.host}</integration.initial.jvmargs>
+				<integration.jmx.jvmargs>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${ep.integration.jmx.port} -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false</integration.jmx.jvmargs>
+				<integration.external.ehcache.config.path.jvmargs>-Dep.external.ehcache.xml.path=${project.build.testOutputDirectory}/ehcache-cucumber.xml</integration.external.ehcache.config.path.jvmargs>
+				<integration.cargo.jvmargs>${integration.initial.jvmargs} ${integration.jmx.jvmargs} ${integration.external.ehcache.config.path.jvmargs}</integration.cargo.jvmargs>
+
+				<ep.integration.baseurl>${ep.integration.url}</ep.integration.baseurl>
+				<ep.integration.jmx.port>7969</ep.integration.jmx.port>
+				<ep.integration.port.http>${ep.integration.itest.port.http}</ep.integration.port.http>
+
+				<!-- required for ep-core tool -->
+				<epdb.maven.groupId>com.h2database</epdb.maven.groupId>
+				<epdb.maven.artifactId>h2</epdb.maven.artifactId>
+				<epdb.maven.version>${com.h2database.version}</epdb.maven.version>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-search-webapp</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-integration-webapp</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-cortex-webapp</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>activemq-pool</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>activemq-jms-pool</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>activemq-client</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.fusesource.hawtbuf</groupId>
+					<artifactId>hawtbuf</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.camel</groupId>
+					<artifactId>camel-jms</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.camel</groupId>
+					<artifactId>camel-core</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>commons-pool</groupId>
+					<artifactId>commons-pool</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-pool2</artifactId>
+					<version>${org.apache.commons.pool2.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.geronimo.specs</groupId>
+					<artifactId>geronimo-jms_1.1_spec</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.geronimo.specs</groupId>
+					<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>log4j-over-slf4j</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-common-test-database</artifactId>
+					<version>${project.version}</version>
+					<type>zip</type>
+					<exclusions>
+						<exclusion>
+							<groupId>com.elasticpath.extensions</groupId>
+							<artifactId>ext-data-population-cli</artifactId>
+						</exclusion>
+						<exclusion>
+							<groupId>com.elasticpath.extensions</groupId>
+							<artifactId>ext-data</artifactId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+				<dependency>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-common-files</artifactId>
+					<version>${project.version}</version>
+					<type>zip</type>
+				</dependency>
+			</dependencies>
+
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-report-icons</id>
+								<phase>process-test-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${report.folder.path}</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.build.testOutputDirectory}/reports/icons</directory>
+											<filtering>false</filtering>
+											<includes>*</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<!-- apply properties to common files -->
+							<execution>
+								<id>copy-and-filter-common-files</id>
+								<phase>process-test-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.build.testOutputDirectory}/tmp-common-files</directory>
+											<filtering>true</filtering>
+											<includes>**/*</includes>
+											<excludes>**/server.xml</excludes>
+										</resource>
+										<resource>
+											<directory>${project.build.testOutputDirectory}/tmp-common-files</directory>
+											<filtering>false</filtering>
+											<includes>**/server.xml</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Randomly allocates an available port to each of the listed properties -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>reserve-network-port</id>
+								<goals>
+									<goal>reserve-network-port</goal>
+								</goals>
+								<phase>generate-sources</phase>
+								<configuration>
+									<portNames>
+										<portName>ep.cortex.itest.port.http</portName>
+										<portName>cargo.tomcat.ajp.port</portName>
+										<portName>cargo.rmi.port</portName>
+										<portName>cargo.tomcat.shutdown.port</portName>
+										<portName>ep.activemq.dynamic.itests.port</portName>
+										<portName>ep.search.itest.port.http</portName>
+										<portName>ep.integration.itest.port.http</portName>
+										<portName>search.cargo.tomcat.ajp.port</portName>
+										<portName>search.cargo.rmi.port</portName>
+										<portName>search.cargo.tomcat.shutdown.port</portName>
+										<portName>integration.cargo.tomcat.ajp.port</portName>
+										<portName>integration.cargo.rmi.port</portName>
+										<portName>integration.cargo.tomcat.shutdown.port</portName>
+									</portNames>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Adds dependencies to bring in the In-Memory H2 database -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>unpack-database</id>
+								<phase>generate-test-resources</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<skip>${skipAllTests}</skip>
+									<artifactItems>
+										<artifactItem>
+											<groupId>com.elasticpath.extensions</groupId>
+											<artifactId>ext-common-test-database</artifactId>
+											<overWrite>true</overWrite>
+											<type>zip</type>
+											<outputDirectory>${database.output.folder}</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>com.elasticpath.extensions</groupId>
+											<artifactId>ext-common-files</artifactId>
+											<overWrite>true</overWrite>
+											<type>zip</type>
+											<outputDirectory>${project.build.testOutputDirectory}/tmp-common-files</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Sets up the In-Memory H2 database -->
+					<plugin>
+						<groupId>com.elasticpath.tools</groupId>
+						<artifactId>ep-core-tool</artifactId>
+						<configuration>
+							<jdbcUrl>${datasource.url}</jdbcUrl>
+							<jdbcDriverClass>${epdb.jdbc.driver}</jdbcDriverClass>
+							<jdbcUsername>${epdb.username}</jdbcUsername>
+							<jdbcPassword>${epdb.password}</jdbcPassword>
+							<jdbcConnectionPoolMinIdle>0</jdbcConnectionPoolMinIdle>
+							<jdbcConnectionPoolMaxIdle>0</jdbcConnectionPoolMaxIdle>
+							<skip>${skipAllTests}</skip>
+						</configuration>
+						<executions>
+							<execution>
+								<id>override-settings</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>bulk-set-settings</goal>
+								</goals>
+								<configuration>
+									<settings>
+										<setting>COMMERCE/SYSTEM/SEARCH/searchHost@replica=${ep.search.server.url}</setting>
+									</settings>
+								</configuration>
+							</execution>
+							<execution>
+								<id>build-indexes</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>request-reindex</goal>
+								</goals>
+								<configuration>
+									<wait>true</wait>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- dump H2 db to restore before each test -->
+					<plugin>
+						<groupId>com.elasticpath.extensions</groupId>
+						<artifactId>metabase-processor-plugin</artifactId>
+						<version>${project.version}</version>
+						<executions>
+							<execution>
+								<id>create-h2-snapshot</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>create-h2-snapshot</goal>
+								</goals>
+								<configuration>
+									<jdbcUrl>${datasource.url}</jdbcUrl>
+									<jdbcDriverClass>${epdb.jdbc.driver}</jdbcDriverClass>
+									<jdbcUsername>${epdb.username}</jdbcUsername>
+									<jdbcPassword>${epdb.password}</jdbcPassword>
+									<dbSnapshotFolder>${database.output.folder}</dbSnapshotFolder>
+									<skip>${skipAllTests}</skip>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Run a JMS broker locally -->
+					<plugin>
+						<groupId>org.apache.activemq.tooling</groupId>
+						<artifactId>activemq-maven-plugin</artifactId>
+						<version>${org.apache.activemq.version}</version>
+						<executions>
+							<execution>
+								<id>activemq-embedded-tcp</id>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<phase>package</phase>
+								<configuration>
+									<skip>${skipAllTests}</skip>
+									<fork>true</fork>
+									<configUri>${ep.activemq.configUri}</configUri>
+								</configuration>
+							</execution>
+							<execution>
+								<id>stop-embedded-tcp</id>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+								<phase>post-integration-test</phase>
+								<configuration>
+									<skip>${skipAllTests}</skip>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Spin up a Webapp Container housing Cortex using Cargo  -->
+					<plugin>
+						<groupId>org.codehaus.cargo</groupId>
+						<artifactId>cargo-maven2-plugin</artifactId>
+
+						<executions>
+							<execution>
+								<id>start-dce-container</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+								<configuration>
+									<configuration>
+										<home>${project.build.directory}/tomcat9x/container</home>
+										<properties>
+											<cargo.jvmargs>${cortex.cargo.jvmargs}</cargo.jvmargs>
+											<cargo.servlet.port>${ep.cortex.itest.port.http}</cargo.servlet.port>
+											<cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+											<cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
+											<cargo.tomcat.shutdown.port>${cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
+										</properties>
+									</configuration>
+									<deployables>
+										<deployable>
+											<groupId>com.elasticpath.extensions</groupId>
+											<artifactId>ext-cortex-webapp</artifactId>
+											<type>war</type>
+											<properties>
+												<context>${ep.cortex.contextUrl}</context>
+											</properties>
+										</deployable>
+									</deployables>
+								</configuration>
+							</execution>
+							<execution>
+								<id>stop-dce-container</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+								<configuration>
+									<configuration>
+										<home>${project.build.directory}/tomcat9x/container</home>
+										<properties>
+											<cargo.jvmargs>${cargo.jvmargs.cortex}</cargo.jvmargs>
+											<cargo.servlet.port>${ep.cortex.itest.port.http}</cargo.servlet.port>
+											<cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+											<cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
+											<cargo.tomcat.shutdown.port>${cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
+										</properties>
+									</configuration>
+								</configuration>
+							</execution>
+							<execution>
+								<id>start-search-container</id>
+								<phase>package</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+								<configuration>
+									<configuration>
+										<home>${project.build.directory}/tomcat9x/search-container</home>
+										<properties>
+											<cargo.jvmargs>${cargo.jvmargs.search}</cargo.jvmargs>
+											<cargo.servlet.port>${ep.search.itest.port.http}</cargo.servlet.port>
+											<cargo.tomcat.ajp.port>${search.cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+											<cargo.rmi.port>${search.cargo.rmi.port}</cargo.rmi.port>
+											<cargo.tomcat.shutdown.port>${search.cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
+										</properties>
+									</configuration>
+									<deployables>
+										<deployable>
+											<groupId>com.elasticpath.extensions</groupId>
+											<artifactId>ext-search-webapp</artifactId>
+											<type>war</type>
+											<pingTimeout>600000</pingTimeout>
+											<properties>
+												<context>${ep.search.contextUrl}</context>
+											</properties>
+										</deployable>
+									</deployables>
+								</configuration>
+							</execution>
+							<execution>
+								<id>start-integration-container</id>
+								<phase>package</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+								<configuration>
+									<configuration>
+										<home>${project.build.directory}/tomcat9x/integration-container</home>
+										<properties>
+											<cargo.jvmargs>${integration.cargo.jvmargs}</cargo.jvmargs>
+											<cargo.servlet.port>${ep.integration.itest.port.http}</cargo.servlet.port>
+											<cargo.tomcat.ajp.port>${integration.cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+											<cargo.rmi.port>${integration.cargo.rmi.port}</cargo.rmi.port>
+											<cargo.tomcat.shutdown.port>${integration.cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
+
+											<cargo.start.jvmargs>
+												-Dep.catalog.batch.datasource=${ep.catalog.batch.non.jta.datasource}
+												-Dep.catalog.batch.database.drop.script=${ep.catalog.batch.database.drop.script}
+												-Dep.catalog.batch.database.create.script=${ep.catalog.batch.database.create.script}
+												-Dep.smtp.host=${ep.systemtest.smtp.host}
+											</cargo.start.jvmargs>
+										</properties>
+									</configuration>
+									<deployables>
+										<deployable>
+											<groupId>com.elasticpath.extensions</groupId>
+											<artifactId>ext-integration-webapp</artifactId>
+											<type>war</type>
+											<pingTimeout>600000</pingTimeout>
+											<properties>
+												<context>${ep.integration.context}</context>
+											</properties>
+										</deployable>
+									</deployables>
+								</configuration>
+							</execution>
+						</executions>
+						<configuration>
+							<skip>${skipAllTests}</skip>
+							<!-- This project is not designed to run cargo standalone, use tomcat:run-war in the war project you want. -->
+							<wait>false</wait>
+							<container>
+								<containerId>tomcat9x</containerId>
+								<artifactInstaller>
+									<groupId>org.apache.tomcat</groupId>
+									<artifactId>tomcat</artifactId>
+									<version>${tomcat.version}</version>
+									<type>tar.gz</type>
+								</artifactInstaller>
+								<timeout>1200000</timeout>
+								<dependencies>
+									<dependency>
+										<groupId>com.h2database</groupId>
+										<artifactId>h2</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.apache.activemq</groupId>
+										<artifactId>activemq-pool</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.apache.activemq</groupId>
+										<artifactId>activemq-jms-pool</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.apache.activemq</groupId>
+										<artifactId>activemq-client</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.fusesource.hawtbuf</groupId>
+										<artifactId>hawtbuf</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.apache.camel</groupId>
+										<artifactId>camel-jms</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.apache.camel</groupId>
+										<artifactId>camel-core</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>commons-pool</groupId>
+										<artifactId>commons-pool</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.apache.commons</groupId>
+										<artifactId>commons-pool2</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.apache.geronimo.specs</groupId>
+										<artifactId>geronimo-jms_1.1_spec</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.apache.geronimo.specs</groupId>
+										<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.slf4j</groupId>
+										<artifactId>slf4j-api</artifactId>
+									</dependency>
+									<dependency>
+										<groupId>org.slf4j</groupId>
+										<artifactId>jcl-over-slf4j</artifactId>
+									</dependency>
+								</dependencies>
+								<systemProperties>
+									<java.awt.headless>true</java.awt.headless>
+									<h2.bindAddress>localhost</h2.bindAddress>
+									<!-- Turn logging down out of the gate.  When slf4j starts at debug things get a bit spammy. -->
+									<org.slf4j.simpleLogger.defaultLogLevel>WARN</org.slf4j.simpleLogger.defaultLogLevel>
+									<epdb.username>${epdb.username}</epdb.username>
+									<epdb.password>${epdb.password}</epdb.password>
+									<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
+									<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+									<epdb.url>${epdb.url}</epdb.url>
+									<epdb.ro.url>${epdb.url}</epdb.ro.url>
+									<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+									<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+									<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+									<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+									<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+									<ep.jms.type>${ep.jms.type}</ep.jms.type>
+									<ep.jms.url>${ep.jms.url}</ep.jms.url>
+								</systemProperties>
+							</container>
+							<configuration>
+								<properties>
+									<cargo.logging>medium</cargo.logging>
+								</properties>
+
+								<files>
+									<copy>
+										<file>${project.build.testOutputDirectory}/tomcat9x/server.xml</file>
+										<tofile>conf/server.xml</tofile>
+										<configfile>true</configfile>
+										<overwrite>true</overwrite>
+									</copy>
+								</files>
+							</configuration>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>generate-deployment-target-properties</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target unless="${skipAllTests}">
+										<ant antfile="${basedir}/src/main/scripts/validate.xml"/>
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>echo-generated-artifacts</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target unless="${skipAllTests}">
+										<echo>=======================================================================================</echo>
+										<echo>The JSON and CSV files are stored under ${result.stats.folder.path} folder</echo>
+										<echo>=========================================================================================</echo>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>ci-release-performance-data-processing</id>
+			<!--
+				Stores performance test results into remote metabase (PostgreSQL).
+
+				This profile is used in *release* build Jenkins jobs.
+
+				What profile does:
+
+				1. Connects to remote metabase
+				2. Processes local performance results (target/dbstats/*.csv files)
+				3. Stores results into remote metabase
+				4. Exports the latest metabase results as a db dump and publishes it to Nexus
+			-->
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.elasticpath.extensions</groupId>
+						<artifactId>metabase-processor-plugin</artifactId>
+						<version>${project.version}</version>
+						<configuration>
+							<jdbcUrl>${perf-reports.jdbc.url}</jdbcUrl>
+							<jdbcDriverClass>${perf-reports.jdbcDriverClass}</jdbcDriverClass>
+							<jdbcUsername>${perf-reports.db.username}</jdbcUsername>
+							<jdbcPassword>${perf-reports.db.password}</jdbcPassword>
+							<skip>${skipAllTests}</skip>
+						</configuration>
+						<executions>
+							<execution>
+								<id>process-release-performance-data</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>process-release-performance-data</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>export-release-performance-data</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>export-release-performance-data</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>zip-metabase-dump</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<skipAssembly>${skipAllTests}</skipAssembly>
+							<descriptors>
+								<descriptor>src/main/assembly/export-metabase-zip.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>ci-pr-compare-performance-results</id>
+			<!--
+				Compares PR and release performance results.
+				This profile is used in PR build Jenkins jobs.
+
+				What profile does:
+
+				1. Connects to remote metabase and obtains the latest performance results for the selected release
+				2. Processes local performance results (target/dbstats/*.csv files)
+				3. Compares local and remote results
+				4. Generates "target/performance-html-report/limitedPrHtmlPerformanceReport.json" that will be sent as a GitHub comment back to PR
+				   If the number of tests exceeds the limit (default: 15), the generated JSON will contain only the specified number of results
+				   The full report "target/performance-html-report/fullPrHtmlPerformanceReport.html" will be generated as well and published as a
+				   Jenkins artifact so it can be accessed from the PR.
+
+				How to run:
+
+				From "extensions/system-tests/performance-tests/performance-cucumber-tests" run
+
+				mvn clean install -Prun-performance-tests,ci-pr-compare-performance-results
+
+				To compare results against different EPC version, run with -Depc.version=<EPC_VERSION> (where EPC_VERSION is 8.2, 8.1 etc..)
+
+				E.g. to compare with 8.1 version, run
+				mvn clean install -Prun-performance-tests,ci-pr-compare-performance-results -Depc.version=8.1
+			-->
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.elasticpath.extensions</groupId>
+						<artifactId>metabase-processor-plugin</artifactId>
+						<version>${project.version}</version>
+						<configuration>
+							<jdbcUrl>${perf-reports.jdbc.url}</jdbcUrl>
+							<jdbcDriverClass>${perf-reports.jdbcDriverClass}</jdbcDriverClass>
+							<jdbcUsername>${perf-reports.db.username}</jdbcUsername>
+							<jdbcPassword>${perf-reports.db.password}</jdbcPassword>
+							<skip>${skipAllTests}</skip>
+						</configuration>
+						<executions>
+							<execution>
+								<id>compare-pr-and-release-results</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>compare-results</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>compare-with-imported-metabase</id>
+			<!--
+				Compares local performance and OOTB release results.
+
+				This profile is intended for *customer* developers wishing to verify performance of the local changes
+				against the latest OOTB release performance results.
+
+				What profile does:
+
+				1. Unpacks the db dump file with the latest OOTB performance results (all supported releases are included)
+				2. Create local H2 db - LOCAL_PERFORMANCE_METABASE
+				3. Imports the OOTB db dump
+				4. Processes local performance results (target/dbstats/*.csv files)
+				5. Compares local performance and imported results
+				6. Generates "target/performance-html-report/fullHtmlPerformanceReport.html" report
+
+				How to run:
+
+				From "extensions/system-tests/performance-tests/performance-cucumber-tests" run
+
+				mvn clean install -Prun-performance-tests,compare-with-imported-metabase
+
+				To compare results against different EPC version, run with -Depc.version=<EPC_VERSION> (where EPC_VERSION is 8.2, 8.1 etc..)
+
+				E.g. to compare with 8.1 version, run
+				mvn clean install -Prun-performance-tests,compare-with-imported-metabase -Depc.version=8.1
+
+			-->
+			<properties>
+				<!-- points to "target/dbstats" folder, where all JSON files are stored and available for download from the HTML report -->
+				<local.report.base.url>../dbstats</local.report.base.url>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>unpack-db-script-with-OOTB-performance-results</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>com.elasticpath.extensions</groupId>
+											<artifactId>performance-cucumber-tests</artifactId>
+											<classifier>exported-performance-results</classifier>
+											<type>zip</type>
+											<version>${project.version}</version>
+											<overWrite>true</overWrite>
+											<outputDirectory>${database.output.folder}</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>com.elasticpath.extensions</groupId>
+						<artifactId>metabase-processor-plugin</artifactId>
+						<version>${project.version}</version>
+						<configuration>
+							<jdbcUrl>jdbc:h2:file:${database.output.folder}/LOCAL_PERFORMANCE_METABASE;AUTO_SERVER=TRUE</jdbcUrl>
+							<jdbcDriverClass>${epdb.jdbc.driver}</jdbcDriverClass>
+							<jdbcUsername>${epdb.username}</jdbcUsername>
+							<jdbcPassword>${epdb.password}</jdbcPassword>
+							<skip>${skipAllTests}</skip>
+						</configuration>
+						<executions>
+							<execution>
+								<id>create-local-h2-metabase-table</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>create-metabase-table</goal>
+								</goals>
+								<configuration>
+									<sqlInitFilePath>${project.basedir}/src/test/resources/sql/h2-metabase-init.sql</sqlInitFilePath>
+								</configuration>
+							</execution>
+							<execution>
+								<id>import-ootb-performance-data</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>import-release-performance-data</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>compare-local-and-imported-performance-results</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>compare-results</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>echo-generated-artifacts</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target unless="${skipAllTests}">
+										<echo>========================================================================================================</echo>
+										<echo>Use browser to open ${project.build.directory}/performance-html-report/fullPerformanceReport.html</echo>
+										<echo>========================================================================================================</echo>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>compare-with-remote-metabase</id>
+			<!--
+				Compares local and remote release results.
+				This profile is intended for *EP* developers wishing to verify performance of the local changes
+				against the latest release performance results.
+
+				It is identical to "ci-pr-compare-performance-results" profile with only difference in "local.report.base.url" property
+				which instructs the mojo to always generate full HTML reports.
+
+				What profile does:
+
+				1. Connects to remote metabase and obtains the latest performance results for the selected release
+				2. Processes local performance results (target/dbstats/*.csv files)
+				3. Compares local and remote results
+				4. Generates "target/performance-html-report/fullHtmlPerformanceReport.html" report
+
+				How to run:
+
+				From "extensions/system-tests/performance-tests/performance-cucumber-tests" run
+
+				mvn clean install -Prun-performance-tests,compare-with-remote-metabase
+
+				To compare results against different EPC version, run with -Depc.version=<EPC_VERSION> (where EPC_VERSION is 8.2, 8.1 etc..)
+
+				E.g. to compare with 8.1 version, run
+				mvn clean install -Prun-performance-tests,compare-with-remote-metabase -Depc.version=8.1
+			-->
+			<properties>
+				<!-- points to "target/dbstats" folder, where all JSON files are stored and available for download from the HTML report -->
+				<local.report.base.url>../dbstats</local.report.base.url>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.elasticpath.extensions</groupId>
+						<artifactId>metabase-processor-plugin</artifactId>
+						<version>${project.version}</version>
+						<configuration>
+							<jdbcUrl>${perf-reports.jdbc.url}</jdbcUrl>
+							<jdbcDriverClass>${perf-reports.jdbcDriverClass}</jdbcDriverClass>
+							<jdbcUsername>${perf-reports.db.username}</jdbcUsername>
+							<jdbcPassword>${perf-reports.db.password}</jdbcPassword>
+							<skip>${skipAllTests}</skip>
+						</configuration>
+						<executions>
+							<execution>
+								<id>compare-local-and-remote-performance-results</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>compare-results</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>echo-generated-artifacts</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target unless="${skipAllTests}">
+										<echo>========================================================================================================</echo>
+										<echo>Use browser to open ${project.build.directory}/performance-html-report/fullPerformanceReport.html</echo>
+										<echo>========================================================================================================</echo>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>integration-test-definitions</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ep-cortex-common-test-definitions</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>performance-common-test-definitions</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.tests</groupId>
+			<artifactId>fluent-relos-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-pool</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-jms-pool</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-client</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.fusesource.hawtbuf</groupId>
+			<artifactId>hawtbuf</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest</groupId>
+			<artifactId>ep-rs-annotated-dispatch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.groovy.modules.http-builder</groupId>
+			<artifactId>http-builder</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-groovy</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-java</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-jms-test-support</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-query-analyzer</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${com.h2database.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.elasticpath.tools</groupId>
+				<artifactId>ep-core-tool</artifactId>
+				<configuration>
+					<skip>${skipAllTests}</skip>
+					<jdbcUrl>${epdb.url}</jdbcUrl>
+					<jdbcDriverClass>${epdb.jdbc.driver}</jdbcDriverClass>
+					<jdbcPassword>${epdb.password}</jdbcPassword>
+					<jdbcUsername>${epdb.username}</jdbcUsername>
+					<jdbcConnectionPoolMinIdle>0</jdbcConnectionPoolMinIdle>
+					<jdbcConnectionPoolMaxIdle>0</jdbcConnectionPoolMaxIdle>
+				</configuration>
+				<executions>
+					<execution>
+						<id>override-setting-metadata</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>bulk-set-setting-metadata</goal>
+						</goals>
+						<configuration>
+							<settings>
+								<setting>COMMERCE/SYSTEM/ONHOLD/holdAllOrdersForStore@refreshStrategy=immediate</setting>
+								<setting>COMMERCE/APPSPECIFIC/RCP/accountLockoutThreshold@refreshStrategy=immediate</setting>
+							</settings>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration combine.self="override">
+					<compilerArgs>
+						<arg>-Xlint:all</arg>
+					</compilerArgs>
+					<compilerId>groovy-eclipse-compiler</compilerId>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-eclipse-compiler</artifactId>
+						<version>${groovy.eclipse.compiler.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-eclipse-batch</artifactId>
+						<version>${groovy.eclipse.batch.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<!-- Configured for Cucumber -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<encoding>${charset.encoding}</encoding>
+					<argLine>-Dfile.encoding=${charset.encoding}</argLine>
+					<systemPropertyVariables>
+						<ep.rest.baseurl>${ep.rest.baseurl}</ep.rest.baseurl>
+						<ep.rest.authtype>${ep.rest.authtype}</ep.rest.authtype>
+						<ep.integration.baseurl>${ep.integration.baseurl}</ep.integration.baseurl>
+						<!-- JMX ports -->
+						<ep.cortex.jmx.port>${ep.cortex.jmx.port}</ep.cortex.jmx.port>
+						<ep.integration.jmx.port>${ep.integration.jmx.port}</ep.integration.jmx.port>
+
+						<result.stats.folder.path>${result.stats.folder.path}</result.stats.folder.path>
+					</systemPropertyVariables>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<skip>${skipCucumberTests}</skip>
+							<systemPropertyVariables>
+								<cucumber.options>${cucumber.options}</cucumber.options>
+							</systemPropertyVariables>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>ep-releases</id>
+			<url>${ep.releases.repository.url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>ep-snapshots</id>
+			<url>${ep.snapshots.repository.url}</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+</project>

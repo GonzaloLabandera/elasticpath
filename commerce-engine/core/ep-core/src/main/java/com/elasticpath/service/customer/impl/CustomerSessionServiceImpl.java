@@ -37,27 +37,20 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	private TimeService timeService;
 
 	@Override
-	public void changeFromAnonymousToRegisteredCustomer(final CustomerSession customerSession, final Customer registeredCustomer,
-														final String storeCode) throws EpServiceException {
-		changeShopper(customerSession, storeCode, registeredCustomer);
-	}
-
-	private void changeShopper(final CustomerSession customerSession, final String storeCode, final Customer incomingCustomer) {
-		final Shopper invalidatedShopper = customerSession.getShopper();
-		final Shopper currentShopper = shopperService.findOrCreateShopper(incomingCustomer, storeCode);
-		customerSession.setShopper(currentShopper);
-
-		currentShopper.updateTransientDataWith(customerSession);
-		updateCustomerSessionForShopperChange(customerSession);
+	public void changeFromSingleSessionToRegisteredCustomer(final Shopper singleSessionShopper,
+															final Customer registeredCustomer, final String storeCode) throws EpServiceException {
+		final Shopper registeredShopper = shopperService.findOrCreateShopper(registeredCustomer, storeCode);
+		registeredShopper.setCustomerSession(singleSessionShopper.getCustomerSession());
+		updateCustomerSessionForShopperChange(registeredShopper.getCustomerSession());
 
 		// Call list of CustomerSessionShopperUpdateHandlers.
-		handleShopperUpdate(customerSession, invalidatedShopper);
+		handleShopperUpdate(singleSessionShopper, registeredShopper);
 
-		if (!currentShopper.equals(invalidatedShopper)) {
-			shopperService.remove(invalidatedShopper);
+		if (!registeredShopper.equals(singleSessionShopper)) {
+			shopperService.remove(singleSessionShopper);
 		}
 
-		shopperService.save(customerSession.getShopper());
+		shopperService.save(registeredShopper);
 	}
 
 	/**
@@ -76,42 +69,37 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	}
 
 	/**
-	 * Fires customer session updated event.
+	 * Fires shopper updated event.
 	 *
-	 * @param customerSession    the customer session that was updated.
-	 * @param invalidatedShopper the recently invalidated shopping context.
+	 * @param singleSessionShopper the recently invalidated shopper
+	 * @param registeredShopper the new shopper that replaces the invalidated shopper
 	 */
-	void handleShopperUpdate(final CustomerSession customerSession, final Shopper invalidatedShopper) {
+	void handleShopperUpdate(final Shopper singleSessionShopper, final Shopper registeredShopper) {
 		for (CustomerSessionShopperUpdateHandler handler : customerSessionShopperUpdateHandlers) {
-			handler.invalidateShopper(customerSession, invalidatedShopper);
+			handler.invalidateShopper(singleSessionShopper, registeredShopper);
 		}
 	}
 
 	@Override
 	public CustomerSession createWithShopper(final Shopper shopper) {
 		final CustomerSession customerSession = create();
-
-		customerSession.setShopper(shopper);
-		shopper.updateTransientDataWith(customerSession);
-
+		shopper.setCustomerSession(customerSession);
 		return customerSession;
 	}
 
 	@Override
-	public CustomerSession initializeCustomerSessionForPricing(final CustomerSession customerSession, final String storeCode,
+	public void initializeCustomerSessionForPricing(final CustomerSession customerSession, final String storeCode,
 															   final Currency currency) {
 		TagSet tagSet = getPrototypeBean(ContextIdNames.TAG_SET, TagSet.class);
 		tagSet.addTag(SELLING_CHANNEL_TAG, new Tag(storeCode));
 		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(getTimeService().getCurrentTime().getTime()));
 		customerSession.setCustomerTagSet(tagSet);
 		customerSession.setCurrency(currency);
-		return customerSession;
 	}
 
 	/**
 	 * Creates a new {@link CustomerSession}.  Does not persist it.
 	 * <p>
-	 * WARNING: Does not attach a Shopper to it!
 	 *
 	 * @return a new {@link CustomerSession} with no {@link Shopper}.
 	 */

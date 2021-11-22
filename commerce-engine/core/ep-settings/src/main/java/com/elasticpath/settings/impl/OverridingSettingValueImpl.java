@@ -5,7 +5,7 @@ package com.elasticpath.settings.impl;
 
 import java.util.Date;
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import com.elasticpath.settings.domain.SettingValue;
 

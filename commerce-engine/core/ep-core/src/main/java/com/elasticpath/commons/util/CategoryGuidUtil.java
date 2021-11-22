@@ -3,7 +3,7 @@
  */
 package com.elasticpath.commons.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A utility class for forming the category GUID out of a category and catalog GUIDs.

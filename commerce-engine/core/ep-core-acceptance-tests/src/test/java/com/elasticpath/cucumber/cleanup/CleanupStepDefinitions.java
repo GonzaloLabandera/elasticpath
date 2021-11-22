@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -19,13 +20,13 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.orderpaymentapi.CartOrderPaymentInstrument;
 import com.elasticpath.domain.orderpaymentapi.OrderPaymentInstrument;
-import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.orderpaymentapi.CartOrderPaymentInstrumentService;
 import com.elasticpath.service.orderpaymentapi.OrderPaymentInstrumentService;
-import com.elasticpath.service.shopper.ShopperService;
+import com.elasticpath.service.shopper.dao.ShopperDao;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 
 /**
@@ -49,7 +50,7 @@ public class CleanupStepDefinitions {
 	private CustomerService customerService;
 
 	@Autowired
-	private ShopperService shopperService;
+	private ShopperDao shopperDao;
 
 	@Autowired
 	private ShoppingCartService shoppingCartService;
@@ -106,9 +107,9 @@ public class CleanupStepDefinitions {
 	public void isCustomerAndShopperRemoved() {
 		String customerGuid = customerHolder.get().getGuid();
 		Customer customer = customerService.findByGuid(customerGuid);
-		Shopper shopper = shopperService.findByCustomerGuid(customerGuid);
+		List<ShopperMemento> shoppers = shopperDao.findByCustomerGuid(customerGuid);
 		assertNull("The customer should have been null after clean up job processed", customer);
-		assertNull("The shopper should have been null after clean up job processed", shopper);
+		assertTrue("The shopper list should have been empty after clean up job processed", shoppers.isEmpty());
 	}
 
 	/**

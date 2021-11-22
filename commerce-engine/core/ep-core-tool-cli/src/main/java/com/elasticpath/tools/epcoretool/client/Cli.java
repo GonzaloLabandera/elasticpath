@@ -3,11 +3,15 @@
  */
 package com.elasticpath.tools.epcoretool.client;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 
 import com.elasticpath.tools.epcoretool.client.parsers.BulkSetSettingParser;
 import com.elasticpath.tools.epcoretool.client.parsers.BulkSetSettingsMetadataParser;
@@ -28,7 +32,7 @@ import com.elasticpath.tools.epcoretool.client.parsers.UnSetSettingParser;
 @SuppressWarnings({"PMD.DoNotCallSystemExit", "PMD.ShortClassName"}) // This is a not a J2EE app
 public final class Cli {
 
-	private static final Logger LOG = Logger.getLogger(Cli.class);
+	private static final Logger LOG = LogManager.getLogger(Cli.class);
 
 	private static final int SUCCESS = 0;
 
@@ -48,8 +52,15 @@ public final class Cli {
 	 * @param args the available arguments
 	 */
 	public static void main(final String[] args) {
-		// Initialize log4j
-		PropertyConfigurator.configure(LoadPropertiesHelper.loadProperties("misc/log4j.properties"));
+		// https://logging.apache.org/log4j/2.x/faq.html#reconfig_from_code
+		// configure log4j
+		try {
+			LoggerContext context = (LoggerContext) LogManager.getContext(false);
+			context.setConfigLocation(getConfigurationFileURI());
+		} catch (Exception ex) {
+            LOG.error("Logger context init failed.", ex);
+			System.exit(1);
+		}
 
 		parsers = new TreeMap<>();
 		parsers.put("bulk-set-settings", new BulkSetSettingParser());
@@ -99,12 +110,25 @@ public final class Cli {
 	 * CLI help command.
 	 */
 	public static void help() {
-		// LOG.error("Please specify one of the following command line parameters:\n" + StringUtils.join(parsers.keySet(), ", "));
 		StringBuilder builder = new StringBuilder();
 		for (CliParser parser : parsers.values()) {
 			builder.append(parser.help());
 		}
-		LOG.info("\n" + builder);
+		LOG.info("\n{}", builder);
+	}
+
+	/**
+	 * Get misc/log4j2.xml configuration file URI.
+	 * @return file of log4j2.xml
+	 * @throws URISyntaxException uri syntax exception
+	 */
+	public static URI getConfigurationFileURI() throws URISyntaxException {
+		URL resource = Cli.class.getClassLoader().getResource("misc/log4j2.xml");
+		if (resource == null) {
+			throw new IllegalArgumentException("File misc/log4j2.xml not found!");
+		} else {
+			return resource.toURI();
+		}
 	}
 
 }

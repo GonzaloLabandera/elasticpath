@@ -19,6 +19,7 @@ import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.apache.openjpa.persistence.OpenJPAQuery;
 
 import com.elasticpath.persistence.api.Persistable;
+import com.elasticpath.persistence.openjpa.support.JPAUtil;
 
 /**
  * A specialized version of the {@link NamedQueryExecutor} executor that executes named queries with list of values.
@@ -37,6 +38,8 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 	private Object[] arrayParameters;
 	private Integer firstResult;
 	private Integer maxResults;
+	private Class<?> resultClass;
+	private boolean isNativeQuery;
 
 	/**
 	 * Set query name.
@@ -122,6 +125,19 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 		return this;
 	}
 
+	/**
+	 * Use provided class to wrap raw data.
+	 *
+	 * @param resultClass the class to wrap raw data with.
+	 * @return the current instance of {@link NamedQueryWithListExecutor}
+	 */
+	public NamedQueryWithListExecutor withResultClass(final Class<?> resultClass) {
+		this.resultClass = resultClass;
+		this.isNativeQuery = true;
+
+		return this;
+	}
+
 	@Override
 	protected String getQuery() {
 		return queryName;
@@ -129,8 +145,11 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 
 	@Override
 	protected List<T> executeMultiResultQuery(final EntityManager entityManager) {
+		OpenJPAQuery namedQuery = null;
 
-		OpenJPAQuery namedQuery = OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName));
+		if (!isNativeQuery) {
+			namedQuery = OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName));
+		}
 
 		if (this.mapParameters != null) {
 			return executeWithMapParameters(namedQuery);
@@ -140,7 +159,7 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 			return executeWithParametersAndLimit(namedQuery);
 		}
 
-		return executeWithParametersInBatches(namedQuery);
+		return executeWithParametersInBatches(entityManager);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -160,7 +179,16 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<T> executeWithParametersInBatches(final OpenJPAQuery namedQuery) {
+	private List<T> executeWithParametersInBatches(final EntityManager entityManager) {
+		if (isNativeQuery) {
+			return executeNativeQueryWithParametersInBatches(entityManager);
+		}
+
+		return executeJPQLQueryWithParametersInBatches(entityManager);
+	}
+
+	private List<T> executeJPQLQueryWithParametersInBatches(final EntityManager entityManager) {
+		OpenJPAQuery namedQuery = OpenJPAPersistence.cast(entityManager.createNamedQuery(queryName));
 
 		List<List<V>> listOfSubListsOfParameters = splitCollection(values);
 
@@ -170,6 +198,35 @@ public class NamedQueryWithListExecutor<V, T extends Persistable> extends Abstra
 
 			namedQuery.setParameters(arrayParameters);
 			namedQuery.setParameter(listParameterName, subListOfParameters);
+
+			result.addAll(getResults(namedQuery));
+		}
+
+		return result;
+	}
+
+	private List<T> executeNativeQueryWithParametersInBatches(final EntityManager entityManager) {
+		String nativeQueryTemplate = JPAUtil.getNativeQueryStringByQueryName(entityManager, queryName);
+
+		List<List<V>> listOfSubListsOfParameters = splitCollection(values);
+
+		final List<T> result = new ArrayList<>();
+
+		for (List<V> subListOfParameters : listOfSubListsOfParameters) {
+			Object[] listValues = subListOfParameters.toArray();
+
+			String modifiedRawNativeQueryString = JPAUtil.expandListParameterForNativeQuery(nativeQueryTemplate, listValues.length);
+
+			Object[] newArrayParameters = new Object[listValues.length + arrayParameters.length];
+			/*the list-param values can't be set in the native queries the same way as in JPQL ones;
+			  The raw SQL query is modified previously and list of list value placeholders is expanded to match the list of params.
+			  For the simplicity reasons, the list values must be always the first to set.
+			 */
+			System.arraycopy(listValues, 0, newArrayParameters, 0, listValues.length);
+			System.arraycopy(arrayParameters, 0, newArrayParameters, listValues.length, arrayParameters.length);
+
+			OpenJPAQuery namedQuery = OpenJPAPersistence.cast(entityManager.createNativeQuery(modifiedRawNativeQueryString, resultClass));
+			namedQuery.setParameters(newArrayParameters);
 
 			result.addAll(getResults(namedQuery));
 		}

@@ -11,7 +11,8 @@ import java.util.Optional;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
@@ -47,7 +48,7 @@ import com.elasticpath.shipping.connectivity.dto.ShippingOption;
  */
 public class CheckoutServiceImpl implements CheckoutService {
 
-	private static final Logger LOG = Logger.getLogger(CheckoutServiceImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CheckoutServiceImpl.class);
 
 	private List<CheckoutAction> setupActionList = Collections.emptyList();
 

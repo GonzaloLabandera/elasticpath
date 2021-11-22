@@ -17,8 +17,9 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotInteractableException;
@@ -43,7 +44,7 @@ import com.elasticpath.selenium.util.FluentWaitDriver;
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.ExcessiveClassLength", "PMD.AvoidDuplicateLiterals"})
 public abstract class AbstractPageObject extends AbstractPage {
-	private static final Logger LOGGER = Logger.getLogger(AbstractPageObject.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractPageObject.class);
 	private static final int POLLING_INTERVAL = 500;
 	private static final int COMBO_SCROLL_REPETITIONS = 10;
 	private static final int WINDOW_SIZE = 800;

@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil.createShipmentDetailsId;
+
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -27,7 +29,6 @@ public class ShipmentDetailsIdParameterServiceImpl implements ShipmentDetailsIdP
 
 	private static final Logger LOG = LoggerFactory.getLogger(ShipmentDetailsIdParameterServiceImpl.class);
 	private CartOrderRepository cartOrderRepository;
-	private ShipmentDetailsService shipmentDetailsService;
 	private ResourceOperationContext resourceOperationContext;
 	private CustomerRepository customerRepository;
 
@@ -39,7 +40,7 @@ public class ShipmentDetailsIdParameterServiceImpl implements ShipmentDetailsIdP
 				? cartOrderRepository.findCartOrderGuidsByCustomer(scope, userId)
 				: cartOrderRepository.findCartOrderGuidsByAccount(scope, customerRepository.getAccountGuid(resourceOperationContext.getSubject()));
 
-		return guids.flatMapMaybe(orderId -> shipmentDetailsService.getShipmentDetailsIdForOrder(scope, orderId))
+		return guids.map(orderId -> createShipmentDetailsId(orderId, ShipmentDetailsConstants.SHIPMENT_TYPE))
 				.map(fieldValueMap -> (IdentifierPart<Map<String, String>>) CompositeIdentifier.of(fieldValueMap))
 				.doOnError(throwable -> LOG.info("Shipment details were empty for scope '{}' and user id '{}'.", scope, userId))
 				.onErrorResumeNext(Observable.empty());
@@ -48,11 +49,6 @@ public class ShipmentDetailsIdParameterServiceImpl implements ShipmentDetailsIdP
 	@Reference
 	public void setCartOrderRepository(final CartOrderRepository cartOrderRepository) {
 		this.cartOrderRepository = cartOrderRepository;
-	}
-
-	@Reference
-	public void setShipmentDetailsService(final ShipmentDetailsService shipmentDetailsService) {
-		this.shipmentDetailsService = shipmentDetailsService;
 	}
 
 	@Reference

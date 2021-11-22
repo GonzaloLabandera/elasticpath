@@ -16,9 +16,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.FetchAttribute;
 import org.apache.openjpa.persistence.FetchGroup;
@@ -58,7 +59,7 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
 
-	private static final Logger LOG = Logger.getLogger(PhysicalOrderShipmentImpl.class);
+	private static final Logger LOG = LogManager.getLogger(PhysicalOrderShipmentImpl.class);
 
 	private String carrierCode;
 	private String carrierName;

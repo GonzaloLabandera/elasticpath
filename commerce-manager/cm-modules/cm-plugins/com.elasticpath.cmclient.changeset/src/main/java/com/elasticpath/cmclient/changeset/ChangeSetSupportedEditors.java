@@ -3,7 +3,7 @@
  */
 package com.elasticpath.cmclient.changeset;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.cmclient.changeset.support.SupportedComponent;
 import com.elasticpath.cmclient.changeset.support.SupportedComponentsExtPoint;

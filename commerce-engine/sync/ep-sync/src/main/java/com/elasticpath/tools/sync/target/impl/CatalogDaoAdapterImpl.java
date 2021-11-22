@@ -3,7 +3,8 @@
  */
 package com.elasticpath.tools.sync.target.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -19,7 +20,7 @@ import com.elasticpath.tools.sync.exception.SyncToolRuntimeException;
 // ---- DOCCatalogDaoAdapterImpl
 public class CatalogDaoAdapterImpl extends AbstractDaoAdapter<Catalog> {
 	
-	private static final Logger LOG = Logger.getLogger(CatalogDaoAdapterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CatalogDaoAdapterImpl.class);
 
 	private CatalogService catalogService;
 	

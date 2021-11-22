@@ -111,4 +111,13 @@ public interface PriceLookupFacade {
 	 */
 	Price getShoppingItemDtoPrice(ShoppingItemDto shoppingItemDto, Store store, Shopper shopper);
 
+	/**
+	 * Checks is the product sku has a price.
+	 * @param productSku the product sku
+	 * @param store the store
+	 * @param shopper the customer session
+	 * @return if this sku has a price
+	 */
+	boolean hasPriceForSku(ProductSku productSku, Store store, Shopper shopper);
+
 }

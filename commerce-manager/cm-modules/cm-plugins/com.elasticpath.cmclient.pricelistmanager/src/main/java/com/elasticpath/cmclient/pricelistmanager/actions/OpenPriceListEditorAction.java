@@ -6,7 +6,8 @@
  */
 package com.elasticpath.cmclient.pricelistmanager.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
@@ -27,7 +28,7 @@ import com.elasticpath.domain.pricing.PriceListDescriptor;
  * a new PriceListEditor for the selected PriceList.
  */
 public class OpenPriceListEditorAction extends AbstractPolicyAwareAction implements PriceListSelectedEventListener {
-	private static final Logger LOG = Logger.getLogger(OpenPriceListEditorAction.class);
+	private static final Logger LOG = LogManager.getLogger(OpenPriceListEditorAction.class);
 	private PriceListDescriptorDTO pldDto;
 	
 	/**

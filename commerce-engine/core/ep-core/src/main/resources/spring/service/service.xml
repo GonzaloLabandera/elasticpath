@@ -18,17 +18,23 @@
 	<import resource="shipping-service.xml"/>
 	<import resource="classpath:tax-calculation-connectivity-api.xml"/>
 	<import resource="classpath:spring/commons/structuredErrorMessage.xml"/>
-	<import resource="classpath:spring/service/validation-strategies.xml"/>
 	<import resource="../../spring/service/orderpaymentapi-service.xml" />
 	<import resource="datapolicy.xml" />
 	<import resource="tag-service.xml" />
+	<import resource="permissions.xml" />
 	<import resource="classpath:META-INF/elasticpath/conf/spring/settings-service.xml"/>
+	<import resource="xpf-converters.xml" />
+	<import resource="xpf-bridges.xml" />
 
 	<bean id="applicationName" class="java.lang.String">
 		<constructor-arg value="CoreOSGiBundle"/>
 	</bean>
 
-	<bean id="versionLogger" class="com.elasticpath.commons.util.impl.VersionLogger" init-method="init"/>
+	<bean id="versionService" class="com.elasticpath.commons.util.impl.VersionService" init-method="init" >
+		<property name="applicationVendor" value="${ep.release.vendor:undefined}" />
+		<property name="applicationName" value="${ep.release.title:undefined}" />
+		<property name="applicationVersion" value="${ep.release.version:undefined}" />
+	</bean>
 
     <bean id="sha1PasswordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"/>
 
@@ -41,7 +47,7 @@
 		<constructor-arg name="strength" value="10"/>
 	</bean>
 
-	<bean id="txProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="txProxyTemplate" abstract="true" class="com.elasticpath.transaction.interceptor.TransactionProxyFactoryBeanWithDeadlockRetry">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="transactionAttributes">
 			<props>
@@ -65,7 +71,6 @@
 				<prop key="auditableProcess*">PROPAGATION_REQUIRED</prop>
 				<prop key="cancelOrder">PROPAGATION_NEVER</prop>
 				<prop key="cancelOrderShipment">PROPAGATION_NEVER</prop>
-				<prop key="createAndSaveShopper">PROPAGATION_REQUIRED</prop>
 				<prop key="disconnectCartFromShopperAndCustomerSession">PROPAGATION_REQUIRED</prop>
 				<prop key="checkout">PROPAGATION_NEVER</prop>
 				<prop key="completeShipment">PROPAGATION_NEVER</prop>
@@ -84,6 +89,7 @@
 				<prop key="touch">PROPAGATION_REQUIRED</prop>
 				<prop key="disableAutoApplyToCarts">PROPAGATION_REQUIRED</prop>
 				<prop key="deactivateCart">PROPAGATION_REQUIRED</prop>
+				<prop key="insertClosures">PROPAGATION_REQUIRED</prop>
 				<!-- AuditDao specific calls -->
 				<prop key="persistChangeSetTransaction">PROPAGATION_REQUIRED</prop>
 				<prop key="persistDataChanged">PROPAGATION_REQUIRED</prop>
@@ -98,7 +104,7 @@
 		<property name="preInterceptors" ref="servicePreInterceptors"/>
 	</bean>
 
-	<bean id="txRequiredProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="txRequiredProxyTemplate" abstract="true" class="com.elasticpath.transaction.interceptor.TransactionProxyFactoryBeanWithDeadlockRetry">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="transactionAttributes">
 			<props>
@@ -109,7 +115,7 @@
 		<property name="preInterceptors" ref="servicePreInterceptors"/>
 	</bean>
 
-	<bean id="txRequiresNewProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="txRequiresNewProxyTemplate" abstract="true" class="com.elasticpath.transaction.interceptor.TransactionProxyFactoryBeanWithDeadlockRetry">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="transactionAttributes">
 			<props>
@@ -121,7 +127,9 @@
 		<property name="preInterceptors" ref="servicePreInterceptors"/>
 	</bean>
 
-	<bean id="cartOrderTxProxyTemplate" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="txProxyTemplateWithoutDeadlockRetry" abstract="true" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean" parent="txProxyTemplate"/>
+
+	<bean id="cartOrderTxProxyTemplate" abstract="true" class="com.elasticpath.transaction.interceptor.TransactionProxyFactoryBeanWithDeadlockRetry">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="transactionAttributes">
 			<props>
@@ -159,7 +167,6 @@
 		<property name="persistenceEngine" ref="persistenceEngine" />
 		<property name="elasticPath" ref="elasticPath" />
 		<property name="customerGroupService" ref="customerGroupService" />
-		<property name="orderPaymentApiCleanupService" ref="orderPaymentApiCleanupService" />
 		<property name="timeService" ref="timeService" />
 		<property name="storeService" ref="storeService" />
 		<property name="fetchPlanHelper" ref="fetchPlanHelper" />
@@ -169,7 +176,10 @@
 		<property name="eventMessagePublisher" ref="customerEventMessagePublisher" />
 		<property name="validator" ref="validator" />
 		<property name="customerConstraintValidationService" ref="customerConstraintValidationService" />
-		<property name="constraintViolationTransformer" ref="constraintViolationTransformer" />
+        <property name="addressService" ref="addressService" />
+		<property name="customerPaymentInstrumentService" ref="customerPaymentInstrumentService" />
+		<property name="orderService" ref="orderService" />
+ 		<property name="constraintViolationTransformer" ref="constraintViolationTransformer" />
 	</bean>
 
 	<bean id="customerServiceTarget" parent="customerServiceTargetTemplate"
@@ -740,6 +750,24 @@
 		<property name="proxy" ref="taxCodeServiceProxy"/>
 	</bean>
 
+	<bean id="attributeValueValidationServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="attributeValueValidationService"/>
+	</bean>
+
+	<bean id="cachedAttributeValueValidationService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.validation.service.AttributeValueValidationService"/>
+		<property name="proxy" ref="attributeValueValidationServiceProxy"/>
+	</bean>
+
+	<bean id="modifierFieldValidationServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="modifierFieldValidationService"/>
+	</bean>
+
+	<bean id="cachedModifierFieldValidationService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.validation.service.ModifierFieldValidationService"/>
+		<property name="proxy" ref="modifierFieldValidationServiceProxy"/>
+	</bean>
+
 	<bean id="productTypeService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.catalog.impl.ProductTypeServiceImpl">
@@ -1022,6 +1050,7 @@
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 				<property name="queryComposerFactory" ref="queryComposerFactory"/>
 				<property name="searchConfigFactory" ref="searchConfigFactory"/>
+				<property name="defaultBatchSize" value="1000"/>
 			</bean>
 		</property>
 	</bean>
@@ -1123,6 +1152,7 @@
     	<property name="listenerList" ref="pricingEventListeners" />
     	<property name="promotedPriceLookupService" ref="promotedPriceLookupService" />
     	<property name="shoppingItemAssembler" ref="shoppingItemAssembler" />
+		<property name="bundleIdentifier" ref="bundleIdentifier" />
 	</bean>
 
 	<bean id="promotedPriceLookupService" class="com.elasticpath.common.pricing.service.impl.PromotedPriceLookupServiceImpl">
@@ -1775,8 +1805,14 @@
 		<property name="target" ref="userAccountAssociationServiceTarget"/>
 	</bean>
 
-	<bean id="accountTreeService" class="com.elasticpath.service.customer.impl.ParentReferenceAccountTreeServiceImpl">
+	<bean id="accountTreeServiceTarget" class="com.elasticpath.service.customer.impl.ParentReferenceAccountTreeServiceImpl">
+		<property name="persistenceEngine" ref="persistenceEngine" />
 		<property name="customerService" ref="customerService" />
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="accountTreeService" parent="txProxyTemplate">
+		<property name="target" ref="accountTreeServiceTarget"/>
 	</bean>
 
 	<!-- validation framework start -->
@@ -1834,6 +1870,7 @@
 		<property name="ruleEngineSessionFactory" ref="ruleEngineSessionFactory"/>
 		<property name="ruleEngineRuleStrategy" ref="ruleEngineRuleStrategy"/>
 		<property name="beanFactory" ref="coreBeanFactory" />
+		<property name="timeService" ref="timeService"/>
 	</bean>
 
 	<alias name="dbRuleEngineDataStrategy" alias="ruleEngineDataStrategy"/>
@@ -2099,7 +2136,7 @@
 				</property>
 			</bean>
 		</property>
-		<property name="attributeValueValidationService" ref="attributeValueValidationService"/>
+		<property name="attributeValueValidationService" ref="cachedAttributeValueValidationService"/>
 		<property name="valueRestrictors" ref="targetCustomerProfileAttributeValueRestrictors"/>
 		<property name="predefinedProfileAttributePolicies" ref="predefinedProfileAttributePolicies"/>
 	</bean>
@@ -2238,12 +2275,9 @@
         <constructor-arg ref="couponService" />
     </bean>
 
-    <bean id="shoppingCartCustomerSessionUpdater" class="com.elasticpath.service.shopper.impl.ShoppingCartCustomerSessionUpdater"/>
-
 	 <util:list id="coreShopperUpdateHandlers" value-type="com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler">
 	 	<ref bean="shoppingCartMergerForShopperUpdates"/>
 		<ref bean="wishListMergerForShopperUpdates"/>
-		<ref bean="shoppingCartCustomerSessionUpdater"/>
 		<ref bean="promotionCodeInvalidatorForShopperUpdates"/>
 		<ref bean="cartOrderCouponsMergerForShopperUpdates"/>
 		<ref bean="customerConsentMergerForShopperUpdates"/>
@@ -2260,7 +2294,6 @@
 
 	<bean id="wishListTargetTemplate" class="com.elasticpath.service.shoppingcart.impl.WishListServiceImpl"
 			abstract="true">
-		<property name="priceLookupFacade" ref="priceLookupFacade" />
 		<property name="productSkuLookup" ref="productSkuLookup" />
 		<property name="cartDirector" ref="cartDirector" />
 		<property name="wishListDao" ref="wishListDao"/>
@@ -2276,9 +2309,10 @@
 	<bean id="shopperService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.shopper.impl.ShopperServiceImpl">
-				<constructor-arg ref="coreBeanFactory" />
-				<constructor-arg ref="shopperDao" />
-				<constructor-arg ref="storeService" />
+				<property name="beanFactory" ref="coreBeanFactory"/>
+				<property name="shopperDao" ref="shopperDao"/>
+				<property name="storeService" ref="storeService"/>
+				<property name="customerService" ref="customerService"/>
 			</bean>
 		</property>
 	</bean>
@@ -2289,8 +2323,10 @@
 		<property name="shoppingItemDtoFactory" ref="shoppingItemDtoFactory" />
 		<property name="productSkuLookup" ref="productSkuLookup"/>
 		<property name="timeService" ref="timeService" />
-		<property name="validationService" ref="addOrUpdateShoppingItemDtoToCartValidationService"/>
 		<property name="dependentItemLookup" ref="dependentItemLookup" />
+		<property name="extensionLookup" ref="xpfExtensionLookup"/>
+		<property name="contextBuilder" ref="xpfShoppingItemValidationContextBuilder" />
+		<property name="structuredErrorMessageConverter" ref="structuredErrorMessageConverter" />
 	</bean>
 
 	<bean id="cartDirector" parent="cartDirectorTemplate"/>
@@ -2301,9 +2337,11 @@
 		<property name="shoppingCartService" ref="shoppingCartService"/>
 		<property name="wishListService" ref="wishListService"/>
 		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
-		<property name="removeShoppingItemFromCartValidationService" ref="removeShoppingItemFromCartValidationService"/>
 		<property name="shoppingItemService" ref="shoppingItemService" />
-	</bean>
+		<property name="extensionLookup" ref="xpfExtensionLookup" />
+		<property name="shoppingItemValidationContextBuilder" ref="xpfShoppingItemValidationContextBuilder" />
+		<property name="structuredErrorMessageConverter" ref="structuredErrorMessageConverter" />
+ 	</bean>
 
 	<bean id="cartDirectorService" parent="txRequiredProxyTemplate">  <!-- All methods are TRANSACTION_REQUIRED -->
 		<property name="target" >
@@ -2317,7 +2355,7 @@
 		<property name="productSkuLookup" ref="productSkuLookup"/>
 	</bean>
 
-	<bean id="paymentScheduleHelper" class="com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl">
+	<bean id="paymentScheduleHelper" class="com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl" init-method="init">
 		<property name="skuOptionService" ref="skuOptionService"/>
 		<property name="beanFactory" ref="coreBeanFactory" />
 	</bean>
@@ -2353,6 +2391,7 @@
 		<property name="customerGroupService" ref="customerGroupService"/>
 		<property name="customerService" ref="customerService" />
 		<property name="accountTreeService" ref="accountTreeService" />
+		<property name="addressService" ref="addressService" />
 	</bean>
 
 	<bean id="customerGroupDtoAssembler" class="com.elasticpath.common.dto.customer.CustomerGroupDtoAssembler">
@@ -2399,7 +2438,7 @@
         <entry key="allocatedjournaling" value-ref="journalingInventoryStrategy"/>
 	</util:map>
 
-	<bean id="inventoryFacadeTemplate" class="com.elasticpath.inventory.impl.InventoryFacadeImpl" init-method="init" abstract="true">
+	<bean id="inventoryFacadeTemplate" class="com.elasticpath.inventory.impl.InventoryFacadeImpl" abstract="true">
         <property name="strategies" ref="inventoryStrategies"/>
 		<property name="inventoryStrategyIdProvider">
 			<settings:setting path="COMMERCE/SYSTEM/INVENTORY/inventoryStrategy"/>
@@ -2718,12 +2757,9 @@
 		</property>
 	</bean>
 
-
-
 	<bean id="modifierFieldValidationService" class="com.elasticpath.validation.service.impl.ModifierFieldValidationServiceImpl">
 		<property name="constraintViolationTransformer" ref="constraintViolationTransformer"/>
 	</bean>
-
 
 	<bean id="storeMessageSourceTemplate" class="com.elasticpath.commons.util.impl.StoreMessageSourceImpl"
 		abstract="true">
@@ -2771,11 +2807,11 @@
 	</util:list>
 
 	<bean id="customerAndUserEmailAddressesExtractionStrategy"
-		  class="com.elasticpath.service.email.impl.CustomerAndUserEmailAddressesExtractionStrategyImpl"/>
+		  class="com.elasticpath.service.email.impl.CustomerEmailAddressExtractionStrategyImpl"/>
 
 	<bean id="shoppingCartItemListTypeProvider" class="com.elasticpath.settings.provider.impl.SettingValueProviderImpl">
 		<property name="path" value="COMMERCE/STORE/shoppingCartItemListType"/>
-		<property name="settingsReader" ref="settingsReader"/>
+		<property name="xpfExtensionLookup" ref="xpfExtensionLookup"/>
 		<property name="settingValueTypeConverter" ref="settingValueTypeConverter"/>
 	</bean>
 
@@ -2795,11 +2831,7 @@
 		<constructor-arg value="user-email"/>
 	</bean>
 
-	<extensibleList:create id="reservedCartModifierKeys" overridableId="reservedCartModifierKeyList" valueType="java.lang.String">
-		<ref bean="user-id"/>
-		<ref bean="user-name"/>
-		<ref bean="user-email"/>
-	</extensibleList:create>
+	<extensibleList:create id="reservedCartModifierKeys" overridableId="reservedCartModifierKeyList" valueType="java.lang.String"/>
 
 	<bean id="outboxMessageService" parent="txProxyTemplate">
 		<property name="target">
@@ -2816,96 +2848,6 @@
 
 	<bean id="outboxMessageServiceTarget" parent="outboxMessageServiceTargetTemplate"/>
 
-	<bean id="publicPermission" class="java.lang.String">
-		<constructor-arg value="PUBLIC" />
-	</bean>
-
-	<bean id="registeredPermission" class="java.lang.String">
-		<constructor-arg value="REGISTERED" />
-	</bean>
-
-	<bean id="readCustomCartsPermission" class="java.lang.String">
-		<constructor-arg value="READ_CUSTOM_CARTS" />
-	</bean>
-
-	<bean id="checkoutWithoutApprovalPermission" class="java.lang.String">
-		<constructor-arg value="CHECKOUT_WITHOUT_APPROVAL" />
-	</bean>
-
-	<bean id="modifyCartsPermission" class="java.lang.String">
-		<constructor-arg value="MODIFY_CARTS" />
-	</bean>
-
-	<bean id="viewPricesPermission" class="java.lang.String">
-		<constructor-arg value="READ_PRICES" />
-	</bean>
-
-	<bean id="modifyAccountsPermission" class="java.lang.String">
-		<constructor-arg value="MODIFY_ACCOUNTS" />
-	</bean>
-
-	<bean id="modifyAccountAddressesPermission" class="java.lang.String">
-		<constructor-arg value="MODIFY_ACCOUNT_ADDRESSES" />
-	</bean>
-
-	<bean id="modifyAccountPaymentInstrumentsPermission" class="java.lang.String">
-		<constructor-arg value="MODIFY_ACCOUNT_PAYMENT_INSTRUMENTS" />
-	</bean>
-
-	<bean id="modifyAccountAssociatesPermission" class="java.lang.String">
-		<constructor-arg value="MODIFY_ACCOUNT_ASSOCIATES" />
-	</bean>
-
-	<!-- Create lists of permissions that a role maps to -->
-	<extensibleList:create id="buyerRolePermissions" overridableId="buyerRolePermissionsList" valueType="java.lang.String">
-		<ref bean="publicPermission" />
-		<ref bean="registeredPermission" />
-		<ref bean="viewPricesPermission" />
-		<ref bean="modifyCartsPermission" />
-		<ref bean="readCustomCartsPermission" />
-		<ref bean="checkoutWithoutApprovalPermission" />
-	</extensibleList:create>
-
-	<extensibleList:create id="buyerAdminRolePermissions" overridableId="buyerAdminRolePermissionsList" valueType="java.lang.String">
-		<ref bean="publicPermission" />
-		<ref bean="registeredPermission" />
-		<ref bean="viewPricesPermission" />
-		<ref bean="modifyCartsPermission" />
-		<ref bean="readCustomCartsPermission" />
-		<ref bean="checkoutWithoutApprovalPermission" />
-		<ref bean="modifyAccountsPermission" />
-		<ref bean="modifyAccountAddressesPermission" />
-		<ref bean="modifyAccountPaymentInstrumentsPermission" />
-		<ref bean="modifyAccountAssociatesPermission" />
-	</extensibleList:create>
-
-	<extensibleList:create id="singleSessionBuyerRolePermissions" overridableId="singleSessionBuyerRolePermissionsList" valueType="java.lang.String">
-		<ref bean="publicPermission" />
-		<ref bean="viewPricesPermission" />
-		<ref bean="modifyCartsPermission" />
-		<ref bean="checkoutWithoutApprovalPermission" />
-	</extensibleList:create>
-
-	<extensibleList:create id="catalogBrowserRolePermissions" overridableId="catalogBrowserRolePermissionsList" valueType="java.lang.String">
-		<ref bean="publicPermission" />
-		<ref bean="registeredPermission" />
-		<ref bean="viewPricesPermission" />
-	</extensibleList:create>
-
-	<extensibleList:create id="limitedCatalogBrowserRolePermissions" overridableId="limitedCatalogBrowserRolePermissionsList" valueType="java.lang.String">
-		<ref bean="publicPermission" />
-		<ref bean="registeredPermission" />
-	</extensibleList:create>
-
-	<!-- Map the permission sets to role names -->
-	<util:map id="roleToPermissionsMap" map-class="java.util.LinkedHashMap" key-type="java.lang.String" value-type="java.util.List">
-		<entry key="SINGLE_SESSION_BUYER" value-ref="singleSessionBuyerRolePermissionsList" />
-		<entry key="LIMITED_CATALOG_BROWSER" value-ref="limitedCatalogBrowserRolePermissionsList" />
-		<entry key="CATALOG_BROWSER" value-ref="catalogBrowserRolePermissionsList" />
-		<entry key="BUYER" value-ref="buyerRolePermissionsList" />
-		<entry key="BUYER_ADMIN" value-ref="buyerAdminRolePermissionsList" />
-	</util:map>
-
 	<bean id="roleToPermissionMappingService" class="com.elasticpath.service.permissions.impl.RoleToPermissionsMappingServiceImpl" >
 		<property name="roleToPermissionsMap" ref="roleToPermissionsMap" />
 	</bean>
@@ -2919,4 +2861,66 @@
 		<value>REGISTERED</value>
 	</util:set>
 
+	<bean id="addressService" parent="txProxyTemplate">
+		<property name="target">
+			<bean parent="addressServiceTarget"/>
+		</property>
+	</bean>
+
+	<bean id="addressServiceTargetTemplate" class="com.elasticpath.service.customer.impl.AddressServiceImpl" abstract="true">
+		<property name="persistenceEngine" ref="persistenceEngine" />
+		<property name="elasticPath" ref="elasticPath" />
+		<property name="validator" ref="validator" />
+		<property name="constraintViolationTransformer" ref="constraintViolationTransformer" />
+	</bean>
+
+	<bean id="addressServiceTarget" parent="addressServiceTargetTemplate" abstract="true"/>
+
+	<bean id="domainToXpfContextConversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<!-- converter references here -->
+				<ref bean="xpfAddressConverter"/>
+				<ref bean="xpfAttributeConverter"/>
+				<ref bean="xpfAttributeValueConverter"/>
+				<ref bean="xpfBundleConstituentConverter"/>
+				<ref bean="xpfCatalogConverter"/>
+				<ref bean="xpfCategoryConverter"/>
+				<ref bean="xpfContactConverter"/>
+				<ref bean="xpfCustomerConverter"/>
+				<ref bean="xpfPriceConverter"/>
+				<ref bean="xpfProductBundleConverter"/>
+				<ref bean="xpfProductConverter"/>
+				<ref bean="xpfProductSkuConverter"/>
+				<ref bean="xpfProductSkuOptionConverter"/>
+				<ref bean="xpfProductSkuOptionValueConverter"/>
+				<ref bean="xpfSessionConverter"/>
+				<ref bean="xpfShopperConverter"/>
+				<ref bean="xpfShoppingCartConverter"/>
+				<ref bean="xpfShoppingItemConverter"/>
+				<ref bean="xpfShoppingItemDtoConverter"/>
+				<ref bean="xpfStoreConverter"/>
+				<ref bean="xpfSettingValueConverter"/>
+				<ref bean="xpfCartTypeConverter"/>
+				<ref bean="xpfModifierGroupConverter"/>
+				<ref bean="xpfModifierFieldConverter"/>
+				<ref bean="xpfShippingOptionConverter"/>
+				<ref bean="xpfProductTypeConverter"/>
+				<ref bean="structuredErrorMessageConverter"/>
+				<ref bean="structuredErrorMessageTypeConverter"/>
+				<ref bean="structuredErrorResolutionConverter"/>
+				<ref bean="xpfStructuredErrorMessageConverter"/>
+				<ref bean="xpfStructuredErrorMessageTypeConverter"/>
+				<ref bean="xpfStructuredErrorResolutionConverter"/>
+				<ref bean="xpfOrderHoldConverter"/>
+			</set>
+		</property>
+	</bean>
+
+	<bean id="purchaseCartValidationService" class="com.elasticpath.service.shoppingcart.validation.impl.PurchaseCartValidationServiceImpl">
+		<property name="extensionLookup" ref="xpfExtensionLookup"/>
+		<property name="shoppingCartValidationContextBuilder" ref="xpfShoppingCartValidationContextBuilder"/>
+		<property name="shoppingItemValidationContextBuilder" ref="xpfShoppingItemValidationContextBuilder"/>
+		<property name="structuredErrorMessageConverter" ref="structuredErrorMessageConverter"/>
+	</bean>
 </beans>

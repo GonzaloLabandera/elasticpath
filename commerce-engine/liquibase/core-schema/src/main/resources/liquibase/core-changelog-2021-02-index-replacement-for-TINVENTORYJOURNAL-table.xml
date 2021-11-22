@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2020
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-2021-02-index-replacement-for-TINVENTORYJOURNAL-table.xml">
+
+
+	<changeSet id="2021-01-replace-old-tinventoryjournal-index" author="elasticpath">
+		<comment>
+			Replace old index in TINDEXJOURNAL table
+		</comment>
+
+		<dropIndex tableName="TINVENTORYJOURNAL" indexName="I_INV_JOURNAL_SKU_WAREHOUSE" />
+
+		<createIndex tableName="TINVENTORYJOURNAL" indexName="I_INV_JOURNAL_SKU_WAREHOUSE">
+			<column name="SKUCODE"/>
+			<column name="WAREHOUSE_UID"/>
+			<column name="ALLOCATED_QUANTITY_DELTA"/>
+			<column name="QUANTITY_ON_HAND_DELTA"/>
+		</createIndex>
+	</changeSet>
+</databaseChangeLog>

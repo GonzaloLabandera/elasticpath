@@ -6,7 +6,6 @@ package com.elasticpath.service.shopper.impl;
 import java.util.Collection;
 
 import com.elasticpath.domain.cartorder.CartOrder;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.cartorder.CartOrderService;
@@ -32,7 +31,7 @@ public final class CartOrderCouponsMergerForShopperUpdates implements CustomerSe
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void invalidateShopper(final CustomerSession customerSession, final Shopper invalidShopper) {
+	public void invalidateShopper(final Shopper invalidShopper, final Shopper newShopper) {
 
 		final ShoppingCart anonymousCart = invalidShopper.getCurrentShoppingCart();
 		final Collection<String> anonymousCartOrderCouponCodes = cartOrderService.getCartOrderCouponCodesByShoppingCartGuid(anonymousCart.getGuid());
@@ -40,8 +39,7 @@ public final class CartOrderCouponsMergerForShopperUpdates implements CustomerSe
 			return;
 		}
 
-		final Shopper currentShopper = customerSession.getShopper();
-		final ShoppingCart currentShopperCart = currentShopper.getCurrentShoppingCart();
+		final ShoppingCart currentShopperCart = newShopper.getCurrentShoppingCart();
 
 		cartOrderService.createOrderIfPossible(currentShopperCart);
 

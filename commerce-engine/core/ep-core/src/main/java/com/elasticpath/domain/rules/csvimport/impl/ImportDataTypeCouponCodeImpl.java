@@ -6,7 +6,7 @@ package com.elasticpath.domain.rules.csvimport.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.common.dto.CouponUsageModelDto;
 import com.elasticpath.commons.exception.EpBindException;

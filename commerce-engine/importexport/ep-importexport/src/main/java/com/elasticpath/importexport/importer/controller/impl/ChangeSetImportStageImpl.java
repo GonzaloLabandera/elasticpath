@@ -18,7 +18,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tools.ant.util.DateUtils;
 import org.springframework.transaction.TransactionException;
 import org.springframework.util.CollectionUtils;
@@ -69,7 +70,7 @@ import com.elasticpath.service.pricing.BaseAmountService;
 @SuppressWarnings("PMD.GodClass")
 public class ChangeSetImportStageImpl implements ImportStage {
 
-	private static final Logger LOG = Logger.getLogger(ChangeSetImportStageImpl.class);
+	private static final Logger LOG = LogManager.getLogger(ChangeSetImportStageImpl.class);
 
 	private static final int LOG_EVERY_N_ENTRIES = 100;
 

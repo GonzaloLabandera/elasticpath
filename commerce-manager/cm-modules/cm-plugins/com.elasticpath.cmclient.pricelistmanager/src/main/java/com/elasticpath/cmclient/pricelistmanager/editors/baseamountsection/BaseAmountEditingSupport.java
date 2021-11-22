@@ -9,7 +9,7 @@ package com.elasticpath.cmclient.pricelistmanager.editors.baseamountsection;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.runtime.Status;

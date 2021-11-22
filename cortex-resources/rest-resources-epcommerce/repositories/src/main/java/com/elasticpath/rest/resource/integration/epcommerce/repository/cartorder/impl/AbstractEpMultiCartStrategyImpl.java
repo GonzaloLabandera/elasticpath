@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -18,22 +19,28 @@ import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.structured.EpStructureErrorMessageException;
 import com.elasticpath.base.exception.structured.EpValidationException;
-import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartPostProcessor;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategy;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ShopperRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.shoppingcart.MulticartItemListTypeLocationProvider;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
-import com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService;
-import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
 import com.elasticpath.service.store.StoreService;
+import com.elasticpath.xpf.XPFExtensionLookup;
+import com.elasticpath.xpf.XPFExtensionPointEnum;
+import com.elasticpath.xpf.XPFExtensionSelector;
+import com.elasticpath.xpf.connectivity.context.XPFShoppingCartValidationContext;
+import com.elasticpath.xpf.connectivity.extensionpoint.ShoppingCartValidator;
+import com.elasticpath.xpf.context.builders.ShoppingCartValidationContextBuilder;
+import com.elasticpath.xpf.converters.StructuredErrorMessageConverter;
+import com.elasticpath.xpf.impl.XPFExtensionSelectorByStoreCode;
 
 /**
  * Abstract Ep strategy for multicarts (b2c, b2b etc).
@@ -45,13 +52,11 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 	@Inject
 	private ShoppingCartService shoppingCartService;
 	@Inject
-	private CustomerSessionRepository customerSessionRepository;
+	private ShopperRepository shopperRepository;
 	@Inject
 	private CartPostProcessor cartPostProcessor;
 	@Inject
 	private ReactiveAdapter reactiveAdapter;
-	@Inject
-	private CreateShoppingCartValidationService createShoppingCartValidationService;
 	@Inject
 	private StoreService storeService;
 	@Inject
@@ -60,23 +65,28 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 	private ResourceOperationContext resourceOperationContext;
 	@Inject
 	private MulticartItemListTypeLocationProvider multicartItemListTypeLocationProvider;
-
+	@Inject
+	private ShoppingCartValidationContextBuilder shoppingCartValidationContextBuilder;
+	@Inject
+	private XPFExtensionLookup extensionLookup;
+	@Inject
+	private StructuredErrorMessageConverter structuredErrorMessageConverter;
 
 	@Override
 	 public Single<ShoppingCart> getShoppingCartSingle(final String cartGuid) {
-		return customerSessionRepository.findOrCreateCustomerSession()
-				.flatMap(customerSession -> getShoppingCartSingle(cartGuid, customerSession));
+		return shopperRepository.findOrCreateShopper()
+				.flatMap(shopper -> getShoppingCartSingle(cartGuid, shopper));
 	}
 
 	/**
-	 * Gets the shopping cart single for cart and customer sessoin.
-	 * @param cartGuid the cart guid.
-	 * @param customerSession the customer session.
-	 * @return the shopper  wrapped in a single.
+	 * Gets the shopping cart single for cart and customer session.
+	 * @param cartGuid the cart guid
+	 * @param shopper the shopper
+	 * @return the shopper wrapped in a single
 	 */
-	protected Single<ShoppingCart> getShoppingCartSingle(final String cartGuid, final CustomerSession customerSession) {
+	protected Single<ShoppingCart> getShoppingCartSingle(final String cartGuid, final Shopper shopper) {
 		return getCartByGuid(cartGuid).flatMap(cart -> reactiveAdapter.fromServiceAsSingle(() -> {
-			cartPostProcessor.postProcessCart(cart, cart.getShopper(), customerSession);
+			cartPostProcessor.postProcessCart(cart, shopper);
 			return cart;
 		}));
 	}
@@ -103,35 +113,44 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 
 	/**
 	 * Internal create cart method. Validates cart can be created and then returns a newly created cart.
-	 * @param customerSession the customer session.
-	 * @param descriptors the descriptors that describe the cart.
-	 * @return a newly created cart.
+	 * @param shopper the shopper
+	 * @param descriptors the descriptors that describe the cart
+	 * @return a newly created cart
 	 */
-	protected Single<ShoppingCart> createCartInternal(final CustomerSession customerSession, final Map<String, String> descriptors) {
+	protected Single<ShoppingCart> createCartInternal(final Shopper shopper, final Map<String, String> descriptors) {
 
-		final ShoppingCart cart = getShoppingCartService().createByCustomerSession(customerSession);
-		descriptors.forEach(cart::setCartDataFieldValue);
+		final ShoppingCart cart = getShoppingCartService().createByShopper(shopper);
+		cart.getModifierFields().putAll(descriptors);
 
 		try {
-			validateCreate(cart);
+			validateCreateOrUpdate(cart);
 		} catch (EpStructureErrorMessageException exception) {
 
 			return Single.error(exceptionTransformer.getResourceOperationFailure(
 					new EpValidationException("Cannot Create Cart", exception.getStructuredErrorMessages())));
 		}
 
-		cart.setShopper(customerSession.getShopper());
-
 		final ShoppingCart savedCart = getShoppingCartService().saveOrUpdate(cart);
 
-		getCartPostProcessor().postProcessCart(savedCart, customerSession.getShopper(), customerSession);
+		getCartPostProcessor().postProcessCart(savedCart, shopper);
 		return Single.just(savedCart);
 	}
 
 	@Override
-	public void validateCreate(final ShoppingCart shoppingCart) {
-		final ShoppingCartValidationContext validationContext = getCreateShoppingCartValidationService().buildContext(shoppingCart);
-		Collection<StructuredErrorMessage> validationMessages = getCreateShoppingCartValidationService().validate(validationContext);
+	public void validateCreateOrUpdate(final ShoppingCart shoppingCart) {
+		final XPFShoppingCartValidationContext context = shoppingCartValidationContextBuilder.build(shoppingCart);
+
+		XPFExtensionSelector xpfExtensionSelector = new XPFExtensionSelectorByStoreCode(shoppingCart.getShopper().getStoreCode());
+		final Collection<StructuredErrorMessage> validationMessages
+				= extensionLookup.getMultipleExtensions(ShoppingCartValidator.class,
+				XPFExtensionPointEnum.VALIDATE_SHOPPING_CART_AT_CART_CREATE_OR_UPDATE,
+				xpfExtensionSelector)
+				.stream()
+				.map(strategy -> strategy.validate(context))
+						.flatMap(Collection::stream)
+				.map(structuredErrorMessageConverter::convert)
+						.collect(Collectors.toList());
+
 		if (!validationMessages.isEmpty()) {
 			throw new EpStructureErrorMessageException("Create cart validation failure.",
 					ImmutableList.copyOf(validationMessages));
@@ -151,7 +170,6 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 
 	}
 
-
 	/**
 	 * 	returns the cart type associated with the strategy.
 	 *
@@ -162,13 +180,12 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 		return multicartItemListTypeLocationProvider.getMulticartItemListTypeForStore(storeCode);
 	}
 
-
 	protected ShoppingCartService getShoppingCartService() {
 		return shoppingCartService;
 	}
 
-	protected CustomerSessionRepository getCustomerSessionRepository() {
-		return customerSessionRepository;
+	protected ShopperRepository getShopperRepository() {
+		return shopperRepository;
 	}
 
 	protected CartPostProcessor getCartPostProcessor() {
@@ -177,10 +194,6 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 
 	protected ReactiveAdapter getReactiveAdapter() {
 		return reactiveAdapter;
-	}
-
-	protected CreateShoppingCartValidationService getCreateShoppingCartValidationService() {
-		return createShoppingCartValidationService;
 	}
 
 	protected StoreService getStoreService() {
@@ -199,16 +212,12 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 		this.shoppingCartService = shoppingCartService;
 	}
 
-	public void setCustomerSessionRepository(final CustomerSessionRepository customerSessionRepository) {
-		this.customerSessionRepository = customerSessionRepository;
+	public void setShopperRepository(final ShopperRepository shopperRepository) {
+		this.shopperRepository = shopperRepository;
 	}
 
 	public void setCartPostProcessor(final CartPostProcessor cartPostProcessor) {
 		this.cartPostProcessor = cartPostProcessor;
-	}
-
-	public void setCreateShoppingCartValidationService(final CreateShoppingCartValidationService createShoppingCartValidationService) {
-		this.createShoppingCartValidationService = createShoppingCartValidationService;
 	}
 
 	public void setStoreService(final StoreService storeService) {
@@ -229,5 +238,9 @@ public abstract class AbstractEpMultiCartStrategyImpl implements MultiCartResolu
 
 	public void setResourceOperationContext(final ResourceOperationContext resourceOperationContext) {
 		this.resourceOperationContext = resourceOperationContext;
+	}
+
+	public void setStructuredErrorMessageConverter(final StructuredErrorMessageConverter structuredErrorMessageConverter) {
+		this.structuredErrorMessageConverter = structuredErrorMessageConverter;
 	}
 }

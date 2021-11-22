@@ -7,14 +7,15 @@ import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.ValidationEventLocator;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Default implementation of validation event handler.
  */
 public class DefaultValidationEventHandler implements ValidationEventHandler {
 
-	private static final Logger LOG = Logger.getLogger(DefaultValidationEventHandler.class);
+	private static final Logger LOG = LogManager.getLogger(DefaultValidationEventHandler.class);
 
 	private String lastErrorStatus = "";
 

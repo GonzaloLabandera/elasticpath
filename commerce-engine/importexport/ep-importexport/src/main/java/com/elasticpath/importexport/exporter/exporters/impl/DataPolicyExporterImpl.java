@@ -6,7 +6,8 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.datapolicy.DataPolicyDTO;
 import com.elasticpath.domain.datapolicy.DataPolicy;
@@ -22,7 +23,7 @@ import com.elasticpath.service.datapolicy.DataPolicyService;
  */
 public class DataPolicyExporterImpl extends AbstractExporterImpl<DataPolicy, DataPolicyDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(DataPolicyExporterImpl.class);
+	private static final Logger LOG = LogManager.getLogger(DataPolicyExporterImpl.class);
 
 	private ImportExportSearcher importExportSearcher;
 

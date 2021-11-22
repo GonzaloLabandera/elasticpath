@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
 
-    <!-- Named queries for InventoryImpl -->
+	<!-- Named queries for InventoryImpl -->
 		<named-query name="INVENTORY_SELECT_BY_GUID_AND_WAREHOUSE_UID">
 			<query>
 				SELECT i
@@ -26,25 +26,7 @@
 			</query>
 		</named-query>
 
-    <!-- Named queries for InventoryJournalImpl -->
-		<named-query name="INVENTORY_JOURNAL_SUM_DELTAS_BY_SKUCODE_AND_WAREHOUSE_UID">
-			<query>
-				SELECT NEW com.elasticpath.inventory.strategy.impl.InventoryJournalRollupImpl(ij.skuCode, ij.warehouseUid, SUM(ij.allocatedQuantityDelta), SUM(ij.quantityOnHandDelta))
-				FROM InventoryJournalImpl ij
-				WHERE ij.skuCode = ?1
-				AND ij.warehouseUid = ?2
-				GROUP BY ij.skuCode, ij.warehouseUid
-			</query>
-		</named-query>
-		<named-query name="INVENTORY_JOURNAL_SUM_DELTAS_BY_SKUCODES_AND_WAREHOUSE_UID">
-			<query>
-				SELECT NEW com.elasticpath.inventory.strategy.impl.InventoryJournalRollupImpl(ij.skuCode, ij.warehouseUid, SUM(ij.allocatedQuantityDelta), SUM(ij.quantityOnHandDelta))
-				FROM InventoryJournalImpl ij
-				WHERE ij.skuCode in (:list)
-				AND ij.warehouseUid = ?1
-				GROUP BY ij.skuCode, ij.warehouseUid
-			</query>
-		</named-query>
+		<!-- Named queries for InventoryJournalImpl -->
 		<named-query name="LOWSTOCK_JOURNALING">
 			<query>
 				SELECT NEW com.elasticpath.inventory.impl.InventoryDtoImpl(ij.skuCode, ij.warehouseUid, i.quantityOnHandInternal, SUM(ij.quantityOnHandDelta), i.allocatedQuantity, SUM(ij.allocatedQuantityDelta), i.reservedQuantityInternal, i.reorderMinimumInternal, i.reorderQuantity, i.restockDate)
@@ -78,7 +60,7 @@
 				SELECT NEW com.elasticpath.inventory.impl.InventoryDtoImpl(i.skuCode, i.warehouseUid, i.quantityOnHandInternal, i.allocatedQuantity, i.reservedQuantityInternal, i.reorderMinimumInternal, i.reorderQuantity, i.restockDate)
 				FROM InventoryImpl i, ProductSkuImpl as psku INNER JOIN psku.productInternal p
 				WHERE i.skuCode IN (:list)
-                AND i.skuCode NOT IN (SELECT ij.skuCode FROM InventoryJournalImpl ij WHERE ij.warehouseUid = ?1)
+				AND i.skuCode NOT IN (SELECT ij.skuCode FROM InventoryJournalImpl ij WHERE ij.warehouseUid = ?1)
 				AND i.warehouseUid = ?1
 				AND i.quantityOnHandInternal &lt;= i.reorderMinimumInternal
 				AND i.skuCode = psku.skuCodeInternal
@@ -90,7 +72,7 @@
 				SELECT NEW com.elasticpath.inventory.impl.InventoryDtoImpl(i.skuCode, i.warehouseUid, i.quantityOnHandInternal, i.allocatedQuantity, i.reservedQuantityInternal, i.reorderMinimumInternal, i.reorderQuantity, i.restockDate)
 				FROM InventoryImpl i, ProductSkuImpl as psku INNER JOIN psku.productInternal p
 				WHERE i.warehouseUid = ?1
-                AND i.skuCode NOT IN (SELECT ij.skuCode FROM InventoryJournalImpl ij WHERE ij.warehouseUid = ?1)
+				AND i.skuCode NOT IN (SELECT ij.skuCode FROM InventoryJournalImpl ij WHERE ij.warehouseUid = ?1)
 				AND i.quantityOnHandInternal &lt;= i.reorderMinimumInternal
 				AND i.skuCode = psku.skuCodeInternal
 				AND p.availabilityCriteriaInternal &lt;&gt; com.elasticpath.domain.catalog.AvailabilityCriteria.ALWAYS_AVAILABLE
@@ -106,33 +88,10 @@
 			</query>
 		</named-query>
 
-		<named-query name="INVENTORY_JOURNAL_ROLLUPS_BY_UIDS">
-			<query>
-				SELECT NEW com.elasticpath.inventory.strategy.impl.InventoryJournalRollupImpl(ij.skuCode, ij.warehouseUid, SUM(ij.allocatedQuantityDelta), SUM(ij.quantityOnHandDelta))
-				FROM InventoryJournalImpl ij WHERE ij.uidPk in (:uids)
-				GROUP BY ij.skuCode, ij.warehouseUid
-			</query>
-		</named-query>
-
 		<named-query name="INVENTORY_JOURNAL_UIDS_BY_KEY">
 			<query>
 				SELECT ij.uidPk
 				FROM InventoryJournalImpl ij
-				WHERE ij.skuCode = ?1
-				AND ij.warehouseUid = ?2
-			</query>
-		</named-query>
-
-		<named-query name="INVENTORY_JOURNAL_DELETE_BY_UIDS">
-			<query>
-				DELETE FROM InventoryJournalImpl ij
-				WHERE ij.uidPk in (:uids)
-			</query>
-		</named-query>
-
-		<named-query name="INVENTORY_JOURNAL_DELETE_BY_SKU_WAREHOUSE">
-			<query>
-				DELETE FROM InventoryJournalImpl ij
 				WHERE ij.skuCode = ?1
 				AND ij.warehouseUid = ?2
 			</query>
@@ -146,9 +105,7 @@
 			</query>
 		</named-query>
 
-
-
-    <!-- Named queries for InventoryJournalLockImpl -->
+	<!-- Named queries for InventoryJournalLockImpl -->
 		<named-query name="INVENTORY_JOURNAL_LOCK_BY_SKUCODE_AND_WAREHOUSE_UID">
 			<query>
 				SELECT lock
@@ -165,5 +122,49 @@
 				AND lock.warehouseUid = ?2
 			</query>
 		</named-query>
-
+		<named-native-query name="INVENTORY_JOURNAL_SUM_DELTAS_BY_SKUCODE_AND_WAREHOUSE_UID">
+			<query>
+				SELECT sub.skuCode, sub.warehouseUid, sub.allocatedQuantityDelta, sub.quantityOnHandDelta
+				FROM
+					(SELECT ij.SKUCODE skuCode, ij.WAREHOUSE_UID warehouseUid, SUM(ij.ALLOCATED_QUANTITY_DELTA) allocatedQuantityDelta, SUM(ij.QUANTITY_ON_HAND_DELTA) quantityOnHandDelta
+						FROM TINVENTORYJOURNAL ij
+						WHERE ij.SKUCODE = ? AND ij.WAREHOUSE_UID = ?
+						GROUP BY ij.SKUCODE, ij.WAREHOUSE_UID
+					) sub
+			</query>
+		</named-native-query>
+		<named-native-query name="INVENTORY_JOURNAL_SUM_DELTAS_BY_SKUCODES_AND_WAREHOUSE_UID">
+			<query>
+				SELECT sub.skuCode, sub.warehouseUid, sub.allocatedQuantityDelta, sub.quantityOnHandDelta
+				FROM
+					(SELECT ij.SKUCODE skuCode, ij.WAREHOUSE_UID warehouseUid, SUM(ij.ALLOCATED_QUANTITY_DELTA) allocatedQuantityDelta, SUM(ij.QUANTITY_ON_HAND_DELTA) quantityOnHandDelta
+						FROM TINVENTORYJOURNAL ij
+						WHERE ij.SKUCODE IN (?) AND ij.WAREHOUSE_UID = ?
+						GROUP BY ij.SKUCODE, ij.WAREHOUSE_UID
+					) sub
+			</query>
+		</named-native-query>
+		<named-native-query name="INVENTORY_JOURNAL_DELETE_BY_UIDS">
+			<query>
+				DELETE FROM TINVENTORYJOURNAL
+				WHERE UIDPK IN (?)
+			</query>
+		</named-native-query>
+		<named-native-query name="INVENTORY_JOURNAL_ROLLUPS_BY_UIDS">
+			<query>
+				SELECT sub.skuCode, sub.warehouseUid, sub.allocatedQuantityDelta, sub.quantityOnHandDelta
+				FROM
+					(SELECT ij.SKUCODE skuCode, ij.WAREHOUSE_UID warehouseUid, SUM(ij.ALLOCATED_QUANTITY_DELTA) allocatedQuantityDelta, SUM(ij.QUANTITY_ON_HAND_DELTA) quantityOnHandDelta
+						FROM TINVENTORYJOURNAL ij
+						WHERE ij.UIDPK IN (?)
+						GROUP BY ij.SKUCODE, ij.WAREHOUSE_UID
+					) sub
+			</query>
+		</named-native-query>
+		<named-native-query name="INVENTORY_JOURNAL_DELETE_BY_SKU_WAREHOUSE">
+			<query>
+				DELETE FROM TINVENTORYJOURNAL
+				WHERE SKUCODE = ? AND WAREHOUSE_UID = ?
+			</query>
+		</named-native-query>
 </entity-mappings>

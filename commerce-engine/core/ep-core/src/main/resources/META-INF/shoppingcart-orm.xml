@@ -112,9 +112,8 @@
 
 	<named-query name="FIND_CART_DATA_FOR_CARTS">
 		<query>
-			SELECT sc.guid, cartData
+			SELECT sc.guid, sc.modifierFields
 			FROM ShoppingCartMementoImpl sc
-			INNER JOIN sc.cartData cartData
 			WHERE sc.guid IN (:list)
 
 		</query>
@@ -168,6 +167,13 @@
 				UPDATE ShoppingCartMementoImpl sc
 				SET sc.status = ShoppingCartStatus.INACTIVE, sc.defaultInternal = null
 				WHERE sc.guid = ?1
+			</query>
+		</named-query>
+		<named-query name="TOUCH_THE_CART">
+			<query>
+				UPDATE ShoppingCartMementoImpl sc
+				SET sc.lastModifiedDate = ?1
+				WHERE sc.guid = ?2
 			</query>
 		</named-query>
 </entity-mappings>

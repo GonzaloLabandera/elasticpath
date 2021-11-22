@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -40,7 +39,6 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -65,7 +63,6 @@ import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.catalog.BrandService;
 import com.elasticpath.service.catalog.CategoryService;
-import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration;
 import com.elasticpath.service.search.CatalogAwareSearchCriteria;
 import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.IndexType;
@@ -130,6 +127,7 @@ public class SolrQueryFactoryImplTest {
 	private Catalog catalog;
 
 	private FacetService facetService;
+
 	/**
 	 * Prepare for test.
 	 *
@@ -215,7 +213,6 @@ public class SolrQueryFactoryImplTest {
 		solrQueryFactoryImpl.setIndexUtility(indexUtilityImpl);
 
 		SolrFacetAdapter facetAdapter = new SolrFacetAdapter();
-		FieldUtils.writeDeclaredField(facetAdapter, "config", Mockito.mock(FilteredNavigationConfiguration.class), true);
 		facetAdapter.setAnalyzer(analyzer);
 		facetAdapter.setCategoryService(categoryService);
 		facetAdapter.setIndexUtility(indexUtilityImpl);

@@ -5,7 +5,8 @@ package com.elasticpath.test.persister;
 
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.test.common.exception.TestApplicationException;
@@ -22,7 +23,7 @@ import com.elasticpath.test.persister.database.SqlServerDataSourceInitializerImp
  */
 public class DatasourceInitializerFactory {
 
-	private static final Logger LOG = Logger.getLogger(DatasourceInitializerFactory.class);
+	private static final Logger LOG = LogManager.getLogger(DatasourceInitializerFactory.class);
 	
 	private static final String RDBMS_MYSQL = "mysql";
 	private static final String RDBMS_MSSQL = "sqlserver";

@@ -74,7 +74,7 @@ public class CartOrderPaymentInstrumentServiceImplTest extends DbTestCase {
         cartOrderPaymentInstrumentService.saveOrUpdate(entity);
 
         assertTrue("CartOrderPaymentInstrument was not attached to cart order",
-                cartOrderPaymentInstrumentService.hasPaymentInstruments(cartOrder));
+                cartOrderPaymentInstrumentService.hasPaymentInstruments(cartOrder.getGuid()));
         CartOrderPaymentInstrument persistedInstrument = cartOrderPaymentInstrumentService.findByGuid(entity.getGuid());
         assertEquals("Wrong CartOrderPaymentInstrument found by GUID", entity, persistedInstrument);
     }
@@ -88,7 +88,7 @@ public class CartOrderPaymentInstrumentServiceImplTest extends DbTestCase {
 
         cartOrderPaymentInstrumentService.saveOrUpdate(entity);
 
-        Collection<CartOrderPaymentInstrument> instruments = cartOrderPaymentInstrumentService.findByCartOrder(cartOrder);
+        Collection<CartOrderPaymentInstrument> instruments = cartOrderPaymentInstrumentService.findByCartOrderGuid(cartOrder.getGuid());
         Iterator<CartOrderPaymentInstrument> iterator = instruments.iterator();
         assertTrue("No CartOrderPaymentInstrument entities were found for this CartOrder", iterator.hasNext());
         assertEquals("Wrong CartOrderPaymentInstrument associated with the CartOrder", entity.getUidPk(), iterator.next().getUidPk());
@@ -107,7 +107,8 @@ public class CartOrderPaymentInstrumentServiceImplTest extends DbTestCase {
 
         final CartOrder persistedCartOrder = cartOrderService.findByStoreCodeAndGuid(scenario.getStore().getCode(), cartOrder.getGuid());
         assertNotNull("Cart Order was unexpectedly removed", persistedCartOrder);
-        assertFalse("CartOrderPaymentInstrument was not removed", cartOrderPaymentInstrumentService.hasPaymentInstruments(cartOrder));
+		assertFalse("CartOrderPaymentInstrument was not removed",
+				cartOrderPaymentInstrumentService.hasPaymentInstruments(cartOrder.getGuid()));
     }
 
 	private CartOrderPaymentInstrument createTestCartOrderPaymentInstrument() {
@@ -134,7 +135,6 @@ public class CartOrderPaymentInstrumentServiceImplTest extends DbTestCase {
 		shoppingCart.setShopper(shopper);
 		shoppingCart.setStore(store);
 		shoppingCart.getShoppingCartMemento().setGuid(Utils.uniqueCode("CART"));
-		shoppingCart.setCustomerSession(customerSession);
 
 		shopper.setCurrentShoppingCart(shoppingCart);
 

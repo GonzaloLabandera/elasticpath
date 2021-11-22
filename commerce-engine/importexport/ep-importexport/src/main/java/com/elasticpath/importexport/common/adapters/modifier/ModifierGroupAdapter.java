@@ -10,7 +10,8 @@ import static com.elasticpath.importexport.common.comparators.ExportComparators.
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.common.dto.DisplayValue;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -30,7 +31,7 @@ import com.elasticpath.service.modifier.ModifierService;
  */
 public class ModifierGroupAdapter extends AbstractDomainAdapterImpl<ModifierGroup, ModifierGroupDTO> {
 
-	private static final Logger LOG = Logger.getLogger(ModifierGroupAdapter.class);
+	private static final Logger LOG = LogManager.getLogger(ModifierGroupAdapter.class);
 
 	private ModifierFieldAdapter modifierFieldAdapter;
 

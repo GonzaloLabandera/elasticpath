@@ -297,6 +297,13 @@ function set_extensions_version() {
   # Update parent versions of modules not in main reactor
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cortex/ext-system-tests/pom.xml"
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cortex/ext-system-tests/cucumber/pom.xml"
+
+  #perf cucumber tests are not in the performance-tests reactor
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/system-tests/performance-tests/cucumber/pom.xml"
+  mvn ${COMMON_MVN_OPTS} ${maven_settings} \
+    org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+    -f "${project_dir}/extensions/system-tests/performance-tests/cucumber/pom.xml" \
+    -DnewVersion="${extensions_version}"
 }
 
 function build_project() {

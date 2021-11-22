@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.datapolicy.DataPoint;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.service.datapolicy.DataPointLocationEnum;
 import com.elasticpath.service.datapolicy.impl.DataPointValue;
 
@@ -70,13 +72,11 @@ public class CartGiftCertificateFieldReaderTest extends AbstractDataPointValueRe
 	@Override
 	protected String getExpectedReadQuery(final String... dataPointKeys) {
 
-		return "SELECT itemData.uidPk,itemData.creationDate,itemData.lastModifiedDate,itemData.key,itemData.value"
+		return "SELECT items.uidPk,items.creationDate,items.lastModifiedDate,items.modifierFields"
 			.concat(" FROM ShoppingCartMementoImpl cart, ShopperMementoImpl shopper")
 			.concat(" INNER JOIN cart.allItems items")
-			.concat(" INNER JOIN items.itemData itemData")
 			.concat(" WHERE shopper.uidPk = cart.shopperUid")
-			.concat(" AND shopper.customer.guid = ?1")
-			.concat(" AND itemData.key IN (:dataPointKeys)");
+			.concat(" AND shopper.customer.guid = ?1");
 	}
 
 	@Test
@@ -93,8 +93,15 @@ public class CartGiftCertificateFieldReaderTest extends AbstractDataPointValueRe
 		String dataPoint1Description = "Description 1";
 		String dataPoint2Description = "Description 2";
 
-		Object[] row1 = new Object[]{uidPk1, createdDate, lastModifiedDate, DATAPOINT_1_KEY, DATAPOINT_1_DB_VALUE};
-		Object[] row2 = new Object[]{uidPk2, createdDate, lastModifiedDate, DATAPOINT_2_KEY, DATAPOINT_2_DB_VALUE};
+		ModifierFieldsMapWrapper modifierFields1 = new ModifierFieldsMapWrapper();
+		modifierFields1.put(DATAPOINT_1_KEY, DATAPOINT_1_DB_VALUE);
+
+		Object[] row1 = new Object[]{uidPk1, createdDate, lastModifiedDate, modifierFields1};
+
+		ModifierFieldsMapWrapper modifierFields2 = new ModifierFieldsMapWrapper();
+		modifierFields2.put(DATAPOINT_2_KEY, DATAPOINT_2_KEY);
+
+		Object[] row2 = new Object[]{uidPk2, createdDate, lastModifiedDate, modifierFields2};
 
 		List<Object[]> rawData = Arrays.asList(row1, row2);
 
@@ -113,6 +120,16 @@ public class CartGiftCertificateFieldReaderTest extends AbstractDataPointValueRe
 
 		assertThat(dataPointValues)
 			.containsExactly(expectedDataPointValue1, expectedDataPointValue2);
+	}
+
+	@Override
+	protected List<Object[]> getRawData(final boolean shouldIncludeFieldValue) {
+		ModifierFieldsMapWrapper modifierFields = new ModifierFieldsMapWrapper();
+		modifierFields.put(DATAPOINT_1_KEY, DATAPOINT_1_DB_VALUE);
+
+		Object[] rawData = new Object[]{UIDPK, CREATED_DATE, LAST_MODIFIED_DATE, modifierFields};
+
+		return Collections.singletonList(rawData);
 	}
 
 }

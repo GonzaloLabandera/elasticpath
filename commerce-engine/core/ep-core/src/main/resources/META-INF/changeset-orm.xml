@@ -116,12 +116,13 @@
 				AND gm.objectIdentifier = ?2
 			</query>
 		</named-query>
-		<named-query name="FIND_OBJECT_MEMBER_BY_OBJ_TYPE_AND_ID">
+		<named-query name="FIND_OBJECT_MEMBER_BY_GROUPID_OBJ_TYPE_AND_ID">
 			<query>
 				SELECT gm
 				FROM BusinessObjectGroupMemberImpl gm
-				WHERE gm.objectType = ?1
-				AND gm.objectIdentifier = ?2
+				WHERE gm.groupId = ?1
+				AND gm.objectType = ?2
+				AND gm.objectIdentifier = ?3
 			</query>
 		</named-query>
 		<named-query name="UPDATE_CHANGESETOBJECTS_FOR_GUIDS">
@@ -155,14 +156,6 @@
 				SELECT bom
 				FROM BusinessObjectMetadataImpl bom
 				WHERE bom.businessObjectGroupMember.groupId = ?1
-			</query>
-		</named-query>
-		<named-query name="FIND_OBJECT_METADATA_BY_OBJ_TYPE_AND_ID">
-			<query>
-				SELECT bom
-				FROM BusinessObjectMetadataImpl bom
-				WHERE bom.businessObjectGroupMember.objectType = ?1
-				AND bom.businessObjectGroupMember.objectIdentifier = ?2
 			</query>
 		</named-query>
 		<named-query name="FIND_OBJECT_METADATA_BY_GROUPID_OBJ_TYPE_AND_ID">

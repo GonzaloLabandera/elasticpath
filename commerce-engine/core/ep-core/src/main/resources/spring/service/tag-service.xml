@@ -25,16 +25,16 @@
 				<bean class="com.elasticpath.tags.service.impl.conditionoperators.ContainsOperatorEvaluatorImpl"/>
 			</set>
 		</property>
-		<property name="decomposedConditionCache">
-			<bean class="com.elasticpath.cache.impl.EhcacheCacheAdapter">
-				<constructor-arg ref="decomposedConditionCache"/>
-			</bean>
-		</property>
 	</bean>
 
 	<bean id="tagConditionDSLBuilder" class="com.elasticpath.tags.service.impl.GroovyConditionDSLBuilderImpl">
 		<property name="tagDefinitionReader" ref="tagDefinitionReader"/>
 		<property name="validationFacade" ref="conditionValidationFacade"/>
+		<property name="decomposedConditionCache">
+			<bean class="com.elasticpath.cache.impl.EhcacheCacheAdapter">
+				<constructor-arg ref="decomposedConditionCache"/>
+			</bean>
+		</property>
 	</bean>
 
 	<bean id="tagDictionaryService"  parent="txProxyTemplate">

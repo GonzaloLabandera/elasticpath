@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="FILE"
+			fileName="log/ImportExport-WARN.log"
+			append="false">
+			<PatternLayout pattern="%-5p %t %d{ISO8601} %c - %m%n" />
+		</File>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5p %t %d{ISO8601} %c - %m%n" />
+		</Console>
+		<IESummary name="IE_SUMMARY"/>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.elasticpath" level="${ep.log.level}" additivity="false">
+			${ep.log.to}
+			<AppenderRef ref="IE_SUMMARY" />
+		</Logger>
+		<Root level="warn">
+			${ep.log.to}
+			<AppenderRef ref="IE_SUMMARY" />
+		</Root>
+	</Loggers>
+</Configuration>

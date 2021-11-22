@@ -50,9 +50,6 @@ public class IndexType implements Serializable {
 	/** A category index type. */
 	public static final IndexType CATEGORY = new IndexType("category");
 
-	/** A customer index type. */
-	public static final IndexType CUSTOMER = new IndexType("customer");
-
 	/** A promotion index type. */
 	public static final IndexType PROMOTION = new IndexType("promotion");
 

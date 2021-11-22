@@ -74,7 +74,8 @@ public class PriceListAssignmentAssembler extends AbstractDtoAssembler<PriceList
 		target.setName(source.getName());
 		target.setDescription(source.getDescription());
 		target.setPriority(source.getPriority());
-		target.setCatalog(getCatalog(source.getCatalogGuid()));
+		Catalog catalog = getCatalog(source.getCatalogGuid());
+		target.setCatalog(catalog);
 		target.setPriceListDescriptor(getPriceListDescriptor(source.getPriceListGuid()));
 		
 		// Copied from DynamicContentDeliveryAssembler.java

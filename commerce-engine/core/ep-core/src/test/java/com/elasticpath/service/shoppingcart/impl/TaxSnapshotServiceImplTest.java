@@ -27,6 +27,7 @@ import org.junit.Test;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
+import com.elasticpath.domain.misc.types.ModifierFieldsMapWrapper;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -102,6 +103,7 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 		stubGetPrototypeBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResult.class, TaxCalculationResultImpl.class);
 		stubGetPrototypeBean(ContextIdNames.TAX_CATEGORY, TaxCategory.class, TaxCategoryImpl.class);
 		stubGetPrototypeBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdiction.class, TaxJurisdictionImpl.class);
+		stubGetPrototypeBean(ContextIdNames.MODIFIER_FIELDS_MAP_WRAPPER, ModifierFieldsMapWrapper.class, ModifierFieldsMapWrapper.class);
 
 		taxSnapshotService = new TaxSnapshotServiceImpl();
 		taxSnapshotService.setBeanFactory(getBeanFactory());

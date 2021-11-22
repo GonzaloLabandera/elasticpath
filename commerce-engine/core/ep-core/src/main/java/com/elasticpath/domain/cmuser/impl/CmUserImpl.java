@@ -30,7 +30,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.ElementDependent;
 import org.apache.openjpa.persistence.PersistentCollection;
@@ -85,7 +86,7 @@ public class CmUserImpl extends AbstractLegacyEntityImpl implements CmUser {
 
 	private static final int IS_TEMPORARY_PASSWORD_MASK = 2;
 
-	private static final Logger LOG = Logger.getLogger(CmUserImpl.class);
+	private static final Logger LOG = LogManager.getLogger(CmUserImpl.class);
 
 	private static final int MAX_NAME_LENGTH = 100;
 

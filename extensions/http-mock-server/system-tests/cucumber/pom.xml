@@ -322,12 +322,12 @@
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-compiler</artifactId>
-						<version>2.9.2-04</version>
+						<version>${groovy.eclipse.compiler.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-batch</artifactId>
-						<version>2.4.15-01</version>
+						<version>${groovy.eclipse.batch.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

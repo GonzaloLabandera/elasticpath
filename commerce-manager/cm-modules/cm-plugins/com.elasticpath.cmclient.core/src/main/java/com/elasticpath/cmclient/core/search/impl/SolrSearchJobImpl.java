@@ -6,7 +6,8 @@ package com.elasticpath.cmclient.core.search.impl;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -27,7 +28,7 @@ import com.elasticpath.service.search.solr.IndexUtility;
  */
 public class SolrSearchJobImpl extends AbstractSearchJobImpl {
 
-	private static final Logger LOG = Logger.getLogger(SolrSearchJobImpl.class);
+	private static final Logger LOG = LogManager.getLogger(SolrSearchJobImpl.class);
 
 	private static final int SEARCH_UNITS_WORK = 3;
 	

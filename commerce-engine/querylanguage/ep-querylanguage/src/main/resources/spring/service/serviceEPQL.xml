@@ -39,6 +39,9 @@
 				<entry key="CONFIGURATION">
 					<ref bean="settingSearchResultConverter"/>	
 				</entry>
+				<entry key="CUSTOMER">
+					<ref bean="customerSearchResultConverter"/>
+				</entry>
 			</map>
 		</property>
 	</bean>
@@ -55,9 +58,6 @@
 				</entry>
                 <entry key="PROMOTION">
                     <value>promotion</value>
-                </entry>
-                <entry key="CUSTOMER">
-                    <value>customer</value>
                 </entry>
 			</map>
 		</property>
@@ -265,13 +265,13 @@
 			<ref bean="nonLocalizedFieldResolver"/>
 		</property>
 		<property name="subQueryBuilder">
-			<ref bean="luceneSubQueryBuilder"/>
+			<ref bean="sqlSubQueryBuilder"/>
 		</property>
 		<property name="completeQueryBuilder">
-			<ref bean="luceneQueryBuilder"/>
+			<ref bean="sqlQueryBuilder"/>
 		</property>
 		<property name="epQLValueResolver">
-			<ref bean="luceneValueResolver"/>
+			<ref bean="sqlValueResolver"/>
 		</property>
 	</bean>
 
@@ -335,6 +335,9 @@
 	</bean>	
 
 	<bean id="settingSearchResultConverter" class="com.elasticpath.ql.custom.setting.SettingSearchResultConverter">
+	</bean>
+
+	<bean id="customerSearchResultConverter" class="com.elasticpath.ql.custom.customer.CustomerSearchResultConverter">
 	</bean>
 	
 <!-- Price List configuration -->

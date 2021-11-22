@@ -8,7 +8,8 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -41,7 +42,7 @@ public class DataPolicyEditor extends AbstractCmClientFormEditor implements Data
 	 */
 	public static final String ID_EDITOR = DataPolicyEditor.class.getName();
 
-	private static final Logger LOG = Logger.getLogger(DataPolicyEditor.class);
+	private static final Logger LOG = LogManager.getLogger(DataPolicyEditor.class);
 
 	/**
 	 * Constant used for matching the right event.

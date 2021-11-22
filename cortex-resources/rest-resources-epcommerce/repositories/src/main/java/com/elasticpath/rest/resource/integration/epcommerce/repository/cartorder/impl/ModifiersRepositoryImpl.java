@@ -110,7 +110,7 @@ public class ModifiersRepositoryImpl implements ModifiersRepository {
 	@Override
 	public Single<Map<ModifierField, String>> findModifierValues(final String cartId, final String shoppingItemGuid) {
 		return getShoppingItem(cartId, shoppingItemGuid)
-				.flatMap(shoppingItem -> getFieldValues(shoppingItem.getSkuGuid(), shoppingItem.getFields()));
+				.flatMap(shoppingItem -> getFieldValues(shoppingItem.getSkuGuid(), shoppingItem.getModifierFields().getMap()));
 
 	}
 
@@ -119,7 +119,7 @@ public class ModifiersRepositoryImpl implements ModifiersRepository {
 																			 final String purchaseLineItemGuid) {
 		return orderRepository.findByGuid(storeCode, purchaseGuid)
 				.map(order -> order.getOrderSkuByGuid(purchaseLineItemGuid))
-				.flatMap(orderSku -> getFieldValues(orderSku.getSkuGuid(), orderSku.getFields()));
+				.flatMap(orderSku -> getFieldValues(orderSku.getSkuGuid(), orderSku.getModifierFields().getMap()));
 	}
 
 	private Single<Map<ModifierField, String>> getFieldValues(final String skuGuid, final Map<String, String> itemData) {
@@ -197,7 +197,7 @@ public class ModifiersRepositoryImpl implements ModifiersRepository {
 				.flatMapObservable(Observable::fromIterable)
 				.filter(ModifierField::isRequired)
 				.map(ModifierField::getCode)
-				.filter(code -> StringUtils.isBlank(shoppingItem.getFields().get(code)));
+				.filter(code -> StringUtils.isBlank(shoppingItem.getModifierFields().get(code)));
 	}
 
 }

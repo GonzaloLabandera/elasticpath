@@ -3,7 +3,8 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.delivery.actions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -22,7 +23,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 public class CreateDynamicContentDeliveryAction extends BaseDynamicContentDeliveryAction {
 
 	/** The logger. */
-	private static final Logger LOG = Logger.getLogger(CreateDynamicContentDeliveryAction.class);
+	private static final Logger LOG = LogManager.getLogger(CreateDynamicContentDeliveryAction.class);
 
 	/**
 	 * The constructor.

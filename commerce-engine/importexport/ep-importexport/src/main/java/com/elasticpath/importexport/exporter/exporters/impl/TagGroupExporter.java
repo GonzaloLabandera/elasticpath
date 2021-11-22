@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
 import com.elasticpath.importexport.common.dto.tag.TagGroupDTO;
@@ -23,7 +24,7 @@ import com.elasticpath.tags.service.TagGroupService;
  */
 public class TagGroupExporter extends AbstractExporterImpl<TagGroup, TagGroupDTO, String> {
 
-	private static final Logger LOG = Logger.getLogger(TagGroupExporter.class);
+	private static final Logger LOG = LogManager.getLogger(TagGroupExporter.class);
 
 	private List<String> tagGroupGuids;
 

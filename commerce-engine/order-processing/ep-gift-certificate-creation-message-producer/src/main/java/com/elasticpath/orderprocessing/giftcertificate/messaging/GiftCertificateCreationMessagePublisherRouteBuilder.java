@@ -12,7 +12,7 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.language.Simple;
 import org.apache.camel.spi.DataFormat;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.core.messaging.giftcertificate.GiftCertificateEventType;
 import com.elasticpath.domain.catalog.GiftCertificate;
@@ -109,7 +109,7 @@ public class GiftCertificateCreationMessagePublisherRouteBuilder extends RouteBu
 				@Simple("${body.shipment}") final OrderShipment orderShipment,
 				@Simple("${body.guid}") final String orderSkuGuid,
 				@Simple("${body.total}") final Money orderSkuTotal,
-				@Simple("${body.fields}") final Map<String, Object> gcFields) {
+				@Simple("${body.modifierFields.map}") final Map<String, Object> gcFields) {
 
 			Order order = orderShipment.getOrder();
 

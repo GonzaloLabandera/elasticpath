@@ -9,6 +9,8 @@ package com.elasticpath.domain.pricing.csvimport.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 
@@ -28,6 +30,8 @@ import com.elasticpath.domain.pricing.exceptions.BaseAmountInvalidException;
  */
 public class BaseAmountDtoInsertUpdateImporterWithHeaderExtensionImpl extends AbstractBaseAmountDtoInsertUpdateImporter 
 				implements DependentDtoImporter<BaseAmountDTO, PriceListDescriptorDTO> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(BaseAmountDtoInsertUpdateImporterWithHeaderExtensionImpl.class);
 
 	@Override
 	public List<ImportBadRow> importDtos(final List<ImportValidRow<BaseAmountDTO>> validRows, final PriceListDescriptorDTO priceListDescriptorDTO) {
@@ -63,6 +67,7 @@ public class BaseAmountDtoInsertUpdateImporterWithHeaderExtensionImpl extends Ab
 					}
 				}
 			} catch (Exception ex) {
+				LOG.error("Importing DTO failed", ex);
 				final ImportFault fault = createImportFault(dto);
 				ImportBadRow badRow = createImportBadRow(row.getRow(), row.getRowNumber(), fault);
 				badRows.add(badRow);
